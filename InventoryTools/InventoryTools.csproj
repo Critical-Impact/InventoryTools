@@ -1,0 +1,130 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net5.0-windows</TargetFramework>
+        <LangVersion>9.0</LangVersion>
+        <Version>1.0.0.0</Version>
+        <AssemblyName>InventoryTools</AssemblyName>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <NoWarn>IDE0003</NoWarn>
+        <OutputType>Library</OutputType>
+        <OutputPath>bin\$(Configuration)\</OutputPath>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    </PropertyGroup>
+
+    <PropertyGroup Label="Documentation">
+        <DocumentationFile></DocumentationFile>
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <DalamudLibPath>$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+        <DalamudOutputPath>$(AppData)\XIVLauncher\devPlugins\InventoryTools\</DalamudOutputPath>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DocumentationFile />
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DocumentationFile />
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="DalamudLinter" Version="1.0.3" />
+        <PackageReference Include="DalamudPackager" Version="2.1.2" />
+        <PackageReference Include="ILRepack" Version="2.1.0-beta1" />
+        <ProjectReference Include="..\CriticalCommonLib\CriticalCommonLib.csproj" />
+        <Reference Include="Dalamud">
+            <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="ImGui.NET">
+            <HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Lumina">
+            <HintPath>$(DalamudLibPath)Lumina.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Lumina.Excel">
+            <HintPath>$(DalamudLibPath)Lumina.Excel.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="FFXIVClientStructs">
+            <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Newtonsoft.Json">
+            <HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+    </ItemGroup>
+
+    <Target Name="DalamudLinter" BeforeTargets="Build" Condition="'$(Configuration)' == 'Debug'">
+        <DalamudLinter
+                ProjectDir="$(ProjectDir)"
+                ProjectFilePath="$(MSBuildProjectFullPath)"/>
+    </Target>
+
+    <Target Name="ILRepackDebug" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug'">
+        <ItemGroup>
+            <InputAssemblies Include="$(TargetPath)" />
+            <InputAssemblies Include="$(TargetDir)*.dll" Exclude="$(TargetPath)" />
+        </ItemGroup>
+        <ItemGroup>
+            <AllowDup Include="Microsoft.DotNet.PlatformAbstractions.HashCodeCombiner" />
+        </ItemGroup>        
+        <Exec Command="$(PkgILRepack)\tools\ILRepack.exe /lib:$(DalamudLibPath) /copyattrs /out:$(DalamudOutputPath)$(TargetFileName) @(InputAssemblies, ' ')" />
+    </Target>
+
+    <Target Name="CopyJsonDebug" AfterTargets="ILRepackDebug" Condition="'$(Configuration)' == 'Debug'">
+        <Copy SourceFiles="$(ProjectDir)InventoryTools.json" DestinationFolder="$(DalamudOutputPath)" ContinueOnError="true" SkipUnchangedFiles="true" />
+    </Target>
+
+
+    <Target Name="ILRepackRelease" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+        <ItemGroup>
+            <InputAssemblies Include="$(TargetPath)" />
+            <InputAssemblies Include="$(TargetDir)*.dll" Exclude="$(TargetPath)" />
+        </ItemGroup>
+        <ItemGroup>
+            <AllowDup Include="Microsoft.DotNet.PlatformAbstractions.HashCodeCombiner" />
+        </ItemGroup>        
+        <Exec Command="$(PkgILRepack)\tools\ILRepack.exe /lib:$(DalamudLibPath) /copyattrs /out:$(TargetDir)$(TargetFileName) @(InputAssemblies, ' ')" />
+    </Target>
+    
+    <Target Name="CleanOutDirRelease" AfterTargets="ILRepackRelease" Condition="'$(Configuration)' == 'Release'">
+        <ItemGroup>
+            <DeleteAssemblies Include="$(TargetDir)*.dll" Exclude="$(TargetPath)" />
+            <DeleteAssemblies Include="$(TargetDir)*.exe" Exclude="$(TargetPath)" />
+            <DeleteAssemblies Include="$(TargetDir)*.pdb" Exclude="$(TargetPath);$(TargetDir)InventoryTools.pdb" />
+            <DeleteAssemblies Include="$(TargetDir)*deps.json" Exclude="$(TargetPath)" />
+            <DeleteAssemblies Include="$(TargetDir)*dev.json" Exclude="$(TargetPath)" />
+            <DeleteAssemblies Include="$(TargetDir)*runtimeconfig.json" Exclude="$(TargetPath)" />
+        </ItemGroup>
+        <Message Text="Deleting @(DeleteAssemblies)" Importance="high" />
+        <Delete Files="@(DeleteAssemblies)" />
+    </Target>
+
+    <Target Name="PackagePluginRelease" AfterTargets="CleanOutDirRelease" Condition="'$(Configuration)' == 'Release'">
+        <DalamudPackager
+                ProjectDir="$(ProjectDir)"
+                OutputPath="$(OutputPath)"
+                AssemblyName="$(AssemblyName)"
+                MakeZip="true"/>
+    </Target>
+
+    <Target Name="CopyJsonRelease" AfterTargets="PackagePluginRelease">
+        <Copy SourceFiles="$(ProjectDir)InventoryTools.json" DestinationFolder="$(TargetDir)" ContinueOnError="true" SkipUnchangedFiles="true" />
+        <Copy SourceFiles="$(ProjectDir)\Images\icon.png" DestinationFolder="$(TargetDir)\InventoryTools\images\" ContinueOnError="true" SkipUnchangedFiles="true"  />
+        <Copy SourceFiles="$(ProjectDir)\Images\banner1.png" DestinationFolder="$(TargetDir)\InventoryTools\images\" ContinueOnError="true" SkipUnchangedFiles="true" />
+    </Target>
+
+    <ItemGroup>
+      <Folder Include="Enums" />
+      <Folder Include="NetworkModel" />
+    </ItemGroup>
+
+</Project>

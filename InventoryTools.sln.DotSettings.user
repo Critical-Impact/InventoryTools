@@ -1,0 +1,17 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=C_003A_005CUsers_005CBlair_005CAppData_005CRoaming_005CXIVLauncher_005Caddon_005CHooks_005Cdev_005CDalamud_002Edll/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=C_003A_005CUsers_005CBlair_005CAppData_005CRoaming_005CXIVLauncher_005Caddon_005CHooks_005Cdev_005CImGui_002ENET_002Edll/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=C_003A_005CUsers_005CBlair_005CAppData_005CRoaming_005CXIVLauncher_005Caddon_005CHooks_005Cdev_005CLumina_002Edll/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=C_003A_005CUsers_005CBlair_005CAppData_005CRoaming_005CXIVLauncher_005Caddon_005CHooks_005Cdev_005CLumina_002EExcel_002Edll/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=C_003A_005CUsers_005CBlair_005CAppData_005CRoaming_005CXIVLauncher_005Caddon_005CHooks_005Cdev_005CNewtonsoft_002EJson_002Edll/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=C_003A_005CUsers_005CBlair_005CRiderProjects_005CInventoryTools_005CFFXIVClientStructs_005Cbin_005CDebug_005CFFXIVClientStructs_002ECommon_002Edll/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=C_003A_005CUsers_005CBlair_005CRiderProjects_005CInventoryTools_005CFFXIVClientStructs_005Cbin_005CDebug_005CFFXIVClientStructs_002Edll/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=C_003A_005CUsers_005CBlair_005CRiderProjects_005CInventoryTools_005CFFXIVClientStructs_005Cbin_005CDebug_005CFFXIVClientStructs_002EGenerators_002Edll/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=C_003A_005CUsers_005CBlair_005CRiderProjects_005CInventoryTools_005CInventoryTools_005Cbin_005CDebug_005Cnet472_005CLPL_005CInventoryTools_002Edll/@EntryIndexedValue">True</s:Boolean>
+	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;&#xD;
+  &lt;Assembly Path="C:\Users\Blair\RiderProjects\InventoryTools\InventoryTools\bin\Debug\net472\LPL\InventoryTools.dll" /&gt;&#xD;
+&lt;/AssemblyExplorer&gt;</s:String>
+	
+	
+	
+	</wpf:ResourceDictionary>
