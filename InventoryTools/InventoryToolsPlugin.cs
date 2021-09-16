@@ -26,7 +26,6 @@ namespace InventoryTools
         private InventoryToolsUi _ui;
         internal GameInterface GameInterface;
         public string Name => "Inventory Tools";
-
         internal DalamudPluginInterface PluginInterface { get; private set; }
         internal OdrScanner OdrScanner { get; private set; }
         internal ClientInterface ClientInterface { get; private set; }
@@ -52,7 +51,7 @@ namespace InventoryTools
             NetworkMonitor = new NetworkMonitor(gameNetwork);
             CharacterMonitor = new CharacterMonitor(gameNetwork,ClientInterface, framework, clientState);
             GameUi = new GameUi(sigScanner, framework);
-            InventoryMonitor = new InventoryMonitor(ClientInterface, clientState, OdrScanner, CharacterMonitor, GameUi);
+            InventoryMonitor = new InventoryMonitor(ClientInterface, clientState, OdrScanner, CharacterMonitor, GameUi, gameNetwork);
             PluginLogic = new PluginLogic(Config, clientState, InventoryMonitor, CharacterMonitor, GameUi, chatGui);
             _ui = new InventoryToolsUi(pluginInterface,PluginLogic, InventoryMonitor, CharacterMonitor, Config, clientState, GameUi);
         }

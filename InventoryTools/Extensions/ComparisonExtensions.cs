@@ -32,30 +32,6 @@ namespace InventoryTools.Extensions
                     return true;
                 }
             }
-            else if (filterString.StartsWith("<") && filterString.Length >= 2)
-            {
-                var filter = filterString.Substring(1);
-                var numberResult = 0;
-                if (int.TryParse(filter, out numberResult))
-                {
-                    if (numberResult > number)
-                    {
-                        return true;
-                    }
-                }
-            }
-            else if (filterString.StartsWith(">") && filterString.Length >= 2)
-            {
-                var filter = filterString.Substring(1);
-                var numberResult = 0;
-                if (int.TryParse(filter, out numberResult))
-                {
-                    if (numberResult < number)
-                    {
-                        return true;
-                    }
-                }
-            }
             else if (filterString.StartsWith("<=") && filterString.Length >= 3)
             {
                 var filter = filterString.Substring(2);
@@ -75,6 +51,30 @@ namespace InventoryTools.Extensions
                 if (int.TryParse(filter, out numberResult))
                 {
                     if (numberResult <= number)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (filterString.StartsWith("<") && filterString.Length >= 2)
+            {
+                var filter = filterString.Substring(1);
+                var numberResult = 0;
+                if (int.TryParse(filter, out numberResult))
+                {
+                    if (numberResult > number)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (filterString.StartsWith(">") && filterString.Length >= 2)
+            {
+                var filter = filterString.Substring(1);
+                var numberResult = 0;
+                if (int.TryParse(filter, out numberResult))
+                {
+                    if (numberResult < number)
                     {
                         return true;
                     }
