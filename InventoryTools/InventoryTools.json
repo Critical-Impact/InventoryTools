@@ -10,6 +10,8 @@
   "ApplicableVersion": "any",
   "DalamudApiLevel": 4,
   "LoadPriority": 0,
-  "ImageUrls": null,
-  "IconUrl": "https://raw.githubusercontent.com/Critical-Impact/InventoryTools/Images/icon.png"
+  "IconUrl": "https://raw.githubusercontent.com/Critical-Impact/InventoryTools/Images/icon.png",
+  "ImageUrls": [
+    "https://raw.githubusercontent.com/Critical-Impact/InventoryTools/Images/banner1.png"
+  ]
 }
