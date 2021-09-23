@@ -54,49 +54,48 @@ namespace InventoryTools
             ImGui.SetNextWindowSize(new Vector2(500, 350) * ImGui.GetIO().FontGlobalScale, ImGuiCond.FirstUseEver);
             ImGui.SetNextWindowSizeConstraints(new Vector2(350, 350) * ImGui.GetIO().FontGlobalScale, new Vector2(2000, 2000) * ImGui.GetIO().FontGlobalScale);
             ImGui.PushStyleColor(ImGuiCol.WindowBg, 0xFF000000);
-            if (ImGui.Begin("Inventory Tools", ref isVisible)) {
-                if (ImGui.BeginTabBar("###InventoryTag", ImGuiTabBarFlags.FittingPolicyScroll))
+            ImGui.Begin("Inventory Tools", ref isVisible);
+            if (ImGui.BeginTabBar("###InventoryTag", ImGuiTabBarFlags.FittingPolicyScroll))
+            {
+                for (var index = 0; index < _pluginLogic.FilterConfigurations.Count; index++)
                 {
-                    for (var index = 0; index < _pluginLogic.FilterConfigurations.Count; index++)
+                    var filterConfiguration = _pluginLogic.FilterConfigurations[index];
+                    var itemTable = _pluginLogic.GetFilterTable(filterConfiguration.Key);
+                    
+                    if (filterConfiguration.DisplayInTabs)
                     {
-                        var filterConfiguration = _pluginLogic.FilterConfigurations[index];
-                        var itemTable = _pluginLogic.GetFilterTable(filterConfiguration.Key);
-                        
-                        if (filterConfiguration.DisplayInTabs)
+                        if (ImGui.BeginTabItem(itemTable.Name))
                         {
-                            if (ImGui.BeginTabItem(itemTable.Name))
+                            itemTable.Draw();
+                            if (_activeFilter != filterConfiguration.Key)
                             {
-                                itemTable.Draw();
-                                if (_activeFilter != filterConfiguration.Key)
+                                _activeFilter = filterConfiguration.Key;
+                                if (_configuration.SwitchFiltersAutomatically &&
+                                    _configuration.ActiveUiFilter != filterConfiguration.Key && _configuration.ActiveUiFilter != null)
                                 {
-                                    _activeFilter = filterConfiguration.Key;
-                                    if (_configuration.SwitchFiltersAutomatically &&
-                                        _configuration.ActiveUiFilter != filterConfiguration.Key && _configuration.ActiveUiFilter != null)
-                                    {
-                                        _pluginLogic.ToggleActiveUiFilterByKey(filterConfiguration.Key);
-                                    }
+                                    _pluginLogic.ToggleActiveUiFilterByKey(filterConfiguration.Key);
                                 }
-                                ImGui.EndTabItem();
                             }
+                            ImGui.EndTabItem();
                         }
                     }
-                    
-                    
-                    if (_configuration.ShowFilterTab && ImGui.BeginTabItem("Filters"))
-                    {
-                        RenderMonitorTab();
-                        ImGui.EndTabItem();
-                    }
-                    if (ImGui.BeginTabItem("Configuration"))
-                    {
-                        DrawConfigurationTab();
-                        ImGui.EndTabItem();
-                    }
-                    ImGui.EndTabBar();
                 }
-                ImGui.SameLine();
-                ImGui.End();
+                
+                
+                if (_configuration.ShowFilterTab && ImGui.BeginTabItem("Filters"))
+                {
+                    RenderMonitorTab();
+                    ImGui.EndTabItem();
+                }
+                if (ImGui.BeginTabItem("Configuration"))
+                {
+                    DrawConfigurationTab();
+                    ImGui.EndTabItem();
+                }
+                ImGui.EndTabBar();
             }
+            ImGui.SameLine();
+            ImGui.End();
 
             if (isVisible != IsVisible)
             {
