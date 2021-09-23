@@ -35,8 +35,14 @@ namespace InventoryTools
             _pluginInterface = pluginInterface;
             _gameUi = gameUi;
             _pluginInterface.UiBuilder.Draw += Draw;
+            _pluginInterface.UiBuilder.OpenConfigUi += UiBuilderOnOpenConfigUi;
         }
-        
+
+        private void UiBuilderOnOpenConfigUi()
+        {
+            _configuration.IsVisible = true;
+        }
+
         public bool IsVisible
         {
             get => _configuration.IsVisible;
@@ -150,6 +156,7 @@ namespace InventoryTools
         {
             _disposing = true;
             _pluginInterface.UiBuilder.Draw -= Draw;
+            _pluginInterface.UiBuilder.OpenConfigUi -= UiBuilderOnOpenConfigUi;
         }
     }
 }
