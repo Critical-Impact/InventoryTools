@@ -81,6 +81,7 @@ namespace InventoryTools
             _commandManager.Dispose();
             PluginLogic.Dispose();
             InventoryMonitor.Dispose();
+            GameUi.Dispose();
             CharacterMonitor.Dispose();
             NetworkMonitor.Dispose();
             ClientInterface.Dispose();

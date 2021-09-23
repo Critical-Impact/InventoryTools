@@ -9,8 +9,8 @@ namespace InventoryTools.Logic
 {
     public class ItemILevelColumn : IColumn
     {
-        public string Name { get; set; } = "Item ILevel";
-        public float Width { get; set; } = 80.0f;
+        public string Name { get; set; } = "iLevel";
+        public float Width { get; set; } = 50.0f;
         public string FilterText { get; set; } = "";
         
         public IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items)

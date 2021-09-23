@@ -11,6 +11,8 @@
         <OutputType>Library</OutputType>
         <OutputPath>bin\$(Configuration)\</OutputPath>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <Configurations>Debug;Release;FullDebug</Configurations>
+        <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
 
     <PropertyGroup Label="Documentation">
@@ -28,6 +30,10 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DocumentationFile />
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'FullDebug' ">
       <DocumentationFile />
     </PropertyGroup>
 
@@ -63,9 +69,7 @@
     </ItemGroup>
 
     <Target Name="DalamudLinter" BeforeTargets="Build" Condition="'$(Configuration)' == 'Debug'">
-        <DalamudLinter
-                ProjectDir="$(ProjectDir)"
-                ProjectFilePath="$(MSBuildProjectFullPath)"/>
+        <DalamudLinter ProjectDir="$(ProjectDir)" ProjectFilePath="$(MSBuildProjectFullPath)" />
     </Target>
 
     <Target Name="ILRepackDebug" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug'">
@@ -109,16 +113,12 @@
     </Target>
 
     <Target Name="PackagePluginRelease" AfterTargets="CleanOutDirRelease" Condition="'$(Configuration)' == 'Release'">
-        <DalamudPackager
-                ProjectDir="$(ProjectDir)"
-                OutputPath="$(OutputPath)"
-                AssemblyName="$(AssemblyName)"
-                MakeZip="true"/>
+        <DalamudPackager ProjectDir="$(ProjectDir)" OutputPath="$(OutputPath)" AssemblyName="$(AssemblyName)" MakeZip="true" />
     </Target>
 
     <Target Name="CopyJsonRelease" AfterTargets="PackagePluginRelease">
         <Copy SourceFiles="$(ProjectDir)InventoryTools.json" DestinationFolder="$(TargetDir)" ContinueOnError="true" SkipUnchangedFiles="true" />
-        <Copy SourceFiles="$(ProjectDir)\Images\icon.png" DestinationFolder="$(TargetDir)\InventoryTools\images\" ContinueOnError="true" SkipUnchangedFiles="true"  />
+        <Copy SourceFiles="$(ProjectDir)\Images\icon.png" DestinationFolder="$(TargetDir)\InventoryTools\images\" ContinueOnError="true" SkipUnchangedFiles="true" />
         <Copy SourceFiles="$(ProjectDir)\Images\banner1.png" DestinationFolder="$(TargetDir)\InventoryTools\images\" ContinueOnError="true" SkipUnchangedFiles="true" />
     </Target>
 

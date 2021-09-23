@@ -22,6 +22,16 @@ namespace InventoryTools.Extensions
 
             return text.Contains(filterString);
         }
+
+        public static bool PassesFilter(this uint number, string filterString)
+        {
+            return PassesFilter((int) number, filterString);
+        }
+
+        public static bool PassesFilter(this ushort number, string filterString)
+        {
+            return PassesFilter((int) number, filterString);
+        }
         public static bool PassesFilter(this int number, string filterString)
         {
             if (filterString.StartsWith("=") && filterString.Length >= 2)

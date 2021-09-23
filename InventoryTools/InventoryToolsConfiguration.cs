@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Numerics;
 using CriticalCommonLib.Models;
 using Dalamud.Configuration;
 using Dalamud.Logging;
@@ -31,7 +32,26 @@ namespace InventoryTools
         public bool SwitchFiltersAutomatically { get; set; } = true;
         public bool RestorePreviousFilter { get; set; } = true;
 
-        public bool DisplayCrossCharacter { get; set; } = true;
+        public Vector3 HighlightColor
+        {
+            get => _highlightColor;
+            set
+            {
+                _highlightColor = value;
+                ConfigurationChanged?.Invoke();
+            }
+        }
+
+        public bool DisplayCrossCharacter
+        {
+            get => _displayCrossCharacter;
+            set
+            {
+                _displayCrossCharacter = value;
+                ConfigurationChanged?.Invoke();
+            }
+        }
+
         public string ActiveUiFilter { get; set; } = null;
         public string ActiveBackgroundFilter { get; set; } = null;
         public bool FirstRun { get; set; } = true;
@@ -65,6 +85,10 @@ namespace InventoryTools
         private DalamudPluginInterface pluginInterface;
 
         private bool _isVisible;
+        private Vector3 _highlightColor = new Vector3(0.078f, 0.806f,
+            0.078f);
+
+        private bool _displayCrossCharacter = true;
 
         public void Initialize(DalamudPluginInterface pluginInterface)
         {

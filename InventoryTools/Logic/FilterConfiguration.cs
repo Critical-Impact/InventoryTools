@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Models;
+using Dalamud.Logging;
 using Dalamud.Plugin;
+using InventoryTools.Extensions;
 using Lumina.Excel.GeneratedSheets;
 using Newtonsoft.Json;
 
@@ -25,12 +27,18 @@ namespace InventoryTools.Logic
         private string _name = "";
         private string _key = "";
         private ulong _ownerId = 0;
-        private bool? _showRelevantDestinationOnly;
-        private bool? _showRelevantSourceOnly;
+        private bool? _filterItemsInRetainers;
         private bool? _sourceAllRetainers;
         private bool? _sourceAllCharacters;
         private bool? _destinationAllRetainers;
         private bool? _destinationAllCharacters;
+        private string _quantity = "";
+        private string _spiritbond = "";
+        private string _nameFilter = "";
+        private string _iLevel = "";
+        private string _shopSellingPrice = "";
+        private string _shopBuyingPrice = "";
+        private bool? _canBeBought;
         private List<(ulong, InventoryCategory)> _sourceInventories = new();
         private FilterType _filterType;
         
@@ -81,6 +89,7 @@ namespace InventoryTools.Logic
                 table.AddColumn(new QuantityColumn());
                 table.AddColumn(new ItemILevelColumn());
                 table.AddColumn(new UiCategoryColumn());
+                table.AddColumn(new SearchCategoryColumn());
                 table.ShowFilterRow = true;
             }
             else
@@ -93,6 +102,7 @@ namespace InventoryTools.Logic
                 table.AddColumn(new QuantityColumn());
                 table.AddColumn(new ItemILevelColumn());
                 table.AddColumn(new UiCategoryColumn());
+                table.AddColumn(new SearchCategoryColumn());
                 table.ShowFilterRow = true;
             }
 
@@ -189,19 +199,10 @@ namespace InventoryTools.Logic
             }
         }
 
-        public bool? ShowRelevantSourceOnly
+        public bool? FilterItemsInRetainers
         {
-            get => _showRelevantSourceOnly;
-            set { _showRelevantSourceOnly = value;
-                NeedsRefresh = true;
-                ConfigurationChanged?.Invoke(this);
-            }
-        }
-
-        public bool? ShowRelevantDestinationOnly
-        {
-            get => _showRelevantDestinationOnly;
-            set { _showRelevantDestinationOnly = value;
+            get => _filterItemsInRetainers;
+            set { _filterItemsInRetainers = value;
                 NeedsRefresh = true;
                 ConfigurationChanged?.Invoke(this);
             }
@@ -211,6 +212,42 @@ namespace InventoryTools.Logic
         {
             get => _displayInTabs;
             set { _displayInTabs = value;
+                ConfigurationChanged?.Invoke(this);
+            }
+        }
+
+        public string Quantity
+        {
+            get => _quantity;
+            set { _quantity = value;
+                NeedsRefresh = true;
+                ConfigurationChanged?.Invoke(this);
+            }
+        }
+
+        public string iLevel
+        {
+            get => _iLevel;
+            set { _iLevel = value;
+                NeedsRefresh = true;
+                ConfigurationChanged?.Invoke(this);
+            }
+        }
+
+        public string Spiritbond
+        {
+            get => _spiritbond;
+            set { _spiritbond = value;
+                NeedsRefresh = true;
+                ConfigurationChanged?.Invoke(this);
+            }
+        }
+
+        public string NameFilter
+        {
+            get => _nameFilter;
+            set { _nameFilter = value;
+                NeedsRefresh = true;
                 ConfigurationChanged?.Invoke(this);
             }
         }
@@ -263,6 +300,40 @@ namespace InventoryTools.Logic
                 ConfigurationChanged?.Invoke(this);
             }            
         }
+        
+        public string ShopSellingPrice
+        {
+            get => _shopSellingPrice;
+            set
+            {
+                _shopSellingPrice = value;
+                NeedsRefresh = true;
+                ConfigurationChanged?.Invoke(this);                
+            }
+        }
+
+        public string ShopBuyingPrice
+        {
+            get => _shopBuyingPrice;
+            set
+            {
+                _shopBuyingPrice = value;
+                NeedsRefresh = true;
+                ConfigurationChanged?.Invoke(this);
+            }
+        }
+
+        public bool? CanBeBought
+        {
+            get => _canBeBought;
+            set
+            {
+                _canBeBought = value;
+                NeedsRefresh = true;
+                ConfigurationChanged?.Invoke(this);
+            }
+        }
+
 
         public ulong OwnerId
         {
@@ -319,6 +390,56 @@ namespace InventoryTools.Logic
                 
             }
 
+            if (!string.IsNullOrEmpty(this.NameFilter))
+            {
+                if (!item.Item.Name.ToString().ToLower().PassesFilter(this.NameFilter.ToLower()))
+                {
+                    matches = false;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(this.Quantity))
+            {
+                if (!item.Quantity.PassesFilter(this.Quantity))
+                {
+                    matches = false;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(this.iLevel))
+            {
+                if (!item.Item.LevelItem.Row.PassesFilter(this.iLevel) || item.EquipSlotCategory.RowId == 0)
+                {
+                    matches = false;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(this.Spiritbond))
+            {
+                var spiritBond = item.Spiritbond;
+                var itemSpiritBond = spiritBond / 100;
+                if (!itemSpiritBond.PassesFilter(this.Spiritbond) || item.IsCollectible)
+                {
+                    matches = false;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(this.ShopBuyingPrice))
+            {
+                if (!item.Item.PriceMid.PassesFilter(this.ShopBuyingPrice) || !item.CanBeBought)
+                {
+                    matches = false;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(this.ShopSellingPrice))
+            {
+                if (!item.Item.PriceLow.PassesFilter(this.ShopSellingPrice))
+                {
+                    matches = false;
+                }
+            }
+            
             return matches;
         }
 
@@ -418,6 +539,24 @@ namespace InventoryTools.Logic
                 }
                 return "";
             }
+        }
+
+        public bool InActiveInventories(ulong activeCharacterId, ulong activeRetainerId, ulong sourceCharacterId,
+            ulong destinationCharacterId)
+        {
+            if (FilterItemsInRetainers.HasValue)
+            {
+                if (FilterItemsInRetainers.Value && activeRetainerId != 0)
+                {
+                    PluginLog.Log("filtering, " + activeCharacterId + ":" + activeRetainerId + ":" + sourceCharacterId + ":" + destinationCharacterId);
+                    if (activeCharacterId == sourceCharacterId && activeRetainerId == destinationCharacterId)
+                    {
+                        return true;
+                    }
+                    return false;
+                }
+            }
+            return true;
         }
 
     }

@@ -1,4 +1,6 @@
-﻿using CriticalCommonLib.Enums;
+﻿using System;
+using System.ComponentModel;
+using CriticalCommonLib.Enums;
 using CriticalCommonLib.Models;
 
 namespace InventoryTools.Logic
@@ -43,6 +45,23 @@ namespace InventoryTools.Logic
             _quantity = quantity;
             _destinationBag = null;
             _destinationRetainerId = null;
+        }
+
+        public string GetExtraInformation()
+        {
+            string info = "";
+            if (InventoryItem.Item != null)
+            {
+                info += (InventoryItem.CanBeBought ? "Can be bought" : "Can't be bought") + '\n';
+                foreach (PropertyDescriptor descriptor in TypeDescriptor.GetProperties(InventoryItem.Item))
+                {
+                    string name = descriptor.Name;
+                    object value = descriptor.GetValue(InventoryItem.Item);
+                    info += String.Format("{0}={1}", name, value) + '\n';
+                }
+            }
+
+            return info;
         }
     }
 }

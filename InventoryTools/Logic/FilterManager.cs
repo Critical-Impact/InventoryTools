@@ -16,6 +16,10 @@ namespace InventoryTools.Logic
         {
             var sortedItems = new List<SortingResult>();
             var unsortableItems = new List<InventoryItem>();
+            var activeCharacter = PluginLogic.CharacterMonitor.ActiveCharacter;
+            var activeRetainer = PluginLogic.CharacterMonitor.ActiveRetainer;
+            var displayCrossCharacter = PluginLogic.PluginConfiguration.DisplayCrossCharacter;
+            
             PluginLog.Verbose("Generating a new filter list");
 
             if (filter.FilterType == FilterType.SortingFilter)
@@ -29,30 +33,30 @@ namespace InventoryTools.Logic
                     foreach (var inventory in character.Value)
                     {
                         var inventoryKey = (character.Key, inventory.Key);
-                        if (filter.SourceAllRetainers.HasValue && filter.SourceAllRetainers.Value && PluginLogic.CharacterMonitor.IsRetainer(character.Key))
+                        if (filter.SourceAllRetainers.HasValue && filter.SourceAllRetainers.Value && PluginLogic.CharacterMonitor.IsRetainer(character.Key) && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
                             sourceInventories.Add(inventoryKey, inventory.Value);
                         }
                         else if (filter.SourceAllCharacters.HasValue && filter.SourceAllCharacters.Value &&
-                                 PluginLogic.CharacterMonitor.ActiveCharacter == character.Key)
+                                 PluginLogic.CharacterMonitor.ActiveCharacter == character.Key && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
                             sourceInventories.Add(inventoryKey, inventory.Value);
                         }
-                        else if (filter.SourceInventories.Contains(inventoryKey))
+                        else if (filter.SourceInventories.Contains(inventoryKey) && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
                             sourceInventories.Add(inventoryKey, inventory.Value);
                         }
 
-                        if (filter.DestinationAllRetainers.HasValue && filter.DestinationAllRetainers.Value && PluginLogic.CharacterMonitor.IsRetainer(character.Key))
+                        if (filter.DestinationAllRetainers.HasValue && filter.DestinationAllRetainers.Value && PluginLogic.CharacterMonitor.IsRetainer(character.Key) && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
                             destinationInventories.Add(inventoryKey, inventory.Value);
                         }
                         else if (filter.DestinationAllCharacters.HasValue && filter.DestinationAllCharacters.Value &&
-                                 PluginLogic.CharacterMonitor.ActiveCharacter == character.Key)
+                                 PluginLogic.CharacterMonitor.ActiveCharacter == character.Key && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
                             destinationInventories.Add(inventoryKey, inventory.Value);
                         }
-                        else if (filter.DestinationInventories.Contains(inventoryKey))
+                        else if (filter.DestinationInventories.Contains(inventoryKey) && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
                             destinationInventories.Add(inventoryKey, inventory.Value);
                         }
@@ -135,9 +139,13 @@ namespace InventoryTools.Logic
                                                       : existingItem.Item.StackSize) + " and has quantity of " +
                                                   existingItem.TempQuantity);
                                     //All the item can fit, stick it in and continue
-                                    sortedItems.Add(new SortingResult(sourceInventory.Key.Item1,
-                                        existingItem.RetainerId, sourceItem.SortedContainer,
-                                        existingItem.SortedCategory, sourceItem, (int) canFit));
+                                    if (filter.InActiveInventories(activeCharacter, activeRetainer,
+                                        sourceInventory.Key.Item1, existingItem.RetainerId))
+                                    {
+                                        sortedItems.Add(new SortingResult(sourceInventory.Key.Item1,
+                                            existingItem.RetainerId, sourceItem.SortedContainer,
+                                            existingItem.SortedCategory, sourceItem, (int) canFit));
+                                    }
                                     if (!absoluteItemLocations.ContainsKey(hashCode))
                                     {
                                         absoluteItemLocations.Add(hashCode, new HashSet<(ulong, InventoryCategory)>());
@@ -187,10 +195,13 @@ namespace InventoryTools.Logic
                                             {
                                                 slotsAvailable[seenInventoryLocation] =
                                                     slotsAvailable[seenInventoryLocation] - 1;
-                                                sortedItems.Add(new SortingResult(sourceInventory.Key.Item1,
-                                                    seenInventoryLocation.Item1, sourceItem.SortedContainer,
-                                                    seenInventoryLocation.Item2, sourceItem,
-                                                    (int) sourceItem.TempQuantity));
+                                                if (filter.InActiveInventories(activeCharacter, activeRetainer, sourceInventory.Key.Item1,seenInventoryLocation.Item1))
+                                                {
+                                                    sortedItems.Add(new SortingResult(sourceInventory.Key.Item1,
+                                                        seenInventoryLocation.Item1, sourceItem.SortedContainer,
+                                                        seenInventoryLocation.Item2, sourceItem,
+                                                        (int) sourceItem.TempQuantity));
+                                                }
                                                 sourceItem.TempQuantity -= sourceItem.TempQuantity;
                                                 break;
                                             }
@@ -238,9 +249,14 @@ namespace InventoryTools.Logic
                         //Don't compare inventory to itself
                         if (nextSlot.Value != 0)
                         {
-                            sortedItems.Add(new SortingResult(sourceInventory.Key.Item1, nextSlot.Key.Item1,
-                                sourceItem.SortedContainer, nextSlot.Key.Item2, sourceItem,
-                                (int) sourceItem.TempQuantity));
+                            if (filter.InActiveInventories(activeCharacter, activeRetainer, sourceInventory.Key.Item1,
+                                nextSlot.Key.Item1))
+                            {
+                                sortedItems.Add(new SortingResult(sourceInventory.Key.Item1, nextSlot.Key.Item1,
+                                    sourceItem.SortedContainer, nextSlot.Key.Item2, sourceItem,
+                                    (int) sourceItem.TempQuantity));
+                            }
+
                             slotsAvailable[nextSlot.Key] = nextSlot.Value - 1;
                         }
                         else
@@ -259,16 +275,16 @@ namespace InventoryTools.Logic
                     foreach (var inventory in character.Value)
                     {
                         var inventoryKey = (character.Key, inventory.Key);
-                        if (filter.SourceAllRetainers.HasValue && filter.SourceAllRetainers.Value && PluginLogic.CharacterMonitor.IsRetainer(character.Key))
+                        if (filter.SourceAllRetainers.HasValue && filter.SourceAllRetainers.Value && PluginLogic.CharacterMonitor.IsRetainer(character.Key) && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
                             sourceInventories.Add(inventoryKey, inventory.Value);
                         }
                         if (filter.SourceAllCharacters.HasValue && filter.SourceAllCharacters.Value &&
-                                 PluginLogic.CharacterMonitor.ActiveCharacter == character.Key)
+                                 PluginLogic.CharacterMonitor.ActiveCharacter == character.Key && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
                             sourceInventories.Add(inventoryKey, inventory.Value);
                         }
-                        if (filter.SourceInventories.Contains(inventoryKey))
+                        if (filter.SourceInventories.Contains(inventoryKey) && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
                             if (!sourceInventories.ContainsKey(inventoryKey))
                             {

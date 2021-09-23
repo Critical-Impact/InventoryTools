@@ -69,6 +69,8 @@ namespace InventoryTools
                     bool showMonitorTab = _configuration.ShowFilterTab;
                     bool switchFiltersAutomatically = _configuration.SwitchFiltersAutomatically;
                     bool restorePreviousFilter = _configuration.RestorePreviousFilter;
+                    bool displayCrossCharacter = _configuration.DisplayCrossCharacter;
+                    Vector3 highlightColor = _configuration.HighlightColor;
                     
                     if (ImGui.Checkbox("Show Filters Tab?", ref showMonitorTab))
                     {
@@ -79,10 +81,6 @@ namespace InventoryTools
                     {
                         _configuration.SwitchFiltersAutomatically = !_configuration.SwitchFiltersAutomatically;
                     }
-
-                    ImGui.SameLine();
-                    UiHelpers.HelpMarker(
-                        "Should the active window filter be switched automatically when switching tabs?.");
 
                     ImGui.Text("Retainer Visuals:");
                     ImGui.Separator();
@@ -102,13 +100,22 @@ namespace InventoryTools
                     ImGui.SameLine();
                     UiHelpers.HelpMarker(
                         "Should the name of the retainer in the summoning bell list have the number of items to be sorted or are available in their inventory?");
-                    ImGui.Text("Advanced Settings:");
-                    ImGui.Separator();
-                    if (ImGui.Checkbox("Allow Cross-Character Inventories?", ref showMonitorTab))
+                    
+                    if (ImGui.ColorEdit3("Highlight Color?", ref highlightColor, ImGuiColorEditFlags.NoInputs))
                     {
-                        _configuration.ShowFilterTab = !_configuration.ShowFilterTab;
+                        _configuration.HighlightColor = highlightColor;
                     }
 
+                    ImGui.SameLine();
+                    UiHelpers.HelpMarker(
+                        "The color to set the highlighted items to.");
+                    
+                    ImGui.Text("Advanced Settings:");
+                    ImGui.Separator();
+                    if (ImGui.Checkbox("Allow Cross-Character Inventories?", ref displayCrossCharacter))
+                    {
+                        _configuration.DisplayCrossCharacter = !_configuration.DisplayCrossCharacter;
+                    }
                     ImGui.SameLine();
                     UiHelpers.HelpMarker(
                         "This is an experimental feature, should characters not currently logged in and their associated retainers be shown in filter configurations?");
@@ -210,7 +217,7 @@ namespace InventoryTools
                             ImGui.TextDisabled(filterType);
 
                             ImGui.SetNextItemWidth(150);
-                            ImGui.LabelText(labelName + "DisplayInTabs", "Display in Tab List?: ");
+                            ImGui.LabelText(labelName + "DisplayInTabs", "Display in Tab List: ");
                             ImGui.SameLine();
                             var displayInTabs = filterConfiguration.DisplayInTabs;
                             if (ImGui.Checkbox(labelName + "DisplayInTabsCheckbox", ref displayInTabs))
@@ -220,15 +227,16 @@ namespace InventoryTools
                                     filterConfiguration.DisplayInTabs = displayInTabs;
                                 }
                             }
-
-
                         }
 
-                        ImGui.NewLine();
                         if (ImGui.CollapsingHeader("Inventories", ImGuiTreeNodeFlags.DefaultOpen))
                         {
-                            var playerCharacters = _characterMonitor.GetPlayerCharacters();
                             var allCharacters = _characterMonitor.AllCharacters();
+                            if (!_configuration.DisplayCrossCharacter)
+                            {
+                                allCharacters = allCharacters.Where(c =>
+                                    PluginLogic.CharacterMonitor.BelongsToActiveCharacter(c.Key)).ToArray();
+                            }
                             
                             ImGui.SetNextItemWidth(200);
                             ImGui.LabelText(labelName + "SourceAllRetainers", "Source from all Retainers: ");
@@ -255,6 +263,9 @@ namespace InventoryTools
                                     filterConfiguration.SourceAllRetainers = false;
                                 }
                             }
+                            ImGui.SameLine();
+                            UiHelpers.HelpMarker(
+                                "Use every retainer's inventory as a source.");
                             
                             ImGui.SetNextItemWidth(200);
                             ImGui.LabelText(labelName + "SourceAllCharacters", "Source from all Characters: ");
@@ -281,8 +292,15 @@ namespace InventoryTools
                                     filterConfiguration.SourceAllCharacters = false;
                                 }
                             }
+                            ImGui.SameLine();
+                            UiHelpers.HelpMarker(
+                                "Use every characters's inventory as a source. This will generally only be your own character unless you have cross-character inventory tracking enabled.");
                             
+                            ImGui.SetNextItemWidth(120);
                             ImGui.LabelText(labelName + "SourceLabel", "Source Inventories: ");
+                            ImGui.SameLine();
+                            UiHelpers.HelpMarker(
+                                "This is a list of source inventories to sort items from based on the filter configuration");
 
                             var currentSource = "";
                             ImGui.SetNextItemWidth(100);
@@ -306,19 +324,23 @@ namespace InventoryTools
                             for (var index = 0; index < filterConfiguration.SourceInventories.Count; index++)
                             {
                                 var sourceInventory = filterConfiguration.SourceInventories[index];
-                                if (index % 6 != 0 || index == 0)
+                                if (PluginLogic.CharacterMonitor.BelongsToActiveCharacter(sourceInventory.Item1) || _configuration.DisplayCrossCharacter)
                                 {
-                                    ImGui.SameLine();
-                                }
+                                    if (index % 6 != 0 || index == 0)
+                                    {
+                                        ImGui.SameLine();
+                                    }
 
-                                if (ImGui.Button(_pluginLogic.GetCharacterName(sourceInventory.Item1) + " X"))
-                                {
-                                    filterConfiguration.RemoveSourceInventory(sourceInventory);
+                                    if (ImGui.Button(_pluginLogic.GetCharacterName(sourceInventory.Item1) + " X"))
+                                    {
+                                        filterConfiguration.RemoveSourceInventory(sourceInventory);
+                                    }
                                 }
                             }
 
                             if (filterConfiguration.FilterType == FilterType.SortingFilter)
                             {
+                                ImGui.Separator();
                                 ImGui.SetNextItemWidth(200);
                                 ImGui.LabelText(labelName + "DestinationAllRetainers", "Destination to all Retainers: ");
                                 ImGui.SameLine();
@@ -344,6 +366,9 @@ namespace InventoryTools
                                         filterConfiguration.DestinationAllRetainers = false;
                                     }
                                 }
+                                ImGui.SameLine();
+                                UiHelpers.HelpMarker(
+                                    "Use every retainer as a destination for items to be sorted.");
                                 
                                 ImGui.SetNextItemWidth(200);
                                 ImGui.LabelText(labelName + "DestinationAllCharacters", "Destination to all Characters: ");
@@ -370,8 +395,15 @@ namespace InventoryTools
                                         filterConfiguration.DestinationAllCharacters = false;
                                     }
                                 }
+                                ImGui.SameLine();
+                                UiHelpers.HelpMarker(
+                                    "Use every character as a destination for items to be sorted. This will generally only be your own character unless you have cross-character inventory tracking enabled.");
                                 
+                                ImGui.SetNextItemWidth(120);
                                 ImGui.LabelText(labelName + "DestinationLabel", "Destination Inventories: ");
+                                ImGui.SameLine();
+                                UiHelpers.HelpMarker(
+                                    "This is a list of destinations to sort items from source into based on the filter configuration.");
 
                                 var currentDestination = "";
                                 ImGui.SetNextItemWidth(100);
@@ -395,25 +427,25 @@ namespace InventoryTools
                                 for (var index = 0; index < filterConfiguration.DestinationInventories.Count; index++)
                                 {
                                     var destinationInventory = filterConfiguration.DestinationInventories[index];
-                                    if (index % 6 != 0 || index == 0)
+                                    if (PluginLogic.CharacterMonitor.BelongsToActiveCharacter(
+                                        destinationInventory.Item1) || _configuration.DisplayCrossCharacter)
                                     {
-                                        ImGui.SameLine();
-                                    }
-
-                                    if (ImGui.Button(_pluginLogic.GetCharacterName(destinationInventory.Item1) + " X"))
-                                    {
-                                        filterConfiguration.RemoveDestinationInventory(destinationInventory);
+                                        if (index % 6 != 0 || index == 0)
+                                        {
+                                            ImGui.SameLine();
+                                        }
+                                        if (ImGui.Button(_pluginLogic.GetCharacterName(destinationInventory.Item1) +
+                                                         " X"))
+                                        {
+                                            filterConfiguration.RemoveDestinationInventory(destinationInventory);
+                                        }
                                     }
                                 }
                             }
                         }
-
-
-                        ImGui.NewLine();
-
                         if (ImGui.CollapsingHeader("Categories", ImGuiTreeNodeFlags.DefaultOpen))
                         {
-                            ImGui.LabelText(labelName + "UiCategoryLabel", "UI Categories: ");
+                            ImGui.LabelText(labelName + "UiCategoryLabel", "Categories: ");
 
                             var currentUiCategory = "";
                             ImGui.SetNextItemWidth(100);
@@ -456,8 +488,10 @@ namespace InventoryTools
                                     ImGui.SameLine();
                                 }
                             }
+                            
+                            ImGui.Separator();
 
-                            ImGui.LabelText(labelName + "SearchCategoryLabel", "Search Categories: ");
+                            ImGui.LabelText(labelName + "SearchCategoryLabel", "Market Board Categories: ");
 
                             var currentSearchCategory = "";
                             ImGui.SetNextItemWidth(100);
@@ -502,12 +536,10 @@ namespace InventoryTools
                             }
                         }
 
-                        ImGui.NewLine();
-
                         if (ImGui.CollapsingHeader("Filters", ImGuiTreeNodeFlags.DefaultOpen))
                         {
-                            ImGui.SetNextItemWidth(200);
-                            ImGui.LabelText(labelName + "IsHQLabel", "Is HQ?: ");
+                            ImGui.SetNextItemWidth(205);
+                            ImGui.LabelText(labelName + "IsHQLabel", "Is HQ: ");
                             ImGui.SameLine();
                             var isHQ = filterConfiguration.IsHq == null ? 0 : (filterConfiguration.IsHq.Value ? 1 : 2);
                             if (ImGui.Combo(labelName + "IsHQCheckbox", ref isHQ, items, 3))
@@ -525,8 +557,11 @@ namespace InventoryTools
                                     filterConfiguration.IsHq = false;
                                 }
                             }
+                            ImGui.SameLine();
+                            UiHelpers.HelpMarker(
+                                "Is the item High Quality?");
 
-                            ImGui.SetNextItemWidth(200);
+                            ImGui.SetNextItemWidth(205);
                             ImGui.LabelText(labelName + "IsCollectibleLabel", "Is Collectible?: ");
                             ImGui.SameLine();
                             var isCollectible = filterConfiguration.IsCollectible == null
@@ -547,9 +582,131 @@ namespace InventoryTools
                                     filterConfiguration.IsCollectible = false;
                                 }
                             }
+                            ImGui.SameLine();
+                            UiHelpers.HelpMarker(
+                                "Is the item Collectible?");
 
-                            ImGui.SetNextItemWidth(200);
-                            ImGui.LabelText(labelName + "DuplicatesOnlyLabel", "Duplicates Only?: ");
+                            ImGui.SetNextItemWidth(205);
+                            ImGui.LabelText(labelName + "Name", "Name: ");
+                            ImGui.SameLine();
+                            var name = filterConfiguration.NameFilter == null ? "" : filterConfiguration.NameFilter;
+                            if (ImGui.InputText(labelName + "NameInput", ref name, 10))
+                            {
+                                if (name != filterConfiguration.NameFilter)
+                                {
+                                    filterConfiguration.NameFilter = name;
+                                }
+                            }
+                            ImGui.SameLine();
+                            UiHelpers.HelpMarker(
+                                "The name of the item");
+
+                            ImGui.SetNextItemWidth(205);
+                            ImGui.LabelText(labelName + "Quantity", "Quantity: ");
+                            ImGui.SameLine();
+                            var quantity = filterConfiguration.Quantity == null ? "" : filterConfiguration.Quantity;
+                            if (ImGui.InputText(labelName + "QuantityInput", ref quantity, 10))
+                            {
+                                if (quantity != filterConfiguration.Quantity)
+                                {
+                                    filterConfiguration.Quantity = quantity;
+                                }
+                            }
+                            ImGui.SameLine();
+                            UiHelpers.HelpMarker(
+                                "The quantity of the item");
+
+                            ImGui.SetNextItemWidth(205);
+                            ImGui.LabelText(labelName + "ILevel", "Item Level: ");
+                            ImGui.SameLine();
+                            var iLevel = filterConfiguration.iLevel == null ? "" : filterConfiguration.iLevel;
+                            if (ImGui.InputText(labelName + "ILevelInput", ref iLevel, 10))
+                            {
+                                if (iLevel != filterConfiguration.iLevel)
+                                {
+                                    filterConfiguration.iLevel = iLevel;
+                                }
+                            }
+                            ImGui.SameLine();
+                            UiHelpers.HelpMarker(
+                                "The item level of the item");
+
+                            ImGui.SetNextItemWidth(205);
+                            ImGui.LabelText(labelName + "Spiritbond", "Spiritbond: ");
+                            ImGui.SameLine();
+                            var spiritbond = filterConfiguration.Spiritbond == null ? "" : filterConfiguration.Spiritbond;
+                            if (ImGui.InputText(labelName + "SpiritbondInput", ref spiritbond, 10))
+                            {
+                                if (spiritbond != filterConfiguration.Spiritbond)
+                                {
+                                    filterConfiguration.Spiritbond = spiritbond;
+                                }
+                            }
+                            ImGui.SameLine();
+                            UiHelpers.HelpMarker(
+                                "The spiritbond percentage of the item");
+
+                            ImGui.SetNextItemWidth(205);
+                            ImGui.LabelText(labelName + "SellingPrice", "Gil Selling Price: ");
+                            ImGui.SameLine();
+                            var sellingPrice = filterConfiguration.ShopSellingPrice == null ? "" : filterConfiguration.ShopSellingPrice;
+                            if (ImGui.InputText(labelName + "SellingPriceInput", ref sellingPrice, 10))
+                            {
+                                if (sellingPrice != filterConfiguration.ShopSellingPrice)
+                                {
+                                    filterConfiguration.ShopSellingPrice = sellingPrice;
+                                }
+                            }
+                            ImGui.SameLine();
+                            UiHelpers.HelpMarker(
+                                "The price when sold to the shops");
+
+                            ImGui.SetNextItemWidth(205);
+                            ImGui.LabelText(labelName + "BuyingPrice", "Gil Buying Price: ");
+                            ImGui.SameLine();
+                            var buyingPrice = filterConfiguration.ShopBuyingPrice == null ? "" : filterConfiguration.ShopBuyingPrice;
+                            if (ImGui.InputText(labelName + "BuyingPriceInput", ref buyingPrice, 10))
+                            {
+                                if (buyingPrice != filterConfiguration.ShopBuyingPrice)
+                                {
+                                    filterConfiguration.ShopBuyingPrice = buyingPrice;
+                                }
+                            }
+                            ImGui.SameLine();
+                            UiHelpers.HelpMarker(
+                                "The price when bought from shops");
+                            
+                            ImGui.SetNextItemWidth(205);
+                            ImGui.LabelText(labelName + "CanBeBoughtLabel", "Can be Purchased for Gil: ");
+                            ImGui.SameLine();
+                            var canBeBought = filterConfiguration.CanBeBought == null
+                                ? 0
+                                : (filterConfiguration.CanBeBought.Value ? 1 : 2);
+                            if (ImGui.Combo(labelName + "CanBeBoughtCheckbox", ref canBeBought, items, 3))
+                            {
+                                if (canBeBought == 0 && filterConfiguration.CanBeBought != null)
+                                {
+                                    filterConfiguration.CanBeBought = null;
+                                }
+                                else if (canBeBought == 1 && filterConfiguration.CanBeBought != true)
+                                {
+                                    filterConfiguration.CanBeBought = true;
+                                }
+                                else if (canBeBought == 2 && filterConfiguration.CanBeBought != false)
+                                {
+                                    filterConfiguration.CanBeBought = false;
+                                }
+                            }
+                            ImGui.SameLine();
+                            UiHelpers.HelpMarker(
+                                "Whether the item can be bought from a gil shop?");
+                            
+                        }
+                        
+                        if (ImGui.CollapsingHeader("Misc", ImGuiTreeNodeFlags.DefaultOpen))
+                        {
+                            ImGui.SetNextItemWidth(205);
+                            ImGui.LabelText(labelName + "DuplicatesOnlyLabel", "Duplicates Only: ");
                             ImGui.SameLine();
                             var duplicatesOnly = filterConfiguration.DuplicatesOnly == null
                                 ? 0
@@ -569,58 +726,38 @@ namespace InventoryTools
                                     filterConfiguration.DuplicatesOnly = false;
                                 }
                             }
-
-                            ImGui.SetNextItemWidth(200);
-                            ImGui.LabelText(labelName + "ShowRelevantSourceOnly", "Show Relevant Source Only?: ");
                             ImGui.SameLine();
-                            var ShowRelevantSourceOnly = filterConfiguration.ShowRelevantSourceOnly == null
-                                ? 0
-                                : (filterConfiguration.ShowRelevantSourceOnly.Value ? 1 : 2);
-                            if (ImGui.Combo(labelName + "ShowRelevantSourceOnlyCheckbox", ref ShowRelevantSourceOnly,
-                                items,
-                                3))
-                            {
-                                if (ShowRelevantSourceOnly == 0 && filterConfiguration.ShowRelevantSourceOnly != null)
-                                {
-                                    filterConfiguration.ShowRelevantSourceOnly = null;
-                                }
-                                else if (ShowRelevantSourceOnly == 1 &&
-                                         filterConfiguration.ShowRelevantSourceOnly != true)
-                                {
-                                    filterConfiguration.ShowRelevantSourceOnly = true;
-                                }
-                                else if (ShowRelevantSourceOnly == 2 &&
-                                         filterConfiguration.ShowRelevantSourceOnly != false)
-                                {
-                                    filterConfiguration.ShowRelevantSourceOnly = false;
-                                }
-                            }
+                            UiHelpers.HelpMarker(
+                                "Filter out any items that do not appear in both the source and destination?");
 
-                            ImGui.SetNextItemWidth(200);
-                            ImGui.LabelText(labelName + "ShowRelevantDestOnly", "Show Relevant Destination Only?: ");
+                            ImGui.SetNextItemWidth(205);
+                            ImGui.LabelText(labelName + "FilterItemsInRetainers", "Filter Items when in Retainers: ");
                             ImGui.SameLine();
-                            var ShowRelevantDestinationOnly = filterConfiguration.ShowRelevantDestinationOnly == null
+                            var FilterItemsInRetainers = filterConfiguration.FilterItemsInRetainers == null
                                 ? 0
-                                : (filterConfiguration.ShowRelevantDestinationOnly.Value ? 1 : 2);
-                            if (ImGui.Combo(labelName + "ShowRelevantDestOnlyCheckbox", ref ShowRelevantDestinationOnly,
+                                : (filterConfiguration.FilterItemsInRetainers.Value ? 1 : 2);
+                            if (ImGui.Combo(labelName + "FilterItemsInRetainersCheckbox", ref FilterItemsInRetainers,
                                 items, 3))
                             {
-                                if (ShowRelevantDestinationOnly == 0 &&
-                                    filterConfiguration.ShowRelevantDestinationOnly != null)
+                                if (FilterItemsInRetainers == 0 &&
+                                    filterConfiguration.FilterItemsInRetainers != null)
                                 {
-                                    filterConfiguration.ShowRelevantDestinationOnly = null;
+                                    filterConfiguration.FilterItemsInRetainers = null;
                                 }
-                                else if (ShowRelevantDestinationOnly == 1 &&
-                                         filterConfiguration.ShowRelevantDestinationOnly != true)
+                                else if (FilterItemsInRetainers == 1 &&
+                                         filterConfiguration.FilterItemsInRetainers != true)
                                 {
-                                    filterConfiguration.ShowRelevantDestinationOnly = true;
+                                    filterConfiguration.FilterItemsInRetainers = true;
                                 }
-                                else if (ShowRelevantDestinationOnly == 2 &&
-                                         filterConfiguration.ShowRelevantDestinationOnly != false)
+                                else if (FilterItemsInRetainers == 2 &&
+                                         filterConfiguration.FilterItemsInRetainers != false)
                                 {
-                                    filterConfiguration.ShowRelevantDestinationOnly = false;
+                                    filterConfiguration.FilterItemsInRetainers = false;
                                 }
                             }
+                            ImGui.SameLine();
+                            UiHelpers.HelpMarker(
+                                "When talking with a retainer should the filter adjust itself to only show items that should be put inside the retainer from your inventory?");
                         }
                     }
                 }

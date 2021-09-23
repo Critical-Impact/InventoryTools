@@ -26,6 +26,7 @@ namespace InventoryTools.Logic
 
         private void FilterConfigurationUpdated(FilterConfiguration filterconfiguration)
         {
+            PluginLog.Log("FilterTable: Filter configuration changed");
             this.NeedsRefresh = true;
         }
 
@@ -48,7 +49,7 @@ namespace InventoryTools.Logic
         public List<IColumn> Columns { get; } = new();
         public int? SortColumn { get; set; }
         public ImGuiSortDirection? SortDirection { get; set; }
-        public IEnumerable<SortingResult> Items { get; set; } = new List<SortingResult>();
+        public List<SortingResult> Items { get; set; } = new List<SortingResult>();
         public int? FreezeCols { get; set; }
         public int? FreezeRows { get; set; }
         public bool ShowFilterRow { get; set; }
@@ -67,6 +68,7 @@ namespace InventoryTools.Logic
             //Do something with unsortable items
             if (FilterConfiguration.FilterResult != null)
             {
+                PluginLog.Log("FilterTable: Refreshing");
                 var items = FilterConfiguration.FilterResult.Value.SortedItems.AsEnumerable();
                 items = PreFilter != null ? PreFilter.Invoke(items) : items; 
                 for (var index = 0; index < Columns.Count; index++)
@@ -79,7 +81,7 @@ namespace InventoryTools.Logic
                     }
                 }
 
-                Items = items;
+                Items = items.ToList();
                 NeedsRefresh = false;
                 Refreshed?.Invoke(this);
             }
@@ -177,11 +179,22 @@ namespace InventoryTools.Logic
                     Refresh();
                 }
 
-                foreach (var item in Items)
+                for (var index = 0; index < Items.Count; index++)
                 {
+                    var item = Items[index];
                     ImGui.TableNextRow();
-                    foreach (var column in Columns)
+                    for (var i = 0; i < Columns.Count; i++)
                     {
+                        var column = Columns[i];
+#if DEBUG
+                        if (i == 1 && ImGui.BeginPopupContextItem(index + "_" + i))
+                        {
+                            ImGui.Text(item.GetExtraInformation());
+                            if (ImGui.Button("Close"))
+                                ImGui.CloseCurrentPopup();
+                            ImGui.EndPopup();
+                        }
+#endif
                         column.Draw(item);
                     }
                 }

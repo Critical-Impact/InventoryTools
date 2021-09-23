@@ -25,7 +25,6 @@ namespace InventoryTools
         private PluginLogic _pluginLogic;
         private DalamudPluginInterface _pluginInterface;
         private GameUi _gameUi;
-
         public InventoryToolsUi(DalamudPluginInterface pluginInterface, PluginLogic pluginLogic, InventoryMonitor inventoryMonitor, CharacterMonitor characterMonitor, InventoryToolsConfiguration configuration, ClientState clientState, GameUi gameUi)
         {
             _pluginLogic = pluginLogic;
@@ -47,7 +46,6 @@ namespace InventoryTools
         private int _selectedFilterTab = 0;
         private bool _disposing = false;
         private string _activeFilter;
-
         public void Draw()
         {
             if (!IsVisible || !this._clientState.IsLoggedIn || _disposing)
@@ -73,17 +71,17 @@ namespace InventoryTools
                                 {
                                     _activeFilter = filterConfiguration.Key;
                                     if (_configuration.SwitchFiltersAutomatically &&
-                                        _configuration.ActiveUiFilter != filterConfiguration.Key)
+                                        _configuration.ActiveUiFilter != filterConfiguration.Key && _configuration.ActiveUiFilter != null)
                                     {
                                         _pluginLogic.ToggleActiveUiFilterByKey(filterConfiguration.Key);
                                     }
                                 }
-
                                 ImGui.EndTabItem();
                             }
                         }
                     }
-
+                    
+                    
                     if (_configuration.ShowFilterTab && ImGui.BeginTabItem("Filters"))
                     {
                         RenderMonitorTab();
@@ -95,7 +93,6 @@ namespace InventoryTools
                         ImGui.EndTabItem();
                     }
                     ImGui.EndTabBar();
-                    
                 }
                 ImGui.SameLine();
                 ImGui.End();
@@ -112,21 +109,17 @@ namespace InventoryTools
         {
             if (ImGui.BeginChild("###monitorLeft", new Vector2(100, -1) * ImGui.GetIO().FontGlobalScale, true))
             {
-
                 for (var index = 0; index < _pluginLogic.FilterConfigurations.Count; index++)
                 {
                     var filterConfiguration = _pluginLogic.FilterConfigurations[index];
-                    if (filterConfiguration.FilterType == FilterType.SortingFilter)
+                    if (ImGui.Selectable(filterConfiguration.Name, index == _selectedFilterTab))
                     {
-                        if (ImGui.Selectable(filterConfiguration.Name, index == _selectedFilterTab))
+                        if (_configuration.SwitchFiltersAutomatically && _configuration.ActiveUiFilter != filterConfiguration.Key)
                         {
-                            if (_configuration.SwitchFiltersAutomatically && _configuration.ActiveUiFilter != filterConfiguration.Key)
-                            {
-                                _pluginLogic.ToggleActiveBackgroundFilterByKey(filterConfiguration.Key);
-                            }
-
-                            _selectedFilterTab = index;
+                            _pluginLogic.ToggleActiveBackgroundFilterByKey(filterConfiguration.Key);
                         }
+
+                        _selectedFilterTab = index;
                     }
                 }
 
