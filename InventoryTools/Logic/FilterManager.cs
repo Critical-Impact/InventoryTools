@@ -35,30 +35,49 @@ namespace InventoryTools.Logic
                         var inventoryKey = (character.Key, inventory.Key);
                         if (filter.SourceAllRetainers.HasValue && filter.SourceAllRetainers.Value && PluginLogic.CharacterMonitor.IsRetainer(character.Key) && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
-                            sourceInventories.Add(inventoryKey, inventory.Value);
+                            if (!sourceInventories.ContainsKey(inventoryKey))
+                            {
+                                sourceInventories.Add(inventoryKey, inventory.Value);
+                            }
                         }
                         else if (filter.SourceAllCharacters.HasValue && filter.SourceAllCharacters.Value &&
                                  PluginLogic.CharacterMonitor.ActiveCharacter == character.Key && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
-                            sourceInventories.Add(inventoryKey, inventory.Value);
+                            if (!sourceInventories.ContainsKey(inventoryKey))
+                            {
+                                sourceInventories.Add(inventoryKey, inventory.Value);
+                            }
                         }
                         else if (filter.SourceInventories.Contains(inventoryKey) && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
-                            sourceInventories.Add(inventoryKey, inventory.Value);
+
+                            if (!sourceInventories.ContainsKey(inventoryKey))
+                            {
+                                sourceInventories.Add(inventoryKey, inventory.Value);
+                            }
                         }
 
                         if (filter.DestinationAllRetainers.HasValue && filter.DestinationAllRetainers.Value && PluginLogic.CharacterMonitor.IsRetainer(character.Key) && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
-                            destinationInventories.Add(inventoryKey, inventory.Value);
+                            if (!destinationInventories.ContainsKey(inventoryKey))
+                            {
+                                destinationInventories.Add(inventoryKey, inventory.Value);
+                            }
                         }
                         else if (filter.DestinationAllCharacters.HasValue && filter.DestinationAllCharacters.Value &&
                                  PluginLogic.CharacterMonitor.ActiveCharacter == character.Key && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
-                            destinationInventories.Add(inventoryKey, inventory.Value);
+                            if (!destinationInventories.ContainsKey(inventoryKey))
+                            {
+                                destinationInventories.Add(inventoryKey, inventory.Value);
+                            }
                         }
                         else if (filter.DestinationInventories.Contains(inventoryKey) && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
-                            destinationInventories.Add(inventoryKey, inventory.Value);
+                            if (!destinationInventories.ContainsKey(inventoryKey))
+                            {
+                                destinationInventories.Add(inventoryKey, inventory.Value);
+                            }
                         }
                     }
                 }
@@ -277,12 +296,17 @@ namespace InventoryTools.Logic
                         var inventoryKey = (character.Key, inventory.Key);
                         if (filter.SourceAllRetainers.HasValue && filter.SourceAllRetainers.Value && PluginLogic.CharacterMonitor.IsRetainer(character.Key) && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
-                            sourceInventories.Add(inventoryKey, inventory.Value);
+                            if (!sourceInventories.ContainsKey(inventoryKey))
+                            {
+                                sourceInventories.Add(inventoryKey, inventory.Value);
+                            }
                         }
-                        if (filter.SourceAllCharacters.HasValue && filter.SourceAllCharacters.Value &&
-                                 PluginLogic.CharacterMonitor.ActiveCharacter == character.Key && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
+                        if (filter.SourceAllCharacters.HasValue && filter.SourceAllCharacters.Value && (displayCrossCharacter || PluginLogic.CharacterMonitor.ActiveCharacter == character.Key))
                         {
-                            sourceInventories.Add(inventoryKey, inventory.Value);
+                            if (!sourceInventories.ContainsKey(inventoryKey))
+                            {
+                                sourceInventories.Add(inventoryKey, inventory.Value);
+                            }
                         }
                         if (filter.SourceInventories.Contains(inventoryKey) && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
@@ -293,6 +317,9 @@ namespace InventoryTools.Logic
                         }
                     }
                 }
+
+                HashSet<int> distinctItems = new HashSet<int>();
+                HashSet<int> duplicateItems = new HashSet<int>();
 
                 //Filter the source and destination inventories based on the applicable items so we have less to sort
                 Dictionary<(ulong, InventoryCategory), List<InventoryItem>> filteredSources = new();
@@ -307,13 +334,47 @@ namespace InventoryTools.Logic
 
                     filteredSources[sourceInventory.Key].AddRange(sourceInventory.Value.Where(filter.FilterItem));
                 }
+                if (filter.DuplicatesOnly.HasValue && filter.DuplicatesOnly == true)
+                {
+                    foreach (var filteredSource in filteredSources)
+                    {
+                        foreach (var item in filteredSource.Value)
+                        {
+                            var hashCode = item.GetHashCode();
+                            if (distinctItems.Contains(hashCode))
+                            {
+                                if (!duplicateItems.Contains(hashCode))
+                                {
+                                    duplicateItems.Add(hashCode);
+                                }
+                            }
+                            else
+                            {
+                                distinctItems.Add(hashCode);
+                            }
+                        }
+                    }
+                }
 
                 foreach (var filteredSource in filteredSources)
                 {
                     foreach (var item in filteredSource.Value)
                     {
-                        sortedItems.Add(new SortingResult(filteredSource.Key.Item1, item.SortedContainer,
-                            item, (int)item.Quantity));
+                        if (filter.DuplicatesOnly.HasValue && filter.DuplicatesOnly == true)
+                        {
+                            if (duplicateItems.Contains(item.GetHashCode()))
+                            {
+                                sortedItems.Add(new SortingResult(filteredSource.Key.Item1, item.SortedContainer,
+                                    item, (int)item.Quantity));
+                            }
+
+                        }
+                        else
+                        {
+                            sortedItems.Add(new SortingResult(filteredSource.Key.Item1, item.SortedContainer,
+                                item, (int)item.Quantity));    
+                        }
+                        
                     }
                 }
             }

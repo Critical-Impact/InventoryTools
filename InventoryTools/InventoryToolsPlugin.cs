@@ -46,10 +46,10 @@ namespace InventoryTools
 
             ExcelCache.Initialise(dataManager);
             GameInterface = new GameInterface(sigScanner);
-            OdrScanner = new OdrScanner(clientState);
             ClientInterface = new ClientInterface(sigScanner, dataManager);
             NetworkMonitor = new NetworkMonitor(gameNetwork);
             CharacterMonitor = new CharacterMonitor(gameNetwork,ClientInterface, framework, clientState);
+            OdrScanner = new OdrScanner(clientState, CharacterMonitor);
             GameUi = new GameUi(sigScanner, framework);
             InventoryMonitor = new InventoryMonitor(ClientInterface, clientState, OdrScanner, CharacterMonitor, GameUi, gameNetwork);
             PluginLogic = new PluginLogic(Config, clientState, InventoryMonitor, CharacterMonitor, GameUi, chatGui);
@@ -63,9 +63,42 @@ namespace InventoryTools
             this.Config.IsVisible = !this.Config.IsVisible;
         }
 
+        [Command("/inv")]
+        [HelpMessage("Shows the inventory tools window.")]
+        public void ShowHideInventoryToolsCommand2(string command, string args)
+        {
+            this.Config.IsVisible = !this.Config.IsVisible;
+        }
+
+        [Command("/invtools")]
+        [HelpMessage("Shows the inventory tools window.")]
+        public void ShowHideInventoryToolsCommand3(string command, string args)
+        {
+            this.Config.IsVisible = !this.Config.IsVisible;
+        }
+
         [Command("/itfiltertoggle")]
         [HelpMessage("Toggles the specified filter on/off and turns off any other filters.")]
         public void FilterToggleCommand(string command, string args)
+        {
+            PluginLog.Verbose(command);
+            PluginLog.Verbose(args);
+            PluginLogic.ToggleActiveBackgroundFilterByName(args);
+        }
+
+        [Command("/invf")]
+        [HelpMessage("Toggles the specified filter on/off and turns off any other filters.")]
+        public void FilterToggleCommand2(string command, string args)
+        {
+            PluginLog.Verbose(command);
+            PluginLog.Verbose(args);
+            PluginLogic.ToggleActiveBackgroundFilterByName(args);
+        }
+
+
+        [Command("/ifilter")]
+        [HelpMessage("Toggles the specified filter on/off and turns off any other filters.")]
+        public void FilterToggleCommand3(string command, string args)
         {
             PluginLog.Verbose(command);
             PluginLog.Verbose(args);

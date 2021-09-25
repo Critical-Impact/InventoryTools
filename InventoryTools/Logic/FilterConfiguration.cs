@@ -439,6 +439,14 @@ namespace InventoryTools.Logic
                     matches = false;
                 }
             }
+
+            if (this.CanBeBought.HasValue && this.CanBeBought.Value)
+            {
+                if (!item.CanBeBought)
+                {
+                    matches = false;
+                }
+            }
             
             return matches;
         }

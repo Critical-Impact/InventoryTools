@@ -34,7 +34,7 @@ namespace InventoryTools
                 for (var index = 0; index < _pluginLogic.FilterConfigurations.Count; index++)
                 {
                     var filterConfiguration = _pluginLogic.FilterConfigurations[index];
-                    if (ImGui.Selectable("  - " + filterConfiguration.Name,
+                    if (ImGui.Selectable("  - " + filterConfiguration.Name + "##" + filterConfiguration.Key,
                         index + 2 == _configuration.SelectedConfigurationPage))
                     {
                         _configuration.SelectedConfigurationPage = index + 2;
@@ -700,7 +700,6 @@ namespace InventoryTools
                             ImGui.SameLine();
                             UiHelpers.HelpMarker(
                                 "Whether the item can be bought from a gil shop?");
-                            
                         }
                         
                         if (ImGui.CollapsingHeader("Misc", ImGuiTreeNodeFlags.DefaultOpen))

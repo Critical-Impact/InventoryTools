@@ -67,10 +67,9 @@ namespace InventoryTools
                 {
                     var filterConfiguration = _pluginLogic.FilterConfigurations[index];
                     var itemTable = _pluginLogic.GetFilterTable(filterConfiguration.Key);
-                    
                     if (filterConfiguration.DisplayInTabs)
                     {
-                        if (ImGui.BeginTabItem(itemTable.Name))
+                        if (ImGui.BeginTabItem(itemTable.Name + "##" + filterConfiguration.Key))
                         {
                             itemTable.Draw();
                             if (_activeFilter != filterConfiguration.Key)
@@ -87,12 +86,12 @@ namespace InventoryTools
                     }
                 }
                 
-                
                 if (_configuration.ShowFilterTab && ImGui.BeginTabItem("Filters"))
                 {
                     RenderMonitorTab();
                     ImGui.EndTabItem();
                 }
+                
                 if (ImGui.BeginTabItem("Configuration"))
                 {
                     DrawConfigurationTab();
