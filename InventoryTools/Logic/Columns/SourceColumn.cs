@@ -14,34 +14,34 @@ namespace InventoryTools.Logic
 
         public IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items)
         {
-            return FilterText == "" ? items : items.Where(c => PluginLogic.CharacterMonitor.Characters[c.RetainerId].Name.ToLower().PassesFilter(FilterText.ToLower()));
+            return FilterText == "" ? items : items.Where(c => PluginLogic.CharacterMonitor.Characters[c.RetainerId]?.Name.ToLower().PassesFilter(FilterText.ToLower()) ?? false);
         }
 
         public IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items)
         {
-            return FilterText == "" ? items : items.Where(c => PluginLogic.CharacterMonitor.Characters[c.SourceRetainerId].Name.ToLower().PassesFilter(FilterText.ToLower()));
+            return FilterText == "" ? items : items.Where(c => PluginLogic.CharacterMonitor.Characters[c.SourceRetainerId]?.Name.ToLower().PassesFilter(FilterText.ToLower()) ?? false);
         }
 
         public IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => PluginLogic.CharacterMonitor.Characters[c.RetainerId].Name.ToLower()) : items.OrderByDescending(c => PluginLogic.CharacterMonitor.Characters[c.RetainerId].Name.ToLower());
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => PluginLogic.CharacterMonitor.Characters[c.RetainerId]?.Name.ToLower() ?? "") : items.OrderByDescending(c => PluginLogic.CharacterMonitor.Characters[c.RetainerId]?.Name.ToLower() ?? "");
         }
 
         public IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => PluginLogic.CharacterMonitor.Characters[c.SourceRetainerId].Name.ToLower()) : items.OrderByDescending(c => PluginLogic.CharacterMonitor.Characters[c.SourceRetainerId].Name.ToLower());
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => PluginLogic.CharacterMonitor.Characters[c.SourceRetainerId]?.Name.ToLower() ?? "") : items.OrderByDescending(c => PluginLogic.CharacterMonitor.Characters[c.SourceRetainerId]?.Name.ToLower() ?? "");
         }
 
         public void Draw(InventoryItem item)
         {
             ImGui.TableNextColumn();
-            ImGui.Text(PluginLogic.CharacterMonitor.Characters[item.RetainerId].Name);
+            ImGui.Text(PluginLogic.CharacterMonitor.Characters[item.RetainerId]?.Name ?? "Unknown");
         }
 
         public void Draw(SortingResult item)
         {
             ImGui.TableNextColumn();
-            ImGui.Text(PluginLogic.CharacterMonitor.Characters[item.SourceRetainerId].Name);
+            ImGui.Text(PluginLogic.CharacterMonitor.Characters[item.SourceRetainerId]?.Name ?? "Unknown");
         }
 
         public void Setup(int columnIndex)

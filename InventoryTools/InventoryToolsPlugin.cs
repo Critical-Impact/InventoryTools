@@ -94,8 +94,7 @@ namespace InventoryTools
             PluginLog.Verbose(args);
             PluginLogic.ToggleActiveBackgroundFilterByName(args);
         }
-
-
+        
         [Command("/ifilter")]
         [HelpMessage("Toggles the specified filter on/off and turns off any other filters.")]
         public void FilterToggleCommand3(string command, string args)

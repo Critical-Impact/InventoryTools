@@ -72,6 +72,18 @@ namespace InventoryTools.Logic
             Key = key;
         }
 
+        public FilterConfiguration(string name, FilterType filterType)
+        {
+            FilterType = filterType;
+            Name = name;
+            Key = Guid.NewGuid().ToString("N");
+        }
+
+
+        public FilterConfiguration()
+        {
+        }
+
         public void Refresh()
         {
             

@@ -187,6 +187,33 @@ namespace InventoryTools
                         _pluginLogic.FilterConfigurations.Add(new FilterConfiguration("New Filter",
                             Guid.NewGuid().ToString("N"), FilterType.SearchFilter));
                     }
+                    
+                    ImGui.NewLine();
+                    ImGui.Separator();
+                    ImGui.Text("Sample Filters:");
+                    if (ImGui.Button("Items that can be bought for 100 gil or less +"))
+                    {
+                        _pluginLogic.AddSampleFilter100Gil();
+                    }                            
+                    ImGui.SameLine();
+                    UiHelpers.HelpMarker(
+                        "This will add a filter that will show all items that can be purchased from gil shops under 100 gil. It will look in both character and retainer inventories.");
+                    
+                    if (ImGui.Button("Put away materials +"))
+                    {
+                        _pluginLogic.AddSampleFilterMaterials();
+                    }
+                    ImGui.SameLine();
+                    UiHelpers.HelpMarker(
+                        "This will add a filter that will be setup to quickly put away any excess materials. It will have all the material categories automatically added. When calculating where to put items it will try to prioritise existing stacks of items.");
+                    
+                    if (ImGui.Button("Duplicated items across characters/retainers +"))
+                    {
+                        _pluginLogic.AddSampleFilterDuplicatedItems();
+                    }
+                    ImGui.SameLine();
+                    UiHelpers.HelpMarker(
+                        "This will add a filter that will provide a list of all the distinct stacks that appear in 2 sets of inventories. You can use this to make sure only one retainer has a specific type of item.");
 
                 }
                 if (_configuration.SelectedConfigurationPage > 1)
@@ -599,7 +626,7 @@ namespace InventoryTools
                             }
                             ImGui.SameLine();
                             UiHelpers.HelpMarker(
-                                "The name of the item");
+                                "The name of the item. ! can be used for comparisons");
 
                             ImGui.SetNextItemWidth(205);
                             ImGui.LabelText(labelName + "Quantity", "Quantity: ");
@@ -614,7 +641,7 @@ namespace InventoryTools
                             }
                             ImGui.SameLine();
                             UiHelpers.HelpMarker(
-                                "The quantity of the item");
+                                "The quantity of the item. !,>,<,>=,<= can be used for comparisons");
 
                             ImGui.SetNextItemWidth(205);
                             ImGui.LabelText(labelName + "ILevel", "Item Level: ");
@@ -629,7 +656,7 @@ namespace InventoryTools
                             }
                             ImGui.SameLine();
                             UiHelpers.HelpMarker(
-                                "The item level of the item");
+                                "The item level of the item. !,>,<,>=,<= can be used for comparisons");
 
                             ImGui.SetNextItemWidth(205);
                             ImGui.LabelText(labelName + "Spiritbond", "Spiritbond: ");
@@ -644,7 +671,7 @@ namespace InventoryTools
                             }
                             ImGui.SameLine();
                             UiHelpers.HelpMarker(
-                                "The spiritbond percentage of the item");
+                                "The spiritbond percentage of the item. !,>,<,>=,<= can be used for comparisons");
 
                             ImGui.SetNextItemWidth(205);
                             ImGui.LabelText(labelName + "SellingPrice", "Gil Selling Price: ");
@@ -659,7 +686,7 @@ namespace InventoryTools
                             }
                             ImGui.SameLine();
                             UiHelpers.HelpMarker(
-                                "The price when sold to the shops");
+                                "The price when sold to the shops. !,>,<,>=,<= can be used for comparisons");
 
                             ImGui.SetNextItemWidth(205);
                             ImGui.LabelText(labelName + "BuyingPrice", "Gil Buying Price: ");
@@ -674,7 +701,7 @@ namespace InventoryTools
                             }
                             ImGui.SameLine();
                             UiHelpers.HelpMarker(
-                                "The price when bought from shops");
+                                "The price when bought from shops. !,>,<,>=,<= can be used for comparisons");
                             
                             ImGui.SetNextItemWidth(205);
                             ImGui.LabelText(labelName + "CanBeBoughtLabel", "Can be Purchased for Gil: ");
@@ -701,7 +728,6 @@ namespace InventoryTools
                             UiHelpers.HelpMarker(
                                 "Whether the item can be bought from a gil shop?");
                         }
-                        
                         if (ImGui.CollapsingHeader("Misc", ImGuiTreeNodeFlags.DefaultOpen))
                         {
                             ImGui.SetNextItemWidth(205);

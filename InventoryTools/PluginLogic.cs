@@ -187,6 +187,51 @@ namespace InventoryTools
             _filterConfigurations.Add(playerItemsFilter);
         }
 
+        public void AddSampleFilter100Gil()
+        {
+            var sampleFilter = new FilterConfiguration("100 gill or less", FilterType.SearchFilter);
+            sampleFilter.DisplayInTabs = true;
+            sampleFilter.SourceAllCharacters = true;
+            sampleFilter.SourceAllRetainers = true;
+            sampleFilter.CanBeBought = true;
+            sampleFilter.ShopBuyingPrice = "<=100";
+            _filterConfigurations.Add(sampleFilter);
+        }
+
+
+        public void AddSampleFilterMaterials()
+        {
+            var sampleFilter = new FilterConfiguration("Put away materials", FilterType.SortingFilter);
+            sampleFilter.DisplayInTabs = true;
+            sampleFilter.SourceAllCharacters = true;
+            sampleFilter.DestinationAllRetainers = true;
+            sampleFilter.FilterItemsInRetainers = true;
+            var itemUiCategories = ExcelCache.GetAllItemUICategories();
+            //I'm making assumptions about the names of these and one day I will try to support more than english
+            var categories = new HashSet<string>() { "Bone", "Cloth", "Catalyst", "Crystal", "Ingredient", "Leather", "Lumber", "Metal", "Part", "Stone" };
+            sampleFilter.ItemUiCategoryId = new List<uint>();
+            foreach (var itemUiCategory in itemUiCategories)
+            {
+                if (categories.Contains(itemUiCategory.Value.Name))
+                {
+                    sampleFilter.ItemUiCategoryId.Add(itemUiCategory.Key);
+                }
+            }
+            _filterConfigurations.Add(sampleFilter);
+        }
+
+        public void AddSampleFilterDuplicatedItems()
+        {
+            var sampleFilter = new FilterConfiguration("Duplicated Items", FilterType.SortingFilter);
+            sampleFilter.DisplayInTabs = true;
+            sampleFilter.SourceAllCharacters = true;
+            sampleFilter.SourceAllRetainers = true;
+            sampleFilter.DestinationAllRetainers = true;
+            sampleFilter.FilterItemsInRetainers = true;
+            sampleFilter.DuplicatesOnly = true;
+            _filterConfigurations.Add(sampleFilter);
+        }
+
 
         public List<FilterConfiguration> FilterConfigurations => _filterConfigurations;
 
@@ -350,6 +395,72 @@ namespace InventoryTools
         {
             InvalidateFilters();
             ToggleHighlights();
+        }
+
+        private void DisableHighlights()
+        {
+            var inventoryGrid0 = _gameUi.GetPrimaryInventoryGrid(0);
+            var inventoryGrid1 = _gameUi.GetPrimaryInventoryGrid(1);
+            var inventoryGrid2 = _gameUi.GetPrimaryInventoryGrid(2);
+            var inventoryGrid3 = _gameUi.GetPrimaryInventoryGrid(3);
+            inventoryGrid0?.ClearColors();
+            inventoryGrid1?.ClearColors();
+            inventoryGrid2?.ClearColors();
+            inventoryGrid3?.ClearColors();
+            
+            var smallInventoryGrid0 = _gameUi.GetNormalInventoryGrid(0);
+            var smallInventoryGrid1 = _gameUi.GetNormalInventoryGrid(1);
+            var smallInventoryGrid2 = _gameUi.GetNormalInventoryGrid(2);
+            var smallInventoryGrid3 = _gameUi.GetNormalInventoryGrid(3);
+            smallInventoryGrid0?.ClearColors();
+            smallInventoryGrid1?.ClearColors();
+            smallInventoryGrid2?.ClearColors();
+            smallInventoryGrid3?.ClearColors();
+            
+            var largeInventoryGrid0 = _gameUi.GetLargeInventoryGrid(0);
+            var largeInventoryGrid1 = _gameUi.GetLargeInventoryGrid(1);
+            var largeInventoryGrid2 = _gameUi.GetLargeInventoryGrid(2);
+            var largeInventoryGrid3 = _gameUi.GetLargeInventoryGrid(3);
+            largeInventoryGrid0?.ClearColors();
+            largeInventoryGrid1?.ClearColors();
+            largeInventoryGrid2?.ClearColors();
+            largeInventoryGrid3?.ClearColors();
+
+            if (_currentRetainerId != 0)
+            {
+                var retainerGrid0 = _gameUi.GetRetainerGrid(0);
+                var retainerGrid1 = _gameUi.GetRetainerGrid(1);
+                var retainerGrid2 = _gameUi.GetRetainerGrid(2);
+                var retainerGrid3 = _gameUi.GetRetainerGrid(3);
+                var retainerGrid4 = _gameUi.GetRetainerGrid(4);
+                var retainerTabGrid = _gameUi.GetLargeRetainerInventoryGrid();
+                retainerGrid0?.ClearColors();
+                retainerGrid1?.ClearColors();
+                retainerGrid2?.ClearColors();
+                retainerGrid3?.ClearColors();
+                retainerGrid4?.ClearColors();
+                retainerTabGrid?.ClearColors();
+
+                var retainerInventoryGrid0 = _gameUi.GetNormalRetainerInventoryGrid(0);
+                var retainerInventoryGrid1 = _gameUi.GetNormalRetainerInventoryGrid(1);
+                var retainerInventoryGrid2 = _gameUi.GetNormalRetainerInventoryGrid(2);
+                var retainerInventoryGrid3 = _gameUi.GetNormalRetainerInventoryGrid(3);
+                var retainerInventoryGrid4 = _gameUi.GetNormalRetainerInventoryGrid(4);
+                retainerInventoryGrid0?.ClearColors();
+                retainerInventoryGrid1?.ClearColors();
+                retainerInventoryGrid2?.ClearColors();
+                retainerInventoryGrid3?.ClearColors();
+                retainerInventoryGrid4?.ClearColors();
+
+            }
+
+            var saddleBagLeft = _gameUi.GetChocoboSaddlebag(0);
+            var saddleBagRight = _gameUi.GetChocoboSaddlebag(1);
+            saddleBagLeft?.ClearColors();
+            saddleBagRight?.ClearColors();
+            
+            var retainerList = _gameUi.GetRetainerList();
+            retainerList?.ClearColors();
         }
         
         
@@ -773,6 +884,8 @@ namespace InventoryTools
             {
                 filterTables.Value.Dispose();
             }
+
+            DisableHighlights();
             _config.FilterConfigurations = FilterConfigurations;
             _config.SavedCharacters = _characterMonitor.Characters;
             _inventoryMonitor.OnInventoryChanged -= InventoryMonitorOnOnInventoryChanged;

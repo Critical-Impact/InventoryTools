@@ -19,7 +19,7 @@ namespace InventoryTools.Logic
 
         public IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items)
         {
-            return FilterText == "" ? items : items.Where(c => c.DestinationRetainerId.HasValue && PluginLogic.CharacterMonitor.Characters[c.DestinationRetainerId.Value].Name.ToLower().PassesFilter(FilterText.ToLower()));
+            return FilterText == "" ? items : items.Where(c => c.DestinationRetainerId.HasValue && PluginLogic.CharacterMonitor.Characters.ContainsKey(c.DestinationRetainerId.Value) && PluginLogic.CharacterMonitor.Characters[c.DestinationRetainerId.Value].Name.ToLower().PassesFilter(FilterText.ToLower()));
         }
 
         public IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
@@ -29,7 +29,7 @@ namespace InventoryTools.Logic
 
         public IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => c.DestinationRetainerId.HasValue ? PluginLogic.CharacterMonitor.Characters[c.DestinationRetainerId.Value].Name.ToLower() : "") : items.OrderByDescending(c => c.DestinationRetainerId.HasValue ? PluginLogic.CharacterMonitor.Characters[c.DestinationRetainerId.Value].Name.ToLower() : "");
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => c.DestinationRetainerId.HasValue ? PluginLogic.CharacterMonitor.Characters[c.DestinationRetainerId.Value]?.Name.ToLower() ?? "" : "") : items.OrderByDescending(c => c.DestinationRetainerId.HasValue ? PluginLogic.CharacterMonitor.Characters[c.DestinationRetainerId.Value]?.Name.ToLower() ?? "" : "");
         }
 
         public void Draw(InventoryItem item)
@@ -41,7 +41,7 @@ namespace InventoryTools.Logic
         public void Draw(SortingResult item)
         {
             ImGui.TableNextColumn();
-            ImGui.Text(item.DestinationRetainerId.HasValue ? PluginLogic.CharacterMonitor.Characters[item.DestinationRetainerId.Value].Name : "Unknown");
+            ImGui.Text(item.DestinationRetainerId.HasValue ? PluginLogic.CharacterMonitor.Characters[item.DestinationRetainerId.Value]?.Name ?? "" : "Unknown");
         }
 
         public void Setup(int columnIndex)

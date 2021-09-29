@@ -118,7 +118,7 @@ namespace InventoryTools.Logic
                                 itemLocations.Add(itemHashCode, new List<InventoryItem>());
                             }
 
-                            itemLocations[itemHashCode].Add(destinationItem);
+                            itemLocations[itemHashCode].Add(destinationItem);                     
                         }
                         else if (destinationItem.IsEmpty)
                         {
@@ -136,7 +136,6 @@ namespace InventoryTools.Logic
                         var hashCode = sourceItem.GetHashCode();
                         if (itemLocations.ContainsKey(hashCode))
                         {
-                            PluginLog.Verbose("Found an existing item");
                             foreach (var existingItem in itemLocations[hashCode])
                             {
                                 //Don't compare inventory to itself
@@ -147,33 +146,39 @@ namespace InventoryTools.Logic
 
                                 if (!existingItem.FullStack)
                                 {
-                                    PluginLog.Verbose("Existing item does not have a full stack");
-                                    var existingCapacity = existingItem.RemainingStack;
+                                    var existingCapacity = existingItem.RemainingTempStack;
                                     var canFit = Math.Min(existingCapacity, sourceItem.TempQuantity);
-                                    PluginLog.Verbose("Existing item has a capacity of " + existingCapacity +
-                                                  " and can fit " + canFit);
-                                    PluginLog.Verbose("Existing item has a stack size of " +
-                                                  (existingItem.Item == null
-                                                      ? "unknown"
-                                                      : existingItem.Item.StackSize) + " and has quantity of " +
-                                                  existingItem.TempQuantity);
-                                    //All the item can fit, stick it in and continue
-                                    if (filter.InActiveInventories(activeCharacter, activeRetainer,
-                                        sourceInventory.Key.Item1, existingItem.RetainerId))
+                                    if (canFit != 0)
                                     {
-                                        sortedItems.Add(new SortingResult(sourceInventory.Key.Item1,
-                                            existingItem.RetainerId, sourceItem.SortedContainer,
-                                            existingItem.SortedCategory, sourceItem, (int) canFit));
-                                    }
-                                    if (!absoluteItemLocations.ContainsKey(hashCode))
-                                    {
-                                        absoluteItemLocations.Add(hashCode, new HashSet<(ulong, InventoryCategory)>());
-                                    }
+                                        PluginLog.Verbose("Existing item has a capacity of " + existingCapacity +
+                                                          " and can fit " + canFit);
+                                        PluginLog.Verbose("Existing item has a stack size of " +
+                                                          (existingItem.Item == null
+                                                              ? "unknown"
+                                                              : existingItem.Item.StackSize) + " and has quantity of " +
+                                                          existingItem.TempQuantity);
+                                        //All the item can fit, stick it in and continue
+                                        if (filter.InActiveInventories(activeCharacter, activeRetainer,
+                                            sourceInventory.Key.Item1, existingItem.RetainerId))
+                                        {
+                                            PluginLog.Verbose("Added item to filter result in existing slot: " +
+                                                              sourceItem.FormattedName);
+                                            sortedItems.Add(new SortingResult(sourceInventory.Key.Item1,
+                                                existingItem.RetainerId, sourceItem.SortedContainer,
+                                                existingItem.SortedCategory, sourceItem, (int) canFit));
+                                        }
 
-                                    absoluteItemLocations[hashCode]
-                                        .Add((existingItem.RetainerId, existingItem.SortedCategory));
-                                    existingItem.TempQuantity += canFit;
-                                    sourceItem.TempQuantity -= canFit;
+                                        if (!absoluteItemLocations.ContainsKey(hashCode))
+                                        {
+                                            absoluteItemLocations.Add(hashCode,
+                                                new HashSet<(ulong, InventoryCategory)>());
+                                        }
+
+                                        absoluteItemLocations[hashCode]
+                                            .Add((existingItem.RetainerId, existingItem.SortedCategory));
+                                        existingItem.TempQuantity += canFit;
+                                        sourceItem.TempQuantity -= canFit;
+                                    }
                                 }
                                 else
                                 {
@@ -214,14 +219,27 @@ namespace InventoryTools.Logic
                                             {
                                                 slotsAvailable[seenInventoryLocation] =
                                                     slotsAvailable[seenInventoryLocation] - 1;
-                                                if (filter.InActiveInventories(activeCharacter, activeRetainer, sourceInventory.Key.Item1,seenInventoryLocation.Item1))
+                                                if (!sourceItem.Item.IsUnique)
                                                 {
-                                                    sortedItems.Add(new SortingResult(sourceInventory.Key.Item1,
-                                                        seenInventoryLocation.Item1, sourceItem.SortedContainer,
-                                                        seenInventoryLocation.Item2, sourceItem,
-                                                        (int) sourceItem.TempQuantity));
+                                                    if (sourceInventory.Key.Item1 != seenInventoryLocation.Item1 ||
+                                                        sourceItem.SortedCategory != seenInventoryLocation.Item2)
+                                                    {
+                                                        if (filter.InActiveInventories(activeCharacter, activeRetainer,
+                                                            sourceInventory.Key.Item1, seenInventoryLocation.Item1))
+                                                        {
+                                                            PluginLog.Verbose(
+                                                                "Added item to filter result as we've seen the item before: " +
+                                                                sourceItem.FormattedName);
+                                                            sortedItems.Add(new SortingResult(sourceInventory.Key.Item1,
+                                                                seenInventoryLocation.Item1, sourceItem.SortedContainer,
+                                                                seenInventoryLocation.Item2, sourceItem,
+                                                                (int) sourceItem.TempQuantity));
+                                                        }
+
+                                                        sourceItem.TempQuantity -= sourceItem.TempQuantity;
+                                                    }
                                                 }
-                                                sourceItem.TempQuantity -= sourceItem.TempQuantity;
+
                                                 break;
                                             }
                                         }
@@ -271,15 +289,22 @@ namespace InventoryTools.Logic
                             if (filter.InActiveInventories(activeCharacter, activeRetainer, sourceInventory.Key.Item1,
                                 nextSlot.Key.Item1))
                             {
-                                sortedItems.Add(new SortingResult(sourceInventory.Key.Item1, nextSlot.Key.Item1,
-                                    sourceItem.SortedContainer, nextSlot.Key.Item2, sourceItem,
-                                    (int) sourceItem.TempQuantity));
+                                //This check stops the item from being sorted into it's own bag, this generally means its already in the optimal place
+                                if (sourceInventory.Key.Item1 != nextSlot.Key.Item1 ||
+                                    sourceItem.SortedCategory != nextSlot.Key.Item2)
+                                {
+                                    PluginLog.Verbose("Added item to filter result in next available slot: " + sourceItem.FormattedName);
+                                    sortedItems.Add(new SortingResult(sourceInventory.Key.Item1, nextSlot.Key.Item1,
+                                        sourceItem.SortedContainer, nextSlot.Key.Item2, sourceItem,
+                                        (int) sourceItem.TempQuantity));
+                                }
                             }
 
                             slotsAvailable[nextSlot.Key] = nextSlot.Value - 1;
                         }
                         else
                         {
+                            PluginLog.Verbose("Added item to unsortable list, maybe I should show these somewhere: " + sourceItem.FormattedName);
                             unsortableItems.Add(sourceItem);
                         }
                     }
