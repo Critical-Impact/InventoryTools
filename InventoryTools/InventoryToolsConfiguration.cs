@@ -55,6 +55,7 @@ namespace InventoryTools
         public string ActiveUiFilter { get; set; } = null;
         public string ActiveBackgroundFilter { get; set; } = null;
         public bool FirstRun { get; set; } = true;
+        public int SelectedHelpPage { get; set; }
 
         public delegate void ConfigurationChangedDelegate();
         public event ConfigurationChangedDelegate ConfigurationChanged; 

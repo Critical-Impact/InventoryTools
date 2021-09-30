@@ -75,7 +75,10 @@ namespace InventoryTools
 
         private void CharacterMonitorOnOnCharacterUpdated(Character character)
         {
-            InvalidateFilters();
+            if (character != null)
+            {
+                InvalidateFilters();
+            }
         }
 
         /// <summary>
@@ -250,6 +253,7 @@ namespace InventoryTools
                     var table = _filterTables[filter.Key];
                     table.Dispose();
                     _filterTables.Remove(filter.Key);
+                    ToggleHighlights();
                 }
             }
         }
@@ -270,6 +274,22 @@ namespace InventoryTools
                 return _clientState.LocalContentId;
             }
             return 0;
+        }
+        
+        public bool DisableActiveUiFilter()
+        {
+            PluginLog.Verbose("PluginLogic: Disabling active ui filter");
+            _config.ActiveUiFilter = null;
+            ToggleHighlights();
+            return true;
+        }
+        
+        public bool DisableActiveBackgroundFilter()
+        {
+            PluginLog.Verbose("PluginLogic: Disabling active background filter");
+            _config.ActiveBackgroundFilter = null;
+            ToggleHighlights();
+            return true;
         }
 
         public bool ToggleActiveUiFilterByKey(string filterKey)

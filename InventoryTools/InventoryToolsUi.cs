@@ -57,7 +57,7 @@ namespace InventoryTools
             if (!IsVisible || !this._clientState.IsLoggedIn || _disposing)
                 return;
             var isVisible = IsVisible;
-            ImGui.SetNextWindowSize(new Vector2(500, 350) * ImGui.GetIO().FontGlobalScale, ImGuiCond.FirstUseEver);
+            ImGui.SetNextWindowSize(new Vector2(350, 350) * ImGui.GetIO().FontGlobalScale, ImGuiCond.FirstUseEver);
             ImGui.SetNextWindowSizeConstraints(new Vector2(350, 350) * ImGui.GetIO().FontGlobalScale, new Vector2(2000, 2000) * ImGui.GetIO().FontGlobalScale);
             ImGui.PushStyleColor(ImGuiCol.WindowBg, 0xFF000000);
             ImGui.Begin("Inventory Tools", ref isVisible);
@@ -95,6 +95,12 @@ namespace InventoryTools
                 if (ImGui.BeginTabItem("Configuration"))
                 {
                     DrawConfigurationTab();
+                    ImGui.EndTabItem();
+                }
+                
+                if (ImGui.BeginTabItem("?"))
+                {
+                    DrawHelpTab();
                     ImGui.EndTabItem();
                 }
                 ImGui.EndTabBar();

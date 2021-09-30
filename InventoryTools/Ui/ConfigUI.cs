@@ -52,17 +52,84 @@ namespace InventoryTools
                 {
                     var activeUiFilter = _pluginLogic.GetActiveUiFilter();
                     var activeBackgroundFilter = _pluginLogic.GetActiveBackgroundFilter();
+                    var filterItems = new string[_pluginLogic.FilterConfigurations.Count + 1];
+
+                    var selectedUiFilter = 0;
+                    filterItems[0] = "None";
+                    for (var index = 0; index < _pluginLogic.FilterConfigurations.Count; index++)
+                    {
+                        var config = _pluginLogic.FilterConfigurations[index];
+                        if (activeUiFilter == config)
+                        {
+                            selectedUiFilter = index + 1;
+                        }
+                        filterItems[index + 1] = config.Name;
+                    }
+
                     ImGui.Text("Filter Details:");
                     ImGui.Separator();
-                    ImGui.Text("Window Filter: " + (activeUiFilter != null ? activeUiFilter.Name : "Not Set"));
+                    ImGui.Text("Window Filter: ");
+                    ImGui.SameLine();
+                    if (ImGui.Combo("##WindowFilter", ref selectedUiFilter,
+                        filterItems, filterItems.Length))
+                    {
+                        for (var index = 0; index < _pluginLogic.FilterConfigurations.Count; index++)
+                        {
+                            if (selectedUiFilter == 0)
+                            {
+                                _pluginLogic.DisableActiveUiFilter();
+                            }
+                            else if (selectedUiFilter - 1 == index)
+                            {
+                                var config = _pluginLogic.FilterConfigurations[index];
+                                if (activeUiFilter != config)
+                                {
+                                    _pluginLogic.ToggleActiveUiFilterByKey(config.Key);
+                                    _pluginLogic.GetFilterTable(config.Key).Refresh();
+                                    break;
+                                }
+                            }
+                        }
+                    }
                     ImGui.SameLine();
                     UiHelpers.HelpMarker(
                         "This is the filter that is active when the Inventory Tools window is visible.");
-                    ImGui.Text("Background Filter: " +
-                               (activeBackgroundFilter != null ? activeBackgroundFilter.Name : "Not Set"));
+                    
+                    var selectedBackgroundFilter = 0;
+                    for (var index = 0; index < _pluginLogic.FilterConfigurations.Count; index++)
+                    {
+                        var config = _pluginLogic.FilterConfigurations[index];
+                        if (activeBackgroundFilter == config)
+                        {
+                            selectedBackgroundFilter = index + 1;
+                        }
+                    }
+                    
+                    ImGui.Text("Background Filter: ");
+                    ImGui.SameLine();
+                    if (ImGui.Combo("##BackgroundFilter", ref selectedBackgroundFilter,
+                        filterItems, filterItems.Length))
+                    {
+                        for (var index = 0; index < _pluginLogic.FilterConfigurations.Count; index++)
+                        {
+                            if (selectedBackgroundFilter == 0)
+                            {
+                                _pluginLogic.DisableActiveBackgroundFilter();
+                            }
+                            else if (selectedBackgroundFilter - 1 == index)
+                            {
+                                var config = _pluginLogic.FilterConfigurations[index];
+                                if (activeBackgroundFilter != config)
+                                {
+                                    _pluginLogic.ToggleActiveBackgroundFilterByKey(config.Key);
+                                    break;
+                                }
+                            }
+                        }
+                    }
                     ImGui.SameLine();
                     UiHelpers.HelpMarker(
-                        "This is the filter that is active when the Inventory Tools window is not visible.");
+                        "This is the filter that is active when the Inventory Tools window is not visible. This filter can be toggled with the associated slash commands.");
                     ImGui.Separator();
                     ImGui.Text("General Options:");
                     ImGui.Separator();
@@ -76,11 +143,17 @@ namespace InventoryTools
                     {
                         _configuration.ShowFilterTab = !_configuration.ShowFilterTab;
                     }
+                    ImGui.SameLine();
+                    UiHelpers.HelpMarker(
+                        "Should the main window show the tab called 'Filters' that lists all the available filters in one screen?");
 
                     if (ImGui.Checkbox("Switch filters when navigating UI?", ref switchFiltersAutomatically))
                     {
                         _configuration.SwitchFiltersAutomatically = !_configuration.SwitchFiltersAutomatically;
                     }
+                    ImGui.SameLine();
+                    UiHelpers.HelpMarker(
+                        "Should the active window filter automatically change when moving between each filter tab? The active filter will only change if there is an active filter already selected.");
 
                     ImGui.Text("Retainer Visuals:");
                     ImGui.Separator();

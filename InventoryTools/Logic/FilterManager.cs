@@ -24,7 +24,6 @@ namespace InventoryTools.Logic
 
             if (filter.FilterType == FilterType.SortingFilter)
             {
-
                 //Determine which source and destination inventories we actually need to examine
                 Dictionary<(ulong, InventoryCategory), List<InventoryItem>> sourceInventories = new();
                 Dictionary<(ulong, InventoryCategory), List<InventoryItem>> destinationInventories = new();
