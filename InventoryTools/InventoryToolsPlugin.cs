@@ -51,7 +51,7 @@ namespace InventoryTools
             CharacterMonitor = new CharacterMonitor(gameNetwork,ClientInterface, framework, clientState);
             OdrScanner = new OdrScanner(clientState, CharacterMonitor);
             GameUi = new GameUi(sigScanner, framework);
-            InventoryMonitor = new InventoryMonitor(ClientInterface, clientState, OdrScanner, CharacterMonitor, GameUi, gameNetwork);
+            InventoryMonitor = new InventoryMonitor(ClientInterface, clientState, OdrScanner, CharacterMonitor, GameUi, gameNetwork, framework);
             PluginLogic = new PluginLogic(Config, clientState, InventoryMonitor, CharacterMonitor, GameUi, chatGui);
             _ui = new InventoryToolsUi(pluginInterface,PluginLogic, InventoryMonitor, CharacterMonitor, Config, clientState, GameUi);
         }

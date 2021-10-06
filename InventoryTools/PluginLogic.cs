@@ -58,6 +58,7 @@ namespace InventoryTools
             _gameUi.WatchWindowState(GameUi.WindowName.InventoryLarge);
             _gameUi.WatchWindowState(GameUi.WindowName.InventoryRetainerLarge);
             _gameUi.WatchWindowState(GameUi.WindowName.InventoryRetainer);
+            _gameUi.WatchWindowState(GameUi.WindowName.InventoryBuddy);
             _gameUi.UiVisibilityChanged += GameUiOnUiVisibilityChanged;
             
             LoadExistingData(_config.GetSavedFilters());
@@ -67,6 +68,8 @@ namespace InventoryTools
                 _config.FirstRun = false;
             }
         }
+        
+        
         private void ConfigOnConfigurationChanged()
         {
             InvalidateFilters();
@@ -235,7 +238,6 @@ namespace InventoryTools
             _filterConfigurations.Add(sampleFilter);
         }
 
-
         public List<FilterConfiguration> FilterConfigurations => _filterConfigurations;
 
         public void LoadExistingData(List<FilterConfiguration> filterConfigurations)
@@ -375,16 +377,18 @@ namespace InventoryTools
             return false;
         }
         
-        private void GameUiOnUiVisibilityChanged(GameUi.WindowName windowName)
+        private void GameUiOnUiVisibilityChanged(GameUi.WindowName windowName, bool isWindowVisible)
         {
-            //TODO: Make this more specific
-            ToggleHighlights();
+            if (isWindowVisible)
+            {
+                ToggleHighlights();
+            }
         }
         
         private void CharacterMonitorOnOnActiveCharacterChanged(ulong retainerId)
         {
-            PluginLog.Verbose("Retainer changed.");
-            PluginLog.Verbose("Retainer ID: " + retainerId);
+            PluginLog.Debug("Retainer changed.");
+            PluginLog.Debug("Retainer ID: " + retainerId);
             _currentRetainerId = retainerId;
             RegenerateFilter();
         }
@@ -474,16 +478,12 @@ namespace InventoryTools
 
             }
 
-            var saddleBagLeft = _gameUi.GetChocoboSaddlebag(0);
-            var saddleBagRight = _gameUi.GetChocoboSaddlebag(1);
-            saddleBagLeft?.ClearColors();
-            saddleBagRight?.ClearColors();
+            var saddleBag = _gameUi.GetChocoboSaddlebag();
+            saddleBag?.ClearColors();
             
             var retainerList = _gameUi.GetRetainerList();
             retainerList?.ClearColors();
         }
-        
-        
         private void ToggleHighlights()
         {
             var activeFilter = GetActiveFilter();
@@ -571,8 +571,6 @@ namespace InventoryTools
                 smallInventoryGrid1?.ClearColors();
                 smallInventoryGrid2?.ClearColors();
                 smallInventoryGrid3?.ClearColors();
-                PluginLog.Verbose("Cleared inventory colours");
-                PluginLog.Verbose("Current Retainer ID: " + _currentRetainerId);
                 if (shouldHighlight && filteredList != null)
                 {
                     for (var index = 0; index < filteredList.Value.SortedItems.Count; index++)
@@ -622,6 +620,7 @@ namespace InventoryTools
                     }
                 }
             }
+            
             var largeInventoryGrid0 = _gameUi.GetLargeInventoryGrid(0);
             var largeInventoryGrid1 = _gameUi.GetLargeInventoryGrid(1);
             var largeInventoryGrid2 = _gameUi.GetLargeInventoryGrid(2);
@@ -633,8 +632,6 @@ namespace InventoryTools
                 largeInventoryGrid1?.ClearColors();
                 largeInventoryGrid2?.ClearColors();
                 largeInventoryGrid3?.ClearColors();
-                PluginLog.Verbose("Cleared inventory colours");
-                PluginLog.Verbose("Current Retainer ID: " + _currentRetainerId);
                 if (shouldHighlight && filteredList != null)
                 {
                     for (var index = 0; index < filteredList.Value.SortedItems.Count; index++)
@@ -749,6 +746,7 @@ namespace InventoryTools
                     }
                 }
                 
+                
                 var retainerInventoryGrid0 = _gameUi.GetNormalRetainerInventoryGrid(0);
                 var retainerInventoryGrid1 = _gameUi.GetNormalRetainerInventoryGrid(1);
                 var retainerInventoryGrid2 = _gameUi.GetNormalRetainerInventoryGrid(2);
@@ -826,14 +824,10 @@ namespace InventoryTools
             }
             
             
-            var saddleBagLeft = _gameUi.GetChocoboSaddlebag(0);
-            var saddleBagRight = _gameUi.GetChocoboSaddlebag(1);
-            if (saddleBagLeft != null && saddleBagRight != null)
+            var saddleBagUi = _gameUi.GetChocoboSaddlebag();
+            if (saddleBagUi != null)
             {
-                saddleBagLeft.ClearColors();
-                saddleBagRight.ClearColors();
-                PluginLog.Verbose("Cleared inventory colours");
-                PluginLog.Verbose("Current Retainer ID: " + _currentRetainerId);
+                saddleBagUi.ClearColors();
                 if (shouldHighlight && filteredList != null)
                 {
                     for (var index = 0; index < filteredList.Value.SortedItems.Count; index++)
@@ -844,19 +838,45 @@ namespace InventoryTools
                              item.DestinationRetainerId ==
                              _currentRetainerId)))
                         {
-                            if (item.SourceBag == InventoryType.SaddleBag0)
+                            if (item.SourceBag == InventoryType.SaddleBag0 ||
+                                item.SourceBag == InventoryType.SaddleBag1)
                             {
-                                saddleBagLeft.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
+                                saddleBagUi.SetLeftTabColor(_config.HighlightColor);
+                            }
+                            else if (item.SourceBag == InventoryType.PremiumSaddleBag0 || item.SourceBag == InventoryType.PremiumSaddleBag1)
+                            {
+                                saddleBagUi.SetRightTabColor(_config.HighlightColor);
                             }
 
-                            if (item.SourceBag == InventoryType.SaddleBag1)
+                            if (saddleBagUi.SaddleBagSelected == 0)
                             {
-                                saddleBagRight.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
+                                if (item.SourceBag == InventoryType.SaddleBag0)
+                                {
+                                    saddleBagUi.SetItemLeftColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
+                                }
+
+                                if (item.SourceBag == InventoryType.SaddleBag1)
+                                {
+                                    saddleBagUi.SetItemRightColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
+                                }
+                            }
+                            else
+                            {
+                                if (item.SourceBag == InventoryType.PremiumSaddleBag0)
+                                {
+                                    saddleBagUi.SetItemLeftColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
+                                }
+
+                                if (item.SourceBag == InventoryType.PremiumSaddleBag1)
+                                {
+                                    saddleBagUi.SetItemRightColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
+                                }
                             }
                         }
                     }
                 }
             }
+            
             var retainerList = _gameUi.GetRetainerList();
             var currentCharacterId = _clientState.LocalContentId;
             if (retainerList != null)

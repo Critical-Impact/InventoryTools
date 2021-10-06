@@ -128,15 +128,17 @@ namespace InventoryTools.Logic
 
                 foreach (var sourceInventory in filteredSources)
                 {
-                    foreach (var sourceItem in sourceInventory.Value)
+                    for (var index = 0; index < sourceInventory.Value.Count; index++)
                     {
+                        var sourceItem = sourceInventory.Value[index];
                         sourceItem.TempQuantity = sourceItem.Quantity;
                         //Item already seen, try to put it into that container
                         var hashCode = sourceItem.GetHashCode();
                         if (itemLocations.ContainsKey(hashCode))
                         {
-                            foreach (var existingItem in itemLocations[hashCode])
+                            for (var i = 0; i < itemLocations[hashCode].Count; i++)
                             {
+                                var existingItem = itemLocations[hashCode][i];
                                 //Don't compare inventory to itself
                                 if (existingItem.RetainerId == sourceItem.RetainerId)
                                 {
@@ -245,7 +247,6 @@ namespace InventoryTools.Logic
 
                                         seenInventoryLocations.Remove(seenInventoryLocation);
                                     }
-
                                 }
                             }
                         }
@@ -292,7 +293,8 @@ namespace InventoryTools.Logic
                                 if (sourceInventory.Key.Item1 != nextSlot.Key.Item1 ||
                                     sourceItem.SortedCategory != nextSlot.Key.Item2)
                                 {
-                                    PluginLog.Verbose("Added item to filter result in next available slot: " + sourceItem.FormattedName);
+                                    PluginLog.Verbose("Added item to filter result in next available slot: " +
+                                                      sourceItem.FormattedName);
                                     sortedItems.Add(new SortingResult(sourceInventory.Key.Item1, nextSlot.Key.Item1,
                                         sourceItem.SortedContainer, nextSlot.Key.Item2, sourceItem,
                                         (int) sourceItem.TempQuantity));
@@ -303,7 +305,8 @@ namespace InventoryTools.Logic
                         }
                         else
                         {
-                            PluginLog.Verbose("Added item to unsortable list, maybe I should show these somewhere: " + sourceItem.FormattedName);
+                            PluginLog.Verbose("Added item to unsortable list, maybe I should show these somewhere: " +
+                                              sourceItem.FormattedName);
                             unsortableItems.Add(sourceItem);
                         }
                     }
