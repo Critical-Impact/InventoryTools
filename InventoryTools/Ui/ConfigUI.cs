@@ -130,12 +130,15 @@ namespace InventoryTools
                     ImGui.SameLine();
                     UiHelpers.HelpMarker(
                         "This is the filter that is active when the Inventory Tools window is not visible. This filter can be toggled with the associated slash commands.");
-                    ImGui.Separator();
                     ImGui.Text("General Options:");
                     ImGui.Separator();
                     bool showMonitorTab = _configuration.ShowFilterTab;
                     bool switchFiltersAutomatically = _configuration.SwitchFiltersAutomatically;
                     bool restorePreviousFilter = _configuration.RestorePreviousFilter;
+                    bool autoSave = _configuration.AutoSave;
+                    int autoSaveMinutes = _configuration.AutoSaveMinutes;
+                    bool colorRetainerList = _configuration.ColorRetainerList;
+                    bool showItemNumberRetainerList = _configuration.ShowItemNumberRetainerList;
                     bool displayCrossCharacter = _configuration.DisplayCrossCharacter;
                     Vector3 highlightColor = _configuration.HighlightColor;
                     
@@ -155,19 +158,44 @@ namespace InventoryTools
                     UiHelpers.HelpMarker(
                         "Should the active window filter automatically change when moving between each filter tab? The active filter will only change if there is an active filter already selected.");
 
+                    ImGui.Text("Auto Save:");
+                    ImGui.Separator();
+                    if (ImGui.Checkbox("Auto save inventories/configuration?", ref autoSave))
+                    {
+                        _configuration.AutoSave = !_configuration.AutoSave;
+                        _pluginLogic.ClearAutoSave();
+                    }
+                    ImGui.SameLine();
+                    UiHelpers.HelpMarker(
+                        "Should the inventories/configuration be automatically saved on a defined interval? While the plugin does save when the game is closed and when configurations are altered, it is not saved in cases of crashing so this attempts to alleviate this.");
+
+                    ImGui.SetNextItemWidth(100);
+                    if (ImGui.InputInt("Auto save every:", ref autoSaveMinutes))
+                    {
+                        if (autoSaveMinutes != _configuration.AutoSaveMinutes)
+                        {
+                            _configuration.AutoSaveMinutes = autoSaveMinutes;
+                            _pluginLogic.ClearAutoSave();
+                        }
+                    }
+                    ImGui.Text("Next Autosave: " + (_pluginLogic.NextSaveTime?.ToString() ?? "N/A"));
+                    ImGui.SameLine();
+                    UiHelpers.HelpMarker(
+                        "How many minutes should there be between each auto save?");
+
                     ImGui.Text("Retainer Visuals:");
                     ImGui.Separator();
-                    if (ImGui.Checkbox("Color name in retainer list?", ref showMonitorTab))
+                    if (ImGui.Checkbox("Color name in retainer list?", ref colorRetainerList))
                     {
-                        _configuration.ShowFilterTab = !_configuration.ShowFilterTab;
+                        _configuration.ColorRetainerList = !_configuration.ColorRetainerList;
                     }
 
                     ImGui.SameLine();
                     UiHelpers.HelpMarker(
                         "Should the name of the retainer in the summoning bell list be coloured if a relevant item is to be sorted or is available in their inventory?");
-                    if (ImGui.Checkbox("Show item number in retainer list?", ref showMonitorTab))
+                    if (ImGui.Checkbox("Show item number in retainer list?", ref showItemNumberRetainerList))
                     {
-                        _configuration.ShowFilterTab = !_configuration.ShowFilterTab;
+                        _configuration.ShowItemNumberRetainerList = !_configuration.ShowItemNumberRetainerList;
                     }
 
                     ImGui.SameLine();
@@ -828,34 +856,40 @@ namespace InventoryTools
                             UiHelpers.HelpMarker(
                                 "Filter out any items that do not appear in both the source and destination?");
 
-                            ImGui.SetNextItemWidth(205);
-                            ImGui.LabelText(labelName + "FilterItemsInRetainers", "Filter Items when in Retainers: ");
-                            ImGui.SameLine();
-                            var FilterItemsInRetainers = filterConfiguration.FilterItemsInRetainers == null
-                                ? 0
-                                : (filterConfiguration.FilterItemsInRetainers.Value ? 1 : 2);
-                            if (ImGui.Combo(labelName + "FilterItemsInRetainersCheckbox", ref FilterItemsInRetainers,
-                                items, 3))
+                            if (filterConfiguration.FilterType == FilterType.SortingFilter)
                             {
-                                if (FilterItemsInRetainers == 0 &&
-                                    filterConfiguration.FilterItemsInRetainers != null)
+                                ImGui.SetNextItemWidth(205);
+                                ImGui.LabelText(labelName + "FilterItemsInRetainers",
+                                    "Filter Items when in Retainers: ");
+                                ImGui.SameLine();
+                                var FilterItemsInRetainers = filterConfiguration.FilterItemsInRetainers == null
+                                    ? 0
+                                    : (filterConfiguration.FilterItemsInRetainers.Value ? 1 : 2);
+                                if (ImGui.Combo(labelName + "FilterItemsInRetainersCheckbox",
+                                    ref FilterItemsInRetainers,
+                                    items, 3))
                                 {
-                                    filterConfiguration.FilterItemsInRetainers = null;
+                                    if (FilterItemsInRetainers == 0 &&
+                                        filterConfiguration.FilterItemsInRetainers != null)
+                                    {
+                                        filterConfiguration.FilterItemsInRetainers = null;
+                                    }
+                                    else if (FilterItemsInRetainers == 1 &&
+                                             filterConfiguration.FilterItemsInRetainers != true)
+                                    {
+                                        filterConfiguration.FilterItemsInRetainers = true;
+                                    }
+                                    else if (FilterItemsInRetainers == 2 &&
+                                             filterConfiguration.FilterItemsInRetainers != false)
+                                    {
+                                        filterConfiguration.FilterItemsInRetainers = false;
+                                    }
                                 }
-                                else if (FilterItemsInRetainers == 1 &&
-                                         filterConfiguration.FilterItemsInRetainers != true)
-                                {
-                                    filterConfiguration.FilterItemsInRetainers = true;
-                                }
-                                else if (FilterItemsInRetainers == 2 &&
-                                         filterConfiguration.FilterItemsInRetainers != false)
-                                {
-                                    filterConfiguration.FilterItemsInRetainers = false;
-                                }
+
+                                ImGui.SameLine();
+                                UiHelpers.HelpMarker(
+                                    "When talking with a retainer should the filter adjust itself to only show items that should be put inside the retainer from your inventory?");
                             }
-                            ImGui.SameLine();
-                            UiHelpers.HelpMarker(
-                                "When talking with a retainer should the filter adjust itself to only show items that should be put inside the retainer from your inventory?");
                         }
                     }
                 }

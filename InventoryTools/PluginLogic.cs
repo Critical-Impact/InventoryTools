@@ -4,6 +4,7 @@ using System.Linq;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
+using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.Gui;
 using Dalamud.Game.Text;
@@ -22,6 +23,7 @@ namespace InventoryTools
         private static ChatGui _chatGui;
         private ClientState _clientState;
         private GameUi _gameUi;
+        private Framework _framework;
         private List<FilterConfiguration> _filterConfigurations = new();
         private Dictionary<string, FilterTable> _filterTables = new();
 
@@ -32,7 +34,9 @@ namespace InventoryTools
         
         private ulong _currentRetainerId;
 
-        public PluginLogic(InventoryToolsConfiguration inventoryToolsConfiguration, ClientState clientState, InventoryMonitor inventoryMonitor, CharacterMonitor characterMonitor, GameUi gameUi, ChatGui chatGui)
+        private DateTime? _nextSaveTime = null;
+
+        public PluginLogic(InventoryToolsConfiguration inventoryToolsConfiguration, ClientState clientState, InventoryMonitor inventoryMonitor, CharacterMonitor characterMonitor, GameUi gameUi, ChatGui chatGui, Framework framework)
         {
             _pluginLogic = this;
             _config = inventoryToolsConfiguration;
@@ -41,12 +45,14 @@ namespace InventoryTools
             _characterMonitor = characterMonitor;
             _gameUi = gameUi;
             _chatGui = chatGui;
+            _framework = framework;
             
             //Events we need to track, inventory updates, active retainer changes, player changes, 
             _inventoryMonitor.OnInventoryChanged += InventoryMonitorOnOnInventoryChanged;
             _characterMonitor.OnActiveRetainerChanged += CharacterMonitorOnOnActiveCharacterChanged;
             _characterMonitor.OnCharacterUpdated += CharacterMonitorOnOnCharacterUpdated;
             _config.ConfigurationChanged += ConfigOnConfigurationChanged;
+            _framework.Update += FrameworkOnUpdate; 
 
             _inventoryMonitor.LoadExistingData(_config.GetSavedInventory());
             _characterMonitor.LoadExistingRetainers(_config.GetSavedRetainers());
@@ -67,13 +73,57 @@ namespace InventoryTools
                 LoadDefaultData();
                 _config.FirstRun = false;
             }
+
+            WatchFilterChanges();
+        }
+
+        private void FrameworkOnUpdate(Framework framework)
+        {
+            if (_config.AutoSave)
+            {
+                if (NextSaveTime == null && _config.AutoSaveMinutes != 0)
+                {
+                    _nextSaveTime = DateTime.Now.AddMinutes(_config.AutoSaveMinutes);
+                }
+                else
+                {
+                    if (DateTime.Now >= NextSaveTime)
+                    {
+                        _nextSaveTime = null;
+                        _config.Save();
+                    }
+                }
+            }
+        }
+
+        private void WatchFilterChanges()
+        {
+            foreach(var filterConfiguration in _filterConfigurations)
+            {
+                filterConfiguration.ConfigurationChanged += FilterConfigurationOnConfigurationChanged;
+            }
         }
         
-        
+        private void UnwatchFilterChanges()
+        {
+            foreach(var filterConfiguration in _filterConfigurations)
+            {
+                filterConfiguration.ConfigurationChanged -= FilterConfigurationOnConfigurationChanged;
+            }
+        }
+
+        private void FilterConfigurationOnConfigurationChanged(FilterConfiguration filterconfiguration)
+        {
+            //Do some sort of debouncing
+            _config.Save();
+        }
+
+
         private void ConfigOnConfigurationChanged()
         {
             InvalidateFilters();
             ToggleHighlights();
+            _config.Save();
         }
 
         private void CharacterMonitorOnOnCharacterUpdated(Character character)
@@ -240,6 +290,13 @@ namespace InventoryTools
 
         public List<FilterConfiguration> FilterConfigurations => _filterConfigurations;
 
+        public DateTime? NextSaveTime => _nextSaveTime;
+
+        public void ClearAutoSave()
+        {
+            _nextSaveTime = null;
+        }
+
         public void LoadExistingData(List<FilterConfiguration> filterConfigurations)
         {
             this._filterConfigurations = filterConfigurations;
@@ -254,6 +311,7 @@ namespace InventoryTools
                 {
                     var table = _filterTables[filter.Key];
                     table.Dispose();
+                    filter.ConfigurationChanged -= FilterConfigurationOnConfigurationChanged;
                     _filterTables.Remove(filter.Key);
                     ToggleHighlights();
                 }
@@ -532,7 +590,7 @@ namespace InventoryTools
                     for (var index = 0; index < filteredList.Value.SortedItems.Count; index++)
                     {
                         var item = filteredList.Value.SortedItems[index];
-                        if (item.SourceRetainerId == _clientState.LocalContentId && (_currentRetainerId == 0 ||
+                        if (activeFilter.FilterType == FilterType.SearchFilter || item.SourceRetainerId == _clientState.LocalContentId && (_currentRetainerId == 0 ||
                             (_currentRetainerId != 0 &&
                              item.DestinationRetainerId ==
                              _currentRetainerId)))
@@ -576,7 +634,7 @@ namespace InventoryTools
                     for (var index = 0; index < filteredList.Value.SortedItems.Count; index++)
                     {
                         var item = filteredList.Value.SortedItems[index];
-                        if (item.SourceRetainerId == _clientState.LocalContentId && (_currentRetainerId == 0 ||
+                        if (activeFilter.FilterType == FilterType.SearchFilter || item.SourceRetainerId == _clientState.LocalContentId && (_currentRetainerId == 0 ||
                             (_currentRetainerId != 0 &&
                              item.DestinationRetainerId ==
                              _currentRetainerId)))
@@ -637,7 +695,7 @@ namespace InventoryTools
                     for (var index = 0; index < filteredList.Value.SortedItems.Count; index++)
                     {
                         var item = filteredList.Value.SortedItems[index];
-                        if (item.SourceRetainerId == _clientState.LocalContentId && (_currentRetainerId == 0 ||
+                        if (activeFilter.FilterType == FilterType.SearchFilter || item.SourceRetainerId == _clientState.LocalContentId && (_currentRetainerId == 0 ||
                             (_currentRetainerId != 0 &&
                              item.DestinationRetainerId ==
                              _currentRetainerId)))
@@ -704,42 +762,32 @@ namespace InventoryTools
                             {
                                 if (item.SourceBag == InventoryType.RetainerBag0)
                                 {
-                                    retainerGrid0.SetColor(item.InventoryItem.SortedSlotIndex, 50, 100,
-                                        50);
-                                    retainerTabGrid.SetTabColor(0, 50, 100,
-                                        50);
+                                    retainerGrid0.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
+                                    retainerTabGrid.SetTabColor(0, _config.HighlightColor);
                                 }
 
                                 if (item.SourceBag == InventoryType.RetainerBag1)
                                 {
-                                    retainerGrid1.SetColor(item.InventoryItem.SortedSlotIndex, 50, 100,
-                                        50);
-                                    retainerTabGrid.SetTabColor(0, 50, 100,
-                                        50);
+                                    retainerGrid1.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
+                                    retainerTabGrid.SetTabColor(0, _config.HighlightColor);
                                 }
 
                                 if (item.SourceBag == InventoryType.RetainerBag2)
                                 {
-                                    retainerGrid2.SetColor(item.InventoryItem.SortedSlotIndex, 0, 100,
-                                        0);
-                                    retainerTabGrid.SetTabColor(1, 50, 100,
-                                        50);
+                                    retainerGrid2.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
+                                    retainerTabGrid.SetTabColor(1, _config.HighlightColor);
                                 }
 
                                 if (item.SourceBag == InventoryType.RetainerBag3)
                                 {
-                                    retainerGrid3.SetColor(item.InventoryItem.SortedSlotIndex, 0, 100,
-                                        0);
-                                    retainerTabGrid.SetTabColor(1, 50, 100,
-                                        50);
+                                    retainerGrid3.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
+                                    retainerTabGrid.SetTabColor(1, _config.HighlightColor);
                                 }
 
                                 if (item.SourceBag == InventoryType.RetainerBag4)
                                 {
-                                    retainerGrid4.SetColor(item.InventoryItem.SortedSlotIndex, 0, 100,
-                                        0);
-                                    retainerTabGrid.SetTabColor(2, 50, 100,
-                                        50);
+                                    retainerGrid4.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
+                                    retainerTabGrid.SetTabColor(2, _config.HighlightColor);
                                 }
                             }
                         }
@@ -833,7 +881,7 @@ namespace InventoryTools
                     for (var index = 0; index < filteredList.Value.SortedItems.Count; index++)
                     {
                         var item = filteredList.Value.SortedItems[index];
-                        if (item.SourceRetainerId == _clientState.LocalContentId && (_currentRetainerId == 0 ||
+                        if (activeFilter.FilterType == FilterType.SearchFilter || item.SourceRetainerId == _clientState.LocalContentId && (_currentRetainerId == 0 ||
                             (_currentRetainerId != 0 &&
                              item.DestinationRetainerId ==
                              _currentRetainerId)))
@@ -925,9 +973,12 @@ namespace InventoryTools
                 filterTables.Value.Dispose();
             }
 
+            UnwatchFilterChanges();
+
             DisableHighlights();
             _config.FilterConfigurations = FilterConfigurations;
             _config.SavedCharacters = _characterMonitor.Characters;
+            _framework.Update -= FrameworkOnUpdate; 
             _inventoryMonitor.OnInventoryChanged -= InventoryMonitorOnOnInventoryChanged;
             _characterMonitor.OnActiveRetainerChanged -= CharacterMonitorOnOnActiveCharacterChanged;
             _characterMonitor.OnCharacterUpdated -= CharacterMonitorOnOnCharacterUpdated;

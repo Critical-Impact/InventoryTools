@@ -97,8 +97,8 @@ namespace InventoryTools
                     DrawConfigurationTab();
                     ImGui.EndTabItem();
                 }
-                
-                if (ImGui.BeginTabItem("?"))
+
+                if (ImGui.BeginTabItem("Help"))
                 {
                     DrawHelpTab();
                     ImGui.EndTabItem();

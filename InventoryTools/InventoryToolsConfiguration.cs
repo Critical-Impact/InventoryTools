@@ -7,6 +7,7 @@ using Dalamud.Configuration;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using InventoryTools.Logic;
+using InventoryTools.Resolvers;
 using Newtonsoft.Json;
 
 namespace InventoryTools
@@ -52,17 +53,41 @@ namespace InventoryTools
             }
         }
 
+        public bool ColorRetainerList
+        {
+            get => _colorRetainerList;
+            set
+            {
+                _colorRetainerList = value;
+                ConfigurationChanged?.Invoke();
+            }
+        }
+
+        public bool ShowItemNumberRetainerList
+        {
+            get => _showItemNumberRetainerList;
+            set
+            {
+                _showItemNumberRetainerList = value;
+                ConfigurationChanged?.Invoke();
+            }
+        }
+
         public string ActiveUiFilter { get; set; } = null;
         public string ActiveBackgroundFilter { get; set; } = null;
         public bool FirstRun { get; set; } = true;
         public int SelectedHelpPage { get; set; }
+        public bool AutoSave { get; set; } = true;
+        public int AutoSaveMinutes { get; set; } = 10;
 
         public delegate void ConfigurationChangedDelegate();
         public event ConfigurationChangedDelegate ConfigurationChanged; 
 
         //Game Caches
         public Dictionary<ulong, Dictionary<InventoryCategory,List<InventoryItem>>> SavedInventories = new ();
+        
         public Dictionary<ulong, Character> SavedCharacters = new();
+        
         public List<FilterConfiguration> FilterConfigurations = new();
 
         //Configuration Helpers
@@ -90,21 +115,25 @@ namespace InventoryTools
             0.078f);
 
         private bool _displayCrossCharacter = true;
+        private bool _colorRetainerList = true;
+        private bool _showItemNumberRetainerList = true;
 
         public void Initialize(DalamudPluginInterface pluginInterface)
         {
             this.pluginInterface = pluginInterface;
         }
-
+        
         public void Save()
         {
             PluginLog.Verbose("Saving inventory tools configuration");
             //Save the configuration manually so we can set ReferenceLoopHandling
-            File.WriteAllText(pluginInterface.ConfigFile.FullName, JsonConvert.SerializeObject((object) this, Formatting.Indented, new JsonSerializerSettings()
+            File.WriteAllText(pluginInterface.ConfigFile.FullName, JsonConvert.SerializeObject((object) this, Formatting.None, new JsonSerializerSettings()
             {
                 TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
                 TypeNameHandling = TypeNameHandling.Objects,
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
+                ContractResolver = new MinifyResolver()
             }));
         }
     }

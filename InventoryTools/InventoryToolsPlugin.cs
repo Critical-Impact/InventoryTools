@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
+using Dalamud.Configuration;
 using Dalamud.Data;
 using Dalamud.Game;
 using Dalamud.Game.ClientState;
@@ -15,7 +17,9 @@ using Dalamud.Logging;
 using Dalamud.Plugin;
 using DalamudPluginProjectTemplate.Attributes;
 using FFXIVClientInterface;
+using InventoryTools.Resolvers;
 using InventoryTools.Structs;
+using Newtonsoft.Json;
 
 namespace InventoryTools
 {
@@ -36,11 +40,22 @@ namespace InventoryTools
         internal GameUi GameUi { get; private set; }
         
         public InventoryToolsConfiguration Config => _config;
+        
+        public InventoryToolsConfiguration Load(DalamudPluginInterface pluginInterface)
+        {
+            if (!File.Exists(pluginInterface.ConfigFile.FullName))
+                return null;
+            return JsonConvert.DeserializeObject<InventoryToolsConfiguration>(File.ReadAllText(pluginInterface.ConfigFile.FullName), new JsonSerializerSettings()
+            {
+                DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
+                ContractResolver = new MinifyResolver()
+            });
+        }
 
         public InventoryToolsPlugin(DalamudPluginInterface pluginInterface, DataManager dataManager, SigScanner sigScanner, ClientState clientState, GameNetwork gameNetwork, Framework framework, CommandManager commandManager, ChatGui chatGui)
         {
             PluginInterface = pluginInterface;
-            _config = (InventoryToolsConfiguration) this.PluginInterface.GetPluginConfig() ?? new InventoryToolsConfiguration();
+            _config = this.Load(pluginInterface) ?? new InventoryToolsConfiguration();
             Config.Initialize(this.PluginInterface);
             _commandManager = new PluginCommandManager<InventoryToolsPlugin>(this, commandManager);
 
@@ -52,7 +67,7 @@ namespace InventoryTools
             OdrScanner = new OdrScanner(clientState, CharacterMonitor);
             GameUi = new GameUi(sigScanner, framework);
             InventoryMonitor = new InventoryMonitor(ClientInterface, clientState, OdrScanner, CharacterMonitor, GameUi, gameNetwork, framework);
-            PluginLogic = new PluginLogic(Config, clientState, InventoryMonitor, CharacterMonitor, GameUi, chatGui);
+            PluginLogic = new PluginLogic(Config, clientState, InventoryMonitor, CharacterMonitor, GameUi, chatGui, framework);
             _ui = new InventoryToolsUi(pluginInterface,PluginLogic, InventoryMonitor, CharacterMonitor, Config, clientState, GameUi);
         }
 

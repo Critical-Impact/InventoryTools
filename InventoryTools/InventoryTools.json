@@ -1,11 +1,11 @@
 ﻿{
   "Author": "Critical_Impact",
   "Name": "Inventory Tools",
-  "Punchline": "Clean up your messy inventories.",
+  "Punchline": "Clean up your sloppppy inventories.",
   "Description": "Adds in a window that allows for the searching and filtering of specific items across inventories. Adds visualisation in game to see where your items should go.",
   "Tags": ["Inventory", "Sorting", "Filtering"],
   "InternalName": "InventoryTools",
-  "AssemblyVersion": "1.0.0.4",
+  "AssemblyVersion": "1.0.0.5",
   "RepoUrl": "https://github.com/Critical-Impact/InventoryTools",
   "ApplicableVersion": "any",
   "DalamudApiLevel": 4,
