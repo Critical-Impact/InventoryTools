@@ -65,6 +65,7 @@ namespace InventoryTools
             _gameUi.WatchWindowState(GameUi.WindowName.InventoryRetainerLarge);
             _gameUi.WatchWindowState(GameUi.WindowName.InventoryRetainer);
             _gameUi.WatchWindowState(GameUi.WindowName.InventoryBuddy);
+            _gameUi.WatchWindowState(GameUi.WindowName.InventoryBuddy2);
             _gameUi.UiVisibilityChanged += GameUiOnUiVisibilityChanged;
             
             LoadExistingData(_config.GetSavedFilters());
@@ -538,6 +539,8 @@ namespace InventoryTools
 
             var saddleBag = _gameUi.GetChocoboSaddlebag();
             saddleBag?.ClearColors();
+            var saddleBag2 = _gameUi.GetChocoboSaddlebag2();
+            saddleBag2?.ClearColors();
             
             var retainerList = _gameUi.GetRetainerList();
             retainerList?.ClearColors();
@@ -590,7 +593,7 @@ namespace InventoryTools
                     for (var index = 0; index < filteredList.Value.SortedItems.Count; index++)
                     {
                         var item = filteredList.Value.SortedItems[index];
-                        if (activeFilter.FilterType == FilterType.SearchFilter || item.SourceRetainerId == _clientState.LocalContentId && (_currentRetainerId == 0 ||
+                        if (activeFilter.FilterType == FilterType.SearchFilter && item.SourceRetainerId == _clientState.LocalContentId || item.SourceRetainerId == _clientState.LocalContentId && (_currentRetainerId == 0 ||
                             (_currentRetainerId != 0 &&
                              item.DestinationRetainerId ==
                              _currentRetainerId)))
@@ -634,7 +637,7 @@ namespace InventoryTools
                     for (var index = 0; index < filteredList.Value.SortedItems.Count; index++)
                     {
                         var item = filteredList.Value.SortedItems[index];
-                        if (activeFilter.FilterType == FilterType.SearchFilter || item.SourceRetainerId == _clientState.LocalContentId && (_currentRetainerId == 0 ||
+                        if (activeFilter.FilterType == FilterType.SearchFilter && item.SourceRetainerId == _clientState.LocalContentId || item.SourceRetainerId == _clientState.LocalContentId && (_currentRetainerId == 0 ||
                             (_currentRetainerId != 0 &&
                              item.DestinationRetainerId ==
                              _currentRetainerId)))
@@ -695,7 +698,7 @@ namespace InventoryTools
                     for (var index = 0; index < filteredList.Value.SortedItems.Count; index++)
                     {
                         var item = filteredList.Value.SortedItems[index];
-                        if (activeFilter.FilterType == FilterType.SearchFilter || item.SourceRetainerId == _clientState.LocalContentId && (_currentRetainerId == 0 ||
+                        if (activeFilter.FilterType == FilterType.SearchFilter && item.SourceRetainerId == _clientState.LocalContentId || item.SourceRetainerId == _clientState.LocalContentId && (_currentRetainerId == 0 ||
                             (_currentRetainerId != 0 &&
                              item.DestinationRetainerId ==
                              _currentRetainerId)))
@@ -872,7 +875,7 @@ namespace InventoryTools
             }
             
             
-            var saddleBagUi = _gameUi.GetChocoboSaddlebag();
+            var saddleBagUi = _gameUi.GetChocoboSaddlebag() ?? _gameUi.GetChocoboSaddlebag2();
             if (saddleBagUi != null)
             {
                 saddleBagUi.ClearColors();
@@ -881,7 +884,7 @@ namespace InventoryTools
                     for (var index = 0; index < filteredList.Value.SortedItems.Count; index++)
                     {
                         var item = filteredList.Value.SortedItems[index];
-                        if (activeFilter.FilterType == FilterType.SearchFilter || item.SourceRetainerId == _clientState.LocalContentId && (_currentRetainerId == 0 ||
+                        if (activeFilter.FilterType == FilterType.SearchFilter && item.SourceRetainerId == _clientState.LocalContentId || item.SourceRetainerId == _clientState.LocalContentId && (_currentRetainerId == 0 ||
                             (_currentRetainerId != 0 &&
                              item.DestinationRetainerId ==
                              _currentRetainerId)))
