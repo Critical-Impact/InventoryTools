@@ -436,7 +436,10 @@ namespace InventoryTools
                             {
                                 for (var playerIndex = 0; playerIndex < allCharacters.Length; playerIndex++)
                                 {
-                                    if (ImGui.Selectable(allCharacters[playerIndex].Value.Name,
+                                    if (!filterConfiguration.SourceInventories.Contains((allCharacters[playerIndex].Key,
+                                        allCharacters[playerIndex].Value.OwnerId == 0
+                                            ? InventoryCategory.CharacterBags
+                                            : InventoryCategory.RetainerBags)) && ImGui.Selectable(allCharacters[playerIndex].Value.Name,
                                         currentSource == allCharacters[playerIndex].Value.Name))
                                     {
                                         filterConfiguration.AddSourceInventory((allCharacters[playerIndex].Key,
@@ -539,7 +542,10 @@ namespace InventoryTools
                                 {
                                     for (var playerIndex = 0; playerIndex < allCharacters.Length; playerIndex++)
                                     {
-                                        if (ImGui.Selectable(allCharacters[playerIndex].Value.Name,
+                                        if (!filterConfiguration.DestinationInventories.Contains((allCharacters[playerIndex].Key,
+                                            allCharacters[playerIndex].Value.OwnerId == 0
+                                                ? InventoryCategory.CharacterBags
+                                                : InventoryCategory.RetainerBags)) && ImGui.Selectable(allCharacters[playerIndex].Value.Name,
                                             currentDestination == allCharacters[playerIndex].Value.Name))
                                         {
                                             filterConfiguration.AddDestinationInventory((allCharacters[playerIndex].Key,
@@ -579,7 +585,7 @@ namespace InventoryTools
                             ImGui.SetNextItemWidth(100);
                             if (ImGui.BeginCombo(labelName + "UiCategoryCombo", currentUiCategory))
                             {
-                                foreach (var item in ExcelCache.GetAllItemUICategories().Values
+                                foreach (var item in ExcelCache.GetAllItemUICategories().Values.Where(c => !filterConfiguration.ItemUiCategoryId.Contains(c.RowId))
                                     .OrderBy(c => c.Name.ToString().Replace("\u0002\u001F\u0001\u0003", "-")))
                                 {
                                     if (item.Name == "")
@@ -625,7 +631,7 @@ namespace InventoryTools
                             ImGui.SetNextItemWidth(100);
                             if (ImGui.BeginCombo(labelName + "SearchCategoryCombo", currentSearchCategory))
                             {
-                                foreach (var item in ExcelCache.GetAllItemSearchCategories().Values
+                                foreach (var item in ExcelCache.GetAllItemSearchCategories().Values.Where(c => !filterConfiguration.ItemSearchCategoryId.Contains(c.RowId))
                                     .OrderBy(c => c.Name.ToString().Replace("\u0002\u001F\u0001\u0003", "-")))
                                 {
                                     if (item.Name == "")
