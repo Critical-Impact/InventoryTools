@@ -355,6 +355,23 @@ namespace InventoryTools
                                     filterConfiguration.DisplayInTabs = displayInTabs;
                                 }
                             }
+
+                           
+                            Vector3 highlightColor = filterConfiguration.HighlightColor ?? new Vector3();
+
+                            if (ImGui.ColorEdit3("Highlight Color?", ref highlightColor, ImGuiColorEditFlags.NoInputs))
+                            {
+                                filterConfiguration.HighlightColor = highlightColor;
+                            }
+                            ImGui.SameLine();
+                            if (filterConfiguration.HighlightColor.HasValue && ImGui.Button("Clear Color"))
+                            {
+                                filterConfiguration.HighlightColor = null;
+                            }
+
+                            ImGui.SameLine();
+                            UiHelpers.HelpMarker(
+                                "The color to set the highlighted items to for this specific filter.");
                         }
 
                         if (ImGui.CollapsingHeader("Inventories", ImGuiTreeNodeFlags.DefaultOpen))

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Models;
 using Dalamud.Logging;
@@ -42,6 +43,7 @@ namespace InventoryTools.Logic
         private bool? _isAvailableAtTimedNode;
         private List<(ulong, InventoryCategory)> _sourceInventories = new();
         private FilterType _filterType;
+        private Vector3? _highlightColor;
         
         [JsonIgnore]
         private FilterResult? _filterResult = null;
@@ -360,6 +362,16 @@ namespace InventoryTools.Logic
         {
             get => _ownerId;
             set => _ownerId = value;
+        }
+        
+        public Vector3? HighlightColor
+        {
+            get => _highlightColor;
+            set
+            {
+                _highlightColor = value;
+                ConfigurationChanged?.Invoke(this);
+            }
         }
 
         public event ConfigurationChangedDelegate ConfigurationChanged;

@@ -116,6 +116,8 @@ namespace InventoryTools
         private void FilterConfigurationOnConfigurationChanged(FilterConfiguration filterconfiguration)
         {
             //Do some sort of debouncing
+            InvalidateFilters();
+            ToggleHighlights();
             _config.Save();
         }
 
@@ -600,22 +602,22 @@ namespace InventoryTools
                         {
                             if (item.SourceBag == InventoryType.Bag0)
                             {
-                                inventoryGrid0.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
+                                inventoryGrid0.SetColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
                             }
 
                             if (item.SourceBag == InventoryType.Bag1)
                             {
-                                inventoryGrid1.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
+                                inventoryGrid1.SetColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
                             }
 
                             if (item.SourceBag == InventoryType.Bag2)
                             {
-                                inventoryGrid2.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
+                                inventoryGrid2.SetColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
                             }
 
                             if (item.SourceBag == InventoryType.Bag3)
                             {
-                                inventoryGrid3.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
+                                inventoryGrid3.SetColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
                             }
                         }
                     }
@@ -644,38 +646,38 @@ namespace InventoryTools
                         {
                             if (item.SourceBag == InventoryType.Bag0)
                             {
-                                smallInventoryGrid0?.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
-                                smallInventoryGrid0?.SetTabColor(0, _config.HighlightColor);
-                                smallInventoryGrid1?.SetTabColor(0, _config.HighlightColor);
-                                smallInventoryGrid2?.SetTabColor(0, _config.HighlightColor);
-                                smallInventoryGrid3?.SetTabColor(0, _config.HighlightColor);
+                                smallInventoryGrid0?.SetColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                smallInventoryGrid0?.SetTabColor(0, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                smallInventoryGrid1?.SetTabColor(0, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                smallInventoryGrid2?.SetTabColor(0, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                smallInventoryGrid3?.SetTabColor(0, activeFilter.HighlightColor ?? _config.HighlightColor);
                             }
 
                             if (item.SourceBag == InventoryType.Bag1)
                             {
-                                smallInventoryGrid1?.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
-                                smallInventoryGrid0?.SetTabColor(1, _config.HighlightColor);
-                                smallInventoryGrid1?.SetTabColor(1, _config.HighlightColor);
-                                smallInventoryGrid2?.SetTabColor(1, _config.HighlightColor);
-                                smallInventoryGrid3?.SetTabColor(1, _config.HighlightColor);
+                                smallInventoryGrid1?.SetColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                smallInventoryGrid0?.SetTabColor(1, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                smallInventoryGrid1?.SetTabColor(1, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                smallInventoryGrid2?.SetTabColor(1, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                smallInventoryGrid3?.SetTabColor(1, activeFilter.HighlightColor ?? _config.HighlightColor);
                             }
 
                             if (item.SourceBag == InventoryType.Bag2)
                             {
-                                smallInventoryGrid2?.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
-                                smallInventoryGrid0?.SetTabColor(2, _config.HighlightColor);
-                                smallInventoryGrid1?.SetTabColor(2, _config.HighlightColor);
-                                smallInventoryGrid2?.SetTabColor(2, _config.HighlightColor);
-                                smallInventoryGrid3?.SetTabColor(2, _config.HighlightColor);
+                                smallInventoryGrid2?.SetColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                smallInventoryGrid0?.SetTabColor(2, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                smallInventoryGrid1?.SetTabColor(2, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                smallInventoryGrid2?.SetTabColor(2, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                smallInventoryGrid3?.SetTabColor(2, activeFilter.HighlightColor ?? _config.HighlightColor);
                             }
 
                             if (item.SourceBag == InventoryType.Bag3)
                             {
-                                smallInventoryGrid3?.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
-                                smallInventoryGrid0?.SetTabColor(3, _config.HighlightColor);
-                                smallInventoryGrid1?.SetTabColor(3, _config.HighlightColor);
-                                smallInventoryGrid2?.SetTabColor(3, _config.HighlightColor);
-                                smallInventoryGrid3?.SetTabColor(3, _config.HighlightColor);
+                                smallInventoryGrid3?.SetColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                smallInventoryGrid0?.SetTabColor(3, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                smallInventoryGrid1?.SetTabColor(3, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                smallInventoryGrid2?.SetTabColor(3, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                smallInventoryGrid3?.SetTabColor(3, activeFilter.HighlightColor ?? _config.HighlightColor);
                             }
                         }
                     }
@@ -705,35 +707,35 @@ namespace InventoryTools
                         {
                             if (item.SourceBag == InventoryType.Bag0)
                             {
-                                largeInventoryGrid0?.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
-                                largeInventoryGrid0?.SetTabColor(0, _config.HighlightColor);
-                                largeInventoryGrid1?.SetTabColor(0, _config.HighlightColor);
-                                largeInventoryGrid2?.SetTabColor(0, _config.HighlightColor);
-                                largeInventoryGrid3?.SetTabColor(0, _config.HighlightColor);
+                                largeInventoryGrid0?.SetColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                largeInventoryGrid0?.SetTabColor(0, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                largeInventoryGrid1?.SetTabColor(0, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                largeInventoryGrid2?.SetTabColor(0, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                largeInventoryGrid3?.SetTabColor(0, activeFilter.HighlightColor ?? _config.HighlightColor);
                             }
                             if (item.SourceBag == InventoryType.Bag1)
                             {
-                                largeInventoryGrid1?.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
-                                largeInventoryGrid0?.SetTabColor(0, _config.HighlightColor);
-                                largeInventoryGrid1?.SetTabColor(0, _config.HighlightColor);
-                                largeInventoryGrid2?.SetTabColor(0, _config.HighlightColor);
-                                largeInventoryGrid3?.SetTabColor(0, _config.HighlightColor);
+                                largeInventoryGrid1?.SetColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                largeInventoryGrid0?.SetTabColor(0, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                largeInventoryGrid1?.SetTabColor(0, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                largeInventoryGrid2?.SetTabColor(0, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                largeInventoryGrid3?.SetTabColor(0, activeFilter.HighlightColor ?? _config.HighlightColor);
                             }
                             if (item.SourceBag == InventoryType.Bag2)
                             {
-                                largeInventoryGrid2?.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
-                                largeInventoryGrid0?.SetTabColor(1, _config.HighlightColor);
-                                largeInventoryGrid1?.SetTabColor(1, _config.HighlightColor);
-                                largeInventoryGrid2?.SetTabColor(1, _config.HighlightColor);
-                                largeInventoryGrid3?.SetTabColor(1, _config.HighlightColor);
+                                largeInventoryGrid2?.SetColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                largeInventoryGrid0?.SetTabColor(1, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                largeInventoryGrid1?.SetTabColor(1, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                largeInventoryGrid2?.SetTabColor(1, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                largeInventoryGrid3?.SetTabColor(1, activeFilter.HighlightColor ?? _config.HighlightColor);
                             }
                             if (item.SourceBag == InventoryType.Bag3)
                             {
-                                largeInventoryGrid3?.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
-                                largeInventoryGrid0?.SetTabColor(1, _config.HighlightColor);
-                                largeInventoryGrid1?.SetTabColor(1, _config.HighlightColor);
-                                largeInventoryGrid2?.SetTabColor(1, _config.HighlightColor);
-                                largeInventoryGrid3?.SetTabColor(1, _config.HighlightColor);
+                                largeInventoryGrid3?.SetColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                largeInventoryGrid0?.SetTabColor(1, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                largeInventoryGrid1?.SetTabColor(1, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                largeInventoryGrid2?.SetTabColor(1, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                largeInventoryGrid3?.SetTabColor(1, activeFilter.HighlightColor ?? _config.HighlightColor);
                             }
                         }
                     }
@@ -765,32 +767,32 @@ namespace InventoryTools
                             {
                                 if (item.SourceBag == InventoryType.RetainerBag0)
                                 {
-                                    retainerGrid0.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
-                                    retainerTabGrid.SetTabColor(0, _config.HighlightColor);
+                                    retainerGrid0.SetColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerTabGrid.SetTabColor(0, activeFilter.HighlightColor ?? _config.HighlightColor);
                                 }
 
                                 if (item.SourceBag == InventoryType.RetainerBag1)
                                 {
-                                    retainerGrid1.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
-                                    retainerTabGrid.SetTabColor(0, _config.HighlightColor);
+                                    retainerGrid1.SetColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerTabGrid.SetTabColor(0, activeFilter.HighlightColor ?? _config.HighlightColor);
                                 }
 
                                 if (item.SourceBag == InventoryType.RetainerBag2)
                                 {
-                                    retainerGrid2.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
-                                    retainerTabGrid.SetTabColor(1, _config.HighlightColor);
+                                    retainerGrid2.SetColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerTabGrid.SetTabColor(1, activeFilter.HighlightColor ?? _config.HighlightColor);
                                 }
 
                                 if (item.SourceBag == InventoryType.RetainerBag3)
                                 {
-                                    retainerGrid3.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
-                                    retainerTabGrid.SetTabColor(1, _config.HighlightColor);
+                                    retainerGrid3.SetColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerTabGrid.SetTabColor(1, activeFilter.HighlightColor ?? _config.HighlightColor);
                                 }
 
                                 if (item.SourceBag == InventoryType.RetainerBag4)
                                 {
-                                    retainerGrid4.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
-                                    retainerTabGrid.SetTabColor(2, _config.HighlightColor);
+                                    retainerGrid4.SetColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerTabGrid.SetTabColor(2, activeFilter.HighlightColor ?? _config.HighlightColor);
                                 }
                             }
                         }
@@ -822,51 +824,51 @@ namespace InventoryTools
                             {
                                 if (item.SourceBag == InventoryType.RetainerBag0)
                                 {
-                                    retainerInventoryGrid0?.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
-                                    retainerInventoryGrid0?.SetTabColor(0, _config.HighlightColor);
-                                    retainerInventoryGrid1?.SetTabColor(0, _config.HighlightColor);
-                                    retainerInventoryGrid2?.SetTabColor(0, _config.HighlightColor);
-                                    retainerInventoryGrid3?.SetTabColor(0, _config.HighlightColor);
-                                    retainerInventoryGrid4?.SetTabColor(0, _config.HighlightColor);
+                                    retainerInventoryGrid0?.SetColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerInventoryGrid0?.SetTabColor(0, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerInventoryGrid1?.SetTabColor(0, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerInventoryGrid2?.SetTabColor(0, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerInventoryGrid3?.SetTabColor(0, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerInventoryGrid4?.SetTabColor(0, activeFilter.HighlightColor ?? _config.HighlightColor);
                                 }
                                 if (item.SourceBag == InventoryType.RetainerBag1)
                                 {
-                                    retainerInventoryGrid1?.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
-                                    retainerInventoryGrid0?.SetTabColor(1, _config.HighlightColor);
-                                    retainerInventoryGrid1?.SetTabColor(1, _config.HighlightColor);
-                                    retainerInventoryGrid2?.SetTabColor(1, _config.HighlightColor);
-                                    retainerInventoryGrid3?.SetTabColor(1, _config.HighlightColor);
-                                    retainerInventoryGrid4?.SetTabColor(1, _config.HighlightColor);
+                                    retainerInventoryGrid1?.SetColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerInventoryGrid0?.SetTabColor(1, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerInventoryGrid1?.SetTabColor(1, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerInventoryGrid2?.SetTabColor(1, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerInventoryGrid3?.SetTabColor(1, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerInventoryGrid4?.SetTabColor(1, activeFilter.HighlightColor ?? _config.HighlightColor);
                                 }
 
                                 if (item.SourceBag == InventoryType.RetainerBag2)
                                 {
-                                    retainerInventoryGrid2?.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
-                                    retainerInventoryGrid0?.SetTabColor(2, _config.HighlightColor);
-                                    retainerInventoryGrid1?.SetTabColor(2, _config.HighlightColor);
-                                    retainerInventoryGrid2?.SetTabColor(2, _config.HighlightColor);
-                                    retainerInventoryGrid3?.SetTabColor(2, _config.HighlightColor);
-                                    retainerInventoryGrid4?.SetTabColor(2, _config.HighlightColor);
+                                    retainerInventoryGrid2?.SetColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerInventoryGrid0?.SetTabColor(2, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerInventoryGrid1?.SetTabColor(2, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerInventoryGrid2?.SetTabColor(2, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerInventoryGrid3?.SetTabColor(2, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerInventoryGrid4?.SetTabColor(2, activeFilter.HighlightColor ?? _config.HighlightColor);
                                 }
 
                                 if (item.SourceBag == InventoryType.RetainerBag3)
                                 {
-                                    retainerInventoryGrid3?.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
-                                    retainerInventoryGrid0?.SetTabColor(3, _config.HighlightColor);
-                                    retainerInventoryGrid1?.SetTabColor(3, _config.HighlightColor);
-                                    retainerInventoryGrid2?.SetTabColor(3, _config.HighlightColor);
-                                    retainerInventoryGrid3?.SetTabColor(3, _config.HighlightColor);
-                                    retainerInventoryGrid4?.SetTabColor(3, _config.HighlightColor);
+                                    retainerInventoryGrid3?.SetColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerInventoryGrid0?.SetTabColor(3, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerInventoryGrid1?.SetTabColor(3, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerInventoryGrid2?.SetTabColor(3, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerInventoryGrid3?.SetTabColor(3, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerInventoryGrid4?.SetTabColor(3, activeFilter.HighlightColor ?? _config.HighlightColor);
                                 }
 
                                 if (item.SourceBag == InventoryType.RetainerBag4)
                                 {
-                                    retainerInventoryGrid4?.SetColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
-                                    retainerInventoryGrid0?.SetTabColor(4, _config.HighlightColor);
-                                    retainerInventoryGrid1?.SetTabColor(4, _config.HighlightColor);
-                                    retainerInventoryGrid2?.SetTabColor(4, _config.HighlightColor);
-                                    retainerInventoryGrid3?.SetTabColor(4, _config.HighlightColor);
-                                    retainerInventoryGrid4?.SetTabColor(4, _config.HighlightColor);
+                                    retainerInventoryGrid4?.SetColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerInventoryGrid0?.SetTabColor(4, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerInventoryGrid1?.SetTabColor(4, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerInventoryGrid2?.SetTabColor(4, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerInventoryGrid3?.SetTabColor(4, activeFilter.HighlightColor ?? _config.HighlightColor);
+                                    retainerInventoryGrid4?.SetTabColor(4, activeFilter.HighlightColor ?? _config.HighlightColor);
                                 }
                             }
                         }
@@ -892,35 +894,35 @@ namespace InventoryTools
                             if (item.SourceBag == InventoryType.SaddleBag0 ||
                                 item.SourceBag == InventoryType.SaddleBag1)
                             {
-                                saddleBagUi.SetLeftTabColor(_config.HighlightColor);
+                                saddleBagUi.SetLeftTabColor(activeFilter.HighlightColor ?? activeFilter.HighlightColor ?? _config.HighlightColor);
                             }
                             else if (item.SourceBag == InventoryType.PremiumSaddleBag0 || item.SourceBag == InventoryType.PremiumSaddleBag1)
                             {
-                                saddleBagUi.SetRightTabColor(_config.HighlightColor);
+                                saddleBagUi.SetRightTabColor(activeFilter.HighlightColor ?? _config.HighlightColor);
                             }
 
                             if (saddleBagUi.SaddleBagSelected == 0)
                             {
                                 if (item.SourceBag == InventoryType.SaddleBag0)
                                 {
-                                    saddleBagUi.SetItemLeftColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
+                                    saddleBagUi.SetItemLeftColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
                                 }
 
                                 if (item.SourceBag == InventoryType.SaddleBag1)
                                 {
-                                    saddleBagUi.SetItemRightColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
+                                    saddleBagUi.SetItemRightColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
                                 }
                             }
                             else
                             {
                                 if (item.SourceBag == InventoryType.PremiumSaddleBag0)
                                 {
-                                    saddleBagUi.SetItemLeftColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
+                                    saddleBagUi.SetItemLeftColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
                                 }
 
                                 if (item.SourceBag == InventoryType.PremiumSaddleBag1)
                                 {
-                                    saddleBagUi.SetItemRightColor(item.InventoryItem.SortedSlotIndex, _config.HighlightColor);
+                                    saddleBagUi.SetItemRightColor(item.InventoryItem.SortedSlotIndex, activeFilter.HighlightColor ?? _config.HighlightColor);
                                 }
                             }
                         }
