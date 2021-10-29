@@ -834,6 +834,31 @@ namespace InventoryTools
                             ImGui.SameLine();
                             UiHelpers.HelpMarker(
                                 "Whether the item can be bought from a gil shop?");
+                            
+                            ImGui.SetNextItemWidth(205);
+                            ImGui.LabelText(labelName + "AvailableAtTimedNodes", "Is this only available from timed nodes?: ");
+                            ImGui.SameLine();
+                            var isAvailableFromTimedNodes = filterConfiguration.IsAvailableAtTimedNode == null
+                                ? 0
+                                : (filterConfiguration.IsAvailableAtTimedNode.Value ? 1 : 2);
+                            if (ImGui.Combo(labelName + "AvailableAtTimedNodesCheckbox", ref isAvailableFromTimedNodes, items, 3))
+                            {
+                                if (isAvailableFromTimedNodes == 0 && filterConfiguration.IsAvailableAtTimedNode != null)
+                                {
+                                    filterConfiguration.IsAvailableAtTimedNode = null;
+                                }
+                                else if (isAvailableFromTimedNodes == 1 && filterConfiguration.IsAvailableAtTimedNode != true)
+                                {
+                                    filterConfiguration.IsAvailableAtTimedNode = true;
+                                }
+                                else if (isAvailableFromTimedNodes == 2 && filterConfiguration.IsAvailableAtTimedNode != false)
+                                {
+                                    filterConfiguration.IsAvailableAtTimedNode = false;
+                                }
+                            }
+                            ImGui.SameLine();
+                            UiHelpers.HelpMarker(
+                                "Whether the item can be bought from a gil shop?");
                         }
                         if (ImGui.CollapsingHeader("Misc", ImGuiTreeNodeFlags.DefaultOpen))
                         {
@@ -899,7 +924,6 @@ namespace InventoryTools
                         }
                     }
                 }
-
                 ImGui.EndChild();
             }
         }

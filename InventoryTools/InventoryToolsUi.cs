@@ -103,6 +103,7 @@ namespace InventoryTools
                     DrawHelpTab();
                     ImGui.EndTabItem();
                 }
+
                 ImGui.EndTabBar();
             }
             ImGui.SameLine();

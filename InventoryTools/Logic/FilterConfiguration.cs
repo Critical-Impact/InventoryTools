@@ -39,6 +39,7 @@ namespace InventoryTools.Logic
         private string _shopSellingPrice = "";
         private string _shopBuyingPrice = "";
         private bool? _canBeBought;
+        private bool? _isAvailableAtTimedNode;
         private List<(ulong, InventoryCategory)> _sourceInventories = new();
         private FilterType _filterType;
         
@@ -78,7 +79,6 @@ namespace InventoryTools.Logic
             Name = name;
             Key = Guid.NewGuid().ToString("N");
         }
-
 
         public FilterConfiguration()
         {
@@ -294,7 +294,6 @@ namespace InventoryTools.Logic
             }            
         }
 
-
         public bool? DestinationAllRetainers
         {
             get => _destinationAllRetainers;
@@ -345,7 +344,17 @@ namespace InventoryTools.Logic
                 ConfigurationChanged?.Invoke(this);
             }
         }
-
+        
+        public bool? IsAvailableAtTimedNode
+        {
+            get => _isAvailableAtTimedNode;
+            set
+            {
+                _isAvailableAtTimedNode = value;
+                NeedsRefresh = true;
+                ConfigurationChanged?.Invoke(this);
+            }            
+        }
 
         public ulong OwnerId
         {
@@ -452,9 +461,25 @@ namespace InventoryTools.Logic
                 }
             }
 
-            if (this.CanBeBought.HasValue && this.CanBeBought.Value)
+            if (this.CanBeBought.HasValue)
             {
-                if (!item.CanBeBought)
+                if (this.CanBeBought.Value && !item.CanBeBought)
+                {
+                    matches = false;
+                }
+                else if (!this.CanBeBought.Value && item.CanBeBought)
+                {
+                    matches = false;
+                }
+            }
+
+            if (this.IsAvailableAtTimedNode.HasValue)
+            {
+                if (this.IsAvailableAtTimedNode.Value && !item.IsItemAvailableAtTimedNode)
+                {
+                    matches = false;
+                }
+                else if (!this.IsAvailableAtTimedNode.Value && item.IsItemAvailableAtTimedNode)
                 {
                     matches = false;
                 }
@@ -523,7 +548,6 @@ namespace InventoryTools.Logic
             }
         }
 
-
         public void AddItemSearchCategory(uint itemSearchCategoryId)
         {
             if (!ItemSearchCategoryId.Contains(itemSearchCategoryId))
@@ -578,9 +602,7 @@ namespace InventoryTools.Logic
             }
             return true;
         }
-
     }
-
     public enum HighlightMode
     {
         Never,
