@@ -604,7 +604,6 @@ namespace InventoryTools.Logic
             {
                 if (FilterItemsInRetainers.Value && activeRetainerId != 0)
                 {
-                    PluginLog.Log("filtering, " + activeCharacterId + ":" + activeRetainerId + ":" + sourceCharacterId + ":" + destinationCharacterId);
                     if (activeCharacterId == sourceCharacterId && activeRetainerId == destinationCharacterId)
                     {
                         return true;

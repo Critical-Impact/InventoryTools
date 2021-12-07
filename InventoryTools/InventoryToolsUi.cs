@@ -97,7 +97,7 @@ namespace InventoryTools
                     DrawConfigurationTab();
                     ImGui.EndTabItem();
                 }
-
+                
                 if (ImGui.BeginTabItem("Help"))
                 {
                     DrawHelpTab();
@@ -153,11 +153,10 @@ namespace InventoryTools
                         }
                     }
                 }
-
                 ImGui.EndChild();
             }
         }
-
+        
         public void Dispose()
         {
             _disposing = true;

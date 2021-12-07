@@ -21,7 +21,7 @@ namespace InventoryTools
 
         private void OnNetworkMessage(IntPtr dataptr, ushort opcode, uint sourceactorid, uint targetactorid, NetworkMessageDirection direction)
         {
-            if (opcode == 0x289 && direction == NetworkMessageDirection.ZoneDown) //Retainer Info - 0x02E3?
+            if (opcode == 0x129 && direction == NetworkMessageDirection.ZoneDown) //Retainer Info - 0x02E3?
             {
                 var retainerInformation = NetworkDecoder.DecodeRetainerInformation(dataptr);
                 OnRetainerInformationUpdated?.Invoke(retainerInformation);

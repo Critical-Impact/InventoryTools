@@ -809,7 +809,6 @@ namespace InventoryTools
                     retainerInventoryGrid3 != null ||
                     retainerInventoryGrid4 != null)
                 {
-                    PluginLog.Log("normal inventory grid changed");
                     retainerInventoryGrid0?.ClearColors();
                     retainerInventoryGrid1?.ClearColors();
                     retainerInventoryGrid2?.ClearColors();
