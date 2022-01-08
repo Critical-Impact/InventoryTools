@@ -11,6 +11,10 @@ using Dalamud.Game.Text;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using InventoryTools.Logic;
+using InventoryTools.MarketBoard;
+using Lumina.Excel.GeneratedSheets;
+using XivCommon;
+using XivCommon.Functions.Tooltips;
 
 namespace InventoryTools
 {
@@ -31,8 +35,9 @@ namespace InventoryTools
         public static CharacterMonitor CharacterMonitor => _characterMonitor;
         public static InventoryToolsConfiguration PluginConfiguration => _config;
         public static PluginLogic Instance => _pluginLogic;
-        
+
         private ulong _currentRetainerId;
+        private XivCommonBase _commonBase { get; set; }
 
         private DateTime? _nextSaveTime = null;
 
@@ -46,17 +51,17 @@ namespace InventoryTools
             _gameUi = gameUi;
             _chatGui = chatGui;
             _framework = framework;
-            
+
             //Events we need to track, inventory updates, active retainer changes, player changes, 
             _inventoryMonitor.OnInventoryChanged += InventoryMonitorOnOnInventoryChanged;
             _characterMonitor.OnActiveRetainerChanged += CharacterMonitorOnOnActiveCharacterChanged;
             _characterMonitor.OnCharacterUpdated += CharacterMonitorOnOnCharacterUpdated;
             _config.ConfigurationChanged += ConfigOnConfigurationChanged;
-            _framework.Update += FrameworkOnUpdate; 
+            _framework.Update += FrameworkOnUpdate;
 
             _inventoryMonitor.LoadExistingData(_config.GetSavedInventory());
             _characterMonitor.LoadExistingRetainers(_config.GetSavedRetainers());
-            
+
             _gameUi.WatchWindowState(GameUi.WindowName.RetainerGrid0);
             _gameUi.WatchWindowState(GameUi.WindowName.InventoryGrid0E);
             _gameUi.WatchWindowState(GameUi.WindowName.RetainerList);
@@ -67,7 +72,7 @@ namespace InventoryTools
             _gameUi.WatchWindowState(GameUi.WindowName.InventoryBuddy);
             _gameUi.WatchWindowState(GameUi.WindowName.InventoryBuddy2);
             _gameUi.UiVisibilityChanged += GameUiOnUiVisibilityChanged;
-            
+
             LoadExistingData(_config.GetSavedFilters());
             if (_config.FirstRun)
             {
@@ -76,6 +81,9 @@ namespace InventoryTools
             }
 
             WatchFilterChanges();
+
+            this._commonBase = new XivCommonBase(Hooks.Tooltips);
+            this._commonBase.Functions.Tooltips.OnItemTooltip += this.OnItemTooltip;
         }
 
         private void FrameworkOnUpdate(Framework framework)
@@ -99,15 +107,15 @@ namespace InventoryTools
 
         private void WatchFilterChanges()
         {
-            foreach(var filterConfiguration in _filterConfigurations)
+            foreach (var filterConfiguration in _filterConfigurations)
             {
                 filterConfiguration.ConfigurationChanged += FilterConfigurationOnConfigurationChanged;
             }
         }
-        
+
         private void UnwatchFilterChanges()
         {
-            foreach(var filterConfiguration in _filterConfigurations)
+            foreach (var filterConfiguration in _filterConfigurations)
             {
                 filterConfiguration.ConfigurationChanged -= FilterConfigurationOnConfigurationChanged;
             }
@@ -234,12 +242,12 @@ namespace InventoryTools
             allItemsFilter.SourceAllCharacters = true;
             allItemsFilter.SourceAllRetainers = true;
             _filterConfigurations.Add(allItemsFilter);
-            
+
             var retainerItemsFilter = new FilterConfiguration("Retainers", "RetainerItemsFilter", FilterType.SearchFilter);
             retainerItemsFilter.DisplayInTabs = true;
             retainerItemsFilter.SourceAllRetainers = true;
             _filterConfigurations.Add(retainerItemsFilter);
-            
+
             var playerItemsFilter = new FilterConfiguration("Player", "PlayerItemsFilter", FilterType.SearchFilter);
             playerItemsFilter.DisplayInTabs = true;
             playerItemsFilter.SourceAllCharacters = true;
@@ -320,7 +328,7 @@ namespace InventoryTools
                 }
             }
         }
-        
+
         public string GetCharacterName(ulong characterId)
         {
             if (_characterMonitor.Characters.ContainsKey(characterId))
@@ -338,7 +346,7 @@ namespace InventoryTools
             }
             return 0;
         }
-        
+
         public bool DisableActiveUiFilter()
         {
             PluginLog.Verbose("PluginLogic: Disabling active ui filter");
@@ -346,7 +354,7 @@ namespace InventoryTools
             ToggleHighlights();
             return true;
         }
-        
+
         public bool DisableActiveBackgroundFilter()
         {
             PluginLog.Verbose("PluginLogic: Disabling active background filter");
@@ -374,7 +382,7 @@ namespace InventoryTools
 
             return false;
         }
-        
+
         public bool ToggleActiveBackgroundFilterByKey(string filterKey)
         {
             PluginLog.Verbose("PluginLogic: Switching active background filter");
@@ -394,8 +402,8 @@ namespace InventoryTools
 
             return false;
         }
-        
-        
+
+
         public bool ToggleActiveUiFilterByName(string filterName)
         {
             PluginLog.Verbose("PluginLogic: Switching active ui filter");
@@ -415,7 +423,7 @@ namespace InventoryTools
 
             return false;
         }
-        
+
         public bool ToggleActiveBackgroundFilterByName(string filterName)
         {
             PluginLog.Verbose("PluginLogic: Switching active background filter");
@@ -437,7 +445,7 @@ namespace InventoryTools
             _chatGui.Print("Failed to find filter with name: " + filterName);
             return false;
         }
-        
+
         private void GameUiOnUiVisibilityChanged(GameUi.WindowName windowName, bool isWindowVisible)
         {
             if (isWindowVisible)
@@ -445,7 +453,7 @@ namespace InventoryTools
                 ToggleHighlights();
             }
         }
-        
+
         private void CharacterMonitorOnOnActiveCharacterChanged(ulong retainerId)
         {
             PluginLog.Debug("Retainer changed.");
@@ -492,7 +500,7 @@ namespace InventoryTools
             inventoryGrid1?.ClearColors();
             inventoryGrid2?.ClearColors();
             inventoryGrid3?.ClearColors();
-            
+
             var smallInventoryGrid0 = _gameUi.GetNormalInventoryGrid(0);
             var smallInventoryGrid1 = _gameUi.GetNormalInventoryGrid(1);
             var smallInventoryGrid2 = _gameUi.GetNormalInventoryGrid(2);
@@ -501,7 +509,7 @@ namespace InventoryTools
             smallInventoryGrid1?.ClearColors();
             smallInventoryGrid2?.ClearColors();
             smallInventoryGrid3?.ClearColors();
-            
+
             var largeInventoryGrid0 = _gameUi.GetLargeInventoryGrid(0);
             var largeInventoryGrid1 = _gameUi.GetLargeInventoryGrid(1);
             var largeInventoryGrid2 = _gameUi.GetLargeInventoryGrid(2);
@@ -543,7 +551,7 @@ namespace InventoryTools
             saddleBag?.ClearColors();
             var saddleBag2 = _gameUi.GetChocoboSaddlebag2();
             saddleBag2?.ClearColors();
-            
+
             var retainerList = _gameUi.GetRetainerList();
             retainerList?.ClearColors();
         }
@@ -683,7 +691,7 @@ namespace InventoryTools
                     }
                 }
             }
-            
+
             var largeInventoryGrid0 = _gameUi.GetLargeInventoryGrid(0);
             var largeInventoryGrid1 = _gameUi.GetLargeInventoryGrid(1);
             var largeInventoryGrid2 = _gameUi.GetLargeInventoryGrid(2);
@@ -798,8 +806,8 @@ namespace InventoryTools
                         }
                     }
                 }
-                
-                
+
+
                 var retainerInventoryGrid0 = _gameUi.GetNormalRetainerInventoryGrid(0);
                 var retainerInventoryGrid1 = _gameUi.GetNormalRetainerInventoryGrid(1);
                 var retainerInventoryGrid2 = _gameUi.GetNormalRetainerInventoryGrid(2);
@@ -874,8 +882,8 @@ namespace InventoryTools
                     }
                 }
             }
-            
-            
+
+
             var saddleBagUi = _gameUi.GetChocoboSaddlebag() ?? _gameUi.GetChocoboSaddlebag2();
             if (saddleBagUi != null)
             {
@@ -928,7 +936,7 @@ namespace InventoryTools
                     }
                 }
             }
-            
+
             var retainerList = _gameUi.GetRetainerList();
             var currentCharacterId = _clientState.LocalContentId;
             if (retainerList != null)
@@ -969,7 +977,80 @@ namespace InventoryTools
                 }
             }
         }
-        
+
+
+
+        private void OnItemTooltip(ItemTooltip tooltip, ulong itemId)
+        {
+            if (!tooltip.Fields.HasFlag(ItemTooltipFields.Description))
+            {
+                return;
+            }
+
+            if (itemId > 2_000_000)
+            {
+                return;
+            }
+
+            if (itemId > 1_000_000)
+            {
+                itemId -= 1_000_000;
+            }
+
+            var item = Service.Data.GetExcelSheet<Item>().GetRow((uint)itemId);
+            if (item == null)
+            {
+                return;
+            }
+
+            var description = tooltip[ItemTooltipString.Description];
+            const string indentation = "      ";
+
+
+            description += "\n\n";
+            description += "[InventoryTools]\n";
+
+            {
+                var ownedItems = InventoryMonitor.AllItems.Where(item => item.ItemId == itemId).ToList();
+                uint storageCount = 0;
+                List<string> locations = new List<string>();
+                foreach (var oItem in ownedItems)
+                {
+                    storageCount += oItem.Quantity;
+                    locations.Add(oItem.FormattedBagLocation);
+                }
+
+
+                if (storageCount > 0)
+                {
+                    description += $"Owned: {storageCount}\n";
+                    description += $"Locations:\n";
+                    foreach (var location in locations)
+                    {
+                        description += $"{indentation}{location}\n";
+                    }
+                }
+            }
+
+            {
+                var marketData = Universalis.GetMarketBoardData((uint)itemId);
+                if (marketData != null)
+                {
+                    description += "Market Board Data:\n";
+
+
+                    // no \t support?!
+                    description += $"{indentation}Max Price:              {marketData.maxPrice}\n";
+                    description += $"{indentation}Average:                 {marketData.averagePrice}\n";
+                    description += $"{indentation}Current Average:  {marketData.currentAveragePrice}\n";
+                    description += $"{indentation}Min Price:               {marketData.minPrice}\n";
+                }
+            }
+
+            tooltip[ItemTooltipString.Description] = description;
+        }
+
+
         public void Dispose()
         {
             foreach (var filterTables in _filterTables)
@@ -982,13 +1063,15 @@ namespace InventoryTools
             DisableHighlights();
             _config.FilterConfigurations = FilterConfigurations;
             _config.SavedCharacters = _characterMonitor.Characters;
-            _framework.Update -= FrameworkOnUpdate; 
+            _framework.Update -= FrameworkOnUpdate;
             _inventoryMonitor.OnInventoryChanged -= InventoryMonitorOnOnInventoryChanged;
             _characterMonitor.OnActiveRetainerChanged -= CharacterMonitorOnOnActiveCharacterChanged;
             _characterMonitor.OnCharacterUpdated -= CharacterMonitorOnOnCharacterUpdated;
             _config.ConfigurationChanged -= ConfigOnConfigurationChanged;
             _gameUi.UiVisibilityChanged -= GameUiOnUiVisibilityChanged;
-            
+
+            _commonBase.Functions.Tooltips.OnItemTooltip -= this.OnItemTooltip;
+            _commonBase.Dispose();
         }
     }
 }
