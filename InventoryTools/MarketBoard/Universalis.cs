@@ -85,8 +85,14 @@ namespace InventoryTools.MarketBoard
                                     double sumPricePerUnit = 0;
                                     for (int i = 0; i < listings.Count && i < 10; i++)
                                     {
+                                        var pricePerUnit = listings[i].pricePerUnit;
+                                        if (pricePerUnit > (sumPricePerUnit / counter) * 10)
+                                        {
+                                            continue;
+                                        }
+
                                         counter++;
-                                        sumPricePerUnit += listings[i].pricePerUnit;
+                                        sumPricePerUnit += pricePerUnit;
                                     }
 
                                     listing.calculcatedPrice = sumPricePerUnit / counter;
