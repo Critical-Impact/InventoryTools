@@ -17,6 +17,7 @@ using Dalamud.Logging;
 using Dalamud.Plugin;
 using DalamudPluginProjectTemplate.Attributes;
 using FFXIVClientInterface;
+using InventoryTools.MarketBoard;
 using InventoryTools.Resolvers;
 using InventoryTools.Structs;
 using Newtonsoft.Json;
@@ -55,6 +56,8 @@ namespace InventoryTools
         public InventoryToolsPlugin(DalamudPluginInterface pluginInterface, DataManager dataManager, SigScanner sigScanner, ClientState clientState, GameNetwork gameNetwork, Framework framework, CommandManager commandManager, ChatGui chatGui)
         {
             PluginInterface = pluginInterface;
+            PluginInterface.Create<Service>();
+
             _config = this.Load(pluginInterface) ?? new InventoryToolsConfiguration();
             Config.Initialize(this.PluginInterface);
             _commandManager = new PluginCommandManager<InventoryToolsPlugin>(this, commandManager);
@@ -135,7 +138,7 @@ namespace InventoryTools
             OdrScanner.Dispose();
             Config.Save();
             ExcelCache.Destroy();
-            PluginInterface.Dispose();
+            Universalis.Dispose();
         }
 
         public void Dispose()
