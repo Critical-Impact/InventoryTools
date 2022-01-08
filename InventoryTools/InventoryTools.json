@@ -5,7 +5,7 @@
   "Description": "Adds in a window that allows for the searching and filtering of specific items across inventories. Adds visualisation in game to see where your items should go.",
   "Tags": ["Inventory", "Sorting", "Filtering"],
   "InternalName": "InventoryTools",
-  "AssemblyVersion": "1.0.0.7",
+  "AssemblyVersion": "1.0.0.8",
   "RepoUrl": "https://github.com/Critical-Impact/InventoryTools",
   "ApplicableVersion": "any",
   "DalamudApiLevel": 5,

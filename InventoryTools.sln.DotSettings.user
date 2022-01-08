@@ -11,6 +11,7 @@
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;&#xD;
   &lt;Assembly Path="C:\Users\Blair\RiderProjects\InventoryTools\InventoryTools\bin\Debug\net472\LPL\InventoryTools.dll" /&gt;&#xD;
   &lt;Assembly Path="C:\Users\Blair\AppData\Roaming\XIVLauncher\addon\Hooks\dev\FFXIVClientStructs.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Users\Blair\AppData\Roaming\XIVLauncher\addon\Hooks\dev\Dalamud.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String>
 	
 	

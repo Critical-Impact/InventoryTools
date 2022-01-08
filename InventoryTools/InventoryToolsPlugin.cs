@@ -73,7 +73,7 @@ namespace InventoryTools
             PluginLogic = new PluginLogic(Config, clientState, InventoryMonitor, CharacterMonitor, GameUi, chatGui, framework);
             _ui = new InventoryToolsUi(pluginInterface,PluginLogic, InventoryMonitor, CharacterMonitor, Config, clientState, GameUi);
         }
-
+        
         [Command("/inventorytools")]
         [HelpMessage("Shows the inventory tools window.")]
         public void ShowHideInventoryToolsCommand(string command, string args)
