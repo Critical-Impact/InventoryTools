@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -77,6 +78,20 @@ namespace InventoryTools.MarketBoard
 
                             if (listing != null)
                             {
+                                if (listing.listings != null && listing.listings.Length > 0)
+                                {
+                                    var listings = new List<Listing>(listing.listings).OrderBy(item => item.pricePerUnit).ToList();
+                                    int counter = 0;
+                                    double sumPricePerUnit = 0;
+                                    for (int i = 0; i < listings.Count && i < 10; i++)
+                                    {
+                                        counter++;
+                                        sumPricePerUnit += listings[i].pricePerUnit;
+                                    }
+
+                                    listing.calculcatedPrice = sumPricePerUnit / counter;
+                                }
+
                                 Cache[itemId] = listing;
                             }
 
@@ -124,6 +139,9 @@ namespace InventoryTools.MarketBoard
         public Stacksizehistogramnq stackSizeHistogramNQ { get; set; }
         public Stacksizehistogramhq stackSizeHistogramHQ { get; set; }
         public string worldName { get; set; }
+
+        [JsonIgnore]
+        public double calculcatedPrice { get; set; }
     }
 
     public class Stacksizehistogram

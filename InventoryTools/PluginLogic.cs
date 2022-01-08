@@ -1038,12 +1038,15 @@ namespace InventoryTools
                 {
                     description += "Market Board Data:\n";
 
-
                     // no \t support?!
+                    description += $"{indentation}Calc Price: {marketData.calculcatedPrice}\n";
+
+#if false // not really needed
                     description += $"{indentation}Max Price:              {marketData.maxPrice}\n";
                     description += $"{indentation}Average:                 {marketData.averagePrice}\n";
                     description += $"{indentation}Current Average:  {marketData.currentAveragePrice}\n";
                     description += $"{indentation}Min Price:               {marketData.minPrice}\n";
+#endif
                 }
             }
 

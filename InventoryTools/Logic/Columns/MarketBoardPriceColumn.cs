@@ -11,7 +11,7 @@ namespace InventoryTools.Logic
 {
     public class MarketBoardPriceColumn : IColumn
     {
-        public string Name { get; set; } = "MB Current Average Price";
+        public string Name { get; set; } = "MB Calc Price";
         public float Width { get; set; } = 250.0f;
         public string FilterText { get; set; } = "";
 
@@ -22,7 +22,7 @@ namespace InventoryTools.Logic
             var marketBoardData = Universalis.GetMarketBoardData(item);
             if (marketBoardData != null)
             {
-                return $"{marketBoardData.currentAveragePrice}";
+                return $"{marketBoardData.calculcatedPrice}";
             }
 
             return LOADING;
