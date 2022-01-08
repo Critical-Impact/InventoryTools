@@ -15,33 +15,33 @@ namespace InventoryTools.MarketBoard
     internal class Universalis
     {
         private static SerialQueue taskQueue = new SerialQueue();
-        private static Dictionary<InventoryItem, Rootobject> Cache = new Dictionary<InventoryItem, Rootobject>();
+        private static Dictionary<uint, Rootobject> Cache = new Dictionary<uint, Rootobject>();
 
         internal static void Dispose()
         {
             taskQueue.Dispose();
         }
-
-        internal static Rootobject GetMarketBoardData(InventoryItem item, string datacenter)
+        internal static Rootobject GetMarketBoardData(InventoryItem item)
         {
-            if (item == null)
+            return GetMarketBoardData(item.ItemId);
+        }
+
+        internal static Rootobject GetMarketBoardData(uint itemId)
+        {
+            if (Cache.ContainsKey(itemId))
             {
-                return new Rootobject();
+                return Cache[itemId];
             }
 
 
-            if (Cache.ContainsKey(item))
-            {
-                return Cache[item];
-            }
+            Cache[itemId] = null;
 
 
-            Cache[item] = null;
-
+            string datacenter = Service.ClientState.LocalPlayer.CurrentWorld.GameData.Name.RawString;
 
             taskQueue.DispatchAsync(() =>
                 {
-                    string url = $"https://universalis.app/api/{datacenter}/{item.ItemId}";
+                    string url = $"https://universalis.app/api/{datacenter}/{itemId}";
                     PluginLog.LogVerbose(url);
 
                     HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
@@ -77,7 +77,7 @@ namespace InventoryTools.MarketBoard
 
                             if (listing != null)
                             {
-                                Cache[item] = listing;
+                                Cache[itemId] = listing;
                             }
 
                             // Simple way to prevent too many requests

@@ -20,7 +20,10 @@ using FFXIVClientInterface;
 using InventoryTools.MarketBoard;
 using InventoryTools.Resolvers;
 using InventoryTools.Structs;
+using Lumina.Excel.GeneratedSheets;
 using Newtonsoft.Json;
+using XivCommon;
+using XivCommon.Functions.Tooltips;
 
 namespace InventoryTools
 {
@@ -39,7 +42,9 @@ namespace InventoryTools
         internal CharacterMonitor CharacterMonitor { get; private set; }
         internal PluginLogic PluginLogic { get; private set; }
         internal GameUi GameUi { get; private set; }
-        
+
+        internal XivCommonBase CommonBase { get; private set; }
+
         public InventoryToolsConfiguration Config => _config;
         
         public InventoryToolsConfiguration Load(DalamudPluginInterface pluginInterface)
@@ -72,6 +77,10 @@ namespace InventoryTools
             InventoryMonitor = new InventoryMonitor(ClientInterface, clientState, OdrScanner, CharacterMonitor, GameUi, gameNetwork, framework);
             PluginLogic = new PluginLogic(Config, clientState, InventoryMonitor, CharacterMonitor, GameUi, chatGui, framework);
             _ui = new InventoryToolsUi(pluginInterface,PluginLogic, InventoryMonitor, CharacterMonitor, Config, clientState, GameUi);
+
+
+            this.CommonBase = new XivCommonBase(Hooks.Tooltips);
+            this.CommonBase.Functions.Tooltips.OnItemTooltip += this.OnItemTooltip;
         }
         
         [Command("/inventorytools")]
@@ -122,6 +131,53 @@ namespace InventoryTools
             PluginLogic.ToggleActiveBackgroundFilterByName(args);
         }
 
+        private void OnItemTooltip(ItemTooltip tooltip, ulong itemId)
+        {
+            if (!tooltip.Fields.HasFlag(ItemTooltipFields.Description))
+            {
+                return;
+            }
+
+            if (itemId > 2_000_000)
+            {
+                return;
+            }
+
+            if (itemId > 1_000_000)
+            {
+                itemId -= 1_000_000;
+            }
+
+            var item = Service.Data.GetExcelSheet<Item>().GetRow((uint)itemId);
+            if (item == null)
+            {
+                return;
+            }
+
+            var description = tooltip[ItemTooltipString.Description];
+
+            var marketData = Universalis.GetMarketBoardData((uint)itemId);
+            if (marketData != null)
+            {
+                string indentation = "      ";
+                description += "\n\n";
+                description += "Market Board Data:\n";
+
+
+                // no \t support?!
+                description += $"{indentation}Max Price:              {marketData.maxPrice}\n";
+                description += $"{indentation}Average:                 {marketData.averagePrice}\n";
+                description += $"{indentation}Current Average:  {marketData.currentAveragePrice}\n";
+                description += $"{indentation}Min Price:               {marketData.minPrice}\n";
+
+
+                description += "\n\n";
+            }
+
+            tooltip[ItemTooltipString.Description] = description;
+        }
+
+
         #region IDisposable Support
 
         protected virtual void Dispose(bool disposing)
@@ -139,6 +195,9 @@ namespace InventoryTools
             Config.Save();
             ExcelCache.Destroy();
             Universalis.Dispose();
+
+            this.CommonBase.Functions.Tooltips.OnItemTooltip -= this.OnItemTooltip;
+            this.CommonBase.Dispose();
         }
 
         public void Dispose()

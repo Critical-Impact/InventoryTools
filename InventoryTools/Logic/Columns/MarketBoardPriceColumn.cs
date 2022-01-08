@@ -19,7 +19,7 @@ namespace InventoryTools.Logic
 
         private string Value(InventoryItem item)
         {
-            var marketBoardData = Universalis.GetMarketBoardData(item, Service.ClientState.LocalPlayer.CurrentWorld.GameData.Name.RawString);
+            var marketBoardData = Universalis.GetMarketBoardData(item);
             if (marketBoardData != null)
             {
                 return $"{marketBoardData.currentAveragePrice}";
