@@ -28,6 +28,20 @@ namespace InventoryTools.Logic
             return LOADING;
         }
 
+        private double ValueDouble(InventoryItem item)
+        {
+            var value = Value(item);
+            double num;
+            if (double.TryParse(value, out num))
+            {
+                return num;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
         public IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items)
         {
             return FilterText == "" ? items : items.Where(c => Value(c).ToLower().PassesFilter(FilterText.ToLower()));
@@ -40,12 +54,12 @@ namespace InventoryTools.Logic
 
         public IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => Value(c)) : items.OrderByDescending(c => Value(c));
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => ValueDouble(c)) : items.OrderByDescending(c => ValueDouble(c));
         }
 
         public IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => Value(c.InventoryItem)) : items.OrderByDescending(c => Value(c.InventoryItem));
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => ValueDouble(c.InventoryItem)) : items.OrderByDescending(c => ValueDouble(c.InventoryItem));
         }
 
         public void Draw(InventoryItem item)
