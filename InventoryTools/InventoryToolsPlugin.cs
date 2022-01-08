@@ -62,11 +62,11 @@ namespace InventoryTools
             ExcelCache.Initialise(dataManager);
             GameInterface = new GameInterface(sigScanner);
             ClientInterface = new ClientInterface(sigScanner, dataManager);
-            NetworkMonitor = new NetworkMonitor(gameNetwork);
-            CharacterMonitor = new CharacterMonitor(gameNetwork,ClientInterface, framework, clientState);
+            NetworkMonitor = new NetworkMonitor(gameNetwork, dataManager);
+            CharacterMonitor = new CharacterMonitor(gameNetwork,ClientInterface, framework, clientState, dataManager);
             OdrScanner = new OdrScanner(clientState, CharacterMonitor);
             GameUi = new GameUi(sigScanner, framework);
-            InventoryMonitor = new InventoryMonitor(ClientInterface, clientState, OdrScanner, CharacterMonitor, GameUi, gameNetwork, framework);
+            InventoryMonitor = new InventoryMonitor(ClientInterface, clientState, OdrScanner, CharacterMonitor, GameUi, gameNetwork, framework, dataManager);
             PluginLogic = new PluginLogic(Config, clientState, InventoryMonitor, CharacterMonitor, GameUi, chatGui, framework);
             _ui = new InventoryToolsUi(pluginInterface,PluginLogic, InventoryMonitor, CharacterMonitor, Config, clientState, GameUi);
         }
