@@ -16,6 +16,7 @@ namespace InventoryTools.MarketBoard
     internal class Universalis
     {
         private static SerialQueue taskQueue = new SerialQueue();
+        private static List<IDisposable> disposables = new List<IDisposable>();
         private static Dictionary<uint, Rootobject> Cache = new Dictionary<uint, Rootobject>();
 
         internal static void Dispose()
@@ -24,6 +25,11 @@ namespace InventoryTools.MarketBoard
         }
         internal static Rootobject GetMarketBoardData(InventoryItem item)
         {
+            if (!item.CanBeBought)
+            {
+                return new Rootobject();
+            }
+
             return GetMarketBoardData(item.ItemId);
         }
 
@@ -31,6 +37,11 @@ namespace InventoryTools.MarketBoard
         {
             if (Cache.ContainsKey(itemId))
             {
+                if (Cache[itemId] == null)
+                {
+                    CheckQueue();
+                }
+
                 return Cache[itemId];
             }
 
@@ -40,7 +51,7 @@ namespace InventoryTools.MarketBoard
 
             string datacenter = Service.ClientState.LocalPlayer.CurrentWorld.GameData.Name.RawString;
 
-            taskQueue.DispatchAsync(() =>
+            var dispatch = taskQueue.DispatchAsync(() =>
                 {
                     string url = $"https://universalis.app/api/{datacenter}/{itemId}";
                     PluginLog.LogVerbose(url);
@@ -95,7 +106,7 @@ namespace InventoryTools.MarketBoard
                                         sumPricePerUnit += pricePerUnit;
                                     }
 
-                                    listing.calculcatedPrice = sumPricePerUnit / counter;
+                                    listing.calculcatedPrice = (sumPricePerUnit / counter).ToString("0.00");
                                 }
 
                                 Cache[itemId] = listing;
@@ -111,11 +122,32 @@ namespace InventoryTools.MarketBoard
                     }
 
                 });
+            disposables.Add(dispatch);
 
 
             return null;
         }
 
+        private static void CheckQueue()
+        {
+            Task checkTask = new Task(async () =>
+                {
+                    await Universalis.taskQueue;
+
+                });
+            checkTask.ContinueWith(task =>
+            {
+                foreach (var item in Universalis.Cache)
+                {
+                    if (item.Value == null)
+                    {
+                        Universalis.Cache.Remove(item.Key);
+                        GetMarketBoardData(item.Key);
+                    }
+                } 
+            });
+
+        }
     }
 
 
@@ -147,7 +179,7 @@ namespace InventoryTools.MarketBoard
         public string worldName { get; set; }
 
         [JsonIgnore]
-        public double calculcatedPrice { get; set; }
+        public string calculcatedPrice { get; set; } = "0";
     }
 
     public class Stacksizehistogram

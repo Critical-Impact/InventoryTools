@@ -75,7 +75,8 @@ namespace InventoryTools.Logic
             var marketBoardData = Value(item.InventoryItem);
             if (marketBoardData != LOADING)
             {
-                ImGui.TextColored(item.InventoryItem.ItemColour, $"{marketBoardData}");
+                
+                ImGui.TextColored(item.InventoryItem.CanBeBought ? item.InventoryItem.ItemColour : ImGuiColors.DalamudRed, $"{marketBoardData}");
             }
             else
             {
