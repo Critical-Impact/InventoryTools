@@ -1034,13 +1034,15 @@ namespace InventoryTools
                 }
 
                 {
-                    var marketData = Cache.GetData((uint)itemId);
-                    if (marketData != null)
+                    if (!ExcelCache.GetItem((uint)itemId).IsUntradable)
                     {
-                        description += "Market Board Data:\n";
+                        var marketData = Cache.GetData((uint)itemId);
+                        if (marketData != null)
+                        {
+                            description += "Market Board Data:\n";
 
-                        // no \t support?!
-                        description += $"{indentation}Calc Price: {marketData.calculcatedPrice}\n";
+                            // no \t support?!
+                            description += $"{indentation}Calc Price: {marketData.calculcatedPrice}\n";
 
 #if false // not really needed
                     description += $"{indentation}Max Price:              {marketData.maxPrice}\n";
@@ -1048,6 +1050,7 @@ namespace InventoryTools
                     description += $"{indentation}Current Average:  {marketData.currentAveragePrice}\n";
                     description += $"{indentation}Min Price:               {marketData.minPrice}\n";
 #endif
+                        }
                     }
                 }
             }

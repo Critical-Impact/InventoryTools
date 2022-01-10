@@ -16,9 +16,15 @@ namespace InventoryTools.Logic
         public string FilterText { get; set; } = "";
 
         private static readonly string LOADING = "loading...";
+        private static readonly string UNTRADABLE = "untradable";
 
         private string Value(InventoryItem item)
         {
+            if (item.Item.IsUntradable)
+            {
+                return UNTRADABLE;
+            }
+
             var marketBoardData = Cache.GetData(item.ItemId);
             if (marketBoardData != null)
             {
@@ -76,7 +82,7 @@ namespace InventoryTools.Logic
             if (marketBoardData != LOADING)
             {
                 
-                ImGui.TextColored(marketBoardData != "0" ? item.InventoryItem.ItemColour : ImGuiColors.DalamudRed, $"{marketBoardData}");
+                ImGui.TextColored(marketBoardData != UNTRADABLE ? item.InventoryItem.ItemColour : ImGuiColors.DalamudRed, $"{marketBoardData}");
             }
             else
             {

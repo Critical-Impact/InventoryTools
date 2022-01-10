@@ -1,4 +1,5 @@
-﻿using Dalamud.Logging;
+﻿using CriticalCommonLib.Services;
+using Dalamud.Logging;
 using InventoryTools.Resolvers;
 using Newtonsoft.Json;
 using System;
@@ -119,6 +120,11 @@ namespace InventoryTools.MarketBoard
             if (!fromCheck)
             {
                 CheckCache();
+            }
+
+            if (ExcelCache.GetItem(itemID).IsUntradable)
+            {
+                return new Rootobject();
             }
 
             if (!fromCheck && MBCache.ContainsKey(itemID))
