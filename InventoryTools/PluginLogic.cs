@@ -1006,40 +1006,41 @@ namespace InventoryTools
             var description = tooltip[ItemTooltipString.Description];
             const string indentation = "      ";
 
-
-            description += "\n\n";
-            description += "[InventoryTools]\n";
-
+            if (_config.DisplayTooltip)
             {
-                var ownedItems = InventoryMonitor.AllItems.Where(item => item.ItemId == itemId).ToList();
-                uint storageCount = 0;
-                List<string> locations = new List<string>();
-                foreach (var oItem in ownedItems)
-                {
-                    storageCount += oItem.Quantity;
-                    locations.Add(oItem.FormattedBagLocation);
-                }
+                description += "\n\n";
+                description += "[InventoryTools]\n";
 
-
-                if (storageCount > 0)
                 {
-                    description += $"Owned: {storageCount}\n";
-                    description += $"Locations:\n";
-                    foreach (var location in locations)
+                    var ownedItems = InventoryMonitor.AllItems.Where(item => item.ItemId == itemId).ToList();
+                    uint storageCount = 0;
+                    List<string> locations = new List<string>();
+                    foreach (var oItem in ownedItems)
                     {
-                        description += $"{indentation}{location}\n";
+                        storageCount += oItem.Quantity;
+                        locations.Add(oItem.FormattedBagLocation);
+                    }
+
+
+                    if (storageCount > 0)
+                    {
+                        description += $"Owned: {storageCount}\n";
+                        description += $"Locations:\n";
+                        foreach (var location in locations)
+                        {
+                            description += $"{indentation}{location}\n";
+                        }
                     }
                 }
-            }
 
-            {
-                var marketData = Universalis.GetMarketBoardData((uint)itemId);
-                if (marketData != null)
                 {
-                    description += "Market Board Data:\n";
+                    var marketData = Cache.GetData((uint)itemId);
+                    if (marketData != null)
+                    {
+                        description += "Market Board Data:\n";
 
-                    // no \t support?!
-                    description += $"{indentation}Calc Price: {marketData.calculcatedPrice}\n";
+                        // no \t support?!
+                        description += $"{indentation}Calc Price: {marketData.calculcatedPrice}\n";
 
 #if false // not really needed
                     description += $"{indentation}Max Price:              {marketData.maxPrice}\n";
@@ -1047,6 +1048,7 @@ namespace InventoryTools
                     description += $"{indentation}Current Average:  {marketData.currentAveragePrice}\n";
                     description += $"{indentation}Min Price:               {marketData.minPrice}\n";
 #endif
+                    }
                 }
             }
 

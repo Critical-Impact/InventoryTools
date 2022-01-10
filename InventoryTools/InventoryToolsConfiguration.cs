@@ -52,7 +52,17 @@ namespace InventoryTools
                 ConfigurationChanged?.Invoke();
             }
         }
-
+        
+        public bool DisplayTooltip
+        {
+            get => _displayTooltip;
+            set
+            {
+                _displayTooltip = value;
+                ConfigurationChanged?.Invoke();
+            }
+        }
+        
         public bool ColorRetainerList
         {
             get => _colorRetainerList;
@@ -117,6 +127,7 @@ namespace InventoryTools
         private bool _displayCrossCharacter = true;
         private bool _colorRetainerList = true;
         private bool _showItemNumberRetainerList = true;
+        private bool _displayTooltip = true;
 
         public void Initialize(DalamudPluginInterface pluginInterface)
         {

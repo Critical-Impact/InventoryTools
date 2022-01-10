@@ -75,6 +75,8 @@ namespace InventoryTools
             InventoryMonitor = new InventoryMonitor(ClientInterface, clientState, OdrScanner, CharacterMonitor, GameUi, gameNetwork, framework);
             PluginLogic = new PluginLogic(Config, clientState, InventoryMonitor, CharacterMonitor, GameUi, chatGui, framework);
             _ui = new InventoryToolsUi(pluginInterface,PluginLogic, InventoryMonitor, CharacterMonitor, Config, clientState, GameUi);
+
+            Cache.LoadCache();
         }
         
         [Command("/inventorytools")]
@@ -142,6 +144,8 @@ namespace InventoryTools
             Config.Save();
             ExcelCache.Destroy();
             Universalis.Dispose();
+
+            Cache.StoreCache();
         }
 
         public void Dispose()

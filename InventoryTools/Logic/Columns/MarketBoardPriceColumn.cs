@@ -19,7 +19,7 @@ namespace InventoryTools.Logic
 
         private string Value(InventoryItem item)
         {
-            var marketBoardData = Universalis.GetMarketBoardData(item);
+            var marketBoardData = Cache.GetData(item.ItemId);
             if (marketBoardData != null)
             {
                 return $"{marketBoardData.calculcatedPrice}";
@@ -76,7 +76,7 @@ namespace InventoryTools.Logic
             if (marketBoardData != LOADING)
             {
                 
-                ImGui.TextColored(item.InventoryItem.CanBeBought ? item.InventoryItem.ItemColour : ImGuiColors.DalamudRed, $"{marketBoardData}");
+                ImGui.TextColored(marketBoardData != "0" ? item.InventoryItem.ItemColour : ImGuiColors.DalamudRed, $"{marketBoardData}");
             }
             else
             {

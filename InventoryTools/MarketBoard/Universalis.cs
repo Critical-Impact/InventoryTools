@@ -17,7 +17,7 @@ namespace InventoryTools.MarketBoard
     {
         private static SerialQueue taskQueue = new SerialQueue();
         private static List<IDisposable> disposables = new List<IDisposable>();
-        private static Dictionary<uint, Rootobject> Cache = new Dictionary<uint, Rootobject>();
+        
 
         internal static void Dispose()
         {
@@ -35,95 +35,83 @@ namespace InventoryTools.MarketBoard
 
         internal static Rootobject GetMarketBoardData(uint itemId)
         {
-            if (Cache.ContainsKey(itemId))
+            if (Service.ClientState != null && Service.ClientState.IsLoggedIn && Service.ClientState.LocalPlayer != null)
             {
-                if (Cache[itemId] == null)
-                {
-                    CheckQueue();
-                }
+                string datacenter = Service.ClientState.LocalPlayer.CurrentWorld.GameData.Name.RawString;
 
-                return Cache[itemId];
-            }
-
-
-            Cache[itemId] = null;
-
-
-            string datacenter = Service.ClientState.LocalPlayer.CurrentWorld.GameData.Name.RawString;
-
-            var dispatch = taskQueue.DispatchAsync(() =>
-                {
-                    string url = $"https://universalis.app/api/{datacenter}/{itemId}";
-                    PluginLog.LogVerbose(url);
-
-                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-                    request.AutomaticDecompression = DecompressionMethods.GZip;
-
-                    Rootobject listing = new Rootobject();
-
-                    using (WebResponse response = request.GetResponse())
+                var dispatch = taskQueue.DispatchAsync(() =>
                     {
-                        try
-                        {
-                            HttpWebResponse webresponse = (HttpWebResponse)response;
+                        string url = $"https://universalis.app/api/{datacenter}/{itemId}";
+                        PluginLog.LogVerbose(url);
 
-                            if (webresponse.StatusCode == HttpStatusCode.TooManyRequests)
+                        HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                        request.AutomaticDecompression = DecompressionMethods.GZip;
+
+                        Rootobject listing = new Rootobject();
+
+                        using (WebResponse response = request.GetResponse())
+                        {
+                            try
                             {
-                                PluginLog.Warning("Universalis: too many requests!");
+                                HttpWebResponse webresponse = (HttpWebResponse)response;
+
+                                if (webresponse.StatusCode == HttpStatusCode.TooManyRequests)
+                                {
+                                    PluginLog.Warning("Universalis: too many requests!");
                                 // sleep for 1 minute if too many requests
                                 Thread.Sleep(60000);
 
-                                request = (HttpWebRequest)WebRequest.Create(url);
-                                webresponse = (HttpWebResponse)request.GetResponse();
-                            }
-                            else
-                            {
-                                PluginLog.LogVerbose($"Universalis: {webresponse.StatusCode}");
-                            }
-
-                            var reader = new StreamReader(webresponse.GetResponseStream());
-                            var value = reader.ReadToEnd();
-                            PluginLog.LogVerbose(value);
-                            listing = JsonConvert.DeserializeObject<Rootobject>(value);
-
-
-                            if (listing != null)
-                            {
-                                if (listing.listings != null && listing.listings.Length > 0)
+                                    request = (HttpWebRequest)WebRequest.Create(url);
+                                    webresponse = (HttpWebResponse)request.GetResponse();
+                                }
+                                else
                                 {
-                                    var listings = new List<Listing>(listing.listings).OrderBy(item => item.pricePerUnit).ToList();
-                                    int counter = 0;
-                                    double sumPricePerUnit = 0;
-                                    for (int i = 0; i < listings.Count && i < 10; i++)
-                                    {
-                                        var pricePerUnit = listings[i].pricePerUnit;
-                                        if (pricePerUnit > (sumPricePerUnit / counter) * 10)
-                                        {
-                                            continue;
-                                        }
-
-                                        counter++;
-                                        sumPricePerUnit += pricePerUnit;
-                                    }
-
-                                    listing.calculcatedPrice = (sumPricePerUnit / counter).ToString("0.00");
+                                    PluginLog.LogVerbose($"Universalis: {webresponse.StatusCode}");
                                 }
 
-                                Cache[itemId] = listing;
-                            }
+                                var reader = new StreamReader(webresponse.GetResponseStream());
+                                var value = reader.ReadToEnd();
+                                PluginLog.LogVerbose(value);
+                                listing = JsonConvert.DeserializeObject<Rootobject>(value);
+
+
+                                if (listing != null)
+                                {
+                                    if (listing.listings != null && listing.listings.Length > 0)
+                                    {
+                                        var listings = new List<Listing>(listing.listings).OrderBy(item => item.pricePerUnit).ToList();
+                                        int counter = 0;
+                                        double sumPricePerUnit = 0;
+                                        for (int i = 0; i < listings.Count && i < 10; i++)
+                                        {
+                                            var pricePerUnit = listings[i].pricePerUnit;
+                                            if (pricePerUnit > (sumPricePerUnit / counter) * 10)
+                                            {
+                                                continue;
+                                            }
+
+                                            counter++;
+                                            sumPricePerUnit += pricePerUnit;
+                                        }
+
+                                        listing.calculcatedPrice = (sumPricePerUnit / counter).ToString("0.00");
+                                    }
+
+                                    Cache.UpdateEntry(itemId, listing);
+                                }
 
                             // Simple way to prevent too many requests
                             Thread.Sleep(500);
+                            }
+                            catch (Exception ex)
+                            {
+                                PluginLog.Debug(ex.ToString());
+                            }
                         }
-                        catch (Exception ex)
-                        {
-                            PluginLog.Debug(ex.ToString());
-                        }
-                    }
 
-                });
-            disposables.Add(dispatch);
-
+                    });
+                disposables.Add(dispatch);
+            }
 
             return null;
         }
@@ -137,14 +125,7 @@ namespace InventoryTools.MarketBoard
                 });
             checkTask.ContinueWith(task =>
             {
-                foreach (var item in Universalis.Cache)
-                {
-                    if (item.Value == null)
-                    {
-                        Universalis.Cache.Remove(item.Key);
-                        GetMarketBoardData(item.Key);
-                    }
-                } 
+                Cache.CheckCache();
             });
 
         }
@@ -177,8 +158,6 @@ namespace InventoryTools.MarketBoard
         public Stacksizehistogramnq stackSizeHistogramNQ { get; set; }
         public Stacksizehistogramhq stackSizeHistogramHQ { get; set; }
         public string worldName { get; set; }
-
-        [JsonIgnore]
         public string calculcatedPrice { get; set; } = "0";
     }
 
