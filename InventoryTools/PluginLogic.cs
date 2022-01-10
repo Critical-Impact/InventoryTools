@@ -1018,7 +1018,10 @@ namespace InventoryTools
                     foreach (var oItem in ownedItems)
                     {
                         storageCount += oItem.Quantity;
-                        locations.Add(oItem.FormattedBagLocation);
+                        var name = CharacterMonitor.Characters[oItem.RetainerId]?.Name ?? "Unknown";
+                        name = name.Trim().Length == 0 ? "Unknown" : name.Trim();
+
+                        locations.Add($"{name} - {oItem.FormattedBagLocation}");
                     }
 
 
