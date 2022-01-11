@@ -140,6 +140,7 @@ namespace InventoryTools
                     bool colorRetainerList = _configuration.ColorRetainerList;
                     bool showItemNumberRetainerList = _configuration.ShowItemNumberRetainerList;
                     bool displayCrossCharacter = _configuration.DisplayCrossCharacter;
+                    bool displayTooltip = _configuration.DisplayTooltip;
                     Vector3 highlightColor = _configuration.HighlightColor;
                     
                     if (ImGui.Checkbox("Show Filters Tab?", ref showMonitorTab))
@@ -220,6 +221,13 @@ namespace InventoryTools
                     ImGui.SameLine();
                     UiHelpers.HelpMarker(
                         "This is an experimental feature, should characters not currently logged in and their associated retainers be shown in filter configurations?");
+                    if (ImGui.Checkbox("Show Tooltip?", ref displayTooltip))
+                    {
+                        _configuration.DisplayTooltip = !_configuration.DisplayTooltip;
+                    }
+                    ImGui.SameLine();
+                    UiHelpers.HelpMarker(
+                        "This will display more information about an item in its description area.");
                 }
                 else if (_configuration.SelectedConfigurationPage == 1)
                 {

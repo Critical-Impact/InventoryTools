@@ -41,6 +41,8 @@
         <PackageReference Include="DalamudLinter" Version="1.0.3" />
         <PackageReference Include="DalamudPackager" Version="2.1.2" />
         <PackageReference Include="ILRepack" Version="2.1.0-beta1" />
+        <PackageReference Include="SerialQueue" Version="2.1.0" />
+        <PackageReference Include="XivCommon" Version="3.2.0" />
         <ProjectReference Include="..\CriticalCommonLib\CriticalCommonLib.csproj" />
         <Reference Include="Dalamud">
             <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>

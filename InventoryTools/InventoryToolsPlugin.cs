@@ -17,9 +17,13 @@ using Dalamud.Logging;
 using Dalamud.Plugin;
 using DalamudPluginProjectTemplate.Attributes;
 using FFXIVClientInterface;
+using InventoryTools.MarketBoard;
 using InventoryTools.Resolvers;
 using InventoryTools.Structs;
+using Lumina.Excel.GeneratedSheets;
 using Newtonsoft.Json;
+using XivCommon;
+using XivCommon.Functions.Tooltips;
 
 namespace InventoryTools
 {
@@ -38,7 +42,7 @@ namespace InventoryTools
         internal CharacterMonitor CharacterMonitor { get; private set; }
         internal PluginLogic PluginLogic { get; private set; }
         internal GameUi GameUi { get; private set; }
-        
+
         public InventoryToolsConfiguration Config => _config;
         
         public InventoryToolsConfiguration Load(DalamudPluginInterface pluginInterface)
@@ -55,6 +59,8 @@ namespace InventoryTools
         public InventoryToolsPlugin(DalamudPluginInterface pluginInterface, DataManager dataManager, SigScanner sigScanner, ClientState clientState, GameNetwork gameNetwork, Framework framework, CommandManager commandManager, ChatGui chatGui)
         {
             PluginInterface = pluginInterface;
+            PluginInterface.Create<Service>();
+
             _config = this.Load(pluginInterface) ?? new InventoryToolsConfiguration();
             Config.Initialize(this.PluginInterface);
             _commandManager = new PluginCommandManager<InventoryToolsPlugin>(this, commandManager);
@@ -69,6 +75,8 @@ namespace InventoryTools
             InventoryMonitor = new InventoryMonitor(ClientInterface, clientState, OdrScanner, CharacterMonitor, GameUi, gameNetwork, framework);
             PluginLogic = new PluginLogic(Config, clientState, InventoryMonitor, CharacterMonitor, GameUi, chatGui, framework);
             _ui = new InventoryToolsUi(pluginInterface,PluginLogic, InventoryMonitor, CharacterMonitor, Config, clientState, GameUi);
+
+            Cache.LoadCache();
         }
         
         [Command("/inventorytools")]
@@ -135,7 +143,9 @@ namespace InventoryTools
             OdrScanner.Dispose();
             Config.Save();
             ExcelCache.Destroy();
-            PluginInterface.Dispose();
+            Universalis.Dispose();
+
+            Cache.StoreCache();
         }
 
         public void Dispose()

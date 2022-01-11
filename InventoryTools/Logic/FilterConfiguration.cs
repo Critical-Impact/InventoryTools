@@ -104,6 +104,7 @@ namespace InventoryTools.Logic
                 table.AddColumn(new ItemILevelColumn());
                 table.AddColumn(new UiCategoryColumn());
                 table.AddColumn(new SearchCategoryColumn());
+                table.AddColumn(new MarketBoardPriceColumn());
                 table.ShowFilterRow = true;
             }
             else
@@ -117,6 +118,7 @@ namespace InventoryTools.Logic
                 table.AddColumn(new ItemILevelColumn());
                 table.AddColumn(new UiCategoryColumn());
                 table.AddColumn(new SearchCategoryColumn());
+                table.AddColumn(new MarketBoardPriceColumn());
                 table.ShowFilterRow = true;
             }
 
