@@ -76,7 +76,7 @@ namespace InventoryTools
             PluginLogic = new PluginLogic(Config, clientState, InventoryMonitor, CharacterMonitor, GameUi, chatGui, framework);
             _ui = new InventoryToolsUi(pluginInterface,PluginLogic, InventoryMonitor, CharacterMonitor, Config, clientState, GameUi);
 
-            Cache.LoadCache();
+            Cache.LoadCache(_config);
         }
         
         [Command("/inventorytools")]

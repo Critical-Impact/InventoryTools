@@ -79,24 +79,58 @@ namespace InventoryTools.MarketBoard
                                 {
                                     if (listing.listings != null && listing.listings.Length > 0)
                                     {
-                                        var listings = new List<Listing>(listing.listings).OrderBy(item => item.pricePerUnit).ToList();
+                                        var list = new List<Listing>(listing.listings);
+
+                                        var listings = list.OrderBy(item => item.pricePerUnit).ToList();
                                         int counter = 0;
+                                        int counterHQ = 0;
                                         double sumPricePerUnit = 0;
+                                        double sumPricePerUnitHQ = 0;
                                         for (int i = 0; i < listings.Count && i < 10; i++)
                                         {
-                                            var pricePerUnit = listings[i].pricePerUnit;
-                                            if (pricePerUnit > (sumPricePerUnit / counter) * 10)
+                                            if (listings[i].hq)
                                             {
-                                                continue;
-                                            }
+                                                var pricePerUnit = listings[i].pricePerUnit;
+                                                if (pricePerUnit > (sumPricePerUnitHQ / counterHQ) * 10)
+                                                {
+                                                    continue;
+                                                }
 
-                                            counter++;
-                                            sumPricePerUnit += pricePerUnit;
+                                                counterHQ++;
+                                                sumPricePerUnitHQ += pricePerUnit;
+                                            }
+                                            else
+                                            {
+                                                var pricePerUnit = listings[i].pricePerUnit;
+                                                if (pricePerUnit > (sumPricePerUnit / counter) * 10)
+                                                {
+                                                    continue;
+                                                }
+
+                                                counter++;
+                                                sumPricePerUnit += pricePerUnit;
+                                            }
                                         }
 
-                                        listing.calculcatedPrice = (sumPricePerUnit / counter).ToString("0.00");
-                                    }
+                                        if (counter != 0)
+                                        {
+                                            listing.calculcatedPrice = (sumPricePerUnit / counter).ToString("0.00");
+                                        }
+                                        else
+                                        {
+                                            listing.calculcatedPrice = "N/A";
+                                        }
 
+                                        if (counterHQ != 0)
+                                        {
+                                            listing.calculcatedPriceHQ = (sumPricePerUnitHQ / counterHQ).ToString("0.00");
+                                        }
+                                        else
+                                        {
+                                            listing.calculcatedPriceHQ = "N/A";
+                                        }
+                                    }
+                                    PluginLog.Verbose("Universalis: item updated");
                                     Cache.UpdateEntry(itemId, listing);
                                 }
 
@@ -134,31 +168,56 @@ namespace InventoryTools.MarketBoard
 
     public class Rootobject
     {
-        public int itemID { get; set; }
-        public int worldID { get; set; }
-        public long lastUploadTime { get; set; }
-        public Listing[] listings { get; set; }
-        public Recenthistory[] recentHistory { get; set; }
-        public float currentAveragePrice { get; set; }
-        public float currentAveragePriceNQ { get; set; }
-        public float currentAveragePriceHQ { get; set; }
-        public float regularSaleVelocity { get; set; }
-        public float nqSaleVelocity { get; set; }
-        public float hqSaleVelocity { get; set; }
-        public float averagePrice { get; set; }
-        public float averagePriceNQ { get; set; }
-        public float averagePriceHQ { get; set; }
-        public float minPrice { get; set; }
-        public float minPriceNQ { get; set; }
-        public float minPriceHQ { get; set; }
-        public float maxPrice { get; set; }
-        public float maxPriceNQ { get; set; }
-        public float maxPriceHQ { get; set; }
-        public Stacksizehistogram stackSizeHistogram { get; set; }
-        public Stacksizehistogramnq stackSizeHistogramNQ { get; set; }
-        public Stacksizehistogramhq stackSizeHistogramHQ { get; set; }
-        public string worldName { get; set; }
+        
+        public int itemID { internal get; set; }
+        
+        public int worldID { internal  get; set; }
+        
+        public long lastUploadTime { internal get; set; }
+        
+        public Listing[] listings { internal get; set; }
+        
+        public Recenthistory[] recentHistory { internal get; set; }
+        
+        public float currentAveragePrice { internal get; set; }
+        
+        public float currentAveragePriceNQ { internal get; set; }
+        
+        public float currentAveragePriceHQ { internal get; set; }
+        
+        public float regularSaleVelocity { internal get; set; }
+        
+        public float nqSaleVelocity { internal get; set; }
+        
+        public float hqSaleVelocity { internal get; set; }
+        
+        public float averagePrice { internal get; set; }
+        
+        public float averagePriceNQ { internal get; set; }
+        
+        public float averagePriceHQ { internal get; set; }
+        
+        public float minPrice { internal get; set; }
+        
+        public float minPriceNQ { internal get; set; }
+        
+        public float minPriceHQ { internal get; set; }
+        
+        public float maxPrice { internal get; set; }
+        
+        public float maxPriceNQ { internal get; set; }
+        
+        public float maxPriceHQ { internal get; set; }
+        
+        public Stacksizehistogram stackSizeHistogram { internal get; set; }
+        
+        public Stacksizehistogramnq stackSizeHistogramNQ { internal get; set; }
+        
+        public Stacksizehistogramhq stackSizeHistogramHQ { internal get; set; }
+        
+        public string worldName { internal get; set; }
         public string calculcatedPrice { get; set; } = "0";
+        public string calculcatedPriceHQ { get; set; } = "0";
     }
 
     public class Stacksizehistogram
@@ -178,21 +237,37 @@ namespace InventoryTools.MarketBoard
 
     public class Listing
     {
+        
         public int lastReviewTime { get; set; }
+        
         public int pricePerUnit { get; set; }
+        
         public int quantity { get; set; }
+        
         public int stainID { get; set; }
+        
         public string creatorName { get; set; }
+        
         public object creatorID { get; set; }
+        
         public bool hq { get; set; }
+        
         public bool isCrafted { get; set; }
+        
         public object listingID { get; set; }
+        
         public object[] materia { get; set; }
+        
         public bool onMannequin { get; set; }
+        
         public int retainerCity { get; set; }
+        
         public string retainerID { get; set; }
+        
         public string retainerName { get; set; }
+        
         public string sellerID { get; set; }
+        
         public int total { get; set; }
     }
 

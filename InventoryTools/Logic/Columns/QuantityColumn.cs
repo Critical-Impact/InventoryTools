@@ -39,7 +39,7 @@ namespace InventoryTools.Logic
             ImGui.Text(item.Quantity.ToString());
         }
 
-        public void Draw(SortingResult item)
+        public void Draw(SortingResult item, int rowIndex)
         {
             ImGui.TableNextColumn();
             ImGui.Text(item.Quantity.ToString());

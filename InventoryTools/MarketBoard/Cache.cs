@@ -6,10 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace InventoryTools.MarketBoard
 {
@@ -24,29 +21,32 @@ namespace InventoryTools.MarketBoard
     internal class Cache
     {
         private static readonly Dictionary<uint, CacheEntry> MBCache = new Dictionary<uint, CacheEntry>();
-        private static readonly TimeSpan MaxDiff = new TimeSpan(24, 0, 0);
         private static readonly Stopwatch StoreTimer = new();
         private static bool IsLoaded = false;
+        private static InventoryToolsConfiguration _configuration;
 
-        internal static void LoadCache()
+        internal static void LoadCache(InventoryToolsConfiguration configuration)
         {
             try
             {
                 var cacheFile = new FileInfo(Service.PluginInterface.ConfigDirectory.FullName + "/universalis.json");
                 string json = File.ReadAllText(cacheFile.FullName, Encoding.UTF8);
-
                 var oldCache = JsonConvert.DeserializeObject<Dictionary<uint, CacheEntry>>(json);
-                foreach (var item in oldCache)
-                {
-                    if (item.Value != null && item.Value.Data != null)
+                if (oldCache != null)
+                    foreach (var item in oldCache)
                     {
-                        MBCache[item.Key] = item.Value;
+                        if (item.Value != null && item.Value.Data != null)
+                        {
+                            MBCache[item.Key] = item.Value;
+                        }
                     }
-                }
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                PluginLog.Verbose("Error while parsing saved universalis data, " + e.Message);
             }
+
+            _configuration = configuration;
 
             IsLoaded = true;
         }
@@ -98,15 +98,15 @@ namespace InventoryTools.MarketBoard
                 if (item.Value == null || item.Value.Data == null)
                 {
                     PluginLog.Verbose($"{item} is null");
-                    GetData(item.Key, true);
+                    GetData(item.Key, fromCheck: true);
                 }
                 else
                 {
                     var now = DateTime.Now;
                     var diff = now - item.Value.LastUpdate;
-                    if (diff > MaxDiff)
+                    if (diff.TotalHours > _configuration.MarketRefreshTimeHours)
                     {
-                        GetData(item.Key, true);
+                        GetData(item.Key, fromCheck: true);
                     }
                 }
             }
@@ -115,9 +115,9 @@ namespace InventoryTools.MarketBoard
             CheckTimer.Restart();
         }
 
-        internal static Rootobject GetData(uint itemID, bool fromCheck = false)
+        internal static Rootobject GetData(uint itemID, bool fromCheck = false, bool forceCheck = false)
         {
-            if (!fromCheck)
+            if (!fromCheck && !forceCheck)
             {
                 CheckCache();
             }
@@ -127,19 +127,18 @@ namespace InventoryTools.MarketBoard
                 return new Rootobject();
             }
 
-            if (!fromCheck && MBCache.ContainsKey(itemID))
+            if (!fromCheck && MBCache.ContainsKey(itemID) && !forceCheck)
             {
                 return MBCache[itemID].Data;
             }
 
+            if (!_configuration.AutomaticallyDownloadMarketPrices && !forceCheck)
+            {
+                return new Rootobject();
+            }
+
             var data = Universalis.GetMarketBoardData(itemID);
 
-            var entry = new CacheEntry();
-            entry.ItemId = itemID;
-            entry.Data = data;
-            MBCache[itemID] = entry;
-
-            StoreCache();
             return data;
         }
 

@@ -38,7 +38,7 @@ namespace InventoryTools.Logic
             ImGui.Text(item.FormattedBagLocation);
         }
 
-        public void Draw(SortingResult item)
+        public void Draw(SortingResult item, int rowIndex)
         {
             ImGui.TableNextColumn();
             ImGui.Text(item.InventoryItem.FormattedBagLocation);

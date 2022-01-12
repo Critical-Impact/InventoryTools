@@ -159,6 +159,14 @@ namespace InventoryTools
                     UiHelpers.HelpMarker(
                         "Should the active window filter automatically change when moving between each filter tab? The active filter will only change if there is an active filter already selected.");
 
+                    if (ImGui.Checkbox("Show Tooltip?", ref displayTooltip))
+                    {
+                        _configuration.DisplayTooltip = !_configuration.DisplayTooltip;
+                    }
+                    ImGui.SameLine();
+                    UiHelpers.HelpMarker(
+                        "When hovering an item, show additional information about the item including it's location in inventories and market price(if available).");
+                    
                     ImGui.Text("Auto Save:");
                     ImGui.Separator();
                     if (ImGui.Checkbox("Auto save inventories/configuration?", ref autoSave))
@@ -212,6 +220,33 @@ namespace InventoryTools
                     UiHelpers.HelpMarker(
                         "The color to set the highlighted items to.");
                     
+                    ImGui.Text("Marketboard Settings:");
+                    ImGui.Separator();
+                    
+                    bool automaticallyDownloadMarketPrices = _configuration.AutomaticallyDownloadMarketPrices;
+                    int marketRefreshTime = _configuration.MarketRefreshTimeHours;
+                    
+                    if (ImGui.Checkbox("Automatically download prices?", ref automaticallyDownloadMarketPrices))
+                    {
+                        _configuration.AutomaticallyDownloadMarketPrices = !_configuration.AutomaticallyDownloadMarketPrices;
+                    }
+                    ImGui.SameLine();
+                    UiHelpers.HelpMarker(
+                        "Should we automatically download prices for any item found?");
+                    
+                    ImGui.SameLine();
+                    UiHelpers.HelpMarker(
+                        "Should the inventories/configuration be automatically saved on a defined interval? While the plugin does save when the game is closed and when configurations are altered, it is not saved in cases of crashing so this attempts to alleviate this.");
+
+                    ImGui.SetNextItemWidth(100);
+                    if (ImGui.InputInt("Keep market prices for X hours:", ref marketRefreshTime))
+                    {
+                        if (marketRefreshTime != _configuration.MarketRefreshTimeHours)
+                        {
+                            _configuration.MarketRefreshTimeHours = marketRefreshTime;
+                        }
+                    }
+                    
                     ImGui.Text("Advanced Settings:");
                     ImGui.Separator();
                     if (ImGui.Checkbox("Allow Cross-Character Inventories?", ref displayCrossCharacter))
@@ -221,13 +256,6 @@ namespace InventoryTools
                     ImGui.SameLine();
                     UiHelpers.HelpMarker(
                         "This is an experimental feature, should characters not currently logged in and their associated retainers be shown in filter configurations?");
-                    if (ImGui.Checkbox("Show Tooltip?", ref displayTooltip))
-                    {
-                        _configuration.DisplayTooltip = !_configuration.DisplayTooltip;
-                    }
-                    ImGui.SameLine();
-                    UiHelpers.HelpMarker(
-                        "This will display more information about an item in its description area.");
                 }
                 else if (_configuration.SelectedConfigurationPage == 1)
                 {

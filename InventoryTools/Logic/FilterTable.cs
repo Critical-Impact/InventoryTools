@@ -195,7 +195,7 @@ namespace InventoryTools.Logic
                             ImGui.EndPopup();
                         }
 #endif
-                        column.Draw(item);
+                        column.Draw(item, index);
                     }
                 }
 

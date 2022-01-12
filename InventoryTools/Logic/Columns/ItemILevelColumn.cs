@@ -39,7 +39,7 @@ namespace InventoryTools.Logic
             ImGui.Text(item.EquipSlotCategory.RowId == 0 ? "" : item.Item.LevelItem.Row.ToString());
         }
 
-        public void Draw(SortingResult item)
+        public void Draw(SortingResult item, int rowIndex)
         {
             ImGui.TableNextColumn();
             ImGui.Text(item.InventoryItem.EquipSlotCategory.RowId == 0 ? "" : item.InventoryItem.Item.LevelItem.Row.ToString());

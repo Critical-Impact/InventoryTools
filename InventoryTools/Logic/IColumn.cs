@@ -19,7 +19,7 @@ namespace InventoryTools.Logic
         public IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items);
         
         public void Draw(InventoryItem item);
-        public void Draw(SortingResult item);
+        public void Draw(SortingResult item, int rowIndex);
 
         public void Setup(int columnIndex);
         

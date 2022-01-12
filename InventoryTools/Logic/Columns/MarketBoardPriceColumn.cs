@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Colors;
+using Dalamud.Logging;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.MarketBoard;
@@ -11,32 +13,39 @@ namespace InventoryTools.Logic
 {
     public class MarketBoardPriceColumn : IColumn
     {
-        public string Name { get; set; } = "MB Calc Price";
+        public string Name { get; set; } = "MB Average Price";
         public float Width { get; set; } = 250.0f;
         public string FilterText { get; set; } = "";
 
         private static readonly string LOADING = "loading...";
         private static readonly string UNTRADABLE = "untradable";
 
-        private string Value(InventoryItem item)
+        private string Value(InventoryItem item, bool forceCheck = false)
         {
-            if (item.Item.IsUntradable)
+            if (!item.CanBeTraded)
             {
                 return UNTRADABLE;
             }
 
-            var marketBoardData = Cache.GetData(item.ItemId);
+            var marketBoardData = Cache.GetData(item.ItemId, fromCheck: false, forceCheck: forceCheck);
             if (marketBoardData != null)
             {
+                if (item.IsHQ)
+                {
+                    if (marketBoardData.calculcatedPriceHQ != "N/A")
+                    {
+                        return $"{marketBoardData.calculcatedPriceHQ}";
+                    }
+                }
                 return $"{marketBoardData.calculcatedPrice}";
             }
 
             return LOADING;
         }
 
-        private double ValueDouble(InventoryItem item)
+        private double ValueDouble(InventoryItem item, bool forceCheck = false)
         {
-            var value = Value(item);
+            var value = Value(item,forceCheck);
             double num;
             if (double.TryParse(value, out num))
             {
@@ -50,12 +59,20 @@ namespace InventoryTools.Logic
 
         public IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items)
         {
-            return FilterText == "" ? items : items.Where(c => Value(c).ToLower().PassesFilter(FilterText.ToLower()));
+            if (FilterText.Contains(">") || FilterText.Contains("=") || FilterText.Contains("<"))
+            {
+                return FilterText == "" ? items : items.Where(c => ValueDouble(c).PassesFilter(FilterText.ToLower()));
+            }
+            return FilterText == "" ? items : items.Where(c => Value(c).PassesFilter(FilterText.ToLower()));
         }
 
         public IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items)
         {
-            return FilterText == "" ? items : items.Where(c => Value(c.InventoryItem).ToLower().PassesFilter(FilterText.ToLower()));
+            if (FilterText.Contains(">") || FilterText.Contains("=") || FilterText.Contains("<"))
+            {
+                return FilterText == "" ? items : items.Where(c => ValueDouble(c.InventoryItem).PassesFilter(FilterText.ToLower()));
+            }
+            return FilterText == "" ? items : items.Where(c => Value(c.InventoryItem).PassesFilter(FilterText.ToLower()));
         }
 
         public IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
@@ -74,7 +91,7 @@ namespace InventoryTools.Logic
             ImGui.TextColored(item.ItemColour, item.FormattedName);
         }
 
-        public void Draw(SortingResult item)
+        public void Draw(SortingResult item, int rowIndex)
         {
             ImGui.TableNextColumn();
 
@@ -87,6 +104,16 @@ namespace InventoryTools.Logic
             else
             {
                 ImGui.TextColored(ImGuiColors.DalamudYellow, LOADING);
+            }
+
+            if (marketBoardData != LOADING && marketBoardData != UNTRADABLE)
+            {
+                ImGui.SameLine();
+                if (ImGui.SmallButton("R##" + rowIndex))
+                {
+                    PluginLog.Verbose("Forcing a universalis check");
+                    Value(item.InventoryItem, true);
+                }
             }
         }
 

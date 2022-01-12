@@ -32,6 +32,70 @@ namespace InventoryTools.Extensions
         {
             return PassesFilter((int) number, filterString);
         }
+        
+        public static bool PassesFilter(this double number, string filterString)
+        {
+            if (filterString.StartsWith("=") && filterString.Length >= 2)
+            {
+                var filter = filterString.Substring(1);
+                if (number.ToString() == filter)
+                {
+                    return true;
+                }
+            }
+            else if (filterString.StartsWith("<=") && filterString.Length >= 3)
+            {
+                var filter = filterString.Substring(2);
+                if (double.TryParse(filter, out var numberResult))
+                {
+                    if (numberResult >= number)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if(filterString.StartsWith(">=") && filterString.Length >= 3)
+            {
+                var filter = filterString.Substring(2);
+                if (double.TryParse(filter, out var numberResult))
+                {
+                    if (numberResult <= number)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (filterString.StartsWith("<") && filterString.Length >= 2)
+            {
+                var filter = filterString.Substring(1);
+                if (double.TryParse(filter, out var numberResult))
+                {
+                    if (numberResult > number)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (filterString.StartsWith(">") && filterString.Length >= 2)
+            {
+                var filter = filterString.Substring(1);
+                if (double.TryParse(filter, out var numberResult))
+                {
+                    if (numberResult < number)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (filterString.StartsWith("!") && filterString.Length >= 2)
+            {
+                var filter = filterString.Substring(1);
+                return !number.ToString().Contains(filter);
+            }
+
+            return number.ToString().Contains(filterString);
+        }
+        
         public static bool PassesFilter(this int number, string filterString)
         {
             if (filterString.StartsWith("=") && filterString.Length >= 2)

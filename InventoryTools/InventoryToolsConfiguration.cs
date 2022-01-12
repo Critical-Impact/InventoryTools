@@ -63,6 +63,30 @@ namespace InventoryTools
             }
         }
         
+        public bool AutomaticallyDownloadMarketPrices
+        {
+            get => _automaticallyDownloadMarketPrices;
+            set
+            {
+                _automaticallyDownloadMarketPrices = value;
+                ConfigurationChanged?.Invoke();
+            }
+        }
+        
+        public int MarketRefreshTimeHours
+        {
+            get => _marketRefreshTimeHours;
+            set
+            {
+                _marketRefreshTimeHours = value;
+                if (_marketRefreshTimeHours == 0)
+                {
+                    _marketRefreshTimeHours = 24;
+                }
+                ConfigurationChanged?.Invoke();
+            }
+        }
+        
         public bool ColorRetainerList
         {
             get => _colorRetainerList;
@@ -128,6 +152,8 @@ namespace InventoryTools
         private bool _colorRetainerList = true;
         private bool _showItemNumberRetainerList = true;
         private bool _displayTooltip = true;
+        private bool _automaticallyDownloadMarketPrices;
+        private int _marketRefreshTimeHours = 24;
 
         public void Initialize(DalamudPluginInterface pluginInterface)
         {

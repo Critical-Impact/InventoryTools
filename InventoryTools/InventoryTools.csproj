@@ -125,6 +125,7 @@
     </Target>
 
     <ItemGroup>
+      <Folder Include="Converters" />
       <Folder Include="Enums" />
       <Folder Include="NetworkModel" />
     </ItemGroup>

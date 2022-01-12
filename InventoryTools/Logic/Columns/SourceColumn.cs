@@ -38,7 +38,7 @@ namespace InventoryTools.Logic
             ImGui.Text(PluginLogic.CharacterMonitor.Characters[item.RetainerId]?.Name ?? "Unknown");
         }
 
-        public void Draw(SortingResult item)
+        public void Draw(SortingResult item, int rowIndex)
         {
             ImGui.TableNextColumn();
             if (PluginLogic.CharacterMonitor.Characters.ContainsKey(item.SourceRetainerId))

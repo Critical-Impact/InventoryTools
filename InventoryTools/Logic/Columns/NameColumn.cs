@@ -39,7 +39,7 @@ namespace InventoryTools.Logic
             ImGui.TextColored(item.ItemColour, item.FormattedName);
         }
 
-        public void Draw(SortingResult item)
+        public void Draw(SortingResult item, int rowIndex)
         {
             ImGui.TableNextColumn();
             ImGui.TextColored(item.InventoryItem.ItemColour, item.InventoryItem.FormattedName);

@@ -997,7 +997,7 @@ namespace InventoryTools
                 itemId -= 1_000_000;
             }
 
-            var item = Service.Data.GetExcelSheet<Item>().GetRow((uint)itemId);
+            var item = ExcelCache.GetItem((uint)itemId);
             if (item == null)
             {
                 return;
@@ -1039,13 +1039,21 @@ namespace InventoryTools
                 {
                     if (!ExcelCache.GetItem((uint)itemId).IsUntradable)
                     {
-                        var marketData = Cache.GetData((uint)itemId);
+                        var marketData = Cache.GetData((uint)itemId, false);
                         if (marketData != null)
                         {
                             description += "Market Board Data:\n";
 
                             // no \t support?!
-                            description += $"{indentation}Calc Price: {marketData.calculcatedPrice}\n";
+                            if (marketData.calculcatedPrice != null)
+                            {
+                                description += $"{indentation}Average Price: {marketData.calculcatedPrice}\n";
+                            }
+
+                            if (marketData.calculcatedPriceHQ != null)
+                            {
+                                description += $"{indentation}Average Price (HQ): {marketData.calculcatedPriceHQ}\n";
+                            }
 
 #if false // not really needed
                     description += $"{indentation}Max Price:              {marketData.maxPrice}\n";

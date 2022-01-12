@@ -38,7 +38,7 @@ namespace InventoryTools.Logic
             ImGui.Text("N/A");
         }
 
-        public void Draw(SortingResult item)
+        public void Draw(SortingResult item, int rowIndex)
         {
             ImGui.TableNextColumn();
             ImGui.Text(item.DestinationRetainerId.HasValue ? PluginLogic.CharacterMonitor.Characters[item.DestinationRetainerId.Value]?.Name ?? "" : "Unknown");
