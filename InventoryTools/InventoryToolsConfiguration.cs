@@ -108,6 +108,7 @@ namespace InventoryTools
         }
 
         public string ActiveUiFilter { get; set; } = null;
+        [JsonIgnore]
         public string ActiveBackgroundFilter { get; set; } = null;
         public bool FirstRun { get; set; } = true;
         public int SelectedHelpPage { get; set; }
