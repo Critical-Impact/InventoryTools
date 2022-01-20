@@ -53,12 +53,7 @@ namespace InventoryTools.Logic
             if (InventoryItem.Item != null)
             {
                 info += (InventoryItem.CanBeBought ? "Can be bought" : "Can't be bought") + '\n';
-                foreach (PropertyDescriptor descriptor in TypeDescriptor.GetProperties(InventoryItem.Item))
-                {
-                    string name = descriptor.Name;
-                    object value = descriptor.GetValue(InventoryItem.Item);
-                    info += String.Format("{0}={1}", name, value) + '\n';
-                }
+
             }
 
             return info;

@@ -44,6 +44,8 @@ namespace InventoryTools.Logic
         private List<(ulong, InventoryCategory)> _sourceInventories = new();
         private FilterType _filterType;
         private Vector3? _highlightColor;
+        private bool? _invertHighlighting = null;
+        private string? _highlightWhen = null;
         
         [JsonIgnore]
         private FilterResult? _filterResult = null;
@@ -288,6 +290,16 @@ namespace InventoryTools.Logic
                 ConfigurationChanged?.Invoke(this);
             }            
         }
+        
+        public string? HighlightWhen
+        {
+            get => _highlightWhen;
+            set
+            {
+                _highlightWhen = value;
+                ConfigurationChanged?.Invoke(this);
+            }
+        }
 
         public bool? SourceAllCharacters
         {
@@ -375,6 +387,16 @@ namespace InventoryTools.Logic
                 ConfigurationChanged?.Invoke(this);
             }
         }
+        
+        public bool? InvertHighlighting
+        {
+            get => _invertHighlighting;
+            set
+            {
+                _invertHighlighting = value;
+                ConfigurationChanged?.Invoke(this);
+            }
+        }
 
         public event ConfigurationChangedDelegate ConfigurationChanged;
         public event ListUpdatedDelegate ListUpdated;
@@ -382,10 +404,6 @@ namespace InventoryTools.Logic
         public bool FilterItem(InventoryItem item)
         {
             var matches = true;
-            if (item.IsEmpty)
-            {
-                return false;
-            }
             if (this.ItemUiCategoryId.Count != 0)
             {
                 if (!ItemUiCategoryId.Contains(item.ItemUICategory.RowId))

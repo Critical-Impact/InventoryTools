@@ -103,6 +103,14 @@ namespace InventoryTools
                     DrawHelpTab();
                     ImGui.EndTabItem();
                 }
+                
+                #if DEBUG
+                if (ImGui.BeginTabItem("Debug"))
+                {
+                    DrawDebugUi();
+                    ImGui.EndTabItem();
+                }
+                #endif
 
                 ImGui.EndTabBar();
             }

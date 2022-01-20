@@ -39,7 +39,7 @@ namespace InventoryTools.Logic
                                 sourceInventories.Add(inventoryKey, inventory.Value);
                             }
                         }
-                        else if (filter.SourceAllCharacters.HasValue && filter.SourceAllCharacters.Value &&
+                        else if (filter.SourceAllCharacters.HasValue && filter.SourceAllCharacters.Value && !PluginLogic.CharacterMonitor.IsRetainer(character.Key) &&
                                  PluginLogic.CharacterMonitor.ActiveCharacter == character.Key && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
                             if (!sourceInventories.ContainsKey(inventoryKey))
@@ -328,7 +328,7 @@ namespace InventoryTools.Logic
                                 sourceInventories.Add(inventoryKey, inventory.Value);
                             }
                         }
-                        if (filter.SourceAllCharacters.HasValue && filter.SourceAllCharacters.Value && (displayCrossCharacter || PluginLogic.CharacterMonitor.ActiveCharacter == character.Key))
+                        if (filter.SourceAllCharacters.HasValue && filter.SourceAllCharacters.Value && !PluginLogic.CharacterMonitor.IsRetainer(character.Key) && (displayCrossCharacter || PluginLogic.CharacterMonitor.ActiveCharacter == character.Key))
                         {
                             if (!sourceInventories.ContainsKey(inventoryKey))
                             {

@@ -107,11 +107,40 @@ namespace InventoryTools
             }
         }
 
+        public bool InvertHighlighting
+        {
+            get => _invertHighlighting;
+            set
+            {
+                _invertHighlighting = value;
+                ConfigurationChanged?.Invoke();
+            }
+        }
+
+        public string HighlightWhen
+        {
+            get => _highlightWhen;
+            set
+            {
+                _highlightWhen = value;
+                ConfigurationChanged?.Invoke();
+            }
+        }
+
+        public enum HighlightWhenEnum
+        {
+            Always,
+            WhenSearching
+        }
+
         public string ActiveUiFilter { get; set; } = null;
         [JsonIgnore]
         public string ActiveBackgroundFilter { get; set; } = null;
         public bool FirstRun { get; set; } = true;
         public int SelectedHelpPage { get; set; }
+        #if DEBUG
+        public int SelectedDebugPage { get; set; }
+        #endif
         public bool AutoSave { get; set; } = true;
         public int AutoSaveMinutes { get; set; } = 10;
 
@@ -153,6 +182,8 @@ namespace InventoryTools
         private bool _colorRetainerList = true;
         private bool _showItemNumberRetainerList = true;
         private bool _displayTooltip = true;
+        private bool _invertHighlighting = false;
+        private string _highlightWhen = "Always";
         private bool _automaticallyDownloadMarketPrices;
         private int _marketRefreshTimeHours = 24;
 

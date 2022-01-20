@@ -18,6 +18,8 @@ namespace InventoryTools
         private unsafe void DrawConfigurationTab()
         {
             var items = new string[] {"N/A", "Yes", "No"};
+            var highlightWhenItems = new string[] {"Always", "When Searching"};
+            var highlightWhenItemsFilter = new string[] {"N/A", "Always", "When Searching"};
 
             if (ImGui.BeginChild("###ivConfigList", new Vector2(150, -1) * ImGui.GetIO().FontGlobalScale, true))
             {
@@ -141,6 +143,8 @@ namespace InventoryTools
                     bool showItemNumberRetainerList = _configuration.ShowItemNumberRetainerList;
                     bool displayCrossCharacter = _configuration.DisplayCrossCharacter;
                     bool displayTooltip = _configuration.DisplayTooltip;
+                    bool invertHighlighting = _configuration.InvertHighlighting;
+                    string highlightWhen = _configuration.HighlightWhen;
                     Vector3 highlightColor = _configuration.HighlightColor;
                     
                     if (ImGui.Checkbox("Show Filters Tab?", ref showMonitorTab))
@@ -192,8 +196,47 @@ namespace InventoryTools
                     UiHelpers.HelpMarker(
                         "How many minutes should there be between each auto save?");
 
-                    ImGui.Text("Retainer Visuals:");
+                    ImGui.Text("Visuals:");
                     ImGui.Separator();
+                    
+                    if (ImGui.ColorEdit3("Highlight Color?", ref highlightColor, ImGuiColorEditFlags.NoInputs))
+                    {
+                        _configuration.HighlightColor = highlightColor;
+                    }
+                    
+                    ImGui.SameLine();
+                    UiHelpers.HelpMarker(
+                        "The color to set the highlighted items to.");
+                    
+                    if (ImGui.Checkbox("Invert Highlighting?", ref invertHighlighting))
+                    {
+                        _configuration.InvertHighlighting = !_configuration.InvertHighlighting;
+                    }
+                    ImGui.SameLine();
+                    UiHelpers.HelpMarker(
+                        "Should all the items not matching a filter be highlighted instead? This can be overridden in the filter configuration.");
+                    
+                    ImGui.SetNextItemWidth(205);
+                    ImGui.LabelText("##HighlightWhen", "Highlight When?: ");
+                    ImGui.SameLine();
+                    var highlightWhenIndex = Array.IndexOf(highlightWhenItems, highlightWhen);
+                    if (highlightWhenIndex == -1)
+                    {
+                        highlightWhenIndex++;
+                    }
+                    if (ImGui.Combo("##HighlightWhenCombo", ref highlightWhenIndex, highlightWhenItems, highlightWhenItems.Length))
+                    {
+                        highlightWhen = highlightWhenItems[highlightWhenIndex];
+                        if (highlightWhen != _configuration.HighlightWhen)
+                        {
+                            _configuration.HighlightWhen = highlightWhen;
+                        }
+                    }
+                    ImGui.SameLine();
+                    UiHelpers.HelpMarker(
+                        "When should the highlighting apply?");
+                    
+                    
                     if (ImGui.Checkbox("Color name in retainer list?", ref colorRetainerList))
                     {
                         _configuration.ColorRetainerList = !_configuration.ColorRetainerList;
@@ -211,14 +254,6 @@ namespace InventoryTools
                     UiHelpers.HelpMarker(
                         "Should the name of the retainer in the summoning bell list have the number of items to be sorted or are available in their inventory?");
                     
-                    if (ImGui.ColorEdit3("Highlight Color?", ref highlightColor, ImGuiColorEditFlags.NoInputs))
-                    {
-                        _configuration.HighlightColor = highlightColor;
-                    }
-
-                    ImGui.SameLine();
-                    UiHelpers.HelpMarker(
-                        "The color to set the highlighted items to.");
                     
                     ImGui.Text("Marketboard Settings:");
                     ImGui.Separator();
@@ -408,6 +443,65 @@ namespace InventoryTools
                             ImGui.SameLine();
                             UiHelpers.HelpMarker(
                                 "The color to set the highlighted items to for this specific filter.");
+                            
+                            ImGui.SetNextItemWidth(205);
+                            ImGui.LabelText(labelName + "InvertHighlight", "Invert Highlighting?: ");
+                            ImGui.SameLine();
+                            var invertHighlighting = filterConfiguration.InvertHighlighting == null ? 0 : (filterConfiguration.InvertHighlighting.Value ? 1 : 2);
+                            if (ImGui.Combo(labelName + "InvertHighlightCheckbox", ref invertHighlighting, items, 3))
+                            {
+                                if (invertHighlighting == 0 && filterConfiguration.InvertHighlighting != null)
+                                {
+                                    filterConfiguration.InvertHighlighting = null;
+                                }
+                                else if (invertHighlighting == 1 && filterConfiguration.InvertHighlighting != true)
+                                {
+                                    filterConfiguration.InvertHighlighting = true;
+                                }
+                                else if (invertHighlighting == 2 && filterConfiguration.IsHq != false)
+                                {
+                                    filterConfiguration.InvertHighlighting = false;
+                                }
+                            }
+                            ImGui.SameLine();
+                            UiHelpers.HelpMarker(
+                                "Should all the items not matching the filter be highlighted instead? If set to N/A will use the 'Invert Highlighting' setting inside the general configuration.");
+                            
+                            ImGui.SetNextItemWidth(205);
+                            ImGui.LabelText(labelName + "HighlightWhen", "Highlight When?: ");
+                            ImGui.SameLine();
+                            var highlightWhen = filterConfiguration.HighlightWhen;
+                            var highlightWhenIndex = -1;
+                            if (highlightWhen == null)
+                            {
+                                highlightWhenIndex = 0;
+                            }
+                            else
+                            {
+                                highlightWhenIndex = Array.IndexOf(highlightWhenItemsFilter, highlightWhen);
+                            }
+                            if (highlightWhenIndex == -1)
+                            {
+                                highlightWhenIndex++;
+                            }
+                            if (ImGui.Combo(labelName + "HighlightWhenCombo", ref highlightWhenIndex, highlightWhenItemsFilter, highlightWhenItemsFilter.Length))
+                            {
+                                if (highlightWhenIndex == 0)
+                                {
+                                    highlightWhen = null;
+                                }
+                                else
+                                {
+                                    highlightWhen = highlightWhenItemsFilter[highlightWhenIndex];
+                                }
+                                if (highlightWhen != filterConfiguration.HighlightWhen)
+                                {
+                                    filterConfiguration.HighlightWhen = highlightWhen;
+                                }
+                            }
+                            ImGui.SameLine();
+                            UiHelpers.HelpMarker(
+                                "When should the highlighting apply?");                            
                         }
 
                         if (ImGui.CollapsingHeader("Inventories", ImGuiTreeNodeFlags.DefaultOpen))
