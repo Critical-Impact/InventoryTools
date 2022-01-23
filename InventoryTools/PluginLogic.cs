@@ -79,11 +79,51 @@ namespace InventoryTools
                 LoadDefaultData();
                 _config.FirstRun = false;
             }
+            RunMigrations();
+
 
             WatchFilterChanges();
 
             this._commonBase = new XivCommonBase(Hooks.Tooltips);
             this._commonBase.Functions.Tooltips.OnItemTooltip += this.OnItemTooltip;
+        }
+
+        private void RunMigrations()
+        {
+            
+            if (_config.InternalVersion == 0)
+            {
+                PluginLog.Log("Migrating to version 1");
+                var highlight = _config.HighlightColor;
+                if (highlight.W == 0.0f)
+                {
+                    highlight.W = 1;
+                    _config.HighlightColor = highlight;
+                }
+
+                _config.TabHighlightColor = _config.HighlightColor;
+
+                foreach (var filterConfig in _filterConfigurations)
+                {
+                    if (filterConfig.HighlightColor != null)
+                    {
+                        if (filterConfig.HighlightColor.Value.X == 0.0f && filterConfig.HighlightColor.Value.Y == 0.0f &&
+                            filterConfig.HighlightColor.Value.Z == 0.0f && filterConfig.HighlightColor.Value.W == 0.0f)
+                        {
+                            filterConfig.HighlightColor = null;
+                            filterConfig.TabHighlightColor = null;
+                        }
+                        else
+                        {
+                            var highlightColor = filterConfig.HighlightColor.Value;
+                            highlightColor.W = 1;
+                            filterConfig.TabHighlightColor = highlightColor;
+                        }
+                    }
+                }
+
+                _config.InternalVersion++;
+            }
         }
 
         private void FrameworkOnUpdate(Framework framework)
@@ -707,35 +747,35 @@ namespace InventoryTools
                 normalInventoryGrid1?.SetColors(grid1Highlights, activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
                 normalInventoryGrid2?.SetColors(grid2Highlights, activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
                 normalInventoryGrid3?.SetColors(grid3Highlights, activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
-                normalInventoryGrid0?.SetTabColors(tab4Highlights, activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
-                normalInventoryGrid1?.SetTabColors(tab4Highlights, activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
-                normalInventoryGrid2?.SetTabColors(tab4Highlights, activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
-                normalInventoryGrid3?.SetTabColors(tab4Highlights, activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
+                normalInventoryGrid0?.SetTabColors(tab4Highlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
+                normalInventoryGrid1?.SetTabColors(tab4Highlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
+                normalInventoryGrid2?.SetTabColors(tab4Highlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
+                normalInventoryGrid3?.SetTabColors(tab4Highlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
                 expandedInventoryGrid0?.SetColors(grid0Highlights, activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
                 expandedInventoryGrid1?.SetColors(grid1Highlights, activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
                 expandedInventoryGrid2?.SetColors(grid2Highlights, activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
                 expandedInventoryGrid3?.SetColors(grid3Highlights, activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
-                expandedInventoryGrid0?.SetTabColors(tab2Highlights, activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
-                expandedInventoryGrid1?.SetTabColors(tab2Highlights, activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
-                expandedInventoryGrid2?.SetTabColors(tab2Highlights, activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
-                expandedInventoryGrid3?.SetTabColors(tab2Highlights, activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
+                expandedInventoryGrid0?.SetTabColors(tab2Highlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
+                expandedInventoryGrid1?.SetTabColors(tab2Highlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
+                expandedInventoryGrid2?.SetTabColors(tab2Highlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
+                expandedInventoryGrid3?.SetTabColors(tab2Highlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
                 if (saddleBagUi != null)
                 {
                     if (saddleBagUi.SaddleBagSelected == 0)
                     {
                         saddleBagUi.SetItemLeftColors(saddleBag0Highlights,
                             activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
-                        saddleBagUi.SetItemLeftColors(saddleBag1Highlights,
+                        saddleBagUi.SetItemRightColors(saddleBag1Highlights,
                             activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
-                        saddleBagUi.SetTabColors(saddleBagTabHighlights, activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
+                        saddleBagUi.SetTabColors(saddleBagTabHighlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
                     }
                     else
                     {
-                        saddleBagUi.SetItemRightColors(pSaddleBag0Highlights,
+                        saddleBagUi.SetItemLeftColors(pSaddleBag0Highlights,
                             activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
                         saddleBagUi.SetItemRightColors(pSaddleBag1Highlights,
                             activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
-                        saddleBagUi.SetTabColors(saddleBagTabHighlights, activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
+                        saddleBagUi.SetTabColors(saddleBagTabHighlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
                     }
                 }
             }
@@ -835,18 +875,18 @@ namespace InventoryTools
                     retainerExpandedGrid4?.SetColors(retainerGrid4Highlights,
                         activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
                     retainerExpandedGrid0?.SetTabColors(retainerTab5Highlights,
-                        activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
+                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
                     retainerExpandedGrid1?.SetTabColors(retainerTab5Highlights,
-                        activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
+                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
                     retainerExpandedGrid2?.SetTabColors(retainerTab5Highlights,
-                        activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
+                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
                     retainerExpandedGrid3?.SetTabColors(retainerTab5Highlights,
-                        activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
+                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
                     retainerExpandedGrid4?.SetTabColors(retainerTab5Highlights,
-                        activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
+                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
                     
                     retainerExpandedTabs?.SetTabColors(retainerTab2Highlights,
-                        activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
+                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
 
                     retainerNormalGrid0?.SetColors(retainerGrid0Highlights,
                         activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
@@ -859,15 +899,15 @@ namespace InventoryTools
                     retainerNormalGrid4?.SetColors(retainerGrid4Highlights,
                         activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
                     retainerNormalGrid0?.SetTabColors(retainerTab5Highlights,
-                        activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
+                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
                     retainerNormalGrid1?.SetTabColors(retainerTab5Highlights,
-                        activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
+                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
                     retainerNormalGrid2?.SetTabColors(retainerTab5Highlights,
-                        activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
+                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
                     retainerNormalGrid3?.SetTabColors(retainerTab5Highlights,
-                        activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
+                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
                     retainerNormalGrid4?.SetTabColors(retainerTab5Highlights,
-                        activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
+                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
                     
 
 

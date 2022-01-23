@@ -33,12 +33,22 @@ namespace InventoryTools
         public bool SwitchFiltersAutomatically { get; set; } = true;
         public bool RestorePreviousFilter { get; set; } = true;
 
-        public Vector3 HighlightColor
+        public Vector4 HighlightColor
         {
             get => _highlightColor;
             set
             {
                 _highlightColor = value;
+                ConfigurationChanged?.Invoke();
+            }
+        }
+
+        public Vector4 TabHighlightColor
+        {
+            get => _tabHighlightColor;
+            set
+            {
+                _tabHighlightColor = value;
                 ConfigurationChanged?.Invoke();
             }
         }
@@ -143,6 +153,7 @@ namespace InventoryTools
         #endif
         public bool AutoSave { get; set; } = true;
         public int AutoSaveMinutes { get; set; } = 10;
+        public int InternalVersion { get; set; } = 0;
 
         public delegate void ConfigurationChangedDelegate();
         public event ConfigurationChangedDelegate ConfigurationChanged; 
@@ -175,14 +186,16 @@ namespace InventoryTools
         private DalamudPluginInterface pluginInterface;
 
         private bool _isVisible;
-        private Vector3 _highlightColor = new Vector3(0.078f, 0.806f,
-            0.078f);
+        private Vector4 _highlightColor = new Vector4(0.007f, 0.008f,
+            0.007f, 0.212f);
+        private Vector4 _tabHighlightColor = new Vector4(0.007f, 0.008f,
+            0.007f, 1.0f);
 
         private bool _displayCrossCharacter = true;
         private bool _colorRetainerList = true;
         private bool _showItemNumberRetainerList = true;
         private bool _displayTooltip = true;
-        private bool _invertHighlighting = false;
+        private bool _invertHighlighting = true;
         private string _highlightWhen = "Always";
         private bool _automaticallyDownloadMarketPrices;
         private int _marketRefreshTimeHours = 24;

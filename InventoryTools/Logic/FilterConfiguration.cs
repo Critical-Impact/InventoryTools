@@ -43,7 +43,8 @@ namespace InventoryTools.Logic
         private bool? _isAvailableAtTimedNode;
         private List<(ulong, InventoryCategory)> _sourceInventories = new();
         private FilterType _filterType;
-        private Vector3? _highlightColor;
+        private Vector4? _highlightColor;
+        private Vector4? _tabHighlightColor;
         private bool? _invertHighlighting = null;
         private string? _highlightWhen = null;
         
@@ -69,7 +70,7 @@ namespace InventoryTools.Logic
             }
             set => _filterResult = value;
         }
-
+        
         public FilterConfiguration(string name, string key, FilterType filterType)
         {
             FilterType = filterType;
@@ -378,12 +379,22 @@ namespace InventoryTools.Logic
             set => _ownerId = value;
         }
         
-        public Vector3? HighlightColor
+        public Vector4? HighlightColor
         {
             get => _highlightColor;
             set
             {
                 _highlightColor = value;
+                ConfigurationChanged?.Invoke(this);
+            }
+        }
+        
+        public Vector4? TabHighlightColor
+        {
+            get => _tabHighlightColor;
+            set
+            {
+                _tabHighlightColor = value;
                 ConfigurationChanged?.Invoke(this);
             }
         }

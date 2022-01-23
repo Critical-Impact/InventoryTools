@@ -145,7 +145,8 @@ namespace InventoryTools
                     bool displayTooltip = _configuration.DisplayTooltip;
                     bool invertHighlighting = _configuration.InvertHighlighting;
                     string highlightWhen = _configuration.HighlightWhen;
-                    Vector3 highlightColor = _configuration.HighlightColor;
+                    Vector4 highlightColor = _configuration.HighlightColor;
+                    Vector4 tabHighlightColor = _configuration.TabHighlightColor;
                     
                     if (ImGui.Checkbox("Show Filters Tab?", ref showMonitorTab))
                     {
@@ -199,14 +200,35 @@ namespace InventoryTools
                     ImGui.Text("Visuals:");
                     ImGui.Separator();
                     
-                    if (ImGui.ColorEdit3("Highlight Color?", ref highlightColor, ImGuiColorEditFlags.NoInputs))
+                    if (ImGui.ColorEdit4("Highlight Color?", ref highlightColor, ImGuiColorEditFlags.NoInputs))
                     {
                         _configuration.HighlightColor = highlightColor;
                     }
+                    if (_configuration.HighlightColor.W == 0)
+                    {
+                        ImGui.SameLine();
+                        ImGui.TextColored(ImGuiColors.DalamudRed, "The filter alpha is set to 0, your items will be invisible.");
+                    }
+
                     
                     ImGui.SameLine();
                     UiHelpers.HelpMarker(
                         "The color to set the highlighted items to.");
+                    
+                    if (ImGui.ColorEdit4("Tab Highlight Color?", ref tabHighlightColor, ImGuiColorEditFlags.NoInputs))
+                    {
+                        _configuration.TabHighlightColor = tabHighlightColor;
+                    }
+                    if (_configuration.TabHighlightColor.W == 0)
+                    {
+                        ImGui.SameLine();
+                        ImGui.TextColored(ImGuiColors.DalamudRed, "The filter alpha is set to 0, your items will be invisible.");
+                    }
+
+                    
+                    ImGui.SameLine();
+                    UiHelpers.HelpMarker(
+                        "The color to set the highlighted tabs(that contain filtered items) to.");
                     
                     if (ImGui.Checkbox("Invert Highlighting?", ref invertHighlighting))
                     {
@@ -428,9 +450,10 @@ namespace InventoryTools
                             }
 
                            
-                            Vector3 highlightColor = filterConfiguration.HighlightColor ?? new Vector3();
+                            Vector4 highlightColor = filterConfiguration.HighlightColor ?? new Vector4();
+                            Vector4 tabHighlightColor = filterConfiguration.TabHighlightColor ?? new Vector4();
 
-                            if (ImGui.ColorEdit3("Highlight Color?", ref highlightColor, ImGuiColorEditFlags.NoInputs))
+                            if (ImGui.ColorEdit4("Highlight Color?", ref highlightColor, ImGuiColorEditFlags.NoInputs))
                             {
                                 filterConfiguration.HighlightColor = highlightColor;
                             }
@@ -440,9 +463,35 @@ namespace InventoryTools
                                 filterConfiguration.HighlightColor = null;
                             }
 
+                            if (filterConfiguration.HighlightColor.HasValue && filterConfiguration.HighlightColor.Value.W == 0)
+                            {
+                                ImGui.SameLine();
+                                ImGui.TextColored(ImGuiColors.DalamudRed, "The filter alpha is set to 0, your items will be invisible.");
+                            }
+
                             ImGui.SameLine();
                             UiHelpers.HelpMarker(
                                 "The color to set the highlighted items to for this specific filter.");
+                            
+                            if (ImGui.ColorEdit4("Highlight Color?", ref tabHighlightColor, ImGuiColorEditFlags.NoInputs))
+                            {
+                                filterConfiguration.TabHighlightColor = tabHighlightColor;
+                            }
+                            ImGui.SameLine();
+                            if (filterConfiguration.TabHighlightColor.HasValue && ImGui.Button("Clear Color"))
+                            {
+                                filterConfiguration.TabHighlightColor = null;
+                            }
+
+                            if (filterConfiguration.TabHighlightColor.HasValue && filterConfiguration.TabHighlightColor.Value.W == 0)
+                            {
+                                ImGui.SameLine();
+                                ImGui.TextColored(ImGuiColors.DalamudRed, "The filter alpha is set to 0, your items will be invisible.");
+                            }
+
+                            ImGui.SameLine();
+                            UiHelpers.HelpMarker(
+                                "The color to set the highlighted tabs(which contain filtered items) to for this specific filter.");
                             
                             ImGui.SetNextItemWidth(205);
                             ImGui.LabelText(labelName + "InvertHighlight", "Invert Highlighting?: ");
