@@ -15,9 +15,10 @@ namespace InventoryTools
 {
     public partial class InventoryToolsUi
     {
+        #if DEBUG
+
         private unsafe void DrawDebugUi()
         {
-
             if (ImGui.BeginChild("###ivDebugList", new Vector2(150, -1) * ImGui.GetIO().FontGlobalScale, true))
             {
                 if (ImGui.Selectable("Retainers", _configuration.SelectedDebugPage == 0))
@@ -102,5 +103,6 @@ namespace InventoryTools
                 ImGui.EndChild();
             }
         }
+        #endif
     }
 }
