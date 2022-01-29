@@ -124,6 +124,21 @@ namespace InventoryTools
 
                 _config.InternalVersion++;
             }
+            if (_config.InternalVersion == 1)
+            {
+                PluginLog.Log("Migrating to version 2");
+                _config.InvertTabHighlighting = _config.InvertHighlighting;
+
+                foreach (var filterConfig in _filterConfigurations)
+                {
+                    if (filterConfig.InvertHighlighting != null)
+                    {
+                        filterConfig.InvertTabHighlighting = filterConfig.InvertHighlighting;
+                    }
+                }
+
+                _config.InternalVersion++;
+            }
         }
 
         private void FrameworkOnUpdate(Framework framework)
@@ -601,6 +616,7 @@ namespace InventoryTools
             FilterTable activeTable = null;
             bool shouldHighlight = false;
             var invertHighlighting = false;
+            var invertTabHighlighting = false;
             //Add in ability to turn off highlights
             if (activeFilter != null)
             {
@@ -625,6 +641,7 @@ namespace InventoryTools
                     shouldHighlight = true;
                 }
                 invertHighlighting = activeFilter.InvertHighlighting ?? _config.InvertHighlighting;
+                invertTabHighlighting = activeFilter.InvertTabHighlighting ?? _config.InvertTabHighlighting;
             }
             
             FilterResult? filteredList = null;
@@ -676,6 +693,9 @@ namespace InventoryTools
             expandedInventoryGrid2?.ClearColors();
             expandedInventoryGrid3?.ClearColors();
             saddleBagUi?.ClearColors();
+            
+            //If invert highlighting is off then we need to make sure the empty items aren't used
+
 
             if (shouldHighlight && filteredList != null)
             {
@@ -686,54 +706,113 @@ namespace InventoryTools
                     {
                         if (item.SourceBag == InventoryType.Bag0)
                         {
-                            tab4Highlights.Add(0);
-                            tab2Highlights.Add(0);
-                            grid0Highlights.Add(item.InventoryItem.SortedSlotIndex);
+                            if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
+                            {
+                                tab4Highlights.Add(0);
+                                tab2Highlights.Add(0);
+                            }
+
+                            if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
+                            {
+                                grid0Highlights.Add(item.InventoryItem.SortedSlotIndex);
+                            }
+
                         }
 
                         else if (item.SourceBag == InventoryType.Bag1)
                         {
-                            tab4Highlights.Add(1);
-                            tab2Highlights.Add(0);
-                            grid1Highlights.Add(item.InventoryItem.SortedSlotIndex);
+                            if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
+                            {
+                                tab4Highlights.Add(1);
+                                tab2Highlights.Add(0);
+                            }
+
+                            if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
+                            {
+                                grid1Highlights.Add(item.InventoryItem.SortedSlotIndex);
+                            }
                         }
 
                         else if (item.SourceBag == InventoryType.Bag2)
                         {
-                            tab4Highlights.Add(2);
-                            tab2Highlights.Add(1);
-                            grid2Highlights.Add(item.InventoryItem.SortedSlotIndex);
+                            if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
+                            {
+                                tab4Highlights.Add(2);
+                                tab2Highlights.Add(1);
+                            }
+
+                            if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
+                            {
+                                grid2Highlights.Add(item.InventoryItem.SortedSlotIndex);
+                            }
                         }
 
                         else if (item.SourceBag == InventoryType.Bag3)
                         {
-                            tab4Highlights.Add(3);
-                            tab2Highlights.Add(1);
-                            grid3Highlights.Add(item.InventoryItem.SortedSlotIndex);
+                            if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
+                            {
+                                tab4Highlights.Add(3);
+                                tab2Highlights.Add(1);
+                            }
+
+                            if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
+                            {
+                                grid3Highlights.Add(item.InventoryItem.SortedSlotIndex);
+                            }
                         }
                         
                         else if (item.SourceBag == InventoryType.SaddleBag0)
                         {
-                            saddleBag0Highlights.Add(item.InventoryItem.SortedSlotIndex);
-                            saddleBagTabHighlights.Add(0);
+                            if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
+                            {
+                                saddleBagTabHighlights.Add(0);
+                            }
+
+                            if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
+                            {
+                                saddleBag0Highlights.Add(item.InventoryItem.SortedSlotIndex);
+                            }
+                            
                         }
                         
                         else if (item.SourceBag == InventoryType.SaddleBag1)
                         {
-                            saddleBag1Highlights.Add(item.InventoryItem.SortedSlotIndex);
-                            saddleBagTabHighlights.Add(0);
+                            if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
+                            {
+                                saddleBagTabHighlights.Add(0);
+                            }
+
+                            if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
+                            {
+                                saddleBag1Highlights.Add(item.InventoryItem.SortedSlotIndex);
+                            }
                         }
                         
                         else if (item.SourceBag == InventoryType.PremiumSaddleBag0)
                         {
-                            pSaddleBag0Highlights.Add(item.InventoryItem.SortedSlotIndex);
-                            saddleBagTabHighlights.Add(1);
+                            if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
+                            {
+                                saddleBagTabHighlights.Add(1);
+                            }
+
+                            if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
+                            {
+                                pSaddleBag0Highlights.Add(item.InventoryItem.SortedSlotIndex);
+                            }
+
                         }
                         
                         else if (item.SourceBag == InventoryType.PremiumSaddleBag1)
                         {
-                            pSaddleBag1Highlights.Add(item.InventoryItem.SortedSlotIndex);
-                            saddleBagTabHighlights.Add(2);
+                            if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
+                            {
+                                saddleBagTabHighlights.Add(1);
+                            }
+
+                            if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
+                            {
+                                pSaddleBag1Highlights.Add(item.InventoryItem.SortedSlotIndex);
+                            }
                         }
 
                     }
@@ -747,18 +826,18 @@ namespace InventoryTools
                 normalInventoryGrid1?.SetColors(grid1Highlights, activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
                 normalInventoryGrid2?.SetColors(grid2Highlights, activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
                 normalInventoryGrid3?.SetColors(grid3Highlights, activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
-                normalInventoryGrid0?.SetTabColors(tab4Highlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
-                normalInventoryGrid1?.SetTabColors(tab4Highlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
-                normalInventoryGrid2?.SetTabColors(tab4Highlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
-                normalInventoryGrid3?.SetTabColors(tab4Highlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
+                normalInventoryGrid0?.SetTabColors(tab4Highlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertTabHighlighting);
+                normalInventoryGrid1?.SetTabColors(tab4Highlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertTabHighlighting);
+                normalInventoryGrid2?.SetTabColors(tab4Highlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertTabHighlighting);
+                normalInventoryGrid3?.SetTabColors(tab4Highlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertTabHighlighting);
                 expandedInventoryGrid0?.SetColors(grid0Highlights, activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
                 expandedInventoryGrid1?.SetColors(grid1Highlights, activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
                 expandedInventoryGrid2?.SetColors(grid2Highlights, activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
                 expandedInventoryGrid3?.SetColors(grid3Highlights, activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
-                expandedInventoryGrid0?.SetTabColors(tab2Highlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
-                expandedInventoryGrid1?.SetTabColors(tab2Highlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
-                expandedInventoryGrid2?.SetTabColors(tab2Highlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
-                expandedInventoryGrid3?.SetTabColors(tab2Highlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
+                expandedInventoryGrid0?.SetTabColors(tab2Highlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertTabHighlighting);
+                expandedInventoryGrid1?.SetTabColors(tab2Highlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertTabHighlighting);
+                expandedInventoryGrid2?.SetTabColors(tab2Highlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertTabHighlighting);
+                expandedInventoryGrid3?.SetTabColors(tab2Highlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertTabHighlighting);
                 if (saddleBagUi != null)
                 {
                     if (saddleBagUi.SaddleBagSelected == 0)
@@ -767,7 +846,7 @@ namespace InventoryTools
                             activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
                         saddleBagUi.SetItemRightColors(saddleBag1Highlights,
                             activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
-                        saddleBagUi.SetTabColors(saddleBagTabHighlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
+                        saddleBagUi.SetTabColors(saddleBagTabHighlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertTabHighlighting);
                     }
                     else
                     {
@@ -775,7 +854,7 @@ namespace InventoryTools
                             activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
                         saddleBagUi.SetItemRightColors(pSaddleBag1Highlights,
                             activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
-                        saddleBagUi.SetTabColors(saddleBagTabHighlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
+                        saddleBagUi.SetTabColors(saddleBagTabHighlights, activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertTabHighlighting);
                     }
                 }
             }
@@ -819,41 +898,71 @@ namespace InventoryTools
                     for (var index = 0; index < filteredList.Value.SortedItems.Count; index++)
                     {
                         var item = filteredList.Value.SortedItems[index];
-                        if (item.SourceRetainerId == _currentRetainerId)
+                        if (MatchesRetainerFilter(activeFilter, item, invertHighlighting))
                         {
                             if (item.SourceBag == InventoryType.RetainerBag0)
                             {
-                                retainerTab2Highlights.Add(0);
-                                retainerTab5Highlights.Add(0);
-                                retainerGrid0Highlights.Add(item.InventoryItem.SortedSlotIndex);
+                                if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
+                                {
+                                    retainerTab2Highlights.Add(0);
+                                    retainerTab5Highlights.Add(0);
+                                }
+                                if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
+                                {
+                                    retainerGrid0Highlights.Add(item.InventoryItem.SortedSlotIndex);
+                                }
                             }
 
                             if (item.SourceBag == InventoryType.RetainerBag1)
                             {
-                                retainerTab2Highlights.Add(0);
-                                retainerTab5Highlights.Add(1);
-                                retainerGrid1Highlights.Add(item.InventoryItem.SortedSlotIndex);
+                                if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
+                                {
+                                    retainerTab2Highlights.Add(0);
+                                    retainerTab5Highlights.Add(1);
+                                }
+                                if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
+                                {
+                                    retainerGrid1Highlights.Add(item.InventoryItem.SortedSlotIndex);
+                                }
                             }
 
                             if (item.SourceBag == InventoryType.RetainerBag2)
                             {
-                                retainerTab2Highlights.Add(1);
-                                retainerTab5Highlights.Add(2);
-                                retainerGrid2Highlights.Add(item.InventoryItem.SortedSlotIndex);
+                                if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
+                                {
+                                    retainerTab2Highlights.Add(1);
+                                    retainerTab5Highlights.Add(2);
+                                }
+                                if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
+                                {
+                                    retainerGrid2Highlights.Add(item.InventoryItem.SortedSlotIndex);
+                                }
                             }
 
                             if (item.SourceBag == InventoryType.RetainerBag3)
                             {
-                                retainerTab2Highlights.Add(1);
-                                retainerTab5Highlights.Add(3);
-                                retainerGrid3Highlights.Add(item.InventoryItem.SortedSlotIndex);
+                                if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
+                                {
+                                    retainerTab2Highlights.Add(1);
+                                    retainerTab5Highlights.Add(3);
+                                }
+                                if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
+                                {
+                                    retainerGrid3Highlights.Add(item.InventoryItem.SortedSlotIndex);
+                                }
                             }
 
                             if (item.SourceBag == InventoryType.RetainerBag4)
                             {
-                                retainerTab2Highlights.Add(2);
-                                retainerTab5Highlights.Add(4);
-                                retainerGrid4Highlights.Add(item.InventoryItem.SortedSlotIndex);
+                                if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
+                                {
+                                    retainerTab2Highlights.Add(2);
+                                    retainerTab5Highlights.Add(4);
+                                }
+                                if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
+                                {
+                                    retainerGrid4Highlights.Add(item.InventoryItem.SortedSlotIndex);
+                                }
                             }
                         }
                     }
@@ -875,18 +984,18 @@ namespace InventoryTools
                     retainerExpandedGrid4?.SetColors(retainerGrid4Highlights,
                         activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
                     retainerExpandedGrid0?.SetTabColors(retainerTab5Highlights,
-                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
+                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertTabHighlighting);
                     retainerExpandedGrid1?.SetTabColors(retainerTab5Highlights,
-                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
+                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertTabHighlighting);
                     retainerExpandedGrid2?.SetTabColors(retainerTab5Highlights,
-                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
+                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertTabHighlighting);
                     retainerExpandedGrid3?.SetTabColors(retainerTab5Highlights,
-                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
+                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertTabHighlighting);
                     retainerExpandedGrid4?.SetTabColors(retainerTab5Highlights,
-                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
+                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertTabHighlighting);
                     
                     retainerExpandedTabs?.SetTabColors(retainerTab2Highlights,
-                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
+                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertTabHighlighting);
 
                     retainerNormalGrid0?.SetColors(retainerGrid0Highlights,
                         activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
@@ -899,15 +1008,15 @@ namespace InventoryTools
                     retainerNormalGrid4?.SetColors(retainerGrid4Highlights,
                         activeFilter.HighlightColor ?? _config.HighlightColor, invertHighlighting);
                     retainerNormalGrid0?.SetTabColors(retainerTab5Highlights,
-                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
+                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertTabHighlighting);
                     retainerNormalGrid1?.SetTabColors(retainerTab5Highlights,
-                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
+                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertTabHighlighting);
                     retainerNormalGrid2?.SetTabColors(retainerTab5Highlights,
-                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
+                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertTabHighlighting);
                     retainerNormalGrid3?.SetTabColors(retainerTab5Highlights,
-                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
+                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertTabHighlighting);
                     retainerNormalGrid4?.SetTabColors(retainerTab5Highlights,
-                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertHighlighting);
+                        activeFilter.TabHighlightColor ?? _config.TabHighlightColor, invertTabHighlighting);
                     
 
 
@@ -979,6 +1088,27 @@ namespace InventoryTools
 
             if (item.InventoryItem.IsEmpty && invertHighlighting)
             {
+                return false;
+            }
+
+            return false;
+        }
+
+        private bool MatchesRetainerFilter(FilterConfiguration activeFilter, SortingResult item, bool invertHighlighting = false)
+        {
+            bool matches = activeFilter.FilterType == FilterType.SearchFilter && item.SourceRetainerId == _currentRetainerId;
+
+
+            if (matches)
+            {
+                if (!item.InventoryItem.IsEmpty)
+                {
+                    return true;
+                }
+            }
+
+            if (item.InventoryItem.IsEmpty && invertHighlighting)
+            {
                 return true;
             }
 
@@ -993,14 +1123,14 @@ namespace InventoryTools
                 return;
             }
 
-            if (itemId > 2_000_000)
+            if (itemId > 2000000 || itemId == 0)
             {
                 return;
             }
 
-            if (itemId > 1_000_000)
+            if (itemId > 1000000)
             {
-                itemId -= 1_000_000;
+                itemId -= 1000000;
             }
 
             var item = ExcelCache.GetItem((uint)itemId);

@@ -87,13 +87,14 @@ namespace InventoryTools
                                 if (activeUiFilter != config)
                                 {
                                     _pluginLogic.ToggleActiveUiFilterByKey(config.Key);
-                                    _pluginLogic.GetFilterTable(config.Key).Refresh();
+                                    _pluginLogic.GetFilterTable(config.Key).Refresh(_configuration);
                                     break;
                                 }
                             }
                         }
                     }
                     ImGui.SameLine();
+                    
                     UiHelpers.HelpMarker(
                         "This is the filter that is active when the Inventory Tools window is visible.");
                     
@@ -144,6 +145,7 @@ namespace InventoryTools
                     bool displayCrossCharacter = _configuration.DisplayCrossCharacter;
                     bool displayTooltip = _configuration.DisplayTooltip;
                     bool invertHighlighting = _configuration.InvertHighlighting;
+                    bool invertTabHighlighting = _configuration.InvertTabHighlighting;
                     string highlightWhen = _configuration.HighlightWhen;
                     Vector4 highlightColor = _configuration.HighlightColor;
                     Vector4 tabHighlightColor = _configuration.TabHighlightColor;
@@ -237,6 +239,14 @@ namespace InventoryTools
                     ImGui.SameLine();
                     UiHelpers.HelpMarker(
                         "Should all the items not matching a filter be highlighted instead? This can be overridden in the filter configuration.");
+                    
+                    if (ImGui.Checkbox("Invert Tab Highlighting?", ref invertTabHighlighting))
+                    {
+                        _configuration.InvertTabHighlighting = !_configuration.InvertTabHighlighting;
+                    }
+                    ImGui.SameLine();
+                    UiHelpers.HelpMarker(
+                        "Should all the tabs not matching a filter be highlighted instead? This can be overridden in the filter configuration.");
                     
                     ImGui.SetNextItemWidth(205);
                     ImGui.LabelText("##HighlightWhen", "Highlight When?: ");
@@ -473,7 +483,7 @@ namespace InventoryTools
                             UiHelpers.HelpMarker(
                                 "The color to set the highlighted items to for this specific filter.");
                             
-                            if (ImGui.ColorEdit4("Highlight Color?", ref tabHighlightColor, ImGuiColorEditFlags.NoInputs))
+                            if (ImGui.ColorEdit4("Tab Highlight Color?", ref tabHighlightColor, ImGuiColorEditFlags.NoInputs))
                             {
                                 filterConfiguration.TabHighlightColor = tabHighlightColor;
                             }
@@ -507,7 +517,7 @@ namespace InventoryTools
                                 {
                                     filterConfiguration.InvertHighlighting = true;
                                 }
-                                else if (invertHighlighting == 2 && filterConfiguration.IsHq != false)
+                                else if (invertHighlighting == 2 && filterConfiguration.InvertHighlighting != false)
                                 {
                                     filterConfiguration.InvertHighlighting = false;
                                 }
@@ -515,6 +525,29 @@ namespace InventoryTools
                             ImGui.SameLine();
                             UiHelpers.HelpMarker(
                                 "Should all the items not matching the filter be highlighted instead? If set to N/A will use the 'Invert Highlighting' setting inside the general configuration.");
+                            
+                            ImGui.SetNextItemWidth(205);
+                            ImGui.LabelText(labelName + "InvertTabHighlight", "Invert Tab Highlighting?: ");
+                            ImGui.SameLine();
+                            var invertTabHighlighting = filterConfiguration.InvertTabHighlighting == null ? 0 : (filterConfiguration.InvertTabHighlighting.Value ? 1 : 2);
+                            if (ImGui.Combo(labelName + "InvertTabHighlightCheckbox", ref invertTabHighlighting, items, 3))
+                            {
+                                if (invertTabHighlighting == 0 && filterConfiguration.InvertTabHighlighting != null)
+                                {
+                                    filterConfiguration.InvertTabHighlighting = null;
+                                }
+                                else if (invertTabHighlighting == 1 && filterConfiguration.InvertTabHighlighting != true)
+                                {
+                                    filterConfiguration.InvertTabHighlighting = true;
+                                }
+                                else if (invertTabHighlighting == 2 && filterConfiguration.InvertTabHighlighting != false)
+                                {
+                                    filterConfiguration.InvertTabHighlighting = false;
+                                }
+                            }
+                            ImGui.SameLine();
+                            UiHelpers.HelpMarker(
+                                "Should all the tabs not matching the filter be highlighted instead? If set to N/A will use the 'Invert Tab Highlighting' setting inside the general configuration.");
                             
                             ImGui.SetNextItemWidth(205);
                             ImGui.LabelText(labelName + "HighlightWhen", "Highlight When?: ");
@@ -627,6 +660,7 @@ namespace InventoryTools
                                 "This is a list of source inventories to sort items from based on the filter configuration");
 
                             var currentSource = "";
+                            
                             ImGui.SetNextItemWidth(100);
                             if (ImGui.BeginCombo(labelName + "SourceCombo", currentSource))
                             {

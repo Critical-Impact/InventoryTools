@@ -64,7 +64,7 @@ namespace InventoryTools.Logic
         public event PreFilterDelegate PreFilter;
         public event ChangedDelegate Refreshed;
 
-        public void Refresh()
+        public void Refresh(InventoryToolsConfiguration configuration)
         {
             //Do something with unsortable items
             if (FilterConfiguration.FilterResult != null)
@@ -118,7 +118,7 @@ namespace InventoryTools.Logic
 
         public bool HighlightItems => PluginLogic.PluginConfiguration.ActiveUiFilter == FilterConfiguration.Key;
 
-        public void Draw()
+        public void Draw(InventoryToolsConfiguration configuration)
         {
             var highlightItems = HighlightItems;
             ImGui.Checkbox( "Highlight?"+ "###" + Key + "VisibilityCheckbox", ref highlightItems);
@@ -182,7 +182,7 @@ namespace InventoryTools.Logic
 
                 if (refresh || NeedsRefresh)
                 {
-                    Refresh();
+                    Refresh(configuration);
                 }
 
                 for (var index = 0; index < Items.Count; index++)

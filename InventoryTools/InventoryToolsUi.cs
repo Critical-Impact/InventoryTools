@@ -71,7 +71,7 @@ namespace InventoryTools
                     {
                         if (ImGui.BeginTabItem(itemTable.Name + "##" + filterConfiguration.Key))
                         {
-                            itemTable.Draw();
+                            itemTable.Draw(_configuration);
                             if (_activeFilter != filterConfiguration.Key)
                             {
                                 _activeFilter = filterConfiguration.Key;
@@ -157,7 +157,7 @@ namespace InventoryTools
                         var table = _pluginLogic.GetFilterTable(filterConfiguration.Key);
                         if (table != null)
                         {
-                            table.Draw();
+                            table.Draw(_configuration);
                         }
                     }
                 }

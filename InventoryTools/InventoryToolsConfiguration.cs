@@ -127,6 +127,16 @@ namespace InventoryTools
             }
         }
 
+        public bool InvertTabHighlighting
+        {
+            get => _invertTabHighlighting;
+            set
+            {
+                _invertTabHighlighting = value;
+                ConfigurationChanged?.Invoke();
+            }
+        }
+
         public string HighlightWhen
         {
             get => _highlightWhen;
@@ -196,6 +206,7 @@ namespace InventoryTools
         private bool _showItemNumberRetainerList = true;
         private bool _displayTooltip = true;
         private bool _invertHighlighting = true;
+        private bool _invertTabHighlighting = false;
         private string _highlightWhen = "Always";
         private bool _automaticallyDownloadMarketPrices;
         private int _marketRefreshTimeHours = 24;

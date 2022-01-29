@@ -46,6 +46,7 @@ namespace InventoryTools.Logic
         private Vector4? _highlightColor;
         private Vector4? _tabHighlightColor;
         private bool? _invertHighlighting = null;
+        private bool? _invertTabHighlighting = null;
         private string? _highlightWhen = null;
         
         [JsonIgnore]
@@ -398,13 +399,23 @@ namespace InventoryTools.Logic
                 ConfigurationChanged?.Invoke(this);
             }
         }
-        
+
         public bool? InvertHighlighting
         {
             get => _invertHighlighting;
             set
             {
                 _invertHighlighting = value;
+                ConfigurationChanged?.Invoke(this);
+            }
+        }
+
+        public bool? InvertTabHighlighting
+        {
+            get => _invertTabHighlighting;
+            set
+            {
+                _invertTabHighlighting = value;
                 ConfigurationChanged?.Invoke(this);
             }
         }
