@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryTools", "Inventory
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CriticalCommonLib", "CriticalCommonLib\CriticalCommonLib.csproj", "{1A9469D2-F846-4804-AFD8-B46653E52F68}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FFXIVClientInterface", "FFXIVClientInterface\FFXIVClientInterface.csproj", "{07B52407-693D-40E2-B75E-3652FD79334A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,5 +25,11 @@ Global
 		{1A9469D2-F846-4804-AFD8-B46653E52F68}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1A9469D2-F846-4804-AFD8-B46653E52F68}.FullDebug|Any CPU.ActiveCfg = FullDebug|Any CPU
 		{1A9469D2-F846-4804-AFD8-B46653E52F68}.FullDebug|Any CPU.Build.0 = FullDebug|Any CPU
+		{07B52407-693D-40E2-B75E-3652FD79334A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07B52407-693D-40E2-B75E-3652FD79334A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07B52407-693D-40E2-B75E-3652FD79334A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07B52407-693D-40E2-B75E-3652FD79334A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07B52407-693D-40E2-B75E-3652FD79334A}.FullDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07B52407-693D-40E2-B75E-3652FD79334A}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 EndGlobal

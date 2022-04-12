@@ -1,125 +1,94 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
+﻿using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Colors;
 using Dalamud.Logging;
 using ImGuiNET;
 using InventoryTools.Extensions;
-using InventoryTools.MarketBoard;
+using Lumina.Excel.GeneratedSheets;
 
-namespace InventoryTools.Logic
+namespace InventoryTools.Logic.Columns
 {
-    public class MarketBoardPriceColumn : IColumn
+    public class MarketBoardPriceColumn : DoubleGilColumn
     {
-        public string Name { get; set; } = "MB Average Price";
-        public float Width { get; set; } = 250.0f;
-        public string FilterText { get; set; } = "";
+        protected static readonly string LoadingString = "loading...";
+        protected static readonly string UntradableString = "untradable";
+        protected static readonly int Loading = -1;
+        protected static readonly int Untradable = -2;
 
-        private static readonly string LOADING = "loading...";
-        private static readonly string UNTRADABLE = "untradable";
-
-        private string Value(InventoryItem item, bool forceCheck = false)
+        public override void DoDraw((int,int)? currentValue, int rowIndex)
         {
-            if (!item.CanBeTraded)
+            if (currentValue.HasValue && currentValue.Value.Item1 == Loading)
             {
-                return UNTRADABLE;
+                ImGui.TableNextColumn();
+                ImGui.TextColored(ImGuiColors.DalamudYellow, LoadingString);
             }
-
-            var marketBoardData = Cache.GetData(item.ItemId, fromCheck: false, forceCheck: forceCheck);
-            if (marketBoardData != null)
+            else if (currentValue.HasValue && currentValue.Value.Item1 == Untradable)
             {
-                if (item.IsHQ)
-                {
-                    if (marketBoardData.calculcatedPriceHQ != "N/A")
-                    {
-                        return $"{marketBoardData.calculcatedPriceHQ}";
-                    }
-                }
-                return $"{marketBoardData.calculcatedPrice}";
+                ImGui.TableNextColumn();
+                ImGui.TextColored(ImGuiColors.DalamudRed, UntradableString);
             }
-
-            return LOADING;
-        }
-
-        private double ValueDouble(InventoryItem item, bool forceCheck = false)
-        {
-            var value = Value(item,forceCheck);
-            double num;
-            if (double.TryParse(value, out num))
+            else if(currentValue.HasValue)
             {
-                return num;
-            }
-            else
-            {
-                return -1;
-            }
-        }
-
-        public IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items)
-        {
-            if (FilterText.Contains(">") || FilterText.Contains("=") || FilterText.Contains("<"))
-            {
-                return FilterText == "" ? items : items.Where(c => ValueDouble(c).PassesFilter(FilterText.ToLower()));
-            }
-            return FilterText == "" ? items : items.Where(c => Value(c).PassesFilter(FilterText.ToLower()));
-        }
-
-        public IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items)
-        {
-            if (FilterText.Contains(">") || FilterText.Contains("=") || FilterText.Contains("<"))
-            {
-                return FilterText == "" ? items : items.Where(c => ValueDouble(c.InventoryItem).PassesFilter(FilterText.ToLower()));
-            }
-            return FilterText == "" ? items : items.Where(c => Value(c.InventoryItem).PassesFilter(FilterText.ToLower()));
-        }
-
-        public IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
-        {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => ValueDouble(c)) : items.OrderByDescending(c => ValueDouble(c));
-        }
-
-        public IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items)
-        {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => ValueDouble(c.InventoryItem)) : items.OrderByDescending(c => ValueDouble(c.InventoryItem));
-        }
-
-        public void Draw(InventoryItem item)
-        {
-            ImGui.TableNextColumn();
-            ImGui.TextColored(item.ItemColour, item.FormattedName);
-        }
-
-        public void Draw(SortingResult item, int rowIndex)
-        {
-            ImGui.TableNextColumn();
-
-            var marketBoardData = Value(item.InventoryItem);
-            if (marketBoardData != LOADING)
-            {
-                
-                ImGui.TextColored(marketBoardData != UNTRADABLE ? item.InventoryItem.ItemColour : ImGuiColors.DalamudRed, $"{marketBoardData}");
-            }
-            else
-            {
-                ImGui.TextColored(ImGuiColors.DalamudYellow, LOADING);
-            }
-
-            if (marketBoardData != LOADING && marketBoardData != UNTRADABLE)
-            {
+                base.DoDraw(currentValue, rowIndex);
                 ImGui.SameLine();
                 if (ImGui.SmallButton("R##" + rowIndex))
                 {
                     PluginLog.Verbose("Forcing a universalis check");
-                    Value(item.InventoryItem, true);
                 }
+            }
+            else
+            {
+                base.DoDraw(currentValue, rowIndex);
             }
         }
 
-        public void Setup(int columnIndex)
+        public override event IColumn.ButtonPressedDelegate? ButtonPressed;
+
+        public override (int,int)? CurrentValue(InventoryItem item)
         {
-            ImGui.TableSetupColumn(Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
+            if (!item.CanBeTraded)
+            {
+                return (Untradable, Untradable);
+            }
+
+            var marketBoardData = Cache.GetPricing(item.ItemId, false);
+            if (marketBoardData != null)
+            {
+                var nq = marketBoardData.averagePriceNQ;
+                var hq = marketBoardData.averagePriceHQ;
+                return ((int)nq, (int)hq);
+            }
+
+            return (Loading, Loading);
         }
+
+        public override (int,int)? CurrentValue(Item item)
+        {
+            if (!item.CanBeTraded())
+            {
+                return (Untradable, Untradable);
+            }
+
+            var marketBoardData = Cache.GetPricing(item.RowId, false);
+            if (marketBoardData != null)
+            {
+                var nq = marketBoardData.averagePriceNQ;
+                var hq = marketBoardData.averagePriceHQ;
+                return ((int)nq, (int)hq);
+            }
+
+            return (Loading, Loading);
+        }
+
+        public override (int,int)? CurrentValue(SortingResult item)
+        {
+            return CurrentValue(item.InventoryItem);
+        }
+
+        public override string Name { get; set; } = "MB Average Price";
+        public override float Width { get; set; } = 250.0f;
+        public override string FilterText { get; set; } = "";
+        public override bool HasFilter { get; set; } = true;
+        public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
     }
 }

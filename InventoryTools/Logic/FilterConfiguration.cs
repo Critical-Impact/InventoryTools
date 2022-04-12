@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
-using CriticalCommonLib.Enums;
+using System.Text;
+using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using Dalamud.Logging;
-using Dalamud.Plugin;
 using InventoryTools.Extensions;
 using Lumina.Excel.GeneratedSheets;
 using Newtonsoft.Json;
@@ -14,6 +15,7 @@ namespace InventoryTools.Logic
     public class FilterConfiguration
     {
         public delegate void ConfigurationChangedDelegate(FilterConfiguration filterConfiguration);
+        public delegate void TableConfigurationChangedDelegate(FilterConfiguration filterConfiguration);
         public delegate void ListUpdatedDelegate(FilterConfiguration filterConfiguration);
 
         private List<(ulong, InventoryCategory)> _destinationInventories = new();
@@ -21,11 +23,17 @@ namespace InventoryTools.Logic
         private bool? _duplicatesOnly;
         private List<uint> _equipSlotCategoryId = new();
         private bool? _isCollectible;
-        private bool? _isHQ;
+        private bool? _isHq;
         private List<uint> _itemSearchCategoryId = new();
         private List<uint> _itemSortCategoryId = new();
         private List<uint> _itemUiCategoryId = new();
-        private string _name = "";
+        private Dictionary<string, bool>? _booleanFilters = new();
+        private Dictionary<string, string>? _stringFilters = new();
+        private Dictionary<string, List<uint>>? _uintChoiceFilters = new();
+        private Dictionary<string, List<ulong>>? _ulongChoiceFilters = new();
+        private Dictionary<string, List<string>>? _stringChoiceFilters = new();
+        private Dictionary<string, Vector4>? _colorFilters = new();
+        private string? _name = "";
         private string _key = "";
         private ulong _ownerId = 0;
         private bool? _filterItemsInRetainers;
@@ -39,6 +47,9 @@ namespace InventoryTools.Logic
         private string _iLevel = "";
         private string _shopSellingPrice = "";
         private string _shopBuyingPrice = "";
+        private string _marketAveragePrice = "";
+        private string _marketTotalAveragePrice = "";
+        private bool _openAsWindow = false;
         private bool? _canBeBought;
         private bool? _isAvailableAtTimedNode;
         private List<(ulong, InventoryCategory)> _sourceInventories = new();
@@ -48,10 +59,69 @@ namespace InventoryTools.Logic
         private bool? _invertHighlighting = null;
         private bool? _invertTabHighlighting = null;
         private string? _highlightWhen = null;
+        private List<string>? _columns;
+        private string? _icon;
+        private static readonly byte CurrentVersion = 1;
+        public string ExportBase64()
+        {
+            var json  = JsonConvert.SerializeObject(this);
+            var bytes = Encoding.UTF8.GetBytes(json).Prepend(CurrentVersion).ToArray();
+            return bytes.ToCompressedBase64();
+        }
+        internal static bool FromBase64(string data, out FilterConfiguration filterConfiguration)
+        {
+            filterConfiguration = new FilterConfiguration();
+            try
+            {
+                var bytes = data.FromCompressedBase64();
+                if (bytes.Length == 0 || bytes[0] != CurrentVersion)
+                {
+                    return false;
+                }
+
+                var json = Encoding.UTF8.GetString(bytes.AsSpan()[1..]);
+                var deserializeObject = JsonConvert.DeserializeObject<FilterConfiguration>(json);
+                if (deserializeObject == null)
+                {
+                    return false;
+                }
+
+                deserializeObject.Key = Guid.NewGuid().ToString("N");
+                filterConfiguration = deserializeObject;
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public string TableId
+        {
+            get
+            {
+                if (_tableId == null)
+                {
+                    var newTableId = GenerateNewTableId();
+                    return newTableId;
+                }
+                return _tableId;
+            }
+            set => _tableId = value;
+        }
+
+        public string GenerateNewTableId()
+        {
+            PluginLog.Log("generating new table id");
+            TableId = Guid.NewGuid().ToString("N");
+            return TableId;
+        }
         
         [JsonIgnore]
         private FilterResult? _filterResult = null;
 
+        private string? _tableId = null;
         public bool NeedsRefresh { get; set; } = true;
         public HighlightMode HighlightMode { get; set; } = HighlightMode.Never;
 
@@ -63,7 +133,7 @@ namespace InventoryTools.Logic
                 if (_filterResult == null || NeedsRefresh)
                 {
                     _filterResult = FilterManager.GenerateFilteredList(this,
-                        PluginLogic.InventoryMonitor.Inventories);
+                        PluginService.InventoryMonitor.Inventories);
                     NeedsRefresh = false;
                     ListUpdated?.Invoke(this);
                 }
@@ -77,6 +147,7 @@ namespace InventoryTools.Logic
             FilterType = filterType;
             Name = name;
             Key = key;
+            AddDefaultColumns();
         }
 
         public FilterConfiguration(string name, FilterType filterType)
@@ -84,6 +155,39 @@ namespace InventoryTools.Logic
             FilterType = filterType;
             Name = name;
             Key = Guid.NewGuid().ToString("N");
+            AddDefaultColumns();
+        }
+
+        public void AddDefaultColumns()
+        {
+            Columns = new List<string>();
+            if (FilterType == FilterType.SearchFilter)
+            {
+                Columns.Add("IconColumn");
+                Columns.Add("NameColumn");
+                Columns.Add("TypeColumn");
+                Columns.Add("QuantityColumn");
+                Columns.Add("SourceColumn");
+                Columns.Add("LocationColumn");
+            }
+            else if (FilterType == FilterType.SortingFilter)
+            {
+                Columns.Add("IconColumn");
+                Columns.Add("NameColumn");
+                Columns.Add("TypeColumn");
+                Columns.Add("QuantityColumn");
+                Columns.Add("SourceColumn");
+                Columns.Add("LocationColumn");
+                Columns.Add("DestinationColumn");
+            }
+            else if (FilterType == FilterType.GameItemFilter)
+            {
+                Columns.Add("IconColumn");
+                Columns.Add("NameColumn");
+                Columns.Add("QuantityColumn");
+                Columns.Add("ItemILevelColumn");
+                Columns.Add("ItemLevelColumn");
+            }
         }
 
         public FilterConfiguration()
@@ -98,34 +202,8 @@ namespace InventoryTools.Logic
         public FilterTable GenerateTable()
         {
             FilterTable table = new FilterTable(this);
-            if (FilterType == FilterType.SearchFilter)
-            {
-                table.AddColumn(new NameColumn());
-                table.AddColumn(new TypeColumn());
-                table.AddColumn(new SourceColumn());
-                table.AddColumn(new LocationColumn());
-                table.AddColumn(new QuantityColumn());
-                table.AddColumn(new ItemILevelColumn());
-                table.AddColumn(new UiCategoryColumn());
-                table.AddColumn(new SearchCategoryColumn());
-                table.AddColumn(new MarketBoardPriceColumn());
-                table.ShowFilterRow = true;
-            }
-            else
-            {
-                table.AddColumn(new NameColumn());
-                table.AddColumn(new TypeColumn());
-                table.AddColumn(new SourceColumn());
-                table.AddColumn(new LocationColumn());
-                table.AddColumn(new DestinationColumn());
-                table.AddColumn(new QuantityColumn());
-                table.AddColumn(new ItemILevelColumn());
-                table.AddColumn(new UiCategoryColumn());
-                table.AddColumn(new SearchCategoryColumn());
-                table.AddColumn(new MarketBoardPriceColumn());
-                table.ShowFilterRow = true;
-            }
-
+            table.RefreshColumns();
+            table.ShowFilterRow = true;
             return table;
         }
 
@@ -186,8 +264,8 @@ namespace InventoryTools.Logic
 
         public bool? IsHq
         {
-            get => _isHQ;
-            set { _isHQ = value;
+            get => _isHq;
+            set { _isHq = value;
                 NeedsRefresh = true;
                 ConfigurationChanged?.Invoke(this);
             }
@@ -236,6 +314,14 @@ namespace InventoryTools.Logic
             }
         }
 
+        public bool OpenAsWindow
+        {
+            get => _openAsWindow;
+            set { _openAsWindow = value;
+                ConfigurationChanged?.Invoke(this);
+            }
+        }
+
         public string Quantity
         {
             get => _quantity;
@@ -245,7 +331,7 @@ namespace InventoryTools.Logic
             }
         }
 
-        public string iLevel
+        public string ILevel
         {
             get => _iLevel;
             set { _iLevel = value;
@@ -352,6 +438,28 @@ namespace InventoryTools.Logic
             }
         }
 
+        public string MarketAveragePrice
+        {
+            get => _marketAveragePrice;
+            set
+            {
+                _marketAveragePrice = value;
+                NeedsRefresh = true;
+                ConfigurationChanged?.Invoke(this);
+            }
+        }
+
+        public string MarketTotalAveragePrice
+        {
+            get => _marketTotalAveragePrice;
+            set
+            {
+                _marketTotalAveragePrice = value;
+                NeedsRefresh = true;
+                ConfigurationChanged?.Invoke(this);
+            }
+        }
+
         public bool? CanBeBought
         {
             get => _canBeBought;
@@ -378,6 +486,12 @@ namespace InventoryTools.Logic
         {
             get => _ownerId;
             set => _ownerId = value;
+        }
+
+        public string? Icon
+        {
+            get => _icon;
+            set => _icon = value;
         }
         
         public Vector4? HighlightColor
@@ -420,128 +534,79 @@ namespace InventoryTools.Logic
             }
         }
 
-        public event ConfigurationChangedDelegate ConfigurationChanged;
-        public event ListUpdatedDelegate ListUpdated;
+        public event ConfigurationChangedDelegate? ConfigurationChanged;
+        public event TableConfigurationChangedDelegate? TableConfigurationChanged;
+        public event ListUpdatedDelegate? ListUpdated;
 
+        public bool FilterItem(Item item)
+        {
+            foreach (var filter in PluginService.PluginLogic.AvailableFilters)
+            {
+                if (!filter.FilterItem(this, item))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
         public bool FilterItem(InventoryItem item)
         {
-            var matches = true;
-            if (this.ItemUiCategoryId.Count != 0)
+            foreach (var filter in PluginService.PluginLogic.AvailableFilters)
             {
-                if (!ItemUiCategoryId.Contains(item.ItemUICategory.RowId))
+                if (!filter.FilterItem(this, item))
                 {
-                    matches = false;
-                }
-            }
-            if (this.ItemSearchCategoryId.Count != 0)
-            {
-                if (!ItemSearchCategoryId.Contains(item.ItemSearchCategory.RowId))
-                {
-                    matches = false;
-                }
-                
-            }
-            if (this.ItemSortCategoryId.Count != 0)
-            {
-                if (!ItemSortCategoryId.Contains(item.ItemSortCategory.RowId))
-                {
-                    matches = false;
-                }
-                
-            }
-            if (this._isHQ != null)
-            {
-                if (item.IsHQ != IsHq)
-                {
-                    matches = false;
-                }
-            }
-            if (this.IsCollectible != null)
-            {
-                if (item.IsCollectible != IsCollectible)
-                {
-                    matches = false;
-                }
-                
-            }
-
-            if (!string.IsNullOrEmpty(this.NameFilter))
-            {
-                if (!item.Item.Name.ToString().ToLower().PassesFilter(this.NameFilter.ToLower()))
-                {
-                    matches = false;
-                }
-            }
-
-            if (!string.IsNullOrEmpty(this.Quantity))
-            {
-                if (!item.Quantity.PassesFilter(this.Quantity))
-                {
-                    matches = false;
-                }
-            }
-
-            if (!string.IsNullOrEmpty(this.iLevel))
-            {
-                if (!item.Item.LevelItem.Row.PassesFilter(this.iLevel) || item.EquipSlotCategory.RowId == 0)
-                {
-                    matches = false;
-                }
-            }
-
-            if (!string.IsNullOrEmpty(this.Spiritbond))
-            {
-                var spiritBond = item.Spiritbond;
-                var itemSpiritBond = spiritBond / 100;
-                if (!itemSpiritBond.PassesFilter(this.Spiritbond) || item.IsCollectible)
-                {
-                    matches = false;
-                }
-            }
-
-            if (!string.IsNullOrEmpty(this.ShopBuyingPrice))
-            {
-                if (!item.Item.PriceMid.PassesFilter(this.ShopBuyingPrice) || !item.CanBeBought)
-                {
-                    matches = false;
-                }
-            }
-
-            if (!string.IsNullOrEmpty(this.ShopSellingPrice))
-            {
-                if (!item.Item.PriceLow.PassesFilter(this.ShopSellingPrice))
-                {
-                    matches = false;
-                }
-            }
-
-            if (this.CanBeBought.HasValue)
-            {
-                if (this.CanBeBought.Value && !item.CanBeBought)
-                {
-                    matches = false;
-                }
-                else if (!this.CanBeBought.Value && item.CanBeBought)
-                {
-                    matches = false;
-                }
-            }
-
-            if (this.IsAvailableAtTimedNode.HasValue)
-            {
-                if (this.IsAvailableAtTimedNode.Value && !item.IsItemAvailableAtTimedNode)
-                {
-                    matches = false;
-                }
-                else if (!this.IsAvailableAtTimedNode.Value && item.IsItemAvailableAtTimedNode)
-                {
-                    matches = false;
+                    return false;
                 }
             }
             
-            return matches;
+            return true;
         }
 
+        public void AddColumn(string columnName)
+        {
+            if (_columns == null)
+            {
+                _columns = new List<string>();
+            }
+            _columns.Add(columnName);
+            GenerateNewTableId();
+            TableConfigurationChanged?.Invoke(this);
+        }
+        
+        public void UpColumn(string columnName)
+        {
+            if (this._columns == null)
+            {
+                return;
+            }
+            _columns = _columns.MoveUp(columnName);
+            GenerateNewTableId();
+            TableConfigurationChanged?.Invoke(this);
+        }
+        
+        public void DownColumn(string columnName)
+        {
+            if (this._columns == null)
+            {
+                return;
+            }
+            _columns = _columns.MoveDown(columnName);
+            GenerateNewTableId();
+            TableConfigurationChanged?.Invoke(this);
+        }
+
+        public void RemoveColumn(string columnName)
+        {
+            if (this._columns == null)
+            {
+                return;
+            }
+            _columns = _columns.Where(c => c != columnName).ToList();
+            GenerateNewTableId();
+            TableConfigurationChanged?.Invoke(this);
+        }
+        
         public void AddDestinationInventory((ulong, InventoryCategory) inventory)
         {
             if (!DestinationInventories.Contains(inventory))
@@ -627,16 +692,246 @@ namespace InventoryTools.Logic
         {
             get
             {
-                if (FilterType == FilterType.SearchFilter)
+                if (FilterType.HasFlag(FilterType.SearchFilter))
                 {
                     return "Search Filter";
                 }
-                else if (FilterType == FilterType.SortingFilter)
+                else if (FilterType.HasFlag(FilterType.SortingFilter))
                 {
                     return "Sort Filter";
                 }
+                else if (FilterType.HasFlag(FilterType.GameItemFilter))
+                {
+                    return "Game Item Filter";
+                }
                 return "";
             }
+        }
+
+        public List<string>? Columns
+        {
+            get => _columns;
+            set
+            {
+                _columns = value;
+                TableConfigurationChanged?.Invoke(this);
+            }
+        }
+
+        public bool? GetBooleanFilter(string key)
+        {
+            if (BooleanFilters.ContainsKey(key))
+            {
+                return BooleanFilters[key];
+            }
+
+            return null;
+        }
+
+        public Vector4? GetColorFilter(string key)
+        {
+            if (ColorFilters.ContainsKey(key))
+            {
+                return ColorFilters[key];
+            }
+
+            return null;
+        }
+
+        public string GetStringFilter(string key)
+        {
+            if (StringFilters.ContainsKey(key))
+            {
+                return StringFilters[key];
+            }
+
+            return "";
+        }
+
+        public List<uint> GetUintChoiceFilter(string key)
+        {
+            if (UintChoiceFilters.ContainsKey(key))
+            {
+                return UintChoiceFilters[key];
+            }
+
+            return new List<uint>();
+        }
+
+        public List<ulong> GetUlongChoiceFilter(string key)
+        {
+            if (UlongChoiceFilters.ContainsKey(key))
+            {
+                return UlongChoiceFilters[key];
+            }
+
+            return new List<ulong>();
+        }
+
+        public List<string> GetStringChoiceFilter(string key)
+        {
+            if (StringChoiceFilters.ContainsKey(key))
+            {
+                return StringChoiceFilters[key];
+            }
+
+            return new List<string>();
+        }
+
+        public void UpdateBooleanFilter(string key, bool value)
+        {
+            if (BooleanFilters.ContainsKey(key) && BooleanFilters[key] == value)
+            {
+                return;
+            }
+
+            BooleanFilters[key] = value;
+            NeedsRefresh = true;
+            ConfigurationChanged?.Invoke(this);
+        }
+
+        public void UpdateColorFilter(string key, Vector4 value)
+        {
+            if (ColorFilters.ContainsKey(key) && ColorFilters[key] == value)
+            {
+                return;
+            }
+
+            ColorFilters[key] = value;
+            NeedsRefresh = true;
+            ConfigurationChanged?.Invoke(this);
+        }
+
+        public void RemoveBooleanFilter(string key)
+        {
+            if (BooleanFilters.ContainsKey(key))
+            {
+                BooleanFilters.Remove(key);
+                NeedsRefresh = true;
+                ConfigurationChanged?.Invoke(this);
+            }
+        }
+
+        public void RemoveColorFilter(string key)
+        {
+            if (ColorFilters.ContainsKey(key))
+            {
+                ColorFilters.Remove(key);
+                NeedsRefresh = true;
+                ConfigurationChanged?.Invoke(this);
+            }
+        }
+
+        public void UpdateStringFilter(string key, string value)
+        {
+            if (StringFilters.ContainsKey(key) && StringFilters[key] == value)
+            {
+                return;
+            }
+
+            StringFilters[key] = value;
+            NeedsRefresh = true;
+            ConfigurationChanged?.Invoke(this);
+        }
+
+        public void UpdateUintChoiceFilter(string key, List<uint> value)
+        {
+            UintChoiceFilters[key] = value;
+            NeedsRefresh = true;
+            ConfigurationChanged?.Invoke(this);
+        }
+
+        public void UpdateUlongChoiceFilter(string key, List<ulong> value)
+        {
+            UlongChoiceFilters[key] = value;
+            NeedsRefresh = true;
+            ConfigurationChanged?.Invoke(this);
+        }
+
+        public void UpdateStringChoiceFilter(string key, List<string> value)
+        {
+            StringChoiceFilters[key] = value;
+            NeedsRefresh = true;
+            ConfigurationChanged?.Invoke(this);
+        }
+
+        public Dictionary<string, bool> BooleanFilters
+        {
+            get
+            {
+                if (_booleanFilters == null)
+                {
+                    _booleanFilters = new();
+                }
+                return _booleanFilters;
+            }
+            set => _booleanFilters = value;
+        }
+
+        public Dictionary<string, Vector4> ColorFilters
+        {
+            get
+            {
+                if (_colorFilters == null)
+                {
+                    _colorFilters = new();
+                }
+                return _colorFilters;
+            }
+            set => _colorFilters = value;
+        }
+
+
+        public Dictionary<string, string> StringFilters
+        {
+            get
+            {
+                if (_stringFilters == null)
+                {
+                    _stringFilters = new();
+                }
+                return _stringFilters;
+            }
+            set => _stringFilters = value;
+        }
+
+        public Dictionary<string, List<uint>> UintChoiceFilters
+        {
+            get
+            {
+                if (_uintChoiceFilters == null)
+                {
+                    _uintChoiceFilters = new Dictionary<string, List<uint>>();
+                }
+                return _uintChoiceFilters;
+            }
+            set => _uintChoiceFilters = value;
+        }
+
+        public Dictionary<string, List<ulong>> UlongChoiceFilters
+        {
+            get
+            {
+                if (_ulongChoiceFilters == null)
+                {
+                    _ulongChoiceFilters = new Dictionary<string, List<ulong>>();
+                }
+                return _ulongChoiceFilters;
+            }
+            set => _ulongChoiceFilters = value;
+        }
+
+        public Dictionary<string, List<string>> StringChoiceFilters
+        {
+            get
+            {
+                if (_stringChoiceFilters == null)
+                {
+                    _stringChoiceFilters = new Dictionary<string, List<string>>();
+                }
+                return _stringChoiceFilters;
+            }
+            set => _stringChoiceFilters = value;
         }
 
         public bool InActiveInventories(ulong activeCharacterId, ulong activeRetainerId, ulong sourceCharacterId,

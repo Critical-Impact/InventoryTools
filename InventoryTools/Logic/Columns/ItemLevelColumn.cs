@@ -1,53 +1,34 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using CriticalCommonLib.Models;
-using ImGuiNET;
-using InventoryTools.Extensions;
+﻿using CriticalCommonLib.Models;
+using Lumina.Excel.GeneratedSheets;
 
-namespace InventoryTools.Logic
+namespace InventoryTools.Logic.Columns
 {
-    public class ItemLevelColumn : IColumn
+    public class ItemLevelColumn : IntegerColumn
     {
-        public string Name { get; set; } = "Item Level";
-        public float Width { get; set; } = 80.0f;
-        public string FilterText { get; set; } = "";
-        
-        public IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items)
+        public override int? CurrentValue(InventoryItem item)
         {
-            return FilterText == "" ? items : items.Where(c => ((int)c.Item.LevelEquip).PassesFilter(FilterText));
+            if (item.Item == null)
+            {
+                return null;
+            }
+            return CurrentValue(item.Item);
         }
 
-        public IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items)
+        public override int? CurrentValue(Item item)
         {
-            return FilterText == "" ? items : items.Where(c => ((int)c.InventoryItem.Item.LevelEquip).PassesFilter(FilterText.ToLower()));
+            return item.LevelEquip;
         }
 
-        public IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
+        public override int? CurrentValue(SortingResult item)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => c.Item.LevelEquip.ToString()) : items.OrderByDescending(c => c.Item.LevelEquip.ToString());
+            return CurrentValue(item.InventoryItem);
         }
 
-        public IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items)
-        {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => c.InventoryItem.Item.LevelEquip.ToString()) : items.OrderByDescending(c => c.InventoryItem.Item.LevelEquip.ToString());
-        }
-
-        public void Draw(InventoryItem item)
-        {
-            ImGui.TableNextColumn();
-            ImGui.Text(item.Item.LevelEquip.ToString());
-        }
-
-        public void Draw(SortingResult item, int rowIndex)
-        {
-            ImGui.TableNextColumn();
-            ImGui.Text(item.InventoryItem.Item.LevelEquip.ToString());
-        }
-
-        public void Setup(int columnIndex)
-        {
-            ImGui.TableSetupColumn(Name, ImGuiTableColumnFlags.WidthFixed, Width,(uint)columnIndex);
-        }
+        public override string Name { get; set; } = "Item Level";
+        public override float Width { get; set; } = 80.0f;
+        public override string FilterText { get; set; } = "";
+        public override bool HasFilter { get; set; } = true;
+        public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
+        public override event IColumn.ButtonPressedDelegate? ButtonPressed;
     }
 }

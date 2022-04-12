@@ -1,61 +1,53 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using CriticalCommonLib.Enums;
-using CriticalCommonLib.Extensions;
-using CriticalCommonLib.Models;
+using CriticalCommonLib;
 using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Ui;
 using Dalamud.Game.ClientState;
-using Dalamud.Interface;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using ImGuiNET;
 using InventoryTools.Logic;
-using Lumina.Excel.GeneratedSheets;
+using InventoryTools.Sections;
 
 namespace InventoryTools
 {
     public partial class InventoryToolsUi : IDisposable
     {
-        private InventoryMonitor _inventoryMonitor;
-        private CharacterMonitor _characterMonitor;
-        private InventoryToolsConfiguration _configuration;
-        private ClientState _clientState;
-        private PluginLogic _pluginLogic;
-        private DalamudPluginInterface _pluginInterface;
-        private GameUi _gameUi;
-        public InventoryToolsUi(DalamudPluginInterface pluginInterface, PluginLogic pluginLogic, InventoryMonitor inventoryMonitor, CharacterMonitor characterMonitor, InventoryToolsConfiguration configuration, ClientState clientState, GameUi gameUi)
+        private bool _disposing = false;
+        private string _activeFilter = "";
+        
+        public InventoryToolsUi()
         {
-            _pluginLogic = pluginLogic;
-            _inventoryMonitor = inventoryMonitor;
-            _configuration = configuration;
-            _clientState = clientState;
-            _characterMonitor = characterMonitor;
-            _pluginInterface = pluginInterface;
-            _gameUi = gameUi;
-            _pluginInterface.UiBuilder.Draw += Draw;
-            _pluginInterface.UiBuilder.OpenConfigUi += UiBuilderOnOpenConfigUi;
+            Service.Interface.UiBuilder.Draw += Draw;
+            Service.Interface.UiBuilder.OpenConfigUi += UiBuilderOnOpenConfigUi;
+        }
+
+        public InventoryToolsConfiguration Configuration
+        {
+            get
+            {
+                return ConfigurationManager.Config;
+            }
         }
 
         private void UiBuilderOnOpenConfigUi()
         {
-            _configuration.IsVisible = true;
+            Configuration.IsVisible = true;
         }
 
         public bool IsVisible
         {
-            get => _configuration.IsVisible;
-            set => _configuration.IsVisible = value;
+            get => Configuration.IsVisible;
+            set => Configuration.IsVisible = value;
         }
         
-        private int _selectedFilterTab = 0;
-        private bool _disposing = false;
-        private string _activeFilter;
         public void Draw()
         {
-            if (!IsVisible || !this._clientState.IsLoggedIn || _disposing)
+            if (!IsVisible || !Service.ClientState.IsLoggedIn || _disposing)
                 return;
+            PluginLogic.DrawCraftRequirementsWindow();
+            PluginLogic.DrawFilterWindows();
             var isVisible = IsVisible;
             ImGui.SetNextWindowSize(new Vector2(350, 350) * ImGui.GetIO().FontGlobalScale, ImGuiCond.FirstUseEver);
             ImGui.SetNextWindowSizeConstraints(new Vector2(350, 350) * ImGui.GetIO().FontGlobalScale, new Vector2(2000, 2000) * ImGui.GetIO().FontGlobalScale);
@@ -63,38 +55,73 @@ namespace InventoryTools
             ImGui.Begin("Inventory Tools", ref isVisible);
             if (ImGui.BeginTabBar("###InventoryTag", ImGuiTabBarFlags.FittingPolicyScroll))
             {
-                for (var index = 0; index < _pluginLogic.FilterConfigurations.Count; index++)
+                for (var index = 0; index < PluginService.PluginLogic.FilterConfigurations.Count; index++)
                 {
-                    var filterConfiguration = _pluginLogic.FilterConfigurations[index];
-                    var itemTable = _pluginLogic.GetFilterTable(filterConfiguration.Key);
+                    var filterConfiguration = PluginService.PluginLogic.FilterConfigurations[index];
+                    var itemTable = PluginService.PluginLogic.GetFilterTable(filterConfiguration.Key);
+                    if (itemTable == null)
+                    {
+                        continue;
+                    }
                     if (filterConfiguration.DisplayInTabs)
                     {
-                        if (ImGui.BeginTabItem(itemTable.Name + "##" + filterConfiguration.Key))
+                        if (PluginFont.AppIcons.HasValue && filterConfiguration.Icon != null)
                         {
-                            itemTable.Draw(_configuration);
-                            if (_activeFilter != filterConfiguration.Key)
+                            ImGui.PushFont(PluginFont.AppIcons.Value);
+                            if (ImGui.BeginTabItem(filterConfiguration.Name + " " + filterConfiguration.Icon + "##" + filterConfiguration.Key))
                             {
-                                _activeFilter = filterConfiguration.Key;
-                                if (_configuration.SwitchFiltersAutomatically &&
-                                    _configuration.ActiveUiFilter != filterConfiguration.Key && _configuration.ActiveUiFilter != null)
+                                ImGui.PopFont();
+                                itemTable.Draw();
+                                if (_activeFilter != filterConfiguration.Key)
                                 {
-                                    _pluginLogic.ToggleActiveUiFilterByKey(filterConfiguration.Key);
+                                    _activeFilter = filterConfiguration.Key;
+                                    if (Configuration.SwitchFiltersAutomatically &&
+                                        Configuration.ActiveUiFilter != filterConfiguration.Key &&
+                                        Configuration.ActiveUiFilter != null)
+                                    {
+                                        PluginService.PluginLogic.ToggleActiveUiFilterByKey(filterConfiguration.Key);
+                                    }
                                 }
+
+                                ImGui.EndTabItem();
                             }
-                            ImGui.EndTabItem();
+                            else
+                            {
+                                ImGui.PopFont();
+                            }
+                        }
+                        else
+                        {
+                            if (ImGui.BeginTabItem(itemTable.Name + "##" + filterConfiguration.Key))
+                            {
+                                itemTable.Draw();
+                                if (_activeFilter != filterConfiguration.Key)
+                                {
+                                    _activeFilter = filterConfiguration.Key;
+                                    if (Configuration.SwitchFiltersAutomatically &&
+                                        Configuration.ActiveUiFilter != filterConfiguration.Key &&
+                                        Configuration.ActiveUiFilter != null)
+                                    {
+                                        PluginService.PluginLogic.ToggleActiveUiFilterByKey(filterConfiguration.Key);
+                                    }
+                                }
+
+                                ImGui.EndTabItem();
+                            }
+
                         }
                     }
                 }
                 
-                if (_configuration.ShowFilterTab && ImGui.BeginTabItem("Filters"))
+                if (Configuration.ShowFilterTab && ImGui.BeginTabItem("Filters"))
                 {
-                    RenderMonitorTab();
+                    FiltersSection.Draw();
                     ImGui.EndTabItem();
                 }
                 
                 if (ImGui.BeginTabItem("Configuration"))
                 {
-                    DrawConfigurationTab();
+                    ConfigurationSection.Draw();
                     ImGui.EndTabItem();
                 }
                 
@@ -111,6 +138,7 @@ namespace InventoryTools
                     ImGui.EndTabItem();
                 }
                 #endif
+                
 
                 ImGui.EndTabBar();
             }
@@ -124,52 +152,11 @@ namespace InventoryTools
             ImGui.PopStyleColor();
         }
 
-        private void RenderMonitorTab()
-        {
-            if (ImGui.BeginChild("###monitorLeft", new Vector2(100, -1) * ImGui.GetIO().FontGlobalScale, true))
-            {
-                for (var index = 0; index < _pluginLogic.FilterConfigurations.Count; index++)
-                {
-                    var filterConfiguration = _pluginLogic.FilterConfigurations[index];
-                    if (ImGui.Selectable(filterConfiguration.Name, index == _selectedFilterTab))
-                    {
-                        if (_configuration.SwitchFiltersAutomatically && _configuration.ActiveUiFilter != filterConfiguration.Key)
-                        {
-                            _pluginLogic.ToggleActiveBackgroundFilterByKey(filterConfiguration.Key);
-                        }
-
-                        _selectedFilterTab = index;
-                    }
-                }
-
-                ImGui.EndChild();
-            }
-
-            ImGui.SameLine();
-
-            if (ImGui.BeginChild("###monitorRight", new Vector2(-1, -1), true, ImGuiWindowFlags.HorizontalScrollbar))
-            {
-                for (var index = 0; index < _pluginLogic.FilterConfigurations.Count; index++)
-                {
-                    if (_selectedFilterTab == index)
-                    {
-                        var filterConfiguration = _pluginLogic.FilterConfigurations[index];
-                        var table = _pluginLogic.GetFilterTable(filterConfiguration.Key);
-                        if (table != null)
-                        {
-                            table.Draw(_configuration);
-                        }
-                    }
-                }
-                ImGui.EndChild();
-            }
-        }
-        
         public void Dispose()
         {
             _disposing = true;
-            _pluginInterface.UiBuilder.Draw -= Draw;
-            _pluginInterface.UiBuilder.OpenConfigUi -= UiBuilderOnOpenConfigUi;
+            Service.Interface.UiBuilder.Draw -= Draw;
+            Service.Interface.UiBuilder.OpenConfigUi -= UiBuilderOnOpenConfigUi;
         }
     }
 }

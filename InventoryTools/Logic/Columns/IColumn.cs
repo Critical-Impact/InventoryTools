@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Numerics;
 using CriticalCommonLib.Models;
 using ImGuiNET;
+using Lumina.Excel.GeneratedSheets;
 
-namespace InventoryTools.Logic
+namespace InventoryTools.Logic.Columns
 {
     public interface IColumn
     {
@@ -12,14 +12,21 @@ namespace InventoryTools.Logic
         
         public string FilterText { get; set; }
         
+        public bool HasFilter { get; set; }
+        
+        public ColumnFilterType FilterType { get; set; }
+        
         public IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items);
         public IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items);
+        public IEnumerable<Item> Filter(IEnumerable<Item> items);
         
         public IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items);
         public IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items);
+        public IEnumerable<Item> Sort(ImGuiSortDirection direction, IEnumerable<Item> items);
         
-        public void Draw(InventoryItem item);
+        public void Draw(InventoryItem item, int rowIndex);
         public void Draw(SortingResult item, int rowIndex);
+        public void Draw(Item item, int rowIndex);
 
         public void Setup(int columnIndex);
         
@@ -27,27 +34,10 @@ namespace InventoryTools.Logic
         {
             ImGui.TableSetupColumn(tableKey + "Filter" + Name, ImGuiTableColumnFlags.NoSort);
         }
+        
+        public delegate void ButtonPressedDelegate(string buttonName, object eventData);
+        public event ButtonPressedDelegate? ButtonPressed;
 
-        public bool DrawFilter(string tableKey, int columnIndex)
-        {
-            var filter = FilterText;
-            var hasChanged = false;
-            ImGui.TableSetColumnIndex(columnIndex);
-            ImGui.PushItemWidth(-20.000000f);
-            ImGui.PushID(Name);
-            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(0, 0));
-            ImGui.InputText("##" + tableKey + "FilterI" + Name, ref filter, 200);
-            ImGui.PopStyleVar();
-            ImGui.SameLine(0.0f, ImGui.GetStyle().ItemInnerSpacing.X);
-            ImGui.TableHeader("");
-            ImGui.PopID();
-            if (filter != FilterText)
-            {
-                FilterText = filter;
-                hasChanged = true;
-            }
-
-            return hasChanged;
-        }
+        public bool DrawFilter(string tableKey, int columnIndex);
     }
 }

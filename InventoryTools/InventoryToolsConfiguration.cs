@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
+using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Resolvers;
 using Dalamud.Configuration;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using InventoryTools.Logic;
-using InventoryTools.Resolvers;
 using Newtonsoft.Json;
 
 namespace InventoryTools
@@ -15,7 +16,36 @@ namespace InventoryTools
     [Serializable]
     public class InventoryToolsConfiguration : IPluginConfiguration
     {
-        public int Version { get; set; }
+        public delegate void ConfigurationChangedDelegate();
+
+        private bool _automaticallyDownloadMarketPrices;
+        private bool _colorRetainerList = true;
+
+        private bool _displayCrossCharacter = true;
+        private bool _displayTooltip = true;
+
+        private Vector4 _highlightColor = new (0.007f, 0.008f,
+            0.007f, 0.212f);
+
+        private string _highlightWhen = "Always";
+        private bool _invertHighlighting = true;
+        private bool _invertTabHighlighting = false;
+
+        private bool _isVisible;
+        private int _marketRefreshTimeHours = 24;
+        private bool _showItemNumberRetainerList = true;
+
+        private Vector4 _tabHighlightColor = new (0.007f, 0.008f,
+            0.007f, 1.0f);
+
+        public List<FilterConfiguration> FilterConfigurations = new();
+
+        public Dictionary<ulong, Character> SavedCharacters = new();
+
+        [JsonIgnore]
+        public Dictionary<ulong, Dictionary<InventoryCategory,List<InventoryItem>>> SavedInventories = new ();
+
+        public bool InventoriesMigrated { get; set; } = false;
 
         public bool IsVisible
         {
@@ -28,10 +58,8 @@ namespace InventoryTools
         }
 
         public int SelectedConfigurationPage { get; set; }
-
         public bool ShowFilterTab { get; set; } = true;
         public bool SwitchFiltersAutomatically { get; set; } = true;
-        public bool RestorePreviousFilter { get; set; } = true;
 
         public Vector4 HighlightColor
         {
@@ -62,7 +90,7 @@ namespace InventoryTools
                 ConfigurationChanged?.Invoke();
             }
         }
-        
+
         public bool DisplayTooltip
         {
             get => _displayTooltip;
@@ -72,17 +100,18 @@ namespace InventoryTools
                 ConfigurationChanged?.Invoke();
             }
         }
-        
+
         public bool AutomaticallyDownloadMarketPrices
         {
             get => _automaticallyDownloadMarketPrices;
             set
             {
                 _automaticallyDownloadMarketPrices = value;
+                Cache.CacheAutoRetrieve = value;
                 ConfigurationChanged?.Invoke();
             }
         }
-        
+
         public int MarketRefreshTimeHours
         {
             get => _marketRefreshTimeHours;
@@ -93,10 +122,11 @@ namespace InventoryTools
                 {
                     _marketRefreshTimeHours = 24;
                 }
+                Cache.CacheTimeHours = _marketRefreshTimeHours;
                 ConfigurationChanged?.Invoke();
             }
         }
-        
+
         public bool ColorRetainerList
         {
             get => _colorRetainerList;
@@ -147,15 +177,11 @@ namespace InventoryTools
             }
         }
 
-        public enum HighlightWhenEnum
-        {
-            Always,
-            WhenSearching
-        }
+        public string? ActiveUiFilter { get; set; } = null;
 
-        public string ActiveUiFilter { get; set; } = null;
         [JsonIgnore]
-        public string ActiveBackgroundFilter { get; set; } = null;
+        public string? ActiveBackgroundFilter { get; set; } = null;
+
         public bool FirstRun { get; set; } = true;
         public int SelectedHelpPage { get; set; }
         #if DEBUG
@@ -164,16 +190,8 @@ namespace InventoryTools
         public bool AutoSave { get; set; } = true;
         public int AutoSaveMinutes { get; set; } = 10;
         public int InternalVersion { get; set; } = 0;
-
-        public delegate void ConfigurationChangedDelegate();
-        public event ConfigurationChangedDelegate ConfigurationChanged; 
-
-        //Game Caches
-        public Dictionary<ulong, Dictionary<InventoryCategory,List<InventoryItem>>> SavedInventories = new ();
-        
-        public Dictionary<ulong, Character> SavedCharacters = new();
-        
-        public List<FilterConfiguration> FilterConfigurations = new();
+        public int Version { get; set; }
+        public event ConfigurationChangedDelegate? ConfigurationChanged;
 
         //Configuration Helpers
         public Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>> GetSavedInventory()
@@ -189,45 +207,6 @@ namespace InventoryTools
         public List<FilterConfiguration> GetSavedFilters()
         {
             return FilterConfigurations;
-        }
-        
-        // Add any other properties or methods here.
-        [JsonIgnore] 
-        private DalamudPluginInterface pluginInterface;
-
-        private bool _isVisible;
-        private Vector4 _highlightColor = new Vector4(0.007f, 0.008f,
-            0.007f, 0.212f);
-        private Vector4 _tabHighlightColor = new Vector4(0.007f, 0.008f,
-            0.007f, 1.0f);
-
-        private bool _displayCrossCharacter = true;
-        private bool _colorRetainerList = true;
-        private bool _showItemNumberRetainerList = true;
-        private bool _displayTooltip = true;
-        private bool _invertHighlighting = true;
-        private bool _invertTabHighlighting = false;
-        private string _highlightWhen = "Always";
-        private bool _automaticallyDownloadMarketPrices;
-        private int _marketRefreshTimeHours = 24;
-
-        public void Initialize(DalamudPluginInterface pluginInterface)
-        {
-            this.pluginInterface = pluginInterface;
-        }
-        
-        public void Save()
-        {
-            PluginLog.Verbose("Saving inventory tools configuration");
-            //Save the configuration manually so we can set ReferenceLoopHandling
-            File.WriteAllText(pluginInterface.ConfigFile.FullName, JsonConvert.SerializeObject((object) this, Formatting.None, new JsonSerializerSettings()
-            {
-                TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
-                TypeNameHandling = TypeNameHandling.Objects,
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
-                ContractResolver = new MinifyResolver()
-            }));
         }
     }
 }

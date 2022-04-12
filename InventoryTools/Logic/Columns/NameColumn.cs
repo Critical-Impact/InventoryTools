@@ -1,53 +1,32 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
+﻿using System.Numerics;
 using CriticalCommonLib.Models;
-using ImGuiNET;
-using InventoryTools.Extensions;
+using Dalamud.Interface.Colors;
+using Lumina.Excel.GeneratedSheets;
 
-namespace InventoryTools.Logic
+namespace InventoryTools.Logic.Columns
 {
-    public class NameColumn : IColumn
+    public class NameColumn : ColoredTextColumn
     {
-        public string Name { get; set; } = "Name";
-        public float Width { get; set; } = 250.0f;
-        public string FilterText { get; set; } = "";
-        
-        public IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items)
+        public override (string, Vector4)? CurrentValue(InventoryItem item)
         {
-            return FilterText == "" ? items : items.Where(c => c.FormattedName.ToLower().PassesFilter(FilterText.ToLower()));
+            return (item.FormattedName, item.ItemColour);
         }
 
-        public IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items)
+        public override (string, Vector4)? CurrentValue(Item item)
         {
-            return FilterText == "" ? items : items.Where(c => c.InventoryItem.FormattedName.ToLower().PassesFilter(FilterText.ToLower()));
+            return (item.Name, ImGuiColors.DalamudWhite);
         }
 
-        public IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
+        public override (string, Vector4)? CurrentValue(SortingResult item)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => c.FormattedName.ToLower()) : items.OrderByDescending(c => c.FormattedName.ToLower());
+            return CurrentValue(item.InventoryItem);
         }
 
-        public IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items)
-        {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => c.InventoryItem.FormattedName.ToLower()) : items.OrderByDescending(c => c.InventoryItem.FormattedName.ToLower());
-        }
-
-        public void Draw(InventoryItem item)
-        {
-            ImGui.TableNextColumn();
-            ImGui.TextColored(item.ItemColour, item.FormattedName);
-        }
-
-        public void Draw(SortingResult item, int rowIndex)
-        {
-            ImGui.TableNextColumn();
-            ImGui.TextColored(item.InventoryItem.ItemColour, item.InventoryItem.FormattedName);
-        }
-
-        public void Setup(int columnIndex)
-        {
-            ImGui.TableSetupColumn(Name, ImGuiTableColumnFlags.WidthFixed, Width,(uint)columnIndex);
-        }
+        public override string Name { get; set; } = "Name";
+        public override float Width { get; set; } = 250.0f;
+        public override string FilterText { get; set; } = "";
+        public override bool HasFilter { get; set; } = true;
+        public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
+        public override event IColumn.ButtonPressedDelegate? ButtonPressed;
     }
 }

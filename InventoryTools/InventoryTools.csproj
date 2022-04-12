@@ -13,6 +13,7 @@
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
         <Configurations>Debug;Release;FullDebug</Configurations>
         <Platforms>AnyCPU</Platforms>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <PropertyGroup Label="Documentation">
@@ -42,6 +43,7 @@
         <PackageReference Include="DalamudPackager" Version="2.1.2" />
         <PackageReference Include="ILRepack" Version="2.1.0-beta1" />
         <PackageReference Include="SerialQueue" Version="2.1.0" />
+        <PackageReference Include="System.Reactive" Version="5.0.0" />
         <PackageReference Include="XivCommon" Version="4.0.0" />
         <ProjectReference Include="..\CriticalCommonLib\CriticalCommonLib.csproj" />
         <Reference Include="Dalamud">
@@ -50,6 +52,10 @@
         </Reference>
         <Reference Include="ImGui.NET">
             <HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="ImGuiScene">
+            <HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="Lumina">
@@ -87,6 +93,7 @@
 
     <Target Name="CopyJsonDebug" AfterTargets="ILRepackDebug" Condition="'$(Configuration)' == 'Debug'">
         <Copy SourceFiles="$(ProjectDir)InventoryTools.json" DestinationFolder="$(DalamudOutputPath)" ContinueOnError="true" SkipUnchangedFiles="true" />
+        <Copy SourceFiles="$(ProjectDir)\Fonts\FFXIVAppIcons.ttf" DestinationFolder="$(DalamudOutputPath)\Fonts" ContinueOnError="true" SkipUnchangedFiles="true" />
     </Target>
 
 
@@ -122,12 +129,12 @@
         <Copy SourceFiles="$(ProjectDir)InventoryTools.json" DestinationFolder="$(TargetDir)" ContinueOnError="true" SkipUnchangedFiles="true" />
         <Copy SourceFiles="$(ProjectDir)\Images\icon.png" DestinationFolder="$(TargetDir)\InventoryTools\images\" ContinueOnError="true" SkipUnchangedFiles="true" />
         <Copy SourceFiles="$(ProjectDir)\Images\banner1.png" DestinationFolder="$(TargetDir)\InventoryTools\images\" ContinueOnError="true" SkipUnchangedFiles="true" />
+        <Copy SourceFiles="$(ProjectDir)\Fonts\FFXIVAppIcons.ttf" DestinationFolder="$(TargetDir)\InventoryTools\Fonts\" ContinueOnError="true" SkipUnchangedFiles="true" />
     </Target>
 
     <ItemGroup>
       <Folder Include="Converters" />
-      <Folder Include="Enums" />
-      <Folder Include="NetworkModel" />
+      <Folder Include="Ui\Tabs" />
     </ItemGroup>
 
 </Project>

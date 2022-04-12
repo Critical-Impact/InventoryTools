@@ -1,8 +1,13 @@
-﻿namespace InventoryTools.Logic
+﻿using System;
+
+namespace InventoryTools.Logic
 {
+    [Flags] 
     public enum FilterType
     {
-        SearchFilter, //For displaying the items in a source
-        SortingFilter //For working out where items should go
+        None = 0,
+        SearchFilter = 1, //For displaying the items in a source
+        SortingFilter = 2, //For working out where items should go
+        GameItemFilter = 4 //For displaying all the items
     }
 }

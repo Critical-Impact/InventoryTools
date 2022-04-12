@@ -1,15 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
-using Dalamud.Interface.Colors;
-using Dalamud.Logging;
-using Dalamud.Plugin;
+﻿using System.Numerics;
 using ImGuiNET;
-using InventoryTools.Logic;
 
 namespace InventoryTools
 {
@@ -20,13 +10,13 @@ namespace InventoryTools
 
             if (ImGui.BeginChild("###ivHelpList", new Vector2(150, -1) * ImGui.GetIO().FontGlobalScale, true))
             {
-                if (ImGui.Selectable("General", _configuration.SelectedHelpPage == 0))
+                if (ImGui.Selectable("General", Configuration.SelectedHelpPage == 0))
                 {
-                    _configuration.SelectedHelpPage = 0;
+                    Configuration.SelectedHelpPage = 0;
                 }
-                if (ImGui.Selectable("Filtering", _configuration.SelectedHelpPage == 1))
+                if (ImGui.Selectable("Filtering", Configuration.SelectedHelpPage == 1))
                 {
-                    _configuration.SelectedHelpPage = 1;
+                    Configuration.SelectedHelpPage = 1;
                 }
                 ImGui.EndChild();
             }
@@ -35,7 +25,7 @@ namespace InventoryTools
 
             if (ImGui.BeginChild("###ivHelpView", new Vector2(-1, -1), true))
             {
-                if (_configuration.SelectedHelpPage == 0)
+                if (Configuration.SelectedHelpPage == 0)
                 {
                     ImGui.Text("Basic Plugin Information:");
                     ImGui.Separator();
@@ -56,7 +46,7 @@ namespace InventoryTools
                     ImGui.TextWrapped("The below commands will toggle the background filter specified with <name>.");
                     ImGui.Text("/itfiltertoggle <name>, /invf <name>, /ifilter <name>");
                 }
-                else if (_configuration.SelectedHelpPage == 1)
+                else if (Configuration.SelectedHelpPage == 1)
                 {
                     ImGui.Text("Advanced Filtering:");
                     ImGui.Separator();
