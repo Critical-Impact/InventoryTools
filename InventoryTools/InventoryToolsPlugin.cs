@@ -16,7 +16,6 @@ using Dalamud.Interface;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using DalamudPluginProjectTemplate.Attributes;
-using FFXIVClientInterface;
 using InventoryTools.MarketBoard;
 using InventoryTools.Resolvers;
 using InventoryTools.Structs;
@@ -36,7 +35,6 @@ namespace InventoryTools
         public string Name => "Inventory Tools";
         internal DalamudPluginInterface PluginInterface { get; private set; }
         internal OdrScanner OdrScanner { get; private set; }
-        internal ClientInterface ClientInterface { get; private set; }
         internal InventoryMonitor InventoryMonitor { get; private set; }
         internal NetworkMonitor NetworkMonitor { get; private set; }
         internal CharacterMonitor CharacterMonitor { get; private set; }
@@ -67,12 +65,11 @@ namespace InventoryTools
 
             ExcelCache.Initialise(dataManager);
             GameInterface = new GameInterface(sigScanner);
-            ClientInterface = new ClientInterface(sigScanner, dataManager);
             NetworkMonitor = new NetworkMonitor(gameNetwork);
-            CharacterMonitor = new CharacterMonitor(gameNetwork,ClientInterface, framework, clientState);
+            CharacterMonitor = new CharacterMonitor(gameNetwork,framework, clientState);
             OdrScanner = new OdrScanner(clientState, CharacterMonitor);
             GameUi = new GameUi(sigScanner, framework);
-            InventoryMonitor = new InventoryMonitor(ClientInterface, clientState, OdrScanner, CharacterMonitor, GameUi, gameNetwork, framework);
+            InventoryMonitor = new InventoryMonitor( clientState, OdrScanner, CharacterMonitor, GameUi, gameNetwork, framework);
             PluginLogic = new PluginLogic(Config, clientState, InventoryMonitor, CharacterMonitor, GameUi, chatGui, framework);
             _ui = new InventoryToolsUi(pluginInterface,PluginLogic, InventoryMonitor, CharacterMonitor, Config, clientState, GameUi);
 
@@ -139,7 +136,6 @@ namespace InventoryTools
             GameUi.Dispose();
             CharacterMonitor.Dispose();
             NetworkMonitor.Dispose();
-            ClientInterface.Dispose();
             OdrScanner.Dispose();
             Config.Save();
             ExcelCache.Destroy();
