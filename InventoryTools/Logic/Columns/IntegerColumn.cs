@@ -41,7 +41,7 @@ namespace InventoryTools.Logic.Columns
                     return false;
                 }
 
-                return currentValue.Value.ToString().ToLower().PassesFilter(FilterText.ToLower());
+                return currentValue.Value.PassesFilter(FilterText);
             });
         }
 
@@ -56,13 +56,12 @@ namespace InventoryTools.Logic.Columns
                     return false;
                 }
 
-                return currentValue.Value.ToString().ToLower().PassesFilter(FilterText.ToLower());
+                return currentValue.Value.PassesFilter(FilterText);
             });
         }
 
         public override IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items)
         {
-            var isChecked = FilterText != "";
             return FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(c);
@@ -71,7 +70,7 @@ namespace InventoryTools.Logic.Columns
                     return false;
                 }
 
-                return currentValue.Value.ToString().ToLower().PassesFilter(FilterText.ToLower());
+                return currentValue.Value.PassesFilter(FilterText);
             });
         }
 

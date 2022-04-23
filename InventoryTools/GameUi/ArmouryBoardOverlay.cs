@@ -15,6 +15,7 @@ namespace InventoryTools.GameUi
             var atkUnitBase = AtkUnitBase;
             if (atkUnitBase != null && HasState)
             {
+                this.SetTabColors(TabColours);
                 var currentBagLocation = CurrentBagLocation;
                 if (currentBagLocation != null && BagColours.ContainsKey(currentBagLocation.Value))
                 {
@@ -28,8 +29,24 @@ namespace InventoryTools.GameUi
             return false;
         }
         
+        
+        private int? _storedTab = null;
+        
+        public override void Update()
+        {
+            var currentTab = CurrentTab;
+            if (currentTab != -1 && currentTab != _storedTab)
+            {
+                _storedTab = currentTab;
+                Draw();
+            }
+        }
+
+        
         public Dictionary<InventoryType, Dictionary<Vector2,Vector4?>> BagColours = new();
+        public Dictionary<InventoryType, Vector4?> TabColours = new();
         public Dictionary<Vector2, Vector4?> EmptyDictionary = new();
+        public Dictionary<InventoryType, Vector4?> EmptyTabs = new();
 
 
         public override void Setup()
@@ -37,6 +54,10 @@ namespace InventoryTools.GameUi
             for (int x = 0; x < 49; x++)
             {
                 EmptyDictionary.Add(new Vector2(x,0), null);
+            }
+            foreach(var type in this.BagToNumber)
+            {
+                EmptyTabs.Add(type.Key, null);
             }
         }
 
@@ -57,6 +78,7 @@ namespace InventoryTools.GameUi
                     foreach (var bag in BagToNumber.Keys)
                     {
                         BagColours[bag] = newState.Value.GetBagHighlights(bag);
+                        TabColours[bag] = newState.Value.GetTabHighlight(BagColours[bag]);
                     }
 
                     Draw();
@@ -81,6 +103,7 @@ namespace InventoryTools.GameUi
                 if (currentBagLocation != null && BagColours.ContainsKey(currentBagLocation.Value))
                 {
                     this.SetColors(currentBagLocation.Value, EmptyDictionary);
+                    this.SetTabColors( EmptyTabs);
                 }
             }
         }

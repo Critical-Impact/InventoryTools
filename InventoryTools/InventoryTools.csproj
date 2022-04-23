@@ -135,7 +135,6 @@
 
     <ItemGroup>
       <Folder Include="Converters" />
-      <Folder Include="Ui\Tabs" />
     </ItemGroup>
 
 </Project>

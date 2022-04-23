@@ -207,6 +207,22 @@ namespace InventoryTools
 
                         }
                     }
+                    if (ImGui.Button("Check select string"))
+                    {
+                        
+                        var inventoryLarge = PluginService.GameUi.GetWindow("SelectString");
+                        if (inventoryLarge != null)
+                        {
+                            var inventoryAddon = (AddonSelectString*) inventoryLarge;
+                            PluginLog.Log(inventoryAddon->PopupMenu.PopupMenu.EntryCount.ToString());
+                            for (int i = 0; i < inventoryAddon->PopupMenu.PopupMenu.EntryCount; i++)
+                            {
+                                var popupMenuEntryName = inventoryAddon->PopupMenu.PopupMenu.EntryNames[i];
+                                PluginLog.Log(popupMenuEntryName->ToString());
+                            }
+
+                        }
+                    }
                     if (ImGui.Button("Check free company tab"))
                     {
                         

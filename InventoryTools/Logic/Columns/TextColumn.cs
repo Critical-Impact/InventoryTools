@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib.Models;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using Lumina.Excel.GeneratedSheets;
+using NaturalSort.Extension;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -75,17 +77,17 @@ namespace InventoryTools.Logic.Columns
 
         public override IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(CurrentValue) : items.OrderByDescending(CurrentValue);
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(CurrentValue, StringComparison.OrdinalIgnoreCase.WithNaturalSort()) : items.OrderByDescending(CurrentValue, StringComparison.OrdinalIgnoreCase.WithNaturalSort());
         }
 
         public override IEnumerable<Item> Sort(ImGuiSortDirection direction, IEnumerable<Item> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(CurrentValue) : items.OrderByDescending(CurrentValue);
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(CurrentValue, StringComparison.OrdinalIgnoreCase.WithNaturalSort()) : items.OrderByDescending(CurrentValue, StringComparison.OrdinalIgnoreCase.WithNaturalSort());
         }
 
         public override IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(CurrentValue) : items.OrderByDescending(CurrentValue);
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(CurrentValue, StringComparison.OrdinalIgnoreCase.WithNaturalSort()) : items.OrderByDescending(CurrentValue, StringComparison.OrdinalIgnoreCase.WithNaturalSort());
         }
 
         public override void DoDraw(string? currentValue, int rowIndex)

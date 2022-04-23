@@ -207,7 +207,10 @@ namespace InventoryTools
                     filterConfig.AddColumn("TypeColumn");
                     filterConfig.AddColumn("SourceColumn");
                     filterConfig.AddColumn("LocationColumn");
-                    filterConfig.AddColumn("DestinationColumn");
+                    if (filterConfig.FilterType == FilterType.SortingFilter)
+                    {
+                        filterConfig.AddColumn("DestinationColumn");
+                    }
                     filterConfig.AddColumn("QuantityColumn");
                     filterConfig.AddColumn("ItemILevelColumn");
                     filterConfig.AddColumn("SearchCategoryColumn");

@@ -34,7 +34,7 @@ namespace InventoryTools
                 {
                     ImGui.Text("Basic Plugin Information:");
                     ImGui.Separator();
-                    ImGui.TextWrapped("Inventory Tools will track both your inventory and your retainer inventories. At present it only covers your character's main bag and saddle bags but will be expanded in the future.");
+                    ImGui.TextWrapped("Inventory Tools will track the multitude of inventories in the game. It also gives you the ability to highlight where items are within said inventories.");
                     ImGui.TextWrapped("I've taken a small amount of inspiration from Teamcraft and full credit to them for the idea of the inventory optimisations that their application provides.");
                     ImGui.TextWrapped("The plugin has been built for speed and such it can't quite do every inventory optimisation that Teamcraft can do but it's getting there.");
                     ImGui.NewLine();
@@ -66,6 +66,7 @@ namespace InventoryTools
                 else if (Configuration.SelectedHelpPage == 2)
                 {
                     ImGui.Text("About:");
+                    ImGui.Text("This plugin is written in some of the free time that I have, it's a labour of love and I will hopefully be actively releasing updates for a while.");
                     ImGui.Separator();
                     if (Configuration.TetrisEnabled)
                     {

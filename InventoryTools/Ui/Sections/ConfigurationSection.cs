@@ -529,6 +529,7 @@ namespace InventoryTools.Sections
                                          .GameItemFilter)));
                                 if (hasValues && ImGui.BeginTabItem(group.Key.ToString()))
                                 {
+                                    ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudWhite);
                                     foreach (var filter in group.Value)
                                     {
                                         if ((filter.AvailableIn.HasFlag(FilterType.SearchFilter) &&
@@ -544,7 +545,7 @@ namespace InventoryTools.Sections
                                             filter.Draw(filterConfiguration);
                                         }
                                     }
-
+                                    ImGui.PopStyleColor();
                                     ImGui.EndTabItem();
                                 }
 
