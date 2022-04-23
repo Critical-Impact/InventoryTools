@@ -1,17 +1,150 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CriticalCommonLib;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Ui;
+using Dalamud.Game;
 using Dalamud.Logging;
+using InventoryTools.GameUi;
 using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic
 {
-    public static class FilterManager
+    public class FilterManager : IDisposable
     {
-        public static FilterResult GenerateFilteredList(FilterConfiguration filter, Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>> inventories)
+        public FilterManager()
+        {
+            PluginService.GameUi.UiVisibilityChanged += GameUiOnUiVisibilityChanged; 
+            PluginService.GameUi.UiUpdated += GameUiOnUiUpdated;
+            AddOverlay(new RetainerListOverlay());
+            AddOverlay(new InventoryExpansionOverlay());
+            AddOverlay(new ArmouryBoardOverlay());
+            AddOverlay(new InventoryLargeOverlay());
+            AddOverlay(new InventoryGridOverlay());
+            AddOverlay(new InventoryRetainerLargeOverlay());
+            AddOverlay(new InventoryRetainerOverlay());
+            AddOverlay(new InventoryBuddyOverlay());
+            AddOverlay(new InventoryBuddyOverlay2());
+            AddOverlay(new FreeCompanyChestOverlay());
+            Service.Framework.Update += FrameworkOnUpdate;
+        }
+
+        private void FrameworkOnUpdate(Framework framework)
+        {
+            foreach (var overlay in _overlays)
+            {
+                overlay.Value.Update();
+            }
+        }
+
+        private Dictionary<WindowName, IAtkOverlayState> _overlays = new();
+        private HashSet<WindowName> _setupHooks = new();
+        private Dictionary<WindowName, DateTime> _lastUpdate = new();
+        public Dictionary<WindowName, IAtkOverlayState> Overlays
+        {
+            get => _overlays;
+        }
+
+        public void UpdateState(FilterState? filterState)
+        {
+            foreach (var overlay in _overlays)
+            {
+                overlay.Value.UpdateState(filterState);
+            }
+        }
+
+        public void SetupUpdateHook(IAtkOverlayState overlayState)
+        {
+            if (_setupHooks.Contains(overlayState.WindowName))
+            {
+                return;
+            }
+            var result = PluginService.GameUi.WatchWindowState(overlayState.WindowName);
+            if (result)
+            {
+                _setupHooks.Add(overlayState.WindowName);
+            }
+        }
+
+        public void AddOverlay(IAtkOverlayState overlayState)
+        {
+            if (!Overlays.ContainsKey(overlayState.WindowName))
+            {
+                Overlays.Add(overlayState.WindowName, overlayState);
+                overlayState.Setup();
+                overlayState.Draw();
+            }
+            else
+            {
+                PluginLog.Error("Attempted to add an overlay that is already registered.");
+            }
+        }
+
+        public void RemoveOverlay(WindowName windowName)
+        {
+            if (Overlays.ContainsKey(windowName))
+            {
+                Overlays[windowName].Clear();
+                Overlays.Remove(windowName);
+            }
+        }
+
+        public void RemoveOverlay(IAtkOverlayState overlayState)
+        {
+            if (Overlays.ContainsKey(overlayState.WindowName))
+            {
+                Overlays.Remove(overlayState.WindowName);
+                overlayState.Clear();
+            }
+        }
+
+        public void ClearOverlays()
+        {
+            foreach (var overlay in _overlays)
+            {
+                RemoveOverlay(overlay.Value);
+            }
+        }
+        private void GameUiOnUiVisibilityChanged(WindowName windowname, bool? windowstate)
+        {
+            if (_overlays.ContainsKey(windowname))
+            {
+                var overlay = _overlays[windowname];
+                if (windowstate.HasValue && windowstate.Value)
+                {
+                    SetupUpdateHook(overlay);
+                }
+
+                if (windowstate.HasValue && !windowstate.Value)
+                {
+                    overlay.UpdateState(null);
+                }
+                overlay.Draw();
+            }
+        }
+        
+        private void GameUiOnUiUpdated(WindowName windowname)
+        {
+            if (_overlays.ContainsKey(windowname))
+            {
+                var overlay = _overlays[windowname];
+                if (!_lastUpdate.ContainsKey(windowname))
+                {
+                    _lastUpdate[windowname] = DateTime.Now.AddMilliseconds(50);
+                    overlay.Draw();
+                }
+                else if(_lastUpdate[windowname] <= DateTime.Now)
+                {
+                    overlay.Draw();
+                    _lastUpdate[windowname] = DateTime.Now.AddMilliseconds(50);
+                }
+            }
+        }
+
+        public FilterResult GenerateFilteredList(FilterConfiguration filter, Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>> inventories)
         {
             var sortedItems = new List<SortingResult>();
             var unsortableItems = new List<InventoryItem>();
@@ -423,6 +556,18 @@ namespace InventoryTools.Logic
 
             
             return new FilterResult(sortedItems, unsortableItems, items);
+        }
+
+        private bool _disposed = false;
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                _disposed = true;
+                Service.Framework.Update -= FrameworkOnUpdate;
+                ClearOverlays();
+                PluginService.GameUi.UiVisibilityChanged -= GameUiOnUiVisibilityChanged;
+            }
         }
     }
 }

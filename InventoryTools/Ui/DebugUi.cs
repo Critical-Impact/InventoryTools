@@ -1,10 +1,22 @@
 using System;
+using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
-using CriticalCommonLib.Enums;
+using CriticalCommonLib.Addons;
+using CriticalCommonLib.Agents;
 using CriticalCommonLib.MarketBoard;
+using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Ui;
+using CriticalCommonLib.UiModule;
+using Dalamud.Interface;
+using Dalamud.Logging;
+using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using ImGuiNET;
+using InventoryTools.GameUi;
+using InventoryType = CriticalCommonLib.Enums.InventoryType;
 
 namespace InventoryTools
 {
@@ -126,32 +138,107 @@ namespace InventoryTools
                         Universalis.RetrieveMarketBoardPrice(12594);
                         Universalis.RetrieveMarketBoardPrice(19984);
                     }
-                    
+
+                    if (ImGui.Button("Item order module"))
+                    {
+                        var clientInterfaceUiModule = (ItemOrderModule*)FFXIVClientStructs.FFXIV.Client.System.Framework.Framework
+                            .Instance()->UIModule->GetItemOrderModule();
+                        var module = clientInterfaceUiModule;
+                        if (module != null)
+                        {
+                            PluginLog.Log($"item order module : {(ulong)module:X}", $"{(ulong)module:X}");
+                        }
+                    }
+
+                    if (ImGui.Button("Check inventory manager pointer"))
+                    {
+                        var instance = InventoryManager.Instance();
+                        if (instance != null)
+                        {
+                            PluginLog.Log($"Manager pointer: {(ulong)instance:X}", $"{(ulong)instance:X}");
+                            
+                        }
+                    }
+                    if (ImGui.Button("Check retainer pointer"))
+                    {
+                        var retainerBag0 = GameInterface.GetContainer(InventoryType.RetainerBag0);
+                        if (retainerBag0 != null)
+                        {
+                            PluginLog.Log($"Retainer Bag 0 Pointer: {(ulong)retainerBag0:X}", $"{(ulong)retainerBag0:X}");
+                            if (retainerBag0->Loaded == 0)
+                            {
+                                PluginLog.Log("Retainer bag not loaded");
+                            }
+                            else
+                            {
+                                var slot1 = &retainerBag0->Items[0];
+                                if (slot1 != null)
+                                {
+                                    PluginLog.Log($"Retainer Bag 0 Slot 0 Pointer: {(ulong)slot1:X}", $"{(ulong)slot1:X}");
+                                }
+                                else
+                                {
+                                    PluginLog.Log("slot 1 is 0");
+                                }
+                            }
+                            
+                        }
+                        else
+                        {
+                            PluginLog.Log("Bag not found");
+                        }
+                    }
+                    if (ImGui.Button("Check armoury agent"))
+                    {
+                        
+                        var agent = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework
+                            .Instance()->UIModule->GetAgentModule()->GetAgentByInternalId(AgentId.ArmouryBoard);
+                        if (agent->IsAgentActive())
+                        {
+                            var armouryAgent = (ArmouryBoard*) agent;
+                            PluginLog.Log(armouryAgent->SelectedTab.ToString());
+                        }
+
+                        var inventoryLarge = PluginService.GameUi.GetWindow("InventoryLarge");
+                        if (inventoryLarge != null)
+                        {
+                            var inventoryAddon = (InventoryLargeAddon*) inventoryLarge;
+                            PluginLog.Log(inventoryAddon->CurrentTab.ToString());
+
+                        }
+                    }
+                    if (ImGui.Button("Check free company tab"))
+                    {
+                        
+                        var inventoryLarge = PluginService.GameUi.GetWindow(WindowName.FreeCompanyChest.ToString());
+                        if (inventoryLarge != null)
+                        {
+                            var inventoryAddon = (InventoryFreeCompanyChestAddon*) inventoryLarge;
+                            PluginLog.Log(inventoryAddon->CurrentTab.ToString());
+
+                        }
+                    }
                 }
                 else if (Configuration.SelectedDebugPage == 3)
                 {
                     unsafe
                     {
-                        var clientInterfaceUiModule = PluginService.ClientInterface.UiModule;
-                        var module = clientInterfaceUiModule?.ItemOrderModule;
-                        if (module != null)
+                        var clientInterfaceUiModule = (ItemOrderModule*)FFXIVClientStructs.FFXIV.Client.System.Framework.Framework
+                            .Instance()->UIModule->GetItemOrderModule();
+                        if (clientInterfaceUiModule != null)
                         {
-                            var moduleData = module.Data;
-                            if (moduleData != null)
+                            ImGui.Text(clientInterfaceUiModule->RetainerID.ToString());
+                            ImGui.Text(new IntPtr(clientInterfaceUiModule->RetainerPtr).ToString());
+                            var container = GameInterface.GetContainer(InventoryType.RetainerBag0);
+                            if (container != null)
                             {
-                                ImGui.Text(moduleData->RetainerID.ToString());
-                                ImGui.Text(new IntPtr(moduleData->RetainerPtr).ToString());
-                                var container = GameInterface.GetContainer(InventoryType.RetainerBag0);
-                                if (container != null)
+                                ImGui.Text(container->Loaded.ToString());
+                                for (int i = 0; i < container->SlotCount; i++)
                                 {
-                                    ImGui.Text(container->Loaded.ToString());
-                                    for (int i = 0; i < container->SlotCount; i++)
-                                    {
-                                        var item = container->Items[i];
-                                        var itemPointer = new IntPtr(&item);
-                                        ImGui.Text(item.ItemId.ToString());
-                                        ImGui.Text(itemPointer.ToString());
-                                    }
+                                    var item = container->Items[i];
+                                    var itemPointer = new IntPtr(&item);
+                                    ImGui.Text(item.ItemId.ToString());
+                                    ImGui.Text(itemPointer.ToString());
                                 }
                             }
                         }

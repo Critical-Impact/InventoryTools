@@ -6,6 +6,7 @@ using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Resolvers;
 using Dalamud.Configuration;
+using Dalamud.Interface.Colors;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using InventoryTools.Logic;
@@ -27,6 +28,8 @@ namespace InventoryTools
         private Vector4 _highlightColor = new (0.007f, 0.008f,
             0.007f, 0.212f);
 
+        private Vector4 _retainerListColor = ImGuiColors.HealerGreen;
+
         private string _highlightWhen = "Always";
         private bool _invertHighlighting = true;
         private bool _invertTabHighlighting = false;
@@ -41,6 +44,8 @@ namespace InventoryTools
         public List<FilterConfiguration> FilterConfigurations = new();
 
         public Dictionary<ulong, Character> SavedCharacters = new();
+
+        private Dictionary<ulong, HashSet<uint>> _acquiredItems = new();
 
         [JsonIgnore]
         public Dictionary<ulong, Dictionary<InventoryCategory,List<InventoryItem>>> SavedInventories = new ();
@@ -67,6 +72,16 @@ namespace InventoryTools
             set
             {
                 _highlightColor = value;
+                ConfigurationChanged?.Invoke();
+            }
+        }
+
+        public Vector4 RetainerListColor
+        {
+            get => _retainerListColor;
+            set
+            {
+                _retainerListColor = value;
                 ConfigurationChanged?.Invoke();
             }
         }
@@ -176,8 +191,17 @@ namespace InventoryTools
                 ConfigurationChanged?.Invoke();
             }
         }
+        
+        public Dictionary<ulong, HashSet<uint>> AcquiredItems
+        {
+            get => _acquiredItems ?? new Dictionary<ulong, HashSet<uint>>();
+            set => _acquiredItems = value;
+        }
 
         public string? ActiveUiFilter { get; set; } = null;
+
+        [JsonIgnore]
+        public bool TetrisEnabled { get; set; } = false;
 
         [JsonIgnore]
         public string? ActiveBackgroundFilter { get; set; } = null;
@@ -191,6 +215,7 @@ namespace InventoryTools
         public int AutoSaveMinutes { get; set; } = 10;
         public int InternalVersion { get; set; } = 0;
         public int Version { get; set; }
+        
         public event ConfigurationChangedDelegate? ConfigurationChanged;
 
         //Configuration Helpers

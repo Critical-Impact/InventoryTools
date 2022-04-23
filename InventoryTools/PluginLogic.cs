@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -12,9 +13,9 @@ using CriticalCommonLib.Services.Ui;
 using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.Gui;
+using Dalamud.Interface.Colors;
 using Dalamud.Logging;
 using Dalamud.Utility;
-using FFXIVClientInterface;
 using ImGuiNET;
 using ImGuiScene;
 using InventoryTools.Extensions;
@@ -61,7 +62,7 @@ namespace InventoryTools
 
         private RightClickColumn _rightClickColumn = new();
         
-        public readonly Dictionary<ushort, TextureWrap> TextureDictionary = new Dictionary<ushort, TextureWrap>();
+        public readonly ConcurrentDictionary<ushort, TextureWrap> TextureDictionary = new ConcurrentDictionary<ushort, TextureWrap>();
         public readonly Dictionary<string, TextureWrap> UldTextureDictionary = new Dictionary<string, TextureWrap>();
 
         public PluginLogic()
@@ -98,7 +99,7 @@ namespace InventoryTools
             AvailableFilters.Add(new HighlightWhenFilter());
             AvailableFilters.Add(new HighlightColorFilter());
             AvailableFilters.Add(new TabHighlightColorFilter());
-
+            AvailableFilters.Add(new RetainerListColorFilter());
             //Events we need to track, inventory updates, active retainer changes, player changes, 
             PluginService.InventoryMonitor.OnInventoryChanged += InventoryMonitorOnOnInventoryChanged;
             PluginService.CharacterMonitor.OnActiveRetainerChanged += CharacterMonitorOnOnActiveCharacterChanged;
@@ -120,6 +121,8 @@ namespace InventoryTools
             PluginService.GameUi.WatchWindowState(WindowName.InventoryBuddy2);
             PluginService.GameUi.UiVisibilityChanged += GameUiOnUiVisibilityChanged;
             
+            GameInterface.AcquiredItemsUpdated += GameInterfaceOnAcquiredItemsUpdated;
+            
             LoadExistingData(PluginConfiguration.GetSavedFilters());
             if (PluginConfiguration.FirstRun)
             {
@@ -132,6 +135,16 @@ namespace InventoryTools
             this.CommonBase = new XivCommonBase(Hooks.Tooltips);
             this.CommonBase.Functions.Tooltips.OnItemTooltip += this.OnItemTooltip;
         }
+
+        private void GameInterfaceOnAcquiredItemsUpdated()
+        {
+            var activeCharacter = PluginService.CharacterMonitor.ActiveCharacter;
+            if (activeCharacter != 0)
+            {
+                PluginConfiguration.AcquiredItems[activeCharacter] = GameInterface.AcquiredItems;
+            }
+        }
+
         private void RunMigrations()
         {
             
@@ -227,6 +240,12 @@ namespace InventoryTools
                 }
                 PluginConfiguration.InternalVersion++;
             }
+
+            if (PluginConfiguration.InternalVersion == 4)
+            {
+                PluginConfiguration.RetainerListColor = ImGuiColors.HealerGreen;
+                PluginConfiguration.InternalVersion++;
+            }
         }
 
         private void FrameworkOnUpdate(Framework framework)
@@ -279,7 +298,6 @@ namespace InventoryTools
             ConfigurationManager.Save();
         }
 
-
         private void ConfigOnConfigurationChanged()
         {
             InvalidateFilters();
@@ -292,9 +310,16 @@ namespace InventoryTools
             if (character != null)
             {
                 InvalidateFilters();
+                if (PluginConfiguration.AcquiredItems.ContainsKey(character.CharacterId))
+                {
+                    GameInterface.AcquiredItems = PluginConfiguration.AcquiredItems[character.CharacterId];
+                }
+            }
+            else
+            {
+                GameInterface.AcquiredItems = new HashSet<uint>();
             }
         }
-
         /// <summary>
         /// Returns the currently active filter determined by the main window state
         /// </summary>
@@ -324,7 +349,7 @@ namespace InventoryTools
 
             return null;
         }
-
+        
         /// <summary>
         /// Returns the currently active UI filter regardless of window state
         /// </summary>
@@ -519,7 +544,7 @@ namespace InventoryTools
         {
             PluginLog.Verbose("PluginLogic: Disabling active background filter");
             PluginConfiguration.ActiveBackgroundFilter = null;
-            ToggleHighlights();
+            //ToggleHighlights();
             return true;
         }
 
@@ -642,12 +667,6 @@ namespace InventoryTools
                     _recentlyAddedSeen.Remove(item.ItemId);
                 }
                 _recentlyAddedSeen.Add(item.ItemId, item);
-                PluginLog.Verbose("PluginLogic: New item, " + item.ItemId + " Quantity: " + item.Quantity + " Flags: " + item.Flags.ToString() );
-            }
-
-            foreach (var item in itemChanges.RemovedItems)
-            {
-                PluginLog.Verbose("PluginLogic: Removed item, " + item.ItemId + " Quantity: " + item.Quantity + " Flags: " + item.Flags.ToString() );
             }
         }
 
@@ -669,71 +688,6 @@ namespace InventoryTools
             ToggleHighlights();
         }
 
-        private void DisableHighlights()
-        {
-            var inventoryGrid0 = PluginService.GameUi.GetPrimaryInventoryGrid(0);
-            var inventoryGrid1 = PluginService.GameUi.GetPrimaryInventoryGrid(1);
-            var inventoryGrid2 = PluginService.GameUi.GetPrimaryInventoryGrid(2);
-            var inventoryGrid3 = PluginService.GameUi.GetPrimaryInventoryGrid(3);
-            inventoryGrid0?.ClearColors();
-            inventoryGrid1?.ClearColors();
-            inventoryGrid2?.ClearColors();
-            inventoryGrid3?.ClearColors();
-
-            var smallInventoryGrid0 = PluginService.GameUi.GetNormalInventoryGrid(0);
-            var smallInventoryGrid1 = PluginService.GameUi.GetNormalInventoryGrid(1);
-            var smallInventoryGrid2 = PluginService.GameUi.GetNormalInventoryGrid(2);
-            var smallInventoryGrid3 = PluginService.GameUi.GetNormalInventoryGrid(3);
-            smallInventoryGrid0?.ClearColors();
-            smallInventoryGrid1?.ClearColors();
-            smallInventoryGrid2?.ClearColors();
-            smallInventoryGrid3?.ClearColors();
-
-            var largeInventoryGrid0 = PluginService.GameUi.GetLargeInventoryGrid(0);
-            var largeInventoryGrid1 = PluginService.GameUi.GetLargeInventoryGrid(1);
-            var largeInventoryGrid2 = PluginService.GameUi.GetLargeInventoryGrid(2);
-            var largeInventoryGrid3 = PluginService.GameUi.GetLargeInventoryGrid(3);
-            largeInventoryGrid0?.ClearColors();
-            largeInventoryGrid1?.ClearColors();
-            largeInventoryGrid2?.ClearColors();
-            largeInventoryGrid3?.ClearColors();
-
-            if (_currentRetainerId != 0)
-            {
-                var retainerGrid0 = PluginService.GameUi.GetRetainerGrid(0);
-                var retainerGrid1 = PluginService.GameUi.GetRetainerGrid(1);
-                var retainerGrid2 = PluginService.GameUi.GetRetainerGrid(2);
-                var retainerGrid3 = PluginService.GameUi.GetRetainerGrid(3);
-                var retainerGrid4 = PluginService.GameUi.GetRetainerGrid(4);
-                var retainerTabGrid = PluginService.GameUi.GetLargeRetainerInventoryGrid();
-                retainerGrid0?.ClearColors();
-                retainerGrid1?.ClearColors();
-                retainerGrid2?.ClearColors();
-                retainerGrid3?.ClearColors();
-                retainerGrid4?.ClearColors();
-                retainerTabGrid?.ClearColors();
-
-                var retainerInventoryGrid0 = PluginService.GameUi.GetNormalRetainerInventoryGrid(0);
-                var retainerInventoryGrid1 = PluginService.GameUi.GetNormalRetainerInventoryGrid(1);
-                var retainerInventoryGrid2 = PluginService.GameUi.GetNormalRetainerInventoryGrid(2);
-                var retainerInventoryGrid3 = PluginService.GameUi.GetNormalRetainerInventoryGrid(3);
-                var retainerInventoryGrid4 = PluginService.GameUi.GetNormalRetainerInventoryGrid(4);
-                retainerInventoryGrid0?.ClearColors();
-                retainerInventoryGrid1?.ClearColors();
-                retainerInventoryGrid2?.ClearColors();
-                retainerInventoryGrid3?.ClearColors();
-                retainerInventoryGrid4?.ClearColors();
-
-            }
-
-            var saddleBag = PluginService.GameUi.GetChocoboSaddlebag();
-            saddleBag?.ClearColors();
-            var saddleBag2 = PluginService.GameUi.GetChocoboSaddlebag2();
-            saddleBag2?.ClearColors();
-
-            var retainerList = PluginService.GameUi.GetRetainerList();
-            retainerList?.ClearColors();
-        }
         private void ToggleHighlights()
         {
             var activeFilter = GetActiveFilter();
@@ -772,6 +726,7 @@ namespace InventoryTools
                 invertTabHighlighting = activeFilter.InvertTabHighlighting ?? PluginConfiguration.InvertTabHighlighting;
             }
             
+            
             FilterResult? filteredList = null;
             if (activeTable != null)
             {
@@ -781,417 +736,8 @@ namespace InventoryTools
             {
                 filteredList = activeFilter.FilterResult.Value;
             }
-
-            HashSet<int> grid0Highlights = new(); 
-            HashSet<int> grid1Highlights = new(); 
-            HashSet<int> grid2Highlights = new(); 
-            HashSet<int> grid3Highlights = new(); 
-            HashSet<int> tab2Highlights = new();
-            HashSet<int> tab4Highlights = new();
-            HashSet<int> saddleBag0Highlights = new();
-            HashSet<int> saddleBag1Highlights = new();
-            HashSet<int> pSaddleBag0Highlights = new();
-            HashSet<int> pSaddleBag1Highlights = new();
-            HashSet<int> saddleBagTabHighlights = new();
             
-            var openAllGrid0 = PluginService.GameUi.GetPrimaryInventoryGrid(0);
-            var openAllGrid1 = PluginService.GameUi.GetPrimaryInventoryGrid(1);
-            var openAllGrid2 = PluginService.GameUi.GetPrimaryInventoryGrid(2);
-            var openAllGrid3 = PluginService.GameUi.GetPrimaryInventoryGrid(3);
-            var normalInventoryGrid0 = PluginService.GameUi.GetNormalInventoryGrid(0);
-            var normalInventoryGrid1 = PluginService.GameUi.GetNormalInventoryGrid(1);
-            var normalInventoryGrid2 = PluginService.GameUi.GetNormalInventoryGrid(2);
-            var normalInventoryGrid3 = PluginService.GameUi.GetNormalInventoryGrid(3);
-            var expandedInventoryGrid0 = PluginService.GameUi.GetLargeInventoryGrid(0);
-            var expandedInventoryGrid1 = PluginService.GameUi.GetLargeInventoryGrid(1);
-            var expandedInventoryGrid2 = PluginService.GameUi.GetLargeInventoryGrid(2);
-            var expandedInventoryGrid3 = PluginService.GameUi.GetLargeInventoryGrid(3);
-            var saddleBagUi = PluginService.GameUi.GetChocoboSaddlebag() ?? PluginService.GameUi.GetChocoboSaddlebag2();
-            
-            openAllGrid0?.ClearColors();
-            openAllGrid1?.ClearColors();
-            openAllGrid2?.ClearColors();
-            openAllGrid3?.ClearColors();
-            normalInventoryGrid0?.ClearColors();
-            normalInventoryGrid1?.ClearColors();
-            normalInventoryGrid2?.ClearColors();
-            normalInventoryGrid3?.ClearColors();
-            expandedInventoryGrid0?.ClearColors();
-            expandedInventoryGrid1?.ClearColors();
-            expandedInventoryGrid2?.ClearColors();
-            expandedInventoryGrid3?.ClearColors();
-            saddleBagUi?.ClearColors();
-            
-            //If invert highlighting is off then we need to make sure the empty items aren't used
-
-
-            if (shouldHighlight && filteredList != null)
-            {
-                for (var index = 0; index < filteredList.Value.SortedItems.Count; index++)
-                {
-                    var item = filteredList.Value.SortedItems[index];
-                    if (activeFilter != null && MatchesFilter(activeFilter, item, invertHighlighting))
-                    {
-                        if (item.SourceBag == InventoryType.Bag0)
-                        {
-                            if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
-                            {
-                                tab4Highlights.Add(0);
-                                tab2Highlights.Add(0);
-                            }
-
-                            if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
-                            {
-                                grid0Highlights.Add(item.InventoryItem.SortedSlotIndex);
-                            }
-
-                        }
-
-                        else if (item.SourceBag == InventoryType.Bag1)
-                        {
-                            if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
-                            {
-                                tab4Highlights.Add(1);
-                                tab2Highlights.Add(0);
-                            }
-
-                            if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
-                            {
-                                grid1Highlights.Add(item.InventoryItem.SortedSlotIndex);
-                            }
-                        }
-
-                        else if (item.SourceBag == InventoryType.Bag2)
-                        {
-                            if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
-                            {
-                                tab4Highlights.Add(2);
-                                tab2Highlights.Add(1);
-                            }
-
-                            if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
-                            {
-                                grid2Highlights.Add(item.InventoryItem.SortedSlotIndex);
-                            }
-                        }
-
-                        else if (item.SourceBag == InventoryType.Bag3)
-                        {
-                            if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
-                            {
-                                tab4Highlights.Add(3);
-                                tab2Highlights.Add(1);
-                            }
-
-                            if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
-                            {
-                                grid3Highlights.Add(item.InventoryItem.SortedSlotIndex);
-                            }
-                        }
-                        
-                        else if (item.SourceBag == InventoryType.SaddleBag0)
-                        {
-                            if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
-                            {
-                                saddleBagTabHighlights.Add(0);
-                            }
-
-                            if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
-                            {
-                                saddleBag0Highlights.Add(item.InventoryItem.SortedSlotIndex);
-                            }
-                            
-                        }
-                        
-                        else if (item.SourceBag == InventoryType.SaddleBag1)
-                        {
-                            if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
-                            {
-                                saddleBagTabHighlights.Add(0);
-                            }
-
-                            if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
-                            {
-                                saddleBag1Highlights.Add(item.InventoryItem.SortedSlotIndex);
-                            }
-                        }
-                        
-                        else if (item.SourceBag == InventoryType.PremiumSaddleBag0)
-                        {
-                            if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
-                            {
-                                saddleBagTabHighlights.Add(1);
-                            }
-
-                            if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
-                            {
-                                pSaddleBag0Highlights.Add(item.InventoryItem.SortedSlotIndex);
-                            }
-
-                        }
-                        
-                        else if (item.SourceBag == InventoryType.PremiumSaddleBag1)
-                        {
-                            if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
-                            {
-                                saddleBagTabHighlights.Add(1);
-                            }
-
-                            if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
-                            {
-                                pSaddleBag1Highlights.Add(item.InventoryItem.SortedSlotIndex);
-                            }
-                        }
-
-                    }
-                }
-                
-                openAllGrid0?.SetColors(grid0Highlights, activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                openAllGrid1?.SetColors(grid1Highlights, activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                openAllGrid2?.SetColors(grid2Highlights, activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                openAllGrid3?.SetColors(grid3Highlights, activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                normalInventoryGrid0?.SetColors(grid0Highlights, activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                normalInventoryGrid1?.SetColors(grid1Highlights, activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                normalInventoryGrid2?.SetColors(grid2Highlights, activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                normalInventoryGrid3?.SetColors(grid3Highlights, activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                normalInventoryGrid0?.SetTabColors(tab4Highlights, activeFilter?.TabHighlightColor ?? PluginConfiguration.TabHighlightColor, invertTabHighlighting);
-                normalInventoryGrid1?.SetTabColors(tab4Highlights, activeFilter?.TabHighlightColor ?? PluginConfiguration.TabHighlightColor, invertTabHighlighting);
-                normalInventoryGrid2?.SetTabColors(tab4Highlights, activeFilter?.TabHighlightColor ?? PluginConfiguration.TabHighlightColor, invertTabHighlighting);
-                normalInventoryGrid3?.SetTabColors(tab4Highlights, activeFilter?.TabHighlightColor ?? PluginConfiguration.TabHighlightColor, invertTabHighlighting);
-                expandedInventoryGrid0?.SetColors(grid0Highlights, activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                expandedInventoryGrid1?.SetColors(grid1Highlights, activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                expandedInventoryGrid2?.SetColors(grid2Highlights, activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                expandedInventoryGrid3?.SetColors(grid3Highlights, activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                expandedInventoryGrid0?.SetTabColors(tab2Highlights, activeFilter?.TabHighlightColor ?? PluginConfiguration.TabHighlightColor, invertTabHighlighting);
-                expandedInventoryGrid1?.SetTabColors(tab2Highlights, activeFilter?.TabHighlightColor ?? PluginConfiguration.TabHighlightColor, invertTabHighlighting);
-                expandedInventoryGrid2?.SetTabColors(tab2Highlights, activeFilter?.TabHighlightColor ?? PluginConfiguration.TabHighlightColor, invertTabHighlighting);
-                expandedInventoryGrid3?.SetTabColors(tab2Highlights, activeFilter?.TabHighlightColor ?? PluginConfiguration.TabHighlightColor, invertTabHighlighting);
-                if (saddleBagUi != null)
-                {
-                    if (saddleBagUi.SaddleBagSelected == 0)
-                    {
-                        saddleBagUi.SetItemLeftColors(saddleBag0Highlights,
-                            activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                        saddleBagUi.SetItemRightColors(saddleBag1Highlights,
-                            activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                        saddleBagUi.SetTabColors(saddleBagTabHighlights, activeFilter?.TabHighlightColor ?? PluginConfiguration.TabHighlightColor, invertTabHighlighting);
-                    }
-                    else
-                    {
-                        saddleBagUi.SetItemLeftColors(pSaddleBag0Highlights,
-                            activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                        saddleBagUi.SetItemRightColors(pSaddleBag1Highlights,
-                            activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                        saddleBagUi.SetTabColors(saddleBagTabHighlights, activeFilter?.TabHighlightColor ?? PluginConfiguration.TabHighlightColor, invertTabHighlighting);
-                    }
-                }
-            }
-
-
-            if (_currentRetainerId != 0)
-            {
-                var retainerExpandedGrid0 = PluginService.GameUi.GetRetainerGrid(0);
-                var retainerExpandedGrid1 = PluginService.GameUi.GetRetainerGrid(1);
-                var retainerExpandedGrid2 = PluginService.GameUi.GetRetainerGrid(2);
-                var retainerExpandedGrid3 = PluginService.GameUi.GetRetainerGrid(3);
-                var retainerExpandedGrid4 = PluginService.GameUi.GetRetainerGrid(4);
-                var retainerExpandedTabs = PluginService.GameUi.GetLargeRetainerInventoryGrid();
-                
-                var retainerNormalGrid0 = PluginService.GameUi.GetNormalRetainerInventoryGrid(0);
-                var retainerNormalGrid1 = PluginService.GameUi.GetNormalRetainerInventoryGrid(1);
-                var retainerNormalGrid2 = PluginService.GameUi.GetNormalRetainerInventoryGrid(2);
-                var retainerNormalGrid3 = PluginService.GameUi.GetNormalRetainerInventoryGrid(3);
-                var retainerNormalGrid4 = PluginService.GameUi.GetNormalRetainerInventoryGrid(4);
-
-                retainerExpandedGrid0?.ClearColors();
-                retainerExpandedGrid1?.ClearColors();
-                retainerExpandedGrid2?.ClearColors();
-                retainerExpandedGrid3?.ClearColors();
-                retainerExpandedGrid4?.ClearColors();
-                retainerExpandedTabs?.ClearColors();
-                retainerNormalGrid0?.ClearColors();
-                retainerNormalGrid1?.ClearColors();
-                retainerNormalGrid2?.ClearColors();
-                retainerNormalGrid3?.ClearColors();
-                retainerNormalGrid4?.ClearColors();
-                if (shouldHighlight && filteredList != null)
-                {
-                    HashSet<int> retainerGrid0Highlights = new();
-                    HashSet<int> retainerGrid1Highlights = new();
-                    HashSet<int> retainerGrid2Highlights = new();
-                    HashSet<int> retainerGrid3Highlights = new();
-                    HashSet<int> retainerGrid4Highlights = new();
-                    HashSet<int> retainerTab2Highlights = new();
-                    HashSet<int> retainerTab5Highlights = new();
-                    for (var index = 0; index < filteredList.Value.SortedItems.Count; index++)
-                    {
-                        var item = filteredList.Value.SortedItems[index];
-                        if (activeFilter != null && MatchesRetainerFilter(activeFilter, item, invertHighlighting))
-                        {
-                            if (item.SourceBag == InventoryType.RetainerBag0)
-                            {
-                                if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
-                                {
-                                    retainerTab2Highlights.Add(0);
-                                    retainerTab5Highlights.Add(0);
-                                }
-                                if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
-                                {
-                                    retainerGrid0Highlights.Add(item.InventoryItem.SortedSlotIndex);
-                                }
-                            }
-
-                            if (item.SourceBag == InventoryType.RetainerBag1)
-                            {
-                                if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
-                                {
-                                    retainerTab2Highlights.Add(0);
-                                    retainerTab5Highlights.Add(1);
-                                }
-                                if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
-                                {
-                                    retainerGrid1Highlights.Add(item.InventoryItem.SortedSlotIndex);
-                                }
-                            }
-
-                            if (item.SourceBag == InventoryType.RetainerBag2)
-                            {
-                                if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
-                                {
-                                    retainerTab2Highlights.Add(1);
-                                    retainerTab5Highlights.Add(2);
-                                }
-                                if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
-                                {
-                                    retainerGrid2Highlights.Add(item.InventoryItem.SortedSlotIndex);
-                                }
-                            }
-
-                            if (item.SourceBag == InventoryType.RetainerBag3)
-                            {
-                                if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
-                                {
-                                    retainerTab2Highlights.Add(1);
-                                    retainerTab5Highlights.Add(3);
-                                }
-                                if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
-                                {
-                                    retainerGrid3Highlights.Add(item.InventoryItem.SortedSlotIndex);
-                                }
-                            }
-
-                            if (item.SourceBag == InventoryType.RetainerBag4)
-                            {
-                                if (!invertTabHighlighting && !item.InventoryItem.IsEmpty || invertTabHighlighting)
-                                {
-                                    retainerTab2Highlights.Add(2);
-                                    retainerTab5Highlights.Add(4);
-                                }
-                                if (!invertHighlighting && !item.InventoryItem.IsEmpty || invertHighlighting)
-                                {
-                                    retainerGrid4Highlights.Add(item.InventoryItem.SortedSlotIndex);
-                                }
-                            }
-                        }
-                    }
-                    
-                    
-                    /***
-                     * Retainer Interface
-                     * Normal = retainerInventoryGrid
-                     * Expanded = retainerGrid + retainerTabGrid
-                     */
-                    retainerExpandedGrid0?.SetColors(retainerGrid0Highlights,
-                        activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                    retainerExpandedGrid1?.SetColors(retainerGrid1Highlights,
-                        activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                    retainerExpandedGrid2?.SetColors(retainerGrid2Highlights,
-                        activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                    retainerExpandedGrid3?.SetColors(retainerGrid3Highlights,
-                        activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                    retainerExpandedGrid4?.SetColors(retainerGrid4Highlights,
-                        activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                    retainerExpandedGrid0?.SetTabColors(retainerTab5Highlights,
-                        activeFilter?.TabHighlightColor ?? PluginConfiguration.TabHighlightColor, invertTabHighlighting);
-                    retainerExpandedGrid1?.SetTabColors(retainerTab5Highlights,
-                        activeFilter?.TabHighlightColor ?? PluginConfiguration.TabHighlightColor, invertTabHighlighting);
-                    retainerExpandedGrid2?.SetTabColors(retainerTab5Highlights,
-                        activeFilter?.TabHighlightColor ?? PluginConfiguration.TabHighlightColor, invertTabHighlighting);
-                    retainerExpandedGrid3?.SetTabColors(retainerTab5Highlights,
-                        activeFilter?.TabHighlightColor ?? PluginConfiguration.TabHighlightColor, invertTabHighlighting);
-                    retainerExpandedGrid4?.SetTabColors(retainerTab5Highlights,
-                        activeFilter?.TabHighlightColor ?? PluginConfiguration.TabHighlightColor, invertTabHighlighting);
-                    
-                    retainerExpandedTabs?.SetTabColors(retainerTab2Highlights,
-                        activeFilter?.TabHighlightColor ?? PluginConfiguration.TabHighlightColor, invertTabHighlighting);
-
-                    retainerNormalGrid0?.SetColors(retainerGrid0Highlights,
-                        activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                    retainerNormalGrid1?.SetColors(retainerGrid1Highlights,
-                        activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                    retainerNormalGrid2?.SetColors(retainerGrid2Highlights,
-                        activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                    retainerNormalGrid3?.SetColors(retainerGrid3Highlights,
-                        activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                    retainerNormalGrid4?.SetColors(retainerGrid4Highlights,
-                        activeFilter?.HighlightColor ?? PluginConfiguration.HighlightColor, invertHighlighting);
-                    retainerNormalGrid0?.SetTabColors(retainerTab5Highlights,
-                        activeFilter?.TabHighlightColor ?? PluginConfiguration.TabHighlightColor, invertTabHighlighting);
-                    retainerNormalGrid1?.SetTabColors(retainerTab5Highlights,
-                        activeFilter?.TabHighlightColor ?? PluginConfiguration.TabHighlightColor, invertTabHighlighting);
-                    retainerNormalGrid2?.SetTabColors(retainerTab5Highlights,
-                        activeFilter?.TabHighlightColor ?? PluginConfiguration.TabHighlightColor, invertTabHighlighting);
-                    retainerNormalGrid3?.SetTabColors(retainerTab5Highlights,
-                        activeFilter?.TabHighlightColor ?? PluginConfiguration.TabHighlightColor, invertTabHighlighting);
-                    retainerNormalGrid4?.SetTabColors(retainerTab5Highlights,
-                        activeFilter?.TabHighlightColor ?? PluginConfiguration.TabHighlightColor, invertTabHighlighting);
-                    
-
-
-                }
-            }
-            
-            /*var retainerList = PluginService.GameUi.GetRetainerList();
-            var currentCharacterId = Service.ClientState.LocalContentId;
-            if (retainerList != null)
-            {
-                PluginLog.Log("retainer list fully returned");
-                PluginLog.Log(retainerList._sortedItems.Count.ToString());
-                retainerList.ClearColors();
-                if (activeFilter != null)
-                {
-                    for (var index = 0; index < retainerList._sortedItems.Count; index++)
-                    {
-                        var listRetainer = retainerList._sortedItems[index];
-                        var retainer =
-                            PluginService.CharacterMonitor.GetCharacterByName(listRetainer.RetainerName, currentCharacterId);
-                        if (retainer != null && filteredList != null)
-                        {
-                            if (activeFilter.FilterType == FilterType.SortingFilter)
-                            {
-                                var count = filteredList.Value.SortedItems.Count(c =>
-                                    c.DestinationRetainerId == retainer.CharacterId &&
-                                    c.SourceRetainerId == currentCharacterId);
-                                if (count != 0)
-                                {
-                                    retainerList.SetTextAndColor(retainer.Name, retainer.Name + "(" + count + ")",
-                                        "00FF00");
-                                }
-                            }
-                            else
-                            {
-                                var count = filteredList.Value.SortedItems.Count(c =>
-                                    c.SourceRetainerId == retainer.CharacterId);
-                                if (count != 0)
-                                {
-                                    retainerList.SetTextAndColor(retainer.Name, retainer.Name + "(" + count + ")",
-                                        "00FF00");
-                                }
-                            }
-                        }
-                    }
-                }
-            }*/
+            PluginService.FilterManager.UpdateState(activeFilter != null ? new FilterState(){ FilterConfiguration = activeFilter, FilterTable = activeTable} : null);
         }
 
         private bool MatchesFilter(FilterConfiguration activeFilter, SortingResult item, bool invertHighlighting = false)
@@ -1665,9 +1211,10 @@ namespace InventoryTools
                 filterTables.Value.Dispose();
             }
 
+            GameInterface.AcquiredItemsUpdated -= GameInterfaceOnAcquiredItemsUpdated;
+
             UnwatchFilterChanges();
 
-            DisableHighlights();
             PluginConfiguration.FilterConfigurations = FilterConfigurations;
             PluginConfiguration.SavedCharacters = PluginService.CharacterMonitor.Characters;
             Service.Framework.Update -= FrameworkOnUpdate;

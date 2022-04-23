@@ -137,6 +137,11 @@ namespace InventoryTools
                     DrawDebugUi();
                     ImGui.EndTabItem();
                 }
+                if (Configuration.TetrisEnabled && ImGui.BeginTabItem("Tetris"))
+                {
+                    DrawTetrisTab();
+                    ImGui.EndTabItem();
+                }
                 #endif
                 
 

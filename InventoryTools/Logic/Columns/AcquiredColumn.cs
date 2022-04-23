@@ -1,5 +1,7 @@
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
+using Dalamud.Logging;
+using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
@@ -32,13 +34,11 @@ namespace InventoryTools.Logic.Columns
             }
             return  CurrentValue(item.InventoryItem.Item);
         }
-        
 
         public override string Name { get; set; } = "Acquired";
         public override float Width { get; set; } = 125.0f;
         public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Boolean;
-        public override event IColumn.ButtonPressedDelegate? ButtonPressed;
     }
 }

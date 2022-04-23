@@ -100,13 +100,17 @@ namespace InventoryTools.Logic.Columns
             }
             return FilterText == "" ? items : items.Where(c =>
             {
-                var currentValue = CurrentValue((Item) c);
+                var currentValue = CurrentValue(c);
                 if (!currentValue.HasValue)
                 {
                     return false;
                 }
 
-                return isChecked && currentValue.Value || !isChecked && !currentValue.Value;
+                if (isChecked)
+                {
+                    return currentValue.Value;
+                }
+                return !currentValue.Value;
             });
         }
 

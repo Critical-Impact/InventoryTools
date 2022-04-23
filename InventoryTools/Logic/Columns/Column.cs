@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib.Models;
@@ -39,7 +40,11 @@ namespace InventoryTools.Logic.Columns
 
         public abstract void Setup(int columnIndex);
 
-        public abstract event IColumn.ButtonPressedDelegate? ButtonPressed;
+        public virtual event IColumn.ButtonPressedDelegate? ButtonPressed
+        {
+            add { throw new NotSupportedException(); }
+            remove { }
+        }
 
         public virtual bool DrawFilter(string tableKey, int columnIndex)
         {

@@ -56,6 +56,7 @@ namespace InventoryTools.Logic
         private FilterType _filterType;
         private Vector4? _highlightColor;
         private Vector4? _tabHighlightColor;
+        private Vector4? _retainerListColor;
         private bool? _invertHighlighting = null;
         private bool? _invertTabHighlighting = null;
         private string? _highlightWhen = null;
@@ -132,7 +133,7 @@ namespace InventoryTools.Logic
             {
                 if (_filterResult == null || NeedsRefresh)
                 {
-                    _filterResult = FilterManager.GenerateFilteredList(this,
+                    _filterResult = PluginService.FilterManager.GenerateFilteredList(this,
                         PluginService.InventoryMonitor.Inventories);
                     NeedsRefresh = false;
                     ListUpdated?.Invoke(this);
@@ -500,6 +501,16 @@ namespace InventoryTools.Logic
             set
             {
                 _highlightColor = value;
+                ConfigurationChanged?.Invoke(this);
+            }
+        }
+        
+        public Vector4? RetainerListColor
+        {
+            get => _retainerListColor;
+            set
+            {
+                _retainerListColor = value;
                 ConfigurationChanged?.Invoke(this);
             }
         }

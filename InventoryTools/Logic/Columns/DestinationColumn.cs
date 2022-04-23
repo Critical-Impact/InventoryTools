@@ -28,6 +28,5 @@ namespace InventoryTools.Logic.Columns
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
         public override FilterType AvailableIn => Logic.FilterType.SortingFilter;
-        public override event IColumn.ButtonPressedDelegate? ButtonPressed;
     }
 }

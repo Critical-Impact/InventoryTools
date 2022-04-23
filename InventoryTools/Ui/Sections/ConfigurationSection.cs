@@ -106,6 +106,7 @@ namespace InventoryTools.Sections
                     string highlightWhen = Configuration.HighlightWhen;
                     Vector4 highlightColor = Configuration.HighlightColor;
                     Vector4 tabHighlightColor = Configuration.TabHighlightColor;
+                    Vector4 retainerListColor = Configuration.RetainerListColor;
 
                     ImGui.Text("Visuals:");
                     ImGui.Separator();
@@ -143,6 +144,23 @@ namespace InventoryTools.Sections
                     ImGui.SameLine();
                     UiHelpers.HelpMarker(
                         "The color to set the highlighted tabs(that contain filtered items) to.");
+
+                    if (ImGui.ColorEdit4("Retainer List Highlight Color?", ref retainerListColor, ImGuiColorEditFlags.NoInputs))
+                    {
+                        Configuration.RetainerListColor = retainerListColor;
+                    }
+
+                    if (Configuration.RetainerListColor.W == 0)
+                    {
+                        ImGui.SameLine();
+                        ImGui.TextColored(ImGuiColors.DalamudRed,
+                            "The filter alpha is set to 0, your retainer list items will be invisible.");
+                    }
+
+
+                    ImGui.SameLine();
+                    UiHelpers.HelpMarker(
+                        "The color to set the retainer(when the retainer contains filtered items) list to.");
 
                     if (ImGui.Checkbox("Invert Highlighting?", ref invertHighlighting))
                     {

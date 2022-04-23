@@ -15,7 +15,7 @@
         <Platforms>AnyCPU</Platforms>
         <Nullable>enable</Nullable>
     </PropertyGroup>
-
+    
     <PropertyGroup Label="Documentation">
         <DocumentationFile></DocumentationFile>
         <GenerateDocumentationFile>false</GenerateDocumentationFile>
@@ -45,7 +45,8 @@
         <PackageReference Include="SerialQueue" Version="2.1.0" />
         <PackageReference Include="System.Reactive" Version="5.0.0" />
         <PackageReference Include="XivCommon" Version="4.0.0" />
-        <ProjectReference Include="..\CriticalCommonLib\CriticalCommonLib.csproj" />
+        <ProjectReference Include="..\CriticalCommonLib\CriticalCommonLib.csproj" OutputItemType="true" />
+        <ProjectReference Include="..\Tetris\Tetris.csproj" />
         <Reference Include="Dalamud">
             <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
             <Private>False</Private>

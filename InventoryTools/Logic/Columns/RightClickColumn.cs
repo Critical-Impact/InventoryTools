@@ -54,7 +54,6 @@ namespace InventoryTools.Logic.Columns
             var hoveredRow = -1;
             ImGui.Selectable("", false, ImGuiSelectableFlags.SpanAllColumns, new Vector2(0, 32));
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow)) {
-                PluginLog.Log(rowIndex.ToString());
                 hoveredRow = rowIndex;
             }
             if (hoveredRow == rowIndex && ImGui.IsMouseReleased(ImGuiMouseButton.Right))
@@ -89,7 +88,5 @@ namespace InventoryTools.Logic.Columns
                 ImGui.EndPopup();
             }
         }
-
-        public override event IColumn.ButtonPressedDelegate? ButtonPressed;
     }
 }

@@ -76,46 +76,11 @@ namespace InventoryTools
                 AppIcons = ImGui.GetIO().Fonts
                     .AddFontFromFileTTF(fontPath, 17f, config, iconRangeHandle.AddrOfPinnedObject());
 
-
-
-
                 iconRangeHandle.Free();
                 gcHandle1.Free();
 
             }
 
-        }
-        
-        private struct ImFontGlyphReal
-        {
-            public uint ColoredVisibleCodepoint;
-            public float AdvanceX;
-            public float X0;
-            public float Y0;
-            public float X1;
-            public float Y1;
-            public float U0;
-            public float V0;
-            public float U1;
-            public float V1;
-
-            public bool Colored
-            {
-                get => (this.ColoredVisibleCodepoint & 1U) > 0U;
-                set => this.ColoredVisibleCodepoint = (uint) ((int) this.ColoredVisibleCodepoint & -2 | (value ? 1 : 0));
-            }
-
-            public bool Visible
-            {
-                get => (this.ColoredVisibleCodepoint >> 1 & 1U) > 0U;
-                set => this.ColoredVisibleCodepoint = (uint) ((int) this.ColoredVisibleCodepoint & -3 | (value ? 2 : 0));
-            }
-
-            public int Codepoint
-            {
-                get => (int) (this.ColoredVisibleCodepoint >> 2);
-                set => this.ColoredVisibleCodepoint = (uint) ((int) this.ColoredVisibleCodepoint & 3 | this.Codepoint << 2);
-            }
         }
     }
 }

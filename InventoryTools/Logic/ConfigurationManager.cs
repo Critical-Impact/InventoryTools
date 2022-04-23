@@ -38,6 +38,7 @@ namespace InventoryTools.Logic
         }
         public static void Load()
         {
+            PluginLog.Verbose("Loading configuration");
             if (!File.Exists(ConfigurationFile))
             {
                 Config = new InventoryToolsConfiguration();
@@ -57,13 +58,16 @@ namespace InventoryTools.Logic
             }
             if (!inventoryToolsConfiguration.InventoriesMigrated)
             {
-                var temp =  JArray.Parse(jsonText);
-                var savedInventories = temp
-                    .Descendants()
-                    .OfType<JProperty>()
-                    .Single(attr => attr.Name == "SavedInventories");
-                var inventories = savedInventories.ToObject<Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>>();
-                inventoryToolsConfiguration.SavedInventories = inventories ?? new Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>();
+                PluginLog.Verbose("Migrating inventories");
+                var temp =  JObject.Parse(jsonText);
+                if (temp.ContainsKey("SavedInventories"))
+                {
+                    var inventories = temp["SavedInventories"]?.ToObject<Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>>();
+                    inventoryToolsConfiguration.SavedInventories = inventories ??
+                                                                   new Dictionary<ulong, Dictionary<InventoryCategory,
+                                                                       List<InventoryItem>>>();
+                }
+
                 inventoryToolsConfiguration.InventoriesMigrated = true;
             }
             else
@@ -98,13 +102,18 @@ namespace InventoryTools.Logic
         {
             try
             {
+                PluginLog.Verbose("Loading inventories from " + InventoryFile);
                 var cacheFile = new FileInfo(InventoryFile);
                 string json = File.ReadAllText(cacheFile.FullName, Encoding.UTF8);
-                return JsonConvert.DeserializeObject<Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>>(json);
+                return JsonConvert.DeserializeObject<Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>>(json, new JsonSerializerSettings()
+                {
+                    DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
+                    ContractResolver = new MinifyResolver()
+                });
             }
             catch (Exception e)
             {
-                PluginLog.Verbose("Error while parsing saved saved inventory data, " + e.Message);
+                PluginLog.Error("Error while parsing saved saved inventory data, " + e.Message);
                 return null;
             }
         }

@@ -1,4 +1,5 @@
-﻿using CriticalCommonLib.Enums;
+﻿using System.Numerics;
+using CriticalCommonLib.Enums;
 using CriticalCommonLib.Models;
 
 namespace InventoryTools.Logic
@@ -44,6 +45,8 @@ namespace InventoryTools.Logic
             _destinationBag = null;
             _destinationRetainerId = null;
         }
+        
+        public Vector2 BagLocation => InventoryItem.BagLocation(_sourceBag);
 
         public string GetExtraInformation()
         {

@@ -82,7 +82,5 @@ namespace InventoryTools.Logic.Columns
                 }
             }
         }
-
-        public override event IColumn.ButtonPressedDelegate? ButtonPressed;
     }
 }

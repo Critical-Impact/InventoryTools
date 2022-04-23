@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using ImGuiNET;
+using InventoryTools.Misc;
 
 namespace InventoryTools
 {
@@ -17,6 +18,10 @@ namespace InventoryTools
                 if (ImGui.Selectable("Filtering", Configuration.SelectedHelpPage == 1))
                 {
                     Configuration.SelectedHelpPage = 1;
+                }
+                if (ImGui.Selectable("About", Configuration.SelectedHelpPage == 2))
+                {
+                    Configuration.SelectedHelpPage = 2;
                 }
                 ImGui.EndChild();
             }
@@ -57,6 +62,27 @@ namespace InventoryTools
                     ImGui.TextWrapped(">= - Show any results that have a value greater or equal to what is entered - available for numbers.");
                     ImGui.TextWrapped("<= - Show any results that have a value less than or equal to what is entered - available for numbers.");
                     ImGui.TextWrapped("= - Show any results that have a value equal to exactly what is entered - available for text and numbers.");
+                }
+                else if (Configuration.SelectedHelpPage == 2)
+                {
+                    ImGui.Text("About:");
+                    ImGui.Separator();
+                    if (Configuration.TetrisEnabled)
+                    {
+                        if (ImGui.Button("I do not like tetris"))
+                        {
+                            TetrisGame.DisableTetris();
+                            Configuration.TetrisEnabled = false;
+                        }
+                    }
+                    else
+                    {
+                        if (ImGui.Button("I like tetris"))
+                        {
+                            TetrisGame.EnableTetris();
+                            Configuration.TetrisEnabled = true;
+                        }
+                    }
                 }
                 ImGui.EndChild();
             }

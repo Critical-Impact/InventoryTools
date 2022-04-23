@@ -35,8 +35,6 @@ namespace InventoryTools.Logic.Columns
             }
         }
 
-        public override event IColumn.ButtonPressedDelegate? ButtonPressed;
-
         public override (int,int)? CurrentValue(InventoryItem item)
         {
             var value = base.CurrentValue(item);
