@@ -434,6 +434,8 @@ namespace InventoryTools
 
         public void AddFilter(FilterConfiguration filterConfiguration)
         {
+            filterConfiguration.DestinationInventories.Clear();
+            filterConfiguration.SourceInventories.Clear();
             if (!_filterConfigurations.Contains(filterConfiguration))
             {
                 _filterConfigurations.Add(filterConfiguration);
