@@ -12,7 +12,11 @@
   &lt;Assembly Path="C:\Users\Blair\RiderProjects\InventoryTools\InventoryTools\bin\Debug\net472\LPL\InventoryTools.dll" /&gt;&#xD;
   &lt;Assembly Path="C:\Users\Blair\AppData\Roaming\XIVLauncher\addon\Hooks\dev\FFXIVClientStructs.dll" /&gt;&#xD;
   &lt;Assembly Path="C:\Users\Blair\AppData\Roaming\XIVLauncher\addon\Hooks\dev\Dalamud.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Users\Blair\.nuget\packages\xivcommon\4.0.0\lib\net5.0-windows7.0\XivCommon.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String>
+	
+	
+	<s:Boolean x:Key="/Default/ResxEditorPersonal/Initialized/@EntryValue">True</s:Boolean>
 	
 	
 	

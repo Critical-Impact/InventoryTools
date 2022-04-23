@@ -1,53 +1,41 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using CriticalCommonLib.Models;
-using ImGuiNET;
-using InventoryTools.Extensions;
+﻿using CriticalCommonLib.Models;
+using Dalamud.Utility;
+using Lumina.Excel.GeneratedSheets;
 
-namespace InventoryTools.Logic
+namespace InventoryTools.Logic.Columns
 {
-    public class UiCategoryColumn : IColumn
+    public class UiCategoryColumn : TextColumn
     {
-        public string Name { get; set; } = "Category";
-        public float Width { get; set; } = 200.0f;
-        public string FilterText { get; set; } = "";
-        
-        public IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items)
+        public override string? CurrentValue(InventoryItem item)
         {
-            return FilterText == "" ? items : items.Where(c => c.ItemUICategory != null && c.FormattedUiCategory.ToLower().PassesFilter(FilterText.ToLower()));
+            if (item.ItemUICategory == null)
+            {
+                return null;
+            }
+
+            return item.FormattedUiCategory;
         }
 
-        public IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items)
+        public override string? CurrentValue(Item item)
         {
-            return FilterText == "" ? items : items.Where(c => c.InventoryItem.ItemUICategory != null && c.InventoryItem.FormattedUiCategory.ToLower().PassesFilter(FilterText.ToLower()));
+            var itemItemUiCategory = item.ItemUICategory;
+            if (itemItemUiCategory == null)
+            {
+                return null;
+            }
+
+            return itemItemUiCategory.Value?.Name.ToDalamudString().ToString() ?? "";
         }
 
-        public IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
+        public override string? CurrentValue(SortingResult item)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => c.ItemUICategory != null ? c.ItemUICategory.Name : "") : items.OrderByDescending(c => c.ItemUICategory != null ? c.ItemUICategory.Name : "");
+            return CurrentValue(item.InventoryItem);
         }
 
-        public IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items)
-        {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => c.InventoryItem.ItemUICategory != null ? c.InventoryItem.ItemUICategory.Name : "") : items.OrderByDescending(c => c.InventoryItem.ItemUICategory != null ? c.InventoryItem.ItemUICategory.Name : "");
-        }
-
-        public void Draw(InventoryItem item)
-        {
-            ImGui.TableNextColumn();
-            ImGui.Text(item.FormattedUiCategory);
-        }
-
-        public void Draw(SortingResult item, int rowIndex)
-        {
-            ImGui.TableNextColumn();
-            ImGui.Text(item.InventoryItem.FormattedUiCategory);
-        }
-
-        public void Setup(int columnIndex)
-        {
-            ImGui.TableSetupColumn(Name, ImGuiTableColumnFlags.WidthFixed, Width,(uint)columnIndex);
-        }
+        public override string Name { get; set; } = "Category";
+        public override float Width { get; set; } = 200.0f;
+        public override string FilterText { get; set; } = "";
+        public override bool HasFilter { get; set; } = true;
+        public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Linq;
+using Dalamud.Logging;
 
 namespace InventoryTools.Extensions
 {
@@ -6,6 +7,16 @@ namespace InventoryTools.Extensions
     {
         public static bool PassesFilter(this string text, string filterString)
         {
+            if (filterString.Contains("||"))
+            {
+                var ors = filterString.Split("||");
+                return ors.Select(c => PassesFilter(text, c)).Any(c => c);
+            }
+            if (filterString.Contains("&&"))
+            {
+                var ands = filterString.Split("&&");
+                return ands.Select(c => PassesFilter(text, c)).All(c => c);
+            }
             if (filterString.StartsWith("=") && filterString.Length >= 2)
             {
                 var filter = filterString.Substring(1);
@@ -35,6 +46,89 @@ namespace InventoryTools.Extensions
         
         public static bool PassesFilter(this double number, string filterString)
         {
+            if (filterString.Contains("||"))
+            {
+                var ors = filterString.Split("||");
+                return ors.Select(c => PassesFilter(number, c)).Any(c => c);
+            }
+            if (filterString.Contains("&&"))
+            {
+                var ands = filterString.Split("&&");
+                return ands.Select(c => PassesFilter(number, c)).All(c => c);
+            }
+            if (filterString.StartsWith("=") && filterString.Length >= 2)
+            {
+                var filter = filterString.Substring(1);
+                if (number.ToString() == filter)
+                {
+                    return true;
+                }
+            }
+            else if (filterString.StartsWith("<=") && filterString.Length >= 3)
+            {
+                var filter = filterString.Substring(2);
+                if (double.TryParse(filter, out var numberResult))
+                {
+                    if (numberResult >= number)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if(filterString.StartsWith(">=") && filterString.Length >= 3)
+            {
+                var filter = filterString.Substring(2);
+                if (double.TryParse(filter, out var numberResult))
+                {
+                    if (numberResult <= number)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (filterString.StartsWith("<") && filterString.Length >= 2)
+            {
+                var filter = filterString.Substring(1);
+                if (double.TryParse(filter, out var numberResult))
+                {
+                    if (numberResult > number)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (filterString.StartsWith(">") && filterString.Length >= 2)
+            {
+                var filter = filterString.Substring(1);
+                if (double.TryParse(filter, out var numberResult))
+                {
+                    if (numberResult < number)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (filterString.StartsWith("!") && filterString.Length >= 2)
+            {
+                var filter = filterString.Substring(1);
+                return !number.ToString().Contains(filter);
+            }
+
+            return number.ToString().Contains(filterString);
+        }
+        
+        public static bool PassesFilter(this float number, string filterString)
+        {
+            if (filterString.Contains("||"))
+            {
+                var ors = filterString.Split("||");
+                return ors.Select(c => PassesFilter(number, c)).Any(c => c);
+            }
+            if (filterString.Contains("&&"))
+            {
+                var ands = filterString.Split("&&");
+                return ands.Select(c => PassesFilter(number, c)).All(c => c);
+            }
             if (filterString.StartsWith("=") && filterString.Length >= 2)
             {
                 var filter = filterString.Substring(1);
@@ -98,6 +192,16 @@ namespace InventoryTools.Extensions
         
         public static bool PassesFilter(this int number, string filterString)
         {
+            if (filterString.Contains("||"))
+            {
+                var ors = filterString.Split("||");
+                return ors.Select(c => PassesFilter(number, c)).Any(c => c);
+            }
+            if (filterString.Contains("&&"))
+            {
+                var ands = filterString.Split("&&");
+                return ands.Select(c => PassesFilter(number, c)).All(c => c);
+            }
             if (filterString.StartsWith("=") && filterString.Length >= 2)
             {
                 var filter = filterString.Substring(1);

@@ -1,23 +1,156 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using CriticalCommonLib;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Ui;
+using Dalamud.Game;
 using Dalamud.Logging;
-using Dalamud.Plugin;
-using InventoryTools.Comparers;
+using InventoryTools.GameUi;
+using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic
 {
-    public static class FilterManager
+    public class FilterManager : IDisposable
     {
-        public static FilterResult GenerateFilteredList(FilterConfiguration filter, Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>> inventories)
+        public FilterManager()
+        {
+            PluginService.GameUi.UiVisibilityChanged += GameUiOnUiVisibilityChanged; 
+            PluginService.GameUi.UiUpdated += GameUiOnUiUpdated;
+            AddOverlay(new RetainerListOverlay());
+            AddOverlay(new InventoryExpansionOverlay());
+            AddOverlay(new ArmouryBoardOverlay());
+            AddOverlay(new InventoryLargeOverlay());
+            AddOverlay(new InventoryGridOverlay());
+            AddOverlay(new InventoryRetainerLargeOverlay());
+            AddOverlay(new InventoryRetainerOverlay());
+            AddOverlay(new InventoryBuddyOverlay());
+            AddOverlay(new InventoryBuddyOverlay2());
+            AddOverlay(new FreeCompanyChestOverlay());
+            Service.Framework.Update += FrameworkOnUpdate;
+        }
+
+        private void FrameworkOnUpdate(Framework framework)
+        {
+            foreach (var overlay in _overlays)
+            {
+                overlay.Value.Update();
+            }
+        }
+
+        private Dictionary<WindowName, IAtkOverlayState> _overlays = new();
+        private HashSet<WindowName> _setupHooks = new();
+        private Dictionary<WindowName, DateTime> _lastUpdate = new();
+        public Dictionary<WindowName, IAtkOverlayState> Overlays
+        {
+            get => _overlays;
+        }
+
+        public void UpdateState(FilterState? filterState)
+        {
+            foreach (var overlay in _overlays)
+            {
+                overlay.Value.UpdateState(filterState);
+            }
+        }
+
+        public void SetupUpdateHook(IAtkOverlayState overlayState)
+        {
+            if (_setupHooks.Contains(overlayState.WindowName))
+            {
+                return;
+            }
+            var result = PluginService.GameUi.WatchWindowState(overlayState.WindowName);
+            if (result)
+            {
+                _setupHooks.Add(overlayState.WindowName);
+            }
+        }
+
+        public void AddOverlay(IAtkOverlayState overlayState)
+        {
+            if (!Overlays.ContainsKey(overlayState.WindowName))
+            {
+                Overlays.Add(overlayState.WindowName, overlayState);
+                overlayState.Setup();
+                overlayState.Draw();
+            }
+            else
+            {
+                PluginLog.Error("Attempted to add an overlay that is already registered.");
+            }
+        }
+
+        public void RemoveOverlay(WindowName windowName)
+        {
+            if (Overlays.ContainsKey(windowName))
+            {
+                Overlays[windowName].Clear();
+                Overlays.Remove(windowName);
+            }
+        }
+
+        public void RemoveOverlay(IAtkOverlayState overlayState)
+        {
+            if (Overlays.ContainsKey(overlayState.WindowName))
+            {
+                Overlays.Remove(overlayState.WindowName);
+                overlayState.Clear();
+            }
+        }
+
+        public void ClearOverlays()
+        {
+            foreach (var overlay in _overlays)
+            {
+                RemoveOverlay(overlay.Value);
+            }
+        }
+        private void GameUiOnUiVisibilityChanged(WindowName windowname, bool? windowstate)
+        {
+            if (_overlays.ContainsKey(windowname))
+            {
+                var overlay = _overlays[windowname];
+                if (windowstate.HasValue && windowstate.Value)
+                {
+                    SetupUpdateHook(overlay);
+                }
+
+                if (windowstate.HasValue && !windowstate.Value)
+                {
+                    overlay.UpdateState(null);
+                }
+                overlay.Draw();
+            }
+        }
+        
+        private void GameUiOnUiUpdated(WindowName windowname)
+        {
+            if (_overlays.ContainsKey(windowname))
+            {
+                var overlay = _overlays[windowname];
+                if (!_lastUpdate.ContainsKey(windowname))
+                {
+                    _lastUpdate[windowname] = DateTime.Now.AddMilliseconds(50);
+                    overlay.Draw();
+                }
+                else if(_lastUpdate[windowname] <= DateTime.Now)
+                {
+                    overlay.Draw();
+                    _lastUpdate[windowname] = DateTime.Now.AddMilliseconds(50);
+                }
+            }
+        }
+
+        public FilterResult GenerateFilteredList(FilterConfiguration filter, Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>> inventories)
         {
             var sortedItems = new List<SortingResult>();
             var unsortableItems = new List<InventoryItem>();
-            var activeCharacter = PluginLogic.CharacterMonitor.ActiveCharacter;
-            var activeRetainer = PluginLogic.CharacterMonitor.ActiveRetainer;
+            var items = new List<Item>();
+            var activeCharacter = PluginService.CharacterMonitor.ActiveCharacter;
+            var activeRetainer = PluginService.CharacterMonitor.ActiveRetainer;
             var displayCrossCharacter = PluginLogic.PluginConfiguration.DisplayCrossCharacter;
             
             PluginLog.Verbose("Generating a new filter list");
@@ -32,22 +165,26 @@ namespace InventoryTools.Logic
                     foreach (var inventory in character.Value)
                     {
                         var inventoryKey = (character.Key, inventory.Key);
-                        if (filter.SourceAllRetainers.HasValue && filter.SourceAllRetainers.Value && PluginLogic.CharacterMonitor.IsRetainer(character.Key) && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
+                        if (filter.SourceAllRetainers.HasValue && filter.SourceAllRetainers.Value && PluginService.CharacterMonitor.IsRetainer(character.Key) && (displayCrossCharacter || PluginService.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
                             if (!sourceInventories.ContainsKey(inventoryKey))
                             {
                                 sourceInventories.Add(inventoryKey, inventory.Value);
                             }
                         }
-                        else if (filter.SourceAllCharacters.HasValue && filter.SourceAllCharacters.Value && !PluginLogic.CharacterMonitor.IsRetainer(character.Key) &&
-                                 PluginLogic.CharacterMonitor.ActiveCharacter == character.Key && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
+                        else if (filter.SourceAllCharacters.HasValue && filter.SourceAllCharacters.Value && !PluginService.CharacterMonitor.IsRetainer(character.Key) &&
+                                 PluginService.CharacterMonitor.ActiveCharacter == character.Key && (displayCrossCharacter || PluginService.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
+                            if (inventoryKey.Item2 is InventoryCategory.FreeCompanyBags)
+                            {
+                                continue;
+                            }
                             if (!sourceInventories.ContainsKey(inventoryKey))
                             {
                                 sourceInventories.Add(inventoryKey, inventory.Value);
                             }
                         }
-                        else if (filter.SourceInventories.Contains(inventoryKey) && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
+                        else if (filter.SourceInventories.Contains(inventoryKey) && (displayCrossCharacter || PluginService.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
 
                             if (!sourceInventories.ContainsKey(inventoryKey))
@@ -56,7 +193,12 @@ namespace InventoryTools.Logic
                             }
                         }
 
-                        if (filter.DestinationAllRetainers.HasValue && filter.DestinationAllRetainers.Value && PluginLogic.CharacterMonitor.IsRetainer(character.Key) && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
+                        if (inventoryKey.Item2 is InventoryCategory.CharacterEquipped or InventoryCategory
+                            .RetainerEquipped or InventoryCategory.RetainerMarket)
+                        {
+                            continue;
+                        }
+                        if (filter.DestinationAllRetainers.HasValue && filter.DestinationAllRetainers.Value && PluginService.CharacterMonitor.IsRetainer(character.Key) && (displayCrossCharacter || PluginService.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
                             if (!destinationInventories.ContainsKey(inventoryKey))
                             {
@@ -64,14 +206,14 @@ namespace InventoryTools.Logic
                             }
                         }
                         else if (filter.DestinationAllCharacters.HasValue && filter.DestinationAllCharacters.Value &&
-                                 PluginLogic.CharacterMonitor.ActiveCharacter == character.Key && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
+                                 PluginService.CharacterMonitor.ActiveCharacter == character.Key && (displayCrossCharacter || PluginService.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
                             if (!destinationInventories.ContainsKey(inventoryKey))
                             {
                                 destinationInventories.Add(inventoryKey, inventory.Value);
                             }
                         }
-                        else if (filter.DestinationInventories.Contains(inventoryKey) && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
+                        else if (filter.DestinationInventories.Contains(inventoryKey) && (displayCrossCharacter || PluginService.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
                             if (!destinationInventories.ContainsKey(inventoryKey))
                             {
@@ -119,8 +261,9 @@ namespace InventoryTools.Logic
 
                             itemLocations[itemHashCode].Add(destinationItem);                     
                         }
-                        else if (destinationItem.IsEmpty)
+                        else if (destinationItem.IsEmpty && !destinationItem.IsEquippedGear)
                         {
+                            PluginLog.Log("Empty slot found at " + destinationItem.SortedContainerName + " " + destinationItem.SortedSlotIndex);
                             slotsAvailable[destinationInventory.Key] = slotsAvailable[destinationInventory.Key] + 1;
                         }
                     }
@@ -183,7 +326,6 @@ namespace InventoryTools.Logic
                                 }
                                 else
                                 {
-                                    PluginLog.Verbose("Existing item does have a full stack");
                                     if (!absoluteItemLocations.ContainsKey(hashCode))
                                     {
                                         absoluteItemLocations.Add(hashCode, new HashSet<(ulong, InventoryCategory)>());
@@ -220,7 +362,7 @@ namespace InventoryTools.Logic
                                             {
                                                 slotsAvailable[seenInventoryLocation] =
                                                     slotsAvailable[seenInventoryLocation] - 1;
-                                                if (!sourceItem.Item.IsUnique)
+                                                if (sourceItem.Item is {IsUnique: false})
                                                 {
                                                     if (sourceInventory.Key.Item1 != seenInventoryLocation.Item1 ||
                                                         sourceItem.SortedCategory != seenInventoryLocation.Item2)
@@ -286,6 +428,7 @@ namespace InventoryTools.Logic
                         //Don't compare inventory to itself
                         if (nextSlot.Value != 0)
                         {
+                            PluginLog.Log("Next slot value is " + nextSlot.Value);
                             if (filter.InActiveInventories(activeCharacter, activeRetainer, sourceInventory.Key.Item1,
                                 nextSlot.Key.Item1))
                             {
@@ -312,7 +455,7 @@ namespace InventoryTools.Logic
                     }
                 }
             }
-            else
+            else if(filter.FilterType == FilterType.SearchFilter)
             {
                 //Determine which source and destination inventories we actually need to examine
                 Dictionary<(ulong, InventoryCategory), List<InventoryItem>> sourceInventories = new();
@@ -321,21 +464,21 @@ namespace InventoryTools.Logic
                     foreach (var inventory in character.Value)
                     {
                         var inventoryKey = (character.Key, inventory.Key);
-                        if (filter.SourceAllRetainers.HasValue && filter.SourceAllRetainers.Value && PluginLogic.CharacterMonitor.IsRetainer(character.Key) && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
+                        if (filter.SourceAllRetainers.HasValue && filter.SourceAllRetainers.Value && PluginService.CharacterMonitor.IsRetainer(character.Key) && (displayCrossCharacter || PluginService.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
                             if (!sourceInventories.ContainsKey(inventoryKey))
                             {
                                 sourceInventories.Add(inventoryKey, inventory.Value);
                             }
                         }
-                        if (filter.SourceAllCharacters.HasValue && filter.SourceAllCharacters.Value && !PluginLogic.CharacterMonitor.IsRetainer(character.Key) && (displayCrossCharacter || PluginLogic.CharacterMonitor.ActiveCharacter == character.Key))
+                        if (filter.SourceAllCharacters.HasValue && filter.SourceAllCharacters.Value && !PluginService.CharacterMonitor.IsRetainer(character.Key) && (displayCrossCharacter || PluginService.CharacterMonitor.ActiveCharacter == character.Key))
                         {
                             if (!sourceInventories.ContainsKey(inventoryKey))
                             {
                                 sourceInventories.Add(inventoryKey, inventory.Value);
                             }
                         }
-                        if (filter.SourceInventories.Contains(inventoryKey) && (displayCrossCharacter || PluginLogic.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
+                        if (filter.SourceInventories.Contains(inventoryKey) && (displayCrossCharacter || PluginService.CharacterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
                             if (!sourceInventories.ContainsKey(inventoryKey))
                             {
@@ -405,8 +548,26 @@ namespace InventoryTools.Logic
                     }
                 }
             }
+            else
+            {
+                items = ExcelCache.GetItems().Where(filter.FilterItem).ToList();
+                
+            }
 
-            return new FilterResult(sortedItems, unsortableItems);
+            
+            return new FilterResult(sortedItems, unsortableItems, items);
+        }
+
+        private bool _disposed = false;
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                _disposed = true;
+                Service.Framework.Update -= FrameworkOnUpdate;
+                ClearOverlays();
+                PluginService.GameUi.UiVisibilityChanged -= GameUiOnUiVisibilityChanged;
+            }
         }
     }
 }

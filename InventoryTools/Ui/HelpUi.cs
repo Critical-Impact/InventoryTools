@@ -1,15 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
-using Dalamud.Interface.Colors;
-using Dalamud.Logging;
-using Dalamud.Plugin;
+﻿using System.Numerics;
 using ImGuiNET;
-using InventoryTools.Logic;
+using InventoryTools.Misc;
 
 namespace InventoryTools
 {
@@ -20,13 +11,17 @@ namespace InventoryTools
 
             if (ImGui.BeginChild("###ivHelpList", new Vector2(150, -1) * ImGui.GetIO().FontGlobalScale, true))
             {
-                if (ImGui.Selectable("General", _configuration.SelectedHelpPage == 0))
+                if (ImGui.Selectable("General", Configuration.SelectedHelpPage == 0))
                 {
-                    _configuration.SelectedHelpPage = 0;
+                    Configuration.SelectedHelpPage = 0;
                 }
-                if (ImGui.Selectable("Filtering", _configuration.SelectedHelpPage == 1))
+                if (ImGui.Selectable("Filtering", Configuration.SelectedHelpPage == 1))
                 {
-                    _configuration.SelectedHelpPage = 1;
+                    Configuration.SelectedHelpPage = 1;
+                }
+                if (ImGui.Selectable("About", Configuration.SelectedHelpPage == 2))
+                {
+                    Configuration.SelectedHelpPage = 2;
                 }
                 ImGui.EndChild();
             }
@@ -35,11 +30,11 @@ namespace InventoryTools
 
             if (ImGui.BeginChild("###ivHelpView", new Vector2(-1, -1), true))
             {
-                if (_configuration.SelectedHelpPage == 0)
+                if (Configuration.SelectedHelpPage == 0)
                 {
                     ImGui.Text("Basic Plugin Information:");
                     ImGui.Separator();
-                    ImGui.TextWrapped("Inventory Tools will track both your inventory and your retainer inventories. At present it only covers your character's main bag and saddle bags but will be expanded in the future.");
+                    ImGui.TextWrapped("Inventory Tools will track the multitude of inventories in the game. It also gives you the ability to highlight where items are within said inventories.");
                     ImGui.TextWrapped("I've taken a small amount of inspiration from Teamcraft and full credit to them for the idea of the inventory optimisations that their application provides.");
                     ImGui.TextWrapped("The plugin has been built for speed and such it can't quite do every inventory optimisation that Teamcraft can do but it's getting there.");
                     ImGui.NewLine();
@@ -56,7 +51,7 @@ namespace InventoryTools
                     ImGui.TextWrapped("The below commands will toggle the background filter specified with <name>.");
                     ImGui.Text("/itfiltertoggle <name>, /invf <name>, /ifilter <name>");
                 }
-                else if (_configuration.SelectedHelpPage == 1)
+                else if (Configuration.SelectedHelpPage == 1)
                 {
                     ImGui.Text("Advanced Filtering:");
                     ImGui.Separator();
@@ -67,6 +62,28 @@ namespace InventoryTools
                     ImGui.TextWrapped(">= - Show any results that have a value greater or equal to what is entered - available for numbers.");
                     ImGui.TextWrapped("<= - Show any results that have a value less than or equal to what is entered - available for numbers.");
                     ImGui.TextWrapped("= - Show any results that have a value equal to exactly what is entered - available for text and numbers.");
+                }
+                else if (Configuration.SelectedHelpPage == 2)
+                {
+                    ImGui.Text("About:");
+                    ImGui.Text("This plugin is written in some of the free time that I have, it's a labour of love and I will hopefully be actively releasing updates for a while.");
+                    ImGui.Separator();
+                    if (Configuration.TetrisEnabled)
+                    {
+                        if (ImGui.Button("I do not like tetris"))
+                        {
+                            TetrisGame.DisableTetris();
+                            Configuration.TetrisEnabled = false;
+                        }
+                    }
+                    else
+                    {
+                        if (ImGui.Button("I like tetris"))
+                        {
+                            TetrisGame.EnableTetris();
+                            Configuration.TetrisEnabled = true;
+                        }
+                    }
                 }
                 ImGui.EndChild();
             }

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CriticalCommonLib.Models;
+using System.Runtime.InteropServices;
 using Dalamud.Logging;
 using ImGuiNET;
+using InventoryTools.Logic.Columns;
+using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic
 {
@@ -21,8 +23,25 @@ namespace InventoryTools.Logic
         {
             FilterConfiguration = filterConfiguration;
             filterConfiguration.ConfigurationChanged += FilterConfigurationUpdated;
+            filterConfiguration.TableConfigurationChanged += FilterConfigurationOnTableConfigurationChanged;
             filterConfiguration.ListUpdated += FilterConfigurationUpdated;
+            unsafe
+            {
+                var clipperNative = Marshal.AllocHGlobal(Marshal.SizeOf<ImGuiListClipper>());
+                var clipper = new ImGuiListClipper();
+                Marshal.StructureToPtr(clipper, clipperNative, false);
+                _clipper = new ImGuiListClipperPtr(clipperNative);
+                _clipper.ItemsHeight = 32;
+            }
+
         }
+
+        private void FilterConfigurationOnTableConfigurationChanged(FilterConfiguration filterconfiguration)
+        {
+            RefreshColumns();
+        }
+
+        private ImGuiListClipperPtr _clipper;
 
         private void FilterConfigurationUpdated(FilterConfiguration filterconfiguration)
         {
@@ -42,14 +61,16 @@ namespace InventoryTools.Logic
         {
             get
             {
-                //Actually return a proper key, generate maybe?
-                return FilterConfiguration.Name;
+                return FilterConfiguration.TableId;
             }
         }
-        public List<IColumn> Columns { get; } = new();
+        public List<IColumn> Columns { get; private set; } = new();
         public int? SortColumn { get; set; }
         public ImGuiSortDirection? SortDirection { get; set; }
-        public List<SortingResult> Items { get; set; } = new List<SortingResult>();
+        public List<SortingResult> SortedItems { get; set; } = new List<SortingResult>();
+        public List<SortingResult> RenderSortedItems { get; set; } = new List<SortingResult>();
+        public List<Item> Items { get; set; } = new List<Item>();
+        public List<Item> RenderItems { get; set; } = new List<Item>();
         public int? FreezeCols { get; set; }
         public int? FreezeRows { get; set; }
         public bool ShowFilterRow { get; set; }
@@ -58,40 +79,92 @@ namespace InventoryTools.Logic
         public FilterConfiguration FilterConfiguration { get; set; }
 
 
-        public delegate IEnumerable<SortingResult> PreFilterDelegate(IEnumerable<SortingResult> items);
+        public delegate IEnumerable<SortingResult> PreFilterSortedItemsDelegate(IEnumerable<SortingResult> items);
+        public delegate IEnumerable<Item> PreFilterItemsDelegate(IEnumerable<Item> items);
         public delegate void ChangedDelegate(FilterTable itemTable);
         
-        public event PreFilterDelegate PreFilter;
-        public event ChangedDelegate Refreshed;
+        public event PreFilterSortedItemsDelegate? PreFilterSortedItems;
+        
+        public event PreFilterItemsDelegate? PreFilterItems;
+        public event ChangedDelegate? Refreshed;
 
         public void Refresh(InventoryToolsConfiguration configuration)
         {
             //Do something with unsortable items
             if (FilterConfiguration.FilterResult != null)
             {
-                PluginLog.Log("FilterTable: Refreshing");
-                var items = FilterConfiguration.FilterResult.Value.SortedItems.AsEnumerable();
-                items = PreFilter != null ? PreFilter.Invoke(items) : items;
-                IsSearching = false;
-                for (var index = 0; index < Columns.Count; index++)
+                if (FilterConfiguration.FilterType == FilterType.SearchFilter ||
+                    FilterConfiguration.FilterType == FilterType.SortingFilter)
                 {
-                    var column = Columns[index];
-                    if (column.FilterText != "")
+                    PluginLog.Log("FilterTable: Refreshing");
+                    var items = FilterConfiguration.FilterResult.Value.SortedItems.AsEnumerable();
+                    items = PreFilterSortedItems != null ? PreFilterSortedItems.Invoke(items) : items;
+                    IsSearching = false;
+                    for (var index = 0; index < Columns.Count; index++)
                     {
-                        IsSearching = true;
+                        var column = Columns[index];
+                        if (column.FilterText != "")
+                        {
+                            IsSearching = true;
+                        }
+
+                        items = column.Filter(items);
+                        if (SortColumn != null && index == SortColumn)
+                        {
+                            items = column.Sort(SortDirection ?? ImGuiSortDirection.None, items);
+                        }
                     }
-                    items = column.Filter(items);
-                    if (SortColumn != null && index == SortColumn)
+
+                    SortedItems = items.ToList();
+                    RenderSortedItems = SortedItems.Where(item => !item.InventoryItem.IsEmpty).ToList();
+                    NeedsRefresh = false;
+                    Refreshed?.Invoke(this);
+                }
+                else
+                {
+                    PluginLog.Log("FilterTable: Refreshing");
+                    var items = FilterConfiguration.FilterResult.Value.AllItems.AsEnumerable();
+                    items = PreFilterItems != null ? PreFilterItems.Invoke(items) : items;
+                    IsSearching = false;
+                    for (var index = 0; index < Columns.Count; index++)
                     {
-                        items = column.Sort(SortDirection ?? ImGuiSortDirection.None, items);
+                        var column = Columns[index];
+                        if (column.FilterText != "")
+                        {
+                            IsSearching = true;
+                        }
+
+                        items = column.Filter(items);
+                        if (SortColumn != null && index == SortColumn)
+                        {
+                            items = column.Sort(SortDirection ?? ImGuiSortDirection.None, items);
+                        }
+                    }
+
+                    Items = items.Where(c => c.Name.ToString() != "").ToList();
+                    RenderItems = Items.ToList();
+                    NeedsRefresh = false;
+                    Refreshed?.Invoke(this);
+                }
+            }
+        }
+
+        public void RefreshColumns()
+        {
+            if (FilterConfiguration.Columns != null)
+            {
+                var newColumns = new List<IColumn>();
+                foreach (var column in FilterConfiguration.Columns)
+                {
+                    var newColumn = PluginLogic.GetClassFromString(column);
+                    if (newColumn != null)
+                    {
+                        newColumns.Add(newColumn);
                     }
                 }
 
-                Items = items.ToList();
-                NeedsRefresh = false;
-                Refreshed?.Invoke(this);
+                this.Columns = newColumns;
             }
-
         }
 
         public void AddColumn(IColumn column)
@@ -118,14 +191,24 @@ namespace InventoryTools.Logic
 
         public bool HighlightItems => PluginLogic.PluginConfiguration.ActiveUiFilter == FilterConfiguration.Key;
 
-        public void Draw(InventoryToolsConfiguration configuration)
+        public void Draw()
         {
             var highlightItems = HighlightItems;
             ImGui.Checkbox( "Highlight?"+ "###" + Key + "VisibilityCheckbox", ref highlightItems);
             if (highlightItems != HighlightItems)
             {
-                PluginLogic.Instance.ToggleActiveUiFilterByKey(FilterConfiguration.Key);
+                PluginService.PluginLogic.ToggleActiveUiFilterByKey(FilterConfiguration.Key);
             }
+
+            if (Columns.Count == 0)
+            {
+                if (NeedsRefresh)
+                {
+                    Refresh(ConfigurationManager.Config);
+                }
+                return;
+            }
+
             if (ImGui.BeginTable(Key, Columns.Count, _tableFlags))
             {
                 var refresh = false;
@@ -173,7 +256,7 @@ namespace InventoryTools.Logic
                     for (var index = 0; index < Columns.Count; index++)
                     {
                         var column = Columns[index];
-                        if (column.DrawFilter(Key, index))
+                        if (column.HasFilter && column.DrawFilter(Key, index))
                         {
                             refresh = true;
                         }
@@ -182,32 +265,54 @@ namespace InventoryTools.Logic
 
                 if (refresh || NeedsRefresh)
                 {
-                    Refresh(configuration);
+                    Refresh(ConfigurationManager.Config);
                 }
-
-                for (var index = 0; index < Items.Count; index++)
+                
+                if (FilterConfiguration.FilterType == FilterType.SearchFilter ||
+                    FilterConfiguration.FilterType == FilterType.SortingFilter)
                 {
-                    var item = Items[index];
-                    if (!item.InventoryItem.IsEmpty)
+                    _clipper.Begin(RenderSortedItems.Count);
+                    while (_clipper.Step())
                     {
-                        ImGui.TableNextRow();
-                        for (var i = 0; i < Columns.Count; i++)
+                        for (var index = _clipper.DisplayStart; index < _clipper.DisplayEnd; index++)
                         {
-                            var column = Columns[i];
-#if DEBUG
-                            if (i == 1 && ImGui.BeginPopupContextItem(index + "_" + i))
+                            var item = RenderSortedItems[index];
+                            ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
+                            for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                             {
-                                ImGui.Text(item.GetExtraInformation());
-                                if (ImGui.Button("Close"))
-                                    ImGui.CloseCurrentPopup();
-                                ImGui.EndPopup();
+                                var column = Columns[columnIndex];
+                                column.Draw(item, index);
+                                ImGui.SameLine();
+                                if (columnIndex == Columns.Count - 1)
+                                {
+                                    PluginService.PluginLogic.RightClickColumn.Draw(item, index);
+                                }
                             }
-#endif
-                            column.Draw(item, index);
                         }
                     }
                 }
-
+                else
+                {
+                    _clipper.Begin(RenderItems.Count);
+                    while (_clipper.Step())
+                    {
+                        for (var index = _clipper.DisplayStart; index < _clipper.DisplayEnd; index++)
+                        {
+                            var item = RenderItems[index];
+                            ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
+                            for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+                            {
+                                var column = Columns[columnIndex];
+                                column.Draw(item, index);
+                                ImGui.SameLine();
+                                if (columnIndex == Columns.Count - 1)
+                                {
+                                    PluginService.PluginLogic.RightClickColumn.Draw(item, index);
+                                }
+                            }
+                        }
+                    }
+                }
                 ImGui.EndTable();
             }
         }
@@ -216,6 +321,11 @@ namespace InventoryTools.Logic
         {
             FilterConfiguration.ConfigurationChanged -= FilterConfigurationUpdated;
             FilterConfiguration.ListUpdated -= FilterConfigurationUpdated;
+            FilterConfiguration.TableConfigurationChanged += FilterConfigurationOnTableConfigurationChanged;
+            unsafe
+            {
+                Marshal.FreeHGlobal(new IntPtr(_clipper.NativePtr));
+            }
         }
     }
 }
