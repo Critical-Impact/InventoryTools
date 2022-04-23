@@ -65,7 +65,10 @@ namespace InventoryTools.Logic
         private static readonly byte CurrentVersion = 1;
         public string ExportBase64()
         {
-            var json  = JsonConvert.SerializeObject(this);
+            var toExport = (FilterConfiguration)this.MemberwiseClone();
+            toExport.DestinationInventories = new List<(ulong, InventoryCategory)>();
+            toExport.SourceInventories = new List<(ulong, InventoryCategory)>();
+            var json  = JsonConvert.SerializeObject(toExport);
             var bytes = Encoding.UTF8.GetBytes(json).Prepend(CurrentVersion).ToArray();
             return bytes.ToCompressedBase64();
         }
