@@ -20,10 +20,11 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "Item ID(Debug)";
+        public override string Name { get; set; } = "Debug - Item ID";
         public override float Width { get; set; } = 100.0f;
         public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = false;
+        public override bool IsDebug { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
     }
 }

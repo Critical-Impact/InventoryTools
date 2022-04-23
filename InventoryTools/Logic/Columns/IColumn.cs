@@ -16,6 +16,8 @@ namespace InventoryTools.Logic.Columns
         
         public ColumnFilterType FilterType { get; set; }
         
+        public bool IsDebug { get; set; }
+        
         public IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items);
         public IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items);
         public IEnumerable<Item> Filter(IEnumerable<Item> items);

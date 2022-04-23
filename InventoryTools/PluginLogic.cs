@@ -902,6 +902,12 @@ namespace InventoryTools
                             IColumn? instance = (IColumn?)Activator.CreateInstance(type);
                             if (instance != null)
                             {
+                                #if !DEBUG
+                                if (instance.IsDebug)
+                                {
+                                    continue;
+                                }
+                                #endif
                                 _gridColumns.Add(type.Name, instance.Name);
                             }
                             else
