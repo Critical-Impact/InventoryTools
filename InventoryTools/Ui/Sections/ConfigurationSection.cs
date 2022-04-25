@@ -57,7 +57,7 @@ namespace InventoryTools.Sections
                 for (var index = 0; index < PluginService.PluginLogic.FilterConfigurations.Count; index++)
                 {
                     var filterConfiguration = PluginService.PluginLogic.FilterConfigurations[index];
-                    if (PluginFont.AppIcons.HasValue && filterConfiguration.Icon != null)
+                    /*if (PluginFont.AppIcons.HasValue && filterConfiguration.Icon != null)
                     {
                         ImGui.PushFont(PluginFont.AppIcons.Value);
                         if (ImGui.Selectable(
@@ -74,7 +74,7 @@ namespace InventoryTools.Sections
                         }
                     }
                     else
-                    {
+                    {*/
                         if (ImGui.Selectable(
                             filterConfiguration.Name + "##" +
                             filterConfiguration.Key,
@@ -82,7 +82,7 @@ namespace InventoryTools.Sections
                         {
                             ConfigSelectedConfigurationPage = index + 5;
                         }
-                    }
+                    //}
                 }
 
                 ImGui.EndChild();
@@ -451,12 +451,10 @@ namespace InventoryTools.Sections
                                 var newIcon = FfxivAppIcons.Icons.Keys.ToList()[icon];
                                 if (FfxivAppIcons.Icons.ContainsKey(newIcon) && newIcon != "")
                                 {
-                                    PluginLog.Log("icon set to " + newIcon);
                                     filterConfiguration.Icon = newIcon;
                                 }
                                 else
                                 {
-                                    PluginLog.Log("icon set to null");
                                     filterConfiguration.Icon = null;
                                 }
                             }

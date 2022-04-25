@@ -44,14 +44,15 @@ namespace InventoryTools
         
         public void Draw()
         {
-            if (!IsVisible || !Service.ClientState.IsLoggedIn || _disposing)
+            if (!Service.ClientState.IsLoggedIn || _disposing)
                 return;
             PluginLogic.DrawCraftRequirementsWindow();
             PluginLogic.DrawFilterWindows();
+            if (!IsVisible)
+                return;
             var isVisible = IsVisible;
             ImGui.SetNextWindowSize(new Vector2(350, 350) * ImGui.GetIO().FontGlobalScale, ImGuiCond.FirstUseEver);
             ImGui.SetNextWindowSizeConstraints(new Vector2(350, 350) * ImGui.GetIO().FontGlobalScale, new Vector2(2000, 2000) * ImGui.GetIO().FontGlobalScale);
-            ImGui.PushStyleColor(ImGuiCol.WindowBg, 0xFF000000);
             ImGui.Begin("Inventory Tools", ref isVisible);
             if (ImGui.BeginTabBar("###InventoryTag", ImGuiTabBarFlags.FittingPolicyScroll))
             {
@@ -65,7 +66,7 @@ namespace InventoryTools
                     }
                     if (filterConfiguration.DisplayInTabs)
                     {
-                        if (PluginFont.AppIcons.HasValue && filterConfiguration.Icon != null)
+                        /*if (PluginFont.AppIcons.HasValue && filterConfiguration.Icon != null)
                         {
                             ImGui.PushFont(PluginFont.AppIcons.Value);
                             if (ImGui.BeginTabItem(filterConfiguration.Name + " " + filterConfiguration.Icon + "##" + filterConfiguration.Key))
@@ -91,7 +92,7 @@ namespace InventoryTools
                             }
                         }
                         else
-                        {
+                        {*/
                             if (ImGui.BeginTabItem(itemTable.Name + "##" + filterConfiguration.Key))
                             {
                                 itemTable.Draw();
@@ -109,7 +110,7 @@ namespace InventoryTools
                                 ImGui.EndTabItem();
                             }
 
-                        }
+                        //}
                     }
                 }
                 
@@ -154,7 +155,6 @@ namespace InventoryTools
             {
                 IsVisible = isVisible;
             }
-            ImGui.PopStyleColor();
         }
 
         public void Dispose()

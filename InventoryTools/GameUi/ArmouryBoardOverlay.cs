@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Drawing;
 using System.Numerics;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Services.Ui;
@@ -19,7 +20,6 @@ namespace InventoryTools.GameUi
                 var currentBagLocation = CurrentBagLocation;
                 if (currentBagLocation != null && BagColours.ContainsKey(currentBagLocation.Value))
                 {
-                    PluginLog.Log("Rendering highlights for " + currentBagLocation.ToString());
                     this.SetColors(currentBagLocation.Value, BagColours[currentBagLocation.Value]);
                 }
 

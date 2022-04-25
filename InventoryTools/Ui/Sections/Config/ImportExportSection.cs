@@ -51,12 +51,12 @@ namespace InventoryTools.Sections
                             ImGui.SameLine();
                         }
 
-                        if (PluginFont.AppIcons.HasValue && filterConfiguration.Icon != null)
+                        /*if (PluginFont.AppIcons.HasValue && filterConfiguration.Icon != null)
                         {
                             ImGui.PushFont(PluginFont.AppIcons.Value);
                             ImGui.Text(filterConfiguration.Icon);
                             ImGui.PopFont();
-                        }
+                        }*/
 
                         ImGui.TableNextColumn();
                         ImGui.Text(filterConfiguration.FormattedFilterType);
@@ -82,12 +82,10 @@ namespace InventoryTools.Sections
                 {
                     ImportData = importData;
                     ImportFailed = false;
-                    PluginLog.Log("import data changed");
                 }
 
                 if (ImGui.Button("Import##ImportBtn"))
                 {
-                    PluginLog.Log("import pressed");
                     if (ImportData == "")
                     {
                         ImportFailed = true;

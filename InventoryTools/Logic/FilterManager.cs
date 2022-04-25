@@ -263,7 +263,6 @@ namespace InventoryTools.Logic
                         }
                         else if (destinationItem.IsEmpty && !destinationItem.IsEquippedGear)
                         {
-                            PluginLog.Log("Empty slot found at " + destinationItem.SortedContainerName + " " + destinationItem.SortedSlotIndex);
                             slotsAvailable[destinationInventory.Key] = slotsAvailable[destinationInventory.Key] + 1;
                         }
                     }
@@ -428,7 +427,6 @@ namespace InventoryTools.Logic
                         //Don't compare inventory to itself
                         if (nextSlot.Value != 0)
                         {
-                            PluginLog.Log("Next slot value is " + nextSlot.Value);
                             if (filter.InActiveInventories(activeCharacter, activeRetainer, sourceInventory.Key.Item1,
                                 nextSlot.Key.Item1))
                             {

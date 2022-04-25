@@ -62,6 +62,14 @@ namespace InventoryTools
 
         private RightClickColumn _rightClickColumn = new();
         
+        public delegate void FilterRemovedDelegate(FilterConfiguration configuration);
+        public delegate void FilterAddedDelegate(FilterConfiguration configuration);
+        public delegate void FilterChangedDelegate(FilterConfiguration configuration);
+
+        public event FilterRemovedDelegate? FilterRemoved; 
+        public event FilterAddedDelegate? FilterAdded; 
+        public event FilterChangedDelegate? FilterChanged; 
+        
         public readonly ConcurrentDictionary<ushort, TextureWrap> TextureDictionary = new ConcurrentDictionary<ushort, TextureWrap>();
         public readonly Dictionary<string, TextureWrap> UldTextureDictionary = new Dictionary<string, TextureWrap>();
 
@@ -100,6 +108,9 @@ namespace InventoryTools
             AvailableFilters.Add(new HighlightColorFilter());
             AvailableFilters.Add(new TabHighlightColorFilter());
             AvailableFilters.Add(new RetainerListColorFilter());
+            AvailableFilters.Add(new IsHousingItemFilter());
+            AvailableFilters.Add(new IsCraftingItemFilter());
+            AvailableFilters.Add(new IsArmoireItemFilter());
             //Events we need to track, inventory updates, active retainer changes, player changes, 
             PluginService.InventoryMonitor.OnInventoryChanged += InventoryMonitorOnOnInventoryChanged;
             PluginService.CharacterMonitor.OnActiveRetainerChanged += CharacterMonitorOnOnActiveCharacterChanged;
@@ -246,6 +257,7 @@ namespace InventoryTools
 
             if (PluginConfiguration.InternalVersion == 4)
             {
+                PluginLog.Log("Migrating to version 5");
                 PluginConfiguration.RetainerListColor = ImGuiColors.HealerGreen;
                 PluginConfiguration.InternalVersion++;
             }
@@ -295,6 +307,7 @@ namespace InventoryTools
 
         private void FilterConfigurationOnConfigurationChanged(FilterConfiguration filterconfiguration)
         {
+            FilterChanged?.Invoke(filterconfiguration);
             //Do some sort of debouncing
             InvalidateFilters();
             ToggleHighlights();
@@ -420,16 +433,19 @@ namespace InventoryTools
             allItemsFilter.SourceAllCharacters = true;
             allItemsFilter.SourceAllRetainers = true;
             _filterConfigurations.Add(allItemsFilter);
+            FilterAdded?.Invoke(allItemsFilter);
 
             var retainerItemsFilter = new FilterConfiguration("Retainers", "RetainerItemsFilter", FilterType.SearchFilter);
             retainerItemsFilter.DisplayInTabs = true;
             retainerItemsFilter.SourceAllRetainers = true;
             _filterConfigurations.Add(retainerItemsFilter);
+            FilterAdded?.Invoke(allItemsFilter);
 
             var playerItemsFilter = new FilterConfiguration("Player", "PlayerItemsFilter", FilterType.SearchFilter);
             playerItemsFilter.DisplayInTabs = true;
             playerItemsFilter.SourceAllCharacters = true;
             _filterConfigurations.Add(playerItemsFilter);
+            FilterAdded?.Invoke(allItemsFilter);
         }
 
         public void AddFilter(FilterConfiguration filterConfiguration)
@@ -440,6 +456,8 @@ namespace InventoryTools
             {
                 _filterConfigurations.Add(filterConfiguration);
             }
+
+            FilterAdded?.Invoke(filterConfiguration);
         }
 
         public void AddSampleFilter100Gil()
@@ -451,6 +469,7 @@ namespace InventoryTools
             sampleFilter.CanBeBought = true;
             sampleFilter.ShopBuyingPrice = "<=100";
             _filterConfigurations.Add(sampleFilter);
+            FilterAdded?.Invoke(sampleFilter);
         }
 
 
@@ -474,6 +493,7 @@ namespace InventoryTools
                 }
             }
             _filterConfigurations.Add(sampleFilter);
+            FilterAdded?.Invoke(sampleFilter);
         }
 
         public void AddSampleFilterDuplicatedItems()
@@ -487,6 +507,7 @@ namespace InventoryTools
             sampleFilter.DuplicatesOnly = true;
             sampleFilter.HighlightWhen = "Always";
             _filterConfigurations.Add(sampleFilter);
+            FilterAdded?.Invoke(sampleFilter);
         }
 
         public List<FilterConfiguration> FilterConfigurations => _filterConfigurations;
@@ -516,6 +537,7 @@ namespace InventoryTools
                     _filterTables.Remove(filter.Key);
                     ToggleHighlights();
                 }
+                FilterRemoved?.Invoke(filter);
             }
         }
 
@@ -573,9 +595,17 @@ namespace InventoryTools
             return false;
         }
 
-        public bool ToggleActiveBackgroundFilterByKey(string filterKey)
+        public bool ToggleBackgroundFilter(FilterConfiguration configuration)
         {
-            PluginLog.Verbose("PluginLogic: Switching active background filter");
+            return ToggleBackgroundFilter(configuration.Key);
+        }
+
+        public bool ToggleBackgroundFilter(string filterKey)
+        {
+            if (PluginConfiguration.IsVisible)
+            {
+                ChatUtilities.PrintGeneralMessage("[Filters] ", "The inventory tools window is open so the changes to the background filter will not be visible until it is closed.");
+            }
             if (filterKey == PluginConfiguration.ActiveBackgroundFilter)
             {
                 PluginConfiguration.ActiveBackgroundFilter = null;
@@ -630,6 +660,18 @@ namespace InventoryTools
                 Service.Chat.Print("Switched filter to: " + filterName);
                 PluginConfiguration.ActiveBackgroundFilter = filter.Key;
                 ToggleHighlights();
+                return true;
+            }
+            Service.Chat.Print("Failed to find filter with name: " + filterName);
+            return false;
+        }
+
+        public bool ToggleWindowFilterByName(string filterName)
+        {
+            if (_filterConfigurations.Any(c => c.Name == filterName))
+            {
+                var filter = _filterConfigurations.First(c => c.Name == filterName);
+                filter.OpenAsWindow = !filter.OpenAsWindow;
                 return true;
             }
             Service.Chat.Print("Failed to find filter with name: " + filterName);
@@ -897,8 +939,6 @@ namespace InventoryTools
                     {
                         if (type.IsClass && type.Name != "RightClickColumn" && !type.IsAbstract)
                         {
-                            PluginLog.Log(type.ToString());
-                            //I'm entirely sure this is fine
                             IColumn? instance = (IColumn?)Activator.CreateInstance(type);
                             if (instance != null)
                             {
@@ -909,11 +949,6 @@ namespace InventoryTools
                                 }
                                 #endif
                                 _gridColumns.Add(type.Name, instance.Name);
-                            }
-                            else
-                            {
-                                
-                                PluginLog.Log("field is null");
                             }
                         }
                     }
@@ -1137,7 +1172,6 @@ namespace InventoryTools
                         ImGuiCond.FirstUseEver);
                     ImGui.SetNextWindowSizeConstraints(new Vector2(350, 500) * ImGui.GetIO().FontGlobalScale,
                         new Vector2(2000, 2000) * ImGui.GetIO().FontGlobalScale);
-                    ImGui.PushStyleColor(ImGuiCol.WindowBg, 0xFF000000);
                     if (ImGui.Begin("Filter: " + filter.Name, ref isVisible))
                     {
                         if (isVisible != filter.OpenAsWindow)
@@ -1195,7 +1229,6 @@ namespace InventoryTools
 
                 if (isVisible != item.Value)
                 {
-                    PluginLog.Log("Trying to close");
                     CraftWindows[item.Key] = isVisible;
                 }
 

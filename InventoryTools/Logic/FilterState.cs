@@ -71,7 +71,7 @@ namespace InventoryTools.Logic
 
         public Vector4? GetTabHighlight(Dictionary<Vector2, Vector4?> bagHighlights)
         {
-            if (InvertHighlighting)
+            if (InvertTabHighlighting)
             {
                 return bagHighlights.All(c => c.Value != null) ? TabHighlightColor : null;
             }
@@ -83,7 +83,7 @@ namespace InventoryTools.Logic
 
         public Vector4? GetTabHighlights(List<Dictionary<Vector2, Vector4?>> bagHighlights)
         {
-            if (InvertHighlighting)
+            if (InvertTabHighlighting)
             {
                 return bagHighlights.All(c => c.All(d => d.Value != null)) ? TabHighlightColor : null;
             }
@@ -198,7 +198,15 @@ namespace InventoryTools.Logic
                             {
                                 bagHighlights.Add(itemBagLocation, BagHighlightColor);
                             }
+                            else if (InvertHighlighting && item.InventoryItem.IsEmpty)
+                            {
+                                bagHighlights.Add(itemBagLocation, BagHighlightColor);
+                            }
                             else if(InvertHighlighting)
+                            {
+                                bagHighlights.Add(itemBagLocation, null);
+                            }
+                            else
                             {
                                 bagHighlights.Add(itemBagLocation, null);
                             }

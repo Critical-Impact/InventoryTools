@@ -48,6 +48,8 @@ namespace InventoryTools.Logic.Filters
                     dict.Add((character.Key, InventoryCategory.CharacterPremiumSaddleBags), character.Value.Name + " - Premium Saddle Bags");
                     dict.Add((character.Key, InventoryCategory.FreeCompanyBags), character.Value.Name + " - Free Company Bags");
                     dict.Add((character.Key, InventoryCategory.CharacterArmoryChest), character.Value.Name + " - Armoury Chest");
+                    dict.Add((character.Key, InventoryCategory.GlamourChest), character.Value.Name + " - Glamour Chest");
+                    dict.Add((character.Key, InventoryCategory.Armoire), character.Value.Name + " - Armoire");
                    
                 }
             }

@@ -53,5 +53,12 @@ namespace InventoryTools
             PluginLog.Verbose(args);
             PluginService.PluginLogic.ToggleActiveBackgroundFilterByName(args);
         }
+
+        [Command("/openfilter")]
+        [HelpMessage("Toggles the specified filter as it's own window.")]
+        public  void OpenFilterCommand(string command, string args)
+        {
+            PluginService.PluginLogic.ToggleWindowFilterByName(args);
+        }
     }
 }

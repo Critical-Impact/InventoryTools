@@ -117,7 +117,6 @@ namespace InventoryTools.Logic
 
         public string GenerateNewTableId()
         {
-            PluginLog.Log("generating new table id");
             TableId = Guid.NewGuid().ToString("N");
             return TableId;
         }

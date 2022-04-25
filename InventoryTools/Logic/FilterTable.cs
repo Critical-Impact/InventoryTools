@@ -45,7 +45,6 @@ namespace InventoryTools.Logic
 
         private void FilterConfigurationUpdated(FilterConfiguration filterconfiguration)
         {
-            PluginLog.Log("FilterTable: Filter configuration changed");
             this.NeedsRefresh = true;
         }
 
@@ -96,7 +95,7 @@ namespace InventoryTools.Logic
                 if (FilterConfiguration.FilterType == FilterType.SearchFilter ||
                     FilterConfiguration.FilterType == FilterType.SortingFilter)
                 {
-                    PluginLog.Log("FilterTable: Refreshing");
+                    PluginLog.Verbose("FilterTable: Refreshing");
                     var items = FilterConfiguration.FilterResult.Value.SortedItems.AsEnumerable();
                     items = PreFilterSortedItems != null ? PreFilterSortedItems.Invoke(items) : items;
                     IsSearching = false;
@@ -122,7 +121,7 @@ namespace InventoryTools.Logic
                 }
                 else
                 {
-                    PluginLog.Log("FilterTable: Refreshing");
+                    PluginLog.Verbose("FilterTable: Refreshing");
                     var items = FilterConfiguration.FilterResult.Value.AllItems.AsEnumerable();
                     items = PreFilterItems != null ? PreFilterItems.Invoke(items) : items;
                     IsSearching = false;

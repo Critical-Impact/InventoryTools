@@ -16,15 +16,16 @@ namespace InventoryTools
         public static PluginLogic PluginLogic { get; private set; } = null!;
         public static GameUiManager GameUi { get; private set; } = null!;
         public static TryOn TryOn { get; private set; } = null!;
-        public static PluginFont PluginFont { get; private set; } = null!;
+        //public static PluginFont PluginFont { get; private set; } = null!;
         public static PluginCommands PluginCommands { get; private set; } = null!;
         public static PluginCommandManager<PluginCommands> CommandManager { get; private set; } = null!;
         public static FilterManager FilterManager { get; private set; } = null!;
+        public static WotsitIpc WotsitIpc { get; private set; } = null!;
 
         public static void Initialise()
         {
             ConfigurationManager.Load();
-            PluginFont = new PluginFont();
+            //PluginFont = new PluginFont();
             ExcelCache.Initialise();
             Universalis.Initalise();
             GameInterface.Initialise(Service.Scanner);
@@ -37,6 +38,7 @@ namespace InventoryTools
             InventoryMonitor = new InventoryMonitor(OdrScanner, CharacterMonitor, GameUi);
             FilterManager = new FilterManager();
             PluginLogic = new PluginLogic(  );
+            WotsitIpc = new WotsitIpc(  );
             PluginCommands = new();
             CommandManager = new PluginCommandManager<PluginCommands>(PluginCommands);
         }
@@ -44,6 +46,7 @@ namespace InventoryTools
         public static void Dispose()
         {
             CommandManager.Dispose();
+            WotsitIpc.Dispose();
             PluginLogic.Dispose();
             FilterManager.Dispose();
             InventoryMonitor.Dispose();
@@ -56,7 +59,7 @@ namespace InventoryTools
             ExcelCache.Destroy();
             Cache.Dispose();
             Universalis.Dispose();
-            PluginFont?.Dispose();
+            //PluginFont?.Dispose();
             GameInterface.Dispose();
             if (TetrisGame.HasInstance)
             {

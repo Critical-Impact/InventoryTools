@@ -83,7 +83,7 @@ namespace InventoryTools.Sections
                         var config = PluginService.PluginLogic.FilterConfigurations[index];
                         if (activeBackgroundFilter != config)
                         {
-                            PluginService.PluginLogic.ToggleActiveBackgroundFilterByKey(config.Key);
+                            PluginService.PluginLogic.ToggleBackgroundFilter(config.Key);
                             break;
                         }
                     }
