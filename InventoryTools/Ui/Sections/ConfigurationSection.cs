@@ -438,7 +438,7 @@ namespace InventoryTools.Sections
                                 filterConfiguration.Name = filterName;
                             }
 
-                            ImGui.SetNextItemWidth(100);
+                            /*ImGui.SetNextItemWidth(100);
                             ImGui.LabelText(labelName + "IconNameLabel", "Tab Icon: ");
                             ImGui.SameLine();
                             var icons = FfxivAppIcons.Icons.Values.ToArray();
@@ -466,7 +466,7 @@ namespace InventoryTools.Sections
                                 ImGui.Text(filterConfiguration.Icon);
                                 ImGui.PopFont();
                             }
-
+*/
                             ImGui.NewLine();
                             if (ImGui.Button("Export Configuration to Clipboard"))
                             {

@@ -67,6 +67,7 @@ namespace InventoryTools
                 {
                     ImGui.Text("About:");
                     ImGui.Text("This plugin is written in some of the free time that I have, it's a labour of love and I will hopefully be actively releasing updates for a while.");
+                    ImGui.Text("If you run into any issues please submit feedback via the plugin installer feedback button.");
                     ImGui.Separator();
                     if (Configuration.TetrisEnabled)
                     {
