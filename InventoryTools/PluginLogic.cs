@@ -342,17 +342,14 @@ namespace InventoryTools
         /// <returns>FilterConfiguration</returns>
         public FilterConfiguration? GetActiveFilter()
         {
-            if (PluginConfiguration.IsVisible)
+            if (PluginConfiguration.ActiveUiFilter != null)
             {
-                if (PluginConfiguration.ActiveUiFilter != null)
+                if (_filterConfigurations.Any(c => c.Key == PluginConfiguration.ActiveUiFilter && (c.OpenAsWindow || PluginConfiguration.IsVisible)))
                 {
-                    if (_filterConfigurations.Any(c => c.Key == PluginConfiguration.ActiveUiFilter))
-                    {
-                        return _filterConfigurations.First(c => c.Key == PluginConfiguration.ActiveUiFilter);
-                    }
+                    return _filterConfigurations.First(c => c.Key == PluginConfiguration.ActiveUiFilter);
                 }
             }
-            else
+            if (!PluginConfiguration.IsVisible)
             {
                 if (PluginConfiguration.ActiveBackgroundFilter != null)
                 {
@@ -745,107 +742,14 @@ namespace InventoryTools
             //Add in ability to turn off highlights
             if (activeFilter != null)
             {
-                if (PluginConfiguration.IsVisible)
+                if (PluginConfiguration.IsVisible || activeFilter.OpenAsWindow)
                 {
                     activeTable = GetFilterTable(activeFilter.Key);
-                    if (activeTable != null)
-                    {
-                        //Allow table to override highlight mode on filter
-                        if (activeTable.HighlightItems)
-                        {
-                            shouldHighlight = activeTable.HighlightItems;
-                            if (activeFilter.HighlightWhen is "When Searching" || activeFilter.HighlightWhen == null &&
-                                PluginConfiguration.HighlightWhen == "When Searching")
-                            {
-                                if (!activeTable.IsSearching)
-                                {
-                                    shouldHighlight = false;
-                                }
-                            }
-                        }
-                    }
                 }
-                else
-                {
-                    shouldHighlight = true;
-                }
-                invertHighlighting = activeFilter.InvertHighlighting ?? PluginConfiguration.InvertHighlighting;
-                invertTabHighlighting = activeFilter.InvertTabHighlighting ?? PluginConfiguration.InvertTabHighlighting;
-            }
-            
-            
-            FilterResult? filteredList = null;
-            if (activeTable != null)
-            {
-                filteredList = new FilterResult(activeTable.SortedItems.ToList(), new List<InventoryItem>(), new List<Item>());
-            }
-            else if (activeFilter != null && activeFilter.FilterResult.HasValue)
-            {
-                filteredList = activeFilter.FilterResult.Value;
             }
             
             PluginService.FilterManager.UpdateState(activeFilter != null ? new FilterState(){ FilterConfiguration = activeFilter, FilterTable = activeTable} : null);
         }
-
-        private bool MatchesFilter(FilterConfiguration activeFilter, SortingResult item, bool invertHighlighting = false)
-        {
-            bool matches = false;
-            if (activeFilter.FilterType == FilterType.SearchFilter &&
-                item.SourceRetainerId == Service.ClientState.LocalContentId)
-            {
-                matches = true;
-            }
-            else if (activeFilter.FilterType == FilterType.GameItemFilter)
-            {
-                matches = true;
-            }
-            
-            if (item.SourceRetainerId == Service.ClientState.LocalContentId && (_currentRetainerId == 0 ||
-                                                                         _currentRetainerId != 0 &&
-                                                                         item.DestinationRetainerId ==
-                                                                         _currentRetainerId))
-            {
-                matches = true;
-            }
-
-
-            if (matches)
-            {
-                if (!item.InventoryItem.IsEmpty)
-                {
-                    return true;
-                }
-            }
-
-            if (item.InventoryItem.IsEmpty && invertHighlighting)
-            {
-                return false;
-            }
-
-            return false;
-        }
-
-        private bool MatchesRetainerFilter(FilterConfiguration activeFilter, SortingResult item, bool invertHighlighting = false)
-        {
-            bool matches = (activeFilter.FilterType.HasFlag(FilterType.SearchFilter) || activeFilter.FilterType.HasFlag(FilterType.SortingFilter)) && item.SourceRetainerId == _currentRetainerId;
-
-
-            if (matches)
-            {
-                if (!item.InventoryItem.IsEmpty)
-                {
-                    return true;
-                }
-            }
-
-            if (item.InventoryItem.IsEmpty && invertHighlighting)
-            {
-                return true;
-            }
-
-            return false;
-        }
-
 
         private void OnItemTooltip(ItemTooltip tooltip, ulong itemId)
         {

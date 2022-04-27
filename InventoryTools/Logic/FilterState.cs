@@ -71,25 +71,53 @@ namespace InventoryTools.Logic
 
         public Vector4? GetTabHighlight(Dictionary<Vector2, Vector4?> bagHighlights)
         {
-            if (InvertTabHighlighting)
+            if (InvertHighlighting)
             {
-                return bagHighlights.All(c => c.Value != null) ? TabHighlightColor : null;
+                if (InvertTabHighlighting)
+                {
+                    return bagHighlights.All(c => c.Value != null) ? TabHighlightColor : null;
+                }
+                else
+                {
+                    return bagHighlights.All(c => c.Value != null) ? null : TabHighlightColor;
+                }
             }
             else
             {
-                return bagHighlights.Any(c => c.Value == null) ? TabHighlightColor : null;
+                if (InvertTabHighlighting)
+                {
+                    return bagHighlights.All(c => c.Value == null) ? TabHighlightColor : null;
+                }
+                else
+                {
+                    return bagHighlights.Any(c => c.Value != null) ? TabHighlightColor : null;
+                }
             }
         }
 
         public Vector4? GetTabHighlights(List<Dictionary<Vector2, Vector4?>> bagHighlights)
         {
-            if (InvertTabHighlighting)
+            if (InvertHighlighting)
             {
-                return bagHighlights.All(c => c.All(d => d.Value != null)) ? TabHighlightColor : null;
+                if (InvertTabHighlighting)
+                {
+                    return bagHighlights.All(c => c.All(d => d.Value != null)) ? TabHighlightColor : null;
+                }
+                else
+                {
+                    return bagHighlights.Any(c => c.Any(d => d.Value == null)) ? TabHighlightColor : null;
+                }
             }
             else
             {
-                return bagHighlights.Any(c => c.Any(d => d.Value != null)) ? TabHighlightColor : null;
+                if (InvertTabHighlighting)
+                {
+                    return bagHighlights.Any(c => c.Any(d => d.Value != null)) ? null : TabHighlightColor;
+                }
+                else
+                {
+                    return bagHighlights.Any(c => c.Any(d => d.Value != null)) ? TabHighlightColor : null;
+                }
             }
         }
 

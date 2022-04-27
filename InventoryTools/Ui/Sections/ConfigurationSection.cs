@@ -57,32 +57,14 @@ namespace InventoryTools.Sections
                 for (var index = 0; index < PluginService.PluginLogic.FilterConfigurations.Count; index++)
                 {
                     var filterConfiguration = PluginService.PluginLogic.FilterConfigurations[index];
-                    /*if (PluginFont.AppIcons.HasValue && filterConfiguration.Icon != null)
+                 
+                    if (ImGui.Selectable(
+                        filterConfiguration.Name + "##" +
+                        filterConfiguration.Key,
+                        index + 5 == ConfigSelectedConfigurationPage))
                     {
-                        ImGui.PushFont(PluginFont.AppIcons.Value);
-                        if (ImGui.Selectable(
-                            filterConfiguration.Name + " " + filterConfiguration.Icon + "##" +
-                            filterConfiguration.Key,
-                            index + 5 == ConfigSelectedConfigurationPage))
-                        {
-                            ImGui.PopFont();
-                            ConfigSelectedConfigurationPage = index + 5;
-                        }
-                        else
-                        {
-                            ImGui.PopFont();
-                        }
+                        ConfigSelectedConfigurationPage = index + 5;
                     }
-                    else
-                    {*/
-                        if (ImGui.Selectable(
-                            filterConfiguration.Name + "##" +
-                            filterConfiguration.Key,
-                            index + 5 == ConfigSelectedConfigurationPage))
-                        {
-                            ConfigSelectedConfigurationPage = index + 5;
-                        }
-                    //}
                 }
 
                 ImGui.EndChild();
