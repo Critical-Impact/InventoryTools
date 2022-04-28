@@ -65,7 +65,9 @@ namespace InventoryTools
         public int SelectedConfigurationPage { get; set; }
         public bool ShowFilterTab { get; set; } = true;
         public bool SwitchFiltersAutomatically { get; set; } = true;
-
+        private bool _tooltipDisplayAmountOwned = true;
+        private bool _tooltipDisplayMarketAveragePrice = true;
+        private bool _tooltipDisplayMarketLowestPrice = false;
         public Vector4 HighlightColor
         {
             get => _highlightColor;
@@ -112,6 +114,36 @@ namespace InventoryTools
             set
             {
                 _displayTooltip = value;
+                ConfigurationChanged?.Invoke();
+            }
+        }
+        
+        public bool TooltipDisplayAmountOwned
+        {
+            get => _tooltipDisplayAmountOwned;
+            set
+            {
+                _tooltipDisplayAmountOwned = value;
+                ConfigurationChanged?.Invoke();
+            }
+        }
+
+        public bool TooltipDisplayMarketAveragePrice
+        {
+            get => _tooltipDisplayMarketAveragePrice;
+            set
+            {
+                _tooltipDisplayMarketAveragePrice = value;
+                ConfigurationChanged?.Invoke();
+            }
+        }
+
+        public bool TooltipDisplayMarketLowestPrice
+        {
+            get => _tooltipDisplayMarketLowestPrice;
+            set
+            {
+                _tooltipDisplayMarketLowestPrice = value;
                 ConfigurationChanged?.Invoke();
             }
         }
@@ -215,7 +247,6 @@ namespace InventoryTools
         public int AutoSaveMinutes { get; set; } = 10;
         public int InternalVersion { get; set; } = 0;
         public int Version { get; set; }
-        
         public event ConfigurationChangedDelegate? ConfigurationChanged;
 
         //Configuration Helpers

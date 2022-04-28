@@ -72,7 +72,7 @@ namespace InventoryTools.Logic
             var bytes = Encoding.UTF8.GetBytes(json).Prepend(CurrentVersion).ToArray();
             return bytes.ToCompressedBase64();
         }
-        internal static bool FromBase64(string data, out FilterConfiguration filterConfiguration)
+        public static bool FromBase64(string data, out FilterConfiguration filterConfiguration)
         {
             filterConfiguration = new FilterConfiguration();
             try

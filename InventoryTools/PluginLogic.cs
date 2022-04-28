@@ -73,7 +73,7 @@ namespace InventoryTools
         public readonly ConcurrentDictionary<ushort, TextureWrap> TextureDictionary = new ConcurrentDictionary<ushort, TextureWrap>();
         public readonly Dictionary<string, TextureWrap> UldTextureDictionary = new Dictionary<string, TextureWrap>();
 
-        public PluginLogic()
+        public PluginLogic(bool noExternals = false)
         {
             
             AvailableFilters.Add(new CanBePurchasedFilter());
@@ -91,6 +91,8 @@ namespace InventoryTools
             AvailableFilters.Add(new SpiritBondFilter());
             AvailableFilters.Add(new MarketBoardPriceFilter());
             AvailableFilters.Add(new MarketBoardTotalPriceFilter());
+            AvailableFilters.Add(new MarketBoardMinPriceFilter());
+            AvailableFilters.Add(new MarketBoardMinTotalPriceFilter());
             AvailableFilters.Add(new AcquiredFilter());
             AvailableFilters.Add(new DuplicatesOnlyFilter());
             AvailableFilters.Add(new DisplayFilterInRetainersFilter());
@@ -111,40 +113,44 @@ namespace InventoryTools
             AvailableFilters.Add(new IsHousingItemFilter());
             AvailableFilters.Add(new IsCraftingItemFilter());
             AvailableFilters.Add(new IsArmoireItemFilter());
-            //Events we need to track, inventory updates, active retainer changes, player changes, 
-            PluginService.InventoryMonitor.OnInventoryChanged += InventoryMonitorOnOnInventoryChanged;
-            PluginService.CharacterMonitor.OnActiveRetainerChanged += CharacterMonitorOnOnActiveCharacterChanged;
-            PluginService.CharacterMonitor.OnCharacterUpdated += CharacterMonitorOnOnCharacterUpdated;
-            PluginConfiguration.ConfigurationChanged += ConfigOnConfigurationChanged;
-            Service.Framework.Update += FrameworkOnUpdate;
-
-            PluginService.InventoryMonitor.LoadExistingData(PluginConfiguration.GetSavedInventory());
-            PluginService.CharacterMonitor.LoadExistingRetainers(PluginConfiguration.GetSavedRetainers());
-
-            PluginService.GameUi.WatchWindowState(WindowName.RetainerGrid0);
-            PluginService.GameUi.WatchWindowState(WindowName.InventoryGrid0E);
-            PluginService.GameUi.WatchWindowState(WindowName.RetainerList);
-            PluginService.GameUi.WatchWindowState(WindowName.Inventory);
-            PluginService.GameUi.WatchWindowState(WindowName.InventoryLarge);
-            PluginService.GameUi.WatchWindowState(WindowName.InventoryRetainerLarge);
-            PluginService.GameUi.WatchWindowState(WindowName.InventoryRetainer);
-            PluginService.GameUi.WatchWindowState(WindowName.InventoryBuddy);
-            PluginService.GameUi.WatchWindowState(WindowName.InventoryBuddy2);
-            PluginService.GameUi.UiVisibilityChanged += GameUiOnUiVisibilityChanged;
-            
-            GameInterface.AcquiredItemsUpdated += GameInterfaceOnAcquiredItemsUpdated;
-            
-            LoadExistingData(PluginConfiguration.GetSavedFilters());
-            if (PluginConfiguration.FirstRun)
+            if (!noExternals)
             {
-                LoadDefaultData();
-                PluginConfiguration.FirstRun = false;
-            }
-            RunMigrations();
-            WatchFilterChanges();
+                //Events we need to track, inventory updates, active retainer changes, player changes, 
+                PluginService.InventoryMonitor.OnInventoryChanged += InventoryMonitorOnOnInventoryChanged;
+                PluginService.CharacterMonitor.OnActiveRetainerChanged += CharacterMonitorOnOnActiveCharacterChanged;
+                PluginService.CharacterMonitor.OnCharacterUpdated += CharacterMonitorOnOnCharacterUpdated;
+                PluginConfiguration.ConfigurationChanged += ConfigOnConfigurationChanged;
+                Service.Framework.Update += FrameworkOnUpdate;
 
-            this.CommonBase = new XivCommonBase(Hooks.Tooltips);
-            this.CommonBase.Functions.Tooltips.OnItemTooltip += this.OnItemTooltip;
+                PluginService.InventoryMonitor.LoadExistingData(PluginConfiguration.GetSavedInventory());
+                PluginService.CharacterMonitor.LoadExistingRetainers(PluginConfiguration.GetSavedRetainers());
+
+                PluginService.GameUi.WatchWindowState(WindowName.RetainerGrid0);
+                PluginService.GameUi.WatchWindowState(WindowName.InventoryGrid0E);
+                PluginService.GameUi.WatchWindowState(WindowName.RetainerList);
+                PluginService.GameUi.WatchWindowState(WindowName.Inventory);
+                PluginService.GameUi.WatchWindowState(WindowName.InventoryLarge);
+                PluginService.GameUi.WatchWindowState(WindowName.InventoryRetainerLarge);
+                PluginService.GameUi.WatchWindowState(WindowName.InventoryRetainer);
+                PluginService.GameUi.WatchWindowState(WindowName.InventoryBuddy);
+                PluginService.GameUi.WatchWindowState(WindowName.InventoryBuddy2);
+                PluginService.GameUi.UiVisibilityChanged += GameUiOnUiVisibilityChanged;
+
+                GameInterface.AcquiredItemsUpdated += GameInterfaceOnAcquiredItemsUpdated;
+
+                LoadExistingData(PluginConfiguration.GetSavedFilters());
+                if (PluginConfiguration.FirstRun)
+                {
+                    LoadDefaultData();
+                    PluginConfiguration.FirstRun = false;
+                }
+
+                RunMigrations();
+                WatchFilterChanges();
+
+                this.CommonBase = new XivCommonBase(Hooks.Tooltips);
+                this.CommonBase.Functions.Tooltips.OnItemTooltip += this.OnItemTooltip;
+            }
         }
 
         private void GameInterfaceOnAcquiredItemsUpdated()
@@ -259,6 +265,14 @@ namespace InventoryTools
             {
                 PluginLog.Log("Migrating to version 5");
                 PluginConfiguration.RetainerListColor = ImGuiColors.HealerGreen;
+                PluginConfiguration.InternalVersion++;
+            }
+
+            if (PluginConfiguration.InternalVersion == 5)
+            {
+                PluginLog.Log("Migrating to version 6");
+                PluginConfiguration.TooltipDisplayAmountOwned = true;
+                PluginConfiguration.TooltipDisplayMarketAveragePrice = true;
                 PluginConfiguration.InternalVersion++;
             }
         }
@@ -736,10 +750,6 @@ namespace InventoryTools
         {
             var activeFilter = GetActiveFilter();
             FilterTable? activeTable = null;
-            bool shouldHighlight = false;
-            var invertHighlighting = false;
-            var invertTabHighlighting = false;
-            //Add in ability to turn off highlights
             if (activeFilter != null)
             {
                 if (PluginConfiguration.IsVisible || activeFilter.OpenAsWindow)
@@ -779,11 +789,11 @@ namespace InventoryTools
 
             if (PluginConfiguration.DisplayTooltip)
             {
-                description += "\n\n";
-                description += "[InventoryTools]\n";
-
+                var lines = new List<string>();
+                if (PluginConfiguration.TooltipDisplayAmountOwned)
                 {
-                    var ownedItems = PluginService.InventoryMonitor.AllItems.Where(item => item.ItemId == itemId).ToList();
+                    var ownedItems = PluginService.InventoryMonitor.AllItems.Where(item => item.ItemId == itemId)
+                        .ToList();
                     uint storageCount = 0;
                     List<string> locations = new List<string>();
                     foreach (var oItem in ownedItems)
@@ -801,29 +811,50 @@ namespace InventoryTools
 
                     if (storageCount > 0)
                     {
-                        description += $"Owned: {storageCount}\n";
-                        description += $"Locations:\n";
+                        lines.Add($"Owned: {storageCount}\n");
+                        lines.Add($"Locations:\n");
                         foreach (var location in locations)
                         {
-                            description += $"{indentation}{location}\n";
+                            lines.Add($"{indentation}{location}\n");
                         }
                     }
                 }
 
+                if (PluginConfiguration.TooltipDisplayMarketAveragePrice ||
+                    PluginConfiguration.TooltipDisplayMarketLowestPrice)
                 {
-                    if (!(ExcelCache.GetItem((uint)itemId)?.IsUntradable ?? true))
+                    if (!(ExcelCache.GetItem((uint) itemId)?.IsUntradable ?? true))
                     {
-                        var marketData = Cache.GetPricing((uint)itemId, false);
+                        var marketData = Cache.GetPricing((uint) itemId, false);
                         if (marketData != null)
                         {
-                            description += "Market Board Data:\n";
-                            description += $"{indentation}Average Price: {marketData.averagePriceNQ}\n";
-                            description += $"{indentation}Average Price (HQ): {marketData.averagePriceHQ}\n";
+                            lines.Add("Market Board Data:\n");
+                            if (PluginConfiguration.TooltipDisplayMarketAveragePrice)
+                            {
+                                lines.Add($"{indentation}Average Price: {marketData.averagePriceNQ}\n");
+                                lines.Add($"{indentation}Average Price (HQ): {marketData.averagePriceHQ}\n");
+                            }
+                            if (PluginConfiguration.TooltipDisplayMarketLowestPrice)
+                            {
+                                lines.Add($"{indentation}Minimum Price: {marketData.minPriceNQ}\n");
+                                lines.Add($"{indentation}Minimum Price (HQ): {marketData.minPriceHQ}\n");
+                            }
                         }
+                    }
+                }
+
+                if (lines.Count != 0)
+                {
+                    description += "\n\n";
+                    description += "[InventoryTools]\n";
+                    foreach (var line in lines)
+                    {
+                        description += line;
                     }
                 }
             }
 
+            
             tooltip[ItemTooltipString.Description] = description;
         }
 

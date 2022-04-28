@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CriticalCommonLib", "Critic
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tetris", "Tetris\Tetris.csproj", "{0B539F46-69D7-4192-AEB7-71F114E92BDB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryToolsTesting", "InventoryToolsTesting\InventoryToolsTesting.csproj", "{1EEB0522-1EB4-4B72-9199-3A42D522D286}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,5 +33,11 @@ Global
 		{0B539F46-69D7-4192-AEB7-71F114E92BDB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0B539F46-69D7-4192-AEB7-71F114E92BDB}.FullDebug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0B539F46-69D7-4192-AEB7-71F114E92BDB}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
+		{1EEB0522-1EB4-4B72-9199-3A42D522D286}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EEB0522-1EB4-4B72-9199-3A42D522D286}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EEB0522-1EB4-4B72-9199-3A42D522D286}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EEB0522-1EB4-4B72-9199-3A42D522D286}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1EEB0522-1EB4-4B72-9199-3A42D522D286}.FullDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EEB0522-1EB4-4B72-9199-3A42D522D286}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 EndGlobal

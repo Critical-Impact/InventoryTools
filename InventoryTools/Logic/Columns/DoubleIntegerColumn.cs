@@ -139,7 +139,7 @@ namespace InventoryTools.Logic.Columns
             });
         }
 
-        public override void DoDraw((int,int)? currentValue, int rowIndex)
+        public override IColumnEvent? DoDraw((int, int)? currentValue, int rowIndex)
         {
             ImGui.TableNextColumn();
             if (currentValue != null)
@@ -150,6 +150,7 @@ namespace InventoryTools.Logic.Columns
             {
                 ImGui.Text(EmptyText);
             }
+            return null;
         }
 
         public override void Setup(int columnIndex)

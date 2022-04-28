@@ -120,6 +120,7 @@ namespace InventoryTools.Sections
             UiHelpers.HelpMarker(
                 "Should the active window filter automatically change when moving between each filter tab? The active filter will only change if there is an active filter already selected.");
 
+            
             if (ImGui.Checkbox("Show Tooltip?", ref displayTooltip))
             {
                 Configuration.DisplayTooltip = !Configuration.DisplayTooltip;
@@ -128,6 +129,36 @@ namespace InventoryTools.Sections
             ImGui.SameLine();
             UiHelpers.HelpMarker(
                 "When hovering an item, show additional information about the item including it's location in inventories and market price(if available).");
+
+            var displayAmountOwned = Configuration.TooltipDisplayAmountOwned;
+            if (ImGui.Checkbox("Tooltip - Display Amount Owned?", ref displayAmountOwned))
+            {
+                Configuration.TooltipDisplayAmountOwned = !Configuration.TooltipDisplayAmountOwned;
+            }
+
+            ImGui.SameLine();
+            UiHelpers.HelpMarker(
+                "When hovering an item, should the tooltip contain information about where the items are located.");
+
+            var displayMarketAverage = Configuration.TooltipDisplayMarketAveragePrice;
+            if (ImGui.Checkbox("Tooltip - Display Market Average Price?", ref displayMarketAverage))
+            {
+                Configuration.TooltipDisplayMarketAveragePrice = !Configuration.TooltipDisplayMarketAveragePrice;
+            }
+
+            ImGui.SameLine();
+            UiHelpers.HelpMarker(
+                "When hovering an item, should the tooltip contain the average market price for NQ/HQ.");
+
+            var displayMarketMinimum = Configuration.TooltipDisplayMarketLowestPrice;
+            if (ImGui.Checkbox("Tooltip - Display Market Minimum Price?", ref displayMarketMinimum))
+            {
+                Configuration.TooltipDisplayMarketLowestPrice = !Configuration.TooltipDisplayMarketLowestPrice;
+            }
+
+            ImGui.SameLine();
+            UiHelpers.HelpMarker(
+                "When hovering an item, should the tooltip contain the average market price for NQ/HQ.");
 
             ImGui.Text("Auto Save:");
             ImGui.Separator();

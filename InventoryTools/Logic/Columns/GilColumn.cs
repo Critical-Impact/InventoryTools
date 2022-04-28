@@ -5,7 +5,7 @@ namespace InventoryTools.Logic.Columns
 {
     public abstract class GilColumn : IntegerColumn
     {
-        public override void DoDraw(int? currentValue, int rowIndex)
+        public override IColumnEvent? DoDraw(int? currentValue, int rowIndex)
         {
             ImGui.TableNextColumn();
             if (currentValue != null)
@@ -17,6 +17,7 @@ namespace InventoryTools.Logic.Columns
             {
                 ImGui.Text(EmptyText);
             }
+            return null;
         }
     }
 }

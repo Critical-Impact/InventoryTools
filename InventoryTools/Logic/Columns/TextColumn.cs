@@ -90,7 +90,7 @@ namespace InventoryTools.Logic.Columns
             return direction == ImGuiSortDirection.Ascending ? items.OrderBy(CurrentValue, StringComparison.OrdinalIgnoreCase.WithNaturalSort()) : items.OrderByDescending(CurrentValue, StringComparison.OrdinalIgnoreCase.WithNaturalSort());
         }
 
-        public override void DoDraw(string? currentValue, int rowIndex)
+        public override IColumnEvent? DoDraw(string? currentValue, int rowIndex)
         {
             ImGui.TableNextColumn();
             if (currentValue != null)
@@ -101,6 +101,8 @@ namespace InventoryTools.Logic.Columns
             {
                 ImGui.Text(EmptyText);
             }
+
+            return null;
         }
 
         public override void Setup(int columnIndex)

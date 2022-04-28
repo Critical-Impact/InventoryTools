@@ -66,51 +66,22 @@ namespace InventoryTools
                     }
                     if (filterConfiguration.DisplayInTabs)
                     {
-                        /*if (PluginFont.AppIcons.HasValue && filterConfiguration.Icon != null)
+                        if (ImGui.BeginTabItem(itemTable.Name + "##" + filterConfiguration.Key))
                         {
-                            ImGui.PushFont(PluginFont.AppIcons.Value);
-                            if (ImGui.BeginTabItem(filterConfiguration.Name + " " + filterConfiguration.Icon + "##" + filterConfiguration.Key))
+                            itemTable.Draw();
+                            if (_activeFilter != filterConfiguration.Key)
                             {
-                                ImGui.PopFont();
-                                itemTable.Draw();
-                                if (_activeFilter != filterConfiguration.Key)
+                                _activeFilter = filterConfiguration.Key;
+                                if (Configuration.SwitchFiltersAutomatically &&
+                                    Configuration.ActiveUiFilter != filterConfiguration.Key &&
+                                    Configuration.ActiveUiFilter != null)
                                 {
-                                    _activeFilter = filterConfiguration.Key;
-                                    if (Configuration.SwitchFiltersAutomatically &&
-                                        Configuration.ActiveUiFilter != filterConfiguration.Key &&
-                                        Configuration.ActiveUiFilter != null)
-                                    {
-                                        PluginService.PluginLogic.ToggleActiveUiFilterByKey(filterConfiguration.Key);
-                                    }
+                                    PluginService.PluginLogic.ToggleActiveUiFilterByKey(filterConfiguration.Key);
                                 }
+                            }
 
-                                ImGui.EndTabItem();
-                            }
-                            else
-                            {
-                                ImGui.PopFont();
-                            }
+                            ImGui.EndTabItem();
                         }
-                        else
-                        {*/
-                            if (ImGui.BeginTabItem(itemTable.Name + "##" + filterConfiguration.Key))
-                            {
-                                itemTable.Draw();
-                                if (_activeFilter != filterConfiguration.Key)
-                                {
-                                    _activeFilter = filterConfiguration.Key;
-                                    if (Configuration.SwitchFiltersAutomatically &&
-                                        Configuration.ActiveUiFilter != filterConfiguration.Key &&
-                                        Configuration.ActiveUiFilter != null)
-                                    {
-                                        PluginService.PluginLogic.ToggleActiveUiFilterByKey(filterConfiguration.Key);
-                                    }
-                                }
-
-                                ImGui.EndTabItem();
-                            }
-
-                        //}
                     }
                 }
                 

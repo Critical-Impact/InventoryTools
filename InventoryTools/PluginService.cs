@@ -43,6 +43,12 @@ namespace InventoryTools
             CommandManager = new PluginCommandManager<PluginCommands>(PluginCommands);
         }
 
+        public static void InitialiseTesting(CharacterMonitor characterMonitor, PluginLogic pluginLogic)
+        {
+            CharacterMonitor = characterMonitor;
+            PluginLogic = pluginLogic;
+        }
+
         public static void Dispose()
         {
             CommandManager.Dispose();

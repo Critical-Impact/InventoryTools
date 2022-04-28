@@ -98,12 +98,13 @@ namespace InventoryTools.Logic
             }
         }
 
-        public static Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>? LoadSavedInventories()
+        public static Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>? LoadSavedInventories(string? fileName = null)
         {
             try
             {
-                PluginLog.Verbose("Loading inventories from " + InventoryFile);
-                var cacheFile = new FileInfo(InventoryFile);
+                fileName ??= InventoryFile;
+                PluginLog.Verbose("Loading inventories from " + fileName);
+                var cacheFile = new FileInfo(fileName);
                 string json = File.ReadAllText(cacheFile.FullName, Encoding.UTF8);
                 return JsonConvert.DeserializeObject<Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>>(json, new JsonSerializerSettings()
                 {

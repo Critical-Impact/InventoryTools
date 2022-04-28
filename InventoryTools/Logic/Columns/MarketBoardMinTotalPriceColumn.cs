@@ -5,12 +5,13 @@ using ImGuiNET;
 
 namespace InventoryTools.Logic.Columns
 {
-    public class MarketBoardTotalPriceColumn : MarketBoardPriceColumn
+    public class MarketBoardMinTotalPriceColumn : MarketBoardMinPriceColumn
     {
         public override FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter;
 
         public override IColumnEvent? DoDraw((int, int)? currentValue, int rowIndex)
         {
+            
             if (currentValue.HasValue && currentValue.Value.Item1 == Loading)
             {
                 ImGui.TableNextColumn();
@@ -48,10 +49,6 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "MB Average Total Price";
-        public override float Width { get; set; } = 250.0f;
-        public override string FilterText { get; set; } = "";
-        public override bool HasFilter { get; set; } = true;
-        public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
+        public override string Name { get; set; } = "MB Minimum Total Price";
     }
 }

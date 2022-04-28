@@ -15,7 +15,23 @@ namespace InventoryTools.Logic.Columns
         protected static readonly int Loading = -1;
         protected static readonly int Untradable = -2;
 
-        public override void DoDraw((int,int)? currentValue, int rowIndex)
+        public override void Draw(InventoryItem item, int rowIndex)
+        {
+            var result = DoDraw(CurrentValue(item), rowIndex);
+            result?.HandleEvent(item);
+        }
+        public override void Draw(SortingResult item, int rowIndex)
+        {
+            var result = DoDraw(CurrentValue(item), rowIndex);
+            result?.HandleEvent(item);
+        }
+        public override void Draw(Item item, int rowIndex)
+        {
+            var result = DoDraw(CurrentValue(item), rowIndex);
+            result?.HandleEvent(item);
+        }
+
+        public override IColumnEvent? DoDraw((int, int)? currentValue, int rowIndex)
         {
             if (currentValue.HasValue && currentValue.Value.Item1 == Loading)
             {
@@ -33,13 +49,14 @@ namespace InventoryTools.Logic.Columns
                 ImGui.SameLine();
                 if (ImGui.SmallButton("R##" + rowIndex))
                 {
-                    PluginLog.Verbose("Forcing a universalis check");
+                    return new RefreshPricingEvent();
                 }
             }
             else
             {
                 base.DoDraw(currentValue, rowIndex);
             }
+            return null;
         }
 
         public override (int,int)? CurrentValue(InventoryItem item)

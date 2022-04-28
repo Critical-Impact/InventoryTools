@@ -38,7 +38,7 @@ namespace InventoryTools.Logic.Columns
         public abstract void Draw(SortingResult item, int rowIndex);
         public abstract void Draw(Item item, int rowIndex);
 
-        public abstract void DoDraw(T currentValue, int rowIndex);
+        public abstract IColumnEvent? DoDraw(T currentValue, int rowIndex);
 
         public abstract void Setup(int columnIndex);
 

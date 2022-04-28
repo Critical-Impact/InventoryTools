@@ -185,7 +185,7 @@ namespace InventoryTools.Logic.Columns
             return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => CurrentValue(c) ?? false) : items.OrderByDescending(c => CurrentValue(c) ?? false);
         }
 
-        public override void DoDraw(bool? currentValue, int rowIndex)
+        public override IColumnEvent? DoDraw(bool? currentValue, int rowIndex)
         {
             ImGui.TableNextColumn();
             if (currentValue.HasValue)
@@ -194,6 +194,7 @@ namespace InventoryTools.Logic.Columns
                                     GameIcon.CrossIcon.Size.X / 2);
                 PluginService.PluginLogic.DrawUldIcon(currentValue.Value ? GameIcon.TickIcon : GameIcon.CrossIcon);
             }
+            return null;
         }
 
         public override void Setup(int columnIndex)

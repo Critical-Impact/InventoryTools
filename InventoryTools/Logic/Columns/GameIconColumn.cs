@@ -65,13 +65,14 @@ namespace InventoryTools.Logic.Columns
             return items;
         }
 
-        public override void DoDraw(ushort? currentValue, int rowIndex)
+        public override IColumnEvent? DoDraw(ushort? currentValue, int rowIndex)
         {
             ImGui.TableNextColumn();
             if (currentValue != null)
             {
                 PluginService.PluginLogic.DrawIcon(currentValue.Value, IconSize);
             }
+            return null;
         }
 
         public override void Setup(int columnIndex)
