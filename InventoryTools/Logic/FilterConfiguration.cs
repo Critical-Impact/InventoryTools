@@ -958,6 +958,10 @@ namespace InventoryTools.Logic
                     {
                         return true;
                     }
+                    if (activeRetainerId == sourceCharacterId && activeRetainerId != destinationCharacterId)
+                    {
+                        return true;
+                    }
                     return false;
                 }
             }

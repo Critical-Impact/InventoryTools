@@ -118,6 +118,7 @@ namespace InventoryTools
                 //Events we need to track, inventory updates, active retainer changes, player changes, 
                 PluginService.InventoryMonitor.OnInventoryChanged += InventoryMonitorOnOnInventoryChanged;
                 PluginService.CharacterMonitor.OnActiveRetainerChanged += CharacterMonitorOnOnActiveCharacterChanged;
+                PluginService.CharacterMonitor.OnActiveRetainerLoaded += CharacterMonitorOnOnActiveCharacterChanged;
                 PluginService.CharacterMonitor.OnCharacterUpdated += CharacterMonitorOnOnCharacterUpdated;
                 PluginConfiguration.ConfigurationChanged += ConfigOnConfigurationChanged;
                 Service.Framework.Update += FrameworkOnUpdate;
@@ -1135,7 +1136,6 @@ namespace InventoryTools
                         ImGuiCond.FirstUseEver);
                     ImGui.SetNextWindowSizeConstraints(new Vector2(350, 500) * ImGui.GetIO().FontGlobalScale,
                         new Vector2(2000, 2000) * ImGui.GetIO().FontGlobalScale);
-                    ImGui.PushStyleColor(ImGuiCol.WindowBg, 0xFF000000);
                     if (ImGui.Begin("Craft Requirements: " + actualItem.Name, ref isVisible))
                     {
                         ImGui.Text(actualItem.Description.ToDalamudString().ToString());
@@ -1199,6 +1199,7 @@ namespace InventoryTools
             Service.Framework.Update -= FrameworkOnUpdate;
             PluginService.InventoryMonitor.OnInventoryChanged -= InventoryMonitorOnOnInventoryChanged;
             PluginService.CharacterMonitor.OnActiveRetainerChanged -= CharacterMonitorOnOnActiveCharacterChanged;
+            PluginService.CharacterMonitor.OnActiveRetainerLoaded -= CharacterMonitorOnOnActiveCharacterChanged;
             PluginService.CharacterMonitor.OnCharacterUpdated -= CharacterMonitorOnOnCharacterUpdated;
             PluginConfiguration.ConfigurationChanged -= ConfigOnConfigurationChanged;
             PluginService.GameUi.UiVisibilityChanged -= GameUiOnUiVisibilityChanged;

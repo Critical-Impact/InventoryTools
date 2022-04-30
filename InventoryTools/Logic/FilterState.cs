@@ -121,15 +121,16 @@ namespace InventoryTools.Logic
             }
         }
 
-        public Dictionary<Vector2, Vector4?> GetBagHighlights(InventoryType bag)
+        public Dictionary<Vector2, Vector4?> GetBagHighlights(InventoryType bag, FilterResult? resultOverride = null)
         {
             var bagHighlights = new Dictionary<Vector2, Vector4?>();
 
-            if (FilterResult.HasValue)
+            var filterResult = resultOverride ?? FilterResult;
+            if (filterResult.HasValue)
             {
-                if (FilterResult.Value.AllItems.Count != 0)
+                if (filterResult.Value.AllItems.Count != 0)
                 {
-                    var allItems = FilterResult.Value.AllItems;
+                    var allItems = filterResult.Value.AllItems;
                     Dictionary<uint, HashSet<Vector2>> availableItems = new ();
                     
                     foreach (var item in PluginService.InventoryMonitor.AllItems)
@@ -215,7 +216,7 @@ namespace InventoryTools.Logic
                 }
 
                 
-                foreach (var item in FilterResult.Value.SortedItems)
+                foreach (var item in filterResult.Value.SortedItems)
                 {
                     if(item.SourceBag == bag && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting)))
                     {
@@ -288,8 +289,11 @@ namespace InventoryTools.Logic
         
         private bool MatchesRetainerFilter(FilterConfiguration activeFilter, SortingResult item, bool invertHighlighting = false)
         {
-            bool matches = (activeFilter.FilterType.HasFlag(FilterType.SearchFilter) || activeFilter.FilterType.HasFlag(FilterType.SortingFilter)) && item.SourceRetainerId == PluginService.CharacterMonitor.ActiveRetainer;
-
+            bool matches = (activeFilter.FilterType.HasFlag(FilterType.SearchFilter) || activeFilter.FilterType.HasFlag(FilterType.SortingFilter));
+            if (item.SourceRetainerId != PluginService.CharacterMonitor.ActiveRetainer)
+            {
+                return false;
+            }
             if (matches)
             {
                 if (!item.InventoryItem.IsEmpty)
@@ -310,7 +314,7 @@ namespace InventoryTools.Logic
         {
             bool matches = false;
             if (activeFilter.FilterType == FilterType.SearchFilter &&
-                item.SourceRetainerId == Service.ClientState.LocalContentId)
+                item.SourceRetainerId == PluginService.CharacterMonitor.ActiveCharacter)
             {
                 matches = true;
             }
@@ -319,7 +323,7 @@ namespace InventoryTools.Logic
                 matches = true;
             }
             
-            if (item.SourceRetainerId == Service.ClientState.LocalContentId && (ActiveRetainerId == null ||
+            if (item.SourceRetainerId == PluginService.CharacterMonitor.ActiveCharacter && (ActiveRetainerId == null ||
                 ActiveRetainerId != null &&
                 item.DestinationRetainerId ==
                 ActiveRetainerId))

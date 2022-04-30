@@ -107,7 +107,7 @@ namespace InventoryTools.GameUi
                     if (filterConfiguration.FilterType == FilterType.SortingFilter)
                     {
                         var grouping = filteredList.Where(c =>
-                                c.SourceRetainerId == currentCharacterId && c.DestinationRetainerId != null)
+                                (c.SourceRetainerId == currentCharacterId || PluginService.CharacterMonitor.BelongsToActiveCharacter(c.SourceRetainerId)) && c.DestinationRetainerId != null)
                             .GroupBy(c => c.DestinationRetainerId!.Value).Where(c => c.Any()).ToList();
                         RetainerColors = grouping.ToDictionary(c => c.Key,
                             c => filterConfiguration.RetainerListColor ??

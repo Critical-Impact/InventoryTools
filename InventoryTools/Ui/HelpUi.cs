@@ -62,6 +62,7 @@ namespace InventoryTools
                     ImGui.TextWrapped(">= - Show any results that have a value greater or equal to what is entered - available for numbers.");
                     ImGui.TextWrapped("<= - Show any results that have a value less than or equal to what is entered - available for numbers.");
                     ImGui.TextWrapped("= - Show any results that have a value equal to exactly what is entered - available for text and numbers.");
+                    ImGui.TextWrapped("&& and || AND and OR respectively - Can be used to chain operators together.");
                 }
                 else if (Configuration.SelectedHelpPage == 2)
                 {
