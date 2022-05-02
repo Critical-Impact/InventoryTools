@@ -25,10 +25,6 @@ namespace InventoryTools.Logic.Columns
             else if(currentValue.HasValue)
             {
                 base.DoDraw(currentValue, rowIndex);
-                if (ImGui.SmallButton("R##" + rowIndex))
-                {
-                    return new RefreshPricingEvent();
-                }
             }
             else
             {

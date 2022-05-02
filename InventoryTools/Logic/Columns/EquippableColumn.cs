@@ -1,20 +1,19 @@
-using CriticalCommonLib.Models;
+﻿using CriticalCommonLib.Models;
 using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
 {
-    public class DebugColumn : TextColumn
+    public class EquippableColumn : TextColumn
     {
         public override string? CurrentValue(InventoryItem item)
         {
-            return item.SortedSlotIndex + " - " + item.GlamourIndex;
             if (item.Item != null) return CurrentValue(item.Item);
             return "";
         }
 
         public override string? CurrentValue(Item item)
         {
-            return "Item Search: " + item.ItemSearchCategory.Row + " - Ui Category: " + item.ItemUICategory.Row + " - Sort Category: " + item.ItemSortCategory.Row + " - Equip Slot Category: " + item.EquipSlotCategory.Row + " - Class Job Category: " + item.ClassJobCategory.Row + " - Buy: " + item.PriceMid + " - Unknown: " + item.Unknown19;
+            return item.ClassJobCategory.Value?.Name ?? "";
         }
 
         public override string? CurrentValue(SortingResult item)
@@ -22,11 +21,10 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "Debug - General Information";
+        public override string Name { get; set; } = "Equippable By";
         public override float Width { get; set; } = 200;
         public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = true;
-        public override bool IsDebug { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
     }
 }

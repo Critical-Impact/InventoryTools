@@ -29,6 +29,7 @@ namespace InventoryTools.Logic
             AddOverlay(new InventoryBuddyOverlay());
             AddOverlay(new InventoryBuddyOverlay2());
             AddOverlay(new FreeCompanyChestOverlay());
+            AddOverlay(new InventoryMiragePrismBoxOverlay());
             Service.Framework.Update += FrameworkOnUpdate;
         }
 
@@ -41,6 +42,11 @@ namespace InventoryTools.Logic
         {
             foreach (var overlay in _overlays)
             {
+                if (overlay.Value.NeedsStateRefresh)
+                {
+                    overlay.Value.UpdateState(_lastState);
+                    overlay.Value.NeedsStateRefresh = false;
+                }
                 overlay.Value.Update();
             }
         }
@@ -48,6 +54,7 @@ namespace InventoryTools.Logic
         private Dictionary<WindowName, IAtkOverlayState> _overlays = new();
         private HashSet<WindowName> _setupHooks = new();
         private Dictionary<WindowName, DateTime> _lastUpdate = new();
+        private FilterState? _lastState;
         public Dictionary<WindowName, IAtkOverlayState> Overlays
         {
             get => _overlays;
@@ -58,6 +65,7 @@ namespace InventoryTools.Logic
             foreach (var overlay in _overlays)
             {
                 overlay.Value.UpdateState(filterState);
+                _lastState = filterState;
             }
         }
 
@@ -121,6 +129,10 @@ namespace InventoryTools.Logic
                 if (windowstate.HasValue && windowstate.Value)
                 {
                     SetupUpdateHook(overlay);
+                    if (_lastState != null && !overlay.HasState)
+                    {
+                        overlay.UpdateState(_lastState);
+                    }
                 }
 
                 if (windowstate.HasValue && !windowstate.Value)
@@ -139,11 +151,25 @@ namespace InventoryTools.Logic
                 if (!_lastUpdate.ContainsKey(windowname))
                 {
                     _lastUpdate[windowname] = DateTime.Now.AddMilliseconds(50);
-                    overlay.Draw();
+                    if (_lastState != null && !overlay.HasState)
+                    {
+                        overlay.UpdateState(_lastState);
+                    }
+                    else
+                    {
+                        overlay.Draw();
+                    }
                 }
                 else if(_lastUpdate[windowname] <= DateTime.Now)
                 {
-                    overlay.Draw();
+                    if (_lastState != null && !overlay.HasState)
+                    {
+                        overlay.UpdateState(_lastState);
+                    }
+                    else
+                    {
+                        overlay.Draw();
+                    }
                     _lastUpdate[windowname] = DateTime.Now.AddMilliseconds(50);
                 }
             }

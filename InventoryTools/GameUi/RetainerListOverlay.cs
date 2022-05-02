@@ -44,6 +44,7 @@ namespace InventoryTools.GameUi
         
 
         public bool HasState { get; set; }
+        public bool NeedsStateRefresh { get; set; }
 
         public void UpdateState(FilterState? newState)
         {
@@ -51,7 +52,7 @@ namespace InventoryTools.GameUi
             {
                 return;
             }
-            if (newState != null)
+            if (AtkUnitBase != null && newState != null)
             {
                 HasState = true;
                 var filterResult = newState.Value.FilterResult;

@@ -2,7 +2,7 @@
     <PropertyGroup>
         <TargetFramework>net5.0-windows</TargetFramework>
         <LangVersion>9.0</LangVersion>
-        <Version>1.0.0.17</Version>
+        <Version>1.0.0.18</Version>
         <AssemblyName>InventoryTools</AssemblyName>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <ProduceReferenceAssembly>false</ProduceReferenceAssembly>

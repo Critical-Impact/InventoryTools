@@ -234,6 +234,15 @@ namespace InventoryTools
 
                         }
                     }
+
+                    if (ImGui.Button("Check prism box"))
+                    {
+                        var prismBox = new AtkInventoryMiragePrismBox();
+                        PluginLog.Log(prismBox.CurrentPage.ToString());
+                        PluginLog.Log(prismBox.CurrentTab.ToString());
+                        PluginLog.Log(prismBox.ClassJobSelected.ToString());
+                        PluginLog.Log(prismBox.OnlyDisplayRaceGenderItems.ToString());
+                    }
                 }
                 else if (Configuration.SelectedDebugPage == 3)
                 {

@@ -52,9 +52,15 @@ namespace InventoryTools.GameUi
         }
 
         public bool HasState { get; set; }
+        public bool NeedsStateRefresh { get; set; }
+
         public void UpdateState(FilterState? newState)
         {
             if (PluginService.CharacterMonitor.ActiveCharacter == 0)
+            {
+                return;
+            }
+            if (AtkUnitBase == null)
             {
                 return;
             }

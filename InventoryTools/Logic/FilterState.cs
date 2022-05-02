@@ -3,7 +3,12 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Enums;
+using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Ui;
+using Dalamud.Game.ClientState.Objects.Enums;
+using Dalamud.Logging;
 using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic
@@ -121,6 +126,121 @@ namespace InventoryTools.Logic
             }
         }
 
+        public Dictionary<Vector2, Vector4?> GetGlamourHighlights(AtkInventoryMiragePrismBox.DresserTab dresserTab, int page, bool displayEquippableOnly,uint classJobSelected, FilterResult? resultOverride = null)
+        {
+            var bagHighlights = new Dictionary<Vector2, Vector4?>();
+            if (PluginService.CharacterMonitor.ActiveCharacter == 0)
+            {
+                return bagHighlights;
+            }
+            var filterResult = resultOverride ?? FilterResult;
+            if (filterResult.HasValue)
+            {
+                if (filterResult.Value.AllItems.Count != 0)
+                {
+                    /*var correctResults = filterResult.Value.AllItems.Where(c =>
+                        AtkInventoryMiragePrismBox.EquipSlotCategoryToDresserTab(c.EquipSlotCategory.Value) ==
+                        dresserTab).Skip(page * 50).Take(50).ToList();
+                    resultOverride = new FilterResult(new List<SortingResult>(), new List<InventoryItem>(),
+                        correctResults);
+                    //TODO: REDO ME
+                    return GetBagHighlights(InventoryType.GlamourChest, resultOverride);*/
+                    return new Dictionary<Vector2, Vector4?>();
+                }
+                else
+                {
+                    var fullInventory =
+                        PluginService.InventoryMonitor.GetSpecificInventory(PluginService.CharacterMonitor
+                            .ActiveCharacter, InventoryCategory.GlamourChest);
+                    
+                    var filteredItems = fullInventory.Where(c =>
+                        AtkInventoryMiragePrismBox.EquipSlotCategoryToDresserTab(c.EquipSlotCategory) ==
+                        dresserTab);
+                    
+                    if (classJobSelected != 0)
+                    {
+                        filteredItems = filteredItems.Where(c => c.Item != null && ExcelCache.IsItemEquippableBy(c.Item.ClassJobCategory.Row, classJobSelected));
+                    }
+
+                    if (displayEquippableOnly && Service.ClientState.LocalPlayer != null)
+                    {
+                        var race = Service.ClientState.LocalPlayer.Customize[(int)CustomizeIndex.Race];
+                        var gender = Service.ClientState.LocalPlayer.Customize[(int) CustomizeIndex.Gender] == 0
+                            ? CharacterSex.Male
+                            : CharacterSex.Female;
+                        filteredItems = filteredItems.Where(c => c.CanBeEquippedByRaceGender(race, gender));
+                        
+                    }
+
+                    var inventoryItems =
+                        filteredItems.Skip(page * 50).Take(50).OrderBy(c => c.SortedSlotIndex).ToList();
+                    var glamourIndex = 0;
+                    foreach (var item in inventoryItems)
+                    {
+                        item.GlamourIndex = glamourIndex;
+                        glamourIndex++;
+                    }
+                    var correctResults = filterResult.Value.SortedItems.OrderBy(c => c.InventoryItem.Slot).ToList();
+                    var x = 0;
+                    var y = 0;
+                    foreach (var item in correctResults)
+                    {
+                        if(inventoryItems.Contains(item.InventoryItem) && item.SourceBag == InventoryType.GlamourChest && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting)))
+                        {
+                            var itemBagLocation = item.BagLocation;
+                            if (!bagHighlights.ContainsKey(itemBagLocation))
+                            {
+                                if (!InvertHighlighting && !item.InventoryItem.IsEmpty)
+                                {
+                                    bagHighlights.Add(itemBagLocation, BagHighlightColor);
+                                }
+                                else if (InvertHighlighting && item.InventoryItem.IsEmpty)
+                                {
+                                    bagHighlights.Add(itemBagLocation, BagHighlightColor);
+                                }
+                                else if(InvertHighlighting)
+                                {
+                                    bagHighlights.Add(itemBagLocation, null);
+                                }
+                                else
+                                {
+                                    bagHighlights.Add(itemBagLocation, null);
+                                }
+                            }
+
+                            x++;
+                            if (x >= 10)
+                            {
+                                x = 0;
+                                y++;
+                            }
+                        }
+                    }
+                    for (int x2 = 0; x2 < 10; x2++)
+                    {
+                        for (int y2 = 0; y2 < 5; y2++)
+                        {
+                            var position = new Vector2(x2,y2);
+                            if(!bagHighlights.ContainsKey(position))
+                            {
+                                if (InvertHighlighting)
+                                {
+                                    bagHighlights.Add(position, BagHighlightColor);
+                                }
+                                else
+                                {
+                                    bagHighlights.Add(position, null);
+                                }
+                            }
+                        }
+                    }
+                    return bagHighlights;
+                }
+            }
+
+            return new Dictionary<Vector2, Vector4?>();
+        }
+        
         public Dictionary<Vector2, Vector4?> GetBagHighlights(InventoryType bag, FilterResult? resultOverride = null)
         {
             var bagHighlights = new Dictionary<Vector2, Vector4?>();

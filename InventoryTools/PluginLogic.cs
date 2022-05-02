@@ -113,6 +113,7 @@ namespace InventoryTools
             AvailableFilters.Add(new IsHousingItemFilter());
             AvailableFilters.Add(new IsCraftingItemFilter());
             AvailableFilters.Add(new IsArmoireItemFilter());
+            AvailableFilters.Add(new EquippableByFilter());
             if (!noExternals)
             {
                 //Events we need to track, inventory updates, active retainer changes, player changes, 
@@ -140,14 +141,15 @@ namespace InventoryTools
                 GameInterface.AcquiredItemsUpdated += GameInterfaceOnAcquiredItemsUpdated;
 
                 LoadExistingData(PluginConfiguration.GetSavedFilters());
+
+                RunMigrations();
+                WatchFilterChanges();
+                
                 if (PluginConfiguration.FirstRun)
                 {
                     LoadDefaultData();
                     PluginConfiguration.FirstRun = false;
                 }
-
-                RunMigrations();
-                WatchFilterChanges();
 
                 this.CommonBase = new XivCommonBase(Hooks.Tooltips);
                 this.CommonBase.Functions.Tooltips.OnItemTooltip += this.OnItemTooltip;
@@ -451,13 +453,13 @@ namespace InventoryTools
             retainerItemsFilter.DisplayInTabs = true;
             retainerItemsFilter.SourceAllRetainers = true;
             _filterConfigurations.Add(retainerItemsFilter);
-            FilterAdded?.Invoke(allItemsFilter);
+            FilterAdded?.Invoke(retainerItemsFilter);
 
             var playerItemsFilter = new FilterConfiguration("Player", "PlayerItemsFilter", FilterType.SearchFilter);
             playerItemsFilter.DisplayInTabs = true;
             playerItemsFilter.SourceAllCharacters = true;
             _filterConfigurations.Add(playerItemsFilter);
-            FilterAdded?.Invoke(allItemsFilter);
+            FilterAdded?.Invoke(playerItemsFilter);
         }
 
         public void AddFilter(FilterConfiguration filterConfiguration)

@@ -15,7 +15,7 @@ namespace InventoryTools.Sections
                 for (var index = 0; index < PluginService.PluginLogic.FilterConfigurations.Count; index++)
                 {
                     var filterConfiguration = PluginService.PluginLogic.FilterConfigurations[index];
-                    if (ImGui.Selectable(filterConfiguration.Name, index == _selectedFilterTab))
+                    if (ImGui.Selectable(filterConfiguration.Name + "###fl" + index, index == _selectedFilterTab))
                     {
                         if (ConfigurationManager.Config.SwitchFiltersAutomatically && ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key)
                         {
