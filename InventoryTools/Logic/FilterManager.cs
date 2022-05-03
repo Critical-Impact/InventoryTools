@@ -30,6 +30,7 @@ namespace InventoryTools.Logic
             AddOverlay(new InventoryBuddyOverlay2());
             AddOverlay(new FreeCompanyChestOverlay());
             AddOverlay(new InventoryMiragePrismBoxOverlay());
+            AddOverlay(new CabinetWithdrawOverlay());
             Service.Framework.Update += FrameworkOnUpdate;
         }
 
@@ -598,6 +599,7 @@ namespace InventoryTools.Logic
                 Service.Framework.Update -= FrameworkOnUpdate;
                 ClearOverlays();
                 PluginService.GameUi.UiVisibilityChanged -= GameUiOnUiVisibilityChanged;
+                PluginService.GameUi.UiUpdated -= GameUiOnUiUpdated;
             }
         }
     }

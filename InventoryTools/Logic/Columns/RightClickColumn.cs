@@ -73,6 +73,11 @@ namespace InventoryTools.Logic.Columns
                 {
                                         
                 }
+                if (ImGui.Selectable("Open in Universalis"))
+                {
+                    $"https://universalis.app/market/{item.RowId}".OpenBrowser();
+                             
+                }
                 if (item.CanTryOn() && ImGui.Selectable("Try On"))
                 {
                     if (PluginService.TryOn.CanUseTryOn)

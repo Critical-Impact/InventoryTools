@@ -126,6 +126,127 @@ namespace InventoryTools.Logic
             }
         }
 
+        public Dictionary<string, Vector4?> GetArmoireHighlights(FilterResult? resultOverride = null)
+        {
+            var bagHighlights = new Dictionary<string, Vector4?>();
+            if (PluginService.CharacterMonitor.ActiveCharacter == 0)
+            {
+                return bagHighlights;
+            }
+            var filterResult = resultOverride ?? FilterResult;
+            if (filterResult.HasValue)
+            {
+                if (filterResult.Value.AllItems.Count != 0)
+                {
+                    //TODO: Implement highlighting
+                    return new Dictionary<string, Vector4?>();
+                }
+                else
+                {
+                    var fullInventory =
+                        PluginService.InventoryMonitor.GetSpecificInventory(PluginService.CharacterMonitor
+                            .ActiveCharacter, InventoryCategory.Armoire);
+                    
+                    var filteredItems = filterResult.Value.SortedItems.Where(c => c.SourceBag == InventoryType.Armoire);
+                    foreach (var item in filteredItems)
+                    {
+                        if(item.SourceBag == InventoryType.Armoire && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting)))
+                        {
+                            if (!bagHighlights.ContainsKey(item.InventoryItem.FormattedName))
+                            {
+                                bagHighlights.Add(item.InventoryItem.FormattedName, BagHighlightColor);
+                            }
+                        }
+                    }
+                    
+                    if (InvertHighlighting)
+                    {
+                        var invertedHighlights = new Dictionary<string, Vector4?>();
+                        foreach (var item in fullInventory)
+                        {
+                            if (!bagHighlights.ContainsKey(item.FormattedName))
+                            {
+                                if (!invertedHighlights.ContainsKey(item.FormattedName))
+                                {
+                                    invertedHighlights.Add(item.FormattedName, BagHighlightColor);
+                                }
+                            }
+                        }
+
+                        return invertedHighlights;
+                    }
+
+                    
+                    return bagHighlights;
+                }
+            }
+
+            return new Dictionary<string, Vector4?>();
+        }
+
+        public Dictionary<uint, Vector4?> GetArmoireTabHighlights(CabinetCategory? currentCategory, FilterResult? resultOverride = null)
+        {
+            var bagHighlights = new Dictionary<uint, Vector4?>();
+            if (PluginService.CharacterMonitor.ActiveCharacter == 0)
+            {
+                return bagHighlights;
+            }
+            var filterResult = resultOverride ?? FilterResult;
+            if (filterResult.HasValue)
+            {
+                if (filterResult.Value.AllItems.Count != 0)
+                {
+                    //TODO: Implement highlighting
+                    return new Dictionary<uint, Vector4?>();
+                }
+                else
+                {
+                    var filteredItems = filterResult.Value.SortedItems.Where(c => c.SourceBag == InventoryType.Armoire);
+                    var cabinetDictionary = ExcelCache.GetSheet<CabinetCategory>().Where(c => c.Category.Row != 0).ToDictionary(c => c.Category.Row, c => (uint)c.MenuOrder - 1);
+                    foreach (var item in filteredItems)
+                    {
+                        if(item.SourceBag == InventoryType.Armoire && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting)))
+                        {
+                            if (!bagHighlights.ContainsKey(cabinetDictionary[item.InventoryItem.CabCat]))
+                            {
+                                bagHighlights.Add(cabinetDictionary[item.InventoryItem.CabCat], TabHighlightColor);
+                            }
+                        }
+                    }
+
+                    if (InvertTabHighlighting)
+                    {
+                        var invertedHighlights = new Dictionary<uint, Vector4?>();
+                        
+                        foreach (var cab in cabinetDictionary)
+                        {
+                            if (!bagHighlights.ContainsKey(cab.Value))
+                            {
+                                if (!invertedHighlights.ContainsKey(cab.Value))
+                                {
+                                    invertedHighlights.Add(cab.Value, TabHighlightColor);
+                                }
+                            }
+                            else
+                            {
+                                if (!invertedHighlights.ContainsKey(cab.Value))
+                                {
+                                    invertedHighlights.Add(cab.Value, null);
+                                }
+                            }
+                        }
+
+                        return invertedHighlights;
+
+                    }
+                   
+                    return bagHighlights;
+                }
+            }
+
+            return new Dictionary<uint, Vector4?>();
+        }
+
         public Dictionary<Vector2, Vector4?> GetGlamourHighlights(AtkInventoryMiragePrismBox.DresserTab dresserTab, int page, bool displayEquippableOnly,uint classJobSelected, FilterResult? resultOverride = null)
         {
             var bagHighlights = new Dictionary<Vector2, Vector4?>();
