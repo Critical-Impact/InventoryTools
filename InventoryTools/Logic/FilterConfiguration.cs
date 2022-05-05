@@ -187,9 +187,18 @@ namespace InventoryTools.Logic
             {
                 Columns.Add("IconColumn");
                 Columns.Add("NameColumn");
-                Columns.Add("QuantityColumn");
+                Columns.Add("UiCategoryColumn");
+                Columns.Add("SearchCategoryColumn");
                 Columns.Add("ItemILevelColumn");
                 Columns.Add("ItemLevelColumn");
+                Columns.Add("RarityColumn");
+                Columns.Add("CraftableColumn");
+                Columns.Add("IsCrafingItemColumn");
+                Columns.Add("CanBeGatheredColumn");
+                Columns.Add("CanBePurchasedColumn");
+                Columns.Add("AcquiredColumn");
+                Columns.Add("SellToVendorPriceColumn");
+                Columns.Add("BuyFromVendorPriceColumn");
             }
         }
 

@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using ImGuiNET;
+using InventoryTools.Extensions;
 using InventoryTools.Misc;
 
 namespace InventoryTools
@@ -32,6 +33,11 @@ namespace InventoryTools
             {
                 if (Configuration.SelectedHelpPage == 0)
                 {
+                    ImGui.Text("This is a very basic guide, for more information please see the wiki.");
+                    if (ImGui.Button("Open Wiki"))
+                    {
+                        "https://github.com/Critical-Impact/InventoryTools/wiki/1.-Overview".OpenBrowser();
+                    }
                     ImGui.Text("Basic Plugin Information:");
                     ImGui.Separator();
                     ImGui.TextWrapped("Inventory Tools will track the multitude of inventories in the game. It also gives you the ability to highlight where items are within said inventories.");
@@ -69,6 +75,18 @@ namespace InventoryTools
                     ImGui.Text("About:");
                     ImGui.Text("This plugin is written in some of the free time that I have, it's a labour of love and I will hopefully be actively releasing updates for a while.");
                     ImGui.Text("If you run into any issues please submit feedback via the plugin installer feedback button.");
+                    ImGui.Text("Plugin Wiki: ");
+                    ImGui.SameLine();
+                    if (ImGui.Button("Open"))
+                    {
+                        "https://github.com/Critical-Impact/InventoryTools/wiki/1.-Overview".OpenBrowser();
+                    }
+                    ImGui.Text("Found a bug?");
+                    ImGui.SameLine();
+                    if (ImGui.Button("Open"))
+                    {
+                        "https://github.com/Critical-Impact/InventoryTools/issues".OpenBrowser();
+                    }
                     ImGui.Separator();
                     if (Configuration.TetrisEnabled)
                     {

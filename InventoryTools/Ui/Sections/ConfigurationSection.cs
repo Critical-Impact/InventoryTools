@@ -393,6 +393,42 @@ namespace InventoryTools.Sections
                         ImGui.SameLine();
                         UiHelpers.HelpMarker(
                             "This will add a filter that will provide a list of all the distinct stacks that appear in 2 sets of inventories. You can use this to make sure only one retainer has a specific type of item.");
+                        
+                        ImGui.Text("Default Filters:");
+                        if (ImGui.Button("All"))
+                        {
+                            PluginService.PluginLogic.AddAllFilter();
+                        }
+
+                        ImGui.SameLine();
+                        UiHelpers.HelpMarker(
+                            "This adds a new copy of the default 'All' filter.");
+                        if (ImGui.Button("Retainers"))
+                        {
+                            PluginService.PluginLogic.AddRetainerFilter();
+                        }
+
+                        ImGui.SameLine();
+                        UiHelpers.HelpMarker(
+                            "This adds a new copy of the default 'Retainer' filter.");
+                        
+                        if (ImGui.Button("Player"))
+                        {
+                            PluginService.PluginLogic.AddPlayerFilter();
+                        }
+
+                        ImGui.SameLine();
+                        UiHelpers.HelpMarker(
+                            "This adds a new copy of the default 'Player' filter.");
+
+                        if (ImGui.Button("All Game Items"))
+                        {
+                            PluginService.PluginLogic.AddAllGameItemsFilter();
+                        }
+
+                        ImGui.SameLine();
+                        UiHelpers.HelpMarker(
+                            "This adds a new copy of the default 'All Game Items' filter.");
                     }
                 }
 

@@ -442,24 +442,49 @@ namespace InventoryTools
 
         public void LoadDefaultData()
         {
-            var allItemsFilter = new FilterConfiguration("All", "AllItemsFilter", FilterType.SearchFilter);
+            AddAllFilter();
+
+            AddRetainerFilter();
+
+            AddPlayerFilter();
+
+            AddAllGameItemsFilter();
+        }
+
+        public void AddAllFilter()
+        {
+            var allItemsFilter = new FilterConfiguration("All", FilterType.SearchFilter);
             allItemsFilter.DisplayInTabs = true;
             allItemsFilter.SourceAllCharacters = true;
             allItemsFilter.SourceAllRetainers = true;
             _filterConfigurations.Add(allItemsFilter);
             FilterAdded?.Invoke(allItemsFilter);
+        }
 
-            var retainerItemsFilter = new FilterConfiguration("Retainers", "RetainerItemsFilter", FilterType.SearchFilter);
+        public void AddRetainerFilter()
+        {
+            var retainerItemsFilter = new FilterConfiguration("Retainers", FilterType.SearchFilter);
             retainerItemsFilter.DisplayInTabs = true;
             retainerItemsFilter.SourceAllRetainers = true;
             _filterConfigurations.Add(retainerItemsFilter);
             FilterAdded?.Invoke(retainerItemsFilter);
+        }
 
-            var playerItemsFilter = new FilterConfiguration("Player", "PlayerItemsFilter", FilterType.SearchFilter);
+        public void AddPlayerFilter()
+        {
+            var playerItemsFilter = new FilterConfiguration("Player",  FilterType.SearchFilter);
             playerItemsFilter.DisplayInTabs = true;
             playerItemsFilter.SourceAllCharacters = true;
             _filterConfigurations.Add(playerItemsFilter);
             FilterAdded?.Invoke(playerItemsFilter);
+        }
+
+        public void AddAllGameItemsFilter()
+        {
+            var allGameItemsFilter = new FilterConfiguration("All Game Items", FilterType.GameItemFilter);
+            allGameItemsFilter.DisplayInTabs = true;
+            _filterConfigurations.Add(allGameItemsFilter);
+            FilterAdded?.Invoke(allGameItemsFilter);
         }
 
         public void AddFilter(FilterConfiguration filterConfiguration)
