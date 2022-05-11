@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
+using ImGuiNET;
 
 namespace InventoryTools.Extensions
 {
@@ -12,6 +13,11 @@ namespace InventoryTools.Extensions
         public static string ToTitleCase(this string title)
         {
             return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(title.ToLower()); 
+        }
+        
+        public static void ToClipboard(this string text)
+        {
+            ImGui.SetClipboardText(text);
         }
     }
 }

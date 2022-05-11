@@ -94,13 +94,17 @@ namespace InventoryTools.GameUi
                     return;
                 }
             }
-            HasState = false;
 
             Bag1InventoryColours = EmptyDictionary;
             Bag2InventoryColours = EmptyDictionary;
             Bag3InventoryColours = EmptyDictionary;
             Bag4InventoryColours = EmptyDictionary;
-            Clear();
+            if (HasState)
+            {
+                Clear();
+            }
+
+            HasState = false;
         }
 
         public void Clear()

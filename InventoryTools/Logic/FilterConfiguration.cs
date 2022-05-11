@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
+using CsvHelper;
 using Dalamud.Logging;
 using InventoryTools.Extensions;
 using Lumina.Excel.GeneratedSheets;
@@ -29,6 +33,8 @@ namespace InventoryTools.Logic
         private List<uint> _itemUiCategoryId = new();
         private Dictionary<string, bool>? _booleanFilters = new();
         private Dictionary<string, string>? _stringFilters = new();
+        private Dictionary<string, int>? _integerFilters = new();
+        private Dictionary<string, uint>? _uintFilters = new();
         private Dictionary<string, List<uint>>? _uintChoiceFilters = new();
         private Dictionary<string, List<ulong>>? _ulongChoiceFilters = new();
         private Dictionary<string, List<string>>? _stringChoiceFilters = new();
@@ -41,6 +47,11 @@ namespace InventoryTools.Logic
         private bool? _sourceAllCharacters;
         private bool? _destinationAllRetainers;
         private bool? _destinationAllCharacters;
+        private bool? _sourceIncludeCrossCharacter;
+        private bool? _destinationIncludeCrossCharacter;
+        private int? _freezeColumns;
+        private HashSet<InventoryCategory>? _destinationCategories;
+        private HashSet<InventoryCategory>? _sourceCategories;
         private string _quantity = "";
         private string _spiritbond = "";
         private string _nameFilter = "";
@@ -419,6 +430,51 @@ namespace InventoryTools.Logic
             }            
         }
 
+        public bool? SourceIncludeCrossCharacter
+        {
+            get => _sourceIncludeCrossCharacter;
+            set { _sourceIncludeCrossCharacter = value;
+                NeedsRefresh = true;
+                ConfigurationChanged?.Invoke(this);
+            }            
+        }
+
+        public bool? DestinationIncludeCrossCharacter
+        {
+            get => _destinationIncludeCrossCharacter;
+            set { _destinationIncludeCrossCharacter = value;
+                NeedsRefresh = true;
+                ConfigurationChanged?.Invoke(this);
+            }            
+        }
+
+        public int? FreezeColumns
+        {
+            get => _freezeColumns;
+            set { _freezeColumns = value;
+                NeedsRefresh = true;
+                TableConfigurationChanged?.Invoke(this);
+            }            
+        }
+
+        public HashSet<InventoryCategory>? DestinationCategories
+        {
+            get => _destinationCategories;
+            set { _destinationCategories = value;
+                NeedsRefresh = true;
+                ConfigurationChanged?.Invoke(this);
+            }            
+        }
+
+        public HashSet<InventoryCategory>? SourceCategories
+        {
+            get => _sourceCategories;
+            set { _sourceCategories = value;
+                NeedsRefresh = true;
+                ConfigurationChanged?.Invoke(this);
+            }            
+        }
+
         public bool? DestinationAllCharacters
         {
             get => _destinationAllCharacters;
@@ -770,6 +826,16 @@ namespace InventoryTools.Logic
             return "";
         }
 
+        public int? GetIntegerFilter(string key)
+        {
+            if (IntegerFilters.ContainsKey(key))
+            {
+                return (int?)IntegerFilters[key];
+            }
+
+            return null;
+        }
+
         public List<uint> GetUintChoiceFilter(string key)
         {
             if (UintChoiceFilters.ContainsKey(key))
@@ -778,6 +844,16 @@ namespace InventoryTools.Logic
             }
 
             return new List<uint>();
+        }
+
+        public uint? GetUintFilter(string key)
+        {
+            if (UintFilters.ContainsKey(key))
+            {
+                return UintFilters[key];
+            }
+
+            return null;
         }
 
         public List<ulong> GetUlongChoiceFilter(string key)
@@ -856,9 +932,42 @@ namespace InventoryTools.Logic
             ConfigurationChanged?.Invoke(this);
         }
 
+        public void UpdateIntegerFilter(string key, int? value)
+        {
+            if (IntegerFilters.ContainsKey(key) && IntegerFilters[key] == value)
+            {
+                return;
+            }
+            if (IntegerFilters.ContainsKey(key) && value == null)
+            {
+                IntegerFilters.Remove(key);
+            }
+            else if (value != null)
+            {
+                IntegerFilters[key] = value.Value;
+            }
+
+            NeedsRefresh = true;
+            ConfigurationChanged?.Invoke(this);
+        }
+
         public void UpdateUintChoiceFilter(string key, List<uint> value)
         {
             UintChoiceFilters[key] = value;
+            NeedsRefresh = true;
+            ConfigurationChanged?.Invoke(this);
+        }
+
+        public void UpdateUintFilter(string key, uint? value)
+        {
+            if (value == null && UintFilters.ContainsKey(key))
+            {
+                UintFilters.Remove(key);
+            }
+            else if(value != null)
+            {
+                UintFilters[key] = value.Value;
+            }
             NeedsRefresh = true;
             ConfigurationChanged?.Invoke(this);
         }
@@ -915,6 +1024,34 @@ namespace InventoryTools.Logic
                 return _stringFilters;
             }
             set => _stringFilters = value;
+        }
+
+
+        public Dictionary<string, int> IntegerFilters
+        {
+            get
+            {
+                if (_integerFilters == null)
+                {
+                    _integerFilters = new();
+                }
+                return _integerFilters;
+            }
+            set => _integerFilters = value;
+        }
+
+
+        public Dictionary<string, uint> UintFilters
+        {
+            get
+            {
+                if (_uintFilters == null)
+                {
+                    _uintFilters = new();
+                }
+                return _uintFilters;
+            }
+            set => _uintFilters = value;
         }
 
         public Dictionary<string, List<uint>> UintChoiceFilters

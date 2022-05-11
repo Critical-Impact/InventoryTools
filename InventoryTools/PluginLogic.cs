@@ -33,7 +33,7 @@ namespace InventoryTools
     {
         private List<FilterConfiguration> _filterConfigurations = new();
         private Dictionary<string, FilterTable> _filterTables = new();
-        private List<IFilter> _availableFilters = new();
+        private List<IFilter>? _availableFilters = null;
 
         private Dictionary<int, InventoryMonitor.ItemChangesItem> _recentlyAddedSeen = new();
 
@@ -71,49 +71,10 @@ namespace InventoryTools
         public event FilterChangedDelegate? FilterChanged; 
         
         public readonly ConcurrentDictionary<ushort, TextureWrap> TextureDictionary = new ConcurrentDictionary<ushort, TextureWrap>();
-        public readonly Dictionary<string, TextureWrap> UldTextureDictionary = new Dictionary<string, TextureWrap>();
+        public readonly ConcurrentDictionary<string, TextureWrap> UldTextureDictionary = new ConcurrentDictionary<string, TextureWrap>();
 
         public PluginLogic(bool noExternals = false)
         {
-            
-            AvailableFilters.Add(new CanBePurchasedFilter());
-            AvailableFilters.Add(new CanCraftFilter());
-            AvailableFilters.Add(new BuyFromVendorPriceFilter());
-            AvailableFilters.Add(new SellToVendorPriceFilter());
-            AvailableFilters.Add(new IsCollectibleFilter());
-            AvailableFilters.Add(new IsHqFilter());
-            AvailableFilters.Add(new ItemLevelFilter());
-            AvailableFilters.Add(new ItemUiCategoryFilter());
-            AvailableFilters.Add(new NameFilter());
-            AvailableFilters.Add(new QuantityFilter());
-            AvailableFilters.Add(new RequiredLevelFilter());
-            AvailableFilters.Add(new SearchCategoryFilter());
-            AvailableFilters.Add(new SpiritBondFilter());
-            AvailableFilters.Add(new MarketBoardPriceFilter());
-            AvailableFilters.Add(new MarketBoardTotalPriceFilter());
-            AvailableFilters.Add(new MarketBoardMinPriceFilter());
-            AvailableFilters.Add(new MarketBoardMinTotalPriceFilter());
-            AvailableFilters.Add(new AcquiredFilter());
-            AvailableFilters.Add(new DuplicatesOnlyFilter());
-            AvailableFilters.Add(new DisplayFilterInRetainersFilter());
-            AvailableFilters.Add(new SourceAllCharactersFilter());
-            AvailableFilters.Add(new SourceAllRetainersFilter());
-            AvailableFilters.Add(new SourceInventoriesFilter());
-            AvailableFilters.Add(new DestinationInventoriesFilter());
-            AvailableFilters.Add(new DestinationAllCharactersFilter());
-            AvailableFilters.Add(new DestinationAllRetainersFilter());
-            AvailableFilters.Add(new IsTimedNodeFilter());
-            AvailableFilters.Add(new ColumnsFilter());
-            AvailableFilters.Add(new InvertHighlightingFilter());
-            AvailableFilters.Add(new InvertTabHighlightingFilter());
-            AvailableFilters.Add(new HighlightWhenFilter());
-            AvailableFilters.Add(new HighlightColorFilter());
-            AvailableFilters.Add(new TabHighlightColorFilter());
-            AvailableFilters.Add(new RetainerListColorFilter());
-            AvailableFilters.Add(new IsHousingItemFilter());
-            AvailableFilters.Add(new IsCraftingItemFilter());
-            AvailableFilters.Add(new IsArmoireItemFilter());
-            AvailableFilters.Add(new EquippableByFilter());
             if (!noExternals)
             {
                 //Events we need to track, inventory updates, active retainer changes, player changes, 
@@ -735,9 +696,9 @@ namespace InventoryTools
 
         private void InventoryMonitorOnOnInventoryChanged(Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>> inventories, InventoryMonitor.ItemChanges itemChanges)
         {
-            RegenerateFilter();
             PluginLog.Verbose("PluginLogic: Inventory changed, saving to config.");
             PluginConfiguration.SavedInventories = inventories;
+            RegenerateFilter();
             if (PluginConfiguration.AutomaticallyDownloadMarketPrices)
             {
                 foreach (var inventory in PluginService.InventoryMonitor.AllItems)
@@ -920,11 +881,35 @@ namespace InventoryTools
                 return _gridColumns;
             }
         }
-
+        
+        
         public List<IFilter> AvailableFilters
         {
-            get => _availableFilters;
-            set => _availableFilters = value;
+            get
+            {
+                if (_availableFilters == null)
+                {
+                    _availableFilters = new List<IFilter>();
+                    var filterType = typeof(IFilter);
+                    var types = AppDomain.CurrentDomain.GetAssemblies()
+                        .Where(c => c.FullName != null && c.FullName.Contains("InventoryTools"))
+                        .SelectMany(s => s.GetTypes())
+                        .Where(p => filterType.IsAssignableFrom(p));
+                    foreach (var type in types)
+                    {
+                        if (type.IsClass && !type.IsAbstract)
+                        {
+                            IFilter? instance = (IFilter?)Activator.CreateInstance(type);
+                            if (instance != null)
+                            {
+                                _availableFilters.Add(instance);
+                            }
+                        }
+                    }
+                }
+
+                return _availableFilters;
+            }
         }
 
         private Dictionary<FilterCategory, List<IFilter>>? _groupedFilters;

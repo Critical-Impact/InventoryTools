@@ -1,24 +1,26 @@
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 
-namespace InventoryTools.Logic.Filters
+namespace InventoryTools.Logic.Filters.Abstract
 {
-    public abstract class ChoiceFilter<T> : Filter<KeyValuePair<T, string>?>  where T : notnull
+    public abstract class ChoiceFilter<T> : Filter<T?>
     {
         public abstract T EmptyValue { get; set; }
         public override bool HasValueSet(FilterConfiguration configuration)
         {
             var keyValuePair = CurrentValue(configuration);
-            return keyValuePair != null && !Equals(keyValuePair.Value.Key, EmptyValue);
+            return keyValuePair != null && !Equals(keyValuePair, EmptyValue);
         }
 
-        public abstract Dictionary<T, string> GetChoices(FilterConfiguration configuration);
+        public abstract List<T> GetChoices(FilterConfiguration configuration);
+
+        public abstract string GetFormattedChoice(T choice);
 
         public override void Draw(FilterConfiguration configuration)
         {
-            ImGui.SetNextItemWidth(200);
+            ImGui.SetNextItemWidth(LabelSize);
             if (HasValueSet(configuration))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.HealerGreen);
@@ -33,19 +35,23 @@ namespace InventoryTools.Logic.Filters
             var choices = GetChoices(configuration);
             var activeChoice = CurrentValue(configuration);
 
-            var currentSearchCategory = activeChoice.HasValue ? activeChoice.Value.Value : "";
+            var currentSearchCategory = activeChoice != null ? GetFormattedChoice(activeChoice) : "";
             ImGui.SameLine();
             if (ImGui.BeginCombo("##" + Key + "Combo", currentSearchCategory))
             {
                 foreach (var item in choices)
                 {
-                    if (item.Value == "")
+                    if (item == null)
                     {
                         continue;
                     }
+                    var text = GetFormattedChoice(item).Replace("\u0002\u001F\u0001\u0003", "-");
+                    if (text == "")
+                    {
+                        continue;
+                    }                    
 
-                    if (ImGui.Selectable(item.Value.Replace("\u0002\u001F\u0001\u0003", "-"),
-                        currentSearchCategory == item.Value))
+                    if (ImGui.Selectable(text,currentSearchCategory == text))
                     {
                         UpdateFilterConfiguration(configuration,item);
                     }

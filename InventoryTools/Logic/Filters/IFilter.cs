@@ -7,6 +7,7 @@ namespace InventoryTools.Logic.Filters
 {
     public interface IFilter
     {
+        public int LabelSize { get; set; }
         public string Key { get; set; }
         public string Name { get; set; }
         public string HelpText { get; set; }

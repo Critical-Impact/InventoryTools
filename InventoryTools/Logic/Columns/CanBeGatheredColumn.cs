@@ -1,5 +1,6 @@
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
+using InventoryTools.Logic.Columns.Abstract;
 using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
@@ -22,7 +23,7 @@ namespace InventoryTools.Logic.Columns
         }
 
         public override string Name { get; set; } = "Can be Gathered?";
-        public override float Width { get; set; } = 100.0f;
+        public override float Width { get; set; } = 80.0f;
         public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Boolean;

@@ -3,6 +3,7 @@ using CriticalCommonLib.Models;
 using Dalamud.Logging;
 using ImGuiNET;
 using InventoryTools.Extensions;
+using InventoryTools.Logic.Columns.Abstract;
 using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns

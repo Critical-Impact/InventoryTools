@@ -1,16 +1,20 @@
 using System.Collections.Generic;
 using System.Linq;
+using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
+using InventoryTools.Extensions;
+using InventoryTools.Logic.Filters.Abstract;
 using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Filters
 {
     public class DestinationInventoriesFilter : MultipleChoiceFilter<(ulong, InventoryCategory)>
     {
+        public override int LabelSize { get; set; } = 240;
         public override string Key { get; set; } = "DestinationInventories";
-        public override string Name { get; set; } = "Destination Inventories";
+        public override string Name { get; set; } = "Destination - Inventories";
         public override string HelpText { get; set; } =
-            "This is a list of destinations to sort items from source into based on the filter configuration.";
+            "This is a list of destinations to sort items into.";
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Inventories;
         public override FilterType AvailableIn { get; set; } = FilterType.SortingFilter;
         
@@ -38,18 +42,18 @@ namespace InventoryTools.Logic.Filters
             {
                 if (PluginService.CharacterMonitor.IsRetainer(character.Key))
                 {
-                    dict.Add((character.Key, InventoryCategory.RetainerBags), character.Value.Name + " - Bags");
-                    dict.Add((character.Key, InventoryCategory.RetainerMarket), character.Value.Name + " - Market");
+                    dict.Add((character.Key, InventoryCategory.RetainerBags), character.Value.Name + " - " + InventoryCategory.RetainerBags.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.RetainerMarket), character.Value.Name + " - " + InventoryCategory.RetainerMarket.FormattedName());
                 }
                 else
                 {
-                    dict.Add((character.Key, InventoryCategory.CharacterBags), character.Value.Name + " - Bags");
-                    dict.Add((character.Key, InventoryCategory.CharacterSaddleBags), character.Value.Name + " - Saddle Bags");
-                    dict.Add((character.Key, InventoryCategory.CharacterPremiumSaddleBags), character.Value.Name + " - Premium Saddle Bags");
-                    dict.Add((character.Key, InventoryCategory.FreeCompanyBags), character.Value.Name + " - Free Company Bags");
-                    dict.Add((character.Key, InventoryCategory.CharacterArmoryChest), character.Value.Name + " - Armoury Chest");
-                    dict.Add((character.Key, InventoryCategory.GlamourChest), character.Value.Name + " - Glamour Chest");
-                    dict.Add((character.Key, InventoryCategory.Armoire), character.Value.Name + " - Armoire");
+                    dict.Add((character.Key, InventoryCategory.CharacterBags), character.Value.Name + " - " + InventoryCategory.CharacterBags.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.CharacterSaddleBags), character.Value.Name + " - " + InventoryCategory.CharacterSaddleBags.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.CharacterPremiumSaddleBags), character.Value.Name + " - " + InventoryCategory.CharacterPremiumSaddleBags.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.FreeCompanyBags), character.Value.Name + " - " + InventoryCategory.FreeCompanyBags.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.CharacterArmoryChest), character.Value.Name + " - " + InventoryCategory.CharacterArmoryChest.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.GlamourChest), character.Value.Name + " - " + InventoryCategory.GlamourChest.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.Armoire), character.Value.Name + " - " + InventoryCategory.Armoire.FormattedName());
                    
                 }
             }

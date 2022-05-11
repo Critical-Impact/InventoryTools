@@ -142,7 +142,6 @@ namespace InventoryTools.GameUi
                     return;
                 }
             }
-            HasState = false;
             ChestInventoryColours[DresserTab.Body] = EmptyDictionary;
             ChestInventoryColours[DresserTab.Ears] = EmptyDictionary;
             ChestInventoryColours[DresserTab.Feet] = EmptyDictionary;
@@ -154,7 +153,12 @@ namespace InventoryTools.GameUi
             ChestInventoryColours[DresserTab.Wrists] = EmptyDictionary;
             ChestInventoryColours[DresserTab.MainHand] = EmptyDictionary;
             ChestInventoryColours[DresserTab.OffHand] = EmptyDictionary;
-            Clear();
+            if (HasState)
+            {
+                Clear();
+            }
+
+            HasState = false;
         }
         
         public override void Setup()

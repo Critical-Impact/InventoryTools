@@ -1,6 +1,7 @@
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using InventoryTools.Extensions;
+using InventoryTools.Logic.Filters.Abstract;
 using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Filters

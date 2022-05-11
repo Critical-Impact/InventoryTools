@@ -51,8 +51,11 @@ namespace InventoryTools.Sections
                 {
                     ConfigSelectedConfigurationPage = 4;
                 }
-
+                
+                ImGui.NewLine();
+                ImGui.Text("Filters");
                 ImGui.Separator();
+                
 
                 for (var index = 0; index < PluginService.PluginLogic.FilterConfigurations.Count; index++)
                 {

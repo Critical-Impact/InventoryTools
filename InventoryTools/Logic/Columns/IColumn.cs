@@ -12,6 +12,8 @@ namespace InventoryTools.Logic.Columns
         
         public string FilterText { get; set; }
         
+        public List<string>? FilterChoices { get; set; }
+        
         public bool HasFilter { get; set; }
         
         public ColumnFilterType FilterType { get; set; }
@@ -29,6 +31,10 @@ namespace InventoryTools.Logic.Columns
         public void Draw(InventoryItem item, int rowIndex);
         public void Draw(SortingResult item, int rowIndex);
         public void Draw(Item item, int rowIndex);
+
+        public string CsvExport(InventoryItem item);
+        public string CsvExport(SortingResult item);
+        public string CsvExport(Item item);
 
         public void Setup(int columnIndex);
         

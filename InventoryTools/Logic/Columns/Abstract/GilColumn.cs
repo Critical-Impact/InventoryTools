@@ -1,7 +1,7 @@
 using Dalamud.Game.Text;
 using ImGuiNET;
 
-namespace InventoryTools.Logic.Columns
+namespace InventoryTools.Logic.Columns.Abstract
 {
     public abstract class GilColumn : IntegerColumn
     {

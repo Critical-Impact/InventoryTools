@@ -7,15 +7,29 @@ using InventoryTools.Extensions;
 using Lumina.Excel.GeneratedSheets;
 using NaturalSort.Extension;
 
-namespace InventoryTools.Logic.Columns
+namespace InventoryTools.Logic.Columns.Abstract
 {
-    public abstract class TextColumn : Column<string?>
+    public abstract class IntegerColumn : Column<int?>
     {
+        public override string CsvExport(InventoryItem item)
+        {
+            return CurrentValue(item).ToString() ?? "";
+        }
+
+        public override string CsvExport(Item item)
+        {
+            return CurrentValue(item).ToString() ?? "";
+        }
+
+        public override string CsvExport(SortingResult item)
+        {
+            return CurrentValue(item).ToString() ?? "";
+        }
         public virtual string EmptyText
         {
             get
             {
-                return "N/A";
+                return "";
             }
         }
         public override void Draw(InventoryItem item, int rowIndex)
@@ -41,7 +55,7 @@ namespace InventoryTools.Logic.Columns
                     return false;
                 }
 
-                return currentValue.ToLower().PassesFilter(FilterText.ToLower());
+                return currentValue.Value.PassesFilter(FilterText);
             });
         }
 
@@ -56,13 +70,12 @@ namespace InventoryTools.Logic.Columns
                     return false;
                 }
 
-                return currentValue.ToLower().PassesFilter(FilterText.ToLower());
+                return currentValue.Value.PassesFilter(FilterText);
             });
         }
 
         public override IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items)
         {
-            var isChecked = FilterText != "";
             return FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(c);
@@ -71,37 +84,36 @@ namespace InventoryTools.Logic.Columns
                     return false;
                 }
 
-                return currentValue.ToLower().PassesFilter(FilterText.ToLower());
+                return currentValue.Value.PassesFilter(FilterText);
             });
         }
 
         public override IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(CurrentValue, StringComparison.OrdinalIgnoreCase.WithNaturalSort()) : items.OrderByDescending(CurrentValue, StringComparison.OrdinalIgnoreCase.WithNaturalSort());
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy<InventoryItem, string>(c => CurrentValue(c).ToString() ?? "", StringComparison.OrdinalIgnoreCase.WithNaturalSort()) : items.OrderByDescending(c => CurrentValue(c).ToString() ?? "", StringComparison.OrdinalIgnoreCase.WithNaturalSort());
         }
 
         public override IEnumerable<Item> Sort(ImGuiSortDirection direction, IEnumerable<Item> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(CurrentValue, StringComparison.OrdinalIgnoreCase.WithNaturalSort()) : items.OrderByDescending(CurrentValue, StringComparison.OrdinalIgnoreCase.WithNaturalSort());
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy<Item, string>(c => CurrentValue(c).ToString() ?? "", StringComparison.OrdinalIgnoreCase.WithNaturalSort()) : items.OrderByDescending(c => CurrentValue(c).ToString() ?? "", StringComparison.OrdinalIgnoreCase.WithNaturalSort());
         }
 
         public override IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(CurrentValue, StringComparison.OrdinalIgnoreCase.WithNaturalSort()) : items.OrderByDescending(CurrentValue, StringComparison.OrdinalIgnoreCase.WithNaturalSort());
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy<SortingResult, string>(c => CurrentValue(c).ToString() ?? "", StringComparison.OrdinalIgnoreCase.WithNaturalSort()) : items.OrderByDescending(c => CurrentValue(c).ToString() ?? "", StringComparison.OrdinalIgnoreCase.WithNaturalSort());
         }
 
-        public override IColumnEvent? DoDraw(string? currentValue, int rowIndex)
+        public override IColumnEvent? DoDraw(int? currentValue, int rowIndex)
         {
             ImGui.TableNextColumn();
             if (currentValue != null)
             {
-                ImGui.Text(currentValue);
+                ImGui.Text(currentValue.Value.ToString());
             }
             else
             {
                 ImGui.Text(EmptyText);
             }
-
             return null;
         }
 

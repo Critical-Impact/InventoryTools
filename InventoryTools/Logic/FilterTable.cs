@@ -1,7 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
+using CriticalCommonLib.MarketBoard;
+using CsvHelper;
 using Dalamud.Logging;
 using ImGuiNET;
 using InventoryTools.Logic.Columns;
@@ -150,6 +156,10 @@ namespace InventoryTools.Logic
 
         public void RefreshColumns()
         {
+            if (FilterConfiguration.FreezeColumns != FreezeCols)
+            {
+                FreezeCols = FilterConfiguration.FreezeColumns;
+            }
             if (FilterConfiguration.Columns != null)
             {
                 var newColumns = new List<IColumn>();
@@ -188,11 +198,24 @@ namespace InventoryTools.Logic
             _tableFlags = tableFlags;
         }
 
+        public void RefreshPricing()
+        {
+            foreach (var item in RenderSortedItems)
+            {
+                Universalis.QueuePriceCheck(item.InventoryItem.ItemId);
+            }
+            foreach (var item in RenderItems)
+            {
+                Universalis.QueuePriceCheck(item.RowId);
+            }
+        }
+
         public bool HighlightItems => PluginLogic.PluginConfiguration.ActiveUiFilter == FilterConfiguration.Key;
 
         public void Draw()
         {
             var highlightItems = HighlightItems;
+            ImGui.BeginChild("TopBar", new Vector2(0, 20));
             ImGui.Checkbox( "Highlight?"+ "###" + Key + "VisibilityCheckbox", ref highlightItems);
             if (highlightItems != HighlightItems)
             {
@@ -207,11 +230,12 @@ namespace InventoryTools.Logic
                 }
                 return;
             }
-
+            ImGui.EndChild();
+            ImGui.BeginChild("Content", new Vector2(0, -25)); 
             if (ImGui.BeginTable(Key, Columns.Count, _tableFlags))
             {
                 var refresh = false;
-                ImGui.TableSetupScrollFreeze(FreezeCols ?? 0, FreezeRows ?? (ShowFilterRow ? 2 : 1));
+                ImGui.TableSetupScrollFreeze(Math.Min(FreezeCols ?? 0,Columns.Count), FreezeRows ?? (ShowFilterRow ? 2 : 1));
                 for (var index = 0; index < Columns.Count; index++)
                 {
                     var column = Columns[index];
@@ -314,6 +338,55 @@ namespace InventoryTools.Logic
                 }
                 ImGui.EndTable();
             }
+            ImGui.EndChild();
+            ImGui.BeginChild("BottomBar", new Vector2(0,0), false, ImGuiWindowFlags.None);
+            if (ImGui.Button("Refresh Market Prices"))
+            {
+                RefreshPricing();
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("Export to CSV"))
+            {
+                PluginService.FileDialogManager.SaveFileDialog("Save to csv", "*.csv", "export.csv", ".csv", SaveCallback, null, true);
+            }
+            ImGui.SameLine();
+            ImGui.Text("Pending Market Requests: " + Universalis.QueuedCount);
+            ImGui.EndTabItem();
+            ImGui.EndChild();
+        }
+
+        public void SaveCallback(bool arg1, string arg2)
+        {
+            if (arg1)
+            {
+                ExportToCsv(arg2);
+            }
+        }
+
+        public void ExportToCsv(string fileName)
+        {
+            using (var writer = new StreamWriter(fileName))
+            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            {
+                foreach (var column in Columns)
+                {
+                    csv.WriteField(column.Name);
+                }
+                csv.NextRecord();
+                if (FilterConfiguration.FilterType == FilterType.SearchFilter ||
+                    FilterConfiguration.FilterType == FilterType.SortingFilter)
+                {
+                    foreach (var item in RenderSortedItems)
+                    {
+                        foreach (var column in Columns)
+                        {
+                            csv.WriteField(column.CsvExport(item));
+                        }
+                        csv.NextRecord();
+                    }
+                }
+            }
+
         }
 
         public void Dispose()

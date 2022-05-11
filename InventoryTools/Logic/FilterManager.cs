@@ -184,7 +184,8 @@ namespace InventoryTools.Logic
             var characterMonitor = PluginService.CharacterMonitor;
             var activeCharacter = characterMonitor.ActiveCharacter;
             var activeRetainer = characterMonitor.ActiveRetainer;
-            var displayCrossCharacter = ConfigurationManager.Config.DisplayCrossCharacter;
+            var displaySourceCrossCharacter = filter.SourceIncludeCrossCharacter ?? ConfigurationManager.Config.DisplayCrossCharacter;
+            var displayDestinationCrossCharacter = filter.DestinationIncludeCrossCharacter ?? ConfigurationManager.Config.DisplayCrossCharacter;
             
             PluginLog.Verbose("Generating a new filter list");
 
@@ -198,15 +199,15 @@ namespace InventoryTools.Logic
                     foreach (var inventory in character.Value)
                     {
                         var inventoryKey = (character.Key, inventory.Key);
-                        if (filter.SourceAllRetainers.HasValue && filter.SourceAllRetainers.Value && characterMonitor.IsRetainer(character.Key) && (displayCrossCharacter || characterMonitor.BelongsToActiveCharacter(character.Key)))
+                        if (filter.SourceAllRetainers.HasValue && filter.SourceAllRetainers.Value && characterMonitor.IsRetainer(character.Key) && (displaySourceCrossCharacter || characterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
                             if (!sourceInventories.ContainsKey(inventoryKey))
                             {
                                 sourceInventories.Add(inventoryKey, inventory.Value);
                             }
                         }
-                        else if (filter.SourceAllCharacters.HasValue && filter.SourceAllCharacters.Value && !characterMonitor.IsRetainer(character.Key) &&
-                                 characterMonitor.ActiveCharacter == character.Key && (displayCrossCharacter || characterMonitor.BelongsToActiveCharacter(character.Key)))
+                        if (filter.SourceAllCharacters.HasValue && filter.SourceAllCharacters.Value && !characterMonitor.IsRetainer(character.Key) &&
+                                 characterMonitor.ActiveCharacter == character.Key && (displaySourceCrossCharacter || characterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
                             if (inventoryKey.Item2 is InventoryCategory.FreeCompanyBags)
                             {
@@ -217,9 +218,16 @@ namespace InventoryTools.Logic
                                 sourceInventories.Add(inventoryKey, inventory.Value);
                             }
                         }
-                        else if (filter.SourceInventories.Contains(inventoryKey) && (displayCrossCharacter || characterMonitor.BelongsToActiveCharacter(character.Key)))
+                        if (filter.SourceInventories.Contains(inventoryKey) && (displaySourceCrossCharacter || characterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
 
+                            if (!sourceInventories.ContainsKey(inventoryKey))
+                            {
+                                sourceInventories.Add(inventoryKey, inventory.Value);
+                            }
+                        }
+                        if (filter.SourceCategories != null && filter.SourceCategories.Contains(inventoryKey.Item2) && (displaySourceCrossCharacter || characterMonitor.BelongsToActiveCharacter(character.Key)))
+                        {
                             if (!sourceInventories.ContainsKey(inventoryKey))
                             {
                                 sourceInventories.Add(inventoryKey, inventory.Value);
@@ -231,22 +239,29 @@ namespace InventoryTools.Logic
                         {
                             continue;
                         }
-                        if (filter.DestinationAllRetainers.HasValue && filter.DestinationAllRetainers.Value && characterMonitor.IsRetainer(character.Key) && (displayCrossCharacter || characterMonitor.BelongsToActiveCharacter(character.Key)))
+                        if (filter.DestinationAllRetainers.HasValue && filter.DestinationAllRetainers.Value && characterMonitor.IsRetainer(character.Key) && (displayDestinationCrossCharacter || characterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
                             if (!destinationInventories.ContainsKey(inventoryKey))
                             {
                                 destinationInventories.Add(inventoryKey, inventory.Value);
                             }
                         }
-                        else if (filter.DestinationAllCharacters.HasValue && filter.DestinationAllCharacters.Value &&
-                                 characterMonitor.ActiveCharacter == character.Key && (displayCrossCharacter || characterMonitor.BelongsToActiveCharacter(character.Key)))
+                        if (filter.DestinationAllCharacters.HasValue && filter.DestinationAllCharacters.Value &&
+                                 characterMonitor.ActiveCharacter == character.Key && (displayDestinationCrossCharacter || characterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
                             if (!destinationInventories.ContainsKey(inventoryKey))
                             {
                                 destinationInventories.Add(inventoryKey, inventory.Value);
                             }
                         }
-                        else if (filter.DestinationInventories.Contains(inventoryKey) && (displayCrossCharacter || characterMonitor.BelongsToActiveCharacter(character.Key)))
+                        if (filter.DestinationInventories.Contains(inventoryKey) && (displayDestinationCrossCharacter || characterMonitor.BelongsToActiveCharacter(character.Key)))
+                        {
+                            if (!destinationInventories.ContainsKey(inventoryKey))
+                            {
+                                destinationInventories.Add(inventoryKey, inventory.Value);
+                            }
+                        }
+                        if (filter.DestinationCategories != null && filter.DestinationCategories.Contains(inventory.Key)  && (displayDestinationCrossCharacter || characterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
                             if (!destinationInventories.ContainsKey(inventoryKey))
                             {
@@ -284,7 +299,11 @@ namespace InventoryTools.Logic
                         }
 
                         destinationItem.TempQuantity = destinationItem.Quantity;
-                        if (filter.FilterItem(destinationItem))
+                        if (destinationItem.IsEmpty && !destinationItem.IsEquippedGear)
+                        {
+                            slotsAvailable[destinationInventory.Key] = slotsAvailable[destinationInventory.Key] + 1;
+                        }
+                        else if (filter.FilterItem(destinationItem))
                         {
                             var itemHashCode = destinationItem.GetHashCode();
                             if (!itemLocations.ContainsKey(itemHashCode))
@@ -293,10 +312,6 @@ namespace InventoryTools.Logic
                             }
 
                             itemLocations[itemHashCode].Add(destinationItem);                     
-                        }
-                        else if (destinationItem.IsEmpty && !destinationItem.IsEquippedGear)
-                        {
-                            slotsAvailable[destinationInventory.Key] = slotsAvailable[destinationInventory.Key] + 1;
                         }
                     }
                 }
@@ -496,21 +511,28 @@ namespace InventoryTools.Logic
                     foreach (var inventory in character.Value)
                     {
                         var inventoryKey = (character.Key, inventory.Key);
-                        if (filter.SourceAllRetainers.HasValue && filter.SourceAllRetainers.Value && characterMonitor.IsRetainer(character.Key) && (displayCrossCharacter || characterMonitor.BelongsToActiveCharacter(character.Key)))
+                        if (filter.SourceAllRetainers.HasValue && filter.SourceAllRetainers.Value && characterMonitor.IsRetainer(character.Key) && (displaySourceCrossCharacter || characterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
                             if (!sourceInventories.ContainsKey(inventoryKey))
                             {
                                 sourceInventories.Add(inventoryKey, inventory.Value);
                             }
                         }
-                        if (filter.SourceAllCharacters.HasValue && filter.SourceAllCharacters.Value && !characterMonitor.IsRetainer(character.Key) && (displayCrossCharacter || characterMonitor.ActiveCharacter == character.Key))
+                        if (filter.SourceAllCharacters.HasValue && filter.SourceAllCharacters.Value && !characterMonitor.IsRetainer(character.Key) && (displaySourceCrossCharacter || characterMonitor.ActiveCharacter == character.Key))
                         {
                             if (!sourceInventories.ContainsKey(inventoryKey))
                             {
                                 sourceInventories.Add(inventoryKey, inventory.Value);
                             }
                         }
-                        if (filter.SourceInventories.Contains(inventoryKey) && (displayCrossCharacter || characterMonitor.BelongsToActiveCharacter(character.Key)))
+                        if (filter.SourceInventories.Contains(inventoryKey) && (displaySourceCrossCharacter || characterMonitor.BelongsToActiveCharacter(character.Key)))
+                        {
+                            if (!sourceInventories.ContainsKey(inventoryKey))
+                            {
+                                sourceInventories.Add(inventoryKey, inventory.Value);
+                            }
+                        }
+                        if (filter.SourceCategories != null && filter.SourceCategories.Contains(inventoryKey.Item2) && (displaySourceCrossCharacter || characterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
                             if (!sourceInventories.ContainsKey(inventoryKey))
                             {

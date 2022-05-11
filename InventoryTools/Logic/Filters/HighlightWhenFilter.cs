@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib.Models;
+using InventoryTools.Logic.Filters.Abstract;
 using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Filters
@@ -8,14 +9,14 @@ namespace InventoryTools.Logic.Filters
     public class HighlightWhenFilter : ChoiceFilter<string>
     {
         public readonly string[] HighlightWhenItemsFilter = new string[] {"N/A", "Always", "When Searching"};
-        public override KeyValuePair<string, string>? CurrentValue(FilterConfiguration configuration)
+        public override string? CurrentValue(FilterConfiguration configuration)
         {
-            return configuration.HighlightWhen != null ? new KeyValuePair<string, string>(configuration.HighlightWhen, configuration.HighlightWhen) : new KeyValuePair<string, string>(EmptyValue,EmptyValue);
+            return configuration.HighlightWhen ?? EmptyValue;
         }
 
-        public override void UpdateFilterConfiguration(FilterConfiguration configuration, KeyValuePair<string, string>? newValue)
+        public override void UpdateFilterConfiguration(FilterConfiguration configuration, string? newValue)
         {
-            configuration.HighlightWhen = newValue != null && newValue.Value.Key != EmptyValue ? newValue.Value.Key : null;
+            configuration.HighlightWhen = newValue != null && newValue != EmptyValue ? newValue : null;
         }
 
         public override string EmptyValue { get; set; } = "N/A";
@@ -39,9 +40,14 @@ namespace InventoryTools.Logic.Filters
             return true;
         }
 
-        public override Dictionary<string, string> GetChoices(FilterConfiguration configuration)
+        public override List<string> GetChoices(FilterConfiguration configuration)
         {
-            return HighlightWhenItemsFilter.ToDictionary(c => c, c => c);
+            return HighlightWhenItemsFilter.ToList();
+        }
+
+        public override string GetFormattedChoice(string choice)
+        {
+            return choice;
         }
     }
 }

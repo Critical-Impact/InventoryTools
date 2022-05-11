@@ -285,7 +285,7 @@ namespace InventoryTools.Logic
 
                     if (displayEquippableOnly && Service.ClientState.LocalPlayer != null)
                     {
-                        var race = Service.ClientState.LocalPlayer.Customize[(int)CustomizeIndex.Race];
+                        var race = (CharacterRace)Service.ClientState.LocalPlayer.Customize[(int)CustomizeIndex.Race];
                         var gender = Service.ClientState.LocalPlayer.Customize[(int) CustomizeIndex.Gender] == 0
                             ? CharacterSex.Male
                             : CharacterSex.Female;

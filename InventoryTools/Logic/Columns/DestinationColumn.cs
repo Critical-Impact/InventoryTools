@@ -1,4 +1,7 @@
-﻿using CriticalCommonLib.Models;
+﻿using CriticalCommonLib.Extensions;
+using CriticalCommonLib.Models;
+using InventoryTools.Extensions;
+using InventoryTools.Logic.Columns.Abstract;
 using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
@@ -17,9 +20,11 @@ namespace InventoryTools.Logic.Columns
 
         public override string? CurrentValue(SortingResult item)
         {
-            return item.DestinationRetainerId.HasValue
+            var destination = item.DestinationRetainerId.HasValue
                 ? PluginService.CharacterMonitor.Characters[item.DestinationRetainerId.Value]?.Name ?? ""
                 : "Unknown";
+            var destinationBag = item.DestinationBag.FormattedName();
+            return destination + " - " + destinationBag;
         }
 
         public override string Name { get; set; } = "Destination";

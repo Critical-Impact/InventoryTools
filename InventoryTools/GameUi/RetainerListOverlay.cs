@@ -130,9 +130,13 @@ namespace InventoryTools.GameUi
                     }
                 }
             }
+            RetainerNames = PluginService.CharacterMonitor.Characters.Where(c => c.Value.CharacterId == PluginService.CharacterMonitor.ActiveCharacter).ToDictionary(c => c.Key, c => c.Value.Name);            
+            if (HasState)
+            {
+                Clear();
+            }
+
             HasState = false;
-            RetainerNames = PluginService.CharacterMonitor.Characters.Where(c => c.Value.CharacterId == PluginService.CharacterMonitor.ActiveCharacter).ToDictionary(c => c.Key, c => c.Value.Name);
-            Clear();
         }
         
         private unsafe string GenerateNewName(IGrouping<ulong, SortingResult> c)

@@ -51,6 +51,6 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "MB Minimum Price";
+        public override string Name { get; set; } = "MB Minimum Price NQ/HQ";
     }
 }

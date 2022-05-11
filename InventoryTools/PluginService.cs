@@ -2,6 +2,7 @@ using CriticalCommonLib;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
+using Dalamud.Interface.ImGuiFileDialog;
 using InventoryTools.Logic;
 using InventoryTools.Misc;
 
@@ -21,6 +22,7 @@ namespace InventoryTools
         public static PluginCommandManager<PluginCommands> CommandManager { get; private set; } = null!;
         public static FilterManager FilterManager { get; private set; } = null!;
         public static WotsitIpc WotsitIpc { get; private set; } = null!;
+        public static FileDialogManager FileDialogManager { get; private set; } = null;
 
         public static void Initialise()
         {
@@ -41,6 +43,7 @@ namespace InventoryTools
             WotsitIpc = new WotsitIpc(  );
             PluginCommands = new();
             CommandManager = new PluginCommandManager<PluginCommands>(PluginCommands);
+            FileDialogManager = new FileDialogManager();
         }
 
         public static void InitialiseTesting(CharacterMonitor characterMonitor, PluginLogic pluginLogic)

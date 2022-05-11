@@ -1,5 +1,6 @@
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
+using InventoryTools.Logic.Columns.Abstract;
 using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns

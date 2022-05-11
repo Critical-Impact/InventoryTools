@@ -86,13 +86,18 @@ namespace InventoryTools.GameUi
                     return;
                 }
             }
-            HasState = false;
             foreach (var bag in BagToNumber.Keys)
             {
                 BagColours[bag] = EmptyDictionary;
             }
 
-            Clear();
+            if (HasState)
+            {
+                Clear();
+            }
+
+            HasState = false;
+
         }
 
         public void Clear()

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib.Models;
 using ImGuiNET;
+using InventoryTools.Logic.Columns.Abstract;
 using Lumina.Excel.GeneratedSheets;
 using NaturalSort.Extension;
 

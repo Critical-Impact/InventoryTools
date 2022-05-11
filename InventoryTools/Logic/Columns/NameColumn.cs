@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Colors;
+using InventoryTools.Logic.Columns.Abstract;
 using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns

@@ -1,21 +1,35 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using CriticalCommonLib.Models;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using Lumina.Excel.GeneratedSheets;
-using NaturalSort.Extension;
 
-namespace InventoryTools.Logic.Columns
+namespace InventoryTools.Logic.Columns.Abstract
 {
-    public abstract class IntegerColumn : Column<int?>
+    public abstract class ColoredTextColumn : Column<(string, Vector4)?>
     {
+        public override string CsvExport(InventoryItem item)
+        {
+            return CurrentValue(item)?.Item1 ?? "";
+        }
+
+        public override string CsvExport(Item item)
+        {
+            return CurrentValue(item)?.Item1 ?? "";
+        }
+
+        public override string CsvExport(SortingResult item)
+        {
+            return CurrentValue(item)?.Item1 ?? "";
+        }
+
         public virtual string EmptyText
         {
             get
             {
-                return "";
+                return "N/A";
             }
         }
         public override void Draw(InventoryItem item, int rowIndex)
@@ -41,7 +55,7 @@ namespace InventoryTools.Logic.Columns
                     return false;
                 }
 
-                return currentValue.Value.PassesFilter(FilterText);
+                return currentValue.Value.Item1.ToLower().PassesFilter(FilterText.ToLower());
             });
         }
 
@@ -56,12 +70,13 @@ namespace InventoryTools.Logic.Columns
                     return false;
                 }
 
-                return currentValue.Value.PassesFilter(FilterText);
+                return currentValue.Value.Item1.ToLower().PassesFilter(FilterText.ToLower());
             });
         }
 
         public override IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items)
         {
+            var isChecked = FilterText != "";
             return FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(c);
@@ -70,31 +85,55 @@ namespace InventoryTools.Logic.Columns
                     return false;
                 }
 
-                return currentValue.Value.PassesFilter(FilterText);
+                return currentValue.Value.Item1.ToLower().PassesFilter(FilterText.ToLower());
             });
         }
 
         public override IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy<InventoryItem, string>(c => CurrentValue(c).ToString() ?? "", StringComparison.OrdinalIgnoreCase.WithNaturalSort()) : items.OrderByDescending(c => CurrentValue(c).ToString() ?? "", StringComparison.OrdinalIgnoreCase.WithNaturalSort());
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(item =>
+            {
+                var currentValue = CurrentValue(item);
+                return !currentValue.HasValue ? "" : currentValue.Value.Item1;
+            }) : items.OrderByDescending(item =>
+            {
+                var currentValue = CurrentValue(item);
+                return !currentValue.HasValue ? "" : currentValue.Value.Item1;
+            });
         }
 
         public override IEnumerable<Item> Sort(ImGuiSortDirection direction, IEnumerable<Item> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy<Item, string>(c => CurrentValue(c).ToString() ?? "", StringComparison.OrdinalIgnoreCase.WithNaturalSort()) : items.OrderByDescending(c => CurrentValue(c).ToString() ?? "", StringComparison.OrdinalIgnoreCase.WithNaturalSort());
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(item =>
+            {
+                var currentValue = CurrentValue(item);
+                return !currentValue.HasValue ? "" : currentValue.Value.Item1;
+            }) : items.OrderByDescending(item =>
+            {
+                var currentValue = CurrentValue(item);
+                return !currentValue.HasValue ? "" : currentValue.Value.Item1;
+            });
         }
 
         public override IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy<SortingResult, string>(c => CurrentValue(c).ToString() ?? "", StringComparison.OrdinalIgnoreCase.WithNaturalSort()) : items.OrderByDescending(c => CurrentValue(c).ToString() ?? "", StringComparison.OrdinalIgnoreCase.WithNaturalSort());
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(item =>
+            {
+                var currentValue = CurrentValue(item);
+                return !currentValue.HasValue ? "" : currentValue.Value.Item1;
+            }) : items.OrderByDescending(item =>
+            {
+                var currentValue = CurrentValue(item);
+                return !currentValue.HasValue ? "" : currentValue.Value.Item1;
+            });
         }
 
-        public override IColumnEvent? DoDraw(int? currentValue, int rowIndex)
+        public override IColumnEvent? DoDraw((string, Vector4)? currentValue, int rowIndex)
         {
             ImGui.TableNextColumn();
-            if (currentValue != null)
+            if (currentValue.HasValue)
             {
-                ImGui.Text(currentValue.Value.ToString());
+                ImGui.TextColored( currentValue.Value.Item2, currentValue.Value.Item1);
             }
             else
             {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Numerics;
 using CriticalCommonLib;
+using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
 using Dalamud.Game.ClientState;
@@ -48,6 +49,7 @@ namespace InventoryTools
                 return;
             PluginLogic.DrawCraftRequirementsWindow();
             PluginLogic.DrawFilterWindows();
+            PluginService.FileDialogManager.Draw();
             if (!IsVisible)
                 return;
             var isVisible = IsVisible;
@@ -79,7 +81,6 @@ namespace InventoryTools
                                     PluginService.PluginLogic.ToggleActiveUiFilterByKey(filterConfiguration.Key);
                                 }
                             }
-
                             ImGui.EndTabItem();
                         }
                     }

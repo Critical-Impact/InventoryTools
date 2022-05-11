@@ -2,8 +2,10 @@ using System.Numerics;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using Dalamud.Logging;
+using Dalamud.Utility;
 using ImGuiNET;
 using InventoryTools.Extensions;
+using InventoryTools.Logic.Columns.Abstract;
 using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
@@ -76,7 +78,10 @@ namespace InventoryTools.Logic.Columns
                 if (ImGui.Selectable("Open in Universalis"))
                 {
                     $"https://universalis.app/market/{item.RowId}".OpenBrowser();
-                             
+                }
+                if (ImGui.Selectable("Copy Name"))
+                {
+                    item.Name.ToDalamudString().ToString().ToClipboard();
                 }
                 if (item.CanTryOn() && ImGui.Selectable("Try On"))
                 {

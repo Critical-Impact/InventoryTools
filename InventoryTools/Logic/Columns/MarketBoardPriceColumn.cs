@@ -4,6 +4,7 @@ using Dalamud.Interface.Colors;
 using Dalamud.Logging;
 using ImGuiNET;
 using InventoryTools.Extensions;
+using InventoryTools.Logic.Columns.Abstract;
 using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
@@ -100,7 +101,7 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "MB Average Price";
+        public override string Name { get; set; } = "MB Average Price NQ/HQ";
         public override float Width { get; set; } = 250.0f;
         public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = true;

@@ -1,10 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
-using Dalamud.Interface.Colors;
 using ImGuiNET;
 using InventoryTools.Extensions;
 
-namespace InventoryTools.Logic.Filters
+namespace InventoryTools.Logic.Filters.Abstract
 {
     public abstract class SortedListFilter<T> : Filter<Dictionary<T, string>> where T:notnull
     {

@@ -6,10 +6,25 @@ using ImGuiNET;
 using InventoryTools.Images;
 using Lumina.Excel.GeneratedSheets;
 
-namespace InventoryTools.Logic.Columns
+namespace InventoryTools.Logic.Columns.Abstract
 {
     public abstract class CheckboxColumn : Column<bool?>
     {
+        public override string CsvExport(InventoryItem item)
+        {
+            return CurrentValue(item) ?? false ? "true" : "false";
+        }
+
+        public override string CsvExport(Item item)
+        {
+            return CurrentValue(item) ?? false ? "true" : "false";
+        }
+
+        public override string CsvExport(SortingResult item)
+        {
+            return CurrentValue(item) ?? false ? "true" : "false";
+        }
+
         public override bool DrawFilter(string tableKey, int columnIndex)
         {
             var filter = FilterText;

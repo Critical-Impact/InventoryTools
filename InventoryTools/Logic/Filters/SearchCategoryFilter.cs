@@ -3,6 +3,7 @@ using System.Linq;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using Dalamud.Utility;
+using InventoryTools.Logic.Filters.Abstract;
 using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Filters

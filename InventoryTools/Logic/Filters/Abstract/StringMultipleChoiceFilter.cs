@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace InventoryTools.Logic.Filters
+namespace InventoryTools.Logic.Filters.Abstract
 {
     public abstract class StringMultipleChoiceFilter : MultipleChoiceFilter<string>
     {

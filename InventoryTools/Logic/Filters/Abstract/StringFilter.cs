@@ -1,7 +1,7 @@
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 
-namespace InventoryTools.Logic.Filters
+namespace InventoryTools.Logic.Filters.Abstract
 {
     public abstract class StringFilter : Filter<string>
     {
@@ -18,7 +18,7 @@ namespace InventoryTools.Logic.Filters
         public override void Draw(FilterConfiguration configuration)
         {
             var value = CurrentValue(configuration) ?? "";
-            ImGui.SetNextItemWidth(200);
+            ImGui.SetNextItemWidth(LabelSize);
             if (HasValueSet(configuration))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);

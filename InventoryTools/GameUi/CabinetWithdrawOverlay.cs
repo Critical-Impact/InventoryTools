@@ -57,9 +57,12 @@ namespace InventoryTools.GameUi
                     return;
                 }
             }
-            HasState = false;
+            if (HasState)
+            {
+                Clear();
+            }
 
-            Clear();
+            HasState = false;
         }
 
         public void Clear()

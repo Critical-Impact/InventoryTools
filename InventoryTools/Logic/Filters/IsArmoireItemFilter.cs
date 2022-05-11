@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
+using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Misc;
 using Lumina.Excel.GeneratedSheets;
 

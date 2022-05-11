@@ -3,7 +3,7 @@ using System.Linq;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 
-namespace InventoryTools.Logic.Filters
+namespace InventoryTools.Logic.Filters.Abstract
 {
     public abstract class MultipleChoiceFilter<T> : Filter<List<T>> where T : notnull
     {
@@ -32,7 +32,7 @@ namespace InventoryTools.Logic.Filters
 
         public override void Draw(FilterConfiguration configuration)
         {
-            ImGui.SetNextItemWidth(200);
+            ImGui.SetNextItemWidth(LabelSize);
             if (HasValueSet(configuration))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);

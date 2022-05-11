@@ -4,10 +4,24 @@ using CriticalCommonLib.Models;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
 
-namespace InventoryTools.Logic.Columns
+namespace InventoryTools.Logic.Columns.Abstract
 {
     public abstract class GameIconColumn : Column<ushort?>
     {
+        public override string CsvExport(InventoryItem item)
+        {
+            return "";
+        }
+
+        public override string CsvExport(Item item)
+        {
+            return "";
+        }
+
+        public override string CsvExport(SortingResult item)
+        {
+            return "";
+        }
         public virtual Vector2 IconSize
         {
             get

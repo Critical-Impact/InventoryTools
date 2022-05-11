@@ -1,14 +1,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib.Models;
+using InventoryTools.Logic.Filters.Abstract;
 using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Filters
 {
     public class SourceInventoriesFilter : MultipleChoiceFilter<(ulong, InventoryCategory)>
     {
+        public override int LabelSize { get; set; } = 240;
         public override string Key { get; set; } = "SourceInventories";
-        public override string Name { get; set; } = "Source Inventories";
+        public override string Name { get; set; } = "Source - Inventories";
         public override string HelpText { get; set; } =
             "This is a list of source inventories to sort items from based on the filter configuration";
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Inventories;

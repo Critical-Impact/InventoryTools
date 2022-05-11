@@ -5,10 +5,25 @@ using ImGuiNET;
 using InventoryTools.Extensions;
 using Lumina.Excel.GeneratedSheets;
 
-namespace InventoryTools.Logic.Columns
+namespace InventoryTools.Logic.Columns.Abstract
 {
     public abstract class DoubleIntegerColumn : Column<(int,int)?>
     {
+        public override string CsvExport(InventoryItem item)
+        {
+            return (CurrentValue(item)?.Item1.ToString()  ?? "") + "/" + (CurrentValue(item)?.Item2.ToString() ?? "");
+        }
+
+        public override string CsvExport(Item item)
+        {
+            return (CurrentValue(item)?.Item1.ToString()  ?? "") + "/" + (CurrentValue(item)?.Item2.ToString() ?? "");
+        }
+
+        public override string CsvExport(SortingResult item)
+        {
+            return (CurrentValue(item)?.Item1.ToString()  ?? "") + "/" + (CurrentValue(item)?.Item2.ToString() ?? "");
+        }
+        
         public virtual string Divider => "/";
 
         public virtual string EmptyText => "";

@@ -3,6 +3,7 @@ using System.Linq;
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
+using InventoryTools.Logic.Filters.Abstract;
 using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Filters
@@ -73,7 +74,10 @@ namespace InventoryTools.Logic.Filters
             base.DrawTable(configuration);
             
             var currentAddColumn = "";
-            if (ImGui.BeginCombo("Add##AddColumns" + Key, currentAddColumn))
+            ImGui.SetNextItemWidth(LabelSize);
+            ImGui.LabelText("##" + Key + "Label", "Add new column: ");
+            ImGui.SameLine();
+            if (ImGui.BeginCombo("Add##" + Key, currentAddColumn))
             {
                 foreach(var column in value.OrderBy(c => c.Value))
                 {

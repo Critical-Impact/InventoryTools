@@ -2,7 +2,7 @@ using System.Numerics;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 
-namespace InventoryTools.Logic.Filters
+namespace InventoryTools.Logic.Filters.Abstract
 {
     public abstract class ColorFilter : Filter<Vector4?>
     {
@@ -19,7 +19,7 @@ namespace InventoryTools.Logic.Filters
         public override void Draw(FilterConfiguration configuration)
         {
             var value = CurrentValue(configuration) ?? Vector4.Zero;
-            ImGui.SetNextItemWidth(200);
+            ImGui.SetNextItemWidth(LabelSize);
             if (HasValueSet(configuration))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);
