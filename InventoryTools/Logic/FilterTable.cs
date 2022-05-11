@@ -166,7 +166,7 @@ namespace InventoryTools.Logic
                 foreach (var column in FilterConfiguration.Columns)
                 {
                     var newColumn = PluginLogic.GetClassFromString(column);
-                    if (newColumn != null)
+                    if (newColumn != null && newColumn is IColumn)
                     {
                         newColumns.Add(newColumn);
                     }
