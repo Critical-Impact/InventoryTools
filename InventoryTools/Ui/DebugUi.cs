@@ -253,7 +253,7 @@ namespace InventoryTools
                         if (clientInterfaceUiModule != null)
                         {
                             ImGui.Text(clientInterfaceUiModule->RetainerID.ToString());
-                            ImGui.Text(new IntPtr(clientInterfaceUiModule->RetainerPtr).ToString());
+                            ImGui.Text($"Retainer Pointer: {(ulong)clientInterfaceUiModule->RetainerPtr:X}");
                             var container = GameInterface.GetContainer(InventoryType.RetainerBag0);
                             if (container != null)
                             {

@@ -68,6 +68,7 @@ namespace InventoryTools
         private bool _tooltipDisplayAmountOwned = true;
         private bool _tooltipDisplayMarketAveragePrice = true;
         private bool _tooltipDisplayMarketLowestPrice = false;
+        private bool _tooltipAddCharacterNameOwned = false;
         public Vector4 HighlightColor
         {
             get => _highlightColor;
@@ -124,6 +125,16 @@ namespace InventoryTools
             set
             {
                 _tooltipDisplayAmountOwned = value;
+                ConfigurationChanged?.Invoke();
+            }
+        }
+        
+        public bool TooltipAddCharacterNameOwned
+        {
+            get => _tooltipAddCharacterNameOwned;
+            set
+            {
+                _tooltipAddCharacterNameOwned = value;
                 ConfigurationChanged?.Invoke();
             }
         }

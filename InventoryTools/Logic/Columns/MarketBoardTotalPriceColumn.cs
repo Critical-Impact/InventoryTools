@@ -36,6 +36,10 @@ namespace InventoryTools.Logic.Columns
 
         public override (int,int)? CurrentValue(InventoryItem item)
         {
+            if (!item.CanBeTraded)
+            {
+                return (Untradable, Untradable);
+            }
             var value = base.CurrentValue(item);
             return value.HasValue ? ((int)(value.Value.Item1 * item.Quantity), (int)(value.Value.Item2 * item.Quantity)) : null;
         }

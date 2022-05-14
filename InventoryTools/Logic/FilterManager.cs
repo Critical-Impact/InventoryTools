@@ -209,11 +209,7 @@ namespace InventoryTools.Logic
                         if (filter.SourceAllCharacters.HasValue && filter.SourceAllCharacters.Value && !characterMonitor.IsRetainer(character.Key) &&
                                  characterMonitor.ActiveCharacter == character.Key && (displaySourceCrossCharacter || characterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
-                            if (inventoryKey.Item2 is InventoryCategory.FreeCompanyBags)
-                            {
-                                continue;
-                            }
-                            if (!sourceInventories.ContainsKey(inventoryKey))
+                            if (inventoryKey.Item2 is not InventoryCategory.FreeCompanyBags && !sourceInventories.ContainsKey(inventoryKey))
                             {
                                 sourceInventories.Add(inventoryKey, inventory.Value);
                             }
@@ -235,7 +231,7 @@ namespace InventoryTools.Logic
                         }
 
                         if (inventoryKey.Item2 is InventoryCategory.CharacterEquipped or InventoryCategory
-                            .RetainerEquipped or InventoryCategory.RetainerMarket)
+                            .RetainerEquipped or InventoryCategory.RetainerMarket or InventoryCategory.Currency or InventoryCategory.Crystals)
                         {
                             continue;
                         }
@@ -331,7 +327,7 @@ namespace InventoryTools.Logic
                             {
                                 var existingItem = itemLocations[hashCode][i];
                                 //Don't compare inventory to itself
-                                if (existingItem.RetainerId == sourceItem.RetainerId)
+                                if (existingItem.RetainerId == sourceItem.RetainerId && existingItem.SortedCategory == sourceItem.SortedCategory)
                                 {
                                     continue;
                                 }

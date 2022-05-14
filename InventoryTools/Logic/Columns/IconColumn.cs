@@ -7,19 +7,19 @@ namespace InventoryTools.Logic.Columns
 {
     public class IconColumn : GameIconColumn
     {
-        public override ushort? CurrentValue(InventoryItem item)
+        public override (ushort, bool)? CurrentValue(InventoryItem item)
         {
-            return item.Icon;
+            return (item.Icon, item.IsHQ);
         }
 
-        public override ushort? CurrentValue(Item item)
+        public override (ushort, bool)? CurrentValue(Item item)
         {
-            return item.Icon;
+            return (item.Icon, false);
         }
 
-        public override ushort? CurrentValue(SortingResult item)
+        public override (ushort, bool)? CurrentValue(SortingResult item)
         {
-            return item.InventoryItem.Icon;
+            return CurrentValue(item.InventoryItem);
         }
 
         public override string Name { get; set; } = "Icon";

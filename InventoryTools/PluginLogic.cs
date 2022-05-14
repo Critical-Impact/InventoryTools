@@ -71,6 +71,7 @@ namespace InventoryTools
         public event FilterChangedDelegate? FilterChanged; 
         
         public readonly ConcurrentDictionary<ushort, TextureWrap> TextureDictionary = new ConcurrentDictionary<ushort, TextureWrap>();
+        public readonly ConcurrentDictionary<ushort, TextureWrap> HQTextureDictionary = new ConcurrentDictionary<ushort, TextureWrap>();
         public readonly ConcurrentDictionary<string, TextureWrap> UldTextureDictionary = new ConcurrentDictionary<string, TextureWrap>();
 
         public PluginLogic(bool noExternals = false)
@@ -82,6 +83,7 @@ namespace InventoryTools
                 PluginService.CharacterMonitor.OnActiveRetainerChanged += CharacterMonitorOnOnActiveCharacterChanged;
                 PluginService.CharacterMonitor.OnActiveRetainerLoaded += CharacterMonitorOnOnActiveCharacterChanged;
                 PluginService.CharacterMonitor.OnCharacterUpdated += CharacterMonitorOnOnCharacterUpdated;
+                PluginService.CharacterMonitor.OnCharacterRemoved += CharacterMonitorOnOnCharacterRemoved;
                 PluginConfiguration.ConfigurationChanged += ConfigOnConfigurationChanged;
                 Service.Framework.Update += FrameworkOnUpdate;
 
@@ -114,6 +116,15 @@ namespace InventoryTools
 
                 this.CommonBase = new XivCommonBase(Hooks.Tooltips);
                 this.CommonBase.Functions.Tooltips.OnItemTooltip += this.OnItemTooltip;
+            }
+        }
+
+        private void CharacterMonitorOnOnCharacterRemoved(ulong characterId)
+        {
+            foreach (var configuration in _filterConfigurations)
+            {
+                configuration.SourceInventories.RemoveAll(c => c.Item1 == characterId);
+                configuration.DestinationInventories.RemoveAll(c => c.Item1 == characterId);
             }
         }
 
@@ -477,8 +488,8 @@ namespace InventoryTools
         {
             var sampleFilter = new FilterConfiguration("Put away materials", FilterType.SortingFilter);
             sampleFilter.DisplayInTabs = true;
-            sampleFilter.SourceAllCharacters = true;
-            sampleFilter.DestinationAllRetainers = true;
+            sampleFilter.SourceCategories = new HashSet<InventoryCategory>() {InventoryCategory.CharacterBags};
+            sampleFilter.DestinationCategories =  new HashSet<InventoryCategory>() {InventoryCategory.RetainerBags};
             sampleFilter.FilterItemsInRetainers = true;
             sampleFilter.HighlightWhen = "Always";
             var itemUiCategories = ExcelCache.GetAllItemUICategories();
@@ -500,9 +511,8 @@ namespace InventoryTools
         {
             var sampleFilter = new FilterConfiguration("Duplicated SortedItems", FilterType.SortingFilter);
             sampleFilter.DisplayInTabs = true;
-            sampleFilter.SourceAllCharacters = true;
-            sampleFilter.SourceAllRetainers = true;
-            sampleFilter.DestinationAllRetainers = true;
+            sampleFilter.SourceCategories = new HashSet<InventoryCategory>() {InventoryCategory.CharacterBags,InventoryCategory.RetainerBags};
+            sampleFilter.DestinationCategories =  new HashSet<InventoryCategory>() {InventoryCategory.RetainerBags};
             sampleFilter.FilterItemsInRetainers = true;
             sampleFilter.DuplicatesOnly = true;
             sampleFilter.HighlightWhen = "Always";
@@ -790,8 +800,14 @@ namespace InventoryTools
                         storageCount += oItem.Quantity;
                         if (PluginService.CharacterMonitor.Characters.ContainsKey(oItem.RetainerId))
                         {
-                            var name = PluginService.CharacterMonitor.Characters[oItem.RetainerId]?.Name ?? "Unknown";
+                            var characterMonitorCharacter = PluginService.CharacterMonitor.Characters[oItem.RetainerId];
+                            var name = characterMonitorCharacter?.FormattedName ?? "Unknown";
                             name = name.Trim().Length == 0 ? "Unknown" : name.Trim();
+                            if (characterMonitorCharacter != null && characterMonitorCharacter.OwnerId != 0 && PluginConfiguration.TooltipAddCharacterNameOwned && PluginService.CharacterMonitor.Characters.ContainsKey(characterMonitorCharacter.OwnerId))
+                            {
+                                var owner = PluginService.CharacterMonitor.Characters[characterMonitorCharacter.OwnerId];
+                                name += " (" + owner.FormattedName + ")";
+                            }
 
                             locations.Add($"{name} - {oItem.FormattedBagLocation}");
                         }
@@ -956,14 +972,17 @@ namespace InventoryTools
             return instance;
         }
         
-        internal void DrawIcon(ushort icon, Vector2 size) {
-            if (icon < 65000) {
-                if (TextureDictionary.ContainsKey(icon)) {
-                    var tex = TextureDictionary[icon];
+        internal void DrawIcon(ushort icon, Vector2 size, bool hqIcon = false) {
+            if (icon < 65100)
+            {
+                var textureDictionary = hqIcon ? HQTextureDictionary : TextureDictionary;
+                
+                if (textureDictionary.ContainsKey(icon)) {
+                    var tex = textureDictionary[icon];
                     if (tex.ImGuiHandle == IntPtr.Zero) {
 
                     } else {
-                        ImGui.Image(TextureDictionary[icon].ImGuiHandle, size);
+                        ImGui.Image(textureDictionary[icon].ImGuiHandle, size);
                     }
                 } else {
                     ImGui.BeginChild("WaitingTexture", size, true);
@@ -971,14 +990,14 @@ namespace InventoryTools
 
                     Task.Run(() => {
                         try {
-                            var iconTex = Service.Data.GetIcon(icon);
+                            var iconTex = hqIcon ?  Service.Data.GetHqIcon(icon) : Service.Data.GetIcon(icon);
                             if (iconTex != null)
                             {
                                 var tex = Service.Interface.UiBuilder.LoadImageRaw(iconTex.GetRgbaImageData(),
                                     iconTex.Header.Width, iconTex.Header.Height, 4);
                                 if (tex.ImGuiHandle != IntPtr.Zero)
                                 {
-                                    TextureDictionary[icon] = tex;
+                                    textureDictionary[icon] = tex;
                                 }
                             }
                         } catch {
@@ -1213,6 +1232,7 @@ namespace InventoryTools
             PluginService.CharacterMonitor.OnActiveRetainerChanged -= CharacterMonitorOnOnActiveCharacterChanged;
             PluginService.CharacterMonitor.OnActiveRetainerLoaded -= CharacterMonitorOnOnActiveCharacterChanged;
             PluginService.CharacterMonitor.OnCharacterUpdated -= CharacterMonitorOnOnCharacterUpdated;
+            PluginService.CharacterMonitor.OnCharacterRemoved -= CharacterMonitorOnOnCharacterRemoved;
             PluginConfiguration.ConfigurationChanged -= ConfigOnConfigurationChanged;
             PluginService.GameUi.UiVisibilityChanged -= GameUiOnUiVisibilityChanged;
 

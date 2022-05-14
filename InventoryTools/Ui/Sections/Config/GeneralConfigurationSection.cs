@@ -135,6 +135,16 @@ namespace InventoryTools.Sections
             {
                 Configuration.TooltipDisplayAmountOwned = !Configuration.TooltipDisplayAmountOwned;
             }
+            
+            var addCharacterNameOwned = Configuration.TooltipAddCharacterNameOwned;
+            if (ImGui.Checkbox("Tooltip - Add Character Name to Owned?", ref addCharacterNameOwned))
+            {
+                Configuration.TooltipAddCharacterNameOwned = !Configuration.TooltipAddCharacterNameOwned;
+            }
+
+            ImGui.SameLine();
+            UiHelpers.HelpMarker(
+                "When hovering an item and you have an amount owned by a retainer, should the owner of that retainer be affixed to that item?");
 
             ImGui.SameLine();
             UiHelpers.HelpMarker(
@@ -155,7 +165,7 @@ namespace InventoryTools.Sections
             {
                 Configuration.TooltipDisplayMarketLowestPrice = !Configuration.TooltipDisplayMarketLowestPrice;
             }
-
+            
             ImGui.SameLine();
             UiHelpers.HelpMarker(
                 "When hovering an item, should the tooltip contain the average market price for NQ/HQ.");

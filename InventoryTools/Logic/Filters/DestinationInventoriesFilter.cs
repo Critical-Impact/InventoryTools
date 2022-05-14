@@ -42,18 +42,18 @@ namespace InventoryTools.Logic.Filters
             {
                 if (PluginService.CharacterMonitor.IsRetainer(character.Key))
                 {
-                    dict.Add((character.Key, InventoryCategory.RetainerBags), character.Value.Name + " - " + InventoryCategory.RetainerBags.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.RetainerMarket), character.Value.Name + " - " + InventoryCategory.RetainerMarket.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.RetainerBags), character.Value.FormattedName + " - " + InventoryCategory.RetainerBags.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.RetainerMarket), character.Value.FormattedName + " - " + InventoryCategory.RetainerMarket.FormattedName());
                 }
                 else
                 {
-                    dict.Add((character.Key, InventoryCategory.CharacterBags), character.Value.Name + " - " + InventoryCategory.CharacterBags.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.CharacterSaddleBags), character.Value.Name + " - " + InventoryCategory.CharacterSaddleBags.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.CharacterPremiumSaddleBags), character.Value.Name + " - " + InventoryCategory.CharacterPremiumSaddleBags.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.FreeCompanyBags), character.Value.Name + " - " + InventoryCategory.FreeCompanyBags.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.CharacterArmoryChest), character.Value.Name + " - " + InventoryCategory.CharacterArmoryChest.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.GlamourChest), character.Value.Name + " - " + InventoryCategory.GlamourChest.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.Armoire), character.Value.Name + " - " + InventoryCategory.Armoire.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.CharacterBags), character.Value.FormattedName + " - " + InventoryCategory.CharacterBags.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.CharacterSaddleBags), character.Value.FormattedName + " - " + InventoryCategory.CharacterSaddleBags.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.CharacterPremiumSaddleBags), character.Value.FormattedName + " - " + InventoryCategory.CharacterPremiumSaddleBags.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.FreeCompanyBags), character.Value.FormattedName + " - " + InventoryCategory.FreeCompanyBags.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.CharacterArmoryChest), character.Value.FormattedName + " - " + InventoryCategory.CharacterArmoryChest.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.GlamourChest), character.Value.FormattedName + " - " + InventoryCategory.GlamourChest.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.Armoire), character.Value.FormattedName + " - " + InventoryCategory.Armoire.FormattedName());
                    
                 }
             }

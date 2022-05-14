@@ -47,9 +47,14 @@ namespace InventoryTools.Sections
                     ConfigSelectedConfigurationPage = 3;
                 }
 
-                if (ImGui.Selectable("Import/Export", ConfigSelectedConfigurationPage == 4))
+                if (ImGui.Selectable("Characters/Retainers", ConfigSelectedConfigurationPage == 4))
                 {
                     ConfigSelectedConfigurationPage = 4;
+                }
+
+                if (ImGui.Selectable("Import/Export", ConfigSelectedConfigurationPage == 5))
+                {
+                    ConfigSelectedConfigurationPage = 5;
                 }
                 
                 ImGui.NewLine();
@@ -64,9 +69,9 @@ namespace InventoryTools.Sections
                     if (ImGui.Selectable(
                         filterConfiguration.Name + "##" +
                         filterConfiguration.Key,
-                        index + 5 == ConfigSelectedConfigurationPage))
+                        index + 6 == ConfigSelectedConfigurationPage))
                     {
-                        ConfigSelectedConfigurationPage = index + 5;
+                        ConfigSelectedConfigurationPage = index + 6;
                     }
                 }
 
@@ -437,12 +442,17 @@ namespace InventoryTools.Sections
 
                 if (ConfigSelectedConfigurationPage == 4)
                 {
+                    CharacterRetainerSection.Draw();
+                }
+                
+                if (ConfigSelectedConfigurationPage == 5)
+                {
                     ImportExportSection.Draw();
                 }
 
-                if (ConfigSelectedConfigurationPage > 4)
+                if (ConfigSelectedConfigurationPage > 5)
                 {
-                    var selectedFilter = ConfigSelectedConfigurationPage - 5;
+                    var selectedFilter = ConfigSelectedConfigurationPage - 6;
                     if (selectedFilter >= 0 && PluginService.PluginLogic.FilterConfigurations.Count > selectedFilter)
                     {
                         var filterConfiguration = PluginService.PluginLogic.FilterConfigurations[selectedFilter];

@@ -21,7 +21,7 @@ namespace InventoryTools.Logic.Columns
         public override string? CurrentValue(SortingResult item)
         {
             var destination = item.DestinationRetainerId.HasValue
-                ? PluginService.CharacterMonitor.Characters[item.DestinationRetainerId.Value]?.Name ?? ""
+                ? PluginService.CharacterMonitor.Characters[item.DestinationRetainerId.Value]?.FormattedName ?? ""
                 : "Unknown";
             var destinationBag = item.DestinationBag.FormattedName();
             return destination + " - " + destinationBag;

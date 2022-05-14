@@ -6,7 +6,7 @@ using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns.Abstract
 {
-    public abstract class GameIconColumn : Column<ushort?>
+    public abstract class GameIconColumn : Column<(ushort,bool)?>
     {
         public override string CsvExport(InventoryItem item)
         {
@@ -79,12 +79,12 @@ namespace InventoryTools.Logic.Columns.Abstract
             return items;
         }
 
-        public override IColumnEvent? DoDraw(ushort? currentValue, int rowIndex)
+        public override IColumnEvent? DoDraw((ushort,bool)? currentValue, int rowIndex)
         {
             ImGui.TableNextColumn();
             if (currentValue != null)
             {
-                PluginService.PluginLogic.DrawIcon(currentValue.Value, IconSize);
+                PluginService.PluginLogic.DrawIcon(currentValue.Value.Item1, IconSize, currentValue.Value.Item2);
             }
             return null;
         }

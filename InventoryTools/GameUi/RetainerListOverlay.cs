@@ -74,6 +74,7 @@ namespace InventoryTools.GameUi
                         }
                         foreach (var item in PluginService.InventoryMonitor.AllItems)
                         {
+                            if (item.IsEmpty) continue;
                             if (hasItems.ContainsKey(item.RetainerId))
                             {
                                 if (!hasItems[item.RetainerId].Contains(item.ItemId))
@@ -107,7 +108,7 @@ namespace InventoryTools.GameUi
                     var filteredList = filterResult.Value.SortedItems;
                     if (filterConfiguration.FilterType == FilterType.SortingFilter)
                     {
-                        var grouping = filteredList.Where(c =>
+                        var grouping = filteredList.Where(c => !c.InventoryItem.IsEmpty && 
                                 (c.SourceRetainerId == currentCharacterId || PluginService.CharacterMonitor.BelongsToActiveCharacter(c.SourceRetainerId)) && c.DestinationRetainerId != null)
                             .GroupBy(c => c.DestinationRetainerId!.Value).Where(c => c.Any()).ToList();
                         RetainerColors = grouping.ToDictionary(c => c.Key,
@@ -119,7 +120,7 @@ namespace InventoryTools.GameUi
                     }
                     else
                     {
-                        var grouping = filteredList.GroupBy(c => c.SourceRetainerId).Where(c => c.Any()).ToList();
+                        var grouping = filteredList.Where(c => !c.InventoryItem.IsEmpty).GroupBy(c => c.SourceRetainerId).Where(c => c.Any()).ToList();
                         RetainerNames = grouping.ToDictionary(c => c.Key, GenerateNewName);
                         RetainerColors = grouping.ToDictionary(c => c.Key,
                             c => filterConfiguration.RetainerListColor ??
@@ -143,7 +144,7 @@ namespace InventoryTools.GameUi
         {
             if (PluginService.CharacterMonitor.Characters.ContainsKey(c.Key))
             {
-                return PluginService.CharacterMonitor.Characters[c.Key].Name + " (" + c.Count() + ")";
+                return PluginService.CharacterMonitor.Characters[c.Key].FormattedName + " (" + c.Count() + ")";
             }
             return "Unknown "  + "(" + c.Count() + ")";
         }
@@ -152,7 +153,7 @@ namespace InventoryTools.GameUi
         {
             if (PluginService.CharacterMonitor.Characters.ContainsKey(c.Key))
             {
-                return PluginService.CharacterMonitor.Characters[c.Key].Name + " (" + c.Value + ")";
+                return PluginService.CharacterMonitor.Characters[c.Key].FormattedName + " (" + c.Value + ")";
             }
             return "Unknown "  + "(" + c.Value + ")";
         }

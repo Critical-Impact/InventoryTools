@@ -40,20 +40,20 @@ namespace InventoryTools.Logic.Filters
             {
                 if (PluginService.CharacterMonitor.IsRetainer(character.Key))
                 {
-                    dict.Add((character.Key, InventoryCategory.RetainerBags), character.Value.Name + " - Bags");
-                    dict.Add((character.Key, InventoryCategory.RetainerEquipped), character.Value.Name + " - Equipped");
-                    dict.Add((character.Key, InventoryCategory.RetainerMarket), character.Value.Name + " - Market");
+                    dict.Add((character.Key, InventoryCategory.RetainerBags), character.Value.FormattedName + " - Bags");
+                    dict.Add((character.Key, InventoryCategory.RetainerEquipped), character.Value.FormattedName + " - Equipped");
+                    dict.Add((character.Key, InventoryCategory.RetainerMarket), character.Value.FormattedName + " - Market");
                 }
                 else
                 {
-                    dict.Add((character.Key, InventoryCategory.CharacterBags), character.Value.Name + " - Bags");
-                    dict.Add((character.Key, InventoryCategory.CharacterEquipped), character.Value.Name + " - Equipped");
-                    dict.Add((character.Key, InventoryCategory.CharacterSaddleBags), character.Value.Name + " - Saddle Bags");
-                    dict.Add((character.Key, InventoryCategory.CharacterPremiumSaddleBags), character.Value.Name + " - Premium Saddle Bags");
-                    dict.Add((character.Key, InventoryCategory.FreeCompanyBags), character.Value.Name + " - Free Company Bags");
-                    dict.Add((character.Key, InventoryCategory.CharacterArmoryChest), character.Value.Name + " - Armoury Chest");
-                    dict.Add((character.Key, InventoryCategory.GlamourChest), character.Value.Name + " - Glamour Chest");
-                    dict.Add((character.Key, InventoryCategory.Armoire), character.Value.Name + " - Armoire");
+                    dict.Add((character.Key, InventoryCategory.CharacterBags), character.Value.FormattedName + " - Bags");
+                    dict.Add((character.Key, InventoryCategory.CharacterEquipped), character.Value.FormattedName + " - Equipped");
+                    dict.Add((character.Key, InventoryCategory.CharacterSaddleBags), character.Value.FormattedName + " - Saddle Bags");
+                    dict.Add((character.Key, InventoryCategory.CharacterPremiumSaddleBags), character.Value.FormattedName + " - Premium Saddle Bags");
+                    dict.Add((character.Key, InventoryCategory.FreeCompanyBags), character.Value.FormattedName + " - Free Company Bags");
+                    dict.Add((character.Key, InventoryCategory.CharacterArmoryChest), character.Value.FormattedName + " - Armoury Chest");
+                    dict.Add((character.Key, InventoryCategory.GlamourChest), character.Value.FormattedName + " - Glamour Chest");
+                    dict.Add((character.Key, InventoryCategory.Armoire), character.Value.FormattedName + " - Armoire");
                    
                 }
             }

@@ -77,13 +77,13 @@ namespace InventoryTools
                     ImGui.Text("If you run into any issues please submit feedback via the plugin installer feedback button.");
                     ImGui.Text("Plugin Wiki: ");
                     ImGui.SameLine();
-                    if (ImGui.Button("Open"))
+                    if (ImGui.Button("Open##WikiBtn"))
                     {
                         "https://github.com/Critical-Impact/InventoryTools/wiki/1.-Overview".OpenBrowser();
                     }
                     ImGui.Text("Found a bug?");
                     ImGui.SameLine();
-                    if (ImGui.Button("Open"))
+                    if (ImGui.Button("Open##BugBtn"))
                     {
                         "https://github.com/Critical-Impact/InventoryTools/issues".OpenBrowser();
                     }

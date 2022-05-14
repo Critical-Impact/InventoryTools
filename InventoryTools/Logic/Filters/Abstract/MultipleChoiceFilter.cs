@@ -82,7 +82,7 @@ namespace InventoryTools.Logic.Filters.Abstract
                 {
                     var itemSearchCategoryName = actualItem
                         .Replace("\u0002\u001F\u0001\u0003", "-");
-                    if (ImGui.Button(itemSearchCategoryName + " X"))
+                    if (ImGui.Button(itemSearchCategoryName + " X" + "##" + Key + index))
                     {
                         if (selectedChoices.Contains(item))
                         {

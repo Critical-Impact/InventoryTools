@@ -43,8 +43,8 @@ namespace InventoryTools.Logic.Filters
         {
            
             var dict = new Dictionary<InventoryCategory, string>();
-            dict.Add(InventoryCategory.RetainerBags, InventoryCategory.RetainerBags.FormattedName());
-            dict.Add(InventoryCategory.RetainerMarket, InventoryCategory.RetainerMarket.FormattedName());
+            dict.Add(InventoryCategory.RetainerBags, "Retainer " + InventoryCategory.RetainerBags.FormattedName());
+            dict.Add(InventoryCategory.RetainerMarket, "Retainer " + InventoryCategory.RetainerMarket.FormattedName());
             dict.Add(InventoryCategory.CharacterBags, InventoryCategory.CharacterBags.FormattedName());
             dict.Add(InventoryCategory.CharacterSaddleBags, InventoryCategory.CharacterSaddleBags.FormattedName());
             dict.Add(InventoryCategory.CharacterPremiumSaddleBags, InventoryCategory.CharacterPremiumSaddleBags.FormattedName());
