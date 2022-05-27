@@ -168,7 +168,7 @@ namespace InventoryTools.Sections
             
             ImGui.SameLine();
             UiHelpers.HelpMarker(
-                "When hovering an item, should the tooltip contain the average market price for NQ/HQ.");
+                "When hovering an item, should the tooltip contain the minimum market price for NQ/HQ.");
 
             ImGui.Text("Auto Save:");
             ImGui.Separator();
