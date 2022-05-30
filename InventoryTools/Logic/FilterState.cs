@@ -17,7 +17,7 @@ namespace InventoryTools.Logic
     {
         public FilterConfiguration FilterConfiguration;
         public FilterTable? FilterTable;
-        public ulong? ActiveRetainerId;
+        public ulong? ActiveRetainerId => PluginService.CharacterMonitor.ActiveRetainer == 0 ? null : PluginService.CharacterMonitor.ActiveRetainer;
 
         public bool InvertHighlighting
         {
@@ -25,6 +25,15 @@ namespace InventoryTools.Logic
             {
                 var activeFilter = FilterConfiguration;
                 return activeFilter.InvertHighlighting ?? ConfigurationManager.Config.InvertHighlighting;
+            }
+        }
+
+        public bool InvertDestinationHighlighting
+        {
+            get
+            {
+                var activeFilter = FilterConfiguration;
+                return activeFilter.InvertDestinationHighlighting ?? ConfigurationManager.Config.InvertDestinationHighlighting;
             }
         }
 
@@ -38,6 +47,7 @@ namespace InventoryTools.Logic
         }
 
         public Vector4 BagHighlightColor => FilterConfiguration.HighlightColor ?? ConfigurationManager.Config.HighlightColor;
+        public Vector4 BagDestinationHighlightColor => FilterConfiguration.DestinationHighlightColor ?? ConfigurationManager.Config.DestinationHighlightColor;
         public Vector4 TabHighlightColor => FilterConfiguration.TabHighlightColor ?? ConfigurationManager.Config.TabHighlightColor;
 
         public bool ShouldHighlight
@@ -73,6 +83,9 @@ namespace InventoryTools.Logic
                 return shouldHighlight;
             }
         }
+
+        public bool ShouldHighlightDestination => ShouldHighlight && FilterConfiguration.HighlightDestination != null && FilterConfiguration.HighlightDestination.Value || FilterConfiguration.HighlightDestination == null && ConfigurationManager.Config.HighlightDestination;
+        public bool ShouldHighlightDestinationEmpty => ShouldHighlight && FilterConfiguration.HighlightDestinationEmpty != null && FilterConfiguration.HighlightDestinationEmpty.Value || FilterConfiguration.HighlightDestinationEmpty == null && ConfigurationManager.Config.HighlightDestinationEmpty;
 
         public Vector4? GetTabHighlight(Dictionary<Vector2, Vector4?> bagHighlights)
         {
@@ -459,7 +472,9 @@ namespace InventoryTools.Logic
                 
                 foreach (var item in filterResult.Value.SortedItems)
                 {
-                    if(item.SourceBag == bag && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting)))
+                    var matchesSource = item.SourceBag == bag && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting));
+                    var matchesDestination = ShouldHighlightDestination && item.DestinationBag == bag && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting));
+                    if(matchesSource)
                     {
                         var itemBagLocation = item.BagLocation;
                         if (!bagHighlights.ContainsKey(itemBagLocation))
@@ -473,6 +488,34 @@ namespace InventoryTools.Logic
                                 bagHighlights.Add(itemBagLocation, BagHighlightColor);
                             }
                             else if(InvertHighlighting)
+                            {
+                                bagHighlights.Add(itemBagLocation, null);
+                            }
+                            else
+                            {
+                                bagHighlights.Add(itemBagLocation, null);
+                            }
+                        }
+                    }
+
+                    if (matchesDestination && item.DestinationSlot != null)
+                    {
+                        if (!ShouldHighlightDestinationEmpty && item.IsEmptyDestinationSlot == true)
+                        {
+                            continue;
+                        }
+                        var itemBagLocation = item.DestinationSlot.Value;
+                        if (!bagHighlights.ContainsKey(itemBagLocation))
+                        {
+                            if (!InvertDestinationHighlighting && !item.InventoryItem.IsEmpty)
+                            {
+                                bagHighlights.Add(itemBagLocation, BagDestinationHighlightColor);
+                            }
+                            else if (InvertDestinationHighlighting && item.InventoryItem.IsEmpty)
+                            {
+                                bagHighlights.Add(itemBagLocation, BagDestinationHighlightColor);
+                            }
+                            else if(InvertDestinationHighlighting)
                             {
                                 bagHighlights.Add(itemBagLocation, null);
                             }

@@ -1,8 +1,11 @@
 using System.Numerics;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using Dalamud.Logging;
 using Dalamud.Utility;
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Columns.Abstract;
@@ -94,6 +97,11 @@ namespace InventoryTools.Logic.Columns
                 if (item.CanBeCrafted() && ImGui.Selectable("View Requirements"))
                 {
                     PluginLogic.ShowCraftRequirementsWindow(item);   
+                }
+
+                if (item.CanBeCrafted() && ImGui.Selectable("Open in Crafting Log"))
+                {
+                    GameInterface.OpenCraftingLog(item.RowId);   
                 }
                 ImGui.EndPopup();
             }

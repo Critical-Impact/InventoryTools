@@ -19,7 +19,7 @@ namespace InventoryTools
     {
         public delegate void ConfigurationChangedDelegate();
 
-        private bool _automaticallyDownloadMarketPrices;
+        private bool _automaticallyDownloadMarketPrices = false;
         private bool _colorRetainerList = true;
 
         private bool _displayCrossCharacter = true;
@@ -28,11 +28,16 @@ namespace InventoryTools
         private Vector4 _highlightColor = new (0.007f, 0.008f,
             0.007f, 0.212f);
 
+        private Vector4 _destinationHighlightColor = new Vector4(0.321f, 0.239f, 0.03f, 1f);
+
         private Vector4 _retainerListColor = ImGuiColors.HealerGreen;
 
         private string _highlightWhen = "Always";
         private bool _invertHighlighting = true;
+        private bool _invertDestinationHighlighting = false;
         private bool _invertTabHighlighting = false;
+        private bool _highlightDestination = false;
+        private bool _highlightDestinationEmpty = false;
 
         private bool _isVisible;
         private int _marketRefreshTimeHours = 24;
@@ -75,6 +80,15 @@ namespace InventoryTools
             set
             {
                 _highlightColor = value;
+                ConfigurationChanged?.Invoke();
+            }
+        }
+        public Vector4 DestinationHighlightColor
+        {
+            get => _destinationHighlightColor;
+            set
+            {
+                _destinationHighlightColor = value;
                 ConfigurationChanged?.Invoke();
             }
         }
@@ -215,6 +229,16 @@ namespace InventoryTools
             }
         }
 
+        public bool InvertDestinationHighlighting
+        {
+            get => _invertDestinationHighlighting;
+            set
+            {
+                _invertDestinationHighlighting = value;
+                ConfigurationChanged?.Invoke();
+            }
+        }
+
         public bool InvertTabHighlighting
         {
             get => _invertTabHighlighting;
@@ -231,6 +255,26 @@ namespace InventoryTools
             set
             {
                 _highlightWhen = value;
+                ConfigurationChanged?.Invoke();
+            }
+        }
+
+        public bool HighlightDestination
+        {
+            get => _highlightDestination;
+            set
+            {
+                _highlightDestination = value;
+                ConfigurationChanged?.Invoke();
+            }
+        }
+
+        public bool HighlightDestinationEmpty
+        {
+            get => _highlightDestinationEmpty;
+            set
+            {
+                _highlightDestinationEmpty = value;
                 ConfigurationChanged?.Invoke();
             }
         }

@@ -1,19 +1,15 @@
 using System.Numerics;
 using CriticalCommonLib.Services;
 using Dalamud.Interface.Colors;
-using Dalamud.Logging;
 using ImGuiNET;
 using InventoryTools.Logic;
 
 namespace InventoryTools.Sections
 {
-    public static class ImportExportSection
+    public class ImportExportPage : IConfigPage
     {
-        public static string ImportData = "";
-        public static bool ImportFailed = false;
-        public static string FailedReason = "";
-        
-        public static void Draw()
+        public string Name { get; } =  "Import/Export";
+        public void Draw()
         {
             ImGui.PushID("ImportSection");
             var pluginLogic = PluginService.PluginLogic;
@@ -112,7 +108,13 @@ namespace InventoryTools.Sections
                     ImGui.TextColored(ImGuiColors.DalamudRed, FailedReason);
                 }
             }
-            ImGui.PopID();
+            ImGui.PopID();                
         }
+
+        public string FailedReason { get; set; } = "";
+
+        public bool ImportFailed { get; set; } = false;
+
+        public string ImportData { get; set; } = "";
     }
 }

@@ -1,17 +1,16 @@
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
-using CriticalCommonLib.Services;
 using ImGuiNET;
 using InventoryTools.Logic;
 
 namespace InventoryTools.Sections
 {
-    public static class CharacterRetainerSection
+    public class CharacterRetainerPage : IConfigPage
     {
-        private static InventoryToolsConfiguration Configuration => ConfigurationManager.Config;
-
-        public static void Draw()
+        public string Name { get; } = "Characters/Retainers";
+        
+        public void Draw()
         {
             if (ImGui.CollapsingHeader("Characters", ImGuiTreeNodeFlags.DefaultOpen))
             {

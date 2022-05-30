@@ -108,7 +108,7 @@ namespace InventoryTools.Logic.Columns.Abstract
             ImGui.TableNextColumn();
             if (currentValue != null)
             {
-                ImGui.Text(currentValue.Value.ToString());
+                ImGui.Text($"{currentValue.Value:n0}");
             }
             else
             {

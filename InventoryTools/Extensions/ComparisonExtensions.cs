@@ -7,6 +7,7 @@ namespace InventoryTools.Extensions
     {
         public static bool PassesFilter(this string text, string filterString)
         {
+            filterString = filterString.Trim();
             if (filterString.Contains("||"))
             {
                 var ors = filterString.Split("||");
@@ -46,6 +47,7 @@ namespace InventoryTools.Extensions
         
         public static bool PassesFilter(this double number, string filterString)
         {
+            filterString = filterString.Trim();
             if (filterString.Contains("||"))
             {
                 var ors = filterString.Split("||");
@@ -119,6 +121,7 @@ namespace InventoryTools.Extensions
         
         public static bool PassesFilter(this float number, string filterString)
         {
+            filterString = filterString.Trim();
             if (filterString.Contains("||"))
             {
                 var ors = filterString.Split("||");
@@ -192,6 +195,7 @@ namespace InventoryTools.Extensions
         
         public static bool PassesFilter(this int number, string filterString)
         {
+            filterString = filterString.Trim();
             if (filterString.Contains("||"))
             {
                 var ors = filterString.Split("||");

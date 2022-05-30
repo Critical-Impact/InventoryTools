@@ -131,6 +131,13 @@ namespace InventoryTools
                 }
                 else if (Configuration.SelectedDebugPage == 2)
                 {
+                    if (ImGui.Button("Check sort ordering"))
+                    {
+                        PluginLog.Log($"item order module : {(ulong)ItemOrderModule.Instance()->PlayerInventory:X}", $"{(ulong)ItemOrderModule.Instance()->PlayerInventory:X}");
+                        PluginLog.Log(ItemOrderModule.Instance()->PlayerInventory->containerId.ToString());
+                        PluginLog.Log(ItemOrderModule.Instance()->PlayerInventory->SlotPerContainer.ToString());
+                        PluginLog.Log(ItemOrderModule.Instance()->PlayerInventory->Unk04.ToString());
+                    }
                     ImGui.Text("Inventory Information:");
                     if (ImGui.Button("Try multi request"))
                     {

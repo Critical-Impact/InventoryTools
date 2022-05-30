@@ -58,7 +58,7 @@ if (inventories != null)
     sampleFilter.HighlightWhen = "Always";
 
     var filterState = new FilterState() { FilterConfiguration = sampleFilter };
-    var filteredList = filterManager.GenerateFilteredList(sampleFilter, inventories);
+    var filteredList = filterManager.GenerateFilteredList(sampleFilter, inventories).Result;
     var bagHighlights = filterState.GetBagHighlights(InventoryType.RetainerBag0,filteredList);
 
     foreach (var a in filteredList.AllItems)

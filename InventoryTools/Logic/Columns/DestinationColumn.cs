@@ -1,5 +1,5 @@
-﻿using CriticalCommonLib.Extensions;
-using CriticalCommonLib.Models;
+﻿using CriticalCommonLib.Models;
+using CriticalCommonLib.Extensions;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Columns.Abstract;
 using Lumina.Excel.GeneratedSheets;
@@ -23,7 +23,7 @@ namespace InventoryTools.Logic.Columns
             var destination = item.DestinationRetainerId.HasValue
                 ? PluginService.CharacterMonitor.Characters[item.DestinationRetainerId.Value]?.FormattedName ?? ""
                 : "Unknown";
-            var destinationBag = item.DestinationBag.FormattedName();
+            var destinationBag = item.DestinationBag?.ToInventoryCategory().FormattedName() ?? "";
             return destination + " - " + destinationBag;
         }
 

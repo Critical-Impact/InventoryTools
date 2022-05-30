@@ -23,6 +23,7 @@ using InventoryTools.Images;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Columns;
 using InventoryTools.Logic.Filters;
+using InventoryTools.Logic.Settings.Abstract;
 using Lumina.Excel.GeneratedSheets;
 using XivCommon;
 using XivCommon.Functions.Tooltips;
@@ -34,6 +35,7 @@ namespace InventoryTools
         private List<FilterConfiguration> _filterConfigurations = new();
         private Dictionary<string, FilterTable> _filterTables = new();
         private List<IFilter>? _availableFilters = null;
+        private List<ISetting>? _availableSettings = null;
 
         private Dictionary<int, InventoryMonitor.ItemChangesItem> _recentlyAddedSeen = new();
 
@@ -248,6 +250,14 @@ namespace InventoryTools
                 PluginLog.Log("Migrating to version 6");
                 PluginConfiguration.TooltipDisplayAmountOwned = true;
                 PluginConfiguration.TooltipDisplayMarketAveragePrice = true;
+                PluginConfiguration.InternalVersion++;
+            }
+
+            if (PluginConfiguration.InternalVersion == 6)
+            {
+                PluginLog.Log("Migrating to version 7");
+                PluginConfiguration.HighlightDestination = true;
+                PluginConfiguration.DestinationHighlightColor = new Vector4(0.321f, 0.239f, 0.03f, 1f);
                 PluginConfiguration.InternalVersion++;
             }
         }
@@ -605,6 +615,40 @@ namespace InventoryTools
             return false;
         }
 
+        public bool EnableActiveUiFilterByKey(string filterKey)
+        {
+            PluginLog.Verbose("PluginLogic: Enabling active ui filter");
+            if (PluginConfiguration.ActiveUiFilter != filterKey)
+            {
+                if (_filterConfigurations.Any(c => c.Key == filterKey))
+                {
+                    PluginConfiguration.ActiveUiFilter = filterKey;
+                    ToggleHighlights();
+                    return true;
+                }
+            }
+            
+
+            return false;
+        }
+
+        public bool EnableActiveBackgroundFilterByKey(string filterKey)
+        {
+            PluginLog.Verbose("PluginLogic: Enabling active background filter");
+            if (PluginConfiguration.ActiveBackgroundFilter != filterKey)
+            {
+                if (_filterConfigurations.Any(c => c.Key == filterKey))
+                {
+                    PluginConfiguration.ActiveBackgroundFilter = filterKey;
+                    ToggleHighlights();
+                    return true;
+                }
+            }
+            
+
+            return false;
+        }
+
         public bool ToggleBackgroundFilter(FilterConfiguration configuration)
         {
             return ToggleBackgroundFilter(configuration.Key);
@@ -898,6 +942,34 @@ namespace InventoryTools
             }
         }
         
+        public List<ISetting> AvailableSettings
+        {
+            get
+            {
+                if (_availableSettings == null)
+                {
+                    _availableSettings = new List<ISetting>();
+                    var filterType = typeof(ISetting);
+                    var types = AppDomain.CurrentDomain.GetAssemblies()
+                        .Where(c => c.FullName != null && c.FullName.Contains("InventoryTools"))
+                        .SelectMany(s => s.GetTypes())
+                        .Where(p => filterType.IsAssignableFrom(p));
+                    foreach (var type in types)
+                    {
+                        if (type.IsClass && !type.IsAbstract)
+                        {
+                            ISetting? instance = (ISetting?)Activator.CreateInstance(type);
+                            if (instance != null)
+                            {
+                                _availableSettings.Add(instance);
+                            }
+                        }
+                    }
+                }
+
+                return _availableSettings;
+            }
+        }
         
         public List<IFilter> AvailableFilters
         {

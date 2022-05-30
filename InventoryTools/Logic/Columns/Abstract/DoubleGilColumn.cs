@@ -11,7 +11,7 @@ namespace InventoryTools.Logic.Columns.Abstract
             if (currentValue != null)
             {
                 
-                ImGui.Text(currentValue.Value.Item1 + SeIconChar.Gil.ToIconString() + Divider + currentValue.Value.Item2 + SeIconChar.Gil.ToIconString());
+                ImGui.Text($"{currentValue.Value.Item1:n0}" + SeIconChar.Gil.ToIconString() + Divider + $"{currentValue.Value.Item2:n0}" + SeIconChar.Gil.ToIconString());
             }
             else
             {

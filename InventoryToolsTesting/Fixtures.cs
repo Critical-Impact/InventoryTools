@@ -51,6 +51,17 @@ namespace TestProject1
                 bags.Add(InventoryType.RetainerBag5, 25);
                 bags.Add(InventoryType.RetainerBag6, 25);
             }
+            if (type == InventoryCategory.CharacterSaddleBags)
+            {
+                bags.Add(InventoryType.SaddleBag0, 75);
+                bags.Add(InventoryType.SaddleBag1, 75);
+            }
+
+            if (type == InventoryCategory.CharacterPremiumSaddleBags)
+            {
+                bags.Add(InventoryType.PremiumSaddleBag0, 75);
+                bags.Add(InventoryType.PremiumSaddleBag1, 75);
+            }
 
             var finalItems = new List<InventoryItem>();
             foreach (var bag in bags)

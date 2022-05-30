@@ -215,7 +215,7 @@ namespace InventoryTools.Logic
         public void Draw()
         {
             var highlightItems = HighlightItems;
-            ImGui.BeginChild("TopBar", new Vector2(0, 20)* ImGui.GetIO().FontGlobalScale);
+            ImGui.BeginChild("TopBar", new Vector2(0, 25)* ImGui.GetIO().FontGlobalScale);
             ImGui.Checkbox( "Highlight?"+ "###" + Key + "VisibilityCheckbox", ref highlightItems);
             if (highlightItems != HighlightItems)
             {
@@ -231,7 +231,7 @@ namespace InventoryTools.Logic
                 return;
             }
             ImGui.EndChild();
-            ImGui.BeginChild("Content", new Vector2(0, -25)* ImGui.GetIO().FontGlobalScale); 
+            ImGui.BeginChild("Content", new Vector2(0, -30)* ImGui.GetIO().FontGlobalScale); 
             if (ImGui.BeginTable(Key, Columns.Count, _tableFlags))
             {
                 var refresh = false;

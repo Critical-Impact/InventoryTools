@@ -14,26 +14,33 @@ namespace InventoryTools.Logic
 
         public InventoryType SourceBag => _sourceBag;
 
-        public InventoryCategory? DestinationBag => _destinationBag;
+        public InventoryType? DestinationBag => _destinationBag;
 
         public InventoryItem InventoryItem => _inventoryItem;
+        
+        public Vector2? DestinationSlot => _destinationSlot;
+        public bool? IsEmptyDestinationSlot => _isEmptyDestinationSlot;
 
         public int Quantity => _quantity;
 
         private ulong? _destinationRetainerId;
         private InventoryType _sourceBag;
-        private InventoryCategory? _destinationBag;
+        private InventoryType? _destinationBag;
         private InventoryItem _inventoryItem;
+        private Vector2? _destinationSlot;
+        private bool? _isEmptyDestinationSlot;
         private int _quantity;
 
-        public SortingResult(ulong sourceRetainerId, ulong destinationRetainerId, InventoryType sourceBag, InventoryCategory destinationBag, InventoryItem inventoryItem, int quantity)
+        public SortingResult(ulong sourceRetainerId, ulong destinationRetainerId, InventoryType sourceBag, InventoryType destinationBag, Vector2 destinationSlot, bool isEmptyDestinationSlot, InventoryItem inventoryItem, int quantity)
         {
             _sourceRetainerId = sourceRetainerId;
             _destinationRetainerId = destinationRetainerId;
             _sourceBag = sourceBag;
+            _destinationSlot = destinationSlot;
             _destinationBag = destinationBag;
             _inventoryItem = inventoryItem;
             _quantity = quantity;
+            _isEmptyDestinationSlot = isEmptyDestinationSlot;
         }
 
         public SortingResult(ulong sourceRetainerId, InventoryType sourceBag, InventoryItem inventoryItem, int quantity)
@@ -44,6 +51,8 @@ namespace InventoryTools.Logic
             _quantity = quantity;
             _destinationBag = null;
             _destinationRetainerId = null;
+            _destinationSlot = null;
+            _isEmptyDestinationSlot = null;
         }
         
         public Vector2 BagLocation => InventoryItem.BagLocation(_sourceBag);

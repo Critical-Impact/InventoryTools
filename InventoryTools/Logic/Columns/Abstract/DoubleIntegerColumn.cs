@@ -159,7 +159,7 @@ namespace InventoryTools.Logic.Columns.Abstract
             ImGui.TableNextColumn();
             if (currentValue != null)
             {
-                ImGui.Text(currentValue.Value.Item1 + Divider + currentValue.Value.Item2);
+                ImGui.Text($"{currentValue.Value.Item1:n0}" + Divider + $"{currentValue.Value.Item2:n0}");
             }
             else
             {

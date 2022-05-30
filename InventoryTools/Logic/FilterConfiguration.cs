@@ -68,8 +68,12 @@ namespace InventoryTools.Logic
         private Vector4? _highlightColor;
         private Vector4? _tabHighlightColor;
         private Vector4? _retainerListColor;
+        private Vector4? _destinationHighlightColor;
         private bool? _invertHighlighting = null;
+        private bool? _invertDestinationHighlighting = null;
         private bool? _invertTabHighlighting = null;
+        private bool? _highlightDestination = null;
+        private bool? _highlightDestinationEmpty = null;
         private string? _highlightWhen = null;
         private List<string>? _columns;
         private string? _icon;
@@ -146,14 +150,29 @@ namespace InventoryTools.Logic
             {
                 if (_filterResult == null || NeedsRefresh)
                 {
-                    _filterResult = PluginService.FilterManager.GenerateFilteredList(this,
-                        PluginService.InventoryMonitor.Inventories);
-                    NeedsRefresh = false;
-                    ListUpdated?.Invoke(this);
+                    StartRefresh();
                 }
                 return _filterResult;
             }
             set => _filterResult = value;
+        }
+        
+        [JsonIgnore]
+        private bool _refreshing;
+
+        public async void StartRefresh()
+        {
+            if (_refreshing)
+            {
+                return;
+            }
+            _refreshing = true;
+            
+            _filterResult = await PluginService.FilterManager.GenerateFilteredList(this,
+                PluginService.InventoryMonitor.Inventories);
+            NeedsRefresh = false;
+            ListUpdated?.Invoke(this);
+            _refreshing = false;
         }
         
         public FilterConfiguration(string name, string key, FilterType filterType)
@@ -203,8 +222,8 @@ namespace InventoryTools.Logic
                 Columns.Add("ItemILevelColumn");
                 Columns.Add("ItemLevelColumn");
                 Columns.Add("RarityColumn");
-                Columns.Add("CraftableColumn");
-                Columns.Add("IsCrafingItemColumn");
+                Columns.Add("CraftColumn");
+                Columns.Add("IsCraftingItemColumn");
                 Columns.Add("CanBeGatheredColumn");
                 Columns.Add("CanBePurchasedColumn");
                 Columns.Add("AcquiredColumn");
@@ -572,6 +591,16 @@ namespace InventoryTools.Logic
             }
         }
         
+        public Vector4? DestinationHighlightColor
+        {
+            get => _destinationHighlightColor;
+            set
+            {
+                _destinationHighlightColor = value;
+                ConfigurationChanged?.Invoke(this);
+            }
+        }
+        
         public Vector4? RetainerListColor
         {
             get => _retainerListColor;
@@ -602,12 +631,42 @@ namespace InventoryTools.Logic
             }
         }
 
+        public bool? InvertDestinationHighlighting
+        {
+            get => _invertDestinationHighlighting;
+            set
+            {
+                _invertDestinationHighlighting = value;
+                ConfigurationChanged?.Invoke(this);
+            }
+        }
+
         public bool? InvertTabHighlighting
         {
             get => _invertTabHighlighting;
             set
             {
                 _invertTabHighlighting = value;
+                ConfigurationChanged?.Invoke(this);
+            }
+        }
+
+        public bool? HighlightDestination
+        {
+            get => _highlightDestination;
+            set
+            {
+                _highlightDestination = value;
+                ConfigurationChanged?.Invoke(this);
+            }
+        }
+
+        public bool? HighlightDestinationEmpty
+        {
+            get => _highlightDestinationEmpty;
+            set
+            {
+                _highlightDestinationEmpty = value;
                 ConfigurationChanged?.Invoke(this);
             }
         }

@@ -22,7 +22,7 @@ namespace InventoryTools
         public static PluginCommandManager<PluginCommands> CommandManager { get; private set; } = null!;
         public static FilterManager FilterManager { get; private set; } = null!;
         public static WotsitIpc WotsitIpc { get; private set; } = null!;
-        public static FileDialogManager FileDialogManager { get; private set; } = null;
+        public static FileDialogManager FileDialogManager { get; private set; } = null!;
 
         public static void Initialise()
         {
