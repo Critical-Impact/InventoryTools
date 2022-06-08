@@ -13,6 +13,8 @@ namespace InventoryTools.Logic.Filters
         public string HelpText { get; set; }
         
         public FilterCategory FilterCategory { get; set; }
+        
+        public int Order { get; set; }
 
         public bool HasValueSet(FilterConfiguration configuration);
         

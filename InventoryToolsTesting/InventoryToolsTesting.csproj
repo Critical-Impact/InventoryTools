@@ -2,18 +2,13 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
+        <LangVersion>9.0</LangVersion>
         <TargetFramework>net5.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\InventoryTools\InventoryTools.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Update="inventories.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
     </ItemGroup>
 
     <PropertyGroup>

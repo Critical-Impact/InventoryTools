@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using CriticalCommonLib.Extensions;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using CsvHelper;
@@ -1171,6 +1172,253 @@ namespace InventoryTools.Logic
                 }
             }
             return true;
+        }
+
+        [JsonIgnore]
+        public Dictionary<ulong, InventoryCategory> DestinationRetainerCategories
+        {
+            get
+            {
+                var categoryValues = Enum.GetValues<InventoryCategory>();
+                
+                Dictionary<ulong, InventoryCategory> categories = new();
+                var allRetainers = PluginService.CharacterMonitor.GetRetainerCharacters().Where(c =>
+                {
+                    var destinationIncludeCrossCharacter = DestinationIncludeCrossCharacter ?? ConfigurationManager.Config.DisplayCrossCharacter;
+                    return PluginService.CharacterMonitor.BelongsToActiveCharacter(c.Key) || destinationIncludeCrossCharacter;
+                }).ToDictionary(c => c.Key, c => c.Value);
+                if (DestinationAllRetainers == true)
+                {
+                    foreach (var retainer in allRetainers)
+                    {
+                        foreach (var categoryValue in categoryValues)
+                        {
+                            if (categoryValue.IsRetainerCategory())
+                            {
+                                if (!categories.ContainsKey(retainer.Key))
+                                {
+                                    categories.Add(retainer.Key, categoryValue);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (DestinationCategories != null)
+                {
+                    foreach (var categoryValue in DestinationCategories)
+                    {
+                        foreach (var retainer in allRetainers)
+                        {
+                            if (categoryValue.IsRetainerCategory())
+                            {
+                                if (!categories.ContainsKey(retainer.Key))
+                                {
+                                    categories.Add(retainer.Key, categoryValue);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                foreach (var category in DestinationInventories)
+                {
+                    if (category.Item2.IsRetainerCategory())
+                    {
+                        if (!categories.ContainsKey(category.Item1))
+                        {
+                            categories.Add(category.Item1, category.Item2);
+                        }
+                    }
+                }
+
+                return categories;
+            }
+        }
+
+        [JsonIgnore]
+        public Dictionary<ulong, InventoryCategory> DestinationCharacterCategories
+        {
+            get
+            {
+                var categoryValues = Enum.GetValues<InventoryCategory>();
+                
+                Dictionary<ulong, InventoryCategory> categories = new();
+                var allCharacters = PluginService.CharacterMonitor.GetPlayerCharacters().Where(c =>
+                {
+                    var destinationIncludeCrossCharacter = DestinationIncludeCrossCharacter ?? ConfigurationManager.Config.DisplayCrossCharacter;
+                    return PluginService.CharacterMonitor.BelongsToActiveCharacter(c.Key) || destinationIncludeCrossCharacter;
+                }).ToDictionary(c => c.Key, c => c.Value);
+                if (DestinationAllCharacters == true)
+                {
+                    foreach (var character in allCharacters)
+                    {
+                        foreach (var categoryValue in categoryValues)
+                        {
+                            if (categoryValue.IsCharacterCategory())
+                            {
+                                if (!categories.ContainsKey(character.Key))
+                                {
+                                    categories.Add(character.Key, categoryValue);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (DestinationCategories != null)
+                {
+                    foreach (var categoryValue in DestinationCategories)
+                    {
+                        foreach (var character in allCharacters)
+                        {
+                            if (categoryValue.IsCharacterCategory())
+                            {
+                                if (!categories.ContainsKey(character.Key))
+                                {
+                                    categories.Add(character.Key, categoryValue);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                foreach (var category in DestinationInventories)
+                {
+                    if (category.Item2.IsCharacterCategory())
+                    {
+                        if (!categories.ContainsKey(category.Item1))
+                        {
+                            categories.Add(category.Item1, category.Item2);
+                        }
+                    }
+                }
+
+                return categories;
+            }
+        }
+        [JsonIgnore]
+        public Dictionary<ulong, InventoryCategory> SourceRetainerCategories
+        {
+            get
+            {
+                var categoryValues = Enum.GetValues<InventoryCategory>();
+                
+                Dictionary<ulong, InventoryCategory> categories = new();
+                var allRetainers = PluginService.CharacterMonitor.GetRetainerCharacters().Where(c =>
+                {
+                    var sourceIncludeCrossCharacter = SourceIncludeCrossCharacter ?? ConfigurationManager.Config.DisplayCrossCharacter;
+                    return PluginService.CharacterMonitor.BelongsToActiveCharacter(c.Key) || sourceIncludeCrossCharacter;
+                }).ToDictionary(c => c.Key, c => c.Value);
+                if (SourceAllRetainers == true)
+                {
+                    foreach (var retainer in allRetainers)
+                    {
+                        foreach (var categoryValue in categoryValues)
+                        {
+                            if (categoryValue.IsRetainerCategory())
+                            {
+                                if (!categories.ContainsKey(retainer.Key))
+                                {
+                                    categories.Add(retainer.Key, categoryValue);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (SourceCategories != null)
+                {
+                    foreach (var categoryValue in SourceCategories)
+                    {
+                        foreach (var retainer in allRetainers)
+                        {
+                            if (categoryValue.IsRetainerCategory())
+                            {
+                                if (!categories.ContainsKey(retainer.Key))
+                                {
+                                    categories.Add(retainer.Key, categoryValue);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                foreach (var category in SourceInventories)
+                {
+                    if (category.Item2.IsRetainerCategory())
+                    {
+                        if (!categories.ContainsKey(category.Item1))
+                        {
+                            categories.Add(category.Item1, category.Item2);
+                        }
+                    }
+                }
+
+                return categories;
+            }
+        }
+
+        [JsonIgnore]
+        public Dictionary<ulong, InventoryCategory> SourceCharacterCategories
+        {
+            get
+            {
+                var categoryValues = Enum.GetValues<InventoryCategory>();
+                
+                Dictionary<ulong, InventoryCategory> categories = new();
+                var allCharacters = PluginService.CharacterMonitor.GetPlayerCharacters().Where(c =>
+                {
+                    var sourceIncludeCrossCharacter = SourceIncludeCrossCharacter ?? ConfigurationManager.Config.DisplayCrossCharacter;
+                    return PluginService.CharacterMonitor.BelongsToActiveCharacter(c.Key) || sourceIncludeCrossCharacter;
+                }).ToDictionary(c => c.Key, c => c.Value);
+                if (SourceAllCharacters == true)
+                {
+                    foreach (var character in allCharacters)
+                    {
+                        foreach (var categoryValue in categoryValues)
+                        {
+                            if (categoryValue.IsCharacterCategory())
+                            {
+                                if (!categories.ContainsKey(character.Key))
+                                {
+                                    categories.Add(character.Key, categoryValue);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (SourceCategories != null)
+                {
+                    foreach (var categoryValue in SourceCategories)
+                    {
+                        foreach (var character in allCharacters)
+                        {
+                            if (categoryValue.IsCharacterCategory())
+                            {
+                                if (!categories.ContainsKey(character.Key))
+                                {
+                                    categories.Add(character.Key, categoryValue);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                foreach (var category in SourceInventories)
+                {
+                    if (category.Item2.IsCharacterCategory())
+                    {
+                        if (!categories.ContainsKey(category.Item1))
+                        {
+                            categories.Add(category.Item1, category.Item2);
+                        }
+                    }
+                }
+
+                return categories;
+            }
         }
     }
     public enum HighlightMode

@@ -17,7 +17,7 @@ var characterMonitor = new CharacterMonitor(true);
 var pluginLogic = new PluginLogic(true);
 PluginService.InitialiseTesting(characterMonitor, pluginLogic);
 ConfigurationManager.Config = new InventoryToolsConfiguration();
-var inventories = ConfigurationManager.LoadSavedInventories("inventories.json");
+var inventories = ConfigurationManager.LoadSavedInventories("inventories2.json");
 ulong currentRetainer = 0;
 if (inventories != null)
 {

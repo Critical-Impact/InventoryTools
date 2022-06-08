@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Threading.Tasks;
 using CriticalCommonLib;
 using CriticalCommonLib.Enums;
+using CriticalCommonLib.Extensions;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
@@ -806,7 +807,20 @@ namespace InventoryTools
 
         private void OnItemTooltip(ItemTooltip tooltip, ulong itemId)
         {
-            if (!tooltip.Fields.HasFlag(ItemTooltipFields.Description))
+            ItemTooltipString itemTooltipString;
+            if (tooltip.Fields.HasFlag(ItemTooltipFields.Description))
+            {
+                itemTooltipString = ItemTooltipString.Description;
+            }
+            else if (tooltip.Fields.HasFlag(ItemTooltipFields.Levels))
+            {
+                itemTooltipString = ItemTooltipString.EquipLevel;
+            }
+            else if (tooltip.Fields.HasFlag(ItemTooltipFields.Effects))
+            {
+                itemTooltipString = ItemTooltipString.Effects;
+            }
+            else
             {
                 return;
             }
@@ -827,7 +841,7 @@ namespace InventoryTools
                 return;
             }
 
-            var description = tooltip[ItemTooltipString.Description];
+            var description = tooltip[itemTooltipString];
             const string indentation = "      ";
 
             if (PluginConfiguration.DisplayTooltip)
@@ -904,7 +918,7 @@ namespace InventoryTools
             }
 
             
-            tooltip[ItemTooltipString.Description] = description;
+            tooltip[itemTooltipString] = description;
         }
 
         private Dictionary<string,string>? _gridColumns;
@@ -1007,7 +1021,7 @@ namespace InventoryTools
             {
                 if (_groupedFilters == null)
                 {
-                    _groupedFilters = AvailableFilters.GroupBy(c => c.FilterCategory).OrderBy(c => IFilter.FilterCategoryOrder.IndexOf(c.Key)).ToDictionary(c => c.Key, c => c.ToList());
+                    _groupedFilters = AvailableFilters.OrderBy(c => c.Order).ThenBy(c => c.Name).GroupBy(c => c.FilterCategory).OrderBy(c => IFilter.FilterCategoryOrder.IndexOf(c.Key)).ToDictionary(c => c.Key, c => c.ToList());
                 }
 
                 return _groupedFilters;
