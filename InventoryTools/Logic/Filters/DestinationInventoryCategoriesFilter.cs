@@ -53,6 +53,8 @@ namespace InventoryTools.Logic.Filters
             dict.Add(InventoryCategory.CharacterArmoryChest, InventoryCategory.CharacterArmoryChest.FormattedName());
             dict.Add(InventoryCategory.GlamourChest, InventoryCategory.GlamourChest.FormattedName());
             dict.Add(InventoryCategory.Armoire, InventoryCategory.Armoire.FormattedName());
+            dict.Add(InventoryCategory.Currency, InventoryCategory.Currency.FormattedName());
+            dict.Add(InventoryCategory.Crystals, InventoryCategory.Crystals.FormattedName());
 
             return dict;
         }

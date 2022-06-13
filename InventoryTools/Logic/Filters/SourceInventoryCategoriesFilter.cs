@@ -43,8 +43,10 @@ namespace InventoryTools.Logic.Filters
         {
            
             var dict = new Dictionary<InventoryCategory, string>();
-            dict.Add(InventoryCategory.RetainerBags, "Retainer " + InventoryCategory.RetainerBags.FormattedName());
-            dict.Add(InventoryCategory.RetainerMarket, "Retainer " + InventoryCategory.RetainerMarket.FormattedName());
+            dict.Add(InventoryCategory.RetainerBags, "Retainer " +InventoryCategory.RetainerBags.FormattedName());
+            dict.Add(InventoryCategory.RetainerMarket, "Retainer " +InventoryCategory.RetainerMarket.FormattedName());
+            dict.Add(InventoryCategory.CharacterEquipped, InventoryCategory.CharacterEquipped.FormattedName());
+            dict.Add(InventoryCategory.RetainerEquipped, "Retainer " +InventoryCategory.RetainerEquipped.FormattedName());
             dict.Add(InventoryCategory.CharacterBags, InventoryCategory.CharacterBags.FormattedName());
             dict.Add(InventoryCategory.CharacterSaddleBags, InventoryCategory.CharacterSaddleBags.FormattedName());
             dict.Add(InventoryCategory.CharacterPremiumSaddleBags, InventoryCategory.CharacterPremiumSaddleBags.FormattedName());
@@ -52,6 +54,8 @@ namespace InventoryTools.Logic.Filters
             dict.Add(InventoryCategory.CharacterArmoryChest, InventoryCategory.CharacterArmoryChest.FormattedName());
             dict.Add(InventoryCategory.GlamourChest, InventoryCategory.GlamourChest.FormattedName());
             dict.Add(InventoryCategory.Armoire, InventoryCategory.Armoire.FormattedName());
+            dict.Add(InventoryCategory.Currency, InventoryCategory.Currency.FormattedName());
+            dict.Add(InventoryCategory.Crystals, InventoryCategory.Crystals.FormattedName());
             return dict;
         }
 

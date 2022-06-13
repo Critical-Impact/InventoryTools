@@ -48,13 +48,17 @@ namespace InventoryTools.Logic.Filters
             UiHelpers.HelpMarker(HelpText);
             var allCharacters = PluginService.CharacterMonitor.Characters;
             List<string> sources = new();
-            foreach (var retainerCategory in configuration.SourceRetainerCategories)
+            foreach (var retainerCategories in configuration.SourceRetainerCategories)
             {
-                if (allCharacters.ContainsKey(retainerCategory.Key))
+                foreach (var retainerCategory in retainerCategories.Value)
                 {
-                    var formattedName = allCharacters[retainerCategory.Key].FormattedName + " - " +
-                                        retainerCategory.Value.FormattedName();
-                    sources.Add(formattedName);
+                    if (allCharacters.ContainsKey(retainerCategories.Key) &&
+                        retainerCategories.Key.ToString().StartsWith("3"))
+                    {
+                        var formattedName = allCharacters[retainerCategories.Key].FormattedName + " - " +
+                                            retainerCategory.FormattedName();
+                        sources.Add(formattedName);
+                    }
                 }
             }
             ImGui.SetNextItemWidth(LabelSize);
@@ -70,13 +74,17 @@ namespace InventoryTools.Logic.Filters
             ImGui.SameLine();
             ImGui.Text(String.Join(", ", sources));
             sources = new();
-            foreach (var characterCategory in configuration.SourceCharacterCategories)
+            foreach (var characterCategories in configuration.SourceCharacterCategories)
             {
-                if (allCharacters.ContainsKey(characterCategory.Key))
+                foreach (var characterCategory in characterCategories.Value)
                 {
-                    var formattedName = allCharacters[characterCategory.Key].FormattedName + " - " +
-                                        characterCategory.Value.FormattedName();
-                    sources.Add(formattedName);
+                    if (allCharacters.ContainsKey(characterCategories.Key) &&
+                        characterCategories.Key.ToString().StartsWith("1"))
+                    {
+                        var formattedName = allCharacters[characterCategories.Key].FormattedName + " - " +
+                                            characterCategory.FormattedName();
+                        sources.Add(formattedName);
+                    }
                 }
             }
             ImGui.SetNextItemWidth(LabelSize);

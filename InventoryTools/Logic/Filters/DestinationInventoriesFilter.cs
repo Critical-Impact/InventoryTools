@@ -44,6 +44,9 @@ namespace InventoryTools.Logic.Filters
                 {
                     dict.Add((character.Key, InventoryCategory.RetainerBags), character.Value.FormattedName + " - " + InventoryCategory.RetainerBags.FormattedName());
                     dict.Add((character.Key, InventoryCategory.RetainerMarket), character.Value.FormattedName + " - " + InventoryCategory.RetainerMarket.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.RetainerEquipped), character.Value.FormattedName + " - " + InventoryCategory.RetainerEquipped.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.Currency), character.Value.FormattedName + " - " + InventoryCategory.Currency.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.Crystals), character.Value.FormattedName + " - " + InventoryCategory.Crystals.FormattedName());
                 }
                 else
                 {
@@ -54,6 +57,9 @@ namespace InventoryTools.Logic.Filters
                     dict.Add((character.Key, InventoryCategory.CharacterArmoryChest), character.Value.FormattedName + " - " + InventoryCategory.CharacterArmoryChest.FormattedName());
                     dict.Add((character.Key, InventoryCategory.GlamourChest), character.Value.FormattedName + " - " + InventoryCategory.GlamourChest.FormattedName());
                     dict.Add((character.Key, InventoryCategory.Armoire), character.Value.FormattedName + " - " + InventoryCategory.Armoire.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.Crystals), character.Value.FormattedName + " - " + InventoryCategory.Crystals.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.Currency), character.Value.FormattedName + " - " + InventoryCategory.Currency.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.CharacterEquipped), character.Value.FormattedName + " - " + InventoryCategory.CharacterEquipped.FormattedName());
                    
                 }
             }

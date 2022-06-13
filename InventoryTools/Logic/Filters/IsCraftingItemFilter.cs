@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Misc;
 using Lumina.Excel.GeneratedSheets;
@@ -23,19 +24,20 @@ namespace InventoryTools.Logic.Filters
             return currentValue switch
             {
                 null => true,
-                true => item.Item != null && Helpers.CraftingMaterialIds.Contains(item.Item.ItemUICategory.Row),
-                _ => item.Item != null && !Helpers.CraftingMaterialIds.Contains(item.Item.ItemUICategory.Row)
+                true => item.Item != null && ExcelCache.IsCraftItem(item.Item.RowId),
+                _ => item.Item != null && !ExcelCache.IsCraftItem(item.Item.RowId)
             };
         }
 
         public override bool FilterItem(FilterConfiguration configuration, Item item)
         {
             var currentValue = this.CurrentValue(configuration);
+            
             return currentValue switch
             {
                 null => true,
-                true => Helpers.CraftingMaterialIds.Contains(item.ItemUICategory.Row),
-                _ => !Helpers.CraftingMaterialIds.Contains(item.ItemUICategory.Row)
+                true => ExcelCache.IsCraftItem(item.RowId),
+                _ => !ExcelCache.IsCraftItem(item.RowId)
             };
         }
     }

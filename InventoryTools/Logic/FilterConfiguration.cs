@@ -1175,13 +1175,13 @@ namespace InventoryTools.Logic
         }
 
         [JsonIgnore]
-        public Dictionary<ulong, InventoryCategory> DestinationRetainerCategories
+        public Dictionary<ulong, HashSet<InventoryCategory>> DestinationRetainerCategories
         {
             get
             {
                 var categoryValues = Enum.GetValues<InventoryCategory>();
                 
-                Dictionary<ulong, InventoryCategory> categories = new();
+                Dictionary<ulong, HashSet<InventoryCategory>> categories = new();
                 var allRetainers = PluginService.CharacterMonitor.GetRetainerCharacters().Where(c =>
                 {
                     var destinationIncludeCrossCharacter = DestinationIncludeCrossCharacter ?? ConfigurationManager.Config.DisplayCrossCharacter;
@@ -1197,7 +1197,12 @@ namespace InventoryTools.Logic
                             {
                                 if (!categories.ContainsKey(retainer.Key))
                                 {
-                                    categories.Add(retainer.Key, categoryValue);
+                                    categories.Add(retainer.Key, new HashSet<InventoryCategory>());
+                                }
+
+                                if (!categories[retainer.Key].Contains(categoryValue))
+                                {
+                                    categories[retainer.Key].Add(categoryValue);
                                 }
                             }
                         }
@@ -1214,7 +1219,11 @@ namespace InventoryTools.Logic
                             {
                                 if (!categories.ContainsKey(retainer.Key))
                                 {
-                                    categories.Add(retainer.Key, categoryValue);
+                                    categories.Add(retainer.Key, new HashSet<InventoryCategory>());
+                                }
+                                if (!categories[retainer.Key].Contains(categoryValue))
+                                {
+                                    categories[retainer.Key].Add(categoryValue);
                                 }
                             }
                         }
@@ -1227,7 +1236,12 @@ namespace InventoryTools.Logic
                     {
                         if (!categories.ContainsKey(category.Item1))
                         {
-                            categories.Add(category.Item1, category.Item2);
+                            categories.Add(category.Item1, new HashSet<InventoryCategory>());
+                        }
+                        
+                        if (!categories[category.Item1].Contains( category.Item2))
+                        {
+                            categories[category.Item1].Add( category.Item2);
                         }
                     }
                 }
@@ -1237,13 +1251,13 @@ namespace InventoryTools.Logic
         }
 
         [JsonIgnore]
-        public Dictionary<ulong, InventoryCategory> DestinationCharacterCategories
+        public Dictionary<ulong, HashSet<InventoryCategory>> DestinationCharacterCategories
         {
             get
             {
                 var categoryValues = Enum.GetValues<InventoryCategory>();
                 
-                Dictionary<ulong, InventoryCategory> categories = new();
+                Dictionary<ulong, HashSet<InventoryCategory>> categories = new();
                 var allCharacters = PluginService.CharacterMonitor.GetPlayerCharacters().Where(c =>
                 {
                     var destinationIncludeCrossCharacter = DestinationIncludeCrossCharacter ?? ConfigurationManager.Config.DisplayCrossCharacter;
@@ -1259,7 +1273,11 @@ namespace InventoryTools.Logic
                             {
                                 if (!categories.ContainsKey(character.Key))
                                 {
-                                    categories.Add(character.Key, categoryValue);
+                                    categories.Add(character.Key, new HashSet<InventoryCategory>());
+                                }
+                                if (!categories[character.Key].Contains(categoryValue))
+                                {
+                                    categories[character.Key].Add(categoryValue);
                                 }
                             }
                         }
@@ -1276,7 +1294,11 @@ namespace InventoryTools.Logic
                             {
                                 if (!categories.ContainsKey(character.Key))
                                 {
-                                    categories.Add(character.Key, categoryValue);
+                                    categories.Add(character.Key, new HashSet<InventoryCategory>());
+                                }
+                                if (!categories[character.Key].Contains(categoryValue))
+                                {
+                                    categories[character.Key].Add(categoryValue);
                                 }
                             }
                         }
@@ -1289,7 +1311,11 @@ namespace InventoryTools.Logic
                     {
                         if (!categories.ContainsKey(category.Item1))
                         {
-                            categories.Add(category.Item1, category.Item2);
+                            categories.Add(category.Item1, new HashSet<InventoryCategory>());
+                        }
+                        if (!categories[category.Item1].Contains( category.Item2))
+                        {
+                            categories[category.Item1].Add( category.Item2);
                         }
                     }
                 }
@@ -1298,13 +1324,13 @@ namespace InventoryTools.Logic
             }
         }
         [JsonIgnore]
-        public Dictionary<ulong, InventoryCategory> SourceRetainerCategories
+        public Dictionary<ulong, HashSet<InventoryCategory>> SourceRetainerCategories
         {
             get
             {
                 var categoryValues = Enum.GetValues<InventoryCategory>();
                 
-                Dictionary<ulong, InventoryCategory> categories = new();
+                Dictionary<ulong, HashSet<InventoryCategory>> categories = new();
                 var allRetainers = PluginService.CharacterMonitor.GetRetainerCharacters().Where(c =>
                 {
                     var sourceIncludeCrossCharacter = SourceIncludeCrossCharacter ?? ConfigurationManager.Config.DisplayCrossCharacter;
@@ -1320,7 +1346,11 @@ namespace InventoryTools.Logic
                             {
                                 if (!categories.ContainsKey(retainer.Key))
                                 {
-                                    categories.Add(retainer.Key, categoryValue);
+                                    categories.Add(retainer.Key, new HashSet<InventoryCategory>());
+                                }
+                                if (!categories[retainer.Key].Contains(categoryValue))
+                                {
+                                    categories[retainer.Key].Add(categoryValue);
                                 }
                             }
                         }
@@ -1337,7 +1367,11 @@ namespace InventoryTools.Logic
                             {
                                 if (!categories.ContainsKey(retainer.Key))
                                 {
-                                    categories.Add(retainer.Key, categoryValue);
+                                    categories.Add(retainer.Key, new HashSet<InventoryCategory>());
+                                }
+                                if (!categories[retainer.Key].Contains(categoryValue))
+                                {
+                                    categories[retainer.Key].Add(categoryValue);
                                 }
                             }
                         }
@@ -1350,7 +1384,11 @@ namespace InventoryTools.Logic
                     {
                         if (!categories.ContainsKey(category.Item1))
                         {
-                            categories.Add(category.Item1, category.Item2);
+                            categories.Add(category.Item1, new HashSet<InventoryCategory>());
+                        }
+                        if (!categories[category.Item1].Contains( category.Item2))
+                        {
+                            categories[category.Item1].Add( category.Item2);
                         }
                     }
                 }
@@ -1360,13 +1398,13 @@ namespace InventoryTools.Logic
         }
 
         [JsonIgnore]
-        public Dictionary<ulong, InventoryCategory> SourceCharacterCategories
+        public Dictionary<ulong, HashSet<InventoryCategory>> SourceCharacterCategories
         {
             get
             {
                 var categoryValues = Enum.GetValues<InventoryCategory>();
                 
-                Dictionary<ulong, InventoryCategory> categories = new();
+                Dictionary<ulong, HashSet<InventoryCategory>> categories = new();
                 var allCharacters = PluginService.CharacterMonitor.GetPlayerCharacters().Where(c =>
                 {
                     var sourceIncludeCrossCharacter = SourceIncludeCrossCharacter ?? ConfigurationManager.Config.DisplayCrossCharacter;
@@ -1382,7 +1420,11 @@ namespace InventoryTools.Logic
                             {
                                 if (!categories.ContainsKey(character.Key))
                                 {
-                                    categories.Add(character.Key, categoryValue);
+                                    categories.Add(character.Key, new HashSet<InventoryCategory>());
+                                }
+                                if (!categories[character.Key].Contains(categoryValue))
+                                {
+                                    categories[character.Key].Add(categoryValue);
                                 }
                             }
                         }
@@ -1399,7 +1441,11 @@ namespace InventoryTools.Logic
                             {
                                 if (!categories.ContainsKey(character.Key))
                                 {
-                                    categories.Add(character.Key, categoryValue);
+                                    categories.Add(character.Key, new HashSet<InventoryCategory>());
+                                }
+                                if (!categories[character.Key].Contains(categoryValue))
+                                {
+                                    categories[character.Key].Add(categoryValue);
                                 }
                             }
                         }
@@ -1412,7 +1458,11 @@ namespace InventoryTools.Logic
                     {
                         if (!categories.ContainsKey(category.Item1))
                         {
-                            categories.Add(category.Item1, category.Item2);
+                            categories.Add(category.Item1, new HashSet<InventoryCategory>());
+                        }
+                        if (!categories[category.Item1].Contains( category.Item2))
+                        {
+                            categories[category.Item1].Add( category.Item2);
                         }
                     }
                 }
