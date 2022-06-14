@@ -70,6 +70,11 @@ namespace InventoryTools
                     {
                         if (ImGui.BeginTabItem(itemTable.Name + "##" + filterConfiguration.Key))
                         {
+                            if (filterConfiguration.FilterType == FilterType.CraftFilter)
+                            {
+                                var craftTable = PluginService.PluginLogic.GetCraftTable(filterConfiguration.Key);
+                                craftTable?.Draw();
+                            }
                             itemTable.Draw();
                             if (_activeFilter != filterConfiguration.Key)
                             {

@@ -191,7 +191,7 @@ namespace InventoryTools.Logic
             
             PluginLog.Verbose("Generating a new filter list");
 
-            if (filter.FilterType == FilterType.SortingFilter)
+            if (filter.FilterType == FilterType.SortingFilter || filter.FilterType == FilterType.CraftFilter)
             {
                 //Determine which source and destination inventories we actually need to examine
                 Dictionary<(ulong, InventoryType), List<InventoryItem>> sourceInventories = new();

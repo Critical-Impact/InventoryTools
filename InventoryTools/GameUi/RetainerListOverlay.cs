@@ -5,6 +5,7 @@ using CriticalCommonLib;
 using CriticalCommonLib.Services.Ui;
 using Dalamud.Logging;
 using InventoryTools.Logic;
+using InventoryTools.Logic.Columns;
 
 namespace InventoryTools.GameUi
 {
@@ -106,11 +107,11 @@ namespace InventoryTools.GameUi
 
                     }
                     var filteredList = filterResult.Value.SortedItems;
-                    if (filterConfiguration.FilterType == FilterType.SortingFilter)
+                    if (filterConfiguration.FilterType == FilterType.SortingFilter || filterConfiguration.FilterType == FilterType.CraftFilter)
                     {
                         var grouping = filteredList.Where(c => !c.InventoryItem.IsEmpty && 
-                                (c.SourceRetainerId == currentCharacterId || PluginService.CharacterMonitor.BelongsToActiveCharacter(c.SourceRetainerId)) && c.DestinationRetainerId != null)
-                            .GroupBy(c => c.DestinationRetainerId!.Value).Where(c => c.Any()).ToList();
+                                (c.SourceRetainerId == currentCharacterId || c.DestinationRetainerId == currentCharacterId || PluginService.CharacterMonitor.BelongsToActiveCharacter(c.SourceRetainerId)) && c.DestinationRetainerId != null)
+                            .GroupBy(c => c.DestinationRetainerId == currentCharacterId ? c.SourceRetainerId : c.DestinationRetainerId!.Value).Where(c => c.Any()).ToList();
                         RetainerColors = grouping.ToDictionary(c => c.Key,
                             c => filterConfiguration.RetainerListColor ??
                                  PluginLogic.PluginConfiguration.RetainerListColor);

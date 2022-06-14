@@ -6,7 +6,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class LocationColumn : TextColumn
     {
-        public override FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter;
+        public override FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter | Logic.FilterType.CraftFilter;
 
         public override string? CurrentValue(InventoryItem item)
         {

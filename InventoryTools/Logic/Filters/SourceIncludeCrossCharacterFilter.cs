@@ -10,7 +10,7 @@ namespace InventoryTools.Logic.Filters
         public override string Key { get; set; } = "SourceIncludeCrossCharacter";
         public override string Name { get; set; } = "Source - Cross Character?";
         public override string HelpText { get; set; } = "Should items be sourced from cross character? Will default to using the default configuration in the main inventory tools configuration if not selected.";
-        public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter;
+        public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter | FilterType.CraftFilter;
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Inventories;
 
         public override bool? CurrentValue(FilterConfiguration configuration)

@@ -32,6 +32,6 @@ namespace InventoryTools.Logic.Columns
         public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
-        public override FilterType AvailableIn => Logic.FilterType.SortingFilter;
+        public override FilterType AvailableIn => Logic.FilterType.SortingFilter | Logic.FilterType.CraftFilter;
     }
 }

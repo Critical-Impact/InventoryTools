@@ -527,6 +527,37 @@ namespace TestProject1
         }
 
         [Test]
+        public void TestCompanyCraftRequirements()
+        {
+            Assert.IsTrue(ExcelCache.IsCompanyCraft(10157));
+            var item = ExcelCache.GetItem(10157);
+            if (item != null)
+            {
+                var craftItems = item.GetFlattenedCraftItems(true, 1);
+                Assert.AreEqual(craftItems.Count, 18);
+                return;
+                var filterManager = new FilterManager(true);
+            
+                var craftFilter = new FilterConfiguration();
+                craftFilter.FilterType = FilterType.CraftFilter;
+                craftFilter.SourceAllRetainers = true;
+                
+                var sortFilter = new FilterConfiguration();
+                sortFilter.FilterType = FilterType.SortingFilter;
+                sortFilter.SourceCategories = new HashSet<InventoryCategory>() {InventoryCategory.CharacterBags};
+                sortFilter.DestinationCategories = new HashSet<InventoryCategory>() {InventoryCategory.RetainerBags};
+                
+                
+                if (_character != null && _retainer != null && _retainer2 != null && _character2 != null)
+                {
+                   
+                }
+            }
+            
+            
+        }
+
+        [Test]
         public void TestGarlandToolsRegex()
         {
             Regex regex = new(@".*Gather: (\d [^.]*). Craft: (\d [^.]*)");
