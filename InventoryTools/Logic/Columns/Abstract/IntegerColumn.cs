@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using ImGuiNET;
 using InventoryTools.Extensions;
@@ -25,6 +26,25 @@ namespace InventoryTools.Logic.Columns.Abstract
         {
             return CurrentValue(item).ToString() ?? "";
         }
+        public override int? CurrentValue(CraftItem currentValue)
+        {
+            if (currentValue.Item == null)
+            {
+                return null;
+            }
+
+            return CurrentValue(currentValue.Item);
+        }
+        
+        public override IEnumerable<CraftItem> Filter(IEnumerable<CraftItem> items)
+        {
+            return items;
+        }
+
+        public override IEnumerable<CraftItem> Sort(ImGuiSortDirection direction, IEnumerable<CraftItem> items)
+        {
+            return items;
+        }
         public virtual string EmptyText
         {
             get
@@ -41,6 +61,10 @@ namespace InventoryTools.Logic.Columns.Abstract
             DoDraw(CurrentValue(item), rowIndex);
         }
         public override void Draw(Item item, int rowIndex)
+        {
+            DoDraw(CurrentValue(item), rowIndex);
+        }
+        public override void Draw(CraftItem item, int rowIndex, FilterConfiguration configuration)
         {
             DoDraw(CurrentValue(item), rowIndex);
         }

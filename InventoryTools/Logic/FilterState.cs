@@ -16,7 +16,7 @@ namespace InventoryTools.Logic
     public struct FilterState
     {
         public FilterConfiguration FilterConfiguration;
-        public FilterTable? FilterTable;
+        public RenderTableBase? FilterTable;
         public ulong? ActiveRetainerId => PluginService.CharacterMonitor.ActiveRetainer == 0 ? null : PluginService.CharacterMonitor.ActiveRetainer;
 
         public bool InvertHighlighting
@@ -55,7 +55,7 @@ namespace InventoryTools.Logic
             get
             {
                 var activeFilter = FilterConfiguration;
-                FilterTable? activeTable = FilterTable;
+                RenderTableBase? activeTable = FilterTable;
                 bool shouldHighlight = false;
                 if (ConfigurationManager.Config.IsVisible || FilterConfiguration.OpenAsWindow)
                 {
@@ -573,7 +573,7 @@ namespace InventoryTools.Logic
         
         private bool MatchesRetainerFilter(FilterConfiguration activeFilter, SortingResult item, bool invertHighlighting = false)
         {
-            bool matches = (activeFilter.FilterType.HasFlag(FilterType.SearchFilter) || activeFilter.FilterType.HasFlag(FilterType.SortingFilter));
+            bool matches = (activeFilter.FilterType.HasFlag(FilterType.SearchFilter) || activeFilter.FilterType.HasFlag(FilterType.SortingFilter) || activeFilter.FilterType.HasFlag(FilterType.CraftFilter));
             if (item.SourceRetainerId != PluginService.CharacterMonitor.ActiveRetainer)
             {
                 return false;
@@ -638,7 +638,7 @@ namespace InventoryTools.Logic
             get
             {
                 var activeFilter = FilterConfiguration;
-                FilterTable? activeTable = FilterTable;
+                RenderTableBase? activeTable = FilterTable;
                 FilterResult? filteredList = activeFilter.FilterResult;
                 
                 if (activeTable != null)

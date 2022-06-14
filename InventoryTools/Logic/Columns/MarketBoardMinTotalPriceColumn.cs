@@ -1,7 +1,9 @@
+using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Colors;
 using Dalamud.Logging;
 using ImGuiNET;
+using InventoryTools.Extensions;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -47,6 +49,20 @@ namespace InventoryTools.Logic.Columns
         public override (int,int)? CurrentValue(SortingResult item)
         {
             return CurrentValue(item.InventoryItem);
+        }
+
+        public override (int, int)? CurrentValue(CraftItem currentValue)
+        {
+            if (currentValue.Item == null)
+            {
+                return (Untradable, Untradable);
+            }
+            if (!currentValue.Item.CanBeTraded())
+            {
+                return (Untradable, Untradable);
+            }
+            var value = base.CurrentValue(currentValue.Item);
+            return value.HasValue ? ((int)(value.Value.Item1 * currentValue.QuantityRequired), (int)(value.Value.Item2 * currentValue.QuantityRequired)) : null;
         }
 
         public override string Name { get; set; } = "MB Minimum Total Price";

@@ -1,4 +1,5 @@
-﻿using CriticalCommonLib.MarketBoard;
+﻿using CriticalCommonLib.Crafting;
+using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Colors;
 using Dalamud.Logging;
@@ -27,6 +28,11 @@ namespace InventoryTools.Logic.Columns
             result?.HandleEvent(item);
         }
         public override void Draw(Item item, int rowIndex)
+        {
+            var result = DoDraw(CurrentValue(item), rowIndex);
+            result?.HandleEvent(item);
+        }
+        public override void Draw(CraftItem item, int rowIndex, FilterConfiguration configuration)
         {
             var result = DoDraw(CurrentValue(item), rowIndex);
             result?.HandleEvent(item);

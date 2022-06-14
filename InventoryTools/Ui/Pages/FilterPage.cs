@@ -93,6 +93,10 @@ namespace InventoryTools.Sections
                          filterConfiguration.FilterType.HasFlag(FilterType
                              .SortingFilter))
                         ||
+                        (filter.AvailableIn.HasFlag(FilterType.CraftFilter) &&
+                         filterConfiguration.FilterType.HasFlag(FilterType
+                             .CraftFilter))
+                        ||
                         (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
                          filterConfiguration.FilterType.HasFlag(FilterType
                              .GameItemFilter)));
@@ -106,6 +110,9 @@ namespace InventoryTools.Sections
                                  ||
                                  (filter.AvailableIn.HasFlag(FilterType.SortingFilter) &&
                                   filterConfiguration.FilterType.HasFlag(FilterType.SortingFilter))
+                                 ||
+                                 (filter.AvailableIn.HasFlag(FilterType.CraftFilter) &&
+                                  filterConfiguration.FilterType.HasFlag(FilterType.CraftFilter))
                                  ||
                                  (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
                                   filterConfiguration.FilterType.HasFlag(FilterType.GameItemFilter))

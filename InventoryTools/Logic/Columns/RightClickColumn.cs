@@ -1,4 +1,6 @@
+using System.Linq;
 using System.Numerics;
+using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
@@ -54,6 +56,76 @@ namespace InventoryTools.Logic.Columns
             Draw(item.InventoryItem.Item, rowIndex);
         }
 
+        public override void Draw(CraftItem item, int rowIndex, FilterConfiguration configuration)
+        {
+            if (item.Item == null)
+            {
+                return;
+            }
+            
+            var hoveredRow = -1;
+            ImGui.Selectable("", false, ImGuiSelectableFlags.SpanAllColumns, new Vector2(0, 32));
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow)) {
+                hoveredRow = rowIndex;
+            }
+            if (hoveredRow == rowIndex && ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+            {
+                ImGui.OpenPopup("RightClick" + rowIndex);
+            }
+
+            if (ImGui.BeginPopup("RightClick" + rowIndex))
+            {
+                DrawMenuItems(item.Item, rowIndex);
+
+                if (item.Item.CanBeCrafted() && item.IsOutputItem && ImGui.Selectable("Remove from craft list"))
+                {
+                    configuration.CraftList.RemoveCraftItem(item.ItemId, item.Flags);
+                    configuration.NeedsRefresh = true;
+                }
+
+                ImGui.EndPopup();
+            }
+        }
+
+        public void DrawMenuItems(Item item, int rowIndex)
+        {
+            ImGui.Text(item.Name);
+            ImGui.Separator();
+            if (ImGui.Selectable("Open in Garland Tools"))
+            {
+                $"https://www.garlandtools.org/db/#item/{item.RowId}".OpenBrowser();
+            }
+            if (ImGui.Selectable("Open in Teamcraft"))
+            {
+                                        
+            }
+            if (ImGui.Selectable("Open in Universalis"))
+            {
+                $"https://universalis.app/market/{item.RowId}".OpenBrowser();
+            }
+            if (ImGui.Selectable("Copy Name"))
+            {
+                item.Name.ToDalamudString().ToString().ToClipboard();
+            }
+            if (item.CanTryOn() && ImGui.Selectable("Try On"))
+            {
+                if (PluginService.TryOn.CanUseTryOn)
+                {
+                    PluginService.TryOn.TryOnItem(item);
+                }
+            }
+
+            if (item.CanBeCrafted() && ImGui.Selectable("View Requirements"))
+            {
+                PluginLogic.ShowCraftRequirementsWindow(item);   
+            }
+
+            if (item.CanOpenCraftLog() && ImGui.Selectable("Open in Crafting Log"))
+            {
+                GameInterface.OpenCraftingLog(item.RowId);   
+            }
+        }
+
         public override void Draw(Item item, int rowIndex)
         {
             var hoveredRow = -1;
@@ -68,41 +140,20 @@ namespace InventoryTools.Logic.Columns
 
             if (ImGui.BeginPopup("RightClick" + rowIndex))
             {
-                ImGui.Text(item.Name);
-                ImGui.Separator();
-                if (ImGui.Selectable("Open in Garland Tools"))
+                DrawMenuItems(item, rowIndex);
+
+                var craftFilters =
+                    PluginService.PluginLogic.FilterConfigurations.Where(c =>
+                        c.FilterType == Logic.FilterType.CraftFilter);
+                foreach (var filter in craftFilters)
                 {
-                    $"https://www.garlandtools.org/db/#item/{item.RowId}".OpenBrowser();
-                }
-                if (ImGui.Selectable("Open in Teamcraft"))
-                {
-                                        
-                }
-                if (ImGui.Selectable("Open in Universalis"))
-                {
-                    $"https://universalis.app/market/{item.RowId}".OpenBrowser();
-                }
-                if (ImGui.Selectable("Copy Name"))
-                {
-                    item.Name.ToDalamudString().ToString().ToClipboard();
-                }
-                if (item.CanTryOn() && ImGui.Selectable("Try On"))
-                {
-                    if (PluginService.TryOn.CanUseTryOn)
+                    if (item.CanBeCrafted()  && ImGui.Selectable("Add to craft list - " + filter.Name))
                     {
-                        PluginService.TryOn.TryOnItem(item);
+                        filter.CraftList.AddCraftItem(item.RowId);
+                        filter.NeedsRefresh = true;
                     }
                 }
 
-                if (item.CanBeCrafted() && ImGui.Selectable("View Requirements"))
-                {
-                    PluginLogic.ShowCraftRequirementsWindow(item);   
-                }
-
-                if (item.CanBeCrafted() && ImGui.Selectable("Open in Crafting Log"))
-                {
-                    GameInterface.OpenCraftingLog(item.RowId);   
-                }
                 ImGui.EndPopup();
             }
         }

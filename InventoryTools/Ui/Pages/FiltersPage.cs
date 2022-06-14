@@ -135,6 +135,16 @@ namespace InventoryTools.Sections
                 ImGui.SameLine();
                 UiHelpers.HelpMarker(
                     "This will create a filter that lets you search for all items in the game.");
+                
+                if (ImGui.Button("Add Craft Filter"))
+                {
+                    PluginService.PluginLogic.FilterConfigurations.Add(new FilterConfiguration("New Craft Filter",
+                        Guid.NewGuid().ToString("N"), FilterType.CraftFilter));
+                }
+
+                ImGui.SameLine();
+                UiHelpers.HelpMarker(
+                    "This will create a filter that lets you select items to craft then show what items are required and what you have available.");
             }
 
             if (ImGui.CollapsingHeader("Sample Filters", ImGuiTreeNodeFlags.DefaultOpen))

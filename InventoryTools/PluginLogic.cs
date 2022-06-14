@@ -34,7 +34,7 @@ namespace InventoryTools
     public partial class PluginLogic : IDisposable
     {
         private List<FilterConfiguration> _filterConfigurations = new();
-        private Dictionary<string, FilterTable> _filterTables = new();
+        private Dictionary<string, RenderTableBase> _filterTables = new();
         private List<IFilter>? _availableFilters = null;
         private List<ISetting>? _availableSettings = null;
 
@@ -397,7 +397,7 @@ namespace InventoryTools
             return null;
         }
 
-        public FilterTable? GetFilterTable(string filterKey)
+        public RenderTableBase? GetFilterTable(string filterKey)
         {
             if (_filterTables.ContainsKey(filterKey))
             {
@@ -408,10 +408,32 @@ namespace InventoryTools
                 if (_filterConfigurations.Any(c => c.Key == filterKey))
                 {
                     var filterConfig = _filterConfigurations.First(c => c.Key == filterKey);
-                    FilterTable generateTable = filterConfig.GenerateTable();
+                    RenderTableBase generateTable = filterConfig.GenerateTable();
                     generateTable.Refreshed += GenerateTableOnRefreshed;
                     _filterTables.Add(filterKey, generateTable);
                     return _filterTables[filterKey];
+                }
+
+                return null;
+            }
+        }
+
+        public RenderTableBase? GetCraftTable(string filterKey)
+        {
+            var tableKey = filterKey + "_craft";
+            if (_filterTables.ContainsKey(tableKey))
+            {
+                return _filterTables[tableKey];
+            }
+            else
+            {
+                if (_filterConfigurations.Any(c => c.Key == filterKey))
+                {
+                    var filterConfig = _filterConfigurations.First(c => c.Key == filterKey);
+                    RenderTableBase generateTable = filterConfig.GenerateCraftTable();
+                    generateTable.Refreshed += GenerateTableOnRefreshed;
+                    _filterTables.Add(tableKey, generateTable);
+                    return _filterTables[tableKey];
                 }
 
                 return null;
@@ -793,7 +815,7 @@ namespace InventoryTools
         private void ToggleHighlights()
         {
             var activeFilter = GetActiveFilter();
-            FilterTable? activeTable = null;
+            RenderTableBase? activeTable = null;
             if (activeFilter != null)
             {
                 if (PluginConfiguration.IsVisible || activeFilter.OpenAsWindow)

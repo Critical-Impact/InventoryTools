@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
@@ -79,6 +80,7 @@ namespace InventoryTools.Logic
         private List<string>? _columns;
         private string? _icon;
         private static readonly byte CurrentVersion = 1;
+        private CraftList? _craftList = null;
         public string ExportBase64()
         {
             var toExport = (FilterConfiguration)this.MemberwiseClone();
@@ -169,6 +171,10 @@ namespace InventoryTools.Logic
             }
             _refreshing = true;
             
+            if (this.FilterType == FilterType.CraftFilter)
+            {
+                CraftList.RefreshRequiredItems(new Dictionary<uint, List<CraftItemSource>>());
+            }
             _filterResult = await PluginService.FilterManager.GenerateFilteredList(this,
                 PluginService.InventoryMonitor.Inventories);
             NeedsRefresh = false;
@@ -231,6 +237,17 @@ namespace InventoryTools.Logic
                 Columns.Add("SellToVendorPriceColumn");
                 Columns.Add("BuyFromVendorPriceColumn");
             }
+            else if (FilterType == FilterType.CraftFilter)
+            {
+                Columns.Add("IconColumn");
+                Columns.Add("NameColumn");
+                Columns.Add("IsCraftingItemColumn");
+                Columns.Add("CanBeGatheredColumn");
+                Columns.Add("CanBePurchasedColumn");
+                Columns.Add("AcquiredColumn");
+                Columns.Add("SellToVendorPriceColumn");
+                Columns.Add("BuyFromVendorPriceColumn");
+            }
         }
 
         public FilterConfiguration()
@@ -242,11 +259,19 @@ namespace InventoryTools.Logic
             
         }
 
-        public FilterTable GenerateTable()
+        public RenderTableBase GenerateTable()
         {
-            FilterTable table = new FilterTable(this);
+            RenderTableBase table = new FilterTable(this);
             table.RefreshColumns();
             table.ShowFilterRow = true;
+            return table;
+        }
+
+        public RenderTableBase GenerateCraftTable()
+        {
+            RenderTableBase table = new CraftItemTable(this);
+            table.RefreshColumns();
+            table.ShowFilterRow = false;
             return table;
         }
 
@@ -678,6 +703,13 @@ namespace InventoryTools.Logic
 
         public bool FilterItem(Item item)
         {
+            if (FilterType == FilterType.CraftFilter)
+            {
+                if (!CraftList.RequiredItems.ContainsKey(item.RowId))
+                {
+                    return false;
+                }
+            }
             foreach (var filter in PluginService.PluginLogic.AvailableFilters)
             {
                 if (!filter.FilterItem(this, item))
@@ -690,6 +722,13 @@ namespace InventoryTools.Logic
         }
         public bool FilterItem(InventoryItem item)
         {
+            if (FilterType == FilterType.CraftFilter)
+            {
+                if (!CraftList.RequiredItems.ContainsKey(item.ItemId))
+                {
+                    return false;
+                }
+            }
             foreach (var filter in PluginService.PluginLogic.AvailableFilters)
             {
                 if (!filter.FilterItem(this, item))
@@ -1468,6 +1507,19 @@ namespace InventoryTools.Logic
                 }
 
                 return categories;
+            }
+            
+        }
+
+        public CraftList CraftList
+        {
+            get
+            {
+                if (_craftList == null)
+                {
+                    _craftList = new CraftList();
+                }
+                return _craftList;
             }
         }
     }
