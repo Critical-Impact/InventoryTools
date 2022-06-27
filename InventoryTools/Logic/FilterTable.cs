@@ -112,30 +112,12 @@ namespace InventoryTools.Logic
             }
         }
 
-        public void RefreshPricing()
-        {
-            foreach (var item in RenderSortedItems)
-            {
-                Universalis.QueuePriceCheck(item.InventoryItem.ItemId);
-            }
-            foreach (var item in RenderItems)
-            {
-                Universalis.QueuePriceCheck(item.RowId);
-            }
-        }
 
-        public override void Draw()
+
+        public override void Draw(Vector2 size)
         {
             var highlightItems = HighlightItems;
-            /*ImGui.BeginChild("TopBar", new Vector2(0, 25)* ImGui.GetIO().FontGlobalScale);
-            ImGui.Checkbox( "Highlight?"+ "###" + Key + "VisibilityCheckbox", ref highlightItems);
-            if (highlightItems != HighlightItems)
-            {
-                PluginService.PluginLogic.ToggleActiveUiFilterByKey(FilterConfiguration.Key);
-            }
 
-
-            ImGui.EndChild();*/
             
             if (Columns.Count == 0)
             {
@@ -146,9 +128,9 @@ namespace InventoryTools.Logic
                 return;
             }
 
-            ImGui.BeginChild("Content", new Vector2(0, 400)* ImGui.GetIO().FontGlobalScale); 
+            ImGui.BeginChild("FilterTableContent", size * ImGui.GetIO().FontGlobalScale); 
             
-            if((FilterConfiguration.FilterType != FilterType.CraftFilter || FilterConfiguration.FilterType == FilterType.CraftFilter && ImGui.CollapsingHeader("Retrieval Items", ImGuiTreeNodeFlags.DefaultOpen)) && ImGui.BeginTable(Key, Columns.Count, _tableFlags))
+            if((FilterConfiguration.FilterType != FilterType.CraftFilter || FilterConfiguration.FilterType == FilterType.CraftFilter && ImGui.CollapsingHeader("Items in Retainers/Bags", ImGuiTreeNodeFlags.DefaultOpen)) && ImGui.BeginTable(Key, Columns.Count, _tableFlags))
             {
                 var refresh = false;
                 ImGui.TableSetupScrollFreeze(Math.Min(FreezeCols ?? 0,Columns.Count), FreezeRows ?? (ShowFilterRow ? 2 : 1));
@@ -256,20 +238,6 @@ namespace InventoryTools.Logic
                 ImGui.EndTable();
             }
             ImGui.EndChild();
-            /*ImGui.BeginChild("BottomBar", new Vector2(0,0), false, ImGuiWindowFlags.None);
-            if (ImGui.Button("Refresh Market Prices"))
-            {
-                RefreshPricing();
-            }
-            ImGui.SameLine();
-            if (ImGui.Button("Export to CSV"))
-            {
-                PluginService.FileDialogManager.SaveFileDialog("Save to csv", "*.csv", "export.csv", ".csv", SaveCallback, null, true);
-            }
-            ImGui.SameLine();
-            ImGui.Text("Pending Market Requests: " + Universalis.QueuedCount);
-            ImGui.EndTabItem();
-            ImGui.EndChild();*/
         }
 
         public void SaveCallback(bool arg1, string arg2)

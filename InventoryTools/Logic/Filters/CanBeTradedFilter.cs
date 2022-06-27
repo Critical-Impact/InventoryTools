@@ -15,14 +15,14 @@ namespace InventoryTools.Logic.Filters
         public override FilterType AvailableIn { get; set; } =
             FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter;
         
-        public override bool FilterItem(FilterConfiguration configuration, InventoryItem item)
+        public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
             var currentValue = CurrentValue(configuration);
 
             return currentValue == null || currentValue.Value && item.CanBeTraded || !currentValue.Value && !item.CanBeTraded;
         }
 
-        public override bool FilterItem(FilterConfiguration configuration, Item item)
+        public override bool? FilterItem(FilterConfiguration configuration, Item item)
         {
             var currentValue = CurrentValue(configuration);
             return currentValue == null || currentValue.Value && item.CanBeTraded() || !currentValue.Value && !item.CanBeTraded();

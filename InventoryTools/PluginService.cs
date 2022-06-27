@@ -1,4 +1,5 @@
 using CriticalCommonLib;
+using CriticalCommonLib.Crafting;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
@@ -23,6 +24,8 @@ namespace InventoryTools
         public static FilterManager FilterManager { get; private set; } = null!;
         public static WotsitIpc WotsitIpc { get; private set; } = null!;
         public static FileDialogManager FileDialogManager { get; private set; } = null!;
+        public static CraftMonitor CraftMonitor { get; private set; } = null!;
+        public static FunTimeService FunTimeService { get; private set; } = null!;
 
         public static void Initialise()
         {
@@ -38,12 +41,14 @@ namespace InventoryTools
             GameUi = new GameUiManager();
             TryOn = new TryOn();
             InventoryMonitor = new InventoryMonitor(OdrScanner, CharacterMonitor, GameUi);
+            CraftMonitor = new CraftMonitor(GameUi);
             FilterManager = new FilterManager();
             PluginLogic = new PluginLogic(  );
             WotsitIpc = new WotsitIpc(  );
             PluginCommands = new();
             CommandManager = new PluginCommandManager<PluginCommands>(PluginCommands);
             FileDialogManager = new FileDialogManager();
+            FunTimeService = new FunTimeService();
         }
 
         public static void InitialiseTesting(CharacterMonitor characterMonitor, PluginLogic pluginLogic)
@@ -54,10 +59,12 @@ namespace InventoryTools
 
         public static void Dispose()
         {
+            FunTimeService.Dispose();
             CommandManager.Dispose();
             WotsitIpc.Dispose();
             PluginLogic.Dispose();
             FilterManager.Dispose();
+            CraftMonitor.Dispose();
             InventoryMonitor.Dispose();
             TryOn.Dispose();
             GameUi.Dispose();

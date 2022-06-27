@@ -18,7 +18,7 @@ namespace InventoryTools.Logic.Filters
             FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter;
 
         
-        public override bool FilterItem(FilterConfiguration configuration, InventoryItem item)
+        public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
             var currentValue = this.CurrentValue(configuration);
             return currentValue switch
@@ -29,7 +29,7 @@ namespace InventoryTools.Logic.Filters
             };
         }
 
-        public override bool FilterItem(FilterConfiguration configuration, Item item)
+        public override bool? FilterItem(FilterConfiguration configuration, Item item)
         {
             var currentValue = this.CurrentValue(configuration);
             return currentValue switch

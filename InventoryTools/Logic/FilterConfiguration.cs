@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.MarketBoard;
@@ -81,6 +82,7 @@ namespace InventoryTools.Logic
         private string? _icon;
         private static readonly byte CurrentVersion = 1;
         private CraftList? _craftList = null;
+        private bool? _useORFiltering = null;
         public string ExportBase64()
         {
             var toExport = (FilterConfiguration)this.MemberwiseClone();
@@ -170,13 +172,57 @@ namespace InventoryTools.Logic
                 return;
             }
             _refreshing = true;
-            
+            CraftList.BeenUpdated = false;
+
+
             if (this.FilterType == FilterType.CraftFilter)
             {
-                CraftList.RefreshRequiredItems(new Dictionary<uint, List<CraftItemSource>>());
+                //Clean up this sloppy function
+                var playerBags = PluginService.InventoryMonitor.GetSpecificInventory(PluginService.CharacterMonitor.ActiveCharacter,
+                   InventoryCategory.CharacterBags);
+                var crystalBags = PluginService.InventoryMonitor.GetSpecificInventory(PluginService.CharacterMonitor.ActiveCharacter,
+                   InventoryCategory.Crystals);
+                var tempFilterResult = await PluginService.FilterManager.GenerateFilteredList(this,
+                    PluginService.InventoryMonitor.Inventories);
+                var externalBags = tempFilterResult.SortedItems.Select(c => c.InventoryItem).ToList();
+                var characterSources = new Dictionary<uint, List<CraftItemSource>>();
+                var externalSources = new Dictionary<uint, List<CraftItemSource>>();
+                foreach (var item in playerBags)
+                {
+                    if (!characterSources.ContainsKey(item.ItemId))
+                    {
+                        characterSources.Add(item.ItemId,new List<CraftItemSource>());
+                    }
+                    characterSources[item.ItemId].Add(new CraftItemSource(item.ItemId, item.Quantity, item.IsHQ));
+                }
+                foreach (var item in crystalBags)
+                {
+                    if (!characterSources.ContainsKey(item.ItemId))
+                    {
+                        characterSources.Add(item.ItemId,new List<CraftItemSource>());
+                    }
+                    characterSources[item.ItemId].Add(new CraftItemSource(item.ItemId, item.Quantity, item.IsHQ));
+                }
+                
+                foreach (var item in externalBags)
+                {
+                    if (!externalSources.ContainsKey(item.ItemId))
+                    {
+                        externalSources.Add(item.ItemId,new List<CraftItemSource>());
+                    }
+                    externalSources[item.ItemId].Add(new CraftItemSource(item.ItemId, item.Quantity, item.IsHQ));
+                }
+                CraftList.Update(characterSources, externalSources);
+                _filterResult = await PluginService.FilterManager.GenerateFilteredList(this,
+                    PluginService.InventoryMonitor.Inventories);
             }
-            _filterResult = await PluginService.FilterManager.GenerateFilteredList(this,
-                PluginService.InventoryMonitor.Inventories);
+
+            else
+            {
+                _filterResult = await PluginService.FilterManager.GenerateFilteredList(this,
+                    PluginService.InventoryMonitor.Inventories);
+            }
+            
             NeedsRefresh = false;
             ListUpdated?.Invoke(this);
             _refreshing = false;
@@ -457,6 +503,17 @@ namespace InventoryTools.Logic
             }
         }
 
+        
+        public bool? UseORFiltering
+        {
+            get => _useORFiltering;
+            set
+            {
+                _useORFiltering = value;
+                ConfigurationChanged?.Invoke(this);
+            }
+        }
+
         public bool? SourceAllCharacters
         {
             get => _sourceAllCharacters;
@@ -705,17 +762,35 @@ namespace InventoryTools.Logic
         {
             if (FilterType == FilterType.CraftFilter)
             {
-                if (!CraftList.RequiredItems.ContainsKey(item.RowId))
+                var requiredMaterialsList = CraftList.BeenUpdated ? CraftList.GetAvailableMaterialsList().Where(c => c.Value != 0).ToDictionary(c => c.Key, c => c.Value) : CraftList.GetRequiredMaterialsList();
+                if (!requiredMaterialsList.ContainsKey(item.RowId))
                 {
                     return false;
                 }
             }
+
+            var matchesAny = false;
             foreach (var filter in PluginService.PluginLogic.AvailableFilters)
             {
-                if (!filter.FilterItem(this, item))
+                if (UseORFiltering != null && UseORFiltering == true)
                 {
-                    return false;
+                    if (filter.FilterItem(this, item) == true)
+                    {
+                        matchesAny = true;
+                    }
                 }
+                else
+                {
+                    if (filter.FilterItem(this, item) == false)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            if (matchesAny)
+            {
+                return true;
             }
 
             return true;
@@ -724,17 +799,44 @@ namespace InventoryTools.Logic
         {
             if (FilterType == FilterType.CraftFilter)
             {
-                if (!CraftList.RequiredItems.ContainsKey(item.ItemId))
+                var requiredMaterialsList = CraftList.BeenUpdated ? CraftList.GetAvailableMaterialsList().Where(c => c.Value != 0).ToDictionary(c => c.Key, c => c.Value) : CraftList.GetRequiredMaterialsList();
+                if (!requiredMaterialsList.ContainsKey(item.ItemId))
                 {
                     return false;
                 }
             }
+
+            var matchesAny = false;
             foreach (var filter in PluginService.PluginLogic.AvailableFilters)
             {
-                if (!filter.FilterItem(this, item))
+                if (!filter.HasValueSet(this))
                 {
-                    return false;
+                    continue;
                 }
+                if (UseORFiltering != null && UseORFiltering == true)
+                {
+                    if (filter.FilterItem(this, item) == true)
+                    {
+                        PluginLog.Log(filter.Key);
+                        matchesAny = true;
+                    }
+                }
+                else
+                {
+                    if (filter.FilterItem(this, item) == false)
+                    {
+                        return false;
+                    }   
+                }
+            }
+
+            if (UseORFiltering != null && UseORFiltering == true && matchesAny)
+            {
+                return true;
+            }
+            else if(UseORFiltering != null && UseORFiltering == true)
+            {
+                return false;
             }
             
             return true;

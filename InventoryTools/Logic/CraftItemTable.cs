@@ -15,6 +15,8 @@ namespace InventoryTools.Logic
     {
         public CraftItemTable(FilterConfiguration filterConfiguration) : base(filterConfiguration)
         {
+            filterConfiguration.CraftList.GenerateCraftChildren();
+            filterConfiguration.StartRefresh();
         }
         
         public override void RefreshColumns()
@@ -24,7 +26,12 @@ namespace InventoryTools.Logic
             var newColumns = new List<IColumn>();
             newColumns.Add(new IconColumn());
             newColumns.Add(new NameColumn());
+            newColumns.Add(new QuantityAvailableColumn());
             newColumns.Add(new CraftAmountRequiredColumn());
+            newColumns.Add(new CraftAmountReadyColumn());
+            newColumns.Add(new CraftAmountAvailableColumn());
+            newColumns.Add(new CraftAmountUnavailableColumn());
+            newColumns.Add(new CraftAmountCanCraftColumn());
             newColumns.Add(new MarketBoardMinPriceColumn());
             newColumns.Add(new MarketBoardMinTotalPriceColumn());
             this.Columns = newColumns;
@@ -32,7 +39,7 @@ namespace InventoryTools.Logic
 
         public List<CraftItem> CraftItems = new();
 
-        public override void Draw()
+        public override void Draw(Vector2 size)
         {
             if (Columns.Count == 0)
             {
@@ -42,119 +49,120 @@ namespace InventoryTools.Logic
                 }
                 return;
             }
-            ImGui.BeginChild("CraftContent", new Vector2(0, 400)* ImGui.GetIO().FontGlobalScale); 
-            if (FilterConfiguration.FilterType == FilterType.CraftFilter && ImGui.BeginTable(Key + "CraftTable", Columns.Count, _tableFlags))
+            if(ImGui.CollapsingHeader("To Craft", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                var refresh = false;
-                ImGui.TableSetupScrollFreeze(Math.Min(FreezeCols ?? 0,Columns.Count), FreezeRows ?? (ShowFilterRow ? 2 : 1));
-                for (var index = 0; index < Columns.Count; index++)
+                ImGui.BeginChild("CraftContent", size * ImGui.GetIO().FontGlobalScale);
+                if (FilterConfiguration.FilterType == FilterType.CraftFilter &&
+                    ImGui.BeginTable(Key + "CraftTable", Columns.Count, _tableFlags))
                 {
-                    var column = Columns[index];
-                    column.Setup(index);
-                }
-                ImGui.TableHeadersRow();
-
-                var currentSortSpecs = ImGui.TableGetSortSpecs();
-                if (currentSortSpecs.SpecsDirty)
-                {
-                    var actualSpecs = currentSortSpecs.Specs;
-                    if (SortColumn != actualSpecs.ColumnIndex)
+                    var refresh = false;
+                    ImGui.TableSetupScrollFreeze(Math.Min(FreezeCols ?? 0, Columns.Count),
+                        FreezeRows ?? (ShowFilterRow ? 2 : 1));
+                    for (var index = 0; index < Columns.Count; index++)
                     {
-                        PluginLog.Verbose("specs dirty");
-                        SortColumn = actualSpecs.ColumnIndex;
+                        var column = Columns[index];
+                        column.Setup(index);
+                    }
+
+                    ImGui.TableHeadersRow();
+
+                    var currentSortSpecs = ImGui.TableGetSortSpecs();
+                    if (currentSortSpecs.SpecsDirty)
+                    {
+                        var actualSpecs = currentSortSpecs.Specs;
+                        if (SortColumn != actualSpecs.ColumnIndex)
+                        {
+                            PluginLog.Verbose("specs dirty");
+                            SortColumn = actualSpecs.ColumnIndex;
+                            refresh = true;
+                        }
+
+                        if (SortDirection != actualSpecs.SortDirection)
+                        {
+                            PluginLog.Verbose("specs dirty");
+                            SortDirection = actualSpecs.SortDirection;
+                            refresh = true;
+                        }
+                    }
+                    else
+                    {
+                        SortColumn = null;
+                        SortDirection = null;
                         refresh = true;
                     }
 
-                    if (SortDirection != actualSpecs.SortDirection)
+                    if (refresh || NeedsRefresh)
                     {
-                        PluginLog.Verbose("specs dirty");
-                        SortDirection = actualSpecs.SortDirection;
-                        refresh = true;
+                        Refresh(ConfigurationManager.Config);
                     }
-                }
-                else
-                {
-                    SortColumn = null;
-                    SortDirection = null;
-                    refresh = true;
-                }
 
-                if (refresh || NeedsRefresh)
-                {
-                    Refresh(ConfigurationManager.Config);
-                }
+                    //Make the visibility of zero quantity required items a toggle
+                    var outputs = CraftItems.Where(c => c.IsOutputItem).ToList();
+                    var preCrafts = CraftItems.Where(c => c.QuantityNeeded != 0 && !c.IsOutputItem && (c.Item?.CanBeCrafted() ?? false)).OrderByDescending(c => c.ItemId).ToList();
+                    var everythingElse = CraftItems.Where(c => c.QuantityNeeded != 0 && !(c.Item?.CanBeCrafted() ?? true)).OrderByDescending(c => c.ItemId).ToList();
 
-                var outputs = CraftItems.Where(c => c.IsOutputItem).ToList();
-                var preCrafts = CraftItems.Where(c => !c.IsOutputItem && (c.Item?.CanBeCrafted() ?? false)).ToList();
-                var everythingElse = CraftItems.Where(c => !(c.Item?.CanBeCrafted() ?? true)).ToList();
-                
-                ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
-                ImGui.TableNextColumn();
-                ImGui.Text("Outputs:");
-                var overallIndex = 0;
-                for (var index = 0; index < outputs.Count; index++)
-                {
-                    overallIndex++;
-                    var item = outputs[index];
-                    ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
-                    for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+                    var overallIndex = 0;
+                    for (var index = 0; index < outputs.Count; index++)
                     {
-                        var column = Columns[columnIndex];
-                        column.Draw(item, index, FilterConfiguration);
-                        ImGui.SameLine();
-                        if (columnIndex == Columns.Count - 1)
+                        overallIndex++;
+                        var item = outputs[index];
+                        ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
+                        for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                         {
-                            PluginService.PluginLogic.RightClickColumn.Draw(item, overallIndex, FilterConfiguration);
+                            var column = Columns[columnIndex];
+                            column.Draw(item, index, FilterConfiguration);
+                            ImGui.SameLine();
+                            if (columnIndex == Columns.Count - 1)
+                            {
+                                PluginService.PluginLogic.RightClickColumn.Draw(item, overallIndex, FilterConfiguration);
+                            }
                         }
                     }
-                }
-                
-                ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
-                ImGui.TableNextColumn();
-                ImGui.Text("Precrafts:");
-                for (var index = 0; index < preCrafts.Count; index++)
-                {
-                    overallIndex++;
-                    var item = preCrafts[index];
-                    ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
-                    for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+
+                    ImGui.TableNextRow(ImGuiTableRowFlags.Headers, 32);
+                    ImGui.TableNextColumn();
+                    ImGui.Text("Precrafts:");
+                    for (var index = 0; index < preCrafts.Count; index++)
                     {
-                        var column = Columns[columnIndex];
-                        column.Draw(item, index, FilterConfiguration);
-                        ImGui.SameLine();
-                        if (columnIndex == Columns.Count - 1)
+                        overallIndex++;
+                        var item = preCrafts[index];
+                        ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
+                        for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                         {
-                            PluginService.PluginLogic.RightClickColumn.Draw(item, overallIndex, FilterConfiguration);
+                            var column = Columns[columnIndex];
+                            column.Draw(item, index, FilterConfiguration);
+                            ImGui.SameLine();
+                            if (columnIndex == Columns.Count - 1)
+                            {
+                                PluginService.PluginLogic.RightClickColumn.Draw(item, overallIndex, FilterConfiguration);
+                            }
                         }
                     }
-                }
-                
-                ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
-                ImGui.TableNextColumn();
-                ImGui.Text("Gather/Buy:");
-                for (var index = 0; index < everythingElse.Count; index++)
-                {
-                    overallIndex++;
-                    var item = everythingElse[index];
-                    ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
-                    for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+
+                    ImGui.TableNextRow(ImGuiTableRowFlags.Headers, 32);
+                    ImGui.TableNextColumn();
+                    ImGui.Text("Gather/Buy:");
+                    for (var index = 0; index < everythingElse.Count; index++)
                     {
-                        var column = Columns[columnIndex];
-                        column.Draw(item, index, FilterConfiguration);
-                        ImGui.SameLine();
-                        if (columnIndex == Columns.Count - 1)
+                        overallIndex++;
+                        var item = everythingElse[index];
+                        ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
+                        for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                         {
-                            PluginService.PluginLogic.RightClickColumn.Draw(item, overallIndex, FilterConfiguration);
+                            var column = Columns[columnIndex];
+                            column.Draw(item, index, FilterConfiguration);
+                            ImGui.SameLine();
+                            if (columnIndex == Columns.Count - 1)
+                            {
+                                PluginService.PluginLogic.RightClickColumn.Draw(item, overallIndex, FilterConfiguration);
+                            }
                         }
                     }
+
+                    ImGui.EndTable();
                 }
-                ImGui.EndTable();
+                ImGui.EndChild();
             }
-            else
-            {
-                ImGui.Text("You shouldn't see me.");
-            }
-            ImGui.EndChild();
         }
 
         public override void Refresh(InventoryToolsConfiguration configuration)
@@ -162,10 +170,17 @@ namespace InventoryTools.Logic
             if (FilterConfiguration.FilterResult != null)
             {
                 PluginLog.Verbose("CraftTable: Refreshing");
-                CraftItems = FilterConfiguration.CraftList.FlattenedMaterials;
+                CraftItems = FilterConfiguration.CraftList.GetFlattenedMergedMaterials();
                 IsSearching = false;
                 NeedsRefresh = false;
             }
+        }
+        
+        public override void Dispose()
+        {
+            FilterConfiguration.ConfigurationChanged -= FilterConfigurationUpdated;
+            FilterConfiguration.ListUpdated -= FilterConfigurationUpdated;
+            FilterConfiguration.TableConfigurationChanged += FilterConfigurationOnTableConfigurationChanged;
         }
     }
 }

@@ -81,7 +81,44 @@ namespace InventoryTools.Logic.Columns
                 {
                     configuration.CraftList.RemoveCraftItem(item.ItemId, item.Flags);
                     configuration.NeedsRefresh = true;
+                    configuration.StartRefresh();
                 }
+
+                if (item.Item.CanBeCrafted() && item.IsOutputItem && item.Phase != null && ExcelCache.IsCompanyCraft(item.ItemId))
+                {
+                    for (uint i = 0; i < 3; i++)
+                    {
+                        if (item.Phase != i)
+                        {
+                            if (ImGui.Selectable("Switch to Phase " + (i + 1)))
+                            {
+                                item.SwitchPhase(i);
+                                configuration.StartRefresh();
+                            }
+                        }
+                    }
+                }
+
+                if (!item.IsOutputItem)
+                {
+                    var craftFilters =
+                        PluginService.PluginLogic.FilterConfigurations.Where(c =>
+                            c.FilterType == Logic.FilterType.CraftFilter);
+                    foreach (var filter in craftFilters)
+                    {
+                        if (item.Item.CanBeCrafted() && !ExcelCache.IsCompanyCraft(item.Item.RowId))
+                        {
+                            //TODO: replace with a dynamic way of determining number of steps
+                            if (ImGui.Selectable("Add " + item.QuantityNeeded + " item to craft list - " + filter.Name))
+                            {
+                                filter.CraftList.AddCraftItem(item.Item.RowId, item.QuantityNeeded, ItemFlags.None);
+                                configuration.NeedsRefresh = true;
+                                configuration.StartRefresh();
+                            }
+                        }
+                    }
+                }
+
 
                 ImGui.EndPopup();
             }
@@ -147,10 +184,24 @@ namespace InventoryTools.Logic.Columns
                         c.FilterType == Logic.FilterType.CraftFilter);
                 foreach (var filter in craftFilters)
                 {
-                    if (item.CanBeCrafted()  && ImGui.Selectable("Add to craft list - " + filter.Name))
+                    if (item.CanBeCrafted() && !ExcelCache.IsCompanyCraft(item.RowId) && ImGui.Selectable("Add to craft list - " + filter.Name))
                     {
                         filter.CraftList.AddCraftItem(item.RowId);
                         filter.NeedsRefresh = true;
+                        filter.StartRefresh();
+                    }
+                    if (item.CanBeCrafted() && ExcelCache.IsCompanyCraft(item.RowId))
+                    {
+                        //TODO: replace with a dynamic way of determining number of steps
+                        for (uint i = 0; i < 3; i++)
+                        {
+                            if (ImGui.Selectable("Add phase " + i + " to craft list - " + filter.Name))
+                            {
+                                filter.CraftList.AddCraftItem(item.RowId, 1, ItemFlags.None, i);
+                                filter.NeedsRefresh = true;
+                                filter.StartRefresh();
+                            }
+                        }
                     }
                 }
 

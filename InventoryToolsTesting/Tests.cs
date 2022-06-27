@@ -80,6 +80,7 @@ namespace TestProject1
                 Assert.AreEqual( 1, oneList.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
             }
         }
+
         
         [Test]
         public void TestSortFilter()
@@ -534,24 +535,7 @@ namespace TestProject1
             if (item != null)
             {
                 var craftItems = item.GetFlattenedCraftItems(true, 1);
-                Assert.AreEqual(craftItems.Count, 18);
-                return;
-                var filterManager = new FilterManager(true);
-            
-                var craftFilter = new FilterConfiguration();
-                craftFilter.FilterType = FilterType.CraftFilter;
-                craftFilter.SourceAllRetainers = true;
-                
-                var sortFilter = new FilterConfiguration();
-                sortFilter.FilterType = FilterType.SortingFilter;
-                sortFilter.SourceCategories = new HashSet<InventoryCategory>() {InventoryCategory.CharacterBags};
-                sortFilter.DestinationCategories = new HashSet<InventoryCategory>() {InventoryCategory.RetainerBags};
-                
-                
-                if (_character != null && _retainer != null && _retainer2 != null && _character2 != null)
-                {
-                   
-                }
+                Assert.AreEqual(craftItems.Count, 43);
             }
             
             

@@ -41,7 +41,7 @@ namespace InventoryTools.Sections
                         var table = PluginService.PluginLogic.GetFilterTable(filterConfiguration.Key);
                         if (table != null)
                         {
-                            table.Draw();
+                            table.Draw(new Vector2(0, 0));
                         }
                     }
                 }

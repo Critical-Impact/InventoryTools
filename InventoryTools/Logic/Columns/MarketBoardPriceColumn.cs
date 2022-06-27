@@ -108,7 +108,7 @@ namespace InventoryTools.Logic.Columns
         }
 
         public override string Name { get; set; } = "MB Average Price NQ/HQ";
-        public override float Width { get; set; } = 250.0f;
+        public override float Width { get; set; } = 200.0f;
         public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;

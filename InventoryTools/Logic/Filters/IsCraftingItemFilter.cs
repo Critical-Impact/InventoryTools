@@ -18,24 +18,24 @@ namespace InventoryTools.Logic.Filters
             FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter;
 
         
-        public override bool FilterItem(FilterConfiguration configuration, InventoryItem item)
+        public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
             var currentValue = this.CurrentValue(configuration);
             return currentValue switch
             {
-                null => true,
+                null => null,
                 true => item.Item != null && ExcelCache.IsCraftItem(item.Item.RowId),
                 _ => item.Item != null && !ExcelCache.IsCraftItem(item.Item.RowId)
             };
         }
 
-        public override bool FilterItem(FilterConfiguration configuration, Item item)
+        public override bool? FilterItem(FilterConfiguration configuration, Item item)
         {
             var currentValue = this.CurrentValue(configuration);
             
             return currentValue switch
             {
-                null => true,
+                null => null,
                 true => ExcelCache.IsCraftItem(item.RowId),
                 _ => !ExcelCache.IsCraftItem(item.RowId)
             };

@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Colors;
 using InventoryTools.Logic.Columns.Abstract;
@@ -21,6 +22,11 @@ namespace InventoryTools.Logic.Columns
         public override (string, Vector4)? CurrentValue(SortingResult item)
         {
             return CurrentValue(item.InventoryItem);
+        }
+
+        public override (string, Vector4)? CurrentValue(CraftItem currentValue)
+        {
+            return (currentValue.FormattedName, ImGuiColors.DalamudWhite);
         }
 
         public override string Name { get; set; } = "Name";
