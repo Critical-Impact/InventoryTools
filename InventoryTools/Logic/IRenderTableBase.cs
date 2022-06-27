@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Numerics;
 using InventoryTools.Logic.Columns;
 
 namespace InventoryTools.Logic
@@ -8,7 +9,7 @@ namespace InventoryTools.Logic
         public void RefreshColumns();
         public List<IColumn> Columns { get; set; }
 
-        public void Draw();
+        public void Draw(Vector2 size);
 
         public void Refresh(InventoryToolsConfiguration configuration);
         

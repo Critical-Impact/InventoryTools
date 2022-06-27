@@ -10,6 +10,7 @@ namespace InventoryTools.Logic.Filters
         Market = 5,
         Display = 6,
         Inventories = 7,
-        Columns = 8
+        Columns = 8,
+        Advanced = 9
     }
 }

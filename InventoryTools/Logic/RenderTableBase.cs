@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using ImGuiNET;
 using InventoryTools.Logic.Columns;
@@ -91,7 +92,7 @@ namespace InventoryTools.Logic
         
         public abstract void RefreshColumns();
 
-        public abstract void Draw();
+        public abstract void Draw(Vector2 size);
 
         public virtual void Dispose()
         {

@@ -15,14 +15,14 @@ namespace InventoryTools.Logic.Filters
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Searching;
         public override FilterType AvailableIn { get; set; } = FilterType.SortingFilter | FilterType.SearchFilter;
         
-        public override bool FilterItem(FilterConfiguration configuration, InventoryItem item)
+        public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
-            return true;
+            return null;
         }
 
-        public override bool FilterItem(FilterConfiguration configuration, Item item)
+        public override bool? FilterItem(FilterConfiguration configuration, Item item)
         {
-            return true;
+            return null;
         }
 
         public override bool? CurrentValue(FilterConfiguration configuration)

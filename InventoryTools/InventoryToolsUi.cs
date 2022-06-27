@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Numerics;
 using CriticalCommonLib;
+using CriticalCommonLib.Addons;
 using CriticalCommonLib.MarketBoard;
+using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
 using Dalamud.Game.ClientState;
@@ -70,12 +72,29 @@ namespace InventoryTools
                     {
                         if (ImGui.BeginTabItem(itemTable.Name + "##" + filterConfiguration.Key))
                         {
+                            ImGui.BeginChild("TopBar", new Vector2(0, 25)* ImGui.GetIO().FontGlobalScale);
+                            var highlightItems = itemTable.HighlightItems;
+                            ImGui.Checkbox( "Highlight?"+ "###" + itemTable.Key + "VisibilityCheckbox", ref highlightItems);
+                            if (highlightItems != itemTable.HighlightItems)
+                            {
+                                PluginService.PluginLogic.ToggleActiveUiFilterByKey(itemTable.FilterConfiguration.Key);
+                            }
+                            if (ImGui.Button("Clear Search"))
+                            {
+                                //TODO: fix me bby
+                            }
+                            ImGui.EndChild();
+                            ImGui.BeginChild("Content", new Vector2(0, -30)* ImGui.GetIO().FontGlobalScale); 
                             if (filterConfiguration.FilterType == FilterType.CraftFilter)
                             {
                                 var craftTable = PluginService.PluginLogic.GetCraftTable(filterConfiguration.Key);
-                                craftTable?.Draw();
+                                craftTable?.Draw(new Vector2(0, -400));
+                                itemTable.Draw(new Vector2(0, 0));
                             }
-                            itemTable.Draw();
+                            else
+                            {
+                                itemTable.Draw(new Vector2(0, 0));
+                            }
                             if (_activeFilter != filterConfiguration.Key)
                             {
                                 _activeFilter = filterConfiguration.Key;
@@ -86,6 +105,60 @@ namespace InventoryTools
                                     PluginService.PluginLogic.ToggleActiveUiFilterByKey(filterConfiguration.Key);
                                 }
                             }
+                            ImGui.EndChild();
+                            //Need to have these buttons be determined dynamically or moved elsewhere
+                            ImGui.BeginChild("BottomBar", new Vector2(0,0), false, ImGuiWindowFlags.None);
+                            if (ImGui.Button("Refresh Market Prices"))
+                            {
+                                foreach (var item in itemTable.RenderSortedItems)
+                                {
+                                    Universalis.QueuePriceCheck(item.InventoryItem.ItemId);
+                                }
+                                foreach (var item in itemTable.RenderItems)
+                                {
+                                    Universalis.QueuePriceCheck(item.RowId);
+                                }
+                            }
+                            ImGui.SameLine();
+                            if (ImGui.Button("Export to CSV"))
+                            {
+                                //PluginService.FileDialogManager.SaveFileDialog("Save to csv", "*.csv", "export.csv", ".csv", SaveCallback, null, true);
+                            }
+                            ImGui.SameLine();
+                            if (filterConfiguration.FilterType == FilterType.CraftFilter)
+                            {
+                                unsafe
+                                {
+                                    var subMarinePartsMenu = PluginService.GameUi.GetWindow("SubmarinePartsMenu");
+                                    if (subMarinePartsMenu != null)
+                                    {
+                                        if (ImGui.Button("Add Submarine Parts to Craft"))
+                                        {
+                                            var subAddon = (SubmarinePartsMenuAddon*)subMarinePartsMenu;
+                                            for (int i = 0; i < 5; i++)
+                                            {
+                                                var itemRequired = subAddon->RequiredItemId(i);
+                                                if (itemRequired != 0)
+                                                {
+                                                    var amountHandedIn = subAddon->AmountHandedIn(i);
+                                                    var amountNeeded = subAddon->AmountNeeded(i);
+                                                    var amountLeft = Math.Max((int)amountNeeded - (int)amountHandedIn, 0);
+                                                    if (amountLeft > 0)
+                                                    {
+                                                        filterConfiguration.CraftList.AddCraftItem(itemRequired, (uint)amountLeft, ItemFlags.None);
+                                                        filterConfiguration.NeedsRefresh = true;
+                                                        filterConfiguration.StartRefresh();
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            ImGui.SameLine();
+                            ImGui.Text("Pending Market Requests: " + Universalis.QueuedCount);
+                            ImGui.EndChild();
                             ImGui.EndTabItem();
                         }
                     }

@@ -14,9 +14,9 @@ namespace InventoryTools.Logic.Filters.Abstract
         public abstract bool HasValueSet(FilterConfiguration configuration);
 
         public abstract FilterType AvailableIn { get; set; }
-        public abstract bool FilterItem(FilterConfiguration configuration, InventoryItem item);
+        public abstract bool? FilterItem(FilterConfiguration configuration, InventoryItem item);
 
-        public abstract bool FilterItem(FilterConfiguration configuration, Item item);
+        public abstract bool? FilterItem(FilterConfiguration configuration, Item item);
 
         public abstract void Draw(FilterConfiguration configuration);
     }

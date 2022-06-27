@@ -16,7 +16,7 @@ namespace InventoryTools.Logic.Filters
         public override FilterType AvailableIn { get; set; } =
             FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter;
 
-        public override bool FilterItem(FilterConfiguration configuration,InventoryItem item)
+        public override bool? FilterItem(FilterConfiguration configuration,InventoryItem item)
         {
             var currentValue = CurrentValue(configuration);
             if (!string.IsNullOrEmpty(currentValue))
@@ -34,7 +34,7 @@ namespace InventoryTools.Logic.Filters
             return true;
         }
 
-        public override bool FilterItem(FilterConfiguration configuration,Item item)
+        public override bool? FilterItem(FilterConfiguration configuration,Item item)
         {
             var currentValue = CurrentValue(configuration);
             if (!string.IsNullOrEmpty(currentValue))

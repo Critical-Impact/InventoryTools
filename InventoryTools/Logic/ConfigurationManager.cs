@@ -76,6 +76,46 @@ namespace InventoryTools.Logic
             }
             Config = inventoryToolsConfiguration;
         }
+        public static void LoadFromFile(string file, string inventoryFileName)
+        {
+            PluginLog.Verbose("Loading configuration");
+            if (!File.Exists(file))
+            {
+                Config = new InventoryToolsConfiguration();
+                return;
+            }
+
+            string jsonText = File.ReadAllText(file);
+            var inventoryToolsConfiguration = JsonConvert.DeserializeObject<InventoryToolsConfiguration>(jsonText, new JsonSerializerSettings()
+            {
+                DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
+                ContractResolver = new MinifyResolver()
+            });
+            if (inventoryToolsConfiguration == null)
+            {
+                Config = new InventoryToolsConfiguration();
+                return;
+            }
+            if (!inventoryToolsConfiguration.InventoriesMigrated)
+            {
+                PluginLog.Verbose("Migrating inventories");
+                var temp =  JObject.Parse(jsonText);
+                if (temp.ContainsKey("SavedInventories"))
+                {
+                    var inventories = temp["SavedInventories"]?.ToObject<Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>>();
+                    inventoryToolsConfiguration.SavedInventories = inventories ??
+                                                                   new Dictionary<ulong, Dictionary<InventoryCategory,
+                                                                       List<InventoryItem>>>();
+                }
+
+                inventoryToolsConfiguration.InventoriesMigrated = true;
+            }
+            else
+            {
+                inventoryToolsConfiguration.SavedInventories = LoadSavedInventories(inventoryFileName) ?? new();
+            }
+            Config = inventoryToolsConfiguration;
+        }
         
         public static void Save()
         {

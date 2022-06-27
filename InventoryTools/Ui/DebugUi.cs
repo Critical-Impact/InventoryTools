@@ -4,6 +4,7 @@ using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Addons;
 using CriticalCommonLib.Agents;
+using CriticalCommonLib.Extensions;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
@@ -47,6 +48,14 @@ namespace InventoryTools
                 if (ImGui.Selectable("Universalis", Configuration.SelectedDebugPage == 4))
                 {
                     Configuration.SelectedDebugPage = 4;
+                }
+                if (ImGui.Selectable("Crafting", Configuration.SelectedDebugPage == 5))
+                {
+                    Configuration.SelectedDebugPage = 5;
+                }
+                if (ImGui.Selectable("Fun Times", Configuration.SelectedDebugPage == 6))
+                {
+                    Configuration.SelectedDebugPage = 6;
                 }
                 ImGui.EndChild();
             }
@@ -163,7 +172,18 @@ namespace InventoryTools
                         if (instance != null)
                         {
                             PluginLog.Log($"Manager pointer: {(ulong)instance:X}", $"{(ulong)instance:X}");
-                            
+                        }
+                    }
+                    if (ImGui.Button("Check inventory item pointer"))
+                    {
+                        var instance = InventoryManager.Instance();
+                        if (instance != null)
+                        {
+                            var inv = instance->GetInventoryContainer(FFXIVClientStructs.FFXIV.Client.Game.InventoryType
+                                .Inventory1);
+                            var inventoryItem = (IntPtr)inv->GetInventorySlot(32);
+                            PluginLog.Log($"first item pointer: {(ulong)inventoryItem:X}", $"{(ulong)inventoryItem:X}");
+                            PluginLog.Log($"first item pointer qty: {(ulong)inventoryItem + 12:X}", $"{(ulong)inventoryItem + 12:X}");
                         }
                     }
                     if (ImGui.Button("Check retainer pointer"))
@@ -211,6 +231,35 @@ namespace InventoryTools
                         {
                             var inventoryAddon = (InventoryLargeAddon*) inventoryLarge;
                             PluginLog.Log(inventoryAddon->CurrentTab.ToString());
+
+                        }
+                    }
+                    if (ImGui.Button("Check current company craft"))
+                    {
+                        var subMarinePartsMenu = PluginService.GameUi.GetWindow("SubmarinePartsMenu");
+                        if (subMarinePartsMenu != null)
+                        {
+                            var subAddon = (SubmarinePartsMenuAddon*) subMarinePartsMenu;
+                            PluginLog.Log("Current Phase: " + subAddon->Phase.ToString());
+                            PluginLog.Log("Item 1: " + subAddon->AmountHandedIn(0).ToString());
+                            PluginLog.Log("Item 2: " + subAddon->AmountHandedIn(1).ToString());
+                            PluginLog.Log("Item 3: " + subAddon->AmountHandedIn(2).ToString());
+                            PluginLog.Log("Item 4: " + subAddon->AmountHandedIn(3).ToString());
+                            PluginLog.Log("Item 5: " + subAddon->AmountHandedIn(4).ToString());
+                            PluginLog.Log("Item 6: " + subAddon->AmountHandedIn(5).ToString());
+                            PluginLog.Log("Item 1: " + subAddon->AmountNeeded(0).ToString());
+                            PluginLog.Log("Item 2: " + subAddon->AmountNeeded(1).ToString());
+                            PluginLog.Log("Item 3: " + subAddon->AmountNeeded(2).ToString());
+                            PluginLog.Log("Item 4: " + subAddon->AmountNeeded(3).ToString());
+                            PluginLog.Log("Item 5: " + subAddon->AmountNeeded(4).ToString());
+                            PluginLog.Log("Item 6: " + subAddon->AmountNeeded(5).ToString());
+                            PluginLog.Log("Crafting: " + subAddon->ResultItemId.ToString());
+                            PluginLog.Log("Item Required: " + subAddon->RequiredItemId(0).ToString());
+                            PluginLog.Log("Item Required: " + subAddon->RequiredItemId(1).ToString());
+                            PluginLog.Log("Item Required: " + subAddon->RequiredItemId(2).ToString());
+                            PluginLog.Log("Item Required: " + subAddon->RequiredItemId(3).ToString());
+                            PluginLog.Log("Item Required: " + subAddon->RequiredItemId(4).ToString());
+                            PluginLog.Log("Item Required: " + subAddon->RequiredItemId(5).ToString());
 
                         }
                     }
@@ -283,6 +332,52 @@ namespace InventoryTools
                 else if (Configuration.SelectedDebugPage == 4)
                 {
                     ImGui.Text("Current Items in Queue: " + Universalis.QueuedCount);
+                }
+                else if (Configuration.SelectedDebugPage == 5)
+                {
+                    var craftMonitorAgent = PluginService.CraftMonitor.Agent;
+                    var simpleCraftMonitorAgent = PluginService.CraftMonitor.SimpleAgent;
+                    if (craftMonitorAgent != null)
+                    {
+                        ImGui.Text("Progress: " + craftMonitorAgent.Progress);
+                        ImGui.Text("Total Progress Required: " + PluginService.CraftMonitor.RecipeLevelTable?.ProgressRequired(PluginService.CraftMonitor.CurrentRecipe) ?? "Unknown");
+                        ImGui.Text("Quality: " + craftMonitorAgent.Quality);
+                        ImGui.Text("Status: " + craftMonitorAgent.Status);
+                        ImGui.Text("Step: " + craftMonitorAgent.Step);
+                        ImGui.Text("Durability: " + craftMonitorAgent.Durability);
+                        ImGui.Text("HQ Chance: " + craftMonitorAgent.HqChance);
+                        ImGui.Text("Item: " + ExcelCache.GetItem(craftMonitorAgent.ResultItemId)?.Name.ToString() ?? "Unknown");
+                        ImGui.Text("Current Recipe: " + PluginService.CraftMonitor.CurrentRecipe?.RowId ?? "Unknown");
+                        ImGui.Text("Recipe Difficulty: " + PluginService.CraftMonitor.RecipeLevelTable?.Difficulty ?? "Unknown");
+                        ImGui.Text("Recipe Difficulty Factor: " + PluginService.CraftMonitor.CurrentRecipe?.DifficultyFactor ?? "Unknown");
+                        ImGui.Text("Recipe Durability: " + PluginService.CraftMonitor.RecipeLevelTable?.Durability ?? "Unknown");
+                        ImGui.Text("Suggested Control: " + PluginService.CraftMonitor.RecipeLevelTable?.SuggestedControl ?? "Unknown");
+                        ImGui.Text("Suggested Craftsmanship: " + PluginService.CraftMonitor.RecipeLevelTable?.SuggestedCraftsmanship ?? "Unknown");
+                        ImGui.Text("Current Craft Type: " + PluginService.CraftMonitor.Agent?.CraftType ?? "Unknown");
+                    }
+                    else if (simpleCraftMonitorAgent != null)
+                    {
+                        ImGui.Text("NQ Complete: " + simpleCraftMonitorAgent.NqCompleted);
+                        ImGui.Text("HQ Complete: " + simpleCraftMonitorAgent.HqCompleted);
+                        ImGui.Text("Failed: " + simpleCraftMonitorAgent.TotalFailed);
+                        ImGui.Text("Total Completed: " + simpleCraftMonitorAgent.TotalCompleted);
+                        ImGui.Text("Total: " + simpleCraftMonitorAgent.Total);
+                        ImGui.Text("Item: " + ExcelCache.GetItem(simpleCraftMonitorAgent.ResultItemId)?.Name.ToString() ?? "Unknown");
+                        ImGui.Text("Current Recipe: " + PluginService.CraftMonitor.CurrentRecipe?.RowId ?? "Unknown");
+                        ImGui.Text("Current Craft Type: " + PluginService.CraftMonitor.Agent?.CraftType ?? "Unknown");
+                    }
+                    else
+                    {
+                        ImGui.Text("Not crafting.");
+                    }
+                }
+                else if (Configuration.SelectedDebugPage == 6)
+                {
+                    ImGui.Text("Running: " + (PluginService.FunTimeService.IsRunning ? "Yes" : "No"));
+                    if (ImGui.Button(PluginService.FunTimeService.IsRunning ? "Stop" : "Start"))
+                    {
+                        PluginService.FunTimeService.Toggle();
+                    }
                 }
                 ImGui.EndChild();
             }

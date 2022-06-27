@@ -23,14 +23,14 @@ namespace InventoryTools.Logic.Filters
             configuration.DestinationIncludeCrossCharacter = newValue;
         }
 
-        public override bool FilterItem(FilterConfiguration configuration,InventoryItem item)
+        public override bool? FilterItem(FilterConfiguration configuration,InventoryItem item)
         {
-            return true;
+            return null;
         }
 
-        public override bool FilterItem(FilterConfiguration configuration, Item item)
+        public override bool? FilterItem(FilterConfiguration configuration, Item item)
         {
-            return true;
+            return null;
         }
     }
 }

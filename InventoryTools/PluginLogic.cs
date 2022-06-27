@@ -103,6 +103,9 @@ namespace InventoryTools
                 PluginService.GameUi.WatchWindowState(WindowName.InventoryBuddy);
                 PluginService.GameUi.WatchWindowState(WindowName.InventoryBuddy2);
                 PluginService.GameUi.UiVisibilityChanged += GameUiOnUiVisibilityChanged;
+                PluginService.CraftMonitor.CraftStarted += CraftMonitorOnCraftStarted;
+                PluginService.CraftMonitor.CraftFailed += CraftMonitorOnCraftFailed ;
+                PluginService.CraftMonitor.CraftCompleted += CraftMonitorOnCraftCompleted ;
 
                 GameInterface.AcquiredItemsUpdated += GameInterfaceOnAcquiredItemsUpdated;
 
@@ -120,6 +123,27 @@ namespace InventoryTools
                 this.CommonBase = new XivCommonBase(Hooks.Tooltips);
                 this.CommonBase.Functions.Tooltips.OnItemTooltip += this.OnItemTooltip;
             }
+        }
+
+        private void CraftMonitorOnCraftCompleted(uint itemid, ItemFlags flags, uint quantity)
+        {
+            PluginLog.Log("craft completed on " + itemid);
+            var activeFilter = GetActiveFilter();
+            if (activeFilter != null && activeFilter.FilterType == FilterType.CraftFilter)
+            {
+                activeFilter.CraftList.MarkCrafted(itemid, ItemFlags.None, 1);
+                activeFilter.StartRefresh();
+            }
+        }
+
+        private void CraftMonitorOnCraftFailed(uint itemid)
+        {
+            PluginLog.Log("craft failed on " + itemid);
+        }
+
+        private void CraftMonitorOnCraftStarted(uint itemid)
+        {
+            PluginLog.Log("craft started on " + itemid);
         }
 
         private void CharacterMonitorOnOnCharacterRemoved(ulong characterId)
@@ -1253,8 +1277,9 @@ namespace InventoryTools
                         {
                             filter.OpenAsWindow = isVisible;
                         }
+                        //TODO: maybe support craft?
                         var itemTable = PluginService.PluginLogic.GetFilterTable(filter.Key);
-                        itemTable?.Draw();
+                        itemTable?.Draw(new Vector2(0, 0));
                     }
                     ImGui.End();
                 }

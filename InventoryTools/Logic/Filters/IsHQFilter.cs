@@ -12,7 +12,7 @@ namespace InventoryTools.Logic.Filters
         public override FilterType AvailableIn { get; set; }  = FilterType.SearchFilter | FilterType.SortingFilter;
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
 
-        public override bool FilterItem(FilterConfiguration configuration,InventoryItem item)
+        public override bool? FilterItem(FilterConfiguration configuration,InventoryItem item)
         {
             var currentValue = CurrentValue(configuration);
             if (currentValue == null) return true;
@@ -26,7 +26,7 @@ namespace InventoryTools.Logic.Filters
 
         }
 
-        public override bool FilterItem(FilterConfiguration configuration, Item item)
+        public override bool? FilterItem(FilterConfiguration configuration, Item item)
         {
             return true;
         }

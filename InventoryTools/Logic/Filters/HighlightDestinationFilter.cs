@@ -12,14 +12,14 @@ namespace InventoryTools.Logic.Filters
             "Should any items that match in the destination bag be highlighted?";
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Display;
         public override FilterType AvailableIn { get; set; } = FilterType.SortingFilter;
-        public override bool FilterItem(FilterConfiguration configuration, InventoryItem item)
+        public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
-            return true;
+            return null;
         }
 
-        public override bool FilterItem(FilterConfiguration configuration, Item item)
+        public override bool? FilterItem(FilterConfiguration configuration, Item item)
         {
-            return true;
+            return null;
         }
 
         public override bool? CurrentValue(FilterConfiguration configuration)

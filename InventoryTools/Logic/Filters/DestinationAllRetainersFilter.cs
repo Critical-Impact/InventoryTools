@@ -12,14 +12,14 @@ namespace InventoryTools.Logic.Filters
         public override string HelpText { get; set; } = "Use every retainer's inventory as a destination.";
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Inventories;
         public override FilterType AvailableIn { get; set; } = FilterType.SortingFilter | FilterType.CraftFilter;
-        public override bool FilterItem(FilterConfiguration configuration, InventoryItem item)
+        public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
-            return true;
+            return null;
         }
 
-        public override bool FilterItem(FilterConfiguration configuration, Item item)
+        public override bool? FilterItem(FilterConfiguration configuration, Item item)
         {
-            return true;
+            return null;
         }
 
         public override bool? CurrentValue(FilterConfiguration configuration)

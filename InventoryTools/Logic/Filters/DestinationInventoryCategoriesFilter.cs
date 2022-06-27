@@ -28,14 +28,14 @@ namespace InventoryTools.Logic.Filters
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Inventories;
         public override FilterType AvailableIn { get; set; } = FilterType.SortingFilter;
         
-        public override bool FilterItem(FilterConfiguration configuration, InventoryItem item)
+        public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
-            return true;
+            return null;
         }
 
-        public override bool FilterItem(FilterConfiguration configuration, Item item)
+        public override bool? FilterItem(FilterConfiguration configuration, Item item)
         {
-            return true;
+            return null;
         }
 
         public override Dictionary<InventoryCategory, string> GetChoices(FilterConfiguration configuration)

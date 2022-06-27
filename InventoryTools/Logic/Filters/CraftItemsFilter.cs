@@ -30,7 +30,7 @@ namespace InventoryTools.Logic.Filters
             base.UpdateFilterConfiguration(configuration, newValue);
         }
 
-        public override bool FilterItem(FilterConfiguration configuration, InventoryItem item)
+        public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
             if (item.Item != null)
             {
@@ -40,7 +40,7 @@ namespace InventoryTools.Logic.Filters
             return true;
         }
 
-        public override bool FilterItem(FilterConfiguration configuration, Item item)
+        public override bool? FilterItem(FilterConfiguration configuration, Item item)
         {
             var currentValue = CurrentValue(configuration);
             if (currentValue != "")
