@@ -1,7 +1,8 @@
+using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -26,13 +27,13 @@ namespace InventoryTools.Logic.Filters
             switch (currentValue.Value)
             {
                 case false:
-                    return !ExcelCache.SpentAtSpecialShop(item.ItemId);
+                    return !Service.ExcelCache.SpentAtSpecialShop(item.ItemId);
                 case true:
-                    return ExcelCache.SpentAtSpecialShop(item.ItemId);
+                    return Service.ExcelCache.SpentAtSpecialShop(item.ItemId);
             }
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration, Item item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
         {
             var currentValue = CurrentValue(configuration);
             if (currentValue == null)
@@ -43,9 +44,9 @@ namespace InventoryTools.Logic.Filters
             switch (currentValue.Value)
             {
                 case false:
-                    return !ExcelCache.SpentAtSpecialShop(item.RowId);
+                    return !Service.ExcelCache.SpentAtSpecialShop(item.RowId);
                 case true:
-                    return ExcelCache.SpentAtSpecialShop(item.RowId);
+                    return Service.ExcelCache.SpentAtSpecialShop(item.RowId);
             }
         }
     }

@@ -1,7 +1,7 @@
 using System.Linq;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -9,16 +9,12 @@ namespace InventoryTools.Logic.Columns
     {
         public override int? CurrentValue(InventoryItem item)
         {
-            if (item.Item == null)
-            {
-                return null;
-            }
             return CurrentValue(item.Item);
         }
 
-        public override int? CurrentValue(Item item)
+        public override int? CurrentValue(ItemEx item)
         {
-            return (int?) PluginService.InventoryMonitor.AllItems.Where(c => c.ItemId == item.RowId).Sum(c => c.Quantity);
+            return (int?) PluginService.InventoryMonitor.ItemCounts.Where(c => c.Key == item.RowId).Sum(c => c.Value);
         }
 
         public override int? CurrentValue(SortingResult item)

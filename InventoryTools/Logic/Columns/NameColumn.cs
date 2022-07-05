@@ -1,7 +1,12 @@
-﻿using System.Numerics;
+﻿using System.Linq;
+using System.Numerics;
+using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
+using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using Lumina.Excel.GeneratedSheets;
 
@@ -14,7 +19,7 @@ namespace InventoryTools.Logic.Columns
             return (item.FormattedName, item.ItemColour);
         }
 
-        public override (string, Vector4)? CurrentValue(Item item)
+        public override (string, Vector4)? CurrentValue(ItemEx item)
         {
             return (item.Name, ImGuiColors.DalamudWhite);
         }
@@ -22,6 +27,39 @@ namespace InventoryTools.Logic.Columns
         public override (string, Vector4)? CurrentValue(SortingResult item)
         {
             return CurrentValue(item.InventoryItem);
+        }
+
+        public override void Draw(CraftItem item, int rowIndex, FilterConfiguration configuration)
+        {
+            base.Draw(item, rowIndex, configuration);
+            if (item.IsOutputItem)
+            {
+                if (Service.ExcelCache.ItemRecipes.ContainsKey(item.ItemId))
+                {
+                    var itemRecipes = Service.ExcelCache.ItemRecipes[item.ItemId];
+                    if (itemRecipes.Count != 1)
+                    {
+                        var actualRecipes = itemRecipes.Select(c => Service.ExcelCache.GetSheet<Recipe>().GetRow(c)!)
+                            .OrderBy(c => c.CraftType.Value?.Name ?? "").ToList();
+                        var value = item.Recipe?.CraftType.Value?.Name ?? "";
+                        ImGui.SameLine();
+                        if (ImGui.BeginCombo("##SetRecipe" + rowIndex, value))
+                        {
+                            foreach (var recipe in actualRecipes)
+                            {
+                                if (ImGui.Selectable(recipe.CraftType.Value?.Name ?? "",
+                                        value == (recipe.CraftType.Value?.Name ?? "")))
+                                {
+                                    configuration.CraftList.SetCraftRecipe(item.ItemId, recipe.RowId);
+                                    configuration.StartRefresh();
+                                }
+                            }
+
+                            ImGui.EndCombo();
+                        }
+                    }
+                }
+            }
         }
 
         public override (string, Vector4)? CurrentValue(CraftItem currentValue)

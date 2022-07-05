@@ -2,9 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
-using InventoryTools.Extensions;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -27,14 +26,14 @@ namespace InventoryTools.Logic.Filters
             "This is a list of sources categories to search in. It will attempt to search for items in any bag of the given category.";
         
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Inventories;
-        public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter;
+        public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter | FilterType.CraftFilter;
         
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
             return null;
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration, Item item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
         {
             return null;
         }

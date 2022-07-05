@@ -1,7 +1,8 @@
+using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -21,19 +22,19 @@ namespace InventoryTools.Logic.Filters
             return currentValue switch
             {
                 null => true,
-                true => item.Item != null && ExcelCache.IsItemCraftLeve(item.ItemId),
-                _ => item.Item != null && !ExcelCache.IsItemCraftLeve(item.ItemId)
+                true => Service.ExcelCache.IsItemCraftLeve(item.ItemId),
+                _ => !Service.ExcelCache.IsItemCraftLeve(item.ItemId)
             };
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration, Item item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
         {
             var currentValue = this.CurrentValue(configuration);
             return currentValue switch
             {
                 null => true,
-                true => ExcelCache.IsItemCraftLeve(item.RowId),
-                _ => !ExcelCache.IsItemCraftLeve(item.RowId)
+                true => Service.ExcelCache.IsItemCraftLeve(item.RowId),
+                _ => !Service.ExcelCache.IsItemCraftLeve(item.RowId)
             };
         }
     }

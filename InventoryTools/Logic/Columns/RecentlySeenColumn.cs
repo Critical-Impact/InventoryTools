@@ -1,7 +1,7 @@
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Columns.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -12,7 +12,7 @@ namespace InventoryTools.Logic.Columns
             return PluginService.PluginLogic.GetLastSeenTime(item.ItemId)?.ToHumanReadableString() ?? "";
         }
 
-        public override string? CurrentValue(Item item)
+        public override string? CurrentValue(ItemEx item)
         {
             return PluginService.PluginLogic.GetLastSeenTime(item.RowId)?.ToHumanReadableString() ?? "";
         }

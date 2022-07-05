@@ -1,18 +1,7 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
 using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Enums;
-using CriticalCommonLib.Extensions;
-using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
-using Dalamud.Logging;
-using InventoryTools;
-using InventoryTools.Extensions;
-using InventoryTools.Logic;
-using Lumina.Excel.GeneratedSheets;
 using NUnit.Framework;
 
 namespace TestProject1
@@ -25,7 +14,7 @@ namespace TestProject1
         public void Init()
         {
             var lumina = new Lumina.GameData( "H:/Games/SquareEnix/FINAL FANTASY XIV - A Realm Reborn/game/sqpack" );
-            ExcelCache.Initialise(lumina);
+            Service.ExcelCache = new ExcelCache(lumina);
         }
         
         [Test]

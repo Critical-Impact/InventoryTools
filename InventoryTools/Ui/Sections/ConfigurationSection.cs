@@ -1,12 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using CriticalCommonLib.Services;
-using Dalamud.Interface.Colors;
-using Dalamud.Logging;
 using ImGuiNET;
-using InventoryTools.Fonts;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings.Abstract;
 

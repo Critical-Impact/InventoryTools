@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Sheets;
 using ImGuiNET;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -23,24 +23,24 @@ namespace InventoryTools.Logic.Columns
         
         public IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items);
         public IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items);
-        public IEnumerable<Item> Filter(IEnumerable<Item> items);
+        public IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items);
         public IEnumerable<CraftItem> Filter(IEnumerable<CraftItem> items);
         
         public IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items);
         public IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items);
-        public IEnumerable<Item> Sort(ImGuiSortDirection direction, IEnumerable<Item> items);
+        public IEnumerable<ItemEx> Sort(ImGuiSortDirection direction, IEnumerable<ItemEx> items);
         
         public IEnumerable<CraftItem> Sort(ImGuiSortDirection direction, IEnumerable<CraftItem> items);
         
         public void Draw(InventoryItem item, int rowIndex);
         public void Draw(SortingResult item, int rowIndex);
-        public void Draw(Item item, int rowIndex);
+        public void Draw(ItemEx item, int rowIndex);
         
         public void Draw(CraftItem item, int rowIndex, FilterConfiguration configuration);
 
         public string CsvExport(InventoryItem item);
         public string CsvExport(SortingResult item);
-        public string CsvExport(Item item);
+        public string CsvExport(ItemEx item);
         public string CsvExport(CraftItem item);
 
         public void Setup(int columnIndex);

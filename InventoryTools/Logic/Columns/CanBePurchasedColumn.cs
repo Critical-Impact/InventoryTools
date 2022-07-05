@@ -1,7 +1,8 @@
+using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -9,12 +10,12 @@ namespace InventoryTools.Logic.Columns
     {
         public override bool? CurrentValue(InventoryItem item)
         {
-            return ExcelCache.IsItemGilShopBuyable(item.ItemId);
+            return item.Item.CanBeBoughtWithGil;
         }
 
-        public override bool? CurrentValue(Item item)
+        public override bool? CurrentValue(ItemEx item)
         {
-            return ExcelCache.IsItemGilShopBuyable(item.RowId);
+            return item.CanBeBoughtWithGil;
         }
 
         public override bool? CurrentValue(SortingResult item)

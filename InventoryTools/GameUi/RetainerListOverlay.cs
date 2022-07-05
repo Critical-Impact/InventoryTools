@@ -3,9 +3,7 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Services.Ui;
-using Dalamud.Logging;
 using InventoryTools.Logic;
-using InventoryTools.Logic.Columns;
 
 namespace InventoryTools.GameUi
 {

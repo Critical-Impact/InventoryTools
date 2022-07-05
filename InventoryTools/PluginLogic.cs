@@ -5,15 +5,12 @@ using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 using CriticalCommonLib;
-using CriticalCommonLib.Enums;
-using CriticalCommonLib.Extensions;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
+using CriticalCommonLib.Sheets;
 using Dalamud.Game;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.Gui;
 using Dalamud.Interface.Colors;
 using Dalamud.Logging;
 using Dalamud.Utility;
@@ -25,7 +22,6 @@ using InventoryTools.Logic;
 using InventoryTools.Logic.Columns;
 using InventoryTools.Logic.Filters;
 using InventoryTools.Logic.Settings.Abstract;
-using Lumina.Excel.GeneratedSheets;
 using XivCommon;
 using XivCommon.Functions.Tooltips;
 
@@ -127,7 +123,6 @@ namespace InventoryTools
 
         private void CraftMonitorOnCraftCompleted(uint itemid, ItemFlags flags, uint quantity)
         {
-            PluginLog.Log("craft completed on " + itemid);
             var activeFilter = GetActiveFilter();
             if (activeFilter != null && activeFilter.FilterType == FilterType.CraftFilter)
             {
@@ -138,12 +133,10 @@ namespace InventoryTools
 
         private void CraftMonitorOnCraftFailed(uint itemid)
         {
-            PluginLog.Log("craft failed on " + itemid);
         }
 
         private void CraftMonitorOnCraftStarted(uint itemid)
         {
-            PluginLog.Log("craft started on " + itemid);
         }
 
         private void CharacterMonitorOnOnCharacterRemoved(ulong characterId)
@@ -287,6 +280,8 @@ namespace InventoryTools
             }
         }
 
+        private uint? currentClassJob = null;
+
         private void FrameworkOnUpdate(Framework framework)
         {
             if (PluginConfiguration.AutoSave)
@@ -301,6 +296,19 @@ namespace InventoryTools
                     {
                         _nextSaveTime = null;
                         ConfigurationManager.Save();
+                    }
+                }
+            }
+
+            if (Service.ClientState.IsLoggedIn && Service.ClientState.LocalPlayer != null && (Service.ClientState.LocalPlayer?.ClassJob.Id ?? null) != currentClassJob)
+            {
+                currentClassJob = Service.ClientState.LocalPlayer?.ClassJob.Id ?? null;
+                if (currentClassJob != null)
+                {
+                    var activeFilter = GetActiveFilter();
+                    if (activeFilter != null)
+                    {
+                        activeFilter.StartRefresh();
                     }
                 }
             }
@@ -549,7 +557,7 @@ namespace InventoryTools
             sampleFilter.DestinationCategories =  new HashSet<InventoryCategory>() {InventoryCategory.RetainerBags};
             sampleFilter.FilterItemsInRetainers = true;
             sampleFilter.HighlightWhen = "Always";
-            var itemUiCategories = ExcelCache.GetAllItemUICategories();
+            var itemUiCategories = Service.ExcelCache.GetAllItemUICategories();
             //I'm making assumptions about the names of these and one day I will try to support more than english
             var categories = new HashSet<string>() { "Bone", "Cloth", "Catalyst", "Crystal", "Ingredient", "Leather", "Lumber", "Metal", "Part", "Stone" };
             sampleFilter.ItemUiCategoryId = new List<uint>();
@@ -881,12 +889,6 @@ namespace InventoryTools
                 itemId -= 1000000;
             }
 
-            var item = ExcelCache.GetItem((uint)itemId);
-            if (item == null)
-            {
-                return;
-            }
-
             var description = tooltip[itemTooltipString];
             const string indentation = "      ";
 
@@ -932,7 +934,7 @@ namespace InventoryTools
                 if (PluginConfiguration.TooltipDisplayMarketAveragePrice ||
                     PluginConfiguration.TooltipDisplayMarketLowestPrice)
                 {
-                    if (!(ExcelCache.GetItem((uint) itemId)?.IsUntradable ?? true))
+                    if (!Service.ExcelCache.GetSheet<ItemEx>().GetRow((uint) itemId).IsUntradable)
                     {
                         var marketData = Cache.GetPricing((uint) itemId, false);
                         if (marketData != null)
@@ -1291,8 +1293,8 @@ namespace InventoryTools
             foreach (var item in CraftWindows)
             {
                 var isVisible = item.Value;
-                var actualItem = ExcelCache.GetItem(item.Key);
-                if (actualItem != null && item.Value)
+                var actualItem = Service.ExcelCache.GetSheet<ItemEx>().GetRow(item.Key);
+                if (item.Value && actualItem != null)
                 {
                     ImGui.SetNextWindowSize(new Vector2(350, 500) * ImGui.GetIO().FontGlobalScale,
                         ImGuiCond.FirstUseEver);
@@ -1304,21 +1306,13 @@ namespace InventoryTools
                     {
                         ImGui.Text(actualItem.Description.ToDalamudString().ToString());
                         ImGui.Separator();
-                        var recipes = ExcelCache.GetItemRecipes(item.Key);
+                        var recipes = actualItem.RecipesAsResult;
                         foreach (var recipe in recipes)
                         {
                             ImGui.Text("Recipe - " + (recipe.CraftType.Value?.Name ?? ""));
-                            foreach (var ingredient in recipe.UnkData5)
+                            foreach (var ingredient in recipe.Ingredients)
                             {
-                                if (ingredient.ItemIngredient != 0)
-                                {
-                                    var ingredientItem = ExcelCache.GetItem((uint) ingredient.ItemIngredient);
-                                    if (ingredientItem != null)
-                                    {
-                                        ImGui.Text(ingredientItem.Name + " - " +
-                                                   ingredient.AmountIngredient);
-                                    }
-                                }
+                                ImGui.Text((ingredient.Item.Value?.Name ?? "Unknown") + " - " + ingredient.Count);
                             }
                             ImGui.Separator();
                         }
@@ -1334,7 +1328,7 @@ namespace InventoryTools
             }
         }
 
-        public static void ShowCraftRequirementsWindow(Item item)
+        public static void ShowCraftRequirementsWindow(ItemEx item)
         {
             if (!CraftWindows.ContainsKey(item.RowId))
             {

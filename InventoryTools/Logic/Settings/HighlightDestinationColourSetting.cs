@@ -1,5 +1,4 @@
 using System.Numerics;
-using Dalamud.Interface.Colors;
 using InventoryTools.Logic.Settings.Abstract;
 
 namespace InventoryTools.Logic.Settings

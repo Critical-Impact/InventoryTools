@@ -1,16 +1,16 @@
 ﻿using System.Collections.Generic;
 using CriticalCommonLib.Models;
-using Lumina.Excel.GeneratedSheets;
+using CriticalCommonLib.Sheets;
 
 namespace InventoryTools.Logic
 {
     public struct FilterResult
     {
         private List<SortingResult> _sortedItems;
-        private List<Item> _allItems;
+        private List<ItemEx> _allItems;
         private List<InventoryItem> _unsortableItems;
 
-        public FilterResult(List<SortingResult> sortedItems, List<InventoryItem> unsortableItems, List<Item> items)
+        public FilterResult(List<SortingResult> sortedItems, List<InventoryItem> unsortableItems, List<ItemEx> items)
         {
             _sortedItems = sortedItems;
             _unsortableItems = unsortableItems;
@@ -21,6 +21,6 @@ namespace InventoryTools.Logic
 
         public List<InventoryItem> UnsortableItems => _unsortableItems;
         
-        public List<Item> AllItems => _allItems;
+        public List<ItemEx> AllItems => _allItems;
     }
 }

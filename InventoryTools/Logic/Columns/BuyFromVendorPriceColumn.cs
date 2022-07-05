@@ -1,7 +1,6 @@
-using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -9,7 +8,7 @@ namespace InventoryTools.Logic.Columns
     {
         public override int? CurrentValue(InventoryItem item)
         {
-            if (item.CanBeBought)
+            if (item.Item.CanBeBoughtWithGil)
             {
                 int buyPrice = (int)item.BuyFromVendorPrice;
                 return buyPrice;
@@ -18,9 +17,9 @@ namespace InventoryTools.Logic.Columns
             return null;
         }
 
-        public override int? CurrentValue(Item item)
+        public override int? CurrentValue(ItemEx item)
         {
-            if (item.CanBeBought())
+            if (item.CanBeBoughtWithGil)
             {
                 int buyPrice = (int)item.PriceMid;
                 return buyPrice;

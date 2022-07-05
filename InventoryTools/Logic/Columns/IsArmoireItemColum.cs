@@ -1,8 +1,8 @@
+using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
-using InventoryTools.Misc;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -10,12 +10,12 @@ namespace InventoryTools.Logic.Columns
     {
         public override bool? CurrentValue(InventoryItem item)
         {
-            return item.Item == null ? false : CurrentValue(item.Item);
+            return CurrentValue(item.Item);
         }
 
-        public override bool? CurrentValue(Item item)
+        public override bool? CurrentValue(ItemEx item)
         {
-            return ExcelCache.IsArmoireItem(item.RowId);
+            return Service.ExcelCache.IsArmoireItem(item.RowId);
         }
 
         public override bool? CurrentValue(SortingResult item)

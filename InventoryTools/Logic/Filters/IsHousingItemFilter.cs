@@ -1,9 +1,6 @@
-using System.Collections.Generic;
 using CriticalCommonLib.Models;
-using Dalamud.Logging;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
-using InventoryTools.Misc;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -24,12 +21,12 @@ namespace InventoryTools.Logic.Filters
             return currentValue switch
             {
                 null => true,
-                true => item.Item != null && item.Item.AdditionalData != 0 && item.Item.ItemAction.Row == 0 && item.Item.FilterGroup != 37 && item.Item.FilterGroup != 15 && item.Item.FilterGroup != 39 && item.Item.FilterGroup != 18,
-                _ => item.Item != null && !(item.Item.AdditionalData != 0 && item.Item.ItemAction.Row == 0 && item.Item.FilterGroup != 37 && item.Item.FilterGroup != 15 && item.Item.FilterGroup != 39 && item.Item.FilterGroup != 18)
+                true => item.Item.AdditionalData != 0 && item.Item.ItemAction.Row == 0 && item.Item.FilterGroup != 37 && item.Item.FilterGroup != 15 && item.Item.FilterGroup != 39 && item.Item.FilterGroup != 18,
+                _ => !(item.Item.AdditionalData != 0 && item.Item.ItemAction.Row == 0 && item.Item.FilterGroup != 37 && item.Item.FilterGroup != 15 && item.Item.FilterGroup != 39 && item.Item.FilterGroup != 18)
             };
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration, Item item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
         {
             var currentValue = this.CurrentValue(configuration);
             return currentValue switch

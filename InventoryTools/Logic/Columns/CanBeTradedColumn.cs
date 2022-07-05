@@ -1,7 +1,6 @@
 using CriticalCommonLib.Models;
-using InventoryTools.Extensions;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -12,9 +11,9 @@ namespace InventoryTools.Logic.Columns
             return item.CanBeTraded;
         }
 
-        public override bool? CurrentValue(Item item)
+        public override bool? CurrentValue(ItemEx item)
         {
-            return item.CanBeTraded();
+            return item.CanBeTraded;
         }
 
         public override bool? CurrentValue(SortingResult item)

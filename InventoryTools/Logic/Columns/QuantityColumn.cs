@@ -1,6 +1,6 @@
 ﻿using CriticalCommonLib.Models;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -12,7 +12,7 @@ namespace InventoryTools.Logic.Columns
             return (int)item.Quantity;
         }
 
-        public override int? CurrentValue(Item item)
+        public override int? CurrentValue(ItemEx item)
         {
             //Add in item counts globally maybe?
             return null;

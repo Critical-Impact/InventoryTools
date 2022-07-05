@@ -1,5 +1,5 @@
 using CriticalCommonLib.Models;
-using Lumina.Excel.GeneratedSheets;
+using CriticalCommonLib.Sheets;
 
 namespace InventoryTools.Logic.Filters.Abstract
 {
@@ -16,7 +16,7 @@ namespace InventoryTools.Logic.Filters.Abstract
         public abstract FilterType AvailableIn { get; set; }
         public abstract bool? FilterItem(FilterConfiguration configuration, InventoryItem item);
 
-        public abstract bool? FilterItem(FilterConfiguration configuration, Item item);
+        public abstract bool? FilterItem(FilterConfiguration configuration, ItemEx item);
 
         public abstract void Draw(FilterConfiguration configuration);
     }

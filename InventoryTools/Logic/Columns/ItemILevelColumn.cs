@@ -1,6 +1,6 @@
 ﻿using CriticalCommonLib.Models;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -8,7 +8,7 @@ namespace InventoryTools.Logic.Columns
     {
         public override int? CurrentValue(InventoryItem item)
         {
-            if (item.EquipSlotCategory == null || item.Item == null)
+            if (item.EquipSlotCategory == null)
             {
                 return null;
             }
@@ -20,7 +20,7 @@ namespace InventoryTools.Logic.Columns
             return (int)item.Item.LevelItem.Row;
         }
 
-        public override int? CurrentValue(Item item)
+        public override int? CurrentValue(ItemEx item)
         {
             if (item.EquipSlotCategory.Row == 0)
             {

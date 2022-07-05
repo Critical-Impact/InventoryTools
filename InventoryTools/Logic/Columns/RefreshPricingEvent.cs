@@ -1,7 +1,6 @@
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.MarketBoard;
-using FFXIVClientStructs.FFXIV.Client.Game;
-using Lumina.Excel.GeneratedSheets;
+using CriticalCommonLib.Sheets;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -18,7 +17,7 @@ namespace InventoryTools.Logic.Columns
 
         }
 
-        public void HandleEvent(Item item)
+        public void HandleEvent(ItemEx item)
         {
             Universalis.QueuePriceCheck(item.RowId);
         }

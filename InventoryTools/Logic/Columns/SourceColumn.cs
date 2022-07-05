@@ -1,6 +1,6 @@
 ﻿using CriticalCommonLib.Models;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -11,7 +11,7 @@ namespace InventoryTools.Logic.Columns
             return PluginService.CharacterMonitor.Characters.ContainsKey(item.RetainerId) ?  PluginService.CharacterMonitor.Characters[item.RetainerId].FormattedName : "Unknown (" + item.RetainerId + ")";
         }
 
-        public override string? CurrentValue(Item item)
+        public override string? CurrentValue(ItemEx item)
         {
             return null;
         }

@@ -1,11 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
-using Lumina.Excel.GeneratedSheets;
-using NaturalSort.Extension;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -16,7 +14,7 @@ namespace InventoryTools.Logic.Columns
             return "Sorting only";
         }
 
-        public override string? CurrentValue(Item item)
+        public override string? CurrentValue(ItemEx item)
         {
             return "Sorting only";
         }
@@ -26,19 +24,33 @@ namespace InventoryTools.Logic.Columns
             return "Sorting only";
         }
 
-        public override IEnumerable<Item> Sort(ImGuiSortDirection direction, IEnumerable<Item> items)
+        public override IEnumerable<ItemEx> Sort(ImGuiSortDirection direction, IEnumerable<ItemEx> items)
         {
             return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => (c.ItemSortCategory.Value?.Param) ?? 0).ThenBy(c => c.EquipSlotCategory.Row != 0 ? (int)c.LevelItem.Row : c.Unknown19) :  items.OrderByDescending(c => (c.ItemSortCategory.Value?.Param) ?? 0).ThenByDescending(c => c.EquipSlotCategory.Row != 0 ? (int)c.LevelItem.Row : c.Unknown19);
         }
 
         public override IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => c.InventoryItem.Item == null ? 0 : (c.InventoryItem.Item.ItemSortCategory.Value?.Param) ?? 0).ThenBy(c =>c.InventoryItem.Item == null ? 0 : c.InventoryItem.Item.EquipSlotCategory.Row != 0 ? (int)c.InventoryItem.Item.LevelItem.Row : c.InventoryItem.Item.Unknown19) :  items.OrderByDescending(c =>c.InventoryItem.Item == null ? 0 : (c.InventoryItem.Item.ItemSortCategory.Value?.Param) ?? 0).ThenByDescending(c =>c.InventoryItem.Item == null ? 0 : c.InventoryItem.Item.EquipSlotCategory.Row != 0 ? (int)c.InventoryItem.Item.LevelItem.Row : c.InventoryItem.Item.Unknown19);
+            return direction == ImGuiSortDirection.Ascending
+                ? items
+                    .OrderBy(c =>c.InventoryItem.Item.ItemSortCategory.Value?.Param)
+                    .ThenBy(c =>
+                        c.InventoryItem.Item.EquipSlotCategory.Row != 0 ? (int)c.InventoryItem.Item.LevelItem.Row :
+                        c.InventoryItem.Item.Unknown19)
+                : items
+                    .OrderByDescending(c => c.InventoryItem.Item.ItemSortCategory.Value?.Param)
+                    .ThenByDescending(c =>c.InventoryItem.Item.EquipSlotCategory.Row != 0 ? (int)c.InventoryItem.Item.LevelItem.Row :
+                        c.InventoryItem.Item.Unknown19);
         }
 
         public override IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => c.Item == null ? 0 : (c.Item.ItemSortCategory.Value?.Param) ?? 0).ThenBy(c =>c.Item == null ? 0 : c.Item.EquipSlotCategory.Row != 0 ? (int)c.Item.LevelItem.Row : c.Item.Unknown19) :  items.OrderByDescending(c =>c.Item == null ? 0 : (c.Item.ItemSortCategory.Value?.Param) ?? 0).ThenByDescending(c =>c.Item == null ? 0 : c.Item.EquipSlotCategory.Row != 0 ? (int)c.Item.LevelItem.Row : c.Item.Unknown19);
+            return direction == ImGuiSortDirection.Ascending
+                ? items.OrderBy(c => c.Item.ItemSortCategory.Value?.Param).ThenBy(c =>
+                    c.Item.EquipSlotCategory.Row != 0 ? (int)c.Item.LevelItem.Row : c.Item.Unknown19)
+                : items.OrderByDescending(c =>c.Item.ItemSortCategory.Value?.Param)
+                    .ThenByDescending(c =>
+                        c.Item.EquipSlotCategory.Row != 0 ? (int)c.Item.LevelItem.Row : c.Item.Unknown19);
         }
 
         public override string Name { get; set; } = "Debug - Market ID";

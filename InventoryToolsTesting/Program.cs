@@ -6,13 +6,12 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using InventoryTools;
 using InventoryTools.Logic;
-using Lumina.Data.Files;
 using Lumina.Excel.GeneratedSheets;
 
 //Not so simple way to test people's filters/inventory files for issues
 var lumina = new Lumina.GameData( "H:/Games/SquareEnix/FINAL FANTASY XIV - A Realm Reborn/game/sqpack" );
-ExcelCache.Initialise(lumina);
-var row = ExcelCache.GetSheet<SpecialShop>().GetRow(1769907);
+Service.ExcelCache = new ExcelCache(lumina);
+var row = Service.ExcelCache.GetSheet<SpecialShop>().GetRow(1769907);
 var characterMonitor = new CharacterMonitor(true);
 var pluginLogic = new PluginLogic(true);
 PluginService.InitialiseTesting(characterMonitor, pluginLogic);

@@ -1,4 +1,3 @@
-using System.Globalization;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 

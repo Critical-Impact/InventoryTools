@@ -1,5 +1,3 @@
-using System;
-
 namespace InventoryTools.Logic.Settings.Abstract
 {
     public abstract class Setting<T> : ISetting

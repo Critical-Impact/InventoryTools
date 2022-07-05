@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using CriticalCommonLib.MarketBoard;
-using CriticalCommonLib.Services;
+using CriticalCommonLib.Sheets;
 using CsvHelper;
 using Dalamud.Logging;
 using ImGuiNET;
 using InventoryTools.Logic.Columns;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic
 {
@@ -75,10 +72,10 @@ namespace InventoryTools.Logic
                             IsSearching = true;
                         }
 
-                        items = column.Filter(items);
+                        items = column.Filter((IEnumerable<ItemEx>)items);
                         if (SortColumn != null && index == SortColumn)
                         {
-                            items = column.Sort(SortDirection ?? ImGuiSortDirection.None, items);
+                            items = column.Sort(SortDirection ?? ImGuiSortDirection.None, (IEnumerable<ItemEx>)items);
                         }
                     }
 
@@ -225,11 +222,11 @@ namespace InventoryTools.Logic
                             for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                             {
                                 var column = Columns[columnIndex];
-                                column.Draw(item, index);
+                                column.Draw((ItemEx)item, index);
                                 ImGui.SameLine();
                                 if (columnIndex == Columns.Count - 1)
                                 {
-                                    PluginService.PluginLogic.RightClickColumn.Draw(item, index);
+                                    PluginService.PluginLogic.RightClickColumn.Draw((ItemEx)item, index);
                                 }
                             }
                         }

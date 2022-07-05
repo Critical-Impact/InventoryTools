@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Filters.Abstract;
 using Lumina.Excel.GeneratedSheets;
@@ -19,18 +21,18 @@ namespace InventoryTools.Logic.Filters
             FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter;
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
-            return item.Item != null && FilterItem(configuration, item.Item) == true;
+            return FilterItem(configuration, item.Item) == true;
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration, Item item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
         {
             var currentValue = this.CurrentValue(configuration);
             if (currentValue.Count == 0)
             {
                 return true;
             }
-            ExcelCache.CalculateClassJobCategoryLookup();
-            var lookup = ExcelCache.ClassJobCategoryLookup;
+            Service.ExcelCache.CalculateClassJobCategoryLookup();
+            var lookup = Service.ExcelCache.ClassJobCategoryLookup;
             if (lookup.ContainsKey(item.ClassJobCategory.Row))
             {
                 var map = lookup[item.ClassJobCategory.Row];
@@ -46,7 +48,7 @@ namespace InventoryTools.Logic.Filters
         public override Dictionary<uint, string> GetChoices(FilterConfiguration configuration)
         {
             var choices = new Dictionary<uint, string>();
-            var sheet = ExcelCache.GetSheet<ClassJob>();
+            var sheet = Service.ExcelCache.GetSheet<ClassJob>();
             foreach (var classJob in sheet)
             {
                 choices.Add(classJob.RowId, classJob.Name.ToString().ToTitleCase());

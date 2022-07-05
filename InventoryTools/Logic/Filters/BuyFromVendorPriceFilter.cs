@@ -1,8 +1,7 @@
-using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Filters.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -21,7 +20,7 @@ namespace InventoryTools.Logic.Filters
             var currentValue = CurrentValue(configuration);
             if (!string.IsNullOrEmpty(currentValue))
             {
-                if (!item.CanBeBought)
+                if (!item.Item.CanBeBoughtWithGil)
                 {
                     return false;
                 }
@@ -34,12 +33,12 @@ namespace InventoryTools.Logic.Filters
             return true;
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration,Item item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
         {
             var currentValue = CurrentValue(configuration);
             if (!string.IsNullOrEmpty(currentValue))
             {
-                if (!item.CanBeBought())
+                if (!item.CanBeBoughtWithGil)
                 {
                     return false;
                 }

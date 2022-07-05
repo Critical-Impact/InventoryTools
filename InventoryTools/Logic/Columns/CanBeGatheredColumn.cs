@@ -1,7 +1,8 @@
+using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -9,17 +10,17 @@ namespace InventoryTools.Logic.Columns
     {
         public override bool? CurrentValue(InventoryItem item)
         {
-            return ExcelCache.CanBeGathered(item.ItemId);
+            return Service.ExcelCache.CanBeGathered(item.ItemId);
         }
 
-        public override bool? CurrentValue(Item item)
+        public override bool? CurrentValue(ItemEx item)
         {
-            return ExcelCache.CanBeGathered(item.RowId);
+            return Service.ExcelCache.CanBeGathered(item.RowId);
         }
 
         public override bool? CurrentValue(SortingResult item)
         {
-            return ExcelCache.CanBeGathered(item.InventoryItem.ItemId);
+            return Service.ExcelCache.CanBeGathered(item.InventoryItem.ItemId);
         }
 
         public override string Name { get; set; } = "Can be Gathered?";

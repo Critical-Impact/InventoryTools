@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Extensions;
-using Lumina.Excel.GeneratedSheets;
 using NaturalSort.Extension;
 
 namespace InventoryTools.Logic.Columns.Abstract
@@ -17,9 +17,9 @@ namespace InventoryTools.Logic.Columns.Abstract
             return CurrentValue(item).ToString() ?? "";
         }
 
-        public override string CsvExport(Item item)
+        public override string CsvExport(ItemEx item)
         {
-            return CurrentValue(item).ToString() ?? "";
+            return CurrentValue((ItemEx)item).ToString() ?? "";
         }
 
         public override string CsvExport(SortingResult item)
@@ -28,11 +28,6 @@ namespace InventoryTools.Logic.Columns.Abstract
         }
         public override int? CurrentValue(CraftItem currentValue)
         {
-            if (currentValue.Item == null)
-            {
-                return null;
-            }
-
             return CurrentValue(currentValue.Item);
         }
         
@@ -60,20 +55,20 @@ namespace InventoryTools.Logic.Columns.Abstract
         {
             DoDraw(CurrentValue(item), rowIndex);
         }
-        public override void Draw(Item item, int rowIndex)
+        public override void Draw(ItemEx item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex);
+            DoDraw(CurrentValue((ItemEx)item), rowIndex);
         }
         public override void Draw(CraftItem item, int rowIndex, FilterConfiguration configuration)
         {
             DoDraw(CurrentValue(item), rowIndex);
         }
 
-        public override IEnumerable<Item> Filter(IEnumerable<Item> items)
+        public override IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items)
         {
             return FilterText == "" ? items : items.Where(c =>
             {
-                var currentValue = CurrentValue((Item) c);
+                var currentValue = CurrentValue( c);
                 if (currentValue == null)
                 {
                     return false;
@@ -114,17 +109,17 @@ namespace InventoryTools.Logic.Columns.Abstract
 
         public override IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy<InventoryItem, string>(c => CurrentValue(c).ToString() ?? "", StringComparison.OrdinalIgnoreCase.WithNaturalSort()) : items.OrderByDescending(c => CurrentValue(c).ToString() ?? "", StringComparison.OrdinalIgnoreCase.WithNaturalSort());
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => CurrentValue(c) ?? Int32.MaxValue) : items.OrderByDescending(c => CurrentValue(c) ?? Int32.MinValue);
         }
 
-        public override IEnumerable<Item> Sort(ImGuiSortDirection direction, IEnumerable<Item> items)
+        public override IEnumerable<ItemEx> Sort(ImGuiSortDirection direction, IEnumerable<ItemEx> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy<Item, string>(c => CurrentValue(c).ToString() ?? "", StringComparison.OrdinalIgnoreCase.WithNaturalSort()) : items.OrderByDescending(c => CurrentValue(c).ToString() ?? "", StringComparison.OrdinalIgnoreCase.WithNaturalSort());
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => CurrentValue(c) ?? Int32.MaxValue) : items.OrderByDescending(c => CurrentValue(c) ?? Int32.MinValue);
         }
 
         public override IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy<SortingResult, string>(c => CurrentValue(c).ToString() ?? "", StringComparison.OrdinalIgnoreCase.WithNaturalSort()) : items.OrderByDescending(c => CurrentValue(c).ToString() ?? "", StringComparison.OrdinalIgnoreCase.WithNaturalSort());
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => CurrentValue(c) ?? Int32.MaxValue) : items.OrderByDescending(c => CurrentValue(c) ?? Int32.MinValue);
         }
 
         public override IColumnEvent? DoDraw(int? currentValue, int rowIndex)

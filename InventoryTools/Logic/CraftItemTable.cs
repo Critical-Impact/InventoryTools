@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Extensions;
-using CriticalCommonLib.Services;
 using Dalamud.Logging;
 using ImGuiNET;
 using InventoryTools.Logic.Columns;
@@ -21,7 +19,7 @@ namespace InventoryTools.Logic
         
         public override void RefreshColumns()
         {
-            FreezeCols = 1;
+            FreezeCols = 2;
 
             var newColumns = new List<IColumn>();
             newColumns.Add(new IconColumn());
@@ -32,8 +30,13 @@ namespace InventoryTools.Logic
             newColumns.Add(new CraftAmountAvailableColumn());
             newColumns.Add(new CraftAmountUnavailableColumn());
             newColumns.Add(new CraftAmountCanCraftColumn());
+            
             newColumns.Add(new MarketBoardMinPriceColumn());
             newColumns.Add(new MarketBoardMinTotalPriceColumn());
+            newColumns.Add(new AcquisitionSourceIconsColumn());
+            newColumns.Add(new CraftGatherColumn());
+            newColumns.Add(new PurchasedWithCurrencyColumn());
+            newColumns.Add(new CraftPeonColumn());
             this.Columns = newColumns;
         }
 
@@ -98,8 +101,8 @@ namespace InventoryTools.Logic
 
                     //Make the visibility of zero quantity required items a toggle
                     var outputs = CraftItems.Where(c => c.IsOutputItem).ToList();
-                    var preCrafts = CraftItems.Where(c => c.QuantityNeeded != 0 && !c.IsOutputItem && (c.Item?.CanBeCrafted() ?? false)).OrderByDescending(c => c.ItemId).ToList();
-                    var everythingElse = CraftItems.Where(c => c.QuantityNeeded != 0 && !(c.Item?.CanBeCrafted() ?? true)).OrderByDescending(c => c.ItemId).ToList();
+                    var preCrafts = CraftItems.Where(c => c.QuantityNeeded != 0 && !c.IsOutputItem && c.Item.CanBeCrafted).OrderByDescending(c => c.ItemId).ToList();
+                    var everythingElse = CraftItems.Where(c => c.QuantityNeeded != 0 && !c.Item.CanBeCrafted).OrderByDescending(c => c.ItemId).ToList();
 
                     var overallIndex = 0;
                     for (var index = 0; index < outputs.Count; index++)

@@ -1,9 +1,9 @@
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Sheets;
 using Dalamud.Logging;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -14,7 +14,7 @@ namespace InventoryTools.Logic.Columns
             return 0;
         }
 
-        public override int? CurrentValue(Item item)
+        public override int? CurrentValue(ItemEx item)
         {
             return 0;
         }
@@ -49,7 +49,6 @@ namespace InventoryTools.Logic.Columns
                             var number = (uint) parsedNumber;
                             if (number != item.QuantityRequired)
                             {
-                                PluginLog.Log("new number: " + number);
                                 //TODO: Probably a better way to do this
                                 configuration.CraftList.SetCraftRequiredQuantity(item.ItemId, number, item.Flags,
                                     item.Phase);

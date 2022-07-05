@@ -1,7 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
+using CriticalCommonLib;
+using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
+using CriticalCommonLib.Sheets;
 using Dalamud.Utility;
 using InventoryTools.Logic.Filters.Abstract;
 using Lumina.Excel.GeneratedSheets;
@@ -25,14 +28,10 @@ namespace InventoryTools.Logic.Filters
         
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
-            if (item.Item == null)
-            {
-                return false;
-            }
             return FilterItem(configuration, item.Item);
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration, Item item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
         {
             var currentValue = CurrentValue(configuration);
             if (currentValue.Count != 0 && !currentValue.Contains(item.ItemUICategory.Row))
@@ -47,7 +46,7 @@ namespace InventoryTools.Logic.Filters
         {
             if (!_choicesLoaded)
             {
-                _choices = ExcelCache.GetAllItemUICategories().OrderBy(c => c.Value.Name.ToString())
+                _choices = Service.ExcelCache.GetAllItemUICategories().OrderBy(c => c.Value.Name.ToString())
                     .ToDictionary(c => c.Key, c => c.Value.Name.ToDalamudString().ToString());
                 _choicesLoaded = true;
             }

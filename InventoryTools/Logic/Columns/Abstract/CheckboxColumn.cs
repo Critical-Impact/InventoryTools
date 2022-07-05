@@ -3,9 +3,9 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Images;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns.Abstract
 {
@@ -16,9 +16,9 @@ namespace InventoryTools.Logic.Columns.Abstract
             return CurrentValue(item) ?? false ? "true" : "false";
         }
 
-        public override string CsvExport(Item item)
+        public override string CsvExport(ItemEx item)
         {
-            return CurrentValue(item) ?? false ? "true" : "false";
+            return CurrentValue((ItemEx)item) ?? false ? "true" : "false";
         }
 
         public override string CsvExport(SortingResult item)
@@ -28,11 +28,6 @@ namespace InventoryTools.Logic.Columns.Abstract
 
         public override bool? CurrentValue(CraftItem currentValue)
         {
-            if (currentValue.Item == null)
-            {
-                return null;
-            }
-
             return CurrentValue(currentValue.Item);
         }
         
@@ -113,16 +108,16 @@ namespace InventoryTools.Logic.Columns.Abstract
         {
             DoDraw(CurrentValue(item), rowIndex);
         }
-        public override void Draw(Item item, int rowIndex)
+        public override void Draw(ItemEx item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex);
+            DoDraw(CurrentValue((ItemEx)item), rowIndex);
         }
         public override void Draw(CraftItem item, int rowIndex, FilterConfiguration configuration)
         {
             DoDraw(CurrentValue(item), rowIndex);
         }
 
-        public override IEnumerable<Item> Filter(IEnumerable<Item> items)
+        public override IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items)
         {
             bool isChecked;
             if (FilterText == "")
@@ -140,7 +135,7 @@ namespace InventoryTools.Logic.Columns.Abstract
             }
             return FilterText == "" ? items : items.Where(c =>
             {
-                var currentValue = CurrentValue(c);
+                var currentValue = CurrentValue((ItemEx)c);
                 if (!currentValue.HasValue)
                 {
                     return false;
@@ -217,9 +212,9 @@ namespace InventoryTools.Logic.Columns.Abstract
             return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => CurrentValue(c) ?? false) : items.OrderByDescending(c => CurrentValue(c) ?? false);
         }
 
-        public override IEnumerable<Item> Sort(ImGuiSortDirection direction, IEnumerable<Item> items)
+        public override IEnumerable<ItemEx> Sort(ImGuiSortDirection direction, IEnumerable<ItemEx> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => CurrentValue(c) ?? false) : items.OrderByDescending(c => CurrentValue(c) ?? false);
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => CurrentValue((ItemEx)c) ?? false) : items.OrderByDescending(c => CurrentValue((ItemEx)c) ?? false);
         }
 
         public override IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items)

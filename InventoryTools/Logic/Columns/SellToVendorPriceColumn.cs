@@ -1,7 +1,7 @@
 using System;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -12,7 +12,7 @@ namespace InventoryTools.Logic.Columns
             return (int)item.SellToVendorPrice;
         }
 
-        public override int? CurrentValue(Item item)
+        public override int? CurrentValue(ItemEx item)
         {
             return (int)item.PriceLow;
         }
