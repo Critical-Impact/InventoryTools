@@ -8,7 +8,6 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
 using Dalamud.Game.ClientState.Objects.Enums;
-using Dalamud.Logging;
 using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic
@@ -215,7 +214,7 @@ namespace InventoryTools.Logic
                 else
                 {
                     var filteredItems = filterResult.Value.SortedItems.Where(c => c.SourceBag == InventoryType.Armoire);
-                    var cabinetDictionary = ExcelCache.GetSheet<CabinetCategory>().Where(c => c.Category.Row != 0).ToDictionary(c => c.Category.Row, c => (uint)c.MenuOrder - 1);
+                    var cabinetDictionary = Service.ExcelCache.GetSheet<CabinetCategory>().Where(c => c.Category.Row != 0).ToDictionary(c => c.Category.Row, c => (uint)c.MenuOrder - 1);
                     foreach (var item in filteredItems)
                     {
                         if(item.SourceBag == InventoryType.Armoire && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting)))
@@ -293,7 +292,7 @@ namespace InventoryTools.Logic
                     
                     if (classJobSelected != 0)
                     {
-                        filteredItems = filteredItems.Where(c => c.Item != null && ExcelCache.IsItemEquippableBy(c.Item.ClassJobCategory.Row, classJobSelected));
+                        filteredItems = filteredItems.Where(c => Service.ExcelCache.IsItemEquippableBy(c.Item.ClassJobCategory.Row, classJobSelected));
                     }
 
                     if (displayEquippableOnly && Service.ClientState.LocalPlayer != null)
@@ -302,7 +301,7 @@ namespace InventoryTools.Logic
                         var gender = Service.ClientState.LocalPlayer.Customize[(int) CustomizeIndex.Gender] == 0
                             ? CharacterSex.Male
                             : CharacterSex.Female;
-                        filteredItems = filteredItems.Where(c => c.CanBeEquippedByRaceGender(race, gender));
+                        filteredItems = filteredItems.Where(c => c.Item.CanBeEquippedByRaceGender(race, gender));
                         
                     }
 

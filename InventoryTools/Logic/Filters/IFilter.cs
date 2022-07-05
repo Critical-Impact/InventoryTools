@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using CriticalCommonLib.Models;
-using Lumina.Excel.GeneratedSheets;
-using Dalamud.Logging;
+using CriticalCommonLib.Sheets;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -20,7 +19,7 @@ namespace InventoryTools.Logic.Filters
         
         public FilterType AvailableIn { get; set; }
         public bool? FilterItem(FilterConfiguration configuration, InventoryItem item);
-        public bool? FilterItem(FilterConfiguration configuration, Item item);
+        public bool? FilterItem(FilterConfiguration configuration, ItemEx item);
         public void Draw(FilterConfiguration configuration);
 
         public static readonly List<FilterCategory> FilterCategoryOrder = new() {FilterCategory.Basic, FilterCategory.Columns, FilterCategory.Inventories, FilterCategory.Display, FilterCategory.Acquisition, FilterCategory.Searching, FilterCategory.Market, FilterCategory.Searching, FilterCategory.Crafting, FilterCategory.Gathering, FilterCategory.Advanced};

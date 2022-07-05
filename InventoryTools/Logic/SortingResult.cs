@@ -60,12 +60,7 @@ namespace InventoryTools.Logic
         public string GetExtraInformation()
         {
             string info = "";
-            if (InventoryItem.Item != null)
-            {
-                info += (InventoryItem.CanBeBought ? "Can be bought" : "Can't be bought") + '\n';
-
-            }
-
+            info += (InventoryItem.Item.CanBeBoughtWithGil ? "Can be bought" : "Can't be bought") + '\n';
             return info;
         }
     }

@@ -1,8 +1,9 @@
 using System.Linq;
+using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -27,22 +28,22 @@ namespace InventoryTools.Logic.Filters
                 return true;
             }
 
-            var expectedItem = ExcelCache.GetItem((uint) currentValue.Value);
-            if (expectedItem == null)
+            var expectedItem = Service.ExcelCache.GetSheet<ItemEx>().GetRow((uint) currentValue.Value);
+            if (expectedItem != null)
             {
                 return true;
             }
 
-            if (ExcelCache.CanCraftItem((uint)currentValue.Value))
+            if (Service.ExcelCache.CanCraftItem((uint)currentValue.Value))
             {
-                var flattenedRecipe = ExcelCache.GetFlattenedItemRecipe((uint) currentValue.Value);
+                var flattenedRecipe = Service.ExcelCache.GetFlattenedItemRecipe((uint) currentValue.Value);
                 return flattenedRecipe.Any(c => c.Key == item.ItemId);
             }
             return false;
         }
 
 
-        public override bool? FilterItem(FilterConfiguration configuration, Item item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
         {
             var currentValue = CurrentValue(configuration);
             if (currentValue == null)
@@ -50,15 +51,15 @@ namespace InventoryTools.Logic.Filters
                 return true;
             }
 
-            var excelItem = ExcelCache.GetItem((uint) currentValue.Value);
+            var excelItem = Service.ExcelCache.GetSheet<ItemEx>().GetRow((uint) currentValue.Value);
             if (excelItem == null)
             {
                 return true;
             }
 
-            if (ExcelCache.CanCraftItem((uint)currentValue.Value))
+            if (Service.ExcelCache.CanCraftItem((uint)currentValue.Value))
             {
-                var flattenedRecipe = ExcelCache.GetFlattenedItemRecipe((uint) currentValue.Value, true);
+                var flattenedRecipe = Service.ExcelCache.GetFlattenedItemRecipe((uint) currentValue.Value, true);
                 return flattenedRecipe.Any(c => c.Key == item.RowId);
             }
 

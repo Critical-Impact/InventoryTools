@@ -13,6 +13,7 @@
   &lt;Assembly Path="C:\Users\Blair\AppData\Roaming\XIVLauncher\addon\Hooks\dev\FFXIVClientStructs.dll" /&gt;&#xD;
   &lt;Assembly Path="C:\Users\Blair\AppData\Roaming\XIVLauncher\addon\Hooks\dev\Dalamud.dll" /&gt;&#xD;
   &lt;Assembly Path="C:\Users\Blair\.nuget\packages\xivcommon\4.0.0\lib\net5.0-windows7.0\XivCommon.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Users\Blair\.nuget\packages\system.reactive\5.0.0\lib\net5.0\System.Reactive.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=3459a58e_002D91bd_002D4346_002D8693_002D90eebe1a1717/@EntryIndexedValue">&lt;SessionState ContinuousTestingIsOn="True" ContinuousTestingMode="1" IsActive="True" Name="All tests from &amp;lt;InventoryToolsTesting&amp;gt;" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;Project Location="C:\Users\Blair\RiderProjects\InventoryTools\InventoryToolsTesting" Presentation="&amp;lt;InventoryToolsTesting&amp;gt;" /&gt;&#xD;

@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Numerics;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Resolvers;
 using Dalamud.Configuration;
 using Dalamud.Interface.Colors;
-using Dalamud.Logging;
-using Dalamud.Plugin;
 using InventoryTools.Logic;
 using Newtonsoft.Json;
 

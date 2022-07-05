@@ -1,9 +1,7 @@
 using System.Collections.Generic;
-using System.Drawing;
 using System.Numerics;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Services.Ui;
-using Dalamud.Logging;
 using InventoryTools.Logic;
 
 namespace InventoryTools.GameUi

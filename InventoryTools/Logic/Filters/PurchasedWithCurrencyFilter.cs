@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
+using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -27,23 +28,23 @@ namespace InventoryTools.Logic.Filters
             {
                 return null;
             }
-            return currentValue.Any(currencyItem => ExcelCache.BoughtWithCurrency(currencyItem, item.ItemId));
+            return currentValue.Any(currencyItem => Service.ExcelCache.BoughtWithCurrency(currencyItem, item.ItemId));
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration, Item item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
         {
             var currentValue = CurrentValue(configuration);
             if (currentValue.Count == 0)
             {
                 return null;
             }
-            return currentValue.Any(currencyItem => ExcelCache.BoughtWithCurrency(currencyItem, item.RowId));
+            return currentValue.Any(currencyItem => Service.ExcelCache.BoughtWithCurrency(currencyItem, item.RowId));
         }
 
         public override Dictionary<uint, string> GetChoices(FilterConfiguration configuration)
         {
-            var currencies = ExcelCache.GetCurrencies(3);
-            return currencies.ToDictionary(c => c, c => ExcelCache.GetItem(c)?.Name ?? "Unknown").OrderBy(c => c.Value).ToDictionary(c => c.Key, c => c.Value);
+            var currencies = Service.ExcelCache.GetCurrencies(3);
+            return currencies.ToDictionary(c => c, c => Service.ExcelCache.GetSheet<ItemEx>().GetRow(c)?.Name.ToString() ?? "Unknown").OrderBy(c => c.Value).ToDictionary(c => c.Key, c => c.Value);
         }
 
         public override bool HideAlreadyPicked { get; set; } = true;

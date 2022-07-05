@@ -1,10 +1,10 @@
 using System;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -15,7 +15,7 @@ namespace InventoryTools.Logic.Columns
             return 0;
         }
 
-        public override int? CurrentValue(Item item)
+        public override int? CurrentValue(ItemEx item)
         {
             return 0;
         }
@@ -36,29 +36,19 @@ namespace InventoryTools.Logic.Columns
 
         public override void Draw(CraftItem item, int rowIndex, FilterConfiguration configuration)
         {
-            if ((int)item.QuantityNeeded - (int)item.QuantityReady <= 0)
+            if (item.IsOutputItem)
             {
-                
+                ImGui.TableNextColumn();
+                return;
             }
-            else if (item.QuantityAvailable < item.QuantityNeeded)
+            if (item.QuantityAvailable != 0)
             {
-                ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudRed);
-            }
-            else if(item.QuantityAvailable >= item.QuantityNeeded)
-            {
-                ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.HealerGreen);
+                ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.ParsedBlue);
             }
 
             base.Draw(item, rowIndex, configuration);
-            if ((int)item.QuantityNeeded - (int)item.QuantityReady <= 0)
-            {
-                
-            }
-            else if (item.QuantityAvailable < item.QuantityNeeded)
-            {
-                ImGui.PopStyleColor();
-            }
-            else if(item.QuantityAvailable >= item.QuantityNeeded)
+
+            if (item.QuantityAvailable != 0)
             {
                 ImGui.PopStyleColor();
             }

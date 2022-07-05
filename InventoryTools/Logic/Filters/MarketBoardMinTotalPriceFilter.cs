@@ -1,7 +1,7 @@
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Extensions;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -47,7 +47,7 @@ namespace InventoryTools.Logic.Filters
             return true;
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration, Item item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
         {
             return true;
         }

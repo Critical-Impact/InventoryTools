@@ -1,10 +1,6 @@
 ﻿using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
-using Dalamud.Interface.Colors;
-using Dalamud.Logging;
-using ImGuiNET;
-using InventoryTools.Extensions;
-using Lumina.Excel.GeneratedSheets;
+using CriticalCommonLib.Sheets;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -28,9 +24,9 @@ namespace InventoryTools.Logic.Columns
             return (Loading, Loading);
         }
 
-        public override (int,int)? CurrentValue(Item item)
+        public override (int, int)? CurrentValue(ItemEx item)
         {
-            if (!item.CanBeTraded())
+            if (!item.CanBeTraded)
             {
                 return (Untradable, Untradable);
             }

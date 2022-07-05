@@ -7,11 +7,10 @@ using CriticalCommonLib.Enums;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
+using CriticalCommonLib.Sheets;
 using Dalamud.Logging;
 using InventoryTools;
-using InventoryTools.Extensions;
 using InventoryTools.Logic;
-using Lumina.Excel.GeneratedSheets;
 using NUnit.Framework;
 
 namespace TestProject1
@@ -30,7 +29,7 @@ namespace TestProject1
         public void Init()
         {
             var lumina = new Lumina.GameData( "H:/Games/SquareEnix/FINAL FANTASY XIV - A Realm Reborn/game/sqpack" );
-            ExcelCache.Initialise(lumina);
+            Service.ExcelCache = new ExcelCache(lumina);
             _characterMonitor = new CharacterMonitor(true);
             _pluginLogic = new PluginLogic(true);
             PluginService.InitialiseTesting(_characterMonitor, _pluginLogic);
@@ -93,9 +92,9 @@ namespace TestProject1
             searchFilter.FilterType = FilterType.SortingFilter;
             
             //Flour, just cause
-            var ryeFlour = ExcelCache.GetItem(4825);
-            var wheatFlour = ExcelCache.GetItem(4826);
-            var cinnamon = ExcelCache.GetItem(4828);
+            var ryeFlour = Service.ExcelCache.GetSheet<ItemEx>().GetRow(4825);
+            var wheatFlour = Service.ExcelCache.GetSheet<ItemEx>().GetRow(4826);
+            var cinnamon = Service.ExcelCache.GetSheet<ItemEx>().GetRow(4828);
             
             
             if (_character != null && _retainer != null && _retainer2 != null && ryeFlour != null && wheatFlour != null && cinnamon != null)
@@ -192,9 +191,9 @@ namespace TestProject1
             searchFilter.FilterType = FilterType.SortingFilter;
             
             //Flour, just cause
-            var ryeFlour = ExcelCache.GetItem(4825);
-            var wheatFlour = ExcelCache.GetItem(4826);
-            var cinnamon = ExcelCache.GetItem(4828);
+            var ryeFlour = Service.ExcelCache.GetSheet<ItemEx>().GetRow(4825);
+            var wheatFlour = Service.ExcelCache.GetSheet<ItemEx>().GetRow(4826);
+            var cinnamon = Service.ExcelCache.GetSheet<ItemEx>().GetRow(4828);
             
             
             if (_character != null && ryeFlour != null && wheatFlour != null && cinnamon != null)
@@ -256,9 +255,9 @@ namespace TestProject1
             searchFilter.FilterType = FilterType.SortingFilter;
             
             //Flour, just cause
-            var ryeFlour = ExcelCache.GetItem(4825);
-            var wheatFlour = ExcelCache.GetItem(4826);
-            var cinnamon = ExcelCache.GetItem(4828);
+            var ryeFlour = Service.ExcelCache.GetSheet<ItemEx>().GetRow(4825);
+            var wheatFlour = Service.ExcelCache.GetSheet<ItemEx>().GetRow(4826);
+            var cinnamon = Service.ExcelCache.GetSheet<ItemEx>().GetRow(4828);
             
             if (_character != null && _retainer != null && _retainer2 != null && ryeFlour != null && wheatFlour != null && cinnamon != null)
             {
@@ -310,9 +309,9 @@ namespace TestProject1
             searchFilter.FilterType = FilterType.SearchFilter;
             
             //Flour, just cause
-            var ryeFlour = ExcelCache.GetItem(4825);
-            var wheatFlour = ExcelCache.GetItem(4826);
-            var cinnamon = ExcelCache.GetItem(4828);
+            var ryeFlour = Service.ExcelCache.GetSheet<ItemEx>().GetRow(4825);
+            var wheatFlour = Service.ExcelCache.GetSheet<ItemEx>().GetRow(4826);
+            var cinnamon = Service.ExcelCache.GetSheet<ItemEx>().GetRow(4828);
             
             if (_character != null && _retainer != null && _retainer2 != null && _character2 != null && ryeFlour != null && wheatFlour != null && cinnamon != null)
             {
@@ -393,9 +392,9 @@ namespace TestProject1
             sortFilter.DestinationCategories = new HashSet<InventoryCategory>() {InventoryCategory.RetainerBags};
             
             //Flour, just cause
-            var ryeFlour = ExcelCache.GetItem(4825);
-            var wheatFlour = ExcelCache.GetItem(4826);
-            var cinnamon = ExcelCache.GetItem(4828);
+            var ryeFlour = Service.ExcelCache.GetSheet<ItemEx>().GetRow(4825);
+            var wheatFlour = Service.ExcelCache.GetSheet<ItemEx>().GetRow(4826);
+            var cinnamon = Service.ExcelCache.GetSheet<ItemEx>().GetRow(4828);
             
             if (_character != null && _retainer != null && _retainer2 != null && _character2 != null && ryeFlour != null && wheatFlour != null && cinnamon != null)
             {
@@ -530,15 +529,13 @@ namespace TestProject1
         [Test]
         public void TestCompanyCraftRequirements()
         {
-            Assert.IsTrue(ExcelCache.IsCompanyCraft(10157));
-            var item = ExcelCache.GetItem(10157);
+            Assert.IsTrue(Service.ExcelCache.IsCompanyCraft(10157));
+            var item = Service.ExcelCache.GetSheet<ItemEx>().GetRow(10157);
             if (item != null)
             {
                 var craftItems = item.GetFlattenedCraftItems(true, 1);
                 Assert.AreEqual(craftItems.Count, 43);
             }
-            
-            
         }
 
         [Test]

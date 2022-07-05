@@ -4,8 +4,7 @@ using CriticalCommonLib;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
-using Dalamud.Game.ClientState.Objects.Enums;
-using InventoryTools.Extensions;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
 using Lumina.Excel.GeneratedSheets;
 
@@ -22,10 +21,10 @@ namespace InventoryTools.Logic.Filters
             FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter;
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
-            return item.Item != null && FilterItem(configuration, item.Item) == true;
+            return FilterItem(configuration, item.Item) == true;
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration, Item item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
         {
             var currentValue = this.CurrentValue(configuration);
             if (currentValue.Count == 0)
@@ -38,7 +37,7 @@ namespace InventoryTools.Logic.Filters
         public override Dictionary<uint, string> GetChoices(FilterConfiguration configuration)
         {
             var choices = new Dictionary<uint, string>();
-            var sheet = ExcelCache.GetSheet<Race>();
+            var sheet = Service.ExcelCache.GetSheet<Race>();
             foreach (var race in sheet)
             {
                 choices.Add(race.RowId, race.Masculine);

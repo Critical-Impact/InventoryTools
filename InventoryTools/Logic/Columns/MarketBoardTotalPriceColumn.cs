@@ -1,6 +1,5 @@
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Colors;
-using Dalamud.Logging;
 using ImGuiNET;
 
 namespace InventoryTools.Logic.Columns

@@ -1,7 +1,6 @@
 ﻿using CriticalCommonLib.Models;
-using InventoryTools.Extensions;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -17,11 +16,11 @@ namespace InventoryTools.Logic.Columns
             return "";
         }
 
-        public override string? CurrentValue(Item item)
+        public override string? CurrentValue(ItemEx item)
         {
             if (item.ItemSearchCategory != null)
             {
-                return item.FormattedSearchCategory();
+                return item.FormattedSearchCategory;
             }
 
             return "";

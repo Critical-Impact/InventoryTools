@@ -29,9 +29,8 @@ namespace InventoryTools
 
         public static void Initialise()
         {
+            Service.ExcelCache = new ExcelCache(Service.Data);
             ConfigurationManager.Load();
-            //PluginFont = new PluginFont();
-            ExcelCache.Initialise();
             Universalis.Initalise();
             GameInterface.Initialise(Service.Scanner);
             Cache.Initalise(Service.Interface.ConfigDirectory.FullName + "/universalis.json");
@@ -40,8 +39,8 @@ namespace InventoryTools
             OdrScanner = new OdrScanner( CharacterMonitor);
             GameUi = new GameUiManager();
             TryOn = new TryOn();
-            InventoryMonitor = new InventoryMonitor(OdrScanner, CharacterMonitor, GameUi);
             CraftMonitor = new CraftMonitor(GameUi);
+            InventoryMonitor = new InventoryMonitor(OdrScanner, CharacterMonitor, GameUi, CraftMonitor);
             FilterManager = new FilterManager();
             PluginLogic = new PluginLogic(  );
             WotsitIpc = new WotsitIpc(  );
@@ -64,15 +63,15 @@ namespace InventoryTools
             WotsitIpc.Dispose();
             PluginLogic.Dispose();
             FilterManager.Dispose();
-            CraftMonitor.Dispose();
             InventoryMonitor.Dispose();
+            CraftMonitor.Dispose();
             TryOn.Dispose();
             GameUi.Dispose();
             CharacterMonitor.Dispose();
             NetworkMonitor.Dispose();
             OdrScanner.Dispose();
             ConfigurationManager.Save();
-            ExcelCache.Destroy();
+            Service.ExcelCache.Destroy();
             Cache.Dispose();
             Universalis.Dispose();
             //PluginFont?.Dispose();

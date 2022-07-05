@@ -9,7 +9,6 @@ using CriticalCommonLib.Services.Ui;
 using Dalamud.Game;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Colors;
-using Dalamud.Logging;
 using InventoryTools.GameUi;
 using Tetris.GameEngine;
 

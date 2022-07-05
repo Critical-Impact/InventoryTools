@@ -1,14 +1,7 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using CriticalCommonLib;
-using CriticalCommonLib.Addons;
-using CriticalCommonLib.Enums;
 using CriticalCommonLib.Services.Ui;
-using Dalamud.Interface.Colors;
-using Dalamud.Logging;
 using InventoryTools.Logic;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.GameUi
 {

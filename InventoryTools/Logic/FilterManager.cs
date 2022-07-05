@@ -8,10 +8,10 @@ using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
+using CriticalCommonLib.Sheets;
 using Dalamud.Game;
 using Dalamud.Logging;
 using InventoryTools.GameUi;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic
 {
@@ -182,7 +182,7 @@ namespace InventoryTools.Logic
         {
             var sortedItems = new List<SortingResult>();
             var unsortableItems = new List<InventoryItem>();
-            var items = new List<Item>();
+            var items = new List<ItemEx>();
             var characterMonitor = PluginService.CharacterMonitor;
             var activeCharacter = characterMonitor.ActiveCharacter;
             var activeRetainer = characterMonitor.ActiveRetainer;
@@ -375,9 +375,7 @@ namespace InventoryTools.Logic
                                         PluginLog.Verbose("Existing item has a capacity of " + existingCapacity +
                                                           " and can fit " + canFit);
                                         PluginLog.Verbose("Existing item has a stack size of " +
-                                                          (existingItem.Item == null
-                                                              ? "unknown"
-                                                              : existingItem.Item.StackSize) + " and has quantity of " +
+                                                          existingItem.Item.StackSize + " and has quantity of " +
                                                           existingItem.TempQuantity);
                                         //All the item can fit, stick it in and continue
                                         if (filter.InActiveInventories(activeCharacter, activeRetainer,
@@ -632,7 +630,7 @@ namespace InventoryTools.Logic
             }
             else
             {
-                items = ExcelCache.GetItems().Where(filter.FilterItem).ToList();
+                items = Service.ExcelCache.AllItems.Select(c => c.Value).Where(filter.FilterItem).ToList();
                 
             }
 

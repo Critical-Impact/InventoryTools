@@ -1,20 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
-using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
-using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
-using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
-using CsvHelper;
+using CriticalCommonLib.Sheets;
 using Dalamud.Logging;
 using InventoryTools.Extensions;
-using Lumina.Excel.GeneratedSheets;
 using Newtonsoft.Json;
 
 namespace InventoryTools.Logic
@@ -213,6 +207,7 @@ namespace InventoryTools.Logic
                     externalSources[item.ItemId].Add(new CraftItemSource(item.ItemId, item.Quantity, item.IsHQ));
                 }
                 CraftList.Update(characterSources, externalSources);
+                CraftList.CalculateCosts();
                 _filterResult = await PluginService.FilterManager.GenerateFilteredList(this,
                     PluginService.InventoryMonitor.Inventories);
             }
@@ -758,7 +753,7 @@ namespace InventoryTools.Logic
         public event TableConfigurationChangedDelegate? TableConfigurationChanged;
         public event ListUpdatedDelegate? ListUpdated;
 
-        public bool FilterItem(Item item)
+        public bool FilterItem(ItemEx item)
         {
             if (FilterType == FilterType.CraftFilter)
             {
@@ -774,14 +769,14 @@ namespace InventoryTools.Logic
             {
                 if (UseORFiltering != null && UseORFiltering == true)
                 {
-                    if (filter.FilterItem(this, item) == true)
+                    if (filter.FilterItem(this, (ItemEx)item) == true)
                     {
                         matchesAny = true;
                     }
                 }
                 else
                 {
-                    if (filter.FilterItem(this, item) == false)
+                    if (filter.FilterItem(this, (ItemEx)item) == false)
                     {
                         return false;
                     }
@@ -817,7 +812,6 @@ namespace InventoryTools.Logic
                 {
                     if (filter.FilterItem(this, item) == true)
                     {
-                        PluginLog.Log(filter.Key);
                         matchesAny = true;
                     }
                 }

@@ -1,7 +1,10 @@
+using System;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Sheets;
+using Dalamud.Interface.Colors;
+using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -12,7 +15,7 @@ namespace InventoryTools.Logic.Columns
             return 0;
         }
 
-        public override int? CurrentValue(Item item)
+        public override int? CurrentValue(ItemEx item)
         {
             return 0;
         }
@@ -24,7 +27,21 @@ namespace InventoryTools.Logic.Columns
 
         public override int? CurrentValue(CraftItem currentValue)
         {
-            return (int)currentValue.QuantityUnavailable;
+            return Math.Max(0, (int)currentValue.QuantityUnavailable - (int)currentValue.QuantityCanCraft);
+        }
+        
+        public override void Draw(CraftItem item, int rowIndex, FilterConfiguration configuration)
+        {
+            if (CurrentValue(item) > 0)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudRed);
+            }
+
+            base.Draw(item, rowIndex, configuration);
+            if (CurrentValue(item) > 0)
+            {
+                ImGui.PopStyleColor();
+            }
         }
         
         public override string Name { get; set; } = "Unavailable";

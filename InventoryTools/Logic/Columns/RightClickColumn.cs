@@ -1,17 +1,14 @@
 using System.Linq;
 using System.Numerics;
+using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
-using Dalamud.Logging;
+using CriticalCommonLib.Sheets;
 using Dalamud.Utility;
-using FFXIVClientStructs.FFXIV.Client.System.Framework;
-using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Columns.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -22,7 +19,7 @@ namespace InventoryTools.Logic.Columns
             return null;
         }
 
-        public override string? CurrentValue(Item item)
+        public override string? CurrentValue(ItemEx item)
         {
             return null;
         }
@@ -40,29 +37,16 @@ namespace InventoryTools.Logic.Columns
 
         public override void Draw(InventoryItem item, int rowIndex)
         {
-            if (item.Item == null)
-            {
-                return;
-            }
             Draw(item.Item, rowIndex);
         }
 
         public override void Draw(SortingResult item, int rowIndex)
         {
-            if (item.InventoryItem.Item == null)
-            {
-                return;
-            }
             Draw(item.InventoryItem.Item, rowIndex);
         }
 
         public override void Draw(CraftItem item, int rowIndex, FilterConfiguration configuration)
         {
-            if (item.Item == null)
-            {
-                return;
-            }
-            
             var hoveredRow = -1;
             ImGui.Selectable("", false, ImGuiSelectableFlags.SpanAllColumns, new Vector2(0, 32));
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow)) {
@@ -76,15 +60,21 @@ namespace InventoryTools.Logic.Columns
             if (ImGui.BeginPopup("RightClick" + rowIndex))
             {
                 DrawMenuItems(item.Item, rowIndex);
+                
+                
+                if (item.Item.CanOpenCraftLog && ImGui.Selectable("Open in Crafting Log"))
+                {
+                    GameInterface.OpenCraftingLog(item.ItemId, item.RecipeId);   
+                }
 
-                if (item.Item.CanBeCrafted() && item.IsOutputItem && ImGui.Selectable("Remove from craft list"))
+                if (item.Item.CanBeCrafted && item.IsOutputItem && ImGui.Selectable("Remove from craft list"))
                 {
                     configuration.CraftList.RemoveCraftItem(item.ItemId, item.Flags);
                     configuration.NeedsRefresh = true;
                     configuration.StartRefresh();
                 }
 
-                if (item.Item.CanBeCrafted() && item.IsOutputItem && item.Phase != null && ExcelCache.IsCompanyCraft(item.ItemId))
+                if (item.Item.CanBeCrafted && item.IsOutputItem && item.Phase != null && Service.ExcelCache.IsCompanyCraft(item.ItemId))
                 {
                     for (uint i = 0; i < 3; i++)
                     {
@@ -106,7 +96,7 @@ namespace InventoryTools.Logic.Columns
                             c.FilterType == Logic.FilterType.CraftFilter);
                     foreach (var filter in craftFilters)
                     {
-                        if (item.Item.CanBeCrafted() && !ExcelCache.IsCompanyCraft(item.Item.RowId))
+                        if (item.Item.CanBeCrafted && !Service.ExcelCache.IsCompanyCraft(item.Item.RowId))
                         {
                             //TODO: replace with a dynamic way of determining number of steps
                             if (ImGui.Selectable("Add " + item.QuantityNeeded + " item to craft list - " + filter.Name))
@@ -124,7 +114,7 @@ namespace InventoryTools.Logic.Columns
             }
         }
 
-        public void DrawMenuItems(Item item, int rowIndex)
+        public void DrawMenuItems(ItemEx item, int rowIndex)
         {
             ImGui.Text(item.Name);
             ImGui.Separator();
@@ -144,7 +134,7 @@ namespace InventoryTools.Logic.Columns
             {
                 item.Name.ToDalamudString().ToString().ToClipboard();
             }
-            if (item.CanTryOn() && ImGui.Selectable("Try On"))
+            if (item.CanTryOn && ImGui.Selectable("Try On"))
             {
                 if (PluginService.TryOn.CanUseTryOn)
                 {
@@ -152,18 +142,13 @@ namespace InventoryTools.Logic.Columns
                 }
             }
 
-            if (item.CanBeCrafted() && ImGui.Selectable("View Requirements"))
+            if (item.CanBeCrafted && ImGui.Selectable("View Requirements"))
             {
                 PluginLogic.ShowCraftRequirementsWindow(item);   
             }
-
-            if (item.CanOpenCraftLog() && ImGui.Selectable("Open in Crafting Log"))
-            {
-                GameInterface.OpenCraftingLog(item.RowId);   
-            }
         }
 
-        public override void Draw(Item item, int rowIndex)
+        public override void Draw(ItemEx item, int rowIndex)
         {
             var hoveredRow = -1;
             ImGui.Selectable("", false, ImGuiSelectableFlags.SpanAllColumns, new Vector2(0, 32));
@@ -178,19 +163,25 @@ namespace InventoryTools.Logic.Columns
             if (ImGui.BeginPopup("RightClick" + rowIndex))
             {
                 DrawMenuItems(item, rowIndex);
+                
+                if (item.CanOpenCraftLog && ImGui.Selectable("Open in Crafting Log"))
+                {
+                    //Maybe pop in each recipe as a menu item
+                    GameInterface.OpenCraftingLog(item.RowId);   
+                }
 
                 var craftFilters =
                     PluginService.PluginLogic.FilterConfigurations.Where(c =>
                         c.FilterType == Logic.FilterType.CraftFilter);
                 foreach (var filter in craftFilters)
                 {
-                    if (item.CanBeCrafted() && !ExcelCache.IsCompanyCraft(item.RowId) && ImGui.Selectable("Add to craft list - " + filter.Name))
+                    if (item.CanBeCrafted && !Service.ExcelCache.IsCompanyCraft(item.RowId) && ImGui.Selectable("Add to craft list - " + filter.Name))
                     {
                         filter.CraftList.AddCraftItem(item.RowId);
                         filter.NeedsRefresh = true;
                         filter.StartRefresh();
                     }
-                    if (item.CanBeCrafted() && ExcelCache.IsCompanyCraft(item.RowId))
+                    if (item.CanBeCrafted && Service.ExcelCache.IsCompanyCraft(item.RowId))
                     {
                         //TODO: replace with a dynamic way of determining number of steps
                         for (uint i = 0; i < 3; i++)

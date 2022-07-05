@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Reflection.Emit;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Sheets;
 using ImGuiNET;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns.Abstract
 {
@@ -17,16 +15,16 @@ namespace InventoryTools.Logic.Columns.Abstract
         public virtual FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter |
                                                  Logic.FilterType.GameItemFilter | Logic.FilterType.CraftFilter;
         public abstract T CurrentValue(InventoryItem item);
-        public abstract T CurrentValue(Item item);
+        public abstract T CurrentValue(ItemEx item);
         public abstract T CurrentValue(SortingResult item);
         public abstract T CurrentValue(CraftItem item);
         public abstract string CsvExport(InventoryItem item);
-        public abstract string CsvExport(Item item);
+        public abstract string CsvExport(ItemEx item);
         public abstract string CsvExport(SortingResult item);
 
         public virtual string CsvExport(CraftItem item)
         {
-            return item.Item != null ? CsvExport(item.Item) : "";
+            return CsvExport(item.Item);
         }
         
         public  abstract string Name { get; set; }
@@ -41,7 +39,7 @@ namespace InventoryTools.Logic.Columns.Abstract
 
         public abstract IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items);
 
-        public abstract IEnumerable<Item> Filter(IEnumerable<Item> items);
+        public abstract IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items);
 
         public abstract IEnumerable<CraftItem> Filter(IEnumerable<CraftItem> items);
 
@@ -49,13 +47,13 @@ namespace InventoryTools.Logic.Columns.Abstract
 
         public abstract IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items);
 
-        public abstract IEnumerable<Item> Sort(ImGuiSortDirection direction, IEnumerable<Item> items);
+        public abstract IEnumerable<ItemEx> Sort(ImGuiSortDirection direction, IEnumerable<ItemEx> items);
         public abstract IEnumerable<CraftItem> Sort(ImGuiSortDirection direction, IEnumerable<CraftItem> items);
 
         public abstract void Draw(InventoryItem item, int rowIndex);
 
         public abstract void Draw(SortingResult item, int rowIndex);
-        public abstract void Draw(Item item, int rowIndex);
+        public abstract void Draw(ItemEx item, int rowIndex);
 
         public abstract void Draw(CraftItem item, int rowIndex, FilterConfiguration configuration);
 

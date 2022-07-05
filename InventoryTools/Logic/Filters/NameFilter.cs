@@ -1,7 +1,7 @@
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Filters.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -15,14 +15,10 @@ namespace InventoryTools.Logic.Filters
 
         public override bool? FilterItem(FilterConfiguration configuration,InventoryItem item)
         {
-            if (item.Item == null)
-            {
-                return false;
-            }
             return FilterItem(configuration, item.Item);
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration, Item item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
         {
             var currentValue = CurrentValue(configuration);
             if (!string.IsNullOrEmpty(currentValue))

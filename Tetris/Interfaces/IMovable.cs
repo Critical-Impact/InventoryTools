@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Tetris.Interfaces
+﻿namespace Tetris.Interfaces
 {
     public interface IMovable
     {

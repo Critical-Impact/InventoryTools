@@ -1,7 +1,8 @@
+using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -17,17 +18,14 @@ namespace InventoryTools.Logic.Filters
 
         public override bool? FilterItem(FilterConfiguration configuration,InventoryItem item)
         {
-            if (item.Item == null)
-            {
-                return false;
-            }
+
             return FilterItem(configuration, item.Item);
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration,Item item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
         {
             var currentValue = CurrentValue(configuration);
-            var canCraft = ExcelCache.CanCraftItem(item.RowId);
+            var canCraft = Service.ExcelCache.CanCraftItem(item.RowId);
             return currentValue == null || currentValue.Value && canCraft || !currentValue.Value && !canCraft;
         }
     }

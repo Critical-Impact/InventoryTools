@@ -1,6 +1,6 @@
 ﻿using CriticalCommonLib.Models;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -8,11 +8,10 @@ namespace InventoryTools.Logic.Columns
     {
         public override string? CurrentValue(InventoryItem item)
         {
-            if (item.Item != null) return CurrentValue(item.Item);
-            return "";
+            return CurrentValue(item.Item);
         }
 
-        public override string? CurrentValue(Item item)
+        public override string? CurrentValue(ItemEx item)
         {
             return item.ClassJobCategory.Value?.Name ?? "";
         }

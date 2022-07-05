@@ -1,9 +1,8 @@
-using System.Collections.Generic;
+using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
-using InventoryTools.Misc;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -24,19 +23,19 @@ namespace InventoryTools.Logic.Filters
             return currentValue switch
             {
                 null => true,
-                true => item.Item != null && ExcelCache.IsArmoireItem(item.Item.RowId),
-                _ => item.Item != null && !ExcelCache.IsArmoireItem(item.Item.RowId)
+                true => Service.ExcelCache.IsArmoireItem(item.Item.RowId),
+                _ => !Service.ExcelCache.IsArmoireItem(item.Item.RowId)
             };
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration, Item item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
         {
             var currentValue = this.CurrentValue(configuration);
             return currentValue switch
             {
                 null => true,
-                true => ExcelCache.IsArmoireItem(item.RowId),
-                _ => !ExcelCache.IsArmoireItem(item.RowId)
+                true => Service.ExcelCache.IsArmoireItem(item.RowId),
+                _ => !Service.ExcelCache.IsArmoireItem(item.RowId)
             };
         }
     }

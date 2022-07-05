@@ -4,11 +4,6 @@ using CriticalCommonLib;
 using CriticalCommonLib.Addons;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
-using CriticalCommonLib.Services.Ui;
-using Dalamud.Game.ClientState;
-using Dalamud.Logging;
-using Dalamud.Plugin;
 using ImGuiNET;
 using InventoryTools.Logic;
 using InventoryTools.Sections;
@@ -135,7 +130,7 @@ namespace InventoryTools
                                         if (ImGui.Button("Add Submarine Parts to Craft"))
                                         {
                                             var subAddon = (SubmarinePartsMenuAddon*)subMarinePartsMenu;
-                                            for (int i = 0; i < 5; i++)
+                                            for (int i = 0; i < 6; i++)
                                             {
                                                 var itemRequired = subAddon->RequiredItemId(i);
                                                 if (itemRequired != 0)
@@ -158,6 +153,14 @@ namespace InventoryTools
 
                             ImGui.SameLine();
                             ImGui.Text("Pending Market Requests: " + Universalis.QueuedCount);
+                            if (filterConfiguration.FilterType == FilterType.CraftFilter)
+                            {
+                                ImGui.SameLine();
+                                ImGui.Text("Total Cost NQ: " + filterConfiguration.CraftList.MinimumNQCost);
+                                ImGui.SameLine();
+                                ImGui.Text("Total Cost HQ: " + filterConfiguration.CraftList.MinimumHQCost);
+                                
+                            }
                             ImGui.EndChild();
                             ImGui.EndTabItem();
                         }

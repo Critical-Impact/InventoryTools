@@ -1,7 +1,6 @@
-using System;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -12,7 +11,7 @@ namespace InventoryTools.Logic.Columns
             return (item.Icon, item.IsHQ);
         }
 
-        public override (ushort, bool)? CurrentValue(Item item)
+        public override (ushort, bool)? CurrentValue(ItemEx item)
         {
             return (item.Icon, false);
         }

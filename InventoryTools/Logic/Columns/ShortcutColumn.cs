@@ -1,10 +1,9 @@
-using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Sheets;
 using Dalamud.Logging;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Columns.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -15,7 +14,7 @@ namespace InventoryTools.Logic.Columns
             return null;
         }
 
-        public override string? CurrentValue(Item item)
+        public override string? CurrentValue(ItemEx item)
         {
             return null;
         }
@@ -38,7 +37,7 @@ namespace InventoryTools.Logic.Columns
             {
                 $"https://www.garlandtools.org/db/#item/{item.ItemId}".OpenBrowser();
             }
-            if (item.CanTryOn && item.Item != null)
+            if (item.Item.CanTryOn)
             {
                 ImGui.SameLine();
                 if (ImGui.SmallButton("Try On##TO" + rowIndex))
@@ -60,14 +59,14 @@ namespace InventoryTools.Logic.Columns
            Draw(item.InventoryItem, rowIndex);
         }
 
-        public override void Draw(Item item, int rowIndex)
+        public override void Draw(ItemEx item, int rowIndex)
         {
             ImGui.TableNextColumn();
             if (ImGui.SmallButton("G##G"+rowIndex))
             {
                 $"https://www.garlandtools.org/db/#item/{item.RowId}".OpenBrowser();
             }
-            if (item.CanTryOn())
+            if (item.CanTryOn)
             {
                 ImGui.SameLine();
                 if (ImGui.SmallButton("Try On##TO" + rowIndex))

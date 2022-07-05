@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using Dalamud.Logging;
 
 namespace InventoryTools.Extensions
 {

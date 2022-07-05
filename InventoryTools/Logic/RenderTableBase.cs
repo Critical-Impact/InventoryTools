@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Logic.Columns;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic
 {
@@ -22,8 +22,8 @@ namespace InventoryTools.Logic
         
         public List<SortingResult> SortedItems { get; set; } = new List<SortingResult>();
         public List<SortingResult> RenderSortedItems { get; set; } = new List<SortingResult>();
-        public List<Item> Items { get; set; } = new List<Item>();
-        public List<Item> RenderItems { get; set; } = new List<Item>();
+        public List<ItemEx> Items { get; set; } = new List<ItemEx>();
+        public List<ItemEx> RenderItems { get; set; } = new List<ItemEx>();
 
         public RenderTableBase(FilterConfiguration filterConfiguration)
         {
@@ -82,7 +82,7 @@ namespace InventoryTools.Logic
 
         public delegate IEnumerable<SortingResult> PreFilterSortedItemsDelegate(IEnumerable<SortingResult> items);
 
-        public delegate IEnumerable<Item> PreFilterItemsDelegate(IEnumerable<Item> items);
+        public delegate IEnumerable<ItemEx> PreFilterItemsDelegate(IEnumerable<ItemEx> items);
 
         public delegate void ChangedDelegate(FilterTable itemTable);
 

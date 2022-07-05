@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -10,12 +10,12 @@ namespace InventoryTools.Logic.Columns
     {
         public override string? CurrentValue(InventoryItem item)
         {
-            return item.EquippableByRace.FormattedName();
+            return CurrentValue(item.Item);
         }
 
-        public override string? CurrentValue(Item item)
+        public override string? CurrentValue(ItemEx item)
         {
-            return item.EquippableByRace().FormattedName();
+            return item.EquipRace.FormattedName();
         }
 
         public override string? CurrentValue(SortingResult item)
