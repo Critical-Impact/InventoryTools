@@ -14,7 +14,7 @@ namespace InventoryTools.Sections
         {
             if (ImGui.CollapsingHeader("Characters", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(5, 5));
+                ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(5, 5) * ImGui.GetIO().FontGlobalScale);
                 if (ImGui.BeginTable("CharacterTable", 3, ImGuiTableFlags.BordersV |
                                                              ImGuiTableFlags.BordersOuterV |
                                                              ImGuiTableFlags.BordersInnerV |
@@ -82,7 +82,7 @@ namespace InventoryTools.Sections
                                 "Are you sure you want to clear all the bags stored for this character?.\nThis operation cannot be undone!\n\n");
                             ImGui.Separator();
 
-                            if (ImGui.Button("OK", new Vector2(120, 0)))
+                            if (ImGui.Button("OK", new Vector2(120, 0) * ImGui.GetIO().FontGlobalScale))
                             {
                                 PluginService.InventoryMonitor.ClearCharacterInventories(character.CharacterId);
                                 ImGui.CloseCurrentPopup();
@@ -90,7 +90,7 @@ namespace InventoryTools.Sections
 
                             ImGui.SetItemDefaultFocus();
                             ImGui.SameLine();
-                            if (ImGui.Button("Cancel", new Vector2(120, 0)))
+                            if (ImGui.Button("Cancel", new Vector2(120, 0) * ImGui.GetIO().FontGlobalScale))
                             {
                                 ImGui.CloseCurrentPopup();
                             }
@@ -106,7 +106,7 @@ namespace InventoryTools.Sections
             }
             if (ImGui.CollapsingHeader("Retainers", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(5, 5));
+                ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(5, 5) * ImGui.GetIO().FontGlobalScale);
                 if (ImGui.BeginTable("RetainerTable", 7, ImGuiTableFlags.BordersV |
                                                              ImGuiTableFlags.BordersOuterV |
                                                              ImGuiTableFlags.BordersInnerV |
@@ -205,7 +205,7 @@ namespace InventoryTools.Sections
                                 "Are you sure you want to clear all the bags stored for this retainer?.\nThis operation cannot be undone!\n\n");
                             ImGui.Separator();
 
-                            if (ImGui.Button("OK", new Vector2(120, 0)))
+                            if (ImGui.Button("OK", new Vector2(120, 0) * ImGui.GetIO().FontGlobalScale))
                             {
                                 PluginService.InventoryMonitor.ClearCharacterInventories(character.CharacterId);
                                 ImGui.CloseCurrentPopup();
@@ -213,7 +213,7 @@ namespace InventoryTools.Sections
 
                             ImGui.SetItemDefaultFocus();
                             ImGui.SameLine();
-                            if (ImGui.Button("Cancel", new Vector2(120, 0)))
+                            if (ImGui.Button("Cancel", new Vector2(120, 0) * ImGui.GetIO().FontGlobalScale))
                             {
                                 ImGui.CloseCurrentPopup();
                             }

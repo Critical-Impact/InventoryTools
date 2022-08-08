@@ -18,19 +18,7 @@ namespace InventoryTools.Logic.Filters
         
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
-            var currentValue = CurrentValue(configuration);
-            if (currentValue == null)
-            {
-                return null;
-            }
-
-            switch (currentValue.Value)
-            {
-                case false:
-                    return !Service.ExcelCache.SpentAtSpecialShop(item.ItemId);
-                case true:
-                    return Service.ExcelCache.SpentAtSpecialShop(item.ItemId);
-            }
+            return FilterItem(configuration, item.Item);
         }
 
         public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
@@ -44,9 +32,9 @@ namespace InventoryTools.Logic.Filters
             switch (currentValue.Value)
             {
                 case false:
-                    return !Service.ExcelCache.SpentAtSpecialShop(item.RowId);
+                    return !item.SpentSpecialShop;
                 case true:
-                    return Service.ExcelCache.SpentAtSpecialShop(item.RowId);
+                    return item.SpentSpecialShop;
             }
         }
     }

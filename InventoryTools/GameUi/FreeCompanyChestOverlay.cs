@@ -14,7 +14,6 @@ namespace InventoryTools.GameUi
             var atkUnitBase = AtkUnitBase;
             if (atkUnitBase != null && HasState)
             {
-                this.SetTabColors(TabColours);
                 if (CurrentTab == FreeCompanyTab.One)
                 {
                     this.SetColors(Bag1InventoryColours);
@@ -39,6 +38,7 @@ namespace InventoryTools.GameUi
                 {
                     this.Clear();
                 }
+                this.SetTabColors(TabColours);
 
                 return true;
             }

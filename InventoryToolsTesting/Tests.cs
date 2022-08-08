@@ -11,9 +11,10 @@ using CriticalCommonLib.Sheets;
 using Dalamud.Logging;
 using InventoryTools;
 using InventoryTools.Logic;
+using InventoryTools.Services;
 using NUnit.Framework;
 
-namespace TestProject1
+namespace InventoryToolsTesting
 {
     [TestFixture]
     public class Tests
@@ -25,11 +26,16 @@ namespace TestProject1
         private CharacterMonitor? _characterMonitor;
         private PluginLogic? _pluginLogic;
 
-        [SetUp]
-        public void Init()
+        [OneTimeSetUp]
+        public void Steup()
         {
             var lumina = new Lumina.GameData( "H:/Games/SquareEnix/FINAL FANTASY XIV - A Realm Reborn/game/sqpack" );
             Service.ExcelCache = new ExcelCache(lumina);
+        }
+        
+        [SetUp]
+        public void Init()
+        {
             _characterMonitor = new CharacterMonitor(true);
             _pluginLogic = new PluginLogic(true);
             PluginService.InitialiseTesting(_characterMonitor, _pluginLogic);
@@ -55,7 +61,7 @@ namespace TestProject1
         [Test]
         public void TestSearchFilter()
         {
-            var filterManager = new FilterManager(true);
+            var filterManager = new FilterService();
             
             var searchFilter = new FilterConfiguration();
             searchFilter.SourceAllCharacters = true;
@@ -70,12 +76,12 @@ namespace TestProject1
                 var inventories = new Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>();
                 inventories.Add(_character.CharacterId, categoryDictionary);
                 
-                var emptyList = filterManager.GenerateFilteredList(searchFilter, inventories).Result;
+                var emptyList = searchFilter.GenerateFilteredList(inventories).Result;
                 Assert.True(emptyList.SortedItems.All(c => c.InventoryItem.IsEmpty));
 
                 inventory[0] = Fixtures.GenerateItem(_character, InventoryType.Bag0, 0, 1000, 1);
                 
-                var oneList = filterManager.GenerateFilteredList(searchFilter, inventories).Result;
+                var oneList = searchFilter.GenerateFilteredList(inventories).Result;
                 Assert.AreEqual( 1, oneList.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
             }
         }
@@ -84,7 +90,7 @@ namespace TestProject1
         [Test]
         public void TestSortFilter()
         {
-            var filterManager = new FilterManager(true);
+            var filterManager = new FilterService();
             
             var searchFilter = new FilterConfiguration();
             searchFilter.SourceAllCharacters = true;
@@ -122,69 +128,69 @@ namespace TestProject1
                 inventories.Add(_retainer2.CharacterId, retainerCategoryDictionary2);
                 
                 //Nothing to sort
-                var emptyList = filterManager.GenerateFilteredList(searchFilter, inventories).Result;
+                var emptyList = searchFilter.GenerateFilteredList(inventories).Result;
                 Assert.True(emptyList.SortedItems.All(c => c.InventoryItem.IsEmpty));
 
                 //1 item to retainer
                 inventory[0] = Fixtures.GenerateItem(_character, InventoryType.Bag0, 0, ryeFlour.RowId, 1);
-                var oneList = filterManager.GenerateFilteredList(searchFilter, inventories).Result;
+                var oneList = searchFilter.GenerateFilteredList( inventories).Result;
                 Assert.AreEqual( 1, oneList.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
 
                 //Duplicates only, 0 items to retainer
                 searchFilter.DuplicatesOnly = true;
-                Assert.True(filterManager.GenerateFilteredList(searchFilter, inventories).Result.SortedItems.All(c => c.InventoryItem.IsEmpty));
+                Assert.True(searchFilter.GenerateFilteredList( inventories).Result.SortedItems.All(c => c.InventoryItem.IsEmpty));
                 
                 //Duplicates only, 1 item to retainer
                 retainerInventory[0] = Fixtures.GenerateItem(_retainer, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1);
-                Assert.True(filterManager.GenerateFilteredList(searchFilter, inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty) == 1);
+                Assert.True(searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty) == 1);
                 
                 //Duplicates only, 1 item to retainer, add a unrelated item
                 retainerInventory[1] = Fixtures.GenerateItem(_retainer, InventoryType.RetainerBag0, 1, wheatFlour.RowId, 1);
-                Assert.True(filterManager.GenerateFilteredList(searchFilter, inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty) == 1);
+                Assert.True(searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty) == 1);
                 
                 //Duplicates only, max out item in existing inventory
                 retainerInventory[0] = Fixtures.GenerateItem(_retainer, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.StackSize);
-                var generateFilteredList = filterManager.GenerateFilteredList(searchFilter, inventories);
+                var generateFilteredList = searchFilter.GenerateFilteredList( inventories);
                 Assert.True(generateFilteredList.Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty) == 1);
                 
                 //Duplicates only, max out item in existing inventory then spill over
                 retainerInventory[0] = Fixtures.GenerateItem(_retainer, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.StackSize - 1);
                 inventory[0] = Fixtures.GenerateItem(_character, InventoryType.Bag0, 0, ryeFlour.RowId, 2);
-                Assert.True(filterManager.GenerateFilteredList(searchFilter, inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty) == 2);
+                Assert.True(searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty) == 2);
                 
                 //Duplicates only, max out retainer, should go nowhere, boy got some cinnamon, 2 items in inventory
                 Fixtures.FillInventory(retainerInventory, cinnamon.RowId, cinnamon.StackSize);
-                Assert.True(filterManager.GenerateFilteredList(searchFilter, inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty) == 0);
-                Assert.True(filterManager.GenerateFilteredList(searchFilter, inventories).Result.UnsortableItems.Count(c => !c.IsEmpty) == 0);
+                Assert.True(searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty) == 0);
+                Assert.True(searchFilter.GenerateFilteredList( inventories).Result.UnsortableItems.Count(c => !c.IsEmpty) == 0);
                 
                 //Allow item to spill over to retainer
                 searchFilter.DuplicatesOnly = false;
-                Assert.True(filterManager.GenerateFilteredList(searchFilter, inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer2.CharacterId) == 1);
+                Assert.True(searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer2.CharacterId) == 1);
                 
                 //Item should goto 2nd retainer first
                 Fixtures.FillInventory(retainerInventory, 0, 0);
                 inventory[0] = Fixtures.GenerateItem(_character, InventoryType.Bag0, 0, ryeFlour.RowId, 1);
                 retainerInventory2[0] = Fixtures.GenerateItem(_retainer2, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.StackSize - 1);
-                Assert.True(filterManager.GenerateFilteredList(searchFilter, inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer2.CharacterId) == 1);
+                Assert.True(searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer2.CharacterId) == 1);
                 
                 //Filter items when in specific retainer, should show 0 sorted items as we are in the first retainer and not the 2nd
                 searchFilter.FilterItemsInRetainers = true;
                 _characterMonitor?.OverrideActiveRetainer(_retainer.CharacterId);
-                Assert.True(filterManager.GenerateFilteredList(searchFilter, inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer2.CharacterId) == 0);
-                Assert.True(filterManager.GenerateFilteredList(searchFilter, inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer.CharacterId) == 0);
+                Assert.True(searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer2.CharacterId) == 0);
+                Assert.True(searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer.CharacterId) == 0);
                 
                 //Switch to retainer 2
                 searchFilter.FilterItemsInRetainers = true;
                 _characterMonitor?.OverrideActiveRetainer(_retainer2.CharacterId);
-                Assert.True(filterManager.GenerateFilteredList(searchFilter, inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer2.CharacterId) == 1);
-                Assert.True(filterManager.GenerateFilteredList(searchFilter, inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer.CharacterId) == 0);
+                Assert.True(searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer2.CharacterId) == 1);
+                Assert.True(searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer.CharacterId) == 0);
             }
         }
         
         [Test]
         public void TestDestinationInventory()
         {
-            var filterManager = new FilterManager(true);
+            var filterManager = new FilterService();
             
             var searchFilter = new FilterConfiguration();
             searchFilter.SourceAllCharacters = true;
@@ -214,12 +220,12 @@ namespace TestProject1
                 inventories.Add(_character.CharacterId, categoryDictionary);
                 
                 //Nothing to sort
-                var emptyList = filterManager.GenerateFilteredList(searchFilter, inventories).Result;
+                var emptyList = searchFilter.GenerateFilteredList( inventories).Result;
                 Assert.True(emptyList.SortedItems.All(c => c.InventoryItem.IsEmpty));
 
                 //1 item to retainer
                 inventory[0] = Fixtures.GenerateItem(_character, InventoryType.Bag0, 0, ryeFlour.RowId, 1);
-                var oneList = filterManager.GenerateFilteredList(searchFilter, inventories).Result;
+                var oneList = searchFilter.GenerateFilteredList( inventories).Result;
                 Assert.AreEqual( 1, oneList.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 
             }
@@ -228,7 +234,7 @@ namespace TestProject1
         [Test]
         public void TestCraftItemFilter()
         {
-            var filterManager = new FilterManager(true);
+            var filterManager = new FilterService();
             
             var searchFilter = new FilterConfiguration();
             searchFilter.SourceAllCharacters = true;
@@ -238,7 +244,7 @@ namespace TestProject1
             
             if (_character != null)
             {
-                var emptyList = filterManager.GenerateFilteredList(searchFilter, new Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>()).Result;
+                var emptyList = searchFilter.GenerateFilteredList( new Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>()).Result;
                 Assert.AreEqual(emptyList.AllItems.Count,16);
             }
         }
@@ -246,7 +252,7 @@ namespace TestProject1
         [Test]
         public void TestDuplicates()
         {
-            var filterManager = new FilterManager(true);
+            var filterManager = new FilterService();
             
             var searchFilter = new FilterConfiguration();
             searchFilter.SourceAllCharacters = true;
@@ -287,12 +293,12 @@ namespace TestProject1
                 retainerInventory2[0] = Fixtures.GenerateItem(_retainer2, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1);
                 
                 //1 in player bag, 1 in retainer bag 1, 1 in retainer bag 2
-                Assert.AreEqual(3, filterManager.GenerateFilteredList(searchFilter, inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+                Assert.AreEqual(3, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 
                 searchFilter.FilterItemsInRetainers = true;
                 
                 //1 from bag to retainer, 1 from retainer to other retainer
-                var actual = filterManager.GenerateFilteredList(searchFilter, inventories).Result.SortedItems.Where(c => !c.InventoryItem.IsEmpty).ToList();
+                var actual = searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Where(c => !c.InventoryItem.IsEmpty).ToList();
                 Assert.AreEqual(_retainer.CharacterId, actual.ToList()[0].DestinationRetainerId);
                 Assert.AreEqual(_retainer2.CharacterId, actual.ToList()[1].DestinationRetainerId);
             }
@@ -301,7 +307,7 @@ namespace TestProject1
         [Test]
         public void TestCrossCharacterSearching()
         {
-            var filterManager = new FilterManager(true);
+            var filterManager = new FilterService();
             
             var searchFilter = new FilterConfiguration();
             searchFilter.SourceAllCharacters = true;
@@ -347,23 +353,23 @@ namespace TestProject1
                 characterInventory2[0] = Fixtures.GenerateItem(_character2, InventoryType.Bag0, 0, ryeFlour.RowId, 1);
                 
                 //Cross character off, should pick up 3
-                Assert.AreEqual(3, filterManager.GenerateFilteredList(searchFilter, inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+                Assert.AreEqual(3, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 
                 //Cross character on, should pick up 4
                 ConfigurationManager.Config.DisplayCrossCharacter = true;
-                Assert.AreEqual(4, filterManager.GenerateFilteredList(searchFilter, inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+                Assert.AreEqual(4, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 
                 //Test cross character source filter setting
                 ConfigurationManager.Config.DisplayCrossCharacter = false;
                 searchFilter.SourceIncludeCrossCharacter = true;
-                Assert.AreEqual(4, filterManager.GenerateFilteredList(searchFilter, inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+                Assert.AreEqual(4, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 
                 //Test cross character destination filter setting
                 searchFilter.DestinationIncludeCrossCharacter = true;
                 searchFilter.FilterType = FilterType.SortingFilter;
                 searchFilter.DestinationAllCharacters = true;
 
-                Assert.AreEqual(2, filterManager.GenerateFilteredList(searchFilter, inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+                Assert.AreEqual(2, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 
 
                 //Test cross character destination filter setting override
@@ -373,14 +379,14 @@ namespace TestProject1
                 searchFilter.SourceIncludeCrossCharacter = true;
 
                 //Because character 2 isnt the active character it wont actually try to sort from character 2 to character 0, hence the 0
-                Assert.AreEqual(0, filterManager.GenerateFilteredList(searchFilter, inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+                Assert.AreEqual(0, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
             }
         }
         
         [Test]
         public void TestInventoryCategoryFilters()
         {
-            var filterManager = new FilterManager(true);
+            var filterManager = new FilterService();
             
             var searchFilter = new FilterConfiguration();
             searchFilter.FilterType = FilterType.SearchFilter;
@@ -430,14 +436,14 @@ namespace TestProject1
                 characterInventory2[0] = Fixtures.GenerateItem(_character2, InventoryType.Bag0, 0, ryeFlour.RowId, 1);
                 
                 //Just character bags as source
-                Assert.AreEqual(1, filterManager.GenerateFilteredList(searchFilter, inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+                Assert.AreEqual(1, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 
                 //Add retainer bags as source
                 searchFilter.SourceCategories.Add(InventoryCategory.RetainerBags);
-                Assert.AreEqual(3, filterManager.GenerateFilteredList(searchFilter, inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+                Assert.AreEqual(3, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 
                 //Sort filter, character to retainer bags
-                Assert.AreEqual(1, filterManager.GenerateFilteredList(sortFilter, inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+                Assert.AreEqual(1, sortFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
             }
         }
 

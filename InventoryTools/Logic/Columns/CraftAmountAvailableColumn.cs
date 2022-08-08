@@ -34,7 +34,7 @@ namespace InventoryTools.Logic.Columns
             return Math.Min((int)currentValue.QuantityAvailable, (int)currentValue.QuantityNeeded);
         }
 
-        public override void Draw(CraftItem item, int rowIndex, FilterConfiguration configuration)
+        public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
         {
             if (item.IsOutputItem)
             {
@@ -46,7 +46,7 @@ namespace InventoryTools.Logic.Columns
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.ParsedBlue);
             }
 
-            base.Draw(item, rowIndex, configuration);
+            base.Draw(configuration, item, rowIndex);
 
             if (item.QuantityAvailable != 0)
             {
@@ -56,7 +56,11 @@ namespace InventoryTools.Logic.Columns
 
         public override string Name { get; set; } = "Retrieve";
         public override float Width { get; set; } = 60;
-        public override string FilterText { get; set; } = "This is the amount available within your filtered inventories available to complete the craft.";
+
+        public override string HelpText { get; set; } =
+            "This is the amount to retrieve from retainers.";
+        public override FilterType AvailableIn { get; } = Logic.FilterType.CraftFilter;
+        public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = false;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
     }

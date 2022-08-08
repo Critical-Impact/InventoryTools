@@ -31,24 +31,27 @@ namespace InventoryTools.Logic.Columns
 
         public override string Name { get; set; } = "Right Click";
         public override float Width { get; set; } = 1.0f;
+
+        public override string HelpText { get; set; } =
+            "You shouldn't see this, but if you do it's the column that adds in the right click functionality.";
         public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = false;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
 
-        public override void Draw(InventoryItem item, int rowIndex)
+        public override void Draw(FilterConfiguration configuration, InventoryItem item, int rowIndex)
         {
-            Draw(item.Item, rowIndex);
+            Draw(configuration, item.Item, rowIndex);
         }
 
-        public override void Draw(SortingResult item, int rowIndex)
+        public override void Draw(FilterConfiguration configuration, SortingResult item, int rowIndex)
         {
-            Draw(item.InventoryItem.Item, rowIndex);
+            Draw(configuration, item.InventoryItem.Item, rowIndex);
         }
 
-        public override void Draw(CraftItem item, int rowIndex, FilterConfiguration configuration)
+        public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
         {
             var hoveredRow = -1;
-            ImGui.Selectable("", false, ImGuiSelectableFlags.SpanAllColumns, new Vector2(0, 32));
+            ImGui.Selectable("", false, ImGuiSelectableFlags.SpanAllColumns, new Vector2(0, 32) * ImGui.GetIO().FontGlobalScale);
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow)) {
                 hoveredRow = rowIndex;
             }
@@ -59,99 +62,17 @@ namespace InventoryTools.Logic.Columns
 
             if (ImGui.BeginPopup("RightClick" + rowIndex))
             {
-                DrawMenuItems(item.Item, rowIndex);
-                
-                
-                if (item.Item.CanOpenCraftLog && ImGui.Selectable("Open in Crafting Log"))
-                {
-                    GameInterface.OpenCraftingLog(item.ItemId, item.RecipeId);   
-                }
-
-                if (item.Item.CanBeCrafted && item.IsOutputItem && ImGui.Selectable("Remove from craft list"))
-                {
-                    configuration.CraftList.RemoveCraftItem(item.ItemId, item.Flags);
-                    configuration.NeedsRefresh = true;
-                    configuration.StartRefresh();
-                }
-
-                if (item.Item.CanBeCrafted && item.IsOutputItem && item.Phase != null && Service.ExcelCache.IsCompanyCraft(item.ItemId))
-                {
-                    for (uint i = 0; i < 3; i++)
-                    {
-                        if (item.Phase != i)
-                        {
-                            if (ImGui.Selectable("Switch to Phase " + (i + 1)))
-                            {
-                                item.SwitchPhase(i);
-                                configuration.StartRefresh();
-                            }
-                        }
-                    }
-                }
-
-                if (!item.IsOutputItem)
-                {
-                    var craftFilters =
-                        PluginService.PluginLogic.FilterConfigurations.Where(c =>
-                            c.FilterType == Logic.FilterType.CraftFilter);
-                    foreach (var filter in craftFilters)
-                    {
-                        if (item.Item.CanBeCrafted && !Service.ExcelCache.IsCompanyCraft(item.Item.RowId))
-                        {
-                            //TODO: replace with a dynamic way of determining number of steps
-                            if (ImGui.Selectable("Add " + item.QuantityNeeded + " item to craft list - " + filter.Name))
-                            {
-                                filter.CraftList.AddCraftItem(item.Item.RowId, item.QuantityNeeded, ItemFlags.None);
-                                configuration.NeedsRefresh = true;
-                                configuration.StartRefresh();
-                            }
-                        }
-                    }
-                }
-
-
+                item.DrawRightClickPopup(configuration);
                 ImGui.EndPopup();
             }
         }
 
-        public void DrawMenuItems(ItemEx item, int rowIndex)
-        {
-            ImGui.Text(item.Name);
-            ImGui.Separator();
-            if (ImGui.Selectable("Open in Garland Tools"))
-            {
-                $"https://www.garlandtools.org/db/#item/{item.RowId}".OpenBrowser();
-            }
-            if (ImGui.Selectable("Open in Teamcraft"))
-            {
-                                        
-            }
-            if (ImGui.Selectable("Open in Universalis"))
-            {
-                $"https://universalis.app/market/{item.RowId}".OpenBrowser();
-            }
-            if (ImGui.Selectable("Copy Name"))
-            {
-                item.Name.ToDalamudString().ToString().ToClipboard();
-            }
-            if (item.CanTryOn && ImGui.Selectable("Try On"))
-            {
-                if (PluginService.TryOn.CanUseTryOn)
-                {
-                    PluginService.TryOn.TryOnItem(item);
-                }
-            }
+        
 
-            if (item.CanBeCrafted && ImGui.Selectable("View Requirements"))
-            {
-                PluginLogic.ShowCraftRequirementsWindow(item);   
-            }
-        }
-
-        public override void Draw(ItemEx item, int rowIndex)
+        public override void Draw(FilterConfiguration configuration, ItemEx item, int rowIndex)
         {
             var hoveredRow = -1;
-            ImGui.Selectable("", false, ImGuiSelectableFlags.SpanAllColumns, new Vector2(0, 32));
+            ImGui.Selectable("", false, ImGuiSelectableFlags.SpanAllColumns, new Vector2(0, 32) * ImGui.GetIO().FontGlobalScale);
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow)) {
                 hoveredRow = rowIndex;
             }
@@ -162,40 +83,7 @@ namespace InventoryTools.Logic.Columns
 
             if (ImGui.BeginPopup("RightClick" + rowIndex))
             {
-                DrawMenuItems(item, rowIndex);
-                
-                if (item.CanOpenCraftLog && ImGui.Selectable("Open in Crafting Log"))
-                {
-                    //Maybe pop in each recipe as a menu item
-                    GameInterface.OpenCraftingLog(item.RowId);   
-                }
-
-                var craftFilters =
-                    PluginService.PluginLogic.FilterConfigurations.Where(c =>
-                        c.FilterType == Logic.FilterType.CraftFilter);
-                foreach (var filter in craftFilters)
-                {
-                    if (item.CanBeCrafted && !Service.ExcelCache.IsCompanyCraft(item.RowId) && ImGui.Selectable("Add to craft list - " + filter.Name))
-                    {
-                        filter.CraftList.AddCraftItem(item.RowId);
-                        filter.NeedsRefresh = true;
-                        filter.StartRefresh();
-                    }
-                    if (item.CanBeCrafted && Service.ExcelCache.IsCompanyCraft(item.RowId))
-                    {
-                        //TODO: replace with a dynamic way of determining number of steps
-                        for (uint i = 0; i < 3; i++)
-                        {
-                            if (ImGui.Selectable("Add phase " + i + " to craft list - " + filter.Name))
-                            {
-                                filter.CraftList.AddCraftItem(item.RowId, 1, ItemFlags.None, i);
-                                filter.NeedsRefresh = true;
-                                filter.StartRefresh();
-                            }
-                        }
-                    }
-                }
-
+                item.DrawRightClickPopup();
                 ImGui.EndPopup();
             }
         }

@@ -11,6 +11,8 @@ namespace InventoryTools.Logic.Columns
         public string Name { get; set; }
         public float Width { get; set; }
         
+        public string HelpText { get; set; }
+        
         public string FilterText { get; set; }
         
         public List<string>? FilterChoices { get; set; }
@@ -20,6 +22,9 @@ namespace InventoryTools.Logic.Columns
         public ColumnFilterType FilterType { get; set; }
         
         public bool IsDebug { get; set; }
+
+        public FilterType AvailableIn { get; }
+        public bool AvailableInType(FilterType type);
         
         public IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items);
         public IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items);
@@ -32,11 +37,11 @@ namespace InventoryTools.Logic.Columns
         
         public IEnumerable<CraftItem> Sort(ImGuiSortDirection direction, IEnumerable<CraftItem> items);
         
-        public void Draw(InventoryItem item, int rowIndex);
-        public void Draw(SortingResult item, int rowIndex);
-        public void Draw(ItemEx item, int rowIndex);
+        public void Draw(FilterConfiguration configuration, InventoryItem item, int rowIndex);
+        public void Draw(FilterConfiguration configuration, SortingResult item, int rowIndex);
+        public void Draw(FilterConfiguration configuration, ItemEx item, int rowIndex);
         
-        public void Draw(CraftItem item, int rowIndex, FilterConfiguration configuration);
+        public void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex);
 
         public string CsvExport(InventoryItem item);
         public string CsvExport(SortingResult item);
@@ -49,6 +54,8 @@ namespace InventoryTools.Logic.Columns
         {
             ImGui.TableSetupColumn(tableKey + "Filter" + Name, ImGuiTableColumnFlags.NoSort);
         }
+
+        public IFilterEvent? DrawFooterFilter(FilterConfiguration configuration);
         
         public delegate void ButtonPressedDelegate(string buttonName, object eventData);
         public event ButtonPressedDelegate? ButtonPressed;

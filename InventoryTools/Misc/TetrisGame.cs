@@ -43,7 +43,7 @@ namespace InventoryTools.Misc
         private static readonly int _timerStep = 10;
 
         public Game Game;
-        private static  Timer? _gameTimer;
+        private static Timer? _gameTimer;
 
         public TetrisGame()
         {
@@ -71,8 +71,9 @@ namespace InventoryTools.Misc
         try {
             if (Game.Status != Game.GameStatus.InProgress) return;
 
-            if (lastMoveTime != null && lastMoveTime.Value.AddMilliseconds(300) >= DateTime.Now)
+            if (lastMoveTime != null && lastMoveTime.Value.AddMilliseconds(100) >= DateTime.Now)
             {
+                Service.KeyState.ClearAll();
                 return;
             }                
 
@@ -95,25 +96,43 @@ namespace InventoryTools.Misc
                 Game.MoveRight();
                 lastMoveTime = DateTime.Now;
             }
+            Service.KeyState.ClearAll();
+            
 
         } catch (Exception) {
             
         }
         }
-        
+
+        public static bool TetrisEnabled { get; set; }
+
+        public static void ToggleTetris()
+        {
+            if (TetrisEnabled)
+            {
+                DisableTetris();
+            }
+            else
+            {
+                EnableTetris();
+            }
+        }
+
         public static void EnableTetris()
         {
-            PluginService.FilterManager.RemoveOverlay(WindowName.InventoryExpansion);
-            PluginService.FilterManager.AddOverlay(new TetrisOverlay());
+            TetrisEnabled = true;
+            PluginService.OverlayService.RemoveOverlay(WindowName.InventoryExpansion);
+            PluginService.OverlayService.AddOverlay(new TetrisOverlay());
         }
 
         public static void DisableTetris()
         {
-            PluginService.FilterManager.RemoveOverlay(WindowName.InventoryExpansion);
-            PluginService.FilterManager.AddOverlay(new InventoryExpansionOverlay());
+            TetrisEnabled = false;
+            PluginService.OverlayService.RemoveOverlay(WindowName.InventoryExpansion);
+            PluginService.OverlayService.AddOverlay(new InventoryExpansionOverlay());
         }
         
-        private void OnTimedEvent(object source, ElapsedEventArgs e)
+        private void OnTimedEvent(object? source, ElapsedEventArgs e)
         {
             if (Game.Status != Game.GameStatus.Finished)
             {

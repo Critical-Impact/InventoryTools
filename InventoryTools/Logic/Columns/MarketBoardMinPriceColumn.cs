@@ -6,6 +6,10 @@ namespace InventoryTools.Logic.Columns
 {
     public class MarketBoardMinPriceColumn : MarketBoardPriceColumn
     {
+        
+        public override string HelpText { get; set; } =
+            "Shows the minimum price of both the NQ and HQ form of the item. This data is sourced from universalis.";
+        
         public override (int,int)? CurrentValue(InventoryItem item)
         {
             if (!item.CanBeTraded)

@@ -23,6 +23,7 @@ namespace InventoryTools.Logic.Columns
 
         public override string Name { get; set; } = "Debug - Item ID";
         public override float Width { get; set; } = 100.0f;
+        public override string HelpText { get; set; } = "Shows the item's internal ID.";
         public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = false;
         public override bool IsDebug { get; set; } = true;

@@ -15,25 +15,25 @@ namespace InventoryTools.Logic.Columns
         protected static readonly int Loading = -1;
         protected static readonly int Untradable = -2;
 
-        public override void Draw(InventoryItem item, int rowIndex)
+        public override void Draw(FilterConfiguration configuration, InventoryItem item, int rowIndex)
         {
             var result = DoDraw(CurrentValue(item), rowIndex);
-            result?.HandleEvent(item);
+            result?.HandleEvent(configuration,item);
         }
-        public override void Draw(SortingResult item, int rowIndex)
+        public override void Draw(FilterConfiguration configuration, SortingResult item, int rowIndex)
         {
             var result = DoDraw(CurrentValue(item), rowIndex);
-            result?.HandleEvent(item);
+            result?.HandleEvent(configuration,item);
         }
-        public override void Draw(ItemEx item, int rowIndex)
+        public override void Draw(FilterConfiguration configuration, ItemEx item, int rowIndex)
         {
             var result = DoDraw(CurrentValue((ItemEx)item), rowIndex);
-            result?.HandleEvent(item);
+            result?.HandleEvent(configuration,item);
         }
-        public override void Draw(CraftItem item, int rowIndex, FilterConfiguration configuration)
+        public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
         {
             var result = DoDraw(CurrentValue(item), rowIndex);
-            result?.HandleEvent(item);
+            result?.HandleEvent(configuration,item);
         }
 
         public override IColumnEvent? DoDraw((int, int)? currentValue, int rowIndex)
@@ -106,6 +106,8 @@ namespace InventoryTools.Logic.Columns
         }
 
         public override string Name { get; set; } = "MB Average Price NQ/HQ";
+        public override string HelpText { get; set; } =
+            "Shows the average price of both the NQ and HQ form of the item. This data is sourced from universalis.";
         public override float Width { get; set; } = 200.0f;
         public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = true;

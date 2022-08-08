@@ -3,26 +3,26 @@ using System.Linq;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
+using InventoryTools.Logic.Columns;
 using InventoryTools.Logic.Filters.Abstract;
+using OtterGui;
 
 namespace InventoryTools.Logic.Filters
 {
     public class ColumnsFilter : SortedListFilter<string>
     {
-        public override Dictionary<string, string> CurrentValue(FilterConfiguration configuration)
+        public override Dictionary<string, (string, string?)> CurrentValue(FilterConfiguration configuration)
         {
-            string GetColumnName(string c)
+            (string, string?) GetColumnDetails(string c)
             {
-                return PluginService.PluginLogic.GridColumns.ContainsKey(c)
-                    ? PluginService.PluginLogic.GridColumns[c]
-                    : c;
+                return PluginService.PluginLogic.GridColumns.ContainsKey(c) ? (PluginService.PluginLogic.GridColumns[c].Name, PluginService.PluginLogic.GridColumns[c].HelpText): (c, null);
             }
 
-            return (configuration.Columns ?? new List<string>()).ToDictionary(c => c, GetColumnName);
+            return (configuration.Columns ?? new List<string>()).ToDictionary(c => c, GetColumnDetails);
         }
         
 
-        public override void UpdateFilterConfiguration(FilterConfiguration configuration, Dictionary<string, string> newValue)
+        public override void UpdateFilterConfiguration(FilterConfiguration configuration, Dictionary<string, (string, string?)> newValue)
         {
             configuration.Columns = newValue.Select(c => c.Key).ToList();
         }
@@ -55,16 +55,16 @@ namespace InventoryTools.Logic.Filters
             var value = CurrentValue(configuration);
             if (!value.ContainsKey(item))
             {
-                value.Add(item, "");
+                value.Add(item, ("", null));
             }
             UpdateFilterConfiguration(configuration, value);
         }
 
-        public Dictionary<string, string> GetAvailableItems(FilterConfiguration configuration)
+        public Dictionary<string, IColumn> GetAvailableItems(FilterConfiguration configuration)
         {
             var value = PluginService.PluginLogic.GridColumns;
             var currentValue = CurrentValue(configuration);
-            return value.Where(c => !currentValue.ContainsKey(c.Key)).ToDictionary(c => c.Key, c => c.Value);
+            return value.Where(c => c.Value.AvailableInType(configuration.FilterType) && !currentValue.ContainsKey(c.Key)).ToDictionary(c => c.Key, c => c.Value);
         }
 
         public override void DrawTable(FilterConfiguration configuration)
@@ -78,12 +78,13 @@ namespace InventoryTools.Logic.Filters
             ImGui.SameLine();
             if (ImGui.BeginCombo("Add##" + Key, currentAddColumn))
             {
-                foreach(var column in value.OrderBy(c => c.Value))
+                foreach(var column in value.OrderBy(c => c.Value.Name))
                 {
-                    if (ImGui.Selectable(column.Value, currentAddColumn == column.Value))
+                    if (ImGui.Selectable(column.Value.Name, currentAddColumn == column.Value.Name))
                     {
                         AddItem(configuration, column.Key);
                     }
+                    ImGuiUtil.HoverTooltip(column.Value.HelpText);
                 }
 
                 ImGui.EndCombo();

@@ -6,6 +6,7 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using InventoryTools;
 using InventoryTools.Logic;
+using InventoryTools.Services;
 using Lumina.Excel.GeneratedSheets;
 
 //Not so simple way to test people's filters/inventory files for issues
@@ -45,7 +46,6 @@ if (inventories != null)
     {
         characterMonitor.OverrideActiveRetainer(currentRetainer);
     }
-    var filterManager = new FilterManager(true);
     //FilterConfiguration filterOut;
     //FilterConfiguration.FromBase64("insert filter here", out filterOut);
     var sampleFilter = new FilterConfiguration("Duplicated SortedItems", FilterType.SearchFilter);
@@ -57,7 +57,7 @@ if (inventories != null)
     sampleFilter.HighlightWhen = "Always";
 
     var filterState = new FilterState() { FilterConfiguration = sampleFilter };
-    var filteredList = filterManager.GenerateFilteredList(sampleFilter, inventories).Result;
+    var filteredList = sampleFilter.GenerateFilteredList(inventories).Result;
     var bagHighlights = filterState.GetBagHighlights(InventoryType.RetainerBag0,filteredList);
 
     foreach (var a in filteredList.AllItems)

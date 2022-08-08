@@ -14,20 +14,20 @@ namespace InventoryTools.Logic.Columns
         protected static readonly int Loading = -1;
         protected static readonly int Untradable = -2;
 
-        public override void Draw(InventoryItem item, int rowIndex)
+        public override void Draw(FilterConfiguration configuration, InventoryItem item, int rowIndex)
         {
             var result = DoDraw(CurrentValue(item), rowIndex);
-            result?.HandleEvent(item);
+            result?.HandleEvent(configuration,item);
         }
-        public override void Draw(SortingResult item, int rowIndex)
+        public override void Draw(FilterConfiguration configuration, SortingResult item, int rowIndex)
         {
             var result = DoDraw(CurrentValue(item), rowIndex);
-            result?.HandleEvent(item);
+            result?.HandleEvent(configuration,item);
         }
-        public override void Draw(ItemEx item, int rowIndex)
+        public override void Draw(FilterConfiguration configuration, ItemEx item, int rowIndex)
         {
             var result = DoDraw(CurrentValue((ItemEx)item), rowIndex);
-            result?.HandleEvent(item);
+            result?.HandleEvent(configuration,item);
         }
 
         public override IColumnEvent? DoDraw(int? currentValue, int rowIndex)
@@ -98,6 +98,8 @@ namespace InventoryTools.Logic.Columns
         }
 
         public override string Name { get; set; } = "MB Average Price NQ";
+        public override string HelpText { get; set; } =
+            "Shows the average price of the NQ form of the item. This data is sourced from universalis.";
         public override float Width { get; set; } = 250.0f;
         public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = true;

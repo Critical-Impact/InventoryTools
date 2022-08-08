@@ -84,7 +84,7 @@ namespace InventoryTools.Logic
 
         public delegate IEnumerable<ItemEx> PreFilterItemsDelegate(IEnumerable<ItemEx> items);
 
-        public delegate void ChangedDelegate(FilterTable itemTable);
+        public delegate void ChangedDelegate(RenderTableBase itemTable);
 
         public virtual event PreFilterSortedItemsDelegate? PreFilterSortedItems;
         public virtual event PreFilterItemsDelegate? PreFilterItems;
@@ -93,6 +93,7 @@ namespace InventoryTools.Logic
         public abstract void RefreshColumns();
 
         public abstract void Draw(Vector2 size);
+        public abstract void DrawFooterItems();
 
         public virtual void Dispose()
         {

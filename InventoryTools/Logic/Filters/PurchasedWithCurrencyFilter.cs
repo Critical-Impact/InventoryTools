@@ -23,12 +23,7 @@ namespace InventoryTools.Logic.Filters
         
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
-            var currentValue = CurrentValue(configuration);
-            if (currentValue.Count == 0)
-            {
-                return null;
-            }
-            return currentValue.Any(currencyItem => Service.ExcelCache.BoughtWithCurrency(currencyItem, item.ItemId));
+            return FilterItem(configuration,item.Item);
         }
 
         public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
@@ -38,7 +33,7 @@ namespace InventoryTools.Logic.Filters
             {
                 return null;
             }
-            return currentValue.Any(currencyItem => Service.ExcelCache.BoughtWithCurrency(currencyItem, item.RowId));
+            return currentValue.Any(item.ObtainedWithSpecialShopCurrency);
         }
 
         public override Dictionary<uint, string> GetChoices(FilterConfiguration configuration)

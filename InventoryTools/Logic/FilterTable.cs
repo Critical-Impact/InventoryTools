@@ -125,7 +125,7 @@ namespace InventoryTools.Logic
                 return;
             }
 
-            ImGui.BeginChild("FilterTableContent", size * ImGui.GetIO().FontGlobalScale); 
+            ImGui.BeginChild("FilterTableContent", size * ImGui.GetIO().FontGlobalScale, false, ImGuiWindowFlags.HorizontalScrollbar); 
             
             if((FilterConfiguration.FilterType != FilterType.CraftFilter || FilterConfiguration.FilterType == FilterType.CraftFilter && ImGui.CollapsingHeader("Items in Retainers/Bags", ImGuiTreeNodeFlags.DefaultOpen)) && ImGui.BeginTable(Key, Columns.Count, _tableFlags))
             {
@@ -144,14 +144,12 @@ namespace InventoryTools.Logic
                     var actualSpecs = currentSortSpecs.Specs;
                     if (SortColumn != actualSpecs.ColumnIndex)
                     {
-                        PluginLog.Verbose("specs dirty");
                         SortColumn = actualSpecs.ColumnIndex;
                         refresh = true;
                     }
 
                     if (SortDirection != actualSpecs.SortDirection)
                     {
-                        PluginLog.Verbose("specs dirty");
                         SortDirection = actualSpecs.SortDirection;
                         refresh = true;
                     }
@@ -197,16 +195,18 @@ namespace InventoryTools.Logic
                         {
                             var item = RenderSortedItems[index];
                             ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
+                            ImGui.PushID(index);
                             for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                             {
                                 var column = Columns[columnIndex];
-                                column.Draw(item, index);
+                                column.Draw(FilterConfiguration, item, index);
                                 ImGui.SameLine();
                                 if (columnIndex == Columns.Count - 1)
                                 {
-                                    PluginService.PluginLogic.RightClickColumn.Draw(item, index);
+                                    PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration, item, index);
                                 }
                             }
+                            ImGui.PopID();
                         }
                     }
                 }
@@ -222,11 +222,11 @@ namespace InventoryTools.Logic
                             for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                             {
                                 var column = Columns[columnIndex];
-                                column.Draw((ItemEx)item, index);
+                                column.Draw(FilterConfiguration, (ItemEx)item, index);
                                 ImGui.SameLine();
                                 if (columnIndex == Columns.Count - 1)
                                 {
-                                    PluginService.PluginLogic.RightClickColumn.Draw((ItemEx)item, index);
+                                    PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration, (ItemEx)item, index);
                                 }
                             }
                         }
@@ -235,6 +235,18 @@ namespace InventoryTools.Logic
                 ImGui.EndTable();
             }
             ImGui.EndChild();
+        }
+
+        public override void DrawFooterItems()
+        {
+            foreach (var column in Columns)
+            {
+                var result = column.DrawFooterFilter(FilterConfiguration);
+                if (result != null)
+                {
+                    result.HandleEvent(FilterConfiguration);
+                }
+            }
         }
 
         public void SaveCallback(bool arg1, string arg2)
@@ -272,12 +284,19 @@ namespace InventoryTools.Logic
 
         }
 
+        public void ClearFilters()
+        {
+            Columns.ForEach(c => c.FilterText = "");
+            NeedsRefresh = true;
+        }
+
         public override void Dispose()
         {
             base.Dispose();
             unsafe
             {
-                Marshal.FreeHGlobal(new IntPtr(_clipper.NativePtr));
+                _clipper = ImGuiNative.ImGuiListClipper_ImGuiListClipper();
+                _clipper.Destroy();
             }
         }
     }

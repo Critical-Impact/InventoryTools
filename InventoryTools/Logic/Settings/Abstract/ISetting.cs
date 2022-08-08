@@ -18,7 +18,7 @@ namespace InventoryTools.Logic.Settings.Abstract
 
         public static readonly List<SettingCategory> SettingCategoryOrder = new() {SettingCategory.General, SettingCategory.Visuals, SettingCategory.MarketBoard};
         
-        public static readonly List<SettingSubCategory> SettingSubCategoryOrder = new() {SettingSubCategory.FilterSettings, SettingSubCategory.AutoSave, SettingSubCategory.Experimental, SettingSubCategory.Highlighting, SettingSubCategory.DestinationHighlighting, SettingSubCategory.Tooltips, SettingSubCategory.Market};
+        public static readonly List<SettingSubCategory> SettingSubCategoryOrder = new() {SettingSubCategory.FilterSettings, SettingSubCategory.AutoSave, SettingSubCategory.Experimental, SettingSubCategory.Highlighting, SettingSubCategory.DestinationHighlighting, SettingSubCategory.Tooltips, SettingSubCategory.Market, SettingSubCategory.ContextMenus, SettingSubCategory.Hotkeys};
 
     }
 }

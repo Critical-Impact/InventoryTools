@@ -1,17 +1,41 @@
+using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
+using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
-using InventoryTools.Logic.Filters;
-using InventoryTools.Logic.Filters.Abstract;
-using Lumina.Excel.GeneratedSheets;
+using OtterGui.Widgets;
 
 namespace InventoryTools.Logic.Columns
 {
     public class BestInSlotColumn : IntegerColumn
     {
+        public override bool IsDebug { get; set; } = true;
+        private ClippedSelectableCombo<KeyValuePair<ulong, Character>>? _characters;
+        private ulong? _selectedCharacter;
+
+        public override IFilterEvent? DrawFooterFilter(FilterConfiguration configuration)
+        {
+            ImGui.SameLine();
+            var characterDictionary = PluginService.CharacterMonitor.Characters;
+            var currentCharacterId = PluginService.CharacterMonitor.ActiveCharacter;
+            var allCharacters = characterDictionary.Where(c => c.Value.Name != "" && (c.Value.OwnerId == currentCharacterId || c.Key == currentCharacterId)).ToList();
+            var currentCharacterName = _selectedCharacter == null
+                ? ""
+                : characterDictionary.ContainsKey(_selectedCharacter.Value)
+                    ? characterDictionary[_selectedCharacter.Value].Name
+                    : "";
+            _characters = new ClippedSelectableCombo<KeyValuePair<ulong, Character>>("BestInSlotCharacterSelect", "BiS Character", 200,allCharacters, character => character.Value.NameWithClassAbv);
+            if (_characters.Draw(currentCharacterName, out var selected))
+            {
+                _selectedCharacter = allCharacters[selected].Key;
+                return new RefreshFilterEvent();
+            }
+
+            return null;
+        }
+
         public override int? CurrentValue(InventoryItem item)
         {
             if (item.SortedCategory == InventoryCategory.CharacterEquipped || item.SortedCategory == InventoryCategory.RetainerEquipped || item.SortedCategory == InventoryCategory.Armoire || item.SortedCategory == InventoryCategory.GlamourChest || item.InGearSet)
@@ -46,10 +70,11 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        private ulong? _characterId = 33776997237932704;
-
         public override string Name { get; set; } = "Relative Item Level";
         public override float Width { get; set; } = 80;
+
+        public override string HelpText { get; set; } =
+            "Shows the relative item level of either your items or your retainers items compared to the item shown. This will show a drop down in the filter that lets you pick which character you are comparing against. A negative value indicates it's worse, a positive indicates it's better.";
 
         public override string FilterText { get; set; } ="";
 
@@ -58,11 +83,11 @@ namespace InventoryTools.Logic.Columns
 
         public bool CanUse(uint itemLevel)
         {
-            if (_characterId != null)
+            if (_selectedCharacter != null)
             {
-                if (PluginService.CharacterMonitor.Characters.ContainsKey(_characterId.Value))
+                if (PluginService.CharacterMonitor.Characters.ContainsKey(_selectedCharacter.Value))
                 {
-                    var character = PluginService.CharacterMonitor.Characters[_characterId.Value];
+                    var character = PluginService.CharacterMonitor.Characters[_selectedCharacter.Value];
                     if (character.OwnerId != 0)
                     {
                         return character.Level >= itemLevel;
@@ -82,11 +107,11 @@ namespace InventoryTools.Logic.Columns
 
         public bool CanCurrentJobEquip(uint classJobCategory)
         {
-            if (_characterId != null)
+            if (_selectedCharacter != null)
             {
-                if (PluginService.CharacterMonitor.Characters.ContainsKey(_characterId.Value))
+                if (PluginService.CharacterMonitor.Characters.ContainsKey(_selectedCharacter.Value))
                 {
-                    var character = PluginService.CharacterMonitor.Characters[_characterId.Value];
+                    var character = PluginService.CharacterMonitor.Characters[_selectedCharacter.Value];
                     if (character.OwnerId != 0)
                     {
                         if(Service.ExcelCache.IsItemEquippableBy(classJobCategory, character.ClassJob))
@@ -114,11 +139,11 @@ namespace InventoryTools.Logic.Columns
 
         public InventoryItem? GetEquippedItem(ItemEx comparingItem)
         {
-            if (_characterId != null)
+            if (_selectedCharacter != null)
             {
-                if (PluginService.CharacterMonitor.Characters.ContainsKey(_characterId.Value))
+                if (PluginService.CharacterMonitor.Characters.ContainsKey(_selectedCharacter.Value))
                 {
-                    var character = PluginService.CharacterMonitor.Characters[_characterId.Value];
+                    var character = PluginService.CharacterMonitor.Characters[_selectedCharacter.Value];
                     if (character.OwnerId != 0)
                     {
                         var equipped = PluginService.InventoryMonitor.GetSpecificInventory(character.CharacterId,InventoryCategory.RetainerEquipped);

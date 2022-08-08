@@ -4,17 +4,32 @@ using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Services;
 using NUnit.Framework;
 
-namespace TestProject1
+namespace InventoryToolsTesting
 {
     [TestFixture]
     public class CraftTests
     {
 
-        [SetUp]
+        [OneTimeSetUp]
         public void Init()
         {
             var lumina = new Lumina.GameData( "H:/Games/SquareEnix/FINAL FANTASY XIV - A Realm Reborn/game/sqpack" );
             Service.ExcelCache = new ExcelCache(lumina);
+        }
+
+        [Test]
+        public void TestSkybuildersCalculations()
+        {
+            CraftList list = new CraftList();
+            list.AddCraftItem(31922, 2);
+            var requiredMaterialsList = list.GetRequiredMaterialsList();
+            Assert.AreEqual( 50, requiredMaterialsList[32014]);
+            
+            list = new CraftList();
+            //Skybuilders bed
+            list.AddCraftItem(31945, 1);
+            requiredMaterialsList = list.GetRequiredMaterialsList();
+            Assert.AreEqual( 50, requiredMaterialsList[32028]);
         }
         
         [Test]
@@ -47,6 +62,11 @@ namespace TestProject1
             Assert.AreEqual(10, requiredMaterialsList[6]);
             //wind shard
             Assert.AreEqual(6, requiredMaterialsList[4]);
+
+            list = new CraftList();
+            list.AddCraftItem(27877, 1);
+            requiredMaterialsList = list.GetRequiredMaterialsList();
+            Assert.AreEqual( 2, requiredMaterialsList[27830]);
         }
         
         [Test]
@@ -72,9 +92,7 @@ namespace TestProject1
             characterMaterials.Add(windCrystal.ItemId, new List<CraftItemSource>() {windCrystal});
             
             list.Update(characterMaterials, externalSources);
-            var availableMaterialsList = list.GetAvailableMaterialsList();
-            var merged = list.GetFlattenedMergedMaterials();
-            var a = "";
+            //TODO: Finish this
         }
 
         [Test]

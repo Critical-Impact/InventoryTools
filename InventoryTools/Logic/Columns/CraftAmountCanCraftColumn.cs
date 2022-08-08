@@ -29,14 +29,14 @@ namespace InventoryTools.Logic.Columns
             return (int?) currentValue.QuantityCanCraft;
         }
         
-        public override void Draw(CraftItem item, int rowIndex, FilterConfiguration configuration)
+        public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
         {
             if (CurrentValue(item) > 0)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.ParsedBlue);
             }
 
-            base.Draw(item, rowIndex, configuration);
+            base.Draw(configuration, item, rowIndex);
             if (CurrentValue(item) > 0)
             {
                 ImGui.PopStyleColor();
@@ -45,8 +45,11 @@ namespace InventoryTools.Logic.Columns
 
         public override string Name { get; set; } = "Craftable";
         public override float Width { get; set; } = 60;
-        public override string FilterText { get; set; } = "This is the amount that you could craft given the items in your inventory.";
+        public override string HelpText { get; set; } =
+            "This is the amount that you could craft given the items in your inventory";
+        public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = false;
+        public override FilterType AvailableIn { get; } = Logic.FilterType.CraftFilter;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
     }
 }

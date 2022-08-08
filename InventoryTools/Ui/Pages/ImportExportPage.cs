@@ -12,10 +12,10 @@ namespace InventoryTools.Sections
         public void Draw()
         {
             ImGui.PushID("ImportSection");
-            var pluginLogic = PluginService.PluginLogic;
             if (ImGui.CollapsingHeader("Export", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(5, 5));
+                var filterConfigurations = PluginService.FilterService.FiltersList;
+                ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(5, 5) * ImGui.GetIO().FontGlobalScale);
                 if (ImGui.BeginTable("FilterConfigTable", 3, ImGuiTableFlags.BordersV |
                                                              ImGuiTableFlags.BordersOuterV |
                                                              ImGuiTableFlags.BordersInnerV |
@@ -27,7 +27,7 @@ namespace InventoryTools.Sections
                     ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint) 1);
                     ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint) 2);
                     ImGui.TableHeadersRow();
-                    if (pluginLogic.FilterConfigurations.Count == 0)
+                    if (filterConfigurations.Count == 0)
                     {
                         ImGui.TableNextRow();
                         ImGui.TableNextColumn();
@@ -36,10 +36,10 @@ namespace InventoryTools.Sections
                         ImGui.TableNextColumn();
                     }
 
-                    for (var index = 0; index < pluginLogic.FilterConfigurations.Count; index++)
+                    for (var index = 0; index < filterConfigurations.Count; index++)
                     {
                         ImGui.TableNextRow();
-                        var filterConfiguration = pluginLogic.FilterConfigurations[index];
+                        var filterConfiguration = filterConfigurations[index];
                         ImGui.TableNextColumn();
                         if (filterConfiguration.Name != "")
                         {
@@ -74,7 +74,7 @@ namespace InventoryTools.Sections
             if (ImGui.CollapsingHeader("Import", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 var importData = ImportData;
-                if (ImGui.InputTextMultiline("Paste filter here",ref importData, 5000, new Vector2(400, 200)))
+                if (ImGui.InputTextMultiline("Paste filter here",ref importData, 5000, new Vector2(400, 200) * ImGui.GetIO().FontGlobalScale))
                 {
                     ImportData = importData;
                     ImportFailed = false;

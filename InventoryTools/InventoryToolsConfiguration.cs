@@ -7,6 +7,7 @@ using Dalamud.Configuration;
 using Dalamud.Interface.Colors;
 using InventoryTools.Logic;
 using Newtonsoft.Json;
+using OtterGui.Classes;
 
 namespace InventoryTools
 {
@@ -34,9 +35,11 @@ namespace InventoryTools
         private bool _invertTabHighlighting = false;
         private bool _highlightDestination = false;
         private bool _highlightDestinationEmpty = false;
+        private bool _addMoreInformationContextMenu = false;
 
         private bool _isVisible;
         private int _marketRefreshTimeHours = 24;
+        private int _marketSaleHistoryLimit = 7;
         private bool _showItemNumberRetainerList = true;
 
         private Vector4 _tabHighlightColor = new (0.007f, 0.008f,
@@ -53,12 +56,24 @@ namespace InventoryTools
 
         public bool InventoriesMigrated { get; set; } = false;
 
+        private HashSet<string>? _openWindows = new();
+
         public bool IsVisible
         {
             get => _isVisible;
             set
             {
                 _isVisible = value;
+                ConfigurationChanged?.Invoke();
+            }
+        }
+
+        public bool AddMoreInformationContextMenu
+        {
+            get => _addMoreInformationContextMenu;
+            set
+            {
+                _addMoreInformationContextMenu = value;
                 ConfigurationChanged?.Invoke();
             }
         }
@@ -70,6 +85,7 @@ namespace InventoryTools
         private bool _tooltipDisplayMarketAveragePrice = true;
         private bool _tooltipDisplayMarketLowestPrice = false;
         private bool _tooltipAddCharacterNameOwned = false;
+        private uint? _tooltipColor = null;
         public Vector4 HighlightColor
         {
             get => _highlightColor;
@@ -195,6 +211,21 @@ namespace InventoryTools
             }
         }
 
+        public int MarketSaleHistoryLimit
+        {
+            get => _marketSaleHistoryLimit;
+            set
+            {
+                _marketSaleHistoryLimit = value;
+                if (_marketSaleHistoryLimit == 0)
+                {
+                    _marketSaleHistoryLimit = 7;
+                }
+                Universalis.SetSaleHistoryLimit(_marketRefreshTimeHours);
+                ConfigurationChanged?.Invoke();
+            }
+        }
+
         public bool ColorRetainerList
         {
             get => _colorRetainerList;
@@ -283,13 +314,13 @@ namespace InventoryTools
 
         public string? ActiveUiFilter { get; set; } = null;
 
-        [JsonIgnore]
         public bool TetrisEnabled { get; set; } = false;
 
-        [JsonIgnore]
         public string? ActiveBackgroundFilter { get; set; } = null;
+        public bool SaveBackgroundFilter { get; set; } = false;
 
         public bool FirstRun { get; set; } = true;
+        public bool IntroShown { get; set; } = false;
         public int SelectedHelpPage { get; set; }
         #if DEBUG
         public int SelectedDebugPage { get; set; }
@@ -298,6 +329,28 @@ namespace InventoryTools
         public int AutoSaveMinutes { get; set; } = 10;
         public int InternalVersion { get; set; } = 0;
         public int Version { get; set; }
+
+        public uint? TooltipColor
+        {
+            get => _tooltipColor;
+            set => _tooltipColor = value;
+        }
+
+        public ModifiableHotkey? MoreInformationHotKey { get; set; }
+
+        public HashSet<string> OpenWindows
+        {
+            get
+            {
+                if (_openWindows == null)
+                {
+                    _openWindows = new HashSet<string>();
+                }
+                return _openWindows;
+            }
+            set => _openWindows = value;
+        }
+
         public event ConfigurationChangedDelegate? ConfigurationChanged;
 
         //Configuration Helpers
@@ -314,6 +367,14 @@ namespace InventoryTools
         public List<FilterConfiguration> GetSavedFilters()
         {
             return FilterConfigurations;
+        }
+
+        public void MarkReloaded()
+        {
+            if (!SaveBackgroundFilter)
+            {
+                ActiveBackgroundFilter = null;
+            }
         }
     }
 }

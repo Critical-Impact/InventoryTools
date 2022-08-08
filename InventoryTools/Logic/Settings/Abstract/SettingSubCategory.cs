@@ -6,9 +6,10 @@ namespace InventoryTools.Logic.Settings.Abstract
         FilterSettings,
         Experimental,
         Tooltips,
+        Hotkeys,
         Highlighting,
         DestinationHighlighting,
         Market,
-        
+        ContextMenus,
     }
 }

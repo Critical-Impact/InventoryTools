@@ -6,9 +6,9 @@ namespace InventoryTools.Logic.Columns
 {
     public interface IColumnEvent
     {
-        public void HandleEvent(SortingResult result);
-        public void HandleEvent(InventoryItem inventoryItem);
-        public void HandleEvent(ItemEx item);
-        public void HandleEvent(CraftItem item);
+        public void HandleEvent(FilterConfiguration configuration, SortingResult result);
+        public void HandleEvent(FilterConfiguration configuration, InventoryItem inventoryItem);
+        public void HandleEvent(FilterConfiguration configuration, ItemEx item);
+        public void HandleEvent(FilterConfiguration configuration, CraftItem item);
     }
 }
