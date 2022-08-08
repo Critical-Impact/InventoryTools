@@ -51,21 +51,25 @@ namespace InventoryTools.Logic.Columns.Abstract
                 return "N/A";
             }
         }
-        public override void Draw(InventoryItem item, int rowIndex)
+        public override void Draw(FilterConfiguration configuration, InventoryItem item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex);
+            var result = DoDraw(CurrentValue(item), rowIndex);
+            result?.HandleEvent(configuration, item);
         }
-        public override void Draw(SortingResult item, int rowIndex)
+        public override void Draw(FilterConfiguration configuration, SortingResult item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex);
+            var result = DoDraw(CurrentValue(item), rowIndex);
+            result?.HandleEvent(configuration, item);
         }
-        public override void Draw(ItemEx item, int rowIndex)
+        public override void Draw(FilterConfiguration configuration, ItemEx item, int rowIndex)
         {
-            DoDraw(CurrentValue((ItemEx)item), rowIndex);
+            var result = DoDraw(CurrentValue((ItemEx)item), rowIndex);
+            result?.HandleEvent(configuration, item);
         }
-        public override void Draw(CraftItem item, int rowIndex, FilterConfiguration configuration)
+        public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex);
+            var result = DoDraw(CurrentValue(item), rowIndex);
+            result?.HandleEvent(configuration, item);
         }
 
         public override IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items)

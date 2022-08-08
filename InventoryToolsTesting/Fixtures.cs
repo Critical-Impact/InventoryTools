@@ -3,7 +3,7 @@ using CriticalCommonLib.Enums;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 
-namespace TestProject1
+namespace InventoryToolsTesting
 {
     public static class Fixtures
     {

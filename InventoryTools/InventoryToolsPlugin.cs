@@ -6,16 +6,16 @@ namespace InventoryTools
 {
     public class InventoryToolsPlugin : IDalamudPlugin
     {
-        private InventoryToolsUi _ui;
-        public string Name => "Inventory Tools";
+        private Ui.InventoryToolsUi _ui;
+        public string Name => "Allagan Tools";
         internal DalamudPluginInterface PluginInterface { get; private set; }
         
         public InventoryToolsPlugin(DalamudPluginInterface pluginInterface)
         {
             PluginInterface = pluginInterface;
             PluginInterface.Create<Service>();
-            PluginService.Initialise();
-            _ui = new InventoryToolsUi();
+            PluginService.Initialise(PluginInterface);
+            _ui = new Ui.InventoryToolsUi();
         }
 
         protected virtual void Dispose(bool disposing)

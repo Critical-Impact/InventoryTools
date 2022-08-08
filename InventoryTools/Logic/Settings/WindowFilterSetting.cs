@@ -15,11 +15,11 @@ namespace InventoryTools.Logic.Settings
         {
             if (newValue == "")
             {
-                PluginService.PluginLogic.DisableActiveUiFilter();
+                PluginService.FilterService.ClearActiveUiFilter();
             }
             else
             {
-                PluginService.PluginLogic.EnableActiveUiFilterByKey(newValue);
+                PluginService.FilterService.SetActiveUiFilterByKey(newValue);
             }
         }
 
@@ -37,7 +37,7 @@ namespace InventoryTools.Logic.Settings
             get
             {
                 var filterItems = new Dictionary<string, string> {{"", "None"}};
-                foreach (var config in PluginService.PluginLogic.FilterConfigurations)
+                foreach (var config in PluginService.FilterService.FiltersList)
                 {
                     filterItems.Add(config.Key, config.Name);
                 }

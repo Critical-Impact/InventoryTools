@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Numerics;
 using CriticalCommonLib.Services;
 using ImGuiNET;
@@ -11,10 +12,11 @@ namespace InventoryTools.Sections
         public string Name { get; } = "Filters";
         public void Draw()
         {
+            var filterConfigurations = PluginService.FilterService.FiltersList.Where(c => c.FilterType != FilterType.CraftFilter).ToList();
             if (ImGui.CollapsingHeader("Filters", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(5, 5));
-                if (ImGui.BeginTable("FilterConfigTable", 3, ImGuiTableFlags.BordersV |
+                ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(5, 5) * ImGui.GetIO().FontGlobalScale);
+                if (ImGui.BeginTable("FilterConfigTable", 4, ImGuiTableFlags.BordersV |
                                                              ImGuiTableFlags.BordersOuterV |
                                                              ImGuiTableFlags.BordersInnerV |
                                                              ImGuiTableFlags.BordersH |
@@ -23,21 +25,23 @@ namespace InventoryTools.Sections
                 {
                     ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint) 0);
                     ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint) 1);
+                    ImGui.TableSetupColumn("Order", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint) 1);
                     ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint) 2);
                     ImGui.TableHeadersRow();
-                    if (PluginService.PluginLogic.FilterConfigurations.Count == 0)
+                    if (filterConfigurations.Count == 0)
                     {
                         ImGui.TableNextRow();
                         ImGui.TableNextColumn();
                         ImGui.Text("No filters available.");
                         ImGui.TableNextColumn();
                         ImGui.TableNextColumn();
+                        ImGui.TableNextColumn();
                     }
 
-                    for (var index = 0; index < PluginService.PluginLogic.FilterConfigurations.Count; index++)
+                    for (var index = 0; index < filterConfigurations.Count; index++)
                     {
                         ImGui.TableNextRow();
-                        var filterConfiguration = PluginService.PluginLogic.FilterConfigurations[index];
+                        var filterConfiguration = filterConfigurations[index];
                         ImGui.TableNextColumn();
                         if (filterConfiguration.Name != "")
                         {
@@ -45,15 +49,22 @@ namespace InventoryTools.Sections
                             ImGui.SameLine();
                         }
 
-                        if (PluginFont.AppIcons.HasValue && filterConfiguration.Icon != null)
-                        {
-                            ImGui.PushFont(PluginFont.AppIcons.Value);
-                            ImGui.Text(filterConfiguration.Icon);
-                            ImGui.PopFont();
-                        }
-
                         ImGui.TableNextColumn();
                         ImGui.Text(filterConfiguration.FormattedFilterType);
+
+                        ImGui.TableNextColumn();
+                        ImGui.Text((filterConfiguration.Order + 1).ToString());
+                        ImGui.SameLine();
+                        if (ImGui.SmallButton("Up##" + index))
+                        {
+                            PluginService.FilterService.MoveFilterUp(filterConfiguration);
+                        }
+                        ImGui.SameLine();
+                        if (ImGui.SmallButton("Down##" + index))
+                        {
+                            PluginService.FilterService.MoveFilterDown(filterConfiguration);
+                        }
+                        
                         ImGui.TableNextColumn();
                         if (ImGui.SmallButton("Export Configuration##" + index))
                         {
@@ -80,15 +91,15 @@ namespace InventoryTools.Sections
                                 "Are you sure you want to delete this filter?.\nThis operation cannot be undone!\n\n");
                             ImGui.Separator();
 
-                            if (ImGui.Button("OK", new Vector2(120, 0)))
+                            if (ImGui.Button("OK", new Vector2(120, 0) * ImGui.GetIO().FontGlobalScale))
                             {
-                                PluginService.PluginLogic.RemoveFilter(filterConfiguration);
+                                PluginService.FilterService.RemoveFilter(filterConfiguration);
                                 ImGui.CloseCurrentPopup();
                             }
 
                             ImGui.SetItemDefaultFocus();
                             ImGui.SameLine();
-                            if (ImGui.Button("Cancel", new Vector2(120, 0)))
+                            if (ImGui.Button("Cancel", new Vector2(120, 0) * ImGui.GetIO().FontGlobalScale))
                             {
                                 ImGui.CloseCurrentPopup();
                             }
@@ -107,7 +118,7 @@ namespace InventoryTools.Sections
             {
                 if (ImGui.Button("Add Search Filter"))
                 {
-                    PluginService.PluginLogic.FilterConfigurations.Add(new FilterConfiguration("New Search Filter",
+                    filterConfigurations.Add(new FilterConfiguration("New Search Filter",
                         Guid.NewGuid().ToString("N"), FilterType.SearchFilter));
                 }
 
@@ -117,7 +128,7 @@ namespace InventoryTools.Sections
 
                 if (ImGui.Button("Add Sort Filter"))
                 {
-                    PluginService.PluginLogic.FilterConfigurations.Add(new FilterConfiguration("New Sort Filter",
+                    filterConfigurations.Add(new FilterConfiguration("New Sort Filter",
                         Guid.NewGuid().ToString("N"), FilterType.SortingFilter));
                 }
 
@@ -128,23 +139,13 @@ namespace InventoryTools.Sections
 
                 if (ImGui.Button("Add Game Item Filter"))
                 {
-                    PluginService.PluginLogic.FilterConfigurations.Add(new FilterConfiguration("New Game Item Filter",
+                    filterConfigurations.Add(new FilterConfiguration("New Game Item Filter",
                         Guid.NewGuid().ToString("N"), FilterType.GameItemFilter));
                 }
 
                 ImGui.SameLine();
                 UiHelpers.HelpMarker(
                     "This will create a filter that lets you search for all items in the game.");
-                
-                if (ImGui.Button("Add Craft Filter"))
-                {
-                    PluginService.PluginLogic.FilterConfigurations.Add(new FilterConfiguration("New Craft Filter",
-                        Guid.NewGuid().ToString("N"), FilterType.CraftFilter));
-                }
-
-                ImGui.SameLine();
-                UiHelpers.HelpMarker(
-                    "This will create a filter that lets you select items to craft then show what items are required and what you have available.");
             }
 
             if (ImGui.CollapsingHeader("Sample Filters", ImGuiTreeNodeFlags.DefaultOpen))

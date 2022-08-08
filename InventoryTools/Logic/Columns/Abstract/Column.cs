@@ -29,12 +29,26 @@ namespace InventoryTools.Logic.Columns.Abstract
         
         public  abstract string Name { get; set; }
         public abstract float Width { get; set; }
+        public abstract string HelpText { get; set; }
         public abstract string FilterText { get; set; }
         public virtual List<string>? FilterChoices { get; set; } = null;
         public abstract bool HasFilter { get; set; }
         public abstract ColumnFilterType FilterType { get; set; }
         
         public virtual bool IsDebug { get; set; } = false;
+        public bool AvailableInType(FilterType type) =>
+            AvailableIn.HasFlag(InventoryTools.Logic.FilterType.SearchFilter) &&
+            type.HasFlag(InventoryTools.Logic.FilterType.SearchFilter)
+            ||
+            (AvailableIn.HasFlag(InventoryTools.Logic.FilterType.SortingFilter) &&
+             type.HasFlag(InventoryTools.Logic.FilterType.SortingFilter))
+            ||
+            (AvailableIn.HasFlag(InventoryTools.Logic.FilterType.CraftFilter) &&
+             type.HasFlag(InventoryTools.Logic.FilterType.CraftFilter))
+            ||
+            (AvailableIn.HasFlag(InventoryTools.Logic.FilterType.GameItemFilter) &&
+             type.HasFlag(InventoryTools.Logic.FilterType.GameItemFilter));
+
         public abstract IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items);
 
         public abstract IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items);
@@ -50,16 +64,20 @@ namespace InventoryTools.Logic.Columns.Abstract
         public abstract IEnumerable<ItemEx> Sort(ImGuiSortDirection direction, IEnumerable<ItemEx> items);
         public abstract IEnumerable<CraftItem> Sort(ImGuiSortDirection direction, IEnumerable<CraftItem> items);
 
-        public abstract void Draw(InventoryItem item, int rowIndex);
+        public abstract void Draw(FilterConfiguration configuration, InventoryItem item, int rowIndex);
 
-        public abstract void Draw(SortingResult item, int rowIndex);
-        public abstract void Draw(ItemEx item, int rowIndex);
+        public abstract void Draw(FilterConfiguration configuration, SortingResult item, int rowIndex);
+        public abstract void Draw(FilterConfiguration configuration, ItemEx item, int rowIndex);
 
-        public abstract void Draw(CraftItem item, int rowIndex, FilterConfiguration configuration);
+        public abstract void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex);
 
         public abstract IColumnEvent? DoDraw(T currentValue, int rowIndex);
 
         public abstract void Setup(int columnIndex);
+        public virtual IFilterEvent? DrawFooterFilter(FilterConfiguration configuration)
+        {
+            return null;
+        }
 
         public virtual event IColumn.ButtonPressedDelegate? ButtonPressed
         {

@@ -15,28 +15,36 @@ namespace InventoryTools.Logic
         {
             filterConfiguration.CraftList.GenerateCraftChildren();
             filterConfiguration.StartRefresh();
+
         }
         
         public override void RefreshColumns()
         {
             FreezeCols = 2;
+            PluginLog.Verbose("Refreshing craft item table columns");
 
             var newColumns = new List<IColumn>();
             newColumns.Add(new IconColumn());
             newColumns.Add(new NameColumn());
-            newColumns.Add(new QuantityAvailableColumn());
-            newColumns.Add(new CraftAmountRequiredColumn());
-            newColumns.Add(new CraftAmountReadyColumn());
-            newColumns.Add(new CraftAmountAvailableColumn());
-            newColumns.Add(new CraftAmountUnavailableColumn());
-            newColumns.Add(new CraftAmountCanCraftColumn());
-            
+            if (FilterConfiguration.SimpleCraftingMode == true)
+            {
+                newColumns.Add(new CraftAmountRequiredColumn());
+                newColumns.Add(new CraftSimpleColumn());
+            }
+            else
+            {
+                newColumns.Add(new QuantityAvailableColumn());
+                newColumns.Add(new CraftAmountRequiredColumn());
+                newColumns.Add(new CraftAmountReadyColumn());
+                newColumns.Add(new CraftAmountAvailableColumn());
+                newColumns.Add(new CraftAmountUnavailableColumn());
+                newColumns.Add(new CraftAmountCanCraftColumn());
+            }
+
             newColumns.Add(new MarketBoardMinPriceColumn());
             newColumns.Add(new MarketBoardMinTotalPriceColumn());
             newColumns.Add(new AcquisitionSourceIconsColumn());
             newColumns.Add(new CraftGatherColumn());
-            newColumns.Add(new PurchasedWithCurrencyColumn());
-            newColumns.Add(new CraftPeonColumn());
             this.Columns = newColumns;
         }
 
@@ -75,14 +83,12 @@ namespace InventoryTools.Logic
                         var actualSpecs = currentSortSpecs.Specs;
                         if (SortColumn != actualSpecs.ColumnIndex)
                         {
-                            PluginLog.Verbose("specs dirty");
                             SortColumn = actualSpecs.ColumnIndex;
                             refresh = true;
                         }
 
                         if (SortDirection != actualSpecs.SortDirection)
                         {
-                            PluginLog.Verbose("specs dirty");
                             SortDirection = actualSpecs.SortDirection;
                             refresh = true;
                         }
@@ -105,6 +111,18 @@ namespace InventoryTools.Logic
                     var everythingElse = CraftItems.Where(c => c.QuantityNeeded != 0 && !c.Item.CanBeCrafted).OrderByDescending(c => c.ItemId).ToList();
 
                     var overallIndex = 0;
+                    if (outputs.Count == 0)
+                    {
+                        ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
+                        for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+                        {
+                            ImGui.TableNextColumn();
+                            if (columnIndex == 1)
+                            {
+                                ImGui.Text("No items have been selected.");
+                            }
+                        }
+                    }
                     for (var index = 0; index < outputs.Count; index++)
                     {
                         overallIndex++;
@@ -113,16 +131,17 @@ namespace InventoryTools.Logic
                         for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                         {
                             var column = Columns[columnIndex];
-                            column.Draw(item, index, FilterConfiguration);
+                            column.Draw(FilterConfiguration, item, index);
                             ImGui.SameLine();
                             if (columnIndex == Columns.Count - 1)
                             {
-                                PluginService.PluginLogic.RightClickColumn.Draw(item, overallIndex, FilterConfiguration);
+                                PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration, item, overallIndex);
                             }
                         }
                     }
 
                     ImGui.TableNextRow(ImGuiTableRowFlags.Headers, 32);
+                    ImGui.TableNextColumn();
                     ImGui.TableNextColumn();
                     ImGui.Text("Precrafts:");
                     for (var index = 0; index < preCrafts.Count; index++)
@@ -133,16 +152,17 @@ namespace InventoryTools.Logic
                         for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                         {
                             var column = Columns[columnIndex];
-                            column.Draw(item, index, FilterConfiguration);
+                            column.Draw(FilterConfiguration, item, index);
                             ImGui.SameLine();
                             if (columnIndex == Columns.Count - 1)
                             {
-                                PluginService.PluginLogic.RightClickColumn.Draw(item, overallIndex, FilterConfiguration);
+                                PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration, item, overallIndex);
                             }
                         }
                     }
 
                     ImGui.TableNextRow(ImGuiTableRowFlags.Headers, 32);
+                    ImGui.TableNextColumn();
                     ImGui.TableNextColumn();
                     ImGui.Text("Gather/Buy:");
                     for (var index = 0; index < everythingElse.Count; index++)
@@ -153,11 +173,11 @@ namespace InventoryTools.Logic
                         for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                         {
                             var column = Columns[columnIndex];
-                            column.Draw(item, index, FilterConfiguration);
+                            column.Draw(FilterConfiguration, item, index);
                             ImGui.SameLine();
                             if (columnIndex == Columns.Count - 1)
                             {
-                                PluginService.PluginLogic.RightClickColumn.Draw(item, overallIndex, FilterConfiguration);
+                                PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration, item, overallIndex);
                             }
                         }
                     }
@@ -166,6 +186,11 @@ namespace InventoryTools.Logic
                 }
                 ImGui.EndChild();
             }
+        }
+
+        public override void DrawFooterItems()
+        {
+            
         }
 
         public override void Refresh(InventoryToolsConfiguration configuration)
@@ -183,7 +208,7 @@ namespace InventoryTools.Logic
         {
             FilterConfiguration.ConfigurationChanged -= FilterConfigurationUpdated;
             FilterConfiguration.ListUpdated -= FilterConfigurationUpdated;
-            FilterConfiguration.TableConfigurationChanged += FilterConfigurationOnTableConfigurationChanged;
+            FilterConfiguration.TableConfigurationChanged -= FilterConfigurationOnTableConfigurationChanged;
         }
     }
 }

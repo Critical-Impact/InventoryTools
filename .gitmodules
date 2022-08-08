@@ -4,3 +4,9 @@
 [submodule "CriticalCommonLib"]
 	path = CriticalCommonLib
 	url = https://github.com/Critical-Impact/CriticalCommonLib.git
+[submodule "OtterGui"]
+	path = OtterGui
+	url = https://github.com/Ottermandias/OtterGui.git
+[submodule "LuminaSupplemental"]
+	path = LuminaSupplemental
+	url = https://github.com/Critical-Impact/LuminaSupplemental

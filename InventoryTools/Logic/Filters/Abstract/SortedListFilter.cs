@@ -1,11 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using ImGuiNET;
 using InventoryTools.Extensions;
+using OtterGui;
 
 namespace InventoryTools.Logic.Filters.Abstract
 {
-    public abstract class SortedListFilter<T> : Filter<Dictionary<T, string>> where T:notnull
+    public abstract class SortedListFilter<T> : Filter<Dictionary<T, (string, string?)>> where T:notnull
     {
         public abstract bool CanRemove { get; set; }
 
@@ -47,10 +49,18 @@ namespace InventoryTools.Logic.Filters.Abstract
                 foreach (var item in value)
                 {
                     ImGui.TableNextRow();
-                    string name = item.Value;
+                    string name = item.Value.Item1;
+                    string? helpText = item.Value.Item2;
                     ImGui.TableNextColumn();
                     ImGui.Text(name);
                     ImGui.TableNextColumn();
+                    ImGui.Selectable("", false, ImGuiSelectableFlags.SpanAllColumns, new Vector2(0, 32) * ImGui.GetIO().FontGlobalScale);
+                    if (helpText != null)
+                    {
+                        ImGuiUtil.HoverTooltip(helpText);
+                    }
+
+                    ImGui.SameLine();
                     if (CanRemove && ImGui.Button( "X##Column" + index))
                     {
                         RemoveItem(configuration, item.Key);
@@ -65,7 +75,6 @@ namespace InventoryTools.Logic.Filters.Abstract
                     {
                         MoveItemDown(configuration, item.Key);
                     }
-
                     index++;
                 }
                 ImGui.EndTable();

@@ -3,8 +3,8 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <LangVersion>9.0</LangVersion>
-        <TargetFramework>net5.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
+        <TargetFramework>net6.0-windows</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
@@ -45,6 +45,10 @@
             <Private>True</Private>
         </Reference>
     </ItemGroup>
+
+    <PropertyGroup>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0-preview-20220401-08" />

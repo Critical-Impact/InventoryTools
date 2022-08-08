@@ -10,12 +10,12 @@ namespace InventoryTools.Logic.Columns
     {
         public override bool? CurrentValue(InventoryItem item)
         {
-            return item.Item.CanBeBoughtWithGil;
+            return item.Item.ObtainedGil;
         }
 
         public override bool? CurrentValue(ItemEx item)
         {
-            return item.CanBeBoughtWithGil;
+            return item.ObtainedGil;
         }
 
         public override bool? CurrentValue(SortingResult item)
@@ -25,6 +25,7 @@ namespace InventoryTools.Logic.Columns
 
         public override string Name { get; set; } = "Can be Purchased?";
         public override float Width { get; set; } = 70.0f;
+        public override string HelpText { get; set; } = "Can the item be purchased with gil?";
         public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Boolean;

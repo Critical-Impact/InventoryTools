@@ -1,0 +1,123 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
+using ImGuiNET;
+using InventoryTools.Logic;
+using InventoryTools.Logic.Settings.Abstract;
+using InventoryTools.Sections;
+
+namespace InventoryTools.Ui
+{
+    public class ConfigurationWindow : Window
+    {
+        public ConfigurationWindow()
+        {
+            _configPages = new List<IConfigPage>();
+            _configPages.Add(new SettingPage(SettingCategory.General));
+            _configPages.Add(new SettingPage(SettingCategory.Visuals));
+            _configPages.Add(new SettingPage(SettingCategory.MarketBoard));
+            _configPages.Add(new FiltersPage());
+            _configPages.Add(new ImportExportPage());
+            _configPages.Add(new CharacterRetainerPage());
+            GenerateFilterPages();
+        }
+        
+        private int ConfigSelectedConfigurationPage
+        {
+            get => ConfigurationManager.Config.SelectedConfigurationPage;
+            set => ConfigurationManager.Config.SelectedConfigurationPage = value;
+        }
+
+        public void GenerateFilterPages()
+        {
+            
+            var filterConfigurations = PluginService.FilterService.FiltersList;
+            var filterPages = new Dictionary<string, IConfigPage>(); 
+            foreach (var filter in filterConfigurations)
+            {
+                if (!_filterPages.ContainsKey(filter.Key))
+                {
+                    filterPages.Add(filter.Key, new FilterPage(filter));
+                }
+            }
+
+            _filterPages = filterPages;
+        }
+        
+        public override bool SaveState => true;
+        public static string AsKey => "configuration";
+        public override string Name => "Allagan Tools - Configuration";
+        public override string Key => AsKey;
+        public override Vector2 Size { get; } = new(700, 700);
+        public override Vector2 MaxSize { get; } = new(2000, 2000);
+        public override Vector2 MinSize { get; } = new(200, 200);
+        public override bool DestroyOnClose => true;
+        private List<IConfigPage> _configPages;
+        public Dictionary<string, IConfigPage> _filterPages = new Dictionary<string,IConfigPage>();
+
+        public override void Draw()
+        {
+            if (ImGui.BeginChild("###ivConfigList", new Vector2(150, -1) * ImGui.GetIO().FontGlobalScale, true))
+            {
+                for (var index = 0; index < _configPages.Count; index++)
+                {
+                    var configPage = _configPages[index];
+                    if (ImGui.Selectable(configPage.Name, ConfigSelectedConfigurationPage == index))
+                    {
+                        ConfigSelectedConfigurationPage = index;
+                    }
+                }
+
+                ImGui.NewLine();
+                ImGui.Text("Filters");
+                ImGui.Separator();
+
+                var filterIndex = _configPages.Count;
+                foreach (var item in _filterPages)
+                {
+                    filterIndex++;
+                    if (ImGui.Selectable(item.Value.Name, ConfigSelectedConfigurationPage == filterIndex))
+                    {
+                        ConfigSelectedConfigurationPage = filterIndex;
+                    }
+
+                }
+                
+
+                ImGui.EndChild();
+            }
+
+            ImGui.SameLine();
+
+            if (ImGui.BeginChild("###ivConfigView", new Vector2(-1, -1), true, ImGuiWindowFlags.HorizontalScrollbar))
+            {
+                for (var index = 0; index < _configPages.Count; index++)
+                {
+                    if (ConfigSelectedConfigurationPage == index)
+                    {
+                        _configPages[index].Draw();
+                    }
+                }
+
+                var filterIndex = _configPages.Count;
+                foreach(var filter in _filterPages)
+                {
+                    filterIndex++;
+                    if (ConfigSelectedConfigurationPage == filterIndex)
+                    {
+                        filter.Value.Draw();
+                    }
+                }
+
+                ImGui.EndChild();
+            }
+        }
+
+        public override void Invalidate()
+        {
+            
+        }
+
+        public override FilterConfiguration? SelectedConfiguration => null;
+    }
+}

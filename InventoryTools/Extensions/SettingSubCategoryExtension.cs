@@ -22,6 +22,10 @@ namespace InventoryTools.Extensions
                     return "Auto Save";
                 case SettingSubCategory.FilterSettings:
                     return "Filter Settings";
+                case SettingSubCategory.ContextMenus:
+                    return "Context/Right Click Menu";
+                case SettingSubCategory.Hotkeys:
+                    return "Hotkeys";
             }
             return settingSubCategory.ToString();
         }

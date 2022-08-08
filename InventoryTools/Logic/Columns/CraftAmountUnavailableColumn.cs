@@ -30,23 +30,25 @@ namespace InventoryTools.Logic.Columns
             return Math.Max(0, (int)currentValue.QuantityUnavailable - (int)currentValue.QuantityCanCraft);
         }
         
-        public override void Draw(CraftItem item, int rowIndex, FilterConfiguration configuration)
+        public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
         {
             if (CurrentValue(item) > 0)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudRed);
             }
 
-            base.Draw(item, rowIndex, configuration);
+            base.Draw(configuration, item, rowIndex);
             if (CurrentValue(item) > 0)
             {
                 ImGui.PopStyleColor();
             }
         }
-        
-        public override string Name { get; set; } = "Unavailable";
+        public override FilterType AvailableIn { get; } = Logic.FilterType.CraftFilter;
+        public override string Name { get; set; } = "Missing";
         public override float Width { get; set; } = 60;
-        public override string FilterText { get; set; } = "This is the amount that needs to be sourced from MB/gathering.";
+        public override string HelpText { get; set; } =
+            "This is the amount that needs to be sourced from MB/gathering.";
+        public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = false;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
     }

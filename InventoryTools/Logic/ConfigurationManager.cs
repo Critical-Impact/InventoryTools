@@ -39,6 +39,7 @@ namespace InventoryTools.Logic
             if (!File.Exists(ConfigurationFile))
             {
                 Config = new InventoryToolsConfiguration();
+                Config.MarkReloaded();
                 return;
             }
 
@@ -51,6 +52,7 @@ namespace InventoryTools.Logic
             if (inventoryToolsConfiguration == null)
             {
                 Config = new InventoryToolsConfiguration();
+                Config.MarkReloaded();
                 return;
             }
             if (!inventoryToolsConfiguration.InventoriesMigrated)
@@ -72,6 +74,7 @@ namespace InventoryTools.Logic
                 inventoryToolsConfiguration.SavedInventories = LoadSavedInventories() ?? new();
             }
             Config = inventoryToolsConfiguration;
+            Config.MarkReloaded();
         }
         public static void LoadFromFile(string file, string inventoryFileName)
         {
@@ -79,6 +82,7 @@ namespace InventoryTools.Logic
             if (!File.Exists(file))
             {
                 Config = new InventoryToolsConfiguration();
+                Config.MarkReloaded();
                 return;
             }
 
@@ -91,6 +95,7 @@ namespace InventoryTools.Logic
             if (inventoryToolsConfiguration == null)
             {
                 Config = new InventoryToolsConfiguration();
+                Config.MarkReloaded();
                 return;
             }
             if (!inventoryToolsConfiguration.InventoriesMigrated)
@@ -112,6 +117,7 @@ namespace InventoryTools.Logic
                 inventoryToolsConfiguration.SavedInventories = LoadSavedInventories(inventoryFileName) ?? new();
             }
             Config = inventoryToolsConfiguration;
+            Config.MarkReloaded();
         }
         
         public static void Save()

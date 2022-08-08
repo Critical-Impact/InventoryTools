@@ -20,7 +20,7 @@ namespace InventoryTools.Logic.Filters
             var currentValue = CurrentValue(configuration);
             if (!string.IsNullOrEmpty(currentValue))
             {
-                if (!item.Item.CanBeBoughtWithGil)
+                if (!item.Item.ObtainedGil)
                 {
                     return false;
                 }
@@ -38,7 +38,7 @@ namespace InventoryTools.Logic.Filters
             var currentValue = CurrentValue(configuration);
             if (!string.IsNullOrEmpty(currentValue))
             {
-                if (!item.CanBeBoughtWithGil)
+                if (!item.ObtainedGil)
                 {
                     return false;
                 }

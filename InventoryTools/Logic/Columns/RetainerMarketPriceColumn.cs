@@ -23,6 +23,9 @@ namespace InventoryTools.Logic.Columns
 
         public override string Name { get; set; } = "Retainer Unit Price";
         public override float Width { get; set; } = 100;
+
+        public override string HelpText { get; set; } =
+            "If the item is selling on the market, this is the price it has been put up for.";
         public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;

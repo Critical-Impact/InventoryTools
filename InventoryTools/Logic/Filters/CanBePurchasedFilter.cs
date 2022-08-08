@@ -25,7 +25,7 @@ namespace InventoryTools.Logic.Filters
         public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
         {
             var currentValue = CurrentValue(configuration);
-            var canBePurchased = item.CanBeBoughtWithGil;
+            var canBePurchased = item.ObtainedGil;
             return currentValue == null || currentValue.Value && canBePurchased || !currentValue.Value && !canBePurchased;
         }
     }

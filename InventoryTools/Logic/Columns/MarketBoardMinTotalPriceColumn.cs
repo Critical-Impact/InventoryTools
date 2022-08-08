@@ -7,6 +7,8 @@ namespace InventoryTools.Logic.Columns
 {
     public class MarketBoardMinTotalPriceColumn : MarketBoardMinPriceColumn
     {
+        public override string HelpText { get; set; } =
+            "Shows the minimum price of both the NQ and HQ form of the item and multiplies it by the quantity available. This data is sourced from universalis.";
         public override FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter;
 
         public override IColumnEvent? DoDraw((int, int)? currentValue, int rowIndex)

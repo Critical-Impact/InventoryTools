@@ -9,7 +9,7 @@ namespace InventoryTools.Logic
 {
     public class WotsitIpc : IDisposable
     {
-        private const string IpcDisplayName = "Inventory Tools";
+        private const string IpcDisplayName = "Allagan Tools";
         private const uint WotsitIconId = 32;
 
         private ICallGateSubscriber<string, string, string, uint, string>? _wotsitRegister;
@@ -36,16 +36,16 @@ namespace InventoryTools.Logic
             var wotsitAvailable = Service.Interface.GetIpcSubscriber<bool>("FA.Available");
             wotsitAvailable.Subscribe(InitForWotsit);
             
-            PluginService.PluginLogic.FilterAdded += FilterAddedRemoved;
-            PluginService.PluginLogic.FilterRemoved += FilterAddedRemoved;
-            PluginService.PluginLogic.FilterChanged += FilterChanged;
+            PluginService.FilterService.FilterAdded += FilterAddedRemoved;
+            PluginService.FilterService.FilterRemoved += FilterAddedRemoved;
+            PluginService.FilterService.FilterModified += FilterChanged;
 
             _delayTimer = new Timer(5000);
             _delayTimer.Elapsed += DelayTimerOnElapsed;
             _delayTimer.Enabled = true;
         }
 
-        private void DelayTimerOnElapsed(object sender, ElapsedEventArgs e)
+        private void DelayTimerOnElapsed(object? sender, ElapsedEventArgs e)
         {
             _delayTimer?.Stop();
             if (!_wotsItRegistered)
@@ -118,7 +118,7 @@ namespace InventoryTools.Logic
             {
                 _wotsitToggleFilterGuids = new Dictionary<string, FilterConfiguration>();
 
-                foreach (var filter in PluginService.PluginLogic.FilterConfigurations)
+                foreach (var filter in PluginService.FilterService.FiltersList)
                 {
                     var guid = _wotsitRegister.InvokeFunc(IpcDisplayName, $"Toggle Filter - {filter.Name}",
                         $"Toggle the filter on/off {filter.Name} as a background filter. ", WotsitIconId);
@@ -134,7 +134,7 @@ namespace InventoryTools.Logic
         {
             if (_wotsitToggleFilterGuids.TryGetValue(guid, out var filter))
             {
-                PluginService.PluginLogic.ToggleBackgroundFilter(filter);
+                PluginService.FilterService.ToggleActiveBackgroundFilter(filter);
             }
         }
 
@@ -148,9 +148,9 @@ namespace InventoryTools.Logic
             {
                 // Wotsit was not installed or too early version
             }
-            PluginService.PluginLogic.FilterAdded -= FilterAddedRemoved;
-            PluginService.PluginLogic.FilterRemoved -= FilterAddedRemoved;
-            PluginService.PluginLogic.FilterChanged -= FilterChanged;
+            PluginService.FilterService.FilterAdded -= FilterAddedRemoved;
+            PluginService.FilterService.FilterRemoved -= FilterAddedRemoved;
+            PluginService.FilterService.FilterModified -= FilterChanged;
             if (_delayTimer != null)
             {
                 _delayTimer.Elapsed -= DelayTimerOnElapsed;

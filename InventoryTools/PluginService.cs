@@ -3,9 +3,15 @@ using CriticalCommonLib.Crafting;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
+using Dalamud.ContextMenu;
 using Dalamud.Interface.ImGuiFileDialog;
+using Dalamud.Plugin;
+using InventoryTools.Commands;
 using InventoryTools.Logic;
 using InventoryTools.Misc;
+using InventoryTools.Services;
+using InventoryTools.Ui;
+using OtterGui.Classes;
 
 namespace InventoryTools
 {
@@ -21,19 +27,29 @@ namespace InventoryTools
         //public static PluginFont PluginFont { get; private set; } = null!;
         public static PluginCommands PluginCommands { get; private set; } = null!;
         public static PluginCommandManager<PluginCommands> CommandManager { get; private set; } = null!;
-        public static FilterManager FilterManager { get; private set; } = null!;
+        public static FilterService FilterService { get; private set; } = null!;
+        public static OverlayService OverlayService { get; private set; } = null!;
+        public static WindowService WindowService { get; private set; } = null!;
         public static WotsitIpc WotsitIpc { get; private set; } = null!;
         public static FileDialogManager FileDialogManager { get; private set; } = null!;
         public static CraftMonitor CraftMonitor { get; private set; } = null!;
-        public static FunTimeService FunTimeService { get; private set; } = null!;
+        public static IconStorage IconStorage { get; private set; } = null!;
+        public static DalamudContextMenuBase ContextMenu { get; private set; } = null!;
+        public static DalamudPluginInterface? PluginInterface { get; private set; } = null!;
+        public static bool PluginLoaded { get; private set; } = false;
 
-        public static void Initialise()
+        public delegate void PluginLoadedDelegate();
+        public static event PluginLoadedDelegate? OnPluginLoaded; 
+
+        public static void Initialise(DalamudPluginInterface pluginInterface)
         {
+            PluginInterface = pluginInterface;
             Service.ExcelCache = new ExcelCache(Service.Data);
             ConfigurationManager.Load();
             Universalis.Initalise();
             GameInterface.Initialise(Service.Scanner);
             Cache.Initalise(Service.Interface.ConfigDirectory.FullName + "/universalis.json");
+            
             NetworkMonitor = new NetworkMonitor();
             CharacterMonitor = new CharacterMonitor();
             OdrScanner = new OdrScanner( CharacterMonitor);
@@ -41,28 +57,39 @@ namespace InventoryTools
             TryOn = new TryOn();
             CraftMonitor = new CraftMonitor(GameUi);
             InventoryMonitor = new InventoryMonitor(OdrScanner, CharacterMonitor, GameUi, CraftMonitor);
-            FilterManager = new FilterManager();
+            
+            FilterService = new FilterService( CharacterMonitor, InventoryMonitor);
+            OverlayService = new OverlayService(FilterService, GameUi);
+            ContextMenu = new DalamudContextMenuBase();
+            IconStorage = new IconStorage(Service.Interface, Service.Data);
+            WindowService = new WindowService(FilterService);
             PluginLogic = new PluginLogic(  );
             WotsitIpc = new WotsitIpc(  );
             PluginCommands = new();
             CommandManager = new PluginCommandManager<PluginCommands>(PluginCommands);
             FileDialogManager = new FileDialogManager();
-            FunTimeService = new FunTimeService();
+            PluginLoaded = true;
+            OnPluginLoaded?.Invoke();
         }
 
         public static void InitialiseTesting(CharacterMonitor characterMonitor, PluginLogic pluginLogic)
         {
             CharacterMonitor = characterMonitor;
             PluginLogic = pluginLogic;
+            PluginLoaded = true;
+            OnPluginLoaded?.Invoke();
         }
 
         public static void Dispose()
         {
-            FunTimeService.Dispose();
+            PluginLoaded = false;
+            ContextMenu.Dispose();
+            IconStorage.Dispose();
             CommandManager.Dispose();
             WotsitIpc.Dispose();
             PluginLogic.Dispose();
-            FilterManager.Dispose();
+            FilterService.Dispose();
+            OverlayService.Dispose();
             InventoryMonitor.Dispose();
             CraftMonitor.Dispose();
             TryOn.Dispose();
@@ -81,6 +108,7 @@ namespace InventoryTools
                 TetrisGame.Instance.Dispose();
             }
             Cache.SaveCache(true);
+            PluginInterface = null;
         }
     }
 }
