@@ -10,7 +10,7 @@ namespace InventoryTools.Ui
         private TextureWrap _allaganToolsIcon;
         public IntroWindow()
         {
-            _allaganToolsIcon = PluginService.PluginLogic.LoadImage("icon");
+            _allaganToolsIcon = PluginService.PluginLogic.LoadImage("icon-hor");
         }
         public override void Invalidate()
         {
@@ -48,9 +48,9 @@ namespace InventoryTools.Ui
             ImGui.EndChild();
         }
 
-        public override Vector2 Size { get; } = new Vector2(600, 320);
-        public override Vector2 MaxSize { get; } = new Vector2(600, 320);
-        public override Vector2 MinSize { get; } = new Vector2(600, 320);
+        public override Vector2 Size { get; } = new Vector2(600, 360);
+        public override Vector2 MaxSize { get; } = new Vector2(600, 360);
+        public override Vector2 MinSize { get; } = new Vector2(600, 360);
         public override bool SaveState => false;
 
         public override ImGuiWindowFlags? WindowFlags { get; } =

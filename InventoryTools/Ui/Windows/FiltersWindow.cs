@@ -71,7 +71,7 @@ namespace InventoryTools.Ui
                     if (ImGui.BeginTabItem(itemTable.Name + "##" + filterConfiguration.Key))
                     {
                         var activeFilter = DrawFilter(itemTable, filterConfiguration, _activeFilter);
-                        if (_activeFilter != activeFilter)
+                        if (_activeFilter != activeFilter && ImGui.IsWindowFocused())
                         {
                             if (ConfigurationManager.Config.SwitchFiltersAutomatically &&
                                 ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&

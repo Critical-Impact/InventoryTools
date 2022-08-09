@@ -1,6 +1,7 @@
 using CriticalCommonLib.Services;
 using Dalamud.Logging;
 using DalamudPluginProjectTemplate.Attributes;
+using InventoryTools.Ui;
 
 namespace InventoryTools.Commands
 {
@@ -110,6 +111,13 @@ namespace InventoryTools.Commands
         public  void ToggleDebugWindow(string command, string args)
         {
             PluginService.WindowService.ToggleDebugWindow();
+        }
+
+        [Command("/itintro")]
+        [HelpMessage("Opens the inventory tools debug window")]
+        public void ToggleIntroWindow(string command, string args)
+        {
+            PluginService.WindowService.OpenWindow<IntroWindow>(IntroWindow.AsKey);
         }
 
         #endif

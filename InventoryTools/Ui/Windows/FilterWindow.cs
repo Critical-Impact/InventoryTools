@@ -1,4 +1,5 @@
 using System.Numerics;
+using ImGuiNET;
 using InventoryTools.Logic;
 
 namespace InventoryTools.Ui
@@ -33,6 +34,15 @@ namespace InventoryTools.Ui
         {
             if (SelectedConfiguration != null)
             {
+                if (ImGui.IsWindowFocused())
+                {
+                    if (ConfigurationManager.Config.SwitchFiltersAutomatically &&
+                        ConfigurationManager.Config.ActiveUiFilter != SelectedConfiguration.Key &&
+                        ConfigurationManager.Config.ActiveUiFilter != null)
+                    {
+                        PluginService.FilterService.ToggleActiveUiFilter(SelectedConfiguration);
+                    }
+                }
                 var table = PluginService.FilterService.GetFilterTable(_filterKey);
                 if (table != null)
                 {
@@ -41,7 +51,7 @@ namespace InventoryTools.Ui
             }
         }
 
-        public override Vector2 Size => new Vector2(350, 500);
+        public override Vector2 Size => new Vector2(600, 500);
         public override Vector2 MaxSize => new Vector2(1500, 1500);
         public override Vector2 MinSize => new Vector2(200, 200);
     }

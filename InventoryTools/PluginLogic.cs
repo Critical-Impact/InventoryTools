@@ -1003,39 +1003,13 @@ namespace InventoryTools
             if (filterConfigurations.Any(c => c.Name == filterName))
             {
                 var filter = filterConfigurations.First(c => c.Name == filterName);
-                filter.OpenAsWindow = !filter.OpenAsWindow;
+                PluginService.WindowService.ToggleFilterWindow(filter.Key);
                 return true;
             }
             Service.Chat.Print("Failed to find filter with name: " + filterName);
             return false;
         }
 
-        public static void DrawFilterWindows()
-        {
-            foreach (var filter in PluginService.FilterService.Filters)
-            {
-                var isVisible = filter.Value.OpenAsWindow;
-                if (isVisible)
-                {
-                    ImGui.SetNextWindowSize(new Vector2(350, 500) * ImGui.GetIO().FontGlobalScale,
-                        ImGuiCond.FirstUseEver);
-                    ImGui.SetNextWindowPos(new Vector2(ImGui.GetIO().DisplaySize.X - 350 - 60, ImGui.GetIO().DisplaySize.Y - 500 - 50),
-                        ImGuiCond.FirstUseEver);
-                    ImGui.SetNextWindowSizeConstraints(new Vector2(350, 500) * ImGui.GetIO().FontGlobalScale,
-                        new Vector2(2000, 2000) * ImGui.GetIO().FontGlobalScale);
-                    if (ImGui.Begin("Filter: " + filter.Value.Name, ref isVisible))
-                    {
-                        if (isVisible != filter.Value.OpenAsWindow)
-                        {
-                            filter.Value.OpenAsWindow = isVisible;
-                        }
-
-                    }
-                    ImGui.End();
-                }
-            }
-        }
-        
         public TextureWrap LoadImage(string imageName)
         {
             var assemblyLocation = PluginService.PluginInterface!.AssemblyLocation.DirectoryName!;

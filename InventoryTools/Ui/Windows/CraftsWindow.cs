@@ -7,6 +7,7 @@ using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using Dalamud.Interface.Colors;
+using Dalamud.Logging;
 using ImGuiNET;
 using ImGuiScene;
 using InventoryTools.Logic;
@@ -64,6 +65,7 @@ namespace InventoryTools.Ui
         }
         public override void Draw()
         {
+            var isWindowFocused = ImGui.IsWindowFocused();
             var filterConfigurations = Filters;
             if (ImGui.BeginChild("###craftsList", new Vector2(180, -1) * ImGui.GetIO().FontGlobalScale, true))
             {
@@ -75,6 +77,13 @@ namespace InventoryTools.Ui
                         if (ImGui.Selectable(filterConfiguration.Name + "###fl" + index, index == _selectedFilterTab))
                         {
                             _selectedFilterTab = index;
+                            if (ConfigurationManager.Config.SwitchFiltersAutomatically &&
+                                ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
+                                ConfigurationManager.Config.ActiveUiFilter != null)
+                            {
+                                PluginLog.Log(filterConfiguration.Key);
+                                PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
+                            }
                         }
                     }
                     ImGui.EndChild();
@@ -122,6 +131,16 @@ namespace InventoryTools.Ui
                     if (_selectedFilterTab == index)
                     {
                         var filterConfiguration = filterConfigurations[index];
+                        if (isWindowFocused)
+                        {
+                            if (ConfigurationManager.Config.SwitchFiltersAutomatically &&
+                                ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
+                                ConfigurationManager.Config.ActiveUiFilter != null)
+                            {
+                                PluginLog.Log(filterConfiguration.Key);
+                                PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
+                            }
+                        }
                         if (_settingsActive)
                         {
                             if (ImGui.BeginChild("Content", new Vector2(0, -44) * ImGui.GetIO().FontGlobalScale, true))
