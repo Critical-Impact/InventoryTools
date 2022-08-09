@@ -26,7 +26,7 @@ namespace InventoryTools.Ui
 
         private void UiBuilderOnOpenConfigUi()
         {
-            Configuration.IsVisible = true;
+            PluginService.WindowService.ToggleConfigurationWindow();
         }
 
         public bool IsVisible
@@ -39,7 +39,6 @@ namespace InventoryTools.Ui
         {
             if (!Service.ClientState.IsLoggedIn || _disposing || !Service.ExcelCache.FinishedLoading || !PluginService.PluginLoaded)
                 return;
-            PluginLogic.DrawFilterWindows();
             foreach (var window in PluginService.WindowService.Windows)
             {
                 var windowVisible = window.Value.Visible;

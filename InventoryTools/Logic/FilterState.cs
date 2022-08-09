@@ -56,7 +56,7 @@ namespace InventoryTools.Logic
                 var activeFilter = FilterConfiguration;
                 RenderTableBase? activeTable = FilterTable;
                 bool shouldHighlight = false;
-                if (ConfigurationManager.Config.IsVisible || FilterConfiguration.OpenAsWindow)
+                if (ConfigurationManager.Config.IsVisible)
                 {
                     if (activeTable != null)
                     {

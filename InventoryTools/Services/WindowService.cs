@@ -49,6 +49,18 @@ namespace InventoryTools.Services
             return AddWindow(itemWindow);
         }
 
+        public bool OpenFilterWindow(string filterKey)
+        {
+            var asKey = FilterWindow.AsKey(filterKey);
+            if (_windows.ContainsKey(asKey))
+            {
+                _windows[asKey].Toggle();
+                return true;
+            }
+            var filterWindow = new FilterWindow(filterKey);
+            return AddWindow(filterWindow);
+        }
+
         public bool HasFilterWindowOpen
         {
             get
@@ -99,6 +111,14 @@ namespace InventoryTools.Services
             if (windowName == ConfigurationWindow.AsKey)
             {
                 return OpenWindow<ConfigurationWindow>(ConfigurationWindow.AsKey);
+            }
+
+            foreach (var config in ConfigurationManager.Config.FilterConfigurations)
+            {
+                if (windowName == FilterWindow.AsKey(config.Key))
+                {
+                    return OpenFilterWindow(config.Key);
+                }
             }
 
             return false;
@@ -189,6 +209,18 @@ namespace InventoryTools.Services
         public bool ToggleFiltersWindow()
         {
             return ToggleWindow<FiltersWindow>(FiltersWindow.AsKey);
+        }
+
+        public bool ToggleFilterWindow(string filterKey)
+        {
+            var asKey = FilterWindow.AsKey(filterKey);
+            if (_windows.ContainsKey(asKey))
+            {
+                _windows[asKey].Toggle();
+                return true;
+            }
+
+            return OpenFilterWindow(filterKey);
         }
         
         private void FilterServiceOnFilterRepositioned(FilterConfiguration configuration)

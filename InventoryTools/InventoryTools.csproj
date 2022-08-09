@@ -70,6 +70,10 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <TargetPath>Images\icon.png</TargetPath>
         </ContentWithTargetPath>
+        <ContentWithTargetPath Include="Images\icon-hor.png">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>Images\icon-hor.png</TargetPath>
+        </ContentWithTargetPath>
         <ContentWithTargetPath Include="Images\banner1.png">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <TargetPath>Images\banner1.png</TargetPath>
@@ -86,6 +90,14 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <TargetPath>Images\screenshot3.png</TargetPath>
         </ContentWithTargetPath>
+        <ContentWithTargetPath Include="Images\screenshot4.png">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>Images\screenshot4.png</TargetPath>
+        </ContentWithTargetPath>
+        <ContentWithTargetPath Include="Images\screenshot5.png">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>Images\screenshot5.png</TargetPath>
+        </ContentWithTargetPath>
     </ItemGroup>
 
     <ProjectExtensions>
@@ -93,7 +105,7 @@
             <ApiLevel>6</ApiLevel>
             <Author>Critical-Impact</Author>
             <Name>Allagan Tools</Name>
-            <Punchline>Can't find an item in your inventory? Need to find a specific item from all the games many items? Need help working out what materials you need for a craft? Allagnics can probably help(somewhat)</Punchline>
+            <Punchline>Can't find an item in your inventory? Need to find a specific item from all the games many items? Need help working out what materials you need for a craft? Allagan Tools can probably help. (formerly Inventory Tools)</Punchline>
             <Description>Adds in a window that allows for the searching and filtering of items across your inventories and the entire games list of items. Adds visualisation in game to see both where your items are and where you should sort them.\n\nFeatures are always being added to Inventory Tools so keep up to date to receive them. Some of the currently included features are:\n\t- Market board integration \n\t- Item highlighting \n\t- Various ways to filter items including have acquired, is craftable, is housing, any many more \n\t- Browse all available game items </Description>
             <IconUrl>https://raw.githubusercontent.com/Critical-Impact/InventoryTools/main/InventoryTools/Images/icon.png</IconUrl>
             <Tags>

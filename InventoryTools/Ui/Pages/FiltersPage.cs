@@ -82,7 +82,7 @@ namespace InventoryTools.Sections
                         ImGui.SameLine();
                         if (ImGui.SmallButton("Open as Window##" + index))
                         {
-                            filterConfiguration.OpenAsWindow = true;
+                            PluginService.WindowService.OpenFilterWindow(filterConfiguration.Key);
                         }
 
                         if (ImGui.BeginPopupModal("Delete?##" + index))
