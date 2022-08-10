@@ -7,6 +7,7 @@ using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
+using Dalamud.Utility;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
@@ -69,7 +70,7 @@ namespace InventoryTools.Ui
             else
             {
                 ImGui.Text("Item Level " + Item.LevelItem.Row.ToString());
-                ImGui.TextWrapped(Item.Description);
+                ImGui.TextWrapped(Item.Description.ToDalamudString().ToString());
                 var itemIcon = PluginService.IconStorage[Item.Icon];
                 if (itemIcon != null)
                 {

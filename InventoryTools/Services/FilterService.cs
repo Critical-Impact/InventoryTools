@@ -174,11 +174,22 @@ namespace InventoryTools.Services
         public bool AddFilter(FilterConfiguration configuration)
         {
             var result = _filters.TryAdd(configuration.Key, configuration);
+            if (configuration.FilterType == FilterType.CraftFilter)
+            {
+                configuration.Order = _filters.Where(c => c.Value.FilterType == FilterType.CraftFilter)
+                    .Max(c => c.Value.Order) + 1;                
+            }
+            else
+            {
+                configuration.Order = _filters.Where(c => c.Value.FilterType != FilterType.CraftFilter)
+                    .Max(c => c.Value.Order) + 1;
+            }
             if (result)
             {
+                ConfigurationManager.Config.FilterConfigurations = FiltersList;
                 FilterAdded?.Invoke(configuration);
             }
-
+            ConfigurationManager.Save();
             return result;
         }
 
@@ -193,6 +204,7 @@ namespace InventoryTools.Services
             var result = _filters.TryRemove(configuration.Key, out _);
             if (result)
             {
+                ConfigurationManager.Config.FilterConfigurations = FiltersList;
                 FilterRemoved?.Invoke(configuration);
             }
 
@@ -455,7 +467,15 @@ namespace InventoryTools.Services
 
         public bool MoveFilterUp(FilterConfiguration configuration)
         {
-            var currentList = FiltersList;
+            List<FilterConfiguration> currentList;
+            if (configuration.FilterType == FilterType.CraftFilter)
+            {
+                currentList = FiltersList.Where(c => c.FilterType == FilterType.CraftFilter).ToList();
+            }
+            else
+            {
+                currentList = FiltersList.Where(c => c.FilterType != FilterType.CraftFilter).ToList();
+            }
             currentList = currentList.MoveUp( configuration);
             var order = 0u;
             foreach (var item in currentList)
@@ -475,7 +495,15 @@ namespace InventoryTools.Services
 
         public bool MoveFilterDown(FilterConfiguration configuration)
         {
-            var currentList = FiltersList;
+            List<FilterConfiguration> currentList;
+            if (configuration.FilterType == FilterType.CraftFilter)
+            {
+                currentList = FiltersList.Where(c => c.FilterType == FilterType.CraftFilter).ToList();
+            }
+            else
+            {
+                currentList = FiltersList.Where(c => c.FilterType != FilterType.CraftFilter).ToList();
+            }
             currentList = currentList.MoveDown( configuration);
             var order = 0u;
             foreach (var item in currentList)

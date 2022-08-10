@@ -989,6 +989,10 @@ namespace InventoryTools.Logic
                 {
                     return "Game Item Filter";
                 }
+                else if (FilterType.HasFlag(FilterType.CraftFilter))
+                {
+                    return "Craft List";
+                }
                 return "";
             }
         }

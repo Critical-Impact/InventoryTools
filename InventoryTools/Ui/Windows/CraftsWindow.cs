@@ -74,7 +74,7 @@ namespace InventoryTools.Ui
                     for (var index = 0; index < filterConfigurations.Count; index++)
                     {
                         var filterConfiguration = filterConfigurations[index];
-                        if (ImGui.Selectable(filterConfiguration.Name + "###fl" + index, index == _selectedFilterTab))
+                        if (ImGui.Selectable(filterConfiguration.Name + "###fl" + filterConfiguration.Key, index == _selectedFilterTab))
                         {
                             _selectedFilterTab = index;
                             if (ConfigurationManager.Config.SwitchFiltersAutomatically &&
@@ -433,7 +433,7 @@ namespace InventoryTools.Ui
 
         public override void Invalidate()
         {
-            
+            _filters = null;
         }
     }
 }

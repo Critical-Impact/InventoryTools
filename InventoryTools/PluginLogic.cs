@@ -154,7 +154,7 @@ namespace InventoryTools
             if (PluginConfiguration.AddMoreInformationContextMenu)
             {
                 InventoryContextMenuItem moreInformation =
-                    new InventoryContextMenuItem(new SeString(new TextPayload("(IT) More Information")), Action);
+                    new InventoryContextMenuItem(new SeString(new TextPayload("(AT) More Information")), Action);
                 args.AddCustomItem(moreInformation);
             }
         }
@@ -320,11 +320,25 @@ namespace InventoryTools
 
             if (PluginConfiguration.InternalVersion == 7)
             {
+                PluginConfiguration.InternalVersion++;
+            }
+
+            if (PluginConfiguration.InternalVersion == 8)
+            {
                 PluginLog.Log("Migrating to version 8");
                 var order = 0u;
                 foreach (var configuration in PluginService.FilterService.Filters)
                 {
                     if (configuration.Value.FilterType != FilterType.CraftFilter)
+                    {
+                        configuration.Value.Order = order;
+                        order++;
+                    }
+                }
+                order = 0u;
+                foreach (var configuration in PluginService.FilterService.Filters)
+                {
+                    if (configuration.Value.FilterType == FilterType.CraftFilter)
                     {
                         configuration.Value.Order = order;
                         order++;

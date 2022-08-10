@@ -68,6 +68,10 @@ namespace InventoryTools.Commands
             if (command != null)
             {
                 commandInfoTuples.Add((command.Command, commandInfo));
+                if (command.SecondaryCommand != null)
+                {
+                    commandInfoTuples.Add((command.SecondaryCommand, commandInfo));
+                }
             }
             if (aliases != null)
             {
