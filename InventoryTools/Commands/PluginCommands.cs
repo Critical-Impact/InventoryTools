@@ -7,7 +7,7 @@ namespace InventoryTools.Commands
 {
     public class PluginCommands
     {
-        [Command("/inventorytools")]
+        [Command("/allagantools","/inventorytools")]
         [HelpMessage("Shows the inventory tools filter window.")]
         public void ShowHideInventoryToolsCommand(string command, string args)
         {
@@ -21,14 +21,14 @@ namespace InventoryTools.Commands
             PluginService.WindowService.ToggleFiltersWindow();
         }
 
-        [Command("/invtools")]
+        [Command("/atools","/invtools")]
         [HelpMessage("Shows the inventory tools filter window.")]
         public  void ShowHideInventoryToolsCommand3(string command, string args)
         {
             PluginService.WindowService.ToggleFiltersWindow();
         }
 
-        [Command("/itfiltertoggle")]
+        [Command("/atfiltertoggle","/itfiltertoggle")]
         [HelpMessage("Toggles the specified filter on/off and turns off any other filters.")]
         public  void FilterToggleCommand(string command, string args)
         {
@@ -37,7 +37,7 @@ namespace InventoryTools.Commands
             PluginService.FilterService.ToggleActiveBackgroundFilter(args);
         }
 
-        [Command("/invf")]
+        [Command("/atf","/invf")]
         [HelpMessage("Toggles the specified filter on/off and turns off any other filters.")]
         public  void FilterToggleCommand2(string command, string args)
         {
@@ -69,7 +69,7 @@ namespace InventoryTools.Commands
             PluginService.WindowService.ToggleCraftsWindow();
         }
 
-        [Command("/itconfig")]
+        [Command("/atconfig","/itconfig")]
         [HelpMessage("Opens the inventory tools configuration window")]
         public  void OpenConfigurationWindow(string command, string args)
         {
@@ -83,7 +83,7 @@ namespace InventoryTools.Commands
             PluginService.WindowService.ToggleConfigurationWindow();
         }
 
-        [Command("/ithelp")]
+        [Command("/athelp","/ithelp")]
         [HelpMessage("Opens the inventory tools help window")]
         public  void OpenHelpWindow(string command, string args)
         {
@@ -97,7 +97,7 @@ namespace InventoryTools.Commands
             PluginService.WindowService.ToggleHelpWindow();
         }
 
-        [Command("/itlogging")]
+        [Command("/atlogging","/itlogging")]
         [HelpMessage("Turns on inventory tools chat logging")]
         public  void ToggleChatLogging(string command, string args)
         {
@@ -106,14 +106,14 @@ namespace InventoryTools.Commands
         
         #if DEBUG
 
-        [Command("/itdebug")]
+        [Command("/atdebug","/itdebug")]
         [HelpMessage("Opens the inventory tools debug window")]
         public  void ToggleDebugWindow(string command, string args)
         {
             PluginService.WindowService.ToggleDebugWindow();
         }
 
-        [Command("/itintro")]
+        [Command("/atintro","/itintro")]
         [HelpMessage("Opens the inventory tools debug window")]
         public void ToggleIntroWindow(string command, string args)
         {

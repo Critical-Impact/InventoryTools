@@ -233,6 +233,10 @@ namespace InventoryTools.Services
             {
                 _windows[FiltersWindow.AsKey].Invalidate();
             }
+            if (_windows.ContainsKey(ConfigurationWindow.AsKey))
+            {
+                _windows[ConfigurationWindow.AsKey].Invalidate();
+            }
         }
 
         private void FilterServiceAddedRemoved(FilterConfiguration configuration)
@@ -244,6 +248,10 @@ namespace InventoryTools.Services
             if (_windows.ContainsKey(FiltersWindow.AsKey))
             {
                 _windows[FiltersWindow.AsKey].Invalidate();
+            }
+            if (_windows.ContainsKey(ConfigurationWindow.AsKey))
+            {
+                _windows[ConfigurationWindow.AsKey].Invalidate();
             }
         }
 

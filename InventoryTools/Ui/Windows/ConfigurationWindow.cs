@@ -17,6 +17,7 @@ namespace InventoryTools.Ui
             _configPages.Add(new SettingPage(SettingCategory.Visuals));
             _configPages.Add(new SettingPage(SettingCategory.MarketBoard));
             _configPages.Add(new FiltersPage());
+            _configPages.Add(new CraftFiltersPage());
             _configPages.Add(new ImportExportPage());
             _configPages.Add(new CharacterRetainerPage());
             GenerateFilterPages();
@@ -31,11 +32,11 @@ namespace InventoryTools.Ui
         public void GenerateFilterPages()
         {
             
-            var filterConfigurations = PluginService.FilterService.FiltersList;
+            var filterConfigurations = PluginService.FilterService.FiltersList.Where(c => c.FilterType != FilterType.CraftFilter);
             var filterPages = new Dictionary<string, IConfigPage>(); 
             foreach (var filter in filterConfigurations)
             {
-                if (!_filterPages.ContainsKey(filter.Key))
+                if (!filterPages.ContainsKey(filter.Key))
                 {
                     filterPages.Add(filter.Key, new FilterPage(filter));
                 }
@@ -57,7 +58,7 @@ namespace InventoryTools.Ui
 
         public override void Draw()
         {
-            if (ImGui.BeginChild("###ivConfigList", new Vector2(150, -1) * ImGui.GetIO().FontGlobalScale, true))
+            if (ImGui.BeginChild("###ivConfigList", new Vector2(150, -1) * ImGui.GetIO().FontGlobalScale, true, ImGuiWindowFlags.NoSavedSettings))
             {
                 for (var index = 0; index < _configPages.Count; index++)
                 {
@@ -76,7 +77,7 @@ namespace InventoryTools.Ui
                 foreach (var item in _filterPages)
                 {
                     filterIndex++;
-                    if (ImGui.Selectable(item.Value.Name, ConfigSelectedConfigurationPage == filterIndex))
+                    if (ImGui.Selectable(item.Value.Name + "##" + item.Key, ConfigSelectedConfigurationPage == filterIndex))
                     {
                         ConfigSelectedConfigurationPage = filterIndex;
                     }
@@ -115,7 +116,7 @@ namespace InventoryTools.Ui
 
         public override void Invalidate()
         {
-            
+            GenerateFilterPages();
         }
 
         public override FilterConfiguration? SelectedConfiguration => null;

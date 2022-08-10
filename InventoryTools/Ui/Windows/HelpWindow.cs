@@ -61,7 +61,7 @@ namespace InventoryTools.Ui
                     ImGui.Text("Commands:");
                     ImGui.Separator();
                     ImGui.TextWrapped("The below commands will open/close the main allagan Tools window.");
-                    ImGui.Text("/inventorytools, /inv, /invtools");
+                    ImGui.Text("/allagantools,/inventorytools, /inv, /invtools");
                     ImGui.TextWrapped("The below commands will toggle the background filter specified with <name>.");
                     ImGui.Text("/itfiltertoggle <name>, /invf <name>, /ifilter <name>");
                 }

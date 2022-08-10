@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <LangVersion>9.0</LangVersion>
-        <Version>1.1.0.8</Version>
+        <Version>1.1.0.9</Version>
         <AssemblyName>InventoryTools</AssemblyName>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
@@ -13,7 +13,7 @@
         <Configurations>Debug;Release;FullDebug</Configurations>
         <Platforms>AnyCPU</Platforms>
         <Nullable>enable</Nullable>
-        <TargetFramework>net6.0-windows</TargetFramework>
+        <TargetFramework>net5.0-windows</TargetFramework>
     </PropertyGroup>
 
     <PropertyGroup>

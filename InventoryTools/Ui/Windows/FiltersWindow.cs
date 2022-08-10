@@ -34,6 +34,7 @@ namespace InventoryTools.Ui
         private static TextureWrap _csvIcon => PluginService.IconStorage.LoadIcon(47);
         private static TextureWrap _clearIcon => PluginService.IconStorage.LoadIcon(66308);
         private static TextureWrap _marketIcon => PluginService.IconStorage.LoadIcon(90003);
+        private static TextureWrap _helpIcon => PluginService.IconStorage.LoadIcon(66313);
         
         private List<FilterConfiguration>? _filters;
 
@@ -92,7 +93,7 @@ namespace InventoryTools.Ui
                         for (var index = 0; index < filterConfigurations.Count; index++)
                         {
                             var filterConfiguration = filterConfigurations[index];
-                            if (ImGui.Selectable(filterConfiguration.Name + "###fl" + index, index == _selectedFilterTab))
+                            if (ImGui.Selectable(filterConfiguration.Name + "###fl" + filterConfiguration.Key, index == _selectedFilterTab))
                             {
                                 if (ConfigurationManager.Config.SwitchFiltersAutomatically && ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key)
                                 {
@@ -291,8 +292,19 @@ namespace InventoryTools.Ui
                 ImGuiUtil.HoverTooltip("Open the craft window.");
 
                 width -= 30;
+                ImGui.SetCursorPosX(width * ImGui.GetIO().FontGlobalScale);
+                ImGui.SetCursorPosY(2 * ImGui.GetIO().FontGlobalScale);
+                if (ImGui.ImageButton(_helpIcon.ImGuiHandle,
+                        new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
+                        new Vector2(1, 1), 2))
+                {
+                    PluginService.WindowService.ToggleHelpWindow();
+                }
+                ImGuiUtil.HoverTooltip("Open the help window.");
+                
                 if (ConfigurationManager.Config.TetrisEnabled)
                 {
+                    width -= 30;
                     ImGui.SetCursorPosX(width * ImGui.GetIO().FontGlobalScale);
                     ImGui.SetCursorPosY(2 * ImGui.GetIO().FontGlobalScale);
                     if (ImGui.ImageButton(_tetrisIcon.ImGuiHandle,
@@ -304,6 +316,7 @@ namespace InventoryTools.Ui
 
                     ImGuiUtil.HoverTooltip("Open the tetris input window.");
                 }
+
 
                 ImGui.EndChild();
             }

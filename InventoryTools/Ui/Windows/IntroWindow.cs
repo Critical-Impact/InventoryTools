@@ -48,7 +48,7 @@ namespace InventoryTools.Ui
             ImGui.EndChild();
         }
 
-        public override Vector2 Size { get; } = new Vector2(600, 360);
+        public override Vector2 Size { get; } = new Vector2(600, 350);
         public override Vector2 MaxSize { get; } = new Vector2(600, 360);
         public override Vector2 MinSize { get; } = new Vector2(600, 360);
         public override bool SaveState => false;
