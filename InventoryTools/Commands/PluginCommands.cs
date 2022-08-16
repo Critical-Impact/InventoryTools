@@ -124,13 +124,6 @@ namespace InventoryTools.Commands
         {
             PluginService.WindowService.ToggleHelpWindow();
         }
-
-        [Command("/atlogging","/itlogging")]
-        [HelpMessage("Turns on inventory tools chat logging")]
-        public  void ToggleChatLogging(string command, string args)
-        {
-            ChatUtilities.LogsEnabled = !ChatUtilities.LogsEnabled;
-        }
         
         #if DEBUG
 
