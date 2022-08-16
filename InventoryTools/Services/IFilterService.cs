@@ -16,7 +16,7 @@ namespace InventoryTools.Services
         bool RemoveFilterByKey(string key);
 
         FilterConfiguration? GetActiveUiFilter(bool ignoreWindowState);
-        FilterConfiguration? GetActiveBackgroundFilter(bool ignoreWindowState);
+        FilterConfiguration? GetActiveBackgroundFilter();
 
         FilterConfiguration? GetActiveFilter();
 
