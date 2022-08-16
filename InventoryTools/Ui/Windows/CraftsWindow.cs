@@ -2,16 +2,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using CriticalCommonLib;
 using CriticalCommonLib.Addons;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
+using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
 using Dalamud.Logging;
+using Dalamud.Utility;
 using ImGuiNET;
 using ImGuiScene;
+using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using OtterGui;
+using OtterGui.Raii;
 
 namespace InventoryTools.Ui
 {
@@ -28,7 +33,7 @@ namespace InventoryTools.Ui
         public override bool DestroyOnClose => false;
         private int _selectedFilterTab = 0;
         private bool _settingsActive = false;
-        private bool _costingBarOpen = false;
+        private bool _addItemBarOpen = false;
         private TextureWrap _settingsIcon => PluginService.IconStorage.LoadIcon(66319);
         private TextureWrap _addIcon => PluginService.IconStorage.LoadIcon(66315);
         private TextureWrap _addEphemeralIcon => PluginService.IconStorage.LoadIcon(66317);
@@ -124,7 +129,7 @@ namespace InventoryTools.Ui
 
             ImGui.SameLine();
 
-            if (ImGui.BeginChild("###craftMainWindow", new Vector2(_costingBarOpen ? -200 : -1, -1) * ImGui.GetIO().FontGlobalScale, false, ImGuiWindowFlags.HorizontalScrollbar))
+            if (ImGui.BeginChild("###craftMainWindow", new Vector2(_addItemBarOpen ? -250 : -1, -1) * ImGui.GetIO().FontGlobalScale, false, ImGuiWindowFlags.HorizontalScrollbar))
             {
                 for (var index = 0; index < filterConfigurations.Count; index++)
                 {
@@ -295,15 +300,15 @@ namespace InventoryTools.Ui
 
                                     ImGuiUtil.HoverTooltip("Clear the current search.");
                                     
-                                    /*ImGui.SameLine();
+                                    ImGui.SameLine();
                                     float width = ImGui.GetWindowSize().X;
                                     ImGui.SetCursorPosX((width - 42) * ImGui.GetIO().FontGlobalScale);
-                                    if (ImGui.ImageButton(_gilIcon.ImGuiHandle,
+                                    if (ImGui.ImageButton(_addIcon.ImGuiHandle,
                                             new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),new Vector2(1, 1), 2))
                                     {
-                                        _costingBarOpen = !_costingBarOpen;
+                                        _addItemBarOpen = !_addItemBarOpen;
                                     }
-                                    ImGuiUtil.HoverTooltip("Toggles the costing bar.");*/
+                                    ImGuiUtil.HoverTooltip("Toggles the add item side bar.");
 
                                     ImGui.EndChild();
                                 }
@@ -391,7 +396,7 @@ namespace InventoryTools.Ui
                 ImGui.EndChild();
             }
             ImGui.SameLine();
-            if (_costingBarOpen && ImGui.BeginChild("###craftsCostingList", new Vector2(-1, -1) * ImGui.GetIO().FontGlobalScale, true))
+            if (_addItemBarOpen && ImGui.BeginChild("###craftsAddItem", new Vector2(-1, -1) * ImGui.GetIO().FontGlobalScale, true))
             {
                 for (var index = 0; index < filterConfigurations.Count; index++)
                 {
@@ -400,11 +405,30 @@ namespace InventoryTools.Ui
                         var filterConfiguration = filterConfigurations[index];
                         if (filterConfiguration.FilterType == FilterType.CraftFilter)
                         {
-                            ImGui.Text("Costings");
+                            ImGui.Text("Add new Item");
+                            var searchString = SearchString;
+                            ImGui.InputText("##ItemSearch", ref searchString, 50);
+                            if (_searchString != searchString)
+                            {
+                                SearchString = searchString;
+                            }
                             ImGui.Separator();
-                            ImGui.Text("Gil");
-                            ImGui.Text("NQ: " + filterConfiguration.CraftList.MinimumNQCost);
-                            ImGui.Text("HQ: " + filterConfiguration.CraftList.MinimumHQCost);
+                            using var table = ImRaii.Table("", 2, ImGuiTableFlags.None);
+                            if (!table)
+                                return;
+
+                            ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 200);
+                            ImGui.TableSetupColumn("", ImGuiTableColumnFlags.None, 16);
+
+                            foreach (var datum in SearchItems)
+                            {
+                                ImGui.TableNextRow();
+                                DrawSearchRow(filterConfiguration, datum);
+                            }
+                            if (_searchString == "")
+                            {
+                                ImGui.Text("Start typing to search...");
+                            }
 
                         }
                     }
@@ -413,7 +437,74 @@ namespace InventoryTools.Ui
                 ImGui.EndChild();
             }
         }
+
+        private void DrawSearchRow(FilterConfiguration filterConfiguration, ItemEx item)
+        {
+            ImGui.TableNextColumn();
+            ImGui.TextWrapped( item.Name);
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right)) 
+            {
+                ImGui.OpenPopup("RightClick" + item.RowId);
+            }
+                    
+            if (ImGui.BeginPopup("RightClick"+ item.RowId))
+            {
+                item.DrawRightClickPopup();
+                ImGui.EndPopup();
+            }
+            ImGui.TableNextColumn();
+            ImGui.PushID("s_" + item.RowId);
+            if (ImGui.ImageButton(_addIcon.ImGuiHandle, new Vector2(16, 16), new Vector2(0,0), new Vector2(1,1), 0))
+            {
+                filterConfiguration.CraftList.AddCraftItem(item.RowId, 1, ItemFlags.None);
+                filterConfiguration.NeedsRefresh = true;
+                filterConfiguration.StartRefresh();
+            }
+
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+            }
+            ImGui.PopID();
+        }
+
+        private string _searchString = "";
+        private List<ItemEx>? _searchItems = null;
+        public List<ItemEx> SearchItems
+        {
+            get
+            {
+                if (SearchString == "")
+                {
+                    _searchItems = new List<ItemEx>();
+                    return _searchItems;
+                }
+                if (_searchItems == null)
+                {
+                    _searchItems = CraftItemsByName.Where(c => c.Value.Contains(SearchString.ToLower())).Take(100)
+                        .Select(c => Service.ExcelCache.GetSheet<ItemEx>().GetRow(c.Key)!).ToList();
+                }
+
+                return _searchItems;
+            }
+        }
+
+        public Dictionary<uint, string>? _craftItemsByName = null;
         
+        public Dictionary<uint, string> CraftItemsByName
+        {
+            get
+            {
+                if (_craftItemsByName == null)
+                {
+                    _craftItemsByName = Service.ExcelCache.GetSheet<ItemEx>().Where(c => c.CanBeCrafted).ToDictionary(c => c.RowId, c => c.Name.ToDalamudString().ToString().ToLower());
+                }
+                return _craftItemsByName;
+            }
+            set => _craftItemsByName = value;
+        }
+
+
         public override FilterConfiguration? SelectedConfiguration
         {
             get
@@ -423,6 +514,16 @@ namespace InventoryTools.Ui
             }
         }
 
+        public string SearchString
+        {
+            get => _searchString;
+            set
+            {
+                _searchString = value;
+                _searchItems = null;
+            }
+        }
+        
         private void SaveCallback(FilterTable filterTable, bool arg1, string arg2)
         {
             if (arg1)
