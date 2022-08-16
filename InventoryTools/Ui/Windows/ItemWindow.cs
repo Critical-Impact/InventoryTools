@@ -307,8 +307,6 @@ namespace InventoryTools.Ui
                     hasSource = true;
                     if (ImGui.CollapsingHeader("Ventures (" + RetainerTasks.Count() + ")"))
                     {
-                        ImGui.NewLine();
-                        ImGui.Text("Ventures: ");
                         ImGuiTable.DrawTable("Ventures", RetainerTasks, DrawRetainerRow, ImGuiTableFlags.None,
                             new[] { "Name", "Time", "Quantities" });
                     }
@@ -318,8 +316,6 @@ namespace InventoryTools.Ui
                     hasSource = true;
                     if (ImGui.CollapsingHeader("Gathering (" + GatheringSources.Count + ")"))
                     {
-                        ImGui.NewLine();
-                        ImGui.Text("Gathering: ");
                         ImGuiTable.DrawTable("Gathering", GatheringSources, DrawGatheringRow,
                             ImGuiTableFlags.None, new[] { "", "Level", "Location", "" });
                     }
@@ -329,7 +325,6 @@ namespace InventoryTools.Ui
                     hasSource = true;
                     if (ImGui.CollapsingHeader("Recipes (" + RecipesAsRequirement.Length + ")"))
                     {
-                        ImGui.Text("Recipes");
                         ImGuiStylePtr style = ImGui.GetStyle();
                         float windowVisibleX2 = ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
                         for (var index = 0; index < RecipesAsRequirement.Length; index++)
