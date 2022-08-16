@@ -41,7 +41,7 @@ namespace InventoryTools.Logic.Filters.Abstract
         {
             var value = CurrentValue(configuration);
 
-            if (ImGui.BeginTable( Key + "ColumnEditTable", 2, ImGuiTableFlags.RowBg))
+            if (ImGui.BeginTable( Key + "ColumnEditTable", 3, ImGuiTableFlags.RowBg))
             {
                 ImGui.TableSetupColumn(Key + "ColumnEditTableName", ImGuiTableColumnFlags.NoSort);
                 ImGui.TableSetupColumn(Key + "ColumnEditTableDelete", ImGuiTableColumnFlags.NoSort);
@@ -54,13 +54,7 @@ namespace InventoryTools.Logic.Filters.Abstract
                     ImGui.TableNextColumn();
                     ImGui.Text(name);
                     ImGui.TableNextColumn();
-                    ImGui.Selectable("", false, ImGuiSelectableFlags.SpanAllColumns, new Vector2(0, 32) * ImGui.GetIO().FontGlobalScale);
-                    if (helpText != null)
-                    {
-                        ImGuiUtil.HoverTooltip(helpText);
-                    }
 
-                    ImGui.SameLine();
                     if (CanRemove && ImGui.Button( "X##Column" + index))
                     {
                         RemoveItem(configuration, item.Key);
@@ -76,6 +70,12 @@ namespace InventoryTools.Logic.Filters.Abstract
                         MoveItemDown(configuration, item.Key);
                     }
                     index++;
+                    ImGui.TableNextColumn();
+                    ImGui.Selectable("", false, ImGuiSelectableFlags.SpanAllColumns, new Vector2(0, 32) * ImGui.GetIO().FontGlobalScale);
+                    if (helpText != null)
+                    {
+                        ImGuiUtil.HoverTooltip(helpText);
+                    }
                 }
                 ImGui.EndTable();
             }
