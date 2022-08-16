@@ -244,9 +244,9 @@ namespace InventoryTools.Services
             return null;
         }
 
-        public FilterConfiguration? GetActiveBackgroundFilter(bool ignoreWindowState = true)
+        public FilterConfiguration? GetActiveBackgroundFilter()
         {
-            if (!ConfigurationManager.Config.IsVisible || ignoreWindowState)
+            if (!PluginService.WindowService.HasFilterWindowOpen)
             {
                 if (ConfigurationManager.Config.ActiveBackgroundFilter != null)
                 {
@@ -268,7 +268,7 @@ namespace InventoryTools.Services
                 return activeUiFilter;
             }
 
-            return GetActiveBackgroundFilter(false);
+            return GetActiveBackgroundFilter();
         }
 
         public FilterConfiguration? GetFilter(string name)
@@ -438,14 +438,17 @@ namespace InventoryTools.Services
             var activeBackgroundFilter = GetActiveBackgroundFilter();
             if (activeBackgroundFilter != null)
             {
-                ClearActiveBackgroundFilter();
                 if (activeBackgroundFilter.Name != name)
+                {
+                    SetActiveBackgroundFilter(name);
+                }
+                else
                 {
                     ClearActiveBackgroundFilter();
                 }
                 return true;
             }
-            ClearActiveBackgroundFilter();
+            SetActiveBackgroundFilter(name);
             return true;
         }
 

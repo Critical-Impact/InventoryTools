@@ -34,7 +34,14 @@ namespace InventoryTools.Commands
         {
             PluginLog.Verbose(command);
             PluginLog.Verbose(args);
-            PluginService.FilterService.ToggleActiveBackgroundFilter(args);
+            if (args.Trim() == "")
+            {
+                ChatUtilities.PrintError("You must enter the name of a filter.");
+            }
+            else
+            {
+                PluginService.FilterService.ToggleActiveBackgroundFilter(args);
+            }
         }
 
         [Command("/atf","/invf")]
@@ -43,7 +50,14 @@ namespace InventoryTools.Commands
         {
             PluginLog.Verbose(command);
             PluginLog.Verbose(args);
-            PluginService.FilterService.ToggleActiveBackgroundFilter(args);
+            if (args.Trim() == "")
+            {
+                ChatUtilities.PrintError("You must enter the name of a filter.");
+            }
+            else
+            {
+                PluginService.FilterService.ToggleActiveBackgroundFilter(args);
+            }
         }
 
         [Command("/ifilter")]
@@ -52,14 +66,28 @@ namespace InventoryTools.Commands
         {
             PluginLog.Verbose(command);
             PluginLog.Verbose(args);
-            PluginService.FilterService.ToggleActiveBackgroundFilter(args);
+            if (args.Trim() == "")
+            {
+                ChatUtilities.PrintError("You must enter the name of a filter.");
+            }
+            else
+            {
+                PluginService.FilterService.ToggleActiveBackgroundFilter(args);
+            }
         }
 
         [Command("/openfilter")]
         [HelpMessage("Toggles the specified filter as it's own window.")]
         public  void OpenFilterCommand(string command, string args)
         {
-            PluginService.PluginLogic.ToggleWindowFilterByName(args);
+            if (args.Trim() == "")
+            {
+                ChatUtilities.PrintError("You must enter the name of a filter.");
+            }
+            else
+            {
+                PluginService.PluginLogic.ToggleWindowFilterByName(args);
+            }
         }
 
         [Command("/crafts")]

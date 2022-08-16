@@ -79,10 +79,15 @@ namespace InventoryTools.Services
         public void RefreshOverlayStates()
         {
             var activeFilter = _filterService.GetActiveUiFilter(false);
+            var activeBackgroundFilter = _filterService.GetActiveBackgroundFilter();
             ChatUtilities.PrintLog("Overlays refreshing, active filter is " + (activeFilter?.Name ?? "no filter"));
             if (activeFilter != null && _filterService.HasFilterTable(activeFilter))
             {
                 UpdateState(new FilterState(){FilterConfiguration = activeFilter, FilterTable = _filterService.GetFilterTable(activeFilter)});
+            }
+            else if (activeBackgroundFilter != null)
+            {
+                UpdateState(new FilterState(){FilterConfiguration = activeBackgroundFilter});
             }
             else
             {
