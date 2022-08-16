@@ -114,6 +114,35 @@ namespace InventoryTools.Ui
 
                     ImGuiUtil.HoverTooltip("Craftable - Open in Craft Log");
                 }
+                if (Item.CanBeCrafted)
+                {
+                    ImGui.SameLine();
+                    var craftableIcon = PluginService.IconStorage[60858];
+                    if (ImGui.ImageButton(craftableIcon.ImGuiHandle,
+                            new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
+                    {
+                        ImGui.OpenPopup("AddCraftList" + _itemId);
+                    }
+                    
+                    if (ImGui.BeginPopup("AddCraftList" + _itemId))
+                    {
+                        var craftFilters =
+                            PluginService.FilterService.FiltersList.Where(c =>
+                                c.FilterType == Logic.FilterType.CraftFilter);
+                        foreach (var filter in craftFilters)
+                        {
+                            if (ImGui.Selectable("Add item to craft list - " + filter.Name))
+                            {
+                                filter.CraftList.AddCraftItem(_itemId, 1, ItemFlags.None);
+                                PluginService.WindowService.OpenCraftsWindow();
+                                PluginService.WindowService.GetCraftsWindow().FocusFilter(filter);
+                            }
+                        }
+                        ImGui.EndPopup();
+                    }
+
+                    ImGuiUtil.HoverTooltip("Craftable - Add to Craft List");
+                }
                 if (Item.CanOpenGatheringLog)
                 {
                     ImGui.SameLine();
@@ -157,6 +186,21 @@ namespace InventoryTools.Ui
                                 {
                                     PluginService.WindowService.OpenItemWindow(source.ItemId.Value);
                                 }
+                                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right)) 
+                                {
+                                    ImGui.OpenPopup("RightClickSource" + source.ItemId);
+                                }
+                    
+                                if (ImGui.BeginPopup("RightClickSource"+ source.ItemId))
+                                {
+                                    var itemEx = Service.ExcelCache.GetSheet<ItemEx>().GetRow(source.ItemId.Value);
+                                    if (itemEx != null)
+                                    {
+                                        itemEx.DrawRightClickPopup();
+                                    }
+
+                                    ImGui.EndPopup();
+                                }
                             }
                             else
                             {
@@ -194,6 +238,21 @@ namespace InventoryTools.Ui
                                         new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1), 0))
                                 {
                                     PluginService.WindowService.OpenItemWindow(use.ItemId.Value);
+                                }
+                                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right)) 
+                                {
+                                    ImGui.OpenPopup("RightClickUse" + use.ItemId);
+                                }
+                    
+                                if (ImGui.BeginPopup("RightClickUse"+ use.ItemId))
+                                {
+                                    var itemEx = Service.ExcelCache.GetSheet<ItemEx>().GetRow(use.ItemId.Value);
+                                    if (itemEx != null)
+                                    {
+                                        itemEx.DrawRightClickPopup();
+                                    }
+
+                                    ImGui.EndPopup();
                                 }
                             }
                             else
@@ -270,7 +329,6 @@ namespace InventoryTools.Ui
                     hasSource = true;
                     if (ImGui.CollapsingHeader("Recipes (" + RecipesAsRequirement.Length + ")"))
                     {
-                        ImGui.NewLine();
                         ImGui.Text("Recipes");
                         ImGuiStylePtr style = ImGui.GetStyle();
                         float windowVisibleX2 = ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
@@ -284,6 +342,20 @@ namespace InventoryTools.Ui
                                 if (ImGui.ImageButton(icon.ImGuiHandle, new(32, 32)))
                                 {
                                     GameInterface.OpenCraftingLog(recipe.ItemResult.Row, recipe.RowId);
+                                }
+                                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right)) 
+                                {
+                                    ImGui.OpenPopup("RightClick" + recipe.RowId);
+                                }
+                    
+                                if (ImGui.BeginPopup("RightClick"+ recipe.RowId))
+                                {
+                                    if (recipe.ResultEx.Value != null)
+                                    {
+                                        recipe.ResultEx.Value.DrawRightClickPopup();
+                                    }
+
+                                    ImGui.EndPopup();
                                 }
 
                                 float lastButtonX2 = ImGui.GetItemRectMax().X;
