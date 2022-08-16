@@ -125,19 +125,19 @@ namespace InventoryTools.Logic
                     }
                     for (var index = 0; index < outputs.Count; index++)
                     {
-                        overallIndex++;
                         var item = outputs[index];
                         ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
                         for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                         {
                             var column = Columns[columnIndex];
-                            column.Draw(FilterConfiguration, item, index);
+                            column.Draw(FilterConfiguration, item, overallIndex);
                             ImGui.SameLine();
                             if (columnIndex == Columns.Count - 1)
                             {
                                 PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration, item, overallIndex);
                             }
                         }
+                        overallIndex++;
                     }
 
                     ImGui.TableNextRow(ImGuiTableRowFlags.Headers, 32);
@@ -146,19 +146,19 @@ namespace InventoryTools.Logic
                     ImGui.Text("Precrafts:");
                     for (var index = 0; index < preCrafts.Count; index++)
                     {
-                        overallIndex++;
                         var item = preCrafts[index];
                         ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
                         for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                         {
                             var column = Columns[columnIndex];
-                            column.Draw(FilterConfiguration, item, index);
+                            column.Draw(FilterConfiguration, item, overallIndex);
                             ImGui.SameLine();
                             if (columnIndex == Columns.Count - 1)
                             {
                                 PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration, item, overallIndex);
                             }
                         }
+                        overallIndex++;
                     }
 
                     ImGui.TableNextRow(ImGuiTableRowFlags.Headers, 32);
@@ -167,19 +167,19 @@ namespace InventoryTools.Logic
                     ImGui.Text("Gather/Buy:");
                     for (var index = 0; index < everythingElse.Count; index++)
                     {
-                        overallIndex++;
                         var item = everythingElse[index];
                         ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
                         for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                         {
                             var column = Columns[columnIndex];
-                            column.Draw(FilterConfiguration, item, index);
+                            column.Draw(FilterConfiguration, item, overallIndex);
                             ImGui.SameLine();
                             if (columnIndex == Columns.Count - 1)
                             {
                                 PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration, item, overallIndex);
                             }
                         }
+                        overallIndex++;
                     }
 
                     ImGui.EndTable();

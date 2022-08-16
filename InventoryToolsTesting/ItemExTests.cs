@@ -27,6 +27,18 @@ namespace InventoryToolsTesting
             Assert.AreEqual(16, gatheringSources.Count);
         }
 
+        
+        [Test]
+        public void TestUplandWheatFlour()
+        {
+            var uplandWheatFlour = Service.ExcelCache.GetSheet<ItemEx>().GetRow(27841)!;
+            var gatheringSources = uplandWheatFlour.GetGatheringSources();
+            Assert.AreEqual(0, gatheringSources.Count);
+            var sources = uplandWheatFlour.Sources;
+            Assert.AreEqual(0, sources.Count);
+            Assert.AreEqual(false, uplandWheatFlour.ObtainedGathering);
+        }
+
         [Test]
         public void TestScrip()
         {
