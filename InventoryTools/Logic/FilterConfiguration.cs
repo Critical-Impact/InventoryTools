@@ -44,6 +44,7 @@ namespace InventoryTools.Logic
         private ulong _ownerId = 0;
         private uint _order = 0;
         private bool? _filterItemsInRetainers;
+        private FilterItemsRetainerEnum _filterItemsInRetainersEnum;
         private bool? _sourceAllRetainers;
         private bool? _sourceAllCharacters;
         private bool? _destinationAllRetainers;
@@ -405,10 +406,20 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete]
         public bool? FilterItemsInRetainers
         {
             get => _filterItemsInRetainers;
             set { _filterItemsInRetainers = value;
+                NeedsRefresh = true;
+                ConfigurationChanged?.Invoke(this);
+            }
+        }
+
+        public FilterItemsRetainerEnum FilterItemsInRetainersEnum
+        {
+            get => _filterItemsInRetainersEnum;
+            set { _filterItemsInRetainersEnum = value;
                 NeedsRefresh = true;
                 ConfigurationChanged?.Invoke(this);
             }
@@ -1307,20 +1318,17 @@ namespace InventoryTools.Logic
         public bool InActiveInventories(ulong activeCharacterId, ulong activeRetainerId, ulong sourceCharacterId,
             ulong destinationCharacterId)
         {
-            if (FilterItemsInRetainers.HasValue)
+            if (FilterItemsInRetainersEnum is FilterItemsRetainerEnum.Yes or FilterItemsRetainerEnum.Only && activeRetainerId != 0)
             {
-                if (FilterItemsInRetainers.Value && activeRetainerId != 0)
+                if (activeCharacterId == sourceCharacterId && activeRetainerId == destinationCharacterId)
                 {
-                    if (activeCharacterId == sourceCharacterId && activeRetainerId == destinationCharacterId)
-                    {
-                        return true;
-                    }
-                    if (activeRetainerId == sourceCharacterId && activeRetainerId != destinationCharacterId)
-                    {
-                        return true;
-                    }
-                    return false;
+                    return true;
                 }
+                if (activeRetainerId == sourceCharacterId && activeRetainerId != destinationCharacterId)
+                {
+                    return true;
+                }
+                return false;
             }
             return true;
         }

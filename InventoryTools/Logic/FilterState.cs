@@ -71,12 +71,28 @@ namespace InventoryTools.Logic
                                     shouldHighlight = false;
                                 }
                             }
+
+                            if (activeFilter.FilterItemsInRetainersEnum == FilterItemsRetainerEnum.Only)
+                            {
+                                if (PluginService.CharacterMonitor.ActiveRetainer == 0 && !PluginService.GameUi.IsWindowVisible(WindowName.RetainerList))
+                                {
+                                    shouldHighlight = false;
+                                }
+                            }
                         }
                     }
                 }
                 else
                 {
                     shouldHighlight = true;
+                    if (activeFilter.FilterItemsInRetainersEnum == FilterItemsRetainerEnum.Only)
+                    {
+                        if (PluginService.CharacterMonitor.ActiveRetainer == 0 && !PluginService.GameUi.IsWindowVisible(WindowName.RetainerList))
+                        {
+                            shouldHighlight = false;
+                        }
+                    }
+                    
                 }
 
                 return shouldHighlight;

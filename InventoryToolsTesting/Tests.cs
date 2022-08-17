@@ -174,13 +174,13 @@ namespace InventoryToolsTesting
                 Assert.True(searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer2.CharacterId) == 1);
                 
                 //Filter items when in specific retainer, should show 0 sorted items as we are in the first retainer and not the 2nd
-                searchFilter.FilterItemsInRetainers = true;
+                searchFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
                 _characterMonitor?.OverrideActiveRetainer(_retainer.CharacterId);
                 Assert.True(searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer2.CharacterId) == 0);
                 Assert.True(searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer.CharacterId) == 0);
                 
                 //Switch to retainer 2
-                searchFilter.FilterItemsInRetainers = true;
+                searchFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
                 _characterMonitor?.OverrideActiveRetainer(_retainer2.CharacterId);
                 Assert.True(searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer2.CharacterId) == 1);
                 Assert.True(searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer.CharacterId) == 0);
@@ -295,7 +295,7 @@ namespace InventoryToolsTesting
                 //1 in player bag, 1 in retainer bag 1, 1 in retainer bag 2
                 Assert.AreEqual(3, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 
-                searchFilter.FilterItemsInRetainers = true;
+                searchFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
                 
                 //1 from bag to retainer, 1 from retainer to other retainer
                 var actual = searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Where(c => !c.InventoryItem.IsEmpty).ToList();

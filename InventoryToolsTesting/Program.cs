@@ -53,7 +53,7 @@ if (inventories != null)
     sampleFilter.SourceAllCharacters = true;
     sampleFilter.SourceAllRetainers = true;
     sampleFilter.DestinationAllRetainers = true;
-    sampleFilter.FilterItemsInRetainers = true;
+    sampleFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
     sampleFilter.HighlightWhen = "Always";
 
     var filterState = new FilterState() { FilterConfiguration = sampleFilter };

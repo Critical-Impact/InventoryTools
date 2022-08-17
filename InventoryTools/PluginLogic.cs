@@ -325,7 +325,7 @@ namespace InventoryTools
 
             if (PluginConfiguration.InternalVersion == 8)
             {
-                PluginLog.Log("Migrating to version 8");
+                PluginLog.Log("Migrating to version 9");
                 var order = 0u;
                 foreach (var configuration in PluginService.FilterService.Filters)
                 {
@@ -345,6 +345,22 @@ namespace InventoryTools
                     }
                 }
                 PluginConfiguration.InternalVersion++;
+            }
+
+            if (PluginConfiguration.InternalVersion == 9)
+            {
+                PluginLog.Log("Migrating to version 10");
+                foreach (var configuration in PluginService.FilterService.Filters)
+                {
+                    if (configuration.Value.FilterItemsInRetainers.HasValue && configuration.Value.FilterItemsInRetainers == true)
+                    {
+                        configuration.Value.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
+                    }
+                    else
+                    {
+                        configuration.Value.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.No;
+                    }
+                }
             }
         }
         
@@ -504,7 +520,7 @@ namespace InventoryTools
             sampleFilter.DisplayInTabs = true;
             sampleFilter.SourceCategories = new HashSet<InventoryCategory>() {InventoryCategory.CharacterBags};
             sampleFilter.DestinationCategories =  new HashSet<InventoryCategory>() {InventoryCategory.RetainerBags};
-            sampleFilter.FilterItemsInRetainers = true;
+            sampleFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
             sampleFilter.HighlightWhen = "Always";
             var itemUiCategories = Service.ExcelCache.GetAllItemUICategories();
             //I'm making assumptions about the names of these and one day I will try to support more than english
@@ -526,7 +542,7 @@ namespace InventoryTools
             sampleFilter.DisplayInTabs = true;
             sampleFilter.SourceCategories = new HashSet<InventoryCategory>() {InventoryCategory.CharacterBags,InventoryCategory.RetainerBags};
             sampleFilter.DestinationCategories =  new HashSet<InventoryCategory>() {InventoryCategory.RetainerBags};
-            sampleFilter.FilterItemsInRetainers = true;
+            sampleFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
             sampleFilter.DuplicatesOnly = true;
             sampleFilter.HighlightWhen = "Always";
             PluginService.FilterService.AddFilter(sampleFilter);
