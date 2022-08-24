@@ -11,6 +11,7 @@ using ImGuiScene;
 using InventoryTools.Logic;
 using InventoryTools.Sections;
 using OtterGui;
+using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 
 namespace InventoryTools.Ui
 {
@@ -234,7 +235,7 @@ namespace InventoryTools.Ui
                                         if (amountLeft > 0)
                                         {
                                             filterConfiguration.CraftList.AddCraftItem(itemRequired,
-                                                (uint)amountLeft, ItemFlags.None);
+                                                (uint)amountLeft, InventoryItem.ItemFlags.None);
                                             filterConfiguration.NeedsRefresh = true;
                                             filterConfiguration.StartRefresh();
                                         }

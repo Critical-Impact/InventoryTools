@@ -122,7 +122,7 @@ namespace InventoryTools.Logic
         
         public static void Save()
         {
-            PluginLog.Verbose("Saving inventory tools configuration");
+            PluginLog.Verbose("Saving allagan tools configuration");
             try
             {
                 File.WriteAllText(ConfigurationFile, JsonConvert.SerializeObject(Config, Formatting.None, new JsonSerializerSettings()
@@ -137,7 +137,7 @@ namespace InventoryTools.Logic
             }
             catch (Exception e)
             {
-                PluginLog.Error($"Failed to save inventory tools configuration due to {e.Message}");
+                PluginLog.Error($"Failed to save allagan tools configuration due to {e.Message}");
             }
         }
 

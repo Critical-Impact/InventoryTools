@@ -25,7 +25,7 @@ namespace InventoryTools.Ui
         public override bool SaveState => true;
 
         public static string AsKey => "debug";
-        public override string Name { get; } = "Inventory Tools - Debug";
+        public override string Name { get; } = "Allagan Tools - Debug";
         public override string Key => AsKey;
         public override Vector2 Size { get; } = new(700, 700);
         public override Vector2 MaxSize { get; } = new(2000, 2000);
@@ -146,6 +146,40 @@ namespace InventoryTools.Ui
                 }
                 else if (ConfigurationManager.Config.SelectedDebugPage == 2)
                 {
+                    if (ImGui.Button("Print 0,0 start"))
+                    {
+                        var position = InventoryManager.Instance()->GetInventoryContainer(FFXIVClientStructs.FFXIV.Client.Game
+                                .InventoryType.Inventory1);
+                        PluginLog.Log($"first item, first bag : {(ulong)position:X}", $"{(ulong)position:X}");
+                    }                    
+                    if (ImGui.Button("Convert Inventory Type"))
+                    {
+                        var saddle1 = FFXIVClientStructs.FFXIV.Client.Game.InventoryType.SaddleBag1;
+                        PluginLog.Log(saddle1.ToString());
+                        PluginLog.Log(saddle1.Convert().ToString());
+                    }                
+                    if (ImGui.Button("broken shit"))
+                    {
+                        var saddleBag0 = InventoryManager.Instance()->GetInventoryContainer(FFXIVClientStructs.FFXIV.Client.Game.InventoryType.SaddleBag1);
+                        if (saddleBag0->Loaded != 0)
+                        {
+                            PluginLog.Log(saddleBag0->Size.ToString());
+                            PluginLog.Log(saddleBag0->Items[7].ItemID.ToString());
+                            if (PluginService.InventoryMonitor.SortOrder.HasValue)
+                            {
+                                var currentSortOrder = PluginService.InventoryMonitor.SortOrder.Value;
+                                if (currentSortOrder.NormalInventories.ContainsKey("SaddleBag"))
+                                {
+                                    PluginLog.Log(currentSortOrder.NormalInventories["SaddleBag"][0].ToString());
+                                }
+                            }
+                        }
+                    }            
+                    if (ImGui.Button("is loaded"))
+                    {
+                        var retainer = InventoryManager.Instance()->GetInventoryContainer(FFXIVClientStructs.FFXIV.Client.Game.InventoryType.RetainerPage1);
+                        PluginLog.Log(retainer->Loaded != 0 ? "True" : "False");
+                    }
                     if (ImGui.Button("Check sort ordering"))
                     {
                         PluginLog.Log($"item order module : {(ulong)ItemOrderModule.Instance()->PlayerInventory:X}", $"{(ulong)ItemOrderModule.Instance()->PlayerInventory:X}");
@@ -190,35 +224,6 @@ namespace InventoryTools.Ui
                             var inventoryItem = (IntPtr)inv->GetInventorySlot(32);
                             PluginLog.Log($"first item pointer: {(ulong)inventoryItem:X}", $"{(ulong)inventoryItem:X}");
                             PluginLog.Log($"first item pointer qty: {(ulong)inventoryItem + 12:X}", $"{(ulong)inventoryItem + 12:X}");
-                        }
-                    }
-                    if (ImGui.Button("Check retainer pointer"))
-                    {
-                        var retainerBag0 = GameInterface.GetContainer(InventoryType.RetainerBag0);
-                        if (retainerBag0 != null)
-                        {
-                            PluginLog.Log($"Retainer Bag 0 Pointer: {(ulong)retainerBag0:X}", $"{(ulong)retainerBag0:X}");
-                            if (retainerBag0->Loaded == 0)
-                            {
-                                PluginLog.Log("Retainer bag not loaded");
-                            }
-                            else
-                            {
-                                var slot1 = &retainerBag0->Items[0];
-                                if (slot1 != null)
-                                {
-                                    PluginLog.Log($"Retainer Bag 0 Slot 0 Pointer: {(ulong)slot1:X}", $"{(ulong)slot1:X}");
-                                }
-                                else
-                                {
-                                    PluginLog.Log("slot 1 is 0");
-                                }
-                            }
-                            
-                        }
-                        else
-                        {
-                            PluginLog.Log("Bag not found");
                         }
                     }
                     if (ImGui.Button("Check armoury agent"))
@@ -316,15 +321,15 @@ namespace InventoryTools.Ui
                         {
                             ImGui.Text(clientInterfaceUiModule->RetainerID.ToString());
                             ImGui.Text($"Retainer Pointer: {(ulong)clientInterfaceUiModule->RetainerPtr:X}");
-                            var container = GameInterface.GetContainer(InventoryType.RetainerBag0);
+                            var container = InventoryManager.Instance()->GetInventoryContainer(FFXIVClientStructs.FFXIV.Client.Game.InventoryType.RetainerPage1);
                             if (container != null)
                             {
                                 ImGui.Text(container->Loaded.ToString());
-                                for (int i = 0; i < container->SlotCount; i++)
+                                for (int i = 0; i < container->Size; i++)
                                 {
                                     var item = container->Items[i];
                                     var itemPointer = new IntPtr(&item);
-                                    ImGui.Text(item.ItemId.ToString());
+                                    ImGui.Text(item.ItemID.ToString());
                                     ImGui.Text(itemPointer.ToString());
                                 }
                             }

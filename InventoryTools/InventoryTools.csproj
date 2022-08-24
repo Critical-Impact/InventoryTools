@@ -26,12 +26,12 @@
 
     <ItemGroup>
         <PackageReference Include="CsvHelper" Version="27.2.1" />
-        <PackageReference Include="Dalamud.ContextMenu" Version="1.0.0" />
+        <PackageReference Include="Dalamud.ContextMenu" Version="1.2.1" />
         <PackageReference Include="DalamudPackager" Version="2.1.7" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
         <PackageReference Include="SerialQueue" Version="2.1.0" />
         <PackageReference Include="System.Reactive" Version="5.0.0" />
-        <PackageReference Include="XivCommon" Version="5.0.1-alpha.1" />
+        <PackageReference Include="XivCommon" Version="6.0.0" />
         <ProjectReference Include="..\CriticalCommonLib\CriticalCommonLib.csproj" OutputItemType="true" />
         <ProjectReference Include="..\OtterGui\OtterGui.csproj" />
         <ProjectReference Include="..\Tetris\Tetris.csproj" />
@@ -102,7 +102,7 @@
 
     <ProjectExtensions>
         <DalamudPlugin>
-            <ApiLevel>6</ApiLevel>
+            <ApiLevel>7</ApiLevel>
             <Author>Critical-Impact</Author>
             <Name>Allagan Tools</Name>
             <Punchline>Can't find an item in your inventory? Need to find a specific item from all the games many items? Need help working out what materials you need for a craft? Allagan Tools can probably help. (formerly Inventory Tools)</Punchline>

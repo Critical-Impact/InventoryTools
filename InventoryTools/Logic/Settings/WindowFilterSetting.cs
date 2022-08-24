@@ -27,7 +27,7 @@ namespace InventoryTools.Logic.Settings
         public override string Name { get; set; } = "Active Window Filter";
 
         public override string HelpText { get; set; } =
-            "This is the filter that is active when the Inventory Tools window is visible.";
+            "This is the filter that is active when the allagan tools window is visible.";
 
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.General;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.FilterSettings;

@@ -34,7 +34,7 @@ namespace InventoryTools
         public static FileDialogManager FileDialogManager { get; private set; } = null!;
         public static CraftMonitor CraftMonitor { get; private set; } = null!;
         public static IconStorage IconStorage { get; private set; } = null!;
-        public static DalamudContextMenuBase ContextMenu { get; private set; } = null!;
+        public static DalamudContextMenu ContextMenu { get; private set; } = null!;
         public static DalamudPluginInterface? PluginInterface { get; private set; } = null!;
         public static bool PluginLoaded { get; private set; } = false;
 
@@ -60,7 +60,7 @@ namespace InventoryTools
             
             FilterService = new FilterService( CharacterMonitor, InventoryMonitor);
             OverlayService = new OverlayService(FilterService, GameUi);
-            ContextMenu = new DalamudContextMenuBase();
+            ContextMenu = new DalamudContextMenu();
             IconStorage = new IconStorage(Service.Interface, Service.Data);
             WindowService = new WindowService(FilterService);
             PluginLogic = new PluginLogic(  );

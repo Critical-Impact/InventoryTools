@@ -17,6 +17,7 @@ using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using OtterGui;
 using OtterGui.Raii;
+using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 
 namespace InventoryTools.Ui
 {
@@ -315,6 +316,7 @@ namespace InventoryTools.Ui
 
                                 if (ImGui.BeginChild("Content", new Vector2(0, -44) * ImGui.GetIO().FontGlobalScale, true))
                                 {
+                                    //Move footer and header drawing to tables to allow each to bring extra detail
                                     var craftTable = PluginService.FilterService.GetCraftTable(filterConfiguration.Key);
                                     craftTable?.Draw(new Vector2(0, -400));
                                     itemTable.Draw(new Vector2(0, 0));
@@ -358,7 +360,7 @@ namespace InventoryTools.Ui
                                                         if (amountLeft > 0)
                                                         {
                                                             filterConfiguration.CraftList.AddCraftItem(itemRequired,
-                                                                (uint)amountLeft, ItemFlags.None);
+                                                                (uint)amountLeft, InventoryItem.ItemFlags.None);
                                                             filterConfiguration.NeedsRefresh = true;
                                                             filterConfiguration.StartRefresh();
                                                         }
@@ -456,7 +458,7 @@ namespace InventoryTools.Ui
             ImGui.PushID("s_" + item.RowId);
             if (ImGui.ImageButton(_addIcon.ImGuiHandle, new Vector2(16, 16), new Vector2(0,0), new Vector2(1,1), 0))
             {
-                filterConfiguration.CraftList.AddCraftItem(item.RowId, 1, ItemFlags.None);
+                filterConfiguration.CraftList.AddCraftItem(item.RowId, 1, InventoryItem.ItemFlags.None);
                 filterConfiguration.NeedsRefresh = true;
                 filterConfiguration.StartRefresh();
             }

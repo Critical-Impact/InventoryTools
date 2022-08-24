@@ -7,6 +7,7 @@ using CriticalCommonLib.Sheets;
 using Dalamud.Utility;
 using ImGuiNET;
 using InventoryTools.Logic;
+using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 
 namespace InventoryTools.Extensions
 {
@@ -50,7 +51,7 @@ namespace InventoryTools.Extensions
                         }
                         if (ImGui.Selectable("Add phase " + i + " to craft list - " + filter.Name))
                         {
-                            filter.CraftList.AddCraftItem(item.RowId, 1, ItemFlags.None, i);
+                            filter.CraftList.AddCraftItem(item.RowId, 1, InventoryItem.ItemFlags.None, i);
                             PluginService.WindowService.OpenCraftsWindow();
                             PluginService.WindowService.GetCraftsWindow().FocusFilter(filter);
                             filter.NeedsRefresh = true;
@@ -129,7 +130,7 @@ namespace InventoryTools.Extensions
                         }
                         if (ImGui.Selectable("Add " + item.QuantityNeeded + " item to craft list - " + filter.Name))
                         {
-                            filter.CraftList.AddCraftItem(item.Item.RowId, item.QuantityNeeded, ItemFlags.None);
+                            filter.CraftList.AddCraftItem(item.Item.RowId, item.QuantityNeeded, InventoryItem.ItemFlags.None);
                             PluginService.WindowService.OpenCraftsWindow();
                             PluginService.WindowService.GetCraftsWindow().FocusFilter(filter);
                             configuration.NeedsRefresh = true;

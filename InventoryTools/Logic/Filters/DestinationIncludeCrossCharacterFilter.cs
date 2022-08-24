@@ -9,7 +9,7 @@ namespace InventoryTools.Logic.Filters
         public override int LabelSize { get; set; } = 240;
         public override string Key { get; set; } = "DestinationIncludeCrossCharacter";
         public override string Name { get; set; } = "Destination - Cross Character?";
-        public override string HelpText { get; set; } = "Should items be sorted cross character? Will default to using the default configuration in the main inventory tools configuration if not selected.";
+        public override string HelpText { get; set; } = "Should items be sorted cross character? Will default to using the default configuration in the main allagan tools configuration if not selected.";
         public override FilterType AvailableIn { get; set; } = FilterType.SortingFilter | FilterType.CraftFilter;
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Inventories;
 

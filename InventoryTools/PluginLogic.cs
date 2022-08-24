@@ -93,7 +93,7 @@ namespace InventoryTools
             PluginService.CraftMonitor.CraftStarted += CraftMonitorOnCraftStarted;
             PluginService.CraftMonitor.CraftFailed += CraftMonitorOnCraftFailed ;
             PluginService.CraftMonitor.CraftCompleted += CraftMonitorOnCraftCompleted ;
-            PluginService.ContextMenu.Functions.ContextMenu.OnOpenInventoryContextMenu += ContextMenuOnOnOpenInventoryContextMenu;
+            PluginService.ContextMenu.OnOpenInventoryContextMenu += ContextMenuOnOnOpenInventoryContextMenu;
             PluginService.OnPluginLoaded += PluginServiceOnOnPluginLoaded;
             GameInterface.AcquiredItemsUpdated += GameInterfaceOnAcquiredItemsUpdated;
 
@@ -168,12 +168,12 @@ namespace InventoryTools
         }
 
 
-        private void CraftMonitorOnCraftCompleted(uint itemid, ItemFlags flags, uint quantity)
+        private void CraftMonitorOnCraftCompleted(uint itemid, FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags flags, uint quantity)
         {
             var activeFilter = PluginService.FilterService.GetActiveFilter();
             if (activeFilter != null && activeFilter.FilterType == FilterType.CraftFilter)
             {
-                activeFilter.CraftList.MarkCrafted(itemid, ItemFlags.None, 1);
+                activeFilter.CraftList.MarkCrafted(itemid, FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None, 1);
                 activeFilter.StartRefresh();
             }
         }
@@ -1058,7 +1058,7 @@ namespace InventoryTools
             GameInterface.AcquiredItemsUpdated -= GameInterfaceOnAcquiredItemsUpdated;
             PluginConfiguration.SavedCharacters = PluginService.CharacterMonitor.Characters;
             Service.Framework.Update -= FrameworkOnUpdate;
-            PluginService.ContextMenu.Functions.ContextMenu.OnOpenInventoryContextMenu -= ContextMenuOnOnOpenInventoryContextMenu;
+            PluginService.ContextMenu.OnOpenInventoryContextMenu -= ContextMenuOnOnOpenInventoryContextMenu;
             PluginService.InventoryMonitor.OnInventoryChanged -= InventoryMonitorOnOnInventoryChanged;
             PluginService.CharacterMonitor.OnCharacterUpdated -= CharacterMonitorOnOnCharacterUpdated;
             PluginService.CraftMonitor.CraftStarted -= CraftMonitorOnCraftStarted;

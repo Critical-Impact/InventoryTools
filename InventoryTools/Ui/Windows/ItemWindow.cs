@@ -14,6 +14,7 @@ using InventoryTools.Logic;
 using Lumina.Excel.GeneratedSheets;
 using OtterGui;
 using OtterGui.Classes;
+using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 
 namespace InventoryTools.Ui
 {
@@ -133,7 +134,7 @@ namespace InventoryTools.Ui
                         {
                             if (ImGui.Selectable("Add item to craft list - " + filter.Name))
                             {
-                                filter.CraftList.AddCraftItem(_itemId, 1, ItemFlags.None);
+                                filter.CraftList.AddCraftItem(_itemId, 1, InventoryItem.ItemFlags.None);
                                 PluginService.WindowService.OpenCraftsWindow();
                                 PluginService.WindowService.GetCraftsWindow().FocusFilter(filter);
                             }
