@@ -18,31 +18,31 @@
     <ItemGroup>
         <Reference Include="Dalamud">
             <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
-            <Private>True</Private>
+            <Private>False</Private>
         </Reference>
         <Reference Include="ImGui.NET">
             <HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
-            <Private>True</Private>
+            <Private>False</Private>
         </Reference>
         <Reference Include="ImGuiScene">
             <HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
-            <Private>True</Private>
+            <Private>False</Private>
         </Reference>
         <Reference Include="Lumina">
             <HintPath>$(DalamudLibPath)Lumina.dll</HintPath>
-            <Private>True</Private>
+            <Private>False</Private>
         </Reference>
         <Reference Include="Lumina.Excel">
             <HintPath>$(DalamudLibPath)Lumina.Excel.dll</HintPath>
-            <Private>True</Private>
+            <Private>False</Private>
         </Reference>
         <Reference Include="FFXIVClientStructs">
             <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
-            <Private>True</Private>
+            <Private>False</Private>
         </Reference>
         <Reference Include="Newtonsoft.Json">
             <HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
-            <Private>True</Private>
+            <Private>False</Private>
         </Reference>
     </ItemGroup>
 
