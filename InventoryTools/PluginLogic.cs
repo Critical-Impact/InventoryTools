@@ -396,7 +396,7 @@ namespace InventoryTools
             if (PluginConfiguration.MoreInformationHotKey != null)
             {
                 var virtualKeys = PluginConfiguration.MoreInformationHotKey.Value.VirtualKeys();
-                if (HotkeyPressed(virtualKeys))
+                if (virtualKeys.Length != 0 && HotkeyPressed(virtualKeys) && virtualKeys[0] != VirtualKey.NO_KEY)
                 {
                         var id = Service.Gui.HoveredItem;
                         if (id >= 2000000 || id == 0) return;
