@@ -1,5 +1,6 @@
 using CriticalCommonLib.Services;
 using Dalamud.Logging;
+using DalamudPluginProjectTemplate;
 using DalamudPluginProjectTemplate.Attributes;
 using InventoryTools.Ui;
 
@@ -7,28 +8,26 @@ namespace InventoryTools.Commands
 {
     public class PluginCommands
     {
-        [Command("/allagantools","/inventorytools")]
+        [Command("/allagantools")]
+        [Aliases("/atools")]
         [HelpMessage("Shows the allagan tools filter window.")]
         public void ShowHideInventoryToolsCommand(string command, string args)
         {
             PluginService.WindowService.ToggleFiltersWindow();
         }
-
+ 
         [Command("/inv")]
+        [Aliases("/inventorytools")]
+        [DoNotShowInHelp]
         [HelpMessage("Shows the allagan tools filter window.")]
         public  void ShowHideInventoryToolsCommand2(string command, string args)
         {
             PluginService.WindowService.ToggleFiltersWindow();
         }
 
-        [Command("/atools","/invtools")]
-        [HelpMessage("Shows the allagan tools filter window.")]
-        public  void ShowHideInventoryToolsCommand3(string command, string args)
-        {
-            PluginService.WindowService.ToggleFiltersWindow();
-        }
 
-        [Command("/atfiltertoggle","/itfiltertoggle")]
+        [Command("/atfiltertoggle")]
+        [Aliases("/atf")]
         [HelpMessage("Toggles the specified filter on/off and turns off any other filters.")]
         public  void FilterToggleCommand(string command, string args)
         {
@@ -44,23 +43,16 @@ namespace InventoryTools.Commands
             }
         }
 
-        [Command("/atf","/invf")]
+        [Command("/invf")]
+        [DoNotShowInHelp]
         [HelpMessage("Toggles the specified filter on/off and turns off any other filters.")]
-        public  void FilterToggleCommand2(string command, string args)
+        public  void FilterToggleCommandIT(string command, string args)
         {
-            PluginLog.Verbose(command);
-            PluginLog.Verbose(args);
-            if (args.Trim() == "")
-            {
-                ChatUtilities.PrintError("You must enter the name of a filter.");
-            }
-            else
-            {
-                PluginService.FilterService.ToggleActiveBackgroundFilter(args);
-            }
+            FilterToggleCommand(command, args);
         }
 
         [Command("/ifilter")]
+        [DoNotShowInHelp]
         [HelpMessage("Toggles the specified filter on/off and turns off any other filters.")]
         public  void FilterToggleCommand3(string command, string args)
         {
@@ -97,21 +89,30 @@ namespace InventoryTools.Commands
             PluginService.WindowService.ToggleCraftsWindow();
         }
 
-        [Command("/atconfig","/itconfig")]
+        [Command("/atconfig")]
         [HelpMessage("Opens the allagan tools configuration window")]
         public  void OpenConfigurationWindow(string command, string args)
         {
             PluginService.WindowService.ToggleConfigurationWindow();
         }
 
+        [Command("/itconfig")]
+        [DoNotShowInHelp]
+        [HelpMessage("Opens the allagan tools configuration window")]
+        public void OpenConfigurationWindowIT(string command, string args)
+        {
+            OpenConfigurationWindow(command, args);
+        }
+
         [Command("/invconfig")]
+        [DoNotShowInHelp]
         [HelpMessage("Opens the allagan tools configuration window")]
         public  void OpenConfigurationWindow2(string command, string args)
         {
             PluginService.WindowService.ToggleConfigurationWindow();
         }
 
-        [Command("/athelp","/ithelp")]
+        [Command("/athelp")]
         [HelpMessage("Opens the allagan tools help window")]
         public  void OpenHelpWindow(string command, string args)
         {
@@ -119,6 +120,8 @@ namespace InventoryTools.Commands
         }
 
         [Command("/invhelp")]
+        [Aliases("/ithelp")]
+        [DoNotShowInHelp]
         [HelpMessage("Opens the allagan tools help window")]
         public  void OpenHelpWindow2(string command, string args)
         {
@@ -127,18 +130,34 @@ namespace InventoryTools.Commands
         
         #if DEBUG
 
-        [Command("/atdebug","/itdebug")]
+        [Command("/atdebug")]
         [HelpMessage("Opens the allagan tools debug window")]
         public  void ToggleDebugWindow(string command, string args)
         {
             PluginService.WindowService.ToggleDebugWindow();
         }
 
-        [Command("/atintro","/itintro")]
+        [Command("/itdebug")]
+        [DoNotShowInHelp]
+        [HelpMessage("Opens the allagan tools debug window")]
+        public  void ToggleDebugWindowIT(string command, string args)
+        {
+            PluginService.WindowService.ToggleDebugWindow();
+        }
+
+        [Command("/atintro")]
         [HelpMessage("Opens the allagan tools debug window")]
         public void ToggleIntroWindow(string command, string args)
         {
             PluginService.WindowService.OpenWindow<IntroWindow>(IntroWindow.AsKey);
+        }
+
+        [Command("/itintro")]
+        [DoNotShowInHelp]
+        [HelpMessage("Opens the allagan tools debug window")]
+        public void ToggleIntroWindowIT(string command, string args)
+        {
+            ToggleIntroWindow(command,args);
         }
 
         #endif

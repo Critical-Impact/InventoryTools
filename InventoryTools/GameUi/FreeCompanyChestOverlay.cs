@@ -11,8 +11,12 @@ namespace InventoryTools.GameUi
     {
         public override bool Draw()
         {
+            if (!HasState || !HasAddon)
+            {
+                return false;
+            }
             var atkUnitBase = AtkUnitBase;
-            if (atkUnitBase != null && HasState)
+            if (atkUnitBase != null)
             {
                 if (CurrentTab == FreeCompanyTab.One)
                 {
@@ -76,11 +80,11 @@ namespace InventoryTools.GameUi
             {
                 return;
             }
-            if (AtkUnitBase != null && newState != null)
+            if (newState != null && HasAddon && newState.Value.ShouldHighlight && newState.Value.HasFilterResult)
             {
                 HasState = true;
                 var filterResult = newState.Value.FilterResult;
-                if (newState.Value.ShouldHighlight && filterResult.HasValue)
+                if (filterResult.HasValue)
                 {
                     Bag1InventoryColours = newState.Value.GetBagHighlights(InventoryType.FreeCompanyBag0);
                     Bag2InventoryColours = newState.Value.GetBagHighlights(InventoryType.FreeCompanyBag1);
@@ -102,13 +106,13 @@ namespace InventoryTools.GameUi
                 }
             }
 
-            Bag1InventoryColours = EmptyDictionary;
-            Bag2InventoryColours = EmptyDictionary;
-            Bag3InventoryColours = EmptyDictionary;
-            Bag4InventoryColours = EmptyDictionary;
-            Bag5InventoryColours = EmptyDictionary;
             if (HasState)
             {
+                Bag1InventoryColours = EmptyDictionary;
+                Bag2InventoryColours = EmptyDictionary;
+                Bag3InventoryColours = EmptyDictionary;
+                Bag4InventoryColours = EmptyDictionary;
+                Bag5InventoryColours = EmptyDictionary;
                 Clear();
             }
 

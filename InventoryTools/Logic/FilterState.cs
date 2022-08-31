@@ -61,14 +61,15 @@ namespace InventoryTools.Logic
                     if (activeTable != null)
                     {
                         //Allow table to override highlight mode on filter
-                        if (activeTable.HighlightItems)
+                        var activeTableHighlightItems = activeTable.HighlightItems;
+                        if (activeTableHighlightItems)
                         {
-                            shouldHighlight = activeTable.HighlightItems;
+                            shouldHighlight = activeTableHighlightItems;
                             if (activeFilter.HighlightWhen is "When Searching" || activeFilter.HighlightWhen == null && ConfigurationManager.Config.HighlightWhen == "When Searching")
                             {
                                 if (!activeTable.IsSearching)
                                 {
-                                    shouldHighlight = false;
+                                    return false;
                                 }
                             }
 
@@ -76,7 +77,7 @@ namespace InventoryTools.Logic
                             {
                                 if (PluginService.CharacterMonitor.ActiveRetainer == 0 && !PluginService.GameUi.IsWindowVisible(WindowName.RetainerList))
                                 {
-                                    shouldHighlight = false;
+                                    return false;
                                 }
                             }
                         }
@@ -646,6 +647,14 @@ namespace InventoryTools.Logic
             }
 
             return false;
+        }
+
+        public bool HasFilterResult
+        {
+            get
+            {
+                return FilterConfiguration.FilterResult != null;
+            }
         }
 
         public FilterResult? FilterResult

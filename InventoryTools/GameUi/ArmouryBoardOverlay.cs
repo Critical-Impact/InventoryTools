@@ -11,8 +11,12 @@ namespace InventoryTools.GameUi
         public override bool ShouldDraw { get; set; }
         public override bool Draw()
         {
+            if (!HasState || !HasAddon)
+            {
+                return false;
+            }
             var atkUnitBase = AtkUnitBase;
-            if (atkUnitBase != null && HasState)
+            if (atkUnitBase != null)
             {
                 this.SetTabColors(TabColours);
                 var currentBagLocation = CurrentBagLocation;
@@ -68,11 +72,11 @@ namespace InventoryTools.GameUi
                 return;
             }
 
-            if (AtkUnitBase != null && newState != null)
+            if (newState != null && HasAddon && newState.Value.ShouldHighlight && newState.Value.HasFilterResult)
             {
                 HasState = true;
                 var filterResult = newState.Value.FilterResult;
-                if (newState.Value.ShouldHighlight && filterResult.HasValue)
+                if (filterResult.HasValue)
                 {
                     foreach (var bag in BagToNumber.Keys)
                     {
@@ -84,13 +88,14 @@ namespace InventoryTools.GameUi
                     return;
                 }
             }
-            foreach (var bag in BagToNumber.Keys)
-            {
-                BagColours[bag] = EmptyDictionary;
-            }
 
             if (HasState)
             {
+                
+                foreach (var bag in BagToNumber.Keys)
+                {
+                    BagColours[bag] = EmptyDictionary;
+                }
                 Clear();
             }
 

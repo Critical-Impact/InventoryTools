@@ -11,8 +11,12 @@ namespace InventoryTools.GameUi
     {
         public override bool Draw()
         {
+            if (!HasState || !HasAddon)
+            {
+                return false;
+            }
             var atkUnitBase = AtkUnitBase;
-            if (atkUnitBase != null && HasState)
+            if (atkUnitBase != null)
             {
                 var colours = TetrisGame.Instance.DrawScene();
                 foreach (var colour in colours)

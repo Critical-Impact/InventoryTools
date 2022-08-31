@@ -33,10 +33,7 @@ namespace InventoryTools.Logic
             filterConfiguration.ListUpdated += FilterConfigurationUpdated;
             unsafe
             {
-                var clipperNative = Marshal.AllocHGlobal(Marshal.SizeOf<ImGuiListClipper>());
-                var clipper = new ImGuiListClipper();
-                Marshal.StructureToPtr(clipper, clipperNative, false);
-                _clipper = new ImGuiListClipperPtr(clipperNative);
+                _clipper = ImGuiNative.ImGuiListClipper_ImGuiListClipper();
                 _clipper.ItemsHeight = 32;
             }
 

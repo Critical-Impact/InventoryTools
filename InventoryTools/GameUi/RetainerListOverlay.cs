@@ -13,8 +13,12 @@ namespace InventoryTools.GameUi
 
         public override unsafe bool Draw()
         {
+            if (!HasState || !HasAddon)
+            {
+                return false;
+            }
             var atkUnitBase = AtkUnitBase;
-            if (atkUnitBase != null && HasState)
+            if (atkUnitBase != null)
             {
                 this.SetNames(RetainerNames, RetainerColors);
                 return true;
@@ -51,13 +55,13 @@ namespace InventoryTools.GameUi
             {
                 return;
             }
-            if (AtkUnitBase != null && newState != null)
+            if (newState != null && HasAddon && newState.Value.ShouldHighlight && newState.Value.HasFilterResult)
             {
                 HasState = true;
                 var filterResult = newState.Value.FilterResult;
                 var filterConfiguration = newState.Value.FilterConfiguration;
                 var currentCharacterId = Service.ClientState.LocalContentId;
-                if (newState.Value.ShouldHighlight && filterResult.HasValue)
+                if (filterResult.HasValue)
                 {
                     if (filterResult.Value.AllItems.Count != 0)
                     {
@@ -130,9 +134,9 @@ namespace InventoryTools.GameUi
                     }
                 }
             }
-            RetainerNames = PluginService.CharacterMonitor.Characters.Where(c => c.Value.CharacterId == PluginService.CharacterMonitor.ActiveCharacter).ToDictionary(c => c.Key, c => c.Value.Name);            
             if (HasState)
             {
+                RetainerNames = PluginService.CharacterMonitor.Characters.Where(c => c.Value.CharacterId == PluginService.CharacterMonitor.ActiveCharacter).ToDictionary(c => c.Key, c => c.Value.Name);            
                 Clear();
             }
 

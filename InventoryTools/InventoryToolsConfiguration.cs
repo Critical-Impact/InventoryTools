@@ -4,7 +4,9 @@ using System.Numerics;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using Dalamud.Configuration;
+using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Colors;
+using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using Newtonsoft.Json;
 using OtterGui.Classes;
@@ -336,7 +338,40 @@ namespace InventoryTools
             set => _tooltipColor = value;
         }
 
-        public ModifiableHotkey? MoreInformationHotKey { get; set; }
+        public ModifiableHotkey? MoreInformationHotKey
+        {
+            get => _moreInformationHotKey;
+            set
+            {
+                _moreInformationKeys = null;
+                _moreInformationHotKey = value;
+            }
+        }
+
+        [JsonIgnore]
+        public VirtualKey[]? MoreInformationKeys
+        {
+            get
+            {
+                if (_moreInformationKeys != null)
+                {
+                    return _moreInformationKeys;
+                }
+                if (_moreInformationKeys == null && MoreInformationHotKey.HasValue)
+                {
+                    _moreInformationKeys = MoreInformationHotKey.Value.VirtualKeys();
+                    if (_moreInformationKeys.Length == 0)
+                    {
+                        _moreInformationKeys = null;
+                    }
+                }
+                return _moreInformationKeys;
+
+            }
+        }
+
+        private VirtualKey[]? _moreInformationKeys;
+        private ModifiableHotkey? _moreInformationHotKey;
 
         public HashSet<string> OpenWindows
         {

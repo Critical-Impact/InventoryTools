@@ -352,7 +352,9 @@ namespace InventoryTools
                 PluginLog.Log("Migrating to version 10");
                 foreach (var configuration in PluginService.FilterService.Filters)
                 {
+#pragma warning disable CS0612
                     if (configuration.Value.FilterItemsInRetainers.HasValue && configuration.Value.FilterItemsInRetainers == true)
+#pragma warning restore CS0612
                     {
                         configuration.Value.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
                     }
@@ -395,8 +397,8 @@ namespace InventoryTools
             //Hotkeys - move to own file at some point
             if (PluginConfiguration.MoreInformationHotKey != null)
             {
-                var virtualKeys = PluginConfiguration.MoreInformationHotKey.Value.VirtualKeys();
-                if (virtualKeys.Length != 0 && HotkeyPressed(virtualKeys) && virtualKeys[0] != VirtualKey.NO_KEY)
+                var virtualKeys = PluginConfiguration.MoreInformationKeys;
+                if (virtualKeys != null && HotkeyPressed(virtualKeys))
                 {
                         var id = Service.Gui.HoveredItem;
                         if (id >= 2000000 || id == 0) return;

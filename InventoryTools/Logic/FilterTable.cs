@@ -156,9 +156,18 @@ namespace InventoryTools.Logic
                 }
                 else
                 {
-                    SortColumn = null;
-                    SortDirection = null;
-                    refresh = true;
+                    if (SortColumn != null)
+                    {
+                        SortColumn = null;
+                        refresh = true;
+                    }
+
+                    if (SortDirection != null)
+                    {
+                        SortDirection = null;
+                        refresh = true;
+                    }
+
                 }
 
                 if (ShowFilterRow)
@@ -209,6 +218,8 @@ namespace InventoryTools.Logic
                             ImGui.PopID();
                         }
                     }
+
+                    _clipper.End();
                 }
                 else
                 {
@@ -231,6 +242,7 @@ namespace InventoryTools.Logic
                             }
                         }
                     }
+                    _clipper.End();
                 }
                 ImGui.EndTable();
             }
@@ -295,7 +307,6 @@ namespace InventoryTools.Logic
             base.Dispose();
             unsafe
             {
-                _clipper = ImGuiNative.ImGuiListClipper_ImGuiListClipper();
                 _clipper.Destroy();
             }
         }

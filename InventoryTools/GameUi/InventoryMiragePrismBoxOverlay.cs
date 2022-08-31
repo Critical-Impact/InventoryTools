@@ -22,6 +22,10 @@ namespace InventoryTools.GameUi
         
         public override void Update()
         {
+            if (!HasState || !HasAddon)
+            {
+                return;
+            }
             var currentTab = CurrentTab;
             var currentPage = CurrentPage;
             var classJobSelected = ClassJobSelected;
@@ -50,8 +54,12 @@ namespace InventoryTools.GameUi
 
         public override bool Draw()
         {
+            if (!HasState || !HasAddon)
+            {
+                return false;
+            }
             var atkUnitBase = AtkUnitBase;
-            if (atkUnitBase != null && HasState)
+            if (atkUnitBase != null)
             {
                 DresserTab? dresserTab = null;
                 switch (CurrentTab)
@@ -109,11 +117,11 @@ namespace InventoryTools.GameUi
             {
                 return;
             }
-            if (AtkUnitBase != null && newState != null)
+            if (newState != null && HasAddon && newState.Value.ShouldHighlight && newState.Value.HasFilterResult)
             {
                 HasState = true;
                 var filterResult = newState.Value.FilterResult;
-                if (newState.Value.ShouldHighlight && filterResult.HasValue)
+                if (filterResult.HasValue)
                 {
                     ChestInventoryColours[DresserTab.Body] = newState.Value.GetGlamourHighlights(DresserTab.Body, CurrentPage, OnlyDisplayRaceGenderItems, ClassJobSelected);
                     ChestInventoryColours[DresserTab.Ears] = newState.Value.GetGlamourHighlights(DresserTab.Ears, CurrentPage, OnlyDisplayRaceGenderItems, ClassJobSelected);
@@ -141,19 +149,20 @@ namespace InventoryTools.GameUi
                     return;
                 }
             }
-            ChestInventoryColours[DresserTab.Body] = EmptyDictionary;
-            ChestInventoryColours[DresserTab.Ears] = EmptyDictionary;
-            ChestInventoryColours[DresserTab.Feet] = EmptyDictionary;
-            ChestInventoryColours[DresserTab.Fingers] = EmptyDictionary;
-            ChestInventoryColours[DresserTab.Hands] = EmptyDictionary;
-            ChestInventoryColours[DresserTab.Head] = EmptyDictionary;
-            ChestInventoryColours[DresserTab.Legs] = EmptyDictionary;
-            ChestInventoryColours[DresserTab.Neck] = EmptyDictionary;
-            ChestInventoryColours[DresserTab.Wrists] = EmptyDictionary;
-            ChestInventoryColours[DresserTab.MainHand] = EmptyDictionary;
-            ChestInventoryColours[DresserTab.OffHand] = EmptyDictionary;
+            
             if (HasState)
             {
+                ChestInventoryColours[DresserTab.Body] = EmptyDictionary;
+                ChestInventoryColours[DresserTab.Ears] = EmptyDictionary;
+                ChestInventoryColours[DresserTab.Feet] = EmptyDictionary;
+                ChestInventoryColours[DresserTab.Fingers] = EmptyDictionary;
+                ChestInventoryColours[DresserTab.Hands] = EmptyDictionary;
+                ChestInventoryColours[DresserTab.Head] = EmptyDictionary;
+                ChestInventoryColours[DresserTab.Legs] = EmptyDictionary;
+                ChestInventoryColours[DresserTab.Neck] = EmptyDictionary;
+                ChestInventoryColours[DresserTab.Wrists] = EmptyDictionary;
+                ChestInventoryColours[DresserTab.MainHand] = EmptyDictionary;
+                ChestInventoryColours[DresserTab.OffHand] = EmptyDictionary;
                 Clear();
             }
 
