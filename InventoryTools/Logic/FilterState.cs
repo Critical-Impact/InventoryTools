@@ -5,7 +5,6 @@ using CriticalCommonLib;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Lumina.Excel.GeneratedSheets;
@@ -231,7 +230,7 @@ namespace InventoryTools.Logic
                 else
                 {
                     var filteredItems = filterResult.Value.SortedItems.Where(c => c.SourceBag == InventoryType.Armoire);
-                    var cabinetDictionary = Service.ExcelCache.GetSheet<CabinetCategory>().Where(c => c.Category.Row != 0).ToDictionary(c => c.Category.Row, c => (uint)c.MenuOrder - 1);
+                    var cabinetDictionary = Service.ExcelCache.GetCabinetCategorySheet().Where(c => c.Category.Row != 0).ToDictionary(c => c.Category.Row, c => (uint)c.MenuOrder - 1);
                     foreach (var item in filteredItems)
                     {
                         if(item.SourceBag == InventoryType.Armoire && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting)))

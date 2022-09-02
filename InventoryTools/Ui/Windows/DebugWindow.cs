@@ -6,9 +6,7 @@ using CriticalCommonLib.Addons;
 using CriticalCommonLib.Agents;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.MarketBoard;
-using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
-using CriticalCommonLib.Sheets;
 using CriticalCommonLib.UiModule;
 using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -16,7 +14,6 @@ using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using ImGuiNET;
 using InventoryTools.Logic;
-using InventoryType = CriticalCommonLib.Enums.InventoryType;
 
 namespace InventoryTools.Ui
 {
@@ -357,7 +354,7 @@ namespace InventoryTools.Ui
                         ImGui.Text("Step: " + craftMonitorAgent.Step);
                         ImGui.Text("Durability: " + craftMonitorAgent.Durability);
                         ImGui.Text("HQ Chance: " + craftMonitorAgent.HqChance);
-                        ImGui.Text("Item: " + (Service.ExcelCache.GetSheet<ItemEx>().GetRow(craftMonitorAgent.ResultItemId)?.Name ?? "Unknown"));
+                        ImGui.Text("Item: " + (Service.ExcelCache.GetItemExSheet().GetRow(craftMonitorAgent.ResultItemId)?.NameString ?? "Unknown"));
                         ImGui.Text("Current Recipe: " + PluginService.CraftMonitor.CurrentRecipe?.RowId ?? "Unknown");
                         ImGui.Text("Recipe Difficulty: " + PluginService.CraftMonitor.RecipeLevelTable?.Difficulty ?? "Unknown");
                         ImGui.Text("Recipe Difficulty Factor: " + PluginService.CraftMonitor.CurrentRecipe?.DifficultyFactor ?? "Unknown");
@@ -373,7 +370,7 @@ namespace InventoryTools.Ui
                         ImGui.Text("Failed: " + simpleCraftMonitorAgent.TotalFailed);
                         ImGui.Text("Total Completed: " + simpleCraftMonitorAgent.TotalCompleted);
                         ImGui.Text("Total: " + simpleCraftMonitorAgent.Total);
-                        ImGui.Text("Item: " + Service.ExcelCache.GetSheet<ItemEx>().GetRow(simpleCraftMonitorAgent.ResultItemId)?.Name.ToString() ?? "Unknown");
+                        ImGui.Text("Item: " + Service.ExcelCache.GetItemExSheet().GetRow(simpleCraftMonitorAgent.ResultItemId)?.NameString.ToString() ?? "Unknown");
                         ImGui.Text("Current Recipe: " + PluginService.CraftMonitor.CurrentRecipe?.RowId ?? "Unknown");
                         ImGui.Text("Current Craft Type: " + PluginService.CraftMonitor.Agent?.CraftType ?? "Unknown");
                     }

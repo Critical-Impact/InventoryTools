@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
 
@@ -39,7 +38,7 @@ namespace InventoryTools.Logic.Filters
         public override Dictionary<uint, string> GetChoices(FilterConfiguration configuration)
         {
             var currencies = Service.ExcelCache.GetCurrencies(3);
-            return currencies.ToDictionary(c => c, c => Service.ExcelCache.GetSheet<ItemEx>().GetRow(c)?.Name.ToString() ?? "Unknown").OrderBy(c => c.Value).ToDictionary(c => c.Key, c => c.Value);
+            return currencies.ToDictionary(c => c, c => Service.ExcelCache.GetItemExSheet().GetRow(c)?.NameString ?? "Unknown").OrderBy(c => c.Value).ToDictionary(c => c.Key, c => c.Value);
         }
 
         public override bool HideAlreadyPicked { get; set; } = true;

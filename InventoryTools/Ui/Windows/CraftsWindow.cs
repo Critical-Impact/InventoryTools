@@ -5,12 +5,10 @@ using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Addons;
 using CriticalCommonLib.MarketBoard;
-using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
 using Dalamud.Logging;
-using Dalamud.Utility;
 using ImGuiNET;
 using ImGuiScene;
 using InventoryTools.Extensions;
@@ -35,6 +33,8 @@ namespace InventoryTools.Ui
         private int _selectedFilterTab = 0;
         private bool _settingsActive = false;
         private bool _addItemBarOpen = false;
+        private bool _craftsExpanded = true;
+        private bool _itemsExpanded = true;
         private TextureWrap _settingsIcon => PluginService.IconStorage.LoadIcon(66319);
         private TextureWrap _addIcon => PluginService.IconStorage.LoadIcon(66315);
         private TextureWrap _addEphemeralIcon => PluginService.IconStorage.LoadIcon(66317);
@@ -98,7 +98,7 @@ namespace InventoryTools.Ui
                 if (ImGui.BeginChild("ListCommands", new Vector2(0, 0) * ImGui.GetIO().FontGlobalScale, false))
                 {
                     float height = ImGui.GetWindowSize().Y;
-                    ImGui.SetCursorPosY((height - 24)* ImGui.GetIO().FontGlobalScale);
+                    ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
                     if (ImGui.ImageButton(_addIcon.ImGuiHandle, new Vector2(20, 20)* ImGui.GetIO().FontGlobalScale, new Vector2(0,0), new Vector2(1,1 ),2))
                     {
                         PluginService.PluginLogic.AddNewCraftFilter();
@@ -112,9 +112,9 @@ namespace InventoryTools.Ui
                     ImGuiUtil.HoverTooltip("Add a new ephemeral craft list.");*/
                     
                     var width = ImGui.GetWindowSize().X;
-                    width -= 28;
-                    ImGui.SetCursorPosX(width * ImGui.GetIO().FontGlobalScale);
-                    ImGui.SetCursorPosY((height - 24) * ImGui.GetIO().FontGlobalScale);
+                    width -= 28 * ImGui.GetIO().FontGlobalScale;
+                    ImGui.SetCursorPosX(width);
+                    ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale );
                     if (ImGui.ImageButton(_settingsIcon.ImGuiHandle,
                             new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
                             new Vector2(1, 1), 2))
@@ -267,7 +267,7 @@ namespace InventoryTools.Ui
                             if (ImGui.BeginChild("BottomBar", new Vector2(0, 0), true, ImGuiWindowFlags.None))
                             {
                                 float width = ImGui.GetWindowSize().X;
-                                ImGui.SetCursorPosX((width - 42) * ImGui.GetIO().FontGlobalScale);
+                                ImGui.SetCursorPosX(width - 42 * ImGui.GetIO().FontGlobalScale);
                                 if (ImGui.ImageButton(_closeSettingsIcon.ImGuiHandle,
                                         new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
                                         new Vector2(1, 1), 2))
@@ -303,7 +303,7 @@ namespace InventoryTools.Ui
                                     
                                     ImGui.SameLine();
                                     float width = ImGui.GetWindowSize().X;
-                                    ImGui.SetCursorPosX((width - 42) * ImGui.GetIO().FontGlobalScale);
+                                    ImGui.SetCursorPosX(width - 42 * ImGui.GetIO().FontGlobalScale);
                                     if (ImGui.ImageButton(_addIcon.ImGuiHandle,
                                             new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),new Vector2(1, 1), 2))
                                     {
@@ -318,8 +318,8 @@ namespace InventoryTools.Ui
                                 {
                                     //Move footer and header drawing to tables to allow each to bring extra detail
                                     var craftTable = PluginService.FilterService.GetCraftTable(filterConfiguration.Key);
-                                    craftTable?.Draw(new Vector2(0, -400));
-                                    itemTable.Draw(new Vector2(0, 0));
+                                    _craftsExpanded = craftTable?.Draw(new Vector2(0, _itemsExpanded ? -300 * ImGui.GetIO().FontGlobalScale : -50 * ImGui.GetIO().FontGlobalScale)) ?? true;
+                                    _itemsExpanded = itemTable.Draw(new Vector2(0, 0));
                                     ImGui.EndChild();
                                 }
 
@@ -379,7 +379,7 @@ namespace InventoryTools.Ui
                                     itemTable.DrawFooterItems();
                                     ImGui.SameLine();
                                     float width = ImGui.GetWindowSize().X;
-                                    ImGui.SetCursorPosX((width - 42) * ImGui.GetIO().FontGlobalScale);
+                                    ImGui.SetCursorPosX(width - 42 * ImGui.GetIO().FontGlobalScale);
                                     if (ImGui.ImageButton(_settingsIcon.ImGuiHandle,
                                             new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
                                             new Vector2(1, 1), 2))
@@ -443,7 +443,7 @@ namespace InventoryTools.Ui
         private void DrawSearchRow(FilterConfiguration filterConfiguration, ItemEx item)
         {
             ImGui.TableNextColumn();
-            ImGui.TextWrapped( item.Name);
+            ImGui.TextWrapped( item.NameString);
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right)) 
             {
                 ImGui.OpenPopup("RightClick" + item.RowId);
@@ -484,7 +484,7 @@ namespace InventoryTools.Ui
                 if (_searchItems == null)
                 {
                     _searchItems = CraftItemsByName.Where(c => c.Value.Contains(SearchString.ToLower())).Take(100)
-                        .Select(c => Service.ExcelCache.GetSheet<ItemEx>().GetRow(c.Key)!).ToList();
+                        .Select(c => Service.ExcelCache.GetItemExSheet().GetRow(c.Key)!).ToList();
                 }
 
                 return _searchItems;
@@ -499,7 +499,7 @@ namespace InventoryTools.Ui
             {
                 if (_craftItemsByName == null)
                 {
-                    _craftItemsByName = Service.ExcelCache.GetSheet<ItemEx>().Where(c => c.CanBeCrafted).ToDictionary(c => c.RowId, c => c.Name.ToDalamudString().ToString().ToLower());
+                    _craftItemsByName = Service.ExcelCache.GetItemExSheet().Where(c => c.CanBeCrafted).ToDictionary(c => c.RowId, c => c.NameString.ToLower());
                 }
                 return _craftItemsByName;
             }

@@ -3,6 +3,7 @@ using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Services;
 using NUnit.Framework;
+using Lumina;
 
 namespace InventoryToolsTesting
 {
@@ -13,7 +14,7 @@ namespace InventoryToolsTesting
         [OneTimeSetUp]
         public void Init()
         {
-            var lumina = new Lumina.GameData( "H:/Games/SquareEnix/FINAL FANTASY XIV - A Realm Reborn/game/sqpack" );
+            var lumina = new GameData( "H:/Games/SquareEnix/FINAL FANTASY XIV - A Realm Reborn/game/sqpack" );
             Service.ExcelCache = new ExcelCache(lumina);
         }
 

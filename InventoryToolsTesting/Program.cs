@@ -6,7 +6,6 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using InventoryTools;
 using InventoryTools.Logic;
-using InventoryTools.Services;
 using Lumina.Excel.GeneratedSheets;
 
 //Not so simple way to test people's filters/inventory files for issues

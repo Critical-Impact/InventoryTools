@@ -1,7 +1,6 @@
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
-using Dalamud.Logging;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 

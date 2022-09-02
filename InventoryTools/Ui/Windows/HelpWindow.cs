@@ -2,7 +2,6 @@ using System.Numerics;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
-using InventoryTools.Misc;
 
 namespace InventoryTools.Ui
 {

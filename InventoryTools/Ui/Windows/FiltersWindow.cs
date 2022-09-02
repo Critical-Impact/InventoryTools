@@ -5,11 +5,9 @@ using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Addons;
 using CriticalCommonLib.MarketBoard;
-using CriticalCommonLib.Models;
 using ImGuiNET;
 using ImGuiScene;
 using InventoryTools.Logic;
-using InventoryTools.Sections;
 using OtterGui;
 using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 
@@ -268,8 +266,8 @@ namespace InventoryTools.Ui
                 }
 
                 var width = ImGui.GetWindowSize().X;
-                width -= 28;
-                ImGui.SetCursorPosX(width * ImGui.GetIO().FontGlobalScale);
+                width -= 28 * ImGui.GetIO().FontGlobalScale;
+                ImGui.SetCursorPosX(width);
                 ImGui.SetCursorPosY(2 * ImGui.GetIO().FontGlobalScale);
                 if (ImGui.ImageButton(_settingsIcon.ImGuiHandle,
                         new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
@@ -280,8 +278,8 @@ namespace InventoryTools.Ui
 
                 ImGuiUtil.HoverTooltip("Open the configuration window.");
 
-                width -= 30;
-                ImGui.SetCursorPosX(width * ImGui.GetIO().FontGlobalScale);
+                width -= 30 * ImGui.GetIO().FontGlobalScale;
+                ImGui.SetCursorPosX(width);
                 ImGui.SetCursorPosY(2 * ImGui.GetIO().FontGlobalScale);
                 if (ImGui.ImageButton(_craftIcon.ImGuiHandle,
                         new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
@@ -292,8 +290,8 @@ namespace InventoryTools.Ui
 
                 ImGuiUtil.HoverTooltip("Open the craft window.");
 
-                width -= 30;
-                ImGui.SetCursorPosX(width * ImGui.GetIO().FontGlobalScale);
+                width -= 30 * ImGui.GetIO().FontGlobalScale;
+                ImGui.SetCursorPosX(width);
                 ImGui.SetCursorPosY(2 * ImGui.GetIO().FontGlobalScale);
                 if (ImGui.ImageButton(_helpIcon.ImGuiHandle,
                         new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
@@ -305,8 +303,8 @@ namespace InventoryTools.Ui
                 
                 if (ConfigurationManager.Config.TetrisEnabled)
                 {
-                    width -= 30;
-                    ImGui.SetCursorPosX(width * ImGui.GetIO().FontGlobalScale);
+                    width -= 30 * ImGui.GetIO().FontGlobalScale;
+                    ImGui.SetCursorPosX(width);
                     ImGui.SetCursorPosY(2 * ImGui.GetIO().FontGlobalScale);
                     if (ImGui.ImageButton(_tetrisIcon.ImGuiHandle,
                             new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),

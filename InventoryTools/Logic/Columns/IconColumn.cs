@@ -1,5 +1,4 @@
 using System.Numerics;
-using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;

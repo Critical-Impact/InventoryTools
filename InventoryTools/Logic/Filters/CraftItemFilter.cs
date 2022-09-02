@@ -1,7 +1,6 @@
 using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
 
@@ -28,7 +27,7 @@ namespace InventoryTools.Logic.Filters
                 return true;
             }
 
-            var expectedItem = Service.ExcelCache.GetSheet<ItemEx>().GetRow((uint) currentValue.Value);
+            var expectedItem = Service.ExcelCache.GetItemExSheet().GetRow((uint) currentValue.Value);
             if (expectedItem != null)
             {
                 return true;
@@ -51,7 +50,7 @@ namespace InventoryTools.Logic.Filters
                 return true;
             }
 
-            var excelItem = Service.ExcelCache.GetSheet<ItemEx>().GetRow((uint) currentValue.Value);
+            var excelItem = Service.ExcelCache.GetItemExSheet().GetRow((uint) currentValue.Value);
             if (excelItem == null)
             {
                 return true;

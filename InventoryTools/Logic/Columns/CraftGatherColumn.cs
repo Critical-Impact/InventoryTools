@@ -1,7 +1,6 @@
 using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;

@@ -2,11 +2,9 @@
 using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Filters.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -48,7 +46,7 @@ namespace InventoryTools.Logic.Filters
         public override Dictionary<uint, string> GetChoices(FilterConfiguration configuration)
         {
             var choices = new Dictionary<uint, string>();
-            var sheet = Service.ExcelCache.GetSheet<ClassJob>();
+            var sheet = Service.ExcelCache.GetClassJobSheet();
             foreach (var classJob in sheet)
             {
                 choices.Add(classJob.RowId, classJob.Name.ToString().ToTitleCase());

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Logic.Columns;
@@ -89,7 +88,7 @@ namespace InventoryTools.Logic
         
         public abstract void RefreshColumns();
 
-        public abstract void Draw(Vector2 size);
+        public abstract bool Draw(Vector2 size);
         public abstract void DrawFooterItems();
 
         public virtual void Dispose()

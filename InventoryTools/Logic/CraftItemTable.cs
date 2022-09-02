@@ -50,7 +50,7 @@ namespace InventoryTools.Logic
 
         public List<CraftItem> CraftItems = new();
 
-        public override void Draw(Vector2 size)
+        public override bool Draw(Vector2 size)
         {
             if (Columns.Count == 0)
             {
@@ -58,10 +58,13 @@ namespace InventoryTools.Logic
                 {
                     Refresh(ConfigurationManager.Config);
                 }
-                return;
+                return true;
             }
+
+            var isExpanded = false;
             if(ImGui.CollapsingHeader("To Craft", ImGuiTreeNodeFlags.DefaultOpen))
             {
+                isExpanded = true;
                 ImGui.BeginChild("CraftContent", size * ImGui.GetIO().FontGlobalScale);
                 if (FilterConfiguration.FilterType == FilterType.CraftFilter &&
                     ImGui.BeginTable(Key + "CraftTable", Columns.Count, _tableFlags))
@@ -186,6 +189,8 @@ namespace InventoryTools.Logic
                 }
                 ImGui.EndChild();
             }
+
+            return isExpanded;
         }
 
         public override void DrawFooterItems()

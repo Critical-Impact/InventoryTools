@@ -11,9 +11,7 @@ using Dalamud.Utility;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
-using Lumina.Excel.GeneratedSheets;
 using OtterGui;
-using OtterGui.Classes;
 using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 
 namespace InventoryTools.Ui
@@ -26,7 +24,7 @@ namespace InventoryTools.Ui
             return "item_" + itemId;
         }
         private uint _itemId;
-        private ItemEx? Item => Service.ExcelCache.GetSheet<ItemEx>().GetRow(_itemId); 
+        private ItemEx? Item => Service.ExcelCache.GetItemExSheet().GetRow(_itemId); 
         public ItemWindow(uint itemId)
         {
             _itemId = itemId;
@@ -59,7 +57,7 @@ namespace InventoryTools.Ui
 
         private RetainerTaskNormalEx[] RetainerTasks { get; }
 
-        public override string Name => Item?.Name ?? "Invalid Item";
+        public override string Name => Item?.NameString ?? "Invalid Item";
         public override string Key => AsKey(_itemId);
         public override bool DestroyOnClose => true;
         public override void Draw()
@@ -161,7 +159,7 @@ namespace InventoryTools.Ui
                     if (ImGui.ImageButton(gbIcon.ImGuiHandle,
                             new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                     {
-                        Service.Commands.ProcessCommand("/gather " + Item.Name);
+                        Service.Commands.ProcessCommand("/gather " + Item.NameString);
                     }
 
                     ImGuiUtil.HoverTooltip("Gatherable - Gather with Gatherbuddy");
@@ -194,7 +192,7 @@ namespace InventoryTools.Ui
                     
                                 if (ImGui.BeginPopup("RightClickSource"+ source.ItemId))
                                 {
-                                    var itemEx = Service.ExcelCache.GetSheet<ItemEx>().GetRow(source.ItemId.Value);
+                                    var itemEx = Service.ExcelCache.GetItemExSheet().GetRow(source.ItemId.Value);
                                     if (itemEx != null)
                                     {
                                         itemEx.DrawRightClickPopup();
@@ -247,7 +245,7 @@ namespace InventoryTools.Ui
                     
                                 if (ImGui.BeginPopup("RightClickUse"+ use.ItemId))
                                 {
-                                    var itemEx = Service.ExcelCache.GetSheet<ItemEx>().GetRow(use.ItemId.Value);
+                                    var itemEx = Service.ExcelCache.GetItemExSheet().GetRow(use.ItemId.Value);
                                     if (itemEx != null)
                                     {
                                         itemEx.DrawRightClickPopup();
@@ -286,7 +284,7 @@ namespace InventoryTools.Ui
                     ImGui.TableNextColumn();
                     if (ImGui.Button("Open Map Link##" + tuple.shop.RowId + "_" + tuple.npc.Key))
                     {
-                        ChatUtilities.PrintFullMapLink(tuple.location, Item.Name);
+                        ChatUtilities.PrintFullMapLink(tuple.location, Item.NameString);
                     }
 
 
@@ -332,9 +330,9 @@ namespace InventoryTools.Ui
                         {
                             ImGui.PushID(index);
                             var recipe = RecipesAsRequirement[index];
-                            if (recipe.ItemResult.Value != null)
+                            if (recipe.ItemResultEx.Value != null)
                             {
-                                var icon = PluginService.IconStorage.LoadIcon(recipe.ItemResult.Value.Icon);
+                                var icon = PluginService.IconStorage.LoadIcon(recipe.ItemResultEx.Value.Icon);
                                 if (ImGui.ImageButton(icon.ImGuiHandle, new(32, 32)))
                                 {
                                     GameInterface.OpenCraftingLog(recipe.ItemResult.Row, recipe.RowId);
@@ -346,9 +344,9 @@ namespace InventoryTools.Ui
                     
                                 if (ImGui.BeginPopup("RightClick"+ recipe.RowId))
                                 {
-                                    if (recipe.ResultEx.Value != null)
+                                    if (recipe.ItemResultEx.Value != null)
                                     {
-                                        recipe.ResultEx.Value.DrawRightClickPopup();
+                                        recipe.ItemResultEx.Value.DrawRightClickPopup();
                                     }
 
                                     ImGui.EndPopup();
@@ -356,7 +354,7 @@ namespace InventoryTools.Ui
 
                                 float lastButtonX2 = ImGui.GetItemRectMax().X;
                                 float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
-                                ImGuiUtil.HoverTooltip(recipe.ItemResult.Value.Name + " - " +
+                                ImGuiUtil.HoverTooltip(recipe.ItemResultEx.Value.NameString + " - " +
                                                        (recipe.CraftType.Value?.Name ?? "Unknown"));
                                 if (index + 1 < RecipesAsRequirement.Length && nextButtonX2 < windowVisibleX2)
                                 {

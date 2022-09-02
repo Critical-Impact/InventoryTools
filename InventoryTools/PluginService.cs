@@ -10,7 +10,6 @@ using InventoryTools.Commands;
 using InventoryTools.Logic;
 using InventoryTools.Misc;
 using InventoryTools.Services;
-using InventoryTools.Ui;
 using OtterGui.Classes;
 
 namespace InventoryTools

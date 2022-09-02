@@ -2,7 +2,6 @@ using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
-using InventoryTools.Misc;
 
 namespace InventoryTools.Logic.Columns
 {

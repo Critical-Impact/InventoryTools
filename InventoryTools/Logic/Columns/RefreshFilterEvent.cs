@@ -1,7 +1,3 @@
-using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
-
 namespace InventoryTools.Logic.Columns
 {
     public class RefreshFilterEvent : IFilterEvent

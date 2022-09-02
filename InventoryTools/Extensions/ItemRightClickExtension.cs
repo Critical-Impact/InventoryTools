@@ -1,10 +1,8 @@
 using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
-using Dalamud.Utility;
 using ImGuiNET;
 using InventoryTools.Logic;
 using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
@@ -144,7 +142,7 @@ namespace InventoryTools.Extensions
         
         public static void DrawMenuItems(ItemEx item)
         {
-            ImGui.Text(item.Name);
+            ImGui.Text(item.NameString);
             ImGui.Separator();
             if (ImGui.Selectable("Open in Garland Tools"))
             {
@@ -160,7 +158,7 @@ namespace InventoryTools.Extensions
             }
             if (ImGui.Selectable("Copy Name"))
             {
-                item.Name.ToDalamudString().ToString().ToClipboard();
+                item.NameString.ToClipboard();
             }
             if (item.CanTryOn && ImGui.Selectable("Try On"))
             {
@@ -182,7 +180,7 @@ namespace InventoryTools.Extensions
 
             if (item.CanOpenGatheringLog && ImGui.Selectable("Gather with Gatherbuddy"))
             {
-                Service.Commands.ProcessCommand("/gather " + item.Name);
+                Service.Commands.ProcessCommand("/gather " + item.NameString);
             }
 
             if (ImGui.Selectable("More Information"))

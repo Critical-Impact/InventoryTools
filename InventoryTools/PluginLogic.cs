@@ -10,7 +10,6 @@ using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
-using CriticalCommonLib.Sheets;
 using Dalamud.ContextMenu;
 using Dalamud.Game;
 using Dalamud.Game.ClientState.Keys;
@@ -27,7 +26,6 @@ using InventoryTools.Logic;
 using InventoryTools.Logic.Columns;
 using InventoryTools.Logic.Filters;
 using InventoryTools.Logic.Settings.Abstract;
-using InventoryTools.Services;
 using InventoryTools.Ui;
 using XivCommon;
 using XivCommon.Functions.Tooltips;
@@ -403,7 +401,7 @@ namespace InventoryTools
                         var id = Service.Gui.HoveredItem;
                         if (id >= 2000000 || id == 0) return;
                         id %= 500000;
-                        var item = Service.ExcelCache.GetSheet<ItemEx>().GetRow((uint) id);
+                        var item = Service.ExcelCache.GetItemExSheet().GetRow((uint) id);
                         if (item == null) return;
                         PluginService.WindowService.OpenItemWindow(item.RowId);
                         foreach (var k in virtualKeys) {
@@ -656,7 +654,7 @@ namespace InventoryTools
                 if (PluginConfiguration.TooltipDisplayMarketAveragePrice ||
                     PluginConfiguration.TooltipDisplayMarketLowestPrice)
                 {
-                    if (!(Service.ExcelCache.GetSheet<ItemEx>().GetRow((uint) itemId)?.IsUntradable ?? true))
+                    if (!(Service.ExcelCache.GetItemExSheet().GetRow((uint) itemId)?.IsUntradable ?? true))
                     {
                         var marketData = Cache.GetPricing((uint) itemId, false);
                         if (marketData != null)

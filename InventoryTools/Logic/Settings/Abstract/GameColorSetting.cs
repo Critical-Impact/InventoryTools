@@ -4,7 +4,6 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Comparer;
-using CriticalCommonLib.Services;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
@@ -17,7 +16,7 @@ namespace InventoryTools.Logic.Settings.Abstract
 
         public GameColorSetting()
         {
-            var list = new List<UIColor>(Service.ExcelCache.GetSheet<UIColor>().Distinct(new UIColorComparer()));
+            var list = new List<UIColor>(Service.ExcelCache.GetUIColorSheet().Distinct(new UIColorComparer()));
             list.Sort((a, b) =>
             {
                 var colorA = Utils.ConvertUIColorToColor(a);

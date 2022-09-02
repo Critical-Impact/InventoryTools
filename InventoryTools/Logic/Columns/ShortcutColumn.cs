@@ -51,7 +51,7 @@ namespace InventoryTools.Logic.Columns
                     }
                     else
                     {
-                        PluginLog.Error("Something went wrong while attempting to try on " + item.Item.Name);
+                        PluginLog.Error("Something went wrong while attempting to try on " + item.Item.NameString);
                     }
                 }
             }
@@ -80,7 +80,7 @@ namespace InventoryTools.Logic.Columns
                     }
                     else
                     {
-                        PluginLog.Error("Something went wrong while attempting to try on " + item.Name);
+                        PluginLog.Error("Something went wrong while attempting to try on " + item.NameString);
                     }
                 }
             }

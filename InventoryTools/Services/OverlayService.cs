@@ -1,14 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using CriticalCommonLib;
-using CriticalCommonLib.Enums;
-using CriticalCommonLib.Extensions;
-using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
-using CriticalCommonLib.Sheets;
 using Dalamud.Game;
 using Dalamud.Logging;
 using InventoryTools.GameUi;

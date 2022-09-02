@@ -3,10 +3,8 @@ using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -37,7 +35,7 @@ namespace InventoryTools.Logic.Filters
         public override Dictionary<uint, string> GetChoices(FilterConfiguration configuration)
         {
             var choices = new Dictionary<uint, string>();
-            var sheet = Service.ExcelCache.GetSheet<Race>();
+            var sheet = Service.ExcelCache.GetRaceSheet();
             foreach (var race in sheet)
             {
                 choices.Add(race.RowId, race.Masculine);

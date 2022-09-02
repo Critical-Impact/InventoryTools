@@ -6,7 +6,6 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Extensions;
-using NaturalSort.Extension;
 
 namespace InventoryTools.Logic.Columns.Abstract
 {

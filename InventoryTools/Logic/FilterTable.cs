@@ -4,7 +4,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using CriticalCommonLib.Sheets;
 using CsvHelper;
 using Dalamud.Logging;
@@ -79,7 +78,7 @@ namespace InventoryTools.Logic
                         }
                     }
 
-                    Items = items.Where(c => c.Name.ToString() != "").ToList();
+                    Items = items.Where(c => c.NameString.ToString() != "").ToList();
                     RenderItems = Items.ToList();
                     NeedsRefresh = false;
                     Refreshed?.Invoke(this);
@@ -111,7 +110,7 @@ namespace InventoryTools.Logic
 
 
 
-        public override void Draw(Vector2 size)
+        public override bool Draw(Vector2 size)
         {
             var highlightItems = HighlightItems;
 
@@ -122,13 +121,15 @@ namespace InventoryTools.Logic
                 {
                     Refresh(ConfigurationManager.Config);
                 }
-                return;
+                return true;
             }
 
+            var isExpanded = false;
             ImGui.BeginChild("FilterTableContent", size * ImGui.GetIO().FontGlobalScale, false, ImGuiWindowFlags.HorizontalScrollbar); 
             
             if((FilterConfiguration.FilterType != FilterType.CraftFilter || FilterConfiguration.FilterType == FilterType.CraftFilter && ImGui.CollapsingHeader("Items in Retainers/Bags", ImGuiTreeNodeFlags.DefaultOpen)) && ImGui.BeginTable(Key, Columns.Count, _tableFlags))
             {
+                isExpanded = true;
                 var refresh = false;
                 ImGui.TableSetupScrollFreeze(Math.Min(FreezeCols ?? 0,Columns.Count), FreezeRows ?? (ShowFilterRow ? 2 : 1));
                 for (var index = 0; index < Columns.Count; index++)
@@ -247,6 +248,7 @@ namespace InventoryTools.Logic
                 ImGui.EndTable();
             }
             ImGui.EndChild();
+            return isExpanded;
         }
 
         public override void DrawFooterItems()

@@ -11,11 +11,15 @@
       <ProjectReference Include="..\InventoryTools\InventoryTools.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\CriticalCommonLib\CriticalCommonLib.csproj" />
+    </ItemGroup>
+
     <PropertyGroup>
         <DalamudLibPath>$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
     </PropertyGroup>
 
-    <ItemGroup>
+    <ItemGroup Condition=" '$(Configuration)'=='Release' ">
         <Reference Include="Dalamud">
             <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
             <Private>False</Private>
@@ -40,9 +44,25 @@
             <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="Newtonsoft.Json">
-            <HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
-            <Private>False</Private>
+    </ItemGroup>
+
+
+    <ItemGroup Condition=" '$(Configuration)'=='Debug' ">
+        <Reference Include="Dalamud">
+            <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="ImGui.NET">
+            <HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="ImGuiScene">
+            <HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="FFXIVClientStructs">
+            <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
+            <Private>True</Private>
         </Reference>
     </ItemGroup>
 
@@ -51,7 +71,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0-preview-20220401-08" />
+      <PackageReference Include="Lumina" Version="3.10.0" />
+      <PackageReference Include="Lumina.Excel" Version="6.2.1" />
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0-preview-20220726-02" />
       <PackageReference Include="NUnit" Version="3.13.3" />
       <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
     </ItemGroup>

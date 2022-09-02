@@ -3,12 +3,10 @@ using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
-using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -21,7 +19,7 @@ namespace InventoryTools.Logic.Columns
 
         public override (string, Vector4)? CurrentValue(ItemEx item)
         {
-            return (item.Name, ImGuiColors.DalamudWhite);
+            return (item.NameString, ImGuiColors.DalamudWhite);
         }
 
         public override (string, Vector4)? CurrentValue(SortingResult item)
@@ -39,7 +37,7 @@ namespace InventoryTools.Logic.Columns
                     var itemRecipes = Service.ExcelCache.ItemRecipes[item.ItemId];
                     if (itemRecipes.Count != 1)
                     {
-                        var actualRecipes = itemRecipes.Select(c => Service.ExcelCache.GetSheet<Recipe>().GetRow(c)!)
+                        var actualRecipes = itemRecipes.Select(c => Service.ExcelCache.GetRecipeExSheet().GetRow(c)!)
                             .OrderBy(c => c.CraftType.Value?.Name ?? "").ToList();
                         var value = item.Recipe?.CraftType.Value?.Name ?? "";
                         ImGui.SameLine();

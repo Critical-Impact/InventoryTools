@@ -9,7 +9,7 @@ namespace InventoryTools.Logic
         public void RefreshColumns();
         public List<IColumn> Columns { get; set; }
 
-        public void Draw(Vector2 size);
+        public bool Draw(Vector2 size);
 
         public void Refresh(InventoryToolsConfiguration configuration);
         
