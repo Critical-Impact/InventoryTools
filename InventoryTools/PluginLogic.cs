@@ -623,9 +623,13 @@ namespace InventoryTools
                     List<string> locations = new List<string>();
                     foreach (var oItem in ownedItems)
                     {
-                        storageCount += oItem.Quantity;
                         if (PluginService.CharacterMonitor.Characters.ContainsKey(oItem.RetainerId))
                         {
+                            if (PluginConfiguration.TooltipCurrentCharacter && !PluginService.CharacterMonitor.BelongsToActiveCharacter(oItem.RetainerId))
+                                continue;
+
+                            storageCount += oItem.Quantity;
+
                             var characterMonitorCharacter = PluginService.CharacterMonitor.Characters[oItem.RetainerId];
                             var name = characterMonitorCharacter?.FormattedName ?? "Unknown";
                             name = name.Trim().Length == 0 ? "Unknown" : name.Trim();
