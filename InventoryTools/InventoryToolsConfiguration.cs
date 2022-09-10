@@ -83,6 +83,7 @@ namespace InventoryTools
         public int SelectedConfigurationPage { get; set; }
         public bool ShowFilterTab { get; set; } = true;
         public bool SwitchFiltersAutomatically { get; set; } = true;
+        private bool _tooltipCurrentCharacter = false;
         private bool _tooltipDisplayAmountOwned = true;
         private bool _tooltipDisplayMarketAveragePrice = true;
         private bool _tooltipDisplayMarketLowestPrice = false;
@@ -143,6 +144,16 @@ namespace InventoryTools
             set
             {
                 _displayTooltip = value;
+                ConfigurationChanged?.Invoke();
+            }
+        }
+
+        public bool TooltipCurrentCharacter
+        {
+            get => _tooltipCurrentCharacter;
+            set
+            {
+                _tooltipCurrentCharacter = value;
                 ConfigurationChanged?.Invoke();
             }
         }
