@@ -19,7 +19,7 @@
         <DalamudLibPath>$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
     </PropertyGroup>
 
-    <ItemGroup Condition=" '$(Configuration)'=='Release' ">
+    <ItemGroup>
         <Reference Include="Dalamud">
             <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
             <Private>False</Private>
@@ -46,33 +46,11 @@
         </Reference>
     </ItemGroup>
 
-
-    <ItemGroup Condition=" '$(Configuration)'=='Debug' ">
-        <Reference Include="Dalamud">
-            <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
-            <Private>True</Private>
-        </Reference>
-        <Reference Include="ImGui.NET">
-            <HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
-            <Private>True</Private>
-        </Reference>
-        <Reference Include="ImGuiScene">
-            <HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
-            <Private>True</Private>
-        </Reference>
-        <Reference Include="FFXIVClientStructs">
-            <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
-            <Private>True</Private>
-        </Reference>
-    </ItemGroup>
-
     <PropertyGroup>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Lumina" Version="3.10.0" />
-      <PackageReference Include="Lumina.Excel" Version="6.2.1" />
       <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0-preview-20220726-02" />
       <PackageReference Include="NUnit" Version="3.13.3" />
       <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />

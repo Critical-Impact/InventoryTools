@@ -3,7 +3,7 @@ namespace InventoryTools.Logic.Settings.Abstract
     public abstract class Setting<T> : ISetting
     {
         public abstract T DefaultValue { get; set; }
-        public virtual int LabelSize { get; set; } = 260;
+        public virtual int LabelSize { get; set; } = 300;
         public abstract T CurrentValue(InventoryToolsConfiguration configuration);
         public abstract void Draw(InventoryToolsConfiguration configuration);
         public abstract void UpdateFilterConfiguration(InventoryToolsConfiguration configuration, T newValue);
