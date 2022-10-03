@@ -14,6 +14,8 @@ namespace InventoryTools.Logic.Columns.Abstract
 
         public virtual FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter |
                                                  Logic.FilterType.GameItemFilter | Logic.FilterType.CraftFilter;
+
+        public virtual bool? CraftOnly => null;
         public abstract T CurrentValue(InventoryItem item);
         public abstract T CurrentValue(ItemEx item);
         public abstract T CurrentValue(SortingResult item);
@@ -71,7 +73,7 @@ namespace InventoryTools.Logic.Columns.Abstract
 
         public abstract void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex);
 
-        public abstract IColumnEvent? DoDraw(T currentValue, int rowIndex);
+        public abstract IColumnEvent? DoDraw(T currentValue, int rowIndex, FilterConfiguration filterConfiguration);
 
         public abstract void Setup(int columnIndex);
         public virtual IFilterEvent? DrawFooterFilter(FilterConfiguration configuration)

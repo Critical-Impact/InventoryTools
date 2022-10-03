@@ -9,12 +9,21 @@ namespace InventoryTools.Ui
     {
         public override bool SaveState => false;
         public static string AsKey => "help";
-        public override string Name => "Allagan Tools - Help";
         public override  string Key => AsKey;
-        public override  Vector2 Size { get; } = new Vector2(700, 700);
+        public override Vector2 DefaultSize { get; } = new Vector2(700, 700);
         public override  Vector2 MaxSize { get; } = new Vector2(2000, 2000);
         public override  Vector2 MinSize { get; } = new Vector2(200, 200);
         public override bool DestroyOnClose => true;
+
+        public HelpWindow(string name = "Allagan Tools - Help") : base(name)
+        {
+            
+        }
+        public HelpWindow() : base("Allagan Tools - Debug")
+        {
+            
+        }
+        
         public override void Draw()
         {
             if (ImGui.BeginChild("###ivHelpList", new Vector2(150, -1) * ImGui.GetIO().FontGlobalScale, true))

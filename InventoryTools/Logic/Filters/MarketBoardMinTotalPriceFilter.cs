@@ -24,7 +24,7 @@ namespace InventoryTools.Logic.Filters
                 {
                     return false;
                 }
-                var marketBoardData = Cache.GetPricing(item.ItemId, false);
+                var marketBoardData = PluginService.MarketCache.GetPricing(item.ItemId, false);
                 if (marketBoardData != null)
                 {
                     float price;

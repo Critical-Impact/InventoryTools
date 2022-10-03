@@ -26,6 +26,8 @@ namespace InventoryTools.Logic.Columns
         public FilterType AvailableIn { get; }
         public bool AvailableInType(FilterType type);
         
+        public bool? CraftOnly { get; }
+        
         public IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items);
         public IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items);
         public IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items);

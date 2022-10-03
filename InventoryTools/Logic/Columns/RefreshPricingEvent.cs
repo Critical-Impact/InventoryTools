@@ -8,23 +8,23 @@ namespace InventoryTools.Logic.Columns
     {
         public void HandleEvent(FilterConfiguration configuration, SortingResult result)
         {
-            Universalis.QueuePriceCheck(result.InventoryItem.ItemId);
+            PluginService.Universalis.QueuePriceCheck(result.InventoryItem.ItemId);
         }
 
         public void HandleEvent(FilterConfiguration configuration, CriticalCommonLib.Models.InventoryItem inventoryItem)
         {
-            Universalis.QueuePriceCheck(inventoryItem.ItemId);
+            PluginService.Universalis.QueuePriceCheck(inventoryItem.ItemId);
 
         }
 
         public void HandleEvent(FilterConfiguration configuration, ItemEx item)
         {
-            Universalis.QueuePriceCheck(item.RowId);
+            PluginService.Universalis.QueuePriceCheck(item.RowId);
         }
 
         public void HandleEvent(FilterConfiguration configuration, CraftItem item)
         {
-            Universalis.QueuePriceCheck(item.ItemId);
+            PluginService.Universalis.QueuePriceCheck(item.ItemId);
         }
     }
 }

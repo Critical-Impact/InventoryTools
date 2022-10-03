@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using ImGuiNET;
 
 namespace InventoryTools.Extensions
@@ -18,6 +19,11 @@ namespace InventoryTools.Extensions
         public static void ToClipboard(this string text)
         {
             ImGui.SetClipboardText(text);
+        }
+        
+        public static string ToSentence( this string input )
+        {
+            return new string(input.SelectMany((c, i) => i > 0 && char.IsUpper(c) ? new[] { ' ', c } : new[] { c }).ToArray());
         }
     }
 }

@@ -32,12 +32,17 @@ namespace InventoryTools.Logic.Filters
             {
                 return null;
             }
-            return currentValue.Any(item.ObtainedWithSpecialShopCurrency);
+            
+            return currentValue.Any(u => item.ObtainedWithSpecialShopCurrency(u) || item.ObtainedCompanyScrip && u is 20 or 21 or 22);
         }
 
         public override Dictionary<uint, string> GetChoices(FilterConfiguration configuration)
         {
             var currencies = Service.ExcelCache.GetCurrencies(3);
+            currencies.Add(20);
+            currencies.Add(21);
+            currencies.Add(22);
+            
             return currencies.ToDictionary(c => c, c => Service.ExcelCache.GetItemExSheet().GetRow(c)?.NameString ?? "Unknown").OrderBy(c => c.Value).ToDictionary(c => c.Key, c => c.Value);
         }
 

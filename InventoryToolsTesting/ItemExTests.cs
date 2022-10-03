@@ -52,7 +52,7 @@ namespace InventoryToolsTesting
             //Wool Top 16906
             var woolTop = Service.ExcelCache.GetItemExSheet().GetRow(16906)!;
             Assert.AreEqual(2, woolTop.Sources.Count);
-            Assert.AreEqual(10, woolTop.Vendors.Count);
+            Assert.AreEqual(4, woolTop.Vendors.Count);
             actualVendors = woolTop.Vendors.SelectMany(shop => shop.ENpcs.SelectMany(npc => npc.Locations.Select(location => (shop, npc, location)))).ToList();
             
             Assert.AreEqual(52, actualVendors.Count);
@@ -64,6 +64,15 @@ namespace InventoryToolsTesting
             //Palebloom Kudzu Cloth
             var item = Service.ExcelCache.GetItemExSheet().GetRow(37829)!;
             Assert.AreEqual(1, item.Sources.Count);
+            
+        }
+
+        [Test]
+        public void TestMoonwardGear()
+        {
+            //Moonward Longsword
+            var item = Service.ExcelCache.GetItemExSheet().GetRow(34850)!;
+            Assert.AreEqual(2, item.Sources.Count);
             
         }
 

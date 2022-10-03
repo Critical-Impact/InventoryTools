@@ -84,10 +84,21 @@ namespace InventoryTools.Commands
 
             return commandInfoTuples;
         }
-
+        
+        private bool _disposed;
         public void Dispose()
         {
-            RemoveCommandHandlers();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        
+        protected virtual void Dispose(bool disposing)
+        {
+            if(!_disposed && disposing)
+            {
+                RemoveCommandHandlers();
+            }
+            _disposed = true;         
         }
     }
 }

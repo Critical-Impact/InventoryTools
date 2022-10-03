@@ -18,14 +18,13 @@ namespace InventoryTools.Ui
         public override bool SaveState => true;
 
         public static string AsKey = "filters";
-        public override string Name => "Allagan Tools - Filters";
         public override string Key => AsKey;
         private string _activeFilter = "";
         private string _tabLayout = "";
         private int _selectedFilterTab = 0;
-        public override Vector2 Size { get; } = new(700, 700);
         public override Vector2 MaxSize { get; } = new(2000, 2000);
         public override Vector2 MinSize { get; } = new(200, 200);
+        public override Vector2 DefaultSize { get; } = new(600, 600);
         public override bool DestroyOnClose => false;
         private static TextureWrap _settingsIcon => PluginService.IconStorage.LoadIcon(66319);
         private static TextureWrap _tetrisIcon => PluginService.IconStorage.LoadIcon(76955);
@@ -37,9 +36,13 @@ namespace InventoryTools.Ui
         
         private List<FilterConfiguration>? _filters;
 
-        public FiltersWindow()
+        public FiltersWindow(string name = "Allagan Tools - Filters") : base(name)
         {
             _tabLayout = Utils.GenerateRandomId();
+        }
+
+        public FiltersWindow() : base("Allagan Tools - Filters")
+        {
         }
 
         private List<FilterConfiguration> Filters
@@ -70,6 +73,7 @@ namespace InventoryTools.Ui
                     }
                     if (ImGui.BeginTabItem(itemTable.Name + "##" + filterConfiguration.Key))
                     {
+                        
                         var activeFilter = DrawFilter(itemTable, filterConfiguration, _activeFilter);
                         if (_activeFilter != activeFilter && ImGui.IsWindowFocused())
                         {
@@ -142,9 +146,10 @@ namespace InventoryTools.Ui
 
         public static unsafe string DrawFilter(FilterTable itemTable, FilterConfiguration filterConfiguration,string activeFilter)
         {
-            if (ImGui.BeginChild("TopBar", new Vector2(0, 25) * ImGui.GetIO().FontGlobalScale))
+            if (ImGui.BeginChild("TopBar", new Vector2(0, 40) * ImGui.GetIO().FontGlobalScale, true, ImGuiWindowFlags.NoScrollbar))
             {
                 var highlightItems = itemTable.HighlightItems;
+                UiHelpers.CenterElement(20 * ImGui.GetIO().FontGlobalScale);              
                 ImGui.Checkbox("Highlight?" + "###" + itemTable.Key + "VisibilityCheckbox",
                     ref highlightItems);
                 if (highlightItems != itemTable.HighlightItems)
@@ -152,9 +157,10 @@ namespace InventoryTools.Ui
                     PluginService.FilterService.ToggleActiveUiFilter(itemTable.FilterConfiguration);
                 }
                 ImGui.SameLine();
+                UiHelpers.CenterElement(20 * ImGui.GetIO().FontGlobalScale);              
                 if (ImGui.ImageButton(_clearIcon.ImGuiHandle,
                         new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
-                        new Vector2(1, 1), 2))
+                        new Vector2(1, 1), 0))
                 {
                     itemTable.ClearFilters();
                 }
@@ -164,7 +170,7 @@ namespace InventoryTools.Ui
                 ImGui.EndChild();
             }
 
-            if (ImGui.BeginChild("Content", new Vector2(0, -30) * ImGui.GetIO().FontGlobalScale))
+            if (ImGui.BeginChild("Content", new Vector2(0, -40) * ImGui.GetIO().FontGlobalScale, true, ImGuiWindowFlags.NoScrollbar))
             {
                 if (filterConfiguration.FilterType == FilterType.CraftFilter)
                 {
@@ -183,24 +189,26 @@ namespace InventoryTools.Ui
             }
 
             //Need to have these buttons be determined dynamically or moved elsewhere
-            if (ImGui.BeginChild("BottomBar", new Vector2(0, 0), false, ImGuiWindowFlags.None))
+            if (ImGui.BeginChild("BottomBar", new Vector2(0, 0), true, ImGuiWindowFlags.NoScrollbar))
             {
+                UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);              
                 if (ImGui.ImageButton(_marketIcon.ImGuiHandle,
                         new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
                         new Vector2(1, 1), 2))
                 {
                     foreach (var item in itemTable.RenderSortedItems)
                     {
-                        Universalis.QueuePriceCheck(item.InventoryItem.ItemId);
+                        PluginService.Universalis.QueuePriceCheck(item.InventoryItem.ItemId);
                     }
 
                     foreach (var item in itemTable.RenderItems)
                     {
-                        Universalis.QueuePriceCheck(item.RowId);
+                        PluginService.Universalis.QueuePriceCheck(item.RowId);
                     }
                 }
                 ImGuiUtil.HoverTooltip("Refresh Market Prices");
                 ImGui.SameLine();
+                UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);              
                 if (ImGui.ImageButton(_csvIcon.ImGuiHandle,
                         new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
                         new Vector2(1, 1), 2))
@@ -210,7 +218,6 @@ namespace InventoryTools.Ui
                 }
 
                 ImGuiUtil.HoverTooltip("Export to CSV");
-                ImGui.SameLine();
                 if (filterConfiguration.FilterType == FilterType.CraftFilter)
                 {
                     unsafe
@@ -218,6 +225,7 @@ namespace InventoryTools.Ui
                         var subMarinePartsMenu = PluginService.GameUi.GetWindow("SubmarinePartsMenu");
                         if (subMarinePartsMenu != null)
                         {
+                            ImGui.SameLine();
                             if (ImGui.Button("Add Submarine Parts to Craft"))
                             {
                                 var subAddon = (SubmarinePartsMenuAddon*)subMarinePartsMenu;
@@ -245,7 +253,7 @@ namespace InventoryTools.Ui
                 }
 
                 ImGui.SameLine();
-                ImGui.Text("Pending Market Requests: " + Universalis.QueuedCount);
+                UiHelpers.VerticalCenter("Pending Market Requests: " + PluginService.Universalis.QueuedCount);
                 if (filterConfiguration.FilterType == FilterType.CraftFilter)
                 {
                     ImGui.SameLine();
@@ -264,35 +272,33 @@ namespace InventoryTools.Ui
                 {
                     itemTable.DrawFooterItems();
                 }
-
                 var width = ImGui.GetWindowSize().X;
-                width -= 28 * ImGui.GetIO().FontGlobalScale;
+                width -= 30 * ImGui.GetIO().FontGlobalScale;
+                UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);              
                 ImGui.SetCursorPosX(width);
-                ImGui.SetCursorPosY(2 * ImGui.GetIO().FontGlobalScale);
                 if (ImGui.ImageButton(_settingsIcon.ImGuiHandle,
                         new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
                         new Vector2(1, 1), 2))
                 {
                     PluginService.WindowService.ToggleConfigurationWindow();
                 }
-
                 ImGuiUtil.HoverTooltip("Open the configuration window.");
-
+                
+                ImGui.SetCursorPosY(0);
                 width -= 30 * ImGui.GetIO().FontGlobalScale;
                 ImGui.SetCursorPosX(width);
-                ImGui.SetCursorPosY(2 * ImGui.GetIO().FontGlobalScale);
+                UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                 if (ImGui.ImageButton(_craftIcon.ImGuiHandle,
                         new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
                         new Vector2(1, 1), 2))
                 {
                     PluginService.WindowService.ToggleCraftsWindow();
                 }
-
                 ImGuiUtil.HoverTooltip("Open the craft window.");
-
+                
                 width -= 30 * ImGui.GetIO().FontGlobalScale;
                 ImGui.SetCursorPosX(width);
-                ImGui.SetCursorPosY(2 * ImGui.GetIO().FontGlobalScale);
+                UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                 if (ImGui.ImageButton(_helpIcon.ImGuiHandle,
                         new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
                         new Vector2(1, 1), 2))
@@ -305,7 +311,7 @@ namespace InventoryTools.Ui
                 {
                     width -= 30 * ImGui.GetIO().FontGlobalScale;
                     ImGui.SetCursorPosX(width);
-                    ImGui.SetCursorPosY(2 * ImGui.GetIO().FontGlobalScale);
+                    UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                     if (ImGui.ImageButton(_tetrisIcon.ImGuiHandle,
                             new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
                             new Vector2(1, 1), 2))

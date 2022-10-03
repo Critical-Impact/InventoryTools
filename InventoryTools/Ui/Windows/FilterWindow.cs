@@ -6,9 +6,13 @@ namespace InventoryTools.Ui
 {
     public class FilterWindow : Window
     {
-        public FilterWindow(string filterKey)
+        public FilterWindow(string filterKey, string name = "Allagan Tools - Filter") : base(name)
         {
             _filterKey = filterKey;
+            if (SelectedConfiguration != null)
+            {
+                WindowName = "Allagan Tools - " + SelectedConfiguration.Name;
+            }
         }
         
         public override void Invalidate()
@@ -26,7 +30,6 @@ namespace InventoryTools.Ui
         public override FilterConfiguration? SelectedConfiguration =>
             PluginService.FilterService.GetFilterByKey(_filterKey);
         
-        public override string Name => "Allagan Tools - " + (SelectedConfiguration?.Name ?? "Unknown");
         public override string Key => AsKey(_filterKey);
         public override bool DestroyOnClose => true;
         public override bool SaveState => true;
@@ -51,7 +54,7 @@ namespace InventoryTools.Ui
             }
         }
 
-        public override Vector2 Size => new Vector2(600, 500);
+        public override Vector2 DefaultSize => new Vector2(600, 500);
         public override Vector2 MaxSize => new Vector2(1500, 1500);
         public override Vector2 MinSize => new Vector2(200, 200);
     }

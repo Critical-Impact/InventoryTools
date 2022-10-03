@@ -25,7 +25,7 @@ namespace InventoryTools.Logic.Filters
             return false;
         }
 
-        public override FilterType AvailableIn { get; set; } = FilterType.SortingFilter;
+        public override FilterType AvailableIn { get; set; } = FilterType.SortingFilter | FilterType.CraftFilter;
         
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {

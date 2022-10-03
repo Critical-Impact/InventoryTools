@@ -23,7 +23,8 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override IColumnEvent? DoDraw((ushort, bool)? currentValue, int rowIndex)
+        public override IColumnEvent? DoDraw((ushort, bool)? currentValue, int rowIndex,
+            FilterConfiguration filterConfiguration)
         {
             ImGui.TableNextColumn();
             if (currentValue != null)
@@ -32,7 +33,7 @@ namespace InventoryTools.Logic.Columns
                 if (textureWrap != null)
                 {
                     ImGui.PushID("icon" + rowIndex);
-                    if (ImGui.ImageButton(textureWrap.ImGuiHandle, IconSize * ImGui.GetIO().FontGlobalScale,new Vector2(0,0), new Vector2(1,1), 2))
+                    if (ImGui.ImageButton(textureWrap.ImGuiHandle, new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) * ImGui.GetIO().FontGlobalScale,new Vector2(0,0), new Vector2(1,1), 2))
                     {
                         ImGui.PopID();
                         return new ItemIconPressedColumnEvent();
@@ -41,7 +42,7 @@ namespace InventoryTools.Logic.Columns
                 }
                 else
                 {
-                    ImGui.Button("", IconSize);
+                    ImGui.Button("", new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) * ImGui.GetIO().FontGlobalScale);
                 }
             }
             return null;

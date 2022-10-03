@@ -10,6 +10,15 @@ namespace InventoryTools.Ui
     {
         public override bool SaveState => false;
 
+        public TetrisWindow(string name = "Allagan Tools - Tetris") : base(name)
+        {
+            
+        }
+        public TetrisWindow() : base("Allagan Tools - Tetris")
+        {
+            
+        }
+
         public override void Draw()
         {
             var tetrisGame = Misc.TetrisGame.Instance.Game;
@@ -45,7 +54,7 @@ namespace InventoryTools.Ui
             }
         }
 
-        public override Vector2 Size => new Vector2(800, 300);
+        public override Vector2 DefaultSize { get; } = new Vector2(800, 300);
         public override Vector2 MaxSize => new Vector2(5000, 5000);
         public override Vector2 MinSize => new Vector2(300, 300);
 
@@ -56,7 +65,6 @@ namespace InventoryTools.Ui
         public override FilterConfiguration? SelectedConfiguration => null;
 
         public static string AsKey => "tetris";
-        public override string Name { get; } = "Allagan Tools - Tetris";
         public override string Key => AsKey;
         public override bool DestroyOnClose => true;
     }

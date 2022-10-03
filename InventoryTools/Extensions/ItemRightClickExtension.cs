@@ -18,7 +18,7 @@ namespace InventoryTools.Extensions
             
             var craftFilters =
                 PluginService.FilterService.FiltersList.Where(c =>
-                    c.FilterType == Logic.FilterType.CraftFilter).ToArray();
+                    c.FilterType == Logic.FilterType.CraftFilter && !c.CraftListDefault).ToArray();
             foreach (var filter in craftFilters)
             {
                 if (item.CanBeCrafted && !Service.ExcelCache.IsCompanyCraft(item.RowId))
@@ -72,7 +72,7 @@ namespace InventoryTools.Extensions
                 }
                 if (ImGui.Selectable("Open in Crafting Log"))
                 {
-                    GameInterface.OpenCraftingLog(item.ItemId, item.RecipeId);
+                    PluginService.GameInterface.OpenCraftingLog(item.ItemId, item.RecipeId);
                 }
             }
 
@@ -115,7 +115,7 @@ namespace InventoryTools.Extensions
             {
                 var craftFilters =
                     PluginService.FilterService.FiltersList.Where(c =>
-                        c.FilterType == Logic.FilterType.CraftFilter);
+                        c.FilterType == Logic.FilterType.CraftFilter && !c.CraftListDefault);
                 foreach (var filter in craftFilters)
                 {
                     if (item.Item.CanBeCrafted && !Service.ExcelCache.IsCompanyCraft(item.Item.RowId))
@@ -160,6 +160,10 @@ namespace InventoryTools.Extensions
             {
                 item.NameString.ToClipboard();
             }
+            if (ImGui.Selectable("Link"))
+            {
+                ChatUtilities.LinkItem(item);
+            }
             if (item.CanTryOn && ImGui.Selectable("Try On"))
             {
                 if (PluginService.TryOn.CanUseTryOn)
@@ -170,12 +174,12 @@ namespace InventoryTools.Extensions
 
             if (item.CanOpenCraftLog && ImGui.Selectable("Open Crafting Log"))
             {
-                GameInterface.OpenCraftingLog(item.RowId);
+                PluginService.GameInterface.OpenCraftingLog(item.RowId);
             }
 
             if (item.CanOpenGatheringLog && ImGui.Selectable("Open Gathering Log"))
             {
-                GameInterface.OpenGatheringLog(item.RowId);
+                PluginService.GameInterface.OpenGatheringLog(item.RowId);
             }
 
             if (item.CanOpenGatheringLog && ImGui.Selectable("Gather with Gatherbuddy"))

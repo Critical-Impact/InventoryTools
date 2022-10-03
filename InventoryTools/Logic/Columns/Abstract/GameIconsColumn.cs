@@ -37,13 +37,6 @@ namespace InventoryTools.Logic.Columns.Abstract
         {
             return items;
         }
-        public virtual Vector2 IconSize
-        {
-            get
-            {
-                return new Vector2(32, 32);
-            }
-        }
         public virtual string EmptyText
         {
             get
@@ -53,19 +46,19 @@ namespace InventoryTools.Logic.Columns.Abstract
         }
         public override void Draw(FilterConfiguration configuration, InventoryItem item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex);
+            DoDraw(CurrentValue(item), rowIndex, configuration);
         }
         public override void Draw(FilterConfiguration configuration, SortingResult item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex);
+            DoDraw(CurrentValue(item), rowIndex, configuration);
         }
         public override void Draw(FilterConfiguration configuration, ItemEx item, int rowIndex)
         {
-            DoDraw(CurrentValue((ItemEx)item), rowIndex);
+            DoDraw(CurrentValue((ItemEx)item), rowIndex, configuration);
         }
         public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex);
+            DoDraw(CurrentValue(item), rowIndex, configuration);
         }
 
         public override IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items)
@@ -98,7 +91,8 @@ namespace InventoryTools.Logic.Columns.Abstract
             return items;
         }
 
-        public override IColumnEvent? DoDraw(List<ushort>? currentValue, int rowIndex)
+        public override IColumnEvent? DoDraw(List<ushort>? currentValue, int rowIndex,
+            FilterConfiguration filterConfiguration)
         {
             ImGui.TableNextColumn();
             if (currentValue != null)
@@ -106,7 +100,7 @@ namespace InventoryTools.Logic.Columns.Abstract
                 for (var index = 0; index < currentValue.Count; index++)
                 {
                     var item = currentValue[index];
-                    PluginService.PluginLogic.DrawIcon(item, IconSize);
+                    PluginService.PluginLogic.DrawIcon(item, new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) * ImGui.GetIO().FontGlobalScale);
                     if (index != currentValue.Count)
                     {
                         ImGui.SameLine();

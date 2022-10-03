@@ -204,7 +204,7 @@ namespace InventoryTools.Logic
                         for (var index = _clipper.DisplayStart; index < _clipper.DisplayEnd; index++)
                         {
                             var item = RenderSortedItems[index];
-                            ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
+                            ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
                             ImGui.PushID(index);
                             for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                             {
@@ -230,7 +230,7 @@ namespace InventoryTools.Logic
                         for (var index = _clipper.DisplayStart; index < _clipper.DisplayEnd; index++)
                         {
                             var item = RenderItems[index];
-                            ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
+                            ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
                             for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                             {
                                 var column = Columns[columnIndex];

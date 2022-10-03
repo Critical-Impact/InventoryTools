@@ -18,7 +18,7 @@ namespace InventoryTools.Logic.Columns
             if (!ActionTypeExt.IsValidAction(action)) {
                 return null;
             }
-            return GameInterface.HasAcquired(item);
+            return PluginService.GameInterface.HasAcquired(item);
         }
 
         public override bool? CurrentValue(SortingResult item)

@@ -88,6 +88,7 @@ namespace InventoryTools
         private bool _tooltipDisplayMarketAveragePrice = true;
         private bool _tooltipDisplayMarketLowestPrice = false;
         private bool _tooltipAddCharacterNameOwned = false;
+        private bool _tooltipDisplayRetrieveAmount = false;
         private uint? _tooltipColor = null;
         public Vector4 HighlightColor
         {
@@ -198,13 +199,22 @@ namespace InventoryTools
             }
         }
 
+        public bool TooltipDisplayRetrieveAmount
+        {
+            get => _tooltipDisplayRetrieveAmount;
+            set
+            {
+                _tooltipDisplayRetrieveAmount = value;
+                ConfigurationChanged?.Invoke();
+            }
+        }
+
         public bool AutomaticallyDownloadMarketPrices
         {
             get => _automaticallyDownloadMarketPrices;
             set
             {
                 _automaticallyDownloadMarketPrices = value;
-                Cache.CacheAutoRetrieve = value;
                 ConfigurationChanged?.Invoke();
             }
         }
@@ -219,7 +229,6 @@ namespace InventoryTools
                 {
                     _marketRefreshTimeHours = 24;
                 }
-                Cache.CacheTimeHours = _marketRefreshTimeHours;
                 ConfigurationChanged?.Invoke();
             }
         }
@@ -234,7 +243,6 @@ namespace InventoryTools
                 {
                     _marketSaleHistoryLimit = 7;
                 }
-                Universalis.SetSaleHistoryLimit(_marketRefreshTimeHours);
                 ConfigurationChanged?.Invoke();
             }
         }
@@ -421,6 +429,13 @@ namespace InventoryTools
             {
                 ActiveBackgroundFilter = null;
             }
+        }
+
+        public void RestoreServiceSettings()
+        {
+            PluginService.MarketCache.CacheAutoRetrieve = _automaticallyDownloadMarketPrices;
+            PluginService.MarketCache.CacheTimeHours = _marketRefreshTimeHours;
+            PluginService.Universalis.SetSaleHistoryLimit(_marketRefreshTimeHours);
         }
     }
 }

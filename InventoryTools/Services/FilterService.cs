@@ -129,39 +129,6 @@ namespace InventoryTools.Services
             }
         }
 
-        private bool _disposed = false;
-
-        public void Dispose()
-        {
-            if (!_disposed)
-            {
-                PluginService.OnPluginLoaded -= PluginServiceOnOnPluginLoaded;
-                ConfigurationManager.Config.ConfigurationChanged -= ConfigOnConfigurationChanged;
-                _characterMonitor.OnCharacterRemoved -= CharacterMonitorOnOnCharacterRemoved;
-                _characterMonitor.OnCharacterUpdated -= CharacterMonitorOnOnCharacterUpdated;
-                _characterMonitor.OnCharacterJobChanged -= CharacterMonitorOnOnCharacterJobChanged;
-                _characterMonitor.OnActiveRetainerChanged -= CharacterMonitorOnOnActiveRetainerChanged;
-                _inventoryMonitor.OnInventoryChanged -= InventoryMonitorOnOnInventoryChanged;                
-                
-                foreach (var filterConfiguration in _filters)
-                {
-                    filterConfiguration.Value.ConfigurationChanged -= FilterConfigurationOnConfigurationChanged;
-                    filterConfiguration.Value.TableConfigurationChanged -= FilterConfigurationOnTableConfigurationChanged;
-                }
-
-                foreach (var filterTable in _filterTables)
-                {
-                    filterTable.Value.Refreshed -= TableOnRefreshed;
-                }
-
-                foreach (var craftItemTable in _craftItemTables)
-                {
-                    craftItemTable.Value.Refreshed -= TableOnRefreshed;
-                }
-                _disposed = true;
-            }
-        }
-
         public ConcurrentDictionary<string, FilterConfiguration> Filters => _filters;
         public List<FilterConfiguration> FiltersList => _filters.Select(c => c.Value).OrderBy(c => c.Order).ToList();
 
@@ -170,7 +137,7 @@ namespace InventoryTools.Services
             var result = _filters.TryAdd(configuration.Key, configuration);
             if (configuration.FilterType == FilterType.CraftFilter)
             {
-                configuration.Order = _filters.Where(c => c.Value.FilterType == FilterType.CraftFilter)
+                configuration.Order = _filters.Where(c => c.Value.FilterType == FilterType.CraftFilter && !c.Value.CraftListDefault)
                     .Max(c => c.Value.Order) + 1;                
             }
             else
@@ -191,6 +158,26 @@ namespace InventoryTools.Services
         {
             var sampleFilter = new FilterConfiguration(name, filterType);
             return AddFilter(sampleFilter);
+        }
+
+        public FilterConfiguration AddNewCraftFilter()
+        {
+            var clonedFilter = GetDefaultCraftList().Clone();
+            if (clonedFilter == null)
+            {
+                var filter = new FilterConfiguration("New Craft List",
+                    Guid.NewGuid().ToString("N"), FilterType.CraftFilter);
+                PluginService.FilterService.AddFilter(filter);
+                return filter;
+            }
+
+            clonedFilter.Name = "New Craft List";
+            clonedFilter.GenerateNewTableId();
+            clonedFilter.GenerateNewCraftTableId();
+            clonedFilter.CraftListDefault = false;
+            clonedFilter.Key = Guid.NewGuid().ToString("N");
+            PluginService.FilterService.AddFilter(clonedFilter);
+            return clonedFilter;
         }
 
         public bool RemoveFilter(FilterConfiguration configuration)
@@ -263,6 +250,31 @@ namespace InventoryTools.Services
             }
 
             return GetActiveBackgroundFilter();
+        }
+
+        public FilterConfiguration GetDefaultCraftList()
+        {
+            if (_filters.Any(c => c.Value.FilterType == FilterType.CraftFilter && c.Value.CraftListDefault))
+            {
+                return _filters.First(c => c.Value.FilterType == FilterType.CraftFilter && c.Value.CraftListDefault).Value;
+            }
+            var defaultFilter = new FilterConfiguration("Default Craft List", FilterType.CraftFilter);
+            defaultFilter.CraftListDefault = true;
+            defaultFilter.DestinationAllCharacters = true;
+            defaultFilter.DestinationIncludeCrossCharacter = false;
+            defaultFilter.SourceAllCharacters = false;
+            defaultFilter.SourceAllRetainers = true;
+            defaultFilter.SourceIncludeCrossCharacter = false;
+            defaultFilter.HighlightWhen = "Always";
+            defaultFilter.SourceCategories = new HashSet<InventoryCategory>()
+            {
+                InventoryCategory.FreeCompanyBags,
+                InventoryCategory.CharacterSaddleBags,
+                InventoryCategory.CharacterPremiumSaddleBags,
+                InventoryCategory.FreeCompanyBags
+            };            
+            AddFilter(defaultFilter);
+            return defaultFilter;
         }
 
         public FilterConfiguration? GetFilter(string name)
@@ -467,7 +479,7 @@ namespace InventoryTools.Services
             List<FilterConfiguration> currentList;
             if (configuration.FilterType == FilterType.CraftFilter)
             {
-                currentList = FiltersList.Where(c => c.FilterType == FilterType.CraftFilter).ToList();
+                currentList = FiltersList.Where(c => c.FilterType == FilterType.CraftFilter && !c.CraftListDefault).ToList();
             }
             else
             {
@@ -495,7 +507,7 @@ namespace InventoryTools.Services
             List<FilterConfiguration> currentList;
             if (configuration.FilterType == FilterType.CraftFilter)
             {
-                currentList = FiltersList.Where(c => c.FilterType == FilterType.CraftFilter).ToList();
+                currentList = FiltersList.Where(c => c.FilterType == FilterType.CraftFilter && !c.CraftListDefault).ToList();
             }
             else
             {
@@ -634,5 +646,44 @@ namespace InventoryTools.Services
         public event IFilterService.FilterToggledDelegate? UiFilterToggled;
         public event IFilterService.FilterToggledDelegate? BackgroundFilterToggled;
         public event IFilterService.FilterTableRefreshedDelegate? FilterTableRefreshed;
+        
+                            
+        private bool _disposed;
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        
+        protected virtual void Dispose(bool disposing)
+        {
+            if(!_disposed && disposing)
+            {
+                PluginService.OnPluginLoaded -= PluginServiceOnOnPluginLoaded;
+                ConfigurationManager.Config.ConfigurationChanged -= ConfigOnConfigurationChanged;
+                _characterMonitor.OnCharacterRemoved -= CharacterMonitorOnOnCharacterRemoved;
+                _characterMonitor.OnCharacterUpdated -= CharacterMonitorOnOnCharacterUpdated;
+                _characterMonitor.OnCharacterJobChanged -= CharacterMonitorOnOnCharacterJobChanged;
+                _characterMonitor.OnActiveRetainerChanged -= CharacterMonitorOnOnActiveRetainerChanged;
+                _inventoryMonitor.OnInventoryChanged -= InventoryMonitorOnOnInventoryChanged;                
+                
+                foreach (var filterConfiguration in _filters)
+                {
+                    filterConfiguration.Value.ConfigurationChanged -= FilterConfigurationOnConfigurationChanged;
+                    filterConfiguration.Value.TableConfigurationChanged -= FilterConfigurationOnTableConfigurationChanged;
+                }
+
+                foreach (var filterTable in _filterTables)
+                {
+                    filterTable.Value.Refreshed -= TableOnRefreshed;
+                }
+
+                foreach (var craftItemTable in _craftItemTables)
+                {
+                    craftItemTable.Value.Refreshed -= TableOnRefreshed;
+                }
+            }
+            _disposed = true;         
+        }
     }
 }

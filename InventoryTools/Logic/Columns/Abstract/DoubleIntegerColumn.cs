@@ -46,19 +46,19 @@ namespace InventoryTools.Logic.Columns.Abstract
 
         public override void Draw(FilterConfiguration configuration, InventoryItem item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex);
+            DoDraw(CurrentValue(item), rowIndex, configuration);
         }
         public override void Draw(FilterConfiguration configuration, SortingResult item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex);
+            DoDraw(CurrentValue(item), rowIndex, configuration);
         }
         public override void Draw(FilterConfiguration configuration, ItemEx item, int rowIndex)
         {
-            DoDraw(CurrentValue((ItemEx)item), rowIndex);
+            DoDraw(CurrentValue((ItemEx)item), rowIndex, configuration);
         }
         public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex);
+            DoDraw(CurrentValue(item), rowIndex, configuration);
         }
 
         public override IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items)
@@ -174,7 +174,8 @@ namespace InventoryTools.Logic.Columns.Abstract
             });
         }
 
-        public override IColumnEvent? DoDraw((int, int)? currentValue, int rowIndex)
+        public override IColumnEvent? DoDraw((int, int)? currentValue, int rowIndex,
+            FilterConfiguration filterConfiguration)
         {
             ImGui.TableNextColumn();
             if (currentValue != null)

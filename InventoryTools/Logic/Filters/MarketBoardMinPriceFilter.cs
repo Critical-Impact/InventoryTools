@@ -24,7 +24,7 @@ namespace InventoryTools.Logic.Filters
                 {
                     return false;
                 }
-                var marketBoardData = Cache.GetPricing(item.ItemId, false);
+                var marketBoardData = PluginService.MarketCache.GetPricing(item.ItemId, false);
                 if (marketBoardData != null)
                 {
                     float price;
@@ -54,7 +54,7 @@ namespace InventoryTools.Logic.Filters
                 {
                     return false;
                 }
-                var marketBoardData = Cache.GetPricing(item.RowId, false);
+                var marketBoardData = PluginService.MarketCache.GetPricing(item.RowId, false);
                 if (marketBoardData != null)
                 {
                     float price = marketBoardData.minPriceNQ;

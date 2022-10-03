@@ -66,6 +66,7 @@ namespace InventoryTools.Logic.Columns
         public override FilterType AvailableIn { get; } = Logic.FilterType.CraftFilter;
         public override string Name { get; set; } = "Required";
         public override float Width { get; set; } = 60;
+        public override bool? CraftOnly => true;
         public override string HelpText { get; set; } = "This is the amount required to complete the craft.";
         public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = false;

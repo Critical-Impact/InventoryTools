@@ -1,4 +1,3 @@
-using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
@@ -9,17 +8,17 @@ namespace InventoryTools.Logic.Columns
     {
         public override bool? CurrentValue(InventoryItem item)
         {
-            return Service.ExcelCache.CanBeGathered(item.ItemId);
+            return CurrentValue(item.Item);
         }
 
         public override bool? CurrentValue(ItemEx item)
         {
-            return Service.ExcelCache.CanBeGathered(item.RowId);
+            return item.CanBeGathered || item.ObtainedFishing;
         }
 
         public override bool? CurrentValue(SortingResult item)
         {
-            return Service.ExcelCache.CanBeGathered(item.InventoryItem.ItemId);
+            return CurrentValue(item.InventoryItem);
         }
 
         public override string Name { get; set; } = "Can be Gathered?";

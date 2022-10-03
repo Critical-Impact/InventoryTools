@@ -8,21 +8,12 @@ namespace InventoryTools.Logic.Columns
     {
         public override int? CurrentValue(InventoryItem item)
         {
-            if (item.EquipSlotCategory == null)
-            {
-                return null;
-            }
-            if (item.EquipSlotCategory.RowId == 0)
-            {
-                return null;
-            }
-
-            return (int)item.Item.LevelItem.Row;
+            return CurrentValue(item.Item);
         }
 
         public override int? CurrentValue(ItemEx item)
         {
-            if (item.EquipSlotCategory.Row == 0)
+            if ((int)item.LevelItem.Row == 0)
             {
                 return null;
             }

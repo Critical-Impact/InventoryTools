@@ -269,17 +269,22 @@ namespace InventoryTools.Misc
 
             return finalPositions;
         }
-
-        private bool _disposed = false;
+        
+        private bool _disposed;
         public void Dispose()
         {
-            if (!_disposed)
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        
+        protected virtual void Dispose(bool disposing)
+        {
+            if(!_disposed && disposing)
             {
-                _disposed = true;
                 _gameTimer?.Dispose();
                 Service.Framework.Update -= FrameworkOnOnUpdateEvent;
-
             }
+            _disposed = true;         
         }
     }
 }

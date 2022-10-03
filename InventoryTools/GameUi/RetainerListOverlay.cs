@@ -80,10 +80,7 @@ namespace InventoryTools.GameUi
                             if (item.IsEmpty) continue;
                             if (hasItems.ContainsKey(item.RetainerId))
                             {
-                                if (!hasItems[item.RetainerId].Contains(item.ItemId))
-                                {
-                                    hasItems[item.RetainerId].Add(item.ItemId);
-                                }
+                                hasItems[item.RetainerId].Add(item.ItemId);
                             }
                         }
 

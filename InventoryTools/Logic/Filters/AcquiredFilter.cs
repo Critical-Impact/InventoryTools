@@ -32,7 +32,7 @@ namespace InventoryTools.Logic.Filters
             if (!ActionTypeExt.IsValidAction(action)) {
                 return false;
             }
-            return currentValue.Value && GameInterface.HasAcquired(item) || !currentValue.Value && !GameInterface.HasAcquired(item);
+            return currentValue.Value && PluginService.GameInterface.HasAcquired(item) || !currentValue.Value && !PluginService.GameInterface.HasAcquired(item);
         }
     }
 }

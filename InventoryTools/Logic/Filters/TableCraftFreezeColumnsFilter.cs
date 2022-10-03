@@ -4,18 +4,18 @@ using InventoryTools.Logic.Filters.Abstract;
 
 namespace InventoryTools.Logic.Filters
 {
-    public class TableFreezeRowsFilter : IntegerFilter
+    public class TableCraftFreezeRowsFilter : IntegerFilter
     {
-        public override string Key { get; set; } = "TableFreezeRows";
+        public override string Key { get; set; } = "TableCraftFreezeRows";
         public override string Name { get; set; } = "Freeze Columns";
 
         public override string HelpText { get; set; } =
             "The number of columns starting at 1 to freeze(always display when scrolling).";
 
-        public override FilterCategory FilterCategory { get; set; } = FilterCategory.Columns;
+        public override FilterCategory FilterCategory { get; set; } = FilterCategory.CraftColumns;
 
         public override FilterType AvailableIn { get; set; } =
-            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.CraftFilter;
+            FilterType.CraftFilter;
         
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
@@ -29,12 +29,12 @@ namespace InventoryTools.Logic.Filters
 
         public override void UpdateFilterConfiguration(FilterConfiguration configuration, int? newValue)
         {
-            configuration.FreezeColumns = newValue;
+            configuration.FreezeCraftColumns = newValue;
         }
 
         public override int? CurrentValue(FilterConfiguration configuration)
         {
-            return configuration.FreezeColumns;
+            return configuration.FreezeCraftColumns;
         }
     }
 }

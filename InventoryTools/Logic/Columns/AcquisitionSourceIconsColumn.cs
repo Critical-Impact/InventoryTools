@@ -6,6 +6,7 @@ using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
+using InventoryTools.Extensions;
 using InventoryTools.Logic.Columns.Abstract;
 using OtterGui;
 
@@ -33,24 +34,48 @@ namespace InventoryTools.Logic.Columns
             return item.Item.Sources;
         }
 
-        public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
-        {
-            DoDraw(CurrentValue(item), rowIndex);
-        }
-
-        public override IColumnEvent? DoDraw(List<ItemSource>? currentValue, int rowIndex)
+        public override IColumnEvent? DoDraw(List<ItemSource>? currentValue, int rowIndex,
+            FilterConfiguration filterConfiguration)
         {
             ImGui.TableNextColumn();
             if (currentValue != null)
             {
-                ImGui.BeginChild("scrolling" + rowIndex, new Vector2(210, 36) * ImGui.GetIO().FontGlobalScale, false);
+                ImGui.BeginChild("scrolling" + rowIndex, new Vector2(210, filterConfiguration.TableHeight + ImGui.GetStyle().CellPadding.Y) * ImGui.GetIO().FontGlobalScale, false);
                 for (var index = 0; index < currentValue.Count; index++)
                 {
                     var item = currentValue[index];
                     var sourceIcon = PluginService.IconStorage[item.Icon];
                     ImGui.Image(sourceIcon.ImGuiHandle,
-                        new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale);
-                    ImGuiUtil.HoverTooltip(item.Name);
+                        new Vector2(filterConfiguration.TableHeight , filterConfiguration.TableHeight ) * ImGui.GetIO().FontGlobalScale);
+                    if (item.HasItem && item.Item != null)
+                    {
+                        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
+                                                ImGuiHoveredFlags.AllowWhenOverlapped &
+                                                ImGuiHoveredFlags.AllowWhenBlockedByPopup &
+                                                ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
+                                                ImGuiHoveredFlags.AnyWindow) &&
+                            ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                        {
+                            ImGui.OpenPopup("RightClick" + item.ItemId);
+                        }
+                        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
+                                                ImGuiHoveredFlags.AllowWhenOverlapped &
+                                                ImGuiHoveredFlags.AllowWhenBlockedByPopup &
+                                                ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
+                                                ImGuiHoveredFlags.AnyWindow) &&
+                            ImGui.IsMouseReleased(ImGuiMouseButton.Left) && item.ItemId != null)
+                        {
+                            PluginService.WindowService.OpenItemWindow(item.ItemId.Value);
+                        }
+
+                        if (ImGui.BeginPopup("RightClick" + item.ItemId))
+                        {
+                            item.Item.DrawRightClickPopup();
+                            ImGui.EndPopup();
+                        }
+                    }
+
+                    ImGuiUtil.HoverTooltip(item.FormattedName);
                     if ((index + 1) % 5 != 0)
                     {
                         ImGui.SameLine();
@@ -132,18 +157,23 @@ namespace InventoryTools.Logic.Columns
 
         public override void Draw(FilterConfiguration configuration, InventoryItem item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex);
+            DoDraw(CurrentValue(item), rowIndex, configuration);
         }
 
         public override void Draw(FilterConfiguration configuration, SortingResult item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex);
+            DoDraw(CurrentValue(item), rowIndex, configuration);
 
         }
 
         public override void Draw(FilterConfiguration configuration, ItemEx item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex);
+            DoDraw(CurrentValue(item), rowIndex, configuration);
+        }
+        
+        public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
+        {
+            DoDraw(CurrentValue(item), rowIndex, configuration);
         }
     }
 }

@@ -17,7 +17,7 @@ namespace InventoryTools.Logic.Columns
                 return (Untradable, Untradable);
             }
 
-            var marketBoardData = Cache.GetPricing(item.ItemId, false);
+            var marketBoardData = PluginService.MarketCache.GetPricing(item.ItemId, false);
             if (marketBoardData != null)
             {
                 var nq = marketBoardData.minPriceNQ;
@@ -35,7 +35,7 @@ namespace InventoryTools.Logic.Columns
                 return (Untradable, Untradable);
             }
 
-            var marketBoardData = Cache.GetPricing(item.RowId, false);
+            var marketBoardData = PluginService.MarketCache.GetPricing(item.RowId, false);
             if (marketBoardData != null)
             {
                 var nq = marketBoardData.minPriceNQ;

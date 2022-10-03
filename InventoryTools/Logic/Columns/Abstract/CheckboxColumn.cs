@@ -102,19 +102,19 @@ namespace InventoryTools.Logic.Columns.Abstract
 
         public override void Draw(FilterConfiguration configuration, InventoryItem item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex);
+            DoDraw(CurrentValue(item), rowIndex, configuration);
         }
         public override void Draw(FilterConfiguration configuration, SortingResult item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex);
+            DoDraw(CurrentValue(item), rowIndex, configuration);
         }
         public override void Draw(FilterConfiguration configuration, ItemEx item, int rowIndex)
         {
-            DoDraw(CurrentValue((ItemEx)item), rowIndex);
+            DoDraw(CurrentValue((ItemEx)item), rowIndex, configuration);
         }
         public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex);
+            DoDraw(CurrentValue(item), rowIndex, configuration);
         }
 
         public override IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items)
@@ -223,14 +223,13 @@ namespace InventoryTools.Logic.Columns.Abstract
         }
         
 
-        public override IColumnEvent? DoDraw(bool? currentValue, int rowIndex)
+        public override IColumnEvent? DoDraw(bool? currentValue, int rowIndex, FilterConfiguration filterConfiguration)
         {
             ImGui.TableNextColumn();
             if (currentValue.HasValue)
             {
-                ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetContentRegionAvail().X / 2) -
-                                    GameIcon.CrossIcon.Size.X / 2);
-                PluginService.PluginLogic.DrawUldIcon(currentValue.Value ? GameIcon.TickIcon : GameIcon.CrossIcon);
+                ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetContentRegionAvail().X / 2) - filterConfiguration.TableHeight / 2.0f);
+                PluginService.PluginLogic.DrawUldIcon(currentValue.Value ? GameIcon.TickIcon : GameIcon.CrossIcon, new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight));
             }
             return null;
         }

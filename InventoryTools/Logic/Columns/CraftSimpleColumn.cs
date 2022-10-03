@@ -78,6 +78,7 @@ namespace InventoryTools.Logic.Columns
 
         public override string Name { get; set; } = "Next Step";
         public override float Width { get; set; } = 100;
+        public override bool? CraftOnly => true;
 
         public override string HelpText { get; set; } =
             "Shows a simplified version of what you should do next in your craft";

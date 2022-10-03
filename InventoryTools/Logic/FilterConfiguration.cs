@@ -52,6 +52,7 @@ namespace InventoryTools.Logic
         private bool? _sourceIncludeCrossCharacter;
         private bool? _destinationIncludeCrossCharacter;
         private int? _freezeColumns;
+        private int? _freezeCraftColumns;
         private HashSet<InventoryCategory>? _destinationCategories;
         private HashSet<InventoryCategory>? _sourceCategories;
         private string _quantity = "";
@@ -76,13 +77,20 @@ namespace InventoryTools.Logic
         private bool? _invertTabHighlighting = null;
         private bool? _highlightDestination = null;
         private bool? _highlightDestinationEmpty = null;
+        private bool _craftListDefault = false;
         private string? _highlightWhen = null;
+        private int _tableHeight = 32;
+        private int _craftTableHeight = 32;
         private List<string>? _columns;
+        private List<string>? _craftColumns;
         private string? _icon;
         private static readonly byte CurrentVersion = 1;
+        
+        //Crafting
         private CraftList? _craftList = null;
         private bool? _simpleCraftingMode = null;
         private bool? _useORFiltering = null;
+        private bool _hideCompletedRows = false;
         public string ExportBase64()
         {
             var toExport = (FilterConfiguration)this.MemberwiseClone();
@@ -140,11 +148,32 @@ namespace InventoryTools.Logic
             TableId = Guid.NewGuid().ToString("N");
             return TableId;
         }
+
+        public string CraftTableId
+        {
+            get
+            {
+                if (_craftTableId == null)
+                {
+                    var newCraftTableId = GenerateNewCraftTableId();
+                    return newCraftTableId;
+                }
+                return _craftTableId;
+            }
+            set => _craftTableId = value;
+        }
+
+        public string GenerateNewCraftTableId()
+        {
+            CraftTableId = Guid.NewGuid().ToString("N");
+            return CraftTableId;
+        }
         
         [JsonIgnore]
         private FilterResult? _filterResult = null;
 
         private string? _tableId = null;
+        private string? _craftTableId = null;
         public bool NeedsRefresh { get; set; } = true;
         public HighlightMode HighlightMode { get; set; } = HighlightMode.Never;
 
@@ -182,7 +211,10 @@ namespace InventoryTools.Logic
                    InventoryCategory.CharacterBags);
                 var crystalBags = PluginService.InventoryMonitor.GetSpecificInventory(PluginService.CharacterMonitor.ActiveCharacter,
                    InventoryCategory.Crystals);
+                var retainerSetting = this.FilterItemsInRetainersEnum;
+                _filterItemsInRetainersEnum = FilterItemsRetainerEnum.No;
                 var tempFilterResult = await GenerateFilteredList(PluginService.InventoryMonitor.Inventories);
+                _filterItemsInRetainersEnum = retainerSetting;
                 var externalBags = tempFilterResult.SortedItems.Select(c => c.InventoryItem).ToList();
                 var characterSources = new Dictionary<uint, List<CraftItemSource>>();
                 var externalSources = new Dictionary<uint, List<CraftItemSource>>();
@@ -212,7 +244,7 @@ namespace InventoryTools.Logic
                     externalSources[item.ItemId].Add(new CraftItemSource(item.ItemId, item.Quantity, item.IsHQ));
                 }
                 CraftList.Update(characterSources, externalSources);
-                CraftList.CalculateCosts();
+                CraftList.CalculateCosts(PluginService.MarketCache);
                 _filterResult = await GenerateFilteredList(PluginService.InventoryMonitor.Inventories);
             }
 
@@ -244,9 +276,9 @@ namespace InventoryTools.Logic
 
         public void AddDefaultColumns()
         {
-            Columns = new List<string>();
             if (FilterType == FilterType.SearchFilter)
             {
+                Columns = new List<string>();
                 Columns.Add("IconColumn");
                 Columns.Add("NameColumn");
                 Columns.Add("TypeColumn");
@@ -256,6 +288,7 @@ namespace InventoryTools.Logic
             }
             else if (FilterType == FilterType.SortingFilter)
             {
+                Columns = new List<string>();
                 Columns.Add("IconColumn");
                 Columns.Add("NameColumn");
                 Columns.Add("TypeColumn");
@@ -266,6 +299,7 @@ namespace InventoryTools.Logic
             }
             else if (FilterType == FilterType.GameItemFilter)
             {
+                Columns = new List<string>();
                 Columns.Add("IconColumn");
                 Columns.Add("NameColumn");
                 Columns.Add("UiCategoryColumn");
@@ -283,11 +317,43 @@ namespace InventoryTools.Logic
             }
             else if (FilterType == FilterType.CraftFilter)
             {
+                if (Columns == null)
+                {
+                    Columns = new List<string>();
+                }
+
+                if (CraftColumns == null)
+                {
+                    CraftColumns = new List<string>();
+                }
                 Columns.Add("IconColumn");
                 Columns.Add("NameColumn");
+                Columns.Add("CraftAmountAvailableColumn");
                 Columns.Add("QuantityColumn");
                 Columns.Add("SourceColumn");
                 Columns.Add("LocationColumn");
+                
+                CraftColumns = new List<string>();
+                AddCraftColumn("IconColumn");
+                AddCraftColumn("NameColumn");
+                if (SimpleCraftingMode == true)
+                {
+                    AddCraftColumn("CraftAmountRequiredColumn");
+                    AddCraftColumn("CraftSimpleColumn");
+                }
+                else
+                {
+                    AddCraftColumn("QuantityAvailableColumn");
+                    AddCraftColumn("CraftAmountRequiredColumn");
+                    AddCraftColumn("CraftAmountReadyColumn");
+                    AddCraftColumn("CraftAmountAvailableColumn");
+                    AddCraftColumn("CraftAmountUnavailableColumn");
+                    AddCraftColumn("CraftAmountCanCraftColumn");
+                }
+                AddCraftColumn("MarketBoardMinPriceColumn");
+                AddCraftColumn("MarketBoardMinTotalPriceColumn");
+                AddCraftColumn("AcquisitionSourceIconsColumn");
+                AddCraftColumn("CraftGatherColumn");
             }
         }
 
@@ -348,6 +414,25 @@ namespace InventoryTools.Logic
         {
             get => _equipSlotCategoryId;
             set { _equipSlotCategoryId = value;
+                NeedsRefresh = true;
+                ConfigurationChanged?.Invoke(this);
+            }
+        }
+
+        public int TableHeight
+        {
+            get => _tableHeight;
+            set { _tableHeight = value;
+                NeedsRefresh = true;
+                TableConfigurationChanged?.Invoke(this);
+            }
+        }
+
+
+        public int CraftTableHeight
+        {
+            get => _craftTableHeight;
+            set { _craftTableHeight = value;
                 NeedsRefresh = true;
                 ConfigurationChanged?.Invoke(this);
             }
@@ -519,6 +604,17 @@ namespace InventoryTools.Logic
             }
         }
 
+        
+        public bool HideCompletedRows
+        {
+            get => _hideCompletedRows;
+            set
+            {
+                _hideCompletedRows = value;
+                ConfigurationChanged?.Invoke(this);
+            }
+        }
+
         public bool? SourceAllCharacters
         {
             get => _sourceAllCharacters;
@@ -559,6 +655,15 @@ namespace InventoryTools.Logic
         {
             get => _freezeColumns;
             set { _freezeColumns = value;
+                NeedsRefresh = true;
+                TableConfigurationChanged?.Invoke(this);
+            }            
+        }
+
+        public int? FreezeCraftColumns
+        {
+            get => _freezeCraftColumns;
+            set { _freezeCraftColumns = value;
                 NeedsRefresh = true;
                 TableConfigurationChanged?.Invoke(this);
             }            
@@ -759,6 +864,16 @@ namespace InventoryTools.Logic
             }
         }
 
+        public bool CraftListDefault
+        {
+            get => _craftListDefault;
+            set
+            {
+                _craftListDefault = value;
+                ConfigurationChanged?.Invoke(this);
+            }
+        }
+
         public bool? SimpleCraftingMode
         {
             get => _simpleCraftingMode;
@@ -811,14 +926,25 @@ namespace InventoryTools.Logic
 
             return true;
         }
-        public bool FilterItem(InventoryItem item)
+        
+        public FilteredItem? FilterItem(InventoryItem item)
         {
+            uint? requiredAmount = null;
             if (FilterType == FilterType.CraftFilter)
             {
                 var requiredMaterialsList = CraftList.BeenUpdated ? CraftList.GetAvailableMaterialsList().Where(c => c.Value != 0).ToDictionary(c => c.Key, c => c.Value) : CraftList.GetRequiredMaterialsList();
                 if (!requiredMaterialsList.ContainsKey(item.ItemId))
                 {
-                    return false;
+                    return null;
+                }
+
+                if (CraftList.BeenUpdated)
+                {
+                    var retrieveMaterialsList = CraftList.GetQuantityToRetrieveList();
+                    if (retrieveMaterialsList.ContainsKey(item.ItemId))
+                    {
+                        requiredAmount = retrieveMaterialsList[item.ItemId];
+                    }
                 }
             }
 
@@ -842,21 +968,21 @@ namespace InventoryTools.Logic
                 {
                     if (filter.FilterItem(this, item) == false)
                     {
-                        return false;
+                        return null;
                     }
                 }
             }
 
             if (UseORFiltering != null && UseORFiltering == true && matchesAny)
             {
-                return true;
+                return new FilteredItem(item, requiredAmount);
             }
             else if(UseORFiltering != null && UseORFiltering == true)
             {
-                return false;
+                return null;
             }
             
-            return true;
+            return new FilteredItem(item, requiredAmount);
         }
 
         public void AddColumn(string columnName)
@@ -867,6 +993,17 @@ namespace InventoryTools.Logic
             }
             _columns.Add(columnName);
             GenerateNewTableId();
+            TableConfigurationChanged?.Invoke(this);
+        }
+
+        public void AddCraftColumn(string columnName)
+        {
+            if (_craftColumns == null)
+            {
+                _craftColumns = new List<string>();
+            }
+            _craftColumns.Add(columnName);
+            GenerateNewCraftTableId();
             TableConfigurationChanged?.Invoke(this);
         }
         
@@ -1014,6 +1151,16 @@ namespace InventoryTools.Logic
             set
             {
                 _columns = value;
+                TableConfigurationChanged?.Invoke(this);
+            }
+        }
+
+        public List<string>? CraftColumns
+        {
+            get => _craftColumns;
+            set
+            {
+                _craftColumns = value;
                 TableConfigurationChanged?.Invoke(this);
             }
         }
@@ -1674,7 +1821,8 @@ namespace InventoryTools.Logic
             var displaySourceCrossCharacter = filter.SourceIncludeCrossCharacter ?? ConfigurationManager.Config.DisplayCrossCharacter;
             var displayDestinationCrossCharacter = filter.DestinationIncludeCrossCharacter ?? ConfigurationManager.Config.DisplayCrossCharacter;
             
-            PluginLog.Verbose("Generating a new filter list");
+            PluginLog.Verbose("Filter Information:");
+            PluginLog.Verbose("Filter Type: " + filter.FilterType);
 
             if (filter.FilterType == FilterType.SortingFilter || filter.FilterType == FilterType.CraftFilter)
             {
@@ -1788,7 +1936,7 @@ namespace InventoryTools.Logic
                 }
 
                 //Filter the source and destination inventories based on the applicable items so we have less to sort
-                Dictionary<(ulong, InventoryType), List<InventoryItem>> filteredSources = new();
+                Dictionary<(ulong, InventoryType), List<FilteredItem>> filteredSources = new();
                 //Dictionary<(ulong, InventoryCategory), List<InventoryItem>> filteredDestinations = new();
                 var sourceKeys = sourceInventories.Select(c => c.Key);
                 PluginLog.Verbose(sourceInventories.Count() + " inventories to examine.");
@@ -1796,10 +1944,17 @@ namespace InventoryTools.Logic
                 {
                     if (!filteredSources.ContainsKey(sourceInventory.Key))
                     {
-                        filteredSources.Add(sourceInventory.Key, new List<InventoryItem>());
+                        filteredSources.Add(sourceInventory.Key, new List<FilteredItem>());
                     }
 
-                    filteredSources[sourceInventory.Key].AddRange(sourceInventory.Value.Where(filter.FilterItem));
+                    foreach (var item in sourceInventory.Value)
+                    {
+                        var filteredItem = filter.FilterItem(item);
+                        if (filteredItem != null)
+                        {
+                            filteredSources[sourceInventory.Key].Add(filteredItem.Value);
+                        }
+                    }
                 }
 
                 var slotsAvailable = new Dictionary<(ulong, InventoryType), Queue<InventoryItem>>();
@@ -1819,25 +1974,39 @@ namespace InventoryTools.Logic
                         {
                             slotsAvailable[destinationInventory.Key].Enqueue(destinationItem);
                         }
-                        else if (filter.FilterItem(destinationItem))
+                        else
                         {
-                            var itemHashCode = destinationItem.GetHashCode();
-                            if (!itemLocations.ContainsKey(itemHashCode))
+                            var filteredDestinationItem = filter.FilterItem(destinationItem);
+                            if (filteredDestinationItem != null)
                             {
-                                itemLocations.Add(itemHashCode, new List<InventoryItem>());
+                                var itemHashCode = destinationItem.GetHashCode();
+                                if (!itemLocations.ContainsKey(itemHashCode))
+                                {
+                                    itemLocations.Add(itemHashCode, new List<InventoryItem>());
+                                }
+
+                                itemLocations[itemHashCode].Add(destinationItem);
                             }
-                            itemLocations[itemHashCode].Add(destinationItem);                     
                         }
                     }
                 }
 
                 foreach (var sourceInventory in filteredSources)
                 {
+                    //PluginLog.Verbose("Found " + sourceInventory.Value.Count + " items in " + sourceInventory.Key + " " + sourceInventory.Key.Item2.ToString());
                     for (var index = 0; index < sourceInventory.Value.Count; index++)
                     {
-                        var sourceItem = sourceInventory.Value[index];
+                        var filteredItem = sourceInventory.Value[index];
+                        var sourceItem = filteredItem.Item;
                         if (sourceItem.IsEmpty) continue;
-                        sourceItem.TempQuantity = sourceItem.Quantity;
+                        if (filteredItem.QuantityRequired == null)
+                        {
+                            sourceItem.TempQuantity = sourceItem.Quantity;
+                        }
+                        else
+                        {
+                            sourceItem.TempQuantity = Math.Min(filteredItem.QuantityRequired.Value, sourceItem.Quantity);
+                        }
                         //Item already seen, try to put it into that container
                         var hashCode = sourceItem.GetHashCode();
                         if (itemLocations.ContainsKey(hashCode))
@@ -1857,17 +2026,10 @@ namespace InventoryTools.Logic
                                     var canFit = Math.Min(existingCapacity, sourceItem.TempQuantity);
                                     if (canFit != 0)
                                     {
-                                        PluginLog.Verbose("Existing item has a capacity of " + existingCapacity +
-                                                          " and can fit " + canFit);
-                                        PluginLog.Verbose("Existing item has a stack size of " +
-                                                          existingItem.Item.StackSize + " and has quantity of " +
-                                                          existingItem.TempQuantity);
                                         //All the item can fit, stick it in and continue
                                         if (filter.InActiveInventories(activeCharacter, activeRetainer,
                                             sourceInventory.Key.Item1, existingItem.RetainerId))
                                         {
-                                            PluginLog.Verbose("Added item to filter result in existing slot: " +
-                                                              sourceItem.FormattedName);
                                             sortedItems.Add(new SortingResult(sourceInventory.Key.Item1,
                                                 existingItem.RetainerId, sourceItem.SortedContainer,
                                                 existingItem.SortedContainer,existingItem.BagLocation(existingItem.SortedContainer),false, sourceItem, (int) canFit));
@@ -1930,9 +2092,9 @@ namespace InventoryTools.Logic
                                                         if (filter.InActiveInventories(activeCharacter, activeRetainer,
                                                             sourceInventory.Key.Item1, seenInventoryLocation.Item1))
                                                         {
-                                                            PluginLog.Verbose(
-                                                                "Added item to filter result as we've seen the item before: " +
-                                                                sourceItem.FormattedName);
+                                                            //PluginLog.Verbose(
+                                                            //    "Added item to filter result as we've seen the item before: " +
+                                                            //    sourceItem.FormattedName);
                                                             sortedItems.Add(new SortingResult(sourceInventory.Key.Item1,
                                                                 seenInventoryLocation.Item1, sourceItem.SortedContainer,
                                                                 seenInventoryLocation.Item2, nextEmptySlot.BagLocation(nextEmptySlot.SortedContainer),true, sourceItem,
@@ -1996,8 +2158,8 @@ namespace InventoryTools.Logic
                                 if (sourceInventory.Key.Item1 != nextSlot.Key.Item1 ||
                                     sourceItem.SortedContainer != nextSlot.Key.Item2)
                                 {
-                                    PluginLog.Verbose("Added item to filter result in next available slot: " +
-                                                      sourceItem.FormattedName);
+                                    //PluginLog.Verbose("Added item to filter result in next available slot: " +
+                                    //                  sourceItem.FormattedName);
                                     sortedItems.Add(new SortingResult(sourceInventory.Key.Item1, nextSlot.Key.Item1,
                                         sourceItem.SortedContainer, nextSlot.Key.Item2, nextEmptySlot.BagLocation(nextEmptySlot.SortedContainer),true, sourceItem,
                                         (int) sourceItem.TempQuantity));
@@ -2006,8 +2168,8 @@ namespace InventoryTools.Logic
                         }
                         else
                         {
-                            PluginLog.Verbose("Added item to unsortable list, maybe I should show these somewhere: " +
-                                              sourceItem.FormattedName);
+                            // PluginLog.Verbose("Added item to unsortable list, maybe I should show these somewhere: " +
+                            //                  sourceItem.FormattedName);
                             unsortableItems.Add(sourceItem);
                         }
                     }
@@ -2057,17 +2219,23 @@ namespace InventoryTools.Logic
                 HashSet<int> duplicateItems = new HashSet<int>();
 
                 //Filter the source and destination inventories based on the applicable items so we have less to sort
-                Dictionary<(ulong, InventoryCategory), List<InventoryItem>> filteredSources = new();
+                Dictionary<(ulong, InventoryCategory), List<FilteredItem>> filteredSources = new();
                 //Dictionary<(ulong, InventoryCategory), List<InventoryItem>> filteredDestinations = new();
                 PluginLog.Verbose(sourceInventories.Count() + " inventories to examine.");
                 foreach (var sourceInventory in sourceInventories)
                 {
                     if (!filteredSources.ContainsKey(sourceInventory.Key))
                     {
-                        filteredSources.Add(sourceInventory.Key, new List<InventoryItem>());
+                        filteredSources.Add(sourceInventory.Key, new List<FilteredItem>());
                     }
-
-                    filteredSources[sourceInventory.Key].AddRange(sourceInventory.Value.Where(filter.FilterItem));
+                    foreach (var item in sourceInventory.Value)
+                    {
+                        var filteredItem = filter.FilterItem(item);
+                        if (filteredItem != null)
+                        {
+                            filteredSources[sourceInventory.Key].Add(filteredItem.Value);
+                        }
+                    }
                 }
                 if (filter.DuplicatesOnly.HasValue && filter.DuplicatesOnly == true)
                 {
@@ -2093,8 +2261,9 @@ namespace InventoryTools.Logic
 
                 foreach (var filteredSource in filteredSources)
                 {
-                    foreach (var item in filteredSource.Value)
+                    foreach (var filteredItem in filteredSource.Value)
                     {
+                        var item = filteredItem.Item;
                         if (filter.DuplicatesOnly.HasValue && filter.DuplicatesOnly == true)
                         {
                             if (duplicateItems.Contains(item.GetHashCode()))
@@ -2129,7 +2298,14 @@ namespace InventoryTools.Logic
         }
         
         #endregion
+
+        public FilterConfiguration? Clone()
+        {
+            var clone = this.Copy();
+            return clone;
+        }
     }
+
     public enum HighlightMode
     {
         Never,

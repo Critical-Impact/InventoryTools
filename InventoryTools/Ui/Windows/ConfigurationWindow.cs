@@ -10,7 +10,17 @@ namespace InventoryTools.Ui
 {
     public class ConfigurationWindow : Window
     {
-        public ConfigurationWindow()
+        public ConfigurationWindow(string name = "Allagan Tools - Configuration") : base(name)
+        {
+            SetupWindow();
+        }
+        
+        public ConfigurationWindow() : base("Allagan Tools - Configuration")
+        {
+            SetupWindow();
+        }
+        
+        private void SetupWindow()
         {
             _configPages = new List<IConfigPage>();
             _configPages.Add(new SettingPage(SettingCategory.General));
@@ -22,6 +32,7 @@ namespace InventoryTools.Ui
             _configPages.Add(new CharacterRetainerPage());
             GenerateFilterPages();
         }
+
         
         private int ConfigSelectedConfigurationPage
         {
@@ -47,9 +58,8 @@ namespace InventoryTools.Ui
         
         public override bool SaveState => true;
         public static string AsKey => "configuration";
-        public override string Name => "Allagan Tools - Configuration";
         public override string Key => AsKey;
-        public override Vector2 Size { get; } = new(700, 700);
+        public override Vector2 DefaultSize { get; } = new(700, 700);
         public override Vector2 MaxSize { get; } = new(2000, 2000);
         public override Vector2 MinSize { get; } = new(200, 200);
         public override bool DestroyOnClose => true;

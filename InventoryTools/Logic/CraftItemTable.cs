@@ -20,32 +20,24 @@ namespace InventoryTools.Logic
         
         public override void RefreshColumns()
         {
-            FreezeCols = 2;
-            PluginLog.Verbose("Refreshing craft item table columns");
-
-            var newColumns = new List<IColumn>();
-            newColumns.Add(new IconColumn());
-            newColumns.Add(new NameColumn());
-            if (FilterConfiguration.SimpleCraftingMode == true)
+            if (FilterConfiguration.FreezeCraftColumns != FreezeCols)
             {
-                newColumns.Add(new CraftAmountRequiredColumn());
-                newColumns.Add(new CraftSimpleColumn());
+                FreezeCols = FilterConfiguration.FreezeCraftColumns;
             }
-            else
+            if (FilterConfiguration.CraftColumns != null)
             {
-                newColumns.Add(new QuantityAvailableColumn());
-                newColumns.Add(new CraftAmountRequiredColumn());
-                newColumns.Add(new CraftAmountReadyColumn());
-                newColumns.Add(new CraftAmountAvailableColumn());
-                newColumns.Add(new CraftAmountUnavailableColumn());
-                newColumns.Add(new CraftAmountCanCraftColumn());
-            }
+                var newColumns = new List<IColumn>();
+                foreach (var column in FilterConfiguration.CraftColumns)
+                {
+                    var newColumn = PluginLogic.GetClassFromString(column);
+                    if (newColumn != null && newColumn is IColumn)
+                    {
+                        newColumns.Add(newColumn);
+                    }
+                }
 
-            newColumns.Add(new MarketBoardMinPriceColumn());
-            newColumns.Add(new MarketBoardMinTotalPriceColumn());
-            newColumns.Add(new AcquisitionSourceIconsColumn());
-            newColumns.Add(new CraftGatherColumn());
-            this.Columns = newColumns;
+                this.Columns = newColumns;
+            }
         }
 
         public List<CraftItem> CraftItems = new();
@@ -109,9 +101,9 @@ namespace InventoryTools.Logic
                     }
 
                     //Make the visibility of zero quantity required items a toggle
-                    var outputs = CraftItems.Where(c => c.IsOutputItem).ToList();
-                    var preCrafts = CraftItems.Where(c => c.QuantityNeeded != 0 && !c.IsOutputItem && c.Item.CanBeCrafted).OrderByDescending(c => c.ItemId).ToList();
-                    var everythingElse = CraftItems.Where(c => c.QuantityNeeded != 0 && !c.Item.CanBeCrafted).OrderByDescending(c => c.ItemId).ToList();
+                    var outputs = GetOutputItemList();
+                    var preCrafts = GetPrecraftItemList();
+                    var everythingElse = GetRemainingItemList();
 
                     var overallIndex = 0;
                     if (outputs.Count == 0)
@@ -122,14 +114,14 @@ namespace InventoryTools.Logic
                             ImGui.TableNextColumn();
                             if (columnIndex == 1)
                             {
-                                ImGui.Text("No items have been selected.");
+                                ImGui.Text("No items have been added to the list. Add items from the top right or by right clicking on an item anywhere within the plugin.");
                             }
                         }
                     }
                     for (var index = 0; index < outputs.Count; index++)
                     {
                         var item = outputs[index];
-                        ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
+                        ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
                         for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                         {
                             var column = Columns[columnIndex];
@@ -150,7 +142,7 @@ namespace InventoryTools.Logic
                     for (var index = 0; index < preCrafts.Count; index++)
                     {
                         var item = preCrafts[index];
-                        ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
+                        ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
                         for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                         {
                             var column = Columns[columnIndex];
@@ -171,7 +163,7 @@ namespace InventoryTools.Logic
                     for (var index = 0; index < everythingElse.Count; index++)
                     {
                         var item = everythingElse[index];
-                        ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
+                        ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
                         for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                         {
                             var column = Columns[columnIndex];
@@ -193,6 +185,33 @@ namespace InventoryTools.Logic
             return isExpanded;
         }
 
+        private List<CraftItem> GetRemainingItemList()
+        {
+            var craftItems = CraftItems.Where(c => c.QuantityNeeded != 0 && !c.Item.CanBeCrafted);
+            if (FilterConfiguration.HideCompletedRows)
+            {
+                craftItems = craftItems.Where(c => c.QuantityMissing != 0);
+            }
+            return craftItems.OrderByDescending(c => c.ItemId).ToList();
+        }
+
+        private List<CraftItem> GetPrecraftItemList()
+        {
+
+
+            var craftItems = CraftItems.Where(c => c.QuantityNeeded != 0 && !c.IsOutputItem && c.Item.CanBeCrafted);
+            if (FilterConfiguration.HideCompletedRows)
+            {
+                craftItems = craftItems.Where(c => c.QuantityMissing != 0);
+            }
+            return craftItems.ToList();
+        }
+
+        private List<CraftItem> GetOutputItemList()
+        {
+            return CraftItems.Where(c => c.IsOutputItem).ToList();
+        }
+
         public override void DrawFooterItems()
         {
             
@@ -207,13 +226,6 @@ namespace InventoryTools.Logic
                 IsSearching = false;
                 NeedsRefresh = false;
             }
-        }
-        
-        public override void Dispose()
-        {
-            FilterConfiguration.ConfigurationChanged -= FilterConfigurationUpdated;
-            FilterConfiguration.ListUpdated -= FilterConfigurationUpdated;
-            FilterConfiguration.TableConfigurationChanged -= FilterConfigurationOnTableConfigurationChanged;
         }
     }
 }

@@ -11,6 +11,7 @@ namespace InventoryTools.Logic.Filters
         Display = 6,
         Inventories = 7,
         Columns = 8,
-        Advanced = 9
+        Advanced = 9,
+        CraftColumns = 10,
     }
 }

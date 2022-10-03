@@ -37,13 +37,6 @@ namespace InventoryTools.Logic.Columns.Abstract
         {
             return items;
         }
-        public virtual Vector2 IconSize
-        {
-            get
-            {
-                return new Vector2(32, 32);
-            }
-        }
         public virtual string EmptyText
         {
             get
@@ -53,22 +46,22 @@ namespace InventoryTools.Logic.Columns.Abstract
         }
         public override void Draw(FilterConfiguration configuration, InventoryItem item, int rowIndex)
         {
-            var result = DoDraw(CurrentValue(item), rowIndex);
+            var result = DoDraw(CurrentValue(item), rowIndex, configuration);
             result?.HandleEvent(configuration, item);
         }
         public override void Draw(FilterConfiguration configuration, SortingResult item, int rowIndex)
         {
-            var result = DoDraw(CurrentValue(item), rowIndex);
+            var result = DoDraw(CurrentValue(item), rowIndex, configuration);
             result?.HandleEvent(configuration, item);
         }
         public override void Draw(FilterConfiguration configuration, ItemEx item, int rowIndex)
         {
-            var result = DoDraw(CurrentValue((ItemEx)item), rowIndex);
+            var result = DoDraw(CurrentValue((ItemEx)item), rowIndex, configuration);
             result?.HandleEvent(configuration, item);
         }
         public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
         {
-            var result = DoDraw(CurrentValue(item), rowIndex);
+            var result = DoDraw(CurrentValue(item), rowIndex, configuration);
             result?.HandleEvent(configuration, item);
         }
 
@@ -102,12 +95,13 @@ namespace InventoryTools.Logic.Columns.Abstract
             return items;
         }
 
-        public override IColumnEvent? DoDraw((ushort,bool)? currentValue, int rowIndex)
+        public override IColumnEvent? DoDraw((ushort, bool)? currentValue, int rowIndex,
+            FilterConfiguration filterConfiguration)
         {
             ImGui.TableNextColumn();
             if (currentValue != null)
             {
-                PluginService.PluginLogic.DrawIcon(currentValue.Value.Item1, IconSize, currentValue.Value.Item2);
+                PluginService.PluginLogic.DrawIcon(currentValue.Value.Item1, new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) * ImGui.GetIO().FontGlobalScale, currentValue.Value.Item2);
             }
             return null;
         }

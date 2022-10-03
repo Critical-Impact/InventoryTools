@@ -8,7 +8,8 @@ namespace InventoryTools.Logic.Columns
     {
         public override FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter;
 
-        public override IColumnEvent? DoDraw((int, int)? currentValue, int rowIndex)
+        public override IColumnEvent? DoDraw((int, int)? currentValue, int rowIndex,
+            FilterConfiguration filterConfiguration)
         {
             if (currentValue.HasValue && currentValue.Value.Item1 == Loading)
             {
@@ -22,12 +23,12 @@ namespace InventoryTools.Logic.Columns
             }
             else if(currentValue.HasValue)
             {
-                base.DoDraw(currentValue, rowIndex);
+                base.DoDraw(currentValue, rowIndex, filterConfiguration);
 
             }
             else
             {
-                base.DoDraw(currentValue, rowIndex);
+                base.DoDraw(currentValue, rowIndex, filterConfiguration);
             }
 
             return null;

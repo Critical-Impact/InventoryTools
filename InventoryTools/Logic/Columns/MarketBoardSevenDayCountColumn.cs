@@ -14,7 +14,7 @@ namespace InventoryTools.Logic.Columns
         protected static readonly int Loading = -1;
         protected static readonly int Untradable = -2;
         
-        public override IColumnEvent? DoDraw(int? currentValue, int rowIndex)
+        public override IColumnEvent? DoDraw(int? currentValue, int rowIndex, FilterConfiguration filterConfiguration)
         {
             if (currentValue.HasValue && currentValue.Value == Loading)
             {
@@ -28,12 +28,12 @@ namespace InventoryTools.Logic.Columns
             }
             else if(currentValue.HasValue)
             {
-                base.DoDraw(currentValue, rowIndex);
+                base.DoDraw(currentValue, rowIndex, filterConfiguration);
 
             }
             else
             {
-                base.DoDraw(currentValue, rowIndex);
+                base.DoDraw(currentValue, rowIndex, filterConfiguration);
             }
 
             return null;
@@ -47,7 +47,7 @@ namespace InventoryTools.Logic.Columns
                 return Untradable;
             }
 
-            var marketBoardData = Cache.GetPricing(item.ItemId, false);
+            var marketBoardData = PluginService.MarketCache.GetPricing(item.ItemId, false);
             if (marketBoardData != null)
             {
                 var sevenDaySellCount = marketBoardData.sevenDaySellCount;
@@ -64,7 +64,7 @@ namespace InventoryTools.Logic.Columns
                 return Untradable;
             }
 
-            var marketBoardData = Cache.GetPricing(item.RowId, false);
+            var marketBoardData = PluginService.MarketCache.GetPricing(item.RowId, false);
             if (marketBoardData != null)
             {
                 return marketBoardData.sevenDaySellCount;

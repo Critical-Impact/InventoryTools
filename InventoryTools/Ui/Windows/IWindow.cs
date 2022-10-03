@@ -1,4 +1,3 @@
-using System.Numerics;
 using ImGuiNET;
 using InventoryTools.Logic;
 
@@ -6,12 +5,7 @@ namespace InventoryTools.Ui
 {
     public interface IWindow
     {
-        public string Name { get; }
         public string Key { get;  }
-        public Vector2 Size { get; }
-        public Vector2 MaxSize { get; }
-        public Vector2 MinSize { get; }
-        public bool Visible { get;  }
         public bool DestroyOnClose { get;}
         
         public ImGuiWindowFlags? WindowFlags { get;}

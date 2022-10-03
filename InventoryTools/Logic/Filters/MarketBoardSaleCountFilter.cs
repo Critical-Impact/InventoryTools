@@ -6,7 +6,7 @@ using InventoryTools.Logic.Filters.Abstract;
 
 namespace InventoryTools.Logic.Filters
 {
-    public class MarketBoardSaleCountFilter : IntegerFilter
+    public class MarketBoardSaleCountFilter : StringFilter
     {
         public override string Key { get; set; } = "MBSaleCount";
         public override string Name { get; set; } = "Marketboard " + ConfigurationManager.Config.MarketSaleHistoryLimit + " Sale Counter";
@@ -21,22 +21,22 @@ namespace InventoryTools.Logic.Filters
         
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
-            throw new System.NotImplementedException();
+            return FilterItem(configuration, item.Item);
         }
 
         public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
         {
             var currentValue = CurrentValue(configuration);
-            if (currentValue != null)
+            if (HasValueSet(configuration))
             {
                 if (!item.CanBeTraded)
                 {
                     return false;
                 }
-                var marketBoardData = Cache.GetPricing(item.RowId, false);
+                var marketBoardData = PluginService.MarketCache.GetPricing(item.RowId, false);
                 if (marketBoardData != null)
                 {
-                    return marketBoardData.sevenDaySellCount.PassesFilter(currentValue.Value.ToString().ToLower());
+                    return marketBoardData.sevenDaySellCount.PassesFilter(currentValue.ToLower());
                 }
 
                 return false;

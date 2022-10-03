@@ -54,6 +54,7 @@ namespace InventoryTools.Logic.Columns
 
         public override string Name { get; set; } = "Inventory";
         public override float Width { get; set; } = 60;
+        public override bool? CraftOnly => true;
         public override FilterType AvailableIn { get; } = Logic.FilterType.CraftFilter;
         public override string HelpText { get; set; } =
             "This is the amount available within your filtered inventories available to complete the craft.";

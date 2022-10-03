@@ -26,7 +26,7 @@ namespace InventoryToolsTesting
         private PluginLogic? _pluginLogic;
 
         [OneTimeSetUp]
-        public void Steup()
+        public void Setup()
         {
             var lumina = new Lumina.GameData( "H:/Games/SquareEnix/FINAL FANTASY XIV - A Realm Reborn/game/sqpack" );
             Service.ExcelCache = new ExcelCache(lumina);
@@ -162,9 +162,14 @@ namespace InventoryToolsTesting
                 Assert.True(searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty) == 0);
                 Assert.True(searchFilter.GenerateFilteredList( inventories).Result.UnsortableItems.Count(c => !c.IsEmpty) == 0);
                 
-                //Allow item to spill over to retainer
+                //Allow item to spill over to retainer 2, but we are in retainer 1 so nothing shows up
                 searchFilter.DuplicatesOnly = false;
-                Assert.True(searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer2.CharacterId) == 1);
+                Assert.AreEqual(0, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer2.CharacterId));
+                
+                
+                //Allow item to spill over to retainer 2 for real
+                _characterMonitor?.OverrideActiveRetainer(0);
+                Assert.AreEqual(1, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer2.CharacterId));
                 
                 //Item should goto 2nd retainer first
                 Fixtures.FillInventory(retainerInventory, 0, 0);
@@ -244,7 +249,7 @@ namespace InventoryToolsTesting
             if (_character != null)
             {
                 var emptyList = searchFilter.GenerateFilteredList( new Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>()).Result;
-                Assert.AreEqual(emptyList.AllItems.Count,16);
+                Assert.AreEqual(16, emptyList.AllItems.Count);
             }
         }
         
@@ -291,7 +296,11 @@ namespace InventoryToolsTesting
                 retainerInventory[0] = Fixtures.GenerateItem(_retainer, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1);
                 retainerInventory2[0] = Fixtures.GenerateItem(_retainer2, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1);
                 
-                //1 in player bag, 1 in retainer bag 1, 1 in retainer bag 2
+                //1 in player bag, 1 in retainer bag 1 as retainer 1 is active
+                Assert.AreEqual(2, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+                
+                _characterMonitor?.OverrideActiveRetainer(0);
+                //1 in player bag, 1 in retainer bag 1, 1 in retainer bag 2 as no retainer is active
                 Assert.AreEqual(3, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 
                 searchFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
@@ -368,8 +377,13 @@ namespace InventoryToolsTesting
                 searchFilter.FilterType = FilterType.SortingFilter;
                 searchFilter.DestinationAllCharacters = true;
 
-                Assert.AreEqual(2, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+                //With a active retainer
+                Assert.AreEqual(1, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 
+                //Without a active retainer
+                _characterMonitor?.OverrideActiveRetainer(0);
+                Assert.AreEqual(2, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+
 
                 //Test cross character destination filter setting override
                 searchFilter.SourceAllRetainers = false;
@@ -495,11 +509,8 @@ namespace InventoryToolsTesting
                 //apparel showcase
                 retainerMarket2.Add(Fixtures.GenerateItem(_retainer, InventoryType.RetainerMarket, 3, 32234, 1));
                 
-                //tier 2 metal aquarium
-                retainerMarket2.Add(Fixtures.GenerateItem(_retainer, InventoryType.RetainerMarket, 4, 21842, 1));
-                
                 //factory beam
-                retainerMarket2.Add(Fixtures.GenerateItem(_retainer, InventoryType.RetainerMarket, 5, 30403, 1));
+                retainerMarket2.Add(Fixtures.GenerateItem(_retainer, InventoryType.RetainerMarket, 4, 30403, 1));
                 
 
                 retainerMarket2 = retainerMarket2.SortByRetainerMarketOrder()

@@ -8,17 +8,27 @@ namespace InventoryTools.Ui
     public class IntroWindow : Window
     {
         private TextureWrap _allaganToolsIcon;
-        public IntroWindow()
+        public IntroWindow(string name = "Allagan Tools") : base(name)
+        {
+            SetupWindow();
+        }
+        
+        public IntroWindow() : base("Allagan Tools")
+        {
+            SetupWindow();
+        }
+        
+        private void SetupWindow()
         {
             _allaganToolsIcon = PluginService.PluginLogic.LoadImage("icon-hor");
         }
+        
         public override void Invalidate()
         {
         }
 
         public static string AsKey => "Intro";
         public override FilterConfiguration? SelectedConfiguration => null;
-        public override string Name => "Allagan Tools";
         public override string Key => AsKey;
         public override bool DestroyOnClose { get; } = true;
         public override void Draw()
@@ -48,7 +58,7 @@ namespace InventoryTools.Ui
             ImGui.EndChild();
         }
 
-        public override Vector2 Size { get; } = new Vector2(600, 350);
+        public override Vector2 DefaultSize { get; } = new Vector2(600, 350);
         public override Vector2 MaxSize { get; } = new Vector2(600, 360);
         public override Vector2 MinSize { get; } = new Vector2(600, 360);
         public override bool SaveState => false;

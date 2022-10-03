@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib.Services;
@@ -12,7 +11,7 @@ namespace InventoryTools.Sections
         public string Name { get; } = "Craft Lists";
         public void Draw()
         {
-            var filterConfigurations = PluginService.FilterService.FiltersList.Where(c => c.FilterType == FilterType.CraftFilter).ToList();
+            var filterConfigurations = PluginService.FilterService.FiltersList.Where(c => c.FilterType == FilterType.CraftFilter && !c.CraftListDefault).ToList();
             if (ImGui.CollapsingHeader("Filters", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(5, 5) * ImGui.GetIO().FontGlobalScale);
@@ -113,8 +112,7 @@ namespace InventoryTools.Sections
             {
                 if (ImGui.Button("Add New Craft List"))
                 {
-                    PluginService.FilterService.AddFilter(new FilterConfiguration("New Search Filter",
-                        Guid.NewGuid().ToString("N"), FilterType.SearchFilter));
+                    PluginService.FilterService.AddNewCraftFilter();
                 }
 
                 ImGui.SameLine();

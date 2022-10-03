@@ -16,21 +16,21 @@ namespace InventoryTools.Logic.Columns
 
         public override void Draw(FilterConfiguration configuration, InventoryItem item, int rowIndex)
         {
-            var result = DoDraw(CurrentValue(item), rowIndex);
+            var result = DoDraw(CurrentValue(item), rowIndex, configuration);
             result?.HandleEvent(configuration,item);
         }
         public override void Draw(FilterConfiguration configuration, SortingResult item, int rowIndex)
         {
-            var result = DoDraw(CurrentValue(item), rowIndex);
+            var result = DoDraw(CurrentValue(item), rowIndex, configuration);
             result?.HandleEvent(configuration,item);
         }
         public override void Draw(FilterConfiguration configuration, ItemEx item, int rowIndex)
         {
-            var result = DoDraw(CurrentValue((ItemEx)item), rowIndex);
+            var result = DoDraw(CurrentValue((ItemEx)item), rowIndex, configuration);
             result?.HandleEvent(configuration,item);
         }
 
-        public override IColumnEvent? DoDraw(int? currentValue, int rowIndex)
+        public override IColumnEvent? DoDraw(int? currentValue, int rowIndex, FilterConfiguration filterConfiguration)
         {
             if (currentValue.HasValue && currentValue.Value == Loading)
             {
@@ -44,7 +44,7 @@ namespace InventoryTools.Logic.Columns
             }
             else if(currentValue.HasValue)
             {
-                base.DoDraw(currentValue, rowIndex);
+                base.DoDraw(currentValue, rowIndex, filterConfiguration);
                 ImGui.SameLine();
                 if (ImGui.SmallButton("R##" + rowIndex))
                 {
@@ -53,7 +53,7 @@ namespace InventoryTools.Logic.Columns
             }
             else
             {
-                base.DoDraw(currentValue, rowIndex);
+                base.DoDraw(currentValue, rowIndex, filterConfiguration);
             }
             return null;
         }
@@ -65,7 +65,7 @@ namespace InventoryTools.Logic.Columns
                 return Untradable;
             }
 
-            var marketBoardData = Cache.GetPricing(item.ItemId, false);
+            var marketBoardData = PluginService.MarketCache.GetPricing(item.ItemId, false);
             if (marketBoardData != null)
             {
                 var hq = marketBoardData.minPriceHQ;
@@ -82,7 +82,7 @@ namespace InventoryTools.Logic.Columns
                 return Untradable;
             }
 
-            var marketBoardData = Cache.GetPricing(item.RowId, false);
+            var marketBoardData = PluginService.MarketCache.GetPricing(item.RowId, false);
             if (marketBoardData != null)
             {
                 var hq = marketBoardData.minPriceHQ;

@@ -160,6 +160,44 @@ namespace InventoryTools.Commands
             ToggleIntroWindow(command,args);
         }
 
+        [Command("/atclearfilter")]
+        [DoNotShowInHelp]
+        [HelpMessage("Clears the active filter. Pass in background or ui to close just the background or ui filters respectively.")]
+        public void ClearFilter(string command, string args)
+        {
+            args = args.Trim();
+            if (args == "")
+            {
+                PluginService.FilterService.ClearActiveBackgroundFilter();
+                PluginService.FilterService.ClearActiveUiFilter();
+            }
+            else if (args == "background")
+            {
+                PluginService.FilterService.ClearActiveBackgroundFilter();
+            }
+            else if (args == "ui")
+            {
+                PluginService.FilterService.ClearActiveUiFilter();
+            }
+        }
+
+        [Command("/atclosefilters")]
+        [DoNotShowInHelp]
+        [HelpMessage("Closes all filter windows.")]
+        public void CloseFilterWindows(string command, string args)
+        {
+            PluginService.WindowService.CloseFilterWindows();
+        }
+
+        [Command("/atclearall")]
+        [DoNotShowInHelp]
+        [HelpMessage("Closes all filter windows and clears all active filters. Pass in background or ui to close just the background or ui filters respectively.")]
+        public void ClearAll(string command, string args)
+        {
+            ClearFilter(command, args);
+            CloseFilterWindows(command,args);
+        }
+
         #endif
     }
 }

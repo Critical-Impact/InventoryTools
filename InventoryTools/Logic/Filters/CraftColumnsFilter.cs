@@ -9,7 +9,7 @@ using OtterGui;
 
 namespace InventoryTools.Logic.Filters
 {
-    public class ColumnsFilter : SortedListFilter<string>
+    public class CraftColumnsFilter : SortedListFilter<string>
     {
         public override Dictionary<string, (string, string?)> CurrentValue(FilterConfiguration configuration)
         {
@@ -18,26 +18,25 @@ namespace InventoryTools.Logic.Filters
                 return PluginService.PluginLogic.GridColumns.ContainsKey(c) ? (PluginService.PluginLogic.GridColumns[c].Name, PluginService.PluginLogic.GridColumns[c].HelpText): (c, null);
             }
 
-            return (configuration.Columns ?? new List<string>()).ToDictionary(c => c, GetColumnDetails);
+            return (configuration.CraftColumns ?? new List<string>()).ToDictionary(c => c, GetColumnDetails);
         }
         
 
         public override void UpdateFilterConfiguration(FilterConfiguration configuration, Dictionary<string, (string, string?)> newValue)
         {
-            configuration.Columns = newValue.Select(c => c.Key).ToList();
+            configuration.CraftColumns = newValue.Select(c => c.Key).ToList();
         }
 
-        public override string Key { get; set; } = "Columns";
-        public override string Name { get; set; } = "Columns";
+        public override string Key { get; set; } = "Craft Columns";
+        public override string Name { get; set; } = "Craft Columns";
         public override string HelpText { get; set; } = "";
-        public override FilterCategory FilterCategory { get; set; } = FilterCategory.Columns;
+        public override FilterCategory FilterCategory { get; set; } = FilterCategory.CraftColumns;
         public override bool HasValueSet(FilterConfiguration configuration)
         {
-            return configuration.Columns != null && configuration.Columns.Count != 0;
+            return configuration.CraftColumns != null && configuration.CraftColumns.Count != 0;
         }
 
-        public override FilterType AvailableIn { get; set; } =
-            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.CraftFilter;
+        public override FilterType AvailableIn { get; set; } = FilterType.CraftFilter;
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
             return null;
@@ -64,7 +63,7 @@ namespace InventoryTools.Logic.Filters
         {
             var value = PluginService.PluginLogic.GridColumns;
             var currentValue = CurrentValue(configuration);
-            return value.Where(c => c.Value.CraftOnly != true && c.Value.AvailableInType(configuration.FilterType) && !currentValue.ContainsKey(c.Key)).ToDictionary(c => c.Key, c => c.Value);
+            return value.Where(c => c.Value.CraftOnly != false && c.Value.AvailableInType(configuration.FilterType) && !currentValue.ContainsKey(c.Key)).ToDictionary(c => c.Key, c => c.Value);
         }
 
         public override void DrawTable(FilterConfiguration configuration)

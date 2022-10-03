@@ -138,24 +138,35 @@ namespace InventoryTools.Logic
             }
         }
 
+        private bool _disposed;
         public void Dispose()
         {
-            try
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        
+        protected virtual void Dispose(bool disposing)
+        {
+            if(!_disposed && disposing)
             {
-                _wotsitUnregister?.InvokeFunc(IpcDisplayName);
+                try
+                {
+                    _wotsitUnregister?.InvokeFunc(IpcDisplayName);
+                }
+                catch (Exception)
+                {
+                    // Wotsit was not installed or too early version
+                }
+                PluginService.FilterService.FilterAdded -= FilterAddedRemoved;
+                PluginService.FilterService.FilterRemoved -= FilterAddedRemoved;
+                PluginService.FilterService.FilterModified -= FilterChanged;
+                if (_delayTimer != null)
+                {
+                    _delayTimer.Elapsed -= DelayTimerOnElapsed;
+                    _delayTimer?.Dispose();
+                }
             }
-            catch (Exception)
-            {
-                // Wotsit was not installed or too early version
-            }
-            PluginService.FilterService.FilterAdded -= FilterAddedRemoved;
-            PluginService.FilterService.FilterRemoved -= FilterAddedRemoved;
-            PluginService.FilterService.FilterModified -= FilterChanged;
-            if (_delayTimer != null)
-            {
-                _delayTimer.Elapsed -= DelayTimerOnElapsed;
-                _delayTimer?.Dispose();
-            }
+            _disposed = true;         
         }
     }
 }

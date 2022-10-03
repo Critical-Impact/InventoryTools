@@ -91,11 +91,22 @@ namespace InventoryTools.Logic
         public abstract bool Draw(Vector2 size);
         public abstract void DrawFooterItems();
 
+        private bool _disposed;
         public virtual void Dispose()
         {
-            FilterConfiguration.ConfigurationChanged -= FilterConfigurationUpdated;
-            FilterConfiguration.ListUpdated -= FilterConfigurationUpdated;
-            FilterConfiguration.TableConfigurationChanged += FilterConfigurationOnTableConfigurationChanged;
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        
+        protected virtual void Dispose(bool disposing)
+        {
+            if(!_disposed && disposing)
+            {
+                FilterConfiguration.ConfigurationChanged -= FilterConfigurationUpdated;
+                FilterConfiguration.ListUpdated -= FilterConfigurationUpdated;
+                FilterConfiguration.TableConfigurationChanged += FilterConfigurationOnTableConfigurationChanged;
+            }
+            _disposed = true;         
         }
     }
 }

@@ -1,4 +1,3 @@
-using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
@@ -9,7 +8,7 @@ namespace InventoryTools.Logic.Filters
     {
         public override string Key { get; set; } = "Gatherable";
         public override string Name { get; set; } = "Can be Gathered?";
-        public override string HelpText { get; set; } = "Can this item be gathered from a node?";
+        public override string HelpText { get; set; } = "Can this item be gathered from a node or caught?";
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Acquisition;
 
         public override FilterType AvailableIn { get; set; } =
@@ -24,7 +23,7 @@ namespace InventoryTools.Logic.Filters
         public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
         {
             var currentValue = CurrentValue(configuration);
-            var canBeGathered = Service.ExcelCache.CanBeGathered(item.RowId);
+            var canBeGathered = item.CanBeGathered || item.ObtainedFishing;
             return currentValue == null || currentValue.Value && canBeGathered || !currentValue.Value && !canBeGathered;
         }
     }

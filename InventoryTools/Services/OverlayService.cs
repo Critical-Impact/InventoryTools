@@ -113,6 +113,9 @@ namespace InventoryTools.Services
         private HashSet<WindowName> _setupHooks = new();
         private Dictionary<WindowName, DateTime> _lastUpdate = new();
         private FilterState? _lastState;
+
+        public FilterState? LastState => _lastState;
+
         public Dictionary<WindowName, IAtkOverlayState> Overlays
         {
             get => _overlays;
@@ -245,13 +248,18 @@ namespace InventoryTools.Services
                 }
             }
         }
-
-        private bool _disposed = false;
+        
+        private bool _disposed;
         public void Dispose()
         {
-            if (!_disposed)
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        
+        protected virtual void Dispose(bool disposing)
+        {
+            if(!_disposed && disposing)
             {
-                _disposed = true;
                 Service.Framework.Update -= FrameworkOnUpdate;
                 ClearOverlays();
                 _filterService.FilterModified -= FilterServiceOnFilterModified;
@@ -261,6 +269,7 @@ namespace InventoryTools.Services
                 PluginService.GameUi.UiUpdated -= GameUiOnUiUpdated;
                 PluginService.OnPluginLoaded -= PluginServiceOnOnPluginLoaded;
             }
+            _disposed = true;         
         }
     }
 }

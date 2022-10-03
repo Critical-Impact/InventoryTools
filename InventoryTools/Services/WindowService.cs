@@ -2,13 +2,17 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using Dalamud.Interface.Windowing;
 using InventoryTools.Logic;
 using InventoryTools.Ui;
+using Window = InventoryTools.Ui.Window;
 
 namespace InventoryTools.Services
 {
     public class WindowService : IDisposable
     {
+        private readonly WindowSystem windowSystem = new("AllaganTools");
+
         private FilterService _filterService;
         public WindowService(FilterService filterService)
         {
@@ -24,8 +28,8 @@ namespace InventoryTools.Services
             RestoreSavedWindows();
         }
 
-        private ConcurrentDictionary<string, IWindow> _windows = new();
-        public ConcurrentDictionary<string, IWindow> Windows => _windows;
+        private ConcurrentDictionary<string, Window> _windows = new();
+        public ConcurrentDictionary<string, Window> Windows => _windows;
 
         private void RestoreSavedWindows()
         {
@@ -65,9 +69,11 @@ namespace InventoryTools.Services
         {
             get
             {
-                return _windows.Any(c => c.Value.SelectedConfiguration != null && c.Value.Visible);
+                return _windows.Any(c => c.Value.SelectedConfiguration != null && c.Value.IsOpen);
             }
         }
+
+        public WindowSystem WindowSystem => windowSystem;
 
         public CraftsWindow GetCraftsWindow()
         {
@@ -165,10 +171,11 @@ namespace InventoryTools.Services
             return AddWindow(window);
         }
 
-        private bool AddWindow(IWindow window)
+        private bool AddWindow(Window window)
         {
             if (_windows.TryAdd(window.Key, window))
             {
+                windowSystem.AddWindow(window);
                 window.Closed += WindowOnClosed;
                 window.Opened += WindowOnOpened;
                 window.Open();
@@ -209,6 +216,19 @@ namespace InventoryTools.Services
         public bool ToggleFiltersWindow()
         {
             return ToggleWindow<FiltersWindow>(FiltersWindow.AsKey);
+        }
+
+        public bool CloseFilterWindows()
+        {
+            foreach (var window in _windows)
+            {
+                if (window.Value is FilterWindow)
+                {
+                    window.Value.Close();
+                }
+            }
+
+            return true;
         }
 
         public bool ToggleFilterWindow(string filterKey)
@@ -254,18 +274,29 @@ namespace InventoryTools.Services
                 _windows[ConfigurationWindow.AsKey].Invalidate();
             }
         }
-
+                
+        private bool _disposed;
         public void Dispose()
         {
-            PluginService.OnPluginLoaded -= PluginServiceOnOnPluginLoaded;
-            _filterService.FilterRepositioned -= FilterServiceOnFilterRepositioned;
-            _filterService.FilterRemoved -= FilterServiceAddedRemoved;
-            _filterService.FilterAdded -= FilterServiceAddedRemoved;
-            foreach (var window in _windows)
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        
+        protected virtual void Dispose(bool disposing)
+        {
+            if(!_disposed && disposing)
             {
-                window.Value.Opened -= WindowOnOpened;
-                window.Value.Closed -= WindowOnClosed;
+                PluginService.OnPluginLoaded -= PluginServiceOnOnPluginLoaded;
+                _filterService.FilterRepositioned -= FilterServiceOnFilterRepositioned;
+                _filterService.FilterRemoved -= FilterServiceAddedRemoved;
+                _filterService.FilterAdded -= FilterServiceAddedRemoved;
+                foreach (var window in _windows)
+                {
+                    window.Value.Opened -= WindowOnOpened;
+                    window.Value.Closed -= WindowOnClosed;
+                }
             }
+            _disposed = true;         
         }
     }
 }

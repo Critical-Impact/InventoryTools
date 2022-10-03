@@ -488,7 +488,7 @@ namespace InventoryTools.Logic
                 foreach (var item in filterResult.Value.SortedItems)
                 {
                     var matchesSource = item.SourceBag == bag && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting));
-                    var matchesDestination = ShouldHighlightDestination && item.DestinationBag == bag && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting));
+                    var matchesDestination = ShouldHighlightDestination && item.DestinationBag == bag && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting, true));
                     if(matchesSource)
                     {
                         var itemBagLocation = item.BagLocation;
@@ -586,10 +586,15 @@ namespace InventoryTools.Logic
             return bagHighlights;
         }
         
-        private bool MatchesRetainerFilter(FilterConfiguration activeFilter, SortingResult item, bool invertHighlighting = false)
+        private bool MatchesRetainerFilter(FilterConfiguration activeFilter, SortingResult item, bool invertHighlighting = false, bool destinationFilter = false)
         {
             bool matches = (activeFilter.FilterType.HasFlag(FilterType.SearchFilter) || activeFilter.FilterType.HasFlag(FilterType.SortingFilter) || activeFilter.FilterType.HasFlag(FilterType.CraftFilter));
             if (item.SourceRetainerId != PluginService.CharacterMonitor.ActiveRetainer)
+            {
+                return false;
+            }
+
+            if (destinationFilter && item.SourceRetainerId == ActiveRetainerId)
             {
                 return false;
             }
