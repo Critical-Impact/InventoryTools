@@ -1,5 +1,11 @@
 name: Automatically PR plogon
 
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
 jobs:
   pull_request:
     runs-on: ubuntu-latest
