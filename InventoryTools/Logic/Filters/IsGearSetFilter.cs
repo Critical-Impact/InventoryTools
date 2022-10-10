@@ -21,7 +21,7 @@ namespace InventoryTools.Logic.Filters
 
             if (item.GearSets == null)
             {
-                return false;
+                return !currentValue.Value;
             }
             switch (currentValue.Value)
             {

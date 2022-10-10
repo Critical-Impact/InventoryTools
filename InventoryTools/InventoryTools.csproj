@@ -28,10 +28,6 @@
         <PackageReference Include="CsvHelper" Version="27.2.1" />
         <PackageReference Include="Dalamud.ContextMenu" Version="1.2.1" />
         <PackageReference Include="DalamudPackager" Version="2.1.7" />
-        <PackageReference Include="Meziantou.Analyzer" Version="1.0.733">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
         <PackageReference Include="SerialQueue" Version="2.1.0" />
         <PackageReference Include="System.Reactive" Version="5.0.0" />
         <PackageReference Include="XivCommon" Version="6.0.0" />
