@@ -14,35 +14,3 @@ jobs:
         with:
           project-url: https://github.com/users/Critical-Impact/projects/1
           github-token: ${{ secrets.ADD_TO_PROJECT_PAT }}
-  pull_request:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create pull request
-        uses: daemitus/DalamudPluginPR2@master
-        with:
-          # ===== Required inputs =====
-          # Personal access token to authenticate with GitHub.
-          # Your access token should be stored in a repository secret
-          token: ${{ secrets.PAT }}
-          
-          # The name of your plugin, used in determining the manifest path.
-          plugin_name: InventoryTools
-          
-          # ===== Optional inputs =====
-          # Enable or disable the entire dalamud_plugin_pr2.
-          # This can be true/false or a partial string searched for within the commit message.
-          # Default: "[PR]"
-          # enabled:
-          
-          # If the artifact should be commited to testing instead of plugins.
-          # This can be true/false or a partial string searched for within the commit message.
-          # Default: "[TEST]"
-          testing: "[Testing]"
-          
-          # Repository where your artifact will be committed.
-          # Default: ${{ github.repository_owner }}/DalamudPluginsD17
-          # repository:
-          
-          # Repository where the PR will be created.
-          # Default: goatcorp/DalamudPluginsD17
-          # pr_repository:
