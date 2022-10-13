@@ -58,6 +58,41 @@ namespace InventoryTools.Extensions
                     }
                 }
             }
+
+            if (item.CanBeCrafted && !Service.ExcelCache.IsCompanyCraft(item.RowId))
+            {
+                if (ImGui.Selectable("Add to new craft list"))
+                {
+                    Service.Framework.RunOnTick(() =>
+                    {
+                        var filter = PluginService.FilterService.AddNewCraftFilter();
+                        filter.CraftList.AddCraftItem(item.RowId);
+                        PluginService.WindowService.OpenCraftsWindow();
+                        PluginService.WindowService.GetCraftsWindow().FocusFilter(filter);
+                        filter.NeedsRefresh = true;
+                        filter.StartRefresh();
+                    });
+                }
+            }
+
+            if (item.CanBeCrafted && Service.ExcelCache.IsCompanyCraft(item.RowId))
+            {
+                for (uint i = 0; i < 3; i++)
+                {
+                    if (ImGui.Selectable("Add phase " + i + " to new craft list"))
+                    {
+                        Service.Framework.RunOnTick(() =>
+                        {
+                            var filter = PluginService.FilterService.AddNewCraftFilter();
+                            filter.CraftList.AddCraftItem(item.RowId);
+                            PluginService.WindowService.OpenCraftsWindow();
+                            PluginService.WindowService.GetCraftsWindow().FocusFilter(filter);
+                            filter.NeedsRefresh = true;
+                            filter.StartRefresh();
+                        });
+                    }
+                }
+            }
         }
         public static void DrawRightClickPopup(this CraftItem item, FilterConfiguration configuration)
         {
@@ -116,24 +151,40 @@ namespace InventoryTools.Extensions
                 var craftFilters =
                     PluginService.FilterService.FiltersList.Where(c =>
                         c.FilterType == Logic.FilterType.CraftFilter && !c.CraftListDefault);
-                foreach (var filter in craftFilters)
+                if (item.Item.CanBeCrafted && !Service.ExcelCache.IsCompanyCraft(item.Item.RowId))
                 {
-                    if (item.Item.CanBeCrafted && !Service.ExcelCache.IsCompanyCraft(item.Item.RowId))
+                    foreach (var filter in craftFilters)
                     {
+
                         //TODO: replace with a dynamic way of determining number of steps
                         if (firstItem)
                         {
                             ImGui.Separator();
                             firstItem = false;
                         }
+
                         if (ImGui.Selectable("Add " + item.QuantityNeeded + " item to craft list - " + filter.Name))
                         {
-                            filter.CraftList.AddCraftItem(item.Item.RowId, item.QuantityNeeded, InventoryItem.ItemFlags.None);
+                            filter.CraftList.AddCraftItem(item.Item.RowId, item.QuantityNeeded,
+                                InventoryItem.ItemFlags.None);
                             PluginService.WindowService.OpenCraftsWindow();
                             PluginService.WindowService.GetCraftsWindow().FocusFilter(filter);
                             configuration.NeedsRefresh = true;
                             configuration.StartRefresh();
                         }
+                    }
+                    if (ImGui.Selectable("Add " + item.QuantityNeeded + " item to new craft list"))
+                    {
+                        Service.Framework.RunOnTick(() =>
+                        {
+                            var filter = PluginService.FilterService.AddNewCraftFilter();
+                            filter.CraftList.AddCraftItem(item.Item.RowId, item.QuantityNeeded,
+                                InventoryItem.ItemFlags.None);
+                            PluginService.WindowService.OpenCraftsWindow();
+                            PluginService.WindowService.GetCraftsWindow().FocusFilter(filter);
+                            configuration.NeedsRefresh = true;
+                            configuration.StartRefresh();
+                        });
                     }
                 }
             }
