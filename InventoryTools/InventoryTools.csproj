@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <LangVersion>10</LangVersion>
-        <Version>1.2.0.9</Version>
-        <AssemblyName>InventoryTools</AssemblyName>
+        <Version>1.2.0.10</Version>
+        <AssemblyName>InventoryTools2</AssemblyName>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
