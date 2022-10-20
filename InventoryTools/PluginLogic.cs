@@ -411,7 +411,7 @@ namespace InventoryTools
                     if (DateTime.Now >= NextSaveTime)
                     {
                         _nextSaveTime = null;
-                        ConfigurationManager.Save();
+                        ConfigurationManager.SaveAsync();
                     }
                 }
             }
@@ -436,7 +436,7 @@ namespace InventoryTools
 
         private void ConfigOnConfigurationChanged()
         {
-            ConfigurationManager.Save();
+            ConfigurationManager.SaveAsync();
         }
 
         private void CharacterMonitorOnOnCharacterUpdated(Character? character)

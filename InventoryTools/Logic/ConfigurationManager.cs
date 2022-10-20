@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Resolvers;
 using Dalamud.Logging;
+using Dispatch;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -139,6 +141,19 @@ namespace InventoryTools.Logic
             {
                 PluginLog.Error($"Failed to save allagan tools configuration due to {e.Message}");
             }
+        }
+
+        private static SerialQueue _saveQueue = new SerialQueue();
+        
+        public static void SaveAsync()
+        {
+            _saveQueue.DispatchAsync(Save);
+        }
+
+        public static void ClearQueue()
+        {
+            _saveQueue.Dispose();
+            _saveQueue = null!;
         }
 
         public static Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>? LoadSavedInventories(string? fileName = null)

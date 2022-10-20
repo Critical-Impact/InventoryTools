@@ -85,7 +85,7 @@ namespace InventoryTools.Services
             if (PluginService.PluginLoaded)
             {
                 InvalidateFilters();
-                ConfigurationManager.Save();
+                ConfigurationManager.SaveAsync();
             }
         }
 
@@ -102,7 +102,7 @@ namespace InventoryTools.Services
         {
             if (PluginService.PluginLoaded)
             {
-                ConfigurationManager.Save();
+                ConfigurationManager.SaveAsync();
             }
         }
 
@@ -112,7 +112,7 @@ namespace InventoryTools.Services
             {
                 FilterModified?.Invoke(filterconfiguration);
                 InvalidateFilter(filterconfiguration);
-                ConfigurationManager.Save();
+                ConfigurationManager.SaveAsync();
             }
         }
         
@@ -150,7 +150,7 @@ namespace InventoryTools.Services
                 ConfigurationManager.Config.FilterConfigurations = FiltersList;
                 FilterAdded?.Invoke(configuration);
             }
-            ConfigurationManager.Save();
+            ConfigurationManager.SaveAsync();
             return result;
         }
 

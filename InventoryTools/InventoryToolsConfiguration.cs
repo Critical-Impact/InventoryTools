@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
+using CriticalCommonLib;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using Dalamud.Configuration;

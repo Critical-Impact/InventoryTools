@@ -97,6 +97,7 @@ namespace InventoryTools
             TryOn.Dispose();
             GameUi.Dispose();
             CharacterMonitor.Dispose();
+            ConfigurationManager.ClearQueue();
             ConfigurationManager.Save();
             Service.ExcelCache.Destroy();
             MarketCache.SaveCache(true);

@@ -226,7 +226,7 @@ namespace InventoryTools.Ui
                         if (subMarinePartsMenu != null)
                         {
                             ImGui.SameLine();
-                            if (ImGui.Button("Add Submarine Parts to Craft"))
+                            if (ImGui.Button("Add Company Craft to List"))
                             {
                                 var subAddon = (SubmarinePartsMenuAddon*)subMarinePartsMenu;
                                 for (int i = 0; i < 6; i++)
