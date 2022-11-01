@@ -34,9 +34,9 @@
       },
       "XivCommon": {
         "type": "Direct",
-        "requested": "[6.0.0, )",
-        "resolved": "6.0.0",
-        "contentHash": "8HwrC7mnkcaP+JxRoIIu9MqFElQRVL8HOr8EQ6Te+11zzvKoXTZZrZ7VWETF2CHfB+7c1v5wONZKqZJ2hETpjg=="
+        "requested": "[6.0.2, )",
+        "resolved": "6.0.2",
+        "contentHash": "C/GnQ61iO0yEpf8LPixU3tCThar1MWUiBkO8gdZHNtVskg8AvFeuIxk7Zmkf2yeAJ0drR/KOTdSS7GpbsgmoaQ=="
       },
       "NaturalSort.Extension": {
         "type": "Transitive",
