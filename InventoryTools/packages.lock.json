@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net6.0-windows7.0": {
+    "net7.0-windows7.0": {
       "CsvHelper": {
         "type": "Direct",
         "requested": "[27.2.1, )",
@@ -34,9 +34,9 @@
       },
       "XivCommon": {
         "type": "Direct",
-        "requested": "[6.0.0, )",
-        "resolved": "6.0.0",
-        "contentHash": "8HwrC7mnkcaP+JxRoIIu9MqFElQRVL8HOr8EQ6Te+11zzvKoXTZZrZ7VWETF2CHfB+7c1v5wONZKqZJ2hETpjg=="
+        "requested": "[7.0.0-alpha.1, )",
+        "resolved": "7.0.0-alpha.1",
+        "contentHash": "4Yy4Wg3bnI/g9BSEYAqOZALmVMJZS0wcP847VlUIThBqIS/47O6tw2BI84he4KuPSTfIsYOzrcz3vAia8+Pn3g=="
       },
       "NaturalSort.Extension": {
         "type": "Transitive",
@@ -46,20 +46,30 @@
       "criticalcommonlib": {
         "type": "Project",
         "dependencies": {
-          "LuminaSupplemental.Excel": "6.0.2",
-          "NaturalSort.Extension": "3.2.0",
-          "SerialQueue": "2.1.0",
-          "System.Reactive": "5.0.0"
+          "LuminaSupplemental.Excel": "[6.0.2, )",
+          "NaturalSort.Extension": "[3.2.0, )",
+          "SerialQueue": "[2.1.0, )",
+          "System.Reactive": "[5.0.0, )",
+          "XivCommon": "[7.0.0-alpha.1, )"
         }
       },
       "luminasupplemental.excel": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "XivCommon": "[7.0.0-alpha.1, )"
+        }
       },
       "ottergui": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "XivCommon": "[7.0.0-alpha.1, )"
+        }
       },
       "tetris": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "XivCommon": "[7.0.0-alpha.1, )"
+        }
       }
     }
   }

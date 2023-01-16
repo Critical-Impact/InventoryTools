@@ -17,6 +17,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 using ImGuiNET;
 using InventoryTools.Logic;
 using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
@@ -104,6 +105,14 @@ namespace InventoryTools.Ui
                 if (ImGui.Selectable("Filter State", ConfigurationManager.Config.SelectedDebugPage == 13))
                 {
                     ConfigurationManager.Config.SelectedDebugPage = 13;
+                }
+                if (ImGui.Selectable("Retainer Sort State", ConfigurationManager.Config.SelectedDebugPage == 14))
+                {
+                    ConfigurationManager.Config.SelectedDebugPage = 14;
+                }
+                if (ImGui.Selectable("Retainer Manager", ConfigurationManager.Config.SelectedDebugPage == 15))
+                {
+                    ConfigurationManager.Config.SelectedDebugPage = 15;
                 }
                 ImGui.EndChild();
             }
@@ -255,6 +264,13 @@ namespace InventoryTools.Ui
                                 PluginLog.Log("Armoury: " + slot.containerIndex.ToString() + " : " + slot.slotIndex);
                             }
                         }
+                        if (parsedItemOrder.RetainerInventories.Count != 0)
+                        {
+                            foreach (var slot in parsedItemOrder.RetainerInventories.First().Value.InventoryCoords)
+                            {
+                                PluginLog.Log("Retainer: " + slot.containerIndex.ToString() + " : " + slot.slotIndex);
+                            }
+                        }
                     }
                     ImGui.Text("Inventory Information:");
                     if (ImGui.Button("Try multi request"))
@@ -388,6 +404,23 @@ namespace InventoryTools.Ui
                         PluginLog.Log(prismBox.CurrentTab.ToString());
                         PluginLog.Log(prismBox.ClassJobSelected.ToString());
                         PluginLog.Log(prismBox.OnlyDisplayRaceGenderItems.ToString());
+                    }
+
+                    if (ImGui.Button("Check prism box agent"))
+                    {
+                        var agents = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule()->GetAgentModule();
+                        InventoryMiragePrismBoxAgent* dresserAgent = (InventoryMiragePrismBoxAgent*)agents->GetAgentByInternalId(AgentId.MiragePrismPrismBox);
+                        PluginLog.Log(dresserAgent->SearchGender.ToString());
+                        PluginLog.Log(dresserAgent->SearchLevel.ToString());
+                        PluginLog.Log(dresserAgent->SearchText.ToString());
+                        PluginLog.Log(dresserAgent->QuickSearchText.ToString());
+                        PluginLog.Log(dresserAgent->SearchOrder.ToString());
+                        PluginLog.Log($"Search Gender Pointer: {(ulong)dresserAgent->SearchGenderPtr:X}");
+
+                        foreach (var glamourItem in dresserAgent->GlamourItems)
+                        {
+                            //PluginLog.Log(glamourItem.CorrectedItemId.ToString());
+                        }
                     }
                 }
                 else if (ConfigurationManager.Config.SelectedDebugPage == 3)
@@ -538,7 +571,6 @@ namespace InventoryTools.Ui
                             memoryInventoryItem.SortedContainer = CriticalCommonLib.Enums.InventoryType.Armoire;
                             memoryInventoryItem.SortedCategory = InventoryCategory.Armoire;
                             memoryInventoryItem.RetainerId = Service.ClientState.LocalContentId;
-                            memoryInventoryItem.CabCat = row.Category.Value?.Category.Row ?? 0;
                             if (memoryInventoryItem.CabCat != currentCategory)
                             {
                                 actualIndex = 0;
@@ -562,24 +594,37 @@ namespace InventoryTools.Ui
 
                     var agents = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule()->GetAgentModule();
                     var dresserAgent = agents->GetAgentByInternalId(AgentId.MiragePrismPrismBox);
-                    Utils.ClickToCopyText($"{(ulong)dresserAgent:X}");
-                    var itemsStart = *(IntPtr*) ((IntPtr) dresserAgent + 0x28);
-                    if (itemsStart != IntPtr.Zero)
+                    if (dresserAgent->IsAgentActive())
                     {
-                        for (var i = 0; i < 800; i++)
+
+                        Utils.ClickToCopyText($"{(ulong)dresserAgent:X}");
+                        var itemsStart = *(IntPtr*)((IntPtr)dresserAgent + 40) + 176;
+
+                        if (itemsStart != IntPtr.Zero)
                         {
-                            var glamItem = (GlamourItem*)(itemsStart + i * 28);
-                            var memoryInventoryItem = CriticalCommonLib.Models.InventoryItem.FromGlamourItem(*glamItem);
-                            memoryInventoryItem.SortedContainer = CriticalCommonLib.Enums.InventoryType.GlamourChest;
-                            memoryInventoryItem.SortedCategory = InventoryCategory.GlamourChest;
-                            memoryInventoryItem.RetainerId = Service.ClientState.LocalContentId;
-                            memoryInventoryItem.SortedSlotIndex = i;
-                            Utils.PrintOutObject(memoryInventoryItem, (ulong)i, new List<string>());
+                            for (var i = 0; i < 800; i++)
+                            {
+                                var glamItem = (GlamourItem*)(itemsStart + i * 136);
+                                var memoryInventoryItem =
+                                    CriticalCommonLib.Models.InventoryItem.FromGlamourItem(*glamItem);
+                                memoryInventoryItem.SortedContainer =
+                                    CriticalCommonLib.Enums.InventoryType.GlamourChest;
+                                memoryInventoryItem.SortedCategory = InventoryCategory.GlamourChest;
+                                memoryInventoryItem.RetainerId = Service.ClientState.LocalContentId;
+                                memoryInventoryItem.SortedSlotIndex = i;
+                                Utils.PrintOutObject(memoryInventoryItem, (ulong)i, new List<string>());
+
+                            }
+                        }
+                        else
+                        {
+                            ImGui.Text("Glamour Chest not loaded.");
                         }
                     }
                     else
                     {
                         ImGui.Text("Glamour Chest not loaded.");
+                        
                     }
                 }
                 else if (ConfigurationManager.Config.SelectedDebugPage == 10)
@@ -1058,6 +1103,8 @@ namespace InventoryTools.Ui
                         var itemOrder = scanner.ParseItemOrder();
                         foreach (var retainer in itemOrder.RetainerInventories)
                         {
+                            Utils.PrintOutObject(retainer.Key, (ulong)retainer.Key, new List<string>());
+
                             for (int i = 0; i < retainer.Value.InventoryCoords.Count; i++)
                             {
                                 var item = retainer.Value.InventoryCoords[i];
@@ -1101,8 +1148,24 @@ namespace InventoryTools.Ui
                         ImGui.TreePop();
                     }
                 }
+                else if (ConfigurationManager.Config.SelectedDebugPage == 14)
+                {
+                    ImGui.Text($"{(ulong)ItemOrderModule.Instance():X}");
+                    //Utils.PrintOutObject(*ItemOrderModule.Instance(), (ulong)ItemOrderModule.Instance(), new List<string>());
+                    
+                }
+                else if(ConfigurationManager.Config.SelectedDebugPage == 15)
+                {
+                    ImGui.Text($"{(ulong)RetainerManager.Instance():X}");
+                    Utils.PrintOutObject(*RetainerManager.Instance(), (ulong) RetainerManager.Instance(), new List<string>());
+
+                    ImGui.Text($"{(ulong)AgentRetainerList.Instance():X}");
+                    Utils.PrintOutObject(*AgentRetainerList.Instance(), (ulong) AgentRetainerList.Instance(), new List<string>());
+                }
+
                 ImGui.EndChild();
             }
+            
         }
         
         public override FilterConfiguration? SelectedConfiguration => null;

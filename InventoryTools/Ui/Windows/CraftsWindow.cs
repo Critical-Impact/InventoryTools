@@ -40,6 +40,7 @@ namespace InventoryTools.Ui
         private TextureWrap _addEphemeralIcon => PluginService.IconStorage.LoadIcon(66317);
         private TextureWrap _closeSettingsIcon => PluginService.IconStorage.LoadIcon(66311);
         private TextureWrap _csvIcon => PluginService.IconStorage.LoadIcon(47);
+        private static TextureWrap _marketIcon => PluginService.IconStorage.LoadIcon(90003);
         private TextureWrap _clearIcon => PluginService.IconStorage.LoadIcon(66308);
         private TextureWrap _gilIcon => PluginService.IconStorage.LoadIcon(26001);
         private List<FilterConfiguration>? _filters;
@@ -243,6 +244,7 @@ namespace InventoryTools.Ui
         private unsafe void DrawCraftPanel(FilterConfiguration filterConfiguration)
         {
             var itemTable = PluginService.FilterService.GetFilterTable(filterConfiguration.Key);
+            var craftTable = PluginService.FilterService.GetCraftTable(filterConfiguration.Key);
             if (itemTable != null)
             {
                 if (ImGui.BeginChild("TopBar", new Vector2(0, 40) * ImGui.GetIO().FontGlobalScale, true,
@@ -297,7 +299,6 @@ namespace InventoryTools.Ui
                 if (ImGui.BeginChild("Content", new Vector2(0, -44) * ImGui.GetIO().FontGlobalScale, true))
                 {
                     //Move footer and header drawing to tables to allow each to bring extra detail
-                    var craftTable = PluginService.FilterService.GetCraftTable(filterConfiguration.Key);
                     _craftsExpanded = craftTable?.Draw(new Vector2(0,
                         _itemsExpanded ? -300 * ImGui.GetIO().FontGlobalScale : -50 * ImGui.GetIO().FontGlobalScale)) ?? true;
                     _itemsExpanded = itemTable.Draw(new Vector2(0, 0));
@@ -308,6 +309,36 @@ namespace InventoryTools.Ui
                 if (ImGui.BeginChild("BottomBar", new Vector2(0, 0) * ImGui.GetIO().FontGlobalScale, true,
                         ImGuiWindowFlags.NoScrollbar))
                 {
+                    UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);              
+                    if (ImGui.ImageButton(_marketIcon.ImGuiHandle,
+                            new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
+                            new Vector2(1, 1), 2))
+                    {
+                        foreach (var item in itemTable.RenderSortedItems)
+                        {
+                            PluginService.Universalis.QueuePriceCheck(item.InventoryItem.ItemId);
+                        }
+
+                        foreach (var item in itemTable.RenderItems)
+                        {
+                            PluginService.Universalis.QueuePriceCheck(item.RowId);
+                        }
+
+                        if (craftTable != null)
+                        {
+                            foreach (var item in craftTable.CraftItems)
+                            {
+                                PluginService.Universalis.QueuePriceCheck(item.ItemId);
+                            }
+
+                            foreach (var item in craftTable.RenderItems)
+                            {
+                                PluginService.Universalis.QueuePriceCheck(item.RowId);
+                            }
+                        }
+                    }
+                    ImGuiUtil.HoverTooltip("Refresh Market Prices");
+                    ImGui.SameLine();
                     UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                     if (ImGui.ImageButton(_csvIcon.ImGuiHandle,
                             new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
@@ -324,7 +355,7 @@ namespace InventoryTools.Ui
                         var subMarinePartsMenu = PluginService.GameUi.GetWindow("SubmarinePartsMenu");
                         if (subMarinePartsMenu != null)
                         {
-                            if (ImGui.Button("Add Submarine Parts to Craft"))
+                            if (ImGui.Button("Add Company Craft to List"))
                             {
                                 var subAddon = (SubmarinePartsMenuAddon*)subMarinePartsMenu;
                                 for (int i = 0; i < 6; i++)
@@ -353,7 +384,6 @@ namespace InventoryTools.Ui
                     ImGui.SameLine();
                     UiHelpers.VerticalCenter("Pending Market Requests: " + PluginService.Universalis.QueuedCount);
 
-                    var craftTable = PluginService.FilterService.GetCraftTable(filterConfiguration.Key);
                     craftTable?.DrawFooterItems();
                     itemTable.DrawFooterItems();
                     ImGui.SameLine();
@@ -411,17 +441,6 @@ namespace InventoryTools.Ui
                     ImGui.SameLine();
                     ImGui.TextDisabled(filterType);
 
-                    ImGui.SetNextItemWidth(150);
-                    ImGui.LabelText(labelName + "DisplayInTabs", "Display in Tab List: ");
-                    ImGui.SameLine();
-                    var displayInTabs = filterConfiguration.DisplayInTabs;
-                    if (ImGui.Checkbox(labelName + "DisplayInTabsCheckbox", ref displayInTabs))
-                    {
-                        if (displayInTabs != filterConfiguration.DisplayInTabs)
-                        {
-                            filterConfiguration.DisplayInTabs = displayInTabs;
-                        }
-                    }
                 }
 
                 if (ImGui.BeginTabBar("###FilterConfigTabs", ImGuiTabBarFlags.FittingPolicyScroll))

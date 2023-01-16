@@ -71,7 +71,7 @@ namespace InventoryTools.Ui
                     {
                         continue;
                     }
-                    if (ImGui.BeginTabItem(itemTable.Name + "##" + filterConfiguration.Key))
+                    if (filterConfiguration.DisplayInTabs && ImGui.BeginTabItem(itemTable.Name + "##" + filterConfiguration.Key))
                     {
                         
                         var activeFilter = DrawFilter(itemTable, filterConfiguration, _activeFilter);

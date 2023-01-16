@@ -4,7 +4,7 @@
         <OutputType>Exe</OutputType>
         <LangVersion>9.0</LangVersion>
         <Nullable>enable</Nullable>
-        <TargetFramework>net6.0-windows</TargetFramework>
+        <TargetFramework>net7.0-windows</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
@@ -22,27 +22,27 @@
     <ItemGroup>
         <Reference Include="Dalamud">
             <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
-            <Private>False</Private>
+            <Private>True</Private>
         </Reference>
         <Reference Include="ImGui.NET">
             <HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
-            <Private>False</Private>
+            <Private>True</Private>
         </Reference>
         <Reference Include="ImGuiScene">
             <HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
-            <Private>False</Private>
+            <Private>True</Private>
         </Reference>
         <Reference Include="Lumina">
             <HintPath>$(DalamudLibPath)Lumina.dll</HintPath>
-            <Private>False</Private>
+            <Private>True</Private>
         </Reference>
         <Reference Include="Lumina.Excel">
             <HintPath>$(DalamudLibPath)Lumina.Excel.dll</HintPath>
-            <Private>False</Private>
+            <Private>True</Private>
         </Reference>
         <Reference Include="FFXIVClientStructs">
             <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
-            <Private>False</Private>
+            <Private>True</Private>
         </Reference>
     </ItemGroup>
 
@@ -54,6 +54,7 @@
       <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0-preview-20220726-02" />
       <PackageReference Include="NUnit" Version="3.13.3" />
       <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
+      <PackageReference Include="XivCommon" Version="7.0.0-alpha.1" />
     </ItemGroup>
 
 </Project>

@@ -106,10 +106,14 @@ namespace InventoryTools.Services
             }
         }
 
-        private void FilterConfigurationOnConfigurationChanged(FilterConfiguration filterconfiguration)
+        private void FilterConfigurationOnConfigurationChanged(FilterConfiguration filterconfiguration, bool filterInvalidated = false)
         {
             if (PluginService.PluginLoaded)
             {
+                if (filterInvalidated)
+                {
+                    FilterInvalidated?.Invoke(filterconfiguration);
+                }
                 FilterModified?.Invoke(filterconfiguration);
                 InvalidateFilter(filterconfiguration);
                 ConfigurationManager.SaveAsync();

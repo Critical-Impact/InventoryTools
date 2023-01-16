@@ -2,11 +2,15 @@
 
     <PropertyGroup>
         <Nullable>enable</Nullable>
-        <TargetFramework>net6.0-windows</TargetFramework>
+        <TargetFramework>net7.0-windows</TargetFramework>
     </PropertyGroup>
 
     <PropertyGroup>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="XivCommon" Version="7.0.0-alpha.1" />
+    </ItemGroup>
     
 </Project>

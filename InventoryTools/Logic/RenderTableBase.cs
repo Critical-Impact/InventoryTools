@@ -29,7 +29,7 @@ namespace InventoryTools.Logic
             FilterConfiguration = filterConfiguration;
             filterConfiguration.ConfigurationChanged += FilterConfigurationUpdated;
             filterConfiguration.TableConfigurationChanged += FilterConfigurationOnTableConfigurationChanged;
-            filterConfiguration.ListUpdated += FilterConfigurationUpdated;
+            filterConfiguration.ListUpdated += FilterConfigurationOnListUpdated;
             unsafe
             {
                 _clipper = ImGuiNative.ImGuiListClipper_ImGuiListClipper();
@@ -71,7 +71,11 @@ namespace InventoryTools.Logic
             RefreshColumns();
         }
 
-        protected void FilterConfigurationUpdated(FilterConfiguration filterconfiguration)
+        protected void FilterConfigurationUpdated(FilterConfiguration filterconfiguration, bool filterInvalidated)
+        {
+        }
+        
+        private void FilterConfigurationOnListUpdated(FilterConfiguration filterconfiguration)
         {
             this.NeedsRefresh = true;
         }
@@ -103,7 +107,7 @@ namespace InventoryTools.Logic
             if(!_disposed && disposing)
             {
                 FilterConfiguration.ConfigurationChanged -= FilterConfigurationUpdated;
-                FilterConfiguration.ListUpdated -= FilterConfigurationUpdated;
+                FilterConfiguration.ListUpdated -= FilterConfigurationOnListUpdated;
                 FilterConfiguration.TableConfigurationChanged += FilterConfigurationOnTableConfigurationChanged;
             }
             _disposed = true;         

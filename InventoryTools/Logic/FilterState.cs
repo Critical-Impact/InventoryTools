@@ -7,6 +7,7 @@ using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Ui;
 using Dalamud.Game.ClientState.Objects.Enums;
+using Dalamud.Logging;
 using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic
@@ -235,7 +236,7 @@ namespace InventoryTools.Logic
                     {
                         if(item.SourceBag == InventoryType.Armoire && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting)))
                         {
-                            if (!bagHighlights.ContainsKey(cabinetDictionary[item.InventoryItem.CabCat]))
+                            if (cabinetDictionary.ContainsKey(item.InventoryItem.CabCat) && !bagHighlights.ContainsKey(cabinetDictionary[item.InventoryItem.CabCat]))
                             {
                                 bagHighlights.Add(cabinetDictionary[item.InventoryItem.CabCat], TabHighlightColor);
                             }

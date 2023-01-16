@@ -105,76 +105,120 @@ namespace InventoryTools.Logic
                     var preCrafts = GetPrecraftItemList();
                     var everythingElse = GetRemainingItemList();
 
-                    var overallIndex = 0;
-                    if (outputs.Count == 0)
+                    ImGui.TableNextRow(ImGuiTableRowFlags.Headers, FilterConfiguration.TableHeight);
+                    ImGui.TableNextColumn();
+                    bool open = ImGui.TreeNodeEx("Crafts:", ImGuiTreeNodeFlags.SpanFullWidth | ImGuiTreeNodeFlags.DefaultOpen);
+                    for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                     {
-                        ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
-                        for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+                        if (columnIndex != 0)
                         {
                             ImGui.TableNextColumn();
-                            if (columnIndex == 1)
-                            {
-                                ImGui.Text("No items have been added to the list. Add items from the top right or by right clicking on an item anywhere within the plugin.");
-                            }
                         }
-                    }
-                    for (var index = 0; index < outputs.Count; index++)
+                    }    
+                    
+                    var overallIndex = 0;
+                    if (open)
                     {
-                        var item = outputs[index];
-                        ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
-                        for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+                        if (outputs.Count == 0)
                         {
-                            var column = Columns[columnIndex];
-                            column.Draw(FilterConfiguration, item, overallIndex);
-                            ImGui.SameLine();
-                            if (columnIndex == Columns.Count - 1)
+                            ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
+                            for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                             {
-                                PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration, item, overallIndex);
+                                ImGui.TableNextColumn();
+                                if (columnIndex == 1)
+                                {
+                                    ImGui.Text(
+                                        "No items have been added to the list. Add items from the top right or by right clicking on an item anywhere within the plugin.");
+                                }
                             }
                         }
-                        overallIndex++;
+
+                        for (var index = 0; index < outputs.Count; index++)
+                        {
+                            var item = outputs[index];
+                            ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
+                            for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+                            {
+                                var column = Columns[columnIndex];
+                                column.Draw(FilterConfiguration, item, overallIndex);
+                                ImGui.SameLine();
+                                if (columnIndex == Columns.Count - 1)
+                                {
+                                    PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration, item,
+                                        overallIndex);
+                                }
+                            }
+
+                            overallIndex++;
+                        }
+                        ImGui.TreePop();
                     }
 
-                    ImGui.TableNextRow(ImGuiTableRowFlags.Headers, 32);
+                    ImGui.TableNextRow(ImGuiTableRowFlags.Headers, FilterConfiguration.TableHeight);
                     ImGui.TableNextColumn();
-                    ImGui.TableNextColumn();
-                    ImGui.Text("Precrafts:");
-                    for (var index = 0; index < preCrafts.Count; index++)
+                    open = ImGui.TreeNodeEx("Precrafts:", ImGuiTreeNodeFlags.SpanFullWidth | ImGuiTreeNodeFlags.DefaultOpen);
+                    for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                     {
-                        var item = preCrafts[index];
-                        ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
-                        for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+                        if (columnIndex != 0)
                         {
-                            var column = Columns[columnIndex];
-                            column.Draw(FilterConfiguration, item, overallIndex);
-                            ImGui.SameLine();
-                            if (columnIndex == Columns.Count - 1)
-                            {
-                                PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration, item, overallIndex);
-                            }
+                            ImGui.TableNextColumn();
                         }
-                        overallIndex++;
+                    }                    
+                    if (open)
+                    {
+                        for (var index = 0; index < preCrafts.Count; index++)
+                        {
+                            var item = preCrafts[index];
+                            ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
+                            for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+                            {
+                                var column = Columns[columnIndex];
+                                column.Draw(FilterConfiguration, item, overallIndex);
+                                ImGui.SameLine();
+                                if (columnIndex == Columns.Count - 1)
+                                {
+                                    PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration, item,
+                                        overallIndex);
+                                }
+                            }
+
+                            overallIndex++;
+                        }
+                        ImGui.TreePop();
+                    }
+                    
+                    ImGui.TableNextRow(ImGuiTableRowFlags.Headers, FilterConfiguration.TableHeight);
+                    ImGui.TableNextColumn();
+                    open = ImGui.TreeNodeEx("Gather/Buy:", ImGuiTreeNodeFlags.SpanFullWidth | ImGuiTreeNodeFlags.DefaultOpen);
+                    for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+                    {
+                        if (columnIndex != 0)
+                        {
+                            ImGui.TableNextColumn();
+                        }
                     }
 
-                    ImGui.TableNextRow(ImGuiTableRowFlags.Headers, 32);
-                    ImGui.TableNextColumn();
-                    ImGui.TableNextColumn();
-                    ImGui.Text("Gather/Buy:");
-                    for (var index = 0; index < everythingElse.Count; index++)
+                    if (open)
                     {
-                        var item = everythingElse[index];
-                        ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
-                        for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+                        for (var index = 0; index < everythingElse.Count; index++)
                         {
-                            var column = Columns[columnIndex];
-                            column.Draw(FilterConfiguration, item, overallIndex);
-                            ImGui.SameLine();
-                            if (columnIndex == Columns.Count - 1)
+                            var item = everythingElse[index];
+                            ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
+                            for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                             {
-                                PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration, item, overallIndex);
+                                var column = Columns[columnIndex];
+                                column.Draw(FilterConfiguration, item, overallIndex);
+                                ImGui.SameLine();
+                                if (columnIndex == Columns.Count - 1)
+                                {
+                                    PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration, item,
+                                        overallIndex);
+                                }
                             }
+
+                            overallIndex++;
                         }
-                        overallIndex++;
+                        ImGui.TreePop();
                     }
 
                     ImGui.EndTable();

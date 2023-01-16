@@ -20,7 +20,24 @@ namespace InventoryTools.Services
             _filterService.FilterRemoved += FilterServiceAddedRemoved;
             _filterService.FilterAdded += FilterServiceAddedRemoved;
             _filterService.FilterRepositioned += FilterServiceOnFilterRepositioned;
+            _filterService.FilterInvalidated += FilterServiceOnFilterInvalidated;
             PluginService.OnPluginLoaded += PluginServiceOnOnPluginLoaded;
+        }
+
+        private void FilterServiceOnFilterInvalidated(FilterConfiguration configuration)
+        {
+            if (_windows.ContainsKey(CraftsWindow.AsKey))
+            {
+                _windows[CraftsWindow.AsKey].Invalidate();
+            }
+            if (_windows.ContainsKey(FiltersWindow.AsKey))
+            {
+                _windows[FiltersWindow.AsKey].Invalidate();
+            }
+            if (_windows.ContainsKey(ConfigurationWindow.AsKey))
+            {
+                _windows[ConfigurationWindow.AsKey].Invalidate();
+            }
         }
 
         private void PluginServiceOnOnPluginLoaded()
@@ -290,6 +307,7 @@ namespace InventoryTools.Services
                 _filterService.FilterRepositioned -= FilterServiceOnFilterRepositioned;
                 _filterService.FilterRemoved -= FilterServiceAddedRemoved;
                 _filterService.FilterAdded -= FilterServiceAddedRemoved;
+                _filterService.FilterInvalidated -= FilterServiceOnFilterInvalidated;
                 foreach (var window in _windows)
                 {
                     window.Value.Opened -= WindowOnOpened;

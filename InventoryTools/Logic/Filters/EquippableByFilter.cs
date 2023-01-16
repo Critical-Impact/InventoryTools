@@ -29,12 +29,10 @@ namespace InventoryTools.Logic.Filters
             {
                 return true;
             }
-            Service.ExcelCache.CalculateClassJobCategoryLookup();
-            var lookup = Service.ExcelCache.ClassJobCategoryLookup;
-            if (lookup.ContainsKey(item.ClassJobCategory.Row))
+            if (item.ClassJobCategoryEx.Value != null)
             {
-                var map = lookup[item.ClassJobCategory.Row];
-                if (map.Any(c => currentValue.Contains(c)))
+                
+                if (item.ClassJobCategoryEx.Value.ApplicableClasses.Any(c => currentValue.Contains(c.Key)))
                 {
                     return true;
                 }

@@ -18,7 +18,7 @@ namespace InventoryTools.Logic
 {
     public class FilterConfiguration
     {
-        public delegate void ConfigurationChangedDelegate(FilterConfiguration filterConfiguration);
+        public delegate void ConfigurationChangedDelegate(FilterConfiguration filterConfiguration, bool filterInvalidated = false);
         public delegate void TableConfigurationChangedDelegate(FilterConfiguration filterConfiguration);
         public delegate void ListUpdatedDelegate(FilterConfiguration filterConfiguration);
 
@@ -182,7 +182,7 @@ namespace InventoryTools.Logic
         {
             get
             {
-                if (_filterResult == null || NeedsRefresh)
+                if ((_filterResult == null || NeedsRefresh) && !_refreshing)
                 {
                     StartRefresh();
                 }
@@ -200,9 +200,10 @@ namespace InventoryTools.Logic
             {
                 return;
             }
+
+            PluginLog.Debug("Started a refresh on the filter configuration.");
             _refreshing = true;
             CraftList.BeenUpdated = false;
-
 
             if (this.FilterType == FilterType.CraftFilter)
             {
@@ -514,7 +515,7 @@ namespace InventoryTools.Logic
         {
             get => _displayInTabs;
             set { _displayInTabs = value;
-                ConfigurationChanged?.Invoke(this);
+                ConfigurationChanged?.Invoke(this, true);
             }
         }
 
