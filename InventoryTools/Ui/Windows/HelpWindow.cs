@@ -19,7 +19,7 @@ namespace InventoryTools.Ui
         {
             
         }
-        public HelpWindow() : base("Allagan Tools - Debug")
+        public HelpWindow() : base("Allagan Tools - Help")
         {
             
         }
