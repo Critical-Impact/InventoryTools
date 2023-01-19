@@ -84,6 +84,8 @@ namespace InventoryTools
         public static void Dispose()
         {
             PluginLoaded = false;
+            ConfigurationManager.ClearQueue();
+            ConfigurationManager.Save();
             ContextMenuService.Dispose();
             IconStorage.Dispose();
             CommandManager.Dispose();
@@ -97,8 +99,6 @@ namespace InventoryTools
             TryOn.Dispose();
             GameUi.Dispose();
             CharacterMonitor.Dispose();
-            ConfigurationManager.ClearQueue();
-            ConfigurationManager.Save();
             Service.ExcelCache.Destroy();
             MarketCache.SaveCache(true);
             MarketCache.Dispose();
