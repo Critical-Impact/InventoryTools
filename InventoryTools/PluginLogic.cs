@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
 using System.Threading.Tasks;
 using CriticalCommonLib;
 using CriticalCommonLib.MarketBoard;
@@ -786,9 +787,7 @@ namespace InventoryTools
                 {
                     _gridColumns = new Dictionary<string, IColumn>();
                     var columnType = typeof(IColumn);
-                    var types = AppDomain.CurrentDomain.GetAssemblies()
-                        .SelectMany(s => s.GetTypes())
-                        .Where(p => columnType.IsAssignableFrom(p));
+                    var types = Assembly.GetExecutingAssembly().GetLoadableTypes().Where(columnType.IsAssignableFrom).ToList();
                     foreach (var type in types)
                     {
                         if (type.IsClass && type.Name != "RightClickColumn" && !type.IsAbstract)
@@ -819,11 +818,8 @@ namespace InventoryTools
                 if (_availableSettings == null)
                 {
                     _availableSettings = new List<ISetting>();
-                    var filterType = typeof(ISetting);
-                    var types = AppDomain.CurrentDomain.GetAssemblies()
-                        .Where(c => c.FullName != null && c.FullName.Contains("InventoryTools"))
-                        .SelectMany(s => s.GetTypes())
-                        .Where(p => filterType.IsAssignableFrom(p));
+                    var columnType = typeof(ISetting);
+                    var types = Assembly.GetExecutingAssembly().GetLoadableTypes().Where(columnType.IsAssignableFrom).ToList();
                     foreach (var type in types)
                     {
                         if (type.IsClass && !type.IsAbstract)
@@ -848,11 +844,8 @@ namespace InventoryTools
                 if (_availableFilters == null)
                 {
                     _availableFilters = new List<IFilter>();
-                    var filterType = typeof(IFilter);
-                    var types = AppDomain.CurrentDomain.GetAssemblies()
-                        .Where(c => c.FullName != null && c.FullName.Contains("InventoryTools"))
-                        .SelectMany(s => s.GetTypes())
-                        .Where(p => filterType.IsAssignableFrom(p));
+                    var columnType = typeof(IFilter);
+                    var types = Assembly.GetExecutingAssembly().GetLoadableTypes().Where(columnType.IsAssignableFrom).ToList();
                     foreach (var type in types)
                     {
                         if (type.IsClass && !type.IsAbstract)
@@ -892,12 +885,10 @@ namespace InventoryTools
             Type? type = Type.GetType(strFullyQualifiedName);
             if (type != null)
                 return type;
-            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                type = asm.GetType(strFullyQualifiedName);
-                if (type != null)
-                    return type;
-            }
+            var asm = Assembly.GetExecutingAssembly();
+            type = asm.GetType(strFullyQualifiedName);
+            if (type != null)
+                return type;
             return null;
         }
         

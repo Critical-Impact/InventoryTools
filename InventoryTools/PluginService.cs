@@ -36,6 +36,8 @@ namespace InventoryTools
         public static MarketCache MarketCache { get; private set; } = null!;
         public static Universalis Universalis { get; private set; } = null!;
         public static GameInterface GameInterface { get; private set; } = null!;
+        
+        public static OdrScanner OdrScanner { get; private set; } = null!;
         public static bool PluginLoaded { get; private set; } = false;
 
         public delegate void PluginLoadedDelegate();
@@ -54,7 +56,8 @@ namespace InventoryTools
             GameUi = new GameUiManager();
             TryOn = new TryOn();
             CraftMonitor = new CraftMonitor(GameUi);
-            InventoryScanner = new InventoryScanner(CharacterMonitor, GameUi, GameInterface);
+            OdrScanner = new OdrScanner(CharacterMonitor);
+            InventoryScanner = new InventoryScanner(CharacterMonitor, GameUi, GameInterface, OdrScanner);
             InventoryMonitor = new InventoryMonitor( CharacterMonitor,  CraftMonitor, InventoryScanner);
             InventoryScanner.Enable();
             

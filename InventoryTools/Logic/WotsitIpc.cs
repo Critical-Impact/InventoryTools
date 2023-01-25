@@ -23,18 +23,13 @@ namespace InventoryTools.Logic
 
         public WotsitIpc()
         {
-            try
-            {
-                InitForWotsit();
-            }
-            catch (Exception)
-            {
-                _wotsItRegistered = false;
-                // ignored
-            }
+            InitForWotsit();
 
             var wotsitAvailable = Service.Interface.GetIpcSubscriber<bool>("FA.Available");
-            wotsitAvailable.Subscribe(InitForWotsit);
+            wotsitAvailable.Subscribe(() =>
+            {
+                Service.Framework.RunOnFrameworkThread(InitForWotsit);
+            });
             
             PluginService.FilterService.FilterAdded += FilterAddedRemoved;
             PluginService.FilterService.FilterRemoved += FilterAddedRemoved;
@@ -83,23 +78,15 @@ namespace InventoryTools.Logic
 
         private void InitForWotsit()
         {
-            if (_wotsItRegistered && _wotsitUnregister != null)
+            if (_wotsitUnregister == null)
             {
-                _wotsitUnregister?.InvokeFunc(IpcDisplayName);
-                _wotsitFilterNames.Clear();
-                _wotsitToggleFilterGuids.Clear();
+                _wotsitUnregister = Service.Interface.GetIpcSubscriber<string, bool>("FA.UnregisterAll");
             }
-
+            
             if (_wotsitRegister == null)
             {
                 _wotsitRegister =
                     Service.Interface.GetIpcSubscriber<string, string, string, uint, string>("FA.RegisterWithSearch");
-            }
-
-
-            if (_wotsitUnregister == null)
-            {
-                _wotsitUnregister = Service.Interface.GetIpcSubscriber<string, bool>("FA.UnregisterAll");
             }
 
             if (_callGateSubscriber == null)
@@ -107,7 +94,23 @@ namespace InventoryTools.Logic
                 _callGateSubscriber = Service.Interface.GetIpcSubscriber<string, bool>("FA.Invoke");
                 _callGateSubscriber.Subscribe(WotsitInvoke);
             }
-
+            
+            if (_wotsitUnregister != null)
+            {
+                try
+                {
+                    _wotsitUnregister?.InvokeFunc(IpcDisplayName);
+                    _wotsitFilterNames.Clear();
+                    _wotsitToggleFilterGuids.Clear();
+                }
+                catch (Exception e)
+                {
+                    PluginLog.Verbose("Could not register with Wotsit IPC. This is normal if you do not have it installed.");
+                    _wotsItRegistered = false;
+                    return;
+                }
+            }
+            
             _wotsItRegistered = true;
             RegisterFilters();
         }
@@ -120,10 +123,17 @@ namespace InventoryTools.Logic
 
                 foreach (var filter in PluginService.FilterService.FiltersList)
                 {
-                    var guid = _wotsitRegister.InvokeFunc(IpcDisplayName, $"Toggle Filter - {filter.Name}",
-                        $"Toggle the filter on/off {filter.Name} as a background filter. ", WotsitIconId);
-                    _wotsitToggleFilterGuids.Add(guid, filter);
-                    _wotsitFilterNames.Add(filter, filter.Name);
+                    try
+                    {
+                        var guid = _wotsitRegister.InvokeFunc(IpcDisplayName, $"Toggle Filter - {filter.Name}",
+                            $"Toggle the filter on/off {filter.Name} as a background filter. ", WotsitIconId);
+                        _wotsitToggleFilterGuids.Add(guid, filter);
+                        _wotsitFilterNames.Add(filter, filter.Name);
+                    }
+                    catch (Exception e)
+                    {
+                        PluginLog.Verbose("Could not register filter with Wotsit IPC. This is normal if you do not have it installed.");
+                    }
                 }
             }
 
@@ -132,10 +142,13 @@ namespace InventoryTools.Logic
 
         private void WotsitInvoke(string guid)
         {
-            if (_wotsitToggleFilterGuids.TryGetValue(guid, out var filter))
+            Service.Framework.RunOnFrameworkThread(() =>
             {
-                PluginService.FilterService.ToggleActiveBackgroundFilter(filter);
-            }
+                if (_wotsitToggleFilterGuids.TryGetValue(guid, out var filter))
+                {
+                    PluginService.FilterService.ToggleActiveBackgroundFilter(filter);
+                }
+            });
         }
 
         private bool _disposed;
