@@ -2,7 +2,7 @@ using InventoryTools.Logic.Settings.Abstract;
 
 namespace InventoryTools.Logic.Settings;
 
-public class TooltipDisplayRetrieveAmountSetting : BooleanSetting
+public partial class TooltipDisplayRetrieveAmountSetting : BooleanSetting
 {
     public override bool DefaultValue { get; set; }
     public override bool CurrentValue(InventoryToolsConfiguration configuration)
