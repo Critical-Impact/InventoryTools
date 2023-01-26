@@ -382,6 +382,12 @@ namespace InventoryTools
                 }
                 PluginConfiguration.InternalVersion++;
             }
+
+            if (PluginConfiguration.InternalVersion == 11)
+            {
+                PluginConfiguration.TooltipLocationLimit = 10;
+                PluginConfiguration.InternalVersion++;
+            }
         }
         
         private bool HotkeyPressed(VirtualKey[] keys) {
@@ -673,9 +679,10 @@ namespace InventoryTools
                 {
                     var ownedItems = PluginService.InventoryMonitor.AllItems.Where(item => item.ItemId == itemId)
                         .ToList();
+                    var maxOwnedItems = ownedItems.Take(PluginConfiguration.TooltipLocationLimit).ToList();
                     uint storageCount = 0;
                     List<string> locations = new List<string>();
-                    foreach (var oItem in ownedItems)
+                    foreach (var oItem in maxOwnedItems)
                     {
                         if (PluginService.CharacterMonitor.Characters.ContainsKey(oItem.RetainerId))
                         {
@@ -701,6 +708,11 @@ namespace InventoryTools
                             locations.Add($"{name} - {oItem.FormattedBagLocation} (" + (oItem.IsHQ ? "HQ" : "NQ") +
                                           ")");
                         }
+                    }
+
+                    if (ownedItems.Count > maxOwnedItems.Count)
+                    {
+                        locations.Add(ownedItems.Count - maxOwnedItems.Count + " other locations.");
                     }
 
 
