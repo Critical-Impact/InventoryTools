@@ -14,7 +14,7 @@ namespace InventoryTools.Logic.Columns
 
         public override int? CurrentValue(ItemEx item)
         {
-            return (int?) PluginService.InventoryMonitor.ItemCounts.Where(c => c.Key == item.RowId || c.Key == item.RowId + 100000).Sum(c => c.Value);
+            return (int?) PluginService.InventoryMonitor.ItemCounts.Where(c => c.Key.Item1 == item.RowId).Sum(c => c.Value);
         }
 
         public override int? CurrentValue(SortingResult item)

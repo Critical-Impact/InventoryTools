@@ -23,6 +23,8 @@ namespace InventoryTools.Services
         FilterConfiguration? GetFilter(string name);
         FilterConfiguration? GetFilterByKey(string key);
         
+        FilterConfiguration? GetFilterByKeyOrName(string keyOrName);
+        
         bool SetActiveUiFilter(string name);
         bool SetActiveUiFilter(FilterConfiguration configuration);
         bool SetActiveUiFilterByKey(string key);

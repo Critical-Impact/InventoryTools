@@ -301,6 +301,17 @@ namespace InventoryTools.Services
             return null;
         }
 
+        public FilterConfiguration? GetFilterByKeyOrName(string keyOrName)
+        {
+            var filter = GetFilterByKey(keyOrName);
+            if (filter == null)
+            {
+                filter = GetFilter(keyOrName);
+            }
+
+            return filter;
+        }
+
         public bool SetActiveUiFilter(string name)
         {
             var configuration = GetFilter(name);

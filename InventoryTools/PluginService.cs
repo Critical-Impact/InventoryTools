@@ -37,6 +37,8 @@ namespace InventoryTools
         public static Universalis Universalis { get; private set; } = null!;
         public static GameInterface GameInterface { get; private set; } = null!;
         
+        public static IPCService IPCService { get; private set; } = null!;
+        
         public static OdrScanner OdrScanner { get; private set; } = null!;
         public static bool PluginLoaded { get; private set; } = false;
 
@@ -72,6 +74,7 @@ namespace InventoryTools
             CommandManager = new PluginCommandManager<PluginCommands>(PluginCommands);
             FileDialogManager = new FileDialogManager();
             ConfigurationManager.Config.RestoreServiceSettings();
+            IPCService = new IPCService(pluginInterface, CharacterMonitor, FilterService, InventoryMonitor);
             PluginLoaded = true;
             OnPluginLoaded?.Invoke();
         }
@@ -87,6 +90,7 @@ namespace InventoryTools
         public static void Dispose()
         {
             PluginLoaded = false;
+            IPCService.Dispose();
             ConfigurationManager.ClearQueue();
             ConfigurationManager.Save();
             ContextMenuService.Dispose();

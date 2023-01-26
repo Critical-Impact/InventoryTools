@@ -39,11 +39,11 @@ namespace InventoryTools
         private List<IFilter>? _availableFilters = null;
         private List<ISetting>? _availableSettings = null;
 
-        private Dictionary<int, InventoryMonitor.ItemChangesItem> _recentlyAddedSeen = new();
+        private Dictionary<uint, InventoryMonitor.ItemChangesItem> _recentlyAddedSeen = new();
 
         public bool WasRecentlySeen(uint itemId)
         {
-            if (_recentlyAddedSeen.ContainsKey((int) itemId))
+            if (_recentlyAddedSeen.ContainsKey(itemId))
             {
                 return true;
             }
@@ -54,7 +54,7 @@ namespace InventoryTools
         {
             if (WasRecentlySeen(itemId))
             {
-                return DateTime.Now - _recentlyAddedSeen[(int) itemId].Date;
+                return DateTime.Now - _recentlyAddedSeen[itemId].Date;
             }
             return null;
         }
