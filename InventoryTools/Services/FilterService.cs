@@ -141,13 +141,30 @@ namespace InventoryTools.Services
             var result = _filters.TryAdd(configuration.Key, configuration);
             if (configuration.FilterType == FilterType.CraftFilter)
             {
-                configuration.Order = _filters.Where(c => c.Value.FilterType == FilterType.CraftFilter && !c.Value.CraftListDefault)
-                    .Max(c => c.Value.Order) + 1;                
+                var filters = _filters.Where(c => c.Value.FilterType == FilterType.CraftFilter && !c.Value.CraftListDefault).ToList();
+                if (filters.Any())
+                {
+                    configuration.Order = filters
+                        .Max(c => c.Value.Order) + 1;
+                }
+                else
+                {
+
+                    configuration.Order = 1;
+                }
             }
             else
             {
-                configuration.Order = _filters.Where(c => c.Value.FilterType != FilterType.CraftFilter)
-                    .Max(c => c.Value.Order) + 1;
+                var filters = _filters.Where(c => c.Value.FilterType != FilterType.CraftFilter).ToList();
+                if (filters.Any())
+                {
+                    configuration.Order = filters
+                        .Max(c => c.Value.Order) + 1;
+                }
+                else
+                {
+                    configuration.Order = 1;
+                }
             }
             if (result)
             {

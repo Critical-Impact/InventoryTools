@@ -7,6 +7,7 @@ using System.Numerics;
 using System.Reflection;
 using System.Threading.Tasks;
 using CriticalCommonLib;
+using CriticalCommonLib.Extensions;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
@@ -25,6 +26,7 @@ using InventoryTools.Images;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Columns;
 using InventoryTools.Logic.Filters;
+using InventoryTools.Logic.Settings;
 using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Ui;
 using XivCommon;
@@ -385,7 +387,10 @@ namespace InventoryTools
 
             if (PluginConfiguration.InternalVersion == 11)
             {
-                PluginConfiguration.TooltipLocationLimit = 10;
+                PluginLog.Log("Migrating to version 12");
+                PluginConfiguration.TooltipLocationLimit = 10;                
+                PluginConfiguration.TooltipLocationDisplayMode =
+                    TooltipLocationDisplayMode.CharacterCategoryQuantityQuality;
                 PluginConfiguration.InternalVersion++;
             }
         }
@@ -634,10 +639,16 @@ namespace InventoryTools
             }
 
             var isHq = false;
+            var isCollectible = false;
             if (itemId > 1000000)
             {
                 itemId -= 1000000;
                 isHq = true;
+            }
+            if (itemId > 500000)
+            {
+                itemId -= 500000;
+                isCollectible = true;
             }
             var lines = new List<Payload>();
             var textLines = new List<string>();
@@ -677,19 +688,22 @@ namespace InventoryTools
 
                 if (PluginConfiguration.TooltipDisplayAmountOwned)
                 {
-                    var ownedItems = PluginService.InventoryMonitor.AllItems.Where(item => item.ItemId == itemId)
+                    var ownedItems = PluginService.InventoryMonitor.AllItems.Where(item => 
+                            item.ItemId == itemId && 
+                            PluginService.CharacterMonitor.Characters.ContainsKey(item.RetainerId) &&
+                            ((PluginConfiguration.TooltipCurrentCharacter && PluginService.CharacterMonitor.BelongsToActiveCharacter(item.RetainerId)) ||  !PluginConfiguration.TooltipCurrentCharacter)
+                            )
                         .ToList();
-                    var maxOwnedItems = ownedItems.Take(PluginConfiguration.TooltipLocationLimit).ToList();
+                        
                     uint storageCount = 0;
                     List<string> locations = new List<string>();
-                    foreach (var oItem in maxOwnedItems)
+                    
+                    if (PluginConfiguration.TooltipLocationDisplayMode ==
+                        TooltipLocationDisplayMode.CharacterBagSlotQuality)
                     {
-                        if (PluginService.CharacterMonitor.Characters.ContainsKey(oItem.RetainerId))
+                        var maxOwnedItems = ownedItems.Take(PluginConfiguration.TooltipLocationLimit).ToList();
+                        foreach (var oItem in maxOwnedItems)
                         {
-                            if (PluginConfiguration.TooltipCurrentCharacter &&
-                                !PluginService.CharacterMonitor.BelongsToActiveCharacter(oItem.RetainerId))
-                                continue;
-
                             storageCount += oItem.Quantity;
 
                             var characterMonitorCharacter = PluginService.CharacterMonitor.Characters[oItem.RetainerId];
@@ -705,16 +719,101 @@ namespace InventoryTools
                                 name += " (" + owner.FormattedName + ")";
                             }
 
-                            locations.Add($"{name} - {oItem.FormattedBagLocation} (" + (oItem.IsHQ ? "HQ" : "NQ") +
-                                          ")");
+                            var typeIcon = "";
+                            if (oItem.IsHQ)
+                            {
+                                typeIcon = "\uE03c";
+                            }
+                            else if (oItem.IsCollectible)
+                            {
+                                typeIcon = "\uE03d";
+                            }
+
+                            locations.Add($"{name} - {oItem.FormattedBagLocation} " + typeIcon);
                         }
+                        if (ownedItems.Count > maxOwnedItems.Count)
+                        {
+                            locations.Add(ownedItems.Count - maxOwnedItems.Count + " other locations.");
+                        }                        
                     }
-
-                    if (ownedItems.Count > maxOwnedItems.Count)
+                    else if (PluginConfiguration.TooltipLocationDisplayMode == TooltipLocationDisplayMode.CharacterCategoryQuantityQuality)
                     {
-                        locations.Add(ownedItems.Count - maxOwnedItems.Count + " other locations.");
-                    }
+                        var groupedItems = ownedItems.GroupBy(c => (c.RetainerId, c.SortedCategory, c.Flags));
+                        var maxGroupedItems = groupedItems.Take(PluginConfiguration.TooltipLocationLimit).ToList();
+                        foreach (var oGroup in maxGroupedItems)
+                        {
+                            var quantity = oGroup.Sum(c => c.Quantity);
+                            storageCount += (uint)quantity;
 
+                            var characterMonitorCharacter = PluginService.CharacterMonitor.Characters[oGroup.Key.RetainerId];
+                            var name = characterMonitorCharacter?.FormattedName ?? "Unknown";
+                            name = name.Trim().Length == 0 ? "Unknown" : name.Trim();
+                            if (characterMonitorCharacter != null && characterMonitorCharacter.OwnerId != 0 &&
+                                PluginConfiguration.TooltipAddCharacterNameOwned &&
+                                PluginService.CharacterMonitor.Characters.ContainsKey(characterMonitorCharacter
+                                    .OwnerId))
+                            {
+                                var owner = PluginService.CharacterMonitor.Characters[
+                                    characterMonitorCharacter.OwnerId];
+                                name += " (" + owner.FormattedName + ")";
+                            }
+
+                            var typeIcon = "";
+                            if ((oGroup.Key.Flags & FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HQ) != 0)
+                            {
+                                typeIcon = "\uE03c";
+                            }
+                            else if ((oGroup.Key.Flags & FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.Collectable) != 0)
+                            {
+                                typeIcon = "\uE03d";
+                            }
+
+                            locations.Add($"{name} - {oGroup.Key.SortedCategory.FormattedName()} - " + quantity + " " + typeIcon);
+                        }
+                        if (groupedItems.Count > maxGroupedItems.Count)
+                        {
+                            locations.Add(groupedItems.Count - maxGroupedItems.Count + " other locations.");
+                        }  
+                    }
+                    else if (PluginConfiguration.TooltipLocationDisplayMode == TooltipLocationDisplayMode.CharacterQuantityQuality)
+                    {
+                        var groupedItems = ownedItems.GroupBy(c => (c.RetainerId, c.Flags));
+                        var maxGroupedItems = groupedItems.Take(PluginConfiguration.TooltipLocationLimit).ToList();
+                        foreach (var oGroup in maxGroupedItems)
+                        {
+                            var quantity = oGroup.Sum(c => c.Quantity);
+                            storageCount += (uint)quantity;
+
+                            var characterMonitorCharacter = PluginService.CharacterMonitor.Characters[oGroup.Key.RetainerId];
+                            var name = characterMonitorCharacter?.FormattedName ?? "Unknown";
+                            name = name.Trim().Length == 0 ? "Unknown" : name.Trim();
+                            if (characterMonitorCharacter != null && characterMonitorCharacter.OwnerId != 0 &&
+                                PluginConfiguration.TooltipAddCharacterNameOwned &&
+                                PluginService.CharacterMonitor.Characters.ContainsKey(characterMonitorCharacter
+                                    .OwnerId))
+                            {
+                                var owner = PluginService.CharacterMonitor.Characters[
+                                    characterMonitorCharacter.OwnerId];
+                                name += " (" + owner.FormattedName + ")";
+                            }
+
+                            var typeIcon = "";
+                            if ((oGroup.Key.Flags & FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HQ) != 0)
+                            {
+                                typeIcon = "\uE03c";
+                            }
+                            else if ((oGroup.Key.Flags & FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.Collectable) != 0)
+                            {
+                                typeIcon = "\uE03d";
+                            }
+
+                            locations.Add($"{name} - " + quantity + " " + typeIcon);
+                        }
+                        if (groupedItems.Count > maxGroupedItems.Count)
+                        {
+                            locations.Add(groupedItems.Count - maxGroupedItems.Count + " other locations.");
+                        }  
+                    }
 
                     if (storageCount > 0)
                     {
@@ -782,8 +881,8 @@ namespace InventoryTools
                     lines = new List<Payload>();
                 }
                 _cachedTooltipLines[itemId] = lines;
+
             }
-            
             var description = tooltip[itemTooltipString];
             description = description.Append(lines);
             tooltip[itemTooltipString] = description;

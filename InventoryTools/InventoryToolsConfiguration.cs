@@ -9,6 +9,7 @@ using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Colors;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
+using InventoryTools.Logic.Settings;
 using Newtonsoft.Json;
 using OtterGui.Classes;
 
@@ -91,6 +92,7 @@ namespace InventoryTools
         private bool _tooltipAddCharacterNameOwned = false;
         private bool _tooltipDisplayRetrieveAmount = false;
         private int _tooltipLocationLimit = 10;
+        private TooltipLocationDisplayMode _tooltipLocationDisplayMode = TooltipLocationDisplayMode.CharacterCategoryQuantityQuality;
         private uint? _tooltipColor = null;
         public Vector4 HighlightColor
         {
@@ -217,6 +219,15 @@ namespace InventoryTools
             set
             {
                 _tooltipLocationLimit = value;
+                ConfigurationChanged?.Invoke();
+            }
+        }
+        public TooltipLocationDisplayMode TooltipLocationDisplayMode
+        {
+            get => _tooltipLocationDisplayMode;
+            set
+            {
+                _tooltipLocationDisplayMode = value;
                 ConfigurationChanged?.Invoke();
             }
         }

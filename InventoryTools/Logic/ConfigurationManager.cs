@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CriticalCommonLib;
@@ -49,7 +50,7 @@ namespace InventoryTools.Logic
             var inventoryToolsConfiguration = JsonConvert.DeserializeObject<InventoryToolsConfiguration>(jsonText, new JsonSerializerSettings()
             {
                 DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
-                ContractResolver = new MinifyResolver()
+                ContractResolver = MinifyResolver
             });
             if (inventoryToolsConfiguration == null)
             {
@@ -92,7 +93,7 @@ namespace InventoryTools.Logic
             var inventoryToolsConfiguration = JsonConvert.DeserializeObject<InventoryToolsConfiguration>(jsonText, new JsonSerializerSettings()
             {
                 DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
-                ContractResolver = new MinifyResolver()
+                ContractResolver = MinifyResolver
             });
             if (inventoryToolsConfiguration == null)
             {
@@ -133,7 +134,7 @@ namespace InventoryTools.Logic
                     TypeNameHandling = TypeNameHandling.Objects,
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                     DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
-                    ContractResolver = new MinifyResolver()
+                    ContractResolver = MinifyResolver
                 }));
                 SaveSavedInventories(Config.SavedInventories);
             }
@@ -167,7 +168,7 @@ namespace InventoryTools.Logic
                 return JsonConvert.DeserializeObject<Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>>(json, new JsonSerializerSettings()
                 {
                     DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
-                    ContractResolver = new MinifyResolver()
+                    ContractResolver = MinifyResolver
                 });
             }
             catch (Exception e)
@@ -177,20 +178,36 @@ namespace InventoryTools.Logic
             }
         }
 
+        public static MinifyResolver MinifyResolver => _minifyResolver ??= new();
+        private static MinifyResolver? _minifyResolver;
+
         public static void SaveSavedInventories(
             Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>> savedInventories)
         {
+            Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>> newSavedInventories =
+                new Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>();
+            
+            foreach (var key in savedInventories.Keys)
+            {
+                newSavedInventories[key] = new Dictionary<InventoryCategory, List<InventoryItem>>();
+                var inventoryDict = savedInventories[key];
+                foreach (var key2 in inventoryDict.Keys)
+                {
+                    var newList = inventoryDict[key2].ToList();
+                    newSavedInventories[key][key2] = newList;
+                }
+            }
             var cacheFile = new FileInfo(InventoryFile);
             PluginLog.Verbose("Saving inventory data");
             try
             {
-                File.WriteAllText(cacheFile.FullName, JsonConvert.SerializeObject((object)savedInventories, Formatting.None, new JsonSerializerSettings()
+                File.WriteAllText(cacheFile.FullName, JsonConvert.SerializeObject(newSavedInventories, Formatting.None, new JsonSerializerSettings()
                 {
                     TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
                     TypeNameHandling = TypeNameHandling.Objects,
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                     DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
-                    ContractResolver = new MinifyResolver()
+                    ContractResolver = MinifyResolver
                 }));
             }
             catch (Exception e)
