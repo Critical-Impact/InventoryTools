@@ -388,6 +388,7 @@ namespace InventoryTools
             if (PluginConfiguration.InternalVersion == 11)
             {
                 PluginLog.Log("Migrating to version 12");
+                PluginConfiguration.TooltipLocationLimit = 10;                
                 PluginConfiguration.TooltipLocationDisplayMode =
                     TooltipLocationDisplayMode.CharacterCategoryQuantityQuality;
                 PluginConfiguration.InternalVersion++;
@@ -693,13 +694,15 @@ namespace InventoryTools
                             ((PluginConfiguration.TooltipCurrentCharacter && PluginService.CharacterMonitor.BelongsToActiveCharacter(item.RetainerId)) ||  !PluginConfiguration.TooltipCurrentCharacter)
                             )
                         .ToList();
-                    
+                        
                     uint storageCount = 0;
                     List<string> locations = new List<string>();
+                    
                     if (PluginConfiguration.TooltipLocationDisplayMode ==
                         TooltipLocationDisplayMode.CharacterBagSlotQuality)
                     {
-                        foreach (var oItem in ownedItems)
+                        var maxOwnedItems = ownedItems.Take(PluginConfiguration.TooltipLocationLimit).ToList();
+                        foreach (var oItem in maxOwnedItems)
                         {
                             storageCount += oItem.Quantity;
 
@@ -728,11 +731,16 @@ namespace InventoryTools
 
                             locations.Add($"{name} - {oItem.FormattedBagLocation} " + typeIcon);
                         }
+                        if (ownedItems.Count > maxOwnedItems.Count)
+                        {
+                            locations.Add(ownedItems.Count - maxOwnedItems.Count + " other locations.");
+                        }                        
                     }
                     else if (PluginConfiguration.TooltipLocationDisplayMode == TooltipLocationDisplayMode.CharacterCategoryQuantityQuality)
                     {
                         var groupedItems = ownedItems.GroupBy(c => (c.RetainerId, c.SortedCategory, c.Flags));
-                        foreach (var oGroup in groupedItems)
+                        var maxGroupedItems = groupedItems.Take(PluginConfiguration.TooltipLocationLimit).ToList();
+                        foreach (var oGroup in maxGroupedItems)
                         {
                             var quantity = oGroup.Sum(c => c.Quantity);
                             storageCount += (uint)quantity;
@@ -762,11 +770,16 @@ namespace InventoryTools
 
                             locations.Add($"{name} - {oGroup.Key.SortedCategory.FormattedName()} - " + quantity + " " + typeIcon);
                         }
+                        if (groupedItems.Count > maxGroupedItems.Count)
+                        {
+                            locations.Add(groupedItems.Count - maxGroupedItems.Count + " other locations.");
+                        }  
                     }
                     else if (PluginConfiguration.TooltipLocationDisplayMode == TooltipLocationDisplayMode.CharacterQuantityQuality)
                     {
                         var groupedItems = ownedItems.GroupBy(c => (c.RetainerId, c.Flags));
-                        foreach (var oGroup in groupedItems)
+                        var maxGroupedItems = groupedItems.Take(PluginConfiguration.TooltipLocationLimit).ToList();
+                        foreach (var oGroup in maxGroupedItems)
                         {
                             var quantity = oGroup.Sum(c => c.Quantity);
                             storageCount += (uint)quantity;
@@ -796,6 +809,10 @@ namespace InventoryTools
 
                             locations.Add($"{name} - " + quantity + " " + typeIcon);
                         }
+                        if (groupedItems.Count > maxGroupedItems.Count)
+                        {
+                            locations.Add(groupedItems.Count - maxGroupedItems.Count + " other locations.");
+                        }  
                     }
 
                     if (storageCount > 0)

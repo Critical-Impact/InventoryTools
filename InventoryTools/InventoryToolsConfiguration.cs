@@ -91,6 +91,7 @@ namespace InventoryTools
         private bool _tooltipDisplayMarketLowestPrice = false;
         private bool _tooltipAddCharacterNameOwned = false;
         private bool _tooltipDisplayRetrieveAmount = false;
+        private int _tooltipLocationLimit = 10;
         private TooltipLocationDisplayMode _tooltipLocationDisplayMode = TooltipLocationDisplayMode.CharacterCategoryQuantityQuality;
         private uint? _tooltipColor = null;
         public Vector4 HighlightColor
@@ -212,6 +213,15 @@ namespace InventoryTools
             }
         }
 
+        public int TooltipLocationLimit
+        {
+            get => _tooltipLocationLimit;
+            set
+            {
+                _tooltipLocationLimit = value;
+                ConfigurationChanged?.Invoke();
+            }
+        }
         public TooltipLocationDisplayMode TooltipLocationDisplayMode
         {
             get => _tooltipLocationDisplayMode;
