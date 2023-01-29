@@ -738,7 +738,7 @@ namespace InventoryTools
                     }
                     else if (PluginConfiguration.TooltipLocationDisplayMode == TooltipLocationDisplayMode.CharacterCategoryQuantityQuality)
                     {
-                        var groupedItems = ownedItems.GroupBy(c => (c.RetainerId, c.SortedCategory, c.Flags));
+                        var groupedItems = ownedItems.GroupBy(c => (c.RetainerId, c.SortedCategory, c.Flags)).ToList();
                         var maxGroupedItems = groupedItems.Take(PluginConfiguration.TooltipLocationLimit).ToList();
                         foreach (var oGroup in maxGroupedItems)
                         {
@@ -777,7 +777,7 @@ namespace InventoryTools
                     }
                     else if (PluginConfiguration.TooltipLocationDisplayMode == TooltipLocationDisplayMode.CharacterQuantityQuality)
                     {
-                        var groupedItems = ownedItems.GroupBy(c => (c.RetainerId, c.Flags));
+                        var groupedItems = ownedItems.GroupBy(c => (c.RetainerId, c.Flags)).ToList();
                         var maxGroupedItems = groupedItems.Take(PluginConfiguration.TooltipLocationLimit).ToList();
                         foreach (var oGroup in maxGroupedItems)
                         {
