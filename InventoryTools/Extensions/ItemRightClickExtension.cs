@@ -111,7 +111,7 @@ namespace InventoryTools.Extensions
                 }
             }
 
-            if (item.Item.CanBeCrafted && item.IsOutputItem)
+            if (item.IsOutputItem)
             {
                 if (firstItem)
                 {

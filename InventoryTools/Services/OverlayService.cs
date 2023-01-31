@@ -74,7 +74,7 @@ namespace InventoryTools.Services
         {
             var activeFilter = _filterService.GetActiveUiFilter(false);
             var activeBackgroundFilter = _filterService.GetActiveBackgroundFilter();
-            ChatUtilities.PrintLog("Overlays refreshing, active filter is " + (activeFilter?.Name ?? "no filter"));
+            PluginLog.Debug("Overlays refreshing, active filter is " + (activeFilter?.Name ?? "no filter"));
             if (activeFilter != null && _filterService.HasFilterTable(activeFilter))
             {
                 UpdateState(new FilterState(){FilterConfiguration = activeFilter, FilterTable = _filterService.GetFilterTable(activeFilter)});
@@ -105,7 +105,11 @@ namespace InventoryTools.Services
                     overlay.Value.UpdateState(_lastState);
                     overlay.Value.NeedsStateRefresh = false;
                 }
-                overlay.Value.Update();
+
+                if (overlay.Value.HasAddon)
+                {
+                    overlay.Value.Update();
+                }
             }
         }
 

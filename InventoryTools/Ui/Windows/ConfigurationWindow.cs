@@ -68,60 +68,60 @@ namespace InventoryTools.Ui
 
         public override void Draw()
         {
-            if (ImGui.BeginChild("###ivConfigList", new Vector2(150, -1) * ImGui.GetIO().FontGlobalScale, true, ImGuiWindowFlags.NoSavedSettings))
+            ImGui.BeginChild("###ivConfigList", new Vector2(150, -1) * ImGui.GetIO().FontGlobalScale, true,
+                ImGuiWindowFlags.NoSavedSettings);
+            
+            for (var index = 0; index < _configPages.Count; index++)
             {
-                for (var index = 0; index < _configPages.Count; index++)
+                var configPage = _configPages[index];
+                if (ImGui.Selectable(configPage.Name, ConfigSelectedConfigurationPage == index))
                 {
-                    var configPage = _configPages[index];
-                    if (ImGui.Selectable(configPage.Name, ConfigSelectedConfigurationPage == index))
-                    {
-                        ConfigSelectedConfigurationPage = index;
-                    }
+                    ConfigSelectedConfigurationPage = index;
                 }
-
-                ImGui.NewLine();
-                ImGui.Text("Filters");
-                ImGui.Separator();
-
-                var filterIndex = _configPages.Count;
-                foreach (var item in _filterPages)
-                {
-                    filterIndex++;
-                    if (ImGui.Selectable(item.Value.Name + "##" + item.Key, ConfigSelectedConfigurationPage == filterIndex))
-                    {
-                        ConfigSelectedConfigurationPage = filterIndex;
-                    }
-
-                }
-                
-
-                ImGui.EndChild();
             }
+
+            ImGui.NewLine();
+            ImGui.Text("Filters");
+            ImGui.Separator();
+
+            var filterIndex = _configPages.Count;
+            foreach (var item in _filterPages)
+            {
+                filterIndex++;
+                if (ImGui.Selectable(item.Value.Name + "##" + item.Key, ConfigSelectedConfigurationPage == filterIndex))
+                {
+                    ConfigSelectedConfigurationPage = filterIndex;
+                }
+
+            }
+            
+            ImGui.EndChild();
+            
 
             ImGui.SameLine();
 
-            if (ImGui.BeginChild("###ivConfigView", new Vector2(-1, -1), true, ImGuiWindowFlags.HorizontalScrollbar))
+            ImGui.BeginChild("###ivConfigView", new Vector2(-1, -1), true, ImGuiWindowFlags.HorizontalScrollbar);
+            
+            for (var index = 0; index < _configPages.Count; index++)
             {
-                for (var index = 0; index < _configPages.Count; index++)
+                if (ConfigSelectedConfigurationPage == index)
                 {
-                    if (ConfigSelectedConfigurationPage == index)
-                    {
-                        _configPages[index].Draw();
-                    }
+                    _configPages[index].Draw();
                 }
-
-                var filterIndex = _configPages.Count;
-                foreach(var filter in _filterPages)
-                {
-                    filterIndex++;
-                    if (ConfigSelectedConfigurationPage == filterIndex)
-                    {
-                        filter.Value.Draw();
-                    }
-                }
-
-                ImGui.EndChild();
             }
+
+            var filterIndex2 = _configPages.Count;
+            foreach(var filter in _filterPages)
+            {
+                filterIndex2++;
+                if (ConfigSelectedConfigurationPage == filterIndex2)
+                {
+                    filter.Value.Draw();
+                }
+            }
+
+            ImGui.EndChild();
+            
         }
 
         public override void Invalidate()
