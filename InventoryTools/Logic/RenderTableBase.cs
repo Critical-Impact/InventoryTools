@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib.Sheets;
+using Dalamud.Logging;
 using ImGuiNET;
 using InventoryTools.Logic.Columns;
 
@@ -17,8 +18,6 @@ namespace InventoryTools.Logic
                                                 ImGuiTableFlags.Hideable | ImGuiTableFlags.ScrollX |
                                                 ImGuiTableFlags.ScrollY;
 
-        protected ImGuiListClipperPtr _clipper;
-        
         public List<SortingResult> SortedItems { get; set; } = new List<SortingResult>();
         public List<SortingResult> RenderSortedItems { get; set; } = new List<SortingResult>();
         public List<ItemEx> Items { get; set; } = new List<ItemEx>();
@@ -30,12 +29,6 @@ namespace InventoryTools.Logic
             filterConfiguration.ConfigurationChanged += FilterConfigurationUpdated;
             filterConfiguration.TableConfigurationChanged += FilterConfigurationOnTableConfigurationChanged;
             filterConfiguration.ListUpdated += FilterConfigurationOnListUpdated;
-            unsafe
-            {
-                _clipper = ImGuiNative.ImGuiListClipper_ImGuiListClipper();
-                _clipper.ItemsHeight = 32;
-            }
-
         }
 
         public string Name
@@ -111,6 +104,20 @@ namespace InventoryTools.Logic
                 FilterConfiguration.TableConfigurationChanged += FilterConfigurationOnTableConfigurationChanged;
             }
             _disposed = true;         
+        }
+        
+        ~RenderTableBase()
+        {
+#if DEBUG
+            // In debug-builds, make sure that a warning is displayed when the Disposable object hasn't been
+            // disposed by the programmer.
+
+            if( _disposed == false )
+            {
+                PluginLog.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
+            }
+#endif
+            Dispose (true);
         }
     }
 }

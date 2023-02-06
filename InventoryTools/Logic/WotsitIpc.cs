@@ -181,5 +181,19 @@ namespace InventoryTools.Logic
             }
             _disposed = true;         
         }
+        
+        ~WotsitIpc()
+        {
+#if DEBUG
+            // In debug-builds, make sure that a warning is displayed when the Disposable object hasn't been
+            // disposed by the programmer.
+
+            if( _disposed == false )
+            {
+                PluginLog.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
+            }
+#endif
+            Dispose (true);
+        }
     }
 }

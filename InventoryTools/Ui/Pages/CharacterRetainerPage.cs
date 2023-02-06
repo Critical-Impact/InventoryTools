@@ -12,7 +12,7 @@ namespace InventoryTools.Sections
         
         public void Draw()
         {
-            if (ImGui.CollapsingHeader("Characters", ImGuiTreeNodeFlags.DefaultOpen))
+            if (ImGui.CollapsingHeader("Characters", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
             {
                 ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(5, 5) * ImGui.GetIO().FontGlobalScale);
                 if (ImGui.BeginTable("CharacterTable", 3, ImGuiTableFlags.BordersV |

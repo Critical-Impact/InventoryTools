@@ -5,6 +5,7 @@ using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
+using Dalamud.Logging;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 
@@ -619,6 +620,7 @@ namespace InventoryTools.Services
                     generateTable.Refreshed += TableOnRefreshed;
                     return _craftItemTables[filterKey];
                 }
+                generateTable.Dispose();
             }
 
             return null;
@@ -639,6 +641,7 @@ namespace InventoryTools.Services
                     generateTable.Refreshed += TableOnRefreshed;
                     return _filterTables[filterKey];
                 }
+                generateTable.Dispose();
             }
 
             return null;
@@ -708,14 +711,30 @@ namespace InventoryTools.Services
                 foreach (var filterTable in _filterTables)
                 {
                     filterTable.Value.Refreshed -= TableOnRefreshed;
+                    filterTable.Value.Dispose();
                 }
 
                 foreach (var craftItemTable in _craftItemTables)
                 {
                     craftItemTable.Value.Refreshed -= TableOnRefreshed;
+                    craftItemTable.Value.Dispose();
                 }
             }
             _disposed = true;         
+        }
+        
+        ~FilterService()
+        {
+#if DEBUG
+            // In debug-builds, make sure that a warning is displayed when the Disposable object hasn't been
+            // disposed by the programmer.
+
+            if( _disposed == false )
+            {
+                PluginLog.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
+            }
+#endif
+            Dispose (true);
         }
     }
 }

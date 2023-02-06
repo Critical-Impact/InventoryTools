@@ -217,33 +217,33 @@ namespace InventoryTools.Ui
             }
 
             ImGuiUtil.HoverTooltip("Export to CSV");
-            if (filterConfiguration.FilterType == FilterType.CraftFilter)
+            if (filterConfiguration.FilterType == FilterType.CraftFilter && PluginService.GameUi.IsWindowVisible(CriticalCommonLib.Services.Ui.WindowName.SubmarinePartsMenu))
             {
-                unsafe
+                var subMarinePartsMenu = PluginService.GameUi.GetWindow("SubmarinePartsMenu");
+                if (subMarinePartsMenu != null)
                 {
-                    var subMarinePartsMenu = PluginService.GameUi.GetWindow("SubmarinePartsMenu");
-                    if (subMarinePartsMenu != null)
+                    ImGui.SameLine();
+                    if (ImGui.Button("Add Company Craft to List"))
                     {
-                        ImGui.SameLine();
-                        if (ImGui.Button("Add Company Craft to List"))
+                        var subAddon = (SubmarinePartsMenuAddon*)subMarinePartsMenu;
+                        for (int i = 0; i < 6; i++)
                         {
-                            var subAddon = (SubmarinePartsMenuAddon*)subMarinePartsMenu;
-                            for (int i = 0; i < 6; i++)
+                            var itemRequired = subAddon->RequiredItemId(i);
+                            if (itemRequired != 0)
                             {
-                                var itemRequired = subAddon->RequiredItemId(i);
-                                if (itemRequired != 0)
+                                var amountHandedIn = subAddon->AmountHandedIn(i);
+                                var amountNeeded = subAddon->AmountNeeded(i);
+                                var amountLeft = Math.Max((int)amountNeeded - (int)amountHandedIn,
+                                    0);
+                                if (amountLeft > 0)
                                 {
-                                    var amountHandedIn = subAddon->AmountHandedIn(i);
-                                    var amountNeeded = subAddon->AmountNeeded(i);
-                                    var amountLeft = Math.Max((int)amountNeeded - (int)amountHandedIn,
-                                        0);
-                                    if (amountLeft > 0)
+                                    Service.Framework.RunOnFrameworkThread(() =>
                                     {
                                         filterConfiguration.CraftList.AddCraftItem(itemRequired,
                                             (uint)amountLeft, InventoryItem.ItemFlags.None);
                                         filterConfiguration.NeedsRefresh = true;
                                         filterConfiguration.StartRefresh();
-                                    }
+                                    });
                                 }
                             }
                         }

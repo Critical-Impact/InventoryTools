@@ -203,12 +203,14 @@ namespace InventoryTools.Services
                         SetupUpdateHook(overlay);
                         if (_lastState != null && !overlay.HasState)
                         {
+                            PluginLog.Verbose("Applying last known state to " + windowname);
                             overlay.UpdateState(_lastState);
                         }
                     }
 
                     if (windowstate.HasValue && !windowstate.Value)
                     {
+                        PluginLog.Verbose("Applying empty state to " + windowname);
                         overlay.UpdateState(null);
                     }
 
@@ -274,6 +276,21 @@ namespace InventoryTools.Services
                 PluginService.OnPluginLoaded -= PluginServiceOnOnPluginLoaded;
             }
             _disposed = true;         
+        }
+        
+            
+        ~OverlayService()
+        {
+#if DEBUG
+            // In debug-builds, make sure that a warning is displayed when the Disposable object hasn't been
+            // disposed by the programmer.
+
+            if( _disposed == false )
+            {
+                PluginLog.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
+            }
+#endif
+            Dispose (true);
         }
     }
 }

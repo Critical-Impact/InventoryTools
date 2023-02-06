@@ -85,7 +85,7 @@ public class ContextMenuService : IDisposable
         return GetObjectItemId(*(uint*)(agent + HWDSupplyContextItemId));
     }
 
-    private unsafe uint? HandleNulls()
+    private uint? HandleNulls()
     {
         var itemId = HandleSatisfactionSupply() ?? HandleHWDSupply();
         return itemId;
@@ -161,5 +161,19 @@ public class ContextMenuService : IDisposable
             _contextMenu.Dispose();
         }
         _disposed = true;         
+    }
+    
+    ~ContextMenuService()
+    {
+#if DEBUG
+        // In debug-builds, make sure that a warning is displayed when the Disposable object hasn't been
+        // disposed by the programmer.
+
+        if( _disposed == false )
+        {
+            PluginLog.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
+        }
+#endif
+        Dispose (true);
     }
 }

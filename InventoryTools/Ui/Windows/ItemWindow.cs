@@ -135,9 +135,12 @@ namespace InventoryTools.Ui
                         {
                             if (ImGui.Selectable("Add item to craft list - " + filter.Name))
                             {
-                                filter.CraftList.AddCraftItem(_itemId, 1, InventoryItem.ItemFlags.None);
-                                PluginService.WindowService.OpenCraftsWindow();
-                                PluginService.WindowService.GetCraftsWindow().FocusFilter(filter);
+                                Service.Framework.RunOnFrameworkThread(() =>
+                                {
+                                    filter.CraftList.AddCraftItem(_itemId, 1, InventoryItem.ItemFlags.None);
+                                    PluginService.WindowService.OpenCraftsWindow();
+                                    PluginService.WindowService.GetCraftsWindow().FocusFilter(filter);
+                                });
                             }
                         }
                         ImGui.EndPopup();
@@ -169,7 +172,7 @@ namespace InventoryTools.Ui
                 }
 
                 ImGui.Separator();
-                if (ImGui.CollapsingHeader("Sources (" + Item.Sources.Count + ")", ImGuiTreeNodeFlags.DefaultOpen))
+                if (ImGui.CollapsingHeader("Sources (" + Item.Sources.Count + ")", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
                 {
                     ImGuiStylePtr style = ImGui.GetStyle();
                     float windowVisibleX2 = ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
@@ -222,7 +225,7 @@ namespace InventoryTools.Ui
                         ImGui.PopID();
                     }
                 }
-                if (ImGui.CollapsingHeader("Uses/Rewards (" + Item.Uses.Count + ")", ImGuiTreeNodeFlags.DefaultOpen))
+                if (ImGui.CollapsingHeader("Uses/Rewards (" + Item.Uses.Count + ")", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
                 {
                     ImGuiStylePtr style = ImGui.GetStyle();
                     float windowVisibleX2 = ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;

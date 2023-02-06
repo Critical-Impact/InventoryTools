@@ -40,6 +40,7 @@ public class IPCService : IDisposable
     private readonly CharacterMonitor _characterMonitor;
     private readonly FilterService _filterService;
     private readonly InventoryMonitor _inventoryMonitor;
+    private bool _disposed;
 
     public IPCService(DalamudPluginInterface pluginInterface, CharacterMonitor characterMonitor, FilterService filterService, InventoryMonitor inventoryMonitor)
     {
@@ -367,31 +368,55 @@ public class IPCService : IDisposable
     private uint InventoryCountByType(uint inventoryType, ulong? characterId)
     {
         return (uint)_inventoryMonitor.AllItems.Where(c => (uint)c.SortedContainer == inventoryType && (characterId == null || c.RetainerId == characterId)).Sum(c => c.Quantity);
-    }
-
+    }            
+    
     public void Dispose()
     {
-        _characterMonitor.OnActiveRetainerChanged -= CharacterMonitorOnOnActiveRetainerChanged;
-        _inventoryMonitor.OnInventoryChanged -= InventoryMonitorOnOnInventoryChanged;
-        _inventoryCountByType?.UnregisterFunc();
-        _inventoryCountByTypes?.UnregisterFunc();
-        _itemCount?.UnregisterFunc();
-        _enableUiFilter?.UnregisterFunc();
-        _disableUiFilter?.UnregisterFunc();
-        _toggleUiFilter?.UnregisterFunc();
-        _enableBackgroundFilter?.UnregisterFunc();
-        _disableBackgroundFilter?.UnregisterFunc();
-        _toggleBackgroundFilter?.UnregisterFunc();
-        _addItemToCraftList?.UnregisterFunc();
-        _removeItemFromCraftList?.UnregisterFunc();
-        _getFilterItems?.UnregisterFunc();
-        _getCraftItems?.UnregisterFunc();
-        _itemAdded?.UnregisterFunc();
-        _getCraftLists?.UnregisterFunc();
-        _addNewCraftList?.UnregisterFunc();
-        _currentCharacter?.UnregisterFunc();
-        _retainerChanged?.UnregisterFunc();
-        _isInitialized?.UnregisterFunc();
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
 
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed && disposing)
+        {
+            _characterMonitor.OnActiveRetainerChanged -= CharacterMonitorOnOnActiveRetainerChanged;
+            _inventoryMonitor.OnInventoryChanged -= InventoryMonitorOnOnInventoryChanged;
+            _inventoryCountByType?.UnregisterFunc();
+            _inventoryCountByTypes?.UnregisterFunc();
+            _itemCount?.UnregisterFunc();
+            _enableUiFilter?.UnregisterFunc();
+            _disableUiFilter?.UnregisterFunc();
+            _toggleUiFilter?.UnregisterFunc();
+            _enableBackgroundFilter?.UnregisterFunc();
+            _disableBackgroundFilter?.UnregisterFunc();
+            _toggleBackgroundFilter?.UnregisterFunc();
+            _addItemToCraftList?.UnregisterFunc();
+            _removeItemFromCraftList?.UnregisterFunc();
+            _getFilterItems?.UnregisterFunc();
+            _getCraftItems?.UnregisterFunc();
+            _itemAdded?.UnregisterFunc();
+            _getCraftLists?.UnregisterFunc();
+            _addNewCraftList?.UnregisterFunc();
+            _currentCharacter?.UnregisterFunc();
+            _retainerChanged?.UnregisterFunc();
+            _isInitialized?.UnregisterFunc();
+        }
+        _disposed = true;         
+
+    }
+    
+    ~IPCService()
+    {
+#if DEBUG
+        // In debug-builds, make sure that a warning is displayed when the Disposable object hasn't been
+        // disposed by the programmer.
+
+        if( _disposed == false )
+        {
+            PluginLog.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
+        }
+#endif
+        Dispose (true);
     }
 }

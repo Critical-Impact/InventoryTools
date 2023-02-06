@@ -353,7 +353,7 @@ namespace InventoryTools.Ui
 
                 ImGuiUtil.HoverTooltip("Export to CSV");
                 ImGui.SameLine();
-                unsafe
+                if(PluginService.GameUi.IsWindowVisible(CriticalCommonLib.Services.Ui.WindowName.SubmarinePartsMenu))
                 {
                     var subMarinePartsMenu = PluginService.GameUi.GetWindow("SubmarinePartsMenu");
                     if (subMarinePartsMenu != null)
@@ -373,18 +373,21 @@ namespace InventoryTools.Ui
                                         0);
                                     if (amountLeft > 0)
                                     {
-                                        filterConfiguration.CraftList.AddCraftItem(itemRequired,
-                                            (uint)amountLeft, InventoryItem.ItemFlags.None);
-                                        filterConfiguration.NeedsRefresh = true;
-                                        filterConfiguration.StartRefresh();
+                                        Service.Framework.RunOnFrameworkThread(() =>
+                                        {
+                                            filterConfiguration.CraftList.AddCraftItem(itemRequired,
+                                                (uint)amountLeft, InventoryItem.ItemFlags.None);
+                                            filterConfiguration.NeedsRefresh = true;
+                                            filterConfiguration.StartRefresh();
+                                        });
                                     }
                                 }
                             }
                         }
                     }
+                    ImGui.SameLine();
                 }
 
-                ImGui.SameLine();
                 UiHelpers.VerticalCenter("Pending Market Requests: " + PluginService.Universalis.QueuedCount);
 
                 craftTable?.DrawFooterItems();
@@ -410,7 +413,7 @@ namespace InventoryTools.Ui
             ImGui.BeginChild("Content", new Vector2(0, -44) * ImGui.GetIO().FontGlobalScale, true);
             var filterName = filterConfiguration.Name;
             var labelName = "##" + filterConfiguration.Key;
-            if (ImGui.CollapsingHeader("General", ImGuiTreeNodeFlags.DefaultOpen))
+            if (ImGui.CollapsingHeader("General", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
             {
                 if (!filterConfiguration.CraftListDefault)
                 {
@@ -561,9 +564,12 @@ namespace InventoryTools.Ui
             ImGui.PushID("s_" + item.RowId);
             if (ImGui.ImageButton(_addIcon.ImGuiHandle, new Vector2(16, 16), new Vector2(0,0), new Vector2(1,1), 0))
             {
-                filterConfiguration.CraftList.AddCraftItem(item.RowId, 1, InventoryItem.ItemFlags.None);
-                filterConfiguration.NeedsRefresh = true;
-                filterConfiguration.StartRefresh();
+                Service.Framework.RunOnFrameworkThread(() =>
+                {
+                    filterConfiguration.CraftList.AddCraftItem(item.RowId, 1, InventoryItem.ItemFlags.None);
+                    filterConfiguration.NeedsRefresh = true;
+                    filterConfiguration.StartRefresh();
+                });
             }
 
             if (ImGui.IsItemHovered())

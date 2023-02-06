@@ -48,7 +48,7 @@ namespace InventoryTools.Sections
         {
             foreach (var groupedSettings in Settings)
             {
-                if (ImGui.CollapsingHeader(groupedSettings.Key.FormattedName(), ImGuiTreeNodeFlags.DefaultOpen))
+                if (ImGui.CollapsingHeader(groupedSettings.Key.FormattedName(), ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
                 {
                     foreach (var setting in groupedSettings.Value)
                     {

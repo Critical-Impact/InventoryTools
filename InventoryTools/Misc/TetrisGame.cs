@@ -9,6 +9,7 @@ using CriticalCommonLib.Services.Ui;
 using Dalamud.Game;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Colors;
+using Dalamud.Logging;
 using InventoryTools.GameUi;
 using Tetris.GameEngine;
 
@@ -285,6 +286,20 @@ namespace InventoryTools.Misc
                 Service.Framework.Update -= FrameworkOnOnUpdateEvent;
             }
             _disposed = true;         
+        }
+        
+        ~TetrisGame()
+        {
+#if DEBUG
+            // In debug-builds, make sure that a warning is displayed when the Disposable object hasn't been
+            // disposed by the programmer.
+
+            if( _disposed == false )
+            {
+                PluginLog.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
+            }
+#endif
+            Dispose (true);
         }
     }
 }

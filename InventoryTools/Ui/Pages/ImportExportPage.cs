@@ -12,7 +12,7 @@ namespace InventoryTools.Sections
         public void Draw()
         {
             ImGui.PushID("ImportSection");
-            if (ImGui.CollapsingHeader("Export", ImGuiTreeNodeFlags.DefaultOpen))
+            if (ImGui.CollapsingHeader("Export", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
             {
                 var filterConfigurations = PluginService.FilterService.FiltersList;
                 ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(5, 5) * ImGui.GetIO().FontGlobalScale);
@@ -71,7 +71,7 @@ namespace InventoryTools.Sections
                 ImGui.PopStyleVar();
             }
 
-            if (ImGui.CollapsingHeader("Import", ImGuiTreeNodeFlags.DefaultOpen))
+            if (ImGui.CollapsingHeader("Import", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
             {
                 var importData = ImportData;
                 if (ImGui.InputTextMultiline("Paste filter here",ref importData, 5000, new Vector2(400, 200) * ImGui.GetIO().FontGlobalScale))

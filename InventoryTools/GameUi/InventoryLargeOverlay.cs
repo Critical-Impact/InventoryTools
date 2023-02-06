@@ -8,7 +8,7 @@ namespace InventoryTools.GameUi
 {
     public class InventoryLargeOverlay : AtkInventoryLarge, IAtkOverlayState
     {
-        public override unsafe bool Draw()
+        public override bool Draw()
         {
             if (!HasState || !HasAddon)
             {

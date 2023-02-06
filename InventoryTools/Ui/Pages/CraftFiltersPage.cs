@@ -12,7 +12,7 @@ namespace InventoryTools.Sections
         public void Draw()
         {
             var filterConfigurations = PluginService.FilterService.FiltersList.Where(c => c.FilterType == FilterType.CraftFilter && !c.CraftListDefault).ToList();
-            if (ImGui.CollapsingHeader("Filters", ImGuiTreeNodeFlags.DefaultOpen))
+            if (ImGui.CollapsingHeader("Filters", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
             {
                 ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(5, 5) * ImGui.GetIO().FontGlobalScale);
                 if (ImGui.BeginTable("FilterConfigTable", 3, ImGuiTableFlags.BordersV |
@@ -108,7 +108,7 @@ namespace InventoryTools.Sections
                 ImGui.PopStyleVar();
             }
 
-            if (ImGui.CollapsingHeader("Create Filters", ImGuiTreeNodeFlags.DefaultOpen))
+            if (ImGui.CollapsingHeader("Create Filters", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
             {
                 if (ImGui.Button("Add New Craft List"))
                 {

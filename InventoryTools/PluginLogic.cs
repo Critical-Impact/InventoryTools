@@ -1240,6 +1240,21 @@ namespace InventoryTools
                 {
                     filterTables.Value.Dispose();
                 }
+
+                foreach (var textureWrap in TextureDictionary)
+                {
+                    textureWrap.Value.Dispose();
+                }
+
+                foreach (var textureWrap in UldTextureDictionary)
+                {
+                    textureWrap.Value.Dispose();
+                }
+
+                foreach (var textureWrap in HQTextureDictionary)
+                {
+                    textureWrap.Value.Dispose();
+                }
                 PluginService.OnPluginLoaded -= PluginServiceOnOnPluginLoaded;
                 PluginService.GameInterface.AcquiredItemsUpdated -= GameInterfaceOnAcquiredItemsUpdated;
                 PluginConfiguration.SavedCharacters = PluginService.CharacterMonitor.Characters;
@@ -1255,6 +1270,21 @@ namespace InventoryTools
                 CommonBase.Dispose();
             }
             _disposed = true;         
+        }
+        
+            
+        ~PluginLogic()
+        {
+#if DEBUG
+            // In debug-builds, make sure that a warning is displayed when the Disposable object hasn't been
+            // disposed by the programmer.
+
+            if( _disposed == false )
+            {
+                PluginLog.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
+            }
+#endif
+            Dispose (true);
         }
     }
 }

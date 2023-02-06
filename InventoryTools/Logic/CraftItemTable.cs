@@ -54,7 +54,7 @@ namespace InventoryTools.Logic
             }
 
             var isExpanded = false;
-            if(ImGui.CollapsingHeader("To Craft", ImGuiTreeNodeFlags.DefaultOpen))
+            if(ImGui.CollapsingHeader("To Craft", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
             {
                 isExpanded = true;
                 ImGui.BeginChild("CraftContent", size * ImGui.GetIO().FontGlobalScale);

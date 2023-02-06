@@ -11,7 +11,7 @@ namespace InventoryTools.GameUi
     {
         public override bool ShouldDraw { get; set; }
 
-        public override unsafe bool Draw()
+        public override bool Draw()
         {
             if (!HasState || !HasAddon)
             {
@@ -27,7 +27,7 @@ namespace InventoryTools.GameUi
             return false;
         }
         
-        public unsafe void Clear()
+        public void Clear()
         {
             var atkUnitBase = AtkUnitBase;
             if (atkUnitBase != null)
@@ -140,7 +140,7 @@ namespace InventoryTools.GameUi
             HasState = false;
         }
         
-        private unsafe string GenerateNewName(IGrouping<ulong, SortingResult> c)
+        private string GenerateNewName(IGrouping<ulong, SortingResult> c)
         {
             if (PluginService.CharacterMonitor.Characters.ContainsKey(c.Key))
             {
@@ -149,7 +149,7 @@ namespace InventoryTools.GameUi
             return "Unknown "  + "(" + c.Count() + ")";
         }
         
-        private unsafe string GenerateNewName(KeyValuePair<ulong, int> c)
+        private string GenerateNewName(KeyValuePair<ulong, int> c)
         {
             if (PluginService.CharacterMonitor.Characters.ContainsKey(c.Key))
             {

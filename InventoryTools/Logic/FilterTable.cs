@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using CriticalCommonLib;
 using CriticalCommonLib.Sheets;
 using CsvHelper;
 using Dalamud.Logging;
@@ -55,7 +56,7 @@ namespace InventoryTools.Logic
                     SortedItems = items.ToList();
                     RenderSortedItems = SortedItems.Where(item => !item.InventoryItem.IsEmpty).ToList();
                     NeedsRefresh = false;
-                    Refreshed?.Invoke(this);
+                    Service.Framework.RunOnFrameworkThread(() => { Refreshed?.Invoke(this); });
                 }
                 else
                 {
@@ -81,7 +82,7 @@ namespace InventoryTools.Logic
                     Items = items.Where(c => c.NameString.ToString() != "").ToList();
                     RenderItems = Items.ToList();
                     NeedsRefresh = false;
-                    Refreshed?.Invoke(this);
+                    Service.Framework.RunOnFrameworkThread(() => { Refreshed?.Invoke(this); });
                 }
             }
         }
@@ -127,7 +128,7 @@ namespace InventoryTools.Logic
             var isExpanded = false;
             ImGui.BeginChild("FilterTableContent", size * ImGui.GetIO().FontGlobalScale, false, ImGuiWindowFlags.HorizontalScrollbar); 
             
-            if((FilterConfiguration.FilterType != FilterType.CraftFilter || FilterConfiguration.FilterType == FilterType.CraftFilter && ImGui.CollapsingHeader("Items in Retainers/Bags", ImGuiTreeNodeFlags.DefaultOpen)) && ImGui.BeginTable(Key, Columns.Count, _tableFlags))
+            if((FilterConfiguration.FilterType != FilterType.CraftFilter || FilterConfiguration.FilterType == FilterType.CraftFilter && ImGui.CollapsingHeader("Items in Retainers/Bags", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader)) && ImGui.BeginTable(Key, Columns.Count, _tableFlags))
             {
                 isExpanded = true;
                 var refresh = false;
@@ -198,10 +199,16 @@ namespace InventoryTools.Logic
                     FilterConfiguration.FilterType == FilterType.SortingFilter ||
                     FilterConfiguration.FilterType == FilterType.CraftFilter)
                 {
-                    _clipper.Begin(RenderSortedItems.Count);
-                    while (_clipper.Step())
+                    ImGuiListClipperPtr clipper;
+                    unsafe
                     {
-                        for (var index = _clipper.DisplayStart; index < _clipper.DisplayEnd; index++)
+                        clipper = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper_ImGuiListClipper());
+                        clipper.ItemsHeight = 32;
+                    }
+                    clipper.Begin(RenderSortedItems.Count);
+                    while (clipper.Step())
+                    {
+                        for (var index = clipper.DisplayStart; index < clipper.DisplayEnd; index++)
                         {
                             var item = RenderSortedItems[index];
                             ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
@@ -220,14 +227,21 @@ namespace InventoryTools.Logic
                         }
                     }
 
-                    _clipper.End();
+                    clipper.End();
+                    clipper.Destroy();
                 }
                 else
                 {
-                    _clipper.Begin(RenderItems.Count);
-                    while (_clipper.Step())
+                    ImGuiListClipperPtr clipper;
+                    unsafe
                     {
-                        for (var index = _clipper.DisplayStart; index < _clipper.DisplayEnd; index++)
+                        clipper = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper_ImGuiListClipper());
+                        clipper.ItemsHeight = 32;
+                    }
+                    clipper.Begin(RenderItems.Count);
+                    while (clipper.Step())
+                    {
+                        for (var index = clipper.DisplayStart; index < clipper.DisplayEnd; index++)
                         {
                             var item = RenderItems[index];
                             ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
@@ -243,7 +257,8 @@ namespace InventoryTools.Logic
                             }
                         }
                     }
-                    _clipper.End();
+                    clipper.End();
+                    clipper.Destroy();
                 }
                 ImGui.EndTable();
             }
@@ -302,15 +317,6 @@ namespace InventoryTools.Logic
         {
             Columns.ForEach(c => c.FilterText = "");
             NeedsRefresh = true;
-        }
-
-        public override void Dispose()
-        {
-            base.Dispose();
-            unsafe
-            {
-                _clipper.Destroy();
-            }
         }
     }
 }
