@@ -30,6 +30,12 @@ namespace InventoryTools.Extensions
                 var filter = filterString.Substring(1);
                 return !text.Contains(filter);
             }
+            else if (filterString.StartsWith("~") && filterString.Length >= 2)
+            {
+                var filter = filterString.Substring(1).Split(" ");
+                var splitText = text.Split(" ");
+                return filter.All(c => splitText.Any(d => d.Contains(c)));
+            }
 
             return text.Contains(filterString);
         }

@@ -1,5 +1,6 @@
 using CriticalCommonLib;
 using CriticalCommonLib.Services;
+using Lumina;
 using NUnit.Framework;
 
 namespace InventoryToolsTesting
@@ -11,7 +12,10 @@ namespace InventoryToolsTesting
         [OneTimeSetUp]
         public void Init()
         {
-            var lumina = new Lumina.GameData( "H:/Games/SquareEnix/FINAL FANTASY XIV - A Realm Reborn/game/sqpack" );
+            var lumina = new Lumina.GameData( "C:/Games/SquareEnix/FINAL FANTASY XIV - A Realm Reborn/game/sqpack", new LuminaOptions()
+            {
+                PanicOnSheetChecksumMismatch = false
+            } );
             Service.ExcelCache = new ExcelCache(lumina);
         }
         

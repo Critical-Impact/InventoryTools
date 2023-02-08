@@ -85,6 +85,7 @@ namespace InventoryTools.Logic
         private List<string>? _craftColumns;
         private string? _icon;
         private static readonly byte CurrentVersion = 1;
+        private HashSet<uint>? _sourceWorlds;
         
         //Crafting
         private CraftList? _craftList = null;
@@ -883,6 +884,15 @@ namespace InventoryTools.Logic
                 _simpleCraftingMode = value;
                 Service.Framework.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
             }
+        }
+        
+        public HashSet<uint>? SourceWorlds
+        {
+            get => _sourceWorlds;
+            set { _sourceWorlds = value;
+                NeedsRefresh = true;
+                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+            }            
         }
 
         public event ConfigurationChangedDelegate? ConfigurationChanged;
@@ -1699,6 +1709,32 @@ namespace InventoryTools.Logic
                         }
                     }
                 }
+                
+                
+                if (SourceWorlds != null)
+                {
+                    foreach (var retainer in allRetainers)
+                    {
+                        if(SourceWorlds.Contains(retainer.Value.WorldId))
+                        {
+                            foreach (var categoryValue in categoryValues)
+                            {
+                                if (categoryValue.IsRetainerCategory())
+                                {
+                                    if (!categories.ContainsKey(retainer.Key))
+                                    {
+                                        categories.Add(retainer.Key, new HashSet<InventoryCategory>());
+                                    }
+
+                                    if (!categories[retainer.Key].Contains(categoryValue))
+                                    {
+                                        categories[retainer.Key].Add(categoryValue);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
 
                 return categories;
             }
@@ -1770,6 +1806,31 @@ namespace InventoryTools.Logic
                         if (!categories[category.Item1].Contains( category.Item2))
                         {
                             categories[category.Item1].Add( category.Item2);
+                        }
+                    }
+                }
+                
+                if (SourceWorlds != null)
+                {
+                    foreach (var retainer in allCharacters)
+                    {
+                        if(SourceWorlds.Contains(retainer.Value.WorldId))
+                        {
+                            foreach (var categoryValue in categoryValues)
+                            {
+                                if (categoryValue.IsRetainerCategory())
+                                {
+                                    if (!categories.ContainsKey(retainer.Key))
+                                    {
+                                        categories.Add(retainer.Key, new HashSet<InventoryCategory>());
+                                    }
+
+                                    if (!categories[retainer.Key].Contains(categoryValue))
+                                    {
+                                        categories[retainer.Key].Add(categoryValue);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -1874,6 +1935,14 @@ namespace InventoryTools.Logic
                             if (filter.SourceCategories != null &&
                                 filter.SourceCategories.Contains(inventoryKey.Item2.ToInventoryCategory()) && (displaySourceCrossCharacter ||
                                     characterMonitor.BelongsToActiveCharacter(character.Key)))
+                            {
+                                if (!sourceInventories.ContainsKey(inventoryKey))
+                                {
+                                    sourceInventories.Add(inventoryKey, inventory.Value.Where(c => c.SortedContainer == type).ToList());
+                                }
+                            }
+
+                            if (filter.SourceWorlds != null && filter.SourceWorlds.Contains(characterMonitor.GetCharacterById(character.Key)?.WorldId ?? 0))
                             {
                                 if (!sourceInventories.ContainsKey(inventoryKey))
                                 {
@@ -2207,6 +2276,14 @@ namespace InventoryTools.Logic
                             }
                         }
                         if (filter.SourceCategories != null && filter.SourceCategories.Contains(inventoryKey.Item2) && (displaySourceCrossCharacter || characterMonitor.BelongsToActiveCharacter(character.Key)))
+                        {
+                            if (!sourceInventories.ContainsKey(inventoryKey))
+                            {
+                                sourceInventories.Add(inventoryKey, inventory.Value);
+                            }
+                        }
+                        
+                        if (filter.SourceWorlds != null && filter.SourceWorlds.Contains(characterMonitor.GetCharacterById(character.Key)?.WorldId ?? 0))
                         {
                             if (!sourceInventories.ContainsKey(inventoryKey))
                             {

@@ -11,6 +11,7 @@ using Dalamud.Logging;
 using InventoryTools;
 using InventoryTools.Logic;
 using InventoryTools.Services;
+using Lumina;
 using NUnit.Framework;
 
 namespace InventoryToolsTesting
@@ -28,7 +29,10 @@ namespace InventoryToolsTesting
         [OneTimeSetUp]
         public void Setup()
         {
-            var lumina = new Lumina.GameData( "H:/Games/SquareEnix/FINAL FANTASY XIV - A Realm Reborn/game/sqpack" );
+            var lumina = new Lumina.GameData( "C:/Games/SquareEnix/FINAL FANTASY XIV - A Realm Reborn/game/sqpack", new LuminaOptions()
+            {
+                PanicOnSheetChecksumMismatch = false
+            } );
             Service.ExcelCache = new ExcelCache(lumina);
         }
         

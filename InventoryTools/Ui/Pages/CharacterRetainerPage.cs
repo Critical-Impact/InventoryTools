@@ -15,7 +15,7 @@ namespace InventoryTools.Sections
             if (ImGui.CollapsingHeader("Characters", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
             {
                 ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(5, 5) * ImGui.GetIO().FontGlobalScale);
-                if (ImGui.BeginTable("CharacterTable", 3, ImGuiTableFlags.BordersV |
+                if (ImGui.BeginTable("CharacterTable", 4, ImGuiTableFlags.BordersV |
                                                              ImGuiTableFlags.BordersOuterV |
                                                              ImGuiTableFlags.BordersInnerV |
                                                              ImGuiTableFlags.BordersH |
@@ -23,6 +23,7 @@ namespace InventoryTools.Sections
                                                              ImGuiTableFlags.BordersInnerH))
                 {
                     ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint) 0);
+                    ImGui.TableSetupColumn("World", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint) 0);
                     ImGui.TableSetupColumn("Display Name", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint) 1);
                     ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint) 2);
                     ImGui.TableHeadersRow();
@@ -31,6 +32,7 @@ namespace InventoryTools.Sections
                     {
                         ImGui.TableNextRow();
                         ImGui.Text("No characters available.");
+                        ImGui.TableNextColumn();
                         ImGui.TableNextColumn();
                         ImGui.TableNextColumn();
                     }
@@ -43,6 +45,13 @@ namespace InventoryTools.Sections
                         if (character.Name != "")
                         {
                             ImGui.Text(character.Name);
+                            ImGui.SameLine();
+                        }
+
+                        ImGui.TableNextColumn();
+                        if (character.WorldId != 0)
+                        {
+                            ImGui.Text(character.World?.Name ?? "Unknown");
                             ImGui.SameLine();
                         }
 
@@ -107,7 +116,7 @@ namespace InventoryTools.Sections
             if (ImGui.CollapsingHeader("Retainers", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(5, 5) * ImGui.GetIO().FontGlobalScale);
-                if (ImGui.BeginTable("RetainerTable", 7, ImGuiTableFlags.BordersV |
+                if (ImGui.BeginTable("RetainerTable", 8, ImGuiTableFlags.BordersV |
                                                              ImGuiTableFlags.BordersOuterV |
                                                              ImGuiTableFlags.BordersInnerV |
                                                              ImGuiTableFlags.BordersH |
@@ -116,17 +125,19 @@ namespace InventoryTools.Sections
                 {
                     ImGui.TableSetupColumn("Hire Order", ImGuiTableColumnFlags.WidthStretch, 30.0f, (uint) 0);
                     ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.WidthStretch, 70.0f, (uint) 1);
-                    ImGui.TableSetupColumn("Gil", ImGuiTableColumnFlags.WidthStretch, 30.0f, (uint) 2);
-                    ImGui.TableSetupColumn("Level", ImGuiTableColumnFlags.WidthStretch, 40.0f, (uint) 3);
-                    ImGui.TableSetupColumn("Owner", ImGuiTableColumnFlags.WidthStretch, 60.0f, (uint) 4);
-                    ImGui.TableSetupColumn("Display Name", ImGuiTableColumnFlags.WidthStretch, 80.0f, (uint) 5);
-                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch, 80.0f, (uint) 6);
+                    ImGui.TableSetupColumn("World", ImGuiTableColumnFlags.WidthStretch, 70.0f, (uint) 2);
+                    ImGui.TableSetupColumn("Gil", ImGuiTableColumnFlags.WidthStretch, 30.0f, (uint) 3);
+                    ImGui.TableSetupColumn("Level", ImGuiTableColumnFlags.WidthStretch, 40.0f, (uint) 4);
+                    ImGui.TableSetupColumn("Owner", ImGuiTableColumnFlags.WidthStretch, 60.0f, (uint) 5);
+                    ImGui.TableSetupColumn("Display Name", ImGuiTableColumnFlags.WidthStretch, 80.0f, (uint) 6);
+                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch, 80.0f, (uint) 7);
                     ImGui.TableHeadersRow();
                     var retainers = PluginService.CharacterMonitor.GetRetainerCharacters().OrderBy(c => c.Value.HireOrder).ToList();
                     if (retainers.Count == 0)
                     {
                         ImGui.TableNextRow();
                         ImGui.Text("No retainers available.");
+                        ImGui.TableNextColumn();
                         ImGui.TableNextColumn();
                         ImGui.TableNextColumn();
                         ImGui.TableNextColumn();
@@ -150,6 +161,13 @@ namespace InventoryTools.Sections
                         ImGui.TableNextColumn();
                         ImGui.Text(character.Name);
                         ImGui.SameLine();
+                        
+                        ImGui.TableNextColumn();
+                        if (character.WorldId != 0)
+                        {
+                            ImGui.Text(character.World?.Name ?? "Unknown");
+                            ImGui.SameLine();
+                        }
                         
                         ImGui.TableNextColumn();
                         ImGui.Text(character.Gil.ToString());

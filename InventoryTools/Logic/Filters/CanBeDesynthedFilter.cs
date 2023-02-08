@@ -16,7 +16,7 @@ namespace InventoryTools.Logic.Filters
         
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
-            return FilterItem(configuration, item);
+            return FilterItem(configuration, item.Item);
         }
 
         public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)

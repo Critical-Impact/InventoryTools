@@ -14,7 +14,10 @@ namespace InventoryToolsTesting
         [OneTimeSetUp]
         public void Init()
         {
-            var lumina = new GameData( "H:/Games/SquareEnix/FINAL FANTASY XIV - A Realm Reborn/game/sqpack" );
+            var lumina = new GameData( "C:/Games/SquareEnix/FINAL FANTASY XIV - A Realm Reborn/game/sqpack", new LuminaOptions()
+            {
+                PanicOnSheetChecksumMismatch = false
+            } );
             Service.ExcelCache = new ExcelCache(lumina);
         }
 
@@ -31,6 +34,15 @@ namespace InventoryToolsTesting
             list.AddCraftItem(31945, 1);
             requiredMaterialsList = list.GetRequiredMaterialsList();
             Assert.AreEqual( 50, requiredMaterialsList[32028]);
+        }
+
+        [Test]
+        public void TestYields()
+        {
+            CraftList list = new CraftList();
+            list.AddCraftItem(5334, 3);
+            var requiredMaterialsList = list.GetRequiredMaterialsList();
+            Assert.AreEqual( 4, requiredMaterialsList[5343]);
         }
         
         [Test]

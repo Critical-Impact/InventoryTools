@@ -13,6 +13,13 @@ namespace InventoryTools.Logic
     {
         public CraftItemTable(FilterConfiguration filterConfiguration) : base(filterConfiguration)
         {
+            _tableFlags = ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersV |
+                          ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.BordersInnerV |
+                          ImGuiTableFlags.BordersH | ImGuiTableFlags.BordersOuterH |
+                          ImGuiTableFlags.BordersInnerH |
+                          ImGuiTableFlags.Resizable |
+                          ImGuiTableFlags.Hideable | ImGuiTableFlags.ScrollX |
+                          ImGuiTableFlags.ScrollY;
             filterConfiguration.CraftList.GenerateCraftChildren();
             filterConfiguration.StartRefresh();
 
@@ -72,28 +79,6 @@ namespace InventoryTools.Logic
 
                     ImGui.TableHeadersRow();
 
-                    var currentSortSpecs = ImGui.TableGetSortSpecs();
-                    if (currentSortSpecs.SpecsDirty)
-                    {
-                        var actualSpecs = currentSortSpecs.Specs;
-                        if (SortColumn != actualSpecs.ColumnIndex)
-                        {
-                            SortColumn = actualSpecs.ColumnIndex;
-                            refresh = true;
-                        }
-
-                        if (SortDirection != actualSpecs.SortDirection)
-                        {
-                            SortDirection = actualSpecs.SortDirection;
-                            refresh = true;
-                        }
-                    }
-                    else
-                    {
-                        SortColumn = null;
-                        SortDirection = null;
-                        refresh = true;
-                    }
 
                     if (refresh || NeedsRefresh)
                     {
