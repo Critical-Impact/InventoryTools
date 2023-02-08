@@ -701,10 +701,12 @@ namespace InventoryTools
                     if (PluginConfiguration.TooltipLocationDisplayMode ==
                         TooltipLocationDisplayMode.CharacterBagSlotQuality)
                     {
-                        var maxOwnedItems = ownedItems.Take(PluginConfiguration.TooltipLocationLimit).ToList();
-                        foreach (var oItem in maxOwnedItems)
+                        foreach (var oItem in ownedItems)
                         {
                             storageCount += oItem.Quantity;
+                            
+                            if (locations.Count >= PluginConfiguration.TooltipLocationLimit)
+                                continue;
 
                             var characterMonitorCharacter = PluginService.CharacterMonitor.Characters[oItem.RetainerId];
                             var name = characterMonitorCharacter?.FormattedName ?? "Unknown";
@@ -731,19 +733,21 @@ namespace InventoryTools
 
                             locations.Add($"{name} - {oItem.FormattedBagLocation} " + typeIcon);
                         }
-                        if (ownedItems.Count > maxOwnedItems.Count)
+                        if (ownedItems.Count > PluginConfiguration.TooltipLocationLimit)
                         {
-                            locations.Add(ownedItems.Count - maxOwnedItems.Count + " other locations.");
+                            locations.Add(ownedItems.Count - PluginConfiguration.TooltipLocationLimit + " other locations.");
                         }                        
                     }
                     else if (PluginConfiguration.TooltipLocationDisplayMode == TooltipLocationDisplayMode.CharacterCategoryQuantityQuality)
                     {
                         var groupedItems = ownedItems.GroupBy(c => (c.RetainerId, c.SortedCategory, c.Flags)).ToList();
-                        var maxGroupedItems = groupedItems.Take(PluginConfiguration.TooltipLocationLimit).ToList();
-                        foreach (var oGroup in maxGroupedItems)
+                        foreach (var oGroup in groupedItems)
                         {
                             var quantity = oGroup.Sum(c => c.Quantity);
                             storageCount += (uint)quantity;
+                            
+                            if (locations.Count >= PluginConfiguration.TooltipLocationLimit)
+                                continue;
 
                             var characterMonitorCharacter = PluginService.CharacterMonitor.Characters[oGroup.Key.RetainerId];
                             var name = characterMonitorCharacter?.FormattedName ?? "Unknown";
@@ -770,19 +774,21 @@ namespace InventoryTools
 
                             locations.Add($"{name} - {oGroup.Key.SortedCategory.FormattedName()} - " + quantity + " " + typeIcon);
                         }
-                        if (groupedItems.Count > maxGroupedItems.Count)
+                        if (groupedItems.Count > PluginConfiguration.TooltipLocationLimit)
                         {
-                            locations.Add(groupedItems.Count - maxGroupedItems.Count + " other locations.");
+                            locations.Add(groupedItems.Count - PluginConfiguration.TooltipLocationLimit + " other locations.");
                         }  
                     }
                     else if (PluginConfiguration.TooltipLocationDisplayMode == TooltipLocationDisplayMode.CharacterQuantityQuality)
                     {
                         var groupedItems = ownedItems.GroupBy(c => (c.RetainerId, c.Flags)).ToList();
-                        var maxGroupedItems = groupedItems.Take(PluginConfiguration.TooltipLocationLimit).ToList();
-                        foreach (var oGroup in maxGroupedItems)
+                        foreach (var oGroup in groupedItems)
                         {
                             var quantity = oGroup.Sum(c => c.Quantity);
                             storageCount += (uint)quantity;
+                            
+                            if (locations.Count >= PluginConfiguration.TooltipLocationLimit)
+                                continue;
 
                             var characterMonitorCharacter = PluginService.CharacterMonitor.Characters[oGroup.Key.RetainerId];
                             var name = characterMonitorCharacter?.FormattedName ?? "Unknown";
@@ -809,9 +815,9 @@ namespace InventoryTools
 
                             locations.Add($"{name} - " + quantity + " " + typeIcon);
                         }
-                        if (groupedItems.Count > maxGroupedItems.Count)
+                        if (groupedItems.Count > PluginConfiguration.TooltipLocationLimit)
                         {
-                            locations.Add(groupedItems.Count - maxGroupedItems.Count + " other locations.");
+                            locations.Add(groupedItems.Count - PluginConfiguration.TooltipLocationLimit + " other locations.");
                         }  
                     }
 
