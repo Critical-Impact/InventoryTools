@@ -63,7 +63,7 @@ namespace InventoryTools.Extensions
             {
                 if (ImGui.Selectable("Add to new craft list"))
                 {
-                    Service.Framework.RunOnTick(() =>
+                    PluginService.FrameworkService.RunOnTick(() =>
                     {
                         var filter = PluginService.FilterService.AddNewCraftFilter();
                         filter.CraftList.AddCraftItem(item.RowId);
@@ -81,7 +81,7 @@ namespace InventoryTools.Extensions
                 {
                     if (ImGui.Selectable("Add phase " + i + " to new craft list"))
                     {
-                        Service.Framework.RunOnTick(() =>
+                        PluginService.FrameworkService.RunOnTick(() =>
                         {
                             var filter = PluginService.FilterService.AddNewCraftFilter();
                             filter.CraftList.AddCraftItem(item.RowId);
@@ -175,7 +175,7 @@ namespace InventoryTools.Extensions
                     }
                     if (ImGui.Selectable("Add " + item.QuantityNeeded + " item to new craft list"))
                     {
-                        Service.Framework.RunOnTick(() =>
+                        PluginService.FrameworkService.RunOnTick(() =>
                         {
                             var filter = PluginService.FilterService.AddNewCraftFilter();
                             filter.CraftList.AddCraftItem(item.Item.RowId, item.QuantityNeeded,
@@ -235,7 +235,7 @@ namespace InventoryTools.Extensions
 
             if (item.CanOpenGatheringLog && ImGui.Selectable("Gather with Gatherbuddy"))
             {
-                Service.Commands.ProcessCommand("/gather " + item.NameString);
+                PluginService.CommandService.ProcessCommand("/gather " + item.NameString);
             }
 
             if (ImGui.Selectable("More Information"))

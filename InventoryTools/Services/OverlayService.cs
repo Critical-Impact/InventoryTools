@@ -10,17 +10,19 @@ using InventoryTools.Logic;
 
 namespace InventoryTools.Services
 {
-    public class OverlayService : IDisposable
+    public class OverlayService : IDisposable, IOverlayService
     {
-        private FilterService _filterService;
-        private GameUiManager _gameUiManager;
+        private IFilterService _filterService;
+        private IGameUiManager _gameUiManager;
+        private IFrameworkService _frameworkService;
         
-        public OverlayService(FilterService filterService, GameUiManager gameUiManager)
+        public OverlayService(IFilterService filterService, IGameUiManager gameUiManager, IFrameworkService frameworkService)
         {
             _gameUiManager = gameUiManager;
-            PluginService.GameUi.UiVisibilityChanged += GameUiOnUiVisibilityChanged;
-            PluginService.GameUi.UiUpdated += GameUiOnUiUpdated;
+            _gameUiManager.UiVisibilityChanged += GameUiOnUiVisibilityChanged;
+            _gameUiManager.UiUpdated += GameUiOnUiUpdated;
             _filterService = filterService;
+            _frameworkService = frameworkService;
             filterService.FilterModified += FilterServiceOnFilterModified;
             filterService.UiFilterToggled += FilterServiceOnFilterToggled;
             filterService.BackgroundFilterToggled += FilterServiceOnFilterToggled;
@@ -37,7 +39,7 @@ namespace InventoryTools.Services
             AddOverlay(new FreeCompanyChestOverlay());
             AddOverlay(new InventoryMiragePrismBoxOverlay());
             AddOverlay(new CabinetWithdrawOverlay());
-            Service.Framework.Update += FrameworkOnUpdate;
+            frameworkService.Update += FrameworkOnUpdate;
             PluginService.OnPluginLoaded += PluginServiceOnOnPluginLoaded;
         }
 
@@ -96,7 +98,7 @@ namespace InventoryTools.Services
             
         }
 
-        private void FrameworkOnUpdate(Framework framework)
+        private void FrameworkOnUpdate(IFrameworkService framework)
         {
             foreach (var overlay in _overlays)
             {
@@ -266,7 +268,7 @@ namespace InventoryTools.Services
         {
             if(!_disposed && disposing)
             {
-                Service.Framework.Update -= FrameworkOnUpdate;
+                _frameworkService.Update -= FrameworkOnUpdate;
                 ClearOverlays();
                 _filterService.FilterModified -= FilterServiceOnFilterModified;
                 _filterService.UiFilterToggled -= FilterServiceOnFilterToggled;

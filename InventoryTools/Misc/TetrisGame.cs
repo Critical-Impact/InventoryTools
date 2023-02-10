@@ -5,12 +5,14 @@ using System.Numerics;
 using System.Timers;
 using CriticalCommonLib;
 using CriticalCommonLib.Enums;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
 using Dalamud.Game;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Colors;
 using Dalamud.Logging;
 using InventoryTools.GameUi;
+using InventoryTools.Services;
 using Tetris.GameEngine;
 
 namespace InventoryTools.Misc
@@ -51,16 +53,16 @@ namespace InventoryTools.Misc
             Game = new Game();
             _gameTimer = new System.Timers.Timer(800);
             _gameTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
-            Service.Framework.Update += FrameworkOnOnUpdateEvent;
+            PluginService.FrameworkService.Update += FrameworkOnOnUpdateEvent;
             _gameTimer.Start();
         }
         
         private bool isKeyPressed(VirtualKey[] keys) {
-            foreach (var vk in Service.KeyState.GetValidVirtualKeys()) {
+            foreach (var vk in PluginService.KeyStateService.GetValidVirtualKeys()) {
                 if (keys.Contains(vk)) {
-                    if (!Service.KeyState[vk]) return false;
+                    if (!PluginService.KeyStateService[vk]) return false;
                 } else {
-                    if (Service.KeyState[vk]) return false;
+                    if (PluginService.KeyStateService[vk]) return false;
                 }
             }
             return true;
@@ -68,13 +70,13 @@ namespace InventoryTools.Misc
 
         private DateTime? lastMoveTime = null;
         
-        private void FrameworkOnOnUpdateEvent(Framework framework) {
+        private void FrameworkOnOnUpdateEvent(IFrameworkService framework) {
         try {
             if (Game.Status != Game.GameStatus.InProgress) return;
 
             if (lastMoveTime != null && lastMoveTime.Value.AddMilliseconds(100) >= DateTime.Now)
             {
-                Service.KeyState.ClearAll();
+                PluginService.KeyStateService.ClearAll();
                 return;
             }                
 
@@ -97,7 +99,7 @@ namespace InventoryTools.Misc
                 Game.MoveRight();
                 lastMoveTime = DateTime.Now;
             }
-            Service.KeyState.ClearAll();
+            PluginService.KeyStateService.ClearAll();
             
 
         } catch (Exception) {
@@ -283,7 +285,7 @@ namespace InventoryTools.Misc
             if(!_disposed && disposing)
             {
                 _gameTimer?.Dispose();
-                Service.Framework.Update -= FrameworkOnOnUpdateEvent;
+                PluginService.FrameworkService.Update -= FrameworkOnOnUpdateEvent;
             }
             _disposed = true;         
         }

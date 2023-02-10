@@ -373,7 +373,7 @@ namespace InventoryTools.Ui
                                         0);
                                     if (amountLeft > 0)
                                     {
-                                        Service.Framework.RunOnFrameworkThread(() =>
+                                        PluginService.FrameworkService.RunOnFrameworkThread(() =>
                                         {
                                             filterConfiguration.CraftList.AddCraftItem(itemRequired,
                                                 (uint)amountLeft, InventoryItem.ItemFlags.None);
@@ -564,7 +564,7 @@ namespace InventoryTools.Ui
             ImGui.PushID("s_" + item.RowId);
             if (ImGui.ImageButton(_addIcon.ImGuiHandle, new Vector2(16, 16), new Vector2(0,0), new Vector2(1,1), 0))
             {
-                Service.Framework.RunOnFrameworkThread(() =>
+                PluginService.FrameworkService.RunOnFrameworkThread(() =>
                 {
                     filterConfiguration.CraftList.AddCraftItem(item.RowId, 1, InventoryItem.ItemFlags.None);
                     filterConfiguration.NeedsRefresh = true;

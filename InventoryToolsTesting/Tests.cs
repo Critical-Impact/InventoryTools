@@ -41,7 +41,11 @@ namespace InventoryToolsTesting
         {
             _characterMonitor = new CharacterMonitor(true);
             _pluginLogic = new PluginLogic(true);
-            PluginService.InitialiseTesting(_characterMonitor, _pluginLogic);
+            PluginService.InitaliseExplicit(new MockServices()
+            {
+                CharacterMonitor = _characterMonitor,
+                PluginLogic = _pluginLogic
+            });
             ConfigurationManager.Config = new InventoryToolsConfiguration();
             _character = Fixtures.GenerateCharacter();
             _character2 = Fixtures.GenerateCharacter();

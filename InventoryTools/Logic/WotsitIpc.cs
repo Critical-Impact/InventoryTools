@@ -7,7 +7,7 @@ using Dalamud.Plugin.Ipc;
 
 namespace InventoryTools.Logic
 {
-    public class WotsitIpc : IDisposable
+    public class WotsitIpc: IDisposable, IWotsitIpc
     {
         private const string IpcDisplayName = "Allagan Tools";
         private const uint WotsitIconId = 32;
@@ -25,10 +25,10 @@ namespace InventoryTools.Logic
         {
             InitForWotsit();
 
-            var wotsitAvailable = Service.Interface.GetIpcSubscriber<bool>("FA.Available");
+            var wotsitAvailable = PluginService.PluginInterfaceService.GetIpcSubscriber<bool>("FA.Available");
             wotsitAvailable.Subscribe(() =>
             {
-                Service.Framework.RunOnFrameworkThread(InitForWotsit);
+                PluginService.FrameworkService.RunOnFrameworkThread(InitForWotsit);
             });
             
             PluginService.FilterService.FilterAdded += FilterAddedRemoved;
@@ -76,22 +76,22 @@ namespace InventoryTools.Logic
             }
         }
 
-        private void InitForWotsit()
+        public void InitForWotsit()
         {
             if (_wotsitUnregister == null)
             {
-                _wotsitUnregister = Service.Interface.GetIpcSubscriber<string, bool>("FA.UnregisterAll");
+                _wotsitUnregister = PluginService.PluginInterfaceService.GetIpcSubscriber<string, bool>("FA.UnregisterAll");
             }
             
             if (_wotsitRegister == null)
             {
                 _wotsitRegister =
-                    Service.Interface.GetIpcSubscriber<string, string, string, uint, string>("FA.RegisterWithSearch");
+                    PluginService.PluginInterfaceService.GetIpcSubscriber<string, string, string, uint, string>("FA.RegisterWithSearch");
             }
 
             if (_callGateSubscriber == null)
             {
-                _callGateSubscriber = Service.Interface.GetIpcSubscriber<string, bool>("FA.Invoke");
+                _callGateSubscriber = PluginService.PluginInterfaceService.GetIpcSubscriber<string, bool>("FA.Invoke");
                 _callGateSubscriber.Subscribe(WotsitInvoke);
             }
             
@@ -115,7 +115,7 @@ namespace InventoryTools.Logic
             RegisterFilters();
         }
 
-        private void RegisterFilters()
+        public void RegisterFilters()
         {
             if (_wotsitRegister != null)
             {
@@ -140,9 +140,9 @@ namespace InventoryTools.Logic
             PluginLog.Debug($"Registered {_wotsitToggleFilterGuids.Count} filters with Wotsit");
         }
 
-        private void WotsitInvoke(string guid)
+        public void WotsitInvoke(string guid)
         {
-            Service.Framework.RunOnFrameworkThread(() =>
+            PluginService.FrameworkService.RunOnFrameworkThread(() =>
             {
                 if (_wotsitToggleFilterGuids.TryGetValue(guid, out var filter))
                 {
@@ -196,4 +196,6 @@ namespace InventoryTools.Logic
             Dispose (true);
         }
     }
+    
+    
 }

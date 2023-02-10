@@ -209,9 +209,9 @@ namespace InventoryTools.Logic
             if (this.FilterType == FilterType.CraftFilter)
             {
                 //Clean up this sloppy function
-                var playerBags = PluginService.InventoryMonitor.GetSpecificInventory(PluginService.CharacterMonitor.ActiveCharacter,
+                var playerBags = PluginService.InventoryMonitor.GetSpecificInventory(PluginService.CharacterMonitor.ActiveCharacterId,
                    InventoryCategory.CharacterBags);
-                var crystalBags = PluginService.InventoryMonitor.GetSpecificInventory(PluginService.CharacterMonitor.ActiveCharacter,
+                var crystalBags = PluginService.InventoryMonitor.GetSpecificInventory(PluginService.CharacterMonitor.ActiveCharacterId,
                    InventoryCategory.Crystals);
                 var retainerSetting = this.FilterItemsInRetainersEnum;
                 _filterItemsInRetainersEnum = FilterItemsRetainerEnum.No;
@@ -256,7 +256,7 @@ namespace InventoryTools.Logic
             }
             
             NeedsRefresh = false;
-            Service.Framework.RunOnFrameworkThread(() => { ListUpdated?.Invoke(this); });
+            PluginService.FrameworkService.RunOnFrameworkThread(() => { ListUpdated?.Invoke(this); });
             _refreshing = false;
         }
         
@@ -390,7 +390,7 @@ namespace InventoryTools.Logic
             get => _sourceInventories;
             set { _sourceInventories = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -399,7 +399,7 @@ namespace InventoryTools.Logic
             get => _itemUiCategoryId;
             set { _itemUiCategoryId = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -408,7 +408,7 @@ namespace InventoryTools.Logic
             get => _itemSearchCategoryId;
             set { _itemSearchCategoryId = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -417,7 +417,7 @@ namespace InventoryTools.Logic
             get => _equipSlotCategoryId;
             set { _equipSlotCategoryId = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -426,7 +426,7 @@ namespace InventoryTools.Logic
             get => _tableHeight;
             set { _tableHeight = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -436,7 +436,7 @@ namespace InventoryTools.Logic
             get => _craftTableHeight;
             set { _craftTableHeight = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -445,7 +445,7 @@ namespace InventoryTools.Logic
             get => _itemSortCategoryId;
             set { _itemSortCategoryId = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -454,7 +454,7 @@ namespace InventoryTools.Logic
             get => _destinationInventories;
             set { _destinationInventories = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -463,7 +463,7 @@ namespace InventoryTools.Logic
             get => _isHq;
             set { _isHq = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -472,7 +472,7 @@ namespace InventoryTools.Logic
             get => _isCollectible;
             set { _isCollectible = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -480,7 +480,7 @@ namespace InventoryTools.Logic
         {
             get => _name == null ? "" :  _name;
             set { _name = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -489,7 +489,7 @@ namespace InventoryTools.Logic
             get => _duplicatesOnly;
             set { _duplicatesOnly = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -499,7 +499,7 @@ namespace InventoryTools.Logic
             get => _filterItemsInRetainers;
             set { _filterItemsInRetainers = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -508,7 +508,7 @@ namespace InventoryTools.Logic
             get => _filterItemsInRetainersEnum;
             set { _filterItemsInRetainersEnum = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -524,7 +524,7 @@ namespace InventoryTools.Logic
         {
             get => _openAsWindow;
             set { _openAsWindow = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -533,7 +533,7 @@ namespace InventoryTools.Logic
             get => _quantity;
             set { _quantity = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -542,7 +542,7 @@ namespace InventoryTools.Logic
             get => _iLevel;
             set { _iLevel = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -551,7 +551,7 @@ namespace InventoryTools.Logic
             get => _spiritbond;
             set { _spiritbond = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -560,7 +560,7 @@ namespace InventoryTools.Logic
             get => _nameFilter;
             set { _nameFilter = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -581,7 +581,7 @@ namespace InventoryTools.Logic
             get => _sourceAllRetainers;
             set { _sourceAllRetainers = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }            
         }
         
@@ -591,7 +591,7 @@ namespace InventoryTools.Logic
             set
             {
                 _highlightWhen = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -602,7 +602,7 @@ namespace InventoryTools.Logic
             set
             {
                 _useORFiltering = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -613,7 +613,7 @@ namespace InventoryTools.Logic
             set
             {
                 _hideCompletedRows = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -622,7 +622,7 @@ namespace InventoryTools.Logic
             get => _sourceAllCharacters;
             set { _sourceAllCharacters = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }            
         }
 
@@ -631,7 +631,7 @@ namespace InventoryTools.Logic
             get => _destinationAllRetainers;
             set { _destinationAllRetainers = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }            
         }
 
@@ -640,7 +640,7 @@ namespace InventoryTools.Logic
             get => _sourceIncludeCrossCharacter;
             set { _sourceIncludeCrossCharacter = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }            
         }
 
@@ -649,7 +649,7 @@ namespace InventoryTools.Logic
             get => _destinationIncludeCrossCharacter;
             set { _destinationIncludeCrossCharacter = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }            
         }
 
@@ -658,7 +658,7 @@ namespace InventoryTools.Logic
             get => _freezeColumns;
             set { _freezeColumns = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
             }            
         }
 
@@ -667,7 +667,7 @@ namespace InventoryTools.Logic
             get => _freezeCraftColumns;
             set { _freezeCraftColumns = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
             }            
         }
 
@@ -676,7 +676,7 @@ namespace InventoryTools.Logic
             get => _destinationCategories;
             set { _destinationCategories = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }            
         }
 
@@ -685,7 +685,7 @@ namespace InventoryTools.Logic
             get => _sourceCategories;
             set { _sourceCategories = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }            
         }
 
@@ -694,7 +694,7 @@ namespace InventoryTools.Logic
             get => _destinationAllCharacters;
             set { _destinationAllCharacters = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }            
         }
         
@@ -705,7 +705,7 @@ namespace InventoryTools.Logic
             {
                 _shopSellingPrice = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });                
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });                
             }
         }
 
@@ -716,7 +716,7 @@ namespace InventoryTools.Logic
             {
                 _shopBuyingPrice = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -727,7 +727,7 @@ namespace InventoryTools.Logic
             {
                 _marketAveragePrice = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -738,7 +738,7 @@ namespace InventoryTools.Logic
             {
                 _marketTotalAveragePrice = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -749,7 +749,7 @@ namespace InventoryTools.Logic
             {
                 _canBeBought = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
         
@@ -760,7 +760,7 @@ namespace InventoryTools.Logic
             {
                 _isAvailableAtTimedNode = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }            
         }
 
@@ -782,7 +782,7 @@ namespace InventoryTools.Logic
             set
             {
                 _highlightColor = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
         
@@ -792,7 +792,7 @@ namespace InventoryTools.Logic
             set
             {
                 _destinationHighlightColor = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
         
@@ -802,7 +802,7 @@ namespace InventoryTools.Logic
             set
             {
                 _retainerListColor = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
         
@@ -812,7 +812,7 @@ namespace InventoryTools.Logic
             set
             {
                 _tabHighlightColor = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -822,7 +822,7 @@ namespace InventoryTools.Logic
             set
             {
                 _invertHighlighting = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -832,7 +832,7 @@ namespace InventoryTools.Logic
             set
             {
                 _invertDestinationHighlighting = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -842,7 +842,7 @@ namespace InventoryTools.Logic
             set
             {
                 _invertTabHighlighting = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -852,7 +852,7 @@ namespace InventoryTools.Logic
             set
             {
                 _highlightDestination = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -862,7 +862,7 @@ namespace InventoryTools.Logic
             set
             {
                 _highlightDestinationEmpty = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -872,7 +872,7 @@ namespace InventoryTools.Logic
             set
             {
                 _craftListDefault = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -882,7 +882,7 @@ namespace InventoryTools.Logic
             set
             {
                 _simpleCraftingMode = value;
-                Service.Framework.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
             }
         }
         
@@ -891,7 +891,7 @@ namespace InventoryTools.Logic
             get => _sourceWorlds;
             set { _sourceWorlds = value;
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }            
         }
 
@@ -1004,7 +1004,7 @@ namespace InventoryTools.Logic
             }
             _columns.Add(columnName);
             GenerateNewTableId();
-            Service.Framework.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
+            PluginService.FrameworkService.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
         }
 
         public void AddCraftColumn(string columnName)
@@ -1015,7 +1015,7 @@ namespace InventoryTools.Logic
             }
             _craftColumns.Add(columnName);
             GenerateNewCraftTableId();
-            Service.Framework.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
+            PluginService.FrameworkService.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
         }
         
         public void UpColumn(string columnName)
@@ -1026,7 +1026,7 @@ namespace InventoryTools.Logic
             }
             _columns = _columns.MoveUp(columnName);
             GenerateNewTableId();
-            Service.Framework.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
+            PluginService.FrameworkService.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
         }
         
         public void DownColumn(string columnName)
@@ -1037,7 +1037,7 @@ namespace InventoryTools.Logic
             }
             _columns = _columns.MoveDown(columnName);
             GenerateNewTableId();
-            Service.Framework.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
+            PluginService.FrameworkService.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
         }
 
         public void RemoveColumn(string columnName)
@@ -1048,7 +1048,7 @@ namespace InventoryTools.Logic
             }
             _columns = _columns.Where(c => c != columnName).ToList();
             GenerateNewTableId();
-            Service.Framework.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
+            PluginService.FrameworkService.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
         }
         
         public void AddDestinationInventory((ulong, InventoryCategory) inventory)
@@ -1057,7 +1057,7 @@ namespace InventoryTools.Logic
             {
                 DestinationInventories.Add(inventory);
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -1067,7 +1067,7 @@ namespace InventoryTools.Logic
             {
                 DestinationInventories.Remove(inventory);
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -1077,7 +1077,7 @@ namespace InventoryTools.Logic
             {
                 SourceInventories.Add(inventory);
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -1087,7 +1087,7 @@ namespace InventoryTools.Logic
             {
                 SourceInventories.Remove(inventory);
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -1097,7 +1097,7 @@ namespace InventoryTools.Logic
             {
                 ItemUiCategoryId.Add(itemUiCategoryId);
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -1107,7 +1107,7 @@ namespace InventoryTools.Logic
             {
                 ItemUiCategoryId.Remove(itemUiCategoryId);
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -1117,7 +1117,7 @@ namespace InventoryTools.Logic
             {
                 ItemSearchCategoryId.Add(itemSearchCategoryId);
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -1127,7 +1127,7 @@ namespace InventoryTools.Logic
             {
                 ItemSearchCategoryId.Remove(itemSearchCategoryId);
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -1162,7 +1162,7 @@ namespace InventoryTools.Logic
             set
             {
                 _columns = value;
-                Service.Framework.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -1172,7 +1172,7 @@ namespace InventoryTools.Logic
             set
             {
                 _craftColumns = value;
-                Service.Framework.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -1265,7 +1265,7 @@ namespace InventoryTools.Logic
 
             BooleanFilters[key] = value;
             NeedsRefresh = true;
-            Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+            PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
         }
 
         public void UpdateColorFilter(string key, Vector4 value)
@@ -1277,7 +1277,7 @@ namespace InventoryTools.Logic
 
             ColorFilters[key] = value;
             NeedsRefresh = true;
-            Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+            PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
         }
 
         public void RemoveBooleanFilter(string key)
@@ -1286,7 +1286,7 @@ namespace InventoryTools.Logic
             {
                 BooleanFilters.Remove(key);
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -1296,7 +1296,7 @@ namespace InventoryTools.Logic
             {
                 ColorFilters.Remove(key);
                 NeedsRefresh = true;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -1309,7 +1309,7 @@ namespace InventoryTools.Logic
 
             StringFilters[key] = value;
             NeedsRefresh = true;
-            Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+            PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
         }
 
         public void UpdateIntegerFilter(string key, int? value)
@@ -1328,14 +1328,14 @@ namespace InventoryTools.Logic
             }
 
             NeedsRefresh = true;
-            Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+            PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
         }
 
         public void UpdateUintChoiceFilter(string key, List<uint> value)
         {
             UintChoiceFilters[key] = value;
             NeedsRefresh = true;
-            Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+            PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
         }
 
         public void UpdateUintFilter(string key, uint? value)
@@ -1349,21 +1349,21 @@ namespace InventoryTools.Logic
                 UintFilters[key] = value.Value;
             }
             NeedsRefresh = true;
-            Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+            PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
         }
 
         public void UpdateUlongChoiceFilter(string key, List<ulong> value)
         {
             UlongChoiceFilters[key] = value;
             NeedsRefresh = true;
-            Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+            PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
         }
 
         public void UpdateStringChoiceFilter(string key, List<string> value)
         {
             StringChoiceFilters[key] = value;
             NeedsRefresh = true;
-            Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+            PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
         }
 
         public Dictionary<string, bool> BooleanFilters
@@ -1856,7 +1856,7 @@ namespace InventoryTools.Logic
         {
             get => _order;
             set { _order = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
 
@@ -1867,7 +1867,7 @@ namespace InventoryTools.Logic
 
         public void NotifyConfigurationChange()
         {
-            Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+            PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
         }
 
 
@@ -1878,7 +1878,7 @@ namespace InventoryTools.Logic
             var unsortableItems = new List<InventoryItem>();
             var items = new List<ItemEx>();
             var characterMonitor = PluginService.CharacterMonitor;
-            var activeCharacter = characterMonitor.ActiveCharacter;
+            var activeCharacter = characterMonitor.ActiveCharacterId;
             var activeRetainer = characterMonitor.ActiveRetainer;
             var displaySourceCrossCharacter = filter.SourceIncludeCrossCharacter ?? ConfigurationManager.Config.DisplayCrossCharacter;
             var displayDestinationCrossCharacter = filter.DestinationIncludeCrossCharacter ?? ConfigurationManager.Config.DisplayCrossCharacter;
@@ -1912,7 +1912,7 @@ namespace InventoryTools.Logic
 
                             if (filter.SourceAllCharacters.HasValue && filter.SourceAllCharacters.Value &&
                                 !characterMonitor.IsRetainer(character.Key) &&
-                                characterMonitor.ActiveCharacter == character.Key && (displaySourceCrossCharacter ||
+                                characterMonitor.ActiveCharacterId == character.Key && (displaySourceCrossCharacter ||
                                     characterMonitor.BelongsToActiveCharacter(character.Key)))
                             {
                                 if (inventoryKey.Item2.ToInventoryCategory() is not InventoryCategory.FreeCompanyBags &&
@@ -1971,7 +1971,7 @@ namespace InventoryTools.Logic
                             }
 
                             if (filter.DestinationAllCharacters.HasValue && filter.DestinationAllCharacters.Value &&
-                                characterMonitor.ActiveCharacter == character.Key &&
+                                characterMonitor.ActiveCharacterId == character.Key &&
                                 (displayDestinationCrossCharacter ||
                                  characterMonitor.BelongsToActiveCharacter(character.Key)))
                             {
@@ -2261,7 +2261,7 @@ namespace InventoryTools.Logic
                                 sourceInventories.Add(inventoryKey, inventory.Value);
                             }
                         }
-                        if (filter.SourceAllCharacters.HasValue && filter.SourceAllCharacters.Value && !characterMonitor.IsRetainer(character.Key) && (displaySourceCrossCharacter || characterMonitor.ActiveCharacter == character.Key))
+                        if (filter.SourceAllCharacters.HasValue && filter.SourceAllCharacters.Value && !characterMonitor.IsRetainer(character.Key) && (displaySourceCrossCharacter || characterMonitor.ActiveCharacterId == character.Key))
                         {
                             if (!sourceInventories.ContainsKey(inventoryKey))
                             {

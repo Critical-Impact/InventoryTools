@@ -37,12 +37,12 @@ public class IPCService : IDisposable
     private readonly ICallGateProvider<bool, bool>? _initialized;
     private readonly bool _initalizedIpc;
 
-    private readonly CharacterMonitor _characterMonitor;
-    private readonly FilterService _filterService;
-    private readonly InventoryMonitor _inventoryMonitor;
+    private readonly ICharacterMonitor _characterMonitor;
+    private readonly IFilterService _filterService;
+    private readonly IInventoryMonitor _inventoryMonitor;
     private bool _disposed;
 
-    public IPCService(DalamudPluginInterface pluginInterface, CharacterMonitor characterMonitor, FilterService filterService, InventoryMonitor inventoryMonitor)
+    public IPCService(DalamudPluginInterface pluginInterface, ICharacterMonitor characterMonitor, IFilterService filterService, IInventoryMonitor inventoryMonitor)
     {
         _characterMonitor = characterMonitor;
         _filterService = filterService;
@@ -149,7 +149,7 @@ public class IPCService : IDisposable
 
     private ulong CurrentCharacter()
     {
-        return _characterMonitor.ActiveCharacter;
+        return _characterMonitor.ActiveCharacterId;
     }
 
     private string AddNewCraftList(string craftListName, Dictionary<uint, uint> items)

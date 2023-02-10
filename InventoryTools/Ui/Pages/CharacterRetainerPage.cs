@@ -71,7 +71,7 @@ namespace InventoryTools.Sections
                             }
                         }
                         ImGui.TableNextColumn();
-                        if (character.CharacterId != Service.ClientState.LocalContentId)
+                        if (character.CharacterId != PluginService.CharacterMonitor.ActiveCharacterId)
                         {
                             if (ImGui.SmallButton("Remove##" + index))
                             {
@@ -203,7 +203,7 @@ namespace InventoryTools.Sections
                             }
                         }
                         ImGui.TableNextColumn();
-                        if (character.CharacterId != Service.ClientState.LocalContentId)
+                        if (character.CharacterId != PluginService.CharacterMonitor.LocalContentId)
                         {
                             if (ImGui.SmallButton("Remove##" + index))
                             {

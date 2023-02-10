@@ -135,7 +135,7 @@ namespace InventoryTools.Ui
                         {
                             if (ImGui.Selectable("Add item to craft list - " + filter.Name))
                             {
-                                Service.Framework.RunOnFrameworkThread(() =>
+                                PluginService.FrameworkService.RunOnFrameworkThread(() =>
                                 {
                                     filter.CraftList.AddCraftItem(_itemId, 1, InventoryItem.ItemFlags.None);
                                     PluginService.WindowService.OpenCraftsWindow();
@@ -165,7 +165,7 @@ namespace InventoryTools.Ui
                     if (ImGui.ImageButton(gbIcon.ImGuiHandle,
                             new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                     {
-                        Service.Commands.ProcessCommand("/gather " + Item.NameString);
+                        PluginService.CommandService.ProcessCommand("/gather " + Item.NameString);
                     }
 
                     ImGuiUtil.HoverTooltip("Gatherable - Gather with Gatherbuddy");

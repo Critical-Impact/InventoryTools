@@ -19,7 +19,7 @@ namespace InventoryTools.Logic.Columns
         {
             ImGui.SameLine();
             var characterDictionary = PluginService.CharacterMonitor.Characters;
-            var currentCharacterId = PluginService.CharacterMonitor.ActiveCharacter;
+            var currentCharacterId = PluginService.CharacterMonitor.ActiveCharacterId;
             var allCharacters = characterDictionary.Where(c => c.Value.Name != "" && (c.Value.OwnerId == currentCharacterId || c.Key == currentCharacterId)).ToList();
             var currentCharacterName = _selectedCharacter == null
                 ? ""
@@ -94,11 +94,12 @@ namespace InventoryTools.Logic.Columns
                     }
                 }
             }
-            if (PluginService.CharacterMonitor.ActiveCharacter != 0)
+            if (PluginService.CharacterMonitor.ActiveCharacterId != 0)
             {
-                if (Service.ClientState.LocalPlayer != null)
+                var activeCharacter = PluginService.CharacterMonitor.ActiveCharacter;
+                if (activeCharacter != null)
                 {
-                    return Service.ClientState.LocalPlayer.Level >= itemLevel;
+                    return activeCharacter.Level >= itemLevel;
                 }
             }
 
@@ -123,11 +124,12 @@ namespace InventoryTools.Logic.Columns
                     }
                 }
             }
-            if (PluginService.CharacterMonitor.ActiveCharacter != 0)
+            if (PluginService.CharacterMonitor.ActiveCharacterId != 0)
             {
-                if (Service.ClientState.LocalPlayer != null)
+                var activeCharacter = PluginService.CharacterMonitor.ActiveCharacter;
+                if (activeCharacter != null)
                 {
-                    if(Service.ExcelCache.IsItemEquippableBy(classJobCategory, Service.ClientState.LocalPlayer.ClassJob.Id))
+                    if(Service.ExcelCache.IsItemEquippableBy(classJobCategory, activeCharacter.ClassJob))
                     {
                         return true;
                     }
@@ -151,9 +153,9 @@ namespace InventoryTools.Logic.Columns
                     }
                 }
             }
-            if (PluginService.CharacterMonitor.ActiveCharacter != 0)
+            if (PluginService.CharacterMonitor.ActiveCharacterId != 0)
             {
-                var equipped = PluginService.InventoryMonitor.GetSpecificInventory(PluginService.CharacterMonitor.ActiveCharacter,
+                var equipped = PluginService.InventoryMonitor.GetSpecificInventory(PluginService.CharacterMonitor.ActiveCharacterId,
                     InventoryCategory.CharacterEquipped);
                 return equipped.FirstOrDefault(c => c.Item.EquipSlotCategoryEx?.SimilarSlots(comparingItem) ?? false);
             }

@@ -158,7 +158,7 @@ namespace InventoryTools.Logic
         public Dictionary<string, Vector4?> GetArmoireHighlights(FilterResult? resultOverride = null)
         {
             var bagHighlights = new Dictionary<string, Vector4?>();
-            if (PluginService.CharacterMonitor.ActiveCharacter == 0)
+            if (PluginService.CharacterMonitor.ActiveCharacterId == 0)
             {
                 return bagHighlights;
             }
@@ -174,7 +174,7 @@ namespace InventoryTools.Logic
                 {
                     var fullInventory =
                         PluginService.InventoryMonitor.GetSpecificInventory(PluginService.CharacterMonitor
-                            .ActiveCharacter, InventoryCategory.Armoire);
+                            .ActiveCharacterId, InventoryCategory.Armoire);
                     
                     var filteredItems = filterResult.Value.SortedItems.Where(c => c.SourceBag == InventoryType.Armoire);
                     foreach (var item in filteredItems)
@@ -216,7 +216,7 @@ namespace InventoryTools.Logic
         public Dictionary<uint, Vector4?> GetArmoireTabHighlights(CabinetCategory? currentCategory, FilterResult? resultOverride = null)
         {
             var bagHighlights = new Dictionary<uint, Vector4?>();
-            if (PluginService.CharacterMonitor.ActiveCharacter == 0)
+            if (PluginService.CharacterMonitor.ActiveCharacterId == 0)
             {
                 return bagHighlights;
             }
@@ -279,7 +279,7 @@ namespace InventoryTools.Logic
         public Dictionary<Vector2, Vector4?> GetGlamourHighlights(AtkInventoryMiragePrismBox.DresserTab dresserTab, int page, bool displayEquippableOnly,uint classJobSelected, FilterResult? resultOverride = null)
         {
             var bagHighlights = new Dictionary<Vector2, Vector4?>();
-            if (PluginService.CharacterMonitor.ActiveCharacter == 0)
+            if (PluginService.CharacterMonitor.ActiveCharacterId == 0)
             {
                 return bagHighlights;
             }
@@ -301,7 +301,7 @@ namespace InventoryTools.Logic
                 {
                     var fullInventory =
                         PluginService.InventoryMonitor.GetSpecificInventory(PluginService.CharacterMonitor
-                            .ActiveCharacter, InventoryCategory.GlamourChest);
+                            .ActiveCharacterId, InventoryCategory.GlamourChest);
                     
                     var filteredItems = fullInventory.Where(c =>
                         AtkInventoryMiragePrismBox.EquipSlotCategoryToDresserTab(c.EquipSlotCategory) ==
@@ -312,12 +312,10 @@ namespace InventoryTools.Logic
                         filteredItems = filteredItems.Where(c => Service.ExcelCache.IsItemEquippableBy(c.Item.ClassJobCategory.Row, classJobSelected));
                     }
 
-                    if (displayEquippableOnly && Service.ClientState.LocalPlayer != null)
+                    if (displayEquippableOnly && PluginService.CharacterMonitor.ActiveCharacter != null)
                     {
-                        var race = (CharacterRace)Service.ClientState.LocalPlayer.Customize[(int)CustomizeIndex.Race];
-                        var gender = Service.ClientState.LocalPlayer.Customize[(int) CustomizeIndex.Gender] == 0
-                            ? CharacterSex.Male
-                            : CharacterSex.Female;
+                        var race = PluginService.CharacterMonitor.ActiveCharacter.Race;
+                        var gender = PluginService.CharacterMonitor.ActiveCharacter.Gender;
                         filteredItems = filteredItems.Where(c => c.Item.CanBeEquippedByRaceGender(race, gender));
                         
                     }
@@ -405,7 +403,7 @@ namespace InventoryTools.Logic
                     
                     foreach (var item in PluginService.InventoryMonitor.AllItems)
                     {
-                        if (item.SortedContainer == bag && item.RetainerId == PluginService.CharacterMonitor.ActiveCharacter)
+                        if (item.SortedContainer == bag && item.RetainerId == PluginService.CharacterMonitor.ActiveCharacterId)
                         {
                             if (!availableItems.ContainsKey(item.ItemId))
                             {
@@ -619,7 +617,7 @@ namespace InventoryTools.Logic
         {
             bool matches = false;
             if (activeFilter.FilterType == FilterType.SearchFilter &&
-                item.SourceRetainerId == PluginService.CharacterMonitor.ActiveCharacter)
+                item.SourceRetainerId == PluginService.CharacterMonitor.ActiveCharacterId)
             {
                 matches = true;
             }
@@ -628,7 +626,7 @@ namespace InventoryTools.Logic
                 matches = true;
             }
             
-            if (item.SourceRetainerId == PluginService.CharacterMonitor.ActiveCharacter && (ActiveRetainerId == null ||
+            if (item.SourceRetainerId == PluginService.CharacterMonitor.ActiveCharacterId && (ActiveRetainerId == null ||
                 ActiveRetainerId != null &&
                 item.DestinationRetainerId ==
                 ActiveRetainerId))

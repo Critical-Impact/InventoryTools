@@ -14,7 +14,11 @@ Service.ExcelCache = new ExcelCache(lumina);
 var row = Service.ExcelCache.GetSheet<SpecialShop>().GetRow(1769907);
 var characterMonitor = new CharacterMonitor(true);
 var pluginLogic = new PluginLogic(true);
-PluginService.InitialiseTesting(characterMonitor, pluginLogic);
+PluginService.InitaliseExplicit(new MockServices()
+{
+    CharacterMonitor = characterMonitor,
+    PluginLogic = pluginLogic
+});
 ConfigurationManager.Config = new InventoryToolsConfiguration();
 var inventories = ConfigurationManager.LoadSavedInventories("inventories2.json");
 ulong currentRetainer = 0;

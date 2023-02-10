@@ -28,6 +28,7 @@ using InventoryTools.Logic.Columns;
 using InventoryTools.Logic.Filters;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Logic.Settings.Abstract;
+using InventoryTools.Services;
 using InventoryTools.Tooltips;
 using InventoryTools.Ui;
 using InventoryItem = CriticalCommonLib.Models.InventoryItem;
@@ -75,7 +76,7 @@ namespace InventoryTools
             PluginService.InventoryMonitor.OnInventoryChanged += InventoryMonitorOnOnInventoryChanged;
             PluginService.CharacterMonitor.OnCharacterUpdated += CharacterMonitorOnOnCharacterUpdated;
             PluginConfiguration.ConfigurationChanged += ConfigOnConfigurationChanged;
-            Service.Framework.Update += FrameworkOnUpdate;
+            PluginService.FrameworkService.Update += FrameworkOnUpdate;
 
             PluginService.InventoryMonitor.LoadExistingData(PluginConfiguration.GetSavedInventory());
             PluginService.CharacterMonitor.LoadExistingRetainers(PluginConfiguration.GetSavedRetainers());
@@ -144,14 +145,14 @@ namespace InventoryTools
 
         private void GameInterfaceOnAcquiredItemsUpdated()
         {
-            var activeCharacter = PluginService.CharacterMonitor.ActiveCharacter;
+            var activeCharacter = PluginService.CharacterMonitor.ActiveCharacterId;
             if (activeCharacter != 0)
             {
                 PluginConfiguration.AcquiredItems[activeCharacter] = PluginService.GameInterface.AcquiredItems;
             }
         }
 
-        private void RunMigrations()
+        public void RunMigrations()
         {
             
             if (PluginConfiguration.InternalVersion == 0)
@@ -376,17 +377,17 @@ namespace InventoryTools
             {
                 return false;
             }
-            foreach (var vk in Service.KeyState.GetValidVirtualKeys()) {
+            foreach (var vk in PluginService.KeyStateService.GetValidVirtualKeys()) {
                 if (keys.Contains(vk)) {
-                    if (!Service.KeyState[vk]) return false;
+                    if (!PluginService.KeyStateService[vk]) return false;
                 } else {
-                    if (Service.KeyState[vk]) return false;
+                    if (PluginService.KeyStateService[vk]) return false;
                 }
             }
             return true;
         }
 
-        private void FrameworkOnUpdate(Framework framework)
+        private void FrameworkOnUpdate(IFrameworkService framework)
         {
             if (PluginConfiguration.AutoSave)
             {
@@ -416,7 +417,7 @@ namespace InventoryTools
                         if (item == null) return;
                         PluginService.WindowService.OpenItemWindow(item.RowId);
                         foreach (var k in virtualKeys) {
-                            Service.KeyState[(int) k] = false;
+                            PluginService.KeyStateService[(int) k] = false;
                         }
                 }
             }
@@ -716,22 +717,22 @@ namespace InventoryTools
                         return tex;
                     }
                 } else {
-
-                    Task.Run(() => {
-                        try {
-                            var iconTex = hqIcon ?  Service.Data.GetHqIcon(icon) : Service.Data.GetIcon(icon);
-                            if (iconTex != null)
+                    try {
+                        var iconTex = hqIcon ?  PluginService.DataService.GetHqIcon(icon) : PluginService.DataService.GetIcon(icon);
+                        if (iconTex != null)
+                        {
+                            var tex = PluginService.PluginInterfaceService.LoadImageRaw(iconTex.GetRgbaImageData(),
+                                iconTex.Header.Width, iconTex.Header.Height, 4);
+                            if (tex.ImGuiHandle != IntPtr.Zero)
                             {
-                                var tex = Service.Interface.UiBuilder.LoadImageRaw(iconTex.GetRgbaImageData(),
-                                    iconTex.Header.Width, iconTex.Header.Height, 4);
-                                if (tex.ImGuiHandle != IntPtr.Zero)
-                                {
-                                    textureDictionary[icon] = tex;
-                                }
+                                textureDictionary[icon] = tex;
+                                return tex;
                             }
-                        } catch {
                         }
-                    });
+                    } catch {
+                        PluginLog.Error("Failed to load icon correctly - " + icon + (hqIcon ? "hq" : "nq"));
+                        return null;
+                    }
                 }
             }
 
@@ -754,21 +755,22 @@ namespace InventoryTools
                     ImGui.BeginChild("WaitingTexture", size, true);
                     ImGui.EndChild();
 
-                    Task.Run(() => {
-                        try {
-                            var iconTex = hqIcon ?  Service.Data.GetHqIcon(icon) : Service.Data.GetIcon(icon);
-                            if (iconTex != null)
+                    try {
+                        var iconTex = hqIcon ?  PluginService.DataService.GetHqIcon(icon) : PluginService.DataService.GetIcon(icon);
+                        if (iconTex != null)
+                        {
+                            var tex = PluginService.PluginInterfaceService.LoadImageRaw(iconTex.GetRgbaImageData(),
+                                iconTex.Header.Width, iconTex.Header.Height, 4);
+                            if (tex.ImGuiHandle != IntPtr.Zero)
                             {
-                                var tex = Service.Interface.UiBuilder.LoadImageRaw(iconTex.GetRgbaImageData(),
-                                    iconTex.Header.Width, iconTex.Header.Height, 4);
-                                if (tex.ImGuiHandle != IntPtr.Zero)
-                                {
-                                    textureDictionary[icon] = tex;
-                                }
+                                textureDictionary[icon] = tex;
                             }
-                        } catch {
                         }
-                    });
+                    } 
+                    catch
+                    {
+                        PluginLog.Error("Failed to load icon correctly - " + icon + (hqIcon ? "hq" : "nq"));
+                    }
                 }
             } else {
                 ImGui.BeginChild("NoIcon", size, true);
@@ -815,25 +817,23 @@ namespace InventoryTools
                 ImGui.BeginChild("WaitingTexture", size, true);
                 ImGui.EndChild();
 
-                Task.Run(() =>
+                try
                 {
-                    try
+                    var iconTex = PluginService.DataService.GetUldIcon(name);
+                    if (iconTex != null)
                     {
-                        var iconTex = Service.Data.GetUldIcon(name);
-                        if (iconTex != null)
+                        var tex = PluginService.PluginInterfaceService.LoadImageRaw(iconTex.GetRgbaImageData(),
+                            iconTex.Header.Width, iconTex.Header.Height, 4);
+                        if (tex.ImGuiHandle != IntPtr.Zero)
                         {
-                            var tex = Service.Interface.UiBuilder.LoadImageRaw(iconTex.GetRgbaImageData(),
-                                iconTex.Header.Width, iconTex.Header.Height, 4);
-                            if (tex.ImGuiHandle != IntPtr.Zero)
-                            {
-                                UldTextureDictionary[name] = tex;
-                            }
+                            UldTextureDictionary[name] = tex;
                         }
                     }
-                    catch
-                    {
-                    }
-                });
+                }
+                catch
+                {
+                    PluginLog.Error("Failed to load icon correctly - " + name);
+                }
             }
         }
         
@@ -870,21 +870,20 @@ namespace InventoryTools
                 ImGui.BeginChild("WaitingTexture", size, true);
                 ImGui.EndChild();
 
-                Task.Run(() => {
-                    try {
-                        var iconTex = Service.Data.GetUldIcon(name);
-                        if (iconTex != null)
+                try {
+                    var iconTex = PluginService.DataService.GetUldIcon(name);
+                    if (iconTex != null)
+                    {
+                        var tex = PluginService.PluginInterfaceService.LoadImageRaw(iconTex.GetRgbaImageData(),
+                            iconTex.Header.Width, iconTex.Header.Height, 4);
+                        if (tex.ImGuiHandle != IntPtr.Zero)
                         {
-                            var tex = Service.Interface.UiBuilder.LoadImageRaw(iconTex.GetRgbaImageData(),
-                                iconTex.Header.Width, iconTex.Header.Height, 4);
-                            if (tex.ImGuiHandle != IntPtr.Zero)
-                            {
-                                UldTextureDictionary[name] = tex;
-                            }
+                            UldTextureDictionary[name] = tex;
                         }
-                    } catch {
                     }
-                });
+                } catch {
+                    PluginLog.Error("Failed to load icon correctly - " + name);
+                }
             }
 
             return false;
@@ -899,16 +898,16 @@ namespace InventoryTools
                 PluginService.WindowService.ToggleFilterWindow(filter.Key);
                 return true;
             }
-            Service.Chat.Print("Failed to find filter with name: " + filterName);
+            PluginService.ChatService.Print("Failed to find filter with name: " + filterName);
             return false;
         }
 
         public TextureWrap LoadImage(string imageName)
         {
-            var assemblyLocation = PluginService.PluginInterface!.AssemblyLocation.DirectoryName!;
+            var assemblyLocation = PluginService.PluginInterfaceService!.AssemblyLocation.DirectoryName!;
             var imagePath = Path.Combine(assemblyLocation, $@"Images\{imageName}.png");
 
-            return  PluginService.PluginInterface!.UiBuilder.LoadImage(imagePath);
+            return  PluginService.PluginInterfaceService!.LoadImage(imagePath);
         }
                                 
         private bool _disposed;
@@ -944,7 +943,7 @@ namespace InventoryTools
                 PluginService.OnPluginLoaded -= PluginServiceOnOnPluginLoaded;
                 PluginService.GameInterface.AcquiredItemsUpdated -= GameInterfaceOnAcquiredItemsUpdated;
                 PluginConfiguration.SavedCharacters = PluginService.CharacterMonitor.Characters;
-                Service.Framework.Update -= FrameworkOnUpdate;
+                PluginService.FrameworkService.Update -= FrameworkOnUpdate;
                 PluginService.InventoryMonitor.OnInventoryChanged -= InventoryMonitorOnOnInventoryChanged;
                 PluginService.CharacterMonitor.OnCharacterUpdated -= CharacterMonitorOnOnCharacterUpdated;
                 PluginService.CraftMonitor.CraftStarted -= CraftMonitorOnCraftStarted;

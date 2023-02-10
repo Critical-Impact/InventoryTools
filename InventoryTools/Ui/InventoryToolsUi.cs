@@ -11,8 +11,8 @@ namespace InventoryTools.Ui
         
         public InventoryToolsUi()
         {
-            Service.Interface.UiBuilder.Draw += Draw;
-            Service.Interface.UiBuilder.OpenConfigUi += UiBuilderOnOpenConfigUi;
+            PluginService.PluginInterfaceService.Draw += Draw;
+            PluginService.PluginInterfaceService.OpenConfigUi += UiBuilderOnOpenConfigUi;
         }
 
 
@@ -37,7 +37,7 @@ namespace InventoryTools.Ui
 
         public void Draw()
         {
-            if (!Service.ClientState.IsLoggedIn || _disposing || !Service.ExcelCache.FinishedLoading || !PluginService.PluginLoaded)
+            if (!PluginService.CharacterMonitor.IsLoggedIn || _disposing || !Service.ExcelCache.FinishedLoading || !PluginService.PluginLoaded)
                 return;
             PluginService.WindowService.WindowSystem.Draw();
 
@@ -55,8 +55,8 @@ namespace InventoryTools.Ui
         {
             if(!_disposed && disposing)
             {
-                Service.Interface.UiBuilder.Draw -= Draw;
-                Service.Interface.UiBuilder.OpenConfigUi -= UiBuilderOnOpenConfigUi;
+                PluginService.PluginInterfaceService.Draw -= Draw;
+                PluginService.PluginInterfaceService.OpenConfigUi -= UiBuilderOnOpenConfigUi;
             }
             _disposed = true;         
         }

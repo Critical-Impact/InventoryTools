@@ -237,7 +237,7 @@ namespace InventoryTools.Ui
                                     0);
                                 if (amountLeft > 0)
                                 {
-                                    Service.Framework.RunOnFrameworkThread(() =>
+                                    PluginService.FrameworkService.RunOnFrameworkThread(() =>
                                     {
                                         filterConfiguration.CraftList.AddCraftItem(itemRequired,
                                             (uint)amountLeft, InventoryItem.ItemFlags.None);

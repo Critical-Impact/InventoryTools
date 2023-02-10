@@ -13,12 +13,12 @@ namespace InventoryTools.Services
 {
     public class FilterService : IDisposable, IFilterService
     {
-        private CharacterMonitor _characterMonitor;
-        private InventoryMonitor _inventoryMonitor;
+        private ICharacterMonitor _characterMonitor;
+        private IInventoryMonitor _inventoryMonitor;
         private ConcurrentDictionary<string, FilterConfiguration> _filters;
         private ConcurrentDictionary<string, FilterTable> _filterTables;
         private ConcurrentDictionary<string, CraftItemTable> _craftItemTables;
-        public FilterService(CharacterMonitor characterMonitor, InventoryMonitor inventoryMonitor)
+        public FilterService(ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor)
         {
             _filters = new ConcurrentDictionary<string, FilterConfiguration>(ConfigurationManager.Config.GetSavedFilters().ToDictionary(c => c.Key, c => c));
             _filterTables = new ConcurrentDictionary<string, FilterTable>();

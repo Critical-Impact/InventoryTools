@@ -67,7 +67,7 @@ namespace InventoryTools.GameUi
 
         public void UpdateState(FilterState? newState)
         {
-            if (PluginService.CharacterMonitor.ActiveCharacter == 0)
+            if (PluginService.CharacterMonitor.ActiveCharacterId == 0)
             {
                 return;
             }

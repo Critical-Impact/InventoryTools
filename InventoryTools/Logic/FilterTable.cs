@@ -56,7 +56,7 @@ namespace InventoryTools.Logic
                     SortedItems = items.ToList();
                     RenderSortedItems = SortedItems.Where(item => !item.InventoryItem.IsEmpty).ToList();
                     NeedsRefresh = false;
-                    Service.Framework.RunOnFrameworkThread(() => { Refreshed?.Invoke(this); });
+                    PluginService.FrameworkService.RunOnFrameworkThread(() => { Refreshed?.Invoke(this); });
                 }
                 else
                 {
@@ -82,7 +82,7 @@ namespace InventoryTools.Logic
                     Items = items.Where(c => c.NameString.ToString() != "").ToList();
                     RenderItems = Items.ToList();
                     NeedsRefresh = false;
-                    Service.Framework.RunOnFrameworkThread(() => { Refreshed?.Invoke(this); });
+                    PluginService.FrameworkService.RunOnFrameworkThread(() => { Refreshed?.Invoke(this); });
                 }
             }
         }

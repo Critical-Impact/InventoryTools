@@ -68,7 +68,7 @@ namespace InventoryTools
             set
             {
                 _isVisible = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
 
@@ -78,7 +78,7 @@ namespace InventoryTools
             set
             {
                 _addMoreInformationContextMenu = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
 
@@ -100,7 +100,7 @@ namespace InventoryTools
             set
             {
                 _highlightColor = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
         public Vector4 DestinationHighlightColor
@@ -109,7 +109,7 @@ namespace InventoryTools
             set
             {
                 _destinationHighlightColor = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
 
@@ -119,7 +119,7 @@ namespace InventoryTools
             set
             {
                 _retainerListColor = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
 
@@ -129,7 +129,7 @@ namespace InventoryTools
             set
             {
                 _tabHighlightColor = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
 
@@ -139,7 +139,7 @@ namespace InventoryTools
             set
             {
                 _displayCrossCharacter = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
 
@@ -149,7 +149,7 @@ namespace InventoryTools
             set
             {
                 _displayTooltip = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
 
@@ -159,7 +159,7 @@ namespace InventoryTools
             set
             {
                 _tooltipCurrentCharacter = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
         
@@ -169,7 +169,7 @@ namespace InventoryTools
             set
             {
                 _tooltipDisplayAmountOwned = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
         
@@ -179,7 +179,7 @@ namespace InventoryTools
             set
             {
                 _tooltipAddCharacterNameOwned = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
 
@@ -189,7 +189,7 @@ namespace InventoryTools
             set
             {
                 _tooltipDisplayMarketAveragePrice = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
 
@@ -199,7 +199,7 @@ namespace InventoryTools
             set
             {
                 _tooltipDisplayMarketLowestPrice = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
 
@@ -209,7 +209,7 @@ namespace InventoryTools
             set
             {
                 _tooltipDisplayRetrieveAmount = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
 
@@ -219,7 +219,7 @@ namespace InventoryTools
             set
             {
                 _tooltipLocationLimit = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
         public TooltipLocationDisplayMode TooltipLocationDisplayMode
@@ -228,7 +228,7 @@ namespace InventoryTools
             set
             {
                 _tooltipLocationDisplayMode = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
 
@@ -238,7 +238,7 @@ namespace InventoryTools
             set
             {
                 _automaticallyDownloadMarketPrices = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
 
@@ -252,7 +252,7 @@ namespace InventoryTools
                 {
                     _marketRefreshTimeHours = 24;
                 }
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
 
@@ -266,7 +266,7 @@ namespace InventoryTools
                 {
                     _marketSaleHistoryLimit = 7;
                 }
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
 
@@ -276,7 +276,7 @@ namespace InventoryTools
             set
             {
                 _colorRetainerList = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
 
@@ -286,7 +286,7 @@ namespace InventoryTools
             set
             {
                 _showItemNumberRetainerList = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
 
@@ -296,7 +296,7 @@ namespace InventoryTools
             set
             {
                 _invertHighlighting = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
 
@@ -306,7 +306,7 @@ namespace InventoryTools
             set
             {
                 _invertDestinationHighlighting = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
 
@@ -316,7 +316,7 @@ namespace InventoryTools
             set
             {
                 _invertTabHighlighting = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
 
@@ -326,7 +326,7 @@ namespace InventoryTools
             set
             {
                 _highlightWhen = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
 
@@ -336,7 +336,7 @@ namespace InventoryTools
             set
             {
                 _highlightDestination = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
 
@@ -346,7 +346,7 @@ namespace InventoryTools
             set
             {
                 _highlightDestinationEmpty = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
         
