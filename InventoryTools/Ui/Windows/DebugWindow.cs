@@ -126,9 +126,9 @@ namespace InventoryTools.Ui
             if (ConfigurationManager.Config.SelectedDebugPage == 0)
             {
                 ImGui.Text("Character Information:");
-                ImGui.Text(Service.ClientState.LocalPlayer?.Name.ToString() ?? "Not Logged in Yet");
-                ImGui.Text("Actual:" + Service.ClientState.LocalContentId.ToString());
-                ImGui.Text("Reported:" + PluginService.CharacterMonitor.ActiveCharacter.ToString());
+                ImGui.Text(PluginService.CharacterMonitor.ActiveCharacter?.Name.ToString() ?? "Not Logged in Yet");
+                ImGui.Text("Actual:" + PluginService.CharacterMonitor.LocalContentId.ToString());
+                ImGui.Text("Reported:" + PluginService.CharacterMonitor.ActiveCharacterId.ToString());
                 ImGui.Text("Retainers:");
                 ImGui.BeginTable("retainerTable", 5);
                 ImGui.TableSetupColumn("Hire Order");
@@ -641,7 +641,7 @@ namespace InventoryTools.Ui
                                 (short)index);
                         memoryInventoryItem.SortedContainer = CriticalCommonLib.Enums.InventoryType.Armoire;
                         memoryInventoryItem.SortedCategory = InventoryCategory.Armoire;
-                        memoryInventoryItem.RetainerId = Service.ClientState.LocalContentId;
+                        memoryInventoryItem.RetainerId = PluginService.CharacterMonitor.LocalContentId;
                         if (memoryInventoryItem.CabCat != currentCategory)
                         {
                             actualIndex = 0;
@@ -684,7 +684,7 @@ namespace InventoryTools.Ui
                             memoryInventoryItem.SortedContainer =
                                 CriticalCommonLib.Enums.InventoryType.GlamourChest;
                             memoryInventoryItem.SortedCategory = InventoryCategory.GlamourChest;
-                            memoryInventoryItem.RetainerId = Service.ClientState.LocalContentId;
+                            memoryInventoryItem.RetainerId = PluginService.CharacterMonitor.LocalContentId;
                             memoryInventoryItem.SortedSlotIndex = i;
                             Utils.PrintOutObject(memoryInventoryItem, (ulong)i, new List<string>());
 

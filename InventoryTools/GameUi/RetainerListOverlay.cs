@@ -51,7 +51,7 @@ namespace InventoryTools.GameUi
 
         public void UpdateState(FilterState? newState)
         {
-            if (PluginService.CharacterMonitor.ActiveCharacter == 0)
+            if (PluginService.CharacterMonitor.ActiveCharacterId == 0)
             {
                 return;
             }
@@ -60,7 +60,7 @@ namespace InventoryTools.GameUi
                 HasState = true;
                 var filterResult = newState.Value.FilterResult;
                 var filterConfiguration = newState.Value.FilterConfiguration;
-                var currentCharacterId = Service.ClientState.LocalContentId;
+                var currentCharacterId = PluginService.CharacterMonitor.LocalContentId;
                 if (filterResult.HasValue)
                 {
                     if (filterResult.Value.AllItems.Count != 0)
@@ -70,7 +70,7 @@ namespace InventoryTools.GameUi
                         Dictionary<ulong, int> characterTotals = new();
 
                         foreach (var character in PluginService.CharacterMonitor.GetRetainerCharacters(PluginService
-                            .CharacterMonitor.ActiveCharacter))
+                            .CharacterMonitor.ActiveCharacterId))
                         {
                             hasItems[character.Key] = new HashSet<uint>();
                             characterTotals[character.Key] = 0;
@@ -133,7 +133,7 @@ namespace InventoryTools.GameUi
             }
             if (HasState)
             {
-                RetainerNames = PluginService.CharacterMonitor.Characters.Where(c => c.Value.CharacterId == PluginService.CharacterMonitor.ActiveCharacter).ToDictionary(c => c.Key, c => c.Value.Name);            
+                RetainerNames = PluginService.CharacterMonitor.Characters.Where(c => c.Value.CharacterId == PluginService.CharacterMonitor.ActiveCharacterId).ToDictionary(c => c.Key, c => c.Value.Name);            
                 Clear();
             }
 

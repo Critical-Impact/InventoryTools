@@ -60,11 +60,11 @@ public class ContextMenuService : IDisposable
         => agent != IntPtr.Zero ? GetObjectItemId(*(uint*)(agent + offset)) : null;
 
     private uint? GetObjectItemId(string name, int offset)
-        => GetObjectItemId(Service.Gui.FindAgentInterface(name), offset);
+        => GetObjectItemId(PluginService.GuiService.FindAgentInterface(name), offset);
 
     private unsafe uint? HandleSatisfactionSupply()
     {
-        var agent = Service.Gui.FindAgentInterface("SatisfactionSupply");
+        var agent = PluginService.GuiService.FindAgentInterface("SatisfactionSupply");
         if (agent == IntPtr.Zero)
             return null;
 
@@ -78,7 +78,7 @@ public class ContextMenuService : IDisposable
     }
     private unsafe uint? HandleHWDSupply()
     {
-        var agent = Service.Gui.FindAgentInterface("HWDSupply");
+        var agent = PluginService.GuiService.FindAgentInterface("HWDSupply");
         if (agent == IntPtr.Zero)
             return null;
 
@@ -131,7 +131,7 @@ public class ContextMenuService : IDisposable
     
     private static unsafe IntPtr AgentById(AgentId id)
     {
-        var uiModule = (UIModule*)Service.Gui.GetUIModule();
+        var uiModule = (UIModule*)PluginService.GuiService.GetUIModule();
         var agents   = uiModule->GetAgentModule();
         var agent    = agents->GetAgentByInternalId(id);
         return (IntPtr)agent;

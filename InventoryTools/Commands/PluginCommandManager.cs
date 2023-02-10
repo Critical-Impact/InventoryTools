@@ -36,7 +36,7 @@ namespace InventoryTools.Commands
             for (var i = 0; i < this._pluginCommands.Length; i++)
             {
                 var (command, commandInfo) = this._pluginCommands[i];
-                Service.Commands.AddHandler(command, commandInfo);
+                PluginService.CommandService.AddHandler(command, commandInfo);
             }
         }
 
@@ -45,7 +45,7 @@ namespace InventoryTools.Commands
             for (var i = 0; i < this._pluginCommands.Length; i++)
             {
                 var (command, _) = this._pluginCommands[i];
-                Service.Commands.RemoveHandler(command);
+                PluginService.CommandService.RemoveHandler(command);
             }
         }
 

@@ -26,14 +26,14 @@ namespace InventoryTools.Logic
         {
             get
             {
-                return Service.Interface.ConfigFile.ToString();
+                return PluginService.PluginInterfaceService.ConfigFile.ToString();
             }
         }
         public static string InventoryFile
         {
             get
             {
-                return Path.Join(Service.Interface.ConfigDirectory.FullName, "inventories.json");
+                return Path.Join(PluginService.PluginInterfaceService.ConfigDirectory.FullName, "inventories.json");
             }
         }
         public static void Load()

@@ -36,7 +36,7 @@ namespace InventoryTools.Logic.Columns
             {
                 if (ImGui.SmallButton("Gather##Gather" + rowIndex))
                 {
-                    Service.Commands.ProcessCommand("/gather " + item.Name);
+                    PluginService.CommandService.ProcessCommand("/gather " + item.Name);
                 }
             }
         }

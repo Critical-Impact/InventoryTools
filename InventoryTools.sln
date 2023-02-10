@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OtterGui", "OtterGui\OtterG
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LuminaSupplemental.Excel", "LuminaSupplemental\src\LuminaSupplemental.Excel\LuminaSupplemental.Excel.csproj", "{5640DD21-65D9-4D77-AA34-62F77CC2BBA8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryToolsMock", "InventoryToolsMock\InventoryToolsMock.csproj", "{71F3D03A-C28B-4A92-830D-1591AABBCCD6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,5 +58,11 @@ Global
 		{5640DD21-65D9-4D77-AA34-62F77CC2BBA8}.FullDebug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5640DD21-65D9-4D77-AA34-62F77CC2BBA8}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
 		{5640DD21-65D9-4D77-AA34-62F77CC2BBA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71F3D03A-C28B-4A92-830D-1591AABBCCD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71F3D03A-C28B-4A92-830D-1591AABBCCD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71F3D03A-C28B-4A92-830D-1591AABBCCD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71F3D03A-C28B-4A92-830D-1591AABBCCD6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71F3D03A-C28B-4A92-830D-1591AABBCCD6}.FullDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71F3D03A-C28B-4A92-830D-1591AABBCCD6}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 EndGlobal

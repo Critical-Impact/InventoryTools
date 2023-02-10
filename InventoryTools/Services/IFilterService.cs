@@ -1,16 +1,18 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using InventoryTools.Logic;
 
 namespace InventoryTools.Services
 {
-    public interface IFilterService
+    public interface IFilterService : IDisposable
     {
         ConcurrentDictionary<string, FilterConfiguration> Filters { get; }
         List<FilterConfiguration> FiltersList { get; }
-        
+
         bool AddFilter(FilterConfiguration configuration);
         bool AddFilter(string name, FilterType filterType);
+        FilterConfiguration AddNewCraftFilter();
         bool RemoveFilter(FilterConfiguration configuration);
         bool RemoveFilter(string name);
         bool RemoveFilterByKey(string key);
@@ -76,5 +78,8 @@ namespace InventoryTools.Services
         event FilterToggledDelegate UiFilterToggled;
         event FilterToggledDelegate BackgroundFilterToggled;
         event FilterTableRefreshedDelegate FilterTableRefreshed;
+        event FilterRepositionedDelegate FilterRepositioned;
+
+        FilterConfiguration? GetDefaultCraftList();
     }
 }

@@ -14,8 +14,8 @@ namespace InventoryTools.Services
     {
         private readonly WindowSystem windowSystem = new("AllaganTools");
 
-        private FilterService _filterService;
-        public WindowService(FilterService filterService)
+        private IFilterService _filterService;
+        public WindowService(IFilterService filterService)
         {
             _filterService = filterService;
             _filterService.FilterRemoved += FilterServiceAddedRemoved;
