@@ -28,6 +28,7 @@ using InventoryTools.Logic.Columns;
 using InventoryTools.Logic.Filters;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Logic.Settings.Abstract;
+using InventoryTools.Tooltips;
 using InventoryTools.Ui;
 using XivCommon;
 using XivCommon.Functions.Tooltips;
@@ -96,6 +97,7 @@ namespace InventoryTools
             PluginService.CraftMonitor.CraftCompleted += CraftMonitorOnCraftCompleted ;
             PluginService.OnPluginLoaded += PluginServiceOnOnPluginLoaded;
             PluginService.GameInterface.AcquiredItemsUpdated += GameInterfaceOnAcquiredItemsUpdated;
+            //PluginService.TooltipService.AddTooltipTweak(new LocationDisplayTooltip());
 
             RunMigrations();
             
@@ -605,6 +607,7 @@ namespace InventoryTools
 
         private void OnItemTooltip(ItemTooltip tooltip, ulong itemId)
         {
+            PluginLog.Log("detouring yo2");
             if (!PluginConfiguration.DisplayTooltip || Service.KeyState[VirtualKey.CONTROL])
             {
                 return;
@@ -614,6 +617,7 @@ namespace InventoryTools
             {
                 _cachedTooltipLines = new Dictionary<ulong, List<Payload>>();
             }
+            
 
             ItemTooltipString itemTooltipString;
             if (tooltip.Fields.HasFlag(ItemTooltipFields.Description))

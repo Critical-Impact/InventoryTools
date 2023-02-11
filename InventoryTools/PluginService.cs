@@ -36,8 +36,8 @@ namespace InventoryTools
         public static MarketCache MarketCache { get; private set; } = null!;
         public static Universalis Universalis { get; private set; } = null!;
         public static GameInterface GameInterface { get; private set; } = null!;
-        
         public static IPCService IPCService { get; private set; } = null!;
+        public static TooltipService TooltipService { get; private set; } = null!;
         
         public static OdrScanner OdrScanner { get; private set; } = null!;
         public static bool PluginLoaded { get; private set; } = false;
@@ -68,6 +68,7 @@ namespace InventoryTools
             ContextMenuService = new ContextMenuService();
             IconStorage = new IconStorage(Service.Interface, Service.Data);
             WindowService = new WindowService(FilterService);
+            TooltipService = new TooltipService();
             PluginLogic = new PluginLogic(  );
             WotsitIpc = new WotsitIpc(  );
             PluginCommands = new();
@@ -98,6 +99,7 @@ namespace InventoryTools
             CommandManager.Dispose();
             WotsitIpc.Dispose();
             PluginLogic.Dispose();
+            TooltipService.Dispose();
             FilterService.Dispose();
             OverlayService.Dispose();
             InventoryMonitor.Dispose();
@@ -137,6 +139,7 @@ namespace InventoryTools
             MarketCache = null!;
             Universalis = null!;
             GameInterface = null!;
+            TooltipService = null!;
         }
     }
 }
