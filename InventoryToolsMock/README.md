@@ -6,11 +6,12 @@ It has no way of connecting to the game and acts purely as a tool to aid in deve
 
 ### Setup
 
-You need to pass in 3 paths as arguments to the executable, the game data path, the config directory and the config file. 
+You need to pass in 2 paths as arguments to the executable, the game data path, the config directory.
 I would highly recommend making a copy of your configuration and putting it in an alternate directory.
 
 **Examples:**
 
 "C:/Games/SquareEnix/FINAL FANTASY XIV - A Realm Reborn/game/sqpack"  
 "C:/Users/YourName/AppData/Roaming/XIVLauncher/pluginConfigs"  
-"C:/Users/YourName/AppData/Roaming/XIVLauncher/pluginConfigs/InventoryTools.json"
+
+You may also pass in the config file and inventories file as the 3rd and 4th parameters respectively if you wish to target specific json files.

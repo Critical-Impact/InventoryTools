@@ -70,7 +70,7 @@ namespace InventoryTools.Sections
                         {
                             var base64 = filterConfiguration.ExportBase64();
                             ImGui.SetClipboardText(base64);
-                            ChatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
+                            PluginService.ChatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
                         }
 
                         ImGui.SameLine();

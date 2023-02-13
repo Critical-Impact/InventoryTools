@@ -31,6 +31,8 @@ namespace InventoryTools
         public ICharacterMonitor? CharacterMonitor;
         public IInventoryScanner? InventoryScanner;
         public ICraftMonitor? CraftMonitor;
+        public IChatUtilities? ChatUtilities;
+        public IGameInterface? GameInterface;
     }
 
     public static class PluginService
@@ -62,8 +64,8 @@ namespace InventoryTools
         public static IUniversalis Universalis { get; private set; } = null!;
         public static IGameInterface GameInterface { get; private set; } = null!;
         public static IPCService IpcService { get; private set; } = null!;
+        public static IChatUtilities ChatUtilities { get; private set; } = null!;
         public static TooltipService TooltipService { get; private set; } = null!;
-        
         public static OdrScanner OdrScanner { get; private set; } = null!;
         public static bool PluginLoaded { get; private set; } = false;
 
@@ -80,6 +82,7 @@ namespace InventoryTools
             GuiService = new GuiService(Service.Gui);
             DataService = new DataService(Service.Data);
             ChatService = new ChatService(Service.Chat);
+            ChatUtilities = new ChatUtilities();
             
             ConfigurationManager.Load();
             Universalis = new Universalis();
@@ -112,7 +115,7 @@ namespace InventoryTools
             OnPluginLoaded?.Invoke();
         }
 
-        public static void InitaliseExplicit(MockServices mockServices)
+        public static void InitaliseExplicit(MockServices mockServices, bool finishLoading = true)
         {
             if (mockServices.CharacterMonitor != null) CharacterMonitor = mockServices.CharacterMonitor;
             if (mockServices.InventoryMonitor != null) InventoryMonitor = mockServices.InventoryMonitor;
@@ -129,8 +132,13 @@ namespace InventoryTools
             if (mockServices.OverlayService != null) OverlayService = mockServices.OverlayService;
             if (mockServices.CraftMonitor != null) CraftMonitor = mockServices.CraftMonitor;
             if (mockServices.InventoryScanner != null) InventoryScanner = mockServices.InventoryScanner;
+            if (mockServices.ChatUtilities != null) ChatUtilities = mockServices.ChatUtilities;
+            if (mockServices.GameInterface != null) GameInterface = mockServices.GameInterface;
             PluginLoaded = true;
-            OnPluginLoaded?.Invoke();
+            if (finishLoading)
+            {
+                OnPluginLoaded?.Invoke();
+            }
         }
 
         public static void Dispose()

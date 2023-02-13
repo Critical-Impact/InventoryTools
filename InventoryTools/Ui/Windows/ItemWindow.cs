@@ -184,27 +184,55 @@ namespace InventoryTools.Ui
                         var sourceIcon = PluginService.IconStorage[source.Icon];
                         if (sourceIcon != null)
                         {
-                            if (source.ItemId != null)
+                            if (source.CanOpen)
                             {
-                                if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                        new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1), 0))
+                                if (source is ItemSource itemSource && itemSource.ItemId != null)
                                 {
-                                    PluginService.WindowService.OpenItemWindow(source.ItemId.Value);
-                                }
-                                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right)) 
-                                {
-                                    ImGui.OpenPopup("RightClickSource" + source.ItemId);
-                                }
-                    
-                                if (ImGui.BeginPopup("RightClickSource"+ source.ItemId))
-                                {
-                                    var itemEx = Service.ExcelCache.GetItemExSheet().GetRow(source.ItemId.Value);
-                                    if (itemEx != null)
+                                    if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                                            new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1),
+                                            0))
                                     {
-                                        itemEx.DrawRightClickPopup();
+                                        Service.FrameworkService.RunOnFrameworkThread(() =>
+                                        {
+                                            PluginService.WindowService.OpenItemWindow(itemSource.ItemId.Value);
+                                        });
                                     }
+                                    if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
+                                                            ImGuiHoveredFlags.AllowWhenOverlapped &
+                                                            ImGuiHoveredFlags.AllowWhenBlockedByPopup &
+                                                            ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
+                                                            ImGuiHoveredFlags.AnyWindow) &&
+                                        ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                                    {
+                                        ImGui.OpenPopup("RightClickSource" + itemSource.ItemId);
+                                    }
+                                    if (ImGui.BeginPopup("RightClickSource" + itemSource.ItemId))
+                                    {
+                                        ImGui.OpenPopup("RightClickSource" + itemSource.ItemId);
+                                        var itemEx = Service.ExcelCache.GetItemExSheet()
+                                            .GetRow(itemSource.ItemId.Value);
+                                        if (itemEx != null)
+                                        {
+                                            itemEx.DrawRightClickPopup();
+                                        }
+                                        ImGui.EndPopup();
+                                    }
+                                }
+                                else if (source is DutySource dutySource)
+                                {
+                                    if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                                            new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1),
+                                            0))
+                                    {
 
-                                    ImGui.EndPopup();
+                                        PluginService.WindowService.OpenDutyWindow(dutySource.ContentFinderConditionId);
+
+                                    }
+                                }
+                                else
+                                {
+                                    ImGui.Image(sourceIcon.ImGuiHandle,
+                                        new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale);
                                 }
                             }
                             else
@@ -290,7 +318,7 @@ namespace InventoryTools.Ui
                     ImGui.TableNextColumn();
                     if (ImGui.Button("Open Map Link##" + tuple.shop.RowId + "_" + tuple.npc.Key + "_" + tuple.location.MapEx.Row))
                     {
-                        ChatUtilities.PrintFullMapLink(tuple.location, Item.NameString);
+                        PluginService.ChatUtilities.PrintFullMapLink(tuple.location, Item.NameString);
                     }
 
 

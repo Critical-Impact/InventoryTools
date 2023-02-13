@@ -12,29 +12,29 @@ using OtterGui;
 
 namespace InventoryTools.Logic.Columns
 {
-    public class AcquisitionSourceIconsColumn : Column<List<ItemSource>?>
+    public class AcquisitionSourceIconsColumn : Column<List<IItemSource>?>
     {
-        public override List<ItemSource>? CurrentValue(InventoryItem item)
+        public override List<IItemSource>? CurrentValue(InventoryItem item)
         {
             return CurrentValue(item.Item);
         }
 
-        public override List<ItemSource>? CurrentValue(ItemEx item)
+        public override List<IItemSource>? CurrentValue(ItemEx item)
         {
             return item.Sources;
         }
 
-        public override List<ItemSource>? CurrentValue(SortingResult item)
+        public override List<IItemSource>? CurrentValue(SortingResult item)
         {
             return CurrentValue(item.InventoryItem);
         }
 
-        public override List<ItemSource>? CurrentValue(CraftItem item)
+        public override List<IItemSource>? CurrentValue(CraftItem item)
         {
             return item.Item.Sources;
         }
 
-        public override IColumnEvent? DoDraw(List<ItemSource>? currentValue, int rowIndex,
+        public override IColumnEvent? DoDraw(List<IItemSource>? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration)
         {
             ImGui.TableNextColumn();
@@ -47,33 +47,38 @@ namespace InventoryTools.Logic.Columns
                     var sourceIcon = PluginService.IconStorage[item.Icon];
                     ImGui.Image(sourceIcon.ImGuiHandle,
                         new Vector2(filterConfiguration.TableHeight , filterConfiguration.TableHeight ) * ImGui.GetIO().FontGlobalScale);
-                    if (item.HasItem && item.Item != null)
+                    //TODO: fix this
+                    if (item is ItemSource source)
                     {
-                        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
-                                                ImGuiHoveredFlags.AllowWhenOverlapped &
-                                                ImGuiHoveredFlags.AllowWhenBlockedByPopup &
-                                                ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
-                                                ImGuiHoveredFlags.AnyWindow) &&
-                            ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                        if (source.HasItem && source.Item != null)
                         {
-                            ImGui.OpenPopup("RightClick" + item.ItemId);
-                        }
-                        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
-                                                ImGuiHoveredFlags.AllowWhenOverlapped &
-                                                ImGuiHoveredFlags.AllowWhenBlockedByPopup &
-                                                ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
-                                                ImGuiHoveredFlags.AnyWindow) &&
-                            ImGui.IsMouseReleased(ImGuiMouseButton.Left) && item.ItemId != null)
-                        {
-                            PluginService.WindowService.OpenItemWindow(item.ItemId.Value);
-                        }
+                            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
+                                                    ImGuiHoveredFlags.AllowWhenOverlapped &
+                                                    ImGuiHoveredFlags.AllowWhenBlockedByPopup &
+                                                    ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
+                                                    ImGuiHoveredFlags.AnyWindow) &&
+                                ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                            {
+                                ImGui.OpenPopup("RightClick" + source.ItemId);
+                            }
+                            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
+                                                    ImGuiHoveredFlags.AllowWhenOverlapped &
+                                                    ImGuiHoveredFlags.AllowWhenBlockedByPopup &
+                                                    ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
+                                                    ImGuiHoveredFlags.AnyWindow) &&
+                                ImGui.IsMouseReleased(ImGuiMouseButton.Left) && source.ItemId != null)
+                            {
+                                PluginService.WindowService.OpenItemWindow(source.ItemId.Value);
+                            }
 
-                        if (ImGui.BeginPopup("RightClick" + item.ItemId))
-                        {
-                            item.Item.DrawRightClickPopup();
-                            ImGui.EndPopup();
+                            if (ImGui.BeginPopup("RightClick" + source.ItemId))
+                            {
+                                source.Item?.DrawRightClickPopup();
+                                ImGui.EndPopup();
+                            }
                         }
                     }
+                    
 
                     ImGuiUtil.HoverTooltip(item.FormattedName);
                     if ((index + 1) % 5 != 0)

@@ -35,8 +35,10 @@ public class MockPlugin
     private MockDataService _dataService;
     private OverlayService _overlayService;
     private MockCraftMonitor _craftMonitor;
+    private MockChatUtilities _chatUtilities;
+    private MockGameInterface _gameInterface;
 
-    public MockPlugin(string gameDirectory, string configDirectory, string configFile)
+    public MockPlugin(string gameDirectory, string configDirectory, string configFile, string? inventoriesFile)
     {
         ConfigurationManager.Config = new InventoryToolsConfiguration();
         var levelSwitch = new LoggingLevelSwitch
@@ -58,10 +60,12 @@ public class MockPlugin
         _craftMonitor = new MockCraftMonitor();
         _inventoryScanner = new MockInventoryScanner();
         _frameworkService = new MockFrameworkService();
+        _chatUtilities = new MockChatUtilities();
         _inventoryMonitor = new InventoryMonitor(_characterMonitor, _craftMonitor, _inventoryScanner, _frameworkService );
         _iconService = new MockIconService(lumina);
         _universalis = new MockUniversalis();
         _gameUiManager = new MockGameUiManager();
+        _gameInterface = new MockGameInterface();
         _marketCache = new MockMarketCache();
         _mockPluginInterfaceService = new MockPluginInterfaceService(new FileInfo(configFile), new DirectoryInfo(configDirectory));
         _dataService = new MockDataService(lumina);
@@ -80,9 +84,11 @@ public class MockPlugin
             MarketCache = _marketCache,
             PluginInterfaceService = _mockPluginInterfaceService,
             PluginLogic = _pluginLogic,
-        });
+            ChatUtilities =  _chatUtilities,
+            GameInterface = _gameInterface
+        }, false);
 
-        ConfigurationManager.LoadFromFile(configFile, @"C:\Users\Blair\AppData\Roaming\XIVLauncher\pluginConfigs\InventoryTools\inventories.json");
+        ConfigurationManager.LoadFromFile(configFile, inventoriesFile);
         PluginService.InventoryMonitor.LoadExistingData(ConfigurationManager.Config.GetSavedInventory());
         PluginService.CharacterMonitor.LoadExistingRetainers(ConfigurationManager.Config.GetSavedRetainers());
         _filterService = new FilterService(_characterMonitor, _inventoryMonitor);
@@ -102,15 +108,10 @@ public class MockPlugin
             PluginService.PluginLogic.LoadDefaultData();
             ConfigurationManager.Config.FirstRun = false;
         }
-        _windowService.OpenWindow<FiltersWindow>(FiltersWindow.AsKey);
-        _windowService.OpenWindow<HelpWindow>(HelpWindow.AsKey);
-        _windowService.OpenWindow<IntroWindow>(IntroWindow.AsKey);
-        _windowService.OpenWindow<ConfigurationWindow>(ConfigurationWindow.AsKey);
-        _windowService.OpenWindow<CraftsWindow>(CraftsWindow.AsKey);
-
-
+        _windowService.OpenWindow<MockWindow>(MockWindow.AsKey);
     }
 
+    private HashSet<string> WindowStates = new HashSet<string>();
     public void Draw()
     {
         foreach (var window in _windowService.Windows)
@@ -126,6 +127,12 @@ public class MockPlugin
         {
             return;
         }
+
+        if (!WindowStates.Contains(window.Key))
+        {
+            WindowStates.Add(window.Key);
+            window.OnOpen();
+        }
         window.Update();
         if (!window.DrawConditions())
             return;
@@ -133,7 +140,8 @@ public class MockPlugin
         if (flag1)
             ImGui.PushID(window.Namespace);
         window.PreDraw();
-        if (window.ForceMainWindow)
+        ApplyConditionals(window);
+        if (window.ForceMainWindow || true)
             ImGuiHelpers.ForceNextWindowMainViewport();
 
         bool isFocused = window.IsFocused;
@@ -148,6 +156,11 @@ public class MockPlugin
             ImGui.PopStyleColor();
         if (internalIsOpen != window.IsOpen)
         {
+            if (WindowStates.Contains(window.Key))
+            {
+                WindowStates.Remove(window.Key);
+            }
+
             window.Close();
             window.OnClose();
         }
@@ -158,5 +171,38 @@ public class MockPlugin
         if (!flag1)
             return;
         ImGui.PopID();
+    }
+    
+    private void ApplyConditionals(Window window)
+    {
+        if (window.Position.HasValue)
+        {
+            var pos = window.Position.Value;
+
+            if (window.ForceMainWindow)
+                pos += ImGuiHelpers.MainViewport.Pos;
+
+            ImGui.SetNextWindowPos(pos, window.PositionCondition);
+        }
+
+        if (window.Size.HasValue)
+        {
+            ImGui.SetNextWindowSize(window.Size.Value * ImGuiHelpers.GlobalScale, window.SizeCondition);
+        }
+
+        if (window.Collapsed.HasValue)
+        {
+            ImGui.SetNextWindowCollapsed(window.Collapsed.Value, window.CollapsedCondition);
+        }
+
+        if (window.SizeConstraints.HasValue)
+        {
+            ImGui.SetNextWindowSizeConstraints(window.SizeConstraints.Value.MinimumSize * ImGuiHelpers.GlobalScale, window.SizeConstraints.Value.MaximumSize * ImGuiHelpers.GlobalScale);
+        }
+
+        if (window.BgAlpha.HasValue)
+        {
+            ImGui.SetNextWindowBgAlpha(window.BgAlpha.Value);
+        }
     }
 }
