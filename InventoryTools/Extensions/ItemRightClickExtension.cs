@@ -213,7 +213,7 @@ namespace InventoryTools.Extensions
             }
             if (ImGui.Selectable("Link"))
             {
-                ChatUtilities.LinkItem(item);
+                PluginService.ChatUtilities.LinkItem(item);
             }
             if (item.CanTryOn && ImGui.Selectable("Try On"))
             {

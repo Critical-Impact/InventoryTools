@@ -37,6 +37,11 @@
         "resolved": "3.1.0",
         "contentHash": "yz/FptkwDL0bxhaxoyrFPI5SyxUUfuZtbH1E2yLiHHFZFFrSXNnWJHfXSt5Anvy1gWpHCLpC520Bxy6G/Opp1g=="
       },
+      "CSVFile": {
+        "type": "Transitive",
+        "resolved": "3.1.0",
+        "contentHash": "yz/FptkwDL0bxhaxoyrFPI5SyxUUfuZtbH1E2yLiHHFZFFrSXNnWJHfXSt5Anvy1gWpHCLpC520Bxy6G/Opp1g=="
+      },
       "NaturalSort.Extension": {
         "type": "Transitive",
         "resolved": "3.2.0",
@@ -55,7 +60,7 @@
         "type": "Project",
         "dependencies": {
           "CSVFile": "[3.1.0, )",
-          "CsvHelper": "[30.0.1, )"
+          "CsvHelper": "[30.0.1, )",
         }
       },
       "ottergui": {

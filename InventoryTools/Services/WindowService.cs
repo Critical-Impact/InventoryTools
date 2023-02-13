@@ -71,6 +71,18 @@ namespace InventoryTools.Services
             return AddWindow(itemWindow);
         }
 
+        public bool OpenDutyWindow(uint contentFinderConditionId)
+        {
+            var asKey = DutyWindow.AsKey(contentFinderConditionId);
+            if (_windows.ContainsKey(asKey))
+            {
+                _windows[asKey].Toggle();
+                return true;
+            }
+            var dutyWindow = new DutyWindow(contentFinderConditionId);
+            return AddWindow(dutyWindow);
+        }
+
         public bool OpenFilterWindow(string filterKey)
         {
             var asKey = FilterWindow.AsKey(filterKey);
@@ -224,6 +236,11 @@ namespace InventoryTools.Services
         public bool ToggleConfigurationWindow()
         {
             return ToggleWindow<ConfigurationWindow>(ConfigurationWindow.AsKey);
+        }
+        
+        public bool ToggleDutiesWindow()
+        {
+            return ToggleWindow<DutiesWindow>(DutiesWindow.AsKey);
         }
 
         public bool ToggleHelpWindow()

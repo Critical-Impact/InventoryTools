@@ -35,7 +35,7 @@ namespace InventoryTools.Commands
             PluginLog.Verbose(args);
             if (args.Trim() == "")
             {
-                ChatUtilities.PrintError("You must enter the name of a filter.");
+                PluginService.ChatUtilities.PrintError("You must enter the name of a filter.");
             }
             else
             {
@@ -60,7 +60,7 @@ namespace InventoryTools.Commands
             PluginLog.Verbose(args);
             if (args.Trim() == "")
             {
-                ChatUtilities.PrintError("You must enter the name of a filter.");
+                PluginService.ChatUtilities.PrintError("You must enter the name of a filter.");
             }
             else
             {
@@ -74,7 +74,7 @@ namespace InventoryTools.Commands
         {
             if (args.Trim() == "")
             {
-                ChatUtilities.PrintError("You must enter the name of a filter.");
+                PluginService.ChatUtilities.PrintError("You must enter the name of a filter.");
             }
             else
             {

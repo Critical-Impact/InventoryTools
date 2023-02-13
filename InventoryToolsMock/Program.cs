@@ -1,5 +1,8 @@
 ﻿using System.Numerics;
+using System.Reflection;
+using Dalamud.Interface;
 using ImGuiNET;
+using InventoryTools.Logic;
 using InventoryTools.Ui;
 using Veldrid;
 using Veldrid.Sdl2;
@@ -18,9 +21,9 @@ namespace InventoryToolsMock
 
         static void Main(string[] args)
         {
-            if (args.Length < 3)
+            if (args.Length < 2)
             {
-                Console.WriteLine("Invalid arguments provided. Please provide the game directory, configuration directory and configuration file as arguments to the executable.");
+                Console.WriteLine("Invalid arguments provided. Please provide the game directory and configuration directory as arguments to the executable.");
                 Console.ReadLine();
                 return;
             }
@@ -39,13 +42,36 @@ namespace InventoryToolsMock
                 Console.ReadLine();
                 return;
             }
-            var configFile = args[2];
+            
+            var configFile = configDirectory + Path.DirectorySeparatorChar + "InventoryTools.json";
+            if (args.Length > 2)
+            {
+                configFile = args[2];
+            }
             if (!new FileInfo(configFile).Exists)
             {
                 Console.WriteLine("Config file: " + configFile + " could not be found.");
                 Console.ReadLine();
                 return;
             }
+
+            string? inventoriesFile = configDirectory + Path.DirectorySeparatorChar + "InventoryTools" + Path.DirectorySeparatorChar + "inventories.json";
+            if (args.Length > 3)
+            {
+                inventoriesFile = args[3];
+            }
+            
+            if (!new FileInfo(inventoriesFile).Exists)
+            {
+                Console.WriteLine("Inventories file: " + inventoriesFile + " could not be found.");
+                inventoriesFile = null;
+            }
+
+            //Hack to bypass private set
+            var field = typeof(ImGuiHelpers).GetProperty("GlobalScale", 
+                BindingFlags.Static | 
+                BindingFlags.Public);
+            field.SetValue(null, 1);
             
             VeldridStartup.CreateWindowAndGraphicsDevice(
                 new WindowCreateInfo(50, 50, 1280, 720, WindowState.Normal, "Allagan Tools - Mocked"),
@@ -59,7 +85,13 @@ namespace InventoryToolsMock
             };
             _cl = _gd.ResourceFactory.CreateCommandList();
             _controller = new ImGuiController(_gd, _gd.MainSwapchain.Framebuffer.OutputDescription, _window.Width, _window.Height);
-            _mockPlugin = new MockPlugin(gameLocation, configDirectory, configFile);
+            _mockPlugin = new MockPlugin(gameLocation, configDirectory, configFile, inventoriesFile);
+            
+            //Hack to bypass private set
+            var property = typeof(ImGuiHelpers).GetProperty("MainViewport", 
+                BindingFlags.Static | 
+                BindingFlags.Public);
+            property.SetValue(null, ImGui.GetMainViewport());
             
             while (_window.Exists)
             {
@@ -77,6 +109,8 @@ namespace InventoryToolsMock
                 _gd.SubmitCommands(_cl);
                 _gd.SwapBuffers(_gd.MainSwapchain);
             }
+            
+            ConfigurationManager.Save();
 
             // Clean up Veldrid resources
             _gd.WaitForIdle();

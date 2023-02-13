@@ -578,7 +578,7 @@ namespace InventoryTools.Services
 
         public void InvalidateFilters()
         {
-            ChatUtilities.PrintLog("Filters invalidated");
+            PluginService.ChatUtilities.PrintLog("Filters invalidated");
             foreach (var filter in _filters)
             {
                 filter.Value.NeedsRefresh = true;

@@ -79,7 +79,7 @@ namespace InventoryTools.Logic
             Config = inventoryToolsConfiguration;
             Config.MarkReloaded();
         }
-        public static void LoadFromFile(string file, string inventoryFileName)
+        public static void LoadFromFile(string file, string? inventoryFileName)
         {
             PluginLog.Verbose("Loading configuration");
             if (!File.Exists(file))

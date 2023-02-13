@@ -61,6 +61,7 @@ namespace InventoryTools.Logic.Filters
                     }
                 }
             }
+            
             ImGui.SetNextItemWidth(LabelSize);
             if (sources.Count != 0)
             {
