@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Enums;
+using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Services;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.Text.SeStringHandling;
@@ -11,28 +12,29 @@ using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using InventoryTools.Logic;
+using InventoryTools.Logic.Settings;
 
 namespace InventoryTools.Tooltips;
 
-public class LocationDisplayTooltip : TooltipService.TooltipTweak
+public class DisplayMarketPriceTooltip : TooltipService.TooltipTweak
 {
+    private const string indentation = "      ";
     public override unsafe void OnGenerateItemTooltip(NumberArrayData* numberArrayData, StringArrayData* stringArrayData)
     {
         if (!ConfigurationManager.Config.DisplayTooltip)
         {
             return;
         }
-        var id = Service.Gui.HoveredItem;
-        if (id < 2000000)
+        var itemId = Service.Gui.HoveredItem;
+        if (itemId < 2000000)
         {
-            bool isHq = id > 1000000;
-            id %= 500000;
+            bool isHq = itemId > 1000000;
+            itemId %= 500000;
             
 
-            var item = Service.ExcelCache.GetItemExSheet().GetRow((uint)id);
+            var item = Service.ExcelCache.GetItemExSheet().GetRow((uint)itemId);
             if (item != null) {
                 var textLines = new List<string>();
-                
                 TooltipService.ItemTooltipField itemTooltipField;
                 var tooltipVisibility = GetTooltipVisibility((int**)numberArrayData);
                 if (tooltipVisibility.HasFlag(ItemTooltipFieldVisibility.Description))
@@ -56,26 +58,26 @@ public class LocationDisplayTooltip : TooltipService.TooltipTweak
 
                 if (seStr != null && seStr.Payloads.Count > 0)
                 {
-                    if (ConfigurationManager.Config.TooltipDisplayRetrieveAmount)
+                    if (ConfigurationManager.Config.TooltipDisplayMarketAveragePrice ||
+                        ConfigurationManager.Config.TooltipDisplayMarketLowestPrice)
                     {
-                        var filterConfiguration = PluginService.FilterService.GetActiveFilter();
-                        if (filterConfiguration != null)
+                        if (!(Service.ExcelCache.GetItemExSheet().GetRow((uint)itemId)?.IsUntradable ?? true))
                         {
-                            if (filterConfiguration.FilterType == FilterType.CraftFilter)
+                            var marketData = PluginService.MarketCache.GetPricing((uint)itemId, false);
+                            if (marketData != null)
                             {
-                                var filterResult = filterConfiguration.FilterResult;
-                                if (filterResult != null)
+                                textLines.Add("Market Board Data:\n");
+                                if (ConfigurationManager.Config.TooltipDisplayMarketAveragePrice)
                                 {
-                                    var sortedItems = filterResult.Value.SortedItems.Where(c =>
-                                        c.InventoryItem.ItemId == id && c.InventoryItem.IsHQ == isHq).ToList();
-                                    if (sortedItems.Any())
-                                    {
-                                        var sortedItem = sortedItems.First();
-                                        if (sortedItem.Quantity != 0)
-                                        {
-                                            textLines.Add("Retrieve: " + sortedItem.Quantity + "\n");
-                                        }
-                                    }
+                                    textLines.Add($"{indentation}Average Price: {Math.Round(marketData.averagePriceNQ, 0)}\n");
+                                    textLines.Add(
+                                        $"{indentation}Average Price (HQ): {Math.Round(marketData.averagePriceHQ, 0)}\n");
+                                }
+
+                                if (ConfigurationManager.Config.TooltipDisplayMarketLowestPrice)
+                                {
+                                    textLines.Add($"{indentation}Minimum Price: {Math.Round(marketData.minPriceNQ, 0)}\n");
+                                    textLines.Add($"{indentation}Minimum Price (HQ): {Math.Round(marketData.minPriceHQ, 0)}\n");
                                 }
                             }
                         }

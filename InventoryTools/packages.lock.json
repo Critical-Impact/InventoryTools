@@ -32,12 +32,6 @@
         "resolved": "5.0.0",
         "contentHash": "erBZjkQHWL9jpasCE/0qKAryzVBJFxGHVBAvgRN1bzM0q2s1S4oYREEEL0Vb+1kA/6BKb5FjUZMp5VXmy+gzkQ=="
       },
-      "XivCommon": {
-        "type": "Direct",
-        "requested": "[7.0.0-alpha.1, )",
-        "resolved": "7.0.0-alpha.1",
-        "contentHash": "4Yy4Wg3bnI/g9BSEYAqOZALmVMJZS0wcP847VlUIThBqIS/47O6tw2BI84he4KuPSTfIsYOzrcz3vAia8+Pn3g=="
-      },
       "NaturalSort.Extension": {
         "type": "Transitive",
         "resolved": "3.2.0",
@@ -49,27 +43,17 @@
           "LuminaSupplemental.Excel": "[6.0.2, )",
           "NaturalSort.Extension": "[3.2.0, )",
           "SerialQueue": "[2.1.0, )",
-          "System.Reactive": "[5.0.0, )",
-          "XivCommon": "[7.0.0-alpha.1, )"
+          "System.Reactive": "[5.0.0, )"
         }
       },
       "luminasupplemental.excel": {
-        "type": "Project",
-        "dependencies": {
-          "XivCommon": "[7.0.0-alpha.1, )"
-        }
+        "type": "Project"
       },
       "ottergui": {
-        "type": "Project",
-        "dependencies": {
-          "XivCommon": "[7.0.0-alpha.1, )"
-        }
+        "type": "Project"
       },
       "tetris": {
-        "type": "Project",
-        "dependencies": {
-          "XivCommon": "[7.0.0-alpha.1, )"
-        }
+        "type": "Project"
       }
     }
   }

@@ -34,7 +34,6 @@
         <PackageReference Include="DalamudPackager" Version="2.1.7" />
         <PackageReference Include="SerialQueue" Version="2.1.0" />
         <PackageReference Include="System.Reactive" Version="5.0.0" />
-        <PackageReference Include="XivCommon" Version="7.0.0-alpha.1" />
         <ProjectReference Include="..\CriticalCommonLib\CriticalCommonLib.csproj" />
         <ProjectReference Include="..\OtterGui\OtterGui.csproj" />
         <ProjectReference Include="..\Tetris\Tetris.csproj" />

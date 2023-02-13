@@ -219,7 +219,6 @@ namespace InventoryTools.Ui
                             .InventoryType.RetainerPage1);
                     PluginLog.Log(retainer->Loaded != 0 ? "True" : "False");
                 }
-
                 if (ImGui.Button("Check sort ordering"))
                 {
                     PluginLog.Log($"item order module : {(ulong)ItemOrderModule.Instance()->SaddleBagPremium:X}",
