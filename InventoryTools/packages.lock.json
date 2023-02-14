@@ -4,9 +4,9 @@
     "net7.0-windows7.0": {
       "CsvHelper": {
         "type": "Direct",
-        "requested": "[27.2.1, )",
-        "resolved": "27.2.1",
-        "contentHash": "uS5ix5hL9gL5taiAG//CScyJa8Fn1ZOh3FDhDvf4laboESFs84mCNropfp7PIt8xCkyQofljFpqu1B5UnSXjyA=="
+        "requested": "[30.0.1, )",
+        "resolved": "30.0.1",
+        "contentHash": "rcZtgbWR+As4G3Vpgx0AMNmShGuQLFjkHAPIIflzrfkJCx8/AOd4m96ZRmiU1Wi39qS5UVjV0P8qdgqOo5Cwyg=="
       },
       "Dalamud.ContextMenu": {
         "type": "Direct",
