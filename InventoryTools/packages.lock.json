@@ -32,6 +32,11 @@
         "resolved": "5.0.0",
         "contentHash": "erBZjkQHWL9jpasCE/0qKAryzVBJFxGHVBAvgRN1bzM0q2s1S4oYREEEL0Vb+1kA/6BKb5FjUZMp5VXmy+gzkQ=="
       },
+      "CSVFile": {
+        "type": "Transitive",
+        "resolved": "3.1.0",
+        "contentHash": "yz/FptkwDL0bxhaxoyrFPI5SyxUUfuZtbH1E2yLiHHFZFFrSXNnWJHfXSt5Anvy1gWpHCLpC520Bxy6G/Opp1g=="
+      },
       "NaturalSort.Extension": {
         "type": "Transitive",
         "resolved": "3.2.0",
@@ -47,7 +52,11 @@
         }
       },
       "luminasupplemental.excel": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "CSVFile": "[3.1.0, )",
+          "CsvHelper": "[30.0.1, )"
+        }
       },
       "ottergui": {
         "type": "Project"
