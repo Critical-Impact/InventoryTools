@@ -1,18 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Enums;
-using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Services;
-using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
-using Dalamud.Logging;
-using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using InventoryTools.Logic;
-using InventoryTools.Logic.Settings;
 
 namespace InventoryTools.Tooltips;
 

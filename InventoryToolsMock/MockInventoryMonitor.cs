@@ -1,3 +1,4 @@
+using CriticalCommonLib.Enums;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 
@@ -35,6 +36,11 @@ public class MockInventoryMonitor : IInventoryMonitor
 
     public event InventoryMonitor.InventoryChangedDelegate? OnInventoryChanged;
     public List<InventoryItem> GetSpecificInventory(ulong characterId, InventoryCategory category)
+    {
+        return new List<InventoryItem>();
+    }
+
+    public List<InventoryItem> GetSpecificInventory(ulong characterId, InventoryType inventoryType)
     {
         return new List<InventoryItem>();
     }

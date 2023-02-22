@@ -4,11 +4,8 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Addons;
-using CriticalCommonLib.MarketBoard;
-using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
-using Dalamud.Logging;
 using ImGuiNET;
 using ImGuiScene;
 using InventoryTools.Extensions;
@@ -111,7 +108,10 @@ namespace InventoryTools.Ui
                         ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
                         ConfigurationManager.Config.ActiveUiFilter != null)
                     {
-                        PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
+                        PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                        {
+                            PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
+                        });
                     }
                 }
             }
@@ -181,7 +181,10 @@ namespace InventoryTools.Ui
                             ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
                             ConfigurationManager.Config.ActiveUiFilter != null)
                         {
-                            PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
+                            PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                            {
+                                PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
+                            });
                         }
                     }
 
@@ -258,7 +261,10 @@ namespace InventoryTools.Ui
                 ImGui.Checkbox("Highlight?" + "###" + itemTable.Key + "VisibilityCheckbox", ref highlightItems);
                 if (highlightItems != itemTable.HighlightItems)
                 {
-                    PluginService.FilterService.ToggleActiveUiFilter(itemTable.FilterConfiguration);
+                    PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                    {
+                        PluginService.FilterService.ToggleActiveUiFilter(itemTable.FilterConfiguration);
+                    });
                 }
 
                 ImGui.SameLine();

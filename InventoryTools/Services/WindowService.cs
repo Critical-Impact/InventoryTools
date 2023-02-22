@@ -149,6 +149,16 @@ namespace InventoryTools.Services
                 return OpenWindow<ConfigurationWindow>(ConfigurationWindow.AsKey);
             }
 
+            if (windowName == DutiesWindow.AsKey)
+            {
+                return OpenWindow<DutiesWindow>(DutiesWindow.AsKey);
+            }
+
+            if (windowName == BNpcWindow.AsKey)
+            {
+                return OpenWindow<BNpcWindow>(BNpcWindow.AsKey);
+            }
+
             foreach (var config in ConfigurationManager.Config.FilterConfigurations)
             {
                 if (windowName == FilterWindow.AsKey(config.Key))
@@ -241,6 +251,11 @@ namespace InventoryTools.Services
         public bool ToggleDutiesWindow()
         {
             return ToggleWindow<DutiesWindow>(DutiesWindow.AsKey);
+        }
+        
+        public bool ToggleMobWindow()
+        {
+            return ToggleWindow<BNpcWindow>(BNpcWindow.AsKey);
         }
 
         public bool ToggleHelpWindow()

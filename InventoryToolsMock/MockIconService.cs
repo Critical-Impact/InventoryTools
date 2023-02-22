@@ -1,10 +1,8 @@
-using Dalamud.Interface.Internal;
 using Dalamud.Utility;
 using ImGuiScene;
 using InventoryTools.Services;
 using Lumina.Data.Files;
 using Lumina.Extensions;
-using Serilog;
 using Veldrid;
 
 namespace InventoryToolsMock;
@@ -41,6 +39,31 @@ public class MockIconService : IIconService
             new VeldridTextureMap(CPUframeBufferTextureId, icon.TextureBuffer.Width, icon.TextureBuffer.Height);
         _icons[(uint)id] = veldridTextureWrap;
         return veldridTextureWrap;
+    }
+
+    private HashSet<int> _availableIcons = new HashSet<int>();
+    private HashSet<int> _unAvailableIcons = new HashSet<int>();
+
+    public bool IconExists(int id)
+    {
+        if (_availableIcons.Contains(id))
+        {
+            return true;
+        }
+        if (_unAvailableIcons.Contains(id))
+        {
+            return false;
+        }
+        var icon     = LoadIconHq((uint)id) ?? _gameData.GetIcon((uint)id);
+        if (icon == null)
+        {
+            _unAvailableIcons.Add(id);
+        }
+        if (icon != null)
+        {
+            _availableIcons.Add(id);
+        }
+        return icon != null;
     }
     
     private TexFile? LoadIconHq(uint id)

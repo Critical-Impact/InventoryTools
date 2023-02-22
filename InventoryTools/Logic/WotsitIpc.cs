@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Timers;
-using CriticalCommonLib;
 using Dalamud.Logging;
 using Dalamud.Plugin.Ipc;
 

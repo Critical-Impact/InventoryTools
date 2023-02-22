@@ -24,7 +24,6 @@ namespace InventoryTools.Logic.Columns
         public override string Name { get; set; } = "Is Aquarium Item?";
         public override float Width { get; set; } = 100;
         public override string HelpText { get; set; } = "Can this item be put in a aquarium?";
-        public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Choice;
     }

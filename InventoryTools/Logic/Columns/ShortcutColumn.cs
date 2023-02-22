@@ -29,7 +29,6 @@ namespace InventoryTools.Logic.Columns
 
         public override string HelpText { get; set; } =
             "Provides a series of small buttons that allow opening garland tools and trying on items.";
-        public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = false;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
         

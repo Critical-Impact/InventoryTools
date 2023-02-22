@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Numerics;
-using CriticalCommonLib.Services;
 using ImGuiNET;
 using InventoryTools.Logic;
 

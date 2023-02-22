@@ -2,7 +2,7 @@ using CriticalCommonLib.Models;
 
 namespace InventoryTools.Logic;
 
-public struct FilteredItem
+public class FilteredItem
 {
     private InventoryItem _item;
     private uint? _quantityRequired;

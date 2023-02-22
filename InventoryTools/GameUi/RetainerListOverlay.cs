@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using CriticalCommonLib;
 using CriticalCommonLib.Services.Ui;
 using InventoryTools.Logic;
 
@@ -55,17 +54,17 @@ namespace InventoryTools.GameUi
             {
                 return;
             }
-            if (newState != null && HasAddon && newState.Value.ShouldHighlight && newState.Value.HasFilterResult)
+            if (newState != null && HasAddon && newState.ShouldHighlight && newState.HasFilterResult)
             {
                 HasState = true;
-                var filterResult = newState.Value.FilterResult;
-                var filterConfiguration = newState.Value.FilterConfiguration;
+                var filterResult = newState.FilterResult;
+                var filterConfiguration = newState.FilterConfiguration;
                 var currentCharacterId = PluginService.CharacterMonitor.LocalContentId;
-                if (filterResult.HasValue)
+                if (filterResult != null)
                 {
-                    if (filterResult.Value.AllItems.Count != 0)
+                    if (filterResult.AllItems.Count != 0)
                     {
-                        var allItems = filterResult.Value.AllItems;
+                        var allItems = filterResult.AllItems;
                         Dictionary<ulong, HashSet<uint>> hasItems = new ();
                         Dictionary<ulong, int> characterTotals = new();
 
@@ -105,7 +104,7 @@ namespace InventoryTools.GameUi
                         return;
 
                     }
-                    var filteredList = filterResult.Value.SortedItems;
+                    var filteredList = filterResult.SortedItems;
                     if (filterConfiguration.FilterType == FilterType.SortingFilter || filterConfiguration.FilterType == FilterType.CraftFilter)
                     {
                         var grouping = filteredList.Where(c => !c.InventoryItem.IsEmpty && 

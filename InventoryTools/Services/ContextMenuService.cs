@@ -1,5 +1,4 @@
 using System;
-using CriticalCommonLib;
 using Dalamud.ContextMenu;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;

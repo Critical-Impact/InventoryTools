@@ -117,34 +117,34 @@ namespace InventoryTools.GameUi
             {
                 return;
             }
-            if (newState != null && HasAddon && newState.Value.ShouldHighlight && newState.Value.HasFilterResult)
+            if (newState != null && HasAddon && newState.ShouldHighlight && newState.HasFilterResult)
             {
                 HasState = true;
-                var filterResult = newState.Value.FilterResult;
-                if (filterResult.HasValue)
+                var filterResult = newState.FilterResult;
+                if (filterResult != null)
                 {
-                    ChestInventoryColours[DresserTab.Body] = newState.Value.GetGlamourHighlights(DresserTab.Body, CurrentPage, OnlyDisplayRaceGenderItems, ClassJobSelected);
-                    ChestInventoryColours[DresserTab.Ears] = newState.Value.GetGlamourHighlights(DresserTab.Ears, CurrentPage, OnlyDisplayRaceGenderItems, ClassJobSelected);
-                    ChestInventoryColours[DresserTab.Feet] = newState.Value.GetGlamourHighlights(DresserTab.Feet, CurrentPage, OnlyDisplayRaceGenderItems, ClassJobSelected);
-                    ChestInventoryColours[DresserTab.Fingers] = newState.Value.GetGlamourHighlights(DresserTab.Fingers, CurrentPage, OnlyDisplayRaceGenderItems, ClassJobSelected);
-                    ChestInventoryColours[DresserTab.Hands] = newState.Value.GetGlamourHighlights(DresserTab.Hands, CurrentPage, OnlyDisplayRaceGenderItems, ClassJobSelected);
-                    ChestInventoryColours[DresserTab.Head] = newState.Value.GetGlamourHighlights(DresserTab.Head, CurrentPage, OnlyDisplayRaceGenderItems, ClassJobSelected);
-                    ChestInventoryColours[DresserTab.Legs] = newState.Value.GetGlamourHighlights(DresserTab.Legs, CurrentPage, OnlyDisplayRaceGenderItems, ClassJobSelected);
-                    ChestInventoryColours[DresserTab.Neck] = newState.Value.GetGlamourHighlights(DresserTab.Neck, CurrentPage, OnlyDisplayRaceGenderItems, ClassJobSelected);
-                    ChestInventoryColours[DresserTab.Wrists] = newState.Value.GetGlamourHighlights(DresserTab.Wrists, CurrentPage, OnlyDisplayRaceGenderItems, ClassJobSelected);
-                    ChestInventoryColours[DresserTab.MainHand] = newState.Value.GetGlamourHighlights(DresserTab.MainHand, CurrentPage, OnlyDisplayRaceGenderItems, ClassJobSelected);
-                    ChestInventoryColours[DresserTab.OffHand] = newState.Value.GetGlamourHighlights(DresserTab.OffHand, CurrentPage, OnlyDisplayRaceGenderItems, ClassJobSelected);
-                    TabColours[0] = newState.Value.GetTabHighlight(ChestInventoryColours[DresserTab.MainHand]);
-                    TabColours[1] =  newState.Value.GetTabHighlight(ChestInventoryColours[DresserTab.OffHand]);
-                    TabColours[2] = newState.Value.GetTabHighlight(ChestInventoryColours[DresserTab.Head]);
-                    TabColours[3] = newState.Value.GetTabHighlight(ChestInventoryColours[DresserTab.Body]);
-                    TabColours[4] = newState.Value.GetTabHighlight(ChestInventoryColours[DresserTab.Hands]);
-                    TabColours[5] = newState.Value.GetTabHighlight(ChestInventoryColours[DresserTab.Legs]);
-                    TabColours[6] = newState.Value.GetTabHighlight(ChestInventoryColours[DresserTab.Feet]);
-                    TabColours[7] = newState.Value.GetTabHighlight(ChestInventoryColours[DresserTab.Ears]);
-                    TabColours[8] = newState.Value.GetTabHighlight(ChestInventoryColours[DresserTab.Neck]);
-                    TabColours[9] = newState.Value.GetTabHighlight(ChestInventoryColours[DresserTab.Wrists]);
-                    TabColours[10] = newState.Value.GetTabHighlight(ChestInventoryColours[DresserTab.Fingers]);
+                    ChestInventoryColours[DresserTab.Body] = newState.GetGlamourHighlights(DresserTab.Body, CurrentPage, OnlyDisplayRaceGenderItems, ClassJobSelected);
+                    ChestInventoryColours[DresserTab.Ears] = newState.GetGlamourHighlights(DresserTab.Ears, CurrentPage, OnlyDisplayRaceGenderItems, ClassJobSelected);
+                    ChestInventoryColours[DresserTab.Feet] = newState.GetGlamourHighlights(DresserTab.Feet, CurrentPage, OnlyDisplayRaceGenderItems, ClassJobSelected);
+                    ChestInventoryColours[DresserTab.Fingers] = newState.GetGlamourHighlights(DresserTab.Fingers, CurrentPage, OnlyDisplayRaceGenderItems, ClassJobSelected);
+                    ChestInventoryColours[DresserTab.Hands] = newState.GetGlamourHighlights(DresserTab.Hands, CurrentPage, OnlyDisplayRaceGenderItems, ClassJobSelected);
+                    ChestInventoryColours[DresserTab.Head] = newState.GetGlamourHighlights(DresserTab.Head, CurrentPage, OnlyDisplayRaceGenderItems, ClassJobSelected);
+                    ChestInventoryColours[DresserTab.Legs] = newState.GetGlamourHighlights(DresserTab.Legs, CurrentPage, OnlyDisplayRaceGenderItems, ClassJobSelected);
+                    ChestInventoryColours[DresserTab.Neck] = newState.GetGlamourHighlights(DresserTab.Neck, CurrentPage, OnlyDisplayRaceGenderItems, ClassJobSelected);
+                    ChestInventoryColours[DresserTab.Wrists] = newState.GetGlamourHighlights(DresserTab.Wrists, CurrentPage, OnlyDisplayRaceGenderItems, ClassJobSelected);
+                    ChestInventoryColours[DresserTab.MainHand] = newState.GetGlamourHighlights(DresserTab.MainHand, CurrentPage, OnlyDisplayRaceGenderItems, ClassJobSelected);
+                    ChestInventoryColours[DresserTab.OffHand] = newState.GetGlamourHighlights(DresserTab.OffHand, CurrentPage, OnlyDisplayRaceGenderItems, ClassJobSelected);
+                    TabColours[0] = newState.GetTabHighlight(ChestInventoryColours[DresserTab.MainHand]);
+                    TabColours[1] =  newState.GetTabHighlight(ChestInventoryColours[DresserTab.OffHand]);
+                    TabColours[2] = newState.GetTabHighlight(ChestInventoryColours[DresserTab.Head]);
+                    TabColours[3] = newState.GetTabHighlight(ChestInventoryColours[DresserTab.Body]);
+                    TabColours[4] = newState.GetTabHighlight(ChestInventoryColours[DresserTab.Hands]);
+                    TabColours[5] = newState.GetTabHighlight(ChestInventoryColours[DresserTab.Legs]);
+                    TabColours[6] = newState.GetTabHighlight(ChestInventoryColours[DresserTab.Feet]);
+                    TabColours[7] = newState.GetTabHighlight(ChestInventoryColours[DresserTab.Ears]);
+                    TabColours[8] = newState.GetTabHighlight(ChestInventoryColours[DresserTab.Neck]);
+                    TabColours[9] = newState.GetTabHighlight(ChestInventoryColours[DresserTab.Wrists]);
+                    TabColours[10] = newState.GetTabHighlight(ChestInventoryColours[DresserTab.Fingers]);
                     Draw();
                     return;
                 }

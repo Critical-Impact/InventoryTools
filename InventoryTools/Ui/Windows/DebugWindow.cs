@@ -1,13 +1,14 @@
 #if DEBUG
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Addons;
 using CriticalCommonLib.Agents;
 using CriticalCommonLib.Extensions;
-using CriticalCommonLib.MarketBoard;
+using CriticalCommonLib.GameStructs;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
@@ -17,10 +18,9 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 using ImGuiNET;
 using InventoryTools.Logic;
-using InventoryTools.Services;
+using LuminaSupplemental.Excel.Model;
 using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 
 namespace InventoryTools.Ui
@@ -35,9 +35,12 @@ namespace InventoryTools.Ui
         public override Vector2 MaxSize { get; } = new(2000, 2000);
         public override Vector2 MinSize { get; } = new(200, 200);
         public override bool DestroyOnClose => false;
+        private List<MobSpawnPosition> _spawnPositions = new List<MobSpawnPosition>();
         private InventoryType inventoryType;
         private FilterState? _filterState;
         private FilterResult? _filterResult;
+        private float CurrentX;
+        private float CurrentZ;
 
         public DebugWindow(string name = "Allagan Tools - Debug") : base(name)
         {
@@ -197,6 +200,68 @@ namespace InventoryTools.Ui
             }
             else if (ConfigurationManager.Config.SelectedDebugPage == 2)
             {
+                float currentX = CurrentX;
+                float currentZ = CurrentZ;
+                ImGui.InputFloat("X:", ref currentX);
+                ImGui.InputFloat("Z:", ref currentZ);
+                if (currentX != CurrentX)
+                {
+                    CurrentX = currentX;
+                }
+
+                if (currentZ != CurrentZ)
+                {
+                    CurrentZ = currentZ;
+                }
+
+                if (_spawnPositions.Count != 0)
+                {
+                    for (var index = 0; index < _spawnPositions.Count; index++)
+                    {
+                        ImGui.PushID(index);
+                        var spawnPosition = _spawnPositions[index];
+                        ImGui.Text(Service.ExcelCache.GetBNpcNameExSheet().GetRow(spawnPosition.BNpcNameId)
+                            ?.FormattedName ?? "Unknown Name");
+                        if (ImGui.Button("Map"))
+                        {
+                            var territoryType = Service.ExcelCache.GetTerritoryTypeExSheet()
+                                .GetRow(spawnPosition.TerritoryTypeId);
+                            if (territoryType != null)
+                            {
+                                var agent = AgentMap.Instance();
+                                agent->SetFlagMapMarker(spawnPosition.TerritoryTypeId, territoryType.MapEx.Row,
+                                    new Vector3(spawnPosition.Position.X, 0f, spawnPosition.Position.Z));
+                                agent->OpenMap(agent->CurrentMapId, agent->CurrentTerritoryId, "Testing");
+                            }
+                        }
+                        ImGui.PopID();
+                    }
+                }
+                
+                if (ImGui.Button("Print Map Loc"))
+                {
+                    var agent = AgentMap.Instance();
+                    agent->SetFlagMapMarker(agent->CurrentTerritoryId, agent->CurrentMapId, new Vector3(currentX, 0f, currentZ));
+                    agent->OpenMap(agent->CurrentMapId, agent->CurrentTerritoryId, "Testing");
+                }
+                
+                if (ImGui.Button("Get Saved Positions"))
+                {
+                    var entries = PluginService.MobTracker.GetEntries();
+                    _spawnPositions = entries;
+                    foreach (var entry in entries)
+                    {
+                        PluginLog.Log(entry.BNpcNameId.ToString());
+                        PluginLog.Log(entry.Position.X.ToString());
+                        PluginLog.Log(entry.Position.Z.ToString());
+                    }
+                }
+                
+                if (ImGui.Button("Save Positions File"))
+                {
+                    var entries = PluginService.MobTracker.GetEntries();
+                     PluginService.MobTracker.SaveCsv(Service.Interface.GetPluginConfigDirectory() + Path.PathSeparator + "mobs.csv", entries);
+                }
                 if (ImGui.Button("Print 0,0 start"))
                 {
                     var position = InventoryManager.Instance()->GetInventoryContainer(FFXIVClientStructs.FFXIV.Client
@@ -642,10 +707,10 @@ namespace InventoryTools.Ui
                         memoryInventoryItem.SortedContainer = CriticalCommonLib.Enums.InventoryType.Armoire;
                         memoryInventoryItem.SortedCategory = InventoryCategory.Armoire;
                         memoryInventoryItem.RetainerId = PluginService.CharacterMonitor.LocalContentId;
-                        if (memoryInventoryItem.CabCat != currentCategory)
+                        if (memoryInventoryItem.Item.CabinetCategory != currentCategory)
                         {
                             actualIndex = 0;
-                            currentCategory = memoryInventoryItem.CabCat;
+                            currentCategory = memoryInventoryItem.Item.CabinetCategory;
                         }
 
                         memoryInventoryItem.SortedSlotIndex = actualIndex;
@@ -1289,7 +1354,7 @@ namespace InventoryTools.Ui
                     _filterState = PluginService.OverlayService.LastState;
                     if (_filterState != null)
                     {
-                        _filterResult = _filterState.Value.FilterResult;
+                        _filterResult = _filterState.FilterResult;
                     }
                 }
 
@@ -1298,9 +1363,9 @@ namespace InventoryTools.Ui
                     if (_filterState != null && _filterResult != null)
                     {
                         Utils.PrintOutObject(_filterState, (ulong)0, new List<string>());
-                        for (var index = 0; index < _filterResult.Value.SortedItems.Count; index++)
+                        for (var index = 0; index < _filterResult.SortedItems.Count; index++)
                         {
-                            var item = _filterResult.Value.SortedItems[index];
+                            var item = _filterResult.SortedItems[index];
                             if (ImGui.TreeNode("Sort Item##" + index))
                             {
                                 Utils.PrintOutObject(item, (ulong)0, new List<string>());

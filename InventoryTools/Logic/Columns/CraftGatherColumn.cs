@@ -44,7 +44,6 @@ namespace InventoryTools.Logic.Columns
         public override string Name { get; set; } = "Gather";
         public override float Width { get; set; } = 100;
         public override string HelpText { get; set; } = "Shows a button that links to gatherbuddy's /gather function.";
-        public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = false;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
     }

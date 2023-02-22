@@ -1,4 +1,3 @@
-using CriticalCommonLib.Services;
 using Dalamud.Logging;
 using DalamudPluginProjectTemplate;
 using DalamudPluginProjectTemplate.Attributes;
@@ -14,6 +13,20 @@ namespace InventoryTools.Commands
         public void ShowHideInventoryToolsCommand(string command, string args)
         {
             PluginService.WindowService.ToggleFiltersWindow();
+        }
+        [Command("/duties")]
+        [Aliases("/atduties")]
+        [HelpMessage("Shows the allagan tools duties window.")]
+        public void ShowHideDutiesWindow(string command, string args)
+        {
+            PluginService.WindowService.ToggleDutiesWindow();
+        }
+        [Command("/mobs")]
+        [Aliases("/atmobs")]
+        [HelpMessage("Shows the allagan tools mobs window.")]
+        public void ShowHideMobsWindow(string command, string args)
+        {
+            PluginService.WindowService.ToggleMobWindow();
         }
  
         [Command("/inv")]

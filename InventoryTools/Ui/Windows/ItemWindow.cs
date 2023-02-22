@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
+using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using Dalamud.Utility;
 using ImGuiNET;
@@ -24,7 +24,8 @@ namespace InventoryTools.Ui
             return "item_" + itemId;
         }
         private uint _itemId;
-        private ItemEx? Item => Service.ExcelCache.GetItemExSheet().GetRow(_itemId); 
+        private ItemEx? Item => Service.ExcelCache.GetItemExSheet().GetRow(_itemId);
+        private CraftItem? _craftItem = null;
         public ItemWindow(uint itemId, string name = "Allagan Tools - Invalid Item") : base(name)
         {
             _itemId = itemId;
@@ -73,6 +74,10 @@ namespace InventoryTools.Ui
             {
                 ImGui.Text("Item Level " + Item.LevelItem.Row.ToString());
                 ImGui.TextWrapped(Item.Description.ToDalamudString().ToString());
+                if (Item.CanBeAcquired)
+                {
+                    ImGui.Text("Acquired:" + (PluginService.GameInterface.HasAcquired(Item) ? "Yes" : "No"));
+                }
                 var itemIcon = PluginService.IconStorage[Item.Icon];
                 if (itemIcon != null)
                 {
@@ -192,7 +197,7 @@ namespace InventoryTools.Ui
                                             new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1),
                                             0))
                                     {
-                                        Service.FrameworkService.RunOnFrameworkThread(() =>
+                                        PluginService.FrameworkService.RunOnFrameworkThread(() =>
                                         {
                                             PluginService.WindowService.OpenItemWindow(itemSource.ItemId.Value);
                                         });
@@ -367,9 +372,10 @@ namespace InventoryTools.Ui
                             if (recipe.ItemResultEx.Value != null)
                             {
                                 var icon = PluginService.IconStorage.LoadIcon(recipe.ItemResultEx.Value.Icon);
-                                if (ImGui.ImageButton(icon.ImGuiHandle, new(32, 32)))
+                                if (ImGui.ImageButton(icon.ImGuiHandle,
+                                        new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1), 0))
                                 {
-                                    PluginService.GameInterface.OpenCraftingLog(recipe.ItemResult.Row, recipe.RowId);
+                                    PluginService.WindowService.OpenItemWindow(recipe.ItemResultEx.Row);
                                 }
                                 if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right)) 
                                 {
@@ -437,6 +443,53 @@ namespace InventoryTools.Ui
                             }
 
                             ImGui.PopID();
+                        }
+                    }
+                }
+
+                if (Item.IsCompanyCraft)
+                {
+                    hasInformation = true;
+                    if (_craftItem == null)
+                    {
+                        _craftItem = new CraftItem(Item.RowId, InventoryItem.ItemFlags.None, 1, true);
+                        _craftItem.GenerateRequiredMaterials();
+                    }
+                    if (ImGui.CollapsingHeader("Company Craft Recipe (" + _craftItem.ChildCrafts.Count + ")"))
+                    {
+                        ImGuiStylePtr style = ImGui.GetStyle();
+                        float windowVisibleX2 = ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
+                        var index = 0;
+                        foreach(var craftItem in _craftItem.ChildCrafts)
+                        {
+                            var item = Service.ExcelCache.GetItemExSheet().GetRow(craftItem.ItemId);
+                            ImGui.PushID(index);
+                            var icon = PluginService.IconStorage.LoadIcon(item.Icon);
+                            if (ImGui.ImageButton(icon.ImGuiHandle, new(32, 32)))
+                            {
+                                PluginService.WindowService.OpenItemWindow(item.RowId);
+                            }
+                            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right)) 
+                            {
+                                ImGui.OpenPopup("RightClick" + item.RowId);
+                            }
+                
+                            if (ImGui.BeginPopup("RightClick"+ item.RowId))
+                            {
+                                item.DrawRightClickPopup();
+                                ImGui.EndPopup();
+                            }
+
+                            float lastButtonX2 = ImGui.GetItemRectMax().X;
+                            float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
+                            ImGuiUtil.HoverTooltip(item.NameString + " - " + craftItem.QuantityRequired);
+                            if (index + 1 < _craftItem.ChildCrafts.Count && nextButtonX2 < windowVisibleX2)
+                            {
+                                ImGui.SameLine();
+                            }
+
+                            ImGui.PopID();
+                            index++;
                         }
                     }
                 }

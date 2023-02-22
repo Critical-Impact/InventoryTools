@@ -61,7 +61,6 @@ namespace InventoryTools.Logic.Columns
         public override string HelpText { get; set; } =
             "This is the amount to retrieve from retainers.";
         public override FilterType AvailableIn { get; } = Logic.FilterType.CraftFilter | Logic.FilterType.SortingFilter;
-        public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = false;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
     }

@@ -3,14 +3,12 @@ using CriticalCommonLib.Crafting;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
-using Dalamud.ContextMenu;
 using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Plugin;
 using InventoryTools.Commands;
 using InventoryTools.Logic;
 using InventoryTools.Misc;
 using InventoryTools.Services;
-using OtterGui.Classes;
 
 namespace InventoryTools
 {
@@ -33,6 +31,9 @@ namespace InventoryTools
         public ICraftMonitor? CraftMonitor;
         public IChatUtilities? ChatUtilities;
         public IGameInterface? GameInterface;
+        public FileDialogManager? FileDialogManager;
+        public IMobTracker? MobTracker;
+        public ITooltipService? TooltipService;
     }
 
     public static class PluginService
@@ -65,8 +66,9 @@ namespace InventoryTools
         public static IGameInterface GameInterface { get; private set; } = null!;
         public static IPCService IpcService { get; private set; } = null!;
         public static IChatUtilities ChatUtilities { get; private set; } = null!;
-        public static TooltipService TooltipService { get; private set; } = null!;
+        public static ITooltipService TooltipService { get; private set; } = null!;
         public static OdrScanner OdrScanner { get; private set; } = null!;
+        public static IMobTracker MobTracker { get; private set; } = null!;
         public static bool PluginLoaded { get; private set; } = false;
 
         public delegate void PluginLoadedDelegate();
@@ -83,7 +85,7 @@ namespace InventoryTools
             DataService = new DataService(Service.Data);
             ChatService = new ChatService(Service.Chat);
             ChatUtilities = new ChatUtilities();
-            
+            MobTracker = new MobTracker();
             ConfigurationManager.Load();
             Universalis = new Universalis();
             GameInterface = new GameInterface();
@@ -97,7 +99,6 @@ namespace InventoryTools
             InventoryScanner = new InventoryScanner(CharacterMonitor, GameUi, GameInterface, OdrScanner);
             InventoryMonitor = new InventoryMonitor( CharacterMonitor,  CraftMonitor, InventoryScanner, FrameworkService);
             InventoryScanner.Enable();
-            
             FilterService = new FilterService( CharacterMonitor, InventoryMonitor);
             OverlayService = new OverlayService(FilterService, GameUi, FrameworkService);
             ContextMenuService = new ContextMenuService();
@@ -134,6 +135,9 @@ namespace InventoryTools
             if (mockServices.InventoryScanner != null) InventoryScanner = mockServices.InventoryScanner;
             if (mockServices.ChatUtilities != null) ChatUtilities = mockServices.ChatUtilities;
             if (mockServices.GameInterface != null) GameInterface = mockServices.GameInterface;
+            if (mockServices.FileDialogManager != null) FileDialogManager = mockServices.FileDialogManager;
+            if (mockServices.MobTracker != null) MobTracker = mockServices.MobTracker;
+            if (mockServices.TooltipService != null) TooltipService = mockServices.TooltipService;
             PluginLoaded = true;
             if (finishLoading)
             {
@@ -152,6 +156,7 @@ namespace InventoryTools
             CommandManager.Dispose();
             WotsitIpc.Dispose();
             PluginLogic.Dispose();
+            MobTracker.Dispose();
             TooltipService.Dispose();
             FilterService.Dispose();
             OverlayService.Dispose();

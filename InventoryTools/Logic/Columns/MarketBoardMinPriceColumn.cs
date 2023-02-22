@@ -1,5 +1,4 @@
-﻿using CriticalCommonLib.MarketBoard;
-using CriticalCommonLib.Models;
+﻿using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 
 namespace InventoryTools.Logic.Columns

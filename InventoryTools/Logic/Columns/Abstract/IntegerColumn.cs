@@ -65,7 +65,7 @@ namespace InventoryTools.Logic.Columns.Abstract
 
         public override IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items)
         {
-            return FilterText == "" ? items : items.Where(c =>
+            return FilterText == "" ? items : items.AsParallel().Where(c =>
             {
                 var currentValue = CurrentValue( c);
                 if (currentValue == null)
@@ -80,7 +80,7 @@ namespace InventoryTools.Logic.Columns.Abstract
         public override IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items)
         {
             var isChecked = FilterText != "";
-            return FilterText == "" ? items : items.Where(c =>
+            return FilterText == "" ? items : items.AsParallel().Where(c =>
             {
                 var currentValue = CurrentValue(c);
                 if (currentValue == null)
@@ -94,7 +94,7 @@ namespace InventoryTools.Logic.Columns.Abstract
 
         public override IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items)
         {
-            return FilterText == "" ? items : items.Where(c =>
+            return FilterText == "" ? items : items.AsParallel().Where(c =>
             {
                 var currentValue = CurrentValue(c);
                 if (currentValue == null)

@@ -3,16 +3,14 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Enums;
-using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Ui;
-using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Logging;
 using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic
 {
-    public struct FilterState
+    public class FilterState
     {
         public FilterConfiguration FilterConfiguration;
         public RenderTableBase? FilterTable;
@@ -163,9 +161,9 @@ namespace InventoryTools.Logic
                 return bagHighlights;
             }
             var filterResult = resultOverride ?? FilterResult;
-            if (filterResult.HasValue)
+            if (filterResult != null)
             {
-                if (filterResult.Value.AllItems.Count != 0)
+                if (filterResult.AllItems.Count != 0)
                 {
                     //TODO: Implement highlighting
                     return new Dictionary<string, Vector4?>();
@@ -176,7 +174,7 @@ namespace InventoryTools.Logic
                         PluginService.InventoryMonitor.GetSpecificInventory(PluginService.CharacterMonitor
                             .ActiveCharacterId, InventoryCategory.Armoire);
                     
-                    var filteredItems = filterResult.Value.SortedItems.Where(c => c.SourceBag == InventoryType.Armoire);
+                    var filteredItems = filterResult.SortedItems.Where(c => c.SourceBag == InventoryType.Armoire);
                     foreach (var item in filteredItems)
                     {
                         if(item.SourceBag == InventoryType.Armoire && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting)))
@@ -221,24 +219,24 @@ namespace InventoryTools.Logic
                 return bagHighlights;
             }
             var filterResult = resultOverride ?? FilterResult;
-            if (filterResult.HasValue)
+            if (filterResult != null)
             {
-                if (filterResult.Value.AllItems.Count != 0)
+                if (filterResult.AllItems.Count != 0)
                 {
                     //TODO: Implement highlighting
                     return new Dictionary<uint, Vector4?>();
                 }
                 else
                 {
-                    var filteredItems = filterResult.Value.SortedItems.Where(c => c.SourceBag == InventoryType.Armoire);
+                    var filteredItems = filterResult.SortedItems.Where(c => c.SourceBag == InventoryType.Armoire);
                     var cabinetDictionary = Service.ExcelCache.GetCabinetCategorySheet().Where(c => c.Category.Row != 0).ToDictionary(c => c.Category.Row, c => (uint)c.MenuOrder - 1);
                     foreach (var item in filteredItems)
                     {
                         if(item.SourceBag == InventoryType.Armoire && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting)))
                         {
-                            if (cabinetDictionary.ContainsKey(item.InventoryItem.CabCat) && !bagHighlights.ContainsKey(cabinetDictionary[item.InventoryItem.CabCat]))
+                            if (cabinetDictionary.ContainsKey(item.InventoryItem.Item.CabinetCategory) && !bagHighlights.ContainsKey(cabinetDictionary[item.InventoryItem.Item.CabinetCategory]))
                             {
-                                bagHighlights.Add(cabinetDictionary[item.InventoryItem.CabCat], TabHighlightColor);
+                                bagHighlights.Add(cabinetDictionary[item.InventoryItem.Item.CabinetCategory], TabHighlightColor);
                             }
                         }
                     }
@@ -284,9 +282,9 @@ namespace InventoryTools.Logic
                 return bagHighlights;
             }
             var filterResult = resultOverride ?? FilterResult;
-            if (filterResult.HasValue)
+            if (filterResult != null)
             {
-                if (filterResult.Value.AllItems.Count != 0)
+                if (filterResult.AllItems.Count != 0)
                 {
                     /*var correctResults = filterResult.Value.AllItems.Where(c =>
                         AtkInventoryMiragePrismBox.EquipSlotCategoryToDresserTab(c.EquipSlotCategory.Value) ==
@@ -328,7 +326,7 @@ namespace InventoryTools.Logic
                         item.GlamourIndex = glamourIndex;
                         glamourIndex++;
                     }
-                    var correctResults = filterResult.Value.SortedItems.OrderBy(c => c.InventoryItem.Slot).ToList();
+                    var correctResults = filterResult.SortedItems.OrderBy(c => c.InventoryItem.Slot).ToList();
                     var x = 0;
                     var y = 0;
                     foreach (var item in correctResults)
@@ -394,47 +392,51 @@ namespace InventoryTools.Logic
             var bagHighlights = new Dictionary<Vector2, Vector4?>();
 
             var filterResult = resultOverride ?? FilterResult;
-            if (filterResult.HasValue)
+            if (filterResult != null)
             {
-                if (filterResult.Value.AllItems.Count != 0)
+                if (filterResult.AllItems.Count != 0)
                 {
-                    var allItems = filterResult.Value.AllItems;
+                    var allItems = filterResult.AllItems;
+                    var itemHashes = new HashSet<uint>();
                     Dictionary<uint, HashSet<Vector2>> availableItems = new ();
                     
-                    foreach (var item in PluginService.InventoryMonitor.AllItems)
+                    foreach (var item in PluginService.InventoryMonitor.GetSpecificInventory(PluginService.CharacterMonitor.ActiveCharacterId, bag))
                     {
-                        if (item.SortedContainer == bag && item.RetainerId == PluginService.CharacterMonitor.ActiveCharacterId)
+                        if (!availableItems.ContainsKey(item.ItemId))
                         {
-                            if (!availableItems.ContainsKey(item.ItemId))
-                            {
-                                availableItems[item.ItemId] = new HashSet<Vector2>();
-                            }
+                            availableItems[item.ItemId] = new HashSet<Vector2>();
+                        }
 
-                            var bagLocation = item.BagLocation(bag);
-                            if (!availableItems[item.ItemId].Contains(bagLocation))
-                            {
-                                availableItems[item.ItemId].Add(bagLocation);
-                            }
+                        var bagLocation = item.BagLocation(bag);
+                        if (!availableItems[item.ItemId].Contains(bagLocation))
+                        {
+                            availableItems[item.ItemId].Add(bagLocation);
+                        }
+                    }
+                    
+                    //Only hash the items we actually need
+                    foreach (var item in allItems)
+                    {
+                        if (availableItems.ContainsKey(item.RowId))
+                        {
+                            itemHashes.Add(item.RowId);
                         }
                     }
 
                     
-                    foreach (var item in allItems)
+                    foreach (var availableItem in availableItems.AsParallel())
                     {
-                        foreach (var availableItem in availableItems)
+                        if (itemHashes.Contains(availableItem.Key))
                         {
-                            if (availableItem.Key == item.RowId)
+                            foreach (var position in availableItem.Value)
                             {
-                                foreach (var position in availableItem.Value)
+                                if (!InvertHighlighting)
                                 {
-                                    if (!InvertHighlighting)
-                                    {
-                                        bagHighlights.Add(position, BagHighlightColor);
-                                    }
-                                    else if (InvertHighlighting)
-                                    {
-                                        bagHighlights.Add(position, null);
-                                    }
+                                    bagHighlights.TryAdd(position, BagHighlightColor);
+                                }
+                                else if (InvertHighlighting)
+                                {
+                                    bagHighlights.TryAdd(position, null);
                                 }
                             }
                         }
@@ -484,7 +486,7 @@ namespace InventoryTools.Logic
                 }
 
                 
-                foreach (var item in filterResult.Value.SortedItems)
+                foreach (var item in filterResult.SortedItems)
                 {
                     var matchesSource = item.SourceBag == bag && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting));
                     var matchesDestination = ShouldHighlightDestination && item.DestinationBag == bag && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting, true));
@@ -670,11 +672,11 @@ namespace InventoryTools.Logic
                 
                 if (activeTable != null)
                 {
-                    filteredList = new FilterResult(activeTable.SortedItems.ToList(), new List<InventoryItem>(), activeTable.Items);
+                    filteredList = new FilterResult(activeTable.SortedItems, new List<InventoryItem>(), activeTable.Items);
                 }
-                else if (activeFilter.FilterResult.HasValue)
+                else if (activeFilter.FilterResult != null)
                 {
-                    filteredList = activeFilter.FilterResult.Value;
+                    filteredList = activeFilter.FilterResult;
                 }
 
                 return filteredList;

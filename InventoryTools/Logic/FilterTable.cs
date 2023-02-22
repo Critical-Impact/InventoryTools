@@ -4,7 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using CriticalCommonLib;
+using System.Text;
 using CriticalCommonLib.Sheets;
 using CsvHelper;
 using Dalamud.Logging;
@@ -35,7 +35,7 @@ namespace InventoryTools.Logic
                     || FilterConfiguration.FilterType == FilterType.CraftFilter)
                 {
                     PluginLog.Verbose("FilterTable: Refreshing");
-                    var items = FilterConfiguration.FilterResult.Value.SortedItems.AsEnumerable();
+                    var items = FilterConfiguration.FilterResult.SortedItems.AsEnumerable();
                     items = PreFilterSortedItems != null ? PreFilterSortedItems.Invoke(items) : items;
                     IsSearching = false;
                     for (var index = 0; index < Columns.Count; index++)
@@ -61,7 +61,7 @@ namespace InventoryTools.Logic
                 else
                 {
                     PluginLog.Verbose("FilterTable: Refreshing");
-                    var items = FilterConfiguration.FilterResult.Value.AllItems.AsEnumerable();
+                    var items = FilterConfiguration.FilterResult.AllItems.AsEnumerable();
                     items = PreFilterItems != null ? PreFilterItems.Invoke(items) : items;
                     IsSearching = false;
                     for (var index = 0; index < Columns.Count; index++)
@@ -288,7 +288,11 @@ namespace InventoryTools.Logic
 
         public void ExportToCsv(string fileName)
         {
-            using (var writer = new StreamWriter(fileName))
+            using (var writer = new StreamWriter(fileName,Encoding.UTF8, new FileStreamOptions()
+                   {
+                       Mode = FileMode.Create,
+                       Access = FileAccess.ReadWrite,
+                   }))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
                 foreach (var column in Columns)

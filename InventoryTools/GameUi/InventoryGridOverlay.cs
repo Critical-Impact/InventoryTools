@@ -74,20 +74,20 @@ namespace InventoryTools.GameUi
             {
                 return;
             }
-            if (newState != null && HasAddon && newState.Value.ShouldHighlight && newState.Value.HasFilterResult)
+            if (newState != null && HasAddon && newState.ShouldHighlight && newState.HasFilterResult)
             {
                 HasState = true;
-                var filterResult = newState.Value.FilterResult;
-                if (filterResult.HasValue)
+                var filterResult = newState.FilterResult;
+                if (filterResult != null)
                 {
-                    Bag1InventoryColours = newState.Value.GetBagHighlights(InventoryType.Bag0);
-                    Bag2InventoryColours = newState.Value.GetBagHighlights(InventoryType.Bag1);
-                    Bag3InventoryColours = newState.Value.GetBagHighlights(InventoryType.Bag2);
-                    Bag4InventoryColours = newState.Value.GetBagHighlights(InventoryType.Bag3);
-                    var tab1 = newState.Value.GetTabHighlight(Bag1InventoryColours);
-                    var tab2 = newState.Value.GetTabHighlight(Bag2InventoryColours);
-                    var tab3 = newState.Value.GetTabHighlight(Bag3InventoryColours);
-                    var tab4 = newState.Value.GetTabHighlight(Bag4InventoryColours);
+                    Bag1InventoryColours = newState.GetBagHighlights(InventoryType.Bag0);
+                    Bag2InventoryColours = newState.GetBagHighlights(InventoryType.Bag1);
+                    Bag3InventoryColours = newState.GetBagHighlights(InventoryType.Bag2);
+                    Bag4InventoryColours = newState.GetBagHighlights(InventoryType.Bag3);
+                    var tab1 = newState.GetTabHighlight(Bag1InventoryColours);
+                    var tab2 = newState.GetTabHighlight(Bag2InventoryColours);
+                    var tab3 = newState.GetTabHighlight(Bag3InventoryColours);
+                    var tab4 = newState.GetTabHighlight(Bag4InventoryColours);
                     TabColours[0] = tab1;
                     TabColours[1] = tab2;
                     TabColours[2] = tab3;

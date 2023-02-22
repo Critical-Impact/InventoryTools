@@ -1,5 +1,4 @@
 using System.Linq;
-using CriticalCommonLib.Services;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 using InventoryTools.Logic;

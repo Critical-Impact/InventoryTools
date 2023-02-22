@@ -69,20 +69,20 @@ namespace InventoryTools.GameUi
             {
                 return;
             }
-            if (newState != null && HasAddon && newState.Value.ShouldHighlight && newState.Value.HasFilterResult)
+            if (newState != null && HasAddon && newState.ShouldHighlight && newState.HasFilterResult)
             {
                 HasState = true;
-                var filterResult = newState.Value.FilterResult;
-                if (filterResult.HasValue)
+                var filterResult = newState.FilterResult;
+                if (filterResult != null)
                 {
-                    Bag1InventoryColours = newState.Value.GetBagHighlights(InventoryType.RetainerBag0);
-                    Bag2InventoryColours = newState.Value.GetBagHighlights(InventoryType.RetainerBag1);
-                    Bag3InventoryColours = newState.Value.GetBagHighlights(InventoryType.RetainerBag2);
-                    Bag4InventoryColours = newState.Value.GetBagHighlights(InventoryType.RetainerBag3);
-                    Bag5InventoryColours = newState.Value.GetBagHighlights(InventoryType.RetainerBag4);
-                    var tab1 = newState.Value.GetTabHighlights(new List<Dictionary<Vector2, Vector4?>>() {Bag1InventoryColours, Bag2InventoryColours});
-                    var tab2 = newState.Value.GetTabHighlights(new List<Dictionary<Vector2, Vector4?>>() {Bag3InventoryColours, Bag4InventoryColours});
-                    var tab3 = newState.Value.GetTabHighlight(Bag5InventoryColours);
+                    Bag1InventoryColours = newState.GetBagHighlights(InventoryType.RetainerBag0);
+                    Bag2InventoryColours = newState.GetBagHighlights(InventoryType.RetainerBag1);
+                    Bag3InventoryColours = newState.GetBagHighlights(InventoryType.RetainerBag2);
+                    Bag4InventoryColours = newState.GetBagHighlights(InventoryType.RetainerBag3);
+                    Bag5InventoryColours = newState.GetBagHighlights(InventoryType.RetainerBag4);
+                    var tab1 = newState.GetTabHighlights(new List<Dictionary<Vector2, Vector4?>>() {Bag1InventoryColours, Bag2InventoryColours});
+                    var tab2 = newState.GetTabHighlights(new List<Dictionary<Vector2, Vector4?>>() {Bag3InventoryColours, Bag4InventoryColours});
+                    var tab3 = newState.GetTabHighlight(Bag5InventoryColours);
                     TabColours[0] = tab1;
                     TabColours[1] = tab2;
                     TabColours[2] = tab3;

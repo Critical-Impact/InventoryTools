@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
-using CriticalCommonLib;
-using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using Dalamud.Configuration;
 using Dalamud.Game.ClientState.Keys;
@@ -59,6 +57,7 @@ namespace InventoryTools
         public Dictionary<ulong, Dictionary<InventoryCategory,List<InventoryItem>>> SavedInventories = new ();
 
         public bool InventoriesMigrated { get; set; } = false;
+        public bool InventoriesMigratedToCsv { get; set; } = false;
 
         private HashSet<string>? _openWindows = new();
 
@@ -349,6 +348,16 @@ namespace InventoryTools
                 PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
+
+        public bool TrackMobSpawns
+        {
+            get => _trackMobSpawns;
+            set
+            {
+                _trackMobSpawns = value;
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+            }
+        }
         
         public Dictionary<ulong, HashSet<uint>> AcquiredItems
         {
@@ -414,6 +423,7 @@ namespace InventoryTools
 
         private VirtualKey[]? _moreInformationKeys;
         private ModifiableHotkey? _moreInformationHotKey;
+        private bool _trackMobSpawns = false;
 
         public HashSet<string> OpenWindows
         {
@@ -427,7 +437,7 @@ namespace InventoryTools
             }
             set => _openWindows = value;
         }
-
+        
         public event ConfigurationChangedDelegate? ConfigurationChanged;
 
         //Configuration Helpers
