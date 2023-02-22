@@ -36,7 +36,6 @@ namespace InventoryTools.Logic.Columns
 
         public override string HelpText { get; set; } =
             "The category of the item based off the market board search categories.";
-        public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
     }

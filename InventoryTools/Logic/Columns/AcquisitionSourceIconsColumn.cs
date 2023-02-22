@@ -40,7 +40,10 @@ namespace InventoryTools.Logic.Columns
             ImGui.TableNextColumn();
             if (currentValue != null)
             {
-                ImGui.BeginChild("scrolling" + rowIndex, new Vector2(210, filterConfiguration.TableHeight + ImGui.GetStyle().CellPadding.Y) * ImGui.GetIO().FontGlobalScale, false);
+                ImGui.BeginChild(rowIndex + "LocationScroll", new Vector2(ImGui.GetColumnWidth() * ImGui.GetIO().FontGlobalScale, 32 + ImGui.GetStyle().CellPadding.Y) * ImGui.GetIO().FontGlobalScale, false);
+                var maxItems = (int)Math.Floor(ImGui.GetColumnWidth() / filterConfiguration.TableHeight * ImGui.GetIO().FontGlobalScale);
+                maxItems = maxItems == 0 ? 1 : maxItems;
+                maxItems--;
                 for (var index = 0; index < currentValue.Count; index++)
                 {
                     var item = currentValue[index];
@@ -81,7 +84,7 @@ namespace InventoryTools.Logic.Columns
                     
 
                     ImGuiUtil.HoverTooltip(item.FormattedName);
-                    if ((index + 1) % 5 != 0)
+                    if (index == 0 || (index) % maxItems != 0)
                     {
                         ImGui.SameLine();
                     }
@@ -116,7 +119,6 @@ namespace InventoryTools.Logic.Columns
 
         public override string HelpText { get; set; } =
             "Shows icons indicating what items can be obtained with(gathering, crafting, currency, etc)";
-        public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = false;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
         public override IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items)

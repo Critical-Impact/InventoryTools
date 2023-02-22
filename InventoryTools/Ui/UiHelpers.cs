@@ -18,7 +18,6 @@ namespace InventoryTools
                 ImGui.EndTooltip();
             }
         }
-        
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static void VerticalCenter(string text)
         {

@@ -82,7 +82,6 @@ namespace InventoryTools.Logic.Columns
 
         public override string HelpText { get; set; } =
             "Shows a simplified version of what you should do next in your craft";
-        public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = false;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
         public override FilterType AvailableIn { get; } = Logic.FilterType.CraftFilter;

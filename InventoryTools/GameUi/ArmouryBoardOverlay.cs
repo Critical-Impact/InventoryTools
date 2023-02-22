@@ -72,16 +72,16 @@ namespace InventoryTools.GameUi
                 return;
             }
 
-            if (newState != null && HasAddon && newState.Value.ShouldHighlight && newState.Value.HasFilterResult)
+            if (newState != null && HasAddon && newState.ShouldHighlight && newState.HasFilterResult)
             {
                 HasState = true;
-                var filterResult = newState.Value.FilterResult;
-                if (filterResult.HasValue)
+                var filterResult = newState.FilterResult;
+                if (filterResult != null)
                 {
                     foreach (var bag in BagToNumber.Keys)
                     {
-                        BagColours[bag] = newState.Value.GetBagHighlights(bag);
-                        TabColours[bag] = newState.Value.GetTabHighlight(BagColours[bag]);
+                        BagColours[bag] = newState.GetBagHighlights(bag);
+                        TabColours[bag] = newState.GetTabHighlight(BagColours[bag]);
                     }
 
                     Draw();

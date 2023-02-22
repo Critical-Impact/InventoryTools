@@ -1,13 +1,23 @@
 using System.Numerics;
+using System.Text;
+using CriticalCommonLib.Models;
+using CriticalCommonLib.Resolvers;
+using Dalamud.Logging;
 using ImGuiNET;
 using InventoryTools;
 using InventoryTools.Logic;
 using InventoryTools.Ui;
+using LuminaSupplemental.Excel.Model;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using QoLBar;
 
 namespace InventoryToolsMock;
 
 public class MockWindow : Window
 {
+    private List<InventoryItem> _items;
+
     public MockWindow(string name = "Mock Tools", ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
     {
     }
@@ -31,29 +41,116 @@ public class MockWindow : Window
 
     public override void Draw()
     {
-        if (ImGui.Button("Craft Window"))
+        if (ImGui.BeginTabBar("MockTabs"))
         {
-            PluginService.WindowService.ToggleCraftsWindow();
+            DrawWindowTab();
+            DrawDataTab();
+            ImGui.EndTabBar();
         }
-        if (ImGui.Button("Filters Window"))
+    }
+
+    private void DrawDataTab()
+    {
+        if (ImGui.BeginTabItem("Data"))
         {
-            PluginService.WindowService.ToggleFiltersWindow();
+            if (ImGui.Button("Add fake spawn data"))
+            {
+                PluginService.MobTracker.AddEntry(new MobSpawnPosition(1,1,1,new Vector3(1,1,1), 1));
+            }
+            if (ImGui.Button("Load existing inventories.json"))
+            {
+                PluginService.FileDialogManager.OpenFileDialog("Pick a file", "*.*", ConvertFile);
+            }
+            if (ImGui.Button("Save loaded json to csv"))
+            {
+                PluginService.FileDialogManager.SaveFileDialog("Pick a file", "*.csv", "inventories", ".csv",
+                    (b, s) =>
+                    {
+                        if (b)
+                        {
+                            CsvLoader.ToCsvRaw<InventoryItem>(_items, s);
+                        }
+                    });
+            }
+            if (ImGui.Button("Refresh overlay states"))
+            {
+                PluginService.CharacterMonitor.OverrideActiveCharacter(PluginService.CharacterMonitor.GetPlayerCharacters().First().Key);
+                PluginService.OverlayService.RefreshOverlayStates();
+            }
+            
+            ImGui.EndTabItem();
         }
-        if (ImGui.Button("Help Window"))
+    }
+    
+    private void ConvertFile(bool success, string fileName)
+    {
+        if (success)
         {
-            PluginService.WindowService.ToggleHelpWindow();
+            try
+            {
+                PluginLog.Verbose("Loading inventories from " + fileName);
+                var cacheFile = new FileInfo(fileName);
+                string json = File.ReadAllText(cacheFile.FullName, Encoding.UTF8);
+                MinifyResolver minifyResolver = new();
+                var parsedInventories = JsonConvert.DeserializeObject<Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>>(json, new JsonSerializerSettings()
+                {
+                    DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
+                    ContractResolver = minifyResolver
+                });
+                _items = parsedInventories.SelectMany(c => c.Value.SelectMany(d => d.Value)).ToList();
+            }
+            catch (Exception e)
+            {
+                PluginLog.Error("Error while parsing saved saved inventory data, " + e.Message);
+            }
         }
-        if (ImGui.Button("Debug Window"))
+    }
+
+    private static void DrawWindowTab()
+    {
+        if (ImGui.BeginTabItem("Windows"))
         {
-            PluginService.WindowService.ToggleDebugWindow();
-        }
-        if (ImGui.Button("Configuration Window"))
-        {
-            PluginService.WindowService.ToggleConfigurationWindow();
-        }
-        if (ImGui.Button("Duties Window"))
-        {
-            PluginService.WindowService.ToggleDutiesWindow();
+            if (ImGui.Button("Craft Window"))
+            {
+                PluginService.WindowService.ToggleCraftsWindow();
+            }
+
+            if (ImGui.Button("Filters Window"))
+            {
+                PluginService.WindowService.ToggleFiltersWindow();
+            }
+
+            if (ImGui.Button("Help Window"))
+            {
+                PluginService.WindowService.ToggleHelpWindow();
+            }
+
+            if (ImGui.Button("Debug Window"))
+            {
+                PluginService.WindowService.ToggleDebugWindow();
+            }
+
+            if (ImGui.Button("Configuration Window"))
+            {
+                PluginService.WindowService.ToggleConfigurationWindow();
+            }
+
+            if (ImGui.Button("Duties Window"))
+            {
+                PluginService.WindowService.ToggleDutiesWindow();
+            }
+
+            if (ImGui.Button("Mobs Window"))
+            {
+                PluginService.WindowService.ToggleMobWindow();
+            }
+
+            if (ImGui.Button("Icons Window"))
+            {
+                PluginService.WindowService.ToggleWindow<IconBrowserWindow>(IconBrowserWindow.AsKey);
+            }
+
+            ImGui.EndTabItem();
         }
     }
 

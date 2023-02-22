@@ -4,7 +4,6 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Addons;
-using CriticalCommonLib.MarketBoard;
 using ImGuiNET;
 using ImGuiScene;
 using InventoryTools.Logic;
@@ -33,6 +32,8 @@ namespace InventoryTools.Ui
         private static TextureWrap _clearIcon => PluginService.IconStorage.LoadIcon(66308);
         private static TextureWrap _marketIcon => PluginService.IconStorage.LoadIcon(90003);
         private static TextureWrap _helpIcon => PluginService.IconStorage.LoadIcon(66313);
+        private static TextureWrap _dutyIcon => PluginService.IconStorage.LoadIcon(61801);
+        private static TextureWrap _mobIcon => PluginService.IconStorage.LoadIcon(60041);
         
         private List<FilterConfiguration>? _filters;
 
@@ -81,7 +82,10 @@ namespace InventoryTools.Ui
                                 ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
                                 ConfigurationManager.Config.ActiveUiFilter != null)
                             {
-                                PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
+                                PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                {
+                                    PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
+                                });
                             }
                         }
 
@@ -101,7 +105,10 @@ namespace InventoryTools.Ui
                             if (ConfigurationManager.Config.SwitchFiltersAutomatically &&
                                 ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key)
                             {
-                                PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
+                                PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                {
+                                    PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
+                                });
                             }
 
                             _selectedFilterTab = index;
@@ -129,7 +136,10 @@ namespace InventoryTools.Ui
                                         ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
                                         ConfigurationManager.Config.ActiveUiFilter != null)
                                     {
-                                        PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
+                                        PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                        {
+                                            PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
+                                        });
                                     }
                                 }
                             }
@@ -154,7 +164,10 @@ namespace InventoryTools.Ui
                 ref highlightItems);
             if (highlightItems != itemTable.HighlightItems)
             {
-                PluginService.FilterService.ToggleActiveUiFilter(itemTable.FilterConfiguration);
+                PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                {
+                    PluginService.FilterService.ToggleActiveUiFilter(itemTable.FilterConfiguration);
+                });
             }
 
             ImGui.SameLine();
@@ -309,6 +322,31 @@ namespace InventoryTools.Ui
             }
 
             ImGuiUtil.HoverTooltip("Open the help window.");
+
+            width -= 30 * ImGui.GetIO().FontGlobalScale;
+            ImGui.SetCursorPosX(width);
+            UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+            if (ImGui.ImageButton(_mobIcon.ImGuiHandle,
+                    new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
+                    new Vector2(1, 1), 2))
+            {
+                PluginService.WindowService.ToggleMobWindow();
+            }
+
+            ImGuiUtil.HoverTooltip("Open the mob window.");
+
+
+            width -= 30 * ImGui.GetIO().FontGlobalScale;
+            ImGui.SetCursorPosX(width);
+            UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+            if (ImGui.ImageButton(_dutyIcon.ImGuiHandle,
+                    new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
+                    new Vector2(1, 1), 2))
+            {
+                PluginService.WindowService.ToggleDutiesWindow();
+            }
+
+            ImGuiUtil.HoverTooltip("Open the duty window.");
 
             if (ConfigurationManager.Config.TetrisEnabled)
             {

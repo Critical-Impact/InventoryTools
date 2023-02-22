@@ -1,5 +1,4 @@
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
 
@@ -32,7 +31,6 @@ namespace InventoryTools.Logic.Columns
         public override string HelpText { get; set; } =
             "If a item can be acquired(mounts, minions, etc) this shows whether or not it has been.";
         
-        public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Boolean;
     }

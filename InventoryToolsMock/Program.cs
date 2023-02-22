@@ -3,7 +3,6 @@ using System.Reflection;
 using Dalamud.Interface;
 using ImGuiNET;
 using InventoryTools.Logic;
-using InventoryTools.Ui;
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
@@ -109,7 +108,7 @@ namespace InventoryToolsMock
                 _gd.SubmitCommands(_cl);
                 _gd.SwapBuffers(_gd.MainSwapchain);
             }
-            
+            _mockPlugin.Dispose();
             ConfigurationManager.Save();
 
             // Clean up Veldrid resources

@@ -76,8 +76,6 @@ namespace InventoryTools.Logic.Columns
         public override string HelpText { get; set; } =
             "Shows the relative item level of either your items or your retainers items compared to the item shown. This will show a drop down in the filter that lets you pick which character you are comparing against. A negative value indicates it's worse, a positive indicates it's better.";
 
-        public override string FilterText { get; set; } ="";
-
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
 

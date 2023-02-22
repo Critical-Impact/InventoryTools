@@ -18,7 +18,7 @@ namespace InventoryTools.Logic.Filters
             var currentValue = CurrentValue(configuration);
             if (!string.IsNullOrEmpty(currentValue))
             {
-                if (!item.Quantity.ToString().ToLower().PassesFilter(currentValue.ToLower()))
+                if (!item.Quantity.PassesFilter(currentValue.ToLower()))
                 {
                     return false;
                 }

@@ -1,7 +1,6 @@
 using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Logic;

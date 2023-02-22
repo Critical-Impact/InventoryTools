@@ -1,7 +1,6 @@
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using Dalamud.Logging;
-using InventoryTools;
 
 namespace InventoryToolsMock;
 
@@ -132,7 +131,7 @@ public class MockCharacterMonitor : ICharacterMonitor
     {
         get
         {
-            return 0;
+            return _activeRetainer;
         }
     }
 
@@ -140,7 +139,7 @@ public class MockCharacterMonitor : ICharacterMonitor
     {
         get
         {
-            return 0;
+            return _activeCharacterId;
         }
     }
 

@@ -4,7 +4,7 @@ using CriticalCommonLib.Sheets;
 
 namespace InventoryTools.Logic
 {
-    public struct FilterResult
+    public class FilterResult
     {
         private List<SortingResult> _sortedItems;
         private List<ItemEx> _allItems;

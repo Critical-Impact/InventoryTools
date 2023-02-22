@@ -4,7 +4,7 @@ using CriticalCommonLib.Models;
 
 namespace InventoryTools.Logic
 {
-    public struct SortingResult
+    public class SortingResult
     {
         private ulong _sourceRetainerId;
 

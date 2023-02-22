@@ -28,7 +28,6 @@ namespace InventoryTools.Logic.Columns
 
         public override string HelpText { get; set; } =
             "The quantity of the item. If viewing from a game items or craft filter, this will show the total number of items available in all inventories.";
-        public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
     }

@@ -69,18 +69,18 @@ namespace InventoryTools.GameUi
             {
                 return;
             }
-            if (newState != null && HasAddon && newState.Value.ShouldHighlight && newState.Value.HasFilterResult)
+            if (newState != null && HasAddon && newState.ShouldHighlight && newState.HasFilterResult)
             {
                 HasState = true;
-                var filterResult = newState.Value.FilterResult;
-                if (filterResult.HasValue)
+                var filterResult = newState.FilterResult;
+                if (filterResult != null)
                 {
-                    Bag1InventoryColours = newState.Value.GetBagHighlights(InventoryType.SaddleBag0);
-                    Bag2InventoryColours = newState.Value.GetBagHighlights(InventoryType.SaddleBag1);
-                    PBag1InventoryColours = newState.Value.GetBagHighlights(InventoryType.PremiumSaddleBag0);
-                    PBag2InventoryColours = newState.Value.GetBagHighlights(InventoryType.PremiumSaddleBag1);
-                    var tab1 = newState.Value.GetTabHighlights(new List<Dictionary<Vector2, Vector4?>>() {Bag1InventoryColours, Bag2InventoryColours});
-                    var tab2 = newState.Value.GetTabHighlights(new List<Dictionary<Vector2, Vector4?>>() {PBag1InventoryColours, PBag2InventoryColours});
+                    Bag1InventoryColours = newState.GetBagHighlights(InventoryType.SaddleBag0);
+                    Bag2InventoryColours = newState.GetBagHighlights(InventoryType.SaddleBag1);
+                    PBag1InventoryColours = newState.GetBagHighlights(InventoryType.PremiumSaddleBag0);
+                    PBag2InventoryColours = newState.GetBagHighlights(InventoryType.PremiumSaddleBag1);
+                    var tab1 = newState.GetTabHighlights(new List<Dictionary<Vector2, Vector4?>>() {Bag1InventoryColours, Bag2InventoryColours});
+                    var tab2 = newState.GetTabHighlights(new List<Dictionary<Vector2, Vector4?>>() {PBag1InventoryColours, PBag2InventoryColours});
                     TabColours[0] = tab1;
                     TabColours[1] = tab2;
                     Draw();

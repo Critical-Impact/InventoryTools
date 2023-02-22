@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using CriticalCommonLib;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
-using Dalamud.Game;
 using Dalamud.Logging;
 using InventoryTools.GameUi;
 using InventoryTools.Logic;
@@ -192,13 +190,12 @@ namespace InventoryTools.Services
         {
             if (PluginService.PluginLoaded)
             {
-                if (windowstate == true)
-                {
-                    RefreshOverlayStates();
-                }
-
                 if (_overlays.ContainsKey(windowname))
                 {
+                    if (windowstate == true)
+                    {
+                        RefreshOverlayStates();
+                    }
                     var overlay = _overlays[windowname];
                     if (windowstate.HasValue && windowstate.Value)
                     {

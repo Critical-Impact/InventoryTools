@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using CriticalCommonLib;
 using Dalamud.Game.Command;
 using Dalamud.Logging;
 using DalamudPluginProjectTemplate;

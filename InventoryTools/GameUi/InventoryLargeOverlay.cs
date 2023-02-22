@@ -69,18 +69,18 @@ namespace InventoryTools.GameUi
             {
                 return;
             }
-            if (newState != null && HasAddon && newState.Value.ShouldHighlight && newState.Value.HasFilterResult)
+            if (newState != null && HasAddon && newState.ShouldHighlight && newState.HasFilterResult)
             {
-                var filterResult = newState.Value.FilterResult;
-                if (filterResult.HasValue)
+                var filterResult = newState.FilterResult;
+                if (filterResult != null)
                 {
                     HasState = true;
-                    Bag1InventoryColours = newState.Value.GetBagHighlights(InventoryType.Bag0);
-                    Bag2InventoryColours = newState.Value.GetBagHighlights(InventoryType.Bag1);
-                    Bag3InventoryColours = newState.Value.GetBagHighlights(InventoryType.Bag2);
-                    Bag4InventoryColours = newState.Value.GetBagHighlights(InventoryType.Bag3);
-                    var tab1 = newState.Value.GetTabHighlights(new List<Dictionary<Vector2, Vector4?>>() {Bag1InventoryColours, Bag2InventoryColours});
-                    var tab2 = newState.Value.GetTabHighlights(new List<Dictionary<Vector2, Vector4?>>() {Bag3InventoryColours, Bag4InventoryColours});
+                    Bag1InventoryColours = newState.GetBagHighlights(InventoryType.Bag0);
+                    Bag2InventoryColours = newState.GetBagHighlights(InventoryType.Bag1);
+                    Bag3InventoryColours = newState.GetBagHighlights(InventoryType.Bag2);
+                    Bag4InventoryColours = newState.GetBagHighlights(InventoryType.Bag3);
+                    var tab1 = newState.GetTabHighlights(new List<Dictionary<Vector2, Vector4?>>() {Bag1InventoryColours, Bag2InventoryColours});
+                    var tab2 = newState.GetTabHighlights(new List<Dictionary<Vector2, Vector4?>>() {Bag3InventoryColours, Bag4InventoryColours});
                     TabColours[0] = tab1;
                     TabColours[1] = tab2;
                     Draw();

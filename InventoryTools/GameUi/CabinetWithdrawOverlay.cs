@@ -42,14 +42,14 @@ namespace InventoryTools.GameUi
             {
                 return;
             }
-            if (newState != null && HasAddon && newState.Value.ShouldHighlight && newState.Value.HasFilterResult)
+            if (newState != null && HasAddon && newState.ShouldHighlight && newState.HasFilterResult)
             {
                 HasState = true;
-                var filterResult = newState.Value.FilterResult;
-                if (filterResult.HasValue)
+                var filterResult = newState.FilterResult;
+                if (filterResult != null)
                 {
-                    Colours = newState.Value.GetArmoireHighlights();
-                    TabColours = newState.Value.GetArmoireTabHighlights(CurrentTab);
+                    Colours = newState.GetArmoireHighlights();
+                    TabColours = newState.GetArmoireTabHighlights(CurrentTab);
                     Draw();
                     return;
                 }

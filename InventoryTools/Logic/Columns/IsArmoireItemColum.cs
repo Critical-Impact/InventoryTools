@@ -1,4 +1,3 @@
-using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
@@ -14,7 +13,7 @@ namespace InventoryTools.Logic.Columns
 
         public override bool? CurrentValue(ItemEx item)
         {
-            return Service.ExcelCache.IsArmoireItem(item.RowId);
+            return item.CabinetCategory != 0;
         }
 
         public override bool? CurrentValue(SortingResult item)
@@ -25,7 +24,6 @@ namespace InventoryTools.Logic.Columns
         public override string Name { get; set; } = "Is Armoire?";
         public override float Width { get; set; } = 100;
         public override string HelpText { get; set; } = "Shows if the item belongs in the armoire.";
-        public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
     }

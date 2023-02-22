@@ -20,7 +20,7 @@ PluginService.InitaliseExplicit(new MockServices()
     PluginLogic = pluginLogic
 });
 ConfigurationManager.Config = new InventoryToolsConfiguration();
-var inventories = ConfigurationManager.LoadSavedInventories("inventories2.json");
+var inventories = ConfigurationManager.LoadInventories("inventories2.json");
 ulong currentRetainer = 0;
 if (inventories != null)
 {

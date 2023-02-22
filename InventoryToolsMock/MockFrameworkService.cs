@@ -1,5 +1,4 @@
 using CriticalCommonLib.Services;
-using InventoryTools.Services;
 
 namespace InventoryToolsMock;
 

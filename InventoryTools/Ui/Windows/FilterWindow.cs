@@ -43,7 +43,10 @@ namespace InventoryTools.Ui
                         ConfigurationManager.Config.ActiveUiFilter != SelectedConfiguration.Key &&
                         ConfigurationManager.Config.ActiveUiFilter != null)
                     {
-                        PluginService.FilterService.ToggleActiveUiFilter(SelectedConfiguration);
+                        PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                        {
+                            PluginService.FilterService.ToggleActiveUiFilter(SelectedConfiguration);
+                        });
                     }
                 }
                 var table = PluginService.FilterService.GetFilterTable(_filterKey);

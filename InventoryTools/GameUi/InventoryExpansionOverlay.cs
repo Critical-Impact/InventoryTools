@@ -54,16 +54,16 @@ namespace InventoryTools.GameUi
             {
                 return;
             }
-            if (newState != null && HasAddon && newState.Value.ShouldHighlight && newState.Value.HasFilterResult)
+            if (newState != null && HasAddon && newState.ShouldHighlight && newState.HasFilterResult)
             {
                 HasState = true;
-                var filterResult = newState.Value.FilterResult;
-                if (filterResult.HasValue)
+                var filterResult = newState.FilterResult;
+                if (filterResult != null)
                 {
-                    Bag1InventoryColours = newState.Value.GetBagHighlights(InventoryType.Bag0);
-                    Bag2InventoryColours = newState.Value.GetBagHighlights(InventoryType.Bag1);
-                    Bag3InventoryColours = newState.Value.GetBagHighlights(InventoryType.Bag2);
-                    Bag4InventoryColours = newState.Value.GetBagHighlights(InventoryType.Bag3);
+                    Bag1InventoryColours = newState.GetBagHighlights(InventoryType.Bag0);
+                    Bag2InventoryColours = newState.GetBagHighlights(InventoryType.Bag1);
+                    Bag3InventoryColours = newState.GetBagHighlights(InventoryType.Bag2);
+                    Bag4InventoryColours = newState.GetBagHighlights(InventoryType.Bag3);
                     Draw();
                     return;
                 }

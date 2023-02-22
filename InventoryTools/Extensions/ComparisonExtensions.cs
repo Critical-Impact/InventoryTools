@@ -1,23 +1,98 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace InventoryTools.Extensions
 {
     public static class ComparisonExtensions
     {
+        public class FilterComparisonText
+        {
+            public bool HasOr = false;
+            public bool HasAnd = false;
+            public bool StartsWithEquals = false;
+            public bool StartsWithNegate = false;
+            public bool StartsWithFuzzy = false;
+            public string SearchText;
+
+            //TODO: Allow this to have sub comparisons
+            public FilterComparisonText(string filterString)
+            {
+                SearchText = filterString.Trim();
+                if (filterString.Contains("||", StringComparison.Ordinal))
+                {
+                    HasOr = true;
+                }
+                if (filterString.Contains("&&", StringComparison.Ordinal))
+                {
+                    HasAnd = true;
+                }
+                if (filterString.StartsWith("=", StringComparison.Ordinal) && filterString.Length >= 2)
+                {
+                    StartsWithEquals = true;
+                    SearchText = SearchText.Substring(1);
+                }
+                else if (filterString.StartsWith("!", StringComparison.Ordinal) && filterString.Length >= 2)
+                {
+                    StartsWithNegate = true;
+                    SearchText = SearchText.Substring(1);
+                }
+                else if (filterString.StartsWith("~", StringComparison.Ordinal) && filterString.Length >= 2)
+                {
+                    StartsWithFuzzy = true;
+                }
+            }
+        }
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public static bool PassesFilter(this string text, FilterComparisonText filterString)
+        {
+            if (filterString.HasOr)
+            {
+                var ors = filterString.SearchText.Split("||");
+                return ors.Select(c => PassesFilter(text, c)).Any(c => c);
+            }
+            if (filterString.HasAnd)
+            {
+                var ands = filterString.SearchText.Split("&&");
+                return ands.Select(c => PassesFilter(text, c)).All(c => c);
+            }
+            if (filterString.StartsWithEquals)
+            {
+                if (text == filterString.SearchText)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+            else if (filterString.StartsWithNegate)
+            {
+                return !text.Contains(filterString.SearchText);
+            }
+            else if (filterString.StartsWithFuzzy)
+            {
+                var filter = filterString.SearchText.Substring(1).Split(" ");
+                var splitText = text.Split(" ");
+                return filter.All(c => splitText.Any(d => d.Contains(c)));
+            }
+
+            return text.Contains(filterString.SearchText, StringComparison.Ordinal);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static bool PassesFilter(this string text, string filterString)
         {
             filterString = filterString.Trim();
-            if (filterString.Contains("||"))
+            if (filterString.Contains("||", StringComparison.Ordinal))
             {
                 var ors = filterString.Split("||");
                 return ors.Select(c => PassesFilter(text, c)).Any(c => c);
             }
-            if (filterString.Contains("&&"))
+            if (filterString.Contains("&&", StringComparison.Ordinal))
             {
                 var ands = filterString.Split("&&");
                 return ands.Select(c => PassesFilter(text, c)).All(c => c);
             }
-            if (filterString.StartsWith("=") && filterString.Length >= 2)
+            if (filterString.StartsWith("=", StringComparison.Ordinal) && filterString.Length >= 2)
             {
                 var filter = filterString.Substring(1);
                 if (text == filter)
@@ -25,19 +100,19 @@ namespace InventoryTools.Extensions
                     return true;
                 }
             }
-            else if (filterString.StartsWith("!") && filterString.Length >= 2)
+            else if (filterString.StartsWith("!", StringComparison.Ordinal) && filterString.Length >= 2)
             {
                 var filter = filterString.Substring(1);
                 return !text.Contains(filter);
             }
-            else if (filterString.StartsWith("~") && filterString.Length >= 2)
+            else if (filterString.StartsWith("~", StringComparison.Ordinal) && filterString.Length >= 2)
             {
                 var filter = filterString.Substring(1).Split(" ");
                 var splitText = text.Split(" ");
                 return filter.All(c => splitText.Any(d => d.Contains(c)));
             }
 
-            return text.Contains(filterString);
+            return text.Contains(filterString, StringComparison.Ordinal);
         }
 
         public static bool PassesFilter(this uint number, string filterString)

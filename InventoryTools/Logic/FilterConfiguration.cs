@@ -2022,7 +2022,7 @@ namespace InventoryTools.Logic
                         var filteredItem = filter.FilterItem(item);
                         if (filteredItem != null)
                         {
-                            filteredSources[sourceInventory.Key].Add(filteredItem.Value);
+                            filteredSources[sourceInventory.Key].Add(filteredItem);
                         }
                     }
                 }
@@ -2311,7 +2311,7 @@ namespace InventoryTools.Logic
                         var filteredItem = filter.FilterItem(item);
                         if (filteredItem != null)
                         {
-                            filteredSources[sourceInventory.Key].Add(filteredItem.Value);
+                            filteredSources[sourceInventory.Key].Add(filteredItem);
                         }
                     }
                 }

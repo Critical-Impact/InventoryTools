@@ -1,5 +1,4 @@
 using CriticalCommonLib.Crafting;
-using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Sheets;
 
 namespace InventoryTools.Logic.Columns

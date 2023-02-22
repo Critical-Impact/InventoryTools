@@ -1,6 +1,5 @@
 namespace InventoryTools.Services;
 
-using System;
 using System.Collections.Generic;
 using Dalamud.Data;
 using Dalamud.Plugin;
@@ -44,6 +43,31 @@ public class IconService : IIconService
         ret        = _pi.UiBuilder.LoadImageRaw(iconData, icon.Header.Width, icon.Header.Height, 4);
         _icons[id] = ret;
         return ret;
+    }
+
+    private HashSet<int> _availableIcons = new HashSet<int>();
+    private HashSet<int> _unAvailableIcons = new HashSet<int>();
+
+    public bool IconExists(int id)
+    {
+        if (_availableIcons.Contains(id))
+        {
+            return true;
+        }
+        if (_unAvailableIcons.Contains(id))
+        {
+            return true;
+        }
+        var icon     = LoadIconHq((uint)id) ?? _gameData.GetIcon((uint)id);
+        if (icon == null)
+        {
+            _unAvailableIcons.Add(id);
+        }
+        if (icon != null)
+        {
+            _availableIcons.Add(id);
+        }
+        return icon != null;
     }
 
     public void Dispose()

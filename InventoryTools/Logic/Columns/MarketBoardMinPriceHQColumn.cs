@@ -1,5 +1,4 @@
-﻿using CriticalCommonLib.MarketBoard;
-using CriticalCommonLib.Models;
+﻿using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
@@ -102,7 +101,6 @@ namespace InventoryTools.Logic.Columns
 
         public override string HelpText { get; set; } =
             "Shows the minimum price of the HQ form of the item. This data is sourced from universalis.";
-        public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
     }

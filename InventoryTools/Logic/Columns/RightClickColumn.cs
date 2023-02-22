@@ -30,7 +30,6 @@ namespace InventoryTools.Logic.Columns
 
         public override string HelpText { get; set; } =
             "You shouldn't see this, but if you do it's the column that adds in the right click functionality.";
-        public override string FilterText { get; set; } = "";
         public override bool HasFilter { get; set; } = false;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
 

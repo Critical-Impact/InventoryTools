@@ -1,14 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Services;
-using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
-using Dalamud.Logging;
-using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using InventoryTools.Logic;
 
@@ -66,7 +62,7 @@ public class LocationDisplayTooltip : TooltipService.TooltipTweak
                                 var filterResult = filterConfiguration.FilterResult;
                                 if (filterResult != null)
                                 {
-                                    var sortedItems = filterResult.Value.SortedItems.Where(c =>
+                                    var sortedItems = filterResult.SortedItems.Where(c =>
                                         c.InventoryItem.ItemId == id && c.InventoryItem.IsHQ == isHq).ToList();
                                     if (sortedItems.Any())
                                     {

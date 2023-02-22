@@ -5,30 +5,22 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
-using System.Threading.Tasks;
 using CriticalCommonLib;
-using CriticalCommonLib.Extensions;
-using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
-using Dalamud.Game;
 using Dalamud.Game.ClientState.Keys;
-using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface.Colors;
 using Dalamud.Logging;
 using Dalamud.Utility;
 using ImGuiNET;
 using ImGuiScene;
-using InventoryTools.Extensions;
 using InventoryTools.Images;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Columns;
 using InventoryTools.Logic.Filters;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Logic.Settings.Abstract;
-using InventoryTools.Services;
 using InventoryTools.Tooltips;
 using InventoryTools.Ui;
 using InventoryItem = CriticalCommonLib.Models.InventoryItem;
@@ -80,6 +72,15 @@ namespace InventoryTools
 
             PluginService.InventoryMonitor.LoadExistingData(PluginConfiguration.GetSavedInventory());
             PluginService.CharacterMonitor.LoadExistingRetainers(PluginConfiguration.GetSavedRetainers());
+            var entries = PluginService.MobTracker.LoadCsv(ConfigurationManager.MobSpawnFile, out var success);
+            if(success)
+            {
+                PluginService.MobTracker.SetEntries(entries);
+            }
+            if (ConfigurationManager.Config.TrackMobSpawns)
+            {
+                PluginService.MobTracker.Enable();
+            }
 
             PluginService.GameUi.WatchWindowState(WindowName.RetainerGrid0);
             PluginService.GameUi.WatchWindowState(WindowName.InventoryGrid0E);
@@ -98,7 +99,6 @@ namespace InventoryTools
             PluginService.TooltipService.AddTooltipTweak(new LocationDisplayTooltip());
             PluginService.TooltipService.AddTooltipTweak(new AmountOwnedTooltip());
             PluginService.TooltipService.AddTooltipTweak(new DisplayMarketPriceTooltip());
-
             RunMigrations();
             
             if (PluginConfiguration.FirstRun)
@@ -426,6 +426,17 @@ namespace InventoryTools
         private void ConfigOnConfigurationChanged()
         {
             ConfigurationManager.SaveAsync();
+            if (PluginService.MobTracker.Enabled != ConfigurationManager.Config.TrackMobSpawns)
+            {
+                if (ConfigurationManager.Config.TrackMobSpawns)
+                {
+                    PluginService.MobTracker.Enable();
+                }
+                else
+                {
+                    PluginService.MobTracker.Disable();
+                }
+            }
         }
 
         private void CharacterMonitorOnOnCharacterUpdated(Character? character)
@@ -950,10 +961,11 @@ namespace InventoryTools
                 PluginService.CraftMonitor.CraftFailed -= CraftMonitorOnCraftFailed ;
                 PluginService.CraftMonitor.CraftCompleted -= CraftMonitorOnCraftCompleted ;
                 PluginConfiguration.ConfigurationChanged -= ConfigOnConfigurationChanged;
-
-                //CommonBase.Functions.Tooltips.OnItemTooltip -= this.OnItemTooltip;
-                //CommonBase.Functions.Tooltips.OnItemTooltip -= this.AddHotKeyTooltip;
-                //CommonBase.Dispose();
+                if (PluginConfiguration.TrackMobSpawns)
+                {
+                    PluginService.MobTracker.SaveCsv(ConfigurationManager.MobSpawnFile,
+                        PluginService.MobTracker.GetEntries());
+                }
             }
             _disposed = true;         
         }

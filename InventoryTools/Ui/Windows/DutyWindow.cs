@@ -1,22 +1,14 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
-using CriticalCommonLib.Interfaces;
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
-using CriticalCommonLib.Sheets;
-using Dalamud.Logging;
 using Dalamud.Utility;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using Lumina.Excel.GeneratedSheets;
-using LuminaSupplemental.Excel.Generated;
 using LuminaSupplemental.Excel.Model;
 using OtterGui;
-using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 
 namespace InventoryTools.Ui
 {
@@ -30,8 +22,10 @@ namespace InventoryTools.Ui
         private uint _contentFinderConditionId;
         private ContentFinderCondition? ContentFinderCondition => Service.ExcelCache.GetContentFinderConditionExSheet().GetRow(_contentFinderConditionId);
 
-        private HashSet<uint> DungeonItems { get; }
+        private HashSet<uint> DungeonChestItems { get; }
+        private HashSet<uint> DungeonRewards { get; }
         private List<DungeonBoss> DungeonBosses { get; }
+        private Dictionary<uint, List<DungeonBossDrop>> DungeonBossDrops { get; }
         
         private Dictionary<uint, List<DungeonBossChest>> DungeonBossChests { get; }
         public DutyWindow(uint contentFinderConditionId, string name = "Allagan Tools - Invalid Duty") : base(name)
@@ -40,27 +34,34 @@ namespace InventoryTools.Ui
             if (ContentFinderCondition != null)
             {
                 WindowName = "Allagan Tools - " + ContentFinderCondition.Name.ToDalamudString();
-                DungeonItems = new HashSet<uint>();
-                foreach (var dungeonChestItem in DutySupplement.DungeonChests)
+                DungeonChestItems = new HashSet<uint>();
+                DungeonRewards = new HashSet<uint>();
+                foreach (var dungeonChest in Service.ExcelCache.DungeonChests)
                 {
-                    if (dungeonChestItem.Value.ContentFinderConditionId == _contentFinderConditionId)
+                    if (dungeonChest.ContentFinderConditionId == _contentFinderConditionId)
                     {
-                        if (DutySupplement.DungeonChestToItems.ContainsKey(dungeonChestItem.Key))
+                        var items = Service.ExcelCache.DungeonChestItems.Where(c => c.ChestId == dungeonChest.RowId);
+                        foreach (var item in items)
                         {
-                            foreach (var item in DutySupplement.DungeonChestToItems[dungeonChestItem.Key])
-                            {
-                                DungeonItems.Add(item);
-                            }
+                            DungeonChestItems.Add(item.ItemId);
                         }
                     }
                 }
+                foreach (var dungeonDrop in Service.ExcelCache.DungeonDrops)
+                {
+                    if (dungeonDrop.ContentFinderConditionId == _contentFinderConditionId)
+                    {
+                        DungeonRewards.Add(dungeonDrop.ItemId);
+                    }
+                }
 
+                DungeonBossDrops = Service.ExcelCache.DungeonBossDrops.Where(c => c.ContentFinderConditionId == _contentFinderConditionId).GroupBy(c => c.FightNo).ToDictionary(c => c.Key, c => c.ToList());
                 DungeonBosses = Service.ExcelCache.DungeonBosses.Where(c => c.ContentFinderConditionId == _contentFinderConditionId).ToList();
                 DungeonBossChests =  Service.ExcelCache.DungeonBossChests.Where(c => c.ContentFinderConditionId == _contentFinderConditionId).GroupBy(c => c.FightNo).ToDictionary(c => c.Key, c => c.ToList());
             }
             else
             {
-                DungeonItems = new HashSet<uint>();
+                DungeonChestItems = new HashSet<uint>();
             }
         }
         public override string Key => AsKey(_contentFinderConditionId);
@@ -92,12 +93,10 @@ namespace InventoryTools.Ui
                 foreach (var dungeonBoss in DungeonBosses)
                 {
                     if (ImGui.CollapsingHeader(
-                            Service.ExcelCache.GetBNpcNameExSheet().GetRow(dungeonBoss.BNpcNameId)?.FormattedName ??
+                            Service.ExcelCache.GetBNpcNameExSheet().GetRow(dungeonBoss.BNpcNameId)?.FormattedName + " - Fight " + (dungeonBoss.FightNo + 1) ??
                             "Unknown Boss",
                             ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
                     {
-                        ImGui.Text("Fight: " + (dungeonBoss.FightNo + 1));
-
                         if (DungeonBossChests.ContainsKey(dungeonBoss.FightNo))
                         {
                             var chests = DungeonBossChests[dungeonBoss.FightNo];
@@ -115,6 +114,7 @@ namespace InventoryTools.Ui
                                     for (var index = 0; index < items.Count; index++)
                                     {
                                         var item = items[index];
+                                        ImGui.PushID("dbc" + dungeonBoss.RowId + "_" + chest.Key + "_" + index);
                                         var useIcon = PluginService.IconStorage[item.Item1.Icon];
                                         if (useIcon != null)
                                         {
@@ -155,18 +155,121 @@ namespace InventoryTools.Ui
                                                 ImGui.SameLine();
                                             }
                                         }
+                                        ImGui.PopID();
                                     }
                                 }
                             }
                         }
+                        if (DungeonBossDrops.ContainsKey(dungeonBoss.FightNo))
+                        {
+                            var drops = DungeonBossDrops[dungeonBoss.FightNo].Select(c => Service.ExcelCache.GetItemExSheet().GetRow(c.ItemId)).Where(c => c != null).Select(c => c!).ToList();
+                            if (ImGui.CollapsingHeader("Drops", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
+                            {
+                                ImGuiStylePtr style = ImGui.GetStyle();
+                                float windowVisibleX2 =
+                                    ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
+                                for (var index = 0; index < drops.Count; index++)
+                                {
+                                    var item = drops[index];
+                                    var useIcon = PluginService.IconStorage[item.Icon];
+                                    if (useIcon != null)
+                                    {
+                                        ImGui.PushID("dbd" + dungeonBoss.RowId + "_" + index);
+                                        if (ImGui.ImageButton(useIcon.ImGuiHandle,
+                                                new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0),
+                                                new(1, 1), 0))
+                                        {
+                                            PluginService.WindowService.OpenItemWindow(item.RowId);
+                                        }
+
+                                        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
+                                                                ImGuiHoveredFlags.AllowWhenOverlapped &
+                                                                ImGuiHoveredFlags.AllowWhenBlockedByPopup &
+                                                                ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
+                                                                ImGuiHoveredFlags.AnyWindow) &&
+                                            ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                                        {
+                                            ImGui.OpenPopup("RightClickUse" + item.RowId);
+                                        }
+
+                                        if (ImGui.BeginPopup("RightClickUse" + item.RowId))
+                                        {
+                                            var itemEx = Service.ExcelCache.GetItemExSheet()
+                                                .GetRow(item.RowId);
+                                            if (itemEx != null)
+                                            {
+                                                itemEx.DrawRightClickPopup();
+                                            }
+
+                                            ImGui.EndPopup();
+                                        }
+
+                                        float lastButtonX2 = ImGui.GetItemRectMax().X;
+                                        float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
+                                        ImGuiUtil.HoverTooltip(item.NameString);
+                                        if (index + 1 < drops.Count && nextButtonX2 < windowVisibleX2)
+                                        {
+                                            ImGui.SameLine();
+                                        }
+                                        ImGui.PopID();
+                                    }
+                                }
+                            }
+                        }                        
                     }
                 }
 
-                if (ImGui.CollapsingHeader("Rewards (" + DungeonItems.Count + ")", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
+                if (ImGui.CollapsingHeader("Other Chests (" + DungeonChestItems.Count + ")", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
                 {
                     ImGuiStylePtr style = ImGui.GetStyle();
                     float windowVisibleX2 = ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
-                    var uses = DungeonItems.Select(c => Service.ExcelCache.GetItemExSheet().GetRow(c)).Where(c => c != null).Select(c => c!).ToList();
+                    var uses = DungeonChestItems.Select(c => Service.ExcelCache.GetItemExSheet().GetRow(c)).Where(c => c != null).Select(c => c!).ToList();
+                    for (var index = 0; index < uses.Count; index++)
+                    {
+                        ImGui.PushID("Use"+index);
+                        var use = uses[index];
+                        var useIcon = PluginService.IconStorage[use.Icon];
+                        if (useIcon != null)
+                        {
+                            if (ImGui.ImageButton(useIcon.ImGuiHandle,
+                                    new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1), 0))
+                            {
+                                PluginService.WindowService.OpenItemWindow(use.RowId);
+                            }
+                            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right)) 
+                            {
+                                ImGui.OpenPopup("RightClickUse" + use.RowId);
+                            }
+                
+                            if (ImGui.BeginPopup("RightClickUse"+ use.RowId))
+                            {
+                                var itemEx = Service.ExcelCache.GetItemExSheet().GetRow(use.RowId);
+                                if (itemEx != null)
+                                {
+                                    itemEx.DrawRightClickPopup();
+                                }
+
+                                ImGui.EndPopup();
+                            }
+
+                            float lastButtonX2 = ImGui.GetItemRectMax().X;
+                            float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
+                            ImGuiUtil.HoverTooltip(use.NameString);
+                            if (index + 1 < uses.Count && nextButtonX2 < windowVisibleX2)
+                            {
+                                ImGui.SameLine();
+                            }
+                        }
+
+                        ImGui.PopID();
+                    }
+                }
+                
+                if (ImGui.CollapsingHeader("Rewards (" + DungeonRewards.Count + ")", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
+                {
+                    ImGuiStylePtr style = ImGui.GetStyle();
+                    float windowVisibleX2 = ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
+                    var uses = DungeonRewards.Select(c => Service.ExcelCache.GetItemExSheet().GetRow(c)).Where(c => c != null).Select(c => c!).ToList();
                     for (var index = 0; index < uses.Count; index++)
                     {
                         ImGui.PushID("Use"+index);

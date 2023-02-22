@@ -5,11 +5,13 @@ using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
+using InventoryTools.Extensions;
 
 namespace InventoryTools.Logic.Columns.Abstract
 {
     public abstract class Column<T> : IColumn
     {
+        private string _filterText = "";
         public virtual uint MaxFilterLength { get; set; } = 200;
 
         public virtual FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter |
@@ -32,7 +34,33 @@ namespace InventoryTools.Logic.Columns.Abstract
         public  abstract string Name { get; set; }
         public abstract float Width { get; set; }
         public abstract string HelpText { get; set; }
-        public abstract string FilterText { get; set; }
+
+        public string FilterText
+        {
+            get => _filterText;
+            set
+            {
+                _filterText = value;
+                _filterComparisonText = new ComparisonExtensions.FilterComparisonText(_filterText);
+            }
+        }
+
+        private ComparisonExtensions.FilterComparisonText? _filterComparisonText;
+
+        public ComparisonExtensions.FilterComparisonText FilterComparisonText
+        {
+            get
+            {
+                if (_filterComparisonText == null)
+                {
+                    _filterComparisonText = new ComparisonExtensions.FilterComparisonText(FilterText);
+                }
+
+                return _filterComparisonText;
+            }
+        }
+
+
         public virtual List<string>? FilterChoices { get; set; } = null;
         public abstract bool HasFilter { get; set; }
         public abstract ColumnFilterType FilterType { get; set; }
