@@ -22,7 +22,7 @@ public class TrackMobSpawnSetting : BooleanSetting
     public override string Name { get; set; } = "Track Mob Spawns";
 
     public override string HelpText { get; set; } =
-        "Should the plugin track where mobs spawn as you move around. This data is not used by the plugin yet but once you have collected enough you can hit the button next to the checkbox to export a file containing those positions. If you upload those CSVs and send a url to the via feedback I can use them provide accurate mob spawns for everyone.";
+        "Should the plugin track where mobs spawn as you move around. This data is not used by the plugin yet but once you have collected enough you can hit the button next to the checkbox to export a file containing those positions. If you upload those CSVs and send a url to via feedback I can use that spawn data to provide accurate mob spawns for everyone.";
 
     public override SettingCategory SettingCategory { get; set; } = SettingCategory.General;
     public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Experimental;
