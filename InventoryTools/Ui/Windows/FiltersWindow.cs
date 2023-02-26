@@ -7,7 +7,8 @@ using CriticalCommonLib.Addons;
 using ImGuiNET;
 using ImGuiScene;
 using InventoryTools.Logic;
-using OtterGui;
+using InventoryTools.Ui.Widgets;
+using ImGuiUtil = OtterGui.ImGuiUtil;
 using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 
 namespace InventoryTools.Ui
@@ -35,15 +36,128 @@ namespace InventoryTools.Ui
         private static TextureWrap _dutyIcon => PluginService.IconStorage.LoadIcon(61801);
         private static TextureWrap _mobIcon => PluginService.IconStorage.LoadIcon(60041);
         
+        
         private List<FilterConfiguration>? _filters;
+        private PopupMenu _addFilterMenu;
 
         public FiltersWindow(string name = "Allagan Tools - Filters") : base(name)
         {
-            _tabLayout = Utils.GenerateRandomId();
+            SetupWindow();
         }
 
         public FiltersWindow() : base("Allagan Tools - Filters")
         {
+            SetupWindow();
+        }
+        
+        private Dictionary<FilterConfiguration, PopupMenu> _popupMenus = new();
+
+        public PopupMenu GetFilterMenu(FilterConfiguration configuration)
+        {
+            if (!_popupMenus.ContainsKey(configuration))
+            {
+                _popupMenus[configuration] = new PopupMenu("fm" + configuration.Key, PopupMenu.PopupMenuButtons.Right,
+                    new List<PopupMenu.IPopupMenuItem>()
+                    {
+                        new PopupMenu.PopupMenuItemSelectableAskName("Duplicate", "df_" + configuration.Key, configuration.Name, DuplicateFilter, "Duplicate the filter."),
+                        new PopupMenu.PopupMenuItemSelectable("Move Left", "mu_" + configuration.Key, MoveFilterUp, "Move the filter left."),
+                        new PopupMenu.PopupMenuItemSelectable("Move Right", "md_" + configuration.Key, MoveFilterDown, "Move the filter right."),
+                        new PopupMenu.PopupMenuItemSelectableConfirm("Remove", "rf_" + configuration.Key, "Are you sure you want to remove this filter?", RemoveFilter, "Remove the filter."),
+                    }
+                );
+            }
+
+            return _popupMenus[configuration];
+        }
+        
+        
+        private void RemoveFilter(string id, bool confirmed)
+        {
+            if (confirmed)
+            {
+                id = id.Replace("rf_", "");
+                var existingFilter = PluginService.FilterService.GetFilterByKey(id);
+                if (existingFilter != null)
+                {
+                    PluginService.FilterService.RemoveFilter(existingFilter);
+                }
+            }
+        }
+
+        private void MoveFilterDown(string id)
+        {
+            id = id.Replace("md_", "");
+            var existingFilter = PluginService.FilterService.GetFilterByKey(id);
+            if (existingFilter != null)
+            {
+                PluginService.FilterService.MoveFilterDown(existingFilter);
+            }
+        }
+
+        private void MoveFilterUp(string id)
+        {
+            id = id.Replace("mu_", "");
+            var existingFilter = PluginService.FilterService.GetFilterByKey(id);
+            if (existingFilter != null)
+            {
+                PluginService.FilterService.MoveFilterUp(existingFilter);
+            }
+        }
+
+        private void DuplicateFilter(string filterName, string id)
+        {
+            id = id.Replace("df_", "");
+            var existingFilter = PluginService.FilterService.GetFilterByKey(id);
+            if (existingFilter != null)
+            {
+                PluginService.FilterService.DuplicateFilter(existingFilter, filterName);
+            }
+        }
+
+        public void SetupWindow()
+        {
+            _tabLayout = Utils.GenerateRandomId();
+            _addFilterMenu = new PopupMenu("addFilter", PopupMenu.PopupMenuButtons.LeftRight,
+                new List<PopupMenu.IPopupMenuItem>()
+                {
+                    new PopupMenu.PopupMenuItemSelectableAskName("Search Filter", "adf1", "New Search Filter", AddSearchFilter, "This will create a new filter that let's you search for specific items within your characters and retainers inventories."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Sort Filter", "af2", "New Sort Filter", AddSortFilter, "This will create a new filter that let's you search for specific items within your characters and retainers inventories then determine where they should be moved to."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Game Item Filter", "af3", "New Game Item Filter", AddGameItemFilter, "This will create a filter that lets you search for all items in the game.")
+                });
+        }
+        
+        private void AddSearchFilter(string newName, string id)
+        {
+            var filterConfiguration = new FilterConfiguration(newName,
+                Guid.NewGuid().ToString("N"), FilterType.SearchFilter);
+            PluginService.FilterService.AddFilter(filterConfiguration);
+            Invalidate();
+            var configWindow = PluginService.WindowService.GetWindow<ConfigurationWindow>(ConfigurationWindow.AsKey);
+            configWindow.Open();
+            configWindow.BringToFront();
+            configWindow.SetActiveFilter(filterConfiguration);
+        }
+
+        private void AddGameItemFilter(string newName, string id)
+        {
+            var filterConfiguration = new FilterConfiguration(newName,Guid.NewGuid().ToString("N"), FilterType.GameItemFilter);
+            PluginService.FilterService.AddFilter(filterConfiguration);
+            Invalidate();
+            var configWindow = PluginService.WindowService.GetWindow<ConfigurationWindow>(ConfigurationWindow.AsKey);
+            configWindow.Open();
+            configWindow.BringToFront();
+            configWindow.SetActiveFilter(filterConfiguration);
+        }
+
+        private void AddSortFilter(string newName, string id)
+        {
+            var filterConfiguration = new FilterConfiguration(newName,Guid.NewGuid().ToString("N"), FilterType.SortingFilter);
+            PluginService.FilterService.AddFilter(filterConfiguration);
+            Invalidate();
+            var configWindow = PluginService.WindowService.GetWindow<ConfigurationWindow>(ConfigurationWindow.AsKey);
+            configWindow.Open();
+            configWindow.BringToFront();
+            configWindow.SetActiveFilter(filterConfiguration);
         }
 
         private List<FilterConfiguration> Filters
@@ -61,7 +175,7 @@ namespace InventoryTools.Ui
 
         public override void Draw()
         {
-            if (ImGui.BeginTabBar("###InventoryTabs" + _tabLayout, ImGuiTabBarFlags.FittingPolicyScroll))
+            if (ImGui.BeginTabBar("###InventoryTabs" + _tabLayout, ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.TabListPopupButton))
             {
                 var filterConfigurations = Filters;
                 for (var index = 0; index < filterConfigurations.Count; index++)
@@ -72,9 +186,11 @@ namespace InventoryTools.Ui
                     {
                         continue;
                     }
+
                     if (filterConfiguration.DisplayInTabs && ImGui.BeginTabItem(itemTable.Name + "##" + filterConfiguration.Key))
                     {
-                        
+                        GetFilterMenu(filterConfiguration).Draw();
+
                         var activeFilter = DrawFilter(itemTable, filterConfiguration, _activeFilter);
                         if (_activeFilter != activeFilter && ImGui.IsWindowFocused())
                         {
@@ -149,6 +265,12 @@ namespace InventoryTools.Ui
                     ImGui.EndChild();
                     ImGui.EndTabItem();
                 }
+
+                if (ImGui.TabItemButton("+", ImGuiTabItemFlags.Trailing | ImGuiTabItemFlags.NoTooltip))
+                {
+                }
+                
+                _addFilterMenu.Draw();
 
                 ImGui.EndTabBar();
             }
@@ -314,18 +436,6 @@ namespace InventoryTools.Ui
             width -= 30 * ImGui.GetIO().FontGlobalScale;
             ImGui.SetCursorPosX(width);
             UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-            if (ImGui.ImageButton(_helpIcon.ImGuiHandle,
-                    new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
-                    new Vector2(1, 1), 2))
-            {
-                PluginService.WindowService.ToggleHelpWindow();
-            }
-
-            ImGuiUtil.HoverTooltip("Open the help window.");
-
-            width -= 30 * ImGui.GetIO().FontGlobalScale;
-            ImGui.SetCursorPosX(width);
-            UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
             if (ImGui.ImageButton(_mobIcon.ImGuiHandle,
                     new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
                     new Vector2(1, 1), 2))
@@ -347,6 +457,18 @@ namespace InventoryTools.Ui
             }
 
             ImGuiUtil.HoverTooltip("Open the duty window.");
+            
+            width -= 30 * ImGui.GetIO().FontGlobalScale;
+            ImGui.SetCursorPosX(width);
+            UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+            if (ImGui.ImageButton(_helpIcon.ImGuiHandle,
+                    new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
+                    new Vector2(1, 1), 2))
+            {
+                PluginService.WindowService.ToggleHelpWindow();
+            }
+
+            ImGuiUtil.HoverTooltip("Open the help window.");
 
             if (ConfigurationManager.Config.TetrisEnabled)
             {

@@ -40,10 +40,10 @@ public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
         return null;
     }
 
-    private Dictionary<uint, List<MobSpawnPosition>> _spawnPositions = new Dictionary<uint, List<MobSpawnPosition>>();
+    private Dictionary<uint, List<MobSpawnPositionEx>> _spawnPositions = new Dictionary<uint, List<MobSpawnPositionEx>>();
     private Dictionary<uint, List<ItemEx>> _mobDrops = new Dictionary<uint, List<ItemEx>>();
 
-    public List<MobSpawnPosition> GetPositions(uint bNpcNameId)
+    public List<MobSpawnPositionEx> GetPositions(uint bNpcNameId)
     {
         if (_spawnPositions.ContainsKey(bNpcNameId))
         {
@@ -150,8 +150,8 @@ public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
                 Draw = (ex, contentTypeId) =>
                 {
                     var positions = GetPositions(ex.Item1.RowId);
-                    ImGui.BeginChild("LocationScroll", new Vector2(ImGui.GetColumnWidth() * ImGui.GetIO().FontGlobalScale, 32 + ImGui.GetStyle().CellPadding.Y) * ImGui.GetIO().FontGlobalScale, false);
-                    var maxItems = (int)Math.Floor(ImGui.GetColumnWidth() / 32);
+                    ImGui.BeginChild("LocationScroll", new Vector2(ImGui.GetColumnWidth() * ImGui.GetIO().FontGlobalScale, RowSize + ImGui.GetStyle().CellPadding.Y) * ImGui.GetIO().FontGlobalScale, false);
+                    var maxItems = (int)Math.Floor(ImGui.GetColumnWidth() / RowSize);
                     maxItems = maxItems == 0 ? 1 : maxItems;
                     var count = 0;
                     for (var index = 0; index < positions.Count; index++)
@@ -162,7 +162,7 @@ public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
                             (territory.RowId == contentTypeId || contentTypeId == 0))
                         {
                             ImGui.PushID("" + position.Position.X + position.Position.Y + position.Position.Z);
-                            if (ImGui.ImageButton(PluginService.IconStorage[60561].ImGuiHandle, new Vector2(32 * ImGui.GetIO().FontGlobalScale, 32 * ImGui.GetIO().FontGlobalScale), new Vector2(0,0), new Vector2(1,1), 0))
+                            if (ImGui.ImageButton(PluginService.IconStorage[60561].ImGuiHandle, new Vector2(RowSize * ImGui.GetIO().FontGlobalScale, RowSize * ImGui.GetIO().FontGlobalScale), new Vector2(0,0), new Vector2(1,1), 0))
                             {
                                 PluginService.ChatUtilities.PrintFullMapLink(
                                     new GenericMapLocation(position.Position.X, position.Position.Y, territory.MapEx,
@@ -197,15 +197,15 @@ public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
                 Draw = (ex, contentTypeId) =>
                 {
                     var drops = GetDrops(ex.Item1.RowId);
-                    ImGui.BeginChild("DropScroll", new Vector2(ImGui.GetColumnWidth(), 32 + ImGui.GetStyle().CellPadding.Y) * ImGui.GetIO().FontGlobalScale, false);
-                    var maxItems = (int)Math.Floor(ImGui.GetColumnWidth() / 32);
+                    ImGui.BeginChild("DropScroll", new Vector2(ImGui.GetColumnWidth(), RowSize + ImGui.GetStyle().CellPadding.Y) * ImGui.GetIO().FontGlobalScale, false);
+                    var maxItems = (int)Math.Floor(ImGui.GetColumnWidth() / RowSize);
                     maxItems = maxItems == 0 ? 1 : maxItems;
                     for (var index = 0; index < drops.Count; index++)
                     {
                         var drop = drops[index];
                         var sourceIcon = PluginService.IconStorage[drop.Icon];
                         ImGui.Image(sourceIcon.ImGuiHandle,
-                            new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale);
+                            new Vector2(RowSize, RowSize) * ImGui.GetIO().FontGlobalScale);
                         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
                                                 ImGuiHoveredFlags.AllowWhenOverlapped &
                                                 ImGuiHoveredFlags.AllowWhenBlockedByPopup &
@@ -333,6 +333,8 @@ public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
 
     public override ImGuiTableFlags TableFlags => _flags;
 
+    public override bool UseClipper => _useClipper;
+
     private List<TableColumn<(BNpcNameEx, BNpcBaseEx)>> _columns;
     private Dictionary<uint, List<(BNpcNameEx, BNpcBaseEx)>> _items;
     private Dictionary<uint, List<(BNpcNameEx, BNpcBaseEx)>> _filteredItems;
@@ -346,6 +348,7 @@ public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
     private Dictionary<uint, string> _tabs;
     private string _tableName;
     private Dictionary<uint, HashSet<uint>> _mappedMobs;
+    private bool _useClipper => true;
 
     public override void Invalidate()
     {

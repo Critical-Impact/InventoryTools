@@ -7,6 +7,7 @@ namespace InventoryTools.Sections
 {
     public class ImportExportPage : IConfigPage
     {
+        private bool _isSeparator;
         public string Name { get; } =  "Import/Export";
         public void Draw()
         {
@@ -109,6 +110,8 @@ namespace InventoryTools.Sections
             }
             ImGui.PopID();                
         }
+
+        public bool IsMenuItem => _isSeparator;
 
         public string FailedReason { get; set; } = "";
 

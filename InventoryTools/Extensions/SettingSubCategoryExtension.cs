@@ -16,8 +16,12 @@ namespace InventoryTools.Extensions
                     return "Destination Highlighting";
                 case SettingSubCategory.Market:
                     return "Market";
-                case SettingSubCategory.Tooltips:
-                    return "Tooltips";
+                case SettingSubCategory.General:
+                    return "General";
+                case SettingSubCategory.Subsetting:
+                    return "Settings";
+                case SettingSubCategory.Visuals:
+                    return "Visuals";
                 case SettingSubCategory.AutoSave:
                     return "Auto Save";
                 case SettingSubCategory.FilterSettings:

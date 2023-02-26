@@ -1,7 +1,9 @@
+using System.Diagnostics;
 using CriticalCommonLib;
 using CriticalCommonLib.Services;
 using Dalamud.Interface;
 using Dalamud.Interface.ImGuiFileDialog;
+using Dalamud.Logging;
 using ImGuiNET;
 using InventoryTools;
 using InventoryTools.Logic;
@@ -39,17 +41,16 @@ public class MockPlugin : IDisposable
     private IMobTracker _mockMobTracker;
     private ITooltipService _tooltipService;
 
-    public MockPlugin(string gameDirectory, string configDirectory, string configFile, string? inventoriesFile)
+    public MockPlugin(GameData gameData, string gameDirectory, string configDirectory, string configFile, string? inventoriesFile)
     {
+        var stopWatch = new Stopwatch();
+        stopWatch.Start();
         ConfigurationManager.Config = new InventoryToolsConfiguration();
         var levelSwitch = new LoggingLevelSwitch
         {
             MinimumLevel = LogEventLevel.Verbose,
         };
-        var lumina = new Lumina.GameData( gameDirectory, new LuminaOptions()
-        {
-            PanicOnSheetChecksumMismatch = false
-        } );
+        var lumina = gameData;
 
 
         Log.Logger = new LoggerConfiguration()
@@ -117,6 +118,9 @@ public class MockPlugin : IDisposable
             PluginService.PluginLogic.LoadDefaultData();
             ConfigurationManager.Config.FirstRun = false;
         }
+
+        stopWatch.Stop();
+        PluginLog.Verbose("Allagan Tools has finished loading. Total load time was " + stopWatch.Elapsed.TotalSeconds + " seconds.");
         _windowService.OpenWindow<MockWindow>(MockWindow.AsKey);
     }
 

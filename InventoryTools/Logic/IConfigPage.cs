@@ -4,5 +4,6 @@ namespace InventoryTools.Logic
     {
         public string Name { get; }
         public void Draw();
+        public bool IsMenuItem { get; }
     }
 }

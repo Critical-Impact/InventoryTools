@@ -182,6 +182,15 @@ namespace InventoryTools.Services
             return AddFilter(sampleFilter);
         }
 
+        public FilterConfiguration DuplicateFilter(FilterConfiguration configuration, string newName)
+        {
+            var newConfiguration = configuration.Clone();
+            newConfiguration.Key = Guid.NewGuid().ToString("N");
+            newConfiguration.Name = newName;
+            AddFilter(newConfiguration);
+            return newConfiguration;
+        }
+
         public FilterConfiguration AddNewCraftFilter()
         {
             var clonedFilter = GetDefaultCraftList().Clone();

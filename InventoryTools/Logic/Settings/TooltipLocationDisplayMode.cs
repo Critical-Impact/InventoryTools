@@ -4,5 +4,6 @@ public enum TooltipLocationDisplayMode
 {
     CharacterBagSlotQuality,
     CharacterCategoryQuantityQuality,
-    CharacterQuantityQuality
+    CharacterQuantityQuality,
+    CharacterBagSlotQuantity
 }

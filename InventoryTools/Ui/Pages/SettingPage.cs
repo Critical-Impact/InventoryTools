@@ -25,6 +25,7 @@ namespace InventoryTools.Sections
 
         public SettingCategory Category { get; set; }
         private Dictionary<SettingSubCategory, List<ISetting>>? _settings;
+        private bool _isSeparator;
 
         public Dictionary<SettingSubCategory, List<ISetting>> Settings
         {
@@ -57,5 +58,7 @@ namespace InventoryTools.Sections
                 }
             }
         }
+
+        public bool IsMenuItem => _isSeparator;
     }
 }

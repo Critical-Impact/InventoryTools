@@ -15,6 +15,7 @@ namespace InventoryTools.Sections
             }
         }
         public FilterConfiguration FilterConfiguration;
+        private bool _isSeparator;
 
         public FilterPage(FilterConfiguration filterConfiguration)
         {
@@ -133,5 +134,7 @@ namespace InventoryTools.Sections
                 ImGui.EndTabBar();
             }
         }
+
+        public bool IsMenuItem => _isSeparator;
     }
 }

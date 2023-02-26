@@ -14,4 +14,6 @@ public interface IGenericTabbedTable<T>
     public string TableName { get; }
     public int? SortColumn { get; }
     public ImGuiSortDirection? SortDirection { get; }
+    public bool UseClipper { get; }
+    public float RowSize { get; }
 }

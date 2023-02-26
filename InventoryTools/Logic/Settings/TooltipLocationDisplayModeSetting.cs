@@ -18,13 +18,13 @@ public class TooltipLocationDisplayModeSetting : ChoiceSetting<TooltipLocationDi
     }
 
     public override string Key { get; set; } = "TooltipLocationDisplayMode";
-    public override string Name { get; set; } = "Tooltip Location Display Mode";
+    public override string Name { get; set; } = "Amount Owned Display Mode";
 
     public override string HelpText { get; set; } =
         "How the locations of items should be presented in the tooltip. This requires 'Display Amount Owned?' to be on.";
 
-    public override SettingCategory SettingCategory { get; set; } = SettingCategory.Visuals;
-    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Tooltips;
+    public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
+    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Visuals;
 
     public override Dictionary<TooltipLocationDisplayMode, string> Choices
     {
@@ -34,6 +34,7 @@ public class TooltipLocationDisplayModeSetting : ChoiceSetting<TooltipLocationDi
             {
                 { TooltipLocationDisplayMode.CharacterQuantityQuality, "Character/Retainer - Quantity - Quality" },
                 { TooltipLocationDisplayMode.CharacterBagSlotQuality, "Character/Retainer - Bag - Slot - Quality" },
+                { TooltipLocationDisplayMode.CharacterBagSlotQuantity, "Character/Retainer - Bag - Slot - Quantity" },
                 {
                     TooltipLocationDisplayMode.CharacterCategoryQuantityQuality,
                     "Character/Retainer - Category - Quantity - Quality"

@@ -11,7 +11,11 @@ using Dalamud.Utility;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
+using Lumina.Excel;
+using Lumina.Excel.GeneratedSheets;
+using LuminaSupplemental.Excel.Model;
 using OtterGui;
+using OtterGui.Raii;
 using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 
 namespace InventoryTools.Ui
@@ -38,6 +42,7 @@ namespace InventoryTools.Ui
                 Vendors = Item.Vendors.SelectMany(shop => shop.ENpcs.SelectMany(npc => npc.Locations.Select(location => (shop, npc, location)))).ToList();
                 GatheringSources = Item.GetGatheringSources().ToList();
                 SharedModels = Item.GetSharedModels();
+                MobDrops = Item.MobDrops.ToArray();
             }
             else
             {
@@ -47,6 +52,7 @@ namespace InventoryTools.Ui
                 GatheringSources = new();
                 Vendors = new();
                 SharedModels = new();
+                MobDrops = Array.Empty<MobDropEx>();
             }
         }
 
@@ -61,6 +67,8 @@ namespace InventoryTools.Ui
         private RecipeEx[] RecipesResult { get; }
 
         private RetainerTaskNormalEx[] RetainerTasks { get; }
+        
+        private MobDropEx[] MobDrops { get; }
 
         public override string Key => AsKey(_itemId);
         public override bool DestroyOnClose => true;
@@ -312,6 +320,35 @@ namespace InventoryTools.Ui
                     }
                 }
 
+                if (MobDrops.Length != 0)
+                {
+                    if (ImGui.CollapsingHeader("Mob Drops (" + MobDrops.Length + ")", ImGuiTreeNodeFlags.CollapsingHeader))
+                    {
+                        var mobDrops = MobDrops;
+                        for (var index = 0; index < mobDrops.Length; index++)
+                        {
+                            var mobDrop = mobDrops[index];
+                            if (mobDrop.BNpcNameEx.Value != null)
+                            {
+                                var mobSpawns = mobDrops[index].GroupedMobSpawns;
+                                if (mobSpawns.Count != 0)
+                                {
+                                    ImGui.PushID("MobDrop" + index);
+                                    if (ImGui.CollapsingHeader("  " +
+                                            mobDrop.BNpcNameEx.Value.FormattedName + "(" + mobSpawns.Count + ")",ImGuiTreeNodeFlags.CollapsingHeader))
+                                    {
+                                        ImGuiTable.DrawTable("MobSpawns" + index, mobSpawns, DrawMobSpawn,
+                                            ImGuiTableFlags.None,
+                                            new[] { "Map", "Spawn Locations" });
+                                    }
+
+                                    ImGui.PopID();
+                                }
+                            }
+                        }
+                    }
+                }
+
                 void DrawSupplierRow((IShop shop, ENpc npc, ILocation location) tuple)
                 {
                     ImGui.TableNextColumn();
@@ -507,6 +544,48 @@ namespace InventoryTools.Ui
                 #endif
 
             }
+        }
+
+        private void DrawMobSpawn(KeyValuePair<TerritoryType, List<MobSpawnPositionEx>> spawnGroup)
+        {
+            ImGui.TableNextColumn();
+            ImGui.Text(spawnGroup.Key.PlaceName.Value?.Name ?? "Unknown");
+            
+            ImGui.TableNextColumn();
+
+            ImGui.BeginChild(spawnGroup.Key.RowId + "LocationScroll", new Vector2(ImGui.GetColumnWidth() * ImGui.GetIO().FontGlobalScale, 32 + ImGui.GetStyle().CellPadding.Y) * ImGui.GetIO().FontGlobalScale, false);
+            var maxItems = (int)Math.Floor(ImGui.GetColumnWidth() / 32);
+            maxItems = maxItems == 0 ? 1 : maxItems;
+            var count = 0;
+            foreach (var position in spawnGroup.Value)
+            {
+                var territory = position.TerritoryTypeEx;
+                if (territory.Value?.PlaceName.Value != null)
+                {
+                    ImGui.PushID("" + position.FormattedId);
+                    if (ImGui.ImageButton(PluginService.IconStorage[60561].ImGuiHandle, new Vector2(32 * ImGui.GetIO().FontGlobalScale, 32 * ImGui.GetIO().FontGlobalScale), new Vector2(0,0), new Vector2(1,1), 0))
+                    {
+                        PluginService.ChatUtilities.PrintFullMapLink(new GenericMapLocation(position.Position.X, position.Position.Y, territory.Value.MapEx,territory.Value.PlaceName), position.FormattedPosition);
+                    }
+
+                    if (ImGui.IsItemHovered())
+                    {
+                        using var tt = ImRaii.Tooltip();
+                        ImGui.TextUnformatted(position.FormattedPosition);
+                    }
+                    if ((count + 1) % maxItems != 0)
+                    {
+                        ImGui.SameLine();
+                    }
+                    ImGui.PopID();
+                }
+
+                count++;
+            }
+
+            ImGui.EndChild();
+            
+            
         }
 
         private void DrawGatheringRow(GatheringSource obj)

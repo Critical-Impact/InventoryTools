@@ -49,6 +49,11 @@ public class MockFilterService : IFilterService
         return true;
     }
 
+    public FilterConfiguration DuplicateFilter(FilterConfiguration configuration, string newName)
+    {
+        return configuration.Clone()!;
+    }
+
     public FilterConfiguration AddNewCraftFilter()
     {
         return new FilterConfiguration();

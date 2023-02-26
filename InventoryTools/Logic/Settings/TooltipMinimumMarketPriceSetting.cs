@@ -17,12 +17,12 @@ namespace InventoryTools.Logic.Settings
         }
 
         public override string Key { get; set; } = "TooltipDisplayMBMinimum";
-        public override string Name { get; set; } = "Display Market Minimum Price?";
+        public override string Name { get; set; } = "Add Market Minimum NQ/HQ Price?";
 
         public override string HelpText { get; set; } =
-            "When hovering an item, should the tooltip contain the average market price for NQ/HQ.";
+            "When hovering an item, should the tooltip contain the minimum market price for both NQ and HQ. Please make sure 'Automatically download prices' is enabled.";
 
-        public override SettingCategory SettingCategory { get; set; } = SettingCategory.Visuals;
-        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Tooltips;
+        public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
+        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Subsetting;
     }
 }

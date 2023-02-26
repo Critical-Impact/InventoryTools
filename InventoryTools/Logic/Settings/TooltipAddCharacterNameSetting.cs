@@ -17,13 +17,13 @@ namespace InventoryTools.Logic.Settings
         }
 
         public override string Key { get; set; } = "TooltipCharacterName";
-        public override string Name { get; set; } = "Add Character Name to Owned?";
+        public override string Name { get; set; } = "Add Character Name to Owned";
 
         public override string HelpText { get; set; } =
             "When hovering an item and you have an amount owned by a retainer, should the owner of that retainer be affixed to that item?";
 
-        public override SettingCategory SettingCategory { get; set; } = SettingCategory.Visuals;
-        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Tooltips;
+        public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
+        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Subsetting;
 
     }
 }

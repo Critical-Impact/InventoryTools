@@ -512,9 +512,9 @@ namespace InventoryTools
             PluginService.FilterService.AddFilter(filterConfiguration);
         }
 
-        public void AddSampleFilter100Gil()
+        public void AddSampleFilter100Gil(string newName = "100 gill or less")
         {
-            var sampleFilter = new FilterConfiguration("100 gill or less", FilterType.SearchFilter);
+            var sampleFilter = new FilterConfiguration(newName, FilterType.SearchFilter);
             sampleFilter.DisplayInTabs = true;
             sampleFilter.SourceAllCharacters = true;
             sampleFilter.SourceAllRetainers = true;
@@ -523,9 +523,9 @@ namespace InventoryTools
             PluginService.FilterService.AddFilter(sampleFilter);
         }
 
-        public void AddSampleFilterMaterials()
+        public void AddSampleFilterMaterials(string newName = "Put away materials")
         {
-            var sampleFilter = new FilterConfiguration("Put away materials", FilterType.SortingFilter);
+            var sampleFilter = new FilterConfiguration(newName, FilterType.SortingFilter);
             sampleFilter.DisplayInTabs = true;
             sampleFilter.SourceCategories = new HashSet<InventoryCategory>() {InventoryCategory.CharacterBags};
             sampleFilter.DestinationCategories =  new HashSet<InventoryCategory>() {InventoryCategory.RetainerBags};
@@ -545,9 +545,9 @@ namespace InventoryTools
             PluginService.FilterService.AddFilter(sampleFilter);
         }
 
-        public void AddSampleFilterDuplicatedItems()
+        public void AddSampleFilterDuplicatedItems(string newName = "Duplicated SortItems")
         {
-            var sampleFilter = new FilterConfiguration("Duplicated SortedItems", FilterType.SortingFilter);
+            var sampleFilter = new FilterConfiguration(newName, FilterType.SortingFilter);
             sampleFilter.DisplayInTabs = true;
             sampleFilter.SourceCategories = new HashSet<InventoryCategory>() {InventoryCategory.CharacterBags,InventoryCategory.RetainerBags};
             sampleFilter.DestinationCategories =  new HashSet<InventoryCategory>() {InventoryCategory.RetainerBags};

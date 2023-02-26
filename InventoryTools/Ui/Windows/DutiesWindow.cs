@@ -36,7 +36,7 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
                 Draw = (ex, contentTypeId) =>
                 {
                     if (ImGui.ImageButton(PluginService.IconStorage[(int)ex.ContentType.Value!.IconDutyFinder].ImGuiHandle,
-                            new Vector2(32, 32)))
+                            new Vector2(RowSize, RowSize)))
                     {
                         _columns[0].OnLeftClick?.Invoke(ex);
                     }
@@ -207,8 +207,8 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetContentRegionAvail().X / 2) - 32 / 2.0f);
-                    PluginService.PluginLogic.DrawUldIcon(ex.AllowUndersized ? GameIcon.TickIcon : GameIcon.CrossIcon, new Vector2(32, 32));
+                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetContentRegionAvail().X / 2) - RowSize / 2.0f);
+                    PluginService.PluginLogic.DrawUldIcon(ex.AllowUndersized ? GameIcon.TickIcon : GameIcon.CrossIcon, new Vector2(RowSize, RowSize));
                 }
             },
             new("Allows Explorer Mode", 80, ImGuiTableColumnFlags.WidthFixed)
@@ -232,8 +232,8 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetContentRegionAvail().X / 2) - 32 / 2.0f);
-                    PluginService.PluginLogic.DrawUldIcon(ex.AllowExplorerMode ? GameIcon.TickIcon : GameIcon.CrossIcon, new Vector2(32, 32));
+                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetContentRegionAvail().X / 2) - RowSize / 2.0f);
+                    PluginService.PluginLogic.DrawUldIcon(ex.AllowExplorerMode ? GameIcon.TickIcon : GameIcon.CrossIcon, new Vector2(RowSize, RowSize));
                 }
             },
             new("PVP", 50, ImGuiTableColumnFlags.WidthFixed)
@@ -257,8 +257,8 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetContentRegionAvail().X / 2) - 32 / 2.0f);
-                    PluginService.PluginLogic.DrawUldIcon(ex.PvP ? GameIcon.TickIcon : GameIcon.CrossIcon, new Vector2(32, 32));
+                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetContentRegionAvail().X / 2) - RowSize / 2.0f);
+                    PluginService.PluginLogic.DrawUldIcon(ex.PvP ? GameIcon.TickIcon : GameIcon.CrossIcon, new Vector2(RowSize, RowSize));
                 }
             },
             new("Accepted Classes", 100, ImGuiTableColumnFlags.WidthFixed)
@@ -343,6 +343,8 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
 
     public override string TableName => _tableName;
 
+    public override bool UseClipper => _useClipper;
+
     public static string AsKey
     {
         get { return "duties"; }
@@ -394,6 +396,7 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
                                                    ImGuiTableFlags.ScrollY;
     private Dictionary<uint, string> _tabs;
     private string _tableName;
+    private bool _useClipper = false;
 
     public override void Invalidate()
     {
