@@ -70,8 +70,10 @@ public abstract class GenericTabbedTable<T> : Window, IGenericTabbedTable<T>
 
     private int? _sortColumn;
     private ImGuiSortDirection? _sortDirection;
+    private uint _rowSize = 32;
 
-    public void DrawTable(string label, IEnumerable<T> data, ImGuiTableFlags flags, List<TableColumn<T>> tableColumns, uint contentTypeId)
+    public void DrawTable(string label, IEnumerable<T> data, ImGuiTableFlags flags, List<TableColumn<T>> tableColumns,
+        uint contentTypeId)
     {
         if (tableColumns.Count == 0)
             return;
@@ -80,12 +82,13 @@ public abstract class GenericTabbedTable<T> : Window, IGenericTabbedTable<T>
         if (!table)
             return;
         var refresh = false;
-        ImGui.TableSetupScrollFreeze(0,2);
+        ImGui.TableSetupScrollFreeze(0, 2);
         for (var index = 0; index < tableColumns.Count; index++)
         {
             var tableColumn = tableColumns[index];
             ImGui.TableSetupColumn(tableColumn.Name, tableColumn.ColumnFlags, tableColumn.Width, (uint)index + 1);
         }
+
         var currentSortSpecs = ImGui.TableGetSortSpecs();
         if (currentSortSpecs.SpecsDirty)
         {
@@ -118,7 +121,7 @@ public abstract class GenericTabbedTable<T> : Window, IGenericTabbedTable<T>
         }
 
         ImGui.TableHeadersRow();
-        
+
         ImGui.TableNextRow(ImGuiTableRowFlags.Headers);
 
         for (var index = 0; index < tableColumns.Count; index++)
@@ -145,20 +148,24 @@ public abstract class GenericTabbedTable<T> : Window, IGenericTabbedTable<T>
                     refresh = true;
                 }
             }
+
             if (column.FilterBool != null)
             {
                 ImGui.TableSetColumnIndex(index);
                 ImGui.PushID(column.Name);
                 ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(0, 0));
                 var isChecked = column.FilterBoolean;
-                var checkboxUnChecked = isChecked.HasValue ? (isChecked.Value  ? GameIcon.CheckboxChecked : GameIcon.CheckboxUnChecked) : GameIcon.CheckboxUnChecked;
-                ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetContentRegionAvail().X / 2) - checkboxUnChecked.Size.X / 2);
+                var checkboxUnChecked = isChecked.HasValue
+                    ? (isChecked.Value ? GameIcon.CheckboxChecked : GameIcon.CheckboxUnChecked)
+                    : GameIcon.CheckboxUnChecked;
+                ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetContentRegionAvail().X / 2) -
+                                    checkboxUnChecked.Size.X / 2);
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 2);
                 if (isChecked == null)
                 {
                     ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0, 0, 0, 0.1f));
                 }
-                
+
                 if (PluginService.PluginLogic.DrawUldIconButton(checkboxUnChecked))
                 {
                     if (!isChecked.HasValue)
@@ -173,6 +180,7 @@ public abstract class GenericTabbedTable<T> : Window, IGenericTabbedTable<T>
                     {
                         column.FilterBoolean = null;
                     }
+
                     refresh = true;
                 }
 
@@ -189,26 +197,43 @@ public abstract class GenericTabbedTable<T> : Window, IGenericTabbedTable<T>
             }
         }
 
-        foreach (var ex in data)
+        var items = data.ToList();
+        ImGuiListClipperPtr clipper;
+        unsafe
         {
-            ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
-            ImGui.PushID(GetRowId(ex));
+            clipper = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper_ImGuiListClipper());
+            clipper.ItemsHeight = RowSize;
+        }
 
-            foreach (var column in tableColumns)
+        clipper.Begin(items.Count);
+        while (clipper.Step())
+        {
+            for (var index = clipper.DisplayStart; index < clipper.DisplayEnd; index++)
             {
-                ImGui.TableNextColumn();
-                column.Draw(ex, contentTypeId);
-            }
-            ImGui.PopID();
-        }
+                var ex = items[index];
+                ImGui.TableNextRow(ImGuiTableRowFlags.None, RowSize);
+                ImGui.PushID(GetRowId(ex));
 
-        if (refresh)
-        {
-            Items.Remove(contentTypeId);
-            FilteredItems.Remove(contentTypeId);
+                foreach (var column in tableColumns)
+                {
+                    ImGui.TableNextColumn();
+                    column.Draw(ex, contentTypeId);
+                }
+
+                ImGui.PopID();
+            }
+
+            if (refresh)
+            {
+                Items.Remove(contentTypeId);
+                FilteredItems.Remove(contentTypeId);
+            }
         }
+        
+        clipper.End();
+        clipper.Destroy();
     }
-    
+
     public abstract int GetRowId(T item);
 
     public abstract Dictionary<uint, List<T>> Items { get; }
@@ -223,4 +248,8 @@ public abstract class GenericTabbedTable<T> : Window, IGenericTabbedTable<T>
     public int? SortColumn => _sortColumn;
 
     public ImGuiSortDirection? SortDirection => _sortDirection;
+    
+    public abstract bool UseClipper { get; }
+
+    public float RowSize => _rowSize;
 }

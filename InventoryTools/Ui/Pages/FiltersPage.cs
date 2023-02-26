@@ -8,6 +8,7 @@ namespace InventoryTools.Sections
 {
     public class FiltersPage : IConfigPage
     {
+        private bool _isSeparator;
         public string Name { get; } = "Filters";
         public void Draw()
         {
@@ -112,107 +113,8 @@ namespace InventoryTools.Sections
 
                 ImGui.PopStyleVar();
             }
-
-            if (ImGui.CollapsingHeader("Create Filters", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
-            {
-                if (ImGui.Button("Add Search Filter"))
-                {
-                    PluginService.FilterService.AddFilter(new FilterConfiguration("New Search Filter",
-                        Guid.NewGuid().ToString("N"), FilterType.SearchFilter));
-                }
-
-                ImGui.SameLine();
-                UiHelpers.HelpMarker(
-                    "This will create a new filter that let's you search for specific items within your characters and retainers inventories.");
-
-                if (ImGui.Button("Add Sort Filter"))
-                {
-                    PluginService.FilterService.AddFilter(new FilterConfiguration("New Sort Filter",
-                        Guid.NewGuid().ToString("N"), FilterType.SortingFilter));
-                }
-
-                ImGui.SameLine();
-                UiHelpers.HelpMarker(
-                    "This will create a new filter that let's you search for specific items within your characters and retainers inventories then determine where they should be moved to.");
-
-
-                if (ImGui.Button("Add Game Item Filter"))
-                {
-                    PluginService.FilterService.AddFilter(new FilterConfiguration("New Game Item Filter",
-                        Guid.NewGuid().ToString("N"), FilterType.GameItemFilter));
-                }
-
-                ImGui.SameLine();
-                UiHelpers.HelpMarker(
-                    "This will create a filter that lets you search for all items in the game.");
-            }
-
-            if (ImGui.CollapsingHeader("Sample Filters", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
-            {
-                ImGui.Text("Sample Filters:");
-                if (ImGui.Button("Items that can be bought for 100 gil or less +"))
-                {
-                    PluginService.PluginLogic.AddSampleFilter100Gil();
-                }
-
-                ImGui.SameLine();
-                UiHelpers.HelpMarker(
-                    "This will add a filter that will show all items that can be purchased from gil shops under 100 gil. It will look in both character and retainer inventories.");
-
-                if (ImGui.Button("Put away materials +"))
-                {
-                    PluginService.PluginLogic.AddSampleFilterMaterials();
-                }
-
-                ImGui.SameLine();
-                UiHelpers.HelpMarker(
-                    "This will add a filter that will be setup to quickly put away any excess materials. It will have all the material categories automatically added. When calculating where to put items it will try to prioritise existing stacks of items.");
-
-                if (ImGui.Button("Duplicated items across characters/retainers +"))
-                {
-                    PluginService.PluginLogic.AddSampleFilterDuplicatedItems();
-                }
-
-                ImGui.SameLine();
-                UiHelpers.HelpMarker(
-                    "This will add a filter that will provide a list of all the distinct stacks that appear in 2 sets of inventories. You can use this to make sure only one retainer has a specific type of item.");
-                
-                ImGui.Text("Default Filters:");
-                if (ImGui.Button("All"))
-                {
-                    PluginService.PluginLogic.AddAllFilter();
-                }
-
-                ImGui.SameLine();
-                UiHelpers.HelpMarker(
-                    "This adds a new copy of the default 'All' filter.");
-                if (ImGui.Button("Retainers"))
-                {
-                    PluginService.PluginLogic.AddRetainerFilter();
-                }
-
-                ImGui.SameLine();
-                UiHelpers.HelpMarker(
-                    "This adds a new copy of the default 'Retainer' filter.");
-                
-                if (ImGui.Button("Player"))
-                {
-                    PluginService.PluginLogic.AddPlayerFilter();
-                }
-
-                ImGui.SameLine();
-                UiHelpers.HelpMarker(
-                    "This adds a new copy of the default 'Player' filter.");
-
-                if (ImGui.Button("All Game Items"))
-                {
-                    PluginService.PluginLogic.AddAllGameItemsFilter();
-                }
-
-                ImGui.SameLine();
-                UiHelpers.HelpMarker(
-                    "This adds a new copy of the default 'All Game Items' filter.");
-            }
         }
+
+        public bool IsMenuItem => _isSeparator;
     }
 }

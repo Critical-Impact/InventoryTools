@@ -16,13 +16,13 @@ namespace InventoryTools.Logic.Settings
         }
 
         public override string Key { get; set; } = "ShowTooltips";
-        public override string Name { get; set; } = "Tweak Item Tooltip?";
+        public override string Name { get; set; } = "Enable Tooltip Tweaks?";
 
         public override string HelpText { get; set; } =
             "When hovering an item in game, show additional information about the item including it's location in inventories and market price(if available).";
 
-        public override SettingCategory SettingCategory { get; set; } = SettingCategory.Visuals;
-        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Tooltips;
+        public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
+        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
 
     }
 }

@@ -12,6 +12,7 @@ namespace InventoryTools.Services
 
         bool AddFilter(FilterConfiguration configuration);
         bool AddFilter(string name, FilterType filterType);
+        FilterConfiguration DuplicateFilter(FilterConfiguration configuration, string newName);
         FilterConfiguration AddNewCraftFilter();
         bool RemoveFilter(FilterConfiguration configuration);
         bool RemoveFilter(string name);

@@ -16,11 +16,11 @@ public partial class TooltipDisplayRetrieveAmountSetting : BooleanSetting
     }
 
     public override string Key { get; set; } = "DisplayRetrievalAmount";
-    public override string Name { get; set; } = "Display Retrieval Amount?";
+    public override string Name { get; set; } = "Add Amount to Retrieve";
 
     public override string HelpText { get; set; } =
         "Should the amount required to be retrieved be shown in the tooltip?";
 
-    public override SettingCategory SettingCategory { get; set; } = SettingCategory.Visuals;
-    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Tooltips;
+    public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
+    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Subsetting;
 }

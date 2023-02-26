@@ -7,6 +7,7 @@ namespace InventoryTools.Sections
 {
     public class CraftFiltersPage : IConfigPage
     {
+        private bool _isSeparator;
         public string Name { get; } = "Craft Lists";
         public void Draw()
         {
@@ -106,19 +107,8 @@ namespace InventoryTools.Sections
 
                 ImGui.PopStyleVar();
             }
-
-            if (ImGui.CollapsingHeader("Create Filters", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
-            {
-                if (ImGui.Button("Add New Craft List"))
-                {
-                    PluginService.FilterService.AddNewCraftFilter();
-                }
-
-                ImGui.SameLine();
-                UiHelpers.HelpMarker(
-                    "This will create a new list that can be accessed from within the craft window showing you a breakdown of the required materials.");
-            }
-
         }
+
+        public bool IsMenuItem => _isSeparator;
     }
 }

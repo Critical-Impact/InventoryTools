@@ -52,7 +52,7 @@ public class IconBrowserWindow : Window
 
     public override void Draw()
     {
-        var iconSize = 48 * ImGuiHelpers.GlobalScale;
+        var iconSize = 64 * ImGuiHelpers.GlobalScale;
 
         if (ImGui.Button("RebuildIconCache"))
         {
@@ -259,16 +259,19 @@ public class IconBrowserWindow : Window
 
     private void AddIcons(int start, int end, string desc = "")
     {
+        var count = 0;
         for (int index = start; index < end; index++)
         {
             if (PluginService.IconStorage.IconExists(index))
             {
-                ImGui.Image(PluginService.IconStorage[index].ImGuiHandle, new Vector2(32, 32));
+                ImGui.Image(PluginService.IconStorage[index].ImGuiHandle, new Vector2(64, 64));
                 ImGuiUtil.HoverTooltip(index.ToString());
-                if (index % 10 != 0)
+                if (count % 10 != 0)
                 {
                     ImGui.SameLine();
                 }
+
+                count++;
             }
             
         }

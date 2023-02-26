@@ -117,6 +117,17 @@ namespace InventoryTools.Services
             return craftsWindow;
         }
 
+        public T GetWindow<T>(string windowName) where T: Window, new()
+        {
+            if (_windows.ContainsKey(windowName) && _windows[windowName] is T)
+            {
+                return (T)_windows[windowName];
+            }
+            var newWindow = new T();
+            AddWindow(newWindow);
+            return newWindow;
+        }
+
         public bool ToggleCraftsWindow()
         {
             return ToggleWindow<CraftsWindow>(CraftsWindow.AsKey);

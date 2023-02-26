@@ -107,6 +107,36 @@ public class AmountOwnedTooltip : TooltipService.TooltipTweak
                                 locations.Add(ownedItems.Count - ConfigurationManager.Config.TooltipLocationLimit + " other locations.");
                             }                        
                         }
+                        if (ConfigurationManager.Config.TooltipLocationDisplayMode ==
+                            TooltipLocationDisplayMode.CharacterBagSlotQuantity)
+                        {
+                            foreach (var oItem in ownedItems)
+                            {
+                                storageCount += oItem.Quantity;
+                                
+                                if (locations.Count >= ConfigurationManager.Config.TooltipLocationLimit)
+                                    continue;
+
+                                var characterMonitorCharacter = PluginService.CharacterMonitor.Characters[oItem.RetainerId];
+                                var name = characterMonitorCharacter?.FormattedName ?? "Unknown";
+                                name = name.Trim().Length == 0 ? "Unknown" : name.Trim();
+                                if (characterMonitorCharacter != null && characterMonitorCharacter.OwnerId != 0 &&
+                                    ConfigurationManager.Config.TooltipAddCharacterNameOwned &&
+                                    PluginService.CharacterMonitor.Characters.ContainsKey(characterMonitorCharacter
+                                        .OwnerId))
+                                {
+                                    var owner = PluginService.CharacterMonitor.Characters[
+                                        characterMonitorCharacter.OwnerId];
+                                    name += " (" + owner.FormattedName + ")";
+                                }
+
+                                locations.Add($"{name} - {oItem.FormattedBagLocation} - {+ oItem.Quantity} ");
+                            }
+                            if (ownedItems.Count > ConfigurationManager.Config.TooltipLocationLimit)
+                            {
+                                locations.Add(ownedItems.Count - ConfigurationManager.Config.TooltipLocationLimit + " other locations.");
+                            }                        
+                        }
                         else if (ConfigurationManager.Config.TooltipLocationDisplayMode == TooltipLocationDisplayMode.CharacterCategoryQuantityQuality)
                         {
                             var groupedItems = ownedItems.GroupBy(c => (c.RetainerId, c.SortedCategory, c.Flags)).ToList();

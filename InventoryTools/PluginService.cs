@@ -1,9 +1,11 @@
+using System.Diagnostics;
 using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
 using Dalamud.Interface.ImGuiFileDialog;
+using Dalamud.Logging;
 using Dalamud.Plugin;
 using InventoryTools.Commands;
 using InventoryTools.Logic;
@@ -76,6 +78,8 @@ namespace InventoryTools
 
         public static void Initialise(DalamudPluginInterface pluginInterface)
         {
+            Stopwatch loadConfigStopwatch = new Stopwatch();
+            loadConfigStopwatch.Start();
             Service.ExcelCache = new ExcelCache(Service.Data);
             FrameworkService = new FrameworkService(Service.Framework);
             CommandService = new CommandService(Service.Commands);
@@ -114,8 +118,10 @@ namespace InventoryTools
             IpcService = new IPCService(pluginInterface, CharacterMonitor, FilterService, InventoryMonitor);
             PluginLoaded = true;
             OnPluginLoaded?.Invoke();
+            loadConfigStopwatch.Stop();
+            PluginLog.Verbose("Allagan Tools has finished loading. Total load time was " + loadConfigStopwatch.Elapsed.TotalSeconds + " seconds.");
         }
-
+        
         public static void InitaliseExplicit(MockServices mockServices, bool finishLoading = true)
         {
             if (mockServices.CharacterMonitor != null) CharacterMonitor = mockServices.CharacterMonitor;

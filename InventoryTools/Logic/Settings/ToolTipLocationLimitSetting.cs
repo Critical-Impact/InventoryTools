@@ -16,8 +16,8 @@ public class ToolTipLocationLimitSetting : IntegerSetting
     }
 
     public override string Key { get; set; } = "TooltipLocationLimit";
-    public override string Name { get; set; } = "Tooltip Location Limit";
+    public override string Name { get; set; } = "Amount Owned Limit";
     public override string HelpText { get; set; } = "The maximum amount of locations to list on the tooltip. This requires 'Display Amount Owned?' to be enabled.";
-    public override SettingCategory SettingCategory { get; set; } = SettingCategory.Visuals;
-    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Tooltips;
+    public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
+    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Visuals;
 }

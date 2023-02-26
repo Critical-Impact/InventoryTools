@@ -78,11 +78,9 @@ namespace InventoryTools.Ui
                 ImGui.Text(ContentFinderCondition.ContentType?.Value?.Name.ToString() ?? "Unknown Content Type");
                 ImGui.Text("Level Required: " + ContentFinderCondition.ClassJobLevelRequired);
                 ImGui.Text("Item Level Required: " + ContentFinderCondition.ItemLevelRequired);
-                var itemIcon = PluginService.IconStorage[(int)(ContentFinderCondition.Icon == 0 ? 61801 : ContentFinderCondition.Icon)];
-                if (itemIcon != null)
-                {
-                    ImGui.Image(itemIcon.ImGuiHandle, new Vector2(100, 100) * ImGui.GetIO().FontGlobalScale);
-                }
+                ;
+                var itemIcon = PluginService.IconStorage[(int)(ContentFinderCondition.ContentType?.Value?.IconDutyFinder ?? 61801)];
+                ImGui.Image(itemIcon.ImGuiHandle, new Vector2(100, 100) * ImGui.GetIO().FontGlobalScale);
                 
                 var garlandIcon = PluginService.IconStorage[65090];
                 if (ImGui.ImageButton(garlandIcon.ImGuiHandle,

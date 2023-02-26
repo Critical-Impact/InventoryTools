@@ -3,6 +3,7 @@ using System.Reflection;
 using Dalamud.Interface;
 using ImGuiNET;
 using InventoryTools.Logic;
+using Lumina;
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
@@ -83,8 +84,12 @@ namespace InventoryToolsMock
                 _controller.WindowResized(_window.Width, _window.Height);
             };
             _cl = _gd.ResourceFactory.CreateCommandList();
-            _controller = new ImGuiController(_gd, _gd.MainSwapchain.Framebuffer.OutputDescription, _window.Width, _window.Height);
-            _mockPlugin = new MockPlugin(gameLocation, configDirectory, configFile, inventoriesFile);
+            var gameData = new Lumina.GameData( gameLocation, new LuminaOptions()
+            {
+                PanicOnSheetChecksumMismatch = false
+            } );
+            _controller = new ImGuiController(gameData, _gd, _gd.MainSwapchain.Framebuffer.OutputDescription, _window.Width, _window.Height);
+            _mockPlugin = new MockPlugin(gameData, gameLocation, configDirectory, configFile, inventoriesFile);
             
             //Hack to bypass private set
             var property = typeof(ImGuiHelpers).GetProperty("MainViewport", 

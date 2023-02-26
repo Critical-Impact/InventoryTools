@@ -5,11 +5,13 @@ namespace InventoryTools.Logic.Settings.Abstract
         AutoSave,
         FilterSettings,
         Experimental,
-        Tooltips,
         Hotkeys,
         Highlighting,
         DestinationHighlighting,
         Market,
         ContextMenus,
+        Visuals,
+        General,
+        Subsetting,
     }
 }

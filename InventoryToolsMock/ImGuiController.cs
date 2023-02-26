@@ -1,7 +1,14 @@
 ﻿using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Text;
+using Dalamud.Interface;
+using Dalamud.Utility;
+using Dalamud.Utility.Timing;
 using ImGuiNET;
+using Lumina;
+using Serilog;
 using Veldrid;
 
 namespace InventoryToolsMock
@@ -28,6 +35,7 @@ namespace InventoryToolsMock
         private Pipeline _pipeline;
         private ResourceSet _mainResourceSet;
         private ResourceSet _fontTextureResourceSet;
+        private GameData _gameData;
 
         private IntPtr _fontAtlasID = (IntPtr)1;
         private bool _controlDown;
@@ -51,12 +59,12 @@ namespace InventoryToolsMock
         /// <summary>
         /// Constructs a new ImGuiController.
         /// </summary>
-        public ImGuiController(GraphicsDevice gd, OutputDescription outputDescription, int width, int height)
+        public ImGuiController(GameData gameData, GraphicsDevice gd, OutputDescription outputDescription, int width, int height)
         {
+            _gameData = gameData;
             _gd = gd;
             _windowWidth = width;
             _windowHeight = height;
-
             IntPtr context = ImGui.CreateContext();
             ImGui.SetCurrentContext(context);
             var fonts = ImGui.GetIO().Fonts;

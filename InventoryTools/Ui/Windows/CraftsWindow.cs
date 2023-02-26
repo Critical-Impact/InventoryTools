@@ -90,7 +90,7 @@ namespace InventoryTools.Ui
                 }
             }
         }
-        public override void Draw()
+        public override unsafe void Draw()
         {
             var isWindowFocused = ImGui.IsWindowFocused();
             var filterConfigurations = Filters;

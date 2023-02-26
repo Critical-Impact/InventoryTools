@@ -7,6 +7,7 @@ namespace InventoryTools.Sections
 {
     public class CharacterRetainerPage : IConfigPage
     {
+        private bool _isSeparator;
         public string Name { get; } = "Characters/Retainers";
         
         public void Draw()
@@ -245,5 +246,7 @@ namespace InventoryTools.Sections
                 ImGui.PopStyleVar();
             }
         }
+
+        public bool IsMenuItem => _isSeparator;
     }
 }

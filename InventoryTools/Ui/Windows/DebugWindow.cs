@@ -121,6 +121,10 @@ namespace InventoryTools.Ui
             {
                 ConfigurationManager.Config.SelectedDebugPage = 16;
             }
+            if (ImGui.Selectable("Mob Tracker", ConfigurationManager.Config.SelectedDebugPage == 17))
+            {
+                ConfigurationManager.Config.SelectedDebugPage = 17;
+            }
             ImGui.EndChild();
 
             ImGui.SameLine();
@@ -1405,6 +1409,10 @@ namespace InventoryTools.Ui
                     ConfigurationManager.SaveAsync();
                     ConfigurationManager.SaveAsync();
                 }
+            }
+            else if (ConfigurationManager.Config.SelectedDebugPage == 16)
+            {
+                
             }
 
             ImGui.EndChild();
