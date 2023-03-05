@@ -39,7 +39,36 @@ namespace InventoryTools.Ui
                 RetainerTasks = Item.RetainerTasks.ToArray();
                 RecipesResult = Item.RecipesAsResult.ToArray();
                 RecipesAsRequirement = Item.RecipesAsRequirement.ToArray();
-                Vendors = Item.Vendors.SelectMany(shop => shop.ENpcs.SelectMany(npc => npc.Locations.Select(location => (shop, npc, location)))).ToList();
+                Vendors = new List<(IShop shop, ENpc? npc, ILocation? location)>();
+                foreach (var vendor in Item.Vendors)
+                {
+                    if (vendor.Name == "")
+                    {
+                        continue;
+                    }
+                    if (!vendor.ENpcs.Any())
+                    {
+                        Vendors.Add(new (vendor, null, null));
+                    }
+                    else
+                    {
+                        foreach (var npc in vendor.ENpcs)
+                        {
+                            if (!npc.Locations.Any())
+                            {
+                                Vendors.Add(new (vendor, npc, null));
+                            }
+                            else
+                            {
+                                foreach (var location in npc.Locations)
+                                {
+                                    Vendors.Add(new (vendor, npc, location));
+                                }
+                            }
+                        }
+                    }
+                }
+                
                 GatheringSources = Item.GetGatheringSources().ToList();
                 SharedModels = Item.GetSharedModels();
                 MobDrops = Item.MobDrops.ToArray();
@@ -60,7 +89,7 @@ namespace InventoryTools.Ui
 
         private List<GatheringSource> GatheringSources { get; }
 
-        private List<(IShop shop, ENpc npc, ILocation location)> Vendors { get; }
+        private List<(IShop shop, ENpc? npc, ILocation? location)> Vendors { get; }
 
         private RecipeEx[] RecipesAsRequirement { get;  }
 
@@ -242,6 +271,28 @@ namespace InventoryTools.Ui
 
                                     }
                                 }
+                                else if (source is AirshipSource airshipSource)
+                                {
+                                    if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                                            new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1),
+                                            0))
+                                    {
+
+                                        PluginService.WindowService.OpenAirshipWindow(airshipSource.AirshipExplorationPointExId);
+
+                                    }
+                                }
+                                else if (source is SubmarineSource submarineSource)
+                                {
+                                    if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                                            new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1),
+                                            0))
+                                    {
+
+                                        PluginService.WindowService.OpenSubmarineWindow(submarineSource.SubmarineExplorationExId);
+
+                                    }
+                                }
                                 else
                                 {
                                     ImGui.Image(sourceIcon.ImGuiHandle,
@@ -349,18 +400,31 @@ namespace InventoryTools.Ui
                     }
                 }
 
-                void DrawSupplierRow((IShop shop, ENpc npc, ILocation location) tuple)
+                void DrawSupplierRow((IShop shop, ENpc? npc, ILocation? location) tuple)
                 {
                     ImGui.TableNextColumn();
-                    ImGui.Text( tuple.npc.Resident?.Singular ?? "Unknown");
-                    ImGui.TableNextColumn();
-                    ImGui.Text(tuple.shop.Name);     
-                    ImGui.TableNextColumn();
-                    ImGui.TextWrapped(tuple.location + " ( " + Math.Round(tuple.location.MapX,2) + "/" + Math.Round(tuple.location.MapY,2) + ")");
-                    ImGui.TableNextColumn();
-                    if (ImGui.Button("Open Map Link##" + tuple.shop.RowId + "_" + tuple.npc.Key + "_" + tuple.location.MapEx.Row))
+                    ImGui.Text(tuple.shop.Name);
+                    if (tuple.npc != null)
                     {
-                        PluginService.ChatUtilities.PrintFullMapLink(tuple.location, Item.NameString);
+                        ImGui.TableNextColumn();
+                        ImGui.Text(tuple.npc?.Resident?.Singular ?? "");
+                    }
+                    if (tuple.location != null)
+                    {
+                        ImGui.TableNextColumn();
+                        ImGui.TextWrapped(tuple.location + " ( " + Math.Round(tuple.location.MapX, 2) + "/" +
+                                          Math.Round(tuple.location.MapY, 2) + ")");
+                        ImGui.TableNextColumn();
+                        if (ImGui.Button("Open Map Link##" + tuple.shop.RowId + "_" + tuple.npc.Key + "_" +
+                                         tuple.location.MapEx.Row))
+                        {
+                            PluginService.ChatUtilities.PrintFullMapLink(tuple.location, Item.NameString);
+                        }
+                    }
+                    else
+                    {
+                        ImGui.TableNextColumn();
+                        ImGui.TableNextColumn();
                     }
 
 
@@ -374,7 +438,7 @@ namespace InventoryTools.Ui
                     {
                         ImGui.Text("Shops: ");
                         ImGuiTable.DrawTable("VendorsText", Vendors, DrawSupplierRow, ImGuiTableFlags.None,
-                            new[] { "NPC", "Shop Name", "Location", "" });
+                            new[] { "Shop Name","NPC", "Location", "" });
                     }
                 }
                 if (RetainerTasks.Length != 0)

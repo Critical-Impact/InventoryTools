@@ -96,9 +96,11 @@ namespace InventoryTools
             PluginService.CraftMonitor.CraftCompleted += CraftMonitorOnCraftCompleted ;
             PluginService.OnPluginLoaded += PluginServiceOnOnPluginLoaded;
             PluginService.GameInterface.AcquiredItemsUpdated += GameInterfaceOnAcquiredItemsUpdated;
+            PluginService.TooltipService.AddTooltipTweak(new HeaderTextTooltip());
             PluginService.TooltipService.AddTooltipTweak(new LocationDisplayTooltip());
             PluginService.TooltipService.AddTooltipTweak(new AmountOwnedTooltip());
             PluginService.TooltipService.AddTooltipTweak(new DisplayMarketPriceTooltip());
+            PluginService.TooltipService.AddTooltipTweak(new FooterTextTooltip());
             RunMigrations();
             
             if (PluginConfiguration.FirstRun)

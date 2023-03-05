@@ -18,7 +18,7 @@ namespace InventoryTools.Extensions
             //TODO: Allow this to have sub comparisons
             public FilterComparisonText(string filterString)
             {
-                SearchText = filterString.Trim();
+                SearchText = filterString.ToLower().Trim();
                 if (filterString.Contains("||", StringComparison.Ordinal))
                 {
                     HasOr = true;

@@ -83,6 +83,30 @@ namespace InventoryTools.Services
             return AddWindow(dutyWindow);
         }
 
+        public bool OpenAirshipWindow(uint airshipExplorationPointId)
+        {
+            var asKey = AirshipWindow.AsKey(airshipExplorationPointId);
+            if (_windows.ContainsKey(asKey))
+            {
+                _windows[asKey].Toggle();
+                return true;
+            }
+            var airshipWindow = new AirshipWindow(airshipExplorationPointId);
+            return AddWindow(airshipWindow);
+        }
+
+        public bool OpenSubmarineWindow(uint submarineExplorationPointId)
+        {
+            var asKey = SubmarineWindow.AsKey(submarineExplorationPointId);
+            if (_windows.ContainsKey(asKey))
+            {
+                _windows[asKey].Toggle();
+                return true;
+            }
+            var submarineWindow = new SubmarineWindow(submarineExplorationPointId);
+            return AddWindow(submarineWindow);
+        }
+
         public bool OpenFilterWindow(string filterKey)
         {
             var asKey = FilterWindow.AsKey(filterKey);
@@ -168,6 +192,16 @@ namespace InventoryTools.Services
             if (windowName == BNpcWindow.AsKey)
             {
                 return OpenWindow<BNpcWindow>(BNpcWindow.AsKey);
+            }
+
+            if (windowName == AirshipsWindow.AsKey)
+            {
+                return OpenWindow<AirshipsWindow>(AirshipsWindow.AsKey);
+            }
+
+            if (windowName == SubmarinesWindow.AsKey)
+            {
+                return OpenWindow<SubmarinesWindow>(SubmarinesWindow.AsKey);
             }
 
             foreach (var config in ConfigurationManager.Config.FilterConfigurations)
@@ -264,6 +298,11 @@ namespace InventoryTools.Services
             return ToggleWindow<DutiesWindow>(DutiesWindow.AsKey);
         }
         
+        public bool ToggleAirshipsWindow()
+        {
+            return ToggleWindow<AirshipsWindow>(AirshipsWindow.AsKey);
+        }
+        
         public bool ToggleMobWindow()
         {
             return ToggleWindow<BNpcWindow>(BNpcWindow.AsKey);
@@ -277,6 +316,11 @@ namespace InventoryTools.Services
         public bool ToggleFiltersWindow()
         {
             return ToggleWindow<FiltersWindow>(FiltersWindow.AsKey);
+        }
+
+        public bool ToggleSubmarinesWindow()
+        {
+            return ToggleWindow<SubmarinesWindow>(SubmarinesWindow.AsKey);
         }
 
         public bool CloseFilterWindows()

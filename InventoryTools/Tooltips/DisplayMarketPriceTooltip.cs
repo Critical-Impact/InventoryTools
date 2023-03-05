@@ -13,6 +13,12 @@ namespace InventoryTools.Tooltips;
 public class DisplayMarketPriceTooltip : TooltipService.TooltipTweak
 {
     private const string indentation = "      ";
+
+    public override bool IsEnabled =>
+        ConfigurationManager.Config.DisplayTooltip &&
+        (ConfigurationManager.Config.TooltipDisplayMarketAveragePrice ||
+         ConfigurationManager.Config.TooltipDisplayMarketLowestPrice);
+
     public override unsafe void OnGenerateItemTooltip(NumberArrayData* numberArrayData, StringArrayData* stringArrayData)
     {
         if (!ConfigurationManager.Config.DisplayTooltip)
@@ -107,7 +113,7 @@ public class DisplayMarketPriceTooltip : TooltipService.TooltipTweak
                             seStr.Payloads.Add(line);
                         }
 
-                        SetTooltipString(stringArrayData, TooltipService.ItemTooltipField.ItemDescription, seStr);
+                        SetTooltipString(stringArrayData, itemTooltipField, seStr);
                     }
                 }
             }

@@ -356,15 +356,6 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
     public override Vector2 MaxSize { get; } = new(2000, 2000);
     public override Vector2 MinSize { get; } = new(200, 200);
     public override Vector2 DefaultSize { get; } = new(600, 600);
-    
-    public ImGuiTableFlags _tableFlags = ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersV |
-                                         ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.BordersInnerV |
-                                         ImGuiTableFlags.BordersH | ImGuiTableFlags.BordersOuterH |
-                                         ImGuiTableFlags.BordersInnerH |
-                                         ImGuiTableFlags.Resizable | ImGuiTableFlags.Sortable |
-                                         ImGuiTableFlags.Hideable | ImGuiTableFlags.ScrollX |
-                                         ImGuiTableFlags.ScrollY;
-
     public override void Draw()
     {
         DrawTabs();

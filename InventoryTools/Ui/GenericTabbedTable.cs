@@ -19,10 +19,6 @@ public abstract class GenericTabbedTable<T> : Window, IGenericTabbedTable<T>
     {
     }
     
-    public static string AsKey
-    {
-        get { return "duties"; }
-    }
 
     private uint _currentTab = 0;
     
@@ -56,7 +52,7 @@ public abstract class GenericTabbedTable<T> : Window, IGenericTabbedTable<T>
             
             foreach(var tab in Tabs)
             {
-                if (ImGui.BeginTabItem(tab.Value))
+                if (tab.Key != 0 && ImGui.BeginTabItem(tab.Value))
                 {
                     CurrentTab = tab.Key;
                     ImGui.PushID(tab.Key.ToString());
@@ -214,10 +210,13 @@ public abstract class GenericTabbedTable<T> : Window, IGenericTabbedTable<T>
                 ImGui.TableNextRow(ImGuiTableRowFlags.None, RowSize);
                 ImGui.PushID(GetRowId(ex));
 
-                foreach (var column in tableColumns)
+                for (var i = 0; i < tableColumns.Count; i++)
                 {
+                    ImGui.PushID(i);
+                    var column = tableColumns[i];
                     ImGui.TableNextColumn();
                     column.Draw(ex, contentTypeId);
+                    ImGui.PopID();
                 }
 
                 ImGui.PopID();

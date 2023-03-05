@@ -145,6 +145,16 @@ public class MockWindow : Window
                 PluginService.WindowService.ToggleMobWindow();
             }
 
+            if (ImGui.Button("Airships Window"))
+            {
+                PluginService.WindowService.ToggleAirshipsWindow();
+            }
+
+            if (ImGui.Button("Submarines Window"))
+            {
+                PluginService.WindowService.ToggleSubmarinesWindow();
+            }
+
             if (ImGui.Button("Icons Window"))
             {
                 PluginService.WindowService.ToggleWindow<IconBrowserWindow>(IconBrowserWindow.AsKey);

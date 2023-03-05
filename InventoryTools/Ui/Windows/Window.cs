@@ -37,11 +37,6 @@ namespace InventoryTools.Ui
             IsOpen = true;
         }
 
-        public void Toggle()
-        {
-            IsOpen = !IsOpen;
-        }
-
         public abstract void Invalidate();
         
         public abstract FilterConfiguration? SelectedConfiguration { get; }

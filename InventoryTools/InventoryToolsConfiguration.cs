@@ -91,6 +91,9 @@ namespace InventoryTools
         private bool _tooltipAddCharacterNameOwned = false;
         private bool _tooltipDisplayRetrieveAmount = false;
         private int _tooltipLocationLimit = 10;
+        private bool _tooltipDisplayHeader = false;
+        private int _tooltipHeaderLines = 0;
+        private int _tooltipFooterLines = 0;
         private TooltipLocationDisplayMode _tooltipLocationDisplayMode = TooltipLocationDisplayMode.CharacterCategoryQuantityQuality;
         private uint? _tooltipColor = null;
         public Vector4 HighlightColor
@@ -359,6 +362,16 @@ namespace InventoryTools
             }
         }
         
+        public bool TooltipDisplayHeader
+        {
+            get => _tooltipDisplayHeader;
+            set
+            {
+                _tooltipDisplayHeader = value;
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+            }
+        }
+        
         public Dictionary<ulong, HashSet<uint>> AcquiredItems
         {
             get => _acquiredItems ?? new Dictionary<ulong, HashSet<uint>>();
@@ -437,7 +450,27 @@ namespace InventoryTools
             }
             set => _openWindows = value;
         }
-        
+
+        public int TooltipHeaderLines
+        {
+            get => _tooltipHeaderLines;
+            set
+            {
+                _tooltipHeaderLines = value;
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+            }
+        }
+
+        public int TooltipFooterLines
+        {
+            get => _tooltipFooterLines;
+            set
+            {
+                _tooltipFooterLines = value;
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+            }
+        }
+
         public event ConfigurationChangedDelegate? ConfigurationChanged;
 
         //Configuration Helpers

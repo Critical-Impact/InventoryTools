@@ -46,15 +46,21 @@ namespace InventoryTools.Logic.Columns
                 maxItems--;
                 for (var index = 0; index < currentValue.Count; index++)
                 {
+                    ImGui.PushID(index);
                     var item = currentValue[index];
                     var sourceIcon = PluginService.IconStorage[item.Icon];
-                    ImGui.Image(sourceIcon.ImGuiHandle,
-                        new Vector2(filterConfiguration.TableHeight , filterConfiguration.TableHeight ) * ImGui.GetIO().FontGlobalScale);
+                    
                     //TODO: fix this
-                    if (item is ItemSource source)
+                    if (item is ItemSource source && source.ItemId != null)
                     {
                         if (source.HasItem && source.Item != null)
                         {
+                            if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                                    new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
+                                    ImGui.GetIO().FontGlobalScale))
+                            {
+                                PluginService.WindowService.OpenItemWindow(source.ItemId.Value);
+                            }
                             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
                                                     ImGuiHoveredFlags.AllowWhenOverlapped &
                                                     ImGuiHoveredFlags.AllowWhenBlockedByPopup &
@@ -64,15 +70,6 @@ namespace InventoryTools.Logic.Columns
                             {
                                 ImGui.OpenPopup("RightClick" + source.ItemId);
                             }
-                            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
-                                                    ImGuiHoveredFlags.AllowWhenOverlapped &
-                                                    ImGuiHoveredFlags.AllowWhenBlockedByPopup &
-                                                    ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
-                                                    ImGuiHoveredFlags.AnyWindow) &&
-                                ImGui.IsMouseReleased(ImGuiMouseButton.Left) && source.ItemId != null)
-                            {
-                                PluginService.WindowService.OpenItemWindow(source.ItemId.Value);
-                            }
 
                             if (ImGui.BeginPopup("RightClick" + source.ItemId))
                             {
@@ -81,13 +78,48 @@ namespace InventoryTools.Logic.Columns
                             }
                         }
                     }
-                    
+                    else if (item is DutySource dutySource)
+                    {
+                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                                new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1)))
+                        {
+
+                            PluginService.WindowService.OpenDutyWindow(dutySource.ContentFinderConditionId);
+
+                        }
+                    }
+                    else if (item is AirshipSource airshipSource)
+                    {
+                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                                new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1)))
+                        {
+
+                            PluginService.WindowService.OpenAirshipWindow(airshipSource.AirshipExplorationPointExId);
+
+                        }
+                    }
+                    else if (item is SubmarineSource submarineSource)
+                    {
+                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                                new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1)))
+                        {
+
+                            PluginService.WindowService.OpenSubmarineWindow(submarineSource.SubmarineExplorationExId);
+
+                        }
+                    }
+                    else
+                    {
+                        ImGui.Image(sourceIcon.ImGuiHandle,
+                            new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale);
+                    }
 
                     ImGuiUtil.HoverTooltip(item.FormattedName);
                     if (index == 0 || (index) % maxItems != 0)
                     {
                         ImGui.SameLine();
                     }
+                    ImGui.PopID();
                 }
                 ImGui.EndChild();
             }

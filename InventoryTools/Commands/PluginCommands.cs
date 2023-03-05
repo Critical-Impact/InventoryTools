@@ -102,6 +102,20 @@ namespace InventoryTools.Commands
             PluginService.WindowService.ToggleCraftsWindow();
         }
 
+        [Command("/airships")]
+        [HelpMessage("Opens the allagan tools airships window")]
+        public  void ToggleAirshipsWindow(string command, string args)
+        {
+            PluginService.WindowService.ToggleAirshipsWindow();
+        }
+
+        [Command("/submarines")]
+        [HelpMessage("Opens the allagan tools submarines window")]
+        public  void ToggleSubmarinesWindow(string command, string args)
+        {
+            PluginService.WindowService.ToggleSubmarinesWindow();
+        }
+
         [Command("/atconfig")]
         [HelpMessage("Opens the allagan tools configuration window")]
         public  void OpenConfigurationWindow(string command, string args)

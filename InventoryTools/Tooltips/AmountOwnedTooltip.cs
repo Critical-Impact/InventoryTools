@@ -6,6 +6,7 @@ using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Services;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
+using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
@@ -15,6 +16,9 @@ namespace InventoryTools.Tooltips;
 public class AmountOwnedTooltip : TooltipService.TooltipTweak
 {
     private const string indentation = "      ";
+    
+    public override bool IsEnabled =>
+        ConfigurationManager.Config.DisplayTooltip && ConfigurationManager.Config.TooltipDisplayAmountOwned;
     public override unsafe void OnGenerateItemTooltip(NumberArrayData* numberArrayData, StringArrayData* stringArrayData)
     {
         if (!ConfigurationManager.Config.DisplayTooltip)
@@ -48,6 +52,7 @@ public class AmountOwnedTooltip : TooltipService.TooltipTweak
                 }
                 else
                 {
+                    PluginLog.Verbose("No where to put the tooltip data.");
                     return;
                 }
                 
@@ -262,7 +267,7 @@ public class AmountOwnedTooltip : TooltipService.TooltipTweak
                         {
                             seStr.Payloads.Add(line);
                         }
-
+                        PluginLog.Verbose("Updating tooltip with amount owned on field " + itemTooltipField.ToString());
                         SetTooltipString(stringArrayData, itemTooltipField, seStr);
                     }
                 }

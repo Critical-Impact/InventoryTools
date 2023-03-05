@@ -316,6 +316,7 @@ namespace InventoryTools.Logic
                 Columns.Add("AcquiredColumn");
                 Columns.Add("SellToVendorPriceColumn");
                 Columns.Add("BuyFromVendorPriceColumn");
+                Columns.Add("AcquisitionSourceIconsColumn");
             }
             else if (FilterType == FilterType.CraftFilter)
             {

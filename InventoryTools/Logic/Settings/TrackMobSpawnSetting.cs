@@ -1,9 +1,8 @@
 using ImGuiNET;
-using InventoryTools;
 using InventoryTools.Logic.Settings.Abstract;
 using OtterGui;
 
-namespace a;
+namespace InventoryTools.Logic.Settings;
 
 public class TrackMobSpawnSetting : BooleanSetting
 {

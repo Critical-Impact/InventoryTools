@@ -10,11 +10,12 @@ using InventoryTools.Logic;
 
 namespace InventoryTools.Tooltips;
 
-public class LocationDisplayTooltip : TooltipService.TooltipTweak
+public class HeaderTextTooltip : TooltipService.TooltipTweak
 {
-    
     public override bool IsEnabled =>
-        ConfigurationManager.Config.DisplayTooltip && ConfigurationManager.Config.TooltipDisplayRetrieveAmount;
+        ConfigurationManager.Config.DisplayTooltip && (ConfigurationManager.Config.TooltipHeaderLines != 0 ||
+                                                       ConfigurationManager.Config.TooltipDisplayHeader);
+
     public override unsafe void OnGenerateItemTooltip(NumberArrayData* numberArrayData, StringArrayData* stringArrayData)
     {
         if (!ConfigurationManager.Config.DisplayTooltip)
@@ -55,44 +56,17 @@ public class LocationDisplayTooltip : TooltipService.TooltipTweak
 
                 if (seStr != null && seStr.Payloads.Count > 0)
                 {
-                    if (ConfigurationManager.Config.TooltipDisplayRetrieveAmount)
+                    var newText = "";
+                    if (ConfigurationManager.Config.TooltipHeaderLines != 0)
                     {
-                        var filterConfiguration = PluginService.FilterService.GetActiveFilter();
-                        if (filterConfiguration != null)
+                        for (int i = 0; i < ConfigurationManager.Config.TooltipHeaderLines; i++)
                         {
-                            if (filterConfiguration.FilterType == FilterType.CraftFilter)
-                            {
-                                var filterResult = filterConfiguration.FilterResult;
-                                if (filterResult != null)
-                                {
-                                    var sortedItems = filterResult.SortedItems.Where(c =>
-                                        c.InventoryItem.ItemId == id && c.InventoryItem.IsHQ == isHq).ToList();
-                                    if (sortedItems.Any())
-                                    {
-                                        var sortedItem = sortedItems.First();
-                                        if (sortedItem.Quantity != 0)
-                                        {
-                                            textLines.Add("Retrieve: " + sortedItem.Quantity + "\n");
-                                        }
-                                    }
-                                }
-                            }
+                            newText += "\n";
                         }
                     }
-
-                    var newText = "";
-                    if (textLines.Count != 0)
+                    if (ConfigurationManager.Config.TooltipDisplayHeader)
                     {
-                        newText += "\n";
-                        for (var index = 0; index < textLines.Count; index++)
-                        {
-                            var line = textLines[index];
-                            if (index == textLines.Count)
-                            {
-                                line = line.TrimEnd('\n');
-                            }
-                            newText += line;
-                        }
+                        newText += "\n[Allagan Tools]";
                     }
 
                     if (newText != "")
