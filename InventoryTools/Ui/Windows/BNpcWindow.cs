@@ -149,43 +149,33 @@ public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
             {
                 Draw = (ex, contentTypeId) =>
                 {
-                    var positions = GetPositions(ex.Item1.RowId);
-                    ImGui.BeginChild("LocationScroll", new Vector2(ImGui.GetColumnWidth() * ImGui.GetIO().FontGlobalScale, RowSize + ImGui.GetStyle().CellPadding.Y) * ImGui.GetIO().FontGlobalScale, false);
-                    var maxItems = (int)Math.Floor(ImGui.GetColumnWidth() / RowSize);
-                    maxItems = maxItems == 0 ? 1 : maxItems;
-                    var count = 0;
-                    for (var index = 0; index < positions.Count; index++)
+                    var positions = GetPositions(ex.Item1.RowId).Where(c => c.TerritoryType.Value != null && c.TerritoryType.Value.PlaceName.Value != null && (c.TerritoryTypeId == contentTypeId || contentTypeId == 0));
+                    UiHelpers.WrapTableColumnElements("Scroll" + ex.Item1.RowId,positions, RowSize - ImGui.GetStyle().FramePadding.X, position =>
                     {
-                        var position = positions[index];
-                        var territory = Service.ExcelCache.GetTerritoryTypeExSheet().GetRow(position.TerritoryTypeId);
-                        if (territory != null && territory.PlaceName.Value != null &&
-                            (territory.RowId == contentTypeId || contentTypeId == 0))
+                        var territory = Service.ExcelCache.GetTerritoryTypeExSheet()
+                            .GetRow(position.TerritoryTypeId);
+                        if (ImGui.ImageButton(PluginService.IconStorage[60561].ImGuiHandle,
+                                new Vector2(RowSize * ImGui.GetIO().FontGlobalScale,
+                                    RowSize * ImGui.GetIO().FontGlobalScale), new Vector2(0, 0),
+                                new Vector2(1, 1), 0))
                         {
-                            ImGui.PushID("" + position.Position.X + position.Position.Y + position.Position.Z);
-                            if (ImGui.ImageButton(PluginService.IconStorage[60561].ImGuiHandle, new Vector2(RowSize * ImGui.GetIO().FontGlobalScale, RowSize * ImGui.GetIO().FontGlobalScale), new Vector2(0,0), new Vector2(1,1), 0))
-                            {
-                                PluginService.ChatUtilities.PrintFullMapLink(
-                                    new GenericMapLocation(position.Position.X, position.Position.Y, territory.MapEx,
-                                        territory.PlaceName), ex.Item1.FormattedName);
-                            }
-
-                            if (ImGui.IsItemHovered())
-                            {
-                                using var tt = ImRaii.Tooltip();
-                                ImGui.TextUnformatted(territory.PlaceName.Value.Name + " - " + position.Position.X +
-                                                      " : " + position.Position.Z);
-                            }
-                            if ((count + 1) % maxItems != 0)
-                            {
-                                ImGui.SameLine();
-                            }
-                            ImGui.PopID();
+                            PluginService.ChatUtilities.PrintFullMapLink(
+                                new GenericMapLocation(position.Position.X, position.Position.Y,
+                                    territory.MapEx,
+                                    territory.PlaceName), ex.Item1.FormattedName);
                         }
 
-                        count++;
-                    }
+                        if (ImGui.IsItemHovered())
+                        {
+                            using var tt = ImRaii.Tooltip();
+                            ImGui.TextUnformatted(territory.PlaceName.Value.Name + " - " +
+                                                  position.Position.X +
+                                                  " : " + position.Position.Z);
+                        }
 
-                    ImGui.EndChild();
+                        return true;
+                    });
+                        
                 }
             },
             new("Drops", 200, ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoSort)
@@ -197,12 +187,10 @@ public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
                 Draw = (ex, contentTypeId) =>
                 {
                     var drops = GetDrops(ex.Item1.RowId);
-                    ImGui.BeginChild("DropScroll", new Vector2(ImGui.GetColumnWidth(), RowSize + ImGui.GetStyle().CellPadding.Y) * ImGui.GetIO().FontGlobalScale, false);
-                    var maxItems = (int)Math.Floor(ImGui.GetColumnWidth() / RowSize);
-                    maxItems = maxItems == 0 ? 1 : maxItems;
-                    for (var index = 0; index < drops.Count; index++)
+                    UiHelpers.WrapTableColumnElements("ScrollDrops" + ex.Item1.RowId, drops,
+                        RowSize - ImGui.GetStyle().FramePadding.X,
+                        drop =>
                     {
-                        var drop = drops[index];
                         var sourceIcon = PluginService.IconStorage[drop.Icon];
                         ImGui.Image(sourceIcon.ImGuiHandle,
                             new Vector2(RowSize, RowSize) * ImGui.GetIO().FontGlobalScale);
@@ -234,12 +222,8 @@ public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
 
 
                         ImGuiUtil.HoverTooltip(drop.NameString);
-                        if ((index + 1) % maxItems != 0)
-                        {
-                            ImGui.SameLine();
-                        }
-                    }
-                    ImGui.EndChild();
+                        return true;
+                    });
                 }
             },
         };

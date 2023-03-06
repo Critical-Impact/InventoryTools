@@ -617,39 +617,48 @@ namespace InventoryTools.Ui
             
             ImGui.TableNextColumn();
 
-            ImGui.BeginChild(spawnGroup.Key.RowId + "LocationScroll", new Vector2(ImGui.GetColumnWidth() * ImGui.GetIO().FontGlobalScale, 32 + ImGui.GetStyle().CellPadding.Y) * ImGui.GetIO().FontGlobalScale, false);
-            var maxItems = (int)Math.Floor(ImGui.GetColumnWidth() / 32);
-            maxItems = maxItems == 0 ? 1 : maxItems;
-            var count = 0;
-            foreach (var position in spawnGroup.Value)
+            using (ImRaii.Child(spawnGroup.Key.RowId + "LocationScroll",
+                       new Vector2(ImGui.GetColumnWidth() * ImGui.GetIO().FontGlobalScale,
+                           32 + ImGui.GetStyle().CellPadding.Y) * ImGui.GetIO().FontGlobalScale, false))
             {
-                var territory = position.TerritoryTypeEx;
-                if (territory.Value?.PlaceName.Value != null)
+                var columnWidth = ImGui.GetColumnWidth() - ImGui.GetStyle().ItemSpacing.X;
+                var itemWidth =  (32 + ImGui.GetStyle().ItemSpacing.X) * ImGui.GetIO().FontGlobalScale;
+                var maxItems = itemWidth != 0 ? (int)Math.Floor(columnWidth / itemWidth) : 0;
+                maxItems = maxItems == 0 ? 1 : maxItems;
+                maxItems--;
+                var count = 0;
+                foreach (var position in spawnGroup.Value)
                 {
-                    ImGui.PushID("" + position.FormattedId);
-                    if (ImGui.ImageButton(PluginService.IconStorage[60561].ImGuiHandle, new Vector2(32 * ImGui.GetIO().FontGlobalScale, 32 * ImGui.GetIO().FontGlobalScale), new Vector2(0,0), new Vector2(1,1), 0))
+                    var territory = position.TerritoryTypeEx;
+                    if (territory.Value?.PlaceName.Value != null)
                     {
-                        PluginService.ChatUtilities.PrintFullMapLink(new GenericMapLocation(position.Position.X, position.Position.Y, territory.Value.MapEx,territory.Value.PlaceName), position.FormattedPosition);
+                        ImGui.PushID("" + position.FormattedId);
+                        if (ImGui.ImageButton(PluginService.IconStorage[60561].ImGuiHandle,
+                                new Vector2(32 * ImGui.GetIO().FontGlobalScale, 32 * ImGui.GetIO().FontGlobalScale),
+                                new Vector2(0, 0), new Vector2(1, 1), 0))
+                        {
+                            PluginService.ChatUtilities.PrintFullMapLink(
+                                new GenericMapLocation(position.Position.X, position.Position.Y, territory.Value.MapEx,
+                                    territory.Value.PlaceName), position.FormattedPosition);
+                        }
+
+                        if (ImGui.IsItemHovered())
+                        {
+                            using var tt = ImRaii.Tooltip();
+                            ImGui.TextUnformatted(position.FormattedPosition);
+                        }
+
+                        if ((count + 1) % maxItems != 0)
+                        {
+                            ImGui.SameLine();
+                        }
+
+                        ImGui.PopID();
                     }
 
-                    if (ImGui.IsItemHovered())
-                    {
-                        using var tt = ImRaii.Tooltip();
-                        ImGui.TextUnformatted(position.FormattedPosition);
-                    }
-                    if ((count + 1) % maxItems != 0)
-                    {
-                        ImGui.SameLine();
-                    }
-                    ImGui.PopID();
+                    count++;
                 }
-
-                count++;
             }
-
-            ImGui.EndChild();
-            
-            
         }
 
         private void DrawGatheringRow(GatheringSource obj)

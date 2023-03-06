@@ -195,13 +195,11 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    var drops = ex.Drops;
-                    ImGui.BeginChild("DropScroll", new Vector2(ImGui.GetColumnWidth(), RowSize + ImGui.GetStyle().CellPadding.Y) * ImGui.GetIO().FontGlobalScale, false);
-                    var maxItems = (int)Math.Floor(ImGui.GetColumnWidth() / RowSize);
-                    maxItems = maxItems == 0 ? 1 : maxItems;
-                    for (var index = 0; index < drops.Count; index++)
+                    var drops = ex.Drops.Where(c => c.Value != null);
+                    UiHelpers.WrapTableColumnElements("Drops" + ex.RowId, drops,
+                    RowSize - ImGui.GetStyle().FramePadding.X,
+                    drop =>
                     {
-                        var drop = drops[index];
                         if (drop.Value != null)
                         {
                             var sourceIcon = PluginService.IconStorage[drop.Value.Icon];
@@ -232,16 +230,12 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
                                 drop.Value.DrawRightClickPopup();
                                 ImGui.EndPopup();
                             }
-
-
                             ImGuiUtil.HoverTooltip(drop.Value.NameString);
-                            if ((index + 1) % maxItems != 0)
-                            {
-                                ImGui.SameLine();
-                            }
                         }
-                    }
-                    ImGui.EndChild();
+
+                        return true;
+                    });
+
                 }
             },
         };

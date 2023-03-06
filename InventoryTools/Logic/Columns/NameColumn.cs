@@ -7,6 +7,7 @@ using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
+using OtterGui.Raii;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -41,19 +42,20 @@ namespace InventoryTools.Logic.Columns
                             .OrderBy(c => c.CraftType.Value?.Name ?? "").ToList();
                         var value = item.Recipe?.CraftType.Value?.Name ?? "";
                         ImGui.SameLine();
-                        if (ImGui.BeginCombo("##SetRecipe" + rowIndex, value))
+                        using (var combo = ImRaii.Combo("##SetRecipe" + rowIndex, value))
                         {
-                            foreach (var recipe in actualRecipes)
+                            if (combo.Success)
                             {
-                                if (ImGui.Selectable(recipe.CraftType.Value?.Name ?? "",
-                                        value == (recipe.CraftType.Value?.Name ?? "")))
+                                foreach (var recipe in actualRecipes)
                                 {
-                                    configuration.CraftList.SetCraftRecipe(item.ItemId, recipe.RowId);
-                                    configuration.StartRefresh();
+                                    if (ImGui.Selectable(recipe.CraftType.Value?.Name ?? "",
+                                            value == (recipe.CraftType.Value?.Name ?? "")))
+                                    {
+                                        configuration.CraftList.SetCraftRecipe(item.ItemId, recipe.RowId);
+                                        configuration.StartRefresh();
+                                    }
                                 }
                             }
-
-                            ImGui.EndCombo();
                         }
                     }
                 }

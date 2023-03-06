@@ -5,6 +5,7 @@ using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Columns.Abstract;
+using OtterGui.Raii;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -55,10 +56,12 @@ namespace InventoryTools.Logic.Columns
                 ImGui.OpenPopup("RightClick" + rowIndex);
             }
 
-            if (ImGui.BeginPopup("RightClick" + rowIndex))
+            using (var popup = ImRaii.Popup("RightClick" + rowIndex))
             {
-                item.DrawRightClickPopup(configuration);
-                ImGui.EndPopup();
+                if (popup.Success)
+                {
+                    item.DrawRightClickPopup(configuration);
+                }
             }
         }
 

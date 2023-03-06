@@ -6,6 +6,7 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Extensions;
+using OtterGui.Raii;
 
 namespace InventoryTools.Logic.Columns.Abstract
 {
@@ -145,36 +146,41 @@ namespace InventoryTools.Logic.Columns.Abstract
                 var hasChanged = false;
                 ImGui.TableSetColumnIndex(columnIndex);
                 ImGui.PushItemWidth(-20.000000f);
-                ImGui.PushID(Name);
-                ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(0, 0));
-
-                var currentItem = FilterText;
-                
-                if (ImGui.BeginCombo("##Choice", currentItem))
+                using (ImRaii.PushId(Name))
                 {
-                    if (FilterChoices != null)
+                    using (ImRaii.PushStyle(ImGuiStyleVar.FramePadding, new Vector2(0, 0)))
                     {
-                        if (ImGui.Selectable("", false))
+
+                        var currentItem = FilterText;
+
+                        using (var combo = ImRaii.Combo("##Choice", currentItem))
                         {
-                            FilterText = "";
-                            hasChanged = true;
-                        }
-                        foreach (var column in FilterChoices)
-                        {
-                            if (ImGui.Selectable(column, currentItem == column))
+                            if (combo.Success)
                             {
-                                FilterText = column;
-                                hasChanged = true;
+                                if (FilterChoices != null)
+                                {
+                                    if (ImGui.Selectable("", false))
+                                    {
+                                        FilterText = "";
+                                        hasChanged = true;
+                                    }
+
+                                    foreach (var column in FilterChoices)
+                                    {
+                                        if (ImGui.Selectable(column, currentItem == column))
+                                        {
+                                            FilterText = column;
+                                            hasChanged = true;
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
 
-                    ImGui.EndCombo();
+                    ImGui.SameLine(0.0f, ImGui.GetStyle().ItemInnerSpacing.X);
+                    ImGui.TableHeader("");
                 }
-                ImGui.PopStyleVar();
-                ImGui.SameLine(0.0f, ImGui.GetStyle().ItemInnerSpacing.X);
-                ImGui.TableHeader("");
-                ImGui.PopID();
                 ImGui.PopItemWidth();
                 return hasChanged;
             }

@@ -9,6 +9,7 @@ using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Columns.Abstract;
 using OtterGui;
+using OtterGui.Raii;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -40,88 +41,70 @@ namespace InventoryTools.Logic.Columns
             ImGui.TableNextColumn();
             if (currentValue != null)
             {
-                ImGui.BeginChild(rowIndex + "LocationScroll", new Vector2(ImGui.GetColumnWidth() * ImGui.GetIO().FontGlobalScale, 32 + ImGui.GetStyle().CellPadding.Y) * ImGui.GetIO().FontGlobalScale, false);
-                var maxItems = (int)Math.Floor(ImGui.GetColumnWidth() / filterConfiguration.TableHeight * ImGui.GetIO().FontGlobalScale);
-                maxItems = maxItems == 0 ? 1 : maxItems;
-                maxItems--;
-                for (var index = 0; index < currentValue.Count; index++)
+                UiHelpers.WrapTableColumnElements("ScrollContainer" + rowIndex,currentValue, filterConfiguration.TableHeight - ImGui.GetStyle().FramePadding.X, item =>
                 {
-                    ImGui.PushID(index);
-                    var item = currentValue[index];
                     var sourceIcon = PluginService.IconStorage[item.Icon];
-                    
-                    //TODO: fix this
-                    if (item is ItemSource source && source.ItemId != null)
+                    if (item is ItemSource source && source.ItemId != null && source.HasItem && source.Item != null)
                     {
-                        if (source.HasItem && source.Item != null)
+                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle, new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),new Vector2(1, 1), 0))
                         {
-                            if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                    new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
-                                    ImGui.GetIO().FontGlobalScale))
-                            {
-                                PluginService.WindowService.OpenItemWindow(source.ItemId.Value);
-                            }
-                            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
-                                                    ImGuiHoveredFlags.AllowWhenOverlapped &
-                                                    ImGuiHoveredFlags.AllowWhenBlockedByPopup &
-                                                    ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
-                                                    ImGuiHoveredFlags.AnyWindow) &&
-                                ImGui.IsMouseReleased(ImGuiMouseButton.Right))
-                            {
-                                ImGui.OpenPopup("RightClick" + source.ItemId);
-                            }
+                            PluginService.WindowService.OpenItemWindow(source.ItemId.Value);
+                        }
 
-                            if (ImGui.BeginPopup("RightClick" + source.ItemId))
+                        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
+                                                ImGuiHoveredFlags.AllowWhenOverlapped &
+                                                ImGuiHoveredFlags.AllowWhenBlockedByPopup &
+                                                ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
+                                                ImGuiHoveredFlags.AnyWindow) &&
+                            ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                        {
+                            ImGui.OpenPopup("RightClick" + source.ItemId);
+                        }
+
+                        using (var popup = ImRaii.Popup("RightClick" + source.ItemId))
+                        {
+                            if (popup.Success)
                             {
                                 source.Item?.DrawRightClickPopup();
-                                ImGui.EndPopup();
                             }
                         }
                     }
                     else if (item is DutySource dutySource)
                     {
                         if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1)))
+                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
                         {
-
                             PluginService.WindowService.OpenDutyWindow(dutySource.ContentFinderConditionId);
-
                         }
                     }
                     else if (item is AirshipSource airshipSource)
                     {
                         if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1)))
+                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
                         {
-
-                            PluginService.WindowService.OpenAirshipWindow(airshipSource.AirshipExplorationPointExId);
-
+                            PluginService.WindowService.OpenAirshipWindow(airshipSource
+                                .AirshipExplorationPointExId);
                         }
                     }
                     else if (item is SubmarineSource submarineSource)
                     {
                         if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1)))
+                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
                         {
-
-                            PluginService.WindowService.OpenSubmarineWindow(submarineSource.SubmarineExplorationExId);
-
+                            PluginService.WindowService.OpenSubmarineWindow(
+                                submarineSource.SubmarineExplorationExId);
                         }
                     }
                     else
                     {
-                        ImGui.Image(sourceIcon.ImGuiHandle,
-                            new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale);
+                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle, new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
+                        {
+                            
+                        }
                     }
-
                     ImGuiUtil.HoverTooltip(item.FormattedName);
-                    if (index == 0 || (index) % maxItems != 0)
-                    {
-                        ImGui.SameLine();
-                    }
-                    ImGui.PopID();
-                }
-                ImGui.EndChild();
+                    return true;
+                });
             }
             return null;
         }
