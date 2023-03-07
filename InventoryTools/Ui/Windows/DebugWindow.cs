@@ -12,12 +12,12 @@ using CriticalCommonLib.GameStructs;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
-using CriticalCommonLib.UiModule;
 using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using ImGuiNET;
 using InventoryTools.Logic;
 using LuminaSupplemental.Excel.Model;
@@ -290,53 +290,42 @@ namespace InventoryTools.Ui
                 }
                 if (ImGui.Button("Check sort ordering"))
                 {
-                    PluginLog.Log($"item order module : {(ulong)ItemOrderModule.Instance()->SaddleBagPremium:X}",
-                        $"{(ulong)ItemOrderModule.Instance()->SaddleBagPremium:X}");
+                    PluginLog.Log($"item order module : {(ulong)ItemOrderModule.Instance()->PremiumSaddleBagSorter:X}",
+                        $"{(ulong)ItemOrderModule.Instance()->PremiumSaddleBagSorter:X}");
                     PluginLog.Log($"item order module : {(ulong)ItemOrderModule.Instance():X}",
                         $"{(ulong)ItemOrderModule.Instance():X}");
                     PluginLog.Log($"slots per container : " +
-                                  ItemOrderModule.Instance()->SaddleBagPremium->SlotPerContainer);
-                    for (int i = 0; i < ItemOrderModule.Instance()->SaddleBagPremium->SlotPerContainer * 2; i++)
+                                  ItemOrderModule.Instance()->PremiumSaddleBagSorter->ItemsPerPage);
+                    for (int i = 0; i < ItemOrderModule.Instance()->PremiumSaddleBagSorter->ItemsPerPage * 2; i++)
                     {
-                        var slotIndex = ItemOrderModule.Instance()->SaddleBagPremium->Slots[i]->SlotIndex;
-                        var containerIndex = ItemOrderModule.Instance()->SaddleBagPremium->Slots[i]->ContainerIndex;
-                        PluginLog.Log(containerIndex.ToString() + ":" + slotIndex.ToString());
+                        // var slotIndex = ItemOrderModule.Instance()->PremiumSaddleBagSorter[i]->SlotIndex;
+                        // var containerIndex = ItemOrderModule.Instance()->PremiumSaddleBagSorter[i]->ContainerIndex;
+                        // PluginLog.Log(containerIndex.ToString() + ":" + slotIndex.ToString());
                     }
 
-                    PluginLog.Log(ItemOrderModule.Instance()->SaddleBagPremium->SlotPerContainer.ToString());
+                    PluginLog.Log(ItemOrderModule.Instance()->PremiumSaddleBagSorter->ItemsPerPage.ToString());
                 }
 
                 if (ImGui.Button("Check retainer sort ordering"))
                 {
-                    PluginLog.Log($"item order module : {(ulong)ItemOrderModule.Instance()->Retainers:X}",
-                        $"{(ulong)ItemOrderModule.Instance()->Retainers:X}");
-                    PluginLog.Log($"item order module : {(ulong)ItemOrderModule.Instance():X}",
-                        $"{(ulong)ItemOrderModule.Instance():X}");
-                    PluginLog.Log(ItemOrderModule.Instance()->Retainers->SortOrders->Retainer1Id.ToString());
-                    PluginLog.Log(ItemOrderModule.Instance()->Retainers->SortOrders->Retainer2Id.ToString());
-                    PluginLog.Log(ItemOrderModule.Instance()->Retainers->SortOrders->Retainer3Id.ToString());
-                    PluginLog.Log(ItemOrderModule.Instance()->Retainers->SortOrders->Retainer4Id.ToString());
-                    PluginLog.Log(ItemOrderModule.Instance()->Retainers->SortOrders->Retainer5Id.ToString());
-                    PluginLog.Log(ItemOrderModule.Instance()->Retainers->SortOrders->Retainer6Id.ToString());
-                    PluginLog.Log(ItemOrderModule.Instance()->Retainers->SortOrders->Retainer7Id.ToString());
-                    PluginLog.Log(ItemOrderModule.Instance()->Retainers->SortOrders->Retainer8Id.ToString());
-                    PluginLog.Log(ItemOrderModule.Instance()->Retainers->SortOrders->Retainer9Id.ToString());
-                    PluginLog.Log(ItemOrderModule.Instance()->Retainers->SortOrders->Retainer10Id.ToString());
-                    PluginLog.Log(ItemOrderModule.Instance()->Retainers->SortOrders->Retainer1Bag->SlotPerContainer
-                        .ToString());
-                    PluginLog.Log(
-                        $"item order module : {(ulong)ItemOrderModule.Instance()->Retainers->SortOrders->Retainer1Bag:X}",
-                        $"{(ulong)ItemOrderModule.Instance()->Retainers->SortOrders->Retainer1Bag:X}");
-                    for (int i = 0;
-                         i < ItemOrderModule.Instance()->Retainers->SortOrders->Retainer1Bag->SlotPerContainer * 5;
-                         i++)
-                    {
-                        var slotIndex =
-                            ItemOrderModule.Instance()->Retainers->SortOrders->Retainer1Bag->Slots[i]->SlotIndex;
-                        var containerIndex =
-                            ItemOrderModule.Instance()->Retainers->SortOrders->Retainer1Bag->Slots[i]->ContainerIndex;
-                        PluginLog.Log(containerIndex.ToString() + ":" + slotIndex.ToString());
-                    }
+                    // PluginLog.Log($"item order module : {(ulong)ItemOrderModule.Instance()->RetainerSorter:X}",
+                    //     $"{(ulong)ItemOrderModule.Instance()->RetainerSorter:X}");
+                    // PluginLog.Log($"item order module : {(ulong)ItemOrderModule.Instance():X}",
+                    //     $"{(ulong)ItemOrderModule.Instance():X}");
+                    // PluginLog.Log(ItemOrderModule.Instance()->RetainerSorter->Get(0).RetainerId.ToString());
+                    // PluginLog.Log(
+                    //     $"item order module : {(ulong)ItemOrderModule.Instance()->RetainerSorter->SortOrders->Retainer1Bag:X}",
+                    //     $"{(ulong)ItemOrderModule.Instance()->RetainerSorter->SortOrders->Retainer1Bag:X}");
+                    // for (int i = 0;
+                    //      i < ItemOrderModule.Instance()->RetainerSorter->SortOrders->Retainer1Bag->SlotPerContainer * 5;
+                    //      i++)
+                    // {
+                    //     var slotIndex =
+                    //         ItemOrderModule.Instance()->Retainers->SortOrders->Retainer1Bag->Slots[i]->SlotIndex;
+                    //     var containerIndex =
+                    //         ItemOrderModule.Instance()->Retainers->SortOrders->Retainer1Bag->Slots[i]->ContainerIndex;
+                    //     PluginLog.Log(containerIndex.ToString() + ":" + slotIndex.ToString());
+                    // }
                 }
 
                 if (ImGui.Button("Memory sort check"))
@@ -541,22 +530,22 @@ namespace InventoryTools.Ui
                         .Instance()->UIModule->GetItemOrderModule();
                     if (clientInterfaceUiModule != null)
                     {
-                        ImGui.Text(clientInterfaceUiModule->RetainerID.ToString());
-                        ImGui.Text($"Retainer Pointer: {(ulong)clientInterfaceUiModule->Retainers:X}");
-                        var container =
-                            InventoryManager.Instance()->GetInventoryContainer(FFXIVClientStructs.FFXIV.Client.Game
-                                .InventoryType.RetainerPage1);
-                        if (container != null)
-                        {
-                            ImGui.Text(container->Loaded.ToString());
-                            for (int i = 0; i < container->Size; i++)
-                            {
-                                var item = container->Items[i];
-                                var itemPointer = new IntPtr(&item);
-                                ImGui.Text(item.ItemID.ToString());
-                                ImGui.Text(itemPointer.ToString());
-                            }
-                        }
+                        // ImGui.Text(clientInterfaceUiModule->RetainerID.ToString());
+                        // ImGui.Text($"Retainer Pointer: {(ulong)clientInterfaceUiModule->Retainers:X}");
+                        // var container =
+                        //     InventoryManager.Instance()->GetInventoryContainer(FFXIVClientStructs.FFXIV.Client.Game
+                        //         .InventoryType.RetainerPage1);
+                        // if (container != null)
+                        // {
+                        //     ImGui.Text(container->Loaded.ToString());
+                        //     for (int i = 0; i < container->Size; i++)
+                        //     {
+                        //         var item = container->Items[i];
+                        //         var itemPointer = new IntPtr(&item);
+                        //         ImGui.Text(item.ItemID.ToString());
+                        //         ImGui.Text(itemPointer.ToString());
+                        //     }
+                        // }
                     }
                     else
                     {
