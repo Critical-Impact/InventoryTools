@@ -155,8 +155,6 @@ namespace InventoryTools
         {
             PluginLoaded = false;
             IpcService.Dispose();
-            ConfigurationManager.ClearQueue();
-            ConfigurationManager.Save();
             ContextMenuService.Dispose();
             IconStorage.Dispose();
             CommandManager.Dispose();
@@ -181,6 +179,8 @@ namespace InventoryTools
             {
                 TetrisGame.Instance.Dispose();
             }
+            ConfigurationManager.ClearQueue();
+            ConfigurationManager.Save();
             FrameworkService.Dispose();
             PluginInterfaceService.Dispose();
 

@@ -4,6 +4,7 @@ using System.Numerics;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
+using Dalamud.Game.Text;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using OtterGui.Raii;
@@ -41,7 +42,7 @@ namespace InventoryTools.Logic.Columns.Abstract
             get => _filterText;
             set
             {
-                _filterText = value;
+                _filterText = value.Replace((char)SeIconChar.Collectible,  ' ').Replace((char)SeIconChar.HighQuality, ' ');
                 _filterComparisonText = new ComparisonExtensions.FilterComparisonText(_filterText);
             }
         }

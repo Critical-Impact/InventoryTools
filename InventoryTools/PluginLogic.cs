@@ -445,6 +445,7 @@ namespace InventoryTools
         {
             if (character != null)
             {
+                ConfigurationManager.SaveAsync();
                 if (PluginConfiguration.AcquiredItems.ContainsKey(character.CharacterId))
                 {
                     PluginService.GameInterface.AcquiredItems = PluginConfiguration.AcquiredItems[character.CharacterId];

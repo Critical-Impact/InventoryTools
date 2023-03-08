@@ -75,7 +75,7 @@ public abstract class GenericTabbedTable<T> : Window, IGenericTabbedTable<T>
             return;
 
         using var table = ImRaii.Table(label, tableColumns.Count, flags);
-        if (!table)
+        if (!table || !table.Success)
             return;
         var refresh = false;
         ImGui.TableSetupScrollFreeze(0, 2);

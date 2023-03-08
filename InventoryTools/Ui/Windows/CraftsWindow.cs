@@ -226,7 +226,7 @@ namespace InventoryTools.Ui
                                 }
 
                                 using var table = ImRaii.Table("", 2, ImGuiTableFlags.None);
-                                if (!table)
+                                if (!table || !table.Success)
                                     return;
 
                                 ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 200);
@@ -457,61 +457,64 @@ namespace InventoryTools.Ui
 
                 }
 
-                using (ImRaii.TabBar("###FilterConfigTabs", ImGuiTabBarFlags.FittingPolicyScroll))
+                using (var tabBar = ImRaii.TabBar("###FilterConfigTabs", ImGuiTabBarFlags.FittingPolicyScroll))
                 {
-                    foreach (var group in PluginService.PluginLogic.GroupedFilters)
+                    if (tabBar.Success)
                     {
-                        var hasValuesSet = false;
-                        foreach (var filter in group.Value)
+                        foreach (var group in PluginService.PluginLogic.GroupedFilters)
                         {
-                            if (filter.HasValueSet(filterConfiguration))
+                            var hasValuesSet = false;
+                            foreach (var filter in group.Value)
                             {
-                                hasValuesSet = true;
-                                break;
-                            }
-                        }
-
-                        using var color = ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.HealerGreen, hasValuesSet);
-
-                        var hasValues = group.Value.Any(filter =>
-                            filter.AvailableIn.HasFlag(FilterType.SearchFilter) &&
-                            filterConfiguration.FilterType.HasFlag(
-                                FilterType.SearchFilter)
-                            ||
-                            (filter.AvailableIn.HasFlag(FilterType.SortingFilter) &&
-                             filterConfiguration.FilterType.HasFlag(FilterType
-                                 .SortingFilter))
-                            ||
-                            (filter.AvailableIn.HasFlag(FilterType.CraftFilter) &&
-                             filterConfiguration.FilterType.HasFlag(FilterType
-                                 .CraftFilter))
-                            ||
-                            (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
-                             filterConfiguration.FilterType.HasFlag(FilterType
-                                 .GameItemFilter)));
-                        if (hasValues)
-                        {
-                            using (var tabItem = ImRaii.TabItem(group.Key.ToString().ToSentence()))
-                            {
-                                if (!tabItem.Success) continue;
-                                using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudWhite))
+                                if (filter.HasValueSet(filterConfiguration))
                                 {
-                                    foreach (var filter in group.Value)
+                                    hasValuesSet = true;
+                                    break;
+                                }
+                            }
+
+                            using var color = ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.HealerGreen, hasValuesSet);
+
+                            var hasValues = group.Value.Any(filter =>
+                                filter.AvailableIn.HasFlag(FilterType.SearchFilter) &&
+                                filterConfiguration.FilterType.HasFlag(
+                                    FilterType.SearchFilter)
+                                ||
+                                (filter.AvailableIn.HasFlag(FilterType.SortingFilter) &&
+                                 filterConfiguration.FilterType.HasFlag(FilterType
+                                     .SortingFilter))
+                                ||
+                                (filter.AvailableIn.HasFlag(FilterType.CraftFilter) &&
+                                 filterConfiguration.FilterType.HasFlag(FilterType
+                                     .CraftFilter))
+                                ||
+                                (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
+                                 filterConfiguration.FilterType.HasFlag(FilterType
+                                     .GameItemFilter)));
+                            if (hasValues)
+                            {
+                                using (var tabItem = ImRaii.TabItem(group.Key.ToString().ToSentence()))
+                                {
+                                    if (!tabItem.Success) continue;
+                                    using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudWhite))
                                     {
-                                        if ((filter.AvailableIn.HasFlag(FilterType.SearchFilter) &&
-                                             filterConfiguration.FilterType.HasFlag(FilterType.SearchFilter)
-                                             ||
-                                             (filter.AvailableIn.HasFlag(FilterType.SortingFilter) &&
-                                              filterConfiguration.FilterType.HasFlag(FilterType.SortingFilter))
-                                             ||
-                                             (filter.AvailableIn.HasFlag(FilterType.CraftFilter) &&
-                                              filterConfiguration.FilterType.HasFlag(FilterType.CraftFilter))
-                                             ||
-                                             (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
-                                              filterConfiguration.FilterType.HasFlag(FilterType.GameItemFilter))
-                                            ))
+                                        foreach (var filter in group.Value)
                                         {
-                                            filter.Draw(filterConfiguration);
+                                            if ((filter.AvailableIn.HasFlag(FilterType.SearchFilter) &&
+                                                 filterConfiguration.FilterType.HasFlag(FilterType.SearchFilter)
+                                                 ||
+                                                 (filter.AvailableIn.HasFlag(FilterType.SortingFilter) &&
+                                                  filterConfiguration.FilterType.HasFlag(FilterType.SortingFilter))
+                                                 ||
+                                                 (filter.AvailableIn.HasFlag(FilterType.CraftFilter) &&
+                                                  filterConfiguration.FilterType.HasFlag(FilterType.CraftFilter))
+                                                 ||
+                                                 (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
+                                                  filterConfiguration.FilterType.HasFlag(FilterType.GameItemFilter))
+                                                ))
+                                            {
+                                                filter.Draw(filterConfiguration);
+                                            }
                                         }
                                     }
                                 }

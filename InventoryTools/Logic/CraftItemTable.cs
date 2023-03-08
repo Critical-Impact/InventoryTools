@@ -69,8 +69,9 @@ namespace InventoryTools.Logic
                 {
                     if (FilterConfiguration.FilterType == FilterType.CraftFilter)
                     {
-                        using (ImRaii.Table(Key + "CraftTable", Columns.Count, _tableFlags))
+                        using (var table = ImRaii.Table(Key + "CraftTable", Columns.Count, _tableFlags))
                         {
+                            if (!table || !table.Success) return isExpanded;
                             var refresh = false;
                             ImGui.TableSetupScrollFreeze(Math.Min(FreezeCols ?? 0, Columns.Count),
                                 FreezeRows ?? (ShowFilterRow ? 2 : 1));

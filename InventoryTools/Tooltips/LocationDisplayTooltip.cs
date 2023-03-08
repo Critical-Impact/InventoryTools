@@ -65,15 +65,23 @@ public class LocationDisplayTooltip : TooltipService.TooltipTweak
                                 var filterResult = filterConfiguration.FilterResult;
                                 if (filterResult != null)
                                 {
-                                    var sortedItems = filterResult.SortedItems.Where(c =>
-                                        c.InventoryItem.ItemId == id && c.InventoryItem.IsHQ == isHq).ToList();
-                                    if (sortedItems.Any())
+                                    var neededItems = filterConfiguration.CraftList.GetMissingMaterialsList();
+                                    uint? neededItemQty = neededItems.ContainsKey((uint)id) ? neededItems[(uint)id] : null;
+                                    if (neededItemQty != null && neededItemQty != 0)
                                     {
-                                        var sortedItem = sortedItems.First();
-                                        if (sortedItem.Quantity != 0)
+                                        var sortedItems = filterResult.SortedItems.Where(c =>
+                                            c.InventoryItem.ItemId == id && c.InventoryItem.IsHQ == isHq).ToList();
+                                        var needText = "Need: " + neededItemQty;
+                                        if (sortedItems.Any())
                                         {
-                                            textLines.Add("Retrieve: " + sortedItem.Quantity + "\n");
+                                            var sortedItem = sortedItems.First();
+                                            if (sortedItem.Quantity != 0)
+                                            {
+                                                needText += " / (" + sortedItem.Quantity + " can be retrieved)";
+                                            }
                                         }
+
+                                        textLines.Add(needText + "\n");
                                     }
                                 }
                             }

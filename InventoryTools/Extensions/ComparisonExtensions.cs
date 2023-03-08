@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Dalamud.Game.Text;
 
 namespace InventoryTools.Extensions
 {
