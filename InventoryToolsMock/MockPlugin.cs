@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using CriticalCommonLib;
 using CriticalCommonLib.Services;
+using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface;
 using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Logging;
@@ -8,11 +9,13 @@ using ImGuiNET;
 using InventoryTools;
 using InventoryTools.Logic;
 using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
 using InventoryTools.Ui;
 using Lumina;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
+using Veldrid;
 
 namespace InventoryToolsMock;
 
@@ -24,7 +27,7 @@ public class MockPlugin : IDisposable
     private IInventoryMonitor _inventoryMonitor;
     private IInventoryScanner _inventoryScanner;
     private FilterService _filterService;
-    private MockFrameworkService _frameworkService;
+    public MockFrameworkService _frameworkService;
     private MockIconService _iconService;
     private MockUniversalis _universalis;
     private WindowService _windowService;
@@ -40,6 +43,9 @@ public class MockPlugin : IDisposable
     private FileDialogManager _fileDialogManager;
     private IMobTracker _mockMobTracker;
     private ITooltipService _tooltipService;
+    private ICommandService _commandService;
+    private IKeyStateService _keyStateService;
+    private IHotkeyService _hotkeyService;
 
     public MockPlugin(GameData gameData, string gameDirectory, string configDirectory, string configFile, string? inventoriesFile)
     {
@@ -74,6 +80,9 @@ public class MockPlugin : IDisposable
         _fileDialogManager = new FileDialogManager();
         _mockMobTracker = new MockMobTracker();
         _tooltipService = new MockTooltipService();
+        _commandService = new MockCommandService();
+        _keyStateService = new MockKeyStateService();
+        _hotkeyService = new HotkeyService(_frameworkService, _keyStateService);
         Service.ExcelCache = new ExcelCache(lumina);
         PluginService.InitaliseExplicit(new MockServices()
         {
@@ -91,7 +100,11 @@ public class MockPlugin : IDisposable
             GameInterface = _gameInterface,
             FileDialogManager = _fileDialogManager,
             MobTracker = _mockMobTracker,
-            TooltipService = _tooltipService
+            TooltipService = _tooltipService,
+            CommandService =  _commandService,
+            HotkeyService = _hotkeyService,
+            KeyStateService = _keyStateService
+            
         }, false);
         ConfigurationManager.LoadFromFile(configFile, inventoriesFile);
         PluginService.InventoryMonitor.LoadExistingData(ConfigurationManager.Config.GetSavedInventory());
@@ -121,7 +134,45 @@ public class MockPlugin : IDisposable
 
         stopWatch.Stop();
         PluginLog.Verbose("Allagan Tools has finished loading. Total load time was " + stopWatch.Elapsed.TotalSeconds + " seconds.");
+        Program._window.KeyDown += WindowOnKeyDown;
+        Program._window.KeyUp += WindowOnKeyUp;
         _windowService.OpenWindow<MockWindow>(MockWindow.AsKey);
+    }
+
+    private void WindowOnKeyDown(KeyEvent keyEvent)
+    {
+        var keyState = keyEvent.ToKeyState();
+        _keyStateService[keyState] = true;
+        if (keyEvent.Modifiers.HasFlag(ModifierKeys.Shift))
+        {
+            _keyStateService[VirtualKey.SHIFT] = true;
+        }
+        if (keyEvent.Modifiers.HasFlag(ModifierKeys.Control))
+        {
+            _keyStateService[VirtualKey.CONTROL] = true;
+        }
+        if (keyEvent.Modifiers.HasFlag(ModifierKeys.Alt))
+        {
+            _keyStateService[VirtualKey.MENU] = true;
+        }
+    }
+
+    private void WindowOnKeyUp(KeyEvent keyEvent)
+    {
+        var keyState = keyEvent.ToKeyState();
+        _keyStateService[keyState] = false;
+        if (keyEvent.Modifiers.HasFlag(ModifierKeys.Shift))
+        {
+            _keyStateService[VirtualKey.SHIFT] = false;
+        }
+        if (keyEvent.Modifiers.HasFlag(ModifierKeys.Control))
+        {
+            _keyStateService[VirtualKey.CONTROL] = false;
+        }
+        if (keyEvent.Modifiers.HasFlag(ModifierKeys.Alt))
+        {
+            _keyStateService[VirtualKey.MENU] = false;
+        }
     }
 
     private HashSet<string> WindowStates = new HashSet<string>();

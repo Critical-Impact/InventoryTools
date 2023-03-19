@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using Dalamud;
 using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
 using Lumina;
 using Lumina.Data.Files;
 using Lumina.Extensions;

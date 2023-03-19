@@ -13,5 +13,10 @@ namespace InventoryTools.Logic.Filters.Abstract
         {
             configuration.UpdateUintChoiceFilter(Key, newValue);
         }
+        
+        public override void ResetFilter(FilterConfiguration configuration)
+        {
+            UpdateFilterConfiguration(configuration, new List<uint>());
+        }
     }
 }

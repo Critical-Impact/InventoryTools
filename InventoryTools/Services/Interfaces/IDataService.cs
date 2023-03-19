@@ -1,7 +1,7 @@
 using Dalamud;
 using Lumina.Data.Files;
 
-namespace InventoryTools.Services;
+namespace InventoryTools.Services.Interfaces;
 
 public interface IDataService
 {

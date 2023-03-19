@@ -1,3 +1,4 @@
+using System.Numerics;
 using ImGuiNET;
 using InventoryTools.Logic;
 
@@ -6,9 +7,11 @@ namespace InventoryTools.Ui
     public interface IWindow
     {
         public string Key { get;  }
+        public string GenericKey { get;  }
         public bool DestroyOnClose { get;}
+        public bool SavePosition { get;}
+        public Vector2 CurrentPosition { get; set; }
         
-        public ImGuiWindowFlags? WindowFlags { get;}
         public void Draw();
         public void Close();
         public void Open();

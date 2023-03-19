@@ -60,5 +60,10 @@ namespace InventoryTools.Logic.Filters.Abstract
                 configuration.RemoveColorFilter(Key);
             }
         }
+        
+        public override void ResetFilter(FilterConfiguration configuration)
+        {
+            UpdateFilterConfiguration(configuration, null);
+        }
     }
 }

@@ -16,6 +16,8 @@ namespace InventoryTools.Extensions
                     return "Marketboard";
                 case SettingCategory.ToolTips:
                     return "Tooltips";
+                case SettingCategory.Hotkeys:
+                    return "Hotkeys";
             }
             return settingCategory.ToString();
         }

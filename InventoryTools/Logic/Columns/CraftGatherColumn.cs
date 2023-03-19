@@ -41,6 +41,30 @@ namespace InventoryTools.Logic.Columns
             }
         }
 
+        public override void Draw(FilterConfiguration configuration, InventoryItem item, int rowIndex)
+        {
+            ImGui.TableNextColumn();
+            if (CurrentValue(item) == true)
+            {
+                if (ImGui.SmallButton("Gather##Gather" + rowIndex))
+                {
+                    PluginService.CommandService.ProcessCommand("/gather " + item.Item.NameString);
+                }
+            }
+        }
+
+        public override void Draw(FilterConfiguration configuration, ItemEx item, int rowIndex)
+        {
+            ImGui.TableNextColumn();
+            if (CurrentValue(item) == true)
+            {
+                if (ImGui.SmallButton("Gather##Gather" + rowIndex))
+                {
+                    PluginService.CommandService.ProcessCommand("/gather " + item.NameString);
+                }
+            }
+        }
+
         public override string Name { get; set; } = "Gather";
         public override float Width { get; set; } = 100;
         public override string HelpText { get; set; } = "Shows a button that links to gatherbuddy's /gather function.";

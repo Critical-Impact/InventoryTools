@@ -18,7 +18,7 @@ namespace InventoryTools.Extensions
         public static List<T> MoveDown<T>(this List<T> items, T item)
         {
             var oldIndex = items.IndexOf(item);
-            if (oldIndex < items.Count)
+            if (oldIndex + 1 < items.Count)
             {
                 items.RemoveAt(oldIndex);
                 oldIndex++;

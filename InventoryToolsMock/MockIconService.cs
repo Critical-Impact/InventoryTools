@@ -1,6 +1,8 @@
 using Dalamud.Utility;
 using ImGuiScene;
+using InventoryTools;
 using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
 using Lumina.Data.Files;
 using Lumina.Extensions;
 using Veldrid;
@@ -15,6 +17,7 @@ public class MockIconService : IIconService
     {
         _gameData = gameData;
         _icons = new Dictionary<uint, TextureWrap>();
+        _images    = new Dictionary<string, TextureWrap>();
     }
     
     public void Dispose()
@@ -22,6 +25,7 @@ public class MockIconService : IIconService
     }
     
     private readonly Dictionary<uint, TextureWrap> _icons;
+    private readonly Dictionary<string, TextureWrap> _images;
 
     public TextureWrap this[int id] => LoadIcon(id);
 
@@ -43,6 +47,18 @@ public class MockIconService : IIconService
 
     private HashSet<int> _availableIcons = new HashSet<int>();
     private HashSet<int> _unAvailableIcons = new HashSet<int>();
+
+    public TextureWrap LoadImage(string imageName)
+    {
+        if (_images.TryGetValue(imageName, out var ret))
+            return ret;
+        
+        var assemblyLocation = PluginService.PluginInterfaceService!.AssemblyLocation.DirectoryName!;
+        var imagePath = Path.Combine(assemblyLocation, $@"Images\{imageName}.png");
+        var textureWrap = PluginService.PluginInterfaceService!.LoadImage(imagePath);
+        _images[imageName] = textureWrap;
+        return  textureWrap;
+    }
 
     public bool IconExists(int id)
     {

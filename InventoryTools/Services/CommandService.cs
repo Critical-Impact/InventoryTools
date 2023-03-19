@@ -1,4 +1,5 @@
 using Dalamud.Game.Command;
+using InventoryTools.Services.Interfaces;
 
 namespace InventoryTools.Services;
 

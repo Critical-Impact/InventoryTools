@@ -11,6 +11,7 @@ using Dalamud.Logging;
 using InventoryTools;
 using InventoryTools.Logic;
 using InventoryTools.Services;
+using InventoryToolsMock;
 using Lumina;
 using NUnit.Framework;
 
@@ -34,6 +35,10 @@ namespace InventoryToolsTesting
                 PanicOnSheetChecksumMismatch = false
             } );
             Service.ExcelCache = new ExcelCache(lumina);
+            PluginService.InitaliseExplicit(new MockServices()
+            {
+                FrameworkService = new MockFrameworkService()
+            });
         }
         
         [SetUp]
@@ -149,29 +154,30 @@ namespace InventoryToolsTesting
                 
                 //Duplicates only, 1 item to retainer
                 retainerInventory[0] = Fixtures.GenerateItem(_retainer, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1);
-                Assert.True(searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty) == 1);
+                Assert.AreEqual(1, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 
                 //Duplicates only, 1 item to retainer, add a unrelated item
                 retainerInventory[1] = Fixtures.GenerateItem(_retainer, InventoryType.RetainerBag0, 1, wheatFlour.RowId, 1);
-                Assert.True(searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty) == 1);
+                Assert.AreEqual(1,searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 
                 //Duplicates only, max out item in existing inventory
                 retainerInventory[0] = Fixtures.GenerateItem(_retainer, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.StackSize);
                 var generateFilteredList = searchFilter.GenerateFilteredList( inventories);
-                Assert.True(generateFilteredList.Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty) == 1);
+                Assert.AreEqual(1, generateFilteredList.Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 
                 //Duplicates only, max out item in existing inventory then spill over
                 retainerInventory[0] = Fixtures.GenerateItem(_retainer, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.StackSize - 1);
                 inventory[0] = Fixtures.GenerateItem(_character, InventoryType.Bag0, 0, ryeFlour.RowId, 2);
-                Assert.True(searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty) == 2);
+                Assert.AreEqual(2, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 
                 //Duplicates only, max out retainer, should go nowhere, boy got some cinnamon, 2 items in inventory
                 Fixtures.FillInventory(retainerInventory, cinnamon.RowId, cinnamon.StackSize);
-                Assert.True(searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty) == 0);
-                Assert.True(searchFilter.GenerateFilteredList( inventories).Result.UnsortableItems.Count(c => !c.IsEmpty) == 0);
+                Assert.AreEqual(0,searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+                Assert.AreEqual(0, searchFilter.GenerateFilteredList( inventories).Result.UnsortableItems.Count(c => !c.IsEmpty));
                 
                 //Allow item to spill over to retainer 2, but we are in retainer 1 so nothing shows up
                 searchFilter.DuplicatesOnly = false;
+                searchFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Only;
                 Assert.AreEqual(0, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer2.CharacterId));
                 
                 
@@ -271,6 +277,7 @@ namespace InventoryToolsTesting
             searchFilter.SourceAllRetainers = true;
             searchFilter.DestinationAllRetainers = true;
             searchFilter.FilterType = FilterType.SortingFilter;
+            searchFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
             
             //Flour, just cause
             var ryeFlour = Service.ExcelCache.GetItemExSheet().GetRow(4825);
@@ -313,10 +320,11 @@ namespace InventoryToolsTesting
                 
                 searchFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
                 
-                //1 from bag to retainer, 1 from retainer to other retainer
+                //All 3 should be going to first retainer
                 var actual = searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Where(c => !c.InventoryItem.IsEmpty).ToList();
                 Assert.AreEqual(_retainer.CharacterId, actual.ToList()[0].DestinationRetainerId);
-                Assert.AreEqual(_retainer2.CharacterId, actual.ToList()[1].DestinationRetainerId);
+                Assert.AreEqual(_retainer.CharacterId, actual.ToList()[1].DestinationRetainerId);
+                Assert.AreEqual(_retainer.CharacterId, actual.ToList()[2].DestinationRetainerId);
             }
         }
         
@@ -385,8 +393,9 @@ namespace InventoryToolsTesting
                 searchFilter.FilterType = FilterType.SortingFilter;
                 searchFilter.DestinationAllCharacters = true;
 
-                //With a active retainer
-                Assert.AreEqual(1, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+                //With a active retainer, this is 2 because the items get merged into the 1 slot
+                var resultSortedItems = searchFilter.GenerateFilteredList( inventories).Result.SortedItems;
+                Assert.AreEqual(2, resultSortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 
                 //Without a active retainer
                 _characterMonitor?.OverrideActiveRetainer(0);
@@ -558,7 +567,7 @@ namespace InventoryToolsTesting
             if (item != null)
             {
                 var craftItems = item.GetFlattenedCraftItems(true, 1);
-                Assert.AreEqual(craftItems.Count, 43);
+                Assert.AreEqual(craftItems.Count, 42);
             }
         }
 

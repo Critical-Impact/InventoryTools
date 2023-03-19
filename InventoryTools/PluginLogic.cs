@@ -15,6 +15,7 @@ using Dalamud.Logging;
 using Dalamud.Utility;
 using ImGuiNET;
 using ImGuiScene;
+using InventoryTools.Hotkeys;
 using InventoryTools.Images;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Columns;
@@ -52,7 +53,6 @@ namespace InventoryTools
             }
             return null;
         }
-        public static InventoryToolsConfiguration PluginConfiguration => ConfigurationManager.Config;
 
         private DateTime? _nextSaveTime = null;
 
@@ -67,11 +67,11 @@ namespace InventoryTools
             //Events we need to track, inventory updates, active retainer changes, player changes, 
             PluginService.InventoryMonitor.OnInventoryChanged += InventoryMonitorOnOnInventoryChanged;
             PluginService.CharacterMonitor.OnCharacterUpdated += CharacterMonitorOnOnCharacterUpdated;
-            PluginConfiguration.ConfigurationChanged += ConfigOnConfigurationChanged;
+            ConfigurationManager.Config.ConfigurationChanged += ConfigOnConfigurationChanged;
             PluginService.FrameworkService.Update += FrameworkOnUpdate;
 
-            PluginService.InventoryMonitor.LoadExistingData(PluginConfiguration.GetSavedInventory());
-            PluginService.CharacterMonitor.LoadExistingRetainers(PluginConfiguration.GetSavedRetainers());
+            PluginService.InventoryMonitor.LoadExistingData(ConfigurationManager.Config.GetSavedInventory());
+            PluginService.CharacterMonitor.LoadExistingRetainers(ConfigurationManager.Config.GetSavedRetainers());
             var entries = PluginService.MobTracker.LoadCsv(ConfigurationManager.MobSpawnFile, out var success);
             if(success)
             {
@@ -91,6 +91,13 @@ namespace InventoryTools
             PluginService.GameUi.WatchWindowState(WindowName.InventoryRetainer);
             PluginService.GameUi.WatchWindowState(WindowName.InventoryBuddy);
             PluginService.GameUi.WatchWindowState(WindowName.InventoryBuddy2);
+            PluginService.HotkeyService.AddHotkey(new AirshipsWindowHotkey());
+            PluginService.HotkeyService.AddHotkey(new ConfigurationWindowHotkey());
+            PluginService.HotkeyService.AddHotkey(new CraftWindowHotkey());
+            PluginService.HotkeyService.AddHotkey(new DutiesWindowHotkey());
+            PluginService.HotkeyService.AddHotkey(new MobWindowHotkey());
+            PluginService.HotkeyService.AddHotkey(new MoreInfoWindowHotkey());
+            PluginService.HotkeyService.AddHotkey(new SubmarinesWindowHotkey());
             PluginService.CraftMonitor.CraftStarted += CraftMonitorOnCraftStarted;
             PluginService.CraftMonitor.CraftFailed += CraftMonitorOnCraftFailed ;
             PluginService.CraftMonitor.CraftCompleted += CraftMonitorOnCraftCompleted ;
@@ -103,10 +110,10 @@ namespace InventoryTools
             PluginService.TooltipService.AddTooltipTweak(new FooterTextTooltip());
             RunMigrations();
             
-            if (PluginConfiguration.FirstRun)
+            if (ConfigurationManager.Config.FirstRun)
             {
                 LoadDefaultData();
-                PluginConfiguration.FirstRun = false;
+                ConfigurationManager.Config.FirstRun = false;
             }
         }
 
@@ -119,10 +126,10 @@ namespace InventoryTools
 
         private void PluginServiceOnOnPluginLoaded()
         {
-            if (!PluginConfiguration.IntroShown)
+            if (!ConfigurationManager.Config.IntroShown)
             {
                 PluginService.WindowService.OpenWindow<IntroWindow>(IntroWindow.AsKey);
-                PluginConfiguration.IntroShown = true;
+                ConfigurationManager.Config.IntroShown = true;
             }
         }
 
@@ -150,23 +157,23 @@ namespace InventoryTools
             var activeCharacter = PluginService.CharacterMonitor.ActiveCharacterId;
             if (activeCharacter != 0)
             {
-                PluginConfiguration.AcquiredItems[activeCharacter] = PluginService.GameInterface.AcquiredItems;
+                ConfigurationManager.Config.AcquiredItems[activeCharacter] = PluginService.GameInterface.AcquiredItems;
             }
         }
 
         public void RunMigrations()
         {
             
-            if (PluginConfiguration.InternalVersion == 0)
+            if (ConfigurationManager.Config.InternalVersion == 0)
             {
                 PluginLog.Log("Migrating to version 1");
-                var highlight = PluginConfiguration.HighlightColor;
+                var highlight = ConfigurationManager.Config.HighlightColor;
                 if (highlight.W == 0.0f)
                 {
                     highlight.W = 1;
-                    PluginConfiguration.HighlightColor = highlight;
+                    ConfigurationManager.Config.HighlightColor = highlight;
                 }
-                PluginConfiguration.TabHighlightColor = PluginConfiguration.HighlightColor;
+                ConfigurationManager.Config.TabHighlightColor = ConfigurationManager.Config.HighlightColor;
 
                 foreach (var filterConfig in PluginService.FilterService.FiltersList)
                 {
@@ -187,12 +194,12 @@ namespace InventoryTools
                     }
                 }
 
-                PluginConfiguration.InternalVersion++;
+                ConfigurationManager.Config.InternalVersion++;
             }
-            if (PluginConfiguration.InternalVersion == 1)
+            if (ConfigurationManager.Config.InternalVersion == 1)
             {
                 PluginLog.Log("Migrating to version 2");
-                PluginConfiguration.InvertTabHighlighting = PluginConfiguration.InvertHighlighting;
+                ConfigurationManager.Config.InvertTabHighlighting = ConfigurationManager.Config.InvertHighlighting;
 
                 foreach (var filterConfig in PluginService.FilterService.FiltersList)
                 {
@@ -202,9 +209,9 @@ namespace InventoryTools
                     }
                 }
 
-                PluginConfiguration.InternalVersion++;
+                ConfigurationManager.Config.InternalVersion++;
             }
-            if (PluginConfiguration.InternalVersion == 2)
+            if (ConfigurationManager.Config.InternalVersion == 2)
             {
                 PluginLog.Log("Migrating to version 3");
                 foreach (var filterConfig in PluginService.FilterService.FiltersList)
@@ -226,9 +233,9 @@ namespace InventoryTools
                     filterConfig.AddColumn("MarketBoardPriceColumn");
                 }
                 PluginService.MarketCache.ClearCache();
-                PluginConfiguration.InternalVersion++;
+                ConfigurationManager.Config.InternalVersion++;
             }
-            if (PluginConfiguration.InternalVersion == 3)
+            if (ConfigurationManager.Config.InternalVersion == 3)
             {
                 PluginLog.Log("Migrating to version 4");
                 
@@ -250,38 +257,38 @@ namespace InventoryTools
                     new SearchCategoryFilter().UpdateFilterConfiguration(filterConfig, filterConfig.ItemSearchCategoryId);
                     filterConfig.FilterType++;
                 }
-                PluginConfiguration.InternalVersion++;
+                ConfigurationManager.Config.InternalVersion++;
             }
 
-            if (PluginConfiguration.InternalVersion == 4)
+            if (ConfigurationManager.Config.InternalVersion == 4)
             {
                 PluginLog.Log("Migrating to version 5");
-                PluginConfiguration.RetainerListColor = ImGuiColors.HealerGreen;
-                PluginConfiguration.InternalVersion++;
+                ConfigurationManager.Config.RetainerListColor = ImGuiColors.HealerGreen;
+                ConfigurationManager.Config.InternalVersion++;
             }
 
-            if (PluginConfiguration.InternalVersion == 5)
+            if (ConfigurationManager.Config.InternalVersion == 5)
             {
                 PluginLog.Log("Migrating to version 6");
-                PluginConfiguration.TooltipDisplayAmountOwned = true;
-                PluginConfiguration.TooltipDisplayMarketAveragePrice = true;
-                PluginConfiguration.InternalVersion++;
+                ConfigurationManager.Config.TooltipDisplayAmountOwned = true;
+                ConfigurationManager.Config.TooltipDisplayMarketAveragePrice = true;
+                ConfigurationManager.Config.InternalVersion++;
             }
 
-            if (PluginConfiguration.InternalVersion == 6)
+            if (ConfigurationManager.Config.InternalVersion == 6)
             {
                 PluginLog.Log("Migrating to version 7");
-                PluginConfiguration.HighlightDestination = true;
-                PluginConfiguration.DestinationHighlightColor = new Vector4(0.321f, 0.239f, 0.03f, 1f);
-                PluginConfiguration.InternalVersion++;
+                ConfigurationManager.Config.HighlightDestination = true;
+                ConfigurationManager.Config.DestinationHighlightColor = new Vector4(0.321f, 0.239f, 0.03f, 1f);
+                ConfigurationManager.Config.InternalVersion++;
             }
 
-            if (PluginConfiguration.InternalVersion == 7)
+            if (ConfigurationManager.Config.InternalVersion == 7)
             {
-                PluginConfiguration.InternalVersion++;
+                ConfigurationManager.Config.InternalVersion++;
             }
 
-            if (PluginConfiguration.InternalVersion == 8)
+            if (ConfigurationManager.Config.InternalVersion == 8)
             {
                 PluginLog.Log("Migrating to version 9");
                 var order = 0u;
@@ -302,10 +309,10 @@ namespace InventoryTools
                         order++;
                     }
                 }
-                PluginConfiguration.InternalVersion++;
+                ConfigurationManager.Config.InternalVersion++;
             }
 
-            if (PluginConfiguration.InternalVersion == 9)
+            if (ConfigurationManager.Config.InternalVersion == 9)
             {
                 PluginLog.Log("Migrating to version 10");
                 foreach (var configuration in PluginService.FilterService.Filters)
@@ -321,10 +328,10 @@ namespace InventoryTools
                         configuration.Value.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.No;
                     }
                 }
-                PluginConfiguration.InternalVersion++;
+                ConfigurationManager.Config.InternalVersion++;
             }
 
-            if (PluginConfiguration.InternalVersion == 10)
+            if (ConfigurationManager.Config.InternalVersion == 10)
             {
                 PluginLog.Log("Migrating to version 11");
                 foreach (var configuration in PluginService.FilterService.Filters)
@@ -361,41 +368,34 @@ namespace InventoryTools
                         }
                     }
                 }
-                PluginConfiguration.InternalVersion++;
+                ConfigurationManager.Config.InternalVersion++;
             }
 
-            if (PluginConfiguration.InternalVersion == 11)
+            if (ConfigurationManager.Config.InternalVersion == 11)
             {
                 PluginLog.Log("Migrating to version 12");
-                PluginConfiguration.TooltipLocationLimit = 10;                
-                PluginConfiguration.TooltipLocationDisplayMode =
+                ConfigurationManager.Config.TooltipLocationLimit = 10;                
+                ConfigurationManager.Config.TooltipLocationDisplayMode =
                     TooltipLocationDisplayMode.CharacterCategoryQuantityQuality;
-                PluginConfiguration.InternalVersion++;
+                ConfigurationManager.Config.InternalVersion++;
             }
-        }
-        
-        private bool HotkeyPressed(VirtualKey[] keys) {
-            if (keys.Length == 1 && keys[0] == VirtualKey.NO_KEY)
+
+            if (ConfigurationManager.Config.InternalVersion == 12)
             {
-                return false;
+                PluginLog.Log("Migrating to version 13");
+                ConfigurationManager.Config.FiltersLayout = WindowLayout.Tabs;
+                ConfigurationManager.Config.CraftWindowLayout = WindowLayout.Sidebar;
+                ConfigurationManager.Config.InternalVersion++;
             }
-            foreach (var vk in PluginService.KeyStateService.GetValidVirtualKeys()) {
-                if (keys.Contains(vk)) {
-                    if (!PluginService.KeyStateService[vk]) return false;
-                } else {
-                    if (PluginService.KeyStateService[vk]) return false;
-                }
-            }
-            return true;
         }
 
         private void FrameworkOnUpdate(IFrameworkService framework)
         {
-            if (PluginConfiguration.AutoSave)
+            if (ConfigurationManager.Config.AutoSave)
             {
-                if (NextSaveTime == null && PluginConfiguration.AutoSaveMinutes != 0)
+                if (NextSaveTime == null && ConfigurationManager.Config.AutoSaveMinutes != 0)
                 {
-                    _nextSaveTime = DateTime.Now.AddMinutes(PluginConfiguration.AutoSaveMinutes);
+                    _nextSaveTime = DateTime.Now.AddMinutes(ConfigurationManager.Config.AutoSaveMinutes);
                 }
                 else
                 {
@@ -404,23 +404,6 @@ namespace InventoryTools
                         _nextSaveTime = null;
                         ConfigurationManager.SaveAsync();
                     }
-                }
-            }
-            //Hotkeys - move to own file at some point
-            if (PluginConfiguration.MoreInformationHotKey != null)
-            {
-                var virtualKeys = PluginConfiguration.MoreInformationKeys;
-                if (virtualKeys != null && virtualKeys.Length != 0 && HotkeyPressed(virtualKeys))
-                {
-                        var id = Service.Gui.HoveredItem;
-                        if (id >= 2000000 || id == 0) return;
-                        id %= 500000;
-                        var item = Service.ExcelCache.GetItemExSheet().GetRow((uint) id);
-                        if (item == null) return;
-                        PluginService.WindowService.OpenItemWindow(item.RowId);
-                        foreach (var k in virtualKeys) {
-                            PluginService.KeyStateService[(int) k] = false;
-                        }
                 }
             }
         }
@@ -446,9 +429,9 @@ namespace InventoryTools
             if (character != null)
             {
                 ConfigurationManager.SaveAsync();
-                if (PluginConfiguration.AcquiredItems.ContainsKey(character.CharacterId))
+                if (ConfigurationManager.Config.AcquiredItems.ContainsKey(character.CharacterId))
                 {
-                    PluginService.GameInterface.AcquiredItems = PluginConfiguration.AcquiredItems[character.CharacterId];
+                    PluginService.GameInterface.AcquiredItems = ConfigurationManager.Config.AcquiredItems[character.CharacterId];
                 }
             }
             else
@@ -464,20 +447,23 @@ namespace InventoryTools
             AddRetainerFilter();
 
             AddPlayerFilter();
+            
+            AddFreeCompanyFilter();
 
             AddAllGameItemsFilter();
         }
 
-        public void AddAllFilter()
+        public void AddAllFilter(string newName = "All")
         {
-            var allItemsFilter = new FilterConfiguration("All", FilterType.SearchFilter);
+            var allItemsFilter = new FilterConfiguration(newName, FilterType.SearchFilter);
             allItemsFilter.DisplayInTabs = true;
             allItemsFilter.SourceAllCharacters = true;
             allItemsFilter.SourceAllRetainers = true;
+            allItemsFilter.SourceAllFreeCompanies = true;
             PluginService.FilterService.AddFilter(allItemsFilter);
         }
 
-        public void AddRetainerFilter()
+        public void AddRetainerFilter(string newName = "Retainers")
         {
             var retainerItemsFilter = new FilterConfiguration("Retainers", FilterType.SearchFilter);
             retainerItemsFilter.DisplayInTabs = true;
@@ -485,7 +471,7 @@ namespace InventoryTools
             PluginService.FilterService.AddFilter(retainerItemsFilter);
         }
 
-        public void AddPlayerFilter()
+        public void AddPlayerFilter(string newName = "Player")
         {
             var playerItemsFilter = new FilterConfiguration("Player",  FilterType.SearchFilter);
             playerItemsFilter.DisplayInTabs = true;
@@ -493,7 +479,15 @@ namespace InventoryTools
             PluginService.FilterService.AddFilter(playerItemsFilter);
         }
 
-        public void AddAllGameItemsFilter()
+        public void AddFreeCompanyFilter(string newName = "Free Company")
+        {
+            var newFilter = new FilterConfiguration("Free Company",  FilterType.SearchFilter);
+            newFilter.DisplayInTabs = true;
+            newFilter.SourceAllFreeCompanies = true;
+            PluginService.FilterService.AddFilter(newFilter);
+        }
+
+        public void AddAllGameItemsFilter(string newName = "All Game Items")
         {
             var allGameItemsFilter = new FilterConfiguration("All Game Items", FilterType.GameItemFilter);
             allGameItemsFilter.DisplayInTabs = true;            
@@ -521,6 +515,7 @@ namespace InventoryTools
             sampleFilter.DisplayInTabs = true;
             sampleFilter.SourceAllCharacters = true;
             sampleFilter.SourceAllRetainers = true;
+            sampleFilter.SourceAllFreeCompanies = true;
             sampleFilter.CanBeBought = true;
             sampleFilter.ShopBuyingPrice = "<=100";
             PluginService.FilterService.AddFilter(sampleFilter);
@@ -571,8 +566,8 @@ namespace InventoryTools
         private void InventoryMonitorOnOnInventoryChanged(Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>> inventories, InventoryMonitor.ItemChanges itemChanges)
         {
             PluginLog.Verbose("PluginLogic: Inventory changed, saving to config.");
-            PluginConfiguration.SavedInventories = inventories;
-            if (PluginConfiguration.AutomaticallyDownloadMarketPrices)
+            ConfigurationManager.Config.SavedInventories = inventories;
+            if (ConfigurationManager.Config.AutomaticallyDownloadMarketPrices)
             {
                 foreach (var inventory in PluginService.InventoryMonitor.AllItems)
                 {
@@ -805,8 +800,11 @@ namespace InventoryTools
                 var tex = UldTextureDictionary[name];
                 if (tex.ImGuiHandle == IntPtr.Zero)
                 {
-                    ImGui.BeginChild("FailedTexture", size, true);
-                    ImGui.Text(name);
+                    if (ImGui.BeginChild("FailedTexture", size, true))
+                    {
+                        ImGui.Text(name);
+                    }
+
                     ImGui.EndChild();
                 }
                 else
@@ -861,8 +859,10 @@ namespace InventoryTools
                 var tex = UldTextureDictionary[name];
                 if (tex.ImGuiHandle == IntPtr.Zero) {
                     ImGui.PushStyleColor(ImGuiCol.Border, new Vector4(1, 0, 0, 1));
-                    ImGui.BeginChild("FailedTexture", size, true);
-                    ImGui.Text(name);
+                    if (ImGui.BeginChild("FailedTexture", size, true))
+                    {
+                        ImGui.Text(name);
+                    }
                     ImGui.EndChild();
                     ImGui.PopStyleColor();
                 } else {
@@ -956,15 +956,15 @@ namespace InventoryTools
                 }
                 PluginService.OnPluginLoaded -= PluginServiceOnOnPluginLoaded;
                 PluginService.GameInterface.AcquiredItemsUpdated -= GameInterfaceOnAcquiredItemsUpdated;
-                PluginConfiguration.SavedCharacters = PluginService.CharacterMonitor.Characters;
+                ConfigurationManager.Config.SavedCharacters = PluginService.CharacterMonitor.Characters;
                 PluginService.FrameworkService.Update -= FrameworkOnUpdate;
                 PluginService.InventoryMonitor.OnInventoryChanged -= InventoryMonitorOnOnInventoryChanged;
                 PluginService.CharacterMonitor.OnCharacterUpdated -= CharacterMonitorOnOnCharacterUpdated;
                 PluginService.CraftMonitor.CraftStarted -= CraftMonitorOnCraftStarted;
                 PluginService.CraftMonitor.CraftFailed -= CraftMonitorOnCraftFailed ;
                 PluginService.CraftMonitor.CraftCompleted -= CraftMonitorOnCraftCompleted ;
-                PluginConfiguration.ConfigurationChanged -= ConfigOnConfigurationChanged;
-                if (PluginConfiguration.TrackMobSpawns)
+                ConfigurationManager.Config.ConfigurationChanged -= ConfigOnConfigurationChanged;
+                if (ConfigurationManager.Config.TrackMobSpawns)
                 {
                     PluginService.MobTracker.SaveCsv(ConfigurationManager.MobSpawnFile,
                         PluginService.MobTracker.GetEntries());

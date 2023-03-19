@@ -3,7 +3,7 @@ using CriticalCommonLib.Services.Ui;
 using InventoryTools.GameUi;
 using InventoryTools.Logic;
 
-namespace InventoryTools.Services;
+namespace InventoryTools.Services.Interfaces;
 
 public interface IOverlayService
 {

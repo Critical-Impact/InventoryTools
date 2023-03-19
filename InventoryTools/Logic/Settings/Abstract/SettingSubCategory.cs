@@ -11,6 +11,7 @@ namespace InventoryTools.Logic.Settings.Abstract
         Market,
         ContextMenus,
         Visuals,
+        WindowLayout,
         General,
         Subsetting,
     }

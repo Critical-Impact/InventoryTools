@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Dalamud.Interface.Windowing;
 using Dalamud.Logging;
+using ImGuiNET;
 using InventoryTools.Logic;
+using InventoryTools.Services.Interfaces;
 using InventoryTools.Ui;
 using Window = InventoryTools.Ui.Window;
 
@@ -244,12 +246,22 @@ namespace InventoryTools.Services
         }
 
 
-        public bool OpenWindow<T>(string windowKey) where T: Window, new()
+        public bool OpenWindow<T>(string windowKey, bool refocus = true) where T: Window, new()
         {
             var asKey = windowKey;
             if (_windows.ContainsKey(asKey))
             {
-                _windows[asKey].Open();
+                if (_windows[asKey].IsOpen)
+                {
+                    if (refocus)
+                    {
+                        _windows[asKey].BringToFront();
+                    }
+                }
+                else
+                {
+                    _windows[asKey].Open();
+                }
                 return true;
             }
             var window = new T();
@@ -276,6 +288,15 @@ namespace InventoryTools.Services
             {
                 ConfigurationManager.Config.OpenWindows.Add(windowKey);
             }
+            var currentWindow = Windows[windowKey];
+            if (currentWindow.SavePosition)
+            {
+                if (ConfigurationManager.Config.SavedWindowPositions.ContainsKey(currentWindow.GenericKey))
+                {
+                    currentWindow.Position = ConfigurationManager.Config.SavedWindowPositions[currentWindow.GenericKey];
+                    currentWindow.PositionCondition = ImGuiCond.Appearing;
+                }
+            }
             PluginService.OverlayService.RefreshOverlayStates();
         }
 
@@ -285,6 +306,28 @@ namespace InventoryTools.Services
             {
                 ConfigurationManager.Config.OpenWindows.Remove(windowKey);
             }
+
+            var currentWindow = Windows[windowKey];
+            if (currentWindow.SavePosition)
+            {
+                bool hasOtherWindowOpen = false;
+                foreach (var window in Windows)
+                {
+                    if (window.Value != currentWindow && window.Value.GenericKey == currentWindow.GenericKey &&
+                        window.Value.IsOpen)
+                    {
+                        hasOtherWindowOpen = true;
+                    }
+                }
+                
+                if (hasOtherWindowOpen == false)
+                {
+                    ConfigurationManager.Config.SavedWindowPositions[currentWindow.GenericKey] =
+                        currentWindow.CurrentPosition;
+                }
+
+            }
+
             PluginService.OverlayService.RefreshOverlayStates();
         }
         

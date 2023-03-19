@@ -14,6 +14,11 @@ namespace InventoryTools.Logic.Filters
             return configuration.DestinationCategories?.ToList() ?? new List<InventoryCategory>();
         }
 
+        public override void ResetFilter(FilterConfiguration configuration)
+        {
+            UpdateFilterConfiguration(configuration, new List<InventoryCategory>());
+        }
+
         public override void UpdateFilterConfiguration(FilterConfiguration configuration, List<InventoryCategory> newValue)
         {
             configuration.DestinationCategories = newValue.Count == 0 ? null : newValue.Distinct().ToHashSet();

@@ -5,7 +5,7 @@ namespace InventoryTools.Logic.Settings
 {
     public class HighlightWhenSetting : ChoiceSetting<string>
     {
-        public static Dictionary<string, string> StaticChoices = new Dictionary<string, string>()
+        public Dictionary<string, string> StaticChoices = new Dictionary<string, string>()
         {
             {"Always", "Always"}, {"When Searching", "When Searching"}
         };

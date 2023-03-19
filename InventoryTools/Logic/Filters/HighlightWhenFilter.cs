@@ -18,6 +18,11 @@ namespace InventoryTools.Logic.Filters
         {
             configuration.HighlightWhen = newValue != null && newValue != EmptyValue ? newValue : null;
         }
+        
+        public override void ResetFilter(FilterConfiguration configuration)
+        {
+            UpdateFilterConfiguration(configuration, EmptyValue);
+        }
 
         public override string EmptyValue { get; set; } = "N/A";
 

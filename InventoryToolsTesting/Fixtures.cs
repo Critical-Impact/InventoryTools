@@ -15,7 +15,7 @@ namespace InventoryToolsTesting
             var character = new Character();
             character.Name = "Character " + CharacterCount; 
             character.OwnerId = 0;
-            character.CharacterId = (ulong)CharacterCount;
+            character.CharacterId = 100 + (ulong)CharacterCount;
             return character;
         }
 
@@ -25,7 +25,7 @@ namespace InventoryToolsTesting
             var character = new Character();
             character.Name = "Retainer " + RetainerCount; 
             character.OwnerId = owner.CharacterId;
-            character.CharacterId = 100 + (ulong)RetainerCount;
+            character.CharacterId = 300 + (ulong)RetainerCount;
             return character;
         }
         

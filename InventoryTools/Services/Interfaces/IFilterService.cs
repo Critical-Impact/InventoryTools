@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using InventoryTools.Logic;
 
-namespace InventoryTools.Services
+namespace InventoryTools.Services.Interfaces
 {
     public interface IFilterService : IDisposable
     {

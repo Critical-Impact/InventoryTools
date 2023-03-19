@@ -1,6 +1,6 @@
 using Dalamud.Game.Command;
 
-namespace InventoryTools.Services;
+namespace InventoryTools.Services.Interfaces;
 
 public interface ICommandService
 {

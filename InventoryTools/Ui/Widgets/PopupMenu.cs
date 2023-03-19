@@ -204,17 +204,19 @@ public class PopupMenu
         }
         
         string? newPopupName = null;
-        if (ImGui.BeginPopup("RightClick"+ _id))
+        using (var popup = ImRaii.Popup("RightClick"+ _id))
         {
-            foreach (var item in _items)
+            if (popup.Success)
             {
-                var drawPopup = item.DrawPopup();
-                if (drawPopup != null)
+                foreach (var item in _items)
                 {
-                    newPopupName = drawPopup;
+                    var drawPopup = item.DrawPopup();
+                    if (drawPopup != null)
+                    {
+                        newPopupName = drawPopup;
+                    }
                 }
             }
-            ImGui.EndPopup();
         }        
         if (newPopupName != null)
         {

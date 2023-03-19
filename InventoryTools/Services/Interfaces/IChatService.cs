@@ -1,6 +1,6 @@
 using Dalamud.Game.Gui;
 
-namespace InventoryTools.Services;
+namespace InventoryTools.Services.Interfaces;
 
 public interface IChatService
 {

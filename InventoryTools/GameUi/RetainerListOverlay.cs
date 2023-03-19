@@ -99,7 +99,7 @@ namespace InventoryTools.GameUi
                         RetainerNames = finalTotals.ToDictionary(c => c.Key, GenerateNewName);
                         RetainerColors = finalTotals.ToDictionary(c => c.Key,
                             c => filterConfiguration.RetainerListColor ??
-                                 PluginLogic.PluginConfiguration.RetainerListColor);
+                                 ConfigurationManager.Config.RetainerListColor);
                         Draw();
                         return;
 
@@ -112,7 +112,7 @@ namespace InventoryTools.GameUi
                             .GroupBy(c => c.DestinationRetainerId == currentCharacterId ? c.SourceRetainerId : c.DestinationRetainerId!.Value).Where(c => c.Any()).ToList();
                         RetainerColors = grouping.ToDictionary(c => c.Key,
                             c => filterConfiguration.RetainerListColor ??
-                                 PluginLogic.PluginConfiguration.RetainerListColor);
+                                 ConfigurationManager.Config.RetainerListColor);
                         RetainerNames = grouping.ToDictionary(c => c.Key, GenerateNewName);
                         Draw();
                         return;
@@ -123,7 +123,7 @@ namespace InventoryTools.GameUi
                         RetainerNames = grouping.ToDictionary(c => c.Key, GenerateNewName);
                         RetainerColors = grouping.ToDictionary(c => c.Key,
                             c => filterConfiguration.RetainerListColor ??
-                                 PluginLogic.PluginConfiguration.RetainerListColor);
+                                 ConfigurationManager.Config.RetainerListColor);
 
                         Draw();
                         return;

@@ -10,6 +10,7 @@ using InventoryTools.Ui;
 using LuminaSupplemental.Excel.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using OtterGui.Raii;
 using QoLBar;
 
 namespace InventoryToolsMock;
@@ -45,7 +46,31 @@ public class MockWindow : Window
         {
             DrawWindowTab();
             DrawDataTab();
+            DrawCharacterTab();
             ImGui.EndTabBar();
+        }
+    }
+
+    private void DrawCharacterTab()
+    {
+        using (var characterTab = ImRaii.TabItem("Characters"))
+        {
+            if (characterTab.Success)
+            {
+                using (var combo = ImRaii.Combo("Active Character", PluginService.CharacterMonitor.ActiveCharacter?.FormattedName ?? "N/A"))
+                {
+                    if (combo.Success)
+                    {
+                        foreach (var character in PluginService.CharacterMonitor.GetPlayerCharacters())
+                        {
+                            if (ImGui.Selectable(character.Value.FormattedName + "##" + character.Key, PluginService.CharacterMonitor.ActiveCharacterId == character.Key))
+                            {
+                                PluginService.CharacterMonitor.OverrideActiveCharacter(character.Key);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -158,6 +183,16 @@ public class MockWindow : Window
             if (ImGui.Button("Icons Window"))
             {
                 PluginService.WindowService.ToggleWindow<IconBrowserWindow>(IconBrowserWindow.AsKey);
+            }
+
+            if (ImGui.Button("Intro Window"))
+            {
+                PluginService.WindowService.ToggleWindow<IntroWindow>(IntroWindow.AsKey);
+            }
+
+            if (ImGui.Button("Mock Items Window"))
+            {
+                PluginService.WindowService.ToggleWindow<MockGameItemsWindow>(MockGameItemsWindow.AsKey);
             }
 
             ImGui.EndTabItem();

@@ -8,6 +8,11 @@ public class MockFrameworkService : IFrameworkService
     {
     }
 
+    public void FireUpdate()
+    {
+        Update?.Invoke(this);
+    }
+
     public event IFrameworkService.OnUpdateDelegate? Update;
     public Task RunOnFrameworkThread(Action action)
     {

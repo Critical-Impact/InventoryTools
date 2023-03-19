@@ -51,15 +51,15 @@ namespace InventoryToolsTesting
             Assert.AreEqual(4, handsaintJacket.Vendors.Count);
             var actualVendors = handsaintJacket.Vendors.SelectMany(shop => shop.ENpcs.SelectMany(npc => npc.Locations.Select(location => (shop, npc, location)))).ToList();
 
-            Assert.AreEqual(26, actualVendors.Count);
+            Assert.AreEqual(28, actualVendors.Count);
             
             //Wool Top 16906
             var woolTop = Service.ExcelCache.GetItemExSheet().GetRow(16906)!;
-            Assert.AreEqual(2, woolTop.Sources.Count);
+            Assert.AreEqual(4, woolTop.Sources.Count);
             Assert.AreEqual(4, woolTop.Vendors.Count);
             actualVendors = woolTop.Vendors.SelectMany(shop => shop.ENpcs.SelectMany(npc => npc.Locations.Select(location => (shop, npc, location)))).ToList();
             
-            Assert.AreEqual(52, actualVendors.Count);
+            Assert.AreEqual(56, actualVendors.Count);
         }
 
         [Test]

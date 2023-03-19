@@ -174,7 +174,7 @@ namespace InventoryTools.Logic
             }
             else
             {
-                var items = LoadInventoriesFromCsv(out bool success);
+                var items = LoadInventoriesFromCsv(out bool success, inventoryFileName);
                 if (success)
                 {
                     var parsedItems =
@@ -291,15 +291,22 @@ namespace InventoryTools.Logic
             return CsvLoader.ToCsvRaw<InventoryItem>(items, Path.Join(PluginService.PluginInterfaceService.ConfigDirectory.FullName, "inventories.csv"));
         }
 
-        public static List<InventoryItem> LoadInventoriesFromCsv(out bool success)
+        public static List<InventoryItem> LoadInventoriesFromCsv(out bool success, string? csvPath = null)
         {
-            var items = CsvLoader.LoadCsv<InventoryItem>(InventoryCsv, out success);
+            var items = CsvLoader.LoadCsv<InventoryItem>(csvPath ?? InventoryCsv, out success);
             if (success && items != null)
             {
                 return items;
             }
 
             return new List<InventoryItem>();
+        }
+
+        public static void Dereference()
+        {
+            Config = null!;
+            _saveQueue = null;
+            _minifyResolver = null;
 
         }
     }

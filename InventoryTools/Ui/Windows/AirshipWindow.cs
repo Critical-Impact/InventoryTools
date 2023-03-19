@@ -11,6 +11,7 @@ using Lumina.Excel;
 using Lumina.Excel.GeneratedSheets;
 using LuminaSupplemental.Excel.Model;
 using OtterGui;
+using OtterGui.Raii;
 
 namespace InventoryTools.Ui
 {
@@ -79,15 +80,16 @@ namespace InventoryTools.Ui
                                 ImGui.OpenPopup("RightClickUse" + drop.RowId);
                             }
                 
-                            if (ImGui.BeginPopup("RightClickUse"+ drop.RowId))
+                            using (var popup = ImRaii.Popup("RightClickUse"+ drop.RowId))
                             {
-                                var itemEx = Service.ExcelCache.GetItemExSheet().GetRow(drop.RowId);
-                                if (itemEx != null)
+                                if (popup.Success)
                                 {
-                                    itemEx.DrawRightClickPopup();
+                                    var itemEx = Service.ExcelCache.GetItemExSheet().GetRow(drop.RowId);
+                                    if (itemEx != null)
+                                    {
+                                        itemEx.DrawRightClickPopup();
+                                    }
                                 }
-
-                                ImGui.EndPopup();
                             }
 
                             float lastButtonX2 = ImGui.GetItemRectMax().X;

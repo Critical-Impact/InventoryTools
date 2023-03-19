@@ -100,6 +100,42 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <TargetPath>Images\screenshot5.png</TargetPath>
         </ContentWithTargetPath>
+        <ContentWithTargetPath Include="Images\empty_button.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>Images\empty_button.png</TargetPath>
+        </ContentWithTargetPath>
+        <ContentWithTargetPath Include="Images\export.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>Images\export.png</TargetPath>
+        </ContentWithTargetPath>
+        <ContentWithTargetPath Include="Images\export2.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>Images\export2.png</TargetPath>
+        </ContentWithTargetPath>
+        <ContentWithTargetPath Include="Images\refresh-web.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>Images\refresh-web.png</TargetPath>
+        </ContentWithTargetPath>
+        <ContentWithTargetPath Include="Images\nuke.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>Images\nuke.png</TargetPath>
+        </ContentWithTargetPath>
+        <ContentWithTargetPath Include="Images\filters.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>Images\filters.png</TargetPath>
+        </ContentWithTargetPath>
+        <ContentWithTargetPath Include="Images\edit.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>Images\edit.png</TargetPath>
+        </ContentWithTargetPath>
+        <ContentWithTargetPath Include="Images\menu.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>Images\menu.png</TargetPath>
+        </ContentWithTargetPath>
+        <ContentWithTargetPath Include="Images\craft.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>Images\craft.png</TargetPath>
+        </ContentWithTargetPath>
     </ItemGroup>
 
     <ProjectExtensions>

@@ -12,7 +12,7 @@ namespace InventoryToolsMock
 {
     class Program
     {
-        private static Sdl2Window _window;
+        public static Sdl2Window _window;
         public static GraphicsDevice _gd;
         private static CommandList _cl;
         public static ImGuiController _controller;
@@ -43,7 +43,7 @@ namespace InventoryToolsMock
                 return;
             }
             
-            var configFile = configDirectory + Path.DirectorySeparatorChar + "InventoryTools.json";
+            var configFile = Path.Combine(configDirectory,"InventoryTools.json");
             if (args.Length > 2)
             {
                 configFile = args[2];
@@ -55,7 +55,7 @@ namespace InventoryToolsMock
                 return;
             }
 
-            string? inventoriesFile = configDirectory + Path.DirectorySeparatorChar + "InventoryTools" + Path.DirectorySeparatorChar + "inventories.json";
+            string? inventoriesFile = Path.Combine(configDirectory, "InventoryTools","inventories.csv");
             if (args.Length > 3)
             {
                 inventoriesFile = args[3];
@@ -83,6 +83,7 @@ namespace InventoryToolsMock
                 _gd.MainSwapchain.Resize((uint)_window.Width, (uint)_window.Height);
                 _controller.WindowResized(_window.Width, _window.Height);
             };
+            
             _cl = _gd.ResourceFactory.CreateCommandList();
             var gameData = new Lumina.GameData( gameLocation, new LuminaOptions()
             {
@@ -101,6 +102,7 @@ namespace InventoryToolsMock
             {
                 InputSnapshot snapshot = _window.PumpEvents();
                 if (!_window.Exists) { break; }
+                _mockPlugin._frameworkService.FireUpdate();
                 _controller.Update(1f / 60f, snapshot);
 
                 _mockPlugin.Draw();

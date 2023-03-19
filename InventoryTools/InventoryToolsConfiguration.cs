@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib.Models;
@@ -60,6 +61,7 @@ namespace InventoryTools
         public bool InventoriesMigratedToCsv { get; set; } = false;
 
         private HashSet<string>? _openWindows = new();
+        private Dictionary<string, Vector2>? _savedWindowPositions = new();
 
         public bool IsVisible
         {
@@ -95,6 +97,8 @@ namespace InventoryTools
         private int _tooltipHeaderLines = 0;
         private int _tooltipFooterLines = 0;
         private TooltipLocationDisplayMode _tooltipLocationDisplayMode = TooltipLocationDisplayMode.CharacterCategoryQuantityQuality;
+        private WindowLayout _craftWindowLayout =  WindowLayout.Tabs;
+        private WindowLayout _filtersLayout = WindowLayout.Tabs;
         private uint? _tooltipColor = null;
         public Vector4 HighlightColor
         {
@@ -230,6 +234,24 @@ namespace InventoryTools
             set
             {
                 _tooltipLocationDisplayMode = value;
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+            }
+        }
+        public WindowLayout CraftWindowLayout
+        {
+            get => _craftWindowLayout;
+            set
+            {
+                _craftWindowLayout = value;
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+            }
+        }
+        public WindowLayout FiltersLayout
+        {
+            get => _filtersLayout;
+            set
+            {
+                _filtersLayout = value;
                 PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
@@ -405,38 +427,38 @@ namespace InventoryTools
         public ModifiableHotkey? MoreInformationHotKey
         {
             get => _moreInformationHotKey;
-            set
-            {
-                _moreInformationKeys = null;
-                _moreInformationHotKey = value;
-            }
+            set => _moreInformationHotKey = value;
         }
-
-        [JsonIgnore]
-        public VirtualKey[]? MoreInformationKeys
+        
+        public ConcurrentDictionary<string,ModifiableHotkey> Hotkeys
         {
             get
             {
-                if (_moreInformationKeys != null)
+                if (_hotkeys == null)
                 {
-                    return _moreInformationKeys;
+                    _hotkeys = new ConcurrentDictionary<string, ModifiableHotkey>();
                 }
-                if (_moreInformationKeys == null && MoreInformationHotKey.HasValue)
-                {
-                    _moreInformationKeys = MoreInformationHotKey.Value.VirtualKeys();
-                    if (_moreInformationKeys.Length == 0)
-                    {
-                        _moreInformationKeys = null;
-                    }
-                }
-                return _moreInformationKeys;
-
+                return _hotkeys;
+            }
+            set
+            {
+                _hotkeys = value;
             }
         }
 
-        private VirtualKey[]? _moreInformationKeys;
         private ModifiableHotkey? _moreInformationHotKey;
+        private ConcurrentDictionary<string,ModifiableHotkey>? _hotkeys;
         private bool _trackMobSpawns = false;
+
+        public ModifiableHotkey? GetHotkey(string hotkey)
+        {
+            if(Hotkeys.TryGetValue(hotkey, out var modifiableHotkey))
+            {
+                return modifiableHotkey;
+            }
+
+            return null;
+        }
 
         public HashSet<string> OpenWindows
         {
@@ -449,6 +471,18 @@ namespace InventoryTools
                 return _openWindows;
             }
             set => _openWindows = value;
+        }
+        public Dictionary<string, Vector2> SavedWindowPositions
+        {
+            get
+            {
+                if (_savedWindowPositions == null)
+                {
+                    _savedWindowPositions = new Dictionary<string, Vector2>();
+                }
+                return _savedWindowPositions;
+            }
+            set => _savedWindowPositions = value;
         }
 
         public int TooltipHeaderLines
@@ -470,7 +504,7 @@ namespace InventoryTools
                 PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
-
+        
         public event ConfigurationChangedDelegate? ConfigurationChanged;
 
         //Configuration Helpers

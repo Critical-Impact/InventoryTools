@@ -5,6 +5,7 @@ using CriticalCommonLib.Services.Ui;
 using Dalamud.Logging;
 using InventoryTools.GameUi;
 using InventoryTools.Logic;
+using InventoryTools.Services.Interfaces;
 
 namespace InventoryTools.Services
 {

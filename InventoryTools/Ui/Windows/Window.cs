@@ -46,8 +46,11 @@ namespace InventoryTools.Ui
 
         public abstract string Key { get; }
 
+        public virtual string GenericKey => Key;
+
         public abstract bool DestroyOnClose { get; }
-        public virtual ImGuiWindowFlags? WindowFlags { get; } = null;
+        public virtual bool SavePosition { get; }
+        public virtual Vector2 CurrentPosition { get; set; }
 
         public abstract bool SaveState { get; }
         

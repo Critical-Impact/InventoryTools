@@ -11,16 +11,61 @@ using InventoryTools.Sections;
 using InventoryTools.Ui.MenuItems;
 using InventoryTools.Ui.Widgets;
 using OtterGui;
+using OtterGui.Raii;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 
 namespace InventoryTools.Ui
 {
     public class ConfigurationWindow : Window
     {
-        private TextureWrap _addIcon => PluginService.IconStorage.LoadIcon(66315);
-        private TextureWrap _lightBulbIcon => PluginService.IconStorage.LoadIcon(66318);
+        private HoverButton _addIcon { get; } = new(PluginService.IconStorage.LoadIcon(66315),  new Vector2(22, 22));
+        private HoverButton _lightBulbIcon { get; } = new(PluginService.IconStorage.LoadIcon(66318),  new Vector2(22, 22));
+        private static HoverButton _menuIcon { get; } = new(PluginService.IconStorage.LoadImage("menu"),  new Vector2(22, 22));
         private PopupMenu _addFilterMenu;
         private PopupMenu _addSampleMenu;
+        private PopupMenu _settingsMenu = new PopupMenu("configMenu", PopupMenu.PopupMenuButtons.All,
+            new List<PopupMenu.IPopupMenuItem>()
+            {
+                new PopupMenu.PopupMenuItemSelectable("Filters Window", "filters", OpenFiltersWindow,"Open the filters window."),
+                new PopupMenu.PopupMenuItemSelectable("Crafts Window", "crafts", OpenCraftsWindow,"Open the crafts window."),
+                new PopupMenu.PopupMenuItemSeparator(),
+                new PopupMenu.PopupMenuItemSelectable("Mob Window", "mobs", OpenMobsWindow,"Open the mobs window."),
+                new PopupMenu.PopupMenuItemSelectable("Duties Window", "duties", OpenDutiesWindow,"Open the duties window."),
+                new PopupMenu.PopupMenuItemSelectable("Airships Window", "airships", OpenAirshipsWindow,"Open the airships window."),
+                new PopupMenu.PopupMenuItemSelectable("Submarines Window", "submarines", OpenAirshipsWindow,"Open the submarines window."),
+                new PopupMenu.PopupMenuItemSeparator(),
+                new PopupMenu.PopupMenuItemSelectable("Help", "help", OpenHelpWindow,"Open the help window."),
+            });
+
+        private static void OpenCraftsWindow(string obj)
+        {
+            PluginService.WindowService.OpenWindow<CraftsWindow>(CraftsWindow.AsKey);
+        }
+
+        private static void OpenFiltersWindow(string obj)
+        {
+            PluginService.WindowService.OpenWindow<FiltersWindow>(FiltersWindow.AsKey);
+        }
+
+        private static void OpenHelpWindow(string obj)
+        {
+            PluginService.WindowService.OpenWindow<HelpWindow>(HelpWindow.AsKey);
+        }
+
+        private static void OpenDutiesWindow(string obj)
+        {
+            PluginService.WindowService.OpenWindow<DutiesWindow>(DutiesWindow.AsKey);
+        }
+
+        private static void OpenAirshipsWindow(string obj)
+        {
+            PluginService.WindowService.OpenWindow<AirshipsWindow>(AirshipsWindow.AsKey);
+        }
+
+        private static void OpenMobsWindow(string obj)
+        {
+            PluginService.WindowService.OpenWindow<BNpcWindow>(BNpcWindow.AsKey);
+        }
 
         public ConfigurationWindow(string name = "Allagan Tools - Configuration") : base(name)
         {
@@ -39,6 +84,7 @@ namespace InventoryTools.Ui
             _configPages.Add(new SettingPage(SettingCategory.General));
             _configPages.Add(new SettingPage(SettingCategory.Visuals));
             _configPages.Add(new SettingPage(SettingCategory.ToolTips));
+            _configPages.Add(new SettingPage(SettingCategory.Hotkeys));
             _configPages.Add(new SettingPage(SettingCategory.MarketBoard));
             _configPages.Add(new SeparatorPageItem("Data", true));
             _configPages.Add(new FiltersPage());
@@ -57,12 +103,48 @@ namespace InventoryTools.Ui
             _addSampleMenu = new PopupMenu("addSampleFilter", PopupMenu.PopupMenuButtons.LeftRight,
                 new List<PopupMenu.IPopupMenuItem>()
                 {
-                    new PopupMenu.PopupMenuItemSelectableAskName("Purchased for less than 100 gil", "af4", "Less than 100 gil", AddLessThan100GilFilter, "This will add a filter that will show all items that can be purchased from gil shops under 100 gil. It will look in both character and retainer inventories."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Put away materials +", "af5", "Put away materials", AddPutAwayMaterialsFilter, "This will add a filter that will be setup to quickly put away any excess materials. It will have all the material categories automatically added. When calculating where to put items it will try to prioritise existing stacks of items."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Duplicated items across characters/retainers +", "af6", "Duplicated items", AddDuplicatedItemsFilter, "This will add a filter that will provide a list of all the distinct stacks that appear in 2 sets of inventories. You can use this to make sure only one retainer has a specific type of item.")
+                    new PopupMenu.PopupMenuItemSelectableAskName("All", "af4", "All", AddAllFilter, "This will add a filter that will be preconfigured to show items across all inventories."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Player", "af5", "Player", AddPlayerFilter, "This will add a filter that will be preconfigured to show items across all character inventories."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Retainers", "af6", "Retainers", AddRetainersFilter, "This will add a filter that will be preconfigured to show items across all retainer inventories."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Free Company", "af7", "Free Company", AddFreeCompanyFilter, "This will add a filter that will be preconfigured to show items across all free company inventories."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("All Game Items", "af8", "All Game Items", AddAllGameItemsFilter, "This will add a filter that will be preconfigured to show all of the game's items."),
+                    new PopupMenu.PopupMenuItemSeparator(),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Purchased for less than 100 gil", "af9", "Less than 100 gil", AddLessThan100GilFilter, "This will add a filter that will show all items that can be purchased from gil shops under 100 gil. It will look in both character and retainer inventories."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Put away materials +", "af10", "Put away materials", AddPutAwayMaterialsFilter, "This will add a filter that will be setup to quickly put away any excess materials. It will have all the material categories automatically added. When calculating where to put items it will try to prioritise existing stacks of items."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Duplicated items across characters/retainers +", "af11", "Duplicated items", AddDuplicatedItemsFilter, "This will add a filter that will provide a list of all the distinct stacks that appear in 2 sets of inventories. You can use this to make sure only one retainer has a specific type of item.")
                 });
             
             GenerateFilterPages();
+        }
+
+        private void AddAllGameItemsFilter(string arg1, string arg2)
+        {
+            PluginService.PluginLogic.AddAllGameItemsFilter(arg1);
+            SetNewFilterActive();
+        }
+
+        private void AddFreeCompanyFilter(string arg1, string arg2)
+        {
+            PluginService.PluginLogic.AddFreeCompanyFilter(arg1);
+            SetNewFilterActive();
+        }
+
+        private void AddRetainersFilter(string arg1, string arg2)
+        {
+            PluginService.PluginLogic.AddRetainerFilter(arg1);
+            SetNewFilterActive();
+        }
+
+        private void AddPlayerFilter(string arg1, string arg2)
+        {
+            PluginService.PluginLogic.AddPlayerFilter(arg1);
+            SetNewFilterActive();
+        }
+
+        private void AddAllFilter(string arg1, string arg2)
+        {
+            PluginService.PluginLogic.AddAllFilter(arg1);
+            SetNewFilterActive();
         }
 
         private Dictionary<FilterConfiguration, PopupMenu> _popupMenus = new();
@@ -215,111 +297,139 @@ namespace InventoryTools.Ui
 
         public override void Draw()
         {
-            ImGui.BeginChild("SideContainer", new Vector2(180, -1) * ImGui.GetIO().FontGlobalScale, true);
-            ImGui.BeginChild("Menu", new Vector2(0, -28) * ImGui.GetIO().FontGlobalScale, false,
-                ImGuiWindowFlags.NoSavedSettings);
-
-            var count = 0;
-            for (var index = 0; index < _configPages.Count; index++)
+            using (var sideBarChild =
+                   ImRaii.Child("SideBar", new Vector2(180, 0) * ImGui.GetIO().FontGlobalScale, true))
             {
-                var configPage = _configPages[index];
-                if (configPage.IsMenuItem)
+                if (sideBarChild.Success)
                 {
-                    configPage.Draw();
-                }
-                else
-                {
-                    if (ImGui.Selectable(configPage.Name, ConfigSelectedConfigurationPage == count))
+                    using (var menuChild = ImRaii.Child("Menu", new Vector2(0, -28) * ImGui.GetIO().FontGlobalScale,
+                               false, ImGuiWindowFlags.NoSavedSettings))
                     {
-                        ConfigSelectedConfigurationPage = count;
+                        if (menuChild.Success)
+                        {
+
+                            var count = 0;
+                            for (var index = 0; index < _configPages.Count; index++)
+                            {
+                                var configPage = _configPages[index];
+                                if (configPage.IsMenuItem)
+                                {
+                                    configPage.Draw();
+                                }
+                                else
+                                {
+                                    if (ImGui.Selectable(configPage.Name, ConfigSelectedConfigurationPage == count))
+                                    {
+                                        ConfigSelectedConfigurationPage = count;
+                                    }
+
+                                    count++;
+                                }
+                            }
+
+                            ImGui.NewLine();
+                            ImGui.Text("Filters");
+                            ImGui.Separator();
+
+                            var filterIndex = count;
+                            foreach (var item in _filterPages)
+                            {
+                                filterIndex++;
+                                if (ImGui.Selectable(item.Value.Name + "##" + item.Key,
+                                        ConfigSelectedConfigurationPage == filterIndex))
+                                {
+                                    ConfigSelectedConfigurationPage = filterIndex;
+                                }
+
+                                var filter = PluginService.FilterService.GetFilterByKey(item.Key);
+                                if (filter != null)
+                                {
+                                    GetFilterMenu(filter).Draw();
+                                }
+
+                            }
+                        }
                     }
 
-                    count++;
+                    using (var commandBarChild = ImRaii.Child("CommandBar",
+                               new Vector2(0, 0) * ImGui.GetIO().FontGlobalScale, false))
+                    {
+                        if (commandBarChild.Success)
+                        {
+
+                            float height = ImGui.GetWindowSize().Y;
+                            ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
+
+                            if(_addIcon.Draw("addFilter"))
+                            {
+
+                            }
+
+                            _addFilterMenu.Draw();
+                            ImGuiUtil.HoverTooltip("Add a new filter");
+
+                            ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
+                            ImGui.SetCursorPosX(26 * ImGui.GetIO().FontGlobalScale);
+
+                            if (_lightBulbIcon.Draw("addSample"))
+                            {
+
+                            }
+
+                            _addSampleMenu.Draw();
+                            ImGuiUtil.HoverTooltip("Add a sample filter");
+
+                            var width = ImGui.GetWindowSize().X;
+                            width -= 24 * ImGui.GetIO().FontGlobalScale;
+                            
+                            ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
+                            ImGui.SetCursorPosX(width * ImGui.GetIO().FontGlobalScale);
+
+                            if (_menuIcon.Draw("openMenu"))
+                            {
+
+                            }
+
+                            _settingsMenu.Draw();
+                        }
+                    }
                 }
             }
-
-            ImGui.NewLine();
-            ImGui.Text("Filters");
-            ImGui.Separator();
-
-            var filterIndex = count;
-            foreach (var item in _filterPages)
-            {
-                filterIndex++;
-                if (ImGui.Selectable(item.Value.Name + "##" + item.Key, ConfigSelectedConfigurationPage == filterIndex))
-                {
-                    ConfigSelectedConfigurationPage = filterIndex;
-                }
-
-                var filter = PluginService.FilterService.GetFilterByKey(item.Key);
-                if (filter != null)
-                {
-                    GetFilterMenu(filter).Draw();
-                }
-
-            }
-            ImGui.EndChild();
-            ImGui.BeginChild("Settings", new Vector2(0, 0) * ImGui.GetIO().FontGlobalScale, false);
-            
-            float height = ImGui.GetWindowSize().Y;
-            ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
-            
-            if (ImGui.ImageButton(_addIcon.ImGuiHandle, new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale,
-                    new Vector2(0, 0), new Vector2(1, 1), 2))
-            {
-                
-            }
-            
-            _addFilterMenu.Draw();
-            ImGuiUtil.HoverTooltip("Add a new filter");
-            
-            ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
-            ImGui.SetCursorPosX(26 * ImGui.GetIO().FontGlobalScale);
-            
-            if (ImGui.ImageButton(_lightBulbIcon.ImGuiHandle, new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale,
-                    new Vector2(0, 0), new Vector2(1, 1), 2))
-            {
-                
-            }
-            
-            _addSampleMenu.Draw();
-            ImGuiUtil.HoverTooltip("Add a sample filter");
-            
-            ImGui.EndChild();
-            ImGui.EndChild();
             
 
             ImGui.SameLine();
 
-            ImGui.BeginChild("###ivConfigView", new Vector2(-1, -1), true, ImGuiWindowFlags.HorizontalScrollbar);
-
-            count = 0;
-            for (var index = 0; index < _configPages.Count; index++)
+            using (var mainChild =
+                   ImRaii.Child("Main", new Vector2(-1, -1), true, ImGuiWindowFlags.HorizontalScrollbar))
             {
-                if (_configPages[index].IsMenuItem)
+                if (mainChild.Success)
                 {
-                    count++;
-                    continue;
-                }
+                    var count = 0;
+                    for (var index = 0; index < _configPages.Count; index++)
+                    {
+                        if (_configPages[index].IsMenuItem)
+                        {
+                            count++;
+                            continue;
+                        }
 
-                if (ConfigSelectedConfigurationPage == index - count)
-                {
-                    _configPages[index].Draw();
+                        if (ConfigSelectedConfigurationPage == index - count)
+                        {
+                            _configPages[index].Draw();
+                        }
+                    }
+
+                    var filterIndex2 = _configPages.Count - count;
+                    foreach (var filter in _filterPages)
+                    {
+                        filterIndex2++;
+                        if (ConfigSelectedConfigurationPage == filterIndex2)
+                        {
+                            filter.Value.Draw();
+                        }
+                    }
                 }
             }
-
-            var filterIndex2 = _configPages.Count - count;
-            foreach(var filter in _filterPages)
-            {
-                filterIndex2++;
-                if (ConfigSelectedConfigurationPage == filterIndex2)
-                {
-                    filter.Value.Draw();
-                }
-            }
-            
-            ImGui.EndChild();
-            
         }
 
         public override void Invalidate()

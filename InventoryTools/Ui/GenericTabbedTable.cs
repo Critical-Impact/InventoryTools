@@ -39,26 +39,36 @@ public abstract class GenericTabbedTable<T> : Window, IGenericTabbedTable<T>
     }
     public void DrawTabs()
     {
-        if (ImGui.BeginTabBar("###Tab" + TableName, ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.TabListPopupButton))
+        using (var tabBar = ImRaii.TabBar("###Tab" + TableName, ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.TabListPopupButton))
         {
-            if (ImGui.BeginTabItem("All"))
+            if (tabBar.Success)
             {
-                CurrentTab = 0;
-                ImGui.PushID(0.ToString());
-                DrawTable(TableName + "Table",GetItems(0), TableFlags, Columns, 0);
-                ImGui.PopID();
-                ImGui.EndTabItem();
-            }
-            
-            foreach(var tab in Tabs)
-            {
-                if (tab.Key != 0 && ImGui.BeginTabItem(tab.Value))
+                using (var tabItem = ImRaii.TabItem("All"))
                 {
-                    CurrentTab = tab.Key;
-                    ImGui.PushID(tab.Key.ToString());
-                    DrawTable(tab.Key + "Table",GetItems(CurrentTab), TableFlags, Columns, CurrentTab);
-                    ImGui.PopID();
-                    ImGui.EndTabItem();
+                    if (tabItem.Success)
+                    {
+                        CurrentTab = 0;
+                        ImGui.PushID(0.ToString());
+                        DrawTable(TableName + "Table", GetItems(0), TableFlags, Columns, 0);
+                        ImGui.PopID();
+                    }
+                }
+
+                foreach (var tab in Tabs)
+                {
+                    if (tab.Key != 0)
+                    {
+                        using (var tabItem = ImRaii.TabItem(tab.Value))
+                        {
+                            if (tabItem.Success)
+                            {
+                                CurrentTab = tab.Key;
+                                ImGui.PushID(tab.Key.ToString());
+                                DrawTable(tab.Key + "Table", GetItems(CurrentTab), TableFlags, Columns, CurrentTab);
+                                ImGui.PopID();
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -221,16 +231,16 @@ public abstract class GenericTabbedTable<T> : Window, IGenericTabbedTable<T>
 
                 ImGui.PopID();
             }
-
-            if (refresh)
-            {
-                Items.Remove(contentTypeId);
-                FilteredItems.Remove(contentTypeId);
-            }
         }
         
         clipper.End();
         clipper.Destroy();
+        
+        if (refresh)
+        {
+            Items.Remove(contentTypeId);
+            FilteredItems.Remove(contentTypeId);
+        }
     }
 
     public abstract int GetRowId(T item);

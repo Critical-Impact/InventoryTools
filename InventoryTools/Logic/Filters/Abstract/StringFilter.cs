@@ -42,5 +42,10 @@ namespace InventoryTools.Logic.Filters.Abstract
         {
             configuration.UpdateStringFilter(Key, newValue);
         }
+        
+        public override void ResetFilter(FilterConfiguration configuration)
+        {
+            UpdateFilterConfiguration(configuration, "");
+        }
     }
 }

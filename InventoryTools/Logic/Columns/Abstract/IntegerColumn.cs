@@ -25,6 +25,11 @@ namespace InventoryTools.Logic.Columns.Abstract
         {
             return CurrentValue(item).ToString() ?? "";
         }
+
+        public override string CsvExport(CraftItem item)
+        {
+            return CurrentValue(item).ToString() ?? "";
+        }
         public override int? CurrentValue(CraftItem currentValue)
         {
             return CurrentValue(currentValue.Item);

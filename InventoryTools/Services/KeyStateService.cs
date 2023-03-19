@@ -1,4 +1,5 @@
 using Dalamud.Game.ClientState.Keys;
+using InventoryTools.Services.Interfaces;
 
 namespace InventoryTools.Services;
 

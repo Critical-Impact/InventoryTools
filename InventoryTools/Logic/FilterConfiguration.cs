@@ -11,6 +11,7 @@ using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using Dalamud.Logging;
+using FFXIVClientStructs.FFXIV.Client.System.String;
 using InventoryTools.Extensions;
 using Newtonsoft.Json;
 
@@ -44,11 +45,13 @@ namespace InventoryTools.Logic
         private ulong _ownerId = 0;
         private uint _order = 0;
         private bool? _filterItemsInRetainers;
-        private FilterItemsRetainerEnum _filterItemsInRetainersEnum;
+        private FilterItemsRetainerEnum? _filterItemsInRetainersEnum;
         private bool? _sourceAllRetainers;
         private bool? _sourceAllCharacters;
+        private bool? _sourceAllFreeCompanies;
         private bool? _destinationAllRetainers;
         private bool? _destinationAllCharacters;
+        private bool? _destinationAllFreeCompanies;
         private bool? _sourceIncludeCrossCharacter;
         private bool? _destinationIncludeCrossCharacter;
         private int? _freezeColumns;
@@ -77,6 +80,7 @@ namespace InventoryTools.Logic
         private bool? _invertTabHighlighting = null;
         private bool? _highlightDestination = null;
         private bool? _highlightDestinationEmpty = null;
+        private bool? _ignoreHQWhenSorting = null;
         private bool _craftListDefault = false;
         private string? _highlightWhen = null;
         private int _tableHeight = 32;
@@ -276,6 +280,31 @@ namespace InventoryTools.Logic
             AddDefaultColumns();
         }
 
+        public static FilterConfiguration GenerateDefaultFilterConfiguration()
+        {
+            var defaultFilter = new FilterConfiguration("Default Craft List", FilterType.CraftFilter);
+            defaultFilter.ApplyDefaultCraftFilterConfiguration();
+            return defaultFilter;
+        }
+
+        public void ApplyDefaultCraftFilterConfiguration()
+        {
+            CraftListDefault = true;
+            DestinationAllCharacters = true;
+            DestinationIncludeCrossCharacter = false;
+            SourceAllCharacters = false;
+            SourceAllRetainers = true;
+            SourceAllFreeCompanies = true;
+            SourceIncludeCrossCharacter = false;
+            HighlightWhen = "Always";
+            SourceCategories = new HashSet<InventoryCategory>()
+            {
+                InventoryCategory.FreeCompanyBags,
+                InventoryCategory.CharacterSaddleBags,
+                InventoryCategory.CharacterPremiumSaddleBags,
+            };
+        }
+
         public void AddDefaultColumns()
         {
             if (FilterType == FilterType.SearchFilter)
@@ -367,6 +396,21 @@ namespace InventoryTools.Logic
         public void Refresh()
         {
             
+        }
+
+        public void ResetFilter()
+        {
+            CraftColumns = new List<string>();
+            Columns = new List<string>();
+            foreach (var filter in PluginService.PluginLogic.AvailableFilters)
+            {
+                if (filter.AvailableIn.HasFlag(FilterType.CraftFilter))
+                {
+                    filter.ResetFilter(this);
+                }
+            }
+            AddDefaultColumns();
+            ApplyDefaultCraftFilterConfiguration();
         }
 
         public FilterTable GenerateTable()
@@ -480,10 +524,31 @@ namespace InventoryTools.Logic
         public string Name
         {
             get => _name == null ? "" :  _name;
-            set { _name = value;
-                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+            set {
+                unsafe
+                {
+                    _name = value;
+                    _nameAsBytes = null;
+                    PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+                }
             }
         }
+
+        [JsonIgnore]
+        public byte[] NameAsBytes
+        {
+            get
+            {
+                if (_nameAsBytes == null)
+                {
+                    _nameAsBytes = System.Text.Encoding.UTF8.GetBytes(Name == "" ? "Untitled" : Name);
+                }
+
+                return _nameAsBytes;
+            }
+        }
+
+        private byte[]? _nameAsBytes;
 
         public bool? DuplicatesOnly
         {
@@ -506,7 +571,14 @@ namespace InventoryTools.Logic
 
         public FilterItemsRetainerEnum FilterItemsInRetainersEnum
         {
-            get => _filterItemsInRetainersEnum;
+            get
+            {
+                if (_filterItemsInRetainersEnum == null)
+                {
+                    _filterItemsInRetainersEnum = FilterItemsRetainerEnum.No;
+                }
+                return _filterItemsInRetainersEnum.Value;
+            }
             set { _filterItemsInRetainersEnum = value;
                 NeedsRefresh = true;
                 PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
@@ -585,6 +657,15 @@ namespace InventoryTools.Logic
                 PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }            
         }
+
+        public bool? SourceAllFreeCompanies
+        {
+            get => _sourceAllFreeCompanies;
+            set { _sourceAllFreeCompanies = value;
+                NeedsRefresh = true;
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+            }            
+        }
         
         public string? HighlightWhen
         {
@@ -631,6 +712,15 @@ namespace InventoryTools.Logic
         {
             get => _destinationAllRetainers;
             set { _destinationAllRetainers = value;
+                NeedsRefresh = true;
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+            }            
+        }
+
+        public bool? DestinationAllFreeCompanies
+        {
+            get => _destinationAllFreeCompanies;
+            set { _destinationAllFreeCompanies = value;
                 NeedsRefresh = true;
                 PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }            
@@ -863,6 +953,16 @@ namespace InventoryTools.Logic
             set
             {
                 _highlightDestinationEmpty = value;
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+            }
+        }
+
+        public bool? IgnoreHQWhenSorting
+        {
+            get => _ignoreHQWhenSorting;
+            set
+            {
+                _ignoreHQWhenSorting = value;
                 PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }
         }
@@ -1479,10 +1579,12 @@ namespace InventoryTools.Logic
         {
             if (FilterItemsInRetainersEnum is FilterItemsRetainerEnum.Yes or FilterItemsRetainerEnum.Only && activeRetainerId != 0)
             {
+                //When the active character is the source and the active retainer is the destination
                 if (activeCharacterId == sourceCharacterId && activeRetainerId == destinationCharacterId)
                 {
                     return true;
                 }
+                //When the active retainer is the source and the destination is elsewhere
                 if (activeRetainerId == sourceCharacterId && activeRetainerId != destinationCharacterId)
                 {
                     return true;
@@ -1551,6 +1653,84 @@ namespace InventoryTools.Logic
                 foreach (var category in DestinationInventories)
                 {
                     if (category.Item2.IsRetainerCategory())
+                    {
+                        if (!categories.ContainsKey(category.Item1))
+                        {
+                            categories.Add(category.Item1, new HashSet<InventoryCategory>());
+                        }
+                        
+                        if (!categories[category.Item1].Contains( category.Item2))
+                        {
+                            categories[category.Item1].Add( category.Item2);
+                        }
+                    }
+                }
+
+                return categories;
+            }
+        }
+        
+        
+        [JsonIgnore]
+        public Dictionary<ulong, HashSet<InventoryCategory>> DestinationFreeCompanyCategories
+        {
+            get
+            {
+                var categoryValues = Enum.GetValues<InventoryCategory>();
+                
+                Dictionary<ulong, HashSet<InventoryCategory>> categories = new();
+                var allFreeCompanies = PluginService.CharacterMonitor.GetFreeCompanies().Where(c =>
+                {
+                    var destinationIncludeCrossCharacter = DestinationIncludeCrossCharacter ?? ConfigurationManager.Config.DisplayCrossCharacter;
+                    return PluginService.CharacterMonitor.BelongsToActiveCharacter(c.Key) || destinationIncludeCrossCharacter;
+                }).ToDictionary(c => c.Key, c => c.Value);
+                
+                if (DestinationAllRetainers == true)
+                {
+                    foreach (var retainer in allFreeCompanies)
+                    {
+                        foreach (var categoryValue in categoryValues)
+                        {
+                            if (categoryValue.IsFreeCompanyCategory())
+                            {
+                                if (!categories.ContainsKey(retainer.Key))
+                                {
+                                    categories.Add(retainer.Key, new HashSet<InventoryCategory>());
+                                }
+
+                                if (!categories[retainer.Key].Contains(categoryValue))
+                                {
+                                    categories[retainer.Key].Add(categoryValue);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                if (DestinationCategories != null)
+                {
+                    foreach (var categoryValue in DestinationCategories)
+                    {
+                        foreach (var freeCompany in allFreeCompanies)
+                        {
+                            if (categoryValue.IsFreeCompanyCategory())
+                            {
+                                if (!categories.ContainsKey(freeCompany.Key))
+                                {
+                                    categories.Add(freeCompany.Key, new HashSet<InventoryCategory>());
+                                }
+                                if (!categories[freeCompany.Key].Contains(categoryValue))
+                                {
+                                    categories[freeCompany.Key].Add(categoryValue);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                foreach (var category in DestinationInventories)
+                {
+                    if (category.Item2.IsFreeCompanyCategory())
                     {
                         if (!categories.ContainsKey(category.Item1))
                         {
@@ -1641,6 +1821,7 @@ namespace InventoryTools.Logic
                 return categories;
             }
         }
+        
         [JsonIgnore]
         public Dictionary<ulong, HashSet<InventoryCategory>> SourceRetainerCategories
         {
@@ -1730,6 +1911,109 @@ namespace InventoryTools.Logic
                                     if (!categories[retainer.Key].Contains(categoryValue))
                                     {
                                         categories[retainer.Key].Add(categoryValue);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return categories;
+            }
+        }
+        
+        
+        [JsonIgnore]
+        public Dictionary<ulong, HashSet<InventoryCategory>> SourceFreeCompanyCategories
+        {
+            get
+            {
+                var categoryValues = Enum.GetValues<InventoryCategory>();
+                
+                Dictionary<ulong, HashSet<InventoryCategory>> categories = new();
+
+                var allFreeCompanies = PluginService.CharacterMonitor.GetFreeCompanies().Where(c =>
+                {
+                    var sourceIncludeCrossCharacter = SourceIncludeCrossCharacter ?? ConfigurationManager.Config.DisplayCrossCharacter;
+                    return PluginService.CharacterMonitor.BelongsToActiveCharacter(c.Key) || sourceIncludeCrossCharacter;
+                    
+                }).ToDictionary(c => c.Key, c => c.Value);
+
+                if (SourceAllFreeCompanies == true)
+                {
+                    foreach (var retainer in allFreeCompanies)
+                    {
+                        foreach (var categoryValue in categoryValues)
+                        {
+                            if (categoryValue.IsFreeCompanyCategory())
+                            {
+                                if (!categories.ContainsKey(retainer.Key))
+                                {
+                                    categories.Add(retainer.Key, new HashSet<InventoryCategory>());
+                                }
+                                if (!categories[retainer.Key].Contains(categoryValue))
+                                {
+                                    categories[retainer.Key].Add(categoryValue);
+                                }
+                            }
+                        }
+                    }
+                }
+                if (SourceCategories != null)
+                {
+                    foreach (var categoryValue in SourceCategories)
+                    {
+                        foreach (var freeCompany in allFreeCompanies)
+                        {
+                            if (categoryValue.IsFreeCompanyCategory())
+                            {
+                                if (!categories.ContainsKey(freeCompany.Key))
+                                {
+                                    categories.Add(freeCompany.Key, new HashSet<InventoryCategory>());
+                                }
+                                if (!categories[freeCompany.Key].Contains(categoryValue))
+                                {
+                                    categories[freeCompany.Key].Add(categoryValue);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                foreach (var category in SourceInventories)
+                {
+                    if (category.Item2.IsFreeCompanyCategory())
+                    {
+                        if (!categories.ContainsKey(category.Item1))
+                        {
+                            categories.Add(category.Item1, new HashSet<InventoryCategory>());
+                        }
+                        if (!categories[category.Item1].Contains( category.Item2))
+                        {
+                            categories[category.Item1].Add( category.Item2);
+                        }
+                    }
+                }
+                
+                
+                if (SourceWorlds != null)
+                {
+                    foreach (var freeCompany in allFreeCompanies)
+                    {
+                        if(SourceWorlds.Contains(freeCompany.Value.WorldId))
+                        {
+                            foreach (var categoryValue in categoryValues)
+                            {
+                                if (categoryValue.IsFreeCompanyCategory())
+                                {
+                                    if (!categories.ContainsKey(freeCompany.Key))
+                                    {
+                                        categories.Add(freeCompany.Key, new HashSet<InventoryCategory>());
+                                    }
+
+                                    if (!categories[freeCompany.Key].Contains(categoryValue))
+                                    {
+                                        categories[freeCompany.Key].Add(categoryValue);
                                     }
                                 }
                             }
@@ -1912,12 +2196,22 @@ namespace InventoryTools.Logic
                             }
 
                             if (filter.SourceAllCharacters.HasValue && filter.SourceAllCharacters.Value &&
-                                !characterMonitor.IsRetainer(character.Key) &&
+                                characterMonitor.IsCharacter(character.Key) &&
                                 characterMonitor.ActiveCharacterId == character.Key && (displaySourceCrossCharacter ||
                                     characterMonitor.BelongsToActiveCharacter(character.Key)))
                             {
                                 if (inventoryKey.Item2.ToInventoryCategory() is not InventoryCategory.FreeCompanyBags &&
                                     !sourceInventories.ContainsKey(inventoryKey))
+                                {
+                                    sourceInventories.Add(inventoryKey, inventory.Value.Where(c => c.SortedContainer == type).ToList());
+                                }
+                            }
+                            
+                            if (filter.SourceAllFreeCompanies.HasValue && filter.SourceAllFreeCompanies.Value &&
+                                characterMonitor.IsFreeCompany(character.Key) && (displaySourceCrossCharacter ||
+                                    characterMonitor.BelongsToActiveCharacter(character.Key)))
+                            {
+                                if (!sourceInventories.ContainsKey(inventoryKey))
                                 {
                                     sourceInventories.Add(inventoryKey, inventory.Value.Where(c => c.SortedContainer == type).ToList());
                                 }
@@ -1964,6 +2258,17 @@ namespace InventoryTools.Logic
                                                                                characterMonitor
                                                                                    .BelongsToActiveCharacter(
                                                                                        character.Key)))
+                            {
+                                if (!destinationInventories.ContainsKey(inventoryKey))
+                                {
+                                    destinationInventories.Add(inventoryKey, inventory.Value.Where(c => c.SortedContainer == type).ToList());
+                                }
+                            }
+
+                            if (filter.DestinationAllFreeCompanies.HasValue && filter.DestinationAllFreeCompanies.Value &&
+                                characterMonitor.IsFreeCompany(character.Key) &&
+                                (displayDestinationCrossCharacter ||
+                                 characterMonitor.BelongsToActiveCharacter(character.Key)))
                             {
                                 if (!destinationInventories.ContainsKey(inventoryKey))
                                 {
@@ -2050,7 +2355,7 @@ namespace InventoryTools.Logic
                             var filteredDestinationItem = filter.FilterItem(destinationItem);
                             if (filteredDestinationItem != null)
                             {
-                                var itemHashCode = destinationItem.GetHashCode();
+                                var itemHashCode = destinationItem.Item.GenerateHashCode(IgnoreHQWhenSorting ?? false);
                                 if (!itemLocations.ContainsKey(itemHashCode))
                                 {
                                     itemLocations.Add(itemHashCode, new List<InventoryItem>());
@@ -2079,7 +2384,7 @@ namespace InventoryTools.Logic
                             sourceItem.TempQuantity = Math.Min(filteredItem.QuantityRequired.Value, sourceItem.Quantity);
                         }
                         //Item already seen, try to put it into that container
-                        var hashCode = sourceItem.GetHashCode();
+                        var hashCode = sourceItem.GenerateHashCode(IgnoreHQWhenSorting ?? false);
                         if (itemLocations.ContainsKey(hashCode))
                         {
                             for (var i = 0; i < itemLocations[hashCode].Count; i++)
@@ -2201,22 +2506,26 @@ namespace InventoryTools.Logic
                             continue;
                         }
 
-                        var nextSlot = slotsAvailable.First();
-                        while (nextSlot.Value.Count == 0 && slotsAvailable.Count != 0)
+                        foreach (var slot in slotsAvailable)
                         {
-                            slotsAvailable.Remove(nextSlot.Key);
-                            if (slotsAvailable.Count == 0)
+                            if (slot.Value.Count == 0)
                             {
-                                continue;
+                                slotsAvailable.Remove(slot.Key);
                             }
-
-                            nextSlot = slotsAvailable.First();
                         }
+                        
+                        var nextSlots = slotsAvailable.Where(c =>
+                            c.Value.Count != 0 &&
+                            filter.InActiveInventories(activeCharacter, activeRetainer, sourceInventory.Key.Item1,
+                                c.Key.Item1) && !(c.Key.Item1 == sourceItem.RetainerId &&
+                                                  c.Key.Item2.ToInventoryCategory() == sourceItem.SortedCategory)).ToList();
 
-                        if (nextSlot.Key.Item1 == sourceItem.RetainerId && nextSlot.Key.Item2.ToInventoryCategory() == sourceItem.SortedCategory)
+                        if (!nextSlots.Any())
                         {
                             continue;
                         }
+
+                        var nextSlot = nextSlots.First();
 
                         //Don't compare inventory to itself
                         if (nextSlot.Value.Count != 0)
@@ -2234,6 +2543,13 @@ namespace InventoryTools.Logic
                                     sortedItems.Add(new SortingResult(sourceInventory.Key.Item1, nextSlot.Key.Item1,
                                         sourceItem.SortedContainer, nextSlot.Key.Item2, nextEmptySlot.BagLocation(nextEmptySlot.SortedContainer),true, sourceItem,
                                         (int) sourceItem.TempQuantity));
+                                    //Add the destination item into the list of locations in case we have an empty slot for an item but multiple sources of the item.
+                                    var newLocationHash = sourceItem.GenerateHashCode(IgnoreHQWhenSorting ?? false);
+                                    itemLocations.TryAdd(newLocationHash, new List<InventoryItem>());
+                                    itemLocations[newLocationHash].Add(nextEmptySlot);
+                                    absoluteItemLocations.TryAdd(newLocationHash,
+                                        new HashSet<(ulong, InventoryType)>());
+                                    absoluteItemLocations[newLocationHash].Add((nextSlot.Key.Item1, nextEmptySlot.SortedContainer));
                                 }
                             }
                         }
@@ -2262,7 +2578,14 @@ namespace InventoryTools.Logic
                                 sourceInventories.Add(inventoryKey, inventory.Value);
                             }
                         }
-                        if (filter.SourceAllCharacters.HasValue && filter.SourceAllCharacters.Value && !characterMonitor.IsRetainer(character.Key) && (displaySourceCrossCharacter || characterMonitor.ActiveCharacterId == character.Key))
+                        if (filter.SourceAllFreeCompanies.HasValue && filter.SourceAllFreeCompanies.Value && characterMonitor.IsFreeCompany(character.Key) && (displaySourceCrossCharacter || characterMonitor.BelongsToActiveCharacter(character.Key)))
+                        {
+                            if (!sourceInventories.ContainsKey(inventoryKey))
+                            {
+                                sourceInventories.Add(inventoryKey, inventory.Value);
+                            }
+                        }
+                        if (filter.SourceAllCharacters.HasValue && filter.SourceAllCharacters.Value && characterMonitor.IsCharacter(character.Key) && (displaySourceCrossCharacter || characterMonitor.ActiveCharacterId == character.Key))
                         {
                             if (!sourceInventories.ContainsKey(inventoryKey))
                             {
@@ -2322,7 +2645,7 @@ namespace InventoryTools.Logic
                     {
                         foreach (var item in filteredSource.Value)
                         {
-                            var hashCode = item.GetHashCode();
+                            var hashCode = item.Item.GenerateHashCode(IgnoreHQWhenSorting ?? false);
                             if (distinctItems.Contains(hashCode))
                             {
                                 if (!duplicateItems.Contains(hashCode))
@@ -2345,7 +2668,7 @@ namespace InventoryTools.Logic
                         var item = filteredItem.Item;
                         if (filter.DuplicatesOnly.HasValue && filter.DuplicatesOnly == true)
                         {
-                            if (duplicateItems.Contains(item.GetHashCode()))
+                            if (duplicateItems.Contains(item.Item.GenerateHashCode(IgnoreHQWhenSorting ?? false)))
                             {
                                 sortedItems.Add(new SortingResult(filteredSource.Key.Item1, item.SortedContainer,
                                     item, (int)item.Quantity));
@@ -2380,6 +2703,7 @@ namespace InventoryTools.Logic
 
         public FilterConfiguration? Clone()
         {
+            FilterResult = null;
             var clone = this.Copy();
             return clone;
         }

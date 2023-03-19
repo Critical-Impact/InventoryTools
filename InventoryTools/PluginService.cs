@@ -11,6 +11,7 @@ using InventoryTools.Commands;
 using InventoryTools.Logic;
 using InventoryTools.Misc;
 using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
 
 namespace InventoryTools
 {
@@ -36,6 +37,9 @@ namespace InventoryTools
         public FileDialogManager? FileDialogManager;
         public IMobTracker? MobTracker;
         public ITooltipService? TooltipService;
+        public ICommandService? CommandService;
+        public IHotkeyService? HotkeyService;
+        public IKeyStateService? KeyStateService;
     }
 
     public static class PluginService
@@ -71,6 +75,7 @@ namespace InventoryTools
         public static ITooltipService TooltipService { get; private set; } = null!;
         public static OdrScanner OdrScanner { get; private set; } = null!;
         public static IMobTracker MobTracker { get; private set; } = null!;
+        public static IHotkeyService HotkeyService { get; private set; } = null!;
         public static bool PluginLoaded { get; private set; } = false;
 
         public delegate void PluginLoadedDelegate();
@@ -109,6 +114,7 @@ namespace InventoryTools
             IconStorage = new IconService(Service.Interface, Service.Data);
             WindowService = new WindowService(FilterService);
             TooltipService = new TooltipService();
+            HotkeyService = new HotkeyService(FrameworkService, KeyStateService);
             PluginLogic = new PluginLogic(  );
             WotsitIpc = new WotsitIpc(  );
             PluginCommands = new();
@@ -144,6 +150,9 @@ namespace InventoryTools
             if (mockServices.FileDialogManager != null) FileDialogManager = mockServices.FileDialogManager;
             if (mockServices.MobTracker != null) MobTracker = mockServices.MobTracker;
             if (mockServices.TooltipService != null) TooltipService = mockServices.TooltipService;
+            if (mockServices.CommandService != null) CommandService = mockServices.CommandService;
+            if (mockServices.HotkeyService != null) HotkeyService = mockServices.HotkeyService;
+            if (mockServices.KeyStateService != null) KeyStateService = mockServices.KeyStateService;
             PluginLoaded = true;
             if (finishLoading)
             {
@@ -154,6 +163,8 @@ namespace InventoryTools
         public static void Dispose()
         {
             PluginLoaded = false;
+            HotkeyService.Dispose();
+            TooltipService.Dispose();
             IpcService.Dispose();
             ContextMenuService.Dispose();
             IconStorage.Dispose();
@@ -166,30 +177,48 @@ namespace InventoryTools
             OverlayService.Dispose();
             InventoryMonitor.Dispose();
             InventoryScanner.Dispose();
+            WindowService.Dispose();
             CraftMonitor.Dispose();
             TryOn.Dispose();
             GameUi.Dispose();
             CharacterMonitor.Dispose();
             Service.ExcelCache.Destroy();
+            Service.ExcelCache.Dispose();
             MarketCache.SaveCache(true);
             MarketCache.Dispose();
             Universalis.Dispose();
             GameInterface.Dispose();
+            OdrScanner.Dispose();
+            CommandManager.Dispose();
             if (TetrisGame.HasInstance)
             {
                 TetrisGame.Instance.Dispose();
             }
             ConfigurationManager.ClearQueue();
             ConfigurationManager.Save();
+            ConfigurationManager.Dereference();
             FrameworkService.Dispose();
             PluginInterfaceService.Dispose();
 
+            Service.Dereference();
+
+            Dereference();
+        }
+
+        public static void Dereference()
+        {
+            FrameworkService = null!;
+            CommandService = null!;
+            PluginInterfaceService = null!;
+            KeyStateService = null!;
+            GuiService = null!;
+            DataService = null!;
+            ChatService = null!;
             InventoryMonitor = null!;
             InventoryScanner = null!;
             CharacterMonitor = null!;
             PluginLogic = null!;
             GameUi = null!;
-            TryOn = null!;
             TryOn = null!;
             PluginCommands = null!;
             CommandManager = null!;
@@ -204,7 +233,13 @@ namespace InventoryTools
             MarketCache = null!;
             Universalis = null!;
             GameInterface = null!;
+            IpcService = null!;
+            ChatUtilities = null!;
             TooltipService = null!;
+            OdrScanner = null!;
+            MobTracker = null!;
+            HotkeyService = null!;
+            OnPluginLoaded = null;
         }
     }
 }

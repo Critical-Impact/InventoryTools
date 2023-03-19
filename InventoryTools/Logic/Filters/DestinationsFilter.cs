@@ -44,6 +44,8 @@ namespace InventoryTools.Logic.Filters
             ImGui.SameLine();
             UiHelpers.HelpMarker(HelpText);
             var allCharacters = PluginService.CharacterMonitor.Characters;
+            
+            //Retainers
             List<string> destinations = new();
             foreach (var retainerCategories in configuration.DestinationRetainerCategories)
             {
@@ -69,7 +71,9 @@ namespace InventoryTools.Logic.Filters
                 ImGui.PopStyleColor();
             }
             ImGui.SameLine();
-            ImGui.Text(String.Join(", ", destinations));
+            ImGui.TextWrapped(String.Join(", ", destinations));
+            
+            //Characters
             destinations = new();
             foreach (var characterCategories in configuration.DestinationCharacterCategories)
             {
@@ -95,7 +99,35 @@ namespace InventoryTools.Logic.Filters
                 ImGui.PopStyleColor();
             }
             ImGui.SameLine();
-            ImGui.Text(String.Join(", ", destinations));
+            ImGui.TextWrapped(String.Join(", ", destinations));
+            
+            //Free Companies
+            destinations = new();
+            foreach (var characterCategories in configuration.DestinationFreeCompanyCategories)
+            {
+                foreach (var characterCategory in characterCategories.Value)
+                {
+                    if (allCharacters.ContainsKey(characterCategories.Key) &&
+                        characterCategories.Key.ToString().StartsWith("9"))
+                    {
+                        var formattedName = allCharacters[characterCategories.Key].FormattedName + " - " +
+                                            characterCategory.FormattedName();
+                        destinations.Add(formattedName);
+                    }
+                }
+            }
+            ImGui.SetNextItemWidth(LabelSize);
+            if (destinations.Count != 0)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);
+            }
+            ImGui.LabelText("##" + Key + "CharacterLabel", "Free Company Destinations" + ":");
+            if (destinations.Count != 0)
+            {
+                ImGui.PopStyleColor();
+            }
+            ImGui.SameLine();
+            ImGui.TextWrapped(String.Join(", ", destinations));
         }
     }
 }

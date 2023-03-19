@@ -4,6 +4,7 @@ using Dalamud.Logging;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
 using ImGuiScene;
+using InventoryTools.Services.Interfaces;
 
 namespace InventoryTools.Services;
 

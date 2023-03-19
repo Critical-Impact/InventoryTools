@@ -19,6 +19,11 @@ namespace InventoryTools.Logic.Filters
         public override FilterType AvailableIn { get; set; } =
             FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter;
         
+        public override void ResetFilter(FilterConfiguration configuration)
+        {
+            UpdateFilterConfiguration(configuration, EmptyValue);
+        }
+        
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
             return null;

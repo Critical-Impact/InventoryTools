@@ -1,6 +1,7 @@
 using Dalamud;
 using Dalamud.Data;
 using InventoryTools.Extensions;
+using InventoryTools.Services.Interfaces;
 using Lumina.Data.Files;
 
 namespace InventoryTools.Services;

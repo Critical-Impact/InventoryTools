@@ -3,7 +3,7 @@ using System.IO;
 using Dalamud.Plugin.Ipc;
 using ImGuiScene;
 
-namespace InventoryTools.Services;
+namespace InventoryTools.Services.Interfaces;
 
 public interface IPluginInterfaceService
 {

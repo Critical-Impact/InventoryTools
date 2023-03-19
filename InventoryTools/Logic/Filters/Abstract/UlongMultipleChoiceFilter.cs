@@ -13,5 +13,10 @@ namespace InventoryTools.Logic.Filters.Abstract
         {
             configuration.UpdateUlongChoiceFilter(Key, newValue);
         }
+        
+        public override void ResetFilter(FilterConfiguration configuration)
+        {
+            UpdateFilterConfiguration(configuration, new List<ulong>());
+        }
     }
 }

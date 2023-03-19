@@ -19,5 +19,11 @@ namespace InventoryTools.Logic.Filters.Abstract
         public abstract bool? FilterItem(FilterConfiguration configuration, ItemEx item);
 
         public abstract void Draw(FilterConfiguration configuration);
+
+        public void ResetFilter(FilterConfiguration configuration)
+        {
+            
+        }
+
     }
 }

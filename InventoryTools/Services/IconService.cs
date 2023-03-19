@@ -1,3 +1,6 @@
+using System.IO;
+using InventoryTools.Services.Interfaces;
+
 namespace InventoryTools.Services;
 
 using System.Collections.Generic;
@@ -12,12 +15,14 @@ public class IconService : IIconService
     private readonly DalamudPluginInterface        _pi;
     private readonly DataManager                   _gameData;
     private readonly Dictionary<uint, TextureWrap> _icons;
+    private readonly Dictionary<string, TextureWrap> _images;
 
     public IconService(DalamudPluginInterface pi, DataManager gameData, int size = 0)
     {
         _pi       = pi;
         _gameData = gameData;
         _icons    = new Dictionary<uint, TextureWrap>(size);
+        _images    = new Dictionary<string, TextureWrap>(size);
     }
 
     public TextureWrap this[int id]
@@ -43,6 +48,18 @@ public class IconService : IIconService
         ret        = _pi.UiBuilder.LoadImageRaw(iconData, icon.Header.Width, icon.Header.Height, 4);
         _icons[id] = ret;
         return ret;
+    }
+
+    public TextureWrap LoadImage(string imageName)
+    {
+        if (_images.TryGetValue(imageName, out var ret))
+            return ret;
+        
+        var assemblyLocation = PluginService.PluginInterfaceService!.AssemblyLocation.DirectoryName!;
+        var imagePath = Path.Combine(assemblyLocation, $@"Images\{imageName}.png");
+        var textureWrap = PluginService.PluginInterfaceService!.LoadImage(imagePath);
+        _images[imageName] = textureWrap;
+        return  textureWrap;
     }
 
     private HashSet<int> _availableIcons = new HashSet<int>();
@@ -74,7 +91,10 @@ public class IconService : IIconService
     {
         foreach (var icon in _icons.Values)
             icon.Dispose();
+        foreach (var image in _images.Values)
+            image.Dispose();
         _icons.Clear();
+        _images.Clear();
     }
 
     ~IconService()

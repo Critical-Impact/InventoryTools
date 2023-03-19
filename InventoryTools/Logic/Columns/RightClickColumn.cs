@@ -79,10 +79,12 @@ namespace InventoryTools.Logic.Columns
                 ImGui.OpenPopup("RightClick" + rowIndex);
             }
 
-            if (ImGui.BeginPopup("RightClick" + rowIndex))
+            using (var popup = ImRaii.Popup("RightClick" + rowIndex))
             {
-                item.DrawRightClickPopup();
-                ImGui.EndPopup();
+                if (popup.Success)
+                {
+                    item.DrawRightClickPopup();
+                }
             }
         }
     }

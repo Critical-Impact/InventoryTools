@@ -8,10 +8,10 @@ namespace InventoryTools.Logic.Columns
 {
     public class MarketBoardSevenDayCountColumn : IntegerColumn
     {
-        protected static readonly string LoadingString = "loading...";
-        protected static readonly string UntradableString = "untradable";
-        protected static readonly int Loading = -1;
-        protected static readonly int Untradable = -2;
+        protected readonly string LoadingString = "loading...";
+        protected readonly string UntradableString = "untradable";
+        protected readonly int Loading = -1;
+        protected readonly int Untradable = -2;
         
         public override IColumnEvent? DoDraw(int? currentValue, int rowIndex, FilterConfiguration filterConfiguration)
         {

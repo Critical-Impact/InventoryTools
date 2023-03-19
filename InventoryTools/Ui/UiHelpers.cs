@@ -34,31 +34,35 @@ namespace InventoryTools
 
         public static void CenterElement(float height)
         {
-            ImGui.SetCursorPosY((ImGui.GetWindowSize().Y - height) / 2.0f);
+            ImGui.SetCursorPosY((ImGui.GetWindowSize().Y - height) / 2.0f + (ImGui.GetStyle().FramePadding.Y / 2.0f));
         }
 
         public static void WrapTableColumnElements<T>(string windowId, IEnumerable<T> items, float rowSize, Func<T, bool> drawElement)
         {
-            using (ImRaii.Child(windowId, new Vector2(ImGui.GetContentRegionAvail().X, rowSize + ImGui.GetStyle().CellPadding.Y + ImGui.GetStyle().ItemSpacing.Y) * ImGui.GetIO().FontGlobalScale, false))
+            using (var wrapTableChild = ImRaii.Child(windowId, new Vector2(ImGui.GetContentRegionAvail().X, rowSize + ImGui.GetStyle().CellPadding.Y + ImGui.GetStyle().ItemSpacing.Y) * ImGui.GetIO().FontGlobalScale, false))
             {
-                var columnWidth = ImGui.GetContentRegionAvail().X * ImGui.GetIO().FontGlobalScale;
-                var itemWidth = (rowSize + ImGui.GetStyle().ItemSpacing.X) * ImGui.GetIO().FontGlobalScale;
-                var maxItems = itemWidth != 0 ? (int)Math.Floor(columnWidth / itemWidth) : 0;
-                maxItems = maxItems == 0 ? 1 : maxItems;
-                var enumerable = items.ToList();
-                var count = 1;
-                for (var index = 0; index < enumerable.Count; index++)
+                if (wrapTableChild.Success)
                 {
-                    using (ImRaii.PushId(index))
+                    var columnWidth = ImGui.GetContentRegionAvail().X * ImGui.GetIO().FontGlobalScale;
+                    var itemWidth = (rowSize + ImGui.GetStyle().ItemSpacing.X) * ImGui.GetIO().FontGlobalScale;
+                    var maxItems = itemWidth != 0 ? (int)Math.Floor(columnWidth / itemWidth) : 0;
+                    maxItems = maxItems == 0 ? 1 : maxItems;
+                    var enumerable = items.ToList();
+                    var count = 1;
+                    for (var index = 0; index < enumerable.Count; index++)
                     {
-                        if (drawElement.Invoke(enumerable[index]))
+                        using (ImRaii.PushId(index))
                         {
-                            
-                            if (count % maxItems != 0)
+                            if (drawElement.Invoke(enumerable[index]))
                             {
-                                ImGui.SameLine();
+
+                                if (count % maxItems != 0)
+                                {
+                                    ImGui.SameLine();
+                                }
+
+                                count++;
                             }
-                            count++;
                         }
                     }
                 }

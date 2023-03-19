@@ -22,6 +22,8 @@ namespace InventoryTools.Extensions
                     return "Settings";
                 case SettingSubCategory.Visuals:
                     return "Visuals";
+                case SettingSubCategory.WindowLayout:
+                    return "Window Layout";
                 case SettingSubCategory.AutoSave:
                     return "Auto Save";
                 case SettingSubCategory.FilterSettings:

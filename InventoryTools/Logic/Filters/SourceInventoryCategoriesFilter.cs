@@ -19,6 +19,11 @@ namespace InventoryTools.Logic.Filters
             configuration.SourceCategories = newValue.Count == 0 ? null : newValue.Distinct().ToHashSet();
         }
         
+        public override void ResetFilter(FilterConfiguration configuration)
+        {
+            UpdateFilterConfiguration(configuration, new List<InventoryCategory>());
+        }
+        
         public override int LabelSize { get; set; } = 240;
         public override string Key { get; set; } = "SourceInventoryCategories";
         public override string Name { get; set; } = "Source - Inventory Categories";

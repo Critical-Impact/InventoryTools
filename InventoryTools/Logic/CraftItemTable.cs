@@ -1,8 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Text;
 using CriticalCommonLib.Crafting;
+using CsvHelper;
 using Dalamud.Logging;
 using ImGuiNET;
 using InventoryTools.Logic.Columns;
@@ -65,149 +69,156 @@ namespace InventoryTools.Logic
             if(ImGui.CollapsingHeader("To Craft", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
             {
                 isExpanded = true;
-                using (ImRaii.Child("CraftContent", size * ImGui.GetIO().FontGlobalScale))
+                using (var craftContentChild = ImRaii.Child("CraftContent", size * ImGui.GetIO().FontGlobalScale))
                 {
-                    if (FilterConfiguration.FilterType == FilterType.CraftFilter)
+                    if (craftContentChild.Success)
                     {
-                        using (var table = ImRaii.Table(Key + "CraftTable", Columns.Count, _tableFlags))
+                        if (FilterConfiguration.FilterType == FilterType.CraftFilter)
                         {
-                            if (!table || !table.Success) return isExpanded;
-                            var refresh = false;
-                            ImGui.TableSetupScrollFreeze(Math.Min(FreezeCols ?? 0, Columns.Count),
-                                FreezeRows ?? (ShowFilterRow ? 2 : 1));
-                            for (var index = 0; index < Columns.Count; index++)
+                            using (var table = ImRaii.Table(Key + "CraftTable", Columns.Count, _tableFlags))
                             {
-                                var column = Columns[index];
-                                column.Setup(index);
-                            }
-
-                            ImGui.TableHeadersRow();
-
-
-                            if (refresh || NeedsRefresh)
-                            {
-                                Refresh(ConfigurationManager.Config);
-                            }
-
-                            //Make the visibility of zero quantity required items a toggle
-                            var outputs = GetOutputItemList();
-                            var preCrafts = GetPrecraftItemList();
-                            var everythingElse = GetRemainingItemList();
-
-                            ImGui.TableNextRow(ImGuiTableRowFlags.Headers, FilterConfiguration.TableHeight);
-                            ImGui.TableNextColumn();
-                            var overallIndex = 0;
-
-                            using (var treeNode = ImRaii.TreeNode("Crafts:",
-                                       ImGuiTreeNodeFlags.SpanFullWidth | ImGuiTreeNodeFlags.DefaultOpen))
-                            {
-                                if (treeNode.Success)
+                                if (!table || !table.Success) return isExpanded;
+                                var refresh = false;
+                                ImGui.TableSetupScrollFreeze(Math.Min(FreezeCols ?? 0, Columns.Count),
+                                    FreezeRows ?? (ShowFilterRow ? 2 : 1));
+                                for (var index = 0; index < Columns.Count; index++)
                                 {
-                                    if (outputs.Count == 0)
+                                    var column = Columns[index];
+                                    column.Setup(index);
+                                }
+
+                                ImGui.TableHeadersRow();
+
+
+                                if (refresh || NeedsRefresh)
+                                {
+                                    Refresh(ConfigurationManager.Config);
+                                }
+
+                                //Make the visibility of zero quantity required items a toggle
+                                var outputs = GetOutputItemList();
+                                var preCrafts = GetPrecraftItemList();
+                                var everythingElse = GetRemainingItemList();
+
+                                ImGui.TableNextRow(ImGuiTableRowFlags.Headers, FilterConfiguration.TableHeight);
+                                ImGui.TableNextColumn();
+                                var overallIndex = 0;
+
+                                using (var treeNode = ImRaii.TreeNode("Crafts:",
+                                           ImGuiTreeNodeFlags.SpanFullWidth | ImGuiTreeNodeFlags.DefaultOpen))
+                                {
+                                    if (treeNode.Success)
                                     {
-                                        ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
-                                        for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+                                        if (outputs.Count == 0)
+                                        {
+                                            ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
+                                            for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+                                            {
+                                                ImGui.TableNextColumn();
+                                                if (columnIndex == 1)
+                                                {
+                                                    ImGui.Text(
+                                                        "No items have been added to the list. Add items from the top right or by right clicking on an item anywhere within the plugin.");
+                                                }
+                                            }
+                                        }
+
+                                        for (var index = 0; index < outputs.Count; index++)
+                                        {
+                                            var item = outputs[index];
+                                            ImGui.TableNextRow(ImGuiTableRowFlags.None,
+                                                FilterConfiguration.TableHeight);
+                                            for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+                                            {
+                                                var column = Columns[columnIndex];
+                                                column.Draw(FilterConfiguration, item, overallIndex);
+                                                ImGui.SameLine();
+                                                if (columnIndex == Columns.Count - 1)
+                                                {
+                                                    PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration,
+                                                        item,
+                                                        overallIndex);
+                                                }
+                                            }
+
+                                            overallIndex++;
+                                        }
+                                    }
+                                }
+
+                                ImGui.TableNextRow(ImGuiTableRowFlags.Headers, FilterConfiguration.TableHeight);
+                                ImGui.TableNextColumn();
+                                using (var treeNode = ImRaii.TreeNode("Precrafts:",
+                                           ImGuiTreeNodeFlags.SpanFullWidth | ImGuiTreeNodeFlags.DefaultOpen))
+                                {
+                                    for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+                                    {
+                                        if (columnIndex != 0)
                                         {
                                             ImGui.TableNextColumn();
-                                            if (columnIndex == 1)
-                                            {
-                                                ImGui.Text(
-                                                    "No items have been added to the list. Add items from the top right or by right clicking on an item anywhere within the plugin.");
-                                            }
                                         }
                                     }
 
-                                    for (var index = 0; index < outputs.Count; index++)
+                                    if (treeNode.Success)
                                     {
-                                        var item = outputs[index];
-                                        ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
-                                        for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+                                        for (var index = 0; index < preCrafts.Count; index++)
                                         {
-                                            var column = Columns[columnIndex];
-                                            column.Draw(FilterConfiguration, item, overallIndex);
-                                            ImGui.SameLine();
-                                            if (columnIndex == Columns.Count - 1)
+                                            var item = preCrafts[index];
+                                            ImGui.TableNextRow(ImGuiTableRowFlags.None,
+                                                FilterConfiguration.TableHeight);
+                                            for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                                             {
-                                                PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration,
-                                                    item,
-                                                    overallIndex);
+                                                var column = Columns[columnIndex];
+                                                column.Draw(FilterConfiguration, item, overallIndex);
+                                                ImGui.SameLine();
+                                                if (columnIndex == Columns.Count - 1)
+                                                {
+                                                    PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration,
+                                                        item,
+                                                        overallIndex);
+                                                }
                                             }
+
+                                            overallIndex++;
                                         }
-
-                                        overallIndex++;
-                                    }
-                                }
-                            }
-
-                            ImGui.TableNextRow(ImGuiTableRowFlags.Headers, FilterConfiguration.TableHeight);
-                            ImGui.TableNextColumn();
-                            using (var treeNode = ImRaii.TreeNode("Precrafts:", ImGuiTreeNodeFlags.SpanFullWidth | ImGuiTreeNodeFlags.DefaultOpen))
-                            {
-                                for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
-                                {
-                                    if (columnIndex != 0)
-                                    {
-                                        ImGui.TableNextColumn();
                                     }
                                 }
 
-                                if (treeNode.Success)
+                                ImGui.TableNextRow(ImGuiTableRowFlags.Headers, FilterConfiguration.TableHeight);
+                                ImGui.TableNextColumn();
+                                using (var treeNode = ImRaii.TreeNode("Gather/Buy:",
+                                           ImGuiTreeNodeFlags.SpanFullWidth | ImGuiTreeNodeFlags.DefaultOpen))
                                 {
-                                    for (var index = 0; index < preCrafts.Count; index++)
+                                    for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                                     {
-                                        var item = preCrafts[index];
-                                        ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
-                                        for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+                                        if (columnIndex != 0)
                                         {
-                                            var column = Columns[columnIndex];
-                                            column.Draw(FilterConfiguration, item, overallIndex);
-                                            ImGui.SameLine();
-                                            if (columnIndex == Columns.Count - 1)
-                                            {
-                                                PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration,
-                                                    item,
-                                                    overallIndex);
-                                            }
+                                            ImGui.TableNextColumn();
                                         }
-
-                                        overallIndex++;
                                     }
-                                }
-                            }
 
-                            ImGui.TableNextRow(ImGuiTableRowFlags.Headers, FilterConfiguration.TableHeight);
-                            ImGui.TableNextColumn();
-                            using (var treeNode = ImRaii.TreeNode("Gather/Buy:",
-                                       ImGuiTreeNodeFlags.SpanFullWidth | ImGuiTreeNodeFlags.DefaultOpen))
-                            {
-                                for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
-                                {
-                                    if (columnIndex != 0)
+                                    if (treeNode.Success)
                                     {
-                                        ImGui.TableNextColumn();
-                                    }
-                                }
-
-                                if (treeNode.Success)
-                                {
-                                    for (var index = 0; index < everythingElse.Count; index++)
-                                    {
-                                        var item = everythingElse[index];
-                                        ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
-                                        for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+                                        for (var index = 0; index < everythingElse.Count; index++)
                                         {
-                                            var column = Columns[columnIndex];
-                                            column.Draw(FilterConfiguration, item, overallIndex);
-                                            ImGui.SameLine();
-                                            if (columnIndex == Columns.Count - 1)
+                                            var item = everythingElse[index];
+                                            ImGui.TableNextRow(ImGuiTableRowFlags.None,
+                                                FilterConfiguration.TableHeight);
+                                            for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                                             {
-                                                PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration,
-                                                    item,
-                                                    overallIndex);
+                                                var column = Columns[columnIndex];
+                                                column.Draw(FilterConfiguration, item, overallIndex);
+                                                ImGui.SameLine();
+                                                if (columnIndex == Columns.Count - 1)
+                                                {
+                                                    PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration,
+                                                        item,
+                                                        overallIndex);
+                                                }
                                             }
-                                        }
 
-                                        overallIndex++;
+                                            overallIndex++;
+                                        }
                                     }
                                 }
                             }
@@ -259,6 +270,34 @@ namespace InventoryTools.Logic
                 CraftItems = FilterConfiguration.CraftList.GetFlattenedMergedMaterials();
                 IsSearching = false;
                 NeedsRefresh = false;
+            }
+        }
+
+        public void ExportToCsv(string fileName)
+        {
+            using (var writer = new StreamWriter(fileName,Encoding.UTF8, new FileStreamOptions()
+                   {
+                       Mode = FileMode.Create,
+                       Access = FileAccess.ReadWrite,
+                   }))
+            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            {
+                foreach (var column in Columns)
+                {
+                    csv.WriteField(column.Name);
+                }
+                csv.NextRecord();
+                if (FilterConfiguration.FilterType == FilterType.CraftFilter)
+                {
+                    foreach (var item in CraftItems)
+                    {
+                        foreach (var column in Columns)
+                        {
+                            csv.WriteField(column.CsvExport(item));
+                        }
+                        csv.NextRecord();
+                    }
+                }
             }
         }
     }

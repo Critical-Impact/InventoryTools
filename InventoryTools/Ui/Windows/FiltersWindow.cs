@@ -4,10 +4,16 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Addons;
+using Dalamud.Interface;
+using Dalamud.Interface.Colors;
 using ImGuiNET;
 using ImGuiScene;
+using InventoryTools.Extensions;
 using InventoryTools.Logic;
+using InventoryTools.Logic.Settings;
+using InventoryTools.Services;
 using InventoryTools.Ui.Widgets;
+using OtterGui.Raii;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 
@@ -22,23 +28,59 @@ namespace InventoryTools.Ui
         private string _activeFilter = "";
         private string _tabLayout = "";
         private int _selectedFilterTab = 0;
+        private bool _settingsActive = false;
         public override Vector2 MaxSize { get; } = new(2000, 2000);
         public override Vector2 MinSize { get; } = new(200, 200);
         public override Vector2 DefaultSize { get; } = new(600, 600);
         public override bool DestroyOnClose => false;
-        private static TextureWrap _settingsIcon => PluginService.IconStorage.LoadIcon(66319);
-        private static TextureWrap _tetrisIcon => PluginService.IconStorage.LoadIcon(76955);
-        private static TextureWrap _craftIcon => PluginService.IconStorage.LoadIcon(114060);
-        private static TextureWrap _csvIcon => PluginService.IconStorage.LoadIcon(47);
-        private static TextureWrap _clearIcon => PluginService.IconStorage.LoadIcon(66308);
-        private static TextureWrap _marketIcon => PluginService.IconStorage.LoadIcon(90003);
-        private static TextureWrap _helpIcon => PluginService.IconStorage.LoadIcon(66313);
-        private static TextureWrap _dutyIcon => PluginService.IconStorage.LoadIcon(61801);
-        private static TextureWrap _mobIcon => PluginService.IconStorage.LoadIcon(60041);
-        
+        private HoverButton _editIcon { get; } = new(PluginService.IconStorage.LoadImage("edit"),  new Vector2(22, 22));
+        private HoverButton _settingsIcon { get; } = new(PluginService.IconStorage.LoadIcon(66319),  new Vector2(22, 22));
+        private HoverButton _craftIcon { get; } = new(PluginService.IconStorage.LoadImage("craft"),  new Vector2(22, 22));
+        private HoverButton _csvIcon { get; } = new(PluginService.IconStorage.LoadImage("export2"),  new Vector2(22,22));
+        private HoverButton _clearIcon { get; } = new(PluginService.IconStorage.LoadIcon(66308),  new Vector2(22, 22));
+        private HoverButton _closeSettingsIcon { get; } = new(PluginService.IconStorage.LoadIcon(66311),  new Vector2(22, 22));
+        private static HoverButton _marketIcon { get; } = new(PluginService.IconStorage.LoadImage("refresh-web"),  new Vector2(22, 22));
+        private HoverButton _addIcon { get; } = new(PluginService.IconStorage.LoadIcon(66315),  new Vector2(22, 22));
+        private static HoverButton _menuIcon { get; } = new(PluginService.IconStorage.LoadImage("menu"),  new Vector2(22, 22));
+
         
         private List<FilterConfiguration>? _filters;
         private PopupMenu _addFilterMenu;
+
+        private PopupMenu _settingsMenu = new PopupMenu("configMenu", PopupMenu.PopupMenuButtons.All,
+            new List<PopupMenu.IPopupMenuItem>()
+            {
+                new PopupMenu.PopupMenuItemSelectable("Mob Window", "mobs", OpenMobsWindow,"Open the mobs window."),
+                new PopupMenu.PopupMenuItemSelectable("Duties Window", "duties", OpenDutiesWindow,"Open the duties window."),
+                new PopupMenu.PopupMenuItemSelectable("Airships Window", "airships", OpenAirshipsWindow,"Open the airships window."),
+                new PopupMenu.PopupMenuItemSelectable("Submarines Window", "submarines", OpenAirshipsWindow,"Open the submarines window."),
+                new PopupMenu.PopupMenuItemSeparator(),
+                new PopupMenu.PopupMenuItemSelectable("Help", "help", OpenHelpWindow,"Open the help window."),
+            });
+
+        private static void OpenHelpWindow(string obj)
+        {
+            PluginService.WindowService.OpenWindow<HelpWindow>(HelpWindow.AsKey);
+        }
+
+        private static void OpenDutiesWindow(string obj)
+        {
+            PluginService.WindowService.OpenWindow<DutiesWindow>(DutiesWindow.AsKey);
+        }
+
+        private static void OpenAirshipsWindow(string obj)
+        {
+            PluginService.WindowService.OpenWindow<AirshipsWindow>(AirshipsWindow.AsKey);
+        }
+
+        private static void OpenMobsWindow(string obj)
+        {
+            PluginService.WindowService.OpenWindow<BNpcWindow>(BNpcWindow.AsKey);
+        }        
+        private static void OpenNPCsWindow(string obj)
+        {
+            PluginService.WindowService.OpenWindow<ENpcWindow>(ENpcWindow.AsKey);
+        }
 
         public FiltersWindow(string name = "Allagan Tools - Filters") : base(name)
         {
@@ -52,16 +94,17 @@ namespace InventoryTools.Ui
         
         private Dictionary<FilterConfiguration, PopupMenu> _popupMenus = new();
 
-        public PopupMenu GetFilterMenu(FilterConfiguration configuration)
+        public PopupMenu GetFilterMenu(FilterConfiguration configuration, WindowLayout layout)
         {
             if (!_popupMenus.ContainsKey(configuration))
             {
                 _popupMenus[configuration] = new PopupMenu("fm" + configuration.Key, PopupMenu.PopupMenuButtons.Right,
                     new List<PopupMenu.IPopupMenuItem>()
                     {
+                        new PopupMenu.PopupMenuItemSelectable("Edit", "ef_" + configuration.Key, EditFilter, "Edit the filter."),
                         new PopupMenu.PopupMenuItemSelectableAskName("Duplicate", "df_" + configuration.Key, configuration.Name, DuplicateFilter, "Duplicate the filter."),
-                        new PopupMenu.PopupMenuItemSelectable("Move Left", "mu_" + configuration.Key, MoveFilterUp, "Move the filter left."),
-                        new PopupMenu.PopupMenuItemSelectable("Move Right", "md_" + configuration.Key, MoveFilterDown, "Move the filter right."),
+                        new PopupMenu.PopupMenuItemSelectable(layout == WindowLayout.Tabs ? "Move Left" : "Move Up", "mu_" + configuration.Key, MoveFilterUp, layout == WindowLayout.Tabs ? "Move the filter left." : "Move the filter up."),
+                        new PopupMenu.PopupMenuItemSelectable(layout == WindowLayout.Tabs ? "Move Right" : "Move Down", "md_" + configuration.Key, MoveFilterDown, layout == WindowLayout.Tabs ? "Move the filter right." : "Move the filter down."),
                         new PopupMenu.PopupMenuItemSelectableConfirm("Remove", "rf_" + configuration.Key, "Are you sure you want to remove this filter?", RemoveFilter, "Remove the filter."),
                     }
                 );
@@ -69,8 +112,19 @@ namespace InventoryTools.Ui
 
             return _popupMenus[configuration];
         }
-        
-        
+
+        private void EditFilter(string id)
+        {
+            id = id.Replace("ef_", "");
+            var existingFilter = PluginService.FilterService.GetFilterByKey(id);
+            if (existingFilter != null)
+            {
+                FocusFilter(existingFilter);
+                this._settingsActive = true;
+            }
+        }
+
+
         private void RemoveFilter(string id, bool confirmed)
         {
             if (confirmed)
@@ -90,7 +144,12 @@ namespace InventoryTools.Ui
             var existingFilter = PluginService.FilterService.GetFilterByKey(id);
             if (existingFilter != null)
             {
+                var currentFilter = this.SelectedConfiguration;
                 PluginService.FilterService.MoveFilterDown(existingFilter);
+                if (currentFilter != null)
+                {
+                    FocusFilter(currentFilter);
+                }
             }
         }
 
@@ -100,7 +159,12 @@ namespace InventoryTools.Ui
             var existingFilter = PluginService.FilterService.GetFilterByKey(id);
             if (existingFilter != null)
             {
+                var currentFilter = this.SelectedConfiguration;
                 PluginService.FilterService.MoveFilterUp(existingFilter);
+                if (currentFilter != null)
+                {
+                    FocusFilter(currentFilter);
+                }
             }
         }
 
@@ -110,9 +174,35 @@ namespace InventoryTools.Ui
             var existingFilter = PluginService.FilterService.GetFilterByKey(id);
             if (existingFilter != null)
             {
-                PluginService.FilterService.DuplicateFilter(existingFilter, filterName);
+                var newFilter = PluginService.FilterService.DuplicateFilter(existingFilter, filterName);
+                var configWindow = PluginService.WindowService.GetWindow<ConfigurationWindow>(ConfigurationWindow.AsKey);
+                configWindow.Open();
+                configWindow.BringToFront();
+                configWindow.SetActiveFilter(newFilter);
+                FocusFilter(newFilter);
             }
         }
+        
+        public void FocusFilter(FilterConfiguration filterConfiguration, bool showSettings = false)
+        {
+            var filterConfigurations = Filters;
+            if (filterConfigurations.Contains(filterConfiguration))
+            {
+                _selectedFilterTab = filterConfigurations.IndexOf(filterConfiguration);
+                var filterIndex = Filters.Contains(filterConfiguration) ? Filters.IndexOf(filterConfiguration) : -1;
+                if (filterIndex != -1)
+                {
+                    _newTab = filterIndex;
+                }
+
+                _applyNewTabTime = DateTime.Now + TimeSpan.FromMilliseconds(10);
+                if (showSettings)
+                {
+                    _settingsActive = true;
+                }
+            }
+        }
+
 
         public void SetupWindow()
         {
@@ -172,81 +262,78 @@ namespace InventoryTools.Ui
                 return _filters;
             }
         }
+        
+        private int? _newTab;
+        private DateTime? _applyNewTabTime;
 
-        public override void Draw()
+        private bool SwitchNewTab => _newTab != null && _applyNewTabTime != null && _applyNewTabTime.Value <= DateTime.Now;
+        
+        public override unsafe void Draw()
         {
-            if (ImGui.BeginTabBar("###InventoryTabs" + _tabLayout, ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.TabListPopupButton))
+            if (ConfigurationManager.Config.FiltersLayout == WindowLayout.Sidebar)
             {
-                var filterConfigurations = Filters;
-                for (var index = 0; index < filterConfigurations.Count; index++)
+                DrawSidebar();
+                DrawMainWindow();
+            }
+            else
+            {
+                DrawTabBar();
+            }
+        }
+
+        private void DrawMainWindow()
+        {
+            using (var mainChild = ImRaii.Child("Main",new Vector2(-1, -1) * ImGui.GetIO().FontGlobalScale, false,ImGuiWindowFlags.HorizontalScrollbar))
+            {
+                if (mainChild.Success)
                 {
-                    var filterConfiguration = filterConfigurations[index];
-                    var itemTable = PluginService.FilterService.GetFilterTable(filterConfiguration);
-                    if (itemTable == null)
-                    {
-                        continue;
-                    }
+                    var isWindowFocused = ImGui.IsWindowFocused();
+                    var filterConfigurations = Filters;
 
-                    if (filterConfiguration.DisplayInTabs && ImGui.BeginTabItem(itemTable.Name + "##" + filterConfiguration.Key))
+                    if (filterConfigurations.Count == 0)
                     {
-                        GetFilterMenu(filterConfiguration).Draw();
-
-                        var activeFilter = DrawFilter(itemTable, filterConfiguration, _activeFilter);
-                        if (_activeFilter != activeFilter && ImGui.IsWindowFocused())
+                        using (var contentChild = ImRaii.Child("Content", new Vector2(0, 0) * ImGui.GetIO().FontGlobalScale, true))
                         {
-                            if (ConfigurationManager.Config.SwitchFiltersAutomatically &&
-                                ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
-                                ConfigurationManager.Config.ActiveUiFilter != null)
+                            if (contentChild.Success)
                             {
-                                PluginService.FrameworkService.RunOnFrameworkThread(() =>
-                                {
-                                    PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
-                                });
+                                ImGui.Text(
+                                    "Get started by adding a craft list by hitting the + button on the bottom left.");
                             }
                         }
-
-                        ImGui.EndTabItem();
-                    }
-                }
-                
-                if (ConfigurationManager.Config.ShowFilterTab && ImGui.BeginTabItem("Filters"))
-                {
-                    ImGui.BeginChild("###monitorLeft", new Vector2(100, -1) * ImGui.GetIO().FontGlobalScale, true);
-                    for (var index = 0; index < filterConfigurations.Count; index++)
-                    {
-                        var filterConfiguration = filterConfigurations[index];
-                        if (ImGui.Selectable(filterConfiguration.Name + "###fl" + filterConfiguration.Key,
-                                index == _selectedFilterTab))
-                        {
-                            if (ConfigurationManager.Config.SwitchFiltersAutomatically &&
-                                ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key)
-                            {
-                                PluginService.FrameworkService.RunOnFrameworkThread(() =>
-                                {
-                                    PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
-                                });
-                            }
-
-                            _selectedFilterTab = index;
-                        }
                     }
 
-                    ImGui.EndChild();
-
-                    ImGui.SameLine();
-
-                    ImGui.BeginChild("###monitorRight", new Vector2(-1, -1), true,
-                        ImGuiWindowFlags.HorizontalScrollbar);
                     for (var index = 0; index < filterConfigurations.Count; index++)
                     {
                         if (_selectedFilterTab == index)
                         {
                             var filterConfiguration = filterConfigurations[index];
-                            var table = PluginService.FilterService.GetFilterTable(filterConfiguration.Key);
-                            if (table != null)
+                            if (isWindowFocused)
                             {
-                                var activeFilter = DrawFilter(table, filterConfiguration, _activeFilter);
-                                if (_activeFilter != activeFilter)
+                                if (ConfigurationManager.Config.SwitchFiltersAutomatically &&
+                                    ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
+                                    ConfigurationManager.Config.ActiveUiFilter != null)
+                                {
+                                    PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                    {
+                                        PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
+                                    });
+                                }
+                            }
+
+                            var itemTable = PluginService.FilterService.GetFilterTable(filterConfiguration);
+                            if (itemTable == null)
+                            {
+                                continue;
+                            }
+
+                            if (_settingsActive)
+                            {
+                                DrawSettingsPanel(filterConfiguration);
+                            }
+                            else
+                            {
+                                var activeFilter = DrawFilter(itemTable, filterConfiguration);
+                                if (_activeFilter != activeFilter && ImGui.IsWindowFocused())
                                 {
                                     if (ConfigurationManager.Config.SwitchFiltersAutomatically &&
                                         ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
@@ -261,8 +348,184 @@ namespace InventoryTools.Ui
                             }
                         }
                     }
+                }
+            }
+        }
 
-                    ImGui.EndChild();
+        private void DrawSidebar()
+        {
+            var filterConfigurations = Filters;
+            using (var sideMenuChild = ImRaii.Child("SideMenu", new Vector2(180, -1) * ImGui.GetIO().FontGlobalScale, true))
+            {
+                if (sideMenuChild.Success)
+                {
+                    using (var craftListChild = ImRaii.Child("CraftList", new Vector2(0, -28) * ImGui.GetIO().FontGlobalScale, false))
+                    {
+                        if (craftListChild.Success)
+                        {
+                            for (var index = 0; index < filterConfigurations.Count; index++)
+                            {
+                                var filterConfiguration = filterConfigurations[index];
+                                if (ImGui.Selectable(filterConfiguration.Name + "###fl" + filterConfiguration.Key,
+                                        index == _selectedFilterTab))
+                                {
+                                    _selectedFilterTab = index;
+                                    if (ConfigurationManager.Config.SwitchFiltersAutomatically &&
+                                        ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
+                                        ConfigurationManager.Config.ActiveUiFilter != null)
+                                    {
+                                        PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                        {
+                                            PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
+                                        });
+                                    }
+                                }
+
+                                GetFilterMenu(filterConfiguration, WindowLayout.Sidebar).Draw();
+                            }
+                        }
+                    }
+
+                    using (var commandBarChild = ImRaii.Child("CommandBar", new Vector2(0, 0) * ImGui.GetIO().FontGlobalScale, false))
+                    {
+                        if (commandBarChild.Success)
+                        {
+                            float height = ImGui.GetWindowSize().Y;
+                            ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
+                            if (_addIcon.Draw("cb_af"))
+                            {
+                            }
+
+                            _addFilterMenu.Draw();
+
+                            ImGuiUtil.HoverTooltip("Add a new filter.");
+                        }
+                    }
+                }
+            }
+
+            ImGui.SameLine();
+        }
+
+        private unsafe void DrawTabBar()
+        {
+            using (var tabBar = ImRaii.TabBar("InventoryTabs" + _tabLayout, ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.TabListPopupButton))
+            {
+                if (!tabBar.Success) return;
+                var filterConfigurations = Filters;
+                for (var index = 0; index < filterConfigurations.Count; index++)
+                {
+                    var filterConfiguration = filterConfigurations[index];
+                    var itemTable = PluginService.FilterService.GetFilterTable(filterConfiguration);
+                    if (itemTable == null)
+                    {
+                        continue;
+                    }
+
+                    if (filterConfiguration.DisplayInTabs)
+                    {
+                        var imGuiTabItemFlags = _newTab == index && SwitchNewTab ? ImGuiTabItemFlags.SetSelected : ImGuiTabItemFlags.None;
+                        using var id = ImRaii.PushId(index);
+                        fixed (byte* namePtr = filterConfiguration.NameAsBytes)
+                        {
+                            using (var tabItem = ImRaii.TabItem(namePtr, imGuiTabItemFlags))
+                            {
+                                GetFilterMenu(filterConfiguration, WindowLayout.Tabs).Draw();
+                                
+                                if (SwitchNewTab && _newTab != null && _newTab == index)
+                                {
+                                    _newTab = null;
+                                    _applyNewTabTime = null;
+                                }
+                                if (!tabItem.Success) continue;
+                                
+                                _selectedFilterTab = index;
+                                if (_settingsActive)
+                                {
+                                    DrawSettingsPanel(filterConfiguration);
+                                }
+                                else
+                                {
+                                    var activeFilter = DrawFilter(itemTable, filterConfiguration);
+                                    if (_activeFilter != activeFilter && ImGui.IsWindowFocused())
+                                    {
+                                        if (ConfigurationManager.Config.SwitchFiltersAutomatically &&
+                                            ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
+                                            ConfigurationManager.Config.ActiveUiFilter != null)
+                                        {
+                                            PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                            {
+                                                PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                if (ConfigurationManager.Config.ShowFilterTab && ImGui.BeginTabItem("Filters"))
+                {
+                    using (var child = ImRaii.Child("filterLeft", new Vector2(100, -1) * ImGui.GetIO().FontGlobalScale,
+                               true))
+                    {
+                        if (child.Success)
+                        {
+                            for (var index = 0; index < filterConfigurations.Count; index++)
+                            {
+                                var filterConfiguration = filterConfigurations[index];
+                                if (ImGui.Selectable(filterConfiguration.Name + "###fl" + filterConfiguration.Key,
+                                        index == _selectedFilterTab))
+                                {
+                                    if (ConfigurationManager.Config.SwitchFiltersAutomatically &&
+                                        ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key)
+                                    {
+                                        PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                        {
+                                            PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
+                                        });
+                                    }
+
+                                    _selectedFilterTab = index;
+                                }
+                            }
+                        }
+                    }
+                    ImGui.SameLine();
+                    using (var child = ImRaii.Child("filterRight", new Vector2(-1, -1), true,
+                               ImGuiWindowFlags.HorizontalScrollbar))
+                    {
+                        if (child.Success)
+                        {
+                            for (var index = 0; index < filterConfigurations.Count; index++)
+                            {
+                                if (_selectedFilterTab == index)
+                                {
+                                    var filterConfiguration = filterConfigurations[index];
+                                    var table = PluginService.FilterService.GetFilterTable(filterConfiguration.Key);
+                                    if (table != null)
+                                    {
+                                        var activeFilter = DrawFilter(table, filterConfiguration);
+                                        if (_activeFilter != activeFilter)
+                                        {
+                                            if (ConfigurationManager.Config.SwitchFiltersAutomatically &&
+                                                ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
+                                                ConfigurationManager.Config.ActiveUiFilter != null)
+                                            {
+                                                PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                                {
+                                                    PluginService.FilterService.ToggleActiveUiFilter(
+                                                        filterConfiguration);
+                                                });
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     ImGui.EndTabItem();
                 }
 
@@ -271,114 +534,107 @@ namespace InventoryTools.Ui
                 }
                 
                 _addFilterMenu.Draw();
-
-                ImGui.EndTabBar();
             }
         }
-
-        public static unsafe string DrawFilter(FilterTable itemTable, FilterConfiguration filterConfiguration,string activeFilter)
+        
+        private void DrawSettingsPanel(FilterConfiguration filterConfiguration)
         {
-            ImGui.BeginChild("TopBar", new Vector2(0, 40) * ImGui.GetIO().FontGlobalScale, true,
-                ImGuiWindowFlags.NoScrollbar);
-            var highlightItems = itemTable.HighlightItems;
-            UiHelpers.CenterElement(20 * ImGui.GetIO().FontGlobalScale);
-            ImGui.Checkbox("Highlight?" + "###" + itemTable.Key + "VisibilityCheckbox",
-                ref highlightItems);
-            if (highlightItems != itemTable.HighlightItems)
+            using (var contentChild = ImRaii.Child("Content", new Vector2(0, -44) * ImGui.GetIO().FontGlobalScale, true))
             {
-                PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                if (contentChild.Success)
                 {
-                    PluginService.FilterService.ToggleActiveUiFilter(itemTable.FilterConfiguration);
-                });
-            }
-
-            ImGui.SameLine();
-            UiHelpers.CenterElement(20 * ImGui.GetIO().FontGlobalScale);
-            if (ImGui.ImageButton(_clearIcon.ImGuiHandle,
-                    new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
-                    new Vector2(1, 1), 0))
-            {
-                itemTable.ClearFilters();
-            }
-
-            ImGuiUtil.HoverTooltip("Clear the current search.");
-
-            ImGui.EndChild();
-
-            ImGui.BeginChild("Content", new Vector2(0, -40) * ImGui.GetIO().FontGlobalScale, true,
-                ImGuiWindowFlags.NoScrollbar);
-            if (filterConfiguration.FilterType == FilterType.CraftFilter)
-            {
-                var craftTable = PluginService.FilterService.GetCraftTable(filterConfiguration);
-                craftTable?.Draw(new Vector2(0, -400));
-                itemTable.Draw(new Vector2(0, 0));
-            }
-            else
-            {
-                itemTable.Draw(new Vector2(0, 0));
-            }
-
-            activeFilter = filterConfiguration.Key;
-
-            ImGui.EndChild();
-
-            //Need to have these buttons be determined dynamically or moved elsewhere
-            ImGui.BeginChild("BottomBar", new Vector2(0, 0), true, ImGuiWindowFlags.NoScrollbar);
-            UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-            if (ImGui.ImageButton(_marketIcon.ImGuiHandle,
-                    new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
-                    new Vector2(1, 1), 2))
-            {
-                foreach (var item in itemTable.RenderSortedItems)
-                {
-                    PluginService.Universalis.QueuePriceCheck(item.InventoryItem.ItemId);
-                }
-
-                foreach (var item in itemTable.RenderItems)
-                {
-                    PluginService.Universalis.QueuePriceCheck(item.RowId);
-                }
-            }
-
-            ImGuiUtil.HoverTooltip("Refresh Market Prices");
-            ImGui.SameLine();
-            UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-            if (ImGui.ImageButton(_csvIcon.ImGuiHandle,
-                    new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
-                    new Vector2(1, 1), 2))
-            {
-                PluginService.FileDialogManager.SaveFileDialog("Save to csv", "*.csv", "export.csv", ".csv",
-                    (b, s) => { SaveCallback(itemTable, b, s); }, null, true);
-            }
-
-            ImGuiUtil.HoverTooltip("Export to CSV");
-            if (filterConfiguration.FilterType == FilterType.CraftFilter && PluginService.GameUi.IsWindowVisible(CriticalCommonLib.Services.Ui.WindowName.SubmarinePartsMenu))
-            {
-                var subMarinePartsMenu = PluginService.GameUi.GetWindow("SubmarinePartsMenu");
-                if (subMarinePartsMenu != null)
-                {
-                    ImGui.SameLine();
-                    if (ImGui.Button("Add Company Craft to List"))
+                    var filterName = filterConfiguration.Name;
+                    var labelName = "##" + filterConfiguration.Key;
+                    if (ImGui.CollapsingHeader("General",
+                            ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
                     {
-                        var subAddon = (SubmarinePartsMenuAddon*)subMarinePartsMenu;
-                        for (int i = 0; i < 6; i++)
+                        ImGui.SetNextItemWidth(100);
+                        ImGui.LabelText(labelName + "FilterNameLabel", "Name: ");
+                        ImGui.SameLine();
+                        ImGui.InputText(labelName + "FilterName", ref filterName, 100);
+                        if (filterName != filterConfiguration.Name)
                         {
-                            var itemRequired = subAddon->RequiredItemId(i);
-                            if (itemRequired != 0)
+                            filterConfiguration.Name = filterName;
+                        }
+
+                        ImGui.NewLine();
+                        if (ImGui.Button("Export Configuration to Clipboard"))
+                        {
+                            var base64 = filterConfiguration.ExportBase64();
+                            ImGui.SetClipboardText(base64);
+                            PluginService.ChatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
+                        }
+
+                        var filterType = filterConfiguration.FormattedFilterType;
+                        ImGui.SetNextItemWidth(100);
+                        ImGui.LabelText(labelName + "FilterTypeLabel", "Filter Type: ");
+                        ImGui.SameLine();
+                        ImGui.TextDisabled(filterType);
+
+                    }
+
+                    using (var tabBar = ImRaii.TabBar("ConfigTabs", ImGuiTabBarFlags.FittingPolicyScroll))
+                    {
+                        if (tabBar.Success)
+                        {
+                            foreach (var group in PluginService.PluginLogic.GroupedFilters)
                             {
-                                var amountHandedIn = subAddon->AmountHandedIn(i);
-                                var amountNeeded = subAddon->AmountNeeded(i);
-                                var amountLeft = Math.Max((int)amountNeeded - (int)amountHandedIn,
-                                    0);
-                                if (amountLeft > 0)
+                                var hasValuesSet = false;
+                                foreach (var filter in group.Value)
                                 {
-                                    PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                    if (filter.HasValueSet(filterConfiguration))
                                     {
-                                        filterConfiguration.CraftList.AddCraftItem(itemRequired,
-                                            (uint)amountLeft, InventoryItem.ItemFlags.None);
-                                        filterConfiguration.NeedsRefresh = true;
-                                        filterConfiguration.StartRefresh();
-                                    });
+                                        hasValuesSet = true;
+                                        break;
+                                    }
+                                }
+
+                                using var color = ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.HealerGreen,
+                                    hasValuesSet);
+
+                                var hasValues = group.Value.Any(filter =>
+                                    filter.AvailableIn.HasFlag(FilterType.SearchFilter) &&
+                                    filterConfiguration.FilterType.HasFlag(
+                                        FilterType.SearchFilter)
+                                    ||
+                                    (filter.AvailableIn.HasFlag(FilterType.SortingFilter) &&
+                                     filterConfiguration.FilterType.HasFlag(FilterType
+                                         .SortingFilter))
+                                    ||
+                                    (filter.AvailableIn.HasFlag(FilterType.CraftFilter) &&
+                                     filterConfiguration.FilterType.HasFlag(FilterType
+                                         .CraftFilter))
+                                    ||
+                                    (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
+                                     filterConfiguration.FilterType.HasFlag(FilterType
+                                         .GameItemFilter)));
+                                if (hasValues)
+                                {
+                                    using (var tabItem = ImRaii.TabItem(group.Key.ToString().ToSentence()))
+                                    {
+                                        if (!tabItem.Success) continue;
+                                        using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudWhite))
+                                        {
+                                            foreach (var filter in group.Value)
+                                            {
+                                                if ((filter.AvailableIn.HasFlag(FilterType.SearchFilter) &&
+                                                     filterConfiguration.FilterType.HasFlag(FilterType.SearchFilter)
+                                                     ||
+                                                     (filter.AvailableIn.HasFlag(FilterType.SortingFilter) &&
+                                                      filterConfiguration.FilterType.HasFlag(FilterType.SortingFilter))
+                                                     ||
+                                                     (filter.AvailableIn.HasFlag(FilterType.CraftFilter) &&
+                                                      filterConfiguration.FilterType.HasFlag(FilterType.CraftFilter))
+                                                     ||
+                                                     (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
+                                                      filterConfiguration.FilterType.HasFlag(FilterType.GameItemFilter))
+                                                    ))
+                                                {
+                                                    filter.Draw(filterConfiguration);
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -386,109 +642,210 @@ namespace InventoryTools.Ui
                 }
             }
 
-            ImGui.SameLine();
-            UiHelpers.VerticalCenter("Pending Market Requests: " + PluginService.Universalis.QueuedCount);
-            if (filterConfiguration.FilterType == FilterType.CraftFilter)
+            using (var bottomBarChild = ImRaii.Child("BottomBar", new Vector2(0, 0), true, ImGuiWindowFlags.NoScrollbar))
             {
-                ImGui.SameLine();
-                ImGui.Text("Total Cost NQ: " + filterConfiguration.CraftList.MinimumNQCost);
-                ImGui.SameLine();
-                ImGui.Text("Total Cost HQ: " + filterConfiguration.CraftList.MinimumHQCost);
-            }
-
-            if (filterConfiguration.FilterType == FilterType.CraftFilter)
-            {
-                var craftTable = PluginService.FilterService.GetCraftTable(filterConfiguration);
-                craftTable?.DrawFooterItems();
-                itemTable.DrawFooterItems();
-            }
-            else
-            {
-                itemTable.DrawFooterItems();
-            }
-
-            var width = ImGui.GetWindowSize().X;
-            width -= 30 * ImGui.GetIO().FontGlobalScale;
-            UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-            ImGui.SetCursorPosX(width);
-            if (ImGui.ImageButton(_settingsIcon.ImGuiHandle,
-                    new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
-                    new Vector2(1, 1), 2))
-            {
-                PluginService.WindowService.ToggleConfigurationWindow();
-            }
-
-            ImGuiUtil.HoverTooltip("Open the configuration window.");
-
-            ImGui.SetCursorPosY(0);
-            width -= 30 * ImGui.GetIO().FontGlobalScale;
-            ImGui.SetCursorPosX(width);
-            UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-            if (ImGui.ImageButton(_craftIcon.ImGuiHandle,
-                    new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
-                    new Vector2(1, 1), 2))
-            {
-                PluginService.WindowService.ToggleCraftsWindow();
-            }
-
-            ImGuiUtil.HoverTooltip("Open the craft window.");
-
-            width -= 30 * ImGui.GetIO().FontGlobalScale;
-            ImGui.SetCursorPosX(width);
-            UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-            if (ImGui.ImageButton(_mobIcon.ImGuiHandle,
-                    new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
-                    new Vector2(1, 1), 2))
-            {
-                PluginService.WindowService.ToggleMobWindow();
-            }
-
-            ImGuiUtil.HoverTooltip("Open the mob window.");
-
-
-            width -= 30 * ImGui.GetIO().FontGlobalScale;
-            ImGui.SetCursorPosX(width);
-            UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-            if (ImGui.ImageButton(_dutyIcon.ImGuiHandle,
-                    new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
-                    new Vector2(1, 1), 2))
-            {
-                PluginService.WindowService.ToggleDutiesWindow();
-            }
-
-            ImGuiUtil.HoverTooltip("Open the duty window.");
-            
-            width -= 30 * ImGui.GetIO().FontGlobalScale;
-            ImGui.SetCursorPosX(width);
-            UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-            if (ImGui.ImageButton(_helpIcon.ImGuiHandle,
-                    new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
-                    new Vector2(1, 1), 2))
-            {
-                PluginService.WindowService.ToggleHelpWindow();
-            }
-
-            ImGuiUtil.HoverTooltip("Open the help window.");
-
-            if (ConfigurationManager.Config.TetrisEnabled)
-            {
-                width -= 30 * ImGui.GetIO().FontGlobalScale;
-                ImGui.SetCursorPosX(width);
-                UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                if (ImGui.ImageButton(_tetrisIcon.ImGuiHandle,
-                        new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
-                        new Vector2(1, 1), 2))
+                if (bottomBarChild.Success)
                 {
-                    PluginService.WindowService.ToggleTetrisWindow();
-                }
+                    UiHelpers.VerticalCenter(
+                        "You are currently editing the filter's configuration. Press the tick on the right hand side to save configuration.");
 
-                ImGuiUtil.HoverTooltip("Open the tetris input window.");
+                    ImGui.SameLine();
+                    float width = ImGui.GetWindowSize().X;
+                    ImGui.SetCursorPosX(width - 42 * ImGui.GetIO().FontGlobalScale);
+                    UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                    if (_closeSettingsIcon.Draw("bb_settings"))
+                    {
+                        _settingsActive = false;
+                    }
+
+                    ImGuiUtil.HoverTooltip("Return to the filter.");
+                }
+            }
+        }
+
+        public unsafe string DrawFilter(FilterTable itemTable, FilterConfiguration filterConfiguration)
+        {
+            using (var topBarChild = ImRaii.Child("TopBar", new Vector2(0, 40) * ImGui.GetIO().FontGlobalScale, true,
+                       ImGuiWindowFlags.NoScrollbar))
+            {
+                if (topBarChild.Success)
+                {
+                    var highlightItems = itemTable.HighlightItems;
+                    UiHelpers.CenterElement(20 * ImGui.GetIO().FontGlobalScale);
+                    ImGui.Checkbox("Highlight?" + "###" + itemTable.Key + "VisibilityCheckbox",
+                        ref highlightItems);
+                    if (highlightItems != itemTable.HighlightItems)
+                    {
+                        PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                        {
+                            PluginService.FilterService.ToggleActiveUiFilter(itemTable.FilterConfiguration);
+                        });
+                    }
+
+                    ImGui.SameLine();
+                    UiHelpers.CenterElement(20 * ImGui.GetIO().FontGlobalScale);
+                    if(_clearIcon.Draw("clearSearch"))
+                    {
+                        itemTable.ClearFilters();
+                    }
+
+                    ImGuiUtil.HoverTooltip("Clear the current search.");
+                    
+                    ImGui.SameLine();
+                    float width = ImGui.GetWindowSize().X;
+                    
+                    ImGui.SameLine();
+                    width -= 28;
+                    ImGui.SetCursorPosX(width * ImGui.GetIO().FontGlobalScale);
+                    if (_editIcon.Draw("tb_edit"))
+                    {
+                        _settingsActive = !_settingsActive;
+                    }
+
+                    ImGuiUtil.HoverTooltip("Edit the filter's configuration.");
+                }
+            }
+            using (var contentChild = ImRaii.Child("Content", new Vector2(0, -40) * ImGui.GetIO().FontGlobalScale, true,
+                       ImGuiWindowFlags.NoScrollbar))
+            {
+                if (contentChild.Success)
+                {
+                    if (filterConfiguration.FilterType == FilterType.CraftFilter)
+                    {
+                        var craftTable = PluginService.FilterService.GetCraftTable(filterConfiguration);
+                        craftTable?.Draw(new Vector2(0, -400));
+                        itemTable.Draw(new Vector2(0, 0));
+                    }
+                    else
+                    {
+                        itemTable.Draw(new Vector2(0, 0));
+                    }
+
+                }
             }
 
+            //Need to have these buttons be determined dynamically or moved elsewhere
+            using (var bottomBarChild =
+                   ImRaii.Child("BottomBar", new Vector2(0, 0), true, ImGuiWindowFlags.NoScrollbar))
+            {
+                if (bottomBarChild.Success)
+                {
+                    UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                    if(_marketIcon.Draw("refreshMarket"))
+                    {
+                        foreach (var item in itemTable.RenderSortedItems)
+                        {
+                            PluginService.Universalis.QueuePriceCheck(item.InventoryItem.ItemId);
+                        }
 
-            ImGui.EndChild();
+                        foreach (var item in itemTable.RenderItems)
+                        {
+                            PluginService.Universalis.QueuePriceCheck(item.RowId);
+                        }
+                    }
 
-            return activeFilter;
+                    ImGuiUtil.HoverTooltip("Refresh Market Prices");
+                    ImGui.SameLine();
+                    UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                    if (_csvIcon.Draw("exportCsv"))
+                    {
+                        PluginService.FileDialogManager.SaveFileDialog("Save to csv", "*.csv", "export.csv", ".csv",
+                            (b, s) => { SaveCallback(itemTable, b, s); }, null, true);
+                    }
+
+                    ImGuiUtil.HoverTooltip("Export to CSV");
+                    if (filterConfiguration.FilterType == FilterType.CraftFilter &&
+                        PluginService.GameUi.IsWindowVisible(
+                            CriticalCommonLib.Services.Ui.WindowName.SubmarinePartsMenu))
+                    {
+                        var subMarinePartsMenu = PluginService.GameUi.GetWindow("SubmarinePartsMenu");
+                        if (subMarinePartsMenu != null)
+                        {
+                            ImGui.SameLine();
+                            if (ImGui.Button("Add Company Craft to List"))
+                            {
+                                var subAddon = (SubmarinePartsMenuAddon*)subMarinePartsMenu;
+                                for (int i = 0; i < 6; i++)
+                                {
+                                    var itemRequired = subAddon->RequiredItemId(i);
+                                    if (itemRequired != 0)
+                                    {
+                                        var amountHandedIn = subAddon->AmountHandedIn(i);
+                                        var amountNeeded = subAddon->AmountNeeded(i);
+                                        var amountLeft = Math.Max((int)amountNeeded - (int)amountHandedIn,
+                                            0);
+                                        if (amountLeft > 0)
+                                        {
+                                            PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                            {
+                                                filterConfiguration.CraftList.AddCraftItem(itemRequired,
+                                                    (uint)amountLeft, InventoryItem.ItemFlags.None);
+                                                filterConfiguration.NeedsRefresh = true;
+                                                filterConfiguration.StartRefresh();
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    ImGui.SameLine();
+                    UiHelpers.VerticalCenter("Pending Market Requests: " + PluginService.Universalis.QueuedCount);
+                    if (filterConfiguration.FilterType == FilterType.CraftFilter)
+                    {
+                        ImGui.SameLine();
+                        ImGui.Text("Total Cost NQ: " + filterConfiguration.CraftList.MinimumNQCost);
+                        ImGui.SameLine();
+                        ImGui.Text("Total Cost HQ: " + filterConfiguration.CraftList.MinimumHQCost);
+                    }
+
+                    if (filterConfiguration.FilterType == FilterType.CraftFilter)
+                    {
+                        var craftTable = PluginService.FilterService.GetCraftTable(filterConfiguration);
+                        craftTable?.DrawFooterItems();
+                        itemTable.DrawFooterItems();
+                    }
+                    else
+                    {
+                        itemTable.DrawFooterItems();
+                    }
+
+                    var width = ImGui.GetWindowSize().X;
+                    width -= 30 * ImGui.GetIO().FontGlobalScale;
+                    ImGui.SetCursorPosX(width);
+                    UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                    if (_menuIcon.Draw("openMenu"))
+                    {
+                    }
+                    _settingsMenu.Draw();
+                    
+                    width -= 30 * ImGui.GetIO().FontGlobalScale;
+                    UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                    ImGui.SetCursorPosX(width);
+                    if (_settingsIcon.Draw("openConfig"))
+                    {
+                        PluginService.WindowService.ToggleConfigurationWindow();
+                    }
+
+                    ImGuiUtil.HoverTooltip("Open the configuration window.");
+
+                    ImGui.SetCursorPosY(0);
+                    width -= 30 * ImGui.GetIO().FontGlobalScale;
+                    ImGui.SetCursorPosX(width);
+                    UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                    if (_craftIcon.Draw("openCraft"))
+                    {
+                        PluginService.WindowService.ToggleCraftsWindow();
+                    }
+
+                    ImGuiUtil.HoverTooltip("Open the craft window.");
+
+                    
+                }
+            }
+
+            return filterConfiguration.Key;
         }
         
         public override FilterConfiguration? SelectedConfiguration

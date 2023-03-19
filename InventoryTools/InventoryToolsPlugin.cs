@@ -1,5 +1,6 @@
 ﻿using System;
 using CriticalCommonLib;
+using Dalamud.Logging;
 using Dalamud.Plugin;
 
 namespace InventoryTools
@@ -21,6 +22,7 @@ namespace InventoryTools
         protected virtual void Dispose(bool disposing)
         {
             if (!disposing) return;
+            PluginLog.Verbose("Starting dispose of InventoryToolsPlugin");
             _ui.Dispose();
             PluginService.Dispose();            
         }

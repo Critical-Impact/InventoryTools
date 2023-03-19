@@ -46,6 +46,8 @@ namespace InventoryTools.Logic.Filters
             ImGui.SameLine();
             UiHelpers.HelpMarker(HelpText);
             var allCharacters = PluginService.CharacterMonitor.Characters;
+            
+            //Retainer Sources
             List<string> sources = new();
             foreach (var retainerCategories in configuration.SourceRetainerCategories)
             {
@@ -72,7 +74,9 @@ namespace InventoryTools.Logic.Filters
                 ImGui.PopStyleColor();
             }
             ImGui.SameLine();
-            ImGui.Text(String.Join(", ", sources));
+            ImGui.TextWrapped(String.Join(", ", sources));
+            
+            //Character Sources
             sources = new();
             foreach (var characterCategories in configuration.SourceCharacterCategories)
             {
@@ -98,7 +102,35 @@ namespace InventoryTools.Logic.Filters
                 ImGui.PopStyleColor();
             }
             ImGui.SameLine();
-            ImGui.Text(String.Join(", ", sources));
+            ImGui.TextWrapped(String.Join(", ", sources));
+            
+            //Free Company Sources
+            sources = new();
+            foreach (var characterCategories in configuration.SourceFreeCompanyCategories)
+            {
+                foreach (var characterCategory in characterCategories.Value)
+                {
+                    if (allCharacters.ContainsKey(characterCategories.Key) &&
+                        characterCategories.Key.ToString().StartsWith("9"))
+                    {
+                        var formattedName = allCharacters[characterCategories.Key].FormattedName + " - " +
+                                            characterCategory.FormattedName();
+                        sources.Add(formattedName);
+                    }
+                }
+            }
+            ImGui.SetNextItemWidth(LabelSize);
+            if (sources.Count != 0)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);
+            }
+            ImGui.LabelText("##" + Key + "CharacterLabel", "Free Company Sources" + ":");
+            if (sources.Count != 0)
+            {
+                ImGui.PopStyleColor();
+            }
+            ImGui.SameLine();
+            ImGui.TextWrapped(String.Join(", ", sources));
         }
     }
 }

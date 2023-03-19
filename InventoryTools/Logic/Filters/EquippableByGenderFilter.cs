@@ -17,6 +17,12 @@ namespace InventoryTools.Logic.Filters
         {
             configuration.UpdateUintFilter(Key,newValue);
         }
+        
+        public override void ResetFilter(FilterConfiguration configuration)
+        {
+            UpdateFilterConfiguration(configuration, null);
+        }
+
 
         public override string Key { get; set; } = "EquippableByGender";
         public override string Name { get; set; } = "Equippable By Gender";

@@ -1,6 +1,6 @@
 using Dalamud.Game.ClientState.Keys;
 
-namespace InventoryTools.Services;
+namespace InventoryTools.Services.Interfaces;
 
 public interface IKeyStateService
 {

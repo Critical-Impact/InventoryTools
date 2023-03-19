@@ -4,7 +4,7 @@ using OtterGui.Classes;
 
 namespace InventoryTools.Logic.Settings
 {
-    public class MoreInfoHotKeySetting : HotKeySetting
+    public class HotkeyMoreInfoSetting : HotKeySetting
     {
         public override ModifiableHotkey DefaultValue { get; set; } = new(VirtualKey.M, ModifierHotkey.Control); 
         
@@ -24,7 +24,7 @@ namespace InventoryTools.Logic.Settings
         public override string HelpText { get; set; } =
             "The hotkey to open the more information window for an item when hovering it.";
 
-        public override SettingCategory SettingCategory { get; set; } = SettingCategory.General;
-        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Hotkeys;
+        public override SettingCategory SettingCategory { get; set; } = SettingCategory.Hotkeys;
+        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
     }
 }

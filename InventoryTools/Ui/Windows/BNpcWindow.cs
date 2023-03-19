@@ -162,7 +162,7 @@ public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
                             PluginService.ChatUtilities.PrintFullMapLink(
                                 new GenericMapLocation(position.Position.X, position.Position.Y,
                                     territory.MapEx,
-                                    territory.PlaceName), ex.Item1.FormattedName);
+                                    territory.PlaceNameEx), ex.Item1.FormattedName);
                         }
 
                         if (ImGui.IsItemHovered())
@@ -232,34 +232,34 @@ public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
         _filteredItems = new Dictionary<uint, List<(BNpcNameEx, BNpcBaseEx)>>();
     }
 
-    public override List<(BNpcNameEx, BNpcBaseEx)> GetItems(uint contentTypeId)
+    public override List<(BNpcNameEx, BNpcBaseEx)> GetItems(uint placeNameId)
     {
-        if (!_items.ContainsKey(contentTypeId))
+        if (!_items.ContainsKey(placeNameId))
         {
-            if (contentTypeId == 0)
+            if (placeNameId == 0)
             {
                 var availableMobs = Service.ExcelCache.MobSpawns.Select(c => (c.BNpcNameId, c.BNpcBaseId)).ToHashSet();
                 var actualMobs = availableMobs.Select(c => (Service.ExcelCache.GetBNpcNameExSheet().GetRow(c.BNpcNameId),
                     Service.ExcelCache.GetBNpcBaseExSheet().GetRow(c.BNpcBaseId))).Where(c => c.Item1 != null && c.Item1.FormattedName != "" && c.Item2 != null).Select(c => (c.Item1!, c.Item2!)).ToList();
-                _items.Add(contentTypeId, actualMobs);
+                _items.Add(placeNameId, actualMobs);
             }
             else
             {
                 bool FilterNpcs(BNpcNameEx c)
                 {
                     var territory = GetTerritory(c.RowId);
-                    return c.FormattedName != "" && territory != null && territory.Contains(contentTypeId);
+                    return c.FormattedName != "" && territory != null && territory.Contains(placeNameId);
                 }
                 var availableMobs = Service.ExcelCache.MobSpawns.Select(c => (c.BNpcNameId, c.BNpcBaseId)).ToHashSet();
                 var actualMobs = availableMobs.Select(c => (Service.ExcelCache.GetBNpcNameExSheet().GetRow(c.BNpcNameId),
                     Service.ExcelCache.GetBNpcBaseExSheet().GetRow(c.BNpcBaseId))).Where(c => c.Item1 != null && FilterNpcs(c.Item1) && c.Item1.FormattedName != "" && c.Item2 != null).Select(c => (c.Item1!, c.Item2!)).ToList();
-                _items.Add(contentTypeId, actualMobs);
+                _items.Add(placeNameId, actualMobs);
             }
         }
 
-        if (!_filteredItems.ContainsKey(contentTypeId))
+        if (!_filteredItems.ContainsKey(placeNameId))
         {
-            var unfilteredList = _items[contentTypeId];
+            var unfilteredList = _items[placeNameId];
             if (SortColumn != null && _columns[(int)SortColumn].Sort != null)
             {
                 unfilteredList = _columns[(int)SortColumn].Sort?.Invoke(SortDirection, unfilteredList).ToList();
@@ -277,10 +277,10 @@ public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
                 }
             }
 
-            _filteredItems.Add(contentTypeId, unfilteredList);
+            _filteredItems.Add(placeNameId, unfilteredList);
         }
 
-        return _filteredItems[contentTypeId];
+        return _filteredItems[placeNameId];
     }
 
     public override Dictionary<uint, string> Tabs => _tabs;

@@ -15,6 +15,7 @@ namespace InventoryTools.Logic
         public FilterConfiguration FilterConfiguration;
         public RenderTableBase? FilterTable;
         public ulong? ActiveRetainerId => PluginService.CharacterMonitor.ActiveRetainer == 0 ? null : PluginService.CharacterMonitor.ActiveRetainer;
+        public ulong? ActiveFreeCompanyId => PluginService.CharacterMonitor.ActiveFreeCompanyId == 0 ? null : PluginService.CharacterMonitor.ActiveFreeCompanyId;
 
         public bool InvertHighlighting
         {
@@ -488,7 +489,7 @@ namespace InventoryTools.Logic
                 
                 foreach (var item in filterResult.SortedItems)
                 {
-                    var matchesSource = item.SourceBag == bag && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting));
+                    var matchesSource = item.SourceBag == bag && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting) || MatchesFreeCompanyFilter(FilterConfiguration, item, InvertHighlighting));
                     var matchesDestination = ShouldHighlightDestination && item.DestinationBag == bag && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting, true));
                     if(matchesSource)
                     {
@@ -596,6 +597,34 @@ namespace InventoryTools.Logic
             }
 
             if (destinationFilter && item.SourceRetainerId == ActiveRetainerId)
+            {
+                return false;
+            }
+            if (matches)
+            {
+                if (!item.InventoryItem.IsEmpty)
+                {
+                    return true;
+                }
+            }
+
+            if (item.InventoryItem.IsEmpty && invertHighlighting)
+            {
+                return true;
+            }
+
+            return false;
+        }
+        
+        private bool MatchesFreeCompanyFilter(FilterConfiguration activeFilter, SortingResult item, bool invertHighlighting = false, bool destinationFilter = false)
+        {
+            bool matches = (activeFilter.FilterType.HasFlag(FilterType.SearchFilter) || activeFilter.FilterType.HasFlag(FilterType.SortingFilter) || activeFilter.FilterType.HasFlag(FilterType.CraftFilter));
+            if (item.SourceRetainerId != PluginService.CharacterMonitor.ActiveFreeCompanyId)
+            {
+                return false;
+            }
+
+            if (destinationFilter && item.SourceRetainerId == ActiveFreeCompanyId)
             {
                 return false;
             }

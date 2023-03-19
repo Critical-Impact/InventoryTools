@@ -5,7 +5,7 @@ namespace InventoryTools.Logic.Settings.Abstract
 {
     public abstract class BooleanSetting : Setting<bool>
     {
-        private static readonly string[] Choices = new []{"N/A", "Yes", "No"};
+        private readonly string[] Choices = new []{"N/A", "Yes", "No"};
 
         public override void Draw(InventoryToolsConfiguration configuration)
         {

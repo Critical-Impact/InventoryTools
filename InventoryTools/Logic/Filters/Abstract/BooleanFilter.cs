@@ -1,5 +1,6 @@
 using Dalamud.Interface.Colors;
 using ImGuiNET;
+using OtterGui.Raii;
 
 namespace InventoryTools.Logic.Filters.Abstract
 {
@@ -46,7 +47,7 @@ namespace InventoryTools.Logic.Filters.Abstract
             return false;
         }
 
-        private static readonly string[] Choices = new []{"N/A", "Yes", "No"};
+        private readonly string[] Choices = new []{"N/A", "Yes", "No"};
 
         public override void Draw(FilterConfiguration configuration)
         {
@@ -64,17 +65,18 @@ namespace InventoryTools.Logic.Filters.Abstract
                 ImGui.LabelText("##" + Key + "Label", Name + ":");
             }
             ImGui.SameLine();
-            if (ImGui.BeginCombo("##"+Key+"Combo", currentValue))
+            using (var combo = ImRaii.Combo("##"+Key+"Combo", currentValue))
             {
-                foreach (var item in Choices)
+                if (combo.Success)
                 {
-                    if (ImGui.Selectable(item, currentValue == item))
+                    foreach (var item in Choices)
                     {
-                        UpdateFilterConfiguration(configuration, ConvertSelection(item));
+                        if (ImGui.Selectable(item, currentValue == item))
+                        {
+                            UpdateFilterConfiguration(configuration, ConvertSelection(item));
+                        }
                     }
                 }
-
-                ImGui.EndCombo();
             }
             ImGui.SameLine();
             UiHelpers.HelpMarker(HelpText);
@@ -91,5 +93,11 @@ namespace InventoryTools.Logic.Filters.Abstract
                 configuration.RemoveBooleanFilter(Key);
             }
         }
+
+        public override void ResetFilter(FilterConfiguration configuration)
+        {
+            UpdateFilterConfiguration(configuration, null);
+        }
+
     }
 }

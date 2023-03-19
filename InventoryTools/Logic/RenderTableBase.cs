@@ -57,7 +57,7 @@ namespace InventoryTools.Logic
         public bool NeedsRefresh { get; set; }
         public bool IsSearching { get; set; }
         public FilterConfiguration FilterConfiguration { get; set; }
-        public bool HighlightItems => PluginLogic.PluginConfiguration.ActiveUiFilter == FilterConfiguration.Key;
+        public bool HighlightItems => ConfigurationManager.Config.ActiveUiFilter == FilterConfiguration.Key;
 
         protected void FilterConfigurationOnTableConfigurationChanged(FilterConfiguration filterconfiguration)
         {

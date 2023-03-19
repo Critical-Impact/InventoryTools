@@ -6,6 +6,7 @@ using ImGuiNET;
 using InventoryTools.Logic.Columns;
 using InventoryTools.Logic.Filters.Abstract;
 using OtterGui;
+using OtterGui.Raii;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -25,6 +26,11 @@ namespace InventoryTools.Logic.Filters
         public override void UpdateFilterConfiguration(FilterConfiguration configuration, Dictionary<string, (string, string?)> newValue)
         {
             configuration.CraftColumns = newValue.Select(c => c.Key).ToList();
+        }
+        
+        public override void ResetFilter(FilterConfiguration configuration)
+        {
+            UpdateFilterConfiguration(configuration, new Dictionary<string, (string, string?)>());
         }
 
         public override string Key { get; set; } = "Craft Columns";
@@ -75,18 +81,20 @@ namespace InventoryTools.Logic.Filters
             ImGui.SetNextItemWidth(LabelSize);
             ImGui.LabelText("##" + Key + "Label", "Add new column: ");
             ImGui.SameLine();
-            if (ImGui.BeginCombo("Add##" + Key, currentAddColumn))
+            using (var combo = ImRaii.Combo("Add##" + Key, currentAddColumn))
             {
-                foreach(var column in value.OrderBy(c => c.Value.Name))
+                if (combo.Success)
                 {
-                    if (ImGui.Selectable(column.Value.Name, currentAddColumn == column.Value.Name))
+                    foreach (var column in value.OrderBy(c => c.Value.Name))
                     {
-                        AddItem(configuration, column.Key);
-                    }
-                    ImGuiUtil.HoverTooltip(column.Value.HelpText);
-                }
+                        if (ImGui.Selectable(column.Value.Name, currentAddColumn == column.Value.Name))
+                        {
+                            AddItem(configuration, column.Key);
+                        }
 
-                ImGui.EndCombo();
+                        ImGuiUtil.HoverTooltip(column.Value.HelpText);
+                    }
+                }
             }
         }
     }

@@ -26,11 +26,16 @@ namespace InventoryTools.Logic.Filters
         {
             return null;
         }
+        
+        public override void ResetFilter(FilterConfiguration configuration)
+        {
+            UpdateFilterConfiguration(configuration, new List<(ulong, InventoryCategory)>());
+        }
 
         public override Dictionary<(ulong, InventoryCategory), string> GetChoices(FilterConfiguration configuration)
         {
             var allCharacters = PluginService.CharacterMonitor.AllCharacters();
-            if (!PluginLogic.PluginConfiguration.DisplayCrossCharacter)
+            if (!ConfigurationManager.Config.DisplayCrossCharacter)
             {
                 allCharacters = allCharacters.Where(c =>
                     PluginService.CharacterMonitor.BelongsToActiveCharacter(c.Key)).ToArray();
@@ -44,6 +49,12 @@ namespace InventoryTools.Logic.Filters
                     dict.Add((character.Key, InventoryCategory.RetainerBags), character.Value.FormattedName + " - " + InventoryCategory.RetainerBags.FormattedName());
                     dict.Add((character.Key, InventoryCategory.RetainerMarket), character.Value.FormattedName + " - " + InventoryCategory.RetainerMarket.FormattedName());
                     dict.Add((character.Key, InventoryCategory.RetainerEquipped), character.Value.FormattedName + " - " + InventoryCategory.RetainerEquipped.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.Currency), character.Value.FormattedName + " - " + InventoryCategory.Currency.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.Crystals), character.Value.FormattedName + " - " + InventoryCategory.Crystals.FormattedName());
+                }
+                else if (PluginService.CharacterMonitor.IsFreeCompany(character.Key))
+                {
+                    dict.Add((character.Key, InventoryCategory.FreeCompanyBags), character.Value.FormattedName + " - " + InventoryCategory.FreeCompanyBags.FormattedName());
                     dict.Add((character.Key, InventoryCategory.Currency), character.Value.FormattedName + " - " + InventoryCategory.Currency.FormattedName());
                     dict.Add((character.Key, InventoryCategory.Crystals), character.Value.FormattedName + " - " + InventoryCategory.Crystals.FormattedName());
                 }

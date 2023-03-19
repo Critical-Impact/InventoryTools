@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
+using OtterGui.Raii;
 
 namespace InventoryTools.Logic.Settings.Abstract
 {
@@ -34,23 +35,24 @@ namespace InventoryTools.Logic.Settings.Abstract
 
             var currentSearchCategory = GetFormattedChoice(activeChoice);
             ImGui.SameLine();
-            if (ImGui.BeginCombo("##" + Key + "Combo", currentSearchCategory))
+            using (var combo = ImRaii.Combo("##" + Key + "Combo", currentSearchCategory))
             {
-                foreach (var item in choices)
+                if (combo.Success)
                 {
-                    var text = item.Value.Replace("\u0002\u001F\u0001\u0003", "-");
-                    if (text == "")
+                    foreach (var item in choices)
                     {
-                        continue;
-                    }                    
+                        var text = item.Value.Replace("\u0002\u001F\u0001\u0003", "-");
+                        if (text == "")
+                        {
+                            continue;
+                        }
 
-                    if (ImGui.Selectable(text,currentSearchCategory == text))
-                    {
-                        UpdateFilterConfiguration(configuration,item.Key);
+                        if (ImGui.Selectable(text, currentSearchCategory == text))
+                        {
+                            UpdateFilterConfiguration(configuration, item.Key);
+                        }
                     }
                 }
-
-                ImGui.EndCombo();
             }
 
             ImGui.SameLine();

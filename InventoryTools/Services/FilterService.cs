@@ -8,6 +8,7 @@ using CriticalCommonLib.Services;
 using Dalamud.Logging;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
+using InventoryTools.Services.Interfaces;
 
 namespace InventoryTools.Services
 {
@@ -289,21 +290,8 @@ namespace InventoryTools.Services
             {
                 return _filters.First(c => c.Value.FilterType == FilterType.CraftFilter && c.Value.CraftListDefault).Value;
             }
-            var defaultFilter = new FilterConfiguration("Default Craft List", FilterType.CraftFilter);
-            defaultFilter.CraftListDefault = true;
-            defaultFilter.DestinationAllCharacters = true;
-            defaultFilter.DestinationIncludeCrossCharacter = false;
-            defaultFilter.SourceAllCharacters = false;
-            defaultFilter.SourceAllRetainers = true;
-            defaultFilter.SourceIncludeCrossCharacter = false;
-            defaultFilter.HighlightWhen = "Always";
-            defaultFilter.SourceCategories = new HashSet<InventoryCategory>()
-            {
-                InventoryCategory.FreeCompanyBags,
-                InventoryCategory.CharacterSaddleBags,
-                InventoryCategory.CharacterPremiumSaddleBags,
-                InventoryCategory.FreeCompanyBags
-            };            
+
+            var defaultFilter = FilterConfiguration.GenerateDefaultFilterConfiguration();
             AddFilter(defaultFilter);
             return defaultFilter;
         }

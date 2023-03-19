@@ -1,6 +1,7 @@
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using Dalamud.Logging;
+using InventoryTools;
 
 namespace InventoryToolsMock;
 
@@ -8,6 +9,7 @@ public class MockCharacterMonitor : ICharacterMonitor
 {
     private ulong _activeRetainer;
     private ulong _activeCharacterId;
+    private ulong _activeFreeCompanyId;
     public void Dispose()
     {
     }
@@ -19,7 +21,7 @@ public class MockCharacterMonitor : ICharacterMonitor
 
     public void UpdateCharacter(Character character)
     {
-        Service.FrameworkService.RunOnFrameworkThread(() => { OnCharacterUpdated?.Invoke(character); });
+        PluginService.FrameworkService.RunOnFrameworkThread(() => { OnCharacterUpdated?.Invoke(character); });
     }
 
     public void RemoveCharacter(ulong characterId)
@@ -27,7 +29,7 @@ public class MockCharacterMonitor : ICharacterMonitor
         if (_characters.ContainsKey(characterId))
         {
             _characters.Remove(characterId);
-            Service.FrameworkService.RunOnFrameworkThread(() => { OnCharacterRemoved?.Invoke(characterId); });
+            PluginService.FrameworkService.RunOnFrameworkThread(() => { OnCharacterRemoved?.Invoke(characterId); });
         }
     }
 
@@ -48,11 +50,11 @@ public class MockCharacterMonitor : ICharacterMonitor
                 _characters[character.CharacterId] = character;
             }
             //character.UpdateFromCurrentPlayer(Service.ClientState.LocalPlayer);
-            Service.FrameworkService.RunOnFrameworkThread(() => { OnCharacterUpdated?.Invoke(character); });
+            PluginService.FrameworkService.RunOnFrameworkThread(() => { OnCharacterUpdated?.Invoke(character); });
         }
         else
         {
-            Service.FrameworkService.RunOnFrameworkThread(() => { OnCharacterUpdated?.Invoke(null); });
+            PluginService.FrameworkService.RunOnFrameworkThread(() => { OnCharacterUpdated?.Invoke(null); });
         }
     }
     
@@ -62,6 +64,7 @@ public class MockCharacterMonitor : ICharacterMonitor
 
     public event CharacterMonitor.ActiveRetainerChangedDelegate? OnActiveRetainerChanged;
     public event CharacterMonitor.ActiveRetainerChangedDelegate? OnActiveRetainerLoaded;
+    public event CharacterMonitor.ActiveFreeCompanyChangedDelegate? OnActiveFreeCompanyChanged;
     public event CharacterMonitor.CharacterUpdatedDelegate? OnCharacterUpdated;
     public event CharacterMonitor.CharacterRemovedDelegate? OnCharacterRemoved;
     public event CharacterMonitor.CharacterJobChangedDelegate? OnCharacterJobChanged;
@@ -69,7 +72,12 @@ public class MockCharacterMonitor : ICharacterMonitor
     
     public KeyValuePair<ulong, Character>[] GetPlayerCharacters()
     {
-        return Characters.Where(c => c.Value.OwnerId == 0 && c.Key != 0 && c.Value.Name != "").ToArray();
+        return Characters.Where(c => c.Value.OwnerId == 0 && c.Value.CharacterType == CharacterType.Character && c.Key != 0 && c.Value.Name != "").ToArray();
+    }
+
+    public KeyValuePair<ulong, Character>[] GetFreeCompanies()
+    {
+        return Characters.Where(c => c.Value.OwnerId == 0 && c.Value.CharacterType == CharacterType.FreeCompanyChest && c.Key != 0 && c.Value.Name != "").ToArray();
     }
 
     public KeyValuePair<ulong, Character>[] AllCharacters()
@@ -84,6 +92,16 @@ public class MockCharacterMonitor : ICharacterMonitor
 
     public bool BelongsToActiveCharacter(ulong characterId)
     {
+        if (IsFreeCompany(characterId))
+        {
+            var activeCharacter = ActiveCharacter;
+            if (activeCharacter == null)
+            {
+                return false;
+            }
+
+            return activeCharacter.FreeCompanyId == characterId;
+        }
         if (characterId != 0 && Characters.ContainsKey(characterId))
         {
             return Characters[characterId].OwnerId == ActiveCharacterId || Characters[characterId].CharacterId == ActiveCharacterId;
@@ -93,19 +111,37 @@ public class MockCharacterMonitor : ICharacterMonitor
 
     public KeyValuePair<ulong, Character>[] GetRetainerCharacters(ulong retainerId)
     {
-        return Characters.Where(c => c.Value.OwnerId == retainerId && c.Key != 0 && c.Value.Name != "").ToArray();
+        return Characters.Where(c => c.Value.OwnerId == retainerId && c.Value.CharacterType == CharacterType.Retainer && c.Key != 0 && c.Value.Name != "").ToArray();
     }
 
     public KeyValuePair<ulong, Character>[] GetRetainerCharacters()
     {
-        return Characters.Where(c => c.Value.OwnerId != 0 && c.Key != 0 && c.Value.Name != "").ToArray();
+        return Characters.Where(c => c.Value.OwnerId != 0 && c.Value.CharacterType == CharacterType.Retainer && c.Key != 0 && c.Value.Name != "").ToArray();
+    }
+
+    public bool IsCharacter(ulong characterId)
+    {
+        if (Characters.ContainsKey(characterId))
+        {
+            return Characters[characterId].CharacterType == CharacterType.Character;
+        }
+        return false;
     }
 
     public bool IsRetainer(ulong characterId)
     {
         if (Characters.ContainsKey(characterId))
         {
-            return Characters[characterId].OwnerId != 0;
+            return Characters[characterId].CharacterType == CharacterType.Retainer;
+        }
+        return false;
+    }
+
+    public bool IsFreeCompany(ulong characterId)
+    {
+        if (Characters.ContainsKey(characterId))
+        {
+            return Characters[characterId].CharacterType == CharacterType.FreeCompanyChest;
         }
         return false;
     }
@@ -143,13 +179,13 @@ public class MockCharacterMonitor : ICharacterMonitor
         }
     }
 
-    public Character? ActiveCharacter
-    {
-        get
-        {
-            return null;
-        }
-    }
+    public ulong ActiveFreeCompanyId { get; }
+
+    public Character? ActiveCharacter =>
+        _characters.ContainsKey(_activeCharacterId) ? _characters[_activeCharacterId] : null;
+
+    public Character? ActiveFreeCompany =>
+        _characters.ContainsKey(_activeFreeCompanyId) ? _characters[_activeFreeCompanyId] : null;
 
     public bool IsLoggedIn
     {
@@ -174,5 +210,10 @@ public class MockCharacterMonitor : ICharacterMonitor
     public void OverrideActiveRetainer(ulong activeRetainer)
     {
         _activeRetainer = activeRetainer;
+    }
+
+    public void OverrideActiveFreeCompany(ulong activeFreeCompanyId)
+    {
+        _activeFreeCompanyId = activeFreeCompanyId;
     }
 }
