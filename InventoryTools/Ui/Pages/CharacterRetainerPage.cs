@@ -35,7 +35,7 @@ namespace InventoryTools.Sections
                     if (characters.Length == 0)
                     {
                         ImGui.TableNextRow();
-                        ImGui.Text("No characters available.");
+                        ImGui.TextUnformatted("No characters available.");
                         ImGui.TableNextColumn();
                         ImGui.TableNextColumn();
                         ImGui.TableNextColumn();
@@ -50,19 +50,19 @@ namespace InventoryTools.Sections
                         ImGui.TableNextColumn();
                         if (character.Name != "")
                         {
-                            ImGui.Text(character.Name);
+                            ImGui.TextUnformatted(character.Name);
                             ImGui.SameLine();
                         }
 
                         ImGui.TableNextColumn();
                         if (character.WorldId != 0)
                         {
-                            ImGui.Text(character.World?.Name ?? "Unknown");
+                            ImGui.TextUnformatted(character.World?.Name ?? "Unknown");
                             ImGui.SameLine();
                         }
 
                         ImGui.TableNextColumn();
-                        ImGui.Text(character.FreeCompanyName);
+                        ImGui.TextUnformatted(character.FreeCompanyName);
 
                         ImGui.TableNextColumn();
                         var value = character.AlternativeName ?? "";
@@ -96,7 +96,7 @@ namespace InventoryTools.Sections
                         }
                         if (ImGui.BeginPopupModal("Are you sure?##" + index))
                         {
-                            ImGui.Text(
+                            ImGui.TextUnformatted(
                                 "Are you sure you want to clear all the bags stored for this character?.\nThis operation cannot be undone!\n\n");
                             ImGui.Separator();
 
@@ -141,7 +141,7 @@ namespace InventoryTools.Sections
                     if (characters.Length == 0)
                     {
                         ImGui.TableNextRow();
-                        ImGui.Text("No free companies available.");
+                        ImGui.TextUnformatted("No free companies available.");
                         ImGui.TableNextColumn();
                         ImGui.TableNextColumn();
                         ImGui.TableNextColumn();
@@ -155,14 +155,14 @@ namespace InventoryTools.Sections
                         ImGui.TableNextColumn();
                         if (character.Name != "")
                         {
-                            ImGui.Text(character.Name);
+                            ImGui.TextUnformatted(character.Name);
                             ImGui.SameLine();
                         }
 
                         ImGui.TableNextColumn();
                         if (character.WorldId != 0)
                         {
-                            ImGui.Text(character.World?.Name ?? "Unknown");
+                            ImGui.TextUnformatted(character.World?.Name ?? "Unknown");
                             ImGui.SameLine();
                         }
 
@@ -198,7 +198,7 @@ namespace InventoryTools.Sections
                         }
                         if (ImGui.BeginPopupModal("Are you sure?##" + index))
                         {
-                            ImGui.Text(
+                            ImGui.TextUnformatted(
                                 "Are you sure you want to clear all the bags stored for this free company?.\nThis operation cannot be undone!\n\n");
                             ImGui.Separator();
 
@@ -271,7 +271,7 @@ namespace InventoryTools.Sections
                 if (retainers.Count == 0)
                 {
                     ImGui.TableNextRow();
-                    ImGui.Text("No retainers available.");
+                    ImGui.TextUnformatted("No retainers available.");
                     ImGui.TableNextColumn();
                     ImGui.TableNextColumn();
                     ImGui.TableNextColumn();
@@ -289,27 +289,27 @@ namespace InventoryTools.Sections
                     
                     ImGui.TableNextColumn();
                     {
-                        ImGui.Text((character.HireOrder + 1).ToString());
+                        ImGui.TextUnformatted((character.HireOrder + 1).ToString());
                         ImGui.SameLine();
                     }
                     
                     ImGui.TableNextColumn();
-                    ImGui.Text(character.Name);
+                    ImGui.TextUnformatted(character.Name);
                     ImGui.SameLine();
                     
                     ImGui.TableNextColumn();
                     if (character.WorldId != 0)
                     {
-                        ImGui.Text(character.World?.Name ?? "Unknown");
+                        ImGui.TextUnformatted(character.World?.Name ?? "Unknown");
                         ImGui.SameLine();
                     }
                     
                     ImGui.TableNextColumn();
-                    ImGui.Text(character.Gil.ToString());
+                    ImGui.TextUnformatted(character.Gil.ToString());
                     ImGui.SameLine();
                     
                     ImGui.TableNextColumn();
-                    ImGui.Text(character.Level.ToString());
+                    ImGui.TextUnformatted(character.Level.ToString());
                     ImGui.SameLine();
                     
                     ImGui.TableNextColumn();
@@ -320,7 +320,7 @@ namespace InventoryTools.Sections
                         characterName = owner.FormattedName;
                     }
 
-                    ImGui.Text(characterName);
+                    ImGui.TextUnformatted(characterName);
                     
                     ImGui.TableNextColumn();
                     var value = character.AlternativeName ?? "";
@@ -354,7 +354,7 @@ namespace InventoryTools.Sections
                     }
                     if (ImGui.BeginPopupModal("Are you sure?##" + index))
                     {
-                        ImGui.Text(
+                        ImGui.TextUnformatted(
                             "Are you sure you want to clear all the bags stored for this retainer?.\nThis operation cannot be undone!\n\n");
                         ImGui.Separator();
 

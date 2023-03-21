@@ -31,7 +31,7 @@ namespace InventoryTools.Sections
                     {
                         ImGui.TableNextRow();
                         ImGui.TableNextColumn();
-                        ImGui.Text("No filters available.");
+                        ImGui.TextUnformatted("No filters available.");
                         ImGui.TableNextColumn();
                         ImGui.TableNextColumn();
                     }
@@ -43,7 +43,7 @@ namespace InventoryTools.Sections
                         ImGui.TableNextColumn();
                         if (filterConfiguration.Name != "")
                         {
-                            ImGui.Text(filterConfiguration.Name);
+                            ImGui.TextUnformatted(filterConfiguration.Name);
                             ImGui.SameLine();
                         }
 
@@ -55,7 +55,7 @@ namespace InventoryTools.Sections
                         }*/
 
                         ImGui.TableNextColumn();
-                        ImGui.Text(filterConfiguration.FormattedFilterType);
+                        ImGui.TextUnformatted(filterConfiguration.FormattedFilterType);
                         ImGui.TableNextColumn();
                         if (ImGui.SmallButton("Export Configuration##" + index))
                         {

@@ -94,7 +94,7 @@ public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    ImGui.Text((ex.Item1.RowId + "," + ex.Item2.RowId).ToString());
+                    ImGui.TextUnformatted((ex.Item1.RowId + "," + ex.Item2.RowId).ToString());
                 }
             },
             new("Name", 150, ImGuiTableColumnFlags.WidthFixed)
@@ -118,7 +118,7 @@ public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    ImGui.Text(ex.Item1.FormattedName);
+                    ImGui.TextUnformatted(ex.Item1.FormattedName);
                 }
             },
             new("Type", 70, ImGuiTableColumnFlags.WidthFixed)
@@ -142,7 +142,7 @@ public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    ImGui.Text(ex.Item2.NpcType.ToString().ToString() ?? "");
+                    ImGui.TextUnformatted(ex.Item2.NpcType.ToString().ToString() ?? "");
                 }
             },
             new("Locations", 200, ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoSort)

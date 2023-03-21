@@ -62,7 +62,7 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>
                 },
                 Draw = (ex, tabId) =>
                 {
-                    ImGui.Text(ex.FormattedNameShort.ToString());
+                    ImGui.TextUnformatted(ex.FormattedNameShort.ToString());
                 }
             },
             new("Unlock Zone", 200, ImGuiTableColumnFlags.WidthFixed)
@@ -88,7 +88,7 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>
                 {
                     if (ex.UnlockPointEx.Row != 0)
                     {
-                        ImGui.Text((ex.UnlockPointEx.Value?.FormattedNameShort ?? "").ToString());
+                        ImGui.TextUnformatted((ex.UnlockPointEx.Value?.FormattedNameShort ?? "").ToString());
                     }
                 }
             },
@@ -115,7 +115,7 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>
                 {
                     if (ex.UnlockPointEx.Row != 0)
                     {
-                        ImGui.Text((ex.RankReq.ToString() ?? "").ToString());
+                        ImGui.TextUnformatted((ex.RankReq.ToString() ?? "").ToString());
                     }
                 }
             },

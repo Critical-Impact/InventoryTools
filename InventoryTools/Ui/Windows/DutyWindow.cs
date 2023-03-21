@@ -70,14 +70,14 @@ namespace InventoryTools.Ui
         {
             if (ContentFinderCondition == null)
             {
-                ImGui.Text("Dungeon with the ID " + _contentFinderConditionId + " could not be found.");   
+                ImGui.TextUnformatted("Dungeon with the ID " + _contentFinderConditionId + " could not be found.");   
             }
             else
             {
-                ImGui.Text(ContentFinderCondition.Name.ToDalamudString().ToString());
-                ImGui.Text(ContentFinderCondition.ContentType?.Value?.Name.ToString() ?? "Unknown Content Type");
-                ImGui.Text("Level Required: " + ContentFinderCondition.ClassJobLevelRequired);
-                ImGui.Text("Item Level Required: " + ContentFinderCondition.ItemLevelRequired);
+                ImGui.TextUnformatted(ContentFinderCondition.Name.ToDalamudString().ToString());
+                ImGui.TextUnformatted(ContentFinderCondition.ContentType?.Value?.Name.ToString() ?? "Unknown Content Type");
+                ImGui.TextUnformatted("Level Required: " + ContentFinderCondition.ClassJobLevelRequired);
+                ImGui.TextUnformatted("Item Level Required: " + ContentFinderCondition.ItemLevelRequired);
                 ;
                 var itemIcon = PluginService.IconStorage[(int)(ContentFinderCondition.ContentType?.Value?.IconDutyFinder ?? 61801)];
                 ImGui.Image(itemIcon.ImGuiHandle, new Vector2(100, 100) * ImGui.GetIO().FontGlobalScale);
@@ -313,7 +313,7 @@ namespace InventoryTools.Ui
                 #if DEBUG
                 if (ImGui.CollapsingHeader("Debug"))
                 {
-                    ImGui.Text("Duty ID: " + _contentFinderConditionId);
+                    ImGui.TextUnformatted("Duty ID: " + _contentFinderConditionId);
                     Utils.PrintOutObject(ContentFinderCondition, 0, new List<string>());
                 }
                 #endif

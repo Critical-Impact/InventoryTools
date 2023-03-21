@@ -30,7 +30,7 @@ namespace InventoryTools.Sections
                     {
                         ImGui.TableNextRow();
                         ImGui.TableNextColumn();
-                        ImGui.Text("No lists available.");
+                        ImGui.TextUnformatted("No lists available.");
                         ImGui.TableNextColumn();
                         ImGui.TableNextColumn();
                     }
@@ -42,12 +42,12 @@ namespace InventoryTools.Sections
                         ImGui.TableNextColumn();
                         if (filterConfiguration.Name != "")
                         {
-                            ImGui.Text(filterConfiguration.Name);
+                            ImGui.TextUnformatted(filterConfiguration.Name);
                             ImGui.SameLine();
                         }
 
                         ImGui.TableNextColumn();
-                        ImGui.Text((filterConfiguration.Order + 1).ToString());
+                        ImGui.TextUnformatted((filterConfiguration.Order + 1).ToString());
                         ImGui.SameLine();
                         if (ImGui.SmallButton("Up##" + index))
                         {
@@ -81,7 +81,7 @@ namespace InventoryTools.Sections
 
                         if (ImGui.BeginPopupModal("Delete?##" + index))
                         {
-                            ImGui.Text(
+                            ImGui.TextUnformatted(
                                 "Are you sure you want to delete this filter?.\nThis operation cannot be undone!\n\n");
                             ImGui.Separator();
 

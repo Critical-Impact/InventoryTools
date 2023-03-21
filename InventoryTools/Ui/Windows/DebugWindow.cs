@@ -164,12 +164,12 @@ namespace InventoryTools.Ui
                 {
                     if (ConfigurationManager.Config.SelectedDebugPage == 0)
                     {
-                        ImGui.Text("Character Information:");
-                        ImGui.Text(PluginService.CharacterMonitor.ActiveCharacter?.Name.ToString() ??
+                        ImGui.TextUnformatted("Character Information:");
+                        ImGui.TextUnformatted(PluginService.CharacterMonitor.ActiveCharacter?.Name.ToString() ??
                                    "Not Logged in Yet");
-                        ImGui.Text("Actual:" + PluginService.CharacterMonitor.LocalContentId.ToString());
-                        ImGui.Text("Reported:" + PluginService.CharacterMonitor.ActiveCharacterId.ToString());
-                        ImGui.Text("Retainers:");
+                        ImGui.TextUnformatted("Actual:" + PluginService.CharacterMonitor.LocalContentId.ToString());
+                        ImGui.TextUnformatted("Reported:" + PluginService.CharacterMonitor.ActiveCharacterId.ToString());
+                        ImGui.TextUnformatted("Retainers:");
                         ImGui.BeginTable("retainerTable", 5);
                         ImGui.TableSetupColumn("Hire Order");
                         ImGui.TableSetupColumn("Name");
@@ -183,15 +183,15 @@ namespace InventoryTools.Ui
                             if (retainer.Value.Name != "Unhired")
                             {
                                 ImGui.TableNextColumn();
-                                ImGui.Text((retainer.Value.HireOrder + 1).ToString());
+                                ImGui.TextUnformatted((retainer.Value.HireOrder + 1).ToString());
                                 ImGui.TableNextColumn();
-                                ImGui.Text(retainer.Value.Name);
+                                ImGui.TextUnformatted(retainer.Value.Name);
                                 ImGui.TableNextColumn();
-                                ImGui.Text(retainer.Value.Gil.ToString());
+                                ImGui.TextUnformatted(retainer.Value.Gil.ToString());
                                 ImGui.TableNextColumn();
-                                ImGui.Text(retainer.Value.CharacterId.ToString());
+                                ImGui.TextUnformatted(retainer.Value.CharacterId.ToString());
                                 ImGui.TableNextColumn();
-                                ImGui.Text(retainer.Value.OwnerId.ToString());
+                                ImGui.TextUnformatted(retainer.Value.OwnerId.ToString());
                             }
                         }
 
@@ -199,7 +199,7 @@ namespace InventoryTools.Ui
                     }
                     else if (ConfigurationManager.Config.SelectedDebugPage == 1)
                     {
-                        ImGui.Text("Inventory Information:");
+                        ImGui.TextUnformatted("Inventory Information:");
                         ImGui.BeginTable("retainerTable", 6);
                         ImGui.TableSetupColumn("Inventory ID");
                         ImGui.TableSetupColumn("Category");
@@ -216,17 +216,17 @@ namespace InventoryTools.Ui
                                 foreach (var item in itemSet.Value)
                                 {
                                     ImGui.TableNextColumn();
-                                    ImGui.Text((inventory.Key).ToString());
+                                    ImGui.TextUnformatted((inventory.Key).ToString());
                                     ImGui.TableNextColumn();
-                                    ImGui.Text(itemSet.Key.ToString());
+                                    ImGui.TextUnformatted(itemSet.Key.ToString());
                                     ImGui.TableNextColumn();
-                                    ImGui.Text(item.FormattedName);
+                                    ImGui.TextUnformatted(item.FormattedName);
                                     ImGui.TableNextColumn();
-                                    ImGui.Text(item.SortedSlotIndex.ToString());
+                                    ImGui.TextUnformatted(item.SortedSlotIndex.ToString());
                                     ImGui.TableNextColumn();
-                                    ImGui.Text(item.ItemId.ToString());
+                                    ImGui.TextUnformatted(item.ItemId.ToString());
                                     ImGui.TableNextColumn();
-                                    ImGui.Text(item.Slot.ToString());
+                                    ImGui.TextUnformatted(item.Slot.ToString());
                                 }
                             }
 
@@ -257,7 +257,7 @@ namespace InventoryTools.Ui
                             {
                                 ImGui.PushID(index);
                                 var spawnPosition = _spawnPositions[index];
-                                ImGui.Text(Service.ExcelCache.GetBNpcNameExSheet().GetRow(spawnPosition.BNpcNameId)
+                                ImGui.TextUnformatted(Service.ExcelCache.GetBNpcNameExSheet().GetRow(spawnPosition.BNpcNameId)
                                     ?.FormattedName ?? "Unknown Name");
                                 if (ImGui.Button("Map"))
                                 {
@@ -342,7 +342,7 @@ namespace InventoryTools.Ui
                             PluginLog.Log(retainer->Loaded != 0 ? "True" : "False");
                         }
 
-                        ImGui.Text("Inventory Information:");
+                        ImGui.TextUnformatted("Inventory Information:");
                         if (ImGui.Button("Try multi request"))
                         {
                             PluginService.Universalis.RetrieveMarketBoardPrice(27757);
@@ -521,32 +521,32 @@ namespace InventoryTools.Ui
                                 .Instance()->UIModule->GetItemOrderModule();
                             if (clientInterfaceUiModule != null)
                             {
-                                ImGui.Text(clientInterfaceUiModule->ActiveRetainerId.ToString());
-                                // ImGui.Text($"Retainer Pointer: {(ulong)clientInterfaceUiModule->Retainers:X}");
+                                ImGui.TextUnformatted(clientInterfaceUiModule->ActiveRetainerId.ToString());
+                                // ImGui.TextUnformatted($"Retainer Pointer: {(ulong)clientInterfaceUiModule->Retainers:X}");
                                 // var container =
                                 //     InventoryManager.Instance()->GetInventoryContainer(FFXIVClientStructs.FFXIV.Client.Game
                                 //         .InventoryType.RetainerPage1);
                                 // if (container != null)
                                 // {
-                                //     ImGui.Text(container->Loaded.ToString());
+                                //     ImGui.TextUnformatted(container->Loaded.ToString());
                                 //     for (int i = 0; i < container->Size; i++)
                                 //     {
                                 //         var item = container->Items[i];
                                 //         var itemPointer = new IntPtr(&item);
-                                //         ImGui.Text(item.ItemID.ToString());
-                                //         ImGui.Text(itemPointer.ToString());
+                                //         ImGui.TextUnformatted(item.ItemID.ToString());
+                                //         ImGui.TextUnformatted(itemPointer.ToString());
                                 //     }
                                 // }
                             }
                             else
                             {
-                                ImGui.Text("Module not loaded");
+                                ImGui.TextUnformatted("Module not loaded");
                             }
                         }
                     }
                     else if (ConfigurationManager.Config.SelectedDebugPage == 4)
                     {
-                        ImGui.Text("Current Items in Queue: " + PluginService.Universalis.QueuedCount);
+                        ImGui.TextUnformatted("Current Items in Queue: " + PluginService.Universalis.QueuedCount);
                     }
                     else if (ConfigurationManager.Config.SelectedDebugPage == 5)
                     {
@@ -554,60 +554,60 @@ namespace InventoryTools.Ui
                         var simpleCraftMonitorAgent = PluginService.CraftMonitor.SimpleAgent;
                         if (craftMonitorAgent != null)
                         {
-                            ImGui.Text("Progress: " + craftMonitorAgent.Progress);
-                            ImGui.Text("Total Progress Required: " +
+                            ImGui.TextUnformatted("Progress: " + craftMonitorAgent.Progress);
+                            ImGui.TextUnformatted("Total Progress Required: " +
                                 PluginService.CraftMonitor.RecipeLevelTable?.ProgressRequired(PluginService.CraftMonitor
                                     .CurrentRecipe) ?? "Unknown");
-                            ImGui.Text("Quality: " + craftMonitorAgent.Quality);
-                            ImGui.Text("Status: " + craftMonitorAgent.Status);
-                            ImGui.Text("Step: " + craftMonitorAgent.Step);
-                            ImGui.Text("Durability: " + craftMonitorAgent.Durability);
-                            ImGui.Text("HQ Chance: " + craftMonitorAgent.HqChance);
-                            ImGui.Text("Item: " +
+                            ImGui.TextUnformatted("Quality: " + craftMonitorAgent.Quality);
+                            ImGui.TextUnformatted("Status: " + craftMonitorAgent.Status);
+                            ImGui.TextUnformatted("Step: " + craftMonitorAgent.Step);
+                            ImGui.TextUnformatted("Durability: " + craftMonitorAgent.Durability);
+                            ImGui.TextUnformatted("HQ Chance: " + craftMonitorAgent.HqChance);
+                            ImGui.TextUnformatted("Item: " +
                                        (Service.ExcelCache.GetItemExSheet().GetRow(craftMonitorAgent.ResultItemId)
                                            ?.NameString ?? "Unknown"));
-                            ImGui.Text(
+                            ImGui.TextUnformatted(
                                 "Current Recipe: " + PluginService.CraftMonitor.CurrentRecipe?.RowId ?? "Unknown");
-                            ImGui.Text(
+                            ImGui.TextUnformatted(
                                 "Recipe Difficulty: " + PluginService.CraftMonitor.RecipeLevelTable?.Difficulty ??
                                 "Unknown");
-                            ImGui.Text(
+                            ImGui.TextUnformatted(
                                 "Recipe Difficulty Factor: " +
                                 PluginService.CraftMonitor.CurrentRecipe?.DifficultyFactor ??
                                 "Unknown");
-                            ImGui.Text(
+                            ImGui.TextUnformatted(
                                 "Recipe Durability: " + PluginService.CraftMonitor.RecipeLevelTable?.Durability ??
                                 "Unknown");
-                            ImGui.Text("Suggested Control: " +
+                            ImGui.TextUnformatted("Suggested Control: " +
                                        PluginService.CraftMonitor.RecipeLevelTable?.SuggestedControl ??
                                        "Unknown");
-                            ImGui.Text("Suggested Craftsmanship: " +
+                            ImGui.TextUnformatted("Suggested Craftsmanship: " +
                                 PluginService.CraftMonitor.RecipeLevelTable?.SuggestedCraftsmanship ?? "Unknown");
-                            ImGui.Text(
+                            ImGui.TextUnformatted(
                                 "Current Craft Type: " + PluginService.CraftMonitor.Agent?.CraftType ?? "Unknown");
                         }
                         else if (simpleCraftMonitorAgent != null)
                         {
-                            ImGui.Text("NQ Complete: " + simpleCraftMonitorAgent.NqCompleted);
-                            ImGui.Text("HQ Complete: " + simpleCraftMonitorAgent.HqCompleted);
-                            ImGui.Text("Failed: " + simpleCraftMonitorAgent.TotalFailed);
-                            ImGui.Text("Total Completed: " + simpleCraftMonitorAgent.TotalCompleted);
-                            ImGui.Text("Total: " + simpleCraftMonitorAgent.Total);
-                            ImGui.Text("Item: " + Service.ExcelCache.GetItemExSheet()
+                            ImGui.TextUnformatted("NQ Complete: " + simpleCraftMonitorAgent.NqCompleted);
+                            ImGui.TextUnformatted("HQ Complete: " + simpleCraftMonitorAgent.HqCompleted);
+                            ImGui.TextUnformatted("Failed: " + simpleCraftMonitorAgent.TotalFailed);
+                            ImGui.TextUnformatted("Total Completed: " + simpleCraftMonitorAgent.TotalCompleted);
+                            ImGui.TextUnformatted("Total: " + simpleCraftMonitorAgent.Total);
+                            ImGui.TextUnformatted("Item: " + Service.ExcelCache.GetItemExSheet()
                                 .GetRow(simpleCraftMonitorAgent.ResultItemId)?.NameString.ToString() ?? "Unknown");
-                            ImGui.Text(
+                            ImGui.TextUnformatted(
                                 "Current Recipe: " + PluginService.CraftMonitor.CurrentRecipe?.RowId ?? "Unknown");
-                            ImGui.Text(
+                            ImGui.TextUnformatted(
                                 "Current Craft Type: " + PluginService.CraftMonitor.Agent?.CraftType ?? "Unknown");
                         }
                         else
                         {
-                            ImGui.Text("Not crafting.");
+                            ImGui.TextUnformatted("Not crafting.");
                         }
                     }
                     else if (ConfigurationManager.Config.SelectedDebugPage == 6)
                     {
-                        //ImGui.Text("Running: " + (PluginService.FunTimeService.IsRunning ? "Yes" : "No"));
+                        //ImGui.TextUnformatted("Running: " + (PluginService.FunTimeService.IsRunning ? "Yes" : "No"));
                         //if (ImGui.Button(PluginService.FunTimeService.IsRunning ? "Stop" : "Start"))
                         //{
                         //    PluginService.FunTimeService.Toggle();
@@ -644,7 +644,7 @@ namespace InventoryTools.Ui
                                 if (container != null)
                                 {
 
-                                    ImGui.Text($"Container Address:");
+                                    ImGui.TextUnformatted($"Container Address:");
                                     ImGui.SameLine();
                                     Utils.ClickToCopyText($"{(ulong)container:X}");
 
@@ -674,7 +674,7 @@ namespace InventoryTools.Ui
                                 }
                                 else
                                 {
-                                    ImGui.Text("Container not found.");
+                                    ImGui.TextUnformatted("Container not found.");
                                 }
 
                                 ImGui.EndTabItem();
@@ -718,7 +718,7 @@ namespace InventoryTools.Ui
                         }
                         else
                         {
-                            ImGui.Text("Armoire not loaded.");
+                            ImGui.TextUnformatted("Armoire not loaded.");
                         }
                     }
                     else if (ConfigurationManager.Config.SelectedDebugPage == 9)
@@ -752,12 +752,12 @@ namespace InventoryTools.Ui
                             }
                             else
                             {
-                                ImGui.Text("Glamour Chest not loaded.");
+                                ImGui.TextUnformatted("Glamour Chest not loaded.");
                             }
                         }
                         else
                         {
-                            ImGui.Text("Glamour Chest not loaded.");
+                            ImGui.TextUnformatted("Glamour Chest not loaded.");
 
                         }
                     }
@@ -1307,19 +1307,19 @@ namespace InventoryTools.Ui
                     }
                     else if (ConfigurationManager.Config.SelectedDebugPage == 11)
                     {
-                        ImGui.Text("Inventories Seen via Network Traffic");
+                        ImGui.TextUnformatted("Inventories Seen via Network Traffic");
                         foreach (var inventory in PluginService.InventoryScanner.InMemory)
                         {
-                            ImGui.Text(inventory.ToString());
+                            ImGui.TextUnformatted(inventory.ToString());
                         }
 
-                        ImGui.Text("Retainer Inventories Seen via Network Traffic");
+                        ImGui.TextUnformatted("Retainer Inventories Seen via Network Traffic");
                         foreach (var inventory in PluginService.InventoryScanner.InMemoryRetainers)
                         {
-                            ImGui.Text(inventory.Key.ToString());
+                            ImGui.TextUnformatted(inventory.Key.ToString());
                             foreach (var hashSet in inventory.Value)
                             {
-                                ImGui.Text(hashSet.ToString());
+                                ImGui.TextUnformatted(hashSet.ToString());
                             }
                         }
                     }
@@ -1371,7 +1371,7 @@ namespace InventoryTools.Ui
                             }
                             else
                             {
-                                ImGui.Text("Filter state is not set.");
+                                ImGui.TextUnformatted("Filter state is not set.");
                             }
 
                             ImGui.TreePop();
@@ -1379,17 +1379,17 @@ namespace InventoryTools.Ui
                     }
                     else if (ConfigurationManager.Config.SelectedDebugPage == 14)
                     {
-                        ImGui.Text($"{(ulong)ItemOrderModule.Instance():X}");
+                        ImGui.TextUnformatted($"{(ulong)ItemOrderModule.Instance():X}");
                         //Utils.PrintOutObject(*ItemOrderModule.Instance(), (ulong)ItemOrderModule.Instance(), new List<string>());
 
                     }
                     else if (ConfigurationManager.Config.SelectedDebugPage == 15)
                     {
-                        ImGui.Text($"{(ulong)RetainerManager.Instance():X}");
+                        ImGui.TextUnformatted($"{(ulong)RetainerManager.Instance():X}");
                         Utils.PrintOutObject(*RetainerManager.Instance(), (ulong)RetainerManager.Instance(),
                             new List<string>());
 
-                        ImGui.Text($"{(ulong)AgentRetainerList.Instance():X}");
+                        ImGui.TextUnformatted($"{(ulong)AgentRetainerList.Instance():X}");
                         Utils.PrintOutObject(*AgentRetainerList.Instance(), (ulong)AgentRetainerList.Instance(),
                             new List<string>());
                     }

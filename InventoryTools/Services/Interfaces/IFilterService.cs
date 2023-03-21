@@ -52,6 +52,7 @@ namespace InventoryTools.Services.Interfaces
         delegate void FilterAddedDelegate(FilterConfiguration configuration);
         delegate void FilterRemovedDelegate(FilterConfiguration configuration);
         delegate void FilterModifiedDelegate(FilterConfiguration configuration);
+        delegate void FilterRecalculatedDelegate(FilterConfiguration configuration);
         delegate void FilterRepositionedDelegate(FilterConfiguration configuration);
         delegate void FiltersInvalidatedDelegate();
         delegate void FilterInvalidatedDelegate(FilterConfiguration configuration);
@@ -76,6 +77,7 @@ namespace InventoryTools.Services.Interfaces
         event FilterModifiedDelegate FilterModified;
         event FiltersInvalidatedDelegate FiltersInvalidated;
         event FilterInvalidatedDelegate FilterInvalidated;
+        event FilterRecalculatedDelegate FilterRecalculated;
         event FilterToggledDelegate UiFilterToggled;
         event FilterToggledDelegate BackgroundFilterToggled;
         event FilterTableRefreshedDelegate FilterTableRefreshed;

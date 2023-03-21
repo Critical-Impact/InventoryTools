@@ -401,7 +401,19 @@ namespace InventoryTools.Logic
                     var itemHashes = new HashSet<uint>();
                     Dictionary<uint, HashSet<Vector2>> availableItems = new ();
                     
-                    foreach (var item in PluginService.InventoryMonitor.GetSpecificInventory(PluginService.CharacterMonitor.ActiveCharacterId, bag))
+                    //Hack until I work out somewhere else to push this
+
+                    var characterId = PluginService.CharacterMonitor.ActiveCharacterId;
+
+                    if (bag == InventoryType.FreeCompanyBag0 || bag == InventoryType.FreeCompanyBag1 ||
+                        bag == InventoryType.FreeCompanyBag2 || bag == InventoryType.FreeCompanyBag3 ||
+                        bag == InventoryType.FreeCompanyBag4 || bag == InventoryType.FreeCompanyBag5)
+                    {
+                        characterId = PluginService.CharacterMonitor.ActiveFreeCompanyId;
+                    }
+                    
+                    
+                    foreach (var item in PluginService.InventoryMonitor.GetSpecificInventory(characterId, bag))
                     {
                         if (!availableItems.ContainsKey(item.ItemId))
                         {

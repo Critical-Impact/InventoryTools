@@ -57,13 +57,13 @@ namespace InventoryTools.Ui
                 {
                     if (ConfigurationManager.Config.SelectedHelpPage == 0)
                     {
-                        ImGui.Text("This is a very basic guide, for more information please see the wiki.");
+                        ImGui.TextUnformatted("This is a very basic guide, for more information please see the wiki.");
                         if (ImGui.Button("Open Wiki"))
                         {
                             "https://github.com/Critical-Impact/InventoryTools/wiki/1.-Overview".OpenBrowser();
                         }
 
-                        ImGui.Text("Basic Plugin Information:");
+                        ImGui.TextUnformatted("Basic Plugin Information:");
                         ImGui.Separator();
                         ImGui.TextWrapped(
                             "Allagan Tools will track the multitude of inventories in the game. It also gives you the ability to highlight where items are within said inventories.");
@@ -72,7 +72,7 @@ namespace InventoryTools.Ui
                         ImGui.TextWrapped(
                             "The plugin has been built for speed and such it can't quite do every inventory optimisation that Teamcraft can do but it's getting there.");
                         ImGui.NewLine();
-                        ImGui.Text("Concepts:");
+                        ImGui.TextUnformatted("Concepts:");
                         ImGui.Separator();
                         ImGui.TextWrapped(
                             "Filters: At present you can only have 1 filter enabled at a time. There are 2 filters available, one is the window filter and one is the background filter. When a filter is active, it enables highlighting and lets you see the relevant items.");
@@ -81,17 +81,17 @@ namespace InventoryTools.Ui
                         ImGui.TextWrapped(
                             "Background Filter: When the allagan Tools window is closed, this is the filter that will be used to determine what to highlight. On top of this, it can be toggled on/off with the commands listed below. The intention is that you could have macros setup to toggle the filters on/off.");
                         ImGui.NewLine();
-                        ImGui.Text("Commands:");
+                        ImGui.TextUnformatted("Commands:");
                         ImGui.Separator();
                         ImGui.TextWrapped("The below commands will open/close the main allagan Tools window.");
-                        ImGui.Text("/allagantools,/inventorytools, /inv, /invtools");
+                        ImGui.TextUnformatted("/allagantools,/inventorytools, /inv, /invtools");
                         ImGui.TextWrapped(
                             "The below commands will toggle the background filter specified with <name>.");
-                        ImGui.Text("/itfiltertoggle <name>, /invf <name>, /ifilter <name>");
+                        ImGui.TextUnformatted("/itfiltertoggle <name>, /invf <name>, /ifilter <name>");
                     }
                     else if (ConfigurationManager.Config.SelectedHelpPage == 1)
                     {
-                        ImGui.Text("Advanced Filtering:");
+                        ImGui.TextUnformatted("Advanced Filtering:");
                         ImGui.Separator();
                         ImGui.TextWrapped(
                             "When creating a filter or when searching through the results of a filter it is possible to use a series of operators to make your search more specific. The available operators are dependant on what you searching against but at present support for !, <, >, >=, <=, = is present.");
@@ -112,19 +112,19 @@ namespace InventoryTools.Ui
                     }
                     else if (ConfigurationManager.Config.SelectedHelpPage == 2)
                     {
-                        ImGui.Text("About:");
-                        ImGui.Text(
+                        ImGui.TextUnformatted("About:");
+                        ImGui.TextUnformatted(
                             "This plugin is written in some of the free time that I have, it's a labour of love and I will hopefully be actively releasing updates for a while.");
-                        ImGui.Text(
+                        ImGui.TextUnformatted(
                             "If you run into any issues please submit feedback via the plugin installer feedback button.");
-                        ImGui.Text("Plugin Wiki: ");
+                        ImGui.TextUnformatted("Plugin Wiki: ");
                         ImGui.SameLine();
                         if (ImGui.Button("Open##WikiBtn"))
                         {
                             "https://github.com/Critical-Impact/InventoryTools/wiki/1.-Overview".OpenBrowser();
                         }
 
-                        ImGui.Text("Found a bug?");
+                        ImGui.TextUnformatted("Found a bug?");
                         ImGui.SameLine();
                         if (ImGui.Button("Open##BugBtn"))
                         {

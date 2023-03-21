@@ -23,16 +23,16 @@ namespace InventoryTools.Ui
         {
             var tetrisGame = Misc.TetrisGame.Instance.Game;
             ImGui.TextWrapped("Welcome to Tetris. ");
-            ImGui.Text("Please turn on the tetris overlay, this will overwrite the contents of your main inventory window.");
-            ImGui.Text("Please make sure your inventory is set to 'Open All'. While the overlay is active, you will not be able to access your inventory.");
+            ImGui.TextUnformatted("Please turn on the tetris overlay, this will overwrite the contents of your main inventory window.");
+            ImGui.TextUnformatted("Please make sure your inventory is set to 'Open All'. While the overlay is active, you will not be able to access your inventory.");
 
             if (ImGui.Button(TetrisGame.TetrisEnabled ? "Disable Tetris Overlay" : "Enable Tetris Overlay"))
             {
                 TetrisGame.ToggleTetris();
             }
             
-            ImGui.Text("Overlay: " + (TetrisGame.TetrisEnabled ? "Enabled" : "Disabled"));
-            ImGui.Text("Current Status: " + tetrisGame.Status.ToString());
+            ImGui.TextUnformatted("Overlay: " + (TetrisGame.TetrisEnabled ? "Enabled" : "Disabled"));
+            ImGui.TextUnformatted("Current Status: " + tetrisGame.Status.ToString());
             if ((tetrisGame.Status == Game.GameStatus.ReadyToStart || tetrisGame.Status == Game.GameStatus.Finished) && ImGui.Button("Start"))
             {
                 if (tetrisGame.Status == Game.GameStatus.Finished)

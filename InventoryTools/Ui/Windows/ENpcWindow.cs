@@ -68,7 +68,7 @@ public class ENpcWindow : GenericTabbedTable<ENpc>
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    ImGui.Text(ex.Resident.FormattedSingular);
+                    ImGui.TextUnformatted(ex.Resident.FormattedSingular);
                 }
             },
             new("Locations", 200, ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoSort)

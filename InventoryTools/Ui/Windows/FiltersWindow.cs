@@ -296,7 +296,7 @@ namespace InventoryTools.Ui
                         {
                             if (contentChild.Success)
                             {
-                                ImGui.Text(
+                                ImGui.TextUnformatted(
                                     "Get started by adding a craft list by hitting the + button on the bottom left.");
                             }
                         }
@@ -795,9 +795,9 @@ namespace InventoryTools.Ui
                     if (filterConfiguration.FilterType == FilterType.CraftFilter)
                     {
                         ImGui.SameLine();
-                        ImGui.Text("Total Cost NQ: " + filterConfiguration.CraftList.MinimumNQCost);
+                        ImGui.TextUnformatted("Total Cost NQ: " + filterConfiguration.CraftList.MinimumNQCost);
                         ImGui.SameLine();
-                        ImGui.Text("Total Cost HQ: " + filterConfiguration.CraftList.MinimumHQCost);
+                        ImGui.TextUnformatted("Total Cost HQ: " + filterConfiguration.CraftList.MinimumHQCost);
                     }
 
                     if (filterConfiguration.FilterType == FilterType.CraftFilter)
@@ -867,8 +867,13 @@ namespace InventoryTools.Ui
         
         public override void Invalidate()
         {
+            var selectedConfiguration = SelectedConfiguration;
             _filters = null;
             _tabLayout = Utils.GenerateRandomId();
+            if (selectedConfiguration != null)
+            {
+                FocusFilter(selectedConfiguration);
+            }
         }
     }
 }

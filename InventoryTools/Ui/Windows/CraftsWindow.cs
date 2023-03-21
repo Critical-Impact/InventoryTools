@@ -356,7 +356,7 @@ namespace InventoryTools.Ui
                         {
                             if (contentChild.Success)
                             {
-                                ImGui.Text(
+                                ImGui.TextUnformatted(
                                     "Get started by adding a craft list by hitting the + button on the bottom left.");
                             }
                         }
@@ -412,7 +412,7 @@ namespace InventoryTools.Ui
                                 var filterConfiguration = filterConfigurations[index];
                                 if (filterConfiguration.FilterType == FilterType.CraftFilter)
                                 {
-                                    ImGui.Text("Add new Item");
+                                    ImGui.TextUnformatted("Add new Item");
                                     var searchString = SearchString;
                                     ImGui.InputText("##ItemSearch", ref searchString, 50);
                                     if (_searchString != searchString)
@@ -423,7 +423,7 @@ namespace InventoryTools.Ui
                                     ImGui.Separator();
                                     if (_searchString == "")
                                     {
-                                        ImGui.Text("Start typing to search...");
+                                        ImGui.TextUnformatted("Start typing to search...");
                                     }
 
                                     using var table = ImRaii.Table("", 2, ImGuiTableFlags.None);
@@ -889,7 +889,7 @@ namespace InventoryTools.Ui
                         {
                             if (popup.Success)
                             {
-                                ImGui.Text(
+                                ImGui.TextUnformatted(
                                     "Are you sure you want to reset the default craft list?.\nThis operation cannot be undone!\n\n");
                                 ImGui.Separator();
 

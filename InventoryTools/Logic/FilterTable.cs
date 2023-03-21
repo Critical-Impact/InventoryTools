@@ -282,6 +282,13 @@ namespace InventoryTools.Logic
                             }
                         }
                     }
+                    else
+                    {
+                        if (NeedsRefresh)
+                        {
+                            Refresh(ConfigurationManager.Config);
+                        }
+                    }
                 }
             }
             return isExpanded;

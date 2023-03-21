@@ -24,7 +24,7 @@ public class SeparatorPageItem : IConfigPage
                 ImGui.NewLine();
             }
 
-            ImGui.Text(_headerName);
+            ImGui.TextUnformatted(_headerName);
         }
         ImGui.Separator();
     }

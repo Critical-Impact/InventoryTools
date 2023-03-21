@@ -95,8 +95,7 @@ namespace InventoryTools.Services
         {
             foreach (var filterConfiguration in _filters)
             {
-                filterConfiguration.Value.ConfigurationChanged += FilterConfigurationOnConfigurationChanged;
-                filterConfiguration.Value.TableConfigurationChanged += FilterConfigurationOnTableConfigurationChanged;
+                WatchFilter(filterConfiguration.Value);
             }
         }
 
@@ -170,11 +169,31 @@ namespace InventoryTools.Services
             }
             if (result)
             {
+                WatchFilter(configuration);
                 ConfigurationManager.Config.FilterConfigurations = FiltersList;
                 FilterAdded?.Invoke(configuration);
             }
             ConfigurationManager.SaveAsync();
             return result;
+        }
+
+        public void WatchFilter(FilterConfiguration filterConfiguration)
+        {
+            filterConfiguration.ConfigurationChanged += FilterConfigurationOnConfigurationChanged;
+            filterConfiguration.TableConfigurationChanged += FilterConfigurationOnTableConfigurationChanged;
+            filterConfiguration.ListUpdated += ValueOnListUpdated;
+        }
+
+        public void UnWatchFilter(FilterConfiguration filterConfiguration)
+        {
+            filterConfiguration.ConfigurationChanged -= FilterConfigurationOnConfigurationChanged;
+            filterConfiguration.TableConfigurationChanged -= FilterConfigurationOnTableConfigurationChanged;
+            filterConfiguration.ListUpdated -= ValueOnListUpdated;
+        }
+        
+        private void ValueOnListUpdated(FilterConfiguration filterConfiguration)
+        {
+            FilterRecalculated?.Invoke(filterConfiguration);
         }
 
         public bool AddFilter(string name, FilterType filterType)
@@ -217,6 +236,7 @@ namespace InventoryTools.Services
             var result = _filters.TryRemove(configuration.Key, out _);
             if (result)
             {
+                UnWatchFilter(configuration);
                 ConfigurationManager.Config.FilterConfigurations = FiltersList;
                 FilterRemoved?.Invoke(configuration);
             }
@@ -673,6 +693,7 @@ namespace InventoryTools.Services
         public event IFilterService.FilterRemovedDelegate? FilterRemoved;
         public event IFilterService.FilterRepositionedDelegate? FilterRepositioned;
         public event IFilterService.FilterModifiedDelegate? FilterModified;
+        public event IFilterService.FilterRecalculatedDelegate? FilterRecalculated;
         public event IFilterService.FiltersInvalidatedDelegate? FiltersInvalidated;
         public event IFilterService.FilterInvalidatedDelegate? FilterInvalidated;
         public event IFilterService.FilterToggledDelegate? UiFilterToggled;
@@ -701,8 +722,7 @@ namespace InventoryTools.Services
                 
                 foreach (var filterConfiguration in _filters)
                 {
-                    filterConfiguration.Value.ConfigurationChanged -= FilterConfigurationOnConfigurationChanged;
-                    filterConfiguration.Value.TableConfigurationChanged -= FilterConfigurationOnTableConfigurationChanged;
+                    UnWatchFilter(filterConfiguration.Value);
                 }
 
                 foreach (var filterTable in _filterTables)

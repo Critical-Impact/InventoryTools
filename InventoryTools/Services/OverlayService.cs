@@ -25,6 +25,7 @@ namespace InventoryTools.Services
             filterService.FilterModified += FilterServiceOnFilterModified;
             filterService.UiFilterToggled += FilterServiceOnFilterToggled;
             filterService.BackgroundFilterToggled += FilterServiceOnFilterToggled;
+            filterService.FilterRecalculated += FilterServiceOnFilterRecalculated;
             filterService.FilterTableRefreshed += FilterServiceOnFilterTableRefreshed;
             AddOverlay(new RetainerListOverlay());
             AddOverlay(new InventoryExpansionOverlay());
@@ -42,18 +43,28 @@ namespace InventoryTools.Services
             PluginService.OnPluginLoaded += PluginServiceOnOnPluginLoaded;
         }
 
-        private void PluginServiceOnOnPluginLoaded()
+        private void FilterServiceOnFilterRecalculated(FilterConfiguration configuration)
         {
-            RefreshOverlayStates();
-        }
-
-        private void FilterServiceOnFilterTableRefreshed(RenderTableBase table)
+            if (PluginService.PluginLoaded)
+            {
+                RefreshOverlayStates();
+            }
+        }        
+        
+        private void FilterServiceOnFilterTableRefreshed(RenderTableBase tableBase)
         {
             if (PluginService.PluginLoaded)
             {
                 RefreshOverlayStates();
             }
         }
+
+        private void PluginServiceOnOnPluginLoaded()
+        {
+            RefreshOverlayStates();
+        }
+        
+        
 
         private void FilterServiceOnFilterToggled(FilterConfiguration configuration, bool newstate)
         {
@@ -267,6 +278,8 @@ namespace InventoryTools.Services
             if(!_disposed && disposing)
             {
                 _frameworkService.Update -= FrameworkOnUpdate;
+                _filterService.FilterTableRefreshed -= FilterServiceOnFilterTableRefreshed;
+                _filterService.FilterRecalculated -= FilterServiceOnFilterRecalculated;
                 ClearOverlays();
                 _filterService.FilterModified -= FilterServiceOnFilterModified;
                 _filterService.UiFilterToggled -= FilterServiceOnFilterToggled;

@@ -206,7 +206,7 @@ namespace InventoryTools.Logic
                 return;
             }
 
-            PluginLog.Debug("Started a refresh on the filter configuration.");
+            PluginLog.Debug("Refreshing filter: " + this.Name);
             _refreshing = true;
             CraftList.BeenUpdated = false;
 
@@ -251,16 +251,20 @@ namespace InventoryTools.Logic
                 }
                 CraftList.Update(characterSources, externalSources);
                 CraftList.CalculateCosts(PluginService.MarketCache);
+                PluginLog.Debug("Generating filtered list for filter: " + this.Name);
                 _filterResult = await GenerateFilteredList(PluginService.InventoryMonitor.Inventories);
+                PluginLog.Debug("Finished generating filtered list for filter: " + this.Name);
             }
-
             else
             {
+                PluginLog.Debug("Generating filtered list for filter: " + this.Name);
                 _filterResult = await GenerateFilteredList(PluginService.InventoryMonitor.Inventories);
+                PluginLog.Debug("Finished generating filtered list for filter: " + this.Name);
             }
             
             NeedsRefresh = false;
-            PluginService.FrameworkService.RunOnFrameworkThread(() => { ListUpdated?.Invoke(this); });
+            await PluginService.FrameworkService.RunOnFrameworkThread(() => { ListUpdated?.Invoke(this); });
+            PluginLog.Debug("Finished refreshing filter: " + this.Name);
             _refreshing = false;
         }
         
@@ -2355,7 +2359,7 @@ namespace InventoryTools.Logic
                             var filteredDestinationItem = filter.FilterItem(destinationItem);
                             if (filteredDestinationItem != null)
                             {
-                                var itemHashCode = destinationItem.Item.GenerateHashCode(IgnoreHQWhenSorting ?? false);
+                                var itemHashCode = destinationItem.GenerateHashCode(IgnoreHQWhenSorting ?? false);
                                 if (!itemLocations.ContainsKey(itemHashCode))
                                 {
                                     itemLocations.Add(itemHashCode, new List<InventoryItem>());
@@ -2668,7 +2672,7 @@ namespace InventoryTools.Logic
                         var item = filteredItem.Item;
                         if (filter.DuplicatesOnly.HasValue && filter.DuplicatesOnly == true)
                         {
-                            if (duplicateItems.Contains(item.Item.GenerateHashCode(IgnoreHQWhenSorting ?? false)))
+                            if (duplicateItems.Contains(item.GenerateHashCode(IgnoreHQWhenSorting ?? false)))
                             {
                                 sortedItems.Add(new SortingResult(filteredSource.Key.Item1, item.SortedContainer,
                                     item, (int)item.Quantity));

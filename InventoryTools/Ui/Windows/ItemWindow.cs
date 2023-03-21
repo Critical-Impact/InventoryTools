@@ -112,11 +112,11 @@ namespace InventoryTools.Ui
 
             if (Item == null)
             {
-                ImGui.Text("Item with the ID " + _itemId + " could not be found.");   
+                ImGui.TextUnformatted("Item with the ID " + _itemId + " could not be found.");   
             }
             else
             {
-                ImGui.Text("Item Level " + Item.LevelItem.Row.ToString());
+                ImGui.TextUnformatted("Item Level " + Item.LevelItem.Row.ToString());
                 if (Item.DescriptionString != "")
                 {
                     ImGui.TextWrapped(Item.DescriptionString);
@@ -124,17 +124,17 @@ namespace InventoryTools.Ui
 
                 if (Item.CanBeAcquired)
                 {
-                    ImGui.Text("Acquired:" + (PluginService.GameInterface.HasAcquired(Item) ? "Yes" : "No"));
+                    ImGui.TextUnformatted("Acquired:" + (PluginService.GameInterface.HasAcquired(Item) ? "Yes" : "No"));
                 }
 
                 if (Item.SellToVendorPrice != 0)
                 {
-                    ImGui.Text("Sell to Vendor: " + Item.SellToVendorPrice + SeIconChar.Gil.ToIconString());
+                    ImGui.TextUnformatted("Sell to Vendor: " + Item.SellToVendorPrice + SeIconChar.Gil.ToIconString());
                 }
 
                 if (Item.BuyFromVendorPrice != 0)
                 {
-                    ImGui.Text("Buy from Vendor: " + Item.BuyFromVendorPrice + SeIconChar.Gil.ToIconString());
+                    ImGui.TextUnformatted("Buy from Vendor: " + Item.BuyFromVendorPrice + SeIconChar.Gil.ToIconString());
                 }
                 var itemIcon = PluginService.IconStorage[Item.Icon];
                 if (itemIcon != null)
@@ -201,6 +201,8 @@ namespace InventoryTools.Ui
                                 PluginService.FrameworkService.RunOnFrameworkThread(() =>
                                 {
                                     filter.CraftList.AddCraftItem(_itemId, 1, InventoryItem.ItemFlags.None);
+                                    filter.NeedsRefresh = true;
+                                    filter.StartRefresh();
                                     PluginService.WindowService.OpenCraftsWindow();
                                     PluginService.WindowService.GetCraftsWindow().FocusFilter(filter);
                                 });
@@ -424,11 +426,11 @@ namespace InventoryTools.Ui
                 void DrawSupplierRow((IShop shop, ENpc? npc, ILocation? location) tuple)
                 {
                     ImGui.TableNextColumn();
-                    ImGui.Text(tuple.shop.Name);
+                    ImGui.TextUnformatted(tuple.shop.Name);
                     if (tuple.npc != null)
                     {
                         ImGui.TableNextColumn();
-                        ImGui.Text(tuple.npc?.Resident?.Singular ?? "");
+                        ImGui.TextUnformatted(tuple.npc?.Resident?.Singular ?? "");
                     }
                     if (tuple.location != null)
                     {
@@ -457,7 +459,7 @@ namespace InventoryTools.Ui
                     hasInformation = true;
                     if (ImGui.CollapsingHeader("Shops (" + Vendors.Count + ")"))
                     {
-                        ImGui.Text("Shops: ");
+                        ImGui.TextUnformatted("Shops: ");
                         ImGuiTable.DrawTable("VendorsText", Vendors, DrawSupplierRow, ImGuiTableFlags.None,
                             new[] { "Shop Name","NPC", "Location", "" });
                     }
@@ -617,13 +619,13 @@ namespace InventoryTools.Ui
                 }
                 if (!hasInformation)
                 {
-                    ImGui.Text("No information available.");
+                    ImGui.TextUnformatted("No information available.");
                 }
                 
                 #if DEBUG
                 if (ImGui.CollapsingHeader("Debug"))
                 {
-                    ImGui.Text("Item ID: " + _itemId);
+                    ImGui.TextUnformatted("Item ID: " + _itemId);
                     Utils.PrintOutObject(Item, 0, new List<string>());
                 }
                 #endif
@@ -634,7 +636,7 @@ namespace InventoryTools.Ui
         private void DrawMobSpawn(KeyValuePair<TerritoryType, List<MobSpawnPositionEx>> spawnGroup)
         {
             ImGui.TableNextColumn();
-            ImGui.Text(spawnGroup.Key.PlaceName.Value?.Name ?? "Unknown");
+            ImGui.TextUnformatted(spawnGroup.Key.PlaceName.Value?.Name ?? "Unknown");
             
             ImGui.TableNextColumn();
 
@@ -698,7 +700,7 @@ namespace InventoryTools.Ui
             }
             ImGuiUtil.HoverTooltip(source.Name + " - Open in Gathering Log");
             ImGui.TableNextColumn();
-            ImGui.Text(obj.Level.GatheringItemLevel.ToString());     
+            ImGui.TextUnformatted(obj.Level.GatheringItemLevel.ToString());     
             ImGui.TableNextColumn();
             ImGui.TextWrapped(obj.PlaceName.Name + " - " + (obj.TerritoryType.PlaceName.Value?.Name ?? "Unknown"));
             ImGui.PopID();
@@ -712,9 +714,9 @@ namespace InventoryTools.Ui
         private void DrawRetainerRow(RetainerTaskNormalEx obj)
         {
             ImGui.TableNextColumn();
-            ImGui.Text( obj.TaskName);
+            ImGui.TextUnformatted( obj.TaskName);
             ImGui.TableNextColumn();
-            ImGui.Text(obj.TaskTime + " minutes");     
+            ImGui.TextUnformatted(obj.TaskTime + " minutes");     
             ImGui.TableNextColumn();
             ImGui.TextWrapped(obj.Quantities);
         }

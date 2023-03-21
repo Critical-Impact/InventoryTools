@@ -63,7 +63,7 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    ImGui.Text(ex.FormattedName);
+                    ImGui.TextUnformatted(ex.FormattedName);
                 }
             },
             new("Roulettes", 200, ImGuiTableColumnFlags.WidthFixed)
@@ -87,7 +87,7 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    ImGui.Text(ex.Roulettes);
+                    ImGui.TextUnformatted(ex.Roulettes);
                 }
             },
             new("Level", 100, ImGuiTableColumnFlags.WidthFixed)
@@ -111,7 +111,7 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    ImGui.Text(ex.ClassJobLevelRequired.ToString());
+                    ImGui.TextUnformatted(ex.ClassJobLevelRequired.ToString());
                 }
             },
             new("Sync Level", 100, ImGuiTableColumnFlags.WidthFixed)
@@ -135,7 +135,7 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    ImGui.Text(ex.ClassJobLevelSync.ToString());
+                    ImGui.TextUnformatted(ex.ClassJobLevelSync.ToString());
                 }
             },
             new("Item Level", 100, ImGuiTableColumnFlags.WidthFixed)
@@ -159,7 +159,7 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    ImGui.Text(ex.ItemLevelRequired.ToString());
+                    ImGui.TextUnformatted(ex.ItemLevelRequired.ToString());
                 }
             },
             new("Item Level Sync", 100, ImGuiTableColumnFlags.WidthFixed)
@@ -183,7 +183,7 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    ImGui.Text(ex.ItemLevelSync.ToString());
+                    ImGui.TextUnformatted(ex.ItemLevelSync.ToString());
                 }
             },
             new("Allows Undersized", 80, ImGuiTableColumnFlags.WidthFixed)
@@ -282,7 +282,7 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    ImGui.Text(ex.AcceptClassJobCategoryEx.Value?.FormattedName ?? "Unknown");
+                    ImGui.TextUnformatted(ex.AcceptClassJobCategoryEx.Value?.FormattedName ?? "Unknown");
                 }
             },
         };

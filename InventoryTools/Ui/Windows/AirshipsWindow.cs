@@ -61,7 +61,7 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
                 },
                 Draw = (ex, tabId) =>
                 {
-                    ImGui.Text(ex.FormattedNameShort.ToString());
+                    ImGui.TextUnformatted(ex.FormattedNameShort.ToString());
                 }
             },
             new("Unlock Zone", 150, ImGuiTableColumnFlags.WidthFixed)
@@ -87,7 +87,7 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
                 {
                     if (ex.UnlockPointEx.Row != 0)
                     {
-                        ImGui.Text((ex.UnlockPointEx.Value?.FormattedNameShort ?? "").ToString());
+                        ImGui.TextUnformatted((ex.UnlockPointEx.Value?.FormattedNameShort ?? "").ToString());
                     }
                 }
             },
@@ -112,7 +112,7 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
                 },
                 Draw = (ex, tabId) =>
                 {
-                    ImGui.Text((ex.RankReq.ToString() ?? "").ToString());
+                    ImGui.TextUnformatted((ex.RankReq.ToString() ?? "").ToString());
                 }
             },
             new("Ceruleum Required", 100, ImGuiTableColumnFlags.WidthFixed)
@@ -136,7 +136,7 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
                 },
                 Draw = (ex, tabId) =>
                 {
-                    ImGui.Text((ex.CeruleumTankReq.ToString() ?? "").ToString());
+                    ImGui.TextUnformatted((ex.CeruleumTankReq.ToString() ?? "").ToString());
                 }
             },
             new("Survey Duration (minutes)", 100, ImGuiTableColumnFlags.WidthFixed)
@@ -160,7 +160,7 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
                 },
                 Draw = (ex, tabId) =>
                 {
-                    ImGui.Text((ex.SurveyDurationmin.ToString() ?? "").ToString());
+                    ImGui.TextUnformatted((ex.SurveyDurationmin.ToString() ?? "").ToString());
                 }
             },
             new("Surveillance Required", 100, ImGuiTableColumnFlags.WidthFixed)
@@ -184,7 +184,7 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
                 },
                 Draw = (ex, tabId) =>
                 {
-                    ImGui.Text((ex.SurveillanceReq.ToString() ?? "").ToString());
+                    ImGui.TextUnformatted((ex.SurveillanceReq.ToString() ?? "").ToString());
                 }
             },
             new("Drops", 200, ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoSort)

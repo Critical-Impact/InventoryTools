@@ -328,7 +328,7 @@ namespace InventoryTools.Ui
                             }
 
                             ImGui.NewLine();
-                            ImGui.Text("Filters");
+                            ImGui.TextUnformatted("Filters");
                             ImGui.Separator();
 
                             var filterIndex = count;

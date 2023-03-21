@@ -45,13 +45,13 @@ namespace InventoryTools.Ui
         {
             if (AirshipExplorationPointEx == null)
             {
-                ImGui.Text("Airship Exploration Point with the ID " + _airshipExplorationPointId + " could not be found.");   
+                ImGui.TextUnformatted("Airship Exploration Point with the ID " + _airshipExplorationPointId + " could not be found.");   
             }
             else
             {
-                ImGui.Text(AirshipExplorationPointEx.NameShort.ToDalamudString().ToString());
-                ImGui.Text("Unlocked Via: " + AirshipExplorationPointEx.AirshipUnlockEx?.AirshipExplorationPointUnlockEx.Value?.FormattedNameShort ?? "N/A");
-                ImGui.Text("Rank Required: " + AirshipExplorationPointEx.RankReq);
+                ImGui.TextUnformatted(AirshipExplorationPointEx.NameShort.ToDalamudString().ToString());
+                ImGui.TextUnformatted("Unlocked Via: " + AirshipExplorationPointEx.AirshipUnlockEx?.AirshipExplorationPointUnlockEx.Value?.FormattedNameShort ?? "N/A");
+                ImGui.TextUnformatted("Rank Required: " + AirshipExplorationPointEx.RankReq);
                 ;
                 var itemIcon = PluginService.IconStorage[65035];
                 ImGui.Image(itemIcon.ImGuiHandle, new Vector2(100, 100) * ImGui.GetIO().FontGlobalScale);
@@ -108,7 +108,7 @@ namespace InventoryTools.Ui
                 #if DEBUG
                 if (ImGui.CollapsingHeader("Debug"))
                 {
-                    ImGui.Text("Duty ID: " + _airshipExplorationPointId);
+                    ImGui.TextUnformatted("Duty ID: " + _airshipExplorationPointId);
                     Utils.PrintOutObject(AirshipExplorationPointEx, 0, new List<string>());
                 }
                 #endif

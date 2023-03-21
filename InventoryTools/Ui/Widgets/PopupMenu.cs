@@ -139,7 +139,7 @@ public class PopupMenu
             if (!popup)
                 return ;
 
-            ImGui.Text(
+            ImGui.TextUnformatted(
                 _question + "\nThis operation cannot be undone!\n\n");
             ImGui.Separator();
 

@@ -44,13 +44,13 @@ namespace InventoryTools.Ui
         {
             if (SubmarineExplorationEx == null)
             {
-                ImGui.Text("Submarine Exploration Point with the ID " + _submarineExplorationPointId + " could not be found.");   
+                ImGui.TextUnformatted("Submarine Exploration Point with the ID " + _submarineExplorationPointId + " could not be found.");   
             }
             else
             {
-                ImGui.Text(SubmarineExplorationEx.FormattedNameShort);
-                ImGui.Text("Unlocked Via: " + SubmarineExplorationEx.SubmarineUnlock?.SubmarineExplorationUnlockEx.Value?.FormattedNameShort ?? "N/A");
-                ImGui.Text("Rank Required: " + SubmarineExplorationEx.RankReq);
+                ImGui.TextUnformatted(SubmarineExplorationEx.FormattedNameShort);
+                ImGui.TextUnformatted("Unlocked Via: " + SubmarineExplorationEx.SubmarineUnlock?.SubmarineExplorationUnlockEx.Value?.FormattedNameShort ?? "N/A");
+                ImGui.TextUnformatted("Rank Required: " + SubmarineExplorationEx.RankReq);
                 ;
                 var itemIcon = PluginService.IconStorage[65035];
                 ImGui.Image(itemIcon.ImGuiHandle, new Vector2(100, 100) * ImGui.GetIO().FontGlobalScale);
@@ -106,7 +106,7 @@ namespace InventoryTools.Ui
                 #if DEBUG
                 if (ImGui.CollapsingHeader("Debug"))
                 {
-                    ImGui.Text("Duty ID: " + _submarineExplorationPointId);
+                    ImGui.TextUnformatted("Duty ID: " + _submarineExplorationPointId);
                     Utils.PrintOutObject(SubmarineExplorationEx, 0, new List<string>());
                 }
                 #endif
