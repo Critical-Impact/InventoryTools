@@ -233,6 +233,13 @@ namespace InventoryTools.Ui
             if (filterConfigurations.Contains(filterConfiguration))
             {
                 _selectedFilterTab = filterConfigurations.IndexOf(filterConfiguration);
+                var filterIndex = Filters.Contains(filterConfiguration) ? Filters.IndexOf(filterConfiguration) : -1;
+                if (filterIndex != -1)
+                {
+                    _newTab = filterIndex;
+                }
+
+                _applyNewTabTime = DateTime.Now + TimeSpan.FromMilliseconds(10);
                 if (showSettings)
                 {
                     _settingsActive = true;
@@ -288,6 +295,7 @@ namespace InventoryTools.Ui
                                 {
                                     _newTab = null;
                                     _applyNewTabTime = null;
+                                    _selectedFilterTab = index;
                                 }
                                 GetFilterMenu(filterConfiguration, WindowLayout.Tabs).Draw();
 
@@ -334,7 +342,7 @@ namespace InventoryTools.Ui
             if (filterIndex != -1)
             {
                 _newTab = filterIndex;
-                _applyNewTabTime = DateTime.Now + TimeSpan.FromMilliseconds(5);
+                _applyNewTabTime = DateTime.Now + TimeSpan.FromMilliseconds(10);
                 //ImGui being shit workaround
             }
         }
@@ -553,7 +561,7 @@ namespace InventoryTools.Ui
                         ImGui.SameLine();
                         float width = ImGui.GetWindowSize().X;
                         width -= 28;
-                        ImGui.SetCursorPosX(width * ImGui.GetIO().FontGlobalScale);
+                        ImGui.SetCursorPosX(width);
                         if (_searchIcon.Draw("tb_oib"))
                         {
                             _addItemBarOpen = !_addItemBarOpen;
@@ -563,7 +571,7 @@ namespace InventoryTools.Ui
 
                         ImGui.SameLine();
                         width -= 28;
-                        ImGui.SetCursorPosX(width * ImGui.GetIO().FontGlobalScale);
+                        ImGui.SetCursorPosX(width);
                         if (_editIcon.Draw("tb_edit"))
                         {
                             _settingsActive = !_settingsActive;
@@ -1023,7 +1031,12 @@ namespace InventoryTools.Ui
 
         public override void Invalidate()
         {
+            var selectedConfiguration = SelectedConfiguration;
             _filters = null;
+            if (selectedConfiguration != null)
+            {
+                FocusFilter(selectedConfiguration);
+            }
         }
     }
 }

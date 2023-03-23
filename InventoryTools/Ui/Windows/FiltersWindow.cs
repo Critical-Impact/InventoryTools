@@ -696,7 +696,7 @@ namespace InventoryTools.Ui
                     
                     ImGui.SameLine();
                     width -= 28;
-                    ImGui.SetCursorPosX(width * ImGui.GetIO().FontGlobalScale);
+                    ImGui.SetCursorPosX(width);
                     if (_editIcon.Draw("tb_edit"))
                     {
                         _settingsActive = !_settingsActive;

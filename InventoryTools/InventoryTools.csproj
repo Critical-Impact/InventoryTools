@@ -143,8 +143,8 @@
             <ApiLevel>8</ApiLevel>
             <Author>Critical-Impact</Author>
             <Name>Allagan Tools</Name>
-            <Punchline>Can't find an item in your inventory? Need to find a specific item from all the games many items? Need help working out what materials you need for a craft? Allagan Tools can probably help. (formerly Inventory Tools)</Punchline>
-            <Description>Adds in a window that allows for the searching and filtering of items across your inventories and the entire games list of items. Adds visualisation in game to see both where your items are and where you should sort them.\n\nFeatures are always being added to Inventory Tools so keep up to date to receive them. Some of the currently included features are:\n\t- Market board integration \n\t- Item highlighting \n\t- Various ways to filter items including have acquired, is craftable, is housing, any many more \n\t- Browse all available game items </Description>
+            <Punchline>Get organized in FFXIV, easily locate/show where to sort items, plan your crafting, and search for mobs, duties, airships, and submarines!</Punchline>
+            <Description>Allagan Tool's primary purpose is to keep track of items across your characters/retainers/free company. With it's filter system you'll never lose track of items or not know where they should be sorted.\n\nWhile this is it's primary purpose, it has quite an exhaustive list of other features including:\n\t- Craft planning\n\t- Market board integration\n\t- Item highlighting in inventories when searching/sorting and picking ingredients for crafts\n\t- Item window that includes vendor and source information among other things\n\t- Duty/mob/airship/submarine windows that are fully searchable\n\t- A filtering system that lets you setup complex searches for specific items \n\t- Tooltip integration that'll let you see where the items are on hover</Description>
             <IconUrl>https://raw.githubusercontent.com/Critical-Impact/InventoryTools/main/InventoryTools/Images/icon.png</IconUrl>
             <Tags>
                 <Tag>Inventory</Tag>
