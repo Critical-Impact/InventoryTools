@@ -31,7 +31,7 @@ public class MockPlugin : IDisposable
     private MockIconService _iconService;
     private MockUniversalis _universalis;
     private WindowService _windowService;
-    private MockGameUiManager _gameUiManager;
+    public MockGameUiManager _gameUiManager;
     private MockMarketCache _marketCache;
     private MockPluginInterfaceService _mockPluginInterfaceService;
     private PluginLogic _pluginLogic;

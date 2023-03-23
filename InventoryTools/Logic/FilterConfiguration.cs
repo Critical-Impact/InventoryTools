@@ -2440,7 +2440,7 @@ namespace InventoryTools.Logic
 
                                 if (sourceItem.TempQuantity == 0)
                                 {
-                                    continue;
+                                    break;
                                 }
                             }
 

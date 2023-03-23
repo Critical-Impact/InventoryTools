@@ -22,7 +22,7 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "Quantity Available";
+        public override string Name { get; set; } = "Available";
         public override float Width { get; set; } = 100;
 
         public override string HelpText { get; set; } =

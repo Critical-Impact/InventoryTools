@@ -9,6 +9,11 @@ public class MockGameUiManager : IGameUiManager
     {
     }
 
+    public void ManualInvokeUiVisibilityChanged(WindowName windowName, bool status)
+    {
+        UiVisibilityChanged?.Invoke(windowName, status);
+    }
+
     public event GameUiManager.UiVisibilityChangedDelegate? UiVisibilityChanged;
     public event GameUiManager.UiUpdatedDelegate? UiUpdated;
     public bool IsWindowVisible(WindowName windowName)

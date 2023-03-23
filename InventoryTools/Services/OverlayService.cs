@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
 using Dalamud.Logging;
@@ -163,6 +164,14 @@ namespace InventoryTools.Services
         {
             if (!Overlays.ContainsKey(overlayState.WindowName))
             {
+                if (overlayState.ExtraWindows != null)
+                {
+                    foreach (var extraWindow in overlayState.ExtraWindows)
+                    {
+                        _windowOverlayMap[extraWindow] = overlayState.WindowName;
+                    }
+                }
+
                 Overlays.Add(overlayState.WindowName, overlayState);
                 overlayState.Setup();
                 overlayState.Draw();
@@ -177,18 +186,24 @@ namespace InventoryTools.Services
         {
             if (Overlays.ContainsKey(windowName))
             {
-                Overlays[windowName].Clear();
+                var atkOverlayState = Overlays[windowName];
+
+                if (atkOverlayState.ExtraWindows != null)
+                {
+                    foreach (var extraWindow in atkOverlayState.ExtraWindows)
+                    {
+                        _windowOverlayMap.Remove(extraWindow);
+                    }
+                }
+
+                atkOverlayState.Clear();
                 Overlays.Remove(windowName);
             }
         }
 
         public void RemoveOverlay(IAtkOverlayState overlayState)
         {
-            if (Overlays.ContainsKey(overlayState.WindowName))
-            {
-                Overlays.Remove(overlayState.WindowName);
-                overlayState.Clear();
-            }
+            RemoveOverlay(overlayState.WindowName);
         }
 
         public void ClearOverlays()
@@ -198,17 +213,48 @@ namespace InventoryTools.Services
                 RemoveOverlay(overlay.Value);
             }
         }
+
+        private Dictionary<WindowName, WindowName> _windowOverlayMap = new();
+        private Dictionary<WindowName, bool> _windowStatuses = new();
         private void GameUiOnUiVisibilityChanged(WindowName windowname, bool? windowstate)
         {
             if (PluginService.PluginLoaded)
             {
+                var extraWindowChange = false;
+                if (_windowOverlayMap.ContainsKey(windowname) && windowstate != null)
+                {
+                    var originalWindow = windowname;
+                    _windowStatuses[windowname] = windowstate.Value;
+                    windowname = _windowOverlayMap[windowname];
+                    extraWindowChange = true;
+                }
+                //As some overlays represent multiple windows we need to track each window and whether or not it's active, once the entire "group" of windows is active we update the overlay accordingly
                 if (_overlays.ContainsKey(windowname))
                 {
+                    if (windowstate != null && !extraWindowChange)
+                    {
+                        _windowStatuses[windowname] = windowstate.Value;
+                    }
+                    var overlay = _overlays[windowname];
+                    if (overlay.ExtraWindows != null)
+                    {
+                        var extraWindowsReady = overlay.ExtraWindows.All(c => _windowStatuses.ContainsKey(c) && _windowStatuses[c] == windowstate) && _windowStatuses.ContainsKey(windowname) && _windowStatuses[windowname] == windowstate;
+                        if (!extraWindowsReady)
+                        {
+                            return;
+                        }
+
+                        if (windowstate != null)
+                        {
+                            PluginLog.Verbose("All extra windows of " + windowname +
+                                              " are now active, entire overlay is now " +
+                                              (windowstate.Value ? "visible" : "invisible"));
+                        }
+                    }
                     if (windowstate == true)
                     {
                         RefreshOverlayStates();
                     }
-                    var overlay = _overlays[windowname];
                     if (windowstate.HasValue && windowstate.Value)
                     {
                         SetupUpdateHook(overlay);

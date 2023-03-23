@@ -17,7 +17,7 @@ namespace InventoryToolsMock
         private static CommandList _cl;
         public static ImGuiController _controller;
         private static Vector3 _clearColor = new Vector3(0.45f, 0.55f, 0.6f);
-        private static MockPlugin _mockPlugin;
+        public static MockPlugin _mockPlugin;
 
         static void Main(string[] args)
         {

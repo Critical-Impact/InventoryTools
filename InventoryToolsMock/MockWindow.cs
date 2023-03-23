@@ -2,6 +2,7 @@ using System.Numerics;
 using System.Text;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Resolvers;
+using CriticalCommonLib.Services.Ui;
 using Dalamud.Logging;
 using ImGuiNET;
 using InventoryTools;
@@ -47,7 +48,49 @@ public class MockWindow : Window
             DrawWindowTab();
             DrawDataTab();
             DrawCharacterTab();
+            DrawGameUiTab();
             ImGui.EndTabBar();
+        }
+    }
+
+    private string _windowName = "";
+
+    private void DrawGameUiTab()
+    {
+        using (var gameUiTab = ImRaii.TabItem("Game UI"))
+        {
+            if (gameUiTab.Success)
+            {
+                using (var combo = ImRaii.Combo("Window Name", _windowName))
+                {
+                    if (combo.Success)
+                    {
+                        foreach (var windowName in Enum.GetNames(typeof(WindowName)))
+                        {
+                            if (ImGui.Selectable(windowName, _windowName == windowName))
+                            {
+                                _windowName = windowName;
+                            }
+                        }
+                    }
+                }
+
+                if (ImGui.Button("Show"))
+                {
+                    if (Enum.TryParse(_windowName, out WindowName actualWindowName))
+                    {
+                        Program._mockPlugin._gameUiManager.ManualInvokeUiVisibilityChanged(actualWindowName, true);
+                    }
+                }
+
+                if (ImGui.Button("Hide"))
+                {
+                    if (Enum.TryParse(_windowName, out WindowName actualWindowName))
+                    {
+                        Program._mockPlugin._gameUiManager.ManualInvokeUiVisibilityChanged(actualWindowName, false);
+                    }
+                }
+            }
         }
     }
 
@@ -193,6 +236,16 @@ public class MockWindow : Window
             if (ImGui.Button("Mock Items Window"))
             {
                 PluginService.WindowService.ToggleWindow<MockGameItemsWindow>(MockGameItemsWindow.AsKey);
+            }
+
+            if (ImGui.Button("New Filters Window Test"))
+            {
+                PluginService.WindowService.ToggleWindow<NewFiltersWindow>(NewFiltersWindow.AsKey);
+            }
+
+            if (ImGui.Button("New Craft Window Test"))
+            {
+                PluginService.WindowService.ToggleWindow<NewCraftsWindow>(NewCraftsWindow.AsKey);
             }
 
             ImGui.EndTabItem();

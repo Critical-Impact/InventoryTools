@@ -44,6 +44,17 @@ namespace InventoryToolsTesting
             var requiredMaterialsList = list.GetRequiredMaterialsList();
             Assert.AreEqual( 4, requiredMaterialsList[5343]);
         }
+
+        [Test]
+        public void TestLeftovers()
+        {
+            //Testing how partial used ingredients of a craft can then be used in crafts in the same list
+            CraftList list = new CraftList();
+            list.AddCraftItem(38930, 300);
+            list.AddCraftItem(38929, 300);
+            var requiredMaterialsList = list.GetRequiredMaterialsList();
+            Assert.AreEqual( 600, requiredMaterialsList[36085]);
+        }
         
         [Test]
         public void TestRecipeCalculation()
@@ -136,8 +147,8 @@ namespace InventoryToolsTesting
             Assert.AreEqual(2, availableMaterialsList[5325]);
 
             var missingMaterialsList = list.GetMissingMaterialsList();
-            Assert.AreEqual(4, missingMaterialsList[5334]);
-            Assert.AreEqual(4, missingMaterialsList[5343]);
+            Assert.AreEqual(8, missingMaterialsList[5334]);
+            Assert.AreEqual(8, missingMaterialsList[5343]);
             
             //Maple lumber
             characterMaterials = new Dictionary<uint, List<CraftItemSource>>();
@@ -151,14 +162,14 @@ namespace InventoryToolsTesting
             var quantityNeededList = list.GetQuantityNeededList();
             missingMaterialsList = list.GetMissingMaterialsList();
             Assert.AreEqual(2, missingMaterialsList[5361]);
-            Assert.AreEqual(6, quantityNeededList[5380]);
-            Assert.AreEqual(6, missingMaterialsList[5380]);
+            Assert.AreEqual(12, quantityNeededList[5380]);
+            Assert.AreEqual(12, missingMaterialsList[5380]);
             
             //Maple lumber
             characterMaterials = new Dictionary<uint, List<CraftItemSource>>();
             externalSources = new Dictionary<uint, List<CraftItemSource>>();
             mapleLumber = new CraftItemSource(5361, 2, false);
-            var mapleLog = new CraftItemSource(5380, 6, false);
+            var mapleLog = new CraftItemSource(5380, 12, false);
             var windShard = new CraftItemSource(4, 999, false);
             characterMaterials.Add(5361, new List<CraftItemSource>() {mapleLumber});
             characterMaterials.Add(5380, new List<CraftItemSource>() {mapleLog});

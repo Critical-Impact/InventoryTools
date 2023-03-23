@@ -317,9 +317,8 @@ namespace InventoryTools.Ui
 
         private void AddCraftFilter(string newName)
         {
-            var filterConfiguration = new FilterConfiguration(newName,
-                Guid.NewGuid().ToString("N"), FilterType.CraftFilter);
-            PluginService.FilterService.AddFilter(filterConfiguration);
+            var filterConfiguration = PluginService.FilterService.AddNewCraftFilter();
+            filterConfiguration.Name = newName;
             Invalidate();
             this.SetActiveFilter(filterConfiguration);
         }

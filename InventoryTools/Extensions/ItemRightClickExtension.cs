@@ -139,6 +139,7 @@ namespace InventoryTools.Extensions
                         if (ImGui.Selectable("Switch to Phase " + (i + 1)))
                         {
                             item.SwitchPhase(i);
+                            configuration.CraftList.GenerateCraftChildren();
                             configuration.StartRefresh();
                         }
                     }

@@ -320,10 +320,12 @@ namespace InventoryToolsTesting
                 
                 searchFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
                 
-                //All 3 should be going to first retainer
+                //1 from bag -> retainer 1
+                //1 from retainer 1 -> retainer 2
+                //1 from retainer 2 -> retainer 1
                 var actual = searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Where(c => !c.InventoryItem.IsEmpty).ToList();
                 Assert.AreEqual(_retainer.CharacterId, actual.ToList()[0].DestinationRetainerId);
-                Assert.AreEqual(_retainer.CharacterId, actual.ToList()[1].DestinationRetainerId);
+                Assert.AreEqual(_retainer2.CharacterId, actual.ToList()[1].DestinationRetainerId);
                 Assert.AreEqual(_retainer.CharacterId, actual.ToList()[2].DestinationRetainerId);
             }
         }
