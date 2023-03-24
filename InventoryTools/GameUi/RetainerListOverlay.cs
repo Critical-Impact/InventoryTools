@@ -54,6 +54,17 @@ namespace InventoryTools.GameUi
             {
                 return;
             }
+
+            if (!ConfigurationManager.Config.ShowItemNumberRetainerList)
+            {
+                if (HasState)
+                {
+                    HasState = false;
+                    Clear();
+                }
+
+                return;
+            }
             if (newState != null && HasAddon && newState.ShouldHighlight && newState.HasFilterResult)
             {
                 HasState = true;

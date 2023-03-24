@@ -529,17 +529,8 @@ namespace InventoryTools
             sampleFilter.DestinationCategories =  new HashSet<InventoryCategory>() {InventoryCategory.RetainerBags};
             sampleFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
             sampleFilter.HighlightWhen = "Always";
-            var itemUiCategories = Service.ExcelCache.GetAllItemUICategories();
-            //I'm making assumptions about the names of these and one day I will try to support more than english
-            var categories = new HashSet<string>() { "Bone", "Cloth", "Catalyst", "Crystal", "Ingredient", "Leather", "Lumber", "Metal", "Part", "Stone" };
-            sampleFilter.ItemUiCategoryId = new List<uint>();
-            foreach (var itemUiCategory in itemUiCategories)
-            {
-                if (categories.Contains(itemUiCategory.Value.Name))
-                {
-                    sampleFilter.ItemUiCategoryId.Add(itemUiCategory.Key);
-                }
-            }
+            var gatherFilter = new CanBeGatheredFilter();
+            gatherFilter.UpdateFilterConfiguration(sampleFilter, true);
             PluginService.FilterService.AddFilter(sampleFilter);
         }
 

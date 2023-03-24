@@ -738,13 +738,14 @@ namespace InventoryTools.Ui
             }
         }
 
+        private string? _newName = null;
         private void DrawSettingsPanel(FilterConfiguration filterConfiguration)
         {
             using (var contentChild = ImRaii.Child("Content", new Vector2(0, -44) * ImGui.GetIO().FontGlobalScale, true))
             {
                 if (contentChild.Success)
                 {
-                    var filterName = filterConfiguration.Name;
+                    var filterName = _newName ?? filterConfiguration.Name;
                     var labelName = "##" + filterConfiguration.Key;
                     if (ImGui.CollapsingHeader("General",
                             ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
@@ -755,9 +756,20 @@ namespace InventoryTools.Ui
                             ImGui.LabelText(labelName + "FilterNameLabel", "Name: ");
                             ImGui.SameLine();
                             ImGui.InputText(labelName + "FilterName", ref filterName, 100);
-                            if (filterName != filterConfiguration.Name)
+                            if (filterName != _newName && filterName != filterConfiguration.Name)
                             {
-                                filterConfiguration.Name = filterName;
+                                _newName = filterName;
+                            }
+
+                            if (_newName != null)
+                            {
+                                ImGui.SameLine();
+                                if (ImGui.Button("Save"))
+                                {
+                                    filterConfiguration.Name = _newName;
+                                    Invalidate();
+                                    _newName = null;
+                                }
                             }
 
                             ImGui.NewLine();
