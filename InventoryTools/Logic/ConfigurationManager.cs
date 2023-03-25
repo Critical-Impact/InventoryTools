@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Resolvers;
 using Dalamud.Logging;
@@ -293,11 +294,19 @@ namespace InventoryTools.Logic
 
         public static List<InventoryItem> LoadInventoriesFromCsv(out bool success, string? csvPath = null)
         {
-            var items = CsvLoader.LoadCsv<InventoryItem>(csvPath ?? InventoryCsv, out success);
-            if (success && items != null)
+            try
             {
+                var items = CsvLoader.LoadCsv<InventoryItem>(csvPath ?? InventoryCsv);
+                success = true;
                 return items;
             }
+            catch (Exception e)
+            {
+                success = false;
+                PluginLog.Error("Failed to load inventories from CSV");
+                PluginLog.Error(e.Message);
+            }
+
 
             return new List<InventoryItem>();
         }
