@@ -117,8 +117,8 @@ namespace InventoryTools.Logic
                                                 ImGui.TableNextColumn();
                                                 if (columnIndex == 1)
                                                 {
-                                                    ImGui.Text(
-                                                        "No items have been added to the list. Add items from the top right or by right clicking on an item anywhere within the plugin.");
+                                                    ImGui.TextWrapped(
+                                                        "No items have been added to the list. Add items via the search menu button at the top right of the screen or by right clicking on an item anywhere within the plugin.");
                                                 }
                                             }
                                         }

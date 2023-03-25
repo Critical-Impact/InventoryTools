@@ -902,7 +902,7 @@ namespace InventoryTools.Ui
                             ImGui.OpenPopup("Reset the default craft list?##defaultReset");
                         }
 
-                        ImGuiUtil.HoverTooltip("Return to the craft list.");
+                        ImGuiUtil.HoverTooltip("Reset to the default settings.");
 
                         using (var popup = ImRaii.Popup("Reset the default craft list?##defaultReset"))
                         {
