@@ -31,17 +31,6 @@ jobs:
         run: dotnet restore -r win
       - name: Build
         run: dotnet build -c ${{ env.CONFIGURATION }} --no-restore ${{ env.INTERNAL_NAME }}
-      - name: Tag
-        run: |
-          buildVersion=$(jq -j .AssemblyVersion "${{ env.INTERNAL_NAME }}/bin/${{ env.CONFIGURATION }}/${{ env.INTERNAL_NAME }}/${{ env.INTERNAL_NAME }}.json")
-          git tag -am "[Automated build $buildVersion]" "v$buildVersion"
-          git push origin "v$buildVersion"
-        shell: bash
-        env:
-          GIT_AUTHOR_NAME: GitHub Action
-          GIT_COMMITTER_NAME: GitHub Action
-          GIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
-          GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
       - name: Push artifacts
         uses: actions/upload-artifact@v3
         with:
