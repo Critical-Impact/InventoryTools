@@ -30,7 +30,7 @@ jobs:
       - name: Restore
         run: dotnet restore -r win
       - name: Build
-        run: dotnet build -c ${{ env.CONFIGURATION }} --no-restore
+        run: dotnet build -c ${{ env.CONFIGURATION }} --no-restore ${{ env.INTERNAL_NAME }}
       - name: Tag
         run: |
           buildVersion=$(jq -j .AssemblyVersion "${{ env.INTERNAL_NAME }}/bin/${{ env.CONFIGURATION }}/${{ env.INTERNAL_NAME }}/${{ env.INTERNAL_NAME }}.json")
