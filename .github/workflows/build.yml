@@ -47,4 +47,4 @@ jobs:
         with:
           name: dist
           path: |
-            dist      
+            InventoryTools/bin/Release/InventoryTools      
