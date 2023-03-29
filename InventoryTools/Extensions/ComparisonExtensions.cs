@@ -200,6 +200,80 @@ namespace InventoryTools.Extensions
             return number.ToString().Contains(filterString);
         }
         
+        public static bool PassesFilter(this decimal number, string filterString)
+        {
+            filterString = filterString.Trim();
+            if (filterString.Contains("||"))
+            {
+                var ors = filterString.Split("||");
+                return ors.Select(c => PassesFilter(number, c)).Any(c => c);
+            }
+            if (filterString.Contains("&&"))
+            {
+                var ands = filterString.Split("&&");
+                return ands.Select(c => PassesFilter(number, c)).All(c => c);
+            }
+            if (filterString.StartsWith("=") && filterString.Length >= 2)
+            {
+                var filter = filterString.Substring(1);
+                if (number.ToString() == filter)
+                {
+                    return true;
+                }
+            }
+            else if (filterString.StartsWith("<=") && filterString.Length >= 3)
+            {
+                var filter = filterString.Substring(2);
+                if (decimal.TryParse(filter, out var numberResult))
+                {
+                    if (numberResult >= number)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if(filterString.StartsWith(">=") && filterString.Length >= 3)
+            {
+                var filter = filterString.Substring(2);
+                if (decimal.TryParse(filter, out var numberResult))
+                {
+                    if (numberResult <= number)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (filterString.StartsWith("<") && filterString.Length >= 2)
+            {
+                var filter = filterString.Substring(1);
+                if (decimal.TryParse(filter, out var numberResult))
+                {
+                    if (numberResult > number)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (filterString.StartsWith(">") && filterString.Length >= 2)
+            {
+                var filter = filterString.Substring(1);
+                if (decimal.TryParse(filter, out var numberResult))
+                {
+                    if (numberResult < number)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (filterString.StartsWith("!") && filterString.Length >= 2)
+            {
+                var filter = filterString.Substring(1);
+                return !number.ToString().Contains(filter);
+            }
+
+            return number.ToString().Contains(filterString);
+        }
+        
         public static bool PassesFilter(this float number, string filterString)
         {
             filterString = filterString.Trim();

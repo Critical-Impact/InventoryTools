@@ -35,6 +35,7 @@ namespace InventoryTools.Logic
         private Dictionary<string, bool>? _booleanFilters = new();
         private Dictionary<string, string>? _stringFilters = new();
         private Dictionary<string, int>? _integerFilters = new();
+        private Dictionary<string, decimal>? _decimalFilters = new();
         private Dictionary<string, uint>? _uintFilters = new();
         private Dictionary<string, List<uint>>? _uintChoiceFilters = new();
         private Dictionary<string, List<ulong>>? _ulongChoiceFilters = new();
@@ -217,6 +218,8 @@ namespace InventoryTools.Logic
                    InventoryCategory.CharacterBags);
                 var crystalBags = PluginService.InventoryMonitor.GetSpecificInventory(PluginService.CharacterMonitor.ActiveCharacterId,
                    InventoryCategory.Crystals);
+                var currencyBags = PluginService.InventoryMonitor.GetSpecificInventory(PluginService.CharacterMonitor.ActiveCharacterId,
+                   InventoryCategory.Currency);
                 var retainerSetting = this.FilterItemsInRetainersEnum;
                 _filterItemsInRetainersEnum = FilterItemsRetainerEnum.No;
                 var tempFilterResult = await GenerateFilteredList(PluginService.InventoryMonitor.Inventories);
@@ -233,6 +236,14 @@ namespace InventoryTools.Logic
                     characterSources[item.ItemId].Add(new CraftItemSource(item.ItemId, item.Quantity, item.IsHQ));
                 }
                 foreach (var item in crystalBags)
+                {
+                    if (!characterSources.ContainsKey(item.ItemId))
+                    {
+                        characterSources.Add(item.ItemId,new List<CraftItemSource>());
+                    }
+                    characterSources[item.ItemId].Add(new CraftItemSource(item.ItemId, item.Quantity, item.IsHQ));
+                }
+                foreach (var item in currencyBags)
                 {
                     if (!characterSources.ContainsKey(item.ItemId))
                     {
@@ -1321,6 +1332,16 @@ namespace InventoryTools.Logic
             return null;
         }
 
+        public int? GetDecimalFilter(string key)
+        {
+            if (DecimalFilters.ContainsKey(key))
+            {
+                return (int?)DecimalFilters[key];
+            }
+
+            return null;
+        }
+
         public List<uint> GetUintChoiceFilter(string key)
         {
             if (UintChoiceFilters.ContainsKey(key))
@@ -1436,6 +1457,25 @@ namespace InventoryTools.Logic
             PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
         }
 
+        public void UpdateDecimalFilter(string key, decimal? value)
+        {
+            if (DecimalFilters.ContainsKey(key) && DecimalFilters[key] == value)
+            {
+                return;
+            }
+            if (DecimalFilters.ContainsKey(key) && value == null)
+            {
+                DecimalFilters.Remove(key);
+            }
+            else if (value != null)
+            {
+                DecimalFilters[key] = value.Value;
+            }
+
+            NeedsRefresh = true;
+            PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+        }
+
         public void UpdateUintChoiceFilter(string key, List<uint> value)
         {
             UintChoiceFilters[key] = value;
@@ -1523,6 +1563,20 @@ namespace InventoryTools.Logic
                 return _integerFilters;
             }
             set => _integerFilters = value;
+        }
+
+
+        public Dictionary<string, decimal> DecimalFilters
+        {
+            get
+            {
+                if (_decimalFilters == null)
+                {
+                    _decimalFilters = new();
+                }
+                return _decimalFilters;
+            }
+            set => _decimalFilters = value;
         }
 
 
