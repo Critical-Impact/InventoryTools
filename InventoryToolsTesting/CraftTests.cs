@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Services;
@@ -220,6 +221,41 @@ namespace InventoryToolsTesting
             var retrieveList = list.GetQuantityToRetrieveList();
             //undyed cotton cloth
             Assert.AreEqual(4, retrieveList[5325]);
+        }
+
+        //When splitting the stacks of an item you have enough of(say 21 out of 20), it'll appear to want negative of the items required to craft it
+        [Test]
+        public void TestSplitStacks()
+        {
+            var characterMaterials = new Dictionary<uint, List<CraftItemSource>>();
+            var externalSources = new Dictionary<uint, List<CraftItemSource>>();
+            var copperIngots = new CraftItemSource(5062, 21, true);
+            characterMaterials.Add(5062, new List<CraftItemSource>() {copperIngots});
+            
+            CraftList list = new CraftList();
+            //Glade Drawer Table
+            list.AddCraftItem(6624, 10);
+            list.GenerateCraftChildren();
+            list.Update(characterMaterials, externalSources);
+
+            var flattenedMergedMaterials = list.GetFlattenedMergedMaterials();
+            //Works normally
+            Assert.AreEqual(false, flattenedMergedMaterials.Any(c => c.ItemId == 5106));
+            
+
+            
+            //Checking to make sure the amount of copper ore required is 0, not -3
+            characterMaterials = new Dictionary<uint, List<CraftItemSource>>();
+            externalSources = new Dictionary<uint, List<CraftItemSource>>();
+            copperIngots = new CraftItemSource(5062, 20, true);
+            var copperIngots2 = new CraftItemSource(5062, 1, true);
+            characterMaterials.Add(5062, new List<CraftItemSource>() {copperIngots, copperIngots2});
+            
+            list.GenerateCraftChildren();
+            list.Update(characterMaterials, externalSources);
+            flattenedMergedMaterials = list.GetFlattenedMergedMaterials();
+            Assert.AreEqual(false, flattenedMergedMaterials.Any(c => c.ItemId == 5106));
+
         }
     }
 }

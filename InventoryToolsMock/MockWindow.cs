@@ -238,15 +238,6 @@ public class MockWindow : Window
                 PluginService.WindowService.ToggleWindow<MockGameItemsWindow>(MockGameItemsWindow.AsKey);
             }
 
-            if (ImGui.Button("New Filters Window Test"))
-            {
-                PluginService.WindowService.ToggleWindow<NewFiltersWindow>(NewFiltersWindow.AsKey);
-            }
-
-            if (ImGui.Button("New Craft Window Test"))
-            {
-                PluginService.WindowService.ToggleWindow<NewCraftsWindow>(NewCraftsWindow.AsKey);
-            }
 
             ImGui.EndTabItem();
         }
