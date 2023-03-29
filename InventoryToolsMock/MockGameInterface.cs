@@ -28,6 +28,11 @@ public class MockGameInterface : IGameInterface
         PluginLog.Log("Game Event: Gathering Log Opened for Item #" + itemId);
     }
 
+    public unsafe void OpenFishingLog(uint itemId, bool isSpearFishing)
+    {
+        PluginLog.Log("Game Event: Fishing Log Opened for Item #" + itemId);
+    }
+
     public unsafe bool HasAcquired(ItemEx item, bool debug = false)
     {
         return false;

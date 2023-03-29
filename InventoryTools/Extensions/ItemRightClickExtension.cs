@@ -233,9 +233,19 @@ namespace InventoryTools.Extensions
                 PluginService.GameInterface.OpenGatheringLog(item.RowId);
             }
 
+            if (item.ObtainedFishing && ImGui.Selectable("Open Fishing Log"))
+            {
+                PluginService.GameInterface.OpenFishingLog(item.RowId, item.IsSpearfishingItem());
+            }
+
             if (item.CanOpenGatheringLog && ImGui.Selectable("Gather with Gatherbuddy"))
             {
                 PluginService.CommandService.ProcessCommand("/gather " + item.NameString);
+            }
+
+            if (item.ObtainedFishing && ImGui.Selectable("Gather with Gatherbuddy"))
+            {
+                PluginService.CommandService.ProcessCommand("/gatherfish " + item.NameString);
             }
 
             if (ImGui.Selectable("More Information"))

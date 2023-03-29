@@ -236,6 +236,29 @@ namespace InventoryTools.Ui
                     ImGuiUtil.HoverTooltip("Gatherable - Gather with Gatherbuddy");
                 }
 
+                if (Item.ObtainedFishing)
+                {
+                    ImGui.SameLine();
+                    var gatherableIcon = PluginService.IconStorage[66457];
+                    if (ImGui.ImageButton(gatherableIcon.ImGuiHandle,
+                            new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
+                    {
+                        PluginService.GameInterface.OpenFishingLog(_itemId, Item.IsSpearfishingItem());
+                    }
+
+                    ImGuiUtil.HoverTooltip("Gatherable - Open in Fishing Log");
+                    
+                    ImGui.SameLine();
+                    var gbIcon = PluginService.IconStorage[63900];
+                    if (ImGui.ImageButton(gbIcon.ImGuiHandle,
+                            new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
+                    {
+                        PluginService.CommandService.ProcessCommand("/gatherfish " + Item.NameString);
+                    }
+
+                    ImGuiUtil.HoverTooltip("Gatherable - Gather with Gatherbuddy");
+                }
+
                 ImGui.Separator();
                 if (ImGui.CollapsingHeader("Sources (" + Item.Sources.Count + ")", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
                 {

@@ -26,7 +26,7 @@ namespace InventoryTools.Logic.Columns
 
         public override bool? CurrentValue(CraftItem currentValue)
         {
-            return Service.ExcelCache.CanBeGathered(currentValue.ItemId);
+            return CurrentValue(currentValue.Item);
         }
 
         public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
@@ -34,9 +34,19 @@ namespace InventoryTools.Logic.Columns
             ImGui.TableNextColumn();
             if (CurrentValue(item) == true)
             {
-                if (ImGui.SmallButton("Gather##Gather" + rowIndex))
+                if (item.Item.ObtainedGathering)
                 {
-                    PluginService.CommandService.ProcessCommand("/gather " + item.Name);
+                    if (ImGui.SmallButton("Gather##Gather" + rowIndex))
+                    {
+                        PluginService.CommandService.ProcessCommand("/gather " + item.Name);
+                    }
+                }
+                else if(item.Item.ObtainedFishing)
+                {
+                    if (ImGui.SmallButton("Gather##Gather" + rowIndex))
+                    {
+                        PluginService.CommandService.ProcessCommand("/gatherfish " + item.Name);
+                    }
                 }
             }
         }
@@ -46,9 +56,19 @@ namespace InventoryTools.Logic.Columns
             ImGui.TableNextColumn();
             if (CurrentValue(item) == true)
             {
-                if (ImGui.SmallButton("Gather##Gather" + rowIndex))
+                if (item.Item.ObtainedGathering)
                 {
-                    PluginService.CommandService.ProcessCommand("/gather " + item.Item.NameString);
+                    if (ImGui.SmallButton("Gather##Gather" + rowIndex))
+                    {
+                        PluginService.CommandService.ProcessCommand("/gather " + item.Item.NameString);
+                    }
+                }
+                else if (item.Item.ObtainedFishing)
+                {
+                    if (ImGui.SmallButton("Gather##Gather" + rowIndex))
+                    {
+                        PluginService.CommandService.ProcessCommand("/gatherfish " + item.Item.NameString);
+                    }
                 }
             }
         }
@@ -58,9 +78,19 @@ namespace InventoryTools.Logic.Columns
             ImGui.TableNextColumn();
             if (CurrentValue(item) == true)
             {
-                if (ImGui.SmallButton("Gather##Gather" + rowIndex))
+                if (item.ObtainedGathering)
                 {
-                    PluginService.CommandService.ProcessCommand("/gather " + item.NameString);
+                    if (ImGui.SmallButton("Gather##Gather" + rowIndex))
+                    {
+                        PluginService.CommandService.ProcessCommand("/gather " + item.NameString);
+                    }
+                }
+                else if (item.ObtainedFishing)
+                {
+                    if (ImGui.SmallButton("Gather##Gather" + rowIndex))
+                    {
+                        PluginService.CommandService.ProcessCommand("/gatherfish " + item.NameString);
+                    }
                 }
             }
         }
