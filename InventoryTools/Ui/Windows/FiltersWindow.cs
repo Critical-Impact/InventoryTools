@@ -37,6 +37,7 @@ namespace InventoryTools.Ui
         private HoverButton _settingsIcon { get; } = new(PluginService.IconStorage.LoadIcon(66319),  new Vector2(22, 22));
         private HoverButton _craftIcon { get; } = new(PluginService.IconStorage.LoadImage("craft"),  new Vector2(22, 22));
         private HoverButton _csvIcon { get; } = new(PluginService.IconStorage.LoadImage("export2"),  new Vector2(22,22));
+        private HoverButton _clipboardIcon { get; } = new(PluginService.IconStorage.LoadImage("clipboard"),  new Vector2(22,22));
         private HoverButton _clearIcon { get; } = new(PluginService.IconStorage.LoadIcon(66308),  new Vector2(22, 22));
         private HoverButton _closeSettingsIcon { get; } = new(PluginService.IconStorage.LoadIcon(66311),  new Vector2(22, 22));
         private static HoverButton _marketIcon { get; } = new(PluginService.IconStorage.LoadImage("refresh-web"),  new Vector2(22, 22));
@@ -754,6 +755,14 @@ namespace InventoryTools.Ui
                     }
 
                     ImGuiUtil.HoverTooltip("Export to CSV");
+                    ImGui.SameLine();
+                    UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                    if (_clipboardIcon.Draw("copyJson"))
+                    {
+                        itemTable.ExportToJson().ToClipboard();
+                    }
+
+                    ImGuiUtil.HoverTooltip("Copy JSON to clipboard");
                     if (filterConfiguration.FilterType == FilterType.CraftFilter &&
                         PluginService.GameUi.IsWindowVisible(
                             CriticalCommonLib.Services.Ui.WindowName.SubmarinePartsMenu))
@@ -841,7 +850,17 @@ namespace InventoryTools.Ui
 
                     ImGuiUtil.HoverTooltip("Open the craft window.");
 
-                    
+                    var totalItems =  itemTable.RenderSortedItems.Count + " items";
+
+                    if (SelectedConfiguration != null && SelectedConfiguration.FilterType == FilterType.GameItemFilter)
+                    {
+                        totalItems =  itemTable.RenderItems.Count + " items";
+                    }
+
+                    var calcTextSize = ImGui.CalcTextSize(totalItems);
+                    width -= calcTextSize.X + 15;
+                    ImGui.SetCursorPosX(width);
+                    UiHelpers.VerticalCenter(totalItems);
                 }
             }
 

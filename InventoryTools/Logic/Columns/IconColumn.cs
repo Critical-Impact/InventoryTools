@@ -1,4 +1,5 @@
 using System.Numerics;
+using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
@@ -21,6 +22,26 @@ namespace InventoryTools.Logic.Columns
         public override (ushort, bool)? CurrentValue(SortingResult item)
         {
             return CurrentValue(item.InventoryItem);
+        }
+        
+        public override dynamic? JsonExport(InventoryItem item)
+        {
+            return CurrentValue(item)?.Item1;
+        }
+
+        public override dynamic? JsonExport(ItemEx item)
+        {
+            return CurrentValue(item)?.Item1;
+        }
+
+        public override dynamic? JsonExport(SortingResult item)
+        {
+            return CurrentValue(item)?.Item1;
+        }
+
+        public override dynamic? JsonExport(CraftItem item)
+        {
+            return CurrentValue(item)?.Item1;
         }
 
         public override IColumnEvent? DoDraw((ushort, bool)? currentValue, int rowIndex,

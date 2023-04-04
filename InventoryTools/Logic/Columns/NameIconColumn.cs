@@ -26,6 +26,26 @@ public class NameIconColumn : TextIconColumn
         return (item.InventoryItem.Item.Name, item.InventoryItem.Item.Icon, item.InventoryItem.IsHQ);
     }
     
+    public override dynamic? JsonExport(InventoryItem item)
+    {
+        return CurrentValue(item)?.Item1 ?? "";
+    }
+
+    public override dynamic? JsonExport(ItemEx item)
+    {
+        return CurrentValue(item)?.Item1 ?? "";
+    }
+
+    public override dynamic? JsonExport(SortingResult item)
+    {
+        return CurrentValue(item)?.Item1 ?? "";
+    }
+
+    public override dynamic? JsonExport(CraftItem item)
+    {
+        return CurrentValue(item)?.Item1 ?? "";
+    }
+    
     public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
     {
         base.Draw(configuration, item, rowIndex);

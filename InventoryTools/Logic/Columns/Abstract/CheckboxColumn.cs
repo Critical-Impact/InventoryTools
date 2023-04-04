@@ -133,7 +133,7 @@ namespace InventoryTools.Logic.Columns.Abstract
             {
                 isChecked = false;
             }
-            return FilterText == "" ? items : items.AsParallel().Where(c =>
+            return FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue((ItemEx)c);
                 if (!currentValue.HasValue)
@@ -165,7 +165,7 @@ namespace InventoryTools.Logic.Columns.Abstract
             {
                 isChecked = false;
             }
-            return FilterText == "" ? items : items.AsParallel().Where(c =>
+            return FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(c);
                 if (!currentValue.HasValue)
@@ -193,7 +193,7 @@ namespace InventoryTools.Logic.Columns.Abstract
             {
                 isChecked = false;
             }
-            return FilterText == "" ? items : items.AsParallel().Where(c =>
+            return FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(c);
                 if (!currentValue.HasValue)

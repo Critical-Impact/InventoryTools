@@ -25,7 +25,27 @@ namespace InventoryTools.Logic.Columns.Abstract
         {
             return CurrentValue(item)?.Item1 ?? "";
         }
-        
+
+        public override dynamic? JsonExport(InventoryItem item)
+        {
+            return CurrentValue(item)?.Item1 ?? "";
+        }
+
+        public override dynamic? JsonExport(ItemEx item)
+        {
+            return CurrentValue(item)?.Item1 ?? "";
+        }
+
+        public override dynamic? JsonExport(SortingResult item)
+        {
+            return CurrentValue(item)?.Item1 ?? "";
+        }
+
+        public override dynamic? JsonExport(CraftItem item)
+        {
+            return CurrentValue(item)?.Item1 ?? "";
+        }
+
         public override (string, Vector4)? CurrentValue(CraftItem currentValue)
         {
             return CurrentValue(currentValue.Item);
@@ -68,7 +88,7 @@ namespace InventoryTools.Logic.Columns.Abstract
 
         public override IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items)
         {
-            return FilterText == "" ? items : items.AsParallel().Where(c =>
+            return FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(c);
                 if (currentValue == null)
@@ -83,7 +103,7 @@ namespace InventoryTools.Logic.Columns.Abstract
         public override IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items)
         {
             var isChecked = FilterText != "";
-            return FilterText == "" ? items : items.AsParallel().Where(c =>
+            return FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(c);
                 if (currentValue == null)
@@ -98,7 +118,7 @@ namespace InventoryTools.Logic.Columns.Abstract
         public override IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items)
         {
             var isChecked = FilterText != "";
-            return FilterText == "" ? items : items.AsParallel().Where(c =>
+            return FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(c);
                 if (currentValue == null)

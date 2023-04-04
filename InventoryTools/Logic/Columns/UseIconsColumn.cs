@@ -13,7 +13,7 @@ using OtterGui.Raii;
 
 namespace InventoryTools.Logic.Columns
 {
-    public class AcquisitionSourceIconsColumn : Column<List<IItemSource>?>
+    public class UseIconsColumn : Column<List<IItemSource>?>
     {
         public override List<IItemSource>? CurrentValue(InventoryItem item)
         {
@@ -22,7 +22,7 @@ namespace InventoryTools.Logic.Columns
 
         public override List<IItemSource>? CurrentValue(ItemEx item)
         {
-            return item.Sources;
+            return item.Uses;
         }
 
         public override List<IItemSource>? CurrentValue(SortingResult item)
@@ -32,7 +32,7 @@ namespace InventoryTools.Logic.Columns
 
         public override List<IItemSource>? CurrentValue(CraftItem item)
         {
-            return item.Item.Sources;
+            return item.Item.Uses;
         }
 
         public override IColumnEvent? DoDraw(List<IItemSource>? currentValue, int rowIndex,
@@ -126,19 +126,19 @@ namespace InventoryTools.Logic.Columns
 
         public override string CsvExport(ItemEx item)
         {
-            return String.Join(", ", item.Sources.Select(c => c.Name));
-        }
-        
-        public override dynamic JsonExport(ItemEx item)
-        {
-            return String.Join(", ", item.Sources.Select(c => c.Name));
+            return String.Join(", ", item.Uses.Select(c => c.Name));
         }
 
-        public override string Name { get; set; } = "Acqusition";
+        public override dynamic JsonExport(ItemEx item)
+        {
+            return String.Join(", ", item.Uses.Select(c => c.Name));
+        }
+
+        public override string Name { get; set; } = "Uses";
         public override float Width { get; set; } = 210;
 
         public override string HelpText { get; set; } =
-            "Shows icons indicating what items can be obtained with(gathering, crafting, currency, etc)";
+            "Shows icons indicating what the items drop/can be used for";
         public override bool HasFilter { get; set; } = false;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
         public override IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items)

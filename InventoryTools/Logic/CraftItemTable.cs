@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -10,6 +11,8 @@ using CsvHelper;
 using Dalamud.Logging;
 using ImGuiNET;
 using InventoryTools.Logic.Columns;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using OtterGui.Raii;
 
 namespace InventoryTools.Logic
@@ -257,6 +260,11 @@ namespace InventoryTools.Logic
             return CraftItems.Where(c => c.IsOutputItem).ToList();
         }
 
+        public int GetCraftListCount()
+        {
+            return CraftItems.Count(c => !FilterConfiguration.HideCompletedRows || c.QuantityMissing != 0);
+        }
+
         public override void DrawFooterItems()
         {
             
@@ -299,6 +307,38 @@ namespace InventoryTools.Logic
                     }
                 }
             }
+        }
+        
+        public string ExportToJson()
+        {
+            var lines = new List<dynamic>();
+            var converter = new ExpandoObjectConverter();
+            if (FilterConfiguration.FilterType == FilterType.CraftFilter)
+            {
+                foreach (var item in CraftItems)
+                {
+                    var newLine = new ExpandoObject() as IDictionary<string, Object>;
+                    newLine["Id"] = item.ItemId;
+                    foreach (var column in Columns)
+                    {
+                        newLine[column.Name] = column.JsonExport(item);
+                    }
+                    lines.Add(newLine);
+                }
+            }
+
+            return JsonConvert.SerializeObject(lines.ToArray(), Formatting.None,
+                new JsonSerializerSettings()
+                {
+                    TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
+                    TypeNameHandling = TypeNameHandling.None,
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                    DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
+                    Converters = new List<JsonConverter>()
+                    {
+                        converter
+                    }
+                });
         }
     }
 }

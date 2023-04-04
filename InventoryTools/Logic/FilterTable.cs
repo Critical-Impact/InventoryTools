@@ -1,15 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using CriticalCommonLib.Resolvers;
 using CriticalCommonLib.Sheets;
 using CsvHelper;
 using Dalamud.Logging;
 using ImGuiNET;
 using InventoryTools.Logic.Columns;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using OtterGui.Raii;
 
 namespace InventoryTools.Logic
@@ -57,6 +61,7 @@ namespace InventoryTools.Logic
                     SortedItems = items.ToList();
                     RenderSortedItems = SortedItems.Where(item => !item.InventoryItem.IsEmpty).ToList();
                     NeedsRefresh = false;
+                    _refreshing = false;
                     PluginService.FrameworkService.RunOnFrameworkThread(() => { Refreshed?.Invoke(this); });
                 }
                 else
@@ -83,8 +88,13 @@ namespace InventoryTools.Logic
                     Items = items.Where(c => c.NameString.ToString() != "").ToList();
                     RenderItems = Items.ToList();
                     NeedsRefresh = false;
+                    _refreshing = false;
                     PluginService.FrameworkService.RunOnFrameworkThread(() => { Refreshed?.Invoke(this); });
                 }
+            }
+            else
+            {
+                _refreshing = false;
             }
         }
 
@@ -111,7 +121,7 @@ namespace InventoryTools.Logic
         }
 
 
-
+        private bool _refreshing = false;
         public override bool Draw(Vector2 size)
         {
             var highlightItems = HighlightItems;
@@ -119,9 +129,10 @@ namespace InventoryTools.Logic
             
             if (Columns.Count == 0)
             {
-                if (NeedsRefresh)
+                if (NeedsRefresh && !_refreshing)
                 {
-                    Refresh(ConfigurationManager.Config);
+                    _refreshing = true;
+                    PluginService.FrameworkService.RunOnFrameworkThread(() => Refresh(ConfigurationManager.Config));
                 }
                 return true;
             }
@@ -341,7 +352,65 @@ namespace InventoryTools.Logic
                         csv.NextRecord();
                     }
                 }
+                else if (FilterConfiguration.FilterType == FilterType.GameItemFilter)
+                {
+                    foreach (var item in RenderItems)
+                    {
+                        foreach (var column in Columns)
+                        {
+                            csv.WriteField(column.CsvExport(item));
+                        }
+                        csv.NextRecord();
+                    }
+                }
             }
+        }
+
+        public string ExportToJson()
+        {
+            var lines = new List<dynamic>();
+            var converter = new ExpandoObjectConverter();
+            if (FilterConfiguration.FilterType == FilterType.SearchFilter ||
+                FilterConfiguration.FilterType == FilterType.SortingFilter ||
+                FilterConfiguration.FilterType == FilterType.CraftFilter)
+            {
+                foreach (var item in RenderSortedItems)
+                {
+                    var newLine = new ExpandoObject() as IDictionary<string, Object>;
+                    newLine["Id"] = item.InventoryItem.ItemId;
+                    foreach (var column in Columns)
+                    {
+                        newLine[column.Name] = column.JsonExport(item);
+                    }
+                    lines.Add(newLine);
+                }
+            }
+            else if (FilterConfiguration.FilterType == FilterType.GameItemFilter)
+            {
+                foreach (var item in RenderItems)
+                {
+                    var newLine = new ExpandoObject() as IDictionary<string, Object>;
+                    newLine["Id"] = item.RowId;
+                    foreach (var column in Columns)
+                    {
+                        newLine[column.Name] = column.JsonExport(item);
+                    }
+                    lines.Add(newLine);
+                }
+            }
+
+            return JsonConvert.SerializeObject(lines.ToArray(), Formatting.None,
+                new JsonSerializerSettings()
+                {
+                    TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
+                    TypeNameHandling = TypeNameHandling.None,
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                    DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
+                    Converters = new List<JsonConverter>()
+                    {
+                        converter
+                    }
+                });
         }
 
         public void ClearFilters()

@@ -296,8 +296,18 @@ namespace InventoryTools.Ui
                     }
 
                     ImGuiUtil.HoverTooltip("Open the craft window.");
-
                     
+                    var totalItems =  itemTable.RenderSortedItems.Count + " items";
+
+                    if (SelectedConfiguration != null && SelectedConfiguration.FilterType == FilterType.GameItemFilter)
+                    {
+                        totalItems =  itemTable.RenderItems.Count + " items";
+                    }
+
+                    var calcTextSize = ImGui.CalcTextSize(totalItems);
+                    width -= calcTextSize.X + 15;
+                    ImGui.SetCursorPosX(width);
+                    UiHelpers.VerticalCenter(totalItems);
                 }
             }
 

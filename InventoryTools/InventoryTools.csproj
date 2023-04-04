@@ -136,6 +136,10 @@
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <TargetPath>Images\craft.png</TargetPath>
         </ContentWithTargetPath>
+        <ContentWithTargetPath Include="Images\clipboard.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>Images\clipboard.png</TargetPath>
+        </ContentWithTargetPath>
     </ItemGroup>
 
     <ProjectExtensions>

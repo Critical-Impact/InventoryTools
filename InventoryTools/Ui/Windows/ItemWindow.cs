@@ -375,27 +375,42 @@ namespace InventoryTools.Ui
                         var useIcon = PluginService.IconStorage[use.Icon];
                         if (useIcon != null)
                         {
-                            if (use.ItemId != null)
+                            if (use.CanOpen)
                             {
-                                if (ImGui.ImageButton(useIcon.ImGuiHandle,
-                                        new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1), 0))
+                                if (use is ItemSource itemSource && itemSource.ItemId != null)
                                 {
-                                    PluginService.WindowService.OpenItemWindow(use.ItemId.Value);
-                                }
-                                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right)) 
-                                {
-                                    ImGui.OpenPopup("RightClickUse" + use.ItemId);
-                                }
-                    
-                                if (ImGui.BeginPopup("RightClickUse"+ use.ItemId))
-                                {
-                                    var itemEx = Service.ExcelCache.GetItemExSheet().GetRow(use.ItemId.Value);
-                                    if (itemEx != null)
+                                    if (ImGui.ImageButton(useIcon.ImGuiHandle,
+                                            new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1),
+                                            0))
                                     {
-                                        itemEx.DrawRightClickPopup();
+                                        PluginService.WindowService.OpenItemWindow(itemSource.ItemId.Value);
                                     }
 
-                                    ImGui.EndPopup();
+                                    if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
+                                                            ImGuiHoveredFlags.AllowWhenOverlapped &
+                                                            ImGuiHoveredFlags.AllowWhenBlockedByPopup &
+                                                            ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
+                                                            ImGuiHoveredFlags.AnyWindow) &&
+                                        ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                                    {
+                                        ImGui.OpenPopup("RightClickUse" + itemSource.ItemId);
+                                    }
+
+                                    if (ImGui.BeginPopup("RightClickUse" + itemSource.ItemId))
+                                    {
+                                        var itemEx = Service.ExcelCache.GetItemExSheet().GetRow(itemSource.ItemId.Value);
+                                        if (itemEx != null)
+                                        {
+                                            itemEx.DrawRightClickPopup();
+                                        }
+
+                                        ImGui.EndPopup();
+                                    }
+                                }
+                                else
+                                {
+                                    ImGui.Image(useIcon.ImGuiHandle,
+                                        new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale);
                                 }
                             }
                             else
@@ -649,6 +664,11 @@ namespace InventoryTools.Ui
                 if (ImGui.CollapsingHeader("Debug"))
                 {
                     ImGui.TextUnformatted("Item ID: " + _itemId);
+                    if (ImGui.Button("Copy"))
+                    {
+                        ImGui.SetClipboardText(_itemId.ToString());
+                    }
+
                     Utils.PrintOutObject(Item, 0, new List<string>());
                 }
                 #endif

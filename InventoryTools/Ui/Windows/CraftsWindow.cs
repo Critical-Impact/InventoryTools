@@ -59,6 +59,7 @@ namespace InventoryTools.Ui
         private static HoverButton _dutyIcon { get; } = new(PluginService.IconStorage.LoadIcon(61801),  new Vector2(22, 22));
 
         private static HoverButton _export2Icon { get; } = new(PluginService.IconStorage.LoadImage("export2"),  new Vector2(22,22));
+        private static HoverButton _clipboardIcon { get; } = new(PluginService.IconStorage.LoadImage("clipboard"),  new Vector2(22,22));
         private static HoverButton _filtersIcon { get; } = new(PluginService.IconStorage.LoadImage("filters"),  new Vector2(22,22));
         
         private static HoverButton _menuIcon { get; } = new(PluginService.IconStorage.LoadImage("menu"),  new Vector2(22, 22));
@@ -631,6 +632,7 @@ namespace InventoryTools.Ui
 
                         ImGuiUtil.HoverTooltip("Refresh Market Prices");
                         ImGui.SameLine();
+                        //Export CSV
                         UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                         if (_export2Icon.Draw("bb_csv"))
                         {
@@ -658,6 +660,32 @@ namespace InventoryTools.Ui
                         }
 
                         ImGuiUtil.HoverTooltip("Export to CSV");
+                        ImGui.SameLine();
+                        //Export Json
+                        UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                        if (_clipboardIcon.Draw("bb_json"))
+                        {
+                            ImGui.OpenPopup("SaveToJson");
+                        }
+                        
+                        if (ImGui.BeginPopup("SaveToJson"))
+                        {
+                            if (ImGui.Selectable("Copy Craft List"))
+                            {
+                                if (craftTable != null)
+                                {
+                                    craftTable.ExportToJson().ToClipboard();
+                                }
+                            }
+
+                            if (ImGui.Selectable("Copy Retainer List"))
+                            {
+                                itemTable.ExportToJson().ToClipboard();
+                            }
+                            ImGui.EndPopup();
+                        }
+
+                        ImGuiUtil.HoverTooltip("Copy JSON to clipboard");
                         ImGui.SameLine();
                         if (PluginService.GameUi.IsWindowVisible(
                                 CriticalCommonLib.Services.Ui.WindowName.SubmarinePartsMenu))
@@ -733,6 +761,17 @@ namespace InventoryTools.Ui
                         }
 
                         ImGuiUtil.HoverTooltip("Open the filters window.");
+                        
+
+
+                        if (craftTable != null)
+                        {
+                            var totalItems =  itemTable.RenderSortedItems.Count + " items / " + craftTable.GetCraftListCount() + " craft items";
+                            var calcTextSize = ImGui.CalcTextSize(totalItems);
+                            width -= calcTextSize.X + 15;
+                            ImGui.SetCursorPosX(width);
+                            UiHelpers.VerticalCenter(totalItems);
+                        }
                     }
                 }
             }

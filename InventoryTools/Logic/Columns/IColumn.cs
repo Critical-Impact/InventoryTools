@@ -50,6 +50,11 @@ namespace InventoryTools.Logic.Columns
         public string CsvExport(ItemEx item);
         public string CsvExport(CraftItem item);
 
+        public dynamic? JsonExport(InventoryItem item);
+        public dynamic? JsonExport(SortingResult item);
+        public dynamic? JsonExport(ItemEx item);
+        public dynamic? JsonExport(CraftItem item);
+
         public void Setup(int columnIndex);
         
         public void SetupFilter(string tableKey)

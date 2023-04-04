@@ -32,6 +32,26 @@ namespace InventoryTools.Logic.Columns.Abstract
         {
             return CsvExport(item.Item);
         }
+
+        public virtual dynamic? JsonExport(InventoryItem item)
+        {
+            return CurrentValue(item);
+        }
+
+        public virtual dynamic? JsonExport(ItemEx item)
+        {
+            return CurrentValue(item);
+        }
+
+        public virtual dynamic? JsonExport(SortingResult item)
+        {
+            return CurrentValue(item);
+        }
+
+        public virtual dynamic? JsonExport(CraftItem item)
+        {
+            return CurrentValue(item);
+        }
         
         public  abstract string Name { get; set; }
         public abstract float Width { get; set; }
