@@ -48,11 +48,13 @@ namespace InventoryTools.Logic
         private bool? _filterItemsInRetainers;
         private FilterItemsRetainerEnum? _filterItemsInRetainersEnum;
         private bool? _sourceAllRetainers;
+        private bool? _sourceAllHouses;
         private bool? _sourceAllCharacters;
         private bool? _sourceAllFreeCompanies;
         private bool? _destinationAllRetainers;
         private bool? _destinationAllCharacters;
         private bool? _destinationAllFreeCompanies;
+        private bool? _destinationAllHouses;
         private bool? _sourceIncludeCrossCharacter;
         private bool? _destinationIncludeCrossCharacter;
         private int? _freezeColumns;
@@ -673,6 +675,15 @@ namespace InventoryTools.Logic
             }            
         }
 
+        public bool? SourceAllHouses
+        {
+            get => _sourceAllHouses;
+            set { _sourceAllHouses = value;
+                NeedsRefresh = true;
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+            }            
+        }
+
         public bool? SourceAllFreeCompanies
         {
             get => _sourceAllFreeCompanies;
@@ -736,6 +747,15 @@ namespace InventoryTools.Logic
         {
             get => _destinationAllFreeCompanies;
             set { _destinationAllFreeCompanies = value;
+                NeedsRefresh = true;
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+            }            
+        }
+
+        public bool? DestinationAllHouses
+        {
+            get => _destinationAllHouses;
+            set { _destinationAllHouses = value;
                 NeedsRefresh = true;
                 PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }            
@@ -1805,6 +1825,82 @@ namespace InventoryTools.Logic
                 return categories;
             }
         }
+        [JsonIgnore]
+        public Dictionary<ulong, HashSet<InventoryCategory>> DestinationHouseCategories
+        {
+            get
+            {
+                var categoryValues = Enum.GetValues<InventoryCategory>();
+                
+                Dictionary<ulong, HashSet<InventoryCategory>> categories = new();
+                var allHouses = PluginService.CharacterMonitor.GetHouses().Where(c =>
+                {
+                    var destinationIncludeCrossCharacter = DestinationIncludeCrossCharacter ?? ConfigurationManager.Config.DisplayCrossCharacter;
+                    return PluginService.CharacterMonitor.BelongsToActiveCharacter(c.Key) || destinationIncludeCrossCharacter;
+                }).ToDictionary(c => c.Key, c => c.Value);
+                
+                if (DestinationAllHouses == true)
+                {
+                    foreach (var house in allHouses)
+                    {
+                        foreach (var categoryValue in categoryValues)
+                        {
+                            if (categoryValue.IsHousingCategory())
+                            {
+                                if (!categories.ContainsKey(house.Key))
+                                {
+                                    categories.Add(house.Key, new HashSet<InventoryCategory>());
+                                }
+
+                                if (!categories[house.Key].Contains(categoryValue))
+                                {
+                                    categories[house.Key].Add(categoryValue);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                if (DestinationCategories != null)
+                {
+                    foreach (var categoryValue in DestinationCategories)
+                    {
+                        foreach (var house in allHouses)
+                        {
+                            if (categoryValue.IsHousingCategory())
+                            {
+                                if (!categories.ContainsKey(house.Key))
+                                {
+                                    categories.Add(house.Key, new HashSet<InventoryCategory>());
+                                }
+                                if (!categories[house.Key].Contains(categoryValue))
+                                {
+                                    categories[house.Key].Add(categoryValue);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                foreach (var category in DestinationInventories)
+                {
+                    if (category.Item2.IsHousingCategory())
+                    {
+                        if (!categories.ContainsKey(category.Item1))
+                        {
+                            categories.Add(category.Item1, new HashSet<InventoryCategory>());
+                        }
+                        
+                        if (!categories[category.Item1].Contains( category.Item2))
+                        {
+                            categories[category.Item1].Add( category.Item2);
+                        }
+                    }
+                }
+
+                return categories;
+            }
+        }
 
         [JsonIgnore]
         public Dictionary<ulong, HashSet<InventoryCategory>> DestinationCharacterCategories
@@ -2017,6 +2113,7 @@ namespace InventoryTools.Logic
                         }
                     }
                 }
+                
                 if (SourceCategories != null)
                 {
                     foreach (var categoryValue in SourceCategories)
@@ -2072,6 +2169,109 @@ namespace InventoryTools.Logic
                                     if (!categories[freeCompany.Key].Contains(categoryValue))
                                     {
                                         categories[freeCompany.Key].Add(categoryValue);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return categories;
+            }
+        }
+        
+        [JsonIgnore]
+        public Dictionary<ulong, HashSet<InventoryCategory>> SourceHouseCategories
+        {
+            get
+            {
+                var categoryValues = Enum.GetValues<InventoryCategory>();
+                
+                Dictionary<ulong, HashSet<InventoryCategory>> categories = new();
+
+                var allHouses = PluginService.CharacterMonitor.GetHouses().Where(c =>
+                {
+                    var sourceIncludeCrossCharacter = SourceIncludeCrossCharacter ?? ConfigurationManager.Config.DisplayCrossCharacter;
+                    return PluginService.CharacterMonitor.BelongsToActiveCharacter(c.Key) || sourceIncludeCrossCharacter;
+                    
+                }).ToDictionary(c => c.Key, c => c.Value);
+
+                if (SourceAllHouses == true)
+                {
+                    foreach (var house in allHouses)
+                    {
+                        foreach (var categoryValue in categoryValues)
+                        {
+                            if (categoryValue.IsHousingCategory())
+                            {
+                                if (!categories.ContainsKey(house.Key))
+                                {
+                                    categories.Add(house.Key, new HashSet<InventoryCategory>());
+                                }
+                                if (!categories[house.Key].Contains(categoryValue))
+                                {
+                                    categories[house.Key].Add(categoryValue);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                if (SourceCategories != null)
+                {
+                    foreach (var categoryValue in SourceCategories)
+                    {
+                        foreach (var categoryId in allHouses)
+                        {
+                            if (categoryValue.IsHousingCategory())
+                            {
+                                if (!categories.ContainsKey(categoryId.Key))
+                                {
+                                    categories.Add(categoryId.Key, new HashSet<InventoryCategory>());
+                                }
+                                if (!categories[categoryId.Key].Contains(categoryValue))
+                                {
+                                    categories[categoryId.Key].Add(categoryValue);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                foreach (var category in SourceInventories)
+                {
+                    if (category.Item2.IsHousingCategory())
+                    {
+                        if (!categories.ContainsKey(category.Item1))
+                        {
+                            categories.Add(category.Item1, new HashSet<InventoryCategory>());
+                        }
+                        if (!categories[category.Item1].Contains( category.Item2))
+                        {
+                            categories[category.Item1].Add( category.Item2);
+                        }
+                    }
+                }
+                
+                
+                if (SourceWorlds != null)
+                {
+                    foreach (var house in allHouses)
+                    {
+                        if(SourceWorlds.Contains(house.Value.WorldId))
+                        {
+                            foreach (var categoryValue in categoryValues)
+                            {
+                                if (categoryValue.IsHousingCategory())
+                                {
+                                    if (!categories.ContainsKey(house.Key))
+                                    {
+                                        categories.Add(house.Key, new HashSet<InventoryCategory>());
+                                    }
+
+                                    if (!categories[house.Key].Contains(categoryValue))
+                                    {
+                                        categories[house.Key].Add(categoryValue);
                                     }
                                 }
                             }
@@ -2274,6 +2474,16 @@ namespace InventoryTools.Logic
                                     sourceInventories.Add(inventoryKey, inventory.Value.Where(c => c.SortedContainer == type).ToList());
                                 }
                             }
+                            
+                            if (filter.SourceAllHouses.HasValue && filter.SourceAllHouses.Value &&
+                                characterMonitor.IsHousing(character.Key) && (displaySourceCrossCharacter ||
+                                    characterMonitor.BelongsToActiveCharacter(character.Key)))
+                            {
+                                if (!sourceInventories.ContainsKey(inventoryKey))
+                                {
+                                    sourceInventories.Add(inventoryKey, inventory.Value.Where(c => c.SortedContainer == type).ToList());
+                                }
+                            }
 
                             if (filter.SourceInventories.Contains((character.Key, inventoryKey.type.ToInventoryCategory())) && (displaySourceCrossCharacter ||
                                 characterMonitor.BelongsToActiveCharacter(character.Key)))
@@ -2325,6 +2535,17 @@ namespace InventoryTools.Logic
 
                             if (filter.DestinationAllFreeCompanies.HasValue && filter.DestinationAllFreeCompanies.Value &&
                                 characterMonitor.IsFreeCompany(character.Key) &&
+                                (displayDestinationCrossCharacter ||
+                                 characterMonitor.BelongsToActiveCharacter(character.Key)))
+                            {
+                                if (!destinationInventories.ContainsKey(inventoryKey))
+                                {
+                                    destinationInventories.Add(inventoryKey, inventory.Value.Where(c => c.SortedContainer == type).ToList());
+                                }
+                            }
+
+                            if (filter.DestinationAllHouses.HasValue && filter.DestinationAllHouses.Value &&
+                                characterMonitor.IsHousing(character.Key) &&
                                 (displayDestinationCrossCharacter ||
                                  characterMonitor.BelongsToActiveCharacter(character.Key)))
                             {
@@ -2637,6 +2858,13 @@ namespace InventoryTools.Logic
                             }
                         }
                         if (filter.SourceAllFreeCompanies.HasValue && filter.SourceAllFreeCompanies.Value && characterMonitor.IsFreeCompany(character.Key) && (displaySourceCrossCharacter || characterMonitor.BelongsToActiveCharacter(character.Key)))
+                        {
+                            if (!sourceInventories.ContainsKey(inventoryKey))
+                            {
+                                sourceInventories.Add(inventoryKey, inventory.Value);
+                            }
+                        }
+                        if (filter.SourceAllHouses.HasValue && filter.SourceAllHouses.Value && characterMonitor.IsHousing(character.Key) && (displaySourceCrossCharacter || characterMonitor.BelongsToActiveCharacter(character.Key)))
                         {
                             if (!sourceInventories.ContainsKey(inventoryKey))
                             {

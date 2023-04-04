@@ -128,6 +128,33 @@ namespace InventoryTools.Logic.Filters
             }
             ImGui.SameLine();
             ImGui.TextWrapped(String.Join(", ", destinations));
+            
+            //Houses
+            destinations = new();
+            foreach (var characterCategories in configuration.DestinationHouseCategories)
+            {
+                foreach (var characterCategory in characterCategories.Value)
+                {
+                    if (allCharacters.ContainsKey(characterCategories.Key))
+                    {
+                        var formattedName = allCharacters[characterCategories.Key].FormattedName + " - " +
+                                            characterCategory.FormattedName();
+                        destinations.Add(formattedName);
+                    }
+                }
+            }
+            ImGui.SetNextItemWidth(LabelSize);
+            if (destinations.Count != 0)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);
+            }
+            ImGui.LabelText("##" + Key + "CharacterLabel", "Free Company Destinations" + ":");
+            if (destinations.Count != 0)
+            {
+                ImGui.PopStyleColor();
+            }
+            ImGui.SameLine();
+            ImGui.TextWrapped(String.Join(", ", destinations));
         }
     }
 }

@@ -10,6 +10,7 @@ public class MockCharacterMonitor : ICharacterMonitor
     private ulong _activeRetainer;
     private ulong _activeCharacterId;
     private ulong _activeFreeCompanyId;
+    private ulong _activeHouseId;
     public void Dispose()
     {
     }
@@ -65,6 +66,7 @@ public class MockCharacterMonitor : ICharacterMonitor
     public event CharacterMonitor.ActiveRetainerChangedDelegate? OnActiveRetainerChanged;
     public event CharacterMonitor.ActiveRetainerChangedDelegate? OnActiveRetainerLoaded;
     public event CharacterMonitor.ActiveFreeCompanyChangedDelegate? OnActiveFreeCompanyChanged;
+    public event CharacterMonitor.ActiveHouseChangedDelegate? OnActiveHouseChanged;
     public event CharacterMonitor.CharacterUpdatedDelegate? OnCharacterUpdated;
     public event CharacterMonitor.CharacterRemovedDelegate? OnCharacterRemoved;
     public event CharacterMonitor.CharacterJobChangedDelegate? OnCharacterJobChanged;
@@ -78,6 +80,11 @@ public class MockCharacterMonitor : ICharacterMonitor
     public KeyValuePair<ulong, Character>[] GetFreeCompanies()
     {
         return Characters.Where(c => c.Value.OwnerId == 0 && c.Value.CharacterType == CharacterType.FreeCompanyChest && c.Key != 0 && c.Value.Name != "").ToArray();
+    }
+
+    public KeyValuePair<ulong, Character>[] GetHouses()
+    {
+        return Characters.Where(c => c.Value.OwnerId == 0 && c.Value.CharacterType == CharacterType.Housing && c.Key != 0 && c.Value.HousingName != "").ToArray();
     }
 
     public KeyValuePair<ulong, Character>[] AllCharacters()
@@ -119,6 +126,17 @@ public class MockCharacterMonitor : ICharacterMonitor
         return Characters.Where(c => c.Value.OwnerId != 0 && c.Value.CharacterType == CharacterType.Retainer && c.Key != 0 && c.Value.Name != "").ToArray();
     }
 
+    public KeyValuePair<ulong, Character>[] GetCharacterHouses(ulong characterId)
+    {
+        return Characters.Where(c => c.Value.Owners.Contains(characterId) && c.Value.CharacterType == CharacterType.Housing && c.Key != 0 && c.Value.Name != "").ToArray();
+    }
+        
+        
+    public KeyValuePair<ulong, Character>[] GetCharacterHouses()
+    {
+        return Characters.Where(c => c.Value.Owners.Count != 0 && c.Value.CharacterType == CharacterType.Housing && c.Key != 0 && c.Value.Name != "").ToArray();
+    }
+
     public bool IsCharacter(ulong characterId)
     {
         if (Characters.ContainsKey(characterId))
@@ -142,6 +160,15 @@ public class MockCharacterMonitor : ICharacterMonitor
         if (Characters.ContainsKey(characterId))
         {
             return Characters[characterId].CharacterType == CharacterType.FreeCompanyChest;
+        }
+        return false;
+    }
+
+    public bool IsHousing(ulong characterId)
+    {
+        if (Characters.ContainsKey(characterId))
+        {
+            return Characters[characterId].CharacterType == CharacterType.Housing;
         }
         return false;
     }
@@ -179,7 +206,22 @@ public class MockCharacterMonitor : ICharacterMonitor
         }
     }
 
+    public ulong ActiveHouseId
+    {
+        get
+        {
+            return _activeHouseId;
+        }
+    }
+
     public ulong ActiveFreeCompanyId { get; }
+    public ulong InternalCharacterId { get; }
+    public bool InternalHasHousePermission { get; }
+    public short InternalRoomId { get; }
+    public byte InternalDivisionId { get; }
+    public sbyte InternalPlotId { get; }
+    public sbyte InternalWardId { get; }
+    public ulong InternalHouseId { get; }
 
     public Character? ActiveCharacter =>
         _characters.ContainsKey(_activeCharacterId) ? _characters[_activeCharacterId] : null;

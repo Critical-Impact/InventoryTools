@@ -169,6 +169,14 @@ namespace InventoryTools.Ui
                                    "Not Logged in Yet");
                         ImGui.TextUnformatted("Actual:" + PluginService.CharacterMonitor.LocalContentId.ToString());
                         ImGui.TextUnformatted("Reported:" + PluginService.CharacterMonitor.ActiveCharacterId.ToString());
+                        ImGui.TextUnformatted("House Id:" + PluginService.CharacterMonitor.ActiveHouseId.ToString());
+                        ImGui.TextUnformatted("Territory Id:" + Service.ClientState.TerritoryType.ToString());
+                        ImGui.TextUnformatted("Ward Id:" + PluginService.CharacterMonitor.InternalWardId.ToString());
+                        ImGui.TextUnformatted("Plot Id:" + PluginService.CharacterMonitor.InternalPlotId.ToString());
+                        ImGui.TextUnformatted("Division Id:" + PluginService.CharacterMonitor.InternalDivisionId.ToString());
+                        ImGui.TextUnformatted("Room Id:" + PluginService.CharacterMonitor.InternalRoomId.ToString());
+                        ImGui.TextUnformatted("House Id:" + PluginService.CharacterMonitor.InternalHouseId.ToString());
+                        ImGui.TextUnformatted("Has Permission:" + (PluginService.CharacterMonitor.InternalHasHousePermission ? "Yes" : "No"));
                         ImGui.TextUnformatted("Retainers:");
                         ImGui.BeginTable("retainerTable", 5);
                         ImGui.TableSetupColumn("Hire Order");

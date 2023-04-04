@@ -131,6 +131,34 @@ namespace InventoryTools.Logic.Filters
             }
             ImGui.SameLine();
             ImGui.TextWrapped(String.Join(", ", sources));
+            
+            //House Sources
+            sources = new();
+            foreach (var characterCategories in configuration.SourceHouseCategories)
+            {
+                foreach (var characterCategory in characterCategories.Value)
+                {
+                    if (allCharacters.ContainsKey(characterCategories.Key) &&
+                        characterCategories.Key.ToString().StartsWith("9"))
+                    {
+                        var formattedName = allCharacters[characterCategories.Key].FormattedName + " - " +
+                                            characterCategory.FormattedName();
+                        sources.Add(formattedName);
+                    }
+                }
+            }
+            ImGui.SetNextItemWidth(LabelSize);
+            if (sources.Count != 0)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);
+            }
+            ImGui.LabelText("##" + Key + "CharacterLabel", "Housing Sources" + ":");
+            if (sources.Count != 0)
+            {
+                ImGui.PopStyleColor();
+            }
+            ImGui.SameLine();
+            ImGui.TextWrapped(String.Join(", ", sources));
         }
     }
 }

@@ -17,6 +17,7 @@ namespace InventoryTools.Logic
         public RenderTableBase? FilterTable;
         public ulong? ActiveRetainerId => PluginService.CharacterMonitor.ActiveRetainer == 0 ? null : PluginService.CharacterMonitor.ActiveRetainer;
         public ulong? ActiveFreeCompanyId => PluginService.CharacterMonitor.ActiveFreeCompanyId == 0 ? null : PluginService.CharacterMonitor.ActiveFreeCompanyId;
+        public ulong? ActiveHousingId => PluginService.CharacterMonitor.ActiveHouseId == 0 ? null : PluginService.CharacterMonitor.ActiveHouseId;
 
         public bool InvertHighlighting
         {
@@ -502,8 +503,8 @@ namespace InventoryTools.Logic
                 
                 foreach (var item in filterResult.SortedItems)
                 {
-                    var matchesSource = item.SourceBag == bag && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting) || MatchesFreeCompanyFilter(FilterConfiguration, item, InvertHighlighting));
-                    var matchesDestination = ShouldHighlightDestination && item.DestinationBag == bag && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting, true));
+                    var matchesSource = item.SourceBag == bag && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting) || MatchesFreeCompanyFilter(FilterConfiguration, item, InvertHighlighting) || MatchesHousingFilter(FilterConfiguration, item, InvertHighlighting));
+                    var matchesDestination = ShouldHighlightDestination && item.DestinationBag == bag && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting, true) || MatchesFreeCompanyFilter(FilterConfiguration, item, InvertHighlighting, true) || MatchesHousingFilter(FilterConfiguration, item, InvertHighlighting, true));
                     if(matchesSource)
                     {
                         var itemBagLocation = item.BagLocation;
@@ -638,6 +639,34 @@ namespace InventoryTools.Logic
             }
 
             if (destinationFilter && item.SourceRetainerId == ActiveFreeCompanyId)
+            {
+                return false;
+            }
+            if (matches)
+            {
+                if (!item.InventoryItem.IsEmpty)
+                {
+                    return true;
+                }
+            }
+
+            if (item.InventoryItem.IsEmpty && invertHighlighting)
+            {
+                return true;
+            }
+
+            return false;
+        }
+        
+        private bool MatchesHousingFilter(FilterConfiguration activeFilter, SortingResult item, bool invertHighlighting = false, bool destinationFilter = false)
+        {
+            bool matches = (activeFilter.FilterType.HasFlag(FilterType.SearchFilter) || activeFilter.FilterType.HasFlag(FilterType.SortingFilter) || activeFilter.FilterType.HasFlag(FilterType.CraftFilter));
+            if (item.SourceRetainerId != PluginService.CharacterMonitor.ActiveHouseId)
+            {
+                return false;
+            }
+
+            if (destinationFilter && item.SourceRetainerId == ActiveHousingId)
             {
                 return false;
             }
