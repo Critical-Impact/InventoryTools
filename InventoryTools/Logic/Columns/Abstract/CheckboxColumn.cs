@@ -25,12 +25,12 @@ namespace InventoryTools.Logic.Columns.Abstract
         {
             return CurrentValue(item) ?? false ? "true" : "false";
         }
-
+        
         public override bool? CurrentValue(CraftItem currentValue)
         {
             return CurrentValue(currentValue.Item);
         }
-        
+
         public override IEnumerable<CraftItem> Filter(IEnumerable<CraftItem> items)
         {
             return items;

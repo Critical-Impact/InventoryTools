@@ -58,6 +58,15 @@ namespace InventoryTools.Logic.Filters
                     dict.Add((character.Key, InventoryCategory.Currency), character.Value.FormattedName + " - " + InventoryCategory.Currency.FormattedName());
                     dict.Add((character.Key, InventoryCategory.Crystals), character.Value.FormattedName + " - " + InventoryCategory.Crystals.FormattedName());
                 }
+                else if (PluginService.CharacterMonitor.IsHousing(character.Key))
+                {
+                    dict.Add((character.Key, InventoryCategory.HousingInteriorAppearance), character.Value.FormattedName + " - " + InventoryCategory.HousingInteriorAppearance.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.HousingInteriorItems), character.Value.FormattedName + " - " + InventoryCategory.HousingInteriorItems.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.HousingInteriorStoreroom), character.Value.FormattedName + " - " + InventoryCategory.HousingInteriorStoreroom.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.HousingExteriorAppearance), character.Value.FormattedName + " - " + InventoryCategory.HousingExteriorAppearance.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.HousingExteriorItems), character.Value.FormattedName + " - " + InventoryCategory.HousingExteriorItems.FormattedName());
+                    dict.Add((character.Key, InventoryCategory.HousingExteriorStoreroom), character.Value.FormattedName + " - " + InventoryCategory.HousingExteriorStoreroom.FormattedName());
+                }
                 else
                 {
                     dict.Add((character.Key, InventoryCategory.CharacterBags), character.Value.FormattedName + " - " + InventoryCategory.CharacterBags.FormattedName());

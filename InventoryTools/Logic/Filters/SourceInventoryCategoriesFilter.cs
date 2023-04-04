@@ -60,6 +60,12 @@ namespace InventoryTools.Logic.Filters
             dict.Add(InventoryCategory.Armoire, InventoryCategory.Armoire.FormattedName());
             dict.Add(InventoryCategory.Currency, InventoryCategory.Currency.FormattedName());
             dict.Add(InventoryCategory.Crystals, InventoryCategory.Crystals.FormattedName());
+            dict.Add(InventoryCategory.HousingInteriorAppearance, InventoryCategory.HousingInteriorAppearance.FormattedName());
+            dict.Add(InventoryCategory.HousingInteriorItems, InventoryCategory.HousingInteriorItems.FormattedName());
+            dict.Add(InventoryCategory.HousingInteriorStoreroom, InventoryCategory.HousingInteriorStoreroom.FormattedName());
+            dict.Add(InventoryCategory.HousingExteriorAppearance, InventoryCategory.HousingExteriorAppearance.FormattedName());
+            dict.Add(InventoryCategory.HousingExteriorItems, InventoryCategory.HousingExteriorItems.FormattedName());
+            dict.Add(InventoryCategory.HousingExteriorStoreroom, InventoryCategory.HousingExteriorStoreroom.FormattedName());
             return dict;
         }
 
