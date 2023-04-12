@@ -41,7 +41,7 @@ namespace InventoryTools.Logic.Columns
             ImGui.TableNextColumn();
             if (currentValue != null)
             {
-                UiHelpers.WrapTableColumnElements("ScrollContainer" + rowIndex,currentValue, filterConfiguration.TableHeight - ImGui.GetStyle().FramePadding.X, item =>
+                UiHelpers.WrapTableColumnElements("ScrollContainer" + rowIndex,currentValue, filterConfiguration.TableHeight * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X, item =>
                 {
                     var sourceIcon = PluginService.IconStorage[item.Icon];
                     if (item is ItemSource source && source.ItemId != null && source.HasItem && source.Item != null)

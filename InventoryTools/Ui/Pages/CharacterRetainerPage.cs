@@ -87,7 +87,6 @@ namespace InventoryTools.Sections
                                 PluginService.CharacterMonitor.RemoveCharacter(character.CharacterId);
                             }
 
-                            ImGui.SameLine();
                         }
 
                         if (ImGui.SmallButton("Clear All Bags##" + index))
@@ -189,7 +188,6 @@ namespace InventoryTools.Sections
                                 PluginService.CharacterMonitor.RemoveCharacter(character.CharacterId);
                             }
 
-                            ImGui.SameLine();
                         }
 
                         if (ImGui.SmallButton("Clear All Bags##" + index))
@@ -345,7 +343,6 @@ namespace InventoryTools.Sections
                             PluginService.CharacterMonitor.RemoveCharacter(character.CharacterId);
                         }
 
-                        ImGui.SameLine();
                     }
 
                     if (ImGui.SmallButton("Clear All Bags##" + index))

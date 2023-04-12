@@ -67,13 +67,11 @@ namespace InventoryTools.Sections
                             PluginService.ChatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
                         }
 
-                        ImGui.SameLine();
                         if (ImGui.SmallButton("Remove##" + index))
                         {
                             ImGui.OpenPopup("Delete?##" + index);
                         }
 
-                        ImGui.SameLine();
                         if (ImGui.SmallButton("Open as Window##" + index))
                         {
                             PluginService.WindowService.OpenFilterWindow(filterConfiguration.Key);

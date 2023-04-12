@@ -39,7 +39,7 @@ namespace InventoryTools
 
         public static void WrapTableColumnElements<T>(string windowId, IEnumerable<T> items, float rowSize, Func<T, bool> drawElement)
         {
-            using (var wrapTableChild = ImRaii.Child(windowId, new Vector2(ImGui.GetContentRegionAvail().X, rowSize + ImGui.GetStyle().CellPadding.Y + ImGui.GetStyle().ItemSpacing.Y) * ImGui.GetIO().FontGlobalScale, false))
+            using (var wrapTableChild = ImRaii.Child(windowId, new Vector2(ImGui.GetContentRegionAvail().X, rowSize + ImGui.GetStyle().CellPadding.Y + ImGui.GetStyle().ItemSpacing.Y), false))
             {
                 if (wrapTableChild.Success)
                 {

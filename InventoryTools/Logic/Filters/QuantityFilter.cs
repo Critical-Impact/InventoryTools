@@ -10,7 +10,7 @@ namespace InventoryTools.Logic.Filters
         public override string Key { get; set; } = "Qty";
         public override string Name { get; set; } = "Quantity";
         public override string HelpText { get; set; } = "The quantity of the item.";
-        public override FilterType AvailableIn { get; set; }  = FilterType.SearchFilter | FilterType.SortingFilter;
+        public override FilterType AvailableIn { get; set; }  = FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter;
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
 
         public override bool? FilterItem(FilterConfiguration configuration,InventoryItem item)
@@ -29,6 +29,28 @@ namespace InventoryTools.Logic.Filters
 
         public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
         {
+            var currentValue = CurrentValue(configuration);
+            if (!string.IsNullOrEmpty(currentValue))
+            {
+                var qty = 0;
+                if (PluginService.InventoryMonitor.ItemCounts.ContainsKey((item.RowId,
+                        FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None)))
+                {
+                    qty += PluginService.InventoryMonitor.ItemCounts[(item.RowId,
+                        FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None)];
+                }
+                if (PluginService.InventoryMonitor.ItemCounts.ContainsKey((item.RowId,
+                        FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HQ)))
+                {
+                    qty += PluginService.InventoryMonitor.ItemCounts[(item.RowId,
+                        FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HQ)];
+                }
+                if (!qty.PassesFilter(currentValue.ToLower()))
+                {
+                    return false;
+                }
+            }
+
             return true;
         }
     }

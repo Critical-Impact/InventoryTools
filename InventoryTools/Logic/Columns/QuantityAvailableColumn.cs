@@ -14,7 +14,20 @@ namespace InventoryTools.Logic.Columns
 
         public override int? CurrentValue(ItemEx item)
         {
-            return (int?) PluginService.InventoryMonitor.ItemCounts.Where(c => c.Key.Item1 == item.RowId).Sum(c => c.Value);
+            var qty = 0;
+            if (PluginService.InventoryMonitor.ItemCounts.ContainsKey((item.RowId,
+                    FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None)))
+            {
+                qty += PluginService.InventoryMonitor.ItemCounts[(item.RowId,
+                    FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None)];
+            }
+            if (PluginService.InventoryMonitor.ItemCounts.ContainsKey((item.RowId,
+                    FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HQ)))
+            {
+                qty += PluginService.InventoryMonitor.ItemCounts[(item.RowId,
+                    FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HQ)];
+            }
+            return qty;
         }
 
         public override int? CurrentValue(SortingResult item)

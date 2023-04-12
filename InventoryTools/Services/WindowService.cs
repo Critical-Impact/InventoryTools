@@ -73,6 +73,18 @@ namespace InventoryTools.Services
             return AddWindow(itemWindow);
         }
 
+        public bool OpenENpcWindow(uint eNpcId)
+        {
+            var asKey = ENpcWindow.AsKey(eNpcId);
+            if (_windows.ContainsKey(asKey))
+            {
+                _windows[asKey].Toggle();
+                return true;
+            }
+            var eNpcWindow = new ENpcWindow(eNpcId);
+            return AddWindow(eNpcWindow);
+        }
+
         public bool OpenDutyWindow(uint contentFinderConditionId)
         {
             var asKey = DutyWindow.AsKey(contentFinderConditionId);

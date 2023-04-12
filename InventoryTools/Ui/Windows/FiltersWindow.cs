@@ -80,7 +80,7 @@ namespace InventoryTools.Ui
         }        
         private static void OpenNPCsWindow(string obj)
         {
-            PluginService.WindowService.OpenWindow<ENpcWindow>(ENpcWindow.AsKey);
+            PluginService.WindowService.OpenWindow<ENpcsWindow>(ENpcsWindow.AsKey);
         }
 
         public FiltersWindow(string name = "Allagan Tools - Filters") : base(name)
@@ -696,7 +696,7 @@ namespace InventoryTools.Ui
                     float width = ImGui.GetWindowSize().X;
                     
                     ImGui.SameLine();
-                    width -= 28;
+                    width -= 28 * ImGui.GetIO().FontGlobalScale;
                     ImGui.SetCursorPosX(width);
                     if (_editIcon.Draw("tb_edit"))
                     {

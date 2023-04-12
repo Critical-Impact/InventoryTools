@@ -197,7 +197,7 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
                 {
                     var drops = ex.Drops.Where(c => c.Value != null);
                     UiHelpers.WrapTableColumnElements("Drops" + ex.RowId, drops,
-                    RowSize - ImGui.GetStyle().FramePadding.X,
+                    RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X,
                     drop =>
                     {
                         if (drop.Value != null)

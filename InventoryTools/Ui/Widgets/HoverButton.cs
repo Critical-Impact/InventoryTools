@@ -31,7 +31,7 @@ public class HoverButton
         var isHovered = _buttonState.ContainsKey(id) && _buttonState[id];
         var success = false;
         using var pushId  = ImRaii.PushId(id);
-        if (ImGui.ImageButton(_textureWrap.ImGuiHandle, size ?? _size, _uv0, _uv1, _framePadding,
+        if (ImGui.ImageButton(_textureWrap.ImGuiHandle, size ?? _size * ImGui.GetIO().FontGlobalScale, _uv0, _uv1, _framePadding,
                 isHovered ? _bgColorHover : _bgColor, isHovered ? _tintColorHover : _tintColor))
         {
             success = true;

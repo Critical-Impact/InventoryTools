@@ -70,7 +70,7 @@ namespace InventoryTools.Ui
                         }
                     }
                 }
-                
+
                 GatheringSources = Item.GetGatheringSources().ToList();
                 SharedModels = Item.GetSharedModels();
                 MobDrops = Item.MobDrops.ToArray();
@@ -464,11 +464,11 @@ namespace InventoryTools.Ui
                 void DrawSupplierRow((IShop shop, ENpc? npc, ILocation? location) tuple)
                 {
                     ImGui.TableNextColumn();
-                    ImGui.TextUnformatted(tuple.shop.Name);
+                    ImGui.TextWrapped(tuple.shop.Name);
                     if (tuple.npc != null)
                     {
                         ImGui.TableNextColumn();
-                        ImGui.TextUnformatted(tuple.npc?.Resident?.Singular ?? "");
+                        ImGui.TextWrapped(tuple.npc?.Resident?.Singular ?? "");
                     }
                     if (tuple.location != null)
                     {
@@ -487,7 +487,6 @@ namespace InventoryTools.Ui
                         ImGui.TableNextColumn();
                         ImGui.TableNextColumn();
                     }
-
 
                 }
 

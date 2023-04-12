@@ -3,6 +3,7 @@ using System.Text;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Resolvers;
 using CriticalCommonLib.Services.Ui;
+using CriticalCommonLib.Sheets;
 using Dalamud.Logging;
 using ImGuiNET;
 using InventoryTools;
@@ -49,11 +50,51 @@ public class MockWindow : Window
             DrawDataTab();
             DrawCharacterTab();
             DrawGameUiTab();
+            DrawImGuiTab();
             ImGui.EndTabBar();
         }
     }
 
     private string _windowName = "";
+
+    private void DrawImGuiTab()
+    {
+        using (var gameUiTab = ImRaii.TabItem("ImGui UI"))
+        {
+            if (gameUiTab.Success)
+            {
+                if (ImGui.Button("9.6pt##DalamudSettingsGlobalUiScaleReset96"))
+                {
+                    ImGui.GetIO().FontGlobalScale = 9.6f / 12.0f;
+                }
+
+                ImGui.SameLine();
+                if (ImGui.Button("12pt##DalamudSettingsGlobalUiScaleReset12"))
+                {
+                    ImGui.GetIO().FontGlobalScale = 1;
+                }
+
+                ImGui.SameLine();
+                if (ImGui.Button("14pt##DalamudSettingsGlobalUiScaleReset14"))
+                {
+                    ImGui.GetIO().FontGlobalScale = 14.0f / 12.0f;
+                }
+
+                ImGui.SameLine();
+                if (ImGui.Button("18pt##DalamudSettingsGlobalUiScaleReset18"))
+                {
+                    ImGui.GetIO().FontGlobalScale = 18.0f / 12.0f;
+                }
+
+                ImGui.SameLine();
+                if (ImGui.Button("36pt##DalamudSettingsGlobalUiScaleReset36"))
+                {
+                    ImGui.GetIO().FontGlobalScale = 36.0f / 12.0f;
+                }
+            }
+        }
+
+    }
 
     private void DrawGameUiTab()
     {
@@ -145,6 +186,10 @@ public class MockWindow : Window
                 PluginService.CharacterMonitor.OverrideActiveCharacter(PluginService.CharacterMonitor.GetPlayerCharacters().First().Key);
                 PluginService.OverlayService.RefreshOverlayStates();
             }
+            if (ImGui.Button("Refresh item counts for inventory"))
+            {
+                PluginService.InventoryMonitor.GenerateItemCounts();
+            }
             
             ImGui.EndTabItem();
         }
@@ -221,6 +266,12 @@ public class MockWindow : Window
             if (ImGui.Button("Submarines Window"))
             {
                 PluginService.WindowService.ToggleSubmarinesWindow();
+            }
+
+
+            if (ImGui.Button("NPCs Window"))
+            {
+                PluginService.WindowService.ToggleWindow<ENpcsWindow>(ENpcsWindow.AsKey);
             }
 
             if (ImGui.Button("Icons Window"))

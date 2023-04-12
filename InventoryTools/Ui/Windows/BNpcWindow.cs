@@ -150,7 +150,7 @@ public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
                 Draw = (ex, contentTypeId) =>
                 {
                     var positions = GetPositions(ex.Item1.RowId).Where(c => c.TerritoryType.Value != null && c.TerritoryType.Value.PlaceName.Value != null && (c.TerritoryTypeId == contentTypeId || contentTypeId == 0));
-                    UiHelpers.WrapTableColumnElements("Scroll" + ex.Item1.RowId,positions, RowSize - ImGui.GetStyle().FramePadding.X, position =>
+                    UiHelpers.WrapTableColumnElements("Scroll" + ex.Item1.RowId,positions, RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X, position =>
                     {
                         var territory = Service.ExcelCache.GetTerritoryTypeExSheet()
                             .GetRow(position.TerritoryTypeId);
@@ -170,7 +170,7 @@ public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
                             using var tt = ImRaii.Tooltip();
                             ImGui.TextUnformatted(territory.PlaceName.Value.Name + " - " +
                                                   position.Position.X +
-                                                  " : " + position.Position.Z);
+                                                  " : " + position.Position.Y);
                         }
 
                         return true;
@@ -188,7 +188,7 @@ public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
                 {
                     var drops = GetDrops(ex.Item1.RowId);
                     UiHelpers.WrapTableColumnElements("ScrollDrops" + ex.Item1.RowId, drops,
-                        RowSize - ImGui.GetStyle().FramePadding.X,
+                        RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X,
                         drop =>
                     {
                         var sourceIcon = PluginService.IconStorage[drop.Icon];

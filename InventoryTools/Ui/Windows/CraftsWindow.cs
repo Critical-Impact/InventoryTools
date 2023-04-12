@@ -561,7 +561,7 @@ namespace InventoryTools.Ui
 
                         ImGui.SameLine();
                         float width = ImGui.GetWindowSize().X;
-                        width -= 28;
+                        width -= 28 * ImGui.GetIO().FontGlobalScale;
                         ImGui.SetCursorPosX(width);
                         if (_searchIcon.Draw("tb_oib"))
                         {
@@ -571,7 +571,7 @@ namespace InventoryTools.Ui
                         ImGuiUtil.HoverTooltip("Toggles the add item side bar.");
 
                         ImGui.SameLine();
-                        width -= 28;
+                        width -= 28 * ImGui.GetIO().FontGlobalScale;
                         ImGui.SetCursorPosX(width);
                         if (_editIcon.Draw("tb_edit"))
                         {
@@ -589,8 +589,8 @@ namespace InventoryTools.Ui
                         //Move footer and header drawing to tables to allow each to bring extra detail
                         _craftsExpanded = craftTable?.Draw(new Vector2(0,
                                               _itemsExpanded
-                                                  ? -300 * ImGui.GetIO().FontGlobalScale
-                                                  : -50 * ImGui.GetIO().FontGlobalScale)) ??
+                                                  ? -300
+                                                  : -50)) ??
                                           true;
                         _itemsExpanded = itemTable.Draw(new Vector2(0, 0));
                     }
@@ -991,7 +991,7 @@ namespace InventoryTools.Ui
             ImGui.TableNextColumn();
             using (ImRaii.PushId("s_" + item.RowId))
             {
-                if (_addIcon.Draw("bbadd_" + item.RowId, new Vector2(16,16)))
+                if (_addIcon.Draw("bbadd_" + item.RowId, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale))
                 {
                     PluginService.FrameworkService.RunOnFrameworkThread(() =>
                     {
