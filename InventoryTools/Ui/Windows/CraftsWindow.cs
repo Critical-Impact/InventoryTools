@@ -75,6 +75,7 @@ namespace InventoryTools.Ui
                 new PopupMenu.PopupMenuItemSelectable("Duties Window", "duties", OpenDutiesWindow,"Open the duties window."),
                 new PopupMenu.PopupMenuItemSelectable("Airships Window", "airships", OpenAirshipsWindow,"Open the airships window."),
                 new PopupMenu.PopupMenuItemSelectable("Submarines Window", "submarines", OpenAirshipsWindow,"Open the submarines window."),
+                new PopupMenu.PopupMenuItemSelectable("Retainer Ventures Window", "ventures", OpenRetainerVenturesWindow,"Open the retainer ventures window."),
                 new PopupMenu.PopupMenuItemSeparator(),
                 new PopupMenu.PopupMenuItemSelectable("Help", "help", OpenHelpWindow,"Open the help window."),
             });
@@ -92,6 +93,11 @@ namespace InventoryTools.Ui
         private static void OpenAirshipsWindow(string obj)
         {
             PluginService.WindowService.OpenWindow<AirshipsWindow>(AirshipsWindow.AsKey);
+        }
+        
+        private static void OpenRetainerVenturesWindow(string obj)
+        {
+            PluginService.WindowService.OpenWindow<RetainerTasksWindow>(RetainerTasksWindow.AsKey);
         }
 
         private static void OpenMobsWindow(string obj)
@@ -358,7 +364,7 @@ namespace InventoryTools.Ui
             {
                 if (child.Success)
                 {
-                    if (filterConfigurations.Count == 0)
+                    if (filterConfigurations.Count == 0 && _selectedFilterTab == 0)
                     {
                         using (var contentChild = ImRaii.Child("Content", new Vector2(0, 0) * ImGui.GetIO().FontGlobalScale, true))
                         {
@@ -461,7 +467,6 @@ namespace InventoryTools.Ui
             {
                 if (sideMenuChild.Success)
                 {
-
                     using (var craftListChild = ImRaii.Child("CraftList", new Vector2(0, -28) * ImGui.GetIO().FontGlobalScale, false))
                     {
                         if (craftListChild.Success)
@@ -485,6 +490,11 @@ namespace InventoryTools.Ui
                                 }
 
                                 GetFilterMenu(filterConfiguration, WindowLayout.Sidebar).Draw();
+                            }
+                            
+                            if (filterConfigurations.Count == 0)
+                            {
+                                ImGui.TextUnformatted("No craft lists created.");
                             }
 
                             ImGui.Separator();

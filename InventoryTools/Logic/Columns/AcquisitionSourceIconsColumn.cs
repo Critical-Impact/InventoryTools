@@ -95,6 +95,14 @@ namespace InventoryTools.Logic.Columns
                                 submarineSource.SubmarineExplorationExId);
                         }
                     }
+                    else if (item is VentureSource ventureSource)
+                    {
+                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
+                        {
+                            PluginService.WindowService.OpenRetainerTaskWindow(ventureSource.RetainerTask.RowId);
+                        }
+                    }
                     else
                     {
                         if (ImGui.ImageButton(sourceIcon.ImGuiHandle, new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
@@ -114,6 +122,7 @@ namespace InventoryTools.Logic.Columns
             ImGui.TableSetupColumn(Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
         }
 
+
         public override string CsvExport(InventoryItem item)
         {
             return CsvExport(item.Item);
@@ -132,6 +141,21 @@ namespace InventoryTools.Logic.Columns
         public override dynamic JsonExport(ItemEx item)
         {
             return String.Join(", ", item.Sources.Select(c => c.Name));
+        }
+        
+        public override dynamic JsonExport(InventoryItem item)
+        {
+            return JsonExport(item.Item);
+        }
+        
+        public override dynamic JsonExport(CraftItem item)
+        {
+            return JsonExport(item.Item);
+        }
+        
+        public override dynamic JsonExport(SortingResult item)
+        {
+            return JsonExport(item.InventoryItem);
         }
 
         public override string Name { get; set; } = "Acqusition";

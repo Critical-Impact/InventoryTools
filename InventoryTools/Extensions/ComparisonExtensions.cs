@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Dalamud.Game.Text;
+using Dalamud.Utility;
 
 namespace InventoryTools.Extensions
 {
@@ -101,10 +102,17 @@ namespace InventoryTools.Extensions
                     return true;
                 }
             }
-            else if (filterString.StartsWith("!", StringComparison.Ordinal) && filterString.Length >= 2)
+            else if (filterString.StartsWith("!", StringComparison.Ordinal))
             {
-                var filter = filterString.Substring(1);
-                return !text.Contains(filter);
+                if (filterString.Length >= 2)
+                {
+                    var filter = filterString.Substring(1);
+                    return !text.Contains(filter);
+                }
+                else if (filterString.Length == 1)
+                {
+                    return !text.IsNullOrEmpty();
+                }
             }
             else if (filterString.StartsWith("~", StringComparison.Ordinal) && filterString.Length >= 2)
             {

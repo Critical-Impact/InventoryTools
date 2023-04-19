@@ -38,7 +38,7 @@ namespace InventoryTools.Ui
             if (Item != null)
             {
                 WindowName = "Allagan Tools - " + Item.Name;
-                RetainerTasks = Item.RetainerTasks.ToArray();
+                RetainerTasks = Item.RetainerTasks?.ToArray() ?? Array.Empty<RetainerTaskEx>();
                 RecipesResult = Item.RecipesAsResult.ToArray();
                 RecipesAsRequirement = Item.RecipesAsRequirement.ToArray();
                 Vendors = new List<(IShop shop, ENpc? npc, ILocation? location)>();
@@ -77,7 +77,7 @@ namespace InventoryTools.Ui
             }
             else
             {
-                RetainerTasks = Array.Empty<RetainerTaskNormalEx>();
+                RetainerTasks = Array.Empty<RetainerTaskEx>();
                 RecipesResult = Array.Empty<RecipeEx>();
                 RecipesAsRequirement = Array.Empty<RecipeEx>();
                 GatheringSources = new();
@@ -97,7 +97,7 @@ namespace InventoryTools.Ui
 
         private RecipeEx[] RecipesResult { get; }
 
-        private RetainerTaskNormalEx[] RetainerTasks { get; }
+        private RetainerTaskEx[] RetainerTasks { get; }
         
         private MobDropEx[] MobDrops { get; }
 
@@ -274,7 +274,7 @@ namespace InventoryTools.Ui
                         {
                             if (source.CanOpen)
                             {
-                                if (source is ItemSource itemSource && itemSource.ItemId != null)
+                                if (source is ItemSource itemSource && itemSource.ItemId != null )
                                 {
                                     if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
                                             new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1),
@@ -336,6 +336,17 @@ namespace InventoryTools.Ui
                                     {
 
                                         PluginService.WindowService.OpenSubmarineWindow(submarineSource.SubmarineExplorationExId);
+
+                                    }
+                                }
+                                else if (source is VentureSource ventureSource)
+                                {
+                                    if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                                            new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1),
+                                            0))
+                                    {
+
+                                        PluginService.WindowService.OpenRetainerTaskWindow(ventureSource.RetainerTask.RowId);
 
                                     }
                                 }
@@ -753,12 +764,12 @@ namespace InventoryTools.Ui
 
         }
 
-        private void DrawRetainerRow(RetainerTaskNormalEx obj)
+        private void DrawRetainerRow(RetainerTaskEx obj)
         {
             ImGui.TableNextColumn();
-            ImGui.TextUnformatted( obj.TaskName);
+            ImGui.TextUnformatted( obj.FormattedName);
             ImGui.TableNextColumn();
-            ImGui.TextUnformatted(obj.TaskTime + " minutes");     
+            ImGui.TextUnformatted(obj.DurationString);     
             ImGui.TableNextColumn();
             ImGui.TextWrapped(obj.Quantities);
         }

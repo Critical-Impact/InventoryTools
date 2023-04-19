@@ -1,5 +1,7 @@
 using Dalamud.Game.Text;
+using Dalamud.Interface;
 using ImGuiNET;
+using OtterGui;
 
 namespace InventoryTools.Logic.Columns.Abstract
 {
@@ -10,8 +12,7 @@ namespace InventoryTools.Logic.Columns.Abstract
             ImGui.TableNextColumn();
             if (currentValue != null)
             {
-                
-                ImGui.Text($"{currentValue.Value:n0}" + SeIconChar.Gil.ToIconString());
+                ImGuiUtil.RightAlign($"{currentValue.Value:n0}" + SeIconChar.Gil.ToIconString());
             }
             else
             {

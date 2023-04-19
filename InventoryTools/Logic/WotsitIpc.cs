@@ -14,6 +14,7 @@ namespace InventoryTools.Logic
         private ICallGateSubscriber<string, string, string, uint, string>? _wotsitRegister;
         private ICallGateSubscriber<string, bool>? _wotsitUnregister;
         private ICallGateSubscriber<string, bool>? _callGateSubscriber;
+        private ICallGateSubscriber<bool> _wotsitAvailable;
         private Dictionary<string, FilterConfiguration> _wotsitToggleFilterGuids = new();
         private Dictionary<FilterConfiguration, string> _wotsitFilterNames = new();
         private bool _wotsItRegistered = false;
@@ -23,12 +24,8 @@ namespace InventoryTools.Logic
         public WotsitIpc()
         {
             InitForWotsit();
-
-            var wotsitAvailable = PluginService.PluginInterfaceService.GetIpcSubscriber<bool>("FA.Available");
-            wotsitAvailable.Subscribe(() =>
-            {
-                PluginService.FrameworkService.RunOnFrameworkThread(InitForWotsit);
-            });
+            _wotsitAvailable = PluginService.PluginInterfaceService.GetIpcSubscriber<bool>("FA.Available");
+            _wotsitAvailable.Subscribe(FaAvailable);
             
             PluginService.FilterService.FilterAdded += FilterAddedRemoved;
             PluginService.FilterService.FilterRemoved += FilterAddedRemoved;
@@ -37,6 +34,11 @@ namespace InventoryTools.Logic
             _delayTimer = new Timer(5000);
             _delayTimer.Elapsed += DelayTimerOnElapsed;
             _delayTimer.Enabled = true;
+        }
+
+        private void FaAvailable()
+        {
+            PluginService.FrameworkService.RunOnTick(InitForWotsit);
         }
 
         private void DelayTimerOnElapsed(object? sender, ElapsedEventArgs e)
@@ -163,6 +165,7 @@ namespace InventoryTools.Logic
             {
                 try
                 {
+                    _wotsitAvailable.Unsubscribe(FaAvailable);
                     _wotsitUnregister?.InvokeFunc(IpcDisplayName);
                 }
                 catch (Exception)

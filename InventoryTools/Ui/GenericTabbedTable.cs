@@ -84,15 +84,21 @@ public abstract class GenericTabbedTable<T> : Window, IGenericTabbedTable<T>
         if (tableColumns.Count == 0)
             return;
 
-        using var table = ImRaii.Table(label, tableColumns.Count, flags);
+        using var table = ImRaii.Table(label, tableColumns.Count(c => (contentTypeId == 0 && c.AllTabOnly) || !c.AllTabOnly), flags);
         if (!table || !table.Success)
             return;
         var refresh = false;
         ImGui.TableSetupScrollFreeze(0, 2);
-        for (var index = 0; index < tableColumns.Count; index++)
+        var index = 0;
+        for (var tableColumnIndex = 0; tableColumnIndex < tableColumns.Count; tableColumnIndex++)
         {
-            var tableColumn = tableColumns[index];
-            ImGui.TableSetupColumn(tableColumn.Name, tableColumn.ColumnFlags, tableColumn.Width, (uint)index + 1);
+            var tableColumn = tableColumns[tableColumnIndex];
+            if (tableColumn.AllTabOnly && contentTypeId != 0)
+            {
+                continue;
+            }
+            ImGui.TableSetupColumn(tableColumn.Name, tableColumn.ColumnFlags, tableColumn.Width, (uint)tableColumnIndex + 1);
+            index++;
         }
 
         var currentSortSpecs = ImGui.TableGetSortSpecs();
@@ -129,11 +135,15 @@ public abstract class GenericTabbedTable<T> : Window, IGenericTabbedTable<T>
         ImGui.TableHeadersRow();
 
         ImGui.TableNextRow(ImGuiTableRowFlags.Headers);
-
-        for (var index = 0; index < tableColumns.Count; index++)
+        index = 0;
+        for (var columnIndex = 0; columnIndex < tableColumns.Count; columnIndex++)
         {
             var name = ImGui.TableGetColumnName(index);
-            var column = tableColumns[index];
+            var column = tableColumns[columnIndex];
+            if (column.AllTabOnly && contentTypeId != 0)
+            {
+                continue;
+            }
             if (column.Filter != null)
             {
                 var filter = column.FilterText;
@@ -201,6 +211,8 @@ public abstract class GenericTabbedTable<T> : Window, IGenericTabbedTable<T>
                 ImGui.PopID();
 
             }
+
+            index++;
         }
 
         var items = data.ToList();
@@ -214,19 +226,25 @@ public abstract class GenericTabbedTable<T> : Window, IGenericTabbedTable<T>
         clipper.Begin(items.Count);
         while (clipper.Step())
         {
-            for (var index = clipper.DisplayStart; index < clipper.DisplayEnd; index++)
+            for (var clipperIndex = clipper.DisplayStart; clipperIndex < clipper.DisplayEnd; clipperIndex++)
             {
-                var ex = items[index];
+                var ex = items[clipperIndex];
                 ImGui.TableNextRow(ImGuiTableRowFlags.None, RowSize);
                 ImGui.PushID(GetRowId(ex));
 
+                var columnIndex = 0;
                 for (var i = 0; i < tableColumns.Count; i++)
                 {
-                    ImGui.PushID(i);
                     var column = tableColumns[i];
+                    if (column.AllTabOnly && contentTypeId != 0)
+                    {
+                        continue;
+                    }
+                    ImGui.PushID(columnIndex);
                     ImGui.TableNextColumn();
                     column.Draw(ex, contentTypeId);
                     ImGui.PopID();
+                    columnIndex++;
                 }
 
                 ImGui.PopID();

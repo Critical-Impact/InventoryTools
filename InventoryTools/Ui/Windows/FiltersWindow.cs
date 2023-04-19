@@ -55,6 +55,7 @@ namespace InventoryTools.Ui
                 new PopupMenu.PopupMenuItemSelectable("Duties Window", "duties", OpenDutiesWindow,"Open the duties window."),
                 new PopupMenu.PopupMenuItemSelectable("Airships Window", "airships", OpenAirshipsWindow,"Open the airships window."),
                 new PopupMenu.PopupMenuItemSelectable("Submarines Window", "submarines", OpenAirshipsWindow,"Open the submarines window."),
+                new PopupMenu.PopupMenuItemSelectable("Retainer Ventures Window", "ventures", OpenRetainerVenturesWindow,"Open the retainer ventures window."),
                 new PopupMenu.PopupMenuItemSeparator(),
                 new PopupMenu.PopupMenuItemSelectable("Help", "help", OpenHelpWindow,"Open the help window."),
             });
@@ -72,6 +73,11 @@ namespace InventoryTools.Ui
         private static void OpenAirshipsWindow(string obj)
         {
             PluginService.WindowService.OpenWindow<AirshipsWindow>(AirshipsWindow.AsKey);
+        }
+
+        private static void OpenRetainerVenturesWindow(string obj)
+        {
+            PluginService.WindowService.OpenWindow<RetainerTasksWindow>(RetainerTasksWindow.AsKey);
         }
 
         private static void OpenMobsWindow(string obj)

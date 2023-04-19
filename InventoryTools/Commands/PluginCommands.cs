@@ -116,6 +116,13 @@ namespace InventoryTools.Commands
             PluginService.WindowService.ToggleSubmarinesWindow();
         }
 
+        [Command("/retainerventures")]
+        [HelpMessage("Opens the allagan tools retainer ventures window")]
+        public  void ToggleToggleRetainerTasksWindow(string command, string args)
+        {
+            PluginService.WindowService.ToggleRetainerTasksWindow();
+        }
+
         [Command("/atconfig")]
         [HelpMessage("Opens the allagan tools configuration window")]
         public  void OpenConfigurationWindow(string command, string args)

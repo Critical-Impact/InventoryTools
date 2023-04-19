@@ -451,6 +451,8 @@ namespace InventoryTools
             AddFreeCompanyFilter();
 
             AddAllGameItemsFilter();
+            
+            AddCraftFilter();
         }
 
         public void AddAllFilter(string newName = "All")
@@ -465,7 +467,7 @@ namespace InventoryTools
 
         public void AddRetainerFilter(string newName = "Retainers")
         {
-            var retainerItemsFilter = new FilterConfiguration("Retainers", FilterType.SearchFilter);
+            var retainerItemsFilter = new FilterConfiguration(newName, FilterType.SearchFilter);
             retainerItemsFilter.DisplayInTabs = true;
             retainerItemsFilter.SourceAllRetainers = true;
             PluginService.FilterService.AddFilter(retainerItemsFilter);
@@ -473,7 +475,7 @@ namespace InventoryTools
 
         public void AddPlayerFilter(string newName = "Player")
         {
-            var playerItemsFilter = new FilterConfiguration("Player",  FilterType.SearchFilter);
+            var playerItemsFilter = new FilterConfiguration(newName,  FilterType.SearchFilter);
             playerItemsFilter.DisplayInTabs = true;
             playerItemsFilter.SourceAllCharacters = true;
             PluginService.FilterService.AddFilter(playerItemsFilter);
@@ -481,7 +483,7 @@ namespace InventoryTools
 
         public void AddFreeCompanyFilter(string newName = "Free Company")
         {
-            var newFilter = new FilterConfiguration("Free Company",  FilterType.SearchFilter);
+            var newFilter = new FilterConfiguration(newName,  FilterType.SearchFilter);
             newFilter.DisplayInTabs = true;
             newFilter.SourceAllFreeCompanies = true;
             PluginService.FilterService.AddFilter(newFilter);
@@ -489,10 +491,16 @@ namespace InventoryTools
 
         public void AddAllGameItemsFilter(string newName = "All Game Items")
         {
-            var allGameItemsFilter = new FilterConfiguration("All Game Items", FilterType.GameItemFilter);
+            var allGameItemsFilter = new FilterConfiguration(newName, FilterType.GameItemFilter);
             allGameItemsFilter.DisplayInTabs = true;            
             PluginService.FilterService.AddFilter(allGameItemsFilter);
+        }
 
+        public void AddCraftFilter(string newName = "Craft List")
+        {
+            var newFilter = new FilterConfiguration(newName, FilterType.CraftFilter);
+            newFilter.DisplayInTabs = true;            
+            PluginService.FilterService.AddFilter(newFilter);
         }
 
         public void AddNewCraftFilter()

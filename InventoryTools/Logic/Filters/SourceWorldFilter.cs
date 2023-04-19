@@ -49,7 +49,7 @@ namespace InventoryTools.Logic.Filters
         {
             if (_choices == null)
             {
-                _choices = Service.ExcelCache.GetWorldSheet().Where(c => c.IsPublic).OrderBy(c =>c.Name.ToString()).ToDictionary(c => c.RowId, c => c.Name.ToString());
+                _choices = Service.ExcelCache.GetWorldSheet().Where(c => c.IsPublic).OrderBy(c =>c.FormattedName).ToDictionary(c => c.RowId, c => c.FormattedName);
             }
 
             return _choices;

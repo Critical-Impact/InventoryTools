@@ -47,8 +47,6 @@ namespace InventoryTools.Sections
                         }
 
                         ImGui.TableNextColumn();
-                        ImGui.TextUnformatted((filterConfiguration.Order + 1).ToString());
-                        ImGui.SameLine();
                         if (ImGui.SmallButton("Up##" + index))
                         {
                             PluginService.FilterService.MoveFilterUp(filterConfiguration);

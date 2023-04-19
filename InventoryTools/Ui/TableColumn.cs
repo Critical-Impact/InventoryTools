@@ -7,11 +7,12 @@ namespace InventoryTools.Ui;
 
 public class TableColumn<T>
 {
-    public TableColumn(string name, uint width, ImGuiTableColumnFlags columnFlags)
+    public TableColumn(string name, uint width, ImGuiTableColumnFlags columnFlags, bool allTabOnly = false)
     {
         Name = name;
         Width = width;
         ColumnFlags = columnFlags;
+        AllTabOnly = allTabOnly;
     }
 
     public string Name { get; private set; }
@@ -26,5 +27,6 @@ public class TableColumn<T>
     public Action<T, uint> Draw { get; set; }
     public string FilterText = "";
     public bool? FilterBoolean = null;
+    public bool AllTabOnly;
 
 }

@@ -133,6 +133,21 @@ namespace InventoryTools.Logic.Columns
         {
             return String.Join(", ", item.Uses.Select(c => c.Name));
         }
+        
+        public override dynamic JsonExport(InventoryItem item)
+        {
+            return JsonExport(item.Item);
+        }
+        
+        public override dynamic JsonExport(CraftItem item)
+        {
+            return JsonExport(item.Item);
+        }
+        
+        public override dynamic JsonExport(SortingResult item)
+        {
+            return JsonExport(item.InventoryItem);
+        }
 
         public override string Name { get; set; } = "Uses";
         public override float Width { get; set; } = 210;

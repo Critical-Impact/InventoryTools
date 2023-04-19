@@ -268,6 +268,11 @@ public class MockWindow : Window
                 PluginService.WindowService.ToggleSubmarinesWindow();
             }
 
+            if (ImGui.Button("Retainer Ventures Window"))
+            {
+                PluginService.WindowService.ToggleSubmarinesWindow();
+            }
+
 
             if (ImGui.Button("NPCs Window"))
             {

@@ -121,6 +121,18 @@ namespace InventoryTools.Services
             return AddWindow(submarineWindow);
         }
 
+        public bool OpenRetainerTaskWindow(uint retainerTaskId)
+        {
+            var asKey = RetainerTaskWindow.AsKey(retainerTaskId);
+            if (_windows.ContainsKey(asKey))
+            {
+                _windows[asKey].Toggle();
+                return true;
+            }
+            var newWindow = new RetainerTaskWindow(retainerTaskId);
+            return AddWindow(newWindow);
+        }
+
         public bool OpenFilterWindow(string filterKey)
         {
             var asKey = FilterWindow.AsKey(filterKey);
@@ -216,6 +228,11 @@ namespace InventoryTools.Services
             if (windowName == SubmarinesWindow.AsKey)
             {
                 return OpenWindow<SubmarinesWindow>(SubmarinesWindow.AsKey);
+            }
+
+            if (windowName == RetainerTasksWindow.AsKey)
+            {
+                return OpenWindow<RetainerTasksWindow>(RetainerTasksWindow.AsKey);
             }
 
             foreach (var config in ConfigurationManager.Config.FilterConfigurations)
@@ -376,6 +393,11 @@ namespace InventoryTools.Services
         public bool ToggleSubmarinesWindow()
         {
             return ToggleWindow<SubmarinesWindow>(SubmarinesWindow.AsKey);
+        }
+
+        public bool ToggleRetainerTasksWindow()
+        {
+            return ToggleWindow<RetainerTasksWindow>(RetainerTasksWindow.AsKey);
         }
 
         public bool CloseFilterWindows()
