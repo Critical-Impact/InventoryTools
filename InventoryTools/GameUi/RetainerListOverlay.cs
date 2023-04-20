@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib.Services.Ui;
+using Dalamud.Logging;
 using InventoryTools.Logic;
 
 namespace InventoryTools.GameUi
@@ -120,7 +121,7 @@ namespace InventoryTools.GameUi
                     {
                         var grouping = filteredList.Where(c => !c.InventoryItem.IsEmpty && 
                                 (c.SourceRetainerId == currentCharacterId || c.DestinationRetainerId == currentCharacterId || PluginService.CharacterMonitor.BelongsToActiveCharacter(c.SourceRetainerId)) && c.DestinationRetainerId != null)
-                            .GroupBy(c => c.DestinationRetainerId == currentCharacterId ? c.SourceRetainerId : c.DestinationRetainerId!.Value).Where(c => c.Any()).ToList();
+                            .GroupBy(c => c.DestinationRetainerId == currentCharacterId || (PluginService.CharacterMonitor.BelongsToActiveCharacter(c.SourceRetainerId) && PluginService.CharacterMonitor.IsHousing(c.DestinationRetainerId!.Value)) ? c.SourceRetainerId : c.DestinationRetainerId!.Value).Where(c => c.Any()).ToList();
                         RetainerColors = grouping.ToDictionary(c => c.Key,
                             c => filterConfiguration.RetainerListColor ??
                                  ConfigurationManager.Config.RetainerListColor);

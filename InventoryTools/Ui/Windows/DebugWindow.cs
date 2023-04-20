@@ -31,6 +31,13 @@ using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 
 namespace InventoryTools.Ui
 {
+    public enum DebugMenu
+    {
+        Characters = 0,
+        Inventories = 1,
+        InventoryScanner = 2,
+        InventoryMonitor = 3
+    }
     public class DebugWindow : Window
     {
         public override bool SaveState => true;
@@ -63,97 +70,27 @@ namespace InventoryTools.Ui
             {
                 if (sideBar.Success)
                 {
-                    if (ImGui.Selectable("Retainers", ConfigurationManager.Config.SelectedDebugPage == 0))
+                    if (ImGui.Selectable("Characters", ConfigurationManager.Config.SelectedDebugPage == (int)DebugMenu.Characters))
                     {
-                        ConfigurationManager.Config.SelectedDebugPage = 0;
+                        ConfigurationManager.Config.SelectedDebugPage = (int)DebugMenu.Characters;
                     }
 
-                    if (ImGui.Selectable("Inventories", ConfigurationManager.Config.SelectedDebugPage == 1))
+                    if (ImGui.Selectable("Inventories", ConfigurationManager.Config.SelectedDebugPage == (int)DebugMenu.Inventories))
                     {
-                        ConfigurationManager.Config.SelectedDebugPage = 1;
+                        ConfigurationManager.Config.SelectedDebugPage = (int)DebugMenu.Inventories;
                     }
 
-                    if (ImGui.Selectable("Stuff", ConfigurationManager.Config.SelectedDebugPage == 2))
+                    if (ImGui.Selectable("Inventory Scanner", ConfigurationManager.Config.SelectedDebugPage == (int)DebugMenu.InventoryScanner))
                     {
-                        ConfigurationManager.Config.SelectedDebugPage = 2;
+                        ConfigurationManager.Config.SelectedDebugPage = (int)DebugMenu.InventoryScanner;
                     }
 
-                    if (ImGui.Selectable("Retainer Debugger", ConfigurationManager.Config.SelectedDebugPage == 3))
+
+                    if (ImGui.Selectable("Inventory Monitor", ConfigurationManager.Config.SelectedDebugPage == (int)DebugMenu.InventoryMonitor))
                     {
-                        ConfigurationManager.Config.SelectedDebugPage = 3;
+                        ConfigurationManager.Config.SelectedDebugPage = (int)DebugMenu.InventoryScanner;
                     }
 
-                    if (ImGui.Selectable("Universalis", ConfigurationManager.Config.SelectedDebugPage == 4))
-                    {
-                        ConfigurationManager.Config.SelectedDebugPage = 4;
-                    }
-
-                    if (ImGui.Selectable("Crafting", ConfigurationManager.Config.SelectedDebugPage == 5))
-                    {
-                        ConfigurationManager.Config.SelectedDebugPage = 5;
-                    }
-
-                    if (ImGui.Selectable("Fun Times", ConfigurationManager.Config.SelectedDebugPage == 6))
-                    {
-                        ConfigurationManager.Config.SelectedDebugPage = 6;
-                    }
-
-                    if (ImGui.Selectable("Inventory Debugging", ConfigurationManager.Config.SelectedDebugPage == 7))
-                    {
-                        ConfigurationManager.Config.SelectedDebugPage = 7;
-                    }
-
-                    if (ImGui.Selectable("Armoire Debugging", ConfigurationManager.Config.SelectedDebugPage == 8))
-                    {
-                        ConfigurationManager.Config.SelectedDebugPage = 8;
-                    }
-
-                    if (ImGui.Selectable("Glamour Chest Debugging", ConfigurationManager.Config.SelectedDebugPage == 9))
-                    {
-                        ConfigurationManager.Config.SelectedDebugPage = 9;
-                    }
-
-                    if (ImGui.Selectable("Inventory Scanner Cache",
-                            ConfigurationManager.Config.SelectedDebugPage == 10))
-                    {
-                        ConfigurationManager.Config.SelectedDebugPage = 10;
-                    }
-
-                    if (ImGui.Selectable("Inventory Container Tracking",
-                            ConfigurationManager.Config.SelectedDebugPage == 11))
-                    {
-                        ConfigurationManager.Config.SelectedDebugPage = 11;
-                    }
-
-                    if (ImGui.Selectable("Memory Sort Order", ConfigurationManager.Config.SelectedDebugPage == 12))
-                    {
-                        ConfigurationManager.Config.SelectedDebugPage = 12;
-                    }
-
-                    if (ImGui.Selectable("Filter State", ConfigurationManager.Config.SelectedDebugPage == 13))
-                    {
-                        ConfigurationManager.Config.SelectedDebugPage = 13;
-                    }
-
-                    if (ImGui.Selectable("Retainer Sort State", ConfigurationManager.Config.SelectedDebugPage == 14))
-                    {
-                        ConfigurationManager.Config.SelectedDebugPage = 14;
-                    }
-
-                    if (ImGui.Selectable("Retainer Manager", ConfigurationManager.Config.SelectedDebugPage == 15))
-                    {
-                        ConfigurationManager.Config.SelectedDebugPage = 15;
-                    }
-
-                    if (ImGui.Selectable("Crasher", ConfigurationManager.Config.SelectedDebugPage == 16))
-                    {
-                        ConfigurationManager.Config.SelectedDebugPage = 16;
-                    }
-
-                    if (ImGui.Selectable("Mob Tracker", ConfigurationManager.Config.SelectedDebugPage == 17))
-                    {
-                        ConfigurationManager.Config.SelectedDebugPage = 17;
-                    }
                 }
             }
             ImGui.SameLine();
@@ -162,87 +99,15 @@ namespace InventoryTools.Ui
             {
                 if (mainChild.Success)
                 {
-                    if (ConfigurationManager.Config.SelectedDebugPage == 0)
+                    if (ConfigurationManager.Config.SelectedDebugPage == (int)DebugMenu.Characters)
                     {
-                        ImGui.TextUnformatted("Character Information:");
-                        ImGui.TextUnformatted(PluginService.CharacterMonitor.ActiveCharacter?.Name.ToString() ??
-                                   "Not Logged in Yet");
-                        ImGui.TextUnformatted("Actual:" + PluginService.CharacterMonitor.LocalContentId.ToString());
-                        ImGui.TextUnformatted("Reported:" + PluginService.CharacterMonitor.ActiveCharacterId.ToString());
-                        ImGui.TextUnformatted("House Id:" + PluginService.CharacterMonitor.ActiveHouseId.ToString());
-                        ImGui.TextUnformatted("Territory Id:" + Service.ClientState.TerritoryType.ToString());
-                        ImGui.TextUnformatted("Ward Id:" + PluginService.CharacterMonitor.InternalWardId.ToString());
-                        ImGui.TextUnformatted("Plot Id:" + PluginService.CharacterMonitor.InternalPlotId.ToString());
-                        ImGui.TextUnformatted("Division Id:" + PluginService.CharacterMonitor.InternalDivisionId.ToString());
-                        ImGui.TextUnformatted("Room Id:" + PluginService.CharacterMonitor.InternalRoomId.ToString());
-                        ImGui.TextUnformatted("House Id:" + PluginService.CharacterMonitor.InternalHouseId.ToString());
-                        ImGui.TextUnformatted("Has Permission:" + (PluginService.CharacterMonitor.InternalHasHousePermission ? "Yes" : "No"));
-                        ImGui.TextUnformatted("Retainers:");
-                        ImGui.BeginTable("retainerTable", 5);
-                        ImGui.TableSetupColumn("Hire Order");
-                        ImGui.TableSetupColumn("Name");
-                        ImGui.TableSetupColumn("Gil");
-                        ImGui.TableSetupColumn("ID");
-                        ImGui.TableSetupColumn("Owner ID");
-                        ImGui.TableHeadersRow();
-                        var retainers = PluginService.CharacterMonitor.Characters;
-                        foreach (var retainer in retainers)
-                        {
-                            if (retainer.Value.Name != "Unhired")
-                            {
-                                ImGui.TableNextColumn();
-                                ImGui.TextUnformatted((retainer.Value.HireOrder + 1).ToString());
-                                ImGui.TableNextColumn();
-                                ImGui.TextUnformatted(retainer.Value.Name);
-                                ImGui.TableNextColumn();
-                                ImGui.TextUnformatted(retainer.Value.Gil.ToString());
-                                ImGui.TableNextColumn();
-                                ImGui.TextUnformatted(retainer.Value.CharacterId.ToString());
-                                ImGui.TableNextColumn();
-                                ImGui.TextUnformatted(retainer.Value.OwnerId.ToString());
-                            }
-                        }
-
-                        ImGui.EndTable();
+                        DrawCharacterDebugTab();
                     }
-                    else if (ConfigurationManager.Config.SelectedDebugPage == 1)
+                    else if (ConfigurationManager.Config.SelectedDebugPage == (int)DebugMenu.Inventories)
                     {
-                        ImGui.TextUnformatted("Inventory Information:");
-                        ImGui.BeginTable("retainerTable", 6);
-                        ImGui.TableSetupColumn("Inventory ID");
-                        ImGui.TableSetupColumn("Category");
-                        ImGui.TableSetupColumn("Name");
-                        ImGui.TableSetupColumn("Sorted Slot Index");
-                        ImGui.TableSetupColumn("Item ID");
-                        ImGui.TableSetupColumn("Unsorted Slot ID");
-                        ImGui.TableHeadersRow();
-                        var inventories = PluginService.InventoryMonitor.Inventories;
-                        foreach (var inventory in inventories)
-                        {
-                            foreach (var itemSet in inventory.Value)
-                            {
-                                foreach (var item in itemSet.Value)
-                                {
-                                    ImGui.TableNextColumn();
-                                    ImGui.TextUnformatted((inventory.Key).ToString());
-                                    ImGui.TableNextColumn();
-                                    ImGui.TextUnformatted(itemSet.Key.ToString());
-                                    ImGui.TableNextColumn();
-                                    ImGui.TextUnformatted(item.FormattedName);
-                                    ImGui.TableNextColumn();
-                                    ImGui.TextUnformatted(item.SortedSlotIndex.ToString());
-                                    ImGui.TableNextColumn();
-                                    ImGui.TextUnformatted(item.ItemId.ToString());
-                                    ImGui.TableNextColumn();
-                                    ImGui.TextUnformatted(item.Slot.ToString());
-                                }
-                            }
-
-                        }
-
-                        ImGui.EndTable();
-
+                        DrawInventoriesDebugTab();
                     }
+/*
                     else if (ConfigurationManager.Config.SelectedDebugPage == 2)
                     {
                         float currentX = CurrentX;
@@ -769,550 +634,16 @@ namespace InventoryTools.Ui
 
                         }
                     }
-                    else if (ConfigurationManager.Config.SelectedDebugPage == 10)
+                    */
+                    else if (ConfigurationManager.Config.SelectedDebugPage == (int)DebugMenu.InventoryScanner)
                     {
-                        if (ImGui.TreeNode("Character Bags 1##characterBags1"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.CharacterBag1.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.CharacterBag1[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Character Bags 2##characterBags2"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.CharacterBag2.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.CharacterBag2[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Character Bags 3##characterBags3"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.CharacterBag3.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.CharacterBag3[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Character Bags 4##characterBags4"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.CharacterBag4.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.CharacterBag4[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Character Equipped##characterEquipped"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.CharacterEquipped.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.CharacterEquipped[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Character Crystals##characterCrystals"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.CharacterCrystals.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.CharacterCrystals[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Character Currency##characterCurrency"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.CharacterCrystals.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.CharacterCrystals[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Saddlebag Left##saddlebagLeft"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.SaddleBag1.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.SaddleBag1[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Saddlebag Right##saddlebagRight"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.SaddleBag2.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.SaddleBag2[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Premium Saddlebag Left##premiumSaddleBagLeft"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.PremiumSaddleBag1.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.PremiumSaddleBag1[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Premium Saddlebag Right##premiumSaddleBagRight"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.PremiumSaddleBag2.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.PremiumSaddleBag2[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Armoury - Head##armouryHead"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.ArmouryHead.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.ArmouryHead[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Armoury - MainHand##armouryMainHand"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.ArmouryMainHand.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.ArmouryMainHand[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Armoury - Body##armouryBody"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.ArmouryBody.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.ArmouryBody[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Armoury - Hands##armouryHands"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.ArmouryHands.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.ArmouryHands[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Armoury - Legs##armouryLegs"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.ArmouryLegs.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.ArmouryLegs[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Armoury - Feet##armouryFeet"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.ArmouryFeet.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.ArmouryFeet[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Armoury - Off Hand##armouryOffHand"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.ArmouryOffHand.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.ArmouryOffHand[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Armoury - Ears##armouryEars"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.ArmouryEars.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.ArmouryEars[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Armoury - Neck##armouryNeck"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.ArmouryNeck.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.ArmouryNeck[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Armoury - Wrists##armouryWrists"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.ArmouryWrists.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.ArmouryWrists[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Armoury - Rings##armouryRings"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.ArmouryRings.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.ArmouryRings[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Armoury - SoulCrystals##armourySoulCrystals"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.ArmourySoulCrystals.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.ArmourySoulCrystals[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Free Company Chest 1##freeCompanyBags1"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.FreeCompanyBag1.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.FreeCompanyBag1[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Free Company Chest 2##freeCompanyBags2"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.FreeCompanyBag2.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.FreeCompanyBag2[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Free Company Chest 3##freeCompanyBags3"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.FreeCompanyBag3.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.FreeCompanyBag3[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Free Company Chest 4##freeCompanyBags4"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.FreeCompanyBag4.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.FreeCompanyBag4[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Free Company Chest 5##freeCompanyBags5"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.FreeCompanyBag5.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.FreeCompanyBag5[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Armoire##armoire"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.Armoire.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.Armoire[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Glamour Chest##glamourChest"))
-                        {
-                            for (int i = 0; i < PluginService.InventoryScanner.GlamourChest.Length; i++)
-                            {
-                                var item = PluginService.InventoryScanner.GlamourChest[i];
-                                Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Retainer Bag 1##retainerBag1"))
-                        {
-                            foreach (var retainer in PluginService.InventoryScanner.RetainerBag1)
-                            {
-                                if (ImGui.TreeNode("Retainer Bag " + retainer.Key + "##1" + retainer.Key))
-                                {
-                                    for (int i = 0; i < retainer.Value.Length; i++)
-                                    {
-                                        var item = retainer.Value[i];
-                                        Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                                    }
-
-                                    ImGui.TreePop();
-                                }
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Retainer Bag 2##retainerBag2"))
-                        {
-                            foreach (var retainer in PluginService.InventoryScanner.RetainerBag2)
-                            {
-                                if (ImGui.TreeNode("Retainer Bag " + retainer.Key + "##2" + retainer.Key))
-                                {
-                                    for (int i = 0; i < retainer.Value.Length; i++)
-                                    {
-                                        var item = retainer.Value[i];
-                                        Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                                    }
-
-                                    ImGui.TreePop();
-                                }
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Retainer Bag 3##retainerBag3"))
-                        {
-                            foreach (var retainer in PluginService.InventoryScanner.RetainerBag3)
-                            {
-                                if (ImGui.TreeNode("Retainer Bag " + retainer.Key + "##3" + retainer.Key))
-                                {
-                                    for (int i = 0; i < retainer.Value.Length; i++)
-                                    {
-                                        var item = retainer.Value[i];
-                                        Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                                    }
-
-                                    ImGui.TreePop();
-                                }
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Retainer Bag 4##retainerBag4"))
-                        {
-                            foreach (var retainer in PluginService.InventoryScanner.RetainerBag4)
-                            {
-                                if (ImGui.TreeNode("Retainer Bag " + retainer.Key + "##4" + retainer.Key))
-                                {
-                                    for (int i = 0; i < retainer.Value.Length; i++)
-                                    {
-                                        var item = retainer.Value[i];
-                                        Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                                    }
-
-                                    ImGui.TreePop();
-                                }
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Retainer Bag 5##retainerBag5"))
-                        {
-                            foreach (var retainer in PluginService.InventoryScanner.RetainerBag5)
-                            {
-                                if (ImGui.TreeNode("Retainer Bag " + retainer.Key + "##5" + retainer.Key))
-                                {
-                                    for (int i = 0; i < retainer.Value.Length; i++)
-                                    {
-                                        var item = retainer.Value[i];
-                                        Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                                    }
-
-                                    ImGui.TreePop();
-                                }
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Retainer Equipped##retainerEquipped"))
-                        {
-                            foreach (var retainer in PluginService.InventoryScanner.RetainerEquipped)
-                            {
-                                if (ImGui.TreeNode("Retainer Equipped" + retainer.Key + "##equipped" + retainer.Key))
-                                {
-                                    for (int i = 0; i < retainer.Value.Length; i++)
-                                    {
-                                        var item = retainer.Value[i];
-                                        Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                                    }
-
-                                    ImGui.TreePop();
-                                }
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Retainer Market##retainerMarket"))
-                        {
-                            foreach (var retainer in PluginService.InventoryScanner.RetainerMarket)
-                            {
-                                if (ImGui.TreeNode("Retainer Market" + retainer.Key + "##market" + retainer.Key))
-                                {
-                                    for (int i = 0; i < retainer.Value.Length; i++)
-                                    {
-                                        var item = retainer.Value[i];
-                                        Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                                    }
-
-                                    ImGui.TreePop();
-                                }
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Retainer Market Prices##retainerMarketPrices"))
-                        {
-                            foreach (var retainer in PluginService.InventoryScanner.RetainerMarketPrices)
-                            {
-                                if (ImGui.TreeNode("Retainer Market" + retainer.Key + "##market" + retainer.Key))
-                                {
-                                    for (int i = 0; i < retainer.Value.Length; i++)
-                                    {
-                                        var item = retainer.Value[i];
-                                        Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                                    }
-
-                                    ImGui.TreePop();
-                                }
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Retainer Crystals##retainerCrystals"))
-                        {
-                            foreach (var retainer in PluginService.InventoryScanner.RetainerCrystals)
-                            {
-                                if (ImGui.TreeNode("Retainer Crystals" + retainer.Key + "##crystals" + retainer.Key))
-                                {
-                                    for (int i = 0; i < retainer.Value.Length; i++)
-                                    {
-                                        var item = retainer.Value[i];
-                                        Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                                    }
-
-                                    ImGui.TreePop();
-                                }
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Retainer Gil##retainerGil"))
-                        {
-                            foreach (var retainer in PluginService.InventoryScanner.RetainerGil)
-                            {
-                                if (ImGui.TreeNode("Retainer Gil" + retainer.Key + "##gil" + retainer.Key))
-                                {
-                                    for (int i = 0; i < retainer.Value.Length; i++)
-                                    {
-                                        var item = retainer.Value[i];
-                                        Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                                    }
-
-                                    ImGui.TreePop();
-                                }
-                            }
-
-                            ImGui.TreePop();
-                        }
-
-                        if (ImGui.TreeNode("Gearsets##gearsets"))
-                        {
-                            foreach (var gearSet in PluginService.InventoryScanner.GearSets)
-                            {
-                                if (ImGui.TreeNode("Gearset " +
-                                                   PluginService.InventoryScanner.GearSetNames[gearSet.Key] +
-                                                   "##gil" + gearSet.Key))
-                                {
-                                    for (int i = 0; i < gearSet.Value.Length; i++)
-                                    {
-                                        var item = gearSet.Value[i];
-                                        Utils.PrintOutObject(item, (ulong)i, new List<string>());
-                                    }
-
-                                    ImGui.TreePop();
-                                }
-                            }
-
-                            ImGui.TreePop();
-                        }
-
+                        DrawInventoryScannerDebugTab();
                     }
+                    else if (ConfigurationManager.Config.SelectedDebugPage == (int)DebugMenu.InventoryMonitor)
+                    {
+                        
+                    }
+                    /*
                     else if (ConfigurationManager.Config.SelectedDebugPage == 11)
                     {
                         ImGui.TextUnformatted("Inventories Seen via Network Traffic");
@@ -1413,11 +744,704 @@ namespace InventoryTools.Ui
                     else if (ConfigurationManager.Config.SelectedDebugPage == 16)
                     {
 
-                    }
+                    }*/
+                    
                 }
             }
         }
-        
+        private void DrawInventoryScannerDebugTab()
+        {
+            if (ImGui.TreeNode("Character Bags 1##characterBags1"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.CharacterBag1.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.CharacterBag1[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Character Bags 2##characterBags2"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.CharacterBag2.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.CharacterBag2[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Character Bags 3##characterBags3"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.CharacterBag3.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.CharacterBag3[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Character Bags 4##characterBags4"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.CharacterBag4.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.CharacterBag4[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Character Equipped##characterEquipped"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.CharacterEquipped.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.CharacterEquipped[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Character Crystals##characterCrystals"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.CharacterCrystals.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.CharacterCrystals[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Character Currency##characterCurrency"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.CharacterCrystals.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.CharacterCrystals[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Saddlebag Left##saddlebagLeft"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.SaddleBag1.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.SaddleBag1[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Saddlebag Right##saddlebagRight"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.SaddleBag2.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.SaddleBag2[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Premium Saddlebag Left##premiumSaddleBagLeft"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.PremiumSaddleBag1.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.PremiumSaddleBag1[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Premium Saddlebag Right##premiumSaddleBagRight"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.PremiumSaddleBag2.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.PremiumSaddleBag2[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Armoury - Head##armouryHead"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.ArmouryHead.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.ArmouryHead[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Armoury - MainHand##armouryMainHand"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.ArmouryMainHand.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.ArmouryMainHand[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Armoury - Body##armouryBody"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.ArmouryBody.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.ArmouryBody[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Armoury - Hands##armouryHands"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.ArmouryHands.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.ArmouryHands[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Armoury - Legs##armouryLegs"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.ArmouryLegs.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.ArmouryLegs[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Armoury - Feet##armouryFeet"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.ArmouryFeet.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.ArmouryFeet[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Armoury - Off Hand##armouryOffHand"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.ArmouryOffHand.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.ArmouryOffHand[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Armoury - Ears##armouryEars"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.ArmouryEars.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.ArmouryEars[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Armoury - Neck##armouryNeck"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.ArmouryNeck.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.ArmouryNeck[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Armoury - Wrists##armouryWrists"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.ArmouryWrists.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.ArmouryWrists[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Armoury - Rings##armouryRings"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.ArmouryRings.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.ArmouryRings[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Armoury - SoulCrystals##armourySoulCrystals"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.ArmourySoulCrystals.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.ArmourySoulCrystals[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Free Company Chest 1##freeCompanyBags1"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.FreeCompanyBag1.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.FreeCompanyBag1[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Free Company Chest 2##freeCompanyBags2"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.FreeCompanyBag2.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.FreeCompanyBag2[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Free Company Chest 3##freeCompanyBags3"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.FreeCompanyBag3.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.FreeCompanyBag3[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Free Company Chest 4##freeCompanyBags4"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.FreeCompanyBag4.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.FreeCompanyBag4[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Free Company Chest 5##freeCompanyBags5"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.FreeCompanyBag5.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.FreeCompanyBag5[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Armoire##armoire"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.Armoire.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.Armoire[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Glamour Chest##glamourChest"))
+            {
+                for (int i = 0; i < PluginService.InventoryScanner.GlamourChest.Length; i++)
+                {
+                    var item = PluginService.InventoryScanner.GlamourChest[i];
+                    Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Retainer Bag 1##retainerBag1"))
+            {
+                foreach (var retainer in PluginService.InventoryScanner.RetainerBag1)
+                {
+                    if (ImGui.TreeNode("Retainer Bag " + retainer.Key + "##1" + retainer.Key))
+                    {
+                        for (int i = 0; i < retainer.Value.Length; i++)
+                        {
+                            var item = retainer.Value[i];
+                            Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                        }
+
+                        ImGui.TreePop();
+                    }
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Retainer Bag 2##retainerBag2"))
+            {
+                foreach (var retainer in PluginService.InventoryScanner.RetainerBag2)
+                {
+                    if (ImGui.TreeNode("Retainer Bag " + retainer.Key + "##2" + retainer.Key))
+                    {
+                        for (int i = 0; i < retainer.Value.Length; i++)
+                        {
+                            var item = retainer.Value[i];
+                            Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                        }
+
+                        ImGui.TreePop();
+                    }
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Retainer Bag 3##retainerBag3"))
+            {
+                foreach (var retainer in PluginService.InventoryScanner.RetainerBag3)
+                {
+                    if (ImGui.TreeNode("Retainer Bag " + retainer.Key + "##3" + retainer.Key))
+                    {
+                        for (int i = 0; i < retainer.Value.Length; i++)
+                        {
+                            var item = retainer.Value[i];
+                            Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                        }
+
+                        ImGui.TreePop();
+                    }
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Retainer Bag 4##retainerBag4"))
+            {
+                foreach (var retainer in PluginService.InventoryScanner.RetainerBag4)
+                {
+                    if (ImGui.TreeNode("Retainer Bag " + retainer.Key + "##4" + retainer.Key))
+                    {
+                        for (int i = 0; i < retainer.Value.Length; i++)
+                        {
+                            var item = retainer.Value[i];
+                            Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                        }
+
+                        ImGui.TreePop();
+                    }
+                }
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Retainer Bag 5##retainerBag5"))
+            {
+                foreach (var retainer in PluginService.InventoryScanner.RetainerBag5)
+                {
+                    if (ImGui.TreeNode("Retainer Bag " + retainer.Key + "##5" + retainer.Key))
+                    {
+                        for (int i = 0; i < retainer.Value.Length; i++)
+                        {
+                            var item = retainer.Value[i];
+                            Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                        }
+
+                        ImGui.TreePop();
+                    }
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Retainer Equipped##retainerEquipped"))
+            {
+                foreach (var retainer in PluginService.InventoryScanner.RetainerEquipped)
+                {
+                    if (ImGui.TreeNode("Retainer Equipped" + retainer.Key + "##equipped" + retainer.Key))
+                    {
+                        for (int i = 0; i < retainer.Value.Length; i++)
+                        {
+                            var item = retainer.Value[i];
+                            Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                        }
+
+                        ImGui.TreePop();
+                    }
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Retainer Market##retainerMarket"))
+            {
+                foreach (var retainer in PluginService.InventoryScanner.RetainerMarket)
+                {
+                    if (ImGui.TreeNode("Retainer Market" + retainer.Key + "##market" + retainer.Key))
+                    {
+                        for (int i = 0; i < retainer.Value.Length; i++)
+                        {
+                            var item = retainer.Value[i];
+                            Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                        }
+
+                        ImGui.TreePop();
+                    }
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Retainer Market Prices##retainerMarketPrices"))
+            {
+                foreach (var retainer in PluginService.InventoryScanner.RetainerMarketPrices)
+                {
+                    if (ImGui.TreeNode("Retainer Market" + retainer.Key + "##market" + retainer.Key))
+                    {
+                        for (int i = 0; i < retainer.Value.Length; i++)
+                        {
+                            var item = retainer.Value[i];
+                            Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                        }
+
+                        ImGui.TreePop();
+                    }
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Retainer Crystals##retainerCrystals"))
+            {
+                foreach (var retainer in PluginService.InventoryScanner.RetainerCrystals)
+                {
+                    if (ImGui.TreeNode("Retainer Crystals" + retainer.Key + "##crystals" + retainer.Key))
+                    {
+                        for (int i = 0; i < retainer.Value.Length; i++)
+                        {
+                            var item = retainer.Value[i];
+                            Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                        }
+
+                        ImGui.TreePop();
+                    }
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Retainer Gil##retainerGil"))
+            {
+                foreach (var retainer in PluginService.InventoryScanner.RetainerGil)
+                {
+                    if (ImGui.TreeNode("Retainer Gil" + retainer.Key + "##gil" + retainer.Key))
+                    {
+                        for (int i = 0; i < retainer.Value.Length; i++)
+                        {
+                            var item = retainer.Value[i];
+                            Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                        }
+
+                        ImGui.TreePop();
+                    }
+                }
+
+                ImGui.TreePop();
+            }
+            var bags = new[]
+            {
+                InventoryType.HousingInteriorPlacedItems1,
+                InventoryType.HousingInteriorPlacedItems2,
+                InventoryType.HousingInteriorPlacedItems3,
+                InventoryType.HousingInteriorPlacedItems4,
+                InventoryType.HousingInteriorPlacedItems5,
+                InventoryType.HousingInteriorPlacedItems6,
+                InventoryType.HousingInteriorPlacedItems7,
+                InventoryType.HousingInteriorPlacedItems8,
+                InventoryType.HousingInteriorStoreroom1,
+                InventoryType.HousingInteriorStoreroom2,
+                InventoryType.HousingInteriorStoreroom3,
+                InventoryType.HousingInteriorStoreroom4,
+                InventoryType.HousingInteriorStoreroom5,
+                InventoryType.HousingInteriorStoreroom6,
+                InventoryType.HousingInteriorStoreroom7,
+                InventoryType.HousingInteriorStoreroom8,
+                InventoryType.HousingExteriorAppearance,
+                InventoryType.HousingInteriorAppearance,
+                InventoryType.HousingExteriorPlacedItems,
+                InventoryType.HousingExteriorStoreroom,
+            };
+
+            if (ImGui.TreeNode("Housing Inventories"))
+            {
+                foreach (var bagType in bags)
+                {
+                    var bag = PluginService.InventoryScanner.GetInventoryByType(bagType);
+                    var bagLoaded = PluginService.InventoryScanner.IsBagLoaded(bagType);
+                    if (ImGui.TreeNode(bagType.ToString() + (bagLoaded ? " (Loaded)" : " (Not Loaded)")))
+                    {
+                        var itemCount = bag.Count(c => c.ItemID != 0);
+                        ImGui.Text(itemCount + "/" + bag.Length);
+                        for (int i = 0; i < bag.Length; i++)
+                        {
+                            var item = bag[i];
+                            Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                        }
+
+                        ImGui.TreePop();
+                    }
+
+                }
+                ImGui.TreePop();
+            }
+        }
+        private void DrawInventoriesDebugTab()
+        {
+            ImGui.TextUnformatted("Inventory Information:");
+            ImGui.Separator();
+            foreach (var inventory in PluginService.InventoryMonitor.Inventories)
+            {
+                var character = PluginService.CharacterMonitor.GetCharacterById(inventory.Key);
+                var characterName = "Unknown";
+                if (character != null)
+                {
+                    characterName = character.FormattedName;
+                }
+
+                if (ImGui.TreeNode(characterName + "##char" + inventory.Key))
+                {
+                    foreach (var item in inventory.Value)
+                    {
+                        ImGui.TextUnformatted(item.Key.FormattedName());
+                        ImGui.Text(item.Value.Count(c => !c.IsEmpty) + "/" + item.Value.Count);
+                        ImGui.Separator();
+                    }
+
+                    ImGui.TreePop();
+                }
+            }
+            ImGui.TextUnformatted("Inventory List:");
+            ImGui.Separator();
+            ImGui.BeginTable("retainerTable", 6);
+            ImGui.TableSetupColumn("Inventory ID");
+            ImGui.TableSetupColumn("Category");
+            ImGui.TableSetupColumn("Name");
+            ImGui.TableSetupColumn("Sorted Slot Index");
+            ImGui.TableSetupColumn("Item ID");
+            ImGui.TableSetupColumn("Unsorted Slot ID");
+            ImGui.TableHeadersRow();
+            var inventories = PluginService.InventoryMonitor.Inventories;
+            foreach (var inventory in inventories)
+            {
+                foreach (var itemSet in inventory.Value)
+                {
+                    foreach (var item in itemSet.Value)
+                    {
+                        ImGui.TableNextColumn();
+                        ImGui.TextUnformatted((inventory.Key).ToString());
+                        ImGui.TableNextColumn();
+                        ImGui.TextUnformatted(itemSet.Key.ToString());
+                        ImGui.TableNextColumn();
+                        ImGui.TextUnformatted(item.FormattedName);
+                        ImGui.TableNextColumn();
+                        ImGui.TextUnformatted(item.SortedSlotIndex.ToString());
+                        ImGui.TableNextColumn();
+                        ImGui.TextUnformatted(item.ItemId.ToString());
+                        ImGui.TableNextColumn();
+                        ImGui.TextUnformatted(item.Slot.ToString());
+                    }
+                }
+            }
+
+            ImGui.EndTable();
+        }
+
+        private void DrawCharacterDebugTab()
+        {
+            ImGui.TextUnformatted("Character Information:");
+            ImGui.TextUnformatted(PluginService.CharacterMonitor.ActiveCharacter?.Name.ToString() ??
+                                  "Not Logged in Yet");
+            ImGui.TextUnformatted("Local Character ID:" + PluginService.CharacterMonitor.LocalContentId.ToString());
+            ImGui.TextUnformatted("Current Territory Id:" + Service.ClientState.TerritoryType.ToString());
+            ImGui.Separator();
+            ImGui.TextUnformatted("Cached Character ID:" + PluginService.CharacterMonitor.ActiveCharacterId.ToString());
+            ImGui.TextUnformatted("Cached House Id:" + PluginService.CharacterMonitor.ActiveHouseId.ToString());
+            ImGui.TextUnformatted("Cached Ward Id:" + PluginService.CharacterMonitor.InternalWardId.ToString());
+            ImGui.TextUnformatted("Cached Plot Id:" + PluginService.CharacterMonitor.InternalPlotId.ToString());
+            ImGui.TextUnformatted("Cached Division Id:" + PluginService.CharacterMonitor.InternalDivisionId.ToString());
+            ImGui.TextUnformatted("Cached Room Id:" + PluginService.CharacterMonitor.InternalRoomId.ToString());
+            ImGui.TextUnformatted("Cached House Id:" + PluginService.CharacterMonitor.InternalHouseId.ToString());
+            ImGui.TextUnformatted("Has Housing Permission:" +
+                                  (PluginService.CharacterMonitor.InternalHasHousePermission ? "Yes" : "No"));
+            ImGui.NewLine();
+            ImGui.TextUnformatted("Retainers:");
+            ImGui.BeginTable("retainerTable", 6);
+            ImGui.TableSetupColumn("Hire Order");
+            ImGui.TableSetupColumn("Name");
+            ImGui.TableSetupColumn("Type");
+            ImGui.TableSetupColumn("Gil");
+            ImGui.TableSetupColumn("ID");
+            ImGui.TableSetupColumn("Owner ID");
+            ImGui.TableHeadersRow();
+            var retainers = PluginService.CharacterMonitor.Characters;
+            foreach (var retainer in retainers)
+            {
+                if (retainer.Value.Name != "Unhired")
+                {
+                    ImGui.TableNextColumn();
+                    ImGui.TextUnformatted((retainer.Value.HireOrder + 1).ToString());
+                    ImGui.TableNextColumn();
+                    ImGui.TextUnformatted(retainer.Value.CharacterType == CharacterType.Housing
+                        ? retainer.Value.HousingName
+                        : retainer.Value.Name);
+                    ImGui.TableNextColumn();
+                    ImGui.TextUnformatted(retainer.Value.CharacterType.ToString());
+                    ImGui.TableNextColumn();
+                    ImGui.TextUnformatted(retainer.Value.Gil.ToString());
+                    ImGui.TableNextColumn();
+                    ImGui.TextUnformatted(retainer.Value.CharacterId.ToString());
+                    ImGui.TableNextColumn();
+                    ImGui.TextUnformatted(retainer.Value.OwnerId.ToString());
+                }
+            }
+
+            ImGui.EndTable();
+            ImGui.Separator();
+            ImGui.TextUnformatted("Character Objects:");
+            foreach (var retainer in retainers)
+            {
+                if (ImGui.TreeNode(retainer.Value.CharacterType == CharacterType.Housing
+                        ? retainer.Value.HousingName
+                        : retainer.Value.Name + "##" + retainer.Key))
+                {
+                    Utils.PrintOutObject(retainer.Value, 0, new List<string>());
+
+                    ImGui.TreePop();
+                }
+            }
+        }
+
         public override FilterConfiguration? SelectedConfiguration => null;
 
         public override void Invalidate()
