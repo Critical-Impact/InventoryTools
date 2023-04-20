@@ -36,6 +36,11 @@ public class MockInventoryScanner : IInventoryScanner
         return Array.Empty<InventoryItem>();
     }
 
+    public bool IsBagLoaded(InventoryType type)
+    {
+        return false;
+    }
+
     public void ClearRetainerCache(ulong retainerId)
     {
         

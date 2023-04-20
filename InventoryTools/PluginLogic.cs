@@ -70,8 +70,8 @@ namespace InventoryTools
             ConfigurationManager.Config.ConfigurationChanged += ConfigOnConfigurationChanged;
             PluginService.FrameworkService.Update += FrameworkOnUpdate;
 
-            PluginService.InventoryMonitor.LoadExistingData(ConfigurationManager.Config.GetSavedInventory());
             PluginService.CharacterMonitor.LoadExistingRetainers(ConfigurationManager.Config.GetSavedRetainers());
+            PluginService.InventoryMonitor.LoadExistingData(ConfigurationManager.Config.GetSavedInventory());
             var entries = PluginService.MobTracker.LoadCsv(ConfigurationManager.MobSpawnFile, out var success);
             if(success)
             {

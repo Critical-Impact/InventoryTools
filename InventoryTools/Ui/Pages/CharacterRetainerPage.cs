@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -23,7 +24,7 @@ namespace InventoryTools.Sections
                                                              ImGuiTableFlags.BordersInnerV |
                                                              ImGuiTableFlags.BordersH |
                                                              ImGuiTableFlags.BordersOuterH |
-                                                             ImGuiTableFlags.BordersInnerH))
+                                                             ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.Resizable))
                 {
                     ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint) 0);
                     ImGui.TableSetupColumn("World", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint) 1);
@@ -165,7 +166,7 @@ namespace InventoryTools.Sections
                                                         ImGuiTableFlags.BordersInnerV |
                                                         ImGuiTableFlags.BordersH |
                                                         ImGuiTableFlags.BordersOuterH |
-                                                        ImGuiTableFlags.BordersInnerH))
+                                                        ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.Resizable))
             {
                 ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)0);
                 ImGui.TableSetupColumn("World", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)1);
@@ -262,23 +263,27 @@ namespace InventoryTools.Sections
         private static void RenderHouseTable()
         {
             ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(5, 5) * ImGui.GetIO().FontGlobalScale);
-            if (ImGui.BeginTable("HouseTable", 4, ImGuiTableFlags.BordersV |
+            if (ImGui.BeginTable("HouseTable", 6, ImGuiTableFlags.BordersV |
                                                         ImGuiTableFlags.BordersOuterV |
                                                         ImGuiTableFlags.BordersInnerV |
                                                         ImGuiTableFlags.BordersH |
                                                         ImGuiTableFlags.BordersOuterH |
-                                                        ImGuiTableFlags.BordersInnerH))
+                                                        ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.Resizable))
             {
                 ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)0);
                 ImGui.TableSetupColumn("World", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)1);
-                ImGui.TableSetupColumn("Display Name", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)3);
-                ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)4);
+                ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)2);
+                ImGui.TableSetupColumn("Owners", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)3);
+                ImGui.TableSetupColumn("Display Name", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)4);
+                ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)5);
                 ImGui.TableHeadersRow();
                 var houses = PluginService.CharacterMonitor.GetCharacterHouses();
                 if (houses.Length == 0)
                 {
                     ImGui.TableNextRow();
                     ImGui.TextUnformatted("No houses available.");
+                    ImGui.TableNextColumn();
+                    ImGui.TableNextColumn();
                     ImGui.TableNextColumn();
                     ImGui.TableNextColumn();
                     ImGui.TableNextColumn();
@@ -302,7 +307,18 @@ namespace InventoryTools.Sections
                         ImGui.TextUnformatted(character.World?.Name ?? "Unknown");
                         ImGui.SameLine();
                     }
+                    
+                    ImGui.TableNextColumn();
+                    ImGui.TextUnformatted(character.GetPlotSize().ToString());
+                    ImGui.SameLine();
 
+                    ImGui.TableNextColumn();
+                    if (character.Owners.Count != 0)
+                    {
+                        ImGui.TextUnformatted(String.Join(",",character.Owners.Select(c => PluginService.CharacterMonitor.GetCharacterById(c)).Where(c => c != null).Select(c => c!.FormattedName).ToList()));
+                        ImGui.SameLine();
+                    }
+                    
                     ImGui.TableNextColumn();
                     var value = character.AlternativeName ?? "";
                     if (ImGui.InputText("##" + index + "Input", ref value, 150))
@@ -371,7 +387,7 @@ namespace InventoryTools.Sections
                                                          ImGuiTableFlags.BordersInnerV |
                                                          ImGuiTableFlags.BordersH |
                                                          ImGuiTableFlags.BordersOuterH |
-                                                         ImGuiTableFlags.BordersInnerH))
+                                                         ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.Resizable))
             {
                 ImGui.TableSetupColumn("Hire Order", ImGuiTableColumnFlags.WidthStretch, 30.0f, (uint) 0);
                 ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.WidthStretch, 70.0f, (uint) 1);
