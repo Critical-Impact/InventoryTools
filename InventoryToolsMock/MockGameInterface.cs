@@ -23,6 +23,17 @@ public class MockGameInterface : IGameInterface
             
         }
     }
+
+    public bool IsGatheringItemGathered(uint item)
+    {
+        return false;
+    }
+
+    public bool? IsItemGathered(uint itemId)
+    {
+        return false;
+    }
+
     public unsafe void OpenGatheringLog(uint itemId)
     {
         PluginLog.Log("Game Event: Gathering Log Opened for Item #" + itemId);

@@ -45,7 +45,10 @@ namespace InventoryTools.Logic.Filters.Abstract
                     {
                         if (item == null)
                         {
-                            continue;
+                            if (ImGui.Selectable("", currentSearchCategory == ""))
+                            {
+                                UpdateFilterConfiguration(configuration, item);
+                            }
                         }
 
                         var text = GetFormattedChoice(item).Replace("\u0002\u001F\u0001\u0003", "-");

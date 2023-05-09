@@ -55,6 +55,7 @@ namespace InventoryTools.Logic.Filters
         {
             var choices = new List<uint?>
             {
+                null,
                 (uint) CharacterSex.Both,
                 (uint) CharacterSex.Female,
                 (uint) CharacterSex.Male,

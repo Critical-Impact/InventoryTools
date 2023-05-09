@@ -1,3 +1,9 @@
+using System;
+using System.Globalization;
+using System.Linq;
+using CriticalCommonLib;
+using CriticalCommonLib.Extensions;
+using CriticalCommonLib.Sheets;
 using Dalamud.Logging;
 using DalamudPluginProjectTemplate;
 using DalamudPluginProjectTemplate.Attributes;
@@ -195,7 +201,6 @@ namespace InventoryTools.Commands
         }
 
         [Command("/atclearfilter")]
-        [DoNotShowInHelp]
         [HelpMessage("Clears the active filter. Pass in background or ui to close just the background or ui filters respectively.")]
         public void ClearFilter(string command, string args)
         {
@@ -216,7 +221,6 @@ namespace InventoryTools.Commands
         }
 
         [Command("/atclosefilters")]
-        [DoNotShowInHelp]
         [HelpMessage("Closes all filter windows.")]
         public void CloseFilterWindows(string command, string args)
         {
@@ -224,12 +228,41 @@ namespace InventoryTools.Commands
         }
 
         [Command("/atclearall")]
-        [DoNotShowInHelp]
         [HelpMessage("Closes all filter windows and clears all active filters. Pass in background or ui to close just the background or ui filters respectively.")]
         public void ClearAll(string command, string args)
         {
             ClearFilter(command, args);
             CloseFilterWindows(command,args);
+        }
+
+        [Command("/moreinfo")]
+        [Aliases("/itemwindow")]
+        [HelpMessage("Opens the more information window for a specific item. Provide the name of the item or the ID of the item.")]
+        public void MoreInformation(string command, string args)
+        {
+            args = args.Trim();
+            if(args == "")
+            {
+                return;
+            }
+
+            ItemEx? item;
+            if (UInt32.TryParse(args, out uint itemId))
+            {
+                item = Service.ExcelCache.GetItemExSheet().GetRow(itemId);
+            }
+            else
+            {
+                item = Service.ExcelCache.GetItemExSheet().FirstOrDefault(c => c.SearchString == args.ToParseable(), null);
+            }
+            if (item != null && item.RowId != 0)
+            {
+                PluginService.WindowService.OpenItemWindow(item.RowId);
+            }
+            else
+            {
+                PluginService.ChatUtilities.PrintError("The item " + args + " could not be found.");
+            }
         }
 
         #endif

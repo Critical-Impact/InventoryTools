@@ -205,21 +205,30 @@ namespace InventoryTools.Logic.Columns.Abstract
             });
         }
 
-
+        private int GetSortOrder(ItemEx c)
+        {
+            var currentValue = CurrentValue(c);
+            return currentValue switch
+            {
+                null => 0,
+                false => 1,
+                _ => 2
+            };
+        }
 
         public override IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => CurrentValue(c) ?? false) : items.OrderByDescending(c => CurrentValue(c) ?? false);
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => GetSortOrder(c.Item)) : items.OrderByDescending(c => GetSortOrder(c.Item));
         }
 
         public override IEnumerable<ItemEx> Sort(ImGuiSortDirection direction, IEnumerable<ItemEx> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => CurrentValue((ItemEx)c) ?? false) : items.OrderByDescending(c => CurrentValue((ItemEx)c) ?? false);
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(GetSortOrder) : items.OrderByDescending(GetSortOrder);
         }
 
         public override IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => CurrentValue(c) ?? false) : items.OrderByDescending(c => CurrentValue(c) ?? false);
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => GetSortOrder(c.InventoryItem.Item)) : items.OrderByDescending(c => GetSortOrder(c.InventoryItem.Item));
         }
         
 

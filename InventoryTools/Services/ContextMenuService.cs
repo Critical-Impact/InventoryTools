@@ -138,10 +138,9 @@ public class ContextMenuService : IDisposable
         
     private void MoreInformationAction(uint itemId)
     {
-        if (itemId != 0)
-        {
-            PluginService.WindowService.OpenItemWindow(itemId);
-        }
+        if (itemId >= 2000000 || itemId == 0) return ;
+        itemId %= 500000;
+        PluginService.WindowService.OpenItemWindow(itemId);
     }
             
     private bool _disposed;
