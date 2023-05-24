@@ -714,7 +714,7 @@ namespace InventoryTools
 
         internal TextureWrap? GetIcon(ushort icon, bool hqIcon = false)
         {
-            if (icon < 65100)
+            if (icon <= 65103)
             {
                 var textureDictionary = hqIcon ? HQTextureDictionary : TextureDictionary;
                 
@@ -748,7 +748,7 @@ namespace InventoryTools
         }
         
         internal void DrawIcon(ushort icon, Vector2 size, bool hqIcon = false) {
-            if (icon < 65100)
+            if (icon <= 65103)
             {
                 var textureDictionary = hqIcon ? HQTextureDictionary : TextureDictionary;
                 

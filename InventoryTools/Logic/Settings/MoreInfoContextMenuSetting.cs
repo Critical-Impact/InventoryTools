@@ -16,7 +16,7 @@ namespace InventoryTools.Logic.Settings
         }
 
         public override string Key { get; set; } = "moreInfoContextMenu";
-        public override string Name { get; set; } = "Context Menu - More Information";
+        public override string Name { get; set; } = "Context Menu - More Information(Not Functioning)";
 
         public override string HelpText { get; set; } =
             "Add the more information item to the right click/context menu for items?";

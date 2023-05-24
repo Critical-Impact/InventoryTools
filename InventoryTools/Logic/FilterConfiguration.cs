@@ -2972,7 +2972,7 @@ namespace InventoryTools.Logic
             }
             else
             {
-                items = Service.ExcelCache.AllItems.Select(c => c.Value).Where(filter.FilterItem).ToList();
+                items = Service.ExcelCache.AllItems.Select(c => c.Value).Where(filter.FilterItem).Where(c => c.RowId != 0).ToList();
                 
             }
 

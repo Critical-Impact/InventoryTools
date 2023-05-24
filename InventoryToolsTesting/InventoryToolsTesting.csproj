@@ -52,6 +52,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Dalamud.ContextMenu" Version="1.2.2" />
       <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0-preview-20220726-02" />
       <PackageReference Include="NUnit" Version="3.13.3" />
       <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />

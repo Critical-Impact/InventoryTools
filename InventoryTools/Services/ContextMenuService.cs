@@ -41,9 +41,9 @@ public class ContextMenuService : IDisposable
     {
         if (ConfigurationManager.Config.AddMoreInformationContextMenu)
         {
-            InventoryContextMenuItem moreInformation =
-                new InventoryContextMenuItem(new SeString(new TextPayload("(AT) More Information")), selectedArgs => MoreInformationAction(selectedArgs.ItemId));
-            args.AddCustomItem(moreInformation);
+            //InventoryContextMenuItem moreInformation =
+            //    new InventoryContextMenuItem(new SeString(new TextPayload("(AT) More Information")), selectedArgs => MoreInformationAction(selectedArgs.ItemId));
+            //args.AddCustomItem(moreInformation);
         }
     }
     

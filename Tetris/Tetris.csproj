@@ -8,5 +8,9 @@
     <PropertyGroup>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Dalamud.ContextMenu" Version="1.2.2" />
+    </ItemGroup>
     
 </Project>
