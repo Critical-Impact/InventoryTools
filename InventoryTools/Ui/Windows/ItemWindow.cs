@@ -37,7 +37,7 @@ namespace InventoryTools.Ui
             _itemId = itemId;
             if (Item != null)
             {
-                WindowName = "Allagan Tools - " + Item.Name;
+                WindowName = "Allagan Tools - " + Item.NameString;
                 RetainerTasks = Item.RetainerTasks?.ToArray() ?? Array.Empty<RetainerTaskEx>();
                 RecipesResult = Item.RecipesAsResult.ToArray();
                 RecipesAsRequirement = Item.RecipesAsRequirement.ToArray();
@@ -156,7 +156,7 @@ namespace InventoryTools.Ui
                 if (ImGui.ImageButton(garlandIcon.ImGuiHandle,
                         new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                 {
-                    $"https://www.garlandtools.org/db/#item/{_itemId}".OpenBrowser();
+                    $"https://www.garlandtools.org/db/#item/{Item.GarlandToolsId}".OpenBrowser();
                 }
                 ImGuiUtil.HoverTooltip("Open in Garland Tools");
                 ImGui.SameLine();
@@ -517,7 +517,7 @@ namespace InventoryTools.Ui
                     hasInformation = true;
                     if (ImGui.CollapsingHeader("Ventures (" + RetainerTasks.Count() + ")"))
                     {
-                        ImGuiTable.DrawTable("Ventures", RetainerTasks, DrawRetainerRow, ImGuiTableFlags.None,
+                        ImGuiTable.DrawTable("Ventures", RetainerTasks, DrawRetainerRow, ImGuiTableFlags.SizingStretchProp,
                             new[] { "Name", "Time", "Quantities" });
                     }
                 }
@@ -625,7 +625,6 @@ namespace InventoryTools.Ui
                     if (_craftItem == null)
                     {
                         _craftItem = new CraftItem(Item.RowId, InventoryItem.ItemFlags.None, 1, true);
-                        _craftItem.GenerateRequiredMaterials();
                     }
                     if (ImGui.CollapsingHeader("Company Craft Recipe (" + _craftItem.ChildCrafts.Count + ")"))
                     {
@@ -767,7 +766,7 @@ namespace InventoryTools.Ui
         private void DrawRetainerRow(RetainerTaskEx obj)
         {
             ImGui.TableNextColumn();
-            ImGui.TextUnformatted( obj.FormattedName);
+            ImGui.TextWrapped( obj.FormattedName);
             ImGui.TableNextColumn();
             ImGui.TextUnformatted(obj.DurationString);     
             ImGui.TableNextColumn();

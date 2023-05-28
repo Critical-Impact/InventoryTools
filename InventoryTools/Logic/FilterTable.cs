@@ -377,10 +377,10 @@ namespace InventoryTools.Logic
                 foreach (var item in RenderSortedItems)
                 {
                     var newLine = new ExpandoObject() as IDictionary<string, Object>;
-                    newLine["Id"] = item.InventoryItem.ItemId;
+                    newLine["id"] = item.InventoryItem.ItemId;
                     foreach (var column in Columns)
                     {
-                        newLine[column.Name] = column.JsonExport(item);
+                        newLine[column.Name.ToLower()] = column.JsonExport(item);
                     }
                     lines.Add(newLine);
                 }
@@ -390,10 +390,10 @@ namespace InventoryTools.Logic
                 foreach (var item in RenderItems)
                 {
                     var newLine = new ExpandoObject() as IDictionary<string, Object>;
-                    newLine["Id"] = item.RowId;
+                    newLine["id"] = item.RowId;
                     foreach (var column in Columns)
                     {
-                        newLine[column.Name] = column.JsonExport(item);
+                        newLine[column.Name.ToLower()] = column.JsonExport(item);
                     }
                     lines.Add(newLine);
                 }

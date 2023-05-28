@@ -13,17 +13,17 @@ public class NameIconColumn : TextIconColumn
 {
     public override (string, ushort, bool)? CurrentValue(InventoryItem item)
     {
-        return (item.Item.Name, item.Icon, item.IsHQ);
+        return (item.Item.NameString, item.Icon, item.IsHQ);
     }
 
     public override (string, ushort, bool)? CurrentValue(ItemEx item)
     {
-        return (item.Name, item.Icon, false);
+        return (item.NameString, item.Icon, false);
     }
 
     public override (string, ushort, bool)? CurrentValue(SortingResult item)
     {
-        return (item.InventoryItem.Item.Name, item.InventoryItem.Item.Icon, item.InventoryItem.IsHQ);
+        return (item.InventoryItem.Item.NameString, item.InventoryItem.Item.Icon, item.InventoryItem.IsHQ);
     }
     
     public override dynamic? JsonExport(InventoryItem item)

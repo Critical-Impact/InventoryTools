@@ -37,7 +37,7 @@ namespace InventoryTools.Logic.Columns
             ImGui.TableNextColumn();
             if (ImGui.SmallButton("G##G" + rowIndex))
             {
-                $"https://www.garlandtools.org/db/#item/{item.ItemId}".OpenBrowser();
+                $"https://www.garlandtools.org/db/#item/{item.Item.GarlandToolsId}".OpenBrowser();
             }
             if (item.Item.CanTryOn)
             {
@@ -66,7 +66,7 @@ namespace InventoryTools.Logic.Columns
             ImGui.TableNextColumn();
             if (ImGui.SmallButton("G##G"+rowIndex))
             {
-                $"https://www.garlandtools.org/db/#item/{item.RowId}".OpenBrowser();
+                $"https://www.garlandtools.org/db/#item/{item.GarlandToolsId}".OpenBrowser();
             }
             if (item.CanTryOn)
             {

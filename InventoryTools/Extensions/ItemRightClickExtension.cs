@@ -197,7 +197,7 @@ namespace InventoryTools.Extensions
             ImGui.Separator();
             if (ImGui.Selectable("Open in Garland Tools"))
             {
-                $"https://www.garlandtools.org/db/#item/{item.RowId}".OpenBrowser();
+                $"https://www.garlandtools.org/db/#item/{item.GarlandToolsId}".OpenBrowser();
             }
             if (ImGui.Selectable("Open in Teamcraft"))
             {
