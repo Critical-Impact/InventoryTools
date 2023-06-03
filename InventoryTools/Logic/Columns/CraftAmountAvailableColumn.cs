@@ -31,7 +31,7 @@ namespace InventoryTools.Logic.Columns
             {
                 return 0;
             }
-            return Math.Min((int)currentValue.QuantityAvailable, (int)currentValue.QuantityNeeded);
+            return (int)currentValue.QuantityWillRetrieve;
         }
 
         public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
@@ -41,14 +41,14 @@ namespace InventoryTools.Logic.Columns
                 ImGui.TableNextColumn();
                 return;
             }
-            if (item.QuantityAvailable != 0)
+            if (item.QuantityWillRetrieve != 0)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.ParsedBlue);
             }
 
             base.Draw(configuration, item, rowIndex);
 
-            if (item.QuantityAvailable != 0)
+            if (item.QuantityWillRetrieve != 0)
             {
                 ImGui.PopStyleColor();
             }

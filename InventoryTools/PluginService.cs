@@ -86,6 +86,7 @@ namespace InventoryTools
             Stopwatch loadConfigStopwatch = new Stopwatch();
             loadConfigStopwatch.Start();
             Service.ExcelCache = new ExcelCache(Service.Data);
+            Service.ExcelCache.PreCacheItemData();
             FrameworkService = new FrameworkService(Service.Framework);
             CommandService = new CommandService(Service.Commands);
             PluginInterfaceService = new PluginInterfaceService(Service.Interface);

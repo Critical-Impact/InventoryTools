@@ -12,6 +12,8 @@ using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
 using InventoryTools.Ui;
 using Lumina;
+using Lumina.Data;
+using Lumina.Excel.GeneratedSheets;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -84,6 +86,7 @@ public class MockPlugin : IDisposable
         _keyStateService = new MockKeyStateService();
         _hotkeyService = new HotkeyService(_frameworkService, _keyStateService);
         Service.ExcelCache = new ExcelCache(lumina);
+        Service.ExcelCache.PreCacheItemData();
         PluginService.InitaliseExplicit(new MockServices()
         {
             CharacterMonitor = _characterMonitor,
@@ -285,5 +288,6 @@ public class MockPlugin : IDisposable
         _pluginLogic.Dispose();
         _craftMonitor.Dispose();
         _gameInterface.Dispose();
+        Service.ExcelCache.Dispose();
     }
 }

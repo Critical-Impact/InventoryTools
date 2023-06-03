@@ -15,7 +15,7 @@ namespace InventoryTools.Logic.Columns
         private ClippedSelectableCombo<KeyValuePair<ulong, Character>>? _characters;
         private ulong? _selectedCharacter;
 
-        public override IFilterEvent? DrawFooterFilter(FilterConfiguration configuration)
+        public override IFilterEvent? DrawFooterFilter(FilterConfiguration configuration, FilterTable table)
         {
             ImGui.SameLine();
             var characterDictionary = PluginService.CharacterMonitor.Characters;

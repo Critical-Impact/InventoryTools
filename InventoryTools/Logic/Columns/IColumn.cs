@@ -62,7 +62,7 @@ namespace InventoryTools.Logic.Columns
             ImGui.TableSetupColumn(tableKey + "Filter" + Name, ImGuiTableColumnFlags.NoSort);
         }
 
-        public IFilterEvent? DrawFooterFilter(FilterConfiguration configuration);
+        public IFilterEvent? DrawFooterFilter(FilterConfiguration configuration, FilterTable filterTable);
         
         public delegate void ButtonPressedDelegate(string buttonName, object eventData);
         public event ButtonPressedDelegate? ButtonPressed;

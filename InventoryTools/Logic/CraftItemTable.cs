@@ -8,11 +8,13 @@ using System.Numerics;
 using System.Text;
 using CriticalCommonLib.Crafting;
 using CsvHelper;
+using Dalamud.Interface.Colors;
 using Dalamud.Logging;
 using ImGuiNET;
 using InventoryTools.Logic.Columns;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using OtterGui;
 using OtterGui.Raii;
 
 namespace InventoryTools.Logic
@@ -91,7 +93,17 @@ namespace InventoryTools.Logic
                                 }
 
                                 ImGui.TableHeadersRow();
+                                for (var index = 0; index < Columns.Count; index++)
+                                {
+                                    var column = Columns[index];
+                                    ImGui.TableSetColumnIndex(index);
+                                    using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGrey))
+                                    {
+                                        ImGuiUtil.RightAlign("?", SortColumn == index ? 8 : 0);
+                                    }
 
+                                    ImGuiUtil.HoverTooltip(column.HelpText);
+                                }
 
                                 if (refresh || NeedsRefresh)
                                 {
@@ -235,10 +247,10 @@ namespace InventoryTools.Logic
 
         private List<CraftItem> GetRemainingItemList()
         {
-            var craftItems = CraftItems.Where(c => c.QuantityNeeded != 0 && !c.Item.CanBeCrafted);
+            var craftItems = CraftItems.Where(c => c.QuantityRequired != 0 && !c.Item.CanBeCrafted);
             if (FilterConfiguration.HideCompletedRows)
             {
-                craftItems = craftItems.Where(c => c.QuantityMissing != 0);
+                craftItems = craftItems.Where(c => c.QuantityNeeded != 0 || c.QuantityWillRetrieve != 0);
             }
             return craftItems.OrderByDescending(c => c.ItemId).ToList();
         }
@@ -247,10 +259,10 @@ namespace InventoryTools.Logic
         {
 
 
-            var craftItems = CraftItems.Where(c => c.QuantityNeeded != 0 && !c.IsOutputItem && c.Item.CanBeCrafted);
+            var craftItems = CraftItems.Where(c => c.QuantityRequired != 0 && !c.IsOutputItem && c.Item.CanBeCrafted);
             if (FilterConfiguration.HideCompletedRows)
             {
-                craftItems = craftItems.Where(c => c.QuantityMissing != 0);
+                craftItems = craftItems.Where(c => c.QuantityNeeded != 0 || c.QuantityWillRetrieve != 0);
             }
             return craftItems.ToList();
         }

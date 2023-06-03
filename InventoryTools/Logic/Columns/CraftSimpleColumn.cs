@@ -18,7 +18,7 @@ namespace InventoryTools.Logic.Columns
         public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
         {
             ImGui.TableNextColumn();
-            var unavailable = Math.Max(0, (int)item.QuantityUnavailable - (int)item.QuantityCanCraft);
+            var unavailable = Math.Max(0, (int)item.RequiredQuantityUnavailable - (int)item.QuantityCanCraft);
             if (unavailable != 0)
             {
                 if (item.Item.ObtainedGathering)
@@ -46,7 +46,7 @@ namespace InventoryTools.Logic.Columns
                 return;
             }
 
-            var retrieve = Math.Min((int)item.QuantityAvailable, (int)item.QuantityNeeded);
+            var retrieve = (int)item.QuantityWillRetrieve;
             if (!item.IsOutputItem && retrieve != 0)
             {
                 ImGui.TextColored(ImGuiColors.DalamudOrange, "Retrieve " + retrieve);

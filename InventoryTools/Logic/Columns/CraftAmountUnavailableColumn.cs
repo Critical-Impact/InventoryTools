@@ -27,7 +27,7 @@ namespace InventoryTools.Logic.Columns
 
         public override int? CurrentValue(CraftItem currentValue)
         {
-            return Math.Max(0, (int)currentValue.QuantityUnavailable - (int)currentValue.QuantityCanCraft);
+            return Math.Max(0, (int)currentValue.RequiredQuantityUnavailable - (int)currentValue.QuantityCanCraft);
         }
         
         public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)

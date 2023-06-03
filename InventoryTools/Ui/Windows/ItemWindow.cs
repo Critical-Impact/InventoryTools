@@ -6,6 +6,7 @@ using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Models.ItemSources;
 using CriticalCommonLib.Sheets;
 using Dalamud.Game.Text;
 using Dalamud.Utility;
@@ -119,7 +120,9 @@ namespace InventoryTools.Ui
                 ImGui.TextUnformatted("Item Level " + Item.LevelItem.Row.ToString());
                 if (Item.DescriptionString != "")
                 {
-                    ImGui.TextWrapped(Item.DescriptionString);
+                    ImGui.PushTextWrapPos();
+                    ImGui.TextUnformatted(Item.DescriptionString);
+                    ImGui.PopTextWrapPos();
                 }
 
                 if (Item.CanBeAcquired)
@@ -196,16 +199,19 @@ namespace InventoryTools.Ui
                                 c.FilterType == Logic.FilterType.CraftFilter && !c.CraftListDefault);
                         foreach (var filter in craftFilters)
                         {
-                            if (ImGui.Selectable("Add item to craft list - " + filter.Name))
+                            using (ImRaii.PushId(filter.Key))
                             {
-                                PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                if (ImGui.Selectable("Add item to craft list - " + filter.Name))
                                 {
-                                    filter.CraftList.AddCraftItem(_itemId, 1, InventoryItem.ItemFlags.None);
-                                    filter.NeedsRefresh = true;
-                                    filter.StartRefresh();
-                                    PluginService.WindowService.OpenCraftsWindow();
-                                    PluginService.WindowService.GetCraftsWindow().FocusFilter(filter);
-                                });
+                                    PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                    {
+                                        filter.CraftList.AddCraftItem(_itemId, 1, InventoryItem.ItemFlags.None);
+                                        filter.NeedsRefresh = true;
+                                        filter.StartRefresh();
+                                        PluginService.WindowService.OpenCraftsWindow();
+                                        PluginService.WindowService.GetCraftsWindow().FocusFilter(filter);
+                                    });
+                                }
                             }
                         }
                         ImGui.EndPopup();
@@ -472,6 +478,68 @@ namespace InventoryTools.Ui
                     }
                 }
 
+                if (Item.IsIshgardCraft)
+                {
+                    if (ImGui.CollapsingHeader("Ishgard Restoration", ImGuiTreeNodeFlags.CollapsingHeader | ImGuiTreeNodeFlags.DefaultOpen))
+                    {
+                        var crafterSupplyEx = Item.GetHwdCrafterSupply();
+                        if (crafterSupplyEx != null)
+                        {
+                            var supplyItem = crafterSupplyEx.GetSupplyItem(_itemId);
+                            if (supplyItem != null)
+                            {
+                                using (var table = ImRaii.Table("SupplyItems", 4 ,ImGuiTableFlags.None))
+                                {
+                                    if (table.Success)
+                                    {
+                                        ImGui.TableNextColumn();
+                                        ImGui.TableHeader("Level");
+                                        ImGui.TableNextColumn();
+                                        ImGui.TableHeader("Collectable Rating");
+                                        ImGui.TableNextColumn();
+                                        ImGui.TableHeader("XP");
+                                        ImGui.TableNextColumn();
+                                        ImGui.TableHeader("Scrip");
+
+                                        ImGui.TableNextRow();
+                                        ImGui.TableNextColumn();
+                                        ImGui.TextWrapped("Base");
+                                        ImGui.TableNextColumn();
+                                        ImGui.TextWrapped(supplyItem.BaseCollectableRating.ToString());
+                                        ImGui.TableNextColumn();
+                                        ImGui.TextWrapped((supplyItem.BaseReward.Value?.ExpReward ?? 0).ToString());
+                                        ImGui.TableNextColumn();
+                                        ImGui.TextWrapped((supplyItem.BaseReward.Value?.ScriptRewardAmount ?? 0)
+                                            .ToString());
+
+                                        ImGui.TableNextRow();
+                                        ImGui.TableNextColumn();
+                                        ImGui.TextWrapped("Mid");
+                                        ImGui.TableNextColumn();
+                                        ImGui.TextWrapped(supplyItem.MidCollectableRating.ToString());
+                                        ImGui.TableNextColumn();
+                                        ImGui.TextWrapped((supplyItem.MidReward.Value?.ExpReward ?? 0).ToString());
+                                        ImGui.TableNextColumn();
+                                        ImGui.TextWrapped((supplyItem.MidReward.Value?.ScriptRewardAmount ?? 0)
+                                            .ToString());
+
+                                        ImGui.TableNextRow();
+                                        ImGui.TableNextColumn();
+                                        ImGui.TextWrapped("High");
+                                        ImGui.TableNextColumn();
+                                        ImGui.TextWrapped(supplyItem.HighCollectableRating.ToString());
+                                        ImGui.TableNextColumn();
+                                        ImGui.TextWrapped((supplyItem.HighReward.Value?.ExpReward ?? 0).ToString());
+                                        ImGui.TableNextColumn();
+                                        ImGui.TextWrapped((supplyItem.HighReward.Value?.ScriptRewardAmount ?? 0)
+                                            .ToString());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 void DrawSupplierRow((IShop shop, ENpc? npc, ILocation? location) tuple)
                 {
                     ImGui.TableNextColumn();
@@ -624,7 +692,7 @@ namespace InventoryTools.Ui
                     hasInformation = true;
                     if (_craftItem == null)
                     {
-                        _craftItem = new CraftItem(Item.RowId, InventoryItem.ItemFlags.None, 1, true);
+                        _craftItem = new CraftItem(Item.RowId, InventoryItem.ItemFlags.None, 1,null, true);
                     }
                     if (ImGui.CollapsingHeader("Company Craft Recipe (" + _craftItem.ChildCrafts.Count + ")"))
                     {

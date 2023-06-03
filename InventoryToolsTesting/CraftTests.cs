@@ -53,7 +53,7 @@ namespace InventoryToolsTesting
             CraftList list = new CraftList();
             list.AddCraftItem(38930, 300);
             list.AddCraftItem(38929, 300);
-            var requiredMaterialsList = list.GetRequiredMaterialsList();
+            var requiredMaterialsList = list.GetQuantityNeededList();
             Assert.AreEqual( 600, requiredMaterialsList[36085]);
         }
         

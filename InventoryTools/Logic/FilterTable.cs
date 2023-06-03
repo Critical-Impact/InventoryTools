@@ -9,11 +9,13 @@ using System.Text;
 using CriticalCommonLib.Resolvers;
 using CriticalCommonLib.Sheets;
 using CsvHelper;
+using Dalamud.Interface.Colors;
 using Dalamud.Logging;
 using ImGuiNET;
 using InventoryTools.Logic.Columns;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using OtterGui;
 using OtterGui.Raii;
 
 namespace InventoryTools.Logic
@@ -161,8 +163,19 @@ namespace InventoryTools.Logic
                                 var column = Columns[index];
                                 column.Setup(index);
                             }
-
+                            
                             ImGui.TableHeadersRow();
+                            
+                            for (var index = 0; index < Columns.Count; index++)
+                            {
+                                var column = Columns[index];
+                                ImGui.TableSetColumnIndex(index);
+                                using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGrey))
+                                {
+                                    ImGuiUtil.RightAlign("?", SortColumn == index ? 8 : 0);
+                                }
+                                ImGuiUtil.HoverTooltip(column.HelpText);
+                            }
 
                             var currentSortSpecs = ImGui.TableGetSortSpecs();
                             if (currentSortSpecs.SpecsDirty)
@@ -203,6 +216,7 @@ namespace InventoryTools.Logic
                                 {
                                     column.SetupFilter(Key);
                                 }
+
 
                                 for (var index = 0; index < Columns.Count; index++)
                                 {
@@ -309,7 +323,7 @@ namespace InventoryTools.Logic
         {
             foreach (var column in Columns)
             {
-                var result = column.DrawFooterFilter(FilterConfiguration);
+                var result = column.DrawFooterFilter(FilterConfiguration, this);
                 if (result != null)
                 {
                     result.HandleEvent(FilterConfiguration);

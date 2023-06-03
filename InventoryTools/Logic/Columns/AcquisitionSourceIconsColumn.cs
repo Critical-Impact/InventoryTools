@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Models.ItemSources;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Extensions;
@@ -41,7 +42,8 @@ namespace InventoryTools.Logic.Columns
             ImGui.TableNextColumn();
             if (currentValue != null)
             {
-                UiHelpers.WrapTableColumnElements("ScrollContainer" + rowIndex,currentValue, filterConfiguration.TableHeight * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X, item =>
+                var itemSources = FilterText != "" ? currentValue.Where(c => c.FormattedName.ToLower().PassesFilter(FilterText)) : currentValue;
+                UiHelpers.WrapTableColumnElements("SourceIconContainer" + rowIndex,itemSources, filterConfiguration.TableHeight * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X, item =>
                 {
                     var sourceIcon = PluginService.IconStorage[item.Icon];
                     if (item is ItemSource source && source.ItemId != null && source.HasItem && source.Item != null)

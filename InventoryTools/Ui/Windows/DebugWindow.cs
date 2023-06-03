@@ -13,6 +13,7 @@ using CriticalCommonLib.GameStructs;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
+using CriticalCommonLib.Sheets;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -25,6 +26,7 @@ using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using ImGuiNET;
 using InventoryTools.Logic;
+using Lumina.Excel.GeneratedSheets;
 using LuminaSupplemental.Excel.Model;
 using OtterGui.Raii;
 using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
@@ -36,7 +38,8 @@ namespace InventoryTools.Ui
         Characters = 0,
         Inventories = 1,
         InventoryScanner = 2,
-        InventoryMonitor = 3
+        InventoryMonitor = 3,
+        Random = 3
     }
     public class DebugWindow : Window
     {
@@ -85,10 +88,14 @@ namespace InventoryTools.Ui
                         ConfigurationManager.Config.SelectedDebugPage = (int)DebugMenu.InventoryScanner;
                     }
 
-
                     if (ImGui.Selectable("Inventory Monitor", ConfigurationManager.Config.SelectedDebugPage == (int)DebugMenu.InventoryMonitor))
                     {
                         ConfigurationManager.Config.SelectedDebugPage = (int)DebugMenu.InventoryScanner;
+                    }
+
+                    if (ImGui.Selectable("Random", ConfigurationManager.Config.SelectedDebugPage == (int)DebugMenu.Random))
+                    {
+                        ConfigurationManager.Config.SelectedDebugPage = (int)DebugMenu.Random;
                     }
 
                 }
@@ -1058,6 +1065,27 @@ namespace InventoryTools.Ui
 
                 ImGui.TreePop();
             }
+            
+            if (ImGui.TreeNode("Free Company Currency##freeCompanyCurrency"))
+            {
+                var bagType = (InventoryType)CriticalCommonLib.Enums.InventoryType.FreeCompanyCurrency;
+                var bag = PluginService.InventoryScanner.GetInventoryByType(bagType);
+                var bagLoaded = PluginService.InventoryScanner.IsBagLoaded(bagType);
+                if (ImGui.TreeNode(bagType.ToString() + (bagLoaded ? " (Loaded)" : " (Not Loaded)")))
+                {
+                    var itemCount = bag.Count(c => c.ItemID != 0);
+                    ImGui.Text(itemCount + "/" + bag.Length);
+                    for (int i = 0; i < bag.Length; i++)
+                    {
+                        var item = bag[i];
+                        Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                    }
+
+                    ImGui.TreePop();
+                }
+
+                ImGui.TreePop();
+            }
 
             if (ImGui.TreeNode("Armoire##armoire"))
             {
@@ -1383,6 +1411,7 @@ namespace InventoryTools.Ui
             ImGui.TextUnformatted(PluginService.CharacterMonitor.ActiveCharacter?.Name.ToString() ??
                                   "Not Logged in Yet");
             ImGui.TextUnformatted("Local Character ID:" + PluginService.CharacterMonitor.LocalContentId.ToString());
+            ImGui.TextUnformatted("Free Company ID:" + PluginService.CharacterMonitor.ActiveFreeCompanyId.ToString());
             ImGui.TextUnformatted("Current Territory Id:" + Service.ClientState.TerritoryType.ToString());
             ImGui.Separator();
             ImGui.TextUnformatted("Cached Character ID:" + PluginService.CharacterMonitor.ActiveCharacterId.ToString());

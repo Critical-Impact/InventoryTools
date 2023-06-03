@@ -126,7 +126,7 @@ namespace InventoryTools.Logic.Columns.Abstract
         public abstract IColumnEvent? DoDraw(T currentValue, int rowIndex, FilterConfiguration filterConfiguration);
 
         public abstract void Setup(int columnIndex);
-        public virtual IFilterEvent? DrawFooterFilter(FilterConfiguration configuration)
+        public virtual IFilterEvent? DrawFooterFilter(FilterConfiguration configuration, FilterTable filterTable)
         {
             return null;
         }
