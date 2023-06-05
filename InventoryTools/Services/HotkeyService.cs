@@ -24,7 +24,9 @@ public class HotkeyService : IHotkeyService
 
     public void AddHotkey(Hotkey hotkey)
     {
-        _hotKeys.Add(hotkey);
+        var hotKeys = _hotKeys.ToList();
+        hotKeys.Add(hotkey);
+        _hotKeys = hotKeys;
     }
 
     private void FrameworkServiceOnUpdate(IFrameworkService framework)
