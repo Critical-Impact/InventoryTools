@@ -76,6 +76,7 @@ namespace InventoryTools.Ui
                 new PopupMenu.PopupMenuItemSelectable("Airships Window", "airships", OpenAirshipsWindow,"Open the airships window."),
                 new PopupMenu.PopupMenuItemSelectable("Submarines Window", "submarines", OpenSubmarinesWindow,"Open the submarines window."),
                 new PopupMenu.PopupMenuItemSelectable("Retainer Ventures Window", "ventures", OpenRetainerVenturesWindow,"Open the retainer ventures window."),
+                new PopupMenu.PopupMenuItemSelectable("Tetris", "tetris", OpenTetrisWindow,"Open the tetris window.", () => ConfigurationManager.Config.TetrisEnabled),
                 new PopupMenu.PopupMenuItemSeparator(),
                 new PopupMenu.PopupMenuItemSelectable("Help", "help", OpenHelpWindow,"Open the help window."),
             });
@@ -108,6 +109,11 @@ namespace InventoryTools.Ui
         private static void OpenMobsWindow(string obj)
         {
             PluginService.WindowService.OpenWindow<BNpcWindow>(BNpcWindow.AsKey);
+        }
+        
+        private static void OpenTetrisWindow(string obj)
+        {
+            PluginService.WindowService.OpenWindow<TetrisWindow>(TetrisWindow.AsKey);
         }
 
         public CraftsWindow(string name = "Allagan Tools - Crafts") : base(name)
@@ -1036,7 +1042,7 @@ namespace InventoryTools.Ui
                 }
                 if (_searchItems == null)
                 {
-                    _searchItems = CraftItemsByName.Where(c => c.Value.Contains(SearchString.ToLower())).Take(100)
+                    _searchItems = CraftItemsByName.Where(c => c.Value.ToLower().PassesFilter(SearchString.ToLower())).Take(100)
                         .Select(c => Service.ExcelCache.GetItemExSheet().GetRow(c.Key)!).ToList();
                 }
 

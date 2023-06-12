@@ -33,6 +33,7 @@ namespace InventoryTools.Ui
                 new PopupMenu.PopupMenuItemSelectable("Airships Window", "airships", OpenAirshipsWindow,"Open the airships window."),
                 new PopupMenu.PopupMenuItemSelectable("Submarines Window", "submarines", OpenSubmarinesWindow,"Open the submarines window."),
                 new PopupMenu.PopupMenuItemSelectable("Retainer Ventures Window", "ventures", OpenRetainerVenturesWindow,"Open the retainer ventures window."),
+                new PopupMenu.PopupMenuItemSelectable("Tetris", "tetris", OpenTetrisWindow,"Open the tetris window.", () => ConfigurationManager.Config.TetrisEnabled),
                 new PopupMenu.PopupMenuItemSeparator(),
                 new PopupMenu.PopupMenuItemSelectable("Help", "help", OpenHelpWindow,"Open the help window."),
             });
@@ -66,6 +67,11 @@ namespace InventoryTools.Ui
         {
             PluginService.WindowService.OpenWindow<BNpcWindow>(BNpcWindow.AsKey);
         }       
+        
+        private static void OpenTetrisWindow(string obj)
+        {
+            PluginService.WindowService.OpenWindow<TetrisWindow>(TetrisWindow.AsKey);
+        }
         
         public FilterWindow(string filterKey, string name = "Allagan Tools - Filter") : base(name)
         {

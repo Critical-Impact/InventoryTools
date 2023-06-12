@@ -2,6 +2,7 @@ using System.Numerics;
 using ImGuiNET;
 using InventoryTools.Logic;
 using InventoryTools.Misc;
+using OtterGui.Raii;
 using Tetris.GameEngine;
 
 namespace InventoryTools.Ui
@@ -22,9 +23,20 @@ namespace InventoryTools.Ui
         public override void Draw()
         {
             var tetrisGame = Misc.TetrisGame.Instance.Game;
-            ImGui.TextWrapped("Welcome to Tetris. ");
+            ImGui.PushTextWrapPos();
+            ImGui.TextUnformatted("Welcome to Tetris. ");
             ImGui.TextUnformatted("Please turn on the tetris overlay, this will overwrite the contents of your main inventory window.");
             ImGui.TextUnformatted("Please make sure your inventory is set to 'Open All'. While the overlay is active, you will not be able to access your inventory.");
+            ImGui.Separator();
+            ImGui.TextUnformatted("Controls:");
+            ImGui.TextUnformatted("Up: Smash Down");
+            ImGui.TextUnformatted("Left: Move Left");
+            ImGui.TextUnformatted("Right: Move Right");
+            ImGui.TextUnformatted("Down: Move Down");
+            ImGui.TextUnformatted("Z: Rotate Left");
+            ImGui.TextUnformatted("X: Rotate Right");
+            ImGui.PopTextWrapPos();
+            ImGui.Separator();
 
             if (ImGui.Button(TetrisGame.TetrisEnabled ? "Disable Tetris Overlay" : "Enable Tetris Overlay"))
             {
@@ -45,6 +57,10 @@ namespace InventoryTools.Ui
                 }
             }
             if (tetrisGame.Status == Game.GameStatus.InProgress && ImGui.Button("Pause"))
+            {
+                tetrisGame.Pause();
+            }
+            if (tetrisGame.Status == Game.GameStatus.Paused && ImGui.Button("Resume"))
             {
                 tetrisGame.Pause();
             }

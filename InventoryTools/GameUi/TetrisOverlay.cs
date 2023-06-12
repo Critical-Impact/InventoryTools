@@ -66,7 +66,7 @@ namespace InventoryTools.GameUi
                 return;
             }
             HasState = true;
-            Clear();
+            Draw();
         }
 
         public void Clear()

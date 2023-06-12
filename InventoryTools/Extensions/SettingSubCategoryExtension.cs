@@ -10,6 +10,8 @@ namespace InventoryTools.Extensions
             {
                 case SettingSubCategory.Experimental:
                     return "Experimental";
+                case SettingSubCategory.Fun:
+                    return "Fun";
                 case SettingSubCategory.Highlighting:
                     return "Highlighting";
                 case SettingSubCategory.DestinationHighlighting:

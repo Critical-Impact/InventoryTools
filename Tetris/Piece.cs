@@ -9,12 +9,13 @@ namespace Tetris
         private int[,] _piece;
         private int _initPosX;
         private int _initPosY;
+        private int _pieceType;
 
         #endregion
 
         #region Constructors
 
-        public Piece(int[,] p)
+        public Piece(int pieceType, int[,] p)
         {
             if (p == null)
             {
@@ -23,6 +24,7 @@ namespace Tetris
             _piece = (int[,])p.Clone();
             _initPosY = (p.GetUpperBound(0) + 1) * -1;
             _initPosX = 0;
+            _pieceType = pieceType;
         }
 
         #endregion
@@ -61,6 +63,14 @@ namespace Tetris
             }
         }
 
+        public int PieceType
+        {
+            get 
+            { 
+                return _pieceType; 
+            }
+        }
+
         #endregion
 
         #region Public Methods
@@ -79,7 +89,20 @@ namespace Tetris
                     rotated[j, Height - i - 1] = _piece[i, j];
                 }
             }
-            return new Piece( rotated );
+            return new Piece(_pieceType, rotated );
+        }
+        
+        public Piece RotateLeft()
+        {
+            int[,] rotated = new int[this.Width, this.Height];
+            for (int i = 0; i < Height; i++)
+            {
+                for (int j = 0; j < Width; j++)
+                {
+                    rotated[Width - j - 1, i] = _piece[i, j];
+                }
+            }
+            return new Piece(_pieceType,rotated);
         }
 
         public void MakeItShadow()
@@ -123,7 +146,7 @@ namespace Tetris
 
         public object Clone()
         {
-            return new Piece(this._piece);
+            return new Piece(_pieceType,this._piece);
         }
 
         #endregion

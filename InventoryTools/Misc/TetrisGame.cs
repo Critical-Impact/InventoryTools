@@ -25,14 +25,14 @@ namespace InventoryTools.Misc
 
         public Dictionary<int, Vector4> BlockColors = new()
         {
-            {1, ImGuiColors.DalamudWhite},
-            {2, ImGuiColors.ParsedPurple},
-            {3, ImGuiColors.ParsedBlue},
-            {4, ImGuiColors.HealerGreen},
-            {5, ImGuiColors.DalamudYellow},
-            {6, ImGuiColors.DalamudRed},
-            {7, ImGuiColors.TankBlue},
-            {8, ImGuiColors.DalamudGrey},
+            {1, new Vector4(0,1,1,1)}, //Straight Line
+            {2, new Vector4(1,1,0,1)}, //Block
+            {3, new Vector4(1,0.498f,0,1)}, //L
+            {4, new Vector4(0.0784f,0,1,1)}, //Reverse L
+            {5, new Vector4(0,1,0,1)},//S block
+            {6, new Vector4(1,0,0,1)},//Z block
+            {7, new Vector4(0.501f,0,0.501f,1)},//T block
+            {8, new Vector4(1,1,1,0.5f)}, //Shadow Piece
         };
         public Vector4 BackgroundColour = new Vector4(0,0,0,0.4f);
         
@@ -77,8 +77,18 @@ namespace InventoryTools.Misc
                 return;
             }                
 
+            if (isKeyPressed(new[]{VirtualKey.Z})) {
+                Game.RotateLeft();
+                lastMoveTime = DateTime.Now;
+            }                 
+
+            if (isKeyPressed(new[]{VirtualKey.X})) {
+                Game.RotateRight();
+                lastMoveTime = DateTime.Now;
+            }          
+
             if (isKeyPressed(new[]{VirtualKey.UP})) {
-                Game.Rotate();
+                Game.SmashDown();
                 lastMoveTime = DateTime.Now;
             }
 
@@ -96,6 +106,7 @@ namespace InventoryTools.Misc
                 Game.MoveRight();
                 lastMoveTime = DateTime.Now;
             }
+            PluginService.OverlayService.RefreshOverlayStates();
             PluginService.KeyStateService.ClearAll();
             
 
@@ -123,6 +134,7 @@ namespace InventoryTools.Misc
             TetrisEnabled = true;
             PluginService.OverlayService.RemoveOverlay(WindowName.InventoryExpansion);
             PluginService.OverlayService.AddOverlay(new TetrisOverlay());
+            PluginService.OverlayService.RefreshOverlayStates();
         }
 
         public static void DisableTetris()
@@ -130,6 +142,7 @@ namespace InventoryTools.Misc
             TetrisEnabled = false;
             PluginService.OverlayService.RemoveOverlay(WindowName.InventoryExpansion);
             PluginService.OverlayService.AddOverlay(new InventoryExpansionOverlay());
+            PluginService.OverlayService.RefreshOverlayStates();
         }
         
         private void OnTimedEvent(object? source, ElapsedEventArgs e)
@@ -140,6 +153,7 @@ namespace InventoryTools.Misc
                 {
                     _timerCounter += _timerStep;
                     Game.MoveDown();
+                    PluginService.OverlayService.RefreshOverlayStates();
                     if (Game.Status == Game.GameStatus.Finished)
                     {
                         _gameTimer?.Stop();
@@ -198,8 +212,19 @@ namespace InventoryTools.Misc
                     var block = gameBoard[x, y];
                     if (!positions.ContainsKey(position))
                     {
-                        var blockColor = BlockColors.ContainsKey(block) ? BlockColors[block] : BackgroundColour;
-                        positions.Add(position, blockColor);
+                        //Shadow Block
+                        if (block == 8)
+                        {
+                            var currentBlock = Game.CurrPiece.PieceType;
+                            var currentBlockColour = BlockColors.ContainsKey(currentBlock) ? BlockColors[currentBlock] : BackgroundColour;
+                            var blockColor = BlockColors.ContainsKey(block) ? BlockColors[block] * currentBlockColour : BackgroundColour;
+                            positions.Add(position, blockColor);
+                        }
+                        else
+                        {
+                            var blockColor = BlockColors.ContainsKey(block) ? BlockColors[block] : BackgroundColour;
+                            positions.Add(position, blockColor);   
+                        }
                     }
                 }
             }

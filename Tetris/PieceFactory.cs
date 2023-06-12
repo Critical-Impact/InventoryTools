@@ -76,31 +76,31 @@ namespace Tetris
             _pieces = new List<Piece>();
 
             //####
-            _pieces.Add(new Piece(new int[,] { { 1, 1, 1, 1 } }));
+            _pieces.Add(new Piece(1, new int[,] { { 1, 1, 1, 1 } }));
 
             //##
             //##
-            _pieces.Add(new Piece(new int[,] { { 2, 2 }, { 2, 2 } }));
+            _pieces.Add(new Piece(2, new int[,] { { 2, 2 }, { 2, 2 } }));
 
             //  #
             //###
-            _pieces.Add(new Piece(new int[,] { { 0, 0, 3 }, { 3, 3, 3 } }));
+            _pieces.Add(new Piece(3, new int[,] { { 0, 0, 3 }, { 3, 3, 3 } }));
 
             //#
             //###
-            _pieces.Add(new Piece(new int[,] { { 4, 0, 0 }, { 4, 4, 4 } }));
+            _pieces.Add(new Piece(4, new int[,] { { 4, 0, 0 }, { 4, 4, 4 } }));
 
             // ##
             //##
-            _pieces.Add(new Piece(new int[,] { { 0, 5, 5 }, { 5, 5, 0 } }));
+            _pieces.Add(new Piece(5, new int[,] { { 0, 5, 5 }, { 5, 5, 0 } }));
 
             //##
             // ##
-            _pieces.Add(new Piece(new int[,] { { 6, 6, 0 }, { 0, 6, 6 } }));
+            _pieces.Add(new Piece(6, new int[,] { { 6, 6, 0 }, { 0, 6, 6 } }));
 
             //###
             // #
-            _pieces.Add(new Piece(new int[,] { { 7, 7, 7 }, { 0, 7, 0 } }));
+            _pieces.Add(new Piece(7, new int[,] { { 7, 7, 7 }, { 0, 7, 0 } }));
         }
 
         #endregion

@@ -26,6 +26,7 @@ public class PopupMenu
     {
         public void Draw();
         public string? DrawPopup();
+        public Func<bool>? ShouldDraw { get; }
     }
     
     public class PopupMenuItemSelectable : IPopupMenuItem
@@ -34,13 +35,15 @@ public class PopupMenu
         private string _id;
         private string? _tooltip;
         private Action<string>? _callback { get; }
+        public Func<bool>? ShouldDraw { get; }
 
-        public PopupMenuItemSelectable(string name, string id, Action<string>? callback, string? tooltip = null)
+        public PopupMenuItemSelectable(string name, string id, Action<string>? callback, string? tooltip = null, Func<bool>? shouldDraw = null)
         {
             _tooltip = tooltip;
             _name = name;
             _id = id;
             _callback = callback;
+            ShouldDraw = shouldDraw;
         }
 
         public void Draw()
@@ -63,6 +66,7 @@ public class PopupMenu
 
             return null;
         }
+
     }
     
     public class PopupMenuItemSelectableAskName : IPopupMenuItem
@@ -74,9 +78,10 @@ public class PopupMenu
         private string _popupName;
         private string _defaultName;
         private string? _tooltip;
+        public Func<bool>? ShouldDraw { get; }
 
         public PopupMenuItemSelectableAskName(string name, string id, string defaultName,
-            Action<string, string>? callback, string? tooltip = null)
+            Action<string, string>? callback, string? tooltip = null, Func<bool>? shouldDraw = null)
         {
             _defaultName = defaultName;
             _newName = defaultName;
@@ -85,6 +90,7 @@ public class PopupMenu
             _callback = callback;
             _tooltip = tooltip;
             _popupName = _id+"NF";
+            ShouldDraw = shouldDraw;
         }
 
         public void Draw()
@@ -123,7 +129,7 @@ public class PopupMenu
         private string? _tooltip;
 
         public PopupMenuItemSelectableConfirm(string name, string id, string question,
-            Action<string, bool>? callback, string? tooltip = null)
+            Action<string, bool>? callback, string? tooltip = null, Func<bool>? shouldDraw = null)
         {
             _question = question;
             _name = name;
@@ -131,6 +137,7 @@ public class PopupMenu
             _callback = callback;
             _tooltip = tooltip;
             _popupName = _id+"NF";
+            ShouldDraw = shouldDraw;
         }
 
         public void Draw()
@@ -171,6 +178,8 @@ public class PopupMenu
 
             return null;
         }
+
+        public Func<bool>? ShouldDraw { get; }
     }
 
     public class PopupMenuItemSeparator : IPopupMenuItem
@@ -184,6 +193,8 @@ public class PopupMenu
             ImGui.Separator();
             return null;
         }
+
+        public Func<bool>? ShouldDraw { get; }
     }
     public PopupMenu(string id, PopupMenuButtons openButtons,List<IPopupMenuItem> items)
     {
@@ -210,6 +221,13 @@ public class PopupMenu
             {
                 foreach (var item in _items)
                 {
+                    if (item.ShouldDraw != null)
+                    {
+                        if (!item.ShouldDraw())
+                        {
+                            continue;
+                        }
+                    }
                     var drawPopup = item.DrawPopup();
                     if (drawPopup != null)
                     {

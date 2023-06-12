@@ -6,6 +6,7 @@
         void MoveLeft();
         void MoveDown();
         void SmashDown();
-        void Rotate();
+        void RotateLeft();
+        void RotateRight();
     }
 }

@@ -5,6 +5,7 @@ namespace InventoryTools.Logic.Settings.Abstract
         AutoSave,
         FilterSettings,
         Experimental,
+        Fun,
         Hotkeys,
         Highlighting,
         DestinationHighlighting,
