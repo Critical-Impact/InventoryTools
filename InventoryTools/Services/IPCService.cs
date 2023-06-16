@@ -17,7 +17,7 @@ public class IPCService : IDisposable
 {
     private readonly ICallGateProvider<uint, ulong?, uint>? _inventoryCountByType;
     private readonly ICallGateProvider<uint[], ulong?, uint>? _inventoryCountByTypes;
-    private readonly ICallGateProvider<uint, ulong, uint, uint>? _itemCount;
+    private readonly ICallGateProvider<uint, ulong, int, uint>? _itemCount;
     private readonly ICallGateProvider<string, bool>? _enableUiFilter;
     private readonly ICallGateProvider<bool>? _disableUiFilter;
     private readonly ICallGateProvider<string, bool>? _toggleUiFilter;
@@ -55,7 +55,7 @@ public class IPCService : IDisposable
         _inventoryCountByTypes = pluginInterface.GetIpcProvider<uint[], ulong?, uint>("AllaganTools.InventoryCountByTypes");
         _inventoryCountByTypes.RegisterFunc(InventoryCountByTypes);
         
-        _itemCount = pluginInterface.GetIpcProvider<uint, ulong, uint, uint>("AllaganTools.ItemCount");
+        _itemCount = pluginInterface.GetIpcProvider<uint, ulong, int, uint>("AllaganTools.ItemCount");
         _itemCount.RegisterFunc(ItemCount);
 
         _enableUiFilter = pluginInterface.GetIpcProvider<string, bool>("AllaganTools.EnableUiFilter");
@@ -138,9 +138,9 @@ public class IPCService : IDisposable
         }
     }
 
-    private uint ItemCount(uint itemId, ulong characterId, uint inventoryType)
+    private uint ItemCount(uint itemId, ulong characterId, int inventoryType)
     {
-        return (uint)_inventoryMonitor.AllItems.Where(c => c.ItemId == itemId && (inventoryType == 0 || (uint)c.SortedContainer == inventoryType) && (c.RetainerId == characterId)).Sum(c => c.Quantity);
+        return (uint)_inventoryMonitor.AllItems.Where(c => c.ItemId == itemId && (inventoryType == -1 || (uint)c.SortedContainer == inventoryType) && (c.RetainerId == characterId)).Sum(c => c.Quantity);
     }
 
     private bool IsInitialized()
