@@ -74,7 +74,7 @@ namespace InventoryTools.Sections
             if (ImGui.CollapsingHeader("Import", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
             {
                 var importData = ImportData;
-                if (ImGui.InputTextMultiline("Paste filter here",ref importData, 5000, new Vector2(400, 200) * ImGui.GetIO().FontGlobalScale))
+                if (ImGui.InputTextMultiline("Paste filter here",ref importData, 10000, new Vector2(400, 200) * ImGui.GetIO().FontGlobalScale))
                 {
                     ImportData = importData;
                     ImportFailed = false;
