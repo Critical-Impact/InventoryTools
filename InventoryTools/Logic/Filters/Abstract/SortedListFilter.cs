@@ -41,13 +41,12 @@ namespace InventoryTools.Logic.Filters.Abstract
         public virtual void DrawTable(FilterConfiguration configuration)
         {
             var value = CurrentValue(configuration);
-            
             using (var table = ImRaii.Table(Key + "ColumnEditTable", 3, ImGuiTableFlags.RowBg))
             {
                 if (table.Success)
                 {
-                    ImGui.TableSetupColumn(Key + "ColumnEditTableName", ImGuiTableColumnFlags.NoSort);
-                    ImGui.TableSetupColumn(Key + "ColumnEditTableDelete", ImGuiTableColumnFlags.NoSort);
+                    ImGui.TableSetupColumn(Key + "ColumnEditTableName", ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthFixed, LabelSize);
+                    ImGui.TableSetupColumn(Key + "ColumnEditTableDelete", ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthFixed, InputSize);
                     var index = 0;
                     foreach (var item in value)
                     {
@@ -93,6 +92,14 @@ namespace InventoryTools.Logic.Filters.Abstract
             DrawTable(configuration);
             ImGui.SameLine();
             UiHelpers.HelpMarker(HelpText);
+            if (HasValueSet(configuration) && ShowReset)
+            {
+                ImGui.SameLine();
+                if (ImGui.Button("Reset##" + Key + "Reset"))
+                {
+                    ResetFilter(configuration);
+                }
+            }
         }
     }
 }

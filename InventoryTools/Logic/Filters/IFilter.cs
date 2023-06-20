@@ -7,9 +7,11 @@ namespace InventoryTools.Logic.Filters
     public interface IFilter
     {
         public int LabelSize { get; set; }
+        public int InputSize { get; set; }
         public string Key { get; set; }
         public string Name { get; set; }
         public string HelpText { get; set; }
+        public bool ShowReset { get; set; }
         
         public FilterCategory FilterCategory { get; set; }
         

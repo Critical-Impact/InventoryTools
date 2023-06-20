@@ -37,6 +37,7 @@ namespace InventoryTools.Logic.Filters
         public override string Name { get; set; } = "Craft Columns";
         public override string HelpText { get; set; } = "";
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.CraftColumns;
+        public override bool ShowReset { get; set; } = false;
         public override bool HasValueSet(FilterConfiguration configuration)
         {
             return configuration.CraftColumns != null && configuration.CraftColumns.Count != 0;
@@ -81,6 +82,7 @@ namespace InventoryTools.Logic.Filters
             ImGui.SetNextItemWidth(LabelSize);
             ImGui.LabelText("##" + Key + "Label", "Add new column: ");
             ImGui.SameLine();
+            ImGui.SetNextItemWidth(InputSize);
             using (var combo = ImRaii.Combo("Add##" + Key, currentAddColumn))
             {
                 if (combo.Success)

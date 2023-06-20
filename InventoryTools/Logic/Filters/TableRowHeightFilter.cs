@@ -10,6 +10,7 @@ public class TableRowHeightFilter : IntegerFilter
     public override string Key { get; set; } = "TableRowHeight";
     public override string Name { get; set; } = "Table Row Height";
     public override string HelpText { get; set; } = "How many pixels high should each item row try to display at?";
+    public override bool ShowReset { get; set; } = false;
     public override FilterCategory FilterCategory { get; set; } = FilterCategory.Display;
 
     public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter |

@@ -6,6 +6,7 @@ namespace InventoryTools.Logic.Filters.Abstract
     public abstract class Filter<T> : IFilter
     {
         public virtual int LabelSize { get; set; } = 200;
+        public virtual int InputSize { get; set; } = 250;
         public abstract T CurrentValue(FilterConfiguration configuration);
         public abstract void Draw(FilterConfiguration configuration);
         public abstract void ResetFilter(FilterConfiguration configuration);
@@ -19,6 +20,7 @@ namespace InventoryTools.Logic.Filters.Abstract
         public abstract FilterCategory FilterCategory { get; set; }
 
         public virtual int Order { get; set; } = 0;
+        public virtual bool ShowReset { get; set; } = true;
 
         public abstract bool HasValueSet(FilterConfiguration configuration);
         public abstract FilterType AvailableIn { get; set; }

@@ -30,12 +30,21 @@ namespace InventoryTools.Logic.Filters.Abstract
                 ImGui.LabelText("##" + Key + "Label", Name + ":");
             }
             ImGui.SameLine();
+            ImGui.SetNextItemWidth(InputSize);
             if (ImGui.InputText("##"+Key+"Input", ref value, 500))
             {
                 UpdateFilterConfiguration(configuration, value);
             }
             ImGui.SameLine();
             UiHelpers.HelpMarker(HelpText);
+            if (HasValueSet(configuration) && ShowReset)
+            {
+                ImGui.SameLine();
+                if (ImGui.Button("Reset##" + Key + "Reset"))
+                {
+                    ResetFilter(configuration);
+                }
+            }
         }
 
         public override void UpdateFilterConfiguration(FilterConfiguration configuration, string newValue)

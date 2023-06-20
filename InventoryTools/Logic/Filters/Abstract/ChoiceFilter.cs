@@ -37,6 +37,7 @@ namespace InventoryTools.Logic.Filters.Abstract
 
             var currentSearchCategory = activeChoice != null ? GetFormattedChoice(activeChoice) : "";
             ImGui.SameLine();
+            ImGui.SetNextItemWidth(InputSize);
             using (var combo = ImRaii.Combo("##" + Key + "Combo", currentSearchCategory))
             {
                 if (combo.Success)
@@ -67,6 +68,14 @@ namespace InventoryTools.Logic.Filters.Abstract
 
             ImGui.SameLine();
             UiHelpers.HelpMarker(HelpText);
+            if (HasValueSet(configuration) && ShowReset)
+            {
+                ImGui.SameLine();
+                if (ImGui.Button("Reset##" + Key + "Reset"))
+                {
+                    ResetFilter(configuration);
+                }
+            }
         }
     }
 }

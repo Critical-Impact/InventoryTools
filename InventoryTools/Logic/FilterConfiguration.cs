@@ -2980,8 +2980,12 @@ namespace InventoryTools.Logic
             return new FilterResult(sortedItems, unsortableItems, items);
         }
 
-        public Task<FilterResult> GenerateFilteredList(Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>> inventories)
+        public Task<FilterResult> GenerateFilteredList(Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>? inventories = null)
         {
+            if (inventories == null)
+            {
+                inventories = PluginService.InventoryMonitor.Inventories;
+            }
             return Task<FilterResult>.Factory.StartNew(() => GenerateFilteredListInternal(this, inventories));
         }
         
