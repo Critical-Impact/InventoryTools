@@ -53,10 +53,6 @@ namespace InventoryTools
         public Dictionary<ulong, Character> SavedCharacters = new();
 
         private Dictionary<ulong, HashSet<uint>> _acquiredItems = new();
-
-        [JsonIgnore]
-        public Dictionary<ulong, Dictionary<InventoryCategory,List<InventoryItem>>> SavedInventories = new ();
-
         public bool InventoriesMigrated { get; set; } = false;
         public bool InventoriesMigratedToCsv { get; set; } = false;
 
@@ -508,10 +504,6 @@ namespace InventoryTools
         public event ConfigurationChangedDelegate? ConfigurationChanged;
 
         //Configuration Helpers
-        public Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>> GetSavedInventory()
-        {
-            return SavedInventories;
-        }
 
         public Dictionary<ulong, Character> GetSavedRetainers()
         {

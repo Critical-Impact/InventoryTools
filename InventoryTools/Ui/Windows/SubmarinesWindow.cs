@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
+using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using Dalamud.Utility;
 using ImGuiNET;
@@ -34,7 +35,7 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>
                 OnLeftClick = OnLeftClick,
                 Draw = (ex, contentTypeId) =>
                 {
-                    if (ImGui.ImageButton(PluginService.IconStorage[65035].ImGuiHandle,
+                    if (ImGui.ImageButton(PluginService.IconStorage[Icons.AirshipIcon].ImGuiHandle,
                             new Vector2(RowSize, RowSize)))
                     {
                         _columns[0].OnLeftClick?.Invoke(ex);

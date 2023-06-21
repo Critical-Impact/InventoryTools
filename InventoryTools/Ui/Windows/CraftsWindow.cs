@@ -6,6 +6,7 @@ using CriticalCommonLib;
 using CriticalCommonLib.Addons;
 using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
+using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using ImGuiNET;
@@ -52,18 +53,15 @@ namespace InventoryTools.Ui
 
         private HoverButton _clearIcon { get; } = new(PluginService.IconStorage.LoadIcon(66308),  new Vector2(22, 22));
 
-        private static HoverButton _mobIcon { get; } = new(PluginService.IconStorage.LoadIcon(60041),  new Vector2(22, 22));
-
-        private static HoverButton _helpIcon { get; } = new(PluginService.IconStorage.LoadIcon(66313),  new Vector2(22, 22));
-
-        private static HoverButton _dutyIcon { get; } = new(PluginService.IconStorage.LoadIcon(61801),  new Vector2(22, 22));
-
         private static HoverButton _export2Icon { get; } = new(PluginService.IconStorage.LoadImage("export2"),  new Vector2(22,22));
         private static HoverButton _clipboardIcon { get; } = new(PluginService.IconStorage.LoadImage("clipboard"),  new Vector2(22,22));
+        private static HoverButton _importTcIcon { get; } = new(PluginService.IconStorage.LoadImage("import_tc"),  new Vector2(22,22));
         private static HoverButton _filtersIcon { get; } = new(PluginService.IconStorage.LoadImage("filters"),  new Vector2(22,22));
         
         private static HoverButton _menuIcon { get; } = new(PluginService.IconStorage.LoadImage("menu"),  new Vector2(22, 22));
-        
+
+
+        private TeamCraftImportWindow? _teamCraftImportWindow;
         private List<FilterConfiguration>? _filters;
         private FilterConfiguration? _defaultFilter;
         private Dictionary<FilterConfiguration, Widgets.PopupMenu> _popupMenus = new();
@@ -266,6 +264,17 @@ namespace InventoryTools.Ui
         }
         public override unsafe void Draw()
         {
+            _teamCraftImportWindow?.Draw();
+            if (_teamCraftImportWindow != null &&_teamCraftImportWindow.HasResult && _teamCraftImportWindow.ParseResult != null && SelectedConfiguration != null)
+            {
+                foreach (var item in _teamCraftImportWindow.ParseResult)
+                {
+                    SelectedConfiguration.CraftList.AddCraftItem(item.Item1, item.Item2);
+                    SelectedConfiguration.NeedsRefresh = true;
+                    SelectedConfiguration.StartRefresh();
+                    _teamCraftImportWindow = null;
+                }
+            }
             if (ConfigurationManager.Config.CraftWindowLayout == WindowLayout.Sidebar)
             {
                 DrawSidebar();
@@ -327,7 +336,7 @@ namespace InventoryTools.Ui
                     }
                     using (var tabItem = ImRaii.TabItem("Default Configuration"))
                     {
-                        if (tabItem.Success)
+                        if (_filters != null && tabItem.Success)
                         {
                             _selectedFilterTab = filterConfigurations.Count + 1;
                             DrawMainWindow();
@@ -509,7 +518,7 @@ namespace InventoryTools.Ui
                             }
 
                             ImGui.Separator();
-                            if (ImGui.Selectable("Default Configuration",
+                            if (_filters != null && ImGui.Selectable("Default Configuration",
                                     filterConfigurations.Count + 1 == _selectedFilterTab))
                             {
                                 _selectedFilterTab = filterConfigurations.Count + 1;
@@ -568,17 +577,16 @@ namespace InventoryTools.Ui
 
                         ImGui.SameLine();
                         UiHelpers.CenterElement(22 * ImGui.GetIO().FontGlobalScale);
-                        var hideCompleted = filterConfiguration.HideCompletedRows;
+                        var hideCompleted = filterConfiguration.CraftList.HideComplete;
                         ImGui.Checkbox("Hide Completed?" + "###" + itemTable.Key + "HideCompleted", ref hideCompleted);
-                        if (hideCompleted != filterConfiguration.HideCompletedRows)
+                        if (hideCompleted != filterConfiguration.CraftList.HideComplete)
                         {
-                            filterConfiguration.HideCompletedRows = hideCompleted;
+                            filterConfiguration.CraftList.HideComplete = hideCompleted;
                             filterConfiguration.NeedsRefresh = true;
                             filterConfiguration.StartRefresh();
                         }
 
                         ImGuiUtil.HoverTooltip("Hide any precrafts/gather/buy items once completed?");
-
 
                         ImGui.SameLine();
                         float width = ImGui.GetWindowSize().X;
@@ -708,6 +716,27 @@ namespace InventoryTools.Ui
 
                         ImGuiUtil.HoverTooltip("Copy JSON to clipboard");
                         ImGui.SameLine();
+                        
+                        UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                        if (_importTcIcon.Draw("bb_import_tc_json"))
+                        {
+                            if (craftTable != null)
+                            {
+                                if(_teamCraftImportWindow == null)
+                                {
+                                    _teamCraftImportWindow = new TeamCraftImportWindow("craftsTCImport");
+                                    _teamCraftImportWindow.OpenImportWindow = true;
+                                }
+                                else
+                                {
+                                    _teamCraftImportWindow.OpenImportWindow = true;
+                                }
+                            }
+                        }
+
+                        ImGuiUtil.HoverTooltip("Import TC List");
+                        ImGui.SameLine();
+
                         if (PluginService.GameUi.IsWindowVisible(
                                 CriticalCommonLib.Services.Ui.WindowName.SubmarinePartsMenu))
                         {
@@ -886,6 +915,10 @@ namespace InventoryTools.Ui
                                      filterConfiguration.FilterType.HasFlag(FilterType
                                          .CraftFilter))
                                     ||
+                                    (filter.AvailableIn.HasFlag(FilterType.HistoryFilter) &&
+                                     filterConfiguration.FilterType.HasFlag(FilterType
+                                         .HistoryFilter))
+                                    ||
                                     (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
                                      filterConfiguration.FilterType.HasFlag(FilterType
                                          .GameItemFilter)));
@@ -906,6 +939,9 @@ namespace InventoryTools.Ui
                                                      ||
                                                      (filter.AvailableIn.HasFlag(FilterType.CraftFilter) &&
                                                       filterConfiguration.FilterType.HasFlag(FilterType.CraftFilter))
+                                                     ||
+                                                     (filter.AvailableIn.HasFlag(FilterType.HistoryFilter) &&
+                                                      filterConfiguration.FilterType.HasFlag(FilterType.HistoryFilter))
                                                      ||
                                                      (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
                                                       filterConfiguration.FilterType.HasFlag(FilterType.GameItemFilter))
@@ -1042,29 +1078,13 @@ namespace InventoryTools.Ui
                 }
                 if (_searchItems == null)
                 {
-                    _searchItems = CraftItemsByName.Where(c => c.Value.ToLower().PassesFilter(SearchString.ToLower())).Take(100)
+                    _searchItems = Service.ExcelCache.ItemsByName.Where(c => c.Value.ToLower().PassesFilter(SearchString.ToLower())).Take(100)
                         .Select(c => Service.ExcelCache.GetItemExSheet().GetRow(c.Key)!).ToList();
                 }
 
                 return _searchItems;
             }
         }
-
-        public Dictionary<uint, string>? _craftItemsByName = null;
-        
-        public Dictionary<uint, string> CraftItemsByName
-        {
-            get
-            {
-                if (_craftItemsByName == null)
-                {
-                    _craftItemsByName = Service.ExcelCache.GetItemExSheet().Where(c => c.CanBeCrafted).ToDictionary(c => c.RowId, c => c.NameString.ToLower());
-                }
-                return _craftItemsByName;
-            }
-            set => _craftItemsByName = value;
-        }
-
 
         public override FilterConfiguration? SelectedConfiguration
         {

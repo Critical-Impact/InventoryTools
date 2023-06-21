@@ -11,6 +11,8 @@ namespace InventoryTools.Logic.Columns
 {
     public class BestInSlotColumn : IntegerColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Tools;
+        
         public override bool IsDebug { get; set; } = true;
         private ClippedSelectableCombo<KeyValuePair<ulong, Character>>? _characters;
         private ulong? _selectedCharacter;

@@ -47,7 +47,7 @@ namespace InventoryTools.Services.Interfaces
 
         void InvalidateFilter(FilterConfiguration configuration);
 
-        void InvalidateFilters();
+        void InvalidateFilters(FilterType? filterType = null);
         
         delegate void FilterAddedDelegate(FilterConfiguration configuration);
         delegate void FilterRemovedDelegate(FilterConfiguration configuration);

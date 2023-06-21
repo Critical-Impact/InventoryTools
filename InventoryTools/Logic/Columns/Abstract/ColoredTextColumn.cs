@@ -6,6 +6,8 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Extensions;
+using InventoryTools.Ui.Widgets;
+using OtterGui.Raii;
 
 namespace InventoryTools.Logic.Columns.Abstract
 {
@@ -50,6 +52,11 @@ namespace InventoryTools.Logic.Columns.Abstract
         {
             return CurrentValue(currentValue.Item);
         }
+        
+        public override (string, Vector4)? CurrentValue(InventoryChange currentValue)
+        {
+            return CurrentValue(currentValue.InventoryItem);
+        }
 
         public override IEnumerable<CraftItem> Filter(IEnumerable<CraftItem> items)
         {
@@ -85,7 +92,10 @@ namespace InventoryTools.Logic.Columns.Abstract
         {
             DoDraw(CurrentValue(item), rowIndex, configuration);
         }
-
+        public override void Draw(FilterConfiguration configuration, InventoryChange item, int rowIndex)
+        {
+            DoDraw(CurrentValue(item), rowIndex, configuration);
+        }
         public override IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items)
         {
             return FilterText == "" ? items : items.Where(c =>
@@ -121,6 +131,21 @@ namespace InventoryTools.Logic.Columns.Abstract
             return FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(c);
+                if (currentValue == null)
+                {
+                    return false;
+                }
+
+                return currentValue.Value.Item1.ToLower().PassesFilter(FilterComparisonText);
+            });
+        }
+        
+        public override IEnumerable<InventoryChange> Filter(IEnumerable<InventoryChange> items)
+        {
+            var isChecked = FilterText != "";
+            return FilterText == "" ? items : items.Where(c =>
+            {
+                var currentValue = CurrentValue(c.InventoryItem);
                 if (currentValue == null)
                 {
                     return false;
@@ -168,6 +193,19 @@ namespace InventoryTools.Logic.Columns.Abstract
                 return !currentValue.HasValue ? "" : currentValue.Value.Item1;
             });
         }
+        
+        public override IEnumerable<InventoryChange> Sort(ImGuiSortDirection direction, IEnumerable<InventoryChange> items)
+        {
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(item =>
+            {
+                var currentValue = CurrentValue(item.InventoryItem);
+                return !currentValue.HasValue ? "" : currentValue.Value.Item1;
+            }) : items.OrderByDescending(item =>
+            {
+                var currentValue = CurrentValue(item.InventoryItem);
+                return !currentValue.HasValue ? "" : currentValue.Value.Item1;
+            });
+        }
 
         public override IColumnEvent? DoDraw((string, Vector4)? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration)
@@ -175,7 +213,14 @@ namespace InventoryTools.Logic.Columns.Abstract
             ImGui.TableNextColumn();
             if (currentValue.HasValue)
             {
-                ImGui.TextColored( currentValue.Value.Item2, currentValue.Value.Item1);
+                if (filterConfiguration.FilterType == Logic.FilterType.CraftFilter)
+                {
+                    ImGuiUtil.VerticalAlignTextColored(currentValue.Value.Item1, currentValue.Value.Item2, filterConfiguration.TableHeight, true);
+                }
+                else
+                {
+                    ImGuiUtil.VerticalAlignTextColored(currentValue.Value.Item1, currentValue.Value.Item2, filterConfiguration.TableHeight, false);
+                }
             }
             else
             {

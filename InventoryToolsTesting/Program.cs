@@ -20,7 +20,7 @@ PluginService.InitaliseExplicit(new MockServices()
     PluginLogic = pluginLogic
 });
 ConfigurationManager.Config = new InventoryToolsConfiguration();
-var inventories = ConfigurationManager.LoadInventories("inventories2.json");
+var inventories = ConfigurationManager.LoadInventoriesJson("inventories2.json");
 ulong currentRetainer = 0;
 if (inventories != null)
 {
@@ -60,11 +60,11 @@ if (inventories != null)
     sampleFilter.HighlightWhen = "Always";
 
     var filterState = new FilterState() { FilterConfiguration = sampleFilter };
-    var filteredList = sampleFilter.GenerateFilteredList(inventories).Result;
-    var bagHighlights = filterState.GetBagHighlights(InventoryType.RetainerBag0,filteredList);
-
-    foreach (var a in filteredList.AllItems)
-    {
-        
-    }
+    // var filteredList = sampleFilter.GenerateFilteredList(inventories).Result;
+    // var bagHighlights = filterState.GetBagHighlights(InventoryType.RetainerBag0,filteredList);
+    //
+    // foreach (var a in filteredList.AllItems)
+    // {
+    //     
+    // }
 }

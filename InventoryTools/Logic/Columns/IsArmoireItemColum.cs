@@ -6,6 +6,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class IsArmoireItem : CheckboxColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override bool? CurrentValue(InventoryItem item)
         {
             return CurrentValue(item.Item);
@@ -21,7 +22,8 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "Is Armoire?";
+        public override string Name { get; set; } = "Is Armoire Item?";
+        public override string RenderName => "Is Armoire?";
         public override float Width { get; set; } = 100;
         public override string HelpText { get; set; } = "Shows if the item belongs in the armoire.";
         public override bool HasFilter { get; set; } = true;

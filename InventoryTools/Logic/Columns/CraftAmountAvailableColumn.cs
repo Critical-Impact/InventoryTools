@@ -10,6 +10,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class CraftAmountAvailableColumn : IntegerColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Crafting;
         public override int? CurrentValue(InventoryItem item)
         {
             return 0;
@@ -54,7 +55,8 @@ namespace InventoryTools.Logic.Columns
             }
         }
 
-        public override string Name { get; set; } = "Retrieve";
+        public override string Name { get; set; } = "Amount to Retrieve";
+        public override string RenderName => "Retrieve";
         public override float Width { get; set; } = 60;
         public override bool? CraftOnly => false;
 

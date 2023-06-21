@@ -2,11 +2,14 @@ using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
+using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Ui.Widgets;
 
 namespace InventoryTools.Logic.Columns
 {
     public class MarketBoardMinTotalPriceColumn : MarketBoardMinPriceColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Market;
         public override string HelpText { get; set; } =
             "Shows the minimum price of both the NQ and HQ form of the item and multiplies it by the quantity available. This data is sourced from universalis.";
         public override FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter;
@@ -18,12 +21,12 @@ namespace InventoryTools.Logic.Columns
             if (currentValue.HasValue && currentValue.Value.Item1 == Loading)
             {
                 ImGui.TableNextColumn();
-                ImGui.TextColored(ImGuiColors.DalamudYellow, LoadingString);
+                ImGuiUtil.VerticalAlignTextColored(LoadingString, ImGuiColors.DalamudYellow, filterConfiguration.TableHeight, false);
             }
             else if (currentValue.HasValue && currentValue.Value.Item1 == Untradable)
             {
                 ImGui.TableNextColumn();
-                ImGui.TextColored(ImGuiColors.DalamudRed, UntradableString);
+                ImGuiUtil.VerticalAlignTextColored(UntradableString, ImGuiColors.DalamudRed, filterConfiguration.TableHeight, false);
             }
             else if(currentValue.HasValue)
             {
@@ -61,7 +64,8 @@ namespace InventoryTools.Logic.Columns
             var value = CurrentValue(currentValue.Item);
             return value.HasValue ? ((int)(value.Value.Item1 * currentValue.QuantityRequired), (int)(value.Value.Item2 * currentValue.QuantityRequired)) : null;
         }
-
-        public override string Name { get; set; } = "MB Minimum Total Price";
+        
+        public override string Name { get; set; } = "Market Board Minimum Total Price(Qty * Price) NQ/HQ";
+        public override string RenderName => "MB Min. Total NQ/HQ";
     }
 }

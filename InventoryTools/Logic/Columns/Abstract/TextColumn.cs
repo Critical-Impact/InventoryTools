@@ -7,6 +7,8 @@ using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using NaturalSort.Extension;
+using OtterGui;
+using ImGuiUtil = InventoryTools.Ui.Widgets.ImGuiUtil;
 
 namespace InventoryTools.Logic.Columns.Abstract
 {
@@ -29,6 +31,11 @@ namespace InventoryTools.Logic.Columns.Abstract
         public override string? CurrentValue(CraftItem currentValue)
         {
             return CurrentValue(currentValue.Item);
+        }
+        
+        public override string? CurrentValue(InventoryChange currentValue)
+        {
+            return CurrentValue(currentValue.InventoryItem);
         }
         
         public override IEnumerable<CraftItem> Filter(IEnumerable<CraftItem> items)
@@ -61,6 +68,10 @@ namespace InventoryTools.Logic.Columns.Abstract
             DoDraw(CurrentValue((ItemEx)item), rowIndex, configuration);
         }
         public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
+        {
+            DoDraw(CurrentValue(item), rowIndex, configuration);
+        }
+        public override void Draw(FilterConfiguration configuration, InventoryChange item, int rowIndex)
         {
             DoDraw(CurrentValue(item), rowIndex, configuration);
         }
@@ -118,6 +129,24 @@ namespace InventoryTools.Logic.Columns.Abstract
                 return currentValue.ToLower().PassesFilter(FilterText.ToLower());
             });
         }
+        
+        public override IEnumerable<InventoryChange> Filter(IEnumerable<InventoryChange> items)
+        {
+            var isChecked = FilterText != "";
+            return FilterText == "" ? items : items.Where(c =>
+            {
+                var currentValue = CurrentValue(c.InventoryItem);
+                if (currentValue == null)
+                {
+                    return false;
+                }
+                if (FilterType == ColumnFilterType.Choice)
+                {
+                    return currentValue == FilterText;
+                }
+                return currentValue.ToLower().PassesFilter(FilterText.ToLower());
+            });
+        }
 
         public override IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
         {
@@ -133,6 +162,11 @@ namespace InventoryTools.Logic.Columns.Abstract
         {
             return direction == ImGuiSortDirection.Ascending ? items.OrderBy(CurrentValue, StringComparison.OrdinalIgnoreCase.WithNaturalSort()) : items.OrderByDescending(CurrentValue, StringComparison.OrdinalIgnoreCase.WithNaturalSort());
         }
+        
+        public override IEnumerable<InventoryChange> Sort(ImGuiSortDirection direction, IEnumerable<InventoryChange> items)
+        {
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => CurrentValue(c.InventoryItem), StringComparison.OrdinalIgnoreCase.WithNaturalSort()) : items.OrderByDescending(c => CurrentValue(c.InventoryItem), StringComparison.OrdinalIgnoreCase.WithNaturalSort());
+        }
 
         public override IColumnEvent? DoDraw(string? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration)
@@ -140,11 +174,16 @@ namespace InventoryTools.Logic.Columns.Abstract
             ImGui.TableNextColumn();
             if (currentValue != null)
             {
-                ImGui.Text(currentValue);
+                var columnWidth = ImGui.GetColumnWidth();
+                var frameHeight = filterConfiguration.TableHeight / 2.0f;
+                var calcText = ImGui.CalcTextSize(currentValue);
+                var textHeight = calcText.X >= columnWidth ? 0 : calcText.Y / 2.0f;
+                ImGui.SetCursorPosY(ImGui.GetCursorPosY() + frameHeight - textHeight);
+                ImGui.TextUnformatted(currentValue);
             }
             else
             {
-                ImGui.Text(EmptyText);
+                ImGui.TextUnformatted(EmptyText);
             }
 
             return null;
@@ -152,7 +191,7 @@ namespace InventoryTools.Logic.Columns.Abstract
 
         public override void Setup(int columnIndex)
         {
-            ImGui.TableSetupColumn(Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
+            ImGui.TableSetupColumn(RenderName ?? Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
         }
     }
 }

@@ -162,7 +162,7 @@ public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
                             PluginService.ChatUtilities.PrintFullMapLink(
                                 new GenericMapLocation(position.Position.X, position.Position.Y,
                                     territory.MapEx,
-                                    territory.PlaceNameEx), ex.Item1.FormattedName);
+                                    territory.PlaceNameEx, new LazyRow<TerritoryTypeEx>(Service.ExcelCache.GameData, territory.RowId, territory.SheetLanguage)), ex.Item1.FormattedName);
                         }
 
                         if (ImGui.IsItemHovered())
@@ -227,7 +227,7 @@ public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
                 }
             },
         };
-        _tabs = Service.ExcelCache.GetTerritoryTypeExSheet().Where(c => availableTerritories.Contains(c.RowId)).ToDictionary(c => c.RowId, c =>c.PlaceName.Value?.Name.ToString() ?? "Unknown");
+        _tabs = Service.ExcelCache.GetTerritoryTypeExSheet().Where(c => availableTerritories.Contains(c.RowId)).OrderBy(c => c.PlaceNameEx.Value?.FormattedName ?? "Unknown").ToDictionary(c => c.RowId, c =>c.PlaceNameEx.Value?.FormattedName ?? "Unknown");
         _items = new Dictionary<uint, List<(BNpcNameEx, BNpcBaseEx)>>();
         _filteredItems = new Dictionary<uint, List<(BNpcNameEx, BNpcBaseEx)>>();
     }

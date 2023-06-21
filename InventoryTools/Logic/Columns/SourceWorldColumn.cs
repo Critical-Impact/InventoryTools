@@ -6,6 +6,7 @@ namespace InventoryTools.Logic.Columns;
 
 public class SourceWorldColumn : TextColumn
 {
+    public override ColumnCategory ColumnCategory => ColumnCategory.Inventory;
     public override string? CurrentValue(InventoryItem item)
     {
         var character = PluginService.CharacterMonitor.GetCharacterById(item.RetainerId);

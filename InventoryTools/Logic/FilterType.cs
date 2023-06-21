@@ -9,6 +9,7 @@ namespace InventoryTools.Logic
         SearchFilter = 1, //For displaying the items in a source
         SortingFilter = 2, //For working out where items should go
         GameItemFilter = 4, //For displaying all the items
-        CraftFilter = 8 //For crafting items
+        CraftFilter = 8, //For crafting items
+        HistoryFilter = 16 //For showing historical movement of items
     }
 }

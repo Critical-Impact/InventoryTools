@@ -116,7 +116,7 @@ public class IPCService : IDisposable
         _initialized.SendMessage(true);
     }
 
-    private void InventoryMonitorOnOnInventoryChanged(Dictionary<ulong, Dictionary<InventoryCategory, List<CriticalCommonLib.Models.InventoryItem>>> inventories, InventoryMonitor.ItemChanges changedItems)
+    private void InventoryMonitorOnOnInventoryChanged(List<InventoryChange> inventoryChanges)
     {
         foreach (var changedItem in changedItems.NewItems)
         {
@@ -225,7 +225,7 @@ public class IPCService : IDisposable
             }
             if (filter.FilterType == FilterType.SearchFilter || filter.FilterType == FilterType.SortingFilter)
             {
-                var filterResult = filter.GenerateFilteredList(PluginService.InventoryMonitor.Inventories).Result;
+                var filterResult = filter.GenerateFilteredList(PluginService.InventoryMonitor.Inventories.Select(c => c.Value).ToList()).Result;
                 foreach (var sortedItem in filterResult.SortedItems)
                 {
                     if (filterItems.ContainsKey(sortedItem.InventoryItem.ItemId))
@@ -238,9 +238,10 @@ public class IPCService : IDisposable
                     }
                 }
             }
+            //TODO: Add history IPC
             if (filter.FilterType == FilterType.GameItemFilter)
             {
-                var filterResult = filter.GenerateFilteredList(PluginService.InventoryMonitor.Inventories).Result;
+                var filterResult = filter.GenerateFilteredList(PluginService.InventoryMonitor.Inventories.Select(c => c.Value).ToList()).Result;
                 foreach (var sortedItem in filterResult.AllItems)
                 {
                     if (filterItems.ContainsKey(sortedItem.RowId))

@@ -7,6 +7,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class QuantityAvailableColumn : IntegerColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Inventory;
         public override int? CurrentValue(InventoryItem item)
         {
             return CurrentValue(item.Item);
@@ -35,12 +36,15 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "Available";
+        public override string Name { get; set; } = "Total Quantity Available";
+        public override string RenderName => "Available";
         public override float Width { get; set; } = 100;
 
         public override string HelpText { get; set; } =
             "The number of items available across all inventories of this item.";
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
+
+        public override FilterType AvailableIn => Logic.FilterType.CraftFilter;
     }
 }

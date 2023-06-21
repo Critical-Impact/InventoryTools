@@ -7,6 +7,7 @@ namespace InventoryTools.Logic.Columns;
 
 public class DesynthesisClassColumn : TextColumn
 {
+    public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
     public override string? CurrentValue(InventoryItem item)
     {
         return CurrentValue(item.Item);
@@ -27,7 +28,8 @@ public class DesynthesisClassColumn : TextColumn
         return CurrentValue(item.InventoryItem);
     }
 
-    public override string Name { get; set; } = "Desynth Class";
+    public override string Name { get; set; } = "Desynthesis Class";
+    public override string RenderName  => "Desynth Class";
     public override float Width { get; set; } = 100;
     public override string HelpText { get; set; } = "What class is related to de-synthesising this item?";
     public override bool HasFilter { get; set; } = true;

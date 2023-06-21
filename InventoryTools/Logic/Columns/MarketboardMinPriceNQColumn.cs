@@ -3,11 +3,14 @@ using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Ui.Widgets;
 
 namespace InventoryTools.Logic.Columns
 {
     public class MarketBoardMinPriceNQColumn : GilColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Market;
+
         protected readonly string LoadingString = "loading...";
         protected readonly string UntradableString = "untradable";
         protected readonly int Loading = -1;
@@ -34,12 +37,12 @@ namespace InventoryTools.Logic.Columns
             if (currentValue.HasValue && currentValue.Value == Loading)
             {
                 ImGui.TableNextColumn();
-                ImGui.TextColored(ImGuiColors.DalamudYellow, LoadingString);
+                ImGuiUtil.VerticalAlignTextColored(LoadingString, ImGuiColors.DalamudYellow, filterConfiguration.TableHeight, false);
             }
             else if (currentValue.HasValue && currentValue.Value == Untradable)
             {
                 ImGui.TableNextColumn();
-                ImGui.TextColored(ImGuiColors.DalamudRed, UntradableString);
+                ImGuiUtil.VerticalAlignTextColored(UntradableString, ImGuiColors.DalamudRed, filterConfiguration.TableHeight, false);
             }
             else if(currentValue.HasValue)
             {
@@ -96,7 +99,8 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "MB Minimum Price NQ";
+        public override string Name { get; set; } = "Market Board Minimum Price NQ";
+        public override string RenderName => "MB Min. Price NQ";
         public override string HelpText { get; set; } =
             "Shows the minimum price of the NQ form of the item. This data is sourced from universalis.";
         public override float Width { get; set; } = 250.0f;

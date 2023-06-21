@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using Dalamud.Logging;
 using ImGuiNET;
@@ -22,6 +23,9 @@ namespace InventoryTools.Logic
         public List<SortingResult> RenderSortedItems { get; set; } = new List<SortingResult>();
         public List<ItemEx> Items { get; set; } = new List<ItemEx>();
         public List<ItemEx> RenderItems { get; set; } = new List<ItemEx>();
+        
+        public List<InventoryChange> InventoryChanges { get; set; } = new List<InventoryChange>();
+        public List<InventoryChange> RenderInventoryChanges { get; set; } = new List<InventoryChange>();
 
         public RenderTableBase(FilterConfiguration filterConfiguration)
         {

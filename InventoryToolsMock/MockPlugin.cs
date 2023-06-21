@@ -48,6 +48,7 @@ public class MockPlugin : IDisposable
     private ICommandService _commandService;
     private IKeyStateService _keyStateService;
     private IHotkeyService _hotkeyService;
+    private InventoryHistory _inventoryHistory;
 
     public MockPlugin(GameData gameData, string gameDirectory, string configDirectory, string configFile, string? inventoriesFile)
     {
@@ -72,6 +73,7 @@ public class MockPlugin : IDisposable
         _frameworkService = new MockFrameworkService();
         _chatUtilities = new MockChatUtilities();
         _inventoryMonitor = new InventoryMonitor(_characterMonitor, _craftMonitor, _inventoryScanner, _frameworkService );
+        _inventoryHistory = new InventoryHistory(_inventoryMonitor);
         _iconService = new MockIconService(lumina);
         _universalis = new MockUniversalis();
         _gameUiManager = new MockGameUiManager();
@@ -106,18 +108,18 @@ public class MockPlugin : IDisposable
             TooltipService = _tooltipService,
             CommandService =  _commandService,
             HotkeyService = _hotkeyService,
-            KeyStateService = _keyStateService
+            KeyStateService = _keyStateService,
+            InventoryHistory = _inventoryHistory
             
         }, false);
-        ConfigurationManager.LoadFromFile(configFile, inventoriesFile);
-        PluginService.InventoryMonitor.LoadExistingData(ConfigurationManager.Config.GetSavedInventory());
+        ConfigurationManager.Load(configFile);
         PluginService.CharacterMonitor.LoadExistingRetainers(ConfigurationManager.Config.GetSavedRetainers());
-        _pluginLogic = new PluginLogic();
+        PluginService.InventoryMonitor.LoadExistingData(ConfigurationManager.LoadInventory(inventoriesFile));
+        PluginService.InventoryHistory.LoadExistingHistory(ConfigurationManager.LoadHistoryFromCsv(out _));
         PluginService.InitaliseExplicit(new MockServices()
         {
-            PluginLogic = _pluginLogic,
         }, false);
-        _filterService = new FilterService(_characterMonitor, _inventoryMonitor);
+        _filterService = new FilterService(_characterMonitor, _inventoryMonitor, _inventoryHistory);
         _windowService = new WindowService(_filterService);
         _overlayService = new OverlayService(_filterService, _gameUiManager, _frameworkService);
         PluginService.InitaliseExplicit(new MockServices()
@@ -127,6 +129,11 @@ public class MockPlugin : IDisposable
             OverlayService = _overlayService,
             DataService = _dataService
         });
+        _pluginLogic = new PluginLogic();
+        PluginService.InitaliseExplicit(new MockServices()
+        {
+            PluginLogic = _pluginLogic,
+        }, false);
         PluginService.PluginLogic.RunMigrations();
             
         if (ConfigurationManager.Config.FirstRun)

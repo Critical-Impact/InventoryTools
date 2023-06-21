@@ -6,6 +6,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class TypeColumn : TextColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override string? CurrentValue(InventoryItem item)
         {
             return item.FormattedType;

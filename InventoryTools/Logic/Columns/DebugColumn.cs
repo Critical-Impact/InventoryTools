@@ -6,6 +6,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class DebugColumn : TextColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Debug;
         public override string? CurrentValue(InventoryItem item)
         {
             return CurrentValue(item.Item);

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
@@ -17,13 +18,17 @@ namespace InventoryTools.Logic.Columns.Abstract
         public virtual uint MaxFilterLength { get; set; } = 200;
 
         public virtual FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter |
-                                                 Logic.FilterType.GameItemFilter | Logic.FilterType.CraftFilter;
+                                                 Logic.FilterType.GameItemFilter | Logic.FilterType.CraftFilter | Logic.FilterType.HistoryFilter;
 
         public virtual bool? CraftOnly => null;
+        public bool CanBeRemoved => true;
+
+        public abstract ColumnCategory ColumnCategory { get; }
         public abstract T CurrentValue(InventoryItem item);
         public abstract T CurrentValue(ItemEx item);
         public abstract T CurrentValue(SortingResult item);
         public abstract T CurrentValue(CraftItem item);
+        public abstract T CurrentValue(InventoryChange change);
         public abstract string CsvExport(InventoryItem item);
         public abstract string CsvExport(ItemEx item);
         public abstract string CsvExport(SortingResult item);
@@ -31,6 +36,11 @@ namespace InventoryTools.Logic.Columns.Abstract
         public virtual string CsvExport(CraftItem item)
         {
             return CsvExport(item.Item);
+        }
+
+        public string CsvExport(InventoryChange item)
+        {
+            return CsvExport(item.InventoryItem);
         }
 
         public virtual dynamic? JsonExport(InventoryItem item)
@@ -52,8 +62,14 @@ namespace InventoryTools.Logic.Columns.Abstract
         {
             return CurrentValue(item);
         }
-        
-        public  abstract string Name { get; set; }
+
+        public dynamic? JsonExport(InventoryChange item)
+        {
+            return JsonExport(item.InventoryItem);
+        }
+
+        public abstract string Name { get; set; }
+        public virtual string? RenderName { get; } = null;
         public abstract float Width { get; set; }
         public abstract string HelpText { get; set; }
 
@@ -99,7 +115,10 @@ namespace InventoryTools.Logic.Columns.Abstract
              type.HasFlag(InventoryTools.Logic.FilterType.CraftFilter))
             ||
             (AvailableIn.HasFlag(InventoryTools.Logic.FilterType.GameItemFilter) &&
-             type.HasFlag(InventoryTools.Logic.FilterType.GameItemFilter));
+             type.HasFlag(InventoryTools.Logic.FilterType.GameItemFilter))
+            ||
+            (AvailableIn.HasFlag(InventoryTools.Logic.FilterType.HistoryFilter) &&
+             type.HasFlag(InventoryTools.Logic.FilterType.HistoryFilter));
 
         public abstract IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items);
 
@@ -108,6 +127,7 @@ namespace InventoryTools.Logic.Columns.Abstract
         public abstract IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items);
 
         public abstract IEnumerable<CraftItem> Filter(IEnumerable<CraftItem> items);
+        public abstract IEnumerable<InventoryChange> Filter(IEnumerable<InventoryChange> items);
 
         public abstract IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items);
 
@@ -116,12 +136,19 @@ namespace InventoryTools.Logic.Columns.Abstract
         public abstract IEnumerable<ItemEx> Sort(ImGuiSortDirection direction, IEnumerable<ItemEx> items);
         public abstract IEnumerable<CraftItem> Sort(ImGuiSortDirection direction, IEnumerable<CraftItem> items);
 
+        public abstract IEnumerable<InventoryChange> Sort(ImGuiSortDirection direction, IEnumerable<InventoryChange> items);
+
         public abstract void Draw(FilterConfiguration configuration, InventoryItem item, int rowIndex);
 
         public abstract void Draw(FilterConfiguration configuration, SortingResult item, int rowIndex);
         public abstract void Draw(FilterConfiguration configuration, ItemEx item, int rowIndex);
 
         public abstract void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex);
+
+        public virtual void Draw(FilterConfiguration configuration, InventoryChange item, int rowIndex)
+        {
+            Draw(configuration, item.InventoryItem, rowIndex);
+        }
 
         public abstract IColumnEvent? DoDraw(T currentValue, int rowIndex, FilterConfiguration filterConfiguration);
 

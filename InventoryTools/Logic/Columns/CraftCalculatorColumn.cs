@@ -14,6 +14,7 @@ namespace InventoryTools.Logic.Columns;
 //TODO: actually dispose this/move this somewhere
 public class CraftCalculatorColumn : IntegerColumn, IDisposable
 {
+    public override ColumnCategory ColumnCategory => ColumnCategory.Tools;
     public Dictionary<uint, uint>? _craftable;
     public CraftCalculator? _craftCalculator;
     public override int? CurrentValue(InventoryItem item)
@@ -71,11 +72,14 @@ public class CraftCalculatorColumn : IntegerColumn, IDisposable
                     {
                         if (character.OwnerId == PluginService.CharacterMonitor.ActiveCharacterId)
                         {
-                            foreach (var inventoryCategory in characterId.Value)
+                            foreach (var inventoryCategory in characterId.Value.GetAllInventories())
                             {
-                                foreach (var inventory in inventoryCategory.Value)
+                                foreach (var inventory in inventoryCategory)
                                 {
-                                    items.Add(inventory);
+                                    if (inventory != null)
+                                    {
+                                        items.Add(inventory);
+                                    }
                                 }
                             }
                         }

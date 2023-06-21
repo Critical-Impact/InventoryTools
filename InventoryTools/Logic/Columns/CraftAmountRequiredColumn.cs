@@ -1,13 +1,22 @@
+using System.Linq;
+using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
+using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
+using FFXIVClientStructs.FFXIV.Common.Math;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Ui.Widgets;
+using OtterGui;
+using OtterGui.Raii;
+using ImGuiUtil = InventoryTools.Ui.Widgets.ImGuiUtil;
 
 namespace InventoryTools.Logic.Columns
 {
     public class CraftAmountRequiredColumn : DoubleIntegerColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Crafting;
         public override (int,int)? CurrentValue(InventoryItem item)
         {
             return null;
@@ -34,10 +43,11 @@ namespace InventoryTools.Logic.Columns
 
         public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
         {
+            ImGui.TableNextColumn();
             if (item.IsOutputItem)
             {
-                ImGui.TableNextColumn();
                 var value = CurrentValue(item)?.Item2.ToString() ?? "";
+                ImGuiUtil.VerticalAlignButton(configuration.TableHeight);
                 if (ImGui.InputText("##"+rowIndex+"RequiredInput", ref value, 4, ImGuiInputTextFlags.CharsDecimal))
                 {
                     if (value != (CurrentValue(item)?.Item2.ToString() ?? ""))
@@ -45,11 +55,16 @@ namespace InventoryTools.Logic.Columns
                         int parsedNumber;
                         if (int.TryParse(value, out parsedNumber))
                         {
-                            var number = (uint) parsedNumber;
+                            if (parsedNumber < 0)
+                            {
+                                parsedNumber = 0;
+                            }
+                            var number = (uint)parsedNumber;
                             if (number != item.QuantityRequired)
                             {
                                 //TODO: Probably a better way to do this
-                                configuration.CraftList.SetCraftRequiredQuantity(item.ItemId, number, item.Flags,
+                                configuration.CraftList.SetCraftRequiredQuantity(item.ItemId, number,
+                                    item.Flags,
                                     item.Phase);
                                 item.QuantityRequired = number;
                                 configuration.StartRefresh();
@@ -60,14 +75,15 @@ namespace InventoryTools.Logic.Columns
             }
             else
             {
-                base.Draw(configuration, item, rowIndex);
+                ImGuiUtil.VerticalAlignText(item.QuantityNeeded + "/" + item.QuantityRequired, configuration.TableHeight, false);
             }
         }
         public override FilterType AvailableIn { get; } = Logic.FilterType.CraftFilter;
-        public override string Name { get; set; } = "Required";
+        public override string Name { get; set; } = "Amount Required";
+        public override string RenderName => "Required";
         public override float Width { get; set; } = 60;
         public override bool? CraftOnly => true;
-        public override string HelpText { get; set; } = "This is the amount required to complete the craft.";
+        public override string HelpText { get; set; } = "This is the amount required for this item in the craft.";
         public override bool HasFilter { get; set; } = false;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
     }

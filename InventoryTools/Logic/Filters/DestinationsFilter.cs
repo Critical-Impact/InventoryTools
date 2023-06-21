@@ -26,16 +26,6 @@ namespace InventoryTools.Logic.Filters
         }
 
         public override FilterType AvailableIn { get; set; } = FilterType.SortingFilter | FilterType.CraftFilter;
-        
-        public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
-        {
-            return null;
-        }
-
-        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
-        {
-            return null;
-        }
 
         public override void Draw(FilterConfiguration configuration)
         {

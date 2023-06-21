@@ -321,6 +321,11 @@ namespace InventoryTools.Ui
                         totalItems =  itemTable.RenderItems.Count + " items";
                     }
 
+                    if (SelectedConfiguration != null && SelectedConfiguration.FilterType == FilterType.HistoryFilter)
+                    {
+                        totalItems =  itemTable.InventoryChanges.Count + " historical records";
+                    }
+
                     var calcTextSize = ImGui.CalcTextSize(totalItems);
                     width -= calcTextSize.X + 15;
                     ImGui.SetCursorPosX(width);

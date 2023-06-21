@@ -10,6 +10,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class CraftAmountUnavailableColumn : IntegerColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Crafting;
         public override int? CurrentValue(InventoryItem item)
         {
             return 0;
@@ -27,7 +28,7 @@ namespace InventoryTools.Logic.Columns
 
         public override int? CurrentValue(CraftItem currentValue)
         {
-            return Math.Max(0, (int)currentValue.RequiredQuantityUnavailable - (int)currentValue.QuantityCanCraft);
+            return Math.Max(0, (int)currentValue.QuantityMissing - (int)currentValue.QuantityCanCraft);
         }
         
         public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
@@ -44,11 +45,12 @@ namespace InventoryTools.Logic.Columns
             }
         }
         public override FilterType AvailableIn { get; } = Logic.FilterType.CraftFilter;
-        public override string Name { get; set; } = "Missing";
+        public override string Name { get; set; } = "Amount Missing";
+        public override string RenderName => "Missing";
         public override float Width { get; set; } = 60;
         public override bool? CraftOnly => true;
         public override string HelpText { get; set; } =
-            "This is the amount that needs to be sourced from MB/gathering.";
+            "This is the amount that needs to be sourced from MB/gathering excluding potential items to be withdrawn from retainers.";
         public override bool HasFilter { get; set; } = false;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
     }

@@ -1,6 +1,7 @@
 using Dalamud.Game.Text;
 using ImGuiNET;
 using OtterGui;
+using ImGuiUtil = InventoryTools.Ui.Widgets.ImGuiUtil;
 
 namespace InventoryTools.Logic.Columns.Abstract
 {
@@ -12,11 +13,15 @@ namespace InventoryTools.Logic.Columns.Abstract
             ImGui.TableNextColumn();
             if (currentValue != null)
             {
-                ImGuiUtil.RightAlign($"{currentValue.Value.Item1:n0}" + SeIconChar.Gil.ToIconString() + Divider + $"{currentValue.Value.Item2:n0}" + SeIconChar.Gil.ToIconString());
+                var text = $"{currentValue.Value.Item1:n0}" + SeIconChar.Gil.ToIconString() + Divider + $"{currentValue.Value.Item2:n0}" + SeIconChar.Gil.ToIconString();
+                var xOffset = ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize(text).X;
+                ImGuiUtil.VerticalAlignText(text, filterConfiguration.TableHeight, false, xOffset);
             }
             else
             {
-                ImGui.Text(EmptyText);
+                var text = EmptyText;
+                var xOffset = ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize(text).X;
+                ImGuiUtil.VerticalAlignText(text, filterConfiguration.TableHeight, false, xOffset);
             }
             return null;
         }

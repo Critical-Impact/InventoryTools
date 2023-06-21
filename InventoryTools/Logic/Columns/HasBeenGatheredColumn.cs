@@ -7,6 +7,7 @@ namespace InventoryTools.Logic.Columns;
 
 public class HasBeenGatheredColumn : CheckboxColumn
 {
+    public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
     public override bool? CurrentValue(InventoryItem item)
     {
         return CurrentValue(item.Item);
@@ -22,7 +23,8 @@ public class HasBeenGatheredColumn : CheckboxColumn
         return CurrentValue(item.InventoryItem);
     }
 
-    public override string Name { get; set; } = "Has been gathered before?";
+    public override string Name { get; set; } = "Logged in Gathering Log?";
+    public override string RenderName => "Logged?";
     public override float Width { get; set; } = 80;
 
     public override string HelpText { get; set; } =

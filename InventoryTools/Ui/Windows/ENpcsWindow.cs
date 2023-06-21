@@ -10,6 +10,7 @@ using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Images;
 using InventoryTools.Logic;
+using Lumina.Excel;
 using Lumina.Excel.GeneratedSheets;
 using OtterGui.Raii;
 
@@ -83,10 +84,7 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
                                     RowSize * ImGui.GetIO().FontGlobalScale), new Vector2(0, 0),
                                 new Vector2(1, 1), 0))
                         {
-                            PluginService.ChatUtilities.PrintFullMapLink(
-                                new GenericMapLocation(position.MapX, position.MapY,
-                                    position.MapEx,
-                                    position.PlaceNameEx), ex.Resident.FormattedSingular);
+                            PluginService.ChatUtilities.PrintFullMapLink(position, ex.Resident.FormattedSingular);
                         }
 
                         if (ImGui.IsItemHovered())

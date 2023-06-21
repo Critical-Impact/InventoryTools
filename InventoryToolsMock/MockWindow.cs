@@ -1,5 +1,7 @@
 using System.Numerics;
 using System.Text;
+using CriticalCommonLib;
+using CriticalCommonLib.Enums;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Resolvers;
 using CriticalCommonLib.Services.Ui;
@@ -23,10 +25,12 @@ public class MockWindow : Window
 
     public MockWindow(string name = "Mock Tools", ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
     {
+        _rng = new Random();
     }
     
     public MockWindow() : base("Mock Tools")
     {
+        _rng = new Random();
     }
 
     public override void OnClose()
@@ -41,6 +45,7 @@ public class MockWindow : Window
     public override Vector2 DefaultSize => new Vector2(200, 200);
     public override Vector2 MaxSize => new Vector2(2000, 2000);
     public override Vector2 MinSize => new Vector2(200, 200);
+    private Random _rng;
 
     public override void Draw()
     {
@@ -190,6 +195,34 @@ public class MockWindow : Window
             {
                 PluginService.InventoryMonitor.GenerateItemCounts();
             }
+            if (ImGui.Button("Push random item to player bag"))
+            {
+                var currentHistory = PluginService.InventoryHistory.GetHistory();
+                var activeCharacter = PluginService.CharacterMonitor.ActiveCharacter;
+                if (activeCharacter != null)
+                {
+                    var fromItem = new InventoryItem();
+                    var slot = (short)_rng.Next(0,35);
+                    fromItem.Slot = slot;
+                    fromItem.ItemId = 0;
+                    fromItem.SortedSlotIndex = slot;
+                    fromItem.SortedContainer = InventoryType.Bag0;
+                    fromItem.SortedCategory = InventoryCategory.CharacterBags;
+                    fromItem.RetainerId = activeCharacter.CharacterId;
+                    fromItem.Quantity = 0;
+                    var toItem = new InventoryItem();
+                    toItem.Slot = slot;
+                    toItem.ItemId = (uint)_rng.Next(1000,10000);
+                    toItem.SortedSlotIndex = slot;
+                    toItem.SortedContainer = InventoryType.Bag0;
+                    toItem.SortedCategory = InventoryCategory.CharacterBags;
+                    toItem.RetainerId = activeCharacter.CharacterId;
+                    toItem.Quantity = 1;
+                    
+                    currentHistory.Add(new InventoryChange(fromItem, toItem, InventoryChangeReason.Added, (uint)currentHistory.Count + 1));
+                }
+                PluginService.InventoryHistory.LoadExistingHistory(currentHistory);
+            }
             
             ImGui.EndTabItem();
         }
@@ -292,6 +325,11 @@ public class MockWindow : Window
             if (ImGui.Button("Mock Items Window"))
             {
                 PluginService.WindowService.ToggleWindow<MockGameItemsWindow>(MockGameItemsWindow.AsKey);
+            }
+
+            if (ImGui.Button("Inventory History Window"))
+            {
+                PluginService.WindowService.ToggleWindow<InventoryHistoryWindow>(InventoryHistoryWindow.AsKey);
             }
 
 

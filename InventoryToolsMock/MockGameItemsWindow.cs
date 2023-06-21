@@ -41,7 +41,7 @@ public class MockGameItemsWindow : Window
                             {
                                 if (sideChild.Success)
                                 {
-                                    foreach (var category in inventory.Value)
+                                    foreach (var category in inventory.Value.GetAllInventoriesByCategory())
                                     {
                                         if (!_selectedCategory.ContainsKey(inventory.Key))
                                         {
@@ -59,7 +59,7 @@ public class MockGameItemsWindow : Window
                             {
                                 if (mainChild.Success)
                                 {
-                                    foreach (var category in inventory.Value)
+                                    foreach (var category in inventory.Value.GetAllInventoriesByCategory())
                                     {
                                         if (_selectedCategory.ContainsKey(inventory.Key) &&
                                             _selectedCategory[inventory.Key] == category.Key)

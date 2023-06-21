@@ -5,6 +5,7 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Extensions;
+using InventoryTools.Ui.Widgets;
 
 namespace InventoryTools.Logic.Columns.Abstract
 {
@@ -28,6 +29,11 @@ namespace InventoryTools.Logic.Columns.Abstract
         public override (int,int)? CurrentValue(CraftItem currentValue)
         {
             return CurrentValue(currentValue.Item);
+        }
+        
+        public override (int,int)? CurrentValue(InventoryChange currentValue)
+        {
+            return CurrentValue(currentValue.InventoryItem);
         }
         
         public override IEnumerable<CraftItem> Filter(IEnumerable<CraftItem> items)
@@ -60,7 +66,10 @@ namespace InventoryTools.Logic.Columns.Abstract
         {
             DoDraw(CurrentValue(item), rowIndex, configuration);
         }
-
+        public override void Draw(FilterConfiguration configuration, InventoryChange item, int rowIndex)
+        {
+            DoDraw(CurrentValue(item), rowIndex, configuration);
+        }
         public override IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items)
         {
             return FilterText == "" ? items : items.Where(c =>
@@ -96,6 +105,21 @@ namespace InventoryTools.Logic.Columns.Abstract
             return FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(c);
+                if (currentValue == null)
+                {
+                    return false;
+                }
+
+                return currentValue.Value.Item1.PassesFilter(FilterText) || currentValue.Value.Item2.PassesFilter(FilterText);
+            });
+        }
+        
+        public override IEnumerable<InventoryChange> Filter(IEnumerable<InventoryChange> items)
+        {
+            var isChecked = FilterText != "";
+            return FilterText == "" ? items : items.Where(c =>
+            {
+                var currentValue = CurrentValue(c.InventoryItem);
                 if (currentValue == null)
                 {
                     return false;
@@ -174,24 +198,48 @@ namespace InventoryTools.Logic.Columns.Abstract
             });
         }
 
+        public override IEnumerable<InventoryChange> Sort(ImGuiSortDirection direction, IEnumerable<InventoryChange> items)
+        {
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(item =>
+            {
+                var currentValue = CurrentValue(item.InventoryItem);
+                if (currentValue == null)
+                {
+                    return 0;
+                }
+
+                return currentValue.Value.Item1;
+            }) : items.OrderByDescending(item =>
+            {
+                var currentValue = CurrentValue(item.InventoryItem);
+                if (currentValue == null)
+                {
+                    return 0;
+                }
+
+                return currentValue.Value.Item1;
+            });
+        }
+
         public override IColumnEvent? DoDraw((int, int)? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration)
         {
             ImGui.TableNextColumn();
             if (currentValue != null)
             {
-                ImGui.Text($"{currentValue.Value.Item1:n0}" + Divider + $"{currentValue.Value.Item2:n0}");
+                var text = $"{currentValue.Value.Item1:n0}" + Divider + $"{currentValue.Value.Item2:n0}";
+                ImGuiUtil.VerticalAlignText(text, filterConfiguration.TableHeight, false);
             }
             else
             {
-                ImGui.Text(EmptyText);
+                ImGuiUtil.VerticalAlignText(EmptyText, filterConfiguration.TableHeight, false);
             }
             return null;
         }
 
         public override void Setup(int columnIndex)
         {
-            ImGui.TableSetupColumn(Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
+            ImGui.TableSetupColumn(RenderName ?? Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
         }
     }
 }

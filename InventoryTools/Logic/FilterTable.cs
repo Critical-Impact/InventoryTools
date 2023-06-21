@@ -66,7 +66,7 @@ namespace InventoryTools.Logic
                     _refreshing = false;
                     PluginService.FrameworkService.RunOnFrameworkThread(() => { Refreshed?.Invoke(this); });
                 }
-                else
+                else if(FilterConfiguration.FilterType == FilterType.GameItemFilter)
                 {
                     PluginLog.Verbose("FilterTable: Refreshing");
                     var items = FilterConfiguration.FilterResult.AllItems.AsEnumerable();
@@ -89,6 +89,32 @@ namespace InventoryTools.Logic
 
                     Items = items.Where(c => c.NameString.ToString() != "").ToList();
                     RenderItems = Items.ToList();
+                    NeedsRefresh = false;
+                    _refreshing = false;
+                    PluginService.FrameworkService.RunOnFrameworkThread(() => { Refreshed?.Invoke(this); });
+                }
+                else
+                {
+                    PluginLog.Verbose("FilterTable: Refreshing");
+                    var items = FilterConfiguration.FilterResult.InventoryHistory.AsEnumerable();
+                    //items = PreFilterItems != null ? PreFilterItems.Invoke(items) : items;
+                    IsSearching = false;
+                    for (var index = 0; index < Columns.Count; index++)
+                    {
+                        var column = Columns[index];
+                        if (column.FilterText != "")
+                        {
+                            IsSearching = true;
+                        }
+
+                        items = column.Filter(items);
+                        if (SortColumn != null && index == SortColumn)
+                        {
+                            items = column.Sort(SortDirection ?? ImGuiSortDirection.None, items);
+                        }
+                    }
+                    InventoryChanges = items.Where(c => c.InventoryItem.FormattedName != "").ToList();
+                    RenderInventoryChanges = InventoryChanges.ToList();
                     NeedsRefresh = false;
                     _refreshing = false;
                     PluginService.FrameworkService.RunOnFrameworkThread(() => { Refreshed?.Invoke(this); });
@@ -272,7 +298,7 @@ namespace InventoryTools.Logic
                                 clipper.End();
                                 clipper.Destroy();
                             }
-                            else
+                            else if(FilterConfiguration.FilterType == FilterType.GameItemFilter)
                             {
                                 ImGuiListClipperPtr clipper;
                                 unsafe
@@ -297,6 +323,38 @@ namespace InventoryTools.Logic
                                             {
                                                 PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration,
                                                     (ItemEx)item, index);
+                                            }
+                                        }
+                                    }
+                                }
+
+                                clipper.End();
+                                clipper.Destroy();
+                            }
+                            else
+                            {
+                                ImGuiListClipperPtr clipper;
+                                unsafe
+                                {
+                                    clipper = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper_ImGuiListClipper());
+                                    clipper.ItemsHeight = 32;
+                                }
+
+                                clipper.Begin(InventoryChanges.Count);
+                                while (clipper.Step())
+                                {
+                                    for (var index = clipper.DisplayStart; index < clipper.DisplayEnd; index++)
+                                    {
+                                        var item = RenderInventoryChanges[index];
+                                        ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
+                                        for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+                                        {
+                                            var column = Columns[columnIndex];
+                                            column.Draw(FilterConfiguration, item, index);
+                                            ImGui.SameLine();
+                                            if (columnIndex == Columns.Count - 1)
+                                            {
+                                                PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration,item, index);
                                             }
                                         }
                                     }
@@ -377,6 +435,17 @@ namespace InventoryTools.Logic
                         csv.NextRecord();
                     }
                 }
+                else if (FilterConfiguration.FilterType == FilterType.HistoryFilter)
+                {
+                    foreach (var item in RenderInventoryChanges)
+                    {
+                        foreach (var column in Columns)
+                        {
+                            csv.WriteField(column.CsvExport(item));
+                        }
+                        csv.NextRecord();
+                    }
+                }
             }
         }
 
@@ -405,6 +474,19 @@ namespace InventoryTools.Logic
                 {
                     var newLine = new ExpandoObject() as IDictionary<string, Object>;
                     newLine["id"] = item.RowId;
+                    foreach (var column in Columns)
+                    {
+                        newLine[column.Name.ToLower()] = column.JsonExport(item);
+                    }
+                    lines.Add(newLine);
+                }
+            }
+            else if (FilterConfiguration.FilterType == FilterType.HistoryFilter)
+            {
+                foreach (var item in RenderInventoryChanges)
+                {
+                    var newLine = new ExpandoObject() as IDictionary<string, Object>;
+                    newLine["id"] = item.InventoryItem.ItemId;
                     foreach (var column in Columns)
                     {
                         newLine[column.Name.ToLower()] = column.JsonExport(item);

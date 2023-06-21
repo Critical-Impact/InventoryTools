@@ -9,6 +9,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class CraftAmountCanCraftColumn : IntegerColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Crafting;
         public override int? CurrentValue(InventoryItem item)
         {
             return 0;
@@ -26,7 +27,7 @@ namespace InventoryTools.Logic.Columns
 
         public override int? CurrentValue(CraftItem currentValue)
         {
-            return (int?) currentValue.QuantityCanCraft;
+            return (int?) (currentValue.QuantityCanCraft / currentValue.Yield);
         }
         
         public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
@@ -43,7 +44,8 @@ namespace InventoryTools.Logic.Columns
             }
         }
 
-        public override string Name { get; set; } = "Craftable";
+        public override string Name { get; set; } = "Amount can Craft";
+        public override string RenderName => "Craftable";
         public override float Width { get; set; } = 60;
         public override bool? CraftOnly => true;
         public override string HelpText { get; set; } =

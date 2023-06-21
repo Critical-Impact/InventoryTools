@@ -58,8 +58,15 @@ namespace InventoryTools.Ui
                 new PopupMenu.PopupMenuItemSelectable("Retainer Ventures Window", "ventures", OpenRetainerVenturesWindow,"Open the retainer ventures window."),
                 new PopupMenu.PopupMenuItemSelectable("Tetris", "tetris", OpenTetrisWindow,"Open the tetris window.", () => ConfigurationManager.Config.TetrisEnabled),
                 new PopupMenu.PopupMenuItemSeparator(),
+                new PopupMenu.PopupMenuItemSelectable("Inventory History Window", "inventoryhistory", OpenInventoryHistoryWindow,"Open the inventory history window."),
+                new PopupMenu.PopupMenuItemSeparator(),
                 new PopupMenu.PopupMenuItemSelectable("Help", "help", OpenHelpWindow,"Open the help window."),
             });
+
+        private static void OpenInventoryHistoryWindow(string obj)
+        {
+            PluginService.WindowService.OpenWindow<InventoryHistoryWindow>(InventoryHistoryWindow.AsKey);
+        }
 
         private static void OpenHelpWindow(string obj)
         {
@@ -230,7 +237,8 @@ namespace InventoryTools.Ui
                 {
                     new PopupMenu.PopupMenuItemSelectableAskName("Search Filter", "adf1", "New Search Filter", AddSearchFilter, "This will create a new filter that let's you search for specific items within your characters and retainers inventories."),
                     new PopupMenu.PopupMenuItemSelectableAskName("Sort Filter", "af2", "New Sort Filter", AddSortFilter, "This will create a new filter that let's you search for specific items within your characters and retainers inventories then determine where they should be moved to."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Game Item Filter", "af3", "New Game Item Filter", AddGameItemFilter, "This will create a filter that lets you search for all items in the game.")
+                    new PopupMenu.PopupMenuItemSelectableAskName("Game Item Filter", "af3", "New Game Item Filter", AddGameItemFilter, "This will create a filter that lets you search for all items in the game."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("History Filter", "af4", "New History Item Filter", AddHistoryFilter, "This will create a filter that lets you view historical data of how your inventory has changed."),
                 });
         }
         
@@ -238,6 +246,18 @@ namespace InventoryTools.Ui
         {
             var filterConfiguration = new FilterConfiguration(newName,
                 Guid.NewGuid().ToString("N"), FilterType.SearchFilter);
+            PluginService.FilterService.AddFilter(filterConfiguration);
+            Invalidate();
+            var configWindow = PluginService.WindowService.GetWindow<ConfigurationWindow>(ConfigurationWindow.AsKey);
+            configWindow.Open();
+            configWindow.BringToFront();
+            configWindow.SetActiveFilter(filterConfiguration);
+        }
+        
+        private void AddHistoryFilter(string newName, string id)
+        {
+            var filterConfiguration = new FilterConfiguration(newName,
+                Guid.NewGuid().ToString("N"), FilterType.HistoryFilter);
             PluginService.FilterService.AddFilter(filterConfiguration);
             Invalidate();
             var configWindow = PluginService.WindowService.GetWindow<ConfigurationWindow>(ConfigurationWindow.AsKey);
@@ -623,6 +643,10 @@ namespace InventoryTools.Ui
                                      filterConfiguration.FilterType.HasFlag(FilterType
                                          .CraftFilter))
                                     ||
+                                    (filter.AvailableIn.HasFlag(FilterType.HistoryFilter) &&
+                                     filterConfiguration.FilterType.HasFlag(FilterType
+                                         .HistoryFilter))
+                                    ||
                                     (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
                                      filterConfiguration.FilterType.HasFlag(FilterType
                                          .GameItemFilter)));
@@ -643,6 +667,9 @@ namespace InventoryTools.Ui
                                                      ||
                                                      (filter.AvailableIn.HasFlag(FilterType.CraftFilter) &&
                                                       filterConfiguration.FilterType.HasFlag(FilterType.CraftFilter))
+                                                     ||
+                                                     (filter.AvailableIn.HasFlag(FilterType.HistoryFilter) &&
+                                                      filterConfiguration.FilterType.HasFlag(FilterType.HistoryFilter))
                                                      ||
                                                      (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
                                                       filterConfiguration.FilterType.HasFlag(FilterType.GameItemFilter))
@@ -760,6 +787,8 @@ namespace InventoryTools.Ui
                         {
                             PluginService.Universalis.QueuePriceCheck(item.RowId);
                         }
+                        
+                        //TODO: Handle history price checking
                     }
 
                     ImGuiUtil.HoverTooltip("Refresh Market Prices");
@@ -872,6 +901,11 @@ namespace InventoryTools.Ui
                     if (SelectedConfiguration != null && SelectedConfiguration.FilterType == FilterType.GameItemFilter)
                     {
                         totalItems =  itemTable.RenderItems.Count + " items";
+                    }
+                    
+                    if (SelectedConfiguration != null && SelectedConfiguration.FilterType == FilterType.HistoryFilter)
+                    {
+                        totalItems =  itemTable.InventoryChanges.Count + " historical records";
                     }
 
                     var calcTextSize = ImGui.CalcTextSize(totalItems);

@@ -12,7 +12,7 @@ namespace InventoryTools.Logic.Filters
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Market;
 
         public override FilterType AvailableIn { get; set; } =
-            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter;
+            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter;
 
         public override bool? FilterItem(FilterConfiguration configuration,InventoryItem item)
         {

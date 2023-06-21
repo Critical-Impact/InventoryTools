@@ -40,6 +40,7 @@ namespace InventoryTools.Services
             AddOverlay(new FreeCompanyChestOverlay());
             AddOverlay(new InventoryMiragePrismBoxOverlay());
             AddOverlay(new CabinetWithdrawOverlay());
+            AddOverlay(new SelectIconStringOverlay());
             frameworkService.Update += FrameworkOnUpdate;
             PluginService.OnPluginLoaded += PluginServiceOnOnPluginLoaded;
         }
@@ -337,7 +338,6 @@ namespace InventoryTools.Services
             _disposed = true;         
         }
         
-            
         ~OverlayService()
         {
 #if DEBUG

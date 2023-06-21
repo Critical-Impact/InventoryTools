@@ -1,11 +1,13 @@
 ﻿using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
+using InventoryTools.Logic.Columns.Abstract;
 
 namespace InventoryTools.Logic.Columns
 {
     public class MarketBoardMinPriceColumn : MarketBoardPriceColumn
     {
-        
+        public override ColumnCategory ColumnCategory => ColumnCategory.Market;
+
         public override string HelpText { get; set; } =
             "Shows the minimum price of both the NQ and HQ form of the item. This data is sourced from universalis.";
         
@@ -50,6 +52,7 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "MB Minimum Price NQ/HQ";
+        public override string Name { get; set; } = "Market Board Minimum Price NQ/HQ";
+        public override string RenderName => "MB Min. Price NQ/HQ";
     }
 }

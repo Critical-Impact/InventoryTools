@@ -82,18 +82,10 @@ namespace InventoryToolsTesting
             if (_character != null && _retainer != null)
             {
                 _characterMonitor?.OverrideActiveCharacter(_character.CharacterId);
-                var inventory = Fixtures.GenerateBlankInventory(InventoryCategory.CharacterBags, _character);
-                var categoryDictionary = new Dictionary<InventoryCategory, List<InventoryItem>>();
-                categoryDictionary.Add(InventoryCategory.CharacterBags, inventory);
-                var inventories = new Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>();
-                inventories.Add(_character.CharacterId, categoryDictionary);
+                var inventory = Fixtures.GenerateBlankInventory(_character);
+                inventory.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, 1000, 1));
                 
-                var emptyList = searchFilter.GenerateFilteredList(inventories).Result;
-                Assert.True(emptyList.SortedItems.All(c => c.InventoryItem.IsEmpty));
-
-                inventory[0] = Fixtures.GenerateItem(_character, InventoryType.Bag0, 0, 1000, 1);
-                
-                var oneList = searchFilter.GenerateFilteredList(inventories).Result;
+                var oneList = searchFilter.GenerateFilteredList(new List<Inventory> { inventory }).Result;
                 Assert.AreEqual( 1, oneList.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
             }
         }
@@ -120,31 +112,17 @@ namespace InventoryToolsTesting
                 _characterMonitor?.OverrideActiveRetainer(_retainer.CharacterId);
                 _characterMonitor?.OverrideActiveCharacter(_character.CharacterId);
 
-                var inventories = new Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>();
+                var inventory = Fixtures.GenerateBlankInventory(_character);
+                var retainerInventory = Fixtures.GenerateBlankInventory(_retainer);
+                var retainerInventory2 = Fixtures.GenerateBlankInventory(_retainer2);
+                var inventories = new List<Inventory>() { inventory, retainerInventory, retainerInventory2 };
 
-                
-                var inventory = Fixtures.GenerateBlankInventory(InventoryCategory.CharacterBags, _character);
-                var categoryDictionary = new Dictionary<InventoryCategory, List<InventoryItem>>();
-                categoryDictionary.Add(InventoryCategory.CharacterBags, inventory);   
-                
-                var retainerInventory = Fixtures.GenerateBlankInventory(InventoryCategory.RetainerBags, _retainer);
-                var retainerCategoryDictionary = new Dictionary<InventoryCategory, List<InventoryItem>>();
-                retainerCategoryDictionary.Add(InventoryCategory.RetainerBags, retainerInventory);
-                
-                var retainerInventory2 = Fixtures.GenerateBlankInventory(InventoryCategory.RetainerBags, _retainer2);
-                var retainerCategoryDictionary2 = new Dictionary<InventoryCategory, List<InventoryItem>>();
-                retainerCategoryDictionary2.Add(InventoryCategory.RetainerBags, retainerInventory2);
-                
-                inventories.Add(_character.CharacterId, categoryDictionary);
-                inventories.Add(_retainer.CharacterId, retainerCategoryDictionary);
-                inventories.Add(_retainer2.CharacterId, retainerCategoryDictionary2);
-                
                 //Nothing to sort
                 var emptyList = searchFilter.GenerateFilteredList(inventories).Result;
                 Assert.True(emptyList.SortedItems.All(c => c.InventoryItem.IsEmpty));
 
                 //1 item to retainer
-                inventory[0] = Fixtures.GenerateItem(_character, InventoryType.Bag0, 0, ryeFlour.RowId, 1);
+                inventory.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
                 var oneList = searchFilter.GenerateFilteredList( inventories).Result;
                 Assert.AreEqual( 1, oneList.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
 
@@ -153,25 +131,25 @@ namespace InventoryToolsTesting
                 Assert.True(searchFilter.GenerateFilteredList( inventories).Result.SortedItems.All(c => c.InventoryItem.IsEmpty));
                 
                 //Duplicates only, 1 item to retainer
-                retainerInventory[0] = Fixtures.GenerateItem(_retainer, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1);
+                retainerInventory.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1));
                 Assert.AreEqual(1, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 
                 //Duplicates only, 1 item to retainer, add a unrelated item
-                retainerInventory[1] = Fixtures.GenerateItem(_retainer, InventoryType.RetainerBag0, 1, wheatFlour.RowId, 1);
+                retainerInventory.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 1, wheatFlour.RowId, 1));
                 Assert.AreEqual(1,searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 
                 //Duplicates only, max out item in existing inventory
-                retainerInventory[0] = Fixtures.GenerateItem(_retainer, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.StackSize);
+                retainerInventory.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.StackSize));
                 var generateFilteredList = searchFilter.GenerateFilteredList( inventories);
                 Assert.AreEqual(1, generateFilteredList.Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 
                 //Duplicates only, max out item in existing inventory then spill over
-                retainerInventory[0] = Fixtures.GenerateItem(_retainer, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.StackSize - 1);
-                inventory[0] = Fixtures.GenerateItem(_character, InventoryType.Bag0, 0, ryeFlour.RowId, 2);
+                retainerInventory.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.StackSize - 1));
+                inventory.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 2));
                 Assert.AreEqual(2, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 
                 //Duplicates only, max out retainer, should go nowhere, boy got some cinnamon, 2 items in inventory
-                Fixtures.FillInventory(retainerInventory, cinnamon.RowId, cinnamon.StackSize);
+                Fixtures.FillInventory(retainerInventory, InventoryCategory.RetainerBags, cinnamon.RowId, cinnamon.StackSize);
                 Assert.AreEqual(0,searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 Assert.AreEqual(0, searchFilter.GenerateFilteredList( inventories).Result.UnsortableItems.Count(c => !c.IsEmpty));
                 
@@ -186,9 +164,9 @@ namespace InventoryToolsTesting
                 Assert.AreEqual(1, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer2.CharacterId));
                 
                 //Item should goto 2nd retainer first
-                Fixtures.FillInventory(retainerInventory, 0, 0);
-                inventory[0] = Fixtures.GenerateItem(_character, InventoryType.Bag0, 0, ryeFlour.RowId, 1);
-                retainerInventory2[0] = Fixtures.GenerateItem(_retainer2, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.StackSize - 1);
+                Fixtures.FillInventory(retainerInventory, InventoryCategory.RetainerBags, 0, 0);
+                inventory.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
+                retainerInventory2.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.StackSize - 1));
                 Assert.True(searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer2.CharacterId) == 1);
                 
                 //Filter items when in specific retainer, should show 0 sorted items as we are in the first retainer and not the 2nd
@@ -225,24 +203,16 @@ namespace InventoryToolsTesting
                 searchFilter.DestinationInventories = new List<(ulong, InventoryCategory)>() {(_character.CharacterId, InventoryCategory.CharacterSaddleBags)};
                 _characterMonitor?.OverrideActiveCharacter(_character.CharacterId);
 
-                var inventories = new Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>();
-
-                
-                var inventory = Fixtures.GenerateBlankInventory(InventoryCategory.CharacterBags, _character);
-                var categoryDictionary = new Dictionary<InventoryCategory, List<InventoryItem>>();
-                categoryDictionary.Add(InventoryCategory.CharacterBags, inventory);
-
-                var saddleBag = Fixtures.GenerateBlankInventory(InventoryCategory.CharacterSaddleBags, _character);
-                categoryDictionary.Add(InventoryCategory.CharacterSaddleBags, saddleBag);
-
-                inventories.Add(_character.CharacterId, categoryDictionary);
+                var inventory = Fixtures.GenerateBlankInventory(_character);
+                var saddleBag = Fixtures.GenerateBlankInventory(_character);
+                var inventories = new List<Inventory>() { inventory, saddleBag };
                 
                 //Nothing to sort
                 var emptyList = searchFilter.GenerateFilteredList( inventories).Result;
                 Assert.True(emptyList.SortedItems.All(c => c.InventoryItem.IsEmpty));
 
                 //1 item to retainer
-                inventory[0] = Fixtures.GenerateItem(_character, InventoryType.Bag0, 0, ryeFlour.RowId, 1);
+                inventory.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
                 var oneList = searchFilter.GenerateFilteredList( inventories).Result;
                 Assert.AreEqual( 1, oneList.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 
@@ -262,7 +232,7 @@ namespace InventoryToolsTesting
             
             if (_character != null)
             {
-                var emptyList = searchFilter.GenerateFilteredList( new Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>()).Result;
+                var emptyList = searchFilter.GenerateFilteredList( new List<Inventory>()).Result;
                 Assert.AreEqual(16, emptyList.AllItems.Count);
             }
         }
@@ -289,27 +259,16 @@ namespace InventoryToolsTesting
                 _characterMonitor?.OverrideActiveRetainer(_retainer.CharacterId);
                 _characterMonitor?.OverrideActiveCharacter(_character.CharacterId);
 
-                var inventories = new Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>();
                 
-                var inventory = Fixtures.GenerateBlankInventory(InventoryCategory.CharacterBags, _character);
-                var categoryDictionary = new Dictionary<InventoryCategory, List<InventoryItem>>();
-                categoryDictionary.Add(InventoryCategory.CharacterBags, inventory);   
+                var inventory = Fixtures.GenerateBlankInventory(_character);
+                var retainerInventory = Fixtures.GenerateBlankInventory(_retainer);
+                var retainerInventory2 = Fixtures.GenerateBlankInventory(_retainer2);
+
+                var inventories = new List<Inventory>() { inventory, retainerInventory, retainerInventory2 };
                 
-                var retainerInventory = Fixtures.GenerateBlankInventory(InventoryCategory.RetainerBags, _retainer);
-                var retainerCategoryDictionary = new Dictionary<InventoryCategory, List<InventoryItem>>();
-                retainerCategoryDictionary.Add(InventoryCategory.RetainerBags, retainerInventory);
-                
-                var retainerInventory2 = Fixtures.GenerateBlankInventory(InventoryCategory.RetainerBags, _retainer2);
-                var retainerCategoryDictionary2 = new Dictionary<InventoryCategory, List<InventoryItem>>();
-                retainerCategoryDictionary2.Add(InventoryCategory.RetainerBags, retainerInventory2);
-                
-                inventories.Add(_character.CharacterId, categoryDictionary);
-                inventories.Add(_retainer.CharacterId, retainerCategoryDictionary);
-                inventories.Add(_retainer2.CharacterId, retainerCategoryDictionary2);
-                
-                inventory[0] = Fixtures.GenerateItem(_character, InventoryType.Bag0, 0, ryeFlour.RowId, 1);
-                retainerInventory[0] = Fixtures.GenerateItem(_retainer, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1);
-                retainerInventory2[0] = Fixtures.GenerateItem(_retainer2, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1);
+                inventory.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
+                retainerInventory.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1));
+                retainerInventory2.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1));
                 
                 //1 in player bag, 1 in retainer bag 1 as retainer 1 is active
                 Assert.AreEqual(2, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
@@ -336,8 +295,10 @@ namespace InventoryToolsTesting
             var filterManager = new FilterService();
             
             var searchFilter = new FilterConfiguration();
-            searchFilter.SourceAllCharacters = true;
-            searchFilter.SourceAllRetainers = true;
+            searchFilter.SourceCategories = new HashSet<InventoryCategory>()
+            {
+                InventoryCategory.RetainerBags, InventoryCategory.CharacterBags
+            };
             searchFilter.FilterType = FilterType.SearchFilter;
             
             //Flour, just cause
@@ -350,33 +311,17 @@ namespace InventoryToolsTesting
                 _characterMonitor?.OverrideActiveRetainer(_retainer.CharacterId);
                 _characterMonitor?.OverrideActiveCharacter(_character.CharacterId);
 
-                var inventories = new Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>();
-                
-                var inventory = Fixtures.GenerateBlankInventory(InventoryCategory.CharacterBags, _character);
-                var categoryDictionary = new Dictionary<InventoryCategory, List<InventoryItem>>();
-                categoryDictionary.Add(InventoryCategory.CharacterBags, inventory);   
-                
-                var retainerInventory = Fixtures.GenerateBlankInventory(InventoryCategory.RetainerBags, _retainer);
-                var retainerCategoryDictionary = new Dictionary<InventoryCategory, List<InventoryItem>>();
-                retainerCategoryDictionary.Add(InventoryCategory.RetainerBags, retainerInventory);
-                
-                var retainerInventory2 = Fixtures.GenerateBlankInventory(InventoryCategory.RetainerBags, _retainer2);
-                var retainerCategoryDictionary2 = new Dictionary<InventoryCategory, List<InventoryItem>>();
-                retainerCategoryDictionary2.Add(InventoryCategory.RetainerBags, retainerInventory2);
-                
-                var characterInventory2 = Fixtures.GenerateBlankInventory(InventoryCategory.CharacterBags, _character2);
-                var characterCategoryDictionary2 = new Dictionary<InventoryCategory, List<InventoryItem>>();
-                characterCategoryDictionary2.Add(InventoryCategory.CharacterBags, characterInventory2);
-                
-                inventories.Add(_character.CharacterId, categoryDictionary);
-                inventories.Add(_retainer.CharacterId, retainerCategoryDictionary);
-                inventories.Add(_retainer2.CharacterId, retainerCategoryDictionary2);
-                inventories.Add(_character2.CharacterId, characterCategoryDictionary2);
-                
-                inventory[0] = Fixtures.GenerateItem(_character, InventoryType.Bag0, 0, ryeFlour.RowId, 1);
-                retainerInventory[0] = Fixtures.GenerateItem(_retainer, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1);
-                retainerInventory2[0] = Fixtures.GenerateItem(_retainer2, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1);
-                characterInventory2[0] = Fixtures.GenerateItem(_character2, InventoryType.Bag0, 0, ryeFlour.RowId, 1);
+                var inventory = Fixtures.GenerateBlankInventory(_character);
+                var retainerInventory = Fixtures.GenerateBlankInventory(_retainer);
+                var retainerInventory2 = Fixtures.GenerateBlankInventory(_retainer2);
+                var characterInventory2 = Fixtures.GenerateBlankInventory(_character2);
+                var inventories = new List<Inventory>()
+                    { inventory, retainerInventory, retainerInventory2, characterInventory2 }; 
+
+                inventory.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
+                retainerInventory.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1));
+                retainerInventory2.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1));
+                characterInventory2.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
                 
                 //Cross character off, should pick up 3
                 Assert.AreEqual(3, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
@@ -393,25 +338,30 @@ namespace InventoryToolsTesting
                 //Test cross character destination filter setting
                 searchFilter.DestinationIncludeCrossCharacter = true;
                 searchFilter.FilterType = FilterType.SortingFilter;
-                searchFilter.DestinationAllCharacters = true;
-
-                //With a active retainer, this is 2 because the items get merged into the 1 slot
+                searchFilter.DestinationCategories = new HashSet<InventoryCategory>()
+                {
+                    InventoryCategory.CharacterBags
+                };
+                searchFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
+                //With a active retainer and filter items in retainers set to yes, only 1 item shows up
                 var resultSortedItems = searchFilter.GenerateFilteredList( inventories).Result.SortedItems;
-                Assert.AreEqual(2, resultSortedItems.Count(c => !c.InventoryItem.IsEmpty));
+                Assert.AreEqual(1, resultSortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 
                 //Without a active retainer
                 _characterMonitor?.OverrideActiveRetainer(0);
-                Assert.AreEqual(2, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+                Assert.AreEqual(4, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
 
 
                 //Test cross character destination filter setting override
-                searchFilter.SourceAllRetainers = false;
+                searchFilter.SourceCategories = new HashSet<InventoryCategory>()
+                {
+                    InventoryCategory.CharacterBags
+                };
                 ConfigurationManager.Config.DisplayCrossCharacter = true;
                 searchFilter.DestinationIncludeCrossCharacter = false;
                 searchFilter.SourceIncludeCrossCharacter = true;
 
-                //Because character 2 isnt the active character it wont actually try to sort from character 2 to character 0, hence the 0
-                Assert.AreEqual(0, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+                Assert.AreEqual(1, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
             }
         }
         
@@ -439,33 +389,19 @@ namespace InventoryToolsTesting
                 _characterMonitor?.OverrideActiveRetainer(_retainer.CharacterId);
                 _characterMonitor?.OverrideActiveCharacter(_character.CharacterId);
 
-                var inventories = new Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>();
                 
-                var inventory = Fixtures.GenerateBlankInventory(InventoryCategory.CharacterBags, _character);
-                var categoryDictionary = new Dictionary<InventoryCategory, List<InventoryItem>>();
-                categoryDictionary.Add(InventoryCategory.CharacterBags, inventory);   
+                var inventory = Fixtures.GenerateBlankInventory(_character);
+                var retainerInventory = Fixtures.GenerateBlankInventory(_retainer);
+                var retainerInventory2 = Fixtures.GenerateBlankInventory(_retainer2);
+                var characterInventory2 = Fixtures.GenerateBlankInventory(_character2);
+                var inventories = new List<Inventory>()
+                    { inventory, retainerInventory, retainerInventory2, characterInventory2 };
                 
-                var retainerInventory = Fixtures.GenerateBlankInventory(InventoryCategory.RetainerBags, _retainer);
-                var retainerCategoryDictionary = new Dictionary<InventoryCategory, List<InventoryItem>>();
-                retainerCategoryDictionary.Add(InventoryCategory.RetainerBags, retainerInventory);
                 
-                var retainerInventory2 = Fixtures.GenerateBlankInventory(InventoryCategory.RetainerBags, _retainer2);
-                var retainerCategoryDictionary2 = new Dictionary<InventoryCategory, List<InventoryItem>>();
-                retainerCategoryDictionary2.Add(InventoryCategory.RetainerBags, retainerInventory2);
-                
-                var characterInventory2 = Fixtures.GenerateBlankInventory(InventoryCategory.CharacterBags, _character2);
-                var characterCategoryDictionary2 = new Dictionary<InventoryCategory, List<InventoryItem>>();
-                characterCategoryDictionary2.Add(InventoryCategory.CharacterBags, characterInventory2);
-                
-                inventories.Add(_character.CharacterId, categoryDictionary);
-                inventories.Add(_retainer.CharacterId, retainerCategoryDictionary);
-                inventories.Add(_retainer2.CharacterId, retainerCategoryDictionary2);
-                inventories.Add(_character2.CharacterId, characterCategoryDictionary2);
-                
-                inventory[0] = Fixtures.GenerateItem(_character, InventoryType.Bag0, 0, ryeFlour.RowId, 1);
-                retainerInventory[0] = Fixtures.GenerateItem(_retainer, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1);
-                retainerInventory2[0] = Fixtures.GenerateItem(_retainer2, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1);
-                characterInventory2[0] = Fixtures.GenerateItem(_character2, InventoryType.Bag0, 0, ryeFlour.RowId, 1);
+                inventory.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
+                retainerInventory.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1));
+                retainerInventory2.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1));
+                characterInventory2.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
                 
                 //Just character bags as source
                 Assert.AreEqual(1, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
@@ -487,25 +423,25 @@ namespace InventoryToolsTesting
                 var retainerMarket = new List<InventoryItem>();
                 
                 //pactmaker's garden scythe
-                retainerMarket.Add(Fixtures.GenerateItem(_retainer, InventoryType.RetainerMarket, 0, 36707, 1));
+                retainerMarket.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 0, 36707, 1));
                 //super potion
-                retainerMarket.Add(Fixtures.GenerateItem(_retainer, InventoryType.RetainerMarket, 1, 23167, 1));
+                retainerMarket.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 1, 23167, 1));
                 
                 //honey muffin
-                retainerMarket.Add(Fixtures.GenerateItem(_retainer, InventoryType.RetainerMarket, 2, 4698, 1));
+                retainerMarket.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 2, 4698, 1));
                 //bubble chocolate
-                retainerMarket.Add(Fixtures.GenerateItem(_retainer, InventoryType.RetainerMarket, 3, 4735, 1));
+                retainerMarket.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 3, 4735, 1));
                 //tsai tou vounou
-                retainerMarket.Add(Fixtures.GenerateItem(_retainer, InventoryType.RetainerMarket, 4, 36060, 1));
+                retainerMarket.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 4, 36060, 1));
                 //giant pumpkin
-                retainerMarket.Add(Fixtures.GenerateItem(_retainer, InventoryType.RetainerMarket, 5, 36100, 1));
+                retainerMarket.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 5, 36100, 1));
                 
                 //quickarm materia X
-                retainerMarket.Add(Fixtures.GenerateItem(_retainer, InventoryType.RetainerMarket, 6, 33941, 1));
+                retainerMarket.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 6, 33941, 1));
                 //thavnarian onion
-                retainerMarket.Add(Fixtures.GenerateItem(_retainer, InventoryType.RetainerMarket, 7, 8166, 1));
+                retainerMarket.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 7, 8166, 1));
                 //folded futon
-                retainerMarket.Add(Fixtures.GenerateItem(_retainer, InventoryType.RetainerMarket, 8, 28976, 1));
+                retainerMarket.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 8, 28976, 1));
 
                 retainerMarket = retainerMarket.SortByRetainerMarketOrder()
                     .ToList();
@@ -518,18 +454,18 @@ namespace InventoryToolsTesting
                 var retainerMarket2 = new List<InventoryItem>();
                 
                 //sailor brais
-                retainerMarket2.Add(Fixtures.GenerateItem(_retainer, InventoryType.RetainerMarket, 0, 7537, 1));
+                retainerMarket2.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 0, 7537, 1));
                 //allagan aetherstone - weapon
-                retainerMarket2.Add(Fixtures.GenerateItem(_retainer, InventoryType.RetainerMarket, 1, 15098, 1));
+                retainerMarket2.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 1, 15098, 1));
                 
                 //eastern teahouse bench
-                retainerMarket2.Add(Fixtures.GenerateItem(_retainer, InventoryType.RetainerMarket, 2, 17983, 1));
+                retainerMarket2.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 2, 17983, 1));
                 
                 //apparel showcase
-                retainerMarket2.Add(Fixtures.GenerateItem(_retainer, InventoryType.RetainerMarket, 3, 32234, 1));
+                retainerMarket2.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 3, 32234, 1));
                 
                 //factory beam
-                retainerMarket2.Add(Fixtures.GenerateItem(_retainer, InventoryType.RetainerMarket, 4, 30403, 1));
+                retainerMarket2.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 4, 30403, 1));
                 
 
                 retainerMarket2 = retainerMarket2.SortByRetainerMarketOrder()
@@ -543,13 +479,13 @@ namespace InventoryToolsTesting
                 var retainerMarket3 = new List<InventoryItem>();
                 
                 //crystarium stove
-                retainerMarket3.Add(Fixtures.GenerateItem(_retainer, InventoryType.RetainerMarket, 0, 27284, 1));
+                retainerMarket3.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 0, 27284, 1));
                 
                 //necklace display stand
-                retainerMarket3.Add(Fixtures.GenerateItem(_retainer, InventoryType.RetainerMarket, 1, 28149, 1));
+                retainerMarket3.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 1, 28149, 1));
                 
                 //restaurant showcase
-                retainerMarket3.Add(Fixtures.GenerateItem(_retainer, InventoryType.RetainerMarket, 2, 35579, 1));
+                retainerMarket3.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 2, 35579, 1));
 
                 retainerMarket3 = retainerMarket3.SortByRetainerMarketOrder()
                     .ToList();

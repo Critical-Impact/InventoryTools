@@ -16,6 +16,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class AcquisitionSourceIconsColumn : Column<List<IItemSource>?>
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override List<IItemSource>? CurrentValue(InventoryItem item)
         {
             return CurrentValue(item.Item);
@@ -34,6 +35,11 @@ namespace InventoryTools.Logic.Columns
         public override List<IItemSource>? CurrentValue(CraftItem item)
         {
             return item.Item.Sources;
+        }
+        
+        public override List<IItemSource>? CurrentValue(InventoryChange currentValue)
+        {
+            return CurrentValue(currentValue.InventoryItem);
         }
 
         public override IColumnEvent? DoDraw(List<IItemSource>? currentValue, int rowIndex,
@@ -121,7 +127,7 @@ namespace InventoryTools.Logic.Columns
 
         public override void Setup(int columnIndex)
         {
-            ImGui.TableSetupColumn(Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
+            ImGui.TableSetupColumn(RenderName ?? Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
         }
 
 
@@ -221,6 +227,20 @@ namespace InventoryTools.Logic.Columns
                 return currentValue.Any(c => c.FormattedName.ToLower().PassesFilter(FilterComparisonText));
             });
         }
+        
+        public override IEnumerable<InventoryChange> Filter(IEnumerable<InventoryChange> items)
+        {
+            return FilterText == "" ? items : items.Where(c =>
+            {
+                var currentValue = CurrentValue(c.InventoryItem);
+                if (currentValue == null)
+                {
+                    return false;
+                }
+
+                return currentValue.Any(c => c.FormattedName.ToLower().PassesFilter(FilterComparisonText));
+            });
+        }
 
         public override IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
         {
@@ -270,6 +290,19 @@ namespace InventoryTools.Logic.Columns
             }) : items.OrderByDescending(item =>
             {
                 var currentValue = CurrentValue(item);
+                return currentValue?.Count ?? 0;
+            });
+        }
+        
+        public override IEnumerable<InventoryChange> Sort(ImGuiSortDirection direction, IEnumerable<InventoryChange> items)
+        {
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(item =>
+            {
+                var currentValue = CurrentValue(item.InventoryItem);
+                return currentValue?.Count ?? 0;
+            }) : items.OrderByDescending(item =>
+            {
+                var currentValue = CurrentValue(item.InventoryItem);
                 return currentValue?.Count ?? 0;
             });
         }

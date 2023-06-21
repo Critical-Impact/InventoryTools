@@ -7,6 +7,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class IsCraftingItemColumn : CheckboxColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override bool? CurrentValue(InventoryItem item)
         {
             return CurrentValue(item.Item);
@@ -22,7 +23,8 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "Is Crafting?";
+        public override string Name { get; set; } = "Is Craft Component?";
+        public override string RenderName => "Is Craft Item?";
         public override float Width { get; set; } = 100;
         public override string HelpText { get; set; } = "Can this item be used to craft another item?";
         public override bool HasFilter { get; set; } = true;

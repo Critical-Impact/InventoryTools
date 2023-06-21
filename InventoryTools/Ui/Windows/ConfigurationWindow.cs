@@ -114,7 +114,8 @@ namespace InventoryTools.Ui
                 {
                     new PopupMenu.PopupMenuItemSelectableAskName("Search Filter", "adf1", "New Search Filter", AddSearchFilter, "This will create a new filter that let's you search for specific items within your characters and retainers inventories."),
                     new PopupMenu.PopupMenuItemSelectableAskName("Sort Filter", "af2", "New Sort Filter", AddSortFilter, "This will create a new filter that let's you search for specific items within your characters and retainers inventories then determine where they should be moved to."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Game Item Filter", "af3", "New Game Item Filter", AddGameItemFilter, "This will create a filter that lets you search for all items in the game.")
+                    new PopupMenu.PopupMenuItemSelectableAskName("Game Item Filter", "af3", "New Game Item Filter", AddGameItemFilter, "This will create a filter that lets you search for all items in the game."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("History Filter", "af4", "New History Item Filter", AddHistoryFilter, "This will create a filter that lets you view historical data of how your inventory has changed."),
                 });
             
             _addSampleMenu = new PopupMenu("addSampleFilter", PopupMenu.PopupMenuButtons.LeftRight,
@@ -250,6 +251,13 @@ namespace InventoryTools.Ui
         {
             PluginService.FilterService.AddFilter(new FilterConfiguration(newName,
                 Guid.NewGuid().ToString("N"), FilterType.SearchFilter));
+            SetNewFilterActive();
+        }
+
+        private void AddHistoryFilter(string newName, string id)
+        {
+            PluginService.FilterService.AddFilter(new FilterConfiguration(newName,
+                Guid.NewGuid().ToString("N"), FilterType.HistoryFilter));
             SetNewFilterActive();
         }
 

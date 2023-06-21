@@ -28,6 +28,11 @@ namespace InventoryTools.Logic.Columns.Abstract
             return CurrentValue(currentValue.Item);
         }
         
+        public override List<ushort>? CurrentValue(InventoryChange currentValue)
+        {
+            return CurrentValue(currentValue.InventoryItem);
+        }
+        
         public override IEnumerable<CraftItem> Filter(IEnumerable<CraftItem> items)
         {
             return items;
@@ -60,7 +65,10 @@ namespace InventoryTools.Logic.Columns.Abstract
         {
             DoDraw(CurrentValue(item), rowIndex, configuration);
         }
-
+        public override void Draw(FilterConfiguration configuration, InventoryChange item, int rowIndex)
+        {
+            DoDraw(CurrentValue(item), rowIndex, configuration);
+        }
         public override IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items)
         {
             return items;
@@ -112,7 +120,7 @@ namespace InventoryTools.Logic.Columns.Abstract
 
         public override void Setup(int columnIndex)
         {
-            ImGui.TableSetupColumn(Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
+            ImGui.TableSetupColumn(RenderName ?? Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
         }
     }
 }

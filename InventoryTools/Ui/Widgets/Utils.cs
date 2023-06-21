@@ -148,5 +148,63 @@ public static class ImGuiUtil
     }
 
     public static Vector2 RotateVector(Vector2 v, float aCos, float aSin) => new(v.X * aCos - v.Y * aSin, v.X * aSin + v.Y * aCos);
+    
+    public static void RightAlignText(string text, float offset = 0)
+    {
+        offset = ImGui.GetContentRegionAvail().X - offset - ImGui.CalcTextSize(text).X;
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + offset);
+    }
 
+    public static void VerticalAlignText( string text, int cellHeight, bool autoWrap, float? xOffset = null)
+    {
+        var columnWidth = ImGui.GetColumnWidth();
+        var frameHeight = cellHeight / 2.0f;
+        var calcText = ImGui.CalcTextSize(text);
+        var textHeight = calcText.X >= columnWidth ? 0 : calcText.Y / 2.0f;
+        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + frameHeight - textHeight);
+        if (xOffset != null)
+        {
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + xOffset.Value);
+        }
+        if (autoWrap)
+        {
+            ImGui.PushTextWrapPos();
+        }
+        ImGui.TextUnformatted(text);
+        if (autoWrap)
+        {
+            ImGui.PopTextWrapPos();
+        }
+    }
+
+    public static void VerticalAlignTextColored(string text, Vector4 colour, int cellHeight,  bool autoWrap)
+    {
+        var columnWidth = ImGui.GetColumnWidth();
+        var frameHeight = cellHeight / 2.0f;
+        var calcText = ImGui.CalcTextSize(text);
+        if (calcText.X <= columnWidth || !autoWrap)
+        {
+            var textHeight = calcText.Y / 2.0f;
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + frameHeight - textHeight);
+        }
+
+        if (autoWrap)
+        {
+            ImGui.PushTextWrapPos();
+        }
+        using var _ = ImRaii.PushColor(ImGuiCol.Text,colour);
+        ImGui.TextUnformatted(text);
+        if (autoWrap)
+        {
+            ImGui.PopTextWrapPos();
+        }
+    }
+
+
+    public static void VerticalAlignButton(int cellHeight)
+    {
+        var frameHeight = cellHeight / 2.0f;
+        var textHeight = (ImGui.GetFontSize() * 1 + ImGui.GetStyle().FramePadding.Y * 2) / 2.0f;
+        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + frameHeight - textHeight);
+    }
 }

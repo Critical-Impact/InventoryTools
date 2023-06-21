@@ -31,6 +31,11 @@ namespace InventoryTools.Logic.Columns.Abstract
         {
             return CurrentValue(currentValue.Item);
         }
+        
+        public override bool? CurrentValue(InventoryChange currentValue)
+        {
+            return CurrentValue(currentValue.InventoryItem);
+        }
 
         public override IEnumerable<CraftItem> Filter(IEnumerable<CraftItem> items)
         {
@@ -117,7 +122,10 @@ namespace InventoryTools.Logic.Columns.Abstract
         {
             DoDraw(CurrentValue(item), rowIndex, configuration);
         }
-
+        public override void Draw(FilterConfiguration configuration, InventoryChange item, int rowIndex)
+        {
+            DoDraw(CurrentValue(item), rowIndex, configuration);
+        }
         public override IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items)
         {
             bool isChecked;
@@ -206,6 +214,34 @@ namespace InventoryTools.Logic.Columns.Abstract
             });
         }
 
+        public override IEnumerable<InventoryChange> Filter(IEnumerable<InventoryChange> items)
+        {
+            bool isChecked;
+            if (FilterText == "")
+            {
+                return items;
+            }
+
+            if (FilterText == "true")
+            {
+                isChecked = true;
+            }
+            else
+            {
+                isChecked = false;
+            }
+            return FilterText == "" ? items : items.Where(c =>
+            {
+                var currentValue = CurrentValue(c.InventoryItem);
+                if (!currentValue.HasValue)
+                {
+                    return false;
+                }
+
+                return isChecked && currentValue.Value || !isChecked && !currentValue.Value;
+            });
+        }
+
         private int GetSortOrder(ItemEx c)
         {
             var currentValue = CurrentValue(c);
@@ -231,6 +267,11 @@ namespace InventoryTools.Logic.Columns.Abstract
         {
             return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => GetSortOrder(c.InventoryItem.Item)) : items.OrderByDescending(c => GetSortOrder(c.InventoryItem.Item));
         }
+
+        public override IEnumerable<InventoryChange> Sort(ImGuiSortDirection direction, IEnumerable<InventoryChange> items)
+        {
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => GetSortOrder(c.InventoryItem.Item)) : items.OrderByDescending(c => GetSortOrder(c.InventoryItem.Item));
+        }
         
 
         public override IColumnEvent? DoDraw(bool? currentValue, int rowIndex, FilterConfiguration filterConfiguration)
@@ -246,7 +287,7 @@ namespace InventoryTools.Logic.Columns.Abstract
 
         public override void Setup(int columnIndex)
         {
-            ImGui.TableSetupColumn(Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
+            ImGui.TableSetupColumn(RenderName ?? Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
         }
     }
 }

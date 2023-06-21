@@ -693,6 +693,7 @@ namespace InventoryTools.Ui
                     if (_craftItem == null)
                     {
                         _craftItem = new CraftItem(Item.RowId, InventoryItem.ItemFlags.None, 1,null, true);
+                        //TODO: Rework this
                     }
                     if (ImGui.CollapsingHeader("Company Craft Recipe (" + _craftItem.ChildCrafts.Count + ")"))
                     {
@@ -782,16 +783,13 @@ namespace InventoryTools.Ui
                                     new Vector2(32 * ImGui.GetIO().FontGlobalScale, 32 * ImGui.GetIO().FontGlobalScale),
                                     new Vector2(0, 0), new Vector2(1, 1), 0))
                             {
-                                PluginService.ChatUtilities.PrintFullMapLink(
-                                    new GenericMapLocation(position.Position.X, position.Position.Y,
-                                        territory.Value.MapEx,
-                                        territory.Value.PlaceNameEx), position.FormattedPosition);
+                                PluginService.ChatUtilities.PrintFullMapLink(position, position.FormattedName);
                             }
 
                             if (ImGui.IsItemHovered())
                             {
                                 using var tt = ImRaii.Tooltip();
-                                ImGui.TextUnformatted(position.FormattedPosition);
+                                ImGui.TextUnformatted(position.FormattedName);
                             }
 
                             if ((count + 1) % maxItems != 0)

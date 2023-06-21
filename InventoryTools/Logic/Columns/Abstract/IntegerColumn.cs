@@ -6,6 +6,7 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Extensions;
+using InventoryTools.Ui.Widgets;
 
 namespace InventoryTools.Logic.Columns.Abstract
 {
@@ -33,6 +34,11 @@ namespace InventoryTools.Logic.Columns.Abstract
         public override int? CurrentValue(CraftItem currentValue)
         {
             return CurrentValue(currentValue.Item);
+        }
+        
+        public override int? CurrentValue(InventoryChange currentValue)
+        {
+            return CurrentValue(currentValue.InventoryItem);
         }
         
         public override IEnumerable<CraftItem> Filter(IEnumerable<CraftItem> items)
@@ -67,7 +73,10 @@ namespace InventoryTools.Logic.Columns.Abstract
         {
             DoDraw(CurrentValue(item), rowIndex, configuration);
         }
-
+        public override void Draw(FilterConfiguration configuration, InventoryChange item, int rowIndex)
+        {
+            DoDraw(CurrentValue(item), rowIndex, configuration);
+        }
         public override IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items)
         {
             return FilterText == "" ? items : items.Where(c =>
@@ -110,6 +119,22 @@ namespace InventoryTools.Logic.Columns.Abstract
                 return currentValue.Value.PassesFilter(FilterText);
             });
         }
+        
+        public override IEnumerable<InventoryChange> Filter(IEnumerable<InventoryChange> items)
+        {
+            var isChecked = FilterText != "";
+            return FilterText == "" ? items : items.Where(c =>
+            {
+                var currentValue = CurrentValue(c.InventoryItem);
+                if (currentValue == null)
+                {
+                    return false;
+                }
+
+                return currentValue.Value.PassesFilter(FilterText);
+            });
+        }
+
 
         public override IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
         {
@@ -126,23 +151,29 @@ namespace InventoryTools.Logic.Columns.Abstract
             return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => CurrentValue(c) ?? Int32.MaxValue) : items.OrderByDescending(c => CurrentValue(c) ?? Int32.MinValue);
         }
 
+        public override IEnumerable<InventoryChange> Sort(ImGuiSortDirection direction, IEnumerable<InventoryChange> items)
+        {
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => CurrentValue(c.InventoryItem) ?? Int32.MaxValue) : items.OrderByDescending(c => CurrentValue(c.InventoryItem) ?? Int32.MinValue);
+        }
+
         public override IColumnEvent? DoDraw(int? currentValue, int rowIndex, FilterConfiguration filterConfiguration)
         {
             ImGui.TableNextColumn();
             if (currentValue != null)
             {
-                ImGui.Text($"{currentValue.Value:n0}");
+                var fmt = $"{currentValue.Value:n0}";
+                ImGuiUtil.VerticalAlignText(fmt, filterConfiguration.TableHeight, false);
             }
             else
             {
-                ImGui.Text(EmptyText);
+                ImGuiUtil.VerticalAlignText(EmptyText, filterConfiguration.TableHeight, false);
             }
             return null;
         }
 
         public override void Setup(int columnIndex)
         {
-            ImGui.TableSetupColumn(Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
+            ImGui.TableSetupColumn(RenderName ?? Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
         }
     }
 }

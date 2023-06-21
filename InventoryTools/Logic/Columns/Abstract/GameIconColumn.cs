@@ -28,6 +28,11 @@ namespace InventoryTools.Logic.Columns.Abstract
             return CurrentValue(currentValue.Item);
         }
         
+        public override (ushort,bool)? CurrentValue(InventoryChange currentValue)
+        {
+            return CurrentValue(currentValue.InventoryItem);
+        }
+        
         public override IEnumerable<CraftItem> Filter(IEnumerable<CraftItem> items)
         {
             return items;
@@ -64,6 +69,11 @@ namespace InventoryTools.Logic.Columns.Abstract
             var result = DoDraw(CurrentValue(item), rowIndex, configuration);
             result?.HandleEvent(configuration, item);
         }
+        public override void Draw(FilterConfiguration configuration, InventoryChange item, int rowIndex)
+        {
+            var result = DoDraw(CurrentValue(item), rowIndex, configuration);
+            result?.HandleEvent(configuration, item.InventoryItem);
+        }
 
         public override IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items)
         {
@@ -71,6 +81,11 @@ namespace InventoryTools.Logic.Columns.Abstract
         }
 
         public override IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items)
+        {
+            return items;
+        }
+
+        public override IEnumerable<InventoryChange> Filter(IEnumerable<InventoryChange> items)
         {
             return items;
         }
@@ -95,6 +110,11 @@ namespace InventoryTools.Logic.Columns.Abstract
             return items;
         }
 
+        public override IEnumerable<InventoryChange> Sort(ImGuiSortDirection direction, IEnumerable<InventoryChange> items)
+        {
+            return items;
+        }
+
         public override IColumnEvent? DoDraw((ushort, bool)? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration)
         {
@@ -108,7 +128,7 @@ namespace InventoryTools.Logic.Columns.Abstract
 
         public override void Setup(int columnIndex)
         {
-            ImGui.TableSetupColumn(Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
+            ImGui.TableSetupColumn(RenderName ?? Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
         }
     }
 }

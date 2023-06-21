@@ -8,6 +8,8 @@ namespace InventoryTools.Logic.Columns
 {
     public class EquippableByRaceColumn : TextColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
+
         public override string? CurrentValue(InventoryItem item)
         {
             return CurrentValue(item.Item);
@@ -23,7 +25,7 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "Equippable By Race";
+        public override string Name { get; set; } = "Equipped By (Race)";
         public override float Width { get; set; } = 200;
         public override string HelpText { get; set; } = "Shows if an item can be equipped by a specific race.";
         public override bool HasFilter { get; set; } = true;

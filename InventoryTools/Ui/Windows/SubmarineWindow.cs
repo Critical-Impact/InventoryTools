@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
+using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using Dalamud.Utility;
 using ImGuiNET;
@@ -52,7 +53,7 @@ namespace InventoryTools.Ui
                 ImGui.TextUnformatted("Unlocked Via: " + SubmarineExplorationEx.SubmarineUnlock?.SubmarineExplorationUnlockEx.Value?.FormattedNameShort ?? "N/A");
                 ImGui.TextUnformatted("Rank Required: " + SubmarineExplorationEx.RankReq);
                 ;
-                var itemIcon = PluginService.IconStorage[65035];
+                var itemIcon = PluginService.IconStorage[Icons.AirshipIcon];
                 ImGui.Image(itemIcon.ImGuiHandle, new Vector2(100, 100) * ImGui.GetIO().FontGlobalScale);
                 
                 

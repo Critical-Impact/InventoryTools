@@ -9,6 +9,8 @@ namespace InventoryTools.Logic.Columns
 {
     public class CraftGatherColumn : CheckboxColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Tools;
+
         public override bool? CurrentValue(InventoryItem item)
         {
             return CurrentValue(item.Item);

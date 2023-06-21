@@ -8,6 +8,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class MarketBoardPriceNQColumn : GilColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Market;
         protected readonly string LoadingString = "loading...";
         protected readonly string UntradableString = "untradable";
         protected readonly int Loading = -1;
@@ -96,7 +97,8 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "MB Average Price NQ";
+        public override string Name { get; set; } = "Market Board Average Price NQ";
+        public override string RenderName => "MB Avg. Price NQ";
         public override string HelpText { get; set; } =
             "Shows the average price of the NQ form of the item. This data is sourced from universalis.";
         public override float Width { get; set; } = 250.0f;

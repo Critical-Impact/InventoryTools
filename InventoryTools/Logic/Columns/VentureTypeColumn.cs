@@ -10,6 +10,7 @@ namespace InventoryTools.Logic.Columns;
 
 public class VentureTypeColumn : TextColumn
 {
+    public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
     public override string? CurrentValue(InventoryItem item)
     {
         return CurrentValue(item.Item);

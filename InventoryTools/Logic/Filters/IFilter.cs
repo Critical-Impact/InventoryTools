@@ -22,10 +22,11 @@ namespace InventoryTools.Logic.Filters
         public FilterType AvailableIn { get; set; }
         public bool? FilterItem(FilterConfiguration configuration, InventoryItem item);
         public bool? FilterItem(FilterConfiguration configuration, ItemEx item);
+        public bool? FilterItem(FilterConfiguration configuration, InventoryChange item);
         public void Draw(FilterConfiguration configuration);
 
         public void ResetFilter(FilterConfiguration configuration);
 
-        public static readonly List<FilterCategory> FilterCategoryOrder = new() {FilterCategory.Basic, FilterCategory.Columns,FilterCategory.CraftColumns, FilterCategory.Inventories, FilterCategory.Display, FilterCategory.Acquisition, FilterCategory.Searching, FilterCategory.Market, FilterCategory.Searching, FilterCategory.Crafting, FilterCategory.Gathering, FilterCategory.Advanced};
+        public static readonly List<FilterCategory> FilterCategoryOrder = new() {FilterCategory.Basic, FilterCategory.Columns,FilterCategory.CraftColumns, FilterCategory.IngredientSourcing, FilterCategory.Inventories, FilterCategory.Display, FilterCategory.Acquisition, FilterCategory.Searching, FilterCategory.Market, FilterCategory.Searching, FilterCategory.Crafting, FilterCategory.Gathering, FilterCategory.Advanced};
     }
 }

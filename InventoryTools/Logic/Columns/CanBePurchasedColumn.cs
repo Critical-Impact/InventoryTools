@@ -6,6 +6,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class CanBePurchasedColumn : CheckboxColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override bool? CurrentValue(InventoryItem item)
         {
             return item.Item.ObtainedGil;
@@ -21,7 +22,7 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "Can be Purchased?";
+        public override string Name { get; set; } = "Is Purchasable?";
         public override float Width { get; set; } = 70.0f;
         public override string HelpText { get; set; } = "Can the item be purchased with gil?";
         public override bool HasFilter { get; set; } = true;

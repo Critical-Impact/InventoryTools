@@ -26,5 +26,11 @@ namespace InventoryTools.Logic.Filters.Abstract
         public abstract FilterType AvailableIn { get; set; }
         public abstract bool? FilterItem(FilterConfiguration configuration,InventoryItem item);
         public abstract bool? FilterItem(FilterConfiguration configuration, ItemEx item);
+
+        public virtual bool? FilterItem(FilterConfiguration configuration, InventoryChange item)
+        {
+            return FilterItem(configuration,item.InventoryItem);
+        }
+
     }
 }

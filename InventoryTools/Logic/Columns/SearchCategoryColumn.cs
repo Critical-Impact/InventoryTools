@@ -6,6 +6,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class SearchCategoryColumn : TextColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override string? CurrentValue(InventoryItem item)
         {
             if (item.ItemSearchCategory != null)
@@ -31,7 +32,8 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "MB Category";
+        public override string Name { get; set; } = "Category (Marketboard)";
+        public override string RenderName => "MB Category";
         public override float Width { get; set; } = 200.0f;
 
         public override string HelpText { get; set; } =

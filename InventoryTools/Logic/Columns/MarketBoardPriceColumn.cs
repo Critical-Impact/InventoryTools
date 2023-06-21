@@ -4,11 +4,13 @@ using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Ui.Widgets;
 
 namespace InventoryTools.Logic.Columns
 {
     public class MarketBoardPriceColumn : DoubleGilColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Market;
         protected readonly string LoadingString = "loading...";
         protected readonly string UntradableString = "untradable";
         protected readonly int Loading = -1;
@@ -41,12 +43,12 @@ namespace InventoryTools.Logic.Columns
             if (currentValue.HasValue && currentValue.Value.Item1 == Loading)
             {
                 ImGui.TableNextColumn();
-                ImGui.TextColored(ImGuiColors.DalamudYellow, LoadingString);
+                ImGuiUtil.VerticalAlignTextColored(LoadingString, ImGuiColors.DalamudYellow, filterConfiguration.TableHeight, false);
             }
             else if (currentValue.HasValue && currentValue.Value.Item1 == Untradable)
             {
                 ImGui.TableNextColumn();
-                ImGui.TextColored(ImGuiColors.DalamudRed, UntradableString);
+                ImGuiUtil.VerticalAlignTextColored(UntradableString, ImGuiColors.DalamudRed, filterConfiguration.TableHeight, false);
             }
             else if(currentValue.HasValue)
             {
@@ -105,11 +107,13 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "MB Average Price NQ/HQ";
+        public override string Name { get; set; } = "Market Board Average Price NQ/HQ";
+        public override string RenderName => "MB Avg. Price NQ/HQ";
         public override string HelpText { get; set; } =
             "Shows the average price of both the NQ and HQ form of the item. This data is sourced from universalis.";
         public override float Width { get; set; } = 200.0f;
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
+        
     }
 }

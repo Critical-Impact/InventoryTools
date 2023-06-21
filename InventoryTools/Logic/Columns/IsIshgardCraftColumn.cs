@@ -8,6 +8,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class IsIshgardCraftColumn : CheckboxColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override bool? CurrentValue(InventoryItem item)
         {
             return item.Item == null ? false : CurrentValue(item.Item);

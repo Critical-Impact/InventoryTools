@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
+using CriticalCommonLib.Models;
 using Dalamud.Utility;
 using ImGuiNET;
 using InventoryTools.Extensions;
@@ -79,7 +80,7 @@ namespace InventoryTools.Ui
                 ImGui.TextUnformatted("Level Required: " + ContentFinderCondition.ClassJobLevelRequired);
                 ImGui.TextUnformatted("Item Level Required: " + ContentFinderCondition.ItemLevelRequired);
                 ;
-                var itemIcon = PluginService.IconStorage[(int)(ContentFinderCondition.ContentType?.Value?.IconDutyFinder ?? 61801)];
+                var itemIcon = PluginService.IconStorage[(int)(ContentFinderCondition.ContentType?.Value?.IconDutyFinder ?? Icons.DutyIcon)];
                 ImGui.Image(itemIcon.ImGuiHandle, new Vector2(100, 100) * ImGui.GetIO().FontGlobalScale);
                 
                 var garlandIcon = PluginService.IconStorage[65090];

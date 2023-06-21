@@ -28,13 +28,13 @@ namespace InventoryToolsTesting
             CraftList list = new CraftList();
             list.AddCraftItem(31922, 2);
             var requiredMaterialsList = list.GetRequiredMaterialsList();
-            Assert.AreEqual( 50, requiredMaterialsList[32014]);
+            Assert.AreEqual( 10, requiredMaterialsList[32014]);
             
             list = new CraftList();
             //Skybuilders bed
             list.AddCraftItem(31945, 1);
             requiredMaterialsList = list.GetRequiredMaterialsList();
-            Assert.AreEqual( 50, requiredMaterialsList[32028]);
+            Assert.AreEqual( 10, requiredMaterialsList[32028]);
         }
 
         [Test]
@@ -148,8 +148,8 @@ namespace InventoryToolsTesting
             Assert.AreEqual(2, availableMaterialsList[5325]);
 
             var missingMaterialsList = list.GetMissingMaterialsList();
-            Assert.AreEqual(8, missingMaterialsList[5334]);
-            Assert.AreEqual(8, missingMaterialsList[5343]);
+            Assert.AreEqual(4, missingMaterialsList[5334]);
+            Assert.AreEqual(4, missingMaterialsList[5343]);
             
             //Maple lumber
             characterMaterials = new Dictionary<uint, List<CraftItemSource>>();
@@ -163,8 +163,8 @@ namespace InventoryToolsTesting
             var quantityNeededList = list.GetQuantityNeededList();
             missingMaterialsList = list.GetMissingMaterialsList();
             Assert.AreEqual(2, missingMaterialsList[5361]);
-            Assert.AreEqual(12, quantityNeededList[5380]);
-            Assert.AreEqual(12, missingMaterialsList[5380]);
+            Assert.AreEqual(6, quantityNeededList[5380]);
+            Assert.AreEqual(6, missingMaterialsList[5380]);
             
             //Maple lumber
             characterMaterials = new Dictionary<uint, List<CraftItemSource>>();
@@ -220,7 +220,7 @@ namespace InventoryToolsTesting
 
             var retrieveList = list.GetQuantityToRetrieveList();
             //undyed cotton cloth
-            Assert.AreEqual(4, retrieveList[5325]);
+            Assert.AreEqual(4, retrieveList[(5325,false)]);
         }
 
         //When splitting the stacks of an item you have enough of(say 21 out of 20), it'll appear to want negative of the items required to craft it
@@ -240,7 +240,7 @@ namespace InventoryToolsTesting
 
             var flattenedMergedMaterials = list.GetFlattenedMergedMaterials();
             //Works normally
-            Assert.AreEqual(false, flattenedMergedMaterials.Any(c => c.ItemId == 5106));
+            Assert.AreEqual(false, flattenedMergedMaterials.Any(c => c.ItemId == 5106 && c.QuantityNeeded != 0));
             
 
             
@@ -254,7 +254,7 @@ namespace InventoryToolsTesting
             list.GenerateCraftChildren();
             list.Update(characterMaterials, externalSources);
             flattenedMergedMaterials = list.GetFlattenedMergedMaterials();
-            Assert.AreEqual(false, flattenedMergedMaterials.Any(c => c.ItemId == 5106));
+            Assert.AreEqual(false, flattenedMergedMaterials.Any(c => c.ItemId == 5106 && c.QuantityNeeded != 0));
 
         }
     }

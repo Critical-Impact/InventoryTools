@@ -6,6 +6,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class ItemLevelColumn : IntegerColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override int? CurrentValue(InventoryItem item)
         {
             return CurrentValue(item.Item);

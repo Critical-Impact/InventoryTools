@@ -16,6 +16,7 @@ using CriticalCommonLib.Services.Ui;
 using CriticalCommonLib.Sheets;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Logging;
+using Dalamud.Memory;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
@@ -24,6 +25,7 @@ using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 using ImGuiNET;
 using InventoryTools.Logic;
 using Lumina.Excel.GeneratedSheets;
@@ -39,7 +41,7 @@ namespace InventoryTools.Ui
         Inventories = 1,
         InventoryScanner = 2,
         InventoryMonitor = 3,
-        Random = 3
+        Random = 4
     }
     public class DebugWindow : Window
     {
@@ -90,7 +92,7 @@ namespace InventoryTools.Ui
 
                     if (ImGui.Selectable("Inventory Monitor", ConfigurationManager.Config.SelectedDebugPage == (int)DebugMenu.InventoryMonitor))
                     {
-                        ConfigurationManager.Config.SelectedDebugPage = (int)DebugMenu.InventoryScanner;
+                        ConfigurationManager.Config.SelectedDebugPage = (int)DebugMenu.InventoryMonitor;
                     }
 
                     if (ImGui.Selectable("Random", ConfigurationManager.Config.SelectedDebugPage == (int)DebugMenu.Random))
@@ -166,6 +168,39 @@ namespace InventoryTools.Ui
                                 var freeCompanyInfoProxy = (InfoProxyFreeCompany*)infoProxy;
                                 PluginLog.Log(freeCompanyInfoProxy->ID.ToString());
                                 PluginLog.Log(SeString.Parse(freeCompanyInfoProxy->Name, 22).TextValue);
+                            }
+                        }
+
+                        if (ImGui.Button("Check Shop List"))
+                        {
+                            var addon = Service.Gui.GetAddonByName("Shop");
+                            var actualAddon = ((AtkUnitBase*) addon);
+                            if (actualAddon != null)
+                            {
+                                var listNode = (AtkComponentNode*)actualAddon->GetNodeById(16);
+                                if (listNode == null || (ushort)listNode->AtkResNode.Type < 1000) return;
+                                var actualListNode = (AtkComponentList*)listNode->Component;
+                                if (actualListNode != null)
+                                {
+                                    for (var i = 0; i < actualListNode->ListLength - 1; i++)
+                                    {
+                                        if (actualListNode->ItemRendererList[i].AtkComponentListItemRenderer != null)
+                                        {
+                                            var listItem = actualListNode->ItemRendererList[i]
+                                                .AtkComponentListItemRenderer;
+
+                                            var uldManager = listItem->AtkComponentButton.AtkComponentBase.UldManager;
+                                            if (uldManager.NodeListCount < 4) continue;
+                                            
+                                            var textNode = (AtkTextNode*)uldManager.SearchNodeById(3);
+                                            if (textNode != null)
+                                            {
+                                                var seString = MemoryHelper.ReadSeString(&textNode->NodeText);
+                                                PluginLog.Log(seString.ToString());
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
 
@@ -648,7 +683,38 @@ namespace InventoryTools.Ui
                     }
                     else if (ConfigurationManager.Config.SelectedDebugPage == (int)DebugMenu.InventoryMonitor)
                     {
-                        
+                        foreach (var character in PluginService.InventoryMonitor.Inventories)
+                        {
+                            using (var characterNode = ImRaii.TreeNode(character.Key + "##" + character.Key))
+                            {
+                                if (characterNode.Success)
+                                {
+                                    using (ImRaii.PushId(character.Key.ToString()))
+                                    {
+                                        var possibleValues = Enum.GetValues<CriticalCommonLib.Enums.InventoryType>();
+                                        foreach (var possibleValue in possibleValues)
+                                        {
+                                            var bag = character.Value.GetInventoryByType(possibleValue);
+                                            var bagName = possibleValue.ToString();
+                                            if (bag != null)
+                                            {
+                                                using (var bagNode = ImRaii.TreeNode(bagName + "##" + bagName))
+                                                {
+                                                    if (bagNode.Success)
+                                                    {
+                                                        for (int i = 0; i < bag.Length; i++)
+                                                        {
+                                                            var item = bag[i];
+                                                            Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                     /*
                     else if (ConfigurationManager.Config.SelectedDebugPage == 11)
@@ -826,9 +892,9 @@ namespace InventoryTools.Ui
 
             if (ImGui.TreeNode("Character Currency##characterCurrency"))
             {
-                for (int i = 0; i < PluginService.InventoryScanner.CharacterCrystals.Length; i++)
+                for (int i = 0; i < PluginService.InventoryScanner.CharacterCurrency.Length; i++)
                 {
-                    var item = PluginService.InventoryScanner.CharacterCrystals[i];
+                    var item = PluginService.InventoryScanner.CharacterCurrency[i];
                     Utils.PrintOutObject(item, (ulong)i, new List<string>());
                 }
 
@@ -1346,63 +1412,63 @@ namespace InventoryTools.Ui
         }
         private void DrawInventoriesDebugTab()
         {
-            ImGui.TextUnformatted("Inventory Information:");
-            ImGui.Separator();
-            foreach (var inventory in PluginService.InventoryMonitor.Inventories)
-            {
-                var character = PluginService.CharacterMonitor.GetCharacterById(inventory.Key);
-                var characterName = "Unknown";
-                if (character != null)
-                {
-                    characterName = character.FormattedName;
-                }
-
-                if (ImGui.TreeNode(characterName + "##char" + inventory.Key))
-                {
-                    foreach (var item in inventory.Value)
-                    {
-                        ImGui.TextUnformatted(item.Key.FormattedName());
-                        ImGui.Text(item.Value.Count(c => !c.IsEmpty) + "/" + item.Value.Count);
-                        ImGui.Separator();
-                    }
-
-                    ImGui.TreePop();
-                }
-            }
-            ImGui.TextUnformatted("Inventory List:");
-            ImGui.Separator();
-            ImGui.BeginTable("retainerTable", 6);
-            ImGui.TableSetupColumn("Inventory ID");
-            ImGui.TableSetupColumn("Category");
-            ImGui.TableSetupColumn("Name");
-            ImGui.TableSetupColumn("Sorted Slot Index");
-            ImGui.TableSetupColumn("Item ID");
-            ImGui.TableSetupColumn("Unsorted Slot ID");
-            ImGui.TableHeadersRow();
-            var inventories = PluginService.InventoryMonitor.Inventories;
-            foreach (var inventory in inventories)
-            {
-                foreach (var itemSet in inventory.Value)
-                {
-                    foreach (var item in itemSet.Value)
-                    {
-                        ImGui.TableNextColumn();
-                        ImGui.TextUnformatted((inventory.Key).ToString());
-                        ImGui.TableNextColumn();
-                        ImGui.TextUnformatted(itemSet.Key.ToString());
-                        ImGui.TableNextColumn();
-                        ImGui.TextUnformatted(item.FormattedName);
-                        ImGui.TableNextColumn();
-                        ImGui.TextUnformatted(item.SortedSlotIndex.ToString());
-                        ImGui.TableNextColumn();
-                        ImGui.TextUnformatted(item.ItemId.ToString());
-                        ImGui.TableNextColumn();
-                        ImGui.TextUnformatted(item.Slot.ToString());
-                    }
-                }
-            }
-
-            ImGui.EndTable();
+            // ImGui.TextUnformatted("Inventory Information:");
+            // ImGui.Separator();
+            // foreach (var inventory in PluginService.InventoryMonitor.Inventories)
+            // {
+            //     var character = PluginService.CharacterMonitor.GetCharacterById(inventory.Key);
+            //     var characterName = "Unknown";
+            //     if (character != null)
+            //     {
+            //         characterName = character.FormattedName;
+            //     }
+            //
+            //     if (ImGui.TreeNode(characterName + "##char" + inventory.Key))
+            //     {
+            //         foreach (var item in inventory.Value)
+            //         {
+            //             ImGui.TextUnformatted(item.Key.FormattedName());
+            //             ImGui.Text(item.Value.Count(c => !c.IsEmpty) + "/" + item.Value.Count);
+            //             ImGui.Separator();
+            //         }
+            //
+            //         ImGui.TreePop();
+            //     }
+            // }
+            // ImGui.TextUnformatted("Inventory List:");
+            // ImGui.Separator();
+            // ImGui.BeginTable("retainerTable", 6);
+            // ImGui.TableSetupColumn("Inventory ID");
+            // ImGui.TableSetupColumn("Category");
+            // ImGui.TableSetupColumn("Name");
+            // ImGui.TableSetupColumn("Sorted Slot Index");
+            // ImGui.TableSetupColumn("Item ID");
+            // ImGui.TableSetupColumn("Unsorted Slot ID");
+            // ImGui.TableHeadersRow();
+            // var inventories = PluginService.InventoryMonitor.Inventories;
+            // foreach (var inventory in inventories)
+            // {
+            //     foreach (var itemSet in inventory.Value.GetAllInventories())
+            //     {
+            //         foreach (var item in itemSet.Value)
+            //         {
+            //             ImGui.TableNextColumn();
+            //             ImGui.TextUnformatted((inventory.Key).ToString());
+            //             ImGui.TableNextColumn();
+            //             ImGui.TextUnformatted(itemSet.Key.ToString());
+            //             ImGui.TableNextColumn();
+            //             ImGui.TextUnformatted(item.FormattedName);
+            //             ImGui.TableNextColumn();
+            //             ImGui.TextUnformatted(item.SortedSlotIndex.ToString());
+            //             ImGui.TableNextColumn();
+            //             ImGui.TextUnformatted(item.ItemId.ToString());
+            //             ImGui.TableNextColumn();
+            //             ImGui.TextUnformatted(item.Slot.ToString());
+            //         }
+            //     }
+            // }
+            //
+            // ImGui.EndTable();
         }
 
         private void DrawCharacterDebugTab()

@@ -29,60 +29,21 @@ namespace InventoryToolsTesting
             return character;
         }
         
-        public static List<InventoryItem> GenerateBlankInventory(InventoryCategory type,
-            Character character)
+        public static Inventory GenerateBlankInventory(Character character)
         {
-            var bags = new Dictionary<InventoryType, int>();
-            if (type == InventoryCategory.CharacterBags)
-            {
-                bags.Add(InventoryType.Bag0, 25);
-                bags.Add(InventoryType.Bag1, 25);
-                bags.Add(InventoryType.Bag2, 25);
-                bags.Add(InventoryType.Bag3, 25);
-            }
-            if (type == InventoryCategory.RetainerBags)
-            {
-                bags.Add(InventoryType.RetainerBag0, 25);
-                bags.Add(InventoryType.RetainerBag1, 25);
-                bags.Add(InventoryType.RetainerBag2, 25);
-                bags.Add(InventoryType.RetainerBag3, 25);
-                bags.Add(InventoryType.RetainerBag4, 25);
-                bags.Add(InventoryType.RetainerBag5, 25);
-                bags.Add(InventoryType.RetainerBag6, 25);
-            }
-            if (type == InventoryCategory.CharacterSaddleBags)
-            {
-                bags.Add(InventoryType.SaddleBag0, 75);
-                bags.Add(InventoryType.SaddleBag1, 75);
-            }
-
-            if (type == InventoryCategory.CharacterPremiumSaddleBags)
-            {
-                bags.Add(InventoryType.PremiumSaddleBag0, 75);
-                bags.Add(InventoryType.PremiumSaddleBag1, 75);
-            }
-
-            var finalItems = new List<InventoryItem>();
-            foreach (var bag in bags)
-            {
-                for (int i = 0; i < bag.Value; i++)
-                {
-                    finalItems.Add(GenerateBlankItem(character, bag.Key, (short)i));
-                }
-            }
-
-            return finalItems;
+            var newInventory = new Inventory(character.CharacterType, character.CharacterId);
+            newInventory.FillSlots();
+            return newInventory;
         }
         
-        public static List<InventoryItem> FillInventory(List<InventoryItem> inventory, uint itemId, uint quantity)
+        public static void FillInventory(Inventory inventory, InventoryCategory category, uint itemId, uint quantity)
         {
-            foreach (var item in inventory)
+            var inventoryItems = inventory.GetItemsByCategory(category);
+            foreach (var item in inventoryItems)
             {
-                item.ItemId = itemId;
-                item.Quantity = quantity;
+                var newItem = GenerateItem(inventory.CharacterId, item.SortedContainer, (short)item.SortedSlotIndex, itemId, quantity);
+                inventory.AddItem(newItem);
             }
-
-            return inventory;
         }
 
         public static InventoryItem GenerateBlankItem(Character character, InventoryType type, short slot)
@@ -97,15 +58,15 @@ namespace InventoryToolsTesting
             return inventoryItem;
         }
 
-        public static InventoryItem GenerateItem(Character character, InventoryType type, short slot, uint itemId, uint quantity)
+        public static InventoryItem GenerateItem(ulong characterId, InventoryType type, short slot, uint itemId, uint quantity)
         {
             var inventoryItem = new InventoryItem();
             inventoryItem.Slot = slot;
             inventoryItem.ItemId = itemId;
-            inventoryItem.SortedSlotIndex = 0;
+            inventoryItem.SortedSlotIndex = slot;
             inventoryItem.SortedContainer = type;
             inventoryItem.SortedCategory = type.ToInventoryCategory();
-            inventoryItem.RetainerId = character.CharacterId;
+            inventoryItem.RetainerId = characterId;
             inventoryItem.Quantity = quantity;
             return inventoryItem;
         }
