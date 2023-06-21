@@ -102,9 +102,9 @@ public class IngredientSearchFilter : UintMultipleChoiceFilter
         if (!_relatedCrafts.ContainsKey(itemId))
         {
             var ingredients = new HashSet<uint>();
-            var craftItem = new CraftItem(itemId, FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None, 1,
-                true);
-            craftItem.GenerateRequiredMaterials();
+            //TODO: Make this work with the new craft list system
+            var craftItem = new CraftItem(itemId, FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None, 1);
+            //craftItem.GenerateRequiredMaterials();
             foreach (var material in craftItem.GetFlattenedMaterials())
             {
                 if (!material.IsOutputItem)

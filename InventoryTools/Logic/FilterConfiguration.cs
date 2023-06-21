@@ -3093,8 +3093,12 @@ namespace InventoryTools.Logic
             return new FilterResult(sortedItems, unsortableItems, items, inventoryHistory);
         }
 
-        public Task<FilterResult> GenerateFilteredList(List<Inventory> inventories)
+        public Task<FilterResult> GenerateFilteredList(List<Inventory>? inventories = null)
         {
+            if (inventories == null)
+            {
+                inventories = PluginService.InventoryMonitor.Inventories.Select(c => c.Value).ToList();
+            }
             return Task<FilterResult>.Factory.StartNew(() => GenerateFilteredListInternal(this, inventories));
         }
         
