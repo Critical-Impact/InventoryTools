@@ -29,7 +29,7 @@ namespace InventoryTools.Logic.Columns
 
         public (Vector4, string) GetNextStep(FilterConfiguration configuration, CraftItem item)
         {
-            var unavailable = Math.Max(0, (int)item.QuantityUnavailable);
+            var unavailable = Math.Max(0, (int)item.QuantityMissingOverall);
             
             if (configuration.CraftList.RetainerRetrieveOrder == RetainerRetrieveOrder.RetrieveFirst)
             {
@@ -74,7 +74,7 @@ namespace InventoryTools.Logic.Columns
                             nextStepString = "Buy " + unavailable + " (MB)";
                             break;
                         case IngredientPreferenceType.Crafting:
-                            if (item.QuantityCanCraft >= item.QuantityMissing / item.Yield)
+                            if (item.QuantityCanCraft >= unavailable / item.Yield)
                             {
                                 if (item.QuantityCanCraft != 0)
                                 {
@@ -88,7 +88,7 @@ namespace InventoryTools.Logic.Columns
                             else
                             {
                                 stepColour = ImGuiColors.DalamudRed;
-                                nextStepString = "Ingredients Missing";
+                                nextStepString = "Craft Ingredients Missing";
                             }
 
                             break;
@@ -99,7 +99,7 @@ namespace InventoryTools.Logic.Columns
                             if (ingredientPreference.LinkedItemId != null &&
                                 ingredientPreference.LinkedItemQuantity != null)
                             {
-                                if (item.QuantityCanCraft >= item.QuantityMissing)
+                                if (item.QuantityCanCraft >= unavailable)
                                 {
                                     if (item.QuantityCanCraft != 0)
                                     {
@@ -111,8 +111,10 @@ namespace InventoryTools.Logic.Columns
                                 }
                                 else
                                 {
+                                    var linkedItem = Service.ExcelCache.GetItemExSheet()
+                                        .GetRow(item.IngredientPreference.LinkedItemId.Value);
                                     stepColour = ImGuiColors.DalamudRed;
-                                    nextStepString = "Ingredients Missing";
+                                    nextStepString = "Not enough " + linkedItem?.NameString;
                                 }
                                 break;
                             }

@@ -2840,11 +2840,16 @@ namespace InventoryTools.Logic
                                 if (sourceInventory.Key.Item1 != nextSlot.Key.Item1 ||
                                     sourceItem.SortedContainer != nextSlot.Key.Item2)
                                 {
-                                    //PluginLog.Verbose("Added item to filter result in next available slot: " +
-                                    //                  sourceItem.FormattedName);
                                     sortedItems.Add(new SortingResult(sourceInventory.Key.Item1, nextSlot.Key.Item1,
                                         sourceItem.SortedContainer, nextSlot.Key.Item2, nextEmptySlot.BagLocation(nextEmptySlot.SortedContainer),true, sourceItem,
                                         (int) sourceItem.TempQuantity));
+                                    
+                                    //We want to add the empty slot to the list of locations we know about, we need to create a copy and add that so any further items with the same ID can properly check how much room is left in the stack
+                                    nextEmptySlot = new InventoryItem(nextEmptySlot);
+                                    nextEmptySlot.ItemId = sourceItem.ItemId;
+                                    nextEmptySlot.Flags = sourceItem.Flags;
+                                    nextEmptySlot.Quantity = sourceItem.Quantity;
+                                    
                                     //Add the destination item into the list of locations in case we have an empty slot for an item but multiple sources of the item.
                                     var newLocationHash = sourceItem.GenerateHashCode(IgnoreHQWhenSorting ?? false);
                                     itemLocations.TryAdd(newLocationHash, new List<InventoryItem>());

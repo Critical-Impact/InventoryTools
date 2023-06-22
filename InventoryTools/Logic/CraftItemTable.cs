@@ -185,7 +185,7 @@ namespace InventoryTools.Logic
 
         public int GetCraftListCount()
         {
-            return CraftItems.Count(c => !FilterConfiguration.CraftList.HideComplete || c.QuantityMissing != 0);
+            return CraftItems.Count(c => !FilterConfiguration.CraftList.HideComplete || !c.IsCompleted);
         }
 
         public override void DrawFooterItems()

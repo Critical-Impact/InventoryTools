@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using CriticalCommonLib.Crafting;
+using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
@@ -54,6 +55,6 @@ public class CraftPrecraftGroupFilter : ChoiceFilter<PrecraftGroupSetting>
 
     public override string GetFormattedChoice(PrecraftGroupSetting choice)
     {
-        return choice.ToString();
+        return choice.FormattedName();
     }
 }

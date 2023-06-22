@@ -1078,7 +1078,7 @@ namespace InventoryTools.Ui
                 }
                 if (_searchItems == null)
                 {
-                    _searchItems = Service.ExcelCache.ItemsByName.Where(c => c.Value.ToLower().PassesFilter(SearchString.ToLower())).Take(100)
+                    _searchItems = Service.ExcelCache.ItemNamesById.Where(c => c.Value.ToLower().PassesFilter(SearchString.ToLower())).Take(100)
                         .Select(c => Service.ExcelCache.GetItemExSheet().GetRow(c.Key)!).ToList();
                 }
 

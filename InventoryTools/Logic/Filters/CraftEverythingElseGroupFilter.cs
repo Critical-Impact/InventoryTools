@@ -58,7 +58,7 @@ public class CraftEverythingElseGroupFilter : ChoiceFilter<EverythingElseGroupSe
             case EverythingElseGroupSetting.Together:
                 return "Together";
             case EverythingElseGroupSetting.ByClosestZone:
-                return "Closest Zone";
+                return "Zone";
         }
         return choice.ToString();
     }

@@ -130,7 +130,7 @@ public class IngredientSearchFilter : UintMultipleChoiceFilter
 
     public override Dictionary<uint, string> GetChoices(FilterConfiguration configuration)
     {
-        return Service.ExcelCache.ItemsByName;
+        return Service.ExcelCache.ItemNamesById;
     }
 
     public override bool HideAlreadyPicked { get; set; } = true;

@@ -692,8 +692,9 @@ namespace InventoryTools.Ui
                     hasInformation = true;
                     if (_craftItem == null)
                     {
-                        _craftItem = new CraftItem(Item.RowId, InventoryItem.ItemFlags.None, 1,null, true);
-                        //TODO: Rework this
+                        var craftList = new CraftList();
+                        craftList.AddCraftItem(Item.RowId, 1);
+                        _craftItem = craftList.CraftItems.First();
                     }
                     if (ImGui.CollapsingHeader("Company Craft Recipe (" + _craftItem.ChildCrafts.Count + ")"))
                     {
