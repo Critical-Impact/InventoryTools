@@ -4,6 +4,7 @@ using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Ui.Widgets;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -27,17 +28,32 @@ namespace InventoryTools.Logic.Columns
 
         public override int? CurrentValue(CraftItem currentValue)
         {
-            return (int?) (currentValue.QuantityCanCraft / currentValue.Yield);
+            return (int?) (currentValue.CraftOperationsRequired);
         }
         
         public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
         {
+            ImGui.TableNextColumn();
             if (CurrentValue(item) > 0)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.ParsedBlue);
             }
 
-            base.Draw(configuration, item, rowIndex);
+            var currentValue = CurrentValue(item);
+            if (currentValue != null)
+            {
+                var fmt = $"{currentValue.Value:n0}";
+                if (item.Yield > 1)
+                {
+                    fmt += " (" + item.Yield + ")";
+                }
+                ImGuiUtil.VerticalAlignText(fmt, configuration.TableHeight, false);
+            }
+            else
+            {
+                ImGuiUtil.VerticalAlignText(EmptyText, configuration.TableHeight, false);
+            }
+
             if (CurrentValue(item) > 0)
             {
                 ImGui.PopStyleColor();

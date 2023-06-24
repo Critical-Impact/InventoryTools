@@ -41,10 +41,55 @@ namespace InventoryToolsTesting
         [Test]
         public void TestYields()
         {
-            CraftList list = new CraftList();
-            list.AddCraftItem(5334, 3);
-            var requiredMaterialsList = list.GetRequiredMaterialsList();
-            Assert.AreEqual( 4, requiredMaterialsList[5343]);
+            {
+                CraftList list = new CraftList();
+                list.AddCraftItem("Cotton Yarn", 3);
+                var requiredMaterialsList = list.GetRequiredMaterialsListNamed();
+                Assert.AreEqual(4, requiredMaterialsList["Cotton Boll"]);
+
+                var cottonBolls = list.GetFlattenedMaterials().First(c => c.Item.NameString == "Cotton Boll");
+                Assert.AreEqual(4, cottonBolls.QuantityRequired);
+                Assert.AreEqual(4, cottonBolls.QuantityNeeded);
+                Assert.AreEqual(0, cottonBolls.QuantityReady);
+                Assert.AreEqual(0, cottonBolls.QuantityAvailable);
+                Assert.AreEqual(0, cottonBolls.QuantityWillRetrieve);
+                Assert.AreEqual(4, cottonBolls.QuantityMissingOverall);
+                Assert.AreEqual(4, cottonBolls.QuantityMissingInventory);
+                Assert.AreEqual(0, cottonBolls.CraftOperationsRequired);
+            }
+
+
+            {
+                CraftList list = new CraftList();
+                list.AddCraftItem("Cotton Yarn", 3);
+                var requiredMaterialsList = list.GetRequiredMaterialsListNamed();
+                Assert.AreEqual(4, requiredMaterialsList["Cotton Boll"]);
+                var sourceStore = new CraftItemSourceStore()
+                    .AddCharacterSource("Cotton Boll", 4, false)
+                    .AddCharacterSource("Lightning Shard", 4, false);
+                list.Update(sourceStore);
+                
+                var cottonBolls = list.GetFlattenedMaterials().First(c => c.Item.NameString == "Cotton Boll");
+                Assert.AreEqual(4, cottonBolls.QuantityRequired);
+                Assert.AreEqual(0, cottonBolls.QuantityNeeded);
+                Assert.AreEqual(4, cottonBolls.QuantityReady);
+                Assert.AreEqual(0, cottonBolls.QuantityAvailable);
+                Assert.AreEqual(0, cottonBolls.QuantityWillRetrieve);
+                Assert.AreEqual(0, cottonBolls.QuantityMissingOverall);
+                Assert.AreEqual(0, cottonBolls.QuantityMissingInventory);
+                Assert.AreEqual(0, cottonBolls.CraftOperationsRequired);
+                
+                var cottonYarn = list.GetFlattenedMaterials().First(c => c.Item.NameString == "Cotton Yarn");
+                Assert.AreEqual(3, cottonYarn.QuantityRequired);
+                Assert.AreEqual(3, cottonYarn.QuantityNeeded);
+                Assert.AreEqual(0, cottonYarn.QuantityReady);
+                Assert.AreEqual(0, cottonYarn.QuantityAvailable);
+                Assert.AreEqual(0, cottonYarn.QuantityWillRetrieve);
+                Assert.AreEqual(3, cottonYarn.QuantityMissingOverall);
+                Assert.AreEqual(3, cottonYarn.QuantityMissingInventory);
+                Assert.AreEqual(2, cottonYarn.CraftOperationsRequired);
+                Assert.AreEqual(3, cottonYarn.QuantityCanCraft);
+            }
         }
 
         [Test]
@@ -142,7 +187,24 @@ namespace InventoryToolsTesting
             missingMaterialsList = list.GetMissingMaterialsListNamed();
             Assert.AreEqual(0, missingMaterialsList["Cotton Boll"]);
             Assert.AreEqual(0, missingMaterialsList["Cotton Yarn"]);
-            
+
+            var cottonBolls = list.GetFlattenedMaterials().First(c => c.Item.NameString == "Cotton Boll");
+            Assert.AreEqual(8, cottonBolls.QuantityRequired);
+            Assert.AreEqual(0, cottonBolls.QuantityNeeded);
+            Assert.AreEqual(0, cottonBolls.QuantityAvailable);
+            Assert.AreEqual(0, cottonBolls.QuantityWillRetrieve);
+            Assert.AreEqual(0, cottonBolls.QuantityMissingOverall);
+            Assert.AreEqual(0, cottonBolls.QuantityMissingInventory);
+
+            var undyedCottonCloth = list.GetFlattenedMaterials().First(c => c.Item.NameString == "Undyed Cotton Cloth");
+            Assert.AreEqual(4, undyedCottonCloth.QuantityRequired);
+            Assert.AreEqual(0, undyedCottonCloth.QuantityNeeded);
+            Assert.AreEqual(0, undyedCottonCloth.QuantityReady);
+            Assert.AreEqual(4, undyedCottonCloth.QuantityAvailable);
+            Assert.AreEqual(4, undyedCottonCloth.QuantityWillRetrieve);
+            Assert.AreEqual(0, undyedCottonCloth.QuantityMissingOverall);
+            Assert.AreEqual(4, undyedCottonCloth.QuantityMissingInventory);
+                
             //Check the amount of missing materials is 4 for each item when provided with 2 externally
             list = new CraftList()
                 .AddCraftItem("Riviera Bed", 2);
@@ -154,6 +216,23 @@ namespace InventoryToolsTesting
             missingMaterialsList = list.GetMissingMaterialsListNamed();
             Assert.AreEqual(4, missingMaterialsList["Cotton Boll"]);
             Assert.AreEqual(4, missingMaterialsList["Cotton Yarn"]);
+            
+            cottonBolls = list.GetFlattenedMaterials().First(c => c.Item.NameString == "Cotton Boll");
+            Assert.AreEqual(8, cottonBolls.QuantityRequired);
+            Assert.AreEqual(4, cottonBolls.QuantityNeeded);
+            Assert.AreEqual(0, cottonBolls.QuantityAvailable);
+            Assert.AreEqual(0, cottonBolls.QuantityWillRetrieve);
+            Assert.AreEqual(4, cottonBolls.QuantityMissingOverall);
+            Assert.AreEqual(4, cottonBolls.QuantityMissingInventory);
+
+            undyedCottonCloth = list.GetFlattenedMaterials().First(c => c.Item.NameString == "Undyed Cotton Cloth");
+            Assert.AreEqual(4, undyedCottonCloth.QuantityRequired);
+            Assert.AreEqual(2, undyedCottonCloth.QuantityNeeded);
+            Assert.AreEqual(0, undyedCottonCloth.QuantityReady);
+            Assert.AreEqual(2, undyedCottonCloth.QuantityAvailable);
+            Assert.AreEqual(2, undyedCottonCloth.QuantityWillRetrieve);
+            Assert.AreEqual(2, undyedCottonCloth.QuantityMissingOverall);
+            Assert.AreEqual(4, undyedCottonCloth.QuantityMissingInventory);
             
             //Crafting 2 riveria bed, 2 maple lumber in inventory
             list = new CraftList()
@@ -171,6 +250,24 @@ namespace InventoryToolsTesting
             Assert.AreEqual(4, missingMaterialsList["Bronze Ingot"]);
             Assert.AreEqual(8, missingMaterialsList["Cotton Yarn"]);
             Assert.AreEqual(4, missingMaterialsList["Undyed Cotton Cloth"]);
+            
+            var mapleLumber = list.GetFlattenedMaterials().First(c => c.Item.NameString == "Maple Lumber");
+            Assert.AreEqual(4, mapleLumber.QuantityRequired);
+            Assert.AreEqual(2, mapleLumber.QuantityNeeded);
+            Assert.AreEqual(0, mapleLumber.QuantityAvailable);
+            Assert.AreEqual(2, mapleLumber.QuantityReady);
+            Assert.AreEqual(0, mapleLumber.QuantityWillRetrieve);
+            Assert.AreEqual(2, mapleLumber.QuantityMissingOverall);
+            Assert.AreEqual(2, mapleLumber.QuantityMissingInventory);
+
+            var mapleLog = list.GetFlattenedMaterials().First(c => c.Item.NameString == "Maple Log");
+            Assert.AreEqual(12, mapleLog.QuantityRequired);
+            Assert.AreEqual(6, mapleLog.QuantityNeeded);
+            Assert.AreEqual(0, mapleLog.QuantityReady);
+            Assert.AreEqual(0, mapleLog.QuantityAvailable);
+            Assert.AreEqual(0, mapleLog.QuantityWillRetrieve);
+            Assert.AreEqual(6, mapleLog.QuantityMissingOverall);
+            Assert.AreEqual(6, mapleLog.QuantityMissingInventory);
 
             //Crafting 2 riveria bed, 2 lumber available, 6 logs available , plenty of wind shards, should craft 2, already have 2
             list = new CraftList()

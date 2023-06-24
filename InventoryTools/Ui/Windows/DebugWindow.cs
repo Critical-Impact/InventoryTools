@@ -1363,6 +1363,19 @@ namespace InventoryTools.Ui
 
                 ImGui.TreePop();
             }
+            if (ImGui.TreeNode("Gearsets##gearsets"))
+            {
+                foreach (var gearSet in PluginService.InventoryScanner.GetGearSets())
+                {
+                    ImGui.Text(gearSet.Key + ":");
+                    foreach (var actualset in gearSet.Value)
+                    {
+                        ImGui.Text(actualset.Item1 + " : " + actualset.Item2);
+                    }
+                }
+
+                ImGui.TreePop();
+            }
             var bags = new[]
             {
                 InventoryType.HousingInteriorPlacedItems1,

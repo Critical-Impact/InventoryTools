@@ -976,6 +976,7 @@ namespace InventoryTools.Ui
 
                     if (!filterConfiguration.CraftListDefault)
                     {
+                        //TODO: Add import from default craft list/save to default craft list
                         ImGui.SameLine();
                         float width = ImGui.GetWindowSize().X;
                         ImGui.SetCursorPosX(width - 42 * ImGui.GetIO().FontGlobalScale);

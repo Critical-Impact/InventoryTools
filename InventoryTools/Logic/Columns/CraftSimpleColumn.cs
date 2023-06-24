@@ -80,8 +80,8 @@ namespace InventoryTools.Logic.Columns
                                 {
                                     if (item.Item.CanBeCrafted)
                                     {
-                                        nextStepString = "Craft " +
-                                                         (uint)Math.Floor((double)item.QuantityCanCraft / item.Yield);
+                                        nextStepString = "Craft " + item.CraftOperationsRequired;
+                                        stepColour = ImGuiColors.ParsedBlue;
                                     }
                                 }
                             }

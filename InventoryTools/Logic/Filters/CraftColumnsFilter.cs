@@ -99,6 +99,7 @@ namespace InventoryTools.Logic.Filters
             {
                 var value = PluginService.PluginLogic.GridColumns;
                 var currentValue = CurrentValue(configuration);
+                //TODO: Adding columns does not seem to remove items from the list
                 _availableItems = value.Where(c => c.Value.CraftOnly != false && c.Value.AvailableInType(configuration.FilterType) && !currentValue.ContainsKey(c.Key)).ToDictionary(c => c.Key, c => c.Value);
             }
 

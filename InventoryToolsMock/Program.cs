@@ -123,11 +123,6 @@ namespace InventoryToolsMock
             _controller.Dispose();
             _cl.Dispose();
             _gd.Dispose();
-
-            while (true)
-            {
-                Thread.Sleep(10);
-            }
         }
     }
 }
