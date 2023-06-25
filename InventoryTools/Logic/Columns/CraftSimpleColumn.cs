@@ -73,7 +73,7 @@ namespace InventoryTools.Logic.Columns
                             nextStepString = "Buy " + unavailable + " (MB)";
                             break;
                         case IngredientPreferenceType.Crafting:
-                            if (item.QuantityCanCraft >= unavailable / item.Yield)
+                            if (item.QuantityCanCraft >= unavailable)
                             {
                                 if (item.QuantityCanCraft != 0)
                                 {

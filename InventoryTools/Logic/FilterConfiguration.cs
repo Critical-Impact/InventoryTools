@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
@@ -196,7 +198,9 @@ namespace InventoryTools.Logic
             }
             set => _filterResult = value;
         }
-        
+
+        private Queue _refreshQueue = new Queue();
+
         [JsonIgnore]
         private bool _refreshing;
 
@@ -204,6 +208,8 @@ namespace InventoryTools.Logic
         {
             if (_refreshing)
             {
+                _refreshQueue?.Enqueue(null);
+                PluginLog.Debug("Not refreshing filter: " + this.Name);
                 return;
             }
 
@@ -277,6 +283,11 @@ namespace InventoryTools.Logic
             await PluginService.FrameworkService.RunOnFrameworkThread(() => { ListUpdated?.Invoke(this); });
             PluginLog.Debug("Finished refreshing filter: " + this.Name);
             _refreshing = false;
+            if (_refreshQueue.Contains(null))
+            {
+                _refreshQueue.Clear();
+                StartRefresh();
+            }
         }
         
         public FilterConfiguration(string name, string key, FilterType filterType)
