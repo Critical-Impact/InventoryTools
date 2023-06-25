@@ -131,8 +131,8 @@ public class CraftCalculatorColumn : IntegerColumn, IDisposable
         {
             if (_craftCalculator != null)
             {
-                _craftCalculator.CancelProcessing();
                 _craftCalculator.CraftingResult -= CraftCalculatorOnCraftingResult;
+                _craftCalculator.Dispose();
             }            
             base.Dispose();
         }
