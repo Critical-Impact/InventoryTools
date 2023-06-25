@@ -39,6 +39,7 @@ public class RetainerRetrieveOrderFilter : ChoiceFilter<RetainerRetrieveOrder>
         if (configuration.FilterType == FilterType.CraftFilter)
         {
             configuration.CraftList.RetainerRetrieveOrder = newValue;
+            configuration.NotifyConfigurationChange();
         }
     }
 

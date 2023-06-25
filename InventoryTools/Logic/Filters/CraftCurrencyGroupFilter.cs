@@ -27,11 +27,13 @@ public class CraftCurrencyGroupFilter : ChoiceFilter<CurrencyGroupSetting>
     public override void ResetFilter(FilterConfiguration configuration)
     {
         configuration.CraftList.SetCurrencyGroupSetting(EmptyValue);
+        configuration.NotifyConfigurationChange();
     }
 
     public override void UpdateFilterConfiguration(FilterConfiguration configuration, CurrencyGroupSetting newValue)
     {
         configuration.CraftList.SetCurrencyGroupSetting(newValue);
+        configuration.NotifyConfigurationChange();
     }
 
     public override string Key { get; set; } = "CraftCurrencyGroupFilter";

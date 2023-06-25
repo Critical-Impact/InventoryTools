@@ -27,11 +27,13 @@ public class CraftCrystalGroupFilter : ChoiceFilter<CrystalGroupSetting>
     public override void ResetFilter(FilterConfiguration configuration)
     {
         configuration.CraftList.SetCrystalGroupSetting(EmptyValue);
+        configuration.NotifyConfigurationChange();
     }
 
     public override void UpdateFilterConfiguration(FilterConfiguration configuration, CrystalGroupSetting newValue)
     {
         configuration.CraftList.SetCrystalGroupSetting(newValue);
+        configuration.NotifyConfigurationChange();
     }
 
     public override string Key { get; set; } = "CraftCrystalGroupFilter";

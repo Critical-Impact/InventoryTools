@@ -28,11 +28,13 @@ public class CraftPrecraftGroupFilter : ChoiceFilter<PrecraftGroupSetting>
     public override void ResetFilter(FilterConfiguration configuration)
     {
         configuration.CraftList.SetPrecraftGroupSetting(EmptyValue);
+        configuration.NotifyConfigurationChange();
     }
 
     public override void UpdateFilterConfiguration(FilterConfiguration configuration, PrecraftGroupSetting newValue)
     {
         configuration.CraftList.SetPrecraftGroupSetting(newValue);
+        configuration.NotifyConfigurationChange();
     }
 
     public override string Key { get; set; } = "CraftPrecraftGroupFilter";

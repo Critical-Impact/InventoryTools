@@ -41,11 +41,13 @@ public class CraftIngredientPreferenceFilter : SortedListFilter<(IngredientPrefe
     public override void ResetFilter(FilterConfiguration configuration)
     {
         configuration.CraftList.ResetIngredientPreferences();
+        configuration.NotifyConfigurationChange();
     }
 
     public override void UpdateFilterConfiguration(FilterConfiguration configuration, Dictionary<(IngredientPreferenceType, uint?), (string, string?)> newValue)
     {
         configuration.CraftList.IngredientPreferenceTypeOrder = newValue.Select(c => c.Key).ToList();
+        configuration.NotifyConfigurationChange();
     }
 
     public override string Key { get; set; } = "CraftIngredientPreference";

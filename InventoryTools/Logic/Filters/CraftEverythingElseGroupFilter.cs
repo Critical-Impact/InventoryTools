@@ -32,6 +32,7 @@ public class CraftEverythingElseGroupFilter : ChoiceFilter<EverythingElseGroupSe
     public override void UpdateFilterConfiguration(FilterConfiguration configuration, EverythingElseGroupSetting newValue)
     {
         configuration.CraftList.SetEverythingElseGroupSetting(newValue);
+        configuration.NotifyConfigurationChange();
     }
 
     public override string Key { get; set; } = "CraftEverythingElseGroupFilter";
