@@ -3096,7 +3096,7 @@ namespace InventoryTools.Logic
                     return false;
                 }
 
-                foreach (var change in matchedItems)
+                foreach (var change in matchedItems.OrderByDescending(c => c.ChangeDate ?? new DateTime()))
                 {
                     if (filter.FilterItem(change))
                     {
