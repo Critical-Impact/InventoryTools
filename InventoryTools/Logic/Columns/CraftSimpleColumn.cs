@@ -110,10 +110,13 @@ namespace InventoryTools.Logic.Columns
                                 }
                                 else
                                 {
-                                    var linkedItem = Service.ExcelCache.GetItemExSheet()
-                                        .GetRow(item.IngredientPreference.LinkedItemId.Value);
-                                    stepColour = ImGuiColors.DalamudRed;
-                                    nextStepString = "Not enough " + linkedItem?.NameString;
+                                    if (item.IngredientPreference.LinkedItemId != null)
+                                    {
+                                        var linkedItem = Service.ExcelCache.GetItemExSheet()
+                                            .GetRow(item.IngredientPreference.LinkedItemId.Value);
+                                        stepColour = ImGuiColors.DalamudRed;
+                                        nextStepString = "Not enough " + (linkedItem?.NameString ?? "Unknown");
+                                    }
                                 }
                                 break;
                             }

@@ -67,7 +67,7 @@ namespace InventoryTools.Logic.Columns
             }
             else
             {
-                ImGuiUtil.VerticalAlignText(item.QuantityNeeded + "/" + item.QuantityRequired, configuration.TableHeight, false);
+                ImGuiUtil.VerticalAlignText(item.QuantityNeeded + "/" + item.QuantityNeededPreUpdate, configuration.TableHeight, false);
             }
         }
         public override FilterType AvailableIn { get; } = Logic.FilterType.CraftFilter;
