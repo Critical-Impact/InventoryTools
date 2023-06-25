@@ -7,7 +7,6 @@ using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Ui.Widgets;
-using OtterGui.Raii;
 
 namespace InventoryTools.Logic.Columns.Abstract
 {

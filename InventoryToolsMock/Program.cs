@@ -17,57 +17,12 @@ namespace InventoryToolsMock
         private static CommandList _cl;
         public static ImGuiController _controller;
         private static Vector3 _clearColor = new Vector3(0.45f, 0.55f, 0.6f);
-        public static MockPlugin _mockPlugin;
+        public static MockPlugin? _mockPlugin;
+        public static MockSettingsWindow _mockSettingsWindow;
+        public static GameData? GameData;
 
         static void Main(string[] args)
         {
-            if (args.Length < 2)
-            {
-                Console.WriteLine("Invalid arguments provided. Please provide the game directory and configuration directory as arguments to the executable.");
-                Console.ReadLine();
-                return;
-            }
-
-            var gameLocation = args[0];
-            if (!new DirectoryInfo(gameLocation).Exists)
-            {
-                Console.WriteLine("Game directory: " + gameLocation + " could not be found.");
-                Console.ReadLine();
-                return;
-            }
-            var configDirectory = args[1];
-            if (!new DirectoryInfo(configDirectory).Exists)
-            {
-                Console.WriteLine("Config directory: " + configDirectory + " could not be found.");
-                Console.ReadLine();
-                return;
-            }
-            
-            var configFile = Path.Combine(configDirectory,"InventoryTools.json");
-            if (args.Length > 2)
-            {
-                configFile = args[2];
-            }
-            if (!new FileInfo(configFile).Exists)
-            {
-                Console.WriteLine("Config file: " + configFile + " could not be found.");
-                Console.ReadLine();
-                return;
-            }
-
-            string? inventoriesFile = Path.Combine(configDirectory, "InventoryTools","inventories.csv");
-            if (args.Length > 3)
-            {
-                inventoriesFile = args[3];
-            }
-            
-            if (!new FileInfo(inventoriesFile).Exists)
-            {
-                Console.WriteLine("Inventories file: " + inventoriesFile + " could not be found.");
-                inventoriesFile = null;
-            }
-
-            //Hack to bypass private set
             var field = typeof(ImGuiHelpers).GetProperty("GlobalScale", 
                 BindingFlags.Static | 
                 BindingFlags.Public);
@@ -85,28 +40,26 @@ namespace InventoryToolsMock
             };
             
             _cl = _gd.ResourceFactory.CreateCommandList();
-            var gameData = new Lumina.GameData( gameLocation, new LuminaOptions()
-            {
-                PanicOnSheetChecksumMismatch = false
-            } );
-            _controller = new ImGuiController(gameData, _gd, _gd.MainSwapchain.Framebuffer.OutputDescription, _window.Width, _window.Height);
-            _mockPlugin = new MockPlugin(gameData, gameLocation, configDirectory, configFile, inventoriesFile);
-            
-            //Hack to bypass private set
+
+            _controller = new ImGuiController(_gd, _gd.MainSwapchain.Framebuffer.OutputDescription, _window.Width, _window.Height);
+            _mockSettingsWindow = new MockSettingsWindow();
             var property = typeof(ImGuiHelpers).GetProperty("MainViewport", 
                 BindingFlags.Static | 
                 BindingFlags.Public);
             property.SetValue(null, ImGui.GetMainViewport());
-            
+            if (AppSettings.Default.AutoStart)
+            {
+                StartPlugin();
+            }
             while (_window.Exists)
             {
                 InputSnapshot snapshot = _window.PumpEvents();
                 if (!_window.Exists) { break; }
-                _mockPlugin._frameworkService.FireUpdate();
+                _mockPlugin?._frameworkService.FireUpdate();
                 _controller.Update(1f / 60f, snapshot);
 
-                _mockPlugin.Draw();
-
+                _mockPlugin?.Draw();
+                _mockSettingsWindow.Draw();
                 _cl.Begin();
                 _cl.SetFramebuffer(_gd.MainSwapchain.Framebuffer);
                 _cl.ClearColorTarget(0, new RgbaFloat(_clearColor.X, _clearColor.Y, _clearColor.Z, 1f));
@@ -115,14 +68,41 @@ namespace InventoryToolsMock
                 _gd.SubmitCommands(_cl);
                 _gd.SwapBuffers(_gd.MainSwapchain);
             }
-            _mockPlugin.Dispose();
-            ConfigurationManager.Save();
+
+            if (_mockPlugin != null)
+            {
+                _mockPlugin.Dispose();
+                ConfigurationManager.Save();
+            }
 
             // Clean up Veldrid resources
             _gd.WaitForIdle();
             _controller.Dispose();
             _cl.Dispose();
             _gd.Dispose();
+        }
+
+        public static void StartPlugin()
+        {
+            var gameLocation = AppSettings.Default.GamePath;
+            var configDirectory = AppSettings.Default.PluginConfigPath;
+
+            if (gameLocation != null && configDirectory != null)
+            {
+                GameData = new GameData(gameLocation, new LuminaOptions()
+                {
+                    PanicOnSheetChecksumMismatch = false
+                });
+                _mockPlugin = new MockPlugin(GameData, configDirectory);
+            }
+        }
+
+        public static void StopPlugin()
+        {
+            var mockPlugin = _mockPlugin;
+            _mockPlugin = null;
+            mockPlugin?.Dispose();
+            GameData = null;
         }
     }
 }

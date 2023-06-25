@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -9,7 +8,6 @@ using Dalamud.Utility;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
-using InventoryTools.Ui.Widgets;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 
 namespace InventoryTools.Ui;

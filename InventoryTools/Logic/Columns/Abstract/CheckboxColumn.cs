@@ -6,7 +6,6 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Images;
-using OtterGui;
 
 namespace InventoryTools.Logic.Columns.Abstract
 {

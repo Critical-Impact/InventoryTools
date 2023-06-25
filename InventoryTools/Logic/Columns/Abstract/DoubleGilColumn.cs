@@ -1,6 +1,5 @@
 using Dalamud.Game.Text;
 using ImGuiNET;
-using OtterGui;
 using ImGuiUtil = InventoryTools.Ui.Widgets.ImGuiUtil;
 
 namespace InventoryTools.Logic.Columns.Abstract

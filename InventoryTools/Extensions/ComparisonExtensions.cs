@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using Dalamud.Game.Text;
 using Dalamud.Utility;
 
 namespace InventoryTools.Extensions
@@ -17,7 +16,6 @@ namespace InventoryTools.Extensions
             public bool StartsWithFuzzy = false;
             public string SearchText;
 
-            //TODO: Allow this to have sub comparisons
             public FilterComparisonText(string filterString)
             {
                 SearchText = filterString.ToLower().Trim();

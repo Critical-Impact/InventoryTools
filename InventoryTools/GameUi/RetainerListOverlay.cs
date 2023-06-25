@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib.Services.Ui;
-using Dalamud.Logging;
 using InventoryTools.Logic;
 
 namespace InventoryTools.GameUi

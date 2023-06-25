@@ -88,6 +88,7 @@ namespace InventoryTools.Logic.Columns
 
             using (var popup = ImRaii.Popup("RightClick" + rowIndex))
             {
+                using var _ = ImRaii.PushId("RightClick" + rowIndex);
                 if (popup.Success)
                 {
                     item.DrawRightClickPopup();

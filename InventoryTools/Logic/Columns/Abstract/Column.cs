@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
@@ -104,6 +103,9 @@ namespace InventoryTools.Logic.Columns.Abstract
         public abstract ColumnFilterType FilterType { get; set; }
         
         public virtual bool IsDebug { get; set; } = false;
+
+        public bool Disposed => _disposed;
+
         public bool AvailableInType(FilterType type) =>
             AvailableIn.HasFlag(InventoryTools.Logic.FilterType.SearchFilter) &&
             type.HasFlag(InventoryTools.Logic.FilterType.SearchFilter)
@@ -235,5 +237,23 @@ namespace InventoryTools.Logic.Columns.Abstract
 
             return false;
         }
+
+        
+        private bool _disposed;
+        public virtual void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        
+        protected virtual void Dispose(bool disposing)
+        {
+            if(!Disposed && disposing)
+            {
+
+            }
+            _disposed = true;         
+        }
+
     }
 }

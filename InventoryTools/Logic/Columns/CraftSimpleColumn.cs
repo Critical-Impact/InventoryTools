@@ -8,7 +8,6 @@ using Dalamud.Interface.Colors;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Ui.Widgets;
-using OtterGui.Raii;
 
 namespace InventoryTools.Logic.Columns
 {

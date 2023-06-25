@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dalamud.Interface.Colors;
-using Dalamud.Logging;
-using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using ImGuiNET;
 using InventoryTools.Extensions;

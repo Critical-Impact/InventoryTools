@@ -4,14 +4,11 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Addons;
-using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
-using ImGuiScene;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
-using InventoryTools.Services;
 using InventoryTools.Ui.Widgets;
 using OtterGui.Raii;
 using ImGuiUtil = OtterGui.ImGuiUtil;
@@ -574,14 +571,14 @@ namespace InventoryTools.Ui
                 _addFilterMenu.Draw();
             }
         }
-        
+        private string? _newName = null;
         private void DrawSettingsPanel(FilterConfiguration filterConfiguration)
         {
             using (var contentChild = ImRaii.Child("Content", new Vector2(0, -44) * ImGui.GetIO().FontGlobalScale, true))
             {
                 if (contentChild.Success)
                 {
-                    var filterName = filterConfiguration.Name;
+                    var filterName = _newName ?? filterConfiguration.Name;
                     var labelName = "##" + filterConfiguration.Key;
                     if (ImGui.CollapsingHeader("General",
                             ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
@@ -590,9 +587,20 @@ namespace InventoryTools.Ui
                         ImGui.LabelText(labelName + "FilterNameLabel", "Name: ");
                         ImGui.SameLine();
                         ImGui.InputText(labelName + "FilterName", ref filterName, 100);
-                        if (filterName != filterConfiguration.Name)
+                        if (filterName != _newName && filterName != filterConfiguration.Name)
                         {
-                            filterConfiguration.Name = filterName;
+                            _newName = filterName;
+                        }
+
+                        if (_newName != null)
+                        {
+                            ImGui.SameLine();
+                            if (ImGui.Button("Save"))
+                            {
+                                filterConfiguration.Name = _newName;
+                                Invalidate();
+                                _newName = null;
+                            }
                         }
 
                         ImGui.NewLine();
@@ -787,8 +795,11 @@ namespace InventoryTools.Ui
                         {
                             PluginService.Universalis.QueuePriceCheck(item.RowId);
                         }
-                        
-                        //TODO: Handle history price checking
+
+                        foreach (var item in itemTable.InventoryChanges)
+                        {
+                            PluginService.Universalis.QueuePriceCheck(item.InventoryItem.ItemId);
+                        }
                     }
 
                     ImGuiUtil.HoverTooltip("Refresh Market Prices");

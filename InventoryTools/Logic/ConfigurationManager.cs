@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Resolvers;
 using Dalamud.Logging;
@@ -104,32 +103,36 @@ namespace InventoryTools.Logic
 
             if (!Config.InventoriesMigrated)
             {
-                string jsonText = File.ReadAllText(ConfigurationFile);
-                var inventoryToolsConfiguration = JsonConvert.DeserializeObject<InventoryToolsConfiguration>(jsonText, new JsonSerializerSettings()
+                if (File.Exists(ConfigurationFile))
                 {
-                    DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
-                    ContractResolver = MinifyResolver
-                });
-                if (inventoryToolsConfiguration != null)
-                {
-                    PluginLog.Verbose("Migrating inventories");
-                    var temp = JObject.Parse(jsonText);
-                    if (temp.ContainsKey("SavedInventories"))
-                    {
-                        var savedInventories = temp["SavedInventories"]
-                            ?.ToObject<Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>>();
-                        
-                        var parsedInventories = savedInventories ??
-                                                new Dictionary<ulong, Dictionary<
-                                                    InventoryCategory,
-                                                    List<InventoryItem>>>();
-                        foreach (var parsedInventory in parsedInventories)
+                    string jsonText = File.ReadAllText(ConfigurationFile);
+                    var inventoryToolsConfiguration = JsonConvert.DeserializeObject<InventoryToolsConfiguration>(
+                        jsonText, new JsonSerializerSettings()
                         {
-                            foreach (var category in parsedInventory.Value)
+                            DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
+                            ContractResolver = MinifyResolver
+                        });
+                    if (inventoryToolsConfiguration != null)
+                    {
+                        PluginLog.Verbose("Migrating inventories");
+                        var temp = JObject.Parse(jsonText);
+                        if (temp.ContainsKey("SavedInventories"))
+                        {
+                            var savedInventories = temp["SavedInventories"]
+                                ?.ToObject<Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>>();
+
+                            var parsedInventories = savedInventories ??
+                                                    new Dictionary<ulong, Dictionary<
+                                                        InventoryCategory,
+                                                        List<InventoryItem>>>();
+                            foreach (var parsedInventory in parsedInventories)
                             {
-                                foreach (var item in category.Value)
+                                foreach (var category in parsedInventory.Value)
                                 {
-                                    inventories.Add(item);
+                                    foreach (var item in category.Value)
+                                    {
+                                        inventories.Add(item);
+                                    }
                                 }
                             }
                         }

@@ -5,11 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
-using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
-using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Colors;
 using Dalamud.Logging;
 using Dalamud.Utility;
@@ -24,7 +22,6 @@ using InventoryTools.Logic.Settings;
 using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Tooltips;
 using InventoryTools.Ui;
-using InventoryItem = CriticalCommonLib.Models.InventoryItem;
 
 namespace InventoryTools
 {
@@ -582,7 +579,7 @@ namespace InventoryTools
             _nextSaveTime = null;
         }
 
-        private void InventoryMonitorOnOnInventoryChanged(List<InventoryChange> inventoryChanges)
+        private void InventoryMonitorOnOnInventoryChanged(List<InventoryChange> inventoryChanges, InventoryMonitor.ItemChanges? itemChanges)
         {
             PluginLog.Verbose("PluginLogic: Inventory changed, saving to config.");
             var allItems = PluginService.InventoryMonitor.AllItems.ToList();
@@ -964,6 +961,11 @@ namespace InventoryTools
                 foreach (var textureWrap in HQTextureDictionary)
                 {
                     textureWrap.Value.Dispose();
+                }
+
+                foreach (var gridColumn in GridColumns)
+                {
+                    gridColumn.Value.Dispose();
                 }
                 PluginService.OnPluginLoaded -= PluginServiceOnOnPluginLoaded;
                 PluginService.GameInterface.AcquiredItemsUpdated -= GameInterfaceOnAcquiredItemsUpdated;

@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Dalamud.Game.ClientState.Keys;
-using Dalamud.Interface.Colors;
 using ImGuiNET;
 using OtterGui.Classes;
 using OtterGui.Widgets;

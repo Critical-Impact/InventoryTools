@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using CriticalCommonLib.Enums;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;

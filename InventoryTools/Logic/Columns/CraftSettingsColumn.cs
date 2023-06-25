@@ -407,4 +407,8 @@ public class CraftSettingsColumn : IColumn
     {
         return false;
     }
+
+    public void Dispose()
+    {
+    }
 }

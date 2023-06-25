@@ -8,7 +8,6 @@ using System.Numerics;
 using System.Text;
 using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Extensions;
 using CsvHelper;
 using Dalamud.Interface.Colors;
 using Dalamud.Logging;
@@ -297,6 +296,14 @@ namespace InventoryTools.Logic
                     }
                 });
         }
-        
+
+        public override void Dispose()
+        {
+            if (!base.Disposed)
+            {
+                Columns.ForEach(c => c.Dispose());
+                base.Dispose();
+            }
+        }
     }
 }

@@ -11,7 +11,6 @@ using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using Dalamud.Logging;
-using FFXIVClientStructs.FFXIV.Client.System.String;
 using InventoryTools.Extensions;
 using Newtonsoft.Json;
 
@@ -414,7 +413,7 @@ namespace InventoryTools.Logic
             
         }
 
-        public void ResetFilter()
+        public void ResetDefaultCraftFilter()
         {
             CraftColumns = new List<string>();
             Columns = new List<string>();
@@ -427,6 +426,23 @@ namespace InventoryTools.Logic
             }
             AddDefaultColumns();
             ApplyDefaultCraftFilterConfiguration();
+        }
+
+        public void ResetCraftFilter()
+        {
+            var defaultConfiguration = PluginService.FilterService.GetDefaultCraftList();
+            if (defaultConfiguration != null)
+            {
+                CraftColumns = new List<string>();
+                Columns = new List<string>();
+                foreach (var filter in PluginService.PluginLogic.AvailableFilters)
+                {
+                    if (filter.AvailableIn.HasFlag(FilterType.CraftFilter))
+                    {
+                        filter.ResetFilter(defaultConfiguration, this);
+                    }
+                }
+            }
         }
 
         public FilterTable GenerateTable()

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using ImGuiNET;
-using Action = Lumina.Excel.GeneratedSheets.Action;
 
 namespace InventoryTools.Ui;
 

@@ -6,11 +6,7 @@ using CriticalCommonLib;
 using CriticalCommonLib.Addons;
 using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
-using Dalamud.Logging;
-using FFXIVClientStructs.FFXIV.Client.System.String;
-using FFXIVClientStructs.FFXIV.Client.UI;
 using ImGuiNET;
-using ImGuiScene;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
@@ -303,7 +299,7 @@ namespace InventoryTools.Ui
                     _newCraftName = "";
                 });
             }
-            //TODO: need to adjust id when refresh happens 
+
             using (var tabbar = ImRaii.TabBar("CraftTabs", ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.TabListPopupButton))
             {
                 if (tabbar.Success)
@@ -976,17 +972,26 @@ namespace InventoryTools.Ui
 
                     if (!filterConfiguration.CraftListDefault)
                     {
-                        //TODO: Add import from default craft list/save to default craft list
                         ImGui.SameLine();
                         float width = ImGui.GetWindowSize().X;
-                        ImGui.SetCursorPosX(width - 42 * ImGui.GetIO().FontGlobalScale);
+                        width -= 42 * ImGui.GetIO().FontGlobalScale;
+                        ImGui.SetCursorPosX(width);
                         UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                         if (_closeSettingsIcon.Draw("bb_settings"))
                         {
                             _settingsActive = false;
                         }
-
                         ImGuiUtil.HoverTooltip("Return to the craft list.");
+                        
+                        ImGui.SameLine();
+                        width -= 30 * ImGui.GetIO().FontGlobalScale;
+                        ImGui.SetCursorPosX(width);
+                        UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                        if (_resetButton.Draw("bb_reset"))
+                        {
+                            filterConfiguration.ResetCraftFilter();
+                        }
+                        ImGuiUtil.HoverTooltip("Reset craft list to default configuration (keeps items).");
                     }
                     else
                     {
@@ -1011,7 +1016,7 @@ namespace InventoryTools.Ui
 
                                 if (ImGui.Button("OK", new Vector2(120, 0) * ImGui.GetIO().FontGlobalScale))
                                 {
-                                    DefaultConfiguration.ResetFilter();
+                                    DefaultConfiguration.ResetCraftFilter();
                                     ImGui.CloseCurrentPopup();
                                 }
 

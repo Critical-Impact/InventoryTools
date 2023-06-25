@@ -58,7 +58,7 @@ namespace InventoryTools.Services
             _craftItemTables = new ConcurrentDictionary<string, CraftItemTable>();
         }
 
-        private void InventoryMonitorOnOnInventoryChanged(List<InventoryChange> inventoryChanges)
+        private void InventoryMonitorOnOnInventoryChanged(List<InventoryChange> inventoryChanges, InventoryMonitor.ItemChanges? itemChanges)
         {
             if (PluginService.PluginLoaded)
             {

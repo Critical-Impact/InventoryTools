@@ -1,18 +1,13 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
-using Dalamud.Utility;
 using ImGuiNET;
 using InventoryTools.Extensions;
-using InventoryTools.Images;
 using InventoryTools.Logic;
 using Lumina.Excel;
-using Lumina.Excel.GeneratedSheets;
-using LuminaSupplemental.Excel.Model;
 using OtterGui;
 using OtterGui.Raii;
 

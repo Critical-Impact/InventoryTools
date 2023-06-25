@@ -2,7 +2,6 @@ using System;
 using Dalamud.Interface;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using ImGuiNET;
-using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
 using OtterGui.Raii;
 

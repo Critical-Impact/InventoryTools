@@ -4,7 +4,6 @@ using System.Numerics;
 using ImGuiNET;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
-using InventoryTools.Services;
 
 namespace InventoryTools.Ui;
 

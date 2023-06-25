@@ -8,9 +8,6 @@ using Dalamud.Utility;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
-using Lumina.Excel;
-using Lumina.Excel.GeneratedSheets;
-using LuminaSupplemental.Excel.Model;
 using OtterGui;
 using OtterGui.Raii;
 

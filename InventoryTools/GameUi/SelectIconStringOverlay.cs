@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Numerics;
-using CriticalCommonLib.Enums;
 using CriticalCommonLib.Services.Ui;
 using Dalamud.Logging;
 using InventoryTools.Logic;

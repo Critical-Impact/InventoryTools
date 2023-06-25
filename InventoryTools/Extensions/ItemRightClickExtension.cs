@@ -38,23 +38,29 @@ namespace InventoryTools.Extensions
                 }
                 if (item.CanBeCrafted && Service.ExcelCache.IsCompanyCraft(item.RowId))
                 {
-                    //TODO: replace with a dynamic way of determining number of steps
-                    for (uint i = 0; i < 3; i++)
+                    if (item.CompanyCraftSequenceEx != null)
                     {
-                        if (firstItem)
+                        for (var index = 0u; index < item.CompanyCraftSequenceEx.CompanyCraftPart.Length; index++)
                         {
-                            ImGui.Separator();
-                            firstItem = false;
-                        }
-                        if (ImGui.Selectable("Add phase " + i + " to craft list - " + filter.Name))
-                        {
-                            filter.CraftList.AddCraftItem(item.RowId, 1, InventoryItem.ItemFlags.None, i);
-                            PluginService.WindowService.OpenCraftsWindow();
-                            PluginService.WindowService.GetCraftsWindow().FocusFilter(filter);
-                            filter.NeedsRefresh = true;
-                            filter.StartRefresh();
+                            var part = item.CompanyCraftSequenceEx.CompanyCraftPart[index];
+                            if (part.Row == 0) continue;
+                            if (firstItem)
+                            {
+                                ImGui.Separator();
+                                firstItem = false;
+                            }
+
+                            if (ImGui.Selectable("Add " + (part.Value?.CompanyCraftType.Value?.Name ?? "Unknown") + " to craft list - " + filter.Name))
+                            {
+                                filter.CraftList.AddCraftItem(item.RowId, 1, InventoryItem.ItemFlags.None, index);
+                                PluginService.WindowService.OpenCraftsWindow();
+                                PluginService.WindowService.GetCraftsWindow().FocusFilter(filter);
+                                filter.NeedsRefresh = true;
+                                filter.StartRefresh();
+                            }
                         }
                     }
+                    ImGui.Separator();
                 }
             }
 
@@ -76,19 +82,25 @@ namespace InventoryTools.Extensions
 
             if (item.CanBeCrafted && Service.ExcelCache.IsCompanyCraft(item.RowId))
             {
-                for (uint i = 0; i < 3; i++)
+                if (item.CompanyCraftSequenceEx != null)
                 {
-                    if (ImGui.Selectable("Add phase " + i + " to new craft list"))
+                    for (var index = 0u; index < item.CompanyCraftSequenceEx.CompanyCraftPart.Length; index++)
                     {
-                        PluginService.FrameworkService.RunOnTick(() =>
+                        var part = item.CompanyCraftSequenceEx.CompanyCraftPart[index];
+                        if (part.Row == 0) continue;
+                        if (ImGui.Selectable("Add " + (part.Value?.CompanyCraftType.Value?.Name ?? "Unknown") + " to new craft list"))
                         {
-                            var filter = PluginService.FilterService.AddNewCraftFilter();
-                            filter.CraftList.AddCraftItem(item.RowId);
-                            PluginService.WindowService.OpenCraftsWindow();
-                            PluginService.WindowService.GetCraftsWindow().FocusFilter(filter);
-                            filter.NeedsRefresh = true;
-                            filter.StartRefresh();
-                        });
+                            var newPhase = index;
+                            PluginService.FrameworkService.RunOnTick(() =>
+                            {
+                                var filter = PluginService.FilterService.AddNewCraftFilter();
+                                filter.CraftList.AddCraftItem(item.RowId,1, InventoryItem.ItemFlags.None, newPhase);
+                                PluginService.WindowService.OpenCraftsWindow();
+                                PluginService.WindowService.GetCraftsWindow().FocusFilter(filter);
+                                filter.NeedsRefresh = true;
+                                filter.StartRefresh();
+                            });
+                        }
                     }
                 }
             }
@@ -125,22 +137,31 @@ namespace InventoryTools.Extensions
                 }
             }
 
-            if (item.Item.CanBeCrafted && item.IsOutputItem && item.Phase != null && Service.ExcelCache.IsCompanyCraft(item.ItemId))
+            if (item.Item.CanBeCrafted && item.IsOutputItem && Service.ExcelCache.IsCompanyCraft(item.ItemId))
             {
-                for (uint i = 0; i < 3; i++)
+                if (item.Item.CompanyCraftSequenceEx != null)
                 {
-                    if (item.Phase != i)
+                    if (item.Phase != null && ImGui.Selectable("Switch to All Phases"))
                     {
-                        if (firstItem)
+                        configuration.CraftList.SetCraftPhase(item.ItemId, null);
+                        configuration.StartRefresh();
+                    }
+                    for (var index = 0u; index < item.Item.CompanyCraftSequenceEx.CompanyCraftPart.Length; index++)
+                    {
+                        var part = item.Item.CompanyCraftSequenceEx.CompanyCraftPart[index];
+                        if (part.Row == 0) continue;
+                        if (item.Phase != index)
                         {
-                            ImGui.Separator();
-                            firstItem = false;
-                        }
-                        if (ImGui.Selectable("Switch to Phase " + (i + 1)))
-                        {
-                            item.SwitchPhase(i);
-                            configuration.CraftList.GenerateCraftChildren();
-                            configuration.StartRefresh();
+                            if (firstItem)
+                            {
+                                ImGui.Separator();
+                                firstItem = false;
+                            }
+                            if (ImGui.Selectable("Switch to " + ((part.Value?.CompanyCraftType.Value?.Name ?? "") + " (Phase " + (index + 1) + ")")))
+                            {
+                                configuration.CraftList.SetCraftPhase(item.ItemId, index);
+                                configuration.StartRefresh();
+                            }
                         }
                     }
                 }
@@ -155,8 +176,6 @@ namespace InventoryTools.Extensions
                 {
                     foreach (var filter in craftFilters)
                     {
-
-                        //TODO: replace with a dynamic way of determining number of steps
                         if (firstItem)
                         {
                             ImGui.Separator();

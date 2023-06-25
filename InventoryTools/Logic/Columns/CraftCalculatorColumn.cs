@@ -1,17 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
-using Lumina.Excel.GeneratedSheets;
-using OtterGui.Widgets;
 
 namespace InventoryTools.Logic.Columns;
 
-//TODO: actually dispose this/move this somewhere
 public class CraftCalculatorColumn : IntegerColumn, IDisposable
 {
     public override ColumnCategory ColumnCategory => ColumnCategory.Tools;
@@ -129,12 +125,16 @@ public class CraftCalculatorColumn : IntegerColumn, IDisposable
         _craftable[e.ItemId] = e.CraftableQuantity ?? 0;
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
-        if (_craftCalculator != null)
+        if (!base.Disposed)
         {
-            _craftCalculator.CancelProcessing();
-            _craftCalculator.CraftingResult -= CraftCalculatorOnCraftingResult;
+            if (_craftCalculator != null)
+            {
+                _craftCalculator.CancelProcessing();
+                _craftCalculator.CraftingResult -= CraftCalculatorOnCraftingResult;
+            }            
+            base.Dispose();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
@@ -7,7 +8,7 @@ using InventoryTools.Logic.Columns.Abstract;
 
 namespace InventoryTools.Logic.Columns
 {
-    public interface IColumn
+    public interface IColumn : IDisposable
     {
         public string Name { get; set; }
         public float Width { get; set; }

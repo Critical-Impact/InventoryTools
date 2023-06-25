@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -9,8 +8,6 @@ using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Images;
 using InventoryTools.Logic;
-using Lumina.Excel.GeneratedSheets;
-using OtterGui.Raii;
 
 namespace InventoryTools.Ui;
 

@@ -7,8 +7,6 @@ using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using NaturalSort.Extension;
-using OtterGui;
-using ImGuiUtil = InventoryTools.Ui.Widgets.ImGuiUtil;
 
 namespace InventoryTools.Logic.Columns.Abstract
 {

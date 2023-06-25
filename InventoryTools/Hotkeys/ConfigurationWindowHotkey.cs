@@ -1,5 +1,3 @@
-using CriticalCommonLib;
-using Dalamud.Game.ClientState.Keys;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
 using OtterGui.Classes;

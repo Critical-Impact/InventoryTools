@@ -4,6 +4,7 @@ using CriticalCommonLib.Services;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface;
 using Dalamud.Interface.ImGuiFileDialog;
+using Dalamud.Interface.Windowing;
 using Dalamud.Logging;
 using ImGuiNET;
 using InventoryTools;
@@ -12,12 +13,11 @@ using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
 using InventoryTools.Ui;
 using Lumina;
-using Lumina.Data;
-using Lumina.Excel.GeneratedSheets;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using Veldrid;
+using Window = InventoryTools.Ui.Window;
 
 namespace InventoryToolsMock;
 
@@ -49,11 +49,12 @@ public class MockPlugin : IDisposable
     private IKeyStateService _keyStateService;
     private IHotkeyService _hotkeyService;
     private InventoryHistory _inventoryHistory;
+    private WindowSystem _windowSystem;
 
-    public MockPlugin(GameData gameData, string gameDirectory, string configDirectory, string configFile, string? inventoriesFile)
+    public MockPlugin(GameData gameData, string configDirectory)
     {
-        var stopWatch = new Stopwatch();
-        stopWatch.Start();
+        var configFile = Path.Combine(configDirectory, "InventoryTools.json");        
+        var inventoriesFile = Path.Combine(configDirectory,"InventoryTools", "inventories.csv");        
         ConfigurationManager.Config = new InventoryToolsConfiguration();
         var levelSwitch = new LoggingLevelSwitch
         {
@@ -61,12 +62,14 @@ public class MockPlugin : IDisposable
         };
         var lumina = gameData;
 
-
         Log.Logger = new LoggerConfiguration()
             .WriteTo.Console(standardErrorFromLevel: LogEventLevel.Verbose)
             .MinimumLevel.ControlledBy(levelSwitch)
             .CreateLogger();
         
+        
+        var stopWatch = new Stopwatch();
+        stopWatch.Start();
         _characterMonitor = new MockCharacterMonitor();
         _craftMonitor = new MockCraftMonitor();
         _inventoryScanner = new MockInventoryScanner();
@@ -114,7 +117,11 @@ public class MockPlugin : IDisposable
         }, false);
         ConfigurationManager.Load(configFile);
         PluginService.CharacterMonitor.LoadExistingRetainers(ConfigurationManager.Config.GetSavedRetainers());
-        PluginService.InventoryMonitor.LoadExistingData(ConfigurationManager.LoadInventory(inventoriesFile));
+        if (File.Exists(inventoriesFile))
+        {
+            PluginService.InventoryMonitor.LoadExistingData(ConfigurationManager.LoadInventory(inventoriesFile));
+        }
+
         PluginService.InventoryHistory.LoadExistingHistory(ConfigurationManager.LoadHistoryFromCsv(out _));
         PluginService.InitaliseExplicit(new MockServices()
         {

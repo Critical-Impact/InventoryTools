@@ -7,7 +7,6 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using InventoryTools;
 using InventoryTools.Logic;
-using InventoryTools.Services;
 using InventoryToolsMock;
 using Lumina;
 using NUnit.Framework;

@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using CriticalCommonLib.Models;
+﻿using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
 

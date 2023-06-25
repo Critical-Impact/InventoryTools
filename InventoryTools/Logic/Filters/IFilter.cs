@@ -26,6 +26,7 @@ namespace InventoryTools.Logic.Filters
         public void Draw(FilterConfiguration configuration);
 
         public void ResetFilter(FilterConfiguration configuration);
+        public void ResetFilter(FilterConfiguration fromConfiguration, FilterConfiguration toConfiguration);
 
         public static readonly List<FilterCategory> FilterCategoryOrder = new() {FilterCategory.Basic, FilterCategory.Columns,FilterCategory.CraftColumns, FilterCategory.IngredientSourcing, FilterCategory.Inventories, FilterCategory.Display, FilterCategory.Acquisition, FilterCategory.Searching, FilterCategory.Market, FilterCategory.Searching, FilterCategory.Crafting, FilterCategory.Gathering, FilterCategory.Advanced};
     }

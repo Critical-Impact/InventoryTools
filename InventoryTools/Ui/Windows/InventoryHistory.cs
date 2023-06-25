@@ -5,7 +5,6 @@ using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using ImGuiNET;
 using InventoryTools.Logic;
-using OtterGui;
 using OtterGui.Raii;
 
 namespace InventoryTools.Ui;

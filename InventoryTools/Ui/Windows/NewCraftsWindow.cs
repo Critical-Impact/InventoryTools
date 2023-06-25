@@ -4,9 +4,7 @@ using System.Numerics;
 using ImGuiNET;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
-using InventoryTools.Services;
 using InventoryTools.Ui.Widgets;
-using OtterGui.Raii;
 
 namespace InventoryTools.Ui;
 

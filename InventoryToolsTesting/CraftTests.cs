@@ -106,64 +106,67 @@ namespace InventoryToolsTesting
         [Test]
         public void TestRecipeCalculation()
         {
-            CraftList list = new CraftList();
-            //Rivera Bed
-            list.AddCraftItem(6542, 2);
+            {
+                CraftList list = new CraftList();
+                //Rivera Bed
+                list.AddCraftItem(6542, 2);
 
-            var requiredMaterialsList = list.GetRequiredMaterialsList();
-            //undyed cotton cloth
-            Assert.AreEqual( 4, requiredMaterialsList[5325]);
-            //cotton yarn
-            Assert.AreEqual(8, requiredMaterialsList[5334]);
-            //cotton boll
-            Assert.AreEqual(8, requiredMaterialsList[5343]);
-            //maple lumber
-            Assert.AreEqual(4, requiredMaterialsList[5361]);
-            //maple log
-            Assert.AreEqual(12, requiredMaterialsList[5380]);
-            //bronze ingot
-            Assert.AreEqual(4, requiredMaterialsList[5056]);
-            //copper ore
-            Assert.AreEqual(8, requiredMaterialsList[5106]);
-            //tin ore
-            Assert.AreEqual(4, requiredMaterialsList[5107]);
-            //fire shard
-            Assert.AreEqual(4, requiredMaterialsList[2]);
-            //lightning shard
-            Assert.AreEqual(10, requiredMaterialsList[6]);
-            //wind shard
-            Assert.AreEqual(6, requiredMaterialsList[4]);
+                var requiredMaterialsList = list.GetRequiredMaterialsList();
+                //undyed cotton cloth
+                Assert.AreEqual(4, requiredMaterialsList[5325]);
+                //cotton yarn
+                Assert.AreEqual(8, requiredMaterialsList[5334]);
+                //cotton boll
+                Assert.AreEqual(8, requiredMaterialsList[5343]);
+                //maple lumber
+                Assert.AreEqual(4, requiredMaterialsList[5361]);
+                //maple log
+                Assert.AreEqual(12, requiredMaterialsList[5380]);
+                //bronze ingot
+                Assert.AreEqual(4, requiredMaterialsList[5056]);
+                //copper ore
+                Assert.AreEqual(8, requiredMaterialsList[5106]);
+                //tin ore
+                Assert.AreEqual(4, requiredMaterialsList[5107]);
+                //fire shard
+                Assert.AreEqual(4, requiredMaterialsList[2]);
+                //lightning shard
+                Assert.AreEqual(10, requiredMaterialsList[6]);
+                //wind shard
+                Assert.AreEqual(6, requiredMaterialsList[4]);
 
-            list = new CraftList();
-            list.AddCraftItem(27877, 1);
-            requiredMaterialsList = list.GetRequiredMaterialsList();
-            Assert.AreEqual( 2, requiredMaterialsList[27830]);
-        }
-        
-        [Test]
-        public void TestCraftableQuantites()
-        {
-            CraftList list = new CraftList();
-            //Rivera Bed
-            list.AddCraftItem(11990, 6);
-            list.AddCraftItem(11957, 6);
-            list.GenerateCraftChildren();
+                list = new CraftList();
+                list.AddCraftItem(27877, 1);
+                requiredMaterialsList = list.GetRequiredMaterialsList();
+                Assert.AreEqual(2, requiredMaterialsList[27830]);
+            }
+
+            {
+                CraftList list = new CraftList();
+                list.AddCraftItem("Dhalmelskin Vest", 6);
+                list.AddCraftItem("Ramie Turban of Crafting", 6);
+                list.GenerateCraftChildren();
+
+                var neededMaterials = list.GetQuantityNeededListNamed();
             
-            var characterMaterials = new Dictionary<uint, List<CraftItemSource>>();
-            var externalSources = new Dictionary<uint, List<CraftItemSource>>();
-            var stalkRamie = new CraftItemSource(12598, 319, false);
-            characterMaterials.Add(stalkRamie.ItemId, new List<CraftItemSource>() {stalkRamie});
-            var flax = new CraftItemSource(5346, 275, false);
-            characterMaterials.Add(flax.ItemId, new List<CraftItemSource>() {flax});
-            var lightningCrystal = new CraftItemSource(12, 999, false);
-            characterMaterials.Add(lightningCrystal.ItemId, new List<CraftItemSource>() {lightningCrystal});
-            var earthCrystal = new CraftItemSource(11, 999, false);
-            characterMaterials.Add(earthCrystal.ItemId, new List<CraftItemSource>() {earthCrystal});
-            var windCrystal = new CraftItemSource(10, 999, false);
-            characterMaterials.Add(windCrystal.ItemId, new List<CraftItemSource>() {windCrystal});
-            
-            list.Update(characterMaterials, externalSources);
-            //TODO: Finish this
+                Assert.AreEqual(36, neededMaterials["Dhalmel Hide"]);
+                Assert.AreEqual(30, neededMaterials["Hardsilver Sand"]);
+                Assert.AreEqual(90, neededMaterials["Stalk of Ramie"]);
+                Assert.AreEqual(12, neededMaterials["Dark Chestnut Log"]);
+                Assert.AreEqual(18, neededMaterials["Raw Star Sapphire"]);
+                Assert.AreEqual(18, neededMaterials["Gold Ore"]);
+                Assert.AreEqual(6, neededMaterials["Basilisk Egg"]);
+                Assert.AreEqual(6, neededMaterials["Silver Ore"]);
+                Assert.AreEqual(84, neededMaterials["Flax"]);
+                Assert.AreEqual(6, neededMaterials["Basilisk Whetstone"]);
+                Assert.AreEqual(6, neededMaterials["Rose Gold Nugget"]);
+                Assert.AreEqual(6, neededMaterials["Hardsilver Nugget"]);
+                Assert.AreEqual(6, neededMaterials["Star Sapphire"]);
+                Assert.AreEqual(12, neededMaterials["Dhalmel Leather"]);
+                Assert.AreEqual(24, neededMaterials["Linen Yarn"]);
+                Assert.AreEqual(24, neededMaterials["Ramie Cloth"]);
+                Assert.AreEqual(60, neededMaterials["Ramie Thread"]);                
+            }
         }
 
         [Test]

@@ -1,11 +1,9 @@
 using System.Numerics;
 using System.Text;
-using CriticalCommonLib;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Resolvers;
 using CriticalCommonLib.Services.Ui;
-using CriticalCommonLib.Sheets;
 using Dalamud.Logging;
 using ImGuiNET;
 using InventoryTools;
@@ -13,7 +11,6 @@ using InventoryTools.Logic;
 using InventoryTools.Ui;
 using LuminaSupplemental.Excel.Model;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using OtterGui.Raii;
 using QoLBar;
 

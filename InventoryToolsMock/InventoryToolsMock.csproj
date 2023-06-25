@@ -56,6 +56,9 @@
 
     <ItemGroup>
       <PackageReference Include="Dalamud.ContextMenu" Version="1.2.3" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="7.0.4" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3-beta1" />
       <PackageReference Include="Veldrid" Version="4.9.0" />
       <PackageReference Include="Veldrid.SDL2" Version="4.9.0" />
@@ -95,5 +98,8 @@
         <EmbeddedResource Include="Shaders/SPIR-V/imgui-frag.spv" LogicalName="imgui-frag.spv" />
         <EmbeddedResource Include="Shaders/Metal/imgui-vertex.metallib" LogicalName="imgui-vertex.metallib" />
         <EmbeddedResource Include="Shaders/Metal/imgui-frag.metallib" LogicalName="imgui-frag.metallib" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Properties" />
     </ItemGroup>
 </Project>

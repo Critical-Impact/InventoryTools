@@ -63,6 +63,8 @@ namespace InventoryTools.Logic
         public FilterConfiguration FilterConfiguration { get; set; }
         public bool HighlightItems => ConfigurationManager.Config.ActiveUiFilter == FilterConfiguration.Key;
 
+        public bool Disposed => _disposed;
+
         protected void FilterConfigurationOnTableConfigurationChanged(FilterConfiguration filterconfiguration)
         {
             RefreshColumns();
@@ -101,7 +103,7 @@ namespace InventoryTools.Logic
         
         protected virtual void Dispose(bool disposing)
         {
-            if(!_disposed && disposing)
+            if(!Disposed && disposing)
             {
                 FilterConfiguration.ConfigurationChanged -= FilterConfigurationUpdated;
                 FilterConfiguration.ListUpdated -= FilterConfigurationOnListUpdated;
@@ -116,7 +118,7 @@ namespace InventoryTools.Logic
             // In debug-builds, make sure that a warning is displayed when the Disposable object hasn't been
             // disposed by the programmer.
 
-            if( _disposed == false )
+            if( Disposed == false )
             {
                 PluginLog.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
             }

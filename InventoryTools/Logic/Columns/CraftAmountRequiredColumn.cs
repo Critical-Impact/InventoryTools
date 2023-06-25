@@ -1,15 +1,8 @@
-using System.Linq;
-using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
-using FFXIVClientStructs.FFXIV.Common.Math;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
-using InventoryTools.Ui.Widgets;
-using OtterGui;
-using OtterGui.Raii;
 using ImGuiUtil = InventoryTools.Ui.Widgets.ImGuiUtil;
 
 namespace InventoryTools.Logic.Columns
@@ -62,7 +55,6 @@ namespace InventoryTools.Logic.Columns
                             var number = (uint)parsedNumber;
                             if (number != item.QuantityRequired)
                             {
-                                //TODO: Probably a better way to do this
                                 configuration.CraftList.SetCraftRequiredQuantity(item.ItemId, number,
                                     item.Flags,
                                     item.Phase);

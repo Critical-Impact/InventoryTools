@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;

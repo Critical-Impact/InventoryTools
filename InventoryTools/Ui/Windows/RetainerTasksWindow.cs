@@ -5,11 +5,9 @@ using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Sheets;
-using Dalamud.Utility;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
-using InventoryTools.Ui.Widgets;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 
 namespace InventoryTools.Ui;

@@ -1,7 +1,4 @@
-using System;
 using System.Numerics;
-using System.Collections.Generic;
-using System.Diagnostics;
 using Dalamud.Interface;
 using ImGuiNET;
 using Dalamud.Logging;
@@ -180,7 +177,6 @@ public class IconBrowserWindow : Window
                 AddIcons(84_000, 85_000, "Hunts");
                 AddIcons(85_000, 90_000, "UI 3");
                 AddIcons(150_000, 170_000, "Tutorials");
-                //AddIcons(170_000, 180_000, "Placeholder"); // TODO: 170k - 180k are blank placeholder files, check if they get used in EW
             }
 
             EndIconList();

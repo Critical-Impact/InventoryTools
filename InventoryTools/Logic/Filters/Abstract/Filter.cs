@@ -10,6 +10,11 @@ namespace InventoryTools.Logic.Filters.Abstract
         public abstract T CurrentValue(FilterConfiguration configuration);
         public abstract void Draw(FilterConfiguration configuration);
         public abstract void ResetFilter(FilterConfiguration configuration);
+        public void ResetFilter(FilterConfiguration fromConfiguration, FilterConfiguration toConfiguration)
+        {
+            var currentValue = CurrentValue(fromConfiguration);
+            UpdateFilterConfiguration(toConfiguration, currentValue);
+        }
 
         public abstract void UpdateFilterConfiguration(FilterConfiguration configuration, T newValue);
 

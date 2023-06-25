@@ -22,7 +22,12 @@ namespace InventoryTools.Logic.Filters.Abstract
         {
             
         }
-        
+
+        public void ResetFilter(FilterConfiguration fromConfiguration, FilterConfiguration toConfiguration)
+        {
+            
+        }
+
         public virtual bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
             return null;

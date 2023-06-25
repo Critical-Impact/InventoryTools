@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
-using CriticalCommonLib.Resolvers;
 using CriticalCommonLib.Sheets;
 using CsvHelper;
 using Dalamud.Interface.Colors;
@@ -513,6 +512,15 @@ namespace InventoryTools.Logic
         {
             Columns.ForEach(c => c.FilterText = "");
             NeedsRefresh = true;
+        }
+        
+        public override void Dispose()
+        {
+            if (!base.Disposed)
+            {
+                Columns.ForEach(c => c.Dispose());
+                base.Dispose();
+            }
         }
     }
 }

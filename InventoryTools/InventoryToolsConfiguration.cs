@@ -4,12 +4,9 @@ using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib.Models;
 using Dalamud.Configuration;
-using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Colors;
-using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
-using Newtonsoft.Json;
 using OtterGui.Classes;
 
 namespace InventoryTools

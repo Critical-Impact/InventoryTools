@@ -1,37 +1,15 @@
 #if DEBUG
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Text;
 using CriticalCommonLib;
-using CriticalCommonLib.Addons;
-using CriticalCommonLib.Agents;
-using CriticalCommonLib.Extensions;
-using CriticalCommonLib.GameStructs;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
-using CriticalCommonLib.Services.Ui;
-using CriticalCommonLib.Sheets;
-using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.Logging;
-using Dalamud.Memory;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using FFXIVClientStructs.FFXIV.Client.Game.UI;
-using FFXIVClientStructs.FFXIV.Client.System.Framework;
-using FFXIVClientStructs.FFXIV.Client.System.String;
-using FFXIVClientStructs.FFXIV.Client.UI;
-using FFXIVClientStructs.FFXIV.Client.UI.Agent;
-using FFXIVClientStructs.FFXIV.Client.UI.Info;
-using FFXIVClientStructs.FFXIV.Client.UI.Misc;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 using ImGuiNET;
 using InventoryTools.Logic;
-using Lumina.Excel.GeneratedSheets;
 using LuminaSupplemental.Excel.Model;
 using OtterGui.Raii;
-using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 
 namespace InventoryTools.Ui
 {

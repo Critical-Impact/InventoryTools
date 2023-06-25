@@ -1,7 +1,6 @@
 // See https://aka.ms/new-console-template for more information
 
 using CriticalCommonLib;
-using CriticalCommonLib.Enums;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using InventoryTools;
