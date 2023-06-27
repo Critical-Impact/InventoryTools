@@ -96,6 +96,7 @@ namespace InventoryTools.Logic.Filters
 
         public Dictionary<string, IColumn> GetAvailableItems(FilterConfiguration configuration)
         {
+            //TODO: Fix this so that it invalidates per filter
             if (_availableItems == null)
             {
                 var value = PluginService.PluginLogic.GridColumns;

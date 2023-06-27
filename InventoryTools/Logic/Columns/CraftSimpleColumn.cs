@@ -4,10 +4,13 @@ using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
+using Dalamud.Interface;
 using Dalamud.Interface.Colors;
+using Dalamud.Interface.Components;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Ui.Widgets;
+using OtterGui.Raii;
 
 namespace InventoryTools.Logic.Columns
 {
@@ -24,6 +27,29 @@ namespace InventoryTools.Logic.Columns
             ImGui.TableNextColumn();
             var nextStep = GetNextStep(configuration, item);
             ImGuiUtil.VerticalAlignTextColored(nextStep.Item2, nextStep.Item1, configuration.TableHeight, true);
+            if (item.MissingIngredients.Count != 0)
+            {
+                ImGui.SameLine();
+                ImGui.PushFont(UiBuilder.IconFont);
+                ImGuiUtil.VerticalAlignTextDisabled(FontAwesomeIcon.InfoCircle.ToIconString(), configuration.TableHeight, false);
+                ImGui.PopFont();
+                if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
+                {
+                    using var tt = ImRaii.Tooltip();
+                    ImGui.Text("Missing Ingredients: ");
+                    foreach (var missingIngredient in item.MissingIngredients)
+                    {
+                        var itemId = missingIngredient.Key.Item1;
+                        var quantity = missingIngredient.Value;
+                        var isHq = missingIngredient.Key.Item2;
+                        var actualItem = Service.ExcelCache.GetItemExSheet().GetRow(itemId);
+                        if (actualItem != null)
+                        {
+                            ImGui.Text(actualItem.NameString + " : " + quantity);
+                        }
+                    }
+                }
+            }
         }
 
         public (Vector4, string) GetNextStep(FilterConfiguration configuration, CraftItem item)
@@ -86,8 +112,9 @@ namespace InventoryTools.Logic.Columns
                             }
                             else
                             {
+                                //Special case
                                 stepColour = ImGuiColors.DalamudRed;
-                                nextStepString = "Craft Ingredients Missing";
+                                nextStepString = "Ingredients Missing";
                             }
 
                             break;

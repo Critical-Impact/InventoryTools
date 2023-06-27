@@ -174,19 +174,19 @@ public class CraftSettingsColumn : IColumn
                             {
                                 configuration.CraftList.UpdateHQRequired(item.ItemId, null);
                                 configuration.NeedsRefresh = true;
-                                configuration.StartRefresh();
+                                configuration.NotifyConfigurationChange();
                             }
                             if (ImGui.Selectable("Yes"))
                             {
                                 configuration.CraftList.UpdateHQRequired(item.ItemId, true);
                                 configuration.NeedsRefresh = true;
-                                configuration.StartRefresh();
+                                configuration.NotifyConfigurationChange();
                             }
                             if (ImGui.Selectable("No"))
                             {
                                 configuration.CraftList.UpdateHQRequired(item.ItemId, false);
                                 configuration.NeedsRefresh = true;
-                                configuration.StartRefresh();
+                                configuration.NotifyConfigurationChange();
                             }
                         }
                     }
@@ -220,25 +220,25 @@ public class CraftSettingsColumn : IColumn
                             {
                                 configuration.CraftList.UpdateCraftRetainerRetrieval(item.ItemId, null);
                                 configuration.NeedsRefresh = true;
-                                configuration.StartRefresh();
+                                configuration.NotifyConfigurationChange();
                             }
                             if (ImGui.Selectable("Yes"))
                             {
                                 configuration.CraftList.UpdateCraftRetainerRetrieval(item.ItemId, CraftRetainerRetrieval.Yes);
                                 configuration.NeedsRefresh = true;
-                                configuration.StartRefresh();
+                                configuration.NotifyConfigurationChange();
                             }
                             if (ImGui.Selectable("No"))
                             {
                                 configuration.CraftList.UpdateCraftRetainerRetrieval(item.ItemId, CraftRetainerRetrieval.No);
                                 configuration.NeedsRefresh = true;
-                                configuration.StartRefresh();
+                                configuration.NotifyConfigurationChange();
                             }
                             if (ImGui.Selectable("HQ Only"))
                             {
                                 configuration.CraftList.UpdateCraftRetainerRetrieval(item.ItemId, CraftRetainerRetrieval.HQOnly);
                                 configuration.NeedsRefresh = true;
-                                configuration.StartRefresh();
+                                configuration.NotifyConfigurationChange();
                             }
                         }
                     }
@@ -258,7 +258,7 @@ public class CraftSettingsColumn : IColumn
                             {
                                 configuration.CraftList.UpdateIngredientPreference(item.ItemId, null);
                                 configuration.NeedsRefresh = true;
-                                configuration.StartRefresh();
+                                configuration.NotifyConfigurationChange();
                             }
                             foreach (var ingredientPreference in item.Item.IngredientPreferences)
                             {
@@ -266,7 +266,7 @@ public class CraftSettingsColumn : IColumn
                                 {
                                     configuration.CraftList.UpdateIngredientPreference(item.ItemId, ingredientPreference);
                                     configuration.NeedsRefresh = true;
-                                    configuration.StartRefresh();
+                                    configuration.NotifyConfigurationChange();
                                 }
                             }
                         }
@@ -283,7 +283,28 @@ public class CraftSettingsColumn : IColumn
         var icon = item.SourceIcon;
         ImGui.Image(PluginService.IconStorage[icon].ImGuiHandle,
             new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
-        ImGuiUtil.HoverTooltip(item.SourceName);
+        var itemRecipe = item.Recipe;
+        if (itemRecipe != null)
+        {
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
+            {
+                using var tt = ImRaii.Tooltip();
+                ImGui.Text($"Recipe ({itemRecipe.CraftTypeEx.Value?.FormattedName ?? "Unknown"}): ");
+                foreach (var ingredient in itemRecipe.Ingredients)
+                {
+                    var actualItem = ingredient.Item.Value;
+                    var quantity = ingredient.Count;
+                    if (actualItem != null)
+                    {
+                        ImGui.Text(actualItem.NameString + " : " + quantity);
+                    }
+                }
+            }
+        }
+        else
+        {
+            ImGuiUtil.HoverTooltip(item.SourceName);
+        }
         ImGui.SameLine();
         
 

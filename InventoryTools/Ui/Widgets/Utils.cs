@@ -176,6 +176,28 @@ public static class ImGuiUtil
         }
     }
 
+    public static void VerticalAlignTextDisabled( string text, int cellHeight, bool autoWrap, float? xOffset = null)
+    {
+        var columnWidth = ImGui.GetColumnWidth();
+        var frameHeight = cellHeight / 2.0f;
+        var calcText = ImGui.CalcTextSize(text);
+        var textHeight = calcText.X >= columnWidth ? 0 : calcText.Y / 2.0f;
+        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + frameHeight - textHeight);
+        if (xOffset != null)
+        {
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + xOffset.Value);
+        }
+        if (autoWrap)
+        {
+            ImGui.PushTextWrapPos();
+        }
+        ImGui.TextDisabled(text);
+        if (autoWrap)
+        {
+            ImGui.PopTextWrapPos();
+        }
+    }
+
     public static void VerticalAlignTextColored(string text, Vector4 colour, int cellHeight,  bool autoWrap)
     {
         var columnWidth = ImGui.GetColumnWidth();

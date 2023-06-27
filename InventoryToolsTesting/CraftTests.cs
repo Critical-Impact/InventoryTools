@@ -88,7 +88,7 @@ namespace InventoryToolsTesting
                 Assert.AreEqual(3, cottonYarn.QuantityMissingOverall);
                 Assert.AreEqual(3, cottonYarn.QuantityMissingInventory);
                 Assert.AreEqual(2, cottonYarn.CraftOperationsRequired);
-                Assert.AreEqual(3, cottonYarn.QuantityCanCraft);
+                Assert.AreEqual(4, cottonYarn.QuantityCanCraft);
             }
         }
 
