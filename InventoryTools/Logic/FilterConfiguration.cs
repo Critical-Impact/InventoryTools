@@ -1121,28 +1121,23 @@ namespace InventoryTools.Logic
         
         public FilteredItem? FilterItem(InventoryItem item)
         {
+            //TODO: Make sure this doesn't break shit
+            if (item.ItemId == 0)
+            {
+                return null;
+            }
             uint? requiredAmount = null;
             if (FilterType == FilterType.CraftFilter)
             {
-                var requiredMaterialsList = CraftList.BeenUpdated ? CraftList.GetAvailableMaterialsList().Where(c => c.Value != 0).ToDictionary(c => c.Key, c => c.Value) : CraftList.GetRequiredMaterialsList();
-                if (!requiredMaterialsList.ContainsKey(item.ItemId))
+                var requiredMaterial = CraftList.GetItemById(item.ItemId, item.IsHQ);
+                if (requiredMaterial == null)
                 {
                     return null;
                 }
 
                 if (CraftList.BeenUpdated)
                 {
-                    var retrieveMaterialsList = CraftList.GetQuantityToRetrieveList();
-                    //Is output item
-                    if (retrieveMaterialsList.ContainsKey((item.ItemId, true)))
-                    {
-                        
-                        requiredAmount = retrieveMaterialsList[(item.ItemId, true)];
-                    }
-                    if (retrieveMaterialsList.ContainsKey((item.ItemId, false)))
-                    {
-                        requiredAmount = retrieveMaterialsList[(item.ItemId, false)];
-                    }
+                    requiredAmount = requiredMaterial.QuantityWillRetrieve;
                 }
             }
 

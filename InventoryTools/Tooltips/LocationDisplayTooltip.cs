@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib;
@@ -80,7 +81,7 @@ public class LocationDisplayTooltip : TooltipService.TooltipTweak
                                                 var sortedItem = sortedItems.First();
                                                 if (sortedItem.Quantity != 0)
                                                 {
-                                                    needText += " / (" + sortedItem.Quantity + " can be retrieved)";
+                                                    needText += " / (" + Math.Min(willRetrieve,sortedItem.Quantity) + " can be retrieved)";
                                                 }
                                             }
                                         }

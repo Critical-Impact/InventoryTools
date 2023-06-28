@@ -83,9 +83,10 @@ namespace InventoryTools.Logic.Columns
             {
                 string nextStepString = "";
                 Vector4 stepColour = ImGuiColors.DalamudYellow;
+                bool escapeSwitch = false; //TODO: Come up with a new way of doing this entire column
                 if (unavailable != 0)
                 {
-
+            
                     switch (ingredientPreference.Type)
                     {
                         case IngredientPreferenceType.Botany:
@@ -99,6 +100,11 @@ namespace InventoryTools.Logic.Columns
                             nextStepString = "Buy " + unavailable + " (MB)";
                             break;
                         case IngredientPreferenceType.Crafting:
+                            if ((int)item.QuantityWillRetrieve != 0)
+                            {
+                                escapeSwitch = true;
+                                break;
+                            }
                             if (item.QuantityCanCraft >= unavailable)
                             {
                                 if (item.QuantityCanCraft != 0)
@@ -171,10 +177,25 @@ namespace InventoryTools.Logic.Columns
                             break;
                     }
 
-                    if (nextStepString != "")
+                    if (nextStepString != "" && !escapeSwitch)
                     {
                         return (stepColour, nextStepString);
                     }
+                }
+            }
+
+            var canCraft = item.QuantityCanCraft;
+            if (canCraft != 0 && (int)item.QuantityWillRetrieve == 0)
+            {
+                return (ImGuiColors.ParsedBlue, "Craft " + (uint)Math.Ceiling((double)canCraft / item.Yield));
+            }
+
+            if (configuration.CraftList.RetainerRetrieveOrder == RetainerRetrieveOrder.RetrieveLast)
+            {
+                var retrieve = (int)item.QuantityWillRetrieve;
+                if (retrieve != 0)
+                {
+                    return (ImGuiColors.DalamudOrange, "Retrieve " + retrieve);
                 }
             }
             if (unavailable != 0)
@@ -190,21 +211,6 @@ namespace InventoryTools.Logic.Columns
                 }
                 return (ImGuiColors.DalamudRed, "Missing " + unavailable);
             }
-            var canCraft = item.QuantityCanCraft;
-            if (canCraft != 0)
-            {
-                return (ImGuiColors.ParsedBlue, "Craft " + (uint)Math.Ceiling((double)canCraft / item.Yield));
-            }
-
-            if (configuration.CraftList.RetainerRetrieveOrder == RetainerRetrieveOrder.RetrieveLast)
-            {
-                var retrieve = (int)item.QuantityWillRetrieve;
-                if (retrieve != 0)
-                {
-                    return (ImGuiColors.DalamudOrange, "Retrieve " + retrieve);
-                }
-            }
-
 
 
             if (item.IsOutputItem)
