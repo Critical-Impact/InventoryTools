@@ -301,6 +301,24 @@ public class CraftSettingsColumn : IColumn
                 }
             }
         }
+        else if(item.Item.CompanyCraftSequenceEx != null)
+        {
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
+            {
+                using var tt = ImRaii.Tooltip();
+                ImGui.Text($"Recipe (Company Craft): ");
+                foreach (var ingredient in item.Item.CompanyCraftSequenceEx.MaterialsRequired(item.Phase))
+                {
+                    var itemId = ingredient.ItemId;
+                    var actualItem = Service.ExcelCache.GetItemExSheet().GetRow(itemId);
+                    var quantity = ingredient.Quantity;
+                    if (actualItem != null)
+                    {
+                        ImGui.Text(actualItem.NameString + " : " + quantity);
+                    }
+                }
+            }
+        }
         else
         {
             ImGuiUtil.HoverTooltip(item.SourceName);

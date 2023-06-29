@@ -77,6 +77,9 @@ namespace InventoryTools.Logic
             string jsonText = File.ReadAllText(file ?? ConfigurationFile);
             var inventoryToolsConfiguration = JsonConvert.DeserializeObject<InventoryToolsConfiguration>(jsonText, new JsonSerializerSettings()
             {
+                TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
+                TypeNameHandling = TypeNameHandling.None,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                 DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
                 ContractResolver = MinifyResolver
             });
@@ -177,7 +180,7 @@ namespace InventoryTools.Logic
                 File.WriteAllText(ConfigurationFile, JsonConvert.SerializeObject(Config, Formatting.None, new JsonSerializerSettings()
                 {
                     TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
-                    TypeNameHandling = TypeNameHandling.Objects,
+                    TypeNameHandling = TypeNameHandling.None,
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                     DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
                     ContractResolver = MinifyResolver

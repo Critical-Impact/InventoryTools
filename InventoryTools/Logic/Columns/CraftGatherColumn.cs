@@ -1,4 +1,6 @@
+using System.Linq;
 using CriticalCommonLib.Crafting;
+using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
@@ -27,7 +29,7 @@ namespace InventoryTools.Logic.Columns
 
         public override bool? CurrentValue(CraftItem currentValue)
         {
-            return CurrentValue(currentValue.Item);
+            return true;
         }
 
         public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
@@ -35,7 +37,25 @@ namespace InventoryTools.Logic.Columns
             ImGui.TableNextColumn();
             if (CurrentValue(item) == true)
             {
-                if (item.Item.ObtainedGathering)
+                if (item.IngredientPreference.Type == IngredientPreferenceType.Buy)
+                {
+                    //TODO: Rework this
+                    if (item.Item.Vendors.Any() && ImGui.SmallButton("Buy##Buy" + rowIndex))
+                    {
+                        var vendor = item.Item.Vendors.FirstOrDefault(c => c.ENpcs.Any());
+                        if (vendor != null)
+                        {
+                            var shopListing = vendor.ENpcs.First();
+                            if (shopListing.Locations.Any())
+                            {
+                                var location = shopListing.Locations.First();
+                                location.TeleportToNearestAetheryte();
+                            }
+                        }
+                    }
+                    
+                }
+                else if (item.Item.ObtainedGathering)
                 {
                     if (ImGui.SmallButton("Gather##Gather" + rowIndex))
                     {

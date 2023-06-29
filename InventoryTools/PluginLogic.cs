@@ -977,6 +977,7 @@ namespace InventoryTools
                 PluginService.CraftMonitor.CraftFailed -= CraftMonitorOnCraftFailed ;
                 PluginService.CraftMonitor.CraftCompleted -= CraftMonitorOnCraftCompleted ;
                 ConfigurationManager.Config.ConfigurationChanged -= ConfigOnConfigurationChanged;
+                ConfigurationManager.Save();
                 ConfigurationManager.SaveInventories(PluginService.InventoryMonitor.AllItems.ToList());
                 ConfigurationManager.SaveHistory(PluginService.InventoryHistory.GetHistory());
                 if (ConfigurationManager.Config.TrackMobSpawns)
