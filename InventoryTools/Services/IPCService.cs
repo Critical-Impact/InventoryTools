@@ -123,8 +123,6 @@ public class IPCService : IDisposable
             if (changedItem.ItemId != 1)
             {
                 _itemAdded?.SendMessage((changedItem.ItemId, changedItem.Flags, changedItem.CharacterId, (uint)changedItem.Quantity));
-                PluginLog.Log("Item Received: " + changedItem.ItemId + " - " + changedItem.Quantity + " - " +
-                              changedItem.CharacterId + " - " + changedItem.Flags.ToString());
             }
         }
         foreach (var changedItem in changedItems.RemovedItems)
@@ -132,8 +130,6 @@ public class IPCService : IDisposable
             if (changedItem.ItemId != 1)
             {
                 _itemRemoved?.SendMessage((changedItem.ItemId, changedItem.Flags, changedItem.CharacterId, (uint)changedItem.Quantity));
-                PluginLog.Log("Item Removed: " + changedItem.ItemId + " - " + changedItem.Quantity + " - " +
-                              changedItem.CharacterId + " - " + changedItem.Flags.ToString());
             }
         }
     }

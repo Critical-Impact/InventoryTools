@@ -163,47 +163,113 @@ namespace InventoryTools.Logic.Columns
 
         public override string HelpText { get; set; } =
             "Shows icons indicating what items can be obtained with(gathering, crafting, currency, etc)";
-        public override bool HasFilter { get; set; } = false;
+        public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
         public override IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items)
         {
-            return items;
-        }
+            return FilterText == "" ? items : items.Where(c =>
+            {
+                var currentValue = CurrentValue(c);
+                if (currentValue == null)
+                {
+                    return false;
+                }
 
+                return currentValue.Any(c => c.FormattedName.ToLower().PassesFilter(FilterComparisonText));
+            });
+        }
         public override IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items)
         {
-            return items;
+            return FilterText == "" ? items : items.Where(c =>
+            {
+                var currentValue = CurrentValue(c);
+                if (currentValue == null)
+                {
+                    return false;
+                }
+
+                return currentValue.Any(c => c.FormattedName.ToLower().PassesFilter(FilterComparisonText));
+            });
         }
 
         public override IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items)
         {
-            //return implement me
-            return items;
+            return FilterText == "" ? items : items.Where(c =>
+            {
+                var currentValue = CurrentValue(c);
+                if (currentValue == null)
+                {
+                    return false;
+                }
+
+                return currentValue.Any(c => c.FormattedName.ToLower().PassesFilter(FilterComparisonText));
+            });
         }
 
         public override IEnumerable<CraftItem> Filter(IEnumerable<CraftItem> items)
         {
-            return items;
+            return FilterText == "" ? items : items.Where(c =>
+            {
+                var currentValue = CurrentValue(c);
+                if (currentValue == null)
+                {
+                    return false;
+                }
+
+                return currentValue.Any(c => c.FormattedName.ToLower().PassesFilter(FilterComparisonText));
+            });
         }
 
         public override IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
         {
-            return items;
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(item =>
+            {
+                var currentValue = CurrentValue(item);
+                return currentValue?.Count ?? 0;
+            }) : items.OrderByDescending(item =>
+            {
+                var currentValue = CurrentValue(item);
+                return currentValue?.Count ?? 0;
+            });
         }
 
         public override IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items)
         {
-            return items;
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(item =>
+            {
+                var currentValue = CurrentValue(item);
+                return currentValue?.Count ?? 0;
+            }) : items.OrderByDescending(item =>
+            {
+                var currentValue = CurrentValue(item);
+                return currentValue?.Count ?? 0;
+            });
         }
 
         public override IEnumerable<ItemEx> Sort(ImGuiSortDirection direction, IEnumerable<ItemEx> items)
         {
-            return items;
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(item =>
+            {
+                var currentValue = CurrentValue(item);
+                return currentValue?.Count ?? 0;
+            }) : items.OrderByDescending(item =>
+            {
+                var currentValue = CurrentValue(item);
+                return currentValue?.Count ?? 0;
+            });
         }
 
         public override IEnumerable<CraftItem> Sort(ImGuiSortDirection direction, IEnumerable<CraftItem> items)
         {
-            return items;
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(item =>
+            {
+                var currentValue = CurrentValue(item);
+                return currentValue?.Count ?? 0;
+            }) : items.OrderByDescending(item =>
+            {
+                var currentValue = CurrentValue(item);
+                return currentValue?.Count ?? 0;
+            });
         }
 
         public override void Draw(FilterConfiguration configuration, InventoryItem item, int rowIndex)

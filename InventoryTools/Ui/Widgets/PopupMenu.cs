@@ -238,8 +238,6 @@ public class PopupMenu
         }        
         if (newPopupName != null)
         {
-            PluginLog.Log("opening popup " + newPopupName);
-
             ImGui.OpenPopup(newPopupName);
         }
         
