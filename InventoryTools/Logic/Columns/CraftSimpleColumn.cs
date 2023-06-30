@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
@@ -143,13 +144,8 @@ namespace InventoryTools.Logic.Columns
                                 }
                                 else
                                 {
-                                    if (item.IngredientPreference.LinkedItemId != null)
-                                    {
-                                        var linkedItem = Service.ExcelCache.GetItemExSheet()
-                                            .GetRow(item.IngredientPreference.LinkedItemId.Value);
-                                        stepColour = ImGuiColors.DalamudRed;
-                                        nextStepString = "Not enough " + (linkedItem?.NameString ?? "Unknown");
-                                    }
+                                    stepColour = ImGuiColors.DalamudRed;
+                                    nextStepString = "Ingredients Missing";
                                 }
                                 break;
                             }

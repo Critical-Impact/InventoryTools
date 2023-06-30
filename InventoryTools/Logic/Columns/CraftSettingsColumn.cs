@@ -319,6 +319,29 @@ public class CraftSettingsColumn : IColumn
                 }
             }
         }
+        else if(item.IngredientPreference.Type == IngredientPreferenceType.Item)
+        {
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
+            {
+                using var tt = ImRaii.Tooltip();
+                ImGui.Text($"Items: ");
+                if (item.IngredientPreference.LinkedItemId != null && item.IngredientPreference.LinkedItemQuantity != null)
+                {
+                    var itemName =Service.ExcelCache.GetItemExSheet().GetRow(item.IngredientPreference.LinkedItemId.Value)?.NameString ?? "Unknown Item" + " : " + item.IngredientPreference.LinkedItemQuantity.Value;
+                    ImGui.Text(itemName);
+                    if (item.IngredientPreference.LinkedItem2Id != null && item.IngredientPreference.LinkedItem2Quantity != null)
+                    {
+                        var itemName2 = (Service.ExcelCache.GetItemExSheet().GetRow(item.IngredientPreference.LinkedItem2Id.Value)?.NameString ?? "Unknown Item") + " : " + item.IngredientPreference.LinkedItem2Quantity.Value;
+                        ImGui.Text(itemName2);
+                    }
+                    if (item.IngredientPreference.LinkedItem3Id != null && item.IngredientPreference.LinkedItem3Quantity != null)
+                    {
+                        var itemName3 = (Service.ExcelCache.GetItemExSheet().GetRow(item.IngredientPreference.LinkedItem3Id.Value)?.NameString ?? "Unknown Item")  + " : " + item.IngredientPreference.LinkedItem3Quantity.Value;
+                        ImGui.Text(itemName3);
+                    }
+                }
+            }
+        }
         else
         {
             ImGuiUtil.HoverTooltip(item.SourceName);

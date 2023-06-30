@@ -135,12 +135,12 @@ public class MockPlugin : IDisposable
             WindowService = _windowService,
             OverlayService = _overlayService,
             DataService = _dataService
-        });
+        }, false);
         _pluginLogic = new PluginLogic();
         PluginService.InitaliseExplicit(new MockServices()
         {
             PluginLogic = _pluginLogic,
-        }, false);
+        }, true);
         PluginService.PluginLogic.RunMigrations();
             
         if (ConfigurationManager.Config.FirstRun)
