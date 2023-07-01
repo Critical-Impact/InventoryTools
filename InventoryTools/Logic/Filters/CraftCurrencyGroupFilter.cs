@@ -26,7 +26,7 @@ public class CraftCurrencyGroupFilter : ChoiceFilter<CurrencyGroupSetting>
 
     public override void ResetFilter(FilterConfiguration configuration)
     {
-        configuration.CraftList.SetCurrencyGroupSetting(EmptyValue);
+        configuration.CraftList.SetCurrencyGroupSetting(DefaultValue);
         configuration.NotifyConfigurationChange();
     }
 
@@ -43,7 +43,7 @@ public class CraftCurrencyGroupFilter : ChoiceFilter<CurrencyGroupSetting>
         "Should the currency be grouped together or show up in the Gather/Buy list?";
 
     public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
-    public override CurrencyGroupSetting EmptyValue { get; set; } = CurrencyGroupSetting.Separate;
+    public override CurrencyGroupSetting DefaultValue { get; set; } = CurrencyGroupSetting.Separate;
     public override List<CurrencyGroupSetting> GetChoices(FilterConfiguration configuration)
     {
         return new List<CurrencyGroupSetting>()

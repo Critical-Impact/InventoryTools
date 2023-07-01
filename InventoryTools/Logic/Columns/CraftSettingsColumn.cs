@@ -25,7 +25,7 @@ public class CraftSettingsColumn : IColumn
 
 
     public string Name { get; set; } = "Settings";
-    public float Width { get; set; } = 80;
+    public float Width { get; set; } = 120;
     public string HelpText { get; set; } = "Modify each items craft settings in this column";
     public string FilterText { get; set; } = "";
 

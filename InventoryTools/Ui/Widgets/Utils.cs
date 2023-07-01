@@ -228,4 +228,34 @@ public static class ImGuiUtil
         var textHeight = (ImGui.GetFontSize() * 1 + ImGui.GetStyle().FramePadding.Y * 2) / 2.0f;
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + frameHeight - textHeight);
     }
+    
+    public static bool? ConfirmPopup(string label, Vector2 size, Action content)
+    {
+        ImGui.SetNextWindowPos(ImGui.GetMainViewport().GetCenter(), ImGuiCond.Always, new Vector2(0.5f));
+        ImGui.SetNextWindowSize(size);
+        using var pop = ImRaii.Popup(label, ImGuiWindowFlags.Modal | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove);
+        if (pop)
+        {
+            content();
+            const string yesButtonText   = "Yes";
+            const string noButtonText   = "No";
+            var          yesButtonSize   = Math.Max(size.X / 5, ImGui.CalcTextSize(yesButtonText).X + 2 * ImGui.GetStyle().FramePadding.X);
+            var          noButtonSize   = Math.Max(size.X / 5, ImGui.CalcTextSize(yesButtonText).X + 2 * ImGui.GetStyle().FramePadding.X);
+            ImGui.SetCursorPos(new Vector2(2 * ImGui.GetStyle().FramePadding.X, size.Y - ImGui.GetFrameHeight() * 1.75f));
+            if (ImGui.Button(yesButtonText, new Vector2(yesButtonSize, 0)))
+            {
+                ImGui.CloseCurrentPopup();
+                return true;
+            }
+            ImGui.SetCursorPos(new Vector2(yesButtonSize + 10, size.Y - ImGui.GetFrameHeight() * 1.75f));
+
+            if (ImGui.Button(noButtonText, new Vector2(noButtonSize, 0)))
+            {
+                ImGui.CloseCurrentPopup();
+                return false;
+            }
+        }
+
+        return null;
+    }
 }

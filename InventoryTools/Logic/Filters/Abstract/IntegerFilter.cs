@@ -5,6 +5,8 @@ namespace InventoryTools.Logic.Filters.Abstract
 {
     public abstract class IntegerFilter : Filter<int?>
     {
+        public override int? DefaultValue { get; set; } = null;
+
         public override bool HasValueSet(FilterConfiguration configuration)
         {
             return CurrentValue(configuration) != null;
@@ -62,7 +64,7 @@ namespace InventoryTools.Logic.Filters.Abstract
         
         public override void ResetFilter(FilterConfiguration configuration)
         {
-            UpdateFilterConfiguration(configuration, null);
+            UpdateFilterConfiguration(configuration, DefaultValue);
         }
     }
 }

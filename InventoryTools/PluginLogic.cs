@@ -74,10 +74,8 @@ namespace InventoryTools
             {
                 PluginService.MobTracker.SetEntries(entries);
             }
-            if (ConfigurationManager.Config.TrackMobSpawns)
-            {
-                PluginService.MobTracker.Enable();
-            }
+
+            SyncConfigurationChanges();
 
             PluginService.GameUi.WatchWindowState(WindowName.RetainerGrid0);
             PluginService.GameUi.WatchWindowState(WindowName.InventoryGrid0E);
@@ -391,6 +389,36 @@ namespace InventoryTools
                 AddHistoryFilter();
                 ConfigurationManager.Config.InternalVersion++;
             }
+
+            if (ConfigurationManager.Config.InternalVersion == 14)
+            {
+                PluginLog.Log("Migrating to version 15");
+                var toReset = AvailableFilters.Where(c =>
+                    c is CraftCrystalGroupFilter or CraftCurrencyGroupFilter or CraftPrecraftGroupFilter
+                        or CraftRetrieveGroupFilter or CraftEverythingElseGroupFilter or CraftIngredientPreferenceFilter).ToList();
+                foreach (var configuration in PluginService.FilterService.Filters)
+                {
+                    foreach (var filterConfig in PluginService.FilterService.FiltersList)
+                    {
+                        if (filterConfig.FilterType == FilterType.CraftFilter)
+                        {
+                            if (filterConfig.CraftListDefault)
+                            {
+                                filterConfig.AddDefaultColumns();
+                            }
+
+                            foreach (var filter in toReset)
+                            {
+                                filter.ResetFilter(filterConfig);
+                            }
+                            
+                            filterConfig.AddCraftColumn("CraftSettingsColumn",2);
+                            filterConfig.AddCraftColumn("CraftSimpleColumn",3);
+                        }
+                    }
+                }                
+                ConfigurationManager.Config.InternalVersion++;
+            }
         }
 
         private void FrameworkOnUpdate(IFrameworkService framework)
@@ -414,6 +442,11 @@ namespace InventoryTools
 
         private void ConfigOnConfigurationChanged()
         {
+            SyncConfigurationChanges();
+        }
+
+        private static void SyncConfigurationChanges()
+        {
             ConfigurationManager.SaveAsync();
             if (PluginService.MobTracker.Enabled != ConfigurationManager.Config.TrackMobSpawns)
             {
@@ -425,6 +458,24 @@ namespace InventoryTools
                 {
                     PluginService.MobTracker.Disable();
                 }
+            }
+
+            if (PluginService.InventoryHistory.Enabled != ConfigurationManager.Config.HistoryEnabled)
+            {
+                if (ConfigurationManager.Config.HistoryEnabled)
+                {
+                    PluginService.InventoryHistory.Enable();
+                }
+                else
+                {
+                    PluginService.InventoryHistory.Disable();
+                }
+            }
+
+            if (PluginService.InventoryHistory.ReasonsToLog.ToList() != ConfigurationManager.Config.HistoryTrackReasons)
+            {
+                PluginService.InventoryHistory.SetChangeReasonsToLog(
+                    ConfigurationManager.Config.HistoryTrackReasons.ToHashSet());
             }
         }
 

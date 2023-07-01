@@ -42,6 +42,8 @@ namespace InventoryTools.Logic.Filters
         public override string HelpText { get; set; } = "";
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.CraftColumns;
         public override bool ShowReset { get; set; } = false;
+        public override Dictionary<string, (string, string?)> DefaultValue { get; set; } = new();
+
         public override bool HasValueSet(FilterConfiguration configuration)
         {
             return configuration.CraftColumns != null && configuration.CraftColumns.Count != 0;

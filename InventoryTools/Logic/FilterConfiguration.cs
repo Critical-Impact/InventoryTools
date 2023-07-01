@@ -87,8 +87,8 @@ namespace InventoryTools.Logic
         private bool? _ignoreHQWhenSorting = null;
         private bool _craftListDefault = false;
         private string? _highlightWhen = null;
-        private int _tableHeight = 32;
-        private int _craftTableHeight = 32;
+        private int _tableHeight = 24;
+        private int _craftTableHeight = 24;
         private List<string>? _columns;
         private List<string>? _craftColumns;
         private string? _icon;
@@ -375,15 +375,7 @@ namespace InventoryTools.Logic
             }
             else if (FilterType == FilterType.CraftFilter)
             {
-                if (Columns == null)
-                {
-                    Columns = new List<string>();
-                }
-
-                if (CraftColumns == null)
-                {
-                    CraftColumns = new List<string>();
-                }
+                Columns = new List<string>();
                 Columns.Add("IconColumn");
                 Columns.Add("NameColumn");
                 Columns.Add("CraftAmountAvailableColumn");
@@ -395,6 +387,7 @@ namespace InventoryTools.Logic
                 AddCraftColumn("IconColumn");
                 AddCraftColumn("NameColumn");
                 AddCraftColumn("CraftAmountRequiredColumn");
+                AddCraftColumn("CraftSettingsColumn");
                 AddCraftColumn("CraftSimpleColumn");
                 AddCraftColumn("MarketBoardMinPriceColumn");
                 AddCraftColumn("MarketBoardMinTotalPriceColumn");
@@ -406,6 +399,7 @@ namespace InventoryTools.Logic
                 Columns = new List<string>();
                 Columns.Add("IconColumn");
                 Columns.Add("NameColumn");
+                Columns.Add("HistoryChangeAmountColumn");
                 Columns.Add("HistoryChangeReasonColumn");
                 Columns.Add("HistoryChangeDateColumn");
                 Columns.Add("TypeColumn");
@@ -444,6 +438,11 @@ namespace InventoryTools.Logic
             var defaultConfiguration = PluginService.FilterService.GetDefaultCraftList();
             if (defaultConfiguration != null)
             {
+                if (this == defaultConfiguration)
+                {
+                    ResetDefaultCraftFilter();
+                    return;
+                }
                 CraftColumns = new List<string>();
                 Columns = new List<string>();
                 foreach (var filter in PluginService.PluginLogic.AvailableFilters)
@@ -1184,20 +1183,35 @@ namespace InventoryTools.Logic
             {
                 _columns = new List<string>();
             }
-            _columns.Add(columnName);
-            GenerateNewTableId();
-            PluginService.FrameworkService.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
+
+            if (!_columns.Contains(columnName))
+            {
+                _columns.Add(columnName);
+                GenerateNewTableId();
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
+            }
         }
 
-        public void AddCraftColumn(string columnName)
+        public void AddCraftColumn(string columnName, int? index = null)
         {
             if (_craftColumns == null)
             {
                 _craftColumns = new List<string>();
             }
-            _craftColumns.Add(columnName);
-            GenerateNewCraftTableId();
-            PluginService.FrameworkService.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
+
+            if (!_craftColumns.Contains(columnName))
+            {
+                if (index != null)
+                {
+                    _craftColumns.Insert(Math.Min(index.Value,_craftColumns.Count), columnName);
+                }
+                else
+                {
+                    _craftColumns.Add(columnName);
+                }
+                GenerateNewCraftTableId();
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { TableConfigurationChanged?.Invoke(this); });
+            }
         }
         
         public void UpColumn(string columnName)

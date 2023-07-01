@@ -21,7 +21,7 @@ namespace InventoryTools.Logic.Filters
         
         public override void ResetFilter(FilterConfiguration configuration)
         {
-            UpdateFilterConfiguration(configuration, EmptyValue);
+            UpdateFilterConfiguration(configuration, DefaultValue);
         }
         
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
@@ -44,7 +44,7 @@ namespace InventoryTools.Logic.Filters
             configuration.FilterItemsInRetainersEnum = newValue;
         }
 
-        public override FilterItemsRetainerEnum EmptyValue { get; set; } = FilterItemsRetainerEnum.No;
+        public override FilterItemsRetainerEnum DefaultValue { get; set; } = FilterItemsRetainerEnum.No;
         public override List<FilterItemsRetainerEnum> GetChoices(FilterConfiguration configuration)
         {
             return Enum.GetValues<FilterItemsRetainerEnum>().ToList();

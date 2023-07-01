@@ -5,6 +5,8 @@ namespace InventoryTools.Logic.Filters.Abstract
 {
     public abstract class StringFilter : Filter<string>
     {
+        public override string DefaultValue { get; set; } = "";
+
         public override bool HasValueSet(FilterConfiguration configuration)
         {
             return CurrentValue(configuration) != "";
@@ -54,7 +56,7 @@ namespace InventoryTools.Logic.Filters.Abstract
         
         public override void ResetFilter(FilterConfiguration configuration)
         {
-            UpdateFilterConfiguration(configuration, "");
+            UpdateFilterConfiguration(configuration, DefaultValue);
         }
     }
 }

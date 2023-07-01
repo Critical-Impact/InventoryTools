@@ -26,6 +26,7 @@ namespace InventoryTools.Logic.Filters.Abstract
 
         public virtual int Order { get; set; } = 0;
         public virtual bool ShowReset { get; set; } = true;
+        public abstract T DefaultValue { get; set; }
 
         public abstract bool HasValueSet(FilterConfiguration configuration);
         public abstract FilterType AvailableIn { get; set; }

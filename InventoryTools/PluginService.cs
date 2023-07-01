@@ -158,9 +158,9 @@ namespace InventoryTools
             if (mockServices.HotkeyService != null) HotkeyService = mockServices.HotkeyService;
             if (mockServices.KeyStateService != null) KeyStateService = mockServices.KeyStateService;
             if (mockServices.InventoryHistory != null) InventoryHistory = mockServices.InventoryHistory;
-            PluginLoaded = true;
             if (finishLoading)
             {
+                PluginLoaded = true;
                 OnPluginLoaded?.Invoke();
             }
         }

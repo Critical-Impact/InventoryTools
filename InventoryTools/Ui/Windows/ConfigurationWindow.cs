@@ -101,6 +101,7 @@ namespace InventoryTools.Ui
             _configPages.Add(new SettingPage(SettingCategory.ToolTips));
             _configPages.Add(new SettingPage(SettingCategory.Hotkeys));
             _configPages.Add(new SettingPage(SettingCategory.MarketBoard));
+            _configPages.Add(new SettingPage(SettingCategory.History));
             _configPages.Add(new SeparatorPageItem("Data", true));
             _configPages.Add(new FiltersPage());
             _configPages.Add(new CraftFiltersPage());

@@ -27,7 +27,7 @@ public class CraftPrecraftGroupFilter : ChoiceFilter<PrecraftGroupSetting>
 
     public override void ResetFilter(FilterConfiguration configuration)
     {
-        configuration.CraftList.SetPrecraftGroupSetting(EmptyValue);
+        configuration.CraftList.SetPrecraftGroupSetting(DefaultValue);
         configuration.NotifyConfigurationChange();
     }
 
@@ -44,7 +44,7 @@ public class CraftPrecraftGroupFilter : ChoiceFilter<PrecraftGroupSetting>
         "How should precrafts be grouped together?";
 
     public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
-    public override PrecraftGroupSetting EmptyValue { get; set; } = PrecraftGroupSetting.ByDepth;
+    public override PrecraftGroupSetting DefaultValue { get; set; } = PrecraftGroupSetting.ByClass;
     public override List<PrecraftGroupSetting> GetChoices(FilterConfiguration configuration)
     {
         return new List<PrecraftGroupSetting>()

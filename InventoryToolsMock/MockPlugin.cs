@@ -54,7 +54,7 @@ public class MockPlugin : IDisposable
     public MockPlugin(GameData gameData, string configDirectory)
     {
         var configFile = Path.Combine(configDirectory, "InventoryTools.json");        
-        var inventoriesFile = Path.Combine(configDirectory,"InventoryTools", "inventories.csv");        
+        var configFolder = Path.Combine(configDirectory,"InventoryTools");             
         ConfigurationManager.Config = new InventoryToolsConfiguration();
         var levelSwitch = new LoggingLevelSwitch
         {
@@ -82,7 +82,7 @@ public class MockPlugin : IDisposable
         _gameUiManager = new MockGameUiManager();
         _gameInterface = new MockGameInterface();
         _marketCache = new MockMarketCache();
-        _mockPluginInterfaceService = new MockPluginInterfaceService(new FileInfo(configFile), new DirectoryInfo(configDirectory));
+        _mockPluginInterfaceService = new MockPluginInterfaceService(new FileInfo(configFile), new DirectoryInfo(configFolder));
         _dataService = new MockDataService(lumina);
         _fileDialogManager = new FileDialogManager();
         _mockMobTracker = new MockMobTracker();
@@ -116,11 +116,9 @@ public class MockPlugin : IDisposable
             
         }, false);
         ConfigurationManager.Load(configFile);
+        var inventories = ConfigurationManager.LoadInventory();
         PluginService.CharacterMonitor.LoadExistingRetainers(ConfigurationManager.Config.GetSavedRetainers());
-        if (File.Exists(inventoriesFile))
-        {
-            PluginService.InventoryMonitor.LoadExistingData(ConfigurationManager.LoadInventory(inventoriesFile));
-        }
+        PluginService.InventoryMonitor.LoadExistingData(inventories);
 
         PluginService.InventoryHistory.LoadExistingHistory(ConfigurationManager.LoadHistoryFromCsv(out _));
         PluginService.InitaliseExplicit(new MockServices()

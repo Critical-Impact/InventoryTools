@@ -26,7 +26,7 @@ public class CraftRetrieveGroupFilter : ChoiceFilter<RetrieveGroupSetting>
 
     public override void ResetFilter(FilterConfiguration configuration)
     {
-        configuration.CraftList.SetRetrieveGroupSetting(EmptyValue);
+        configuration.CraftList.SetRetrieveGroupSetting(DefaultValue);
         configuration.NotifyConfigurationChange();
     }
 
@@ -43,7 +43,7 @@ public class CraftRetrieveGroupFilter : ChoiceFilter<RetrieveGroupSetting>
         "Should the items you need to retrieve be grouped?";
 
     public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
-    public override RetrieveGroupSetting EmptyValue { get; set; } = RetrieveGroupSetting.None;
+    public override RetrieveGroupSetting DefaultValue { get; set; } = RetrieveGroupSetting.None;
     public override List<RetrieveGroupSetting> GetChoices(FilterConfiguration configuration)
     {
         return new List<RetrieveGroupSetting>()

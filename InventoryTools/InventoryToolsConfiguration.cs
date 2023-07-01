@@ -41,6 +41,7 @@ namespace InventoryTools
         private int _marketRefreshTimeHours = 24;
         private int _marketSaleHistoryLimit = 7;
         private bool _showItemNumberRetainerList = true;
+        private bool _historyEnabled = false;
 
         private Vector4 _tabHighlightColor = new (0.007f, 0.008f,
             0.007f, 1.0f);
@@ -55,6 +56,40 @@ namespace InventoryTools
 
         private HashSet<string>? _openWindows = new();
         private Dictionary<string, Vector2>? _savedWindowPositions = new();
+        private List<InventoryChangeReason>? _historyTrackReasons = new();
+        public bool HistoryEnabled
+        {
+            get => _historyEnabled;
+            set
+            {
+                _historyEnabled = value;
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+            }
+        }
+        public List<InventoryChangeReason> HistoryTrackReasons
+        {
+            get
+            {
+                if (_historyTrackReasons == null)
+                {
+                    _historyTrackReasons = new List<InventoryChangeReason>()
+                    {
+                        InventoryChangeReason.Added,
+                        InventoryChangeReason.Moved,
+                        InventoryChangeReason.Removed,
+                        InventoryChangeReason.Transferred,
+                        InventoryChangeReason.MarketPriceChanged,
+                        InventoryChangeReason.QuantityChanged
+                    };
+                }
+                return _historyTrackReasons;
+            }
+            set
+            {
+                _historyTrackReasons = value;
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+            }
+        }
 
         public bool IsVisible
         {
@@ -93,6 +128,7 @@ namespace InventoryTools
         private WindowLayout _craftWindowLayout =  WindowLayout.Tabs;
         private WindowLayout _filtersLayout = WindowLayout.Tabs;
         private uint? _tooltipColor = null;
+        private HashSet<NotificationPopup>? _notificationsSeen = new ();
         public Vector4 HighlightColor
         {
             get => _highlightColor;
@@ -385,6 +421,27 @@ namespace InventoryTools
                 _tooltipDisplayHeader = value;
                 PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
+        }
+        
+        public HashSet<NotificationPopup> NotificationsSeen
+        {
+            get => _notificationsSeen ??= new HashSet<NotificationPopup>();
+            set
+            {
+                _notificationsSeen = value;
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+            }
+        }
+
+        public bool HasSeenNotification(NotificationPopup popup)
+        {
+            return NotificationsSeen.Contains(popup);
+        }
+
+        public void MarkNotificationSeen(NotificationPopup popup)
+        {
+            NotificationsSeen.Add(popup);
+            PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
         }
         
         public Dictionary<ulong, HashSet<uint>> AcquiredItems

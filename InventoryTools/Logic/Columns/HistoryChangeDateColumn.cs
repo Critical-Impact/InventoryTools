@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
@@ -5,28 +6,27 @@ using InventoryTools.Logic.Columns.Abstract;
 
 namespace InventoryTools.Logic.Columns;
 
-public class HistoryChangeDateColumn : TextColumn
+public class HistoryChangeDateColumn : DateTimeColumn
 {
     public override ColumnCategory ColumnCategory => ColumnCategory.History;
-    public override string? CurrentValue(InventoryItem item)
+    public override DateTime? CurrentValue(InventoryItem item)
     {
-        return "";
+        return null;
     }
 
-    public override string? CurrentValue(ItemEx item)
+    public override DateTime? CurrentValue(ItemEx item)
     {
-        return "";
+        return null;
     }
 
-    public override string? CurrentValue(SortingResult item)
+    public override DateTime? CurrentValue(SortingResult item)
     {
-        return "";
+        return null;
     }
 
-    public override string? CurrentValue(InventoryChange currentValue)
+    public override DateTime? CurrentValue(InventoryChange currentValue)
     {
-        //TODO: Make a date column
-        return currentValue.ChangeDate?.ToString(CultureInfo.InvariantCulture) ?? "Unknown Date";
+        return currentValue.ChangeDate;
     }
 
     public override string Name { get; set; } = "History Event Date/Time";

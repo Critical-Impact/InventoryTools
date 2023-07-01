@@ -16,7 +16,7 @@ namespace InventoryTools.Logic.Filters.Abstract
         
         public override void ResetFilter(FilterConfiguration configuration)
         {
-            UpdateFilterConfiguration(configuration, new List<uint>());
+            UpdateFilterConfiguration(configuration, DefaultValue);
         }
     }
 }

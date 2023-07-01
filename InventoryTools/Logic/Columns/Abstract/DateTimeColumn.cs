@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
@@ -10,28 +11,28 @@ using NaturalSort.Extension;
 
 namespace InventoryTools.Logic.Columns.Abstract
 {
-    public abstract class TextColumn : Column<string?>
+    public abstract class DateTimeColumn : Column<DateTime?>
     {
         public override string CsvExport(InventoryItem item)
         {
-            return CurrentValue(item) ?? "";
+            return CurrentValue(item)?.ToString(CultureInfo.CurrentCulture) ?? "";
         }
 
         public override string CsvExport(ItemEx item)
         {
-            return CurrentValue((ItemEx)item) ?? "";
+            return CurrentValue(item)?.ToString(CultureInfo.CurrentCulture) ?? "";
         }
 
         public override string CsvExport(SortingResult item)
         {
-            return CurrentValue(item) ?? "";
+            return CurrentValue(item)?.ToString(CultureInfo.CurrentCulture) ?? "";
         }
-        public override string? CurrentValue(CraftItem currentValue)
+        public override DateTime? CurrentValue(CraftItem currentValue)
         {
             return CurrentValue(currentValue.Item);
         }
         
-        public override string? CurrentValue(InventoryChange currentValue)
+        public override DateTime? CurrentValue(InventoryChange currentValue)
         {
             return CurrentValue(currentValue.InventoryItem);
         }
@@ -83,12 +84,7 @@ namespace InventoryTools.Logic.Columns.Abstract
                 {
                     return false;
                 }
-
-                if (FilterType == ColumnFilterType.Choice)
-                {
-                    return currentValue == FilterText;
-                }
-                return currentValue.ToLower().PassesFilter(FilterText.ToLower());
+                return currentValue.Value.PassesFilter(FilterText.ToLower());
             });
         }
 
@@ -102,11 +98,7 @@ namespace InventoryTools.Logic.Columns.Abstract
                 {
                     return false;
                 }
-                if (FilterType == ColumnFilterType.Choice)
-                {
-                    return currentValue == FilterText;
-                }
-                return currentValue.ToLower().PassesFilter(FilterText.ToLower());
+                return currentValue.Value.PassesFilter(FilterText.ToLower());
             });
         }
 
@@ -120,11 +112,7 @@ namespace InventoryTools.Logic.Columns.Abstract
                 {
                     return false;
                 }
-                if (FilterType == ColumnFilterType.Choice)
-                {
-                    return currentValue == FilterText;
-                }
-                return currentValue.ToLower().PassesFilter(FilterText.ToLower());
+                return currentValue.Value.PassesFilter(FilterText.ToLower());
             });
         }
         
@@ -138,46 +126,43 @@ namespace InventoryTools.Logic.Columns.Abstract
                 {
                     return false;
                 }
-                if (FilterType == ColumnFilterType.Choice)
-                {
-                    return currentValue == FilterText;
-                }
-                return currentValue.ToLower().PassesFilter(FilterText.ToLower());
+                return currentValue.Value.PassesFilter(FilterText.ToLower());
             });
         }
 
         public override IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(CurrentValue, StringComparison.OrdinalIgnoreCase.WithNaturalSort()) : items.OrderByDescending(CurrentValue, StringComparison.OrdinalIgnoreCase.WithNaturalSort());
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(CurrentValue) : items.OrderByDescending(CurrentValue);
         }
 
         public override IEnumerable<ItemEx> Sort(ImGuiSortDirection direction, IEnumerable<ItemEx> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(item => CurrentValue((ItemEx)item), StringComparison.OrdinalIgnoreCase.WithNaturalSort()) : items.OrderByDescending(item => CurrentValue((ItemEx)item), StringComparison.OrdinalIgnoreCase.WithNaturalSort());
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(CurrentValue) : items.OrderByDescending(CurrentValue);
         }
 
         public override IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(CurrentValue, StringComparison.OrdinalIgnoreCase.WithNaturalSort()) : items.OrderByDescending(CurrentValue, StringComparison.OrdinalIgnoreCase.WithNaturalSort());
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(CurrentValue) : items.OrderByDescending(CurrentValue);
         }
         
         public override IEnumerable<InventoryChange> Sort(ImGuiSortDirection direction, IEnumerable<InventoryChange> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => CurrentValue(c), StringComparison.OrdinalIgnoreCase.WithNaturalSort()) : items.OrderByDescending(c => CurrentValue(c), StringComparison.OrdinalIgnoreCase.WithNaturalSort());
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(CurrentValue) : items.OrderByDescending(CurrentValue);
         }
 
-        public override IColumnEvent? DoDraw(string? currentValue, int rowIndex,
+        public override IColumnEvent? DoDraw(DateTime? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration)
         {
             ImGui.TableNextColumn();
             if (currentValue != null)
             {
+                var formattedValue = currentValue.Value.ToString(CultureInfo.CurrentCulture);
                 var columnWidth = ImGui.GetColumnWidth();
                 var frameHeight = filterConfiguration.TableHeight / 2.0f;
-                var calcText = ImGui.CalcTextSize(currentValue);
+                var calcText = ImGui.CalcTextSize(formattedValue);
                 var textHeight = calcText.X >= columnWidth ? 0 : calcText.Y / 2.0f;
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() + frameHeight - textHeight);
-                ImGui.TextUnformatted(currentValue);
+                ImGui.TextUnformatted(formattedValue);
             }
             else
             {

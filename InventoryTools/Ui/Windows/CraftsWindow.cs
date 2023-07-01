@@ -34,7 +34,7 @@ namespace InventoryTools.Ui
         private bool _addItemBarOpen = false;
         private bool _craftsExpanded = true;
         private bool _itemsExpanded = true;
-        
+
         private HoverButton _editIcon { get; } = new(PluginService.IconStorage.LoadImage("edit"),  new Vector2(22, 22));
         private HoverButton _settingsIcon { get; } = new(PluginService.IconStorage.LoadIcon(66319),  new Vector2(22, 22));
 
@@ -260,6 +260,46 @@ namespace InventoryTools.Ui
         }
         public override unsafe void Draw()
         {
+            if (!ConfigurationManager.Config.HasSeenNotification(NotificationPopup.CraftNotice) && ImGui.IsWindowFocused())
+            {
+                ImGui.OpenPopup("notification");
+                ConfigurationManager.Config.MarkNotificationSeen(NotificationPopup.CraftNotice);
+            }
+
+            ImGuiUtil.HelpPopup("notification", new Vector2(750,270), () =>
+            {
+                ImGui.TextUnformatted("Craft System Notice");
+                ImGui.Separator();
+                ImGui.NewLine();
+                ImGui.PushTextWrapPos();
+                ImGui.Bullet();
+                ImGui.Text("The craft system has received an update, and your default configuration has been reset. Please readjust it according to your preferences.");
+                ImGui.PopTextWrapPos();
+
+                ImGui.BulletText("You can now copy configurations between your craft lists.");
+
+                ImGui.BulletText("Two new columns have been added to your craft lists: 'Next Step' and 'Settings'.");
+
+                ImGui.Indent();
+                ImGui.BulletText("The 'Next Step' column provides guidance on what you should do next.");
+                ImGui.Unindent();
+
+                ImGui.Indent();
+                ImGui.BulletText("The 'Settings' column allows you to configure item sourcing, retainer settings, and recipes.");
+                ImGui.Unindent();
+
+                ImGui.BulletText("The update includes the following changes:");
+
+                ImGui.Indent();
+                ImGui.BulletText("You can now change groupings for crafts based on class or required crafting order.");
+                ImGui.BulletText("Retrievable items can be prioritized in their own group.");
+                ImGui.BulletText("Gatherable and purchasable items can be grouped by zone.");
+                ImGui.BulletText("Improved handling of items that can be purchased with seals, poetics, and scrip currencies.");
+                ImGui.Unindent();
+
+                ImGui.BulletText("You can customize these options further by clicking the pencil icon in the top right corner of a list.");
+
+            });
             _teamCraftImportWindow?.Draw();
             if (_teamCraftImportWindow != null &&_teamCraftImportWindow.HasResult && _teamCraftImportWindow.ParseResult != null && SelectedConfiguration != null)
             {

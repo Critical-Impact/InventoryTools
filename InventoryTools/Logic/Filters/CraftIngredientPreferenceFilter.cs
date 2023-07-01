@@ -57,6 +57,8 @@ public class CraftIngredientPreferenceFilter : SortedListFilter<(IngredientPrefe
         "When generating the materials for a craft, the 'Ingredient Sourcing' setting determines the preferred method of acquisition. The craft list will refer to this sorted list to determine the appropriate method. Please note that this assumes the item in the craft list can be obtained through this method. If not, the next item in the ingredient sourcing list will be considered.";
 
     public override FilterCategory FilterCategory { get; set; } = FilterCategory.IngredientSourcing;
+    public override Dictionary<(IngredientPreferenceType, uint?), (string, string?)> DefaultValue { get; set; } = new();
+
     public override bool HasValueSet(FilterConfiguration configuration)
     {
         return true;

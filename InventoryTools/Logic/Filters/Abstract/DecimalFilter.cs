@@ -5,6 +5,8 @@ namespace InventoryTools.Logic.Filters.Abstract
 {
     public abstract class DecimalFilter : Filter<decimal?>
     {
+        public override decimal? DefaultValue { get; set; } = null;
+
         public override bool HasValueSet(FilterConfiguration configuration)
         {
             return CurrentValue(configuration) != null;
@@ -62,7 +64,7 @@ namespace InventoryTools.Logic.Filters.Abstract
         
         public override void ResetFilter(FilterConfiguration configuration)
         {
-            UpdateFilterConfiguration(configuration, null);
+            UpdateFilterConfiguration(configuration, DefaultValue);
         }
     }
 }

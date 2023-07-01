@@ -18,6 +18,8 @@ namespace InventoryTools.Extensions
                     return "Tooltips";
                 case SettingCategory.Hotkeys:
                     return "Hotkeys";
+                case SettingCategory.History:
+                    return "History";
             }
             return settingCategory.ToString();
         }

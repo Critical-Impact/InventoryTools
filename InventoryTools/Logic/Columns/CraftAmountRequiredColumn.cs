@@ -52,13 +52,12 @@ namespace InventoryTools.Logic.Columns
                             {
                                 parsedNumber = 0;
                             }
-                            var number = (uint)parsedNumber;
+                            var number = item.GetRoundedQuantity((uint)parsedNumber);
                             if (number != item.QuantityRequired)
                             {
                                 configuration.CraftList.SetCraftRequiredQuantity(item.ItemId, number,
                                     item.Flags,
                                     item.Phase);
-                                item.QuantityRequired = number;
                                 configuration.StartRefresh();
                             }
                         }

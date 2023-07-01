@@ -198,7 +198,10 @@ namespace InventoryTools.Logic
         
         public static void SaveAsync()
         {
-            _saveQueue.DispatchAsync(Save);
+            if (PluginService.PluginLoaded)
+            {
+                _saveQueue.DispatchAsync(Save);
+            }
         }
 
         public static void ClearQueue()

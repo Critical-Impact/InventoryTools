@@ -49,7 +49,7 @@ namespace InventoryTools.Logic.Filters
             return item.CanBeEquippedByRaceGender(CharacterRace.Any, sex);
         }
 
-        public override uint? EmptyValue { get; set; } = null;
+        public override uint? DefaultValue { get; set; } = null;
 
         public override List<uint?> GetChoices(FilterConfiguration configuration)
         {

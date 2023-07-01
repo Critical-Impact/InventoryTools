@@ -26,7 +26,7 @@ public class CraftCrystalGroupFilter : ChoiceFilter<CrystalGroupSetting>
 
     public override void ResetFilter(FilterConfiguration configuration)
     {
-        configuration.CraftList.SetCrystalGroupSetting(EmptyValue);
+        configuration.CraftList.SetCrystalGroupSetting(DefaultValue);
         configuration.NotifyConfigurationChange();
     }
 
@@ -43,7 +43,7 @@ public class CraftCrystalGroupFilter : ChoiceFilter<CrystalGroupSetting>
         "Should the crystals be grouped together or show up in the Gather/Buy list?";
 
     public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
-    public override CrystalGroupSetting EmptyValue { get; set; } = CrystalGroupSetting.Separate;
+    public override CrystalGroupSetting DefaultValue { get; set; } = CrystalGroupSetting.Separate;
     public override List<CrystalGroupSetting> GetChoices(FilterConfiguration configuration)
     {
         return new List<CrystalGroupSetting>()

@@ -26,7 +26,7 @@ public class CraftEverythingElseGroupFilter : ChoiceFilter<EverythingElseGroupSe
 
     public override void ResetFilter(FilterConfiguration configuration)
     {
-        configuration.CraftList.SetEverythingElseGroupSetting(EmptyValue);
+        configuration.CraftList.SetEverythingElseGroupSetting(DefaultValue);
     }
 
     public override void UpdateFilterConfiguration(FilterConfiguration configuration, EverythingElseGroupSetting newValue)
@@ -42,7 +42,7 @@ public class CraftEverythingElseGroupFilter : ChoiceFilter<EverythingElseGroupSe
         "How should everything else not in it's own group be grouped?";
 
     public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
-    public override EverythingElseGroupSetting EmptyValue { get; set; } = EverythingElseGroupSetting.Together;
+    public override EverythingElseGroupSetting DefaultValue { get; set; } = EverythingElseGroupSetting.ByClosestZone;
     public override List<EverythingElseGroupSetting> GetChoices(FilterConfiguration configuration)
     {
         return new List<EverythingElseGroupSetting>()

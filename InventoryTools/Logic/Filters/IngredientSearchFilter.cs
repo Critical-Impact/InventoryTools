@@ -19,6 +19,8 @@ public class IngredientSearchFilter : UintMultipleChoiceFilter
 
     public override FilterCategory FilterCategory { get; set; } = FilterCategory.Searching;
 
+    public override List<uint> DefaultValue { get; set; } = new();
+
     public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter |
                                                            FilterType.GameItemFilter;
     public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)

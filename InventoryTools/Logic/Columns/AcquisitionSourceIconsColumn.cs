@@ -167,7 +167,7 @@ namespace InventoryTools.Logic.Columns
         }
 
         public override string Name { get; set; } = "Acqusition";
-        public override float Width { get; set; } = 210;
+        public override float Width { get; set; } = 250;
 
         public override string HelpText { get; set; } =
             "Shows icons indicating what items can be obtained with(gathering, crafting, currency, etc)";
