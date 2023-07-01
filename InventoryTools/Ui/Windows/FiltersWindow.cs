@@ -311,7 +311,7 @@ namespace InventoryTools.Ui
                 ImGui.OpenPopup("historynotice");
                 ConfigurationManager.Config.MarkNotificationSeen(NotificationPopup.HistoryNotice);
             }
-            var choice = InventoryTools.Ui.Widgets.ImGuiUtil.ConfirmPopup("historynotice", new Vector2(800,280), () =>
+            var choice = InventoryTools.Ui.Widgets.ImGuiUtil.ConfirmPopup("historynotice", new Vector2(800,340) * ImGui.GetIO().FontGlobalScale, () =>
             {
                 ImGui.TextUnformatted("History Filter Notice");
                 ImGui.Separator();
@@ -335,6 +335,7 @@ namespace InventoryTools.Ui
                 ImGui.BulletText("It is not limited to tracking just these events and can track most changes to individual items.");
 
                 ImGui.BulletText("To change what is tracking, check out the History tab inside the main configuration section(gear icon).");
+                ImGui.BulletText("Please note that this module is experimental so it may sometimes track single events as 2 events.");
                 ImGui.NewLine();
                 ImGui.Text("By default the history module is turned off, would you like to turn it on?");
             });

@@ -386,13 +386,6 @@ namespace InventoryTools
             if (ConfigurationManager.Config.InternalVersion == 13)
             {
                 PluginLog.Log("Migrating to version 14");
-                AddHistoryFilter();
-                ConfigurationManager.Config.InternalVersion++;
-            }
-
-            if (ConfigurationManager.Config.InternalVersion == 14)
-            {
-                PluginLog.Log("Migrating to version 15");
                 var toReset = AvailableFilters.Where(c =>
                     c is CraftCrystalGroupFilter or CraftCurrencyGroupFilter or CraftPrecraftGroupFilter
                         or CraftRetrieveGroupFilter or CraftEverythingElseGroupFilter or CraftIngredientPreferenceFilter).ToList();
@@ -416,7 +409,7 @@ namespace InventoryTools
                             filterConfig.AddCraftColumn("CraftSimpleColumn",3);
                         }
                     }
-                }                
+                }                                
                 ConfigurationManager.Config.InternalVersion++;
             }
         }

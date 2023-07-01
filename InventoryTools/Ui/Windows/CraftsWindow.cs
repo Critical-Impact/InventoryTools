@@ -266,7 +266,7 @@ namespace InventoryTools.Ui
                 ConfigurationManager.Config.MarkNotificationSeen(NotificationPopup.CraftNotice);
             }
 
-            ImGuiUtil.HelpPopup("notification", new Vector2(750,270), () =>
+            ImGuiUtil.HelpPopup("notification", new Vector2(750,340) * ImGui.GetIO().FontGlobalScale, () =>
             {
                 ImGui.TextUnformatted("Craft System Notice");
                 ImGui.Separator();
@@ -847,8 +847,6 @@ namespace InventoryTools.Ui
                         }
 
                         ImGuiUtil.HoverTooltip("Open the filters window.");
-                        
-
 
                         if (craftTable != null)
                         {

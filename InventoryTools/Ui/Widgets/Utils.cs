@@ -247,7 +247,7 @@ public static class ImGuiUtil
                 ImGui.CloseCurrentPopup();
                 return true;
             }
-            ImGui.SetCursorPos(new Vector2(yesButtonSize + 10, size.Y - ImGui.GetFrameHeight() * 1.75f));
+            ImGui.SetCursorPos(new Vector2(yesButtonSize + 20, size.Y - ImGui.GetFrameHeight() * 1.75f));
 
             if (ImGui.Button(noButtonText, new Vector2(noButtonSize, 0)))
             {

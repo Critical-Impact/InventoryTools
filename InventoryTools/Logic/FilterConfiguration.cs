@@ -2984,10 +2984,13 @@ namespace InventoryTools.Logic
                     }
                     foreach (var item in sourceInventory.Value)
                     {
-                        var filteredItem = filter.FilterItem(item);
-                        if (filteredItem != null)
+                        if (item != null)
                         {
-                            filteredSources[sourceInventory.Key].Add(filteredItem);
+                            var filteredItem = filter.FilterItem(item);
+                            if (filteredItem != null)
+                            {
+                                filteredSources[sourceInventory.Key].Add(filteredItem);
+                            }
                         }
                     }
                 }

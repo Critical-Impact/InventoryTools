@@ -94,6 +94,10 @@ namespace InventoryTools.Ui
                     {
                         DrawInventoriesDebugTab();
                     }
+                    else if (ConfigurationManager.Config.SelectedDebugPage == (int)DebugMenu.Random)
+                    {
+                        DrawRandomTab();
+                    }
 /*
                     else if (ConfigurationManager.Config.SelectedDebugPage == 2)
                     {
@@ -1399,6 +1403,14 @@ namespace InventoryTools.Ui
 
                 }
                 ImGui.TreePop();
+            }
+        }
+
+        public void DrawRandomTab()
+        {
+            if (ImGui.Button("Clear notices"))
+            {
+                ConfigurationManager.Config.NotificationsSeen.Clear();
             }
         }
         private void DrawInventoriesDebugTab()

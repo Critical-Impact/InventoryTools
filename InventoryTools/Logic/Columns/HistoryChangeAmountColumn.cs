@@ -30,7 +30,7 @@ public class HistoryChangeAmountColumn : TextColumn
 
 
     public override string Name { get; set; } = "History Event Amount";
-    public override string RenderName => "Event";
+    public override string RenderName => "Amount";
     public override float Width { get; set; } = 100;
     public override string HelpText { get; set; } = "The amount that changed(if applicable)";
     public override bool HasFilter { get; set; } = true;
