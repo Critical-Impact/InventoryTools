@@ -2479,7 +2479,7 @@ namespace InventoryTools.Logic
 
 
         #region Filter Generation
-        public async Task<FilterResult> GenerateFilteredListInternal(FilterConfiguration filter, List<Inventory> inventories)
+        public FilterResult GenerateFilteredListInternal(FilterConfiguration filter, List<Inventory> inventories)
         {
             var sortedItems = new List<SortingResult>();
             var unsortableItems = new List<InventoryItem>();
@@ -3141,13 +3141,13 @@ namespace InventoryTools.Logic
             return new FilterResult(sortedItems, unsortableItems, items, inventoryHistory);
         }
 
-        public async Task<FilterResult> GenerateFilteredList(List<Inventory>? inventories = null)
+        public Task<FilterResult> GenerateFilteredList(List<Inventory>? inventories = null)
         {
             if (inventories == null)
             {
                 inventories = PluginService.InventoryMonitor.Inventories.Select(c => c.Value).ToList();
             }
-            return await GenerateFilteredListInternal(this, inventories);
+            return Task<FilterResult>.Factory.StartNew(() => GenerateFilteredListInternal(this, inventories));
         }
         
         #endregion
