@@ -282,11 +282,15 @@ namespace InventoryTools.Logic
             NeedsRefresh = false;
             await PluginService.FrameworkService.RunOnFrameworkThread(() => { ListUpdated?.Invoke(this); });
             PluginLog.Debug("Finished refreshing filter: " + this.Name);
-            _refreshing = false;
             if (_refreshQueue.Contains(null))
             {
                 _refreshQueue.Clear();
+                _refreshing = false;
                 StartRefresh();
+            }
+            else
+            {
+                _refreshing = false;
             }
         }
         
@@ -2475,7 +2479,7 @@ namespace InventoryTools.Logic
 
 
         #region Filter Generation
-        public FilterResult GenerateFilteredListInternal(FilterConfiguration filter, List<Inventory> inventories)
+        public async Task<FilterResult> GenerateFilteredListInternal(FilterConfiguration filter, List<Inventory> inventories)
         {
             var sortedItems = new List<SortingResult>();
             var unsortableItems = new List<InventoryItem>();
@@ -3137,13 +3141,13 @@ namespace InventoryTools.Logic
             return new FilterResult(sortedItems, unsortableItems, items, inventoryHistory);
         }
 
-        public Task<FilterResult> GenerateFilteredList(List<Inventory>? inventories = null)
+        public async Task<FilterResult> GenerateFilteredList(List<Inventory>? inventories = null)
         {
             if (inventories == null)
             {
                 inventories = PluginService.InventoryMonitor.Inventories.Select(c => c.Value).ToList();
             }
-            return Task<FilterResult>.Factory.StartNew(() => GenerateFilteredListInternal(this, inventories));
+            return await GenerateFilteredListInternal(this, inventories);
         }
         
         #endregion
