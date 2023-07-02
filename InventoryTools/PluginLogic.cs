@@ -430,6 +430,17 @@ namespace InventoryTools
                 };
                 ConfigurationManager.Config.InternalVersion++;
             }
+
+            if (ConfigurationManager.Config.InternalVersion == 15)
+            {
+                PluginLog.Log("Migrating to version 16");
+                var historyFilter = PluginService.FilterService.GetFilter("History");
+                if (historyFilter == null && !ConfigurationManager.Config.FirstRun)
+                {
+                    AddHistoryFilter();
+                }
+                ConfigurationManager.Config.InternalVersion++;
+            }
         }
 
         private void FrameworkOnUpdate(IFrameworkService framework)
