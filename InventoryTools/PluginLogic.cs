@@ -76,8 +76,6 @@ namespace InventoryTools
                 PluginService.MobTracker.SetEntries(entries);
             }
 
-            SyncConfigurationChanges();
-
             PluginService.GameUi.WatchWindowState(WindowName.RetainerGrid0);
             PluginService.GameUi.WatchWindowState(WindowName.InventoryGrid0E);
             PluginService.GameUi.WatchWindowState(WindowName.RetainerList);
@@ -111,6 +109,7 @@ namespace InventoryTools
                 LoadDefaultData();
                 ConfigurationManager.Config.FirstRun = false;
             }
+            SyncConfigurationChanges();
         }
 
 #pragma warning disable CS8618
@@ -484,10 +483,14 @@ namespace InventoryTools
                 }
             }
 
-            if (PluginService.InventoryHistory.ReasonsToLog.ToList() != ConfigurationManager.Config.HistoryTrackReasons)
+            if (ConfigurationManager.Config.HistoryTrackReasons != null)
             {
-                PluginService.InventoryHistory.SetChangeReasonsToLog(
-                    ConfigurationManager.Config.HistoryTrackReasons.Distinct().ToHashSet());
+                if (PluginService.InventoryHistory.ReasonsToLog.ToList() !=
+                    ConfigurationManager.Config.HistoryTrackReasons)
+                {
+                    PluginService.InventoryHistory.SetChangeReasonsToLog(
+                        ConfigurationManager.Config.HistoryTrackReasons.Distinct().ToHashSet());
+                }
             }
         }
 
