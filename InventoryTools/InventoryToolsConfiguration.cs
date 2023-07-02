@@ -30,7 +30,7 @@ namespace InventoryTools
 
         private Vector4 _retainerListColor = ImGuiColors.HealerGreen;
 
-        private string _highlightWhen = "Always";
+        private string _highlightWhen = "When Searching";
         private bool _invertHighlighting = true;
         private bool _invertDestinationHighlighting = false;
         private bool _invertTabHighlighting = false;
@@ -106,8 +106,8 @@ namespace InventoryTools
         public bool SwitchFiltersAutomatically { get; set; } = true;
         private bool _tooltipCurrentCharacter = false;
         private bool _tooltipDisplayAmountOwned = true;
-        private bool _tooltipDisplayMarketAveragePrice = true;
-        private bool _tooltipDisplayMarketLowestPrice = false;
+        private bool _tooltipDisplayMarketAveragePrice = false;
+        private bool _tooltipDisplayMarketLowestPrice = true;
         private bool _tooltipAddCharacterNameOwned = false;
         private bool _tooltipDisplayRetrieveAmount = false;
         private int _tooltipLocationLimit = 10;

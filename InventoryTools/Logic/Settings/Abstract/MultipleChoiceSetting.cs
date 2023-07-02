@@ -187,6 +187,12 @@ public abstract class MultipleChoiceSetting<T> : Setting<List<T>> where T:notnul
             _cachedChoices = null;
         }
     }
+    
+    public override bool HasValueSet(InventoryToolsConfiguration configuration)
+    {
+        var currentValue = CurrentValue(configuration).Distinct().ToHashSet();
+        return !currentValue.SetEquals(DefaultValue.Distinct().ToHashSet());
+    }
 
     public override void Reset(InventoryToolsConfiguration configuration)
     {

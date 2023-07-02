@@ -5,8 +5,8 @@ namespace InventoryTools.Logic.Settings
 {
     public class TabHighlightColourSetting : ColorSetting
     {
-        public override Vector4 DefaultValue { get; set; } = new(0f, 0f,
-            0f, 0.18f);
+        public override Vector4 DefaultValue { get; set; } = new(0.007f, 0.008f,
+            0.007f, 1.0f);
         
         public override Vector4 CurrentValue(InventoryToolsConfiguration configuration)
         {

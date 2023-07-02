@@ -57,5 +57,5 @@ public class HistoryTrackEventsSetting : MultipleChoiceSetting<InventoryChangeRe
         return _changeReasons;
     }
 
-    public override bool HideAlreadyPicked { get; set; }
+    public override bool HideAlreadyPicked { get; set; } = true;
 }

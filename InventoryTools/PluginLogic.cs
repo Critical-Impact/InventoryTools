@@ -169,7 +169,7 @@ namespace InventoryTools
                     highlight.W = 1;
                     ConfigurationManager.Config.HighlightColor = highlight;
                 }
-                ConfigurationManager.Config.TabHighlightColor = ConfigurationManager.Config.HighlightColor;
+                ConfigurationManager.Config.TabHighlightColor = new(0.007f, 0.008f, 0.007f, 1.0f);
 
                 foreach (var filterConfig in PluginService.FilterService.FiltersList)
                 {
