@@ -40,6 +40,7 @@ namespace InventoryTools
         public ICommandService? CommandService;
         public IHotkeyService? HotkeyService;
         public IKeyStateService? KeyStateService;
+        public InventoryHistory? InventoryHistory;
     }
 
     public static class PluginService
@@ -76,6 +77,7 @@ namespace InventoryTools
         public static OdrScanner OdrScanner { get; private set; } = null!;
         public static IMobTracker MobTracker { get; private set; } = null!;
         public static IHotkeyService HotkeyService { get; private set; } = null!;
+        public static InventoryHistory InventoryHistory { get; private set; } = null!;
         public static bool PluginLoaded { get; private set; } = false;
 
         public delegate void PluginLoadedDelegate();
@@ -86,6 +88,7 @@ namespace InventoryTools
             Stopwatch loadConfigStopwatch = new Stopwatch();
             loadConfigStopwatch.Start();
             Service.ExcelCache = new ExcelCache(Service.Data);
+            Service.ExcelCache.PreCacheItemData();
             FrameworkService = new FrameworkService(Service.Framework);
             CommandService = new CommandService(Service.Commands);
             PluginInterfaceService = new PluginInterfaceService(Service.Interface);
@@ -108,7 +111,8 @@ namespace InventoryTools
             InventoryScanner = new InventoryScanner(CharacterMonitor, GameUi, GameInterface, OdrScanner);
             InventoryMonitor = new InventoryMonitor( CharacterMonitor,  CraftMonitor, InventoryScanner, FrameworkService);
             InventoryScanner.Enable();
-            FilterService = new FilterService( CharacterMonitor, InventoryMonitor);
+            InventoryHistory = new InventoryHistory(InventoryMonitor);
+            FilterService = new FilterService( CharacterMonitor, InventoryMonitor, InventoryHistory);
             OverlayService = new OverlayService(FilterService, GameUi, FrameworkService);
             ContextMenuService = new ContextMenuService();
             IconStorage = new IconService(Service.Interface, Service.Data);
@@ -153,9 +157,10 @@ namespace InventoryTools
             if (mockServices.CommandService != null) CommandService = mockServices.CommandService;
             if (mockServices.HotkeyService != null) HotkeyService = mockServices.HotkeyService;
             if (mockServices.KeyStateService != null) KeyStateService = mockServices.KeyStateService;
-            PluginLoaded = true;
+            if (mockServices.InventoryHistory != null) InventoryHistory = mockServices.InventoryHistory;
             if (finishLoading)
             {
+                PluginLoaded = true;
                 OnPluginLoaded?.Invoke();
             }
         }
@@ -175,6 +180,7 @@ namespace InventoryTools
             TooltipService.Dispose();
             FilterService.Dispose();
             OverlayService.Dispose();
+            InventoryHistory.Dispose();
             InventoryMonitor.Dispose();
             InventoryScanner.Dispose();
             WindowService.Dispose();
@@ -216,6 +222,7 @@ namespace InventoryTools
             ChatService = null!;
             InventoryMonitor = null!;
             InventoryScanner = null!;
+            InventoryHistory = null!;
             CharacterMonitor = null!;
             PluginLogic = null!;
             GameUi = null!;

@@ -35,6 +35,12 @@ namespace InventoryTools.Logic.Columns.Abstract
             return CurrentValue(currentValue.Item);
         }
         
+        public override decimal? CurrentValue(InventoryChange currentValue)
+        {
+            return CurrentValue(currentValue.InventoryItem);
+        }
+
+        
         public override IEnumerable<CraftItem> Filter(IEnumerable<CraftItem> items)
         {
             return items;
@@ -67,7 +73,10 @@ namespace InventoryTools.Logic.Columns.Abstract
         {
             DoDraw(CurrentValue(item), rowIndex, configuration);
         }
-
+        public override void Draw(FilterConfiguration configuration, InventoryChange item, int rowIndex)
+        {
+            DoDraw(CurrentValue(item), rowIndex, configuration);
+        }
         public override IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items)
         {
             return FilterText == "" ? items : items.Where(c =>
@@ -110,6 +119,21 @@ namespace InventoryTools.Logic.Columns.Abstract
                 return currentValue.Value.PassesFilter(FilterText);
             });
         }
+        
+        public override IEnumerable<InventoryChange> Filter(IEnumerable<InventoryChange> items)
+        {
+            var isChecked = FilterText != "";
+            return FilterText == "" ? items : items.Where(c =>
+            {
+                var currentValue = CurrentValue(c.InventoryItem);
+                if (currentValue == null)
+                {
+                    return false;
+                }
+
+                return currentValue.Value.PassesFilter(FilterText);
+            });
+        }
 
         public override IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
         {
@@ -124,6 +148,11 @@ namespace InventoryTools.Logic.Columns.Abstract
         public override IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items)
         {
             return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => CurrentValue(c) ?? Int32.MaxValue) : items.OrderByDescending(c => CurrentValue(c) ?? Int32.MinValue);
+        }
+        
+        public override IEnumerable<InventoryChange> Sort(ImGuiSortDirection direction, IEnumerable<InventoryChange> items)
+        {
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => CurrentValue(c.InventoryItem) ?? Int32.MaxValue) : items.OrderByDescending(c => CurrentValue(c.InventoryItem) ?? Int32.MinValue);
         }
 
         public override IColumnEvent? DoDraw(decimal? currentValue, int rowIndex, FilterConfiguration filterConfiguration)
@@ -142,7 +171,7 @@ namespace InventoryTools.Logic.Columns.Abstract
 
         public override void Setup(int columnIndex)
         {
-            ImGui.TableSetupColumn(Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
+            ImGui.TableSetupColumn(RenderName ?? Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
         }
     }
 }

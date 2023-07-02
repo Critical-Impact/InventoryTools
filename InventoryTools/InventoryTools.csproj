@@ -108,6 +108,10 @@
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <TargetPath>Images\export.png</TargetPath>
         </ContentWithTargetPath>
+        <ContentWithTargetPath Include="Images\import_tc.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>Images\import_tc.png</TargetPath>
+        </ContentWithTargetPath>
         <ContentWithTargetPath Include="Images\export2.png">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <TargetPath>Images\export2.png</TargetPath>
@@ -139,6 +143,10 @@
         <ContentWithTargetPath Include="Images\clipboard.png">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <TargetPath>Images\clipboard.png</TargetPath>
+        </ContentWithTargetPath>
+        <ContentWithTargetPath Include="Images\hq.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>Images\hq.png</TargetPath>
         </ContentWithTargetPath>
     </ItemGroup>
 

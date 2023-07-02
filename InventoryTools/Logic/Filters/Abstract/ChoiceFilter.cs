@@ -7,11 +7,10 @@ namespace InventoryTools.Logic.Filters.Abstract
 {
     public abstract class ChoiceFilter<T> : Filter<T?>
     {
-        public abstract T EmptyValue { get; set; }
         public override bool HasValueSet(FilterConfiguration configuration)
         {
             var keyValuePair = CurrentValue(configuration);
-            return keyValuePair != null && !Equals(keyValuePair, EmptyValue);
+            return keyValuePair != null && !Equals(keyValuePair, DefaultValue);
         }
 
         public abstract List<T> GetChoices(FilterConfiguration configuration);

@@ -9,6 +9,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class ShortcutColumn : TextColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Tools;
         public override string? CurrentValue(InventoryItem item)
         {
             return null;
@@ -35,7 +36,7 @@ namespace InventoryTools.Logic.Columns
         public override void Draw(FilterConfiguration configuration, InventoryItem item, int rowIndex)
         {
             ImGui.TableNextColumn();
-            if (ImGui.SmallButton("G##G" + rowIndex))
+            if (ImGui.SmallButton("GT##GT" + rowIndex))
             {
                 $"https://www.garlandtools.org/db/#item/{item.Item.GarlandToolsId}".OpenBrowser();
             }

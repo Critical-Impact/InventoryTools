@@ -6,6 +6,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class CanBeGatheredColumn : CheckboxColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override bool? CurrentValue(InventoryItem item)
         {
             return CurrentValue(item.Item);
@@ -21,7 +22,7 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "Can be Gathered?";
+        public override string Name { get; set; } = "Is Gatherable?";
         public override float Width { get; set; } = 80.0f;
         public override string HelpText { get; set; } = "Can the item be gathered?";
         public override bool HasFilter { get; set; } = true;

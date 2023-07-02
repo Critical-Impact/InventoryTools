@@ -11,6 +11,7 @@ namespace InventoryTools.Logic.Columns;
 
 public class NameIconColumn : TextIconColumn
 {
+    public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
     public override (string, ushort, bool)? CurrentValue(InventoryItem item)
     {
         return (item.Item.NameString, item.Icon, item.IsHQ);
@@ -81,6 +82,7 @@ public class NameIconColumn : TextIconColumn
     }
 
     public override string Name { get; set; } = "Name & Icon";
+    public override string RenderName => "Name";
     public override float Width { get; set; } = 100;
     public override string HelpText { get; set; } = "The name of the item with the icon next to it.";
     public override bool HasFilter { get; set; } = false;

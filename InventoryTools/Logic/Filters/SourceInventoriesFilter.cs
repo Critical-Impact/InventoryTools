@@ -15,7 +15,8 @@ namespace InventoryTools.Logic.Filters
         public override string HelpText { get; set; } =
             "This is a list of source inventories to sort items from based on the filter configuration";
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Inventories;
-        public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter | FilterType.CraftFilter;
+        public override List<(ulong, InventoryCategory)> DefaultValue { get; set; } = new();
+        public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter | FilterType.CraftFilter | FilterType.HistoryFilter;
         
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {

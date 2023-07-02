@@ -2,7 +2,6 @@ using System.Numerics;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
-using OtterGui;
 using OtterGui.Raii;
 
 namespace InventoryTools.Ui

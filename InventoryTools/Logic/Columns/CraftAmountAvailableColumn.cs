@@ -1,4 +1,3 @@
-using System;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
@@ -10,6 +9,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class CraftAmountAvailableColumn : IntegerColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Crafting;
         public override int? CurrentValue(InventoryItem item)
         {
             return 0;
@@ -31,7 +31,7 @@ namespace InventoryTools.Logic.Columns
             {
                 return 0;
             }
-            return Math.Min((int)currentValue.QuantityAvailable, (int)currentValue.QuantityNeeded);
+            return (int)currentValue.QuantityWillRetrieve;
         }
 
         public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
@@ -41,20 +41,21 @@ namespace InventoryTools.Logic.Columns
                 ImGui.TableNextColumn();
                 return;
             }
-            if (item.QuantityAvailable != 0)
+            if (item.QuantityWillRetrieve != 0)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.ParsedBlue);
             }
 
             base.Draw(configuration, item, rowIndex);
 
-            if (item.QuantityAvailable != 0)
+            if (item.QuantityWillRetrieve != 0)
             {
                 ImGui.PopStyleColor();
             }
         }
 
-        public override string Name { get; set; } = "Retrieve";
+        public override string Name { get; set; } = "Amount to Retrieve";
+        public override string RenderName => "Retrieve";
         public override float Width { get; set; } = 60;
         public override bool? CraftOnly => false;
 

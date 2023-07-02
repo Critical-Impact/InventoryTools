@@ -1,22 +1,13 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
-using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Interfaces;
-using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
-using Dalamud.Game.Text;
-using Dalamud.Utility;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
-using Lumina.Excel;
-using Lumina.Excel.GeneratedSheets;
-using LuminaSupplemental.Excel.Model;
 using OtterGui;
-using OtterGui.Raii;
 
 namespace InventoryTools.Ui
 {

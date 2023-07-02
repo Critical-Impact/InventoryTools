@@ -8,6 +8,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class MarketBoardSevenDayCountColumn : IntegerColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Market;
         protected readonly string LoadingString = "loading...";
         protected readonly string UntradableString = "untradable";
         protected readonly int Loading = -1;
@@ -77,7 +78,8 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "MB " +  + ConfigurationManager.Config.MarketSaleHistoryLimit + " Sale Count";        
+        public override string Name { get; set; } = "Market Board " + ConfigurationManager.Config.MarketSaleHistoryLimit + " Day Sale Count";
+        public override string RenderName => "MB " + ConfigurationManager.Config.MarketSaleHistoryLimit + " Day Sales";        
         public override string HelpText { get; set; } =
             "Shows the number of sales over a " +  + ConfigurationManager.Config.MarketSaleHistoryLimit + " day period for the item. This data is sourced from universalis.";
         public override float Width { get; set; } = 250.0f;

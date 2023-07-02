@@ -30,6 +30,7 @@ namespace InventoryTools.Logic.Filters
             "This is a list of destinations categories to sort items into. It will attempt to sort items into any bag of the given category.";
         
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Inventories;
+        public override List<InventoryCategory> DefaultValue { get; set; } = new();
         public override FilterType AvailableIn { get; set; } = FilterType.SortingFilter;
         
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)

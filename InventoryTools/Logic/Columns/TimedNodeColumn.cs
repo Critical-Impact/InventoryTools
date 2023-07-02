@@ -7,6 +7,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class TimedNodeColumn : CheckboxColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override bool? CurrentValue(InventoryItem item)
         {
             return Service.ExcelCache.IsItemAvailableAtTimedNode(item.ItemId);
@@ -22,7 +23,8 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "From Timed Node?";
+        public override string Name { get; set; } = "Is From Timed Node?";
+        public override string RenderName => "Timed Node?";
         public override float Width { get; set; } = 125.0f;
         public override string HelpText { get; set; } = "Is this item available at a timed node?";
         public override bool HasFilter { get; set; } = true;

@@ -27,5 +27,19 @@ namespace InventoryTools.Extensions
 
             return items;
         }
+        public static List<T> MoveTop<T>(this List<T> items, T item)
+        {
+            var oldIndex = items.IndexOf(item);
+            items.RemoveAt(oldIndex);
+            items.Insert(0, item);
+            return items;
+        }
+        public static List<T> MoveBottom<T>(this List<T> items, T item)
+        {
+            var oldIndex = items.IndexOf(item);
+            items.RemoveAt(oldIndex);
+            items.Insert(items.Count, item);
+            return items;
+        }
     }
 }

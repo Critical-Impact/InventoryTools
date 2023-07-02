@@ -2,8 +2,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
+using CriticalCommonLib.Models;
 using Dalamud.Utility;
 using ImGuiNET;
+using ImGuiScene;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using Lumina.Excel.GeneratedSheets;
@@ -22,12 +24,12 @@ namespace InventoryTools.Ui
         private uint _contentFinderConditionId;
         private ContentFinderCondition? ContentFinderCondition => Service.ExcelCache.GetContentFinderConditionExSheet().GetRow(_contentFinderConditionId);
 
-        private HashSet<uint> DungeonChestItems { get; }
-        private HashSet<uint> DungeonRewards { get; }
-        private List<DungeonBoss> DungeonBosses { get; }
-        private Dictionary<uint, List<DungeonBossDrop>> DungeonBossDrops { get; }
-        
-        private Dictionary<uint, List<DungeonBossChest>> DungeonBossChests { get; }
+        private HashSet<uint> DungeonChestItems { get; } = null!;
+        private HashSet<uint> DungeonRewards { get; } = null!;
+        private List<DungeonBoss> DungeonBosses { get; } = null!;
+        private Dictionary<uint, List<DungeonBossDrop>> DungeonBossDrops { get; } = null!;
+
+        private Dictionary<uint, List<DungeonBossChest>> DungeonBossChests { get; } = null!;
         public DutyWindow(uint contentFinderConditionId, string name = "Allagan Tools - Invalid Duty") : base(name)
         {
             _contentFinderConditionId = contentFinderConditionId;
@@ -79,7 +81,7 @@ namespace InventoryTools.Ui
                 ImGui.TextUnformatted("Level Required: " + ContentFinderCondition.ClassJobLevelRequired);
                 ImGui.TextUnformatted("Item Level Required: " + ContentFinderCondition.ItemLevelRequired);
                 ;
-                var itemIcon = PluginService.IconStorage[(int)(ContentFinderCondition.ContentType?.Value?.IconDutyFinder ?? 61801)];
+                var itemIcon = PluginService.IconStorage[(int)(ContentFinderCondition.ContentType?.Value?.IconDutyFinder ?? Icons.DutyIcon)];
                 ImGui.Image(itemIcon.ImGuiHandle, new Vector2(100, 100) * ImGui.GetIO().FontGlobalScale);
                 
                 var garlandIcon = PluginService.IconStorage[65090];
@@ -112,8 +114,9 @@ namespace InventoryTools.Ui
                                     for (var index = 0; index < items.Count; index++)
                                     {
                                         var item = items[index];
+                                        if (item.Item1 == null) continue;
                                         ImGui.PushID("dbc" + dungeonBoss.RowId + "_" + chest.Key + "_" + index);
-                                        var useIcon = PluginService.IconStorage[item.Item1.Icon];
+                                        TextureWrap? useIcon = PluginService.IconStorage[item.Item1.Icon];
                                         if (useIcon != null)
                                         {
                                             if (ImGui.ImageButton(useIcon.ImGuiHandle,

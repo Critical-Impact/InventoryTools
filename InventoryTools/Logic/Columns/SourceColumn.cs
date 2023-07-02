@@ -6,6 +6,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class SourceColumn : TextColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Inventory;
         public override string? CurrentValue(InventoryItem item)
         {
             return PluginService.CharacterMonitor.Characters.ContainsKey(item.RetainerId) ?  PluginService.CharacterMonitor.Characters[item.RetainerId].FormattedName : "Unknown (" + item.RetainerId + ")";

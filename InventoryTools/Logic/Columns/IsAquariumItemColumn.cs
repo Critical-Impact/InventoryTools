@@ -6,6 +6,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class IsAquariumItemColumn : CheckboxColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override bool? CurrentValue(InventoryItem item)
         {
             return CurrentValue(item.Item);

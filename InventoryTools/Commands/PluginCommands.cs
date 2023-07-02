@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Extensions;
@@ -253,7 +252,7 @@ namespace InventoryTools.Commands
             }
             else
             {
-                item = Service.ExcelCache.GetItemExSheet().FirstOrDefault(c => c.SearchString == args.ToParseable(), null);
+                item = Service.ExcelCache.GetItemExSheet().FirstOrDefault(c => c!.SearchString == args.ToParseable(), null);
             }
             if (item != null && item.RowId != 0)
             {

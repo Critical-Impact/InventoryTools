@@ -11,20 +11,20 @@ namespace InventoryTools.Logic.Filters
         public readonly string[] HighlightWhenItemsFilter = new string[] {"N/A", "Always", "When Searching"};
         public override string? CurrentValue(FilterConfiguration configuration)
         {
-            return configuration.HighlightWhen ?? EmptyValue;
+            return configuration.HighlightWhen ?? DefaultValue;
         }
 
         public override void UpdateFilterConfiguration(FilterConfiguration configuration, string? newValue)
         {
-            configuration.HighlightWhen = newValue != null && newValue != EmptyValue ? newValue : null;
+            configuration.HighlightWhen = newValue != null && newValue != DefaultValue ? newValue : null;
         }
         
         public override void ResetFilter(FilterConfiguration configuration)
         {
-            UpdateFilterConfiguration(configuration, EmptyValue);
+            UpdateFilterConfiguration(configuration, DefaultValue);
         }
 
-        public override string EmptyValue { get; set; } = "N/A";
+        public override string? DefaultValue { get; set; } = "N/A";
 
 
         public override string Key { get; set; } = "HighlightWhen";
@@ -33,7 +33,7 @@ namespace InventoryTools.Logic.Filters
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Display;
 
         public override FilterType AvailableIn { get; set; } =
-            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.CraftFilter;
+            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.CraftFilter | FilterType.HistoryFilter;
         
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {

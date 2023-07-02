@@ -1,4 +1,3 @@
-using Dalamud.Game.ClientState.Keys;
 using OtterGui.Classes;
 
 namespace InventoryTools.Hotkeys;

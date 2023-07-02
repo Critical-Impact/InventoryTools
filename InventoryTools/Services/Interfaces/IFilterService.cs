@@ -47,7 +47,7 @@ namespace InventoryTools.Services.Interfaces
 
         void InvalidateFilter(FilterConfiguration configuration);
 
-        void InvalidateFilters();
+        void InvalidateFilters(FilterType? filterType = null);
         
         delegate void FilterAddedDelegate(FilterConfiguration configuration);
         delegate void FilterRemovedDelegate(FilterConfiguration configuration);
@@ -83,6 +83,6 @@ namespace InventoryTools.Services.Interfaces
         event FilterTableRefreshedDelegate FilterTableRefreshed;
         event FilterRepositionedDelegate FilterRepositioned;
 
-        FilterConfiguration? GetDefaultCraftList();
+        FilterConfiguration GetDefaultCraftList();
     }
 }

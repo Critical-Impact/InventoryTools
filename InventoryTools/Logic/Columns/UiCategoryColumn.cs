@@ -7,6 +7,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class UiCategoryColumn : TextColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override string? CurrentValue(InventoryItem item)
         {
             if (item.ItemUICategory == null)
@@ -33,7 +34,8 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "Category";
+        public override string Name { get; set; } = "Category (Basic)";
+        public override string RenderName => "Category";
         public override float Width { get; set; } = 200.0f;
         public override string HelpText { get; set; } = "The category of the item.";
         public override bool HasFilter { get; set; } = true;

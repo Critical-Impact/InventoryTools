@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using CriticalCommonLib.Models;
+﻿using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
 
@@ -7,7 +6,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class QuantityColumn : IntegerColumn
     {
-
+        public override ColumnCategory ColumnCategory => ColumnCategory.Inventory;
         public override int? CurrentValue(InventoryItem item)
         {
             return (int)item.Quantity;
@@ -36,12 +35,16 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "Quantity";
+        public override string Name { get; set; } = "Total Quantity Available";
+        public override string RenderName => "Quantity";
+
         public override float Width { get; set; } = 70.0f;
 
         public override string HelpText { get; set; } =
             "The quantity of the item. If viewing from a game items or craft filter, this will show the total number of items available in all inventories.";
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
+        
+        public override FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter | Logic.FilterType.GameItemFilter | Logic.FilterType.HistoryFilter;
     }
 }

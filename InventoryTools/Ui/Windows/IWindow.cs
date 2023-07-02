@@ -1,5 +1,4 @@
 using System.Numerics;
-using ImGuiNET;
 using InventoryTools.Logic;
 
 namespace InventoryTools.Ui

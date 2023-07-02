@@ -3,6 +3,7 @@ using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using ImGuiNET;
 using InventoryTools;
+using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Ui;
 using OtterGui;
@@ -22,6 +23,8 @@ public class MockGameItemsWindow : Window
         _selectedCategory = new Dictionary<ulong, InventoryCategory>();
     }
 
+    public InventoryItem? _cutItem;
+    public InventoryItem? _copyItem;
     public Dictionary<ulong, InventoryCategory> _selectedCategory;
     public override void Draw()
     {
@@ -41,7 +44,7 @@ public class MockGameItemsWindow : Window
                             {
                                 if (sideChild.Success)
                                 {
-                                    foreach (var category in inventory.Value)
+                                    foreach (var category in inventory.Value.GetAllInventoriesByCategory())
                                     {
                                         if (!_selectedCategory.ContainsKey(inventory.Key))
                                         {
@@ -59,7 +62,7 @@ public class MockGameItemsWindow : Window
                             {
                                 if (mainChild.Success)
                                 {
-                                    foreach (var category in inventory.Value)
+                                    foreach (var category in inventory.Value.GetAllInventoriesByCategory())
                                     {
                                         if (_selectedCategory.ContainsKey(inventory.Key) &&
                                             _selectedCategory[inventory.Key] == category.Key)
@@ -76,8 +79,9 @@ public class MockGameItemsWindow : Window
                                                         var chunkedItems = type.OrderBy(c => c.Slot).Chunk(5);
                                                         foreach (var itemChunk in chunkedItems)
                                                         {
-                                                            foreach (var item in itemChunk)
+                                                            for (var index = 0; index < itemChunk.Length; index++)
                                                             {
+                                                                var item = itemChunk[index];
                                                                 using (ImRaii.PushId(item.Slot))
                                                                 {
                                                                     if(ImGui.ImageButton(item.ItemId == 0 ? PluginService.IconStorage[62574].ImGuiHandle :
@@ -90,6 +94,57 @@ public class MockGameItemsWindow : Window
                                                                     }
                                                                     ImGuiUtil.HoverTooltip(item.FormattedName + " - " + item.Quantity + " in slot " + item.Slot);
                                                                     ImGui.SameLine();
+                                                                    
+                                                                    if (ImGui.IsItemHovered() && ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                                                                    {
+                                                                        ImGui.OpenPopup("RightClick" + item.SortedContainer + "_" + item.SortedSlotIndex);
+                                                                    }
+
+                                                                    using (var popup = ImRaii.Popup("RightClick" + item.SortedContainer + "_" + item.SortedSlotIndex))
+                                                                    {
+                                                                        if (popup.Success)
+                                                                        {
+                                                                            item.Item.DrawRightClickPopup();
+                                                                            ImGui.Separator();
+                                                                            if (ImGui.Selectable("Copy item"))
+                                                                            {
+                                                                                _copyItem = item;
+                                                                                _cutItem = null;
+                                                                            }
+                                                                            if (ImGui.Selectable("Cut item"))
+                                                                            {
+                                                                                _cutItem = item;
+                                                                                _copyItem = null;
+                                                                            }
+                                                                            if ((_copyItem != null || _cutItem != null) && ImGui.Selectable("Past item"))
+                                                                            {
+                                                                                if (_copyItem != null)
+                                                                                {
+                                                                                    _copyItem = new InventoryItem(
+                                                                                        _copyItem);
+                                                                                    _copyItem.SortedSlotIndex =
+                                                                                        item.SortedSlotIndex;
+                                                                                    _copyItem.SortedContainer =
+                                                                                        item.SortedContainer;
+                                                                                    _copyItem.Container =
+                                                                                        item.Container;
+                                                                                    _copyItem.Slot =
+                                                                                        item.Slot;
+                                                                                    _copyItem.RetainerId =
+                                                                                        item.RetainerId;
+                                                                                    inventory.Value.AddItem(_copyItem);
+                                                                                    _copyItem = null;
+                                                                                    PluginService.InventoryMonitor.SignalRefresh();
+                                                                                }
+                                                                                else if (_cutItem != null)
+                                                                                {
+                                                                                    inventory.Value.AddItem(_cutItem);
+                                                                                    _cutItem = null;
+                                                                                    PluginService.InventoryMonitor.SignalRefresh();
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
                                                                 }
                                                             }
                                                             ImGui.NewLine();

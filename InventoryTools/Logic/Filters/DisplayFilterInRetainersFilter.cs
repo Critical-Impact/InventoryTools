@@ -17,11 +17,11 @@ namespace InventoryTools.Logic.Filters
 
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Display;
         public override FilterType AvailableIn { get; set; } =
-            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter;
+            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter | FilterType.CraftFilter;
         
         public override void ResetFilter(FilterConfiguration configuration)
         {
-            UpdateFilterConfiguration(configuration, EmptyValue);
+            UpdateFilterConfiguration(configuration, DefaultValue);
         }
         
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
@@ -44,7 +44,7 @@ namespace InventoryTools.Logic.Filters
             configuration.FilterItemsInRetainersEnum = newValue;
         }
 
-        public override FilterItemsRetainerEnum EmptyValue { get; set; } = FilterItemsRetainerEnum.No;
+        public override FilterItemsRetainerEnum DefaultValue { get; set; } = FilterItemsRetainerEnum.No;
         public override List<FilterItemsRetainerEnum> GetChoices(FilterConfiguration configuration)
         {
             return Enum.GetValues<FilterItemsRetainerEnum>().ToList();

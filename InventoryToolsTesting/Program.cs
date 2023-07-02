@@ -1,7 +1,6 @@
 // See https://aka.ms/new-console-template for more information
 
 using CriticalCommonLib;
-using CriticalCommonLib.Enums;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using InventoryTools;
@@ -20,7 +19,7 @@ PluginService.InitaliseExplicit(new MockServices()
     PluginLogic = pluginLogic
 });
 ConfigurationManager.Config = new InventoryToolsConfiguration();
-var inventories = ConfigurationManager.LoadInventories("inventories2.json");
+var inventories = ConfigurationManager.LoadInventoriesJson("inventories2.json");
 ulong currentRetainer = 0;
 if (inventories != null)
 {
@@ -59,12 +58,12 @@ if (inventories != null)
     sampleFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
     sampleFilter.HighlightWhen = "Always";
 
-    var filterState = new FilterState() { FilterConfiguration = sampleFilter };
-    var filteredList = sampleFilter.GenerateFilteredList(inventories).Result;
-    var bagHighlights = filterState.GetBagHighlights(InventoryType.RetainerBag0,filteredList);
-
-    foreach (var a in filteredList.AllItems)
-    {
-        
-    }
+    var filterState = new FilterState(sampleFilter);
+    // var filteredList = sampleFilter.GenerateFilteredList(inventories).Result;
+    // var bagHighlights = filterState.GetBagHighlights(InventoryType.RetainerBag0,filteredList);
+    //
+    // foreach (var a in filteredList.AllItems)
+    // {
+    //     
+    // }
 }

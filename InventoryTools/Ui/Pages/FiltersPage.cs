@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
@@ -8,7 +7,7 @@ namespace InventoryTools.Sections
 {
     public class FiltersPage : IConfigPage
     {
-        private bool _isSeparator;
+        private bool _isSeparator = false;
         public string Name { get; } = "Filters";
         public void Draw()
         {

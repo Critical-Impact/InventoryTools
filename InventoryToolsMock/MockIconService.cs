@@ -1,7 +1,6 @@
 using Dalamud.Utility;
 using ImGuiScene;
 using InventoryTools;
-using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
 using Lumina.Data.Files;
 using Lumina.Extensions;

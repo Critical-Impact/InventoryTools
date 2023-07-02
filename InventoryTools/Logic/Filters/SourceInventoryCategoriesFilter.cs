@@ -31,7 +31,8 @@ namespace InventoryTools.Logic.Filters
             "This is a list of sources categories to search in. It will attempt to search for items in any bag of the given category.";
         
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Inventories;
-        public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter | FilterType.CraftFilter;
+        public override List<InventoryCategory> DefaultValue { get; set; } = new();
+        public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter | FilterType.CraftFilter | FilterType.HistoryFilter;
         
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {

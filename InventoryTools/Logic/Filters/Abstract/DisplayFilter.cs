@@ -15,15 +15,32 @@ namespace InventoryTools.Logic.Filters.Abstract
         public abstract bool HasValueSet(FilterConfiguration configuration);
         public bool ShowReset { get; set; } = false;
         public abstract FilterType AvailableIn { get; set; }
-        public abstract bool? FilterItem(FilterConfiguration configuration, InventoryItem item);
-
-        public abstract bool? FilterItem(FilterConfiguration configuration, ItemEx item);
 
         public abstract void Draw(FilterConfiguration configuration);
 
         public void ResetFilter(FilterConfiguration configuration)
         {
             
+        }
+
+        public void ResetFilter(FilterConfiguration fromConfiguration, FilterConfiguration toConfiguration)
+        {
+            
+        }
+
+        public virtual bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
+        {
+            return null;
+        }
+
+        public virtual bool? FilterItem(FilterConfiguration configuration, ItemEx item)
+        {
+            return null;
+        }
+
+        public virtual bool? FilterItem(FilterConfiguration configuration, InventoryChange item)
+        {
+            return null;
         }
 
     }

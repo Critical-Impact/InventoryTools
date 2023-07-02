@@ -8,7 +8,7 @@ namespace InventoryTools.Ui
 {
     public class IntroWindow : Window
     {
-        private TextureWrap _allaganToolsIcon;
+        private TextureWrap _allaganToolsIcon = null!;
         public IntroWindow(string name = "Allagan Tools") : base(name)
         {
             Flags =
@@ -57,13 +57,23 @@ namespace InventoryTools.Ui
                         {
                             ImGui.TextWrapped("Welcome to Allagan Tools.");
                             ImGui.TextWrapped(
-                                "Allagan Tools is a plugin for Final Fantasy XIV that was formerly called Inventory Tools. The addition of crafting and item windows has made the plugin larger than its original scope.");
+                                "Allagan Tools is a plugin for Final Fantasy XIV that provides the following features:");
+                            using (ImRaii.PushIndent())
+                            {
+                                ImGui.Bullet();
+                                ImGui.Text("Track your inventories");
+                                ImGui.Bullet();
+                                ImGui.Text("Plan your crafts");
+                                ImGui.Bullet();
+                                ImGui.Text("Provide information about items, monsters, duties and much more");
+                            }
+                            
                             ImGui.TextWrapped(
-                                "There are now various new windows that can be opened via command shortcuts and from the main window.");
+                                "You can open various new windows using command shortcuts(the main filter  or from the main window.");
                             ImGui.TextWrapped(
-                                "A large amount of the functionality of the plugin can be accessed by right clicking on items within the various windows. This includes information on ways to obtain items, gathering locations, store locations, recipes and more. ");
+                                "If you're unsure, right-click on an item or a table row for more options!");
                             ImGui.TextWrapped(
-                                "The data parsing for items is still being worked on and as such it will not be as comprehensive as Garland Tools and Teamcraft. However, Allagan Tools is constantly being updated and improved to provide you with the best experience possible.");
+                                "To learn about the different features, I recommend going to the settings section and reading the information provided by the ? icons.");
                         }
                     }
 
@@ -88,9 +98,9 @@ namespace InventoryTools.Ui
             }
         }
 
-        public override Vector2 DefaultSize { get; } = new Vector2(600, 350);
-        public override Vector2 MaxSize { get; } = new Vector2(600, 360);
-        public override Vector2 MinSize { get; } = new Vector2(600, 360);
+        public override Vector2 DefaultSize { get; } = new Vector2(800, 300);
+        public override Vector2 MaxSize { get; } = new Vector2(800, 300);
+        public override Vector2 MinSize { get; } = new Vector2(800, 300);
         public override bool SaveState => false;
     }
 }

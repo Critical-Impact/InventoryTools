@@ -5,9 +5,7 @@ using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
-using InventoryTools.Extensions;
 using InventoryTools.Logic.Filters.Abstract;
-using OtterGui;
 using OtterGui.Raii;
 
 namespace InventoryTools.Logic.Filters;
@@ -20,6 +18,8 @@ public class IngredientSearchFilter : UintMultipleChoiceFilter
     public override string HelpText { get; set; } = "Select craftable items and the filter will determine the ingredients used in the craft and will only list those ingredients. The add all from filter button will add all the items from the selected filter to the list.";
 
     public override FilterCategory FilterCategory { get; set; } = FilterCategory.Searching;
+
+    public override List<uint> DefaultValue { get; set; } = new();
 
     public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter |
                                                            FilterType.GameItemFilter;
@@ -102,10 +102,9 @@ public class IngredientSearchFilter : UintMultipleChoiceFilter
         if (!_relatedCrafts.ContainsKey(itemId))
         {
             var ingredients = new HashSet<uint>();
-            var craftItem = new CraftItem(itemId, FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None, 1,
-                true);
-            craftItem.GenerateRequiredMaterials();
-            foreach (var material in craftItem.GetFlattenedMaterials())
+            var craftList = new CraftList();
+            craftList.AddCraftItem(itemId);
+            foreach (var material in craftList.GetFlattenedMaterials())
             {
                 if (!material.IsOutputItem)
                 {
@@ -130,7 +129,7 @@ public class IngredientSearchFilter : UintMultipleChoiceFilter
 
     public override Dictionary<uint, string> GetChoices(FilterConfiguration configuration)
     {
-        return Service.ExcelCache.ItemsByName;
+        return Service.ExcelCache.ItemNamesById;
     }
 
     public override bool HideAlreadyPicked { get; set; } = true;

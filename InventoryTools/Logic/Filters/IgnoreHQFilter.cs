@@ -13,7 +13,7 @@ public class IgnoreHQFilter : BooleanFilter
         "When sorting should the filter consider HQ and NQ items to be the same when attempting to stack them? This primary use for this filter is to find items that can have their quality lowered.";
 
     public override FilterCategory FilterCategory { get; set; } = FilterCategory.Advanced;
-    public override FilterType AvailableIn { get; set; } = FilterType.SortingFilter | FilterType.CraftFilter;
+    public override FilterType AvailableIn { get; set; } = FilterType.SortingFilter;
 
     public override void UpdateFilterConfiguration(FilterConfiguration configuration, bool? newValue)
     {

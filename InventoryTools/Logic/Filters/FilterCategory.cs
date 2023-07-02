@@ -13,5 +13,6 @@ namespace InventoryTools.Logic.Filters
         Columns = 8,
         Advanced = 9,
         CraftColumns = 10,
+        IngredientSourcing = 11,
     }
 }

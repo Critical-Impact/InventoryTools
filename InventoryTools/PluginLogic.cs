@@ -5,11 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
-using CriticalCommonLib;
+using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
-using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Colors;
 using Dalamud.Logging;
 using Dalamud.Utility;
@@ -24,7 +23,6 @@ using InventoryTools.Logic.Settings;
 using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Tooltips;
 using InventoryTools.Ui;
-using InventoryItem = CriticalCommonLib.Models.InventoryItem;
 
 namespace InventoryTools
 {
@@ -33,7 +31,6 @@ namespace InventoryTools
         private Dictionary<string, RenderTableBase> _filterTables = new();
         private List<IFilter>? _availableFilters = null;
         private List<ISetting>? _availableSettings = null;
-
         private Dictionary<uint, InventoryMonitor.ItemChangesItem> _recentlyAddedSeen = new();
 
         public bool WasRecentlySeen(uint itemId)
@@ -71,16 +68,15 @@ namespace InventoryTools
             PluginService.FrameworkService.Update += FrameworkOnUpdate;
 
             PluginService.CharacterMonitor.LoadExistingRetainers(ConfigurationManager.Config.GetSavedRetainers());
-            PluginService.InventoryMonitor.LoadExistingData(ConfigurationManager.Config.GetSavedInventory());
+            PluginService.InventoryMonitor.LoadExistingData(ConfigurationManager.LoadInventory());
+            PluginService.InventoryHistory.LoadExistingHistory(ConfigurationManager.LoadHistoryFromCsv(out _));
             var entries = PluginService.MobTracker.LoadCsv(ConfigurationManager.MobSpawnFile, out var success);
             if(success)
             {
                 PluginService.MobTracker.SetEntries(entries);
             }
-            if (ConfigurationManager.Config.TrackMobSpawns)
-            {
-                PluginService.MobTracker.Enable();
-            }
+
+            SyncConfigurationChanges();
 
             PluginService.GameUi.WatchWindowState(WindowName.RetainerGrid0);
             PluginService.GameUi.WatchWindowState(WindowName.InventoryGrid0E);
@@ -173,7 +169,7 @@ namespace InventoryTools
                     highlight.W = 1;
                     ConfigurationManager.Config.HighlightColor = highlight;
                 }
-                ConfigurationManager.Config.TabHighlightColor = ConfigurationManager.Config.HighlightColor;
+                ConfigurationManager.Config.TabHighlightColor = new(0.007f, 0.008f, 0.007f, 1.0f);
 
                 foreach (var filterConfig in PluginService.FilterService.FiltersList)
                 {
@@ -384,7 +380,55 @@ namespace InventoryTools
             {
                 PluginLog.Log("Migrating to version 13");
                 ConfigurationManager.Config.FiltersLayout = WindowLayout.Tabs;
-                ConfigurationManager.Config.CraftWindowLayout = WindowLayout.Sidebar;
+                ConfigurationManager.Config.CraftWindowLayout = WindowLayout.Tabs;
+                ConfigurationManager.Config.InternalVersion++;
+            }
+
+            if (ConfigurationManager.Config.InternalVersion == 13)
+            {
+                PluginLog.Log("Migrating to version 14");
+                var toReset = AvailableFilters.Where(c =>
+                    c is CraftCrystalGroupFilter or CraftCurrencyGroupFilter or CraftPrecraftGroupFilter
+                        or CraftRetrieveGroupFilter or CraftEverythingElseGroupFilter or CraftIngredientPreferenceFilter
+                        or CraftDefaultHQRequiredFilter or CraftDefaultRetrieveFromRetainerFilter
+                        or CraftDefaultRetrieveFromRetainerOutputFilter).ToList();
+                PluginService.FilterService.GetDefaultCraftList();
+                foreach (var configuration in PluginService.FilterService.Filters)
+                {
+                    foreach (var filterConfig in PluginService.FilterService.FiltersList)
+                    {
+                        if (filterConfig.FilterType == FilterType.CraftFilter)
+                        {
+                            if (filterConfig.CraftListDefault)
+                            {
+                                filterConfig.AddDefaultColumns();
+                            }
+
+                            foreach (var filter in toReset)
+                            {
+                                filter.ResetFilter(filterConfig);
+                            }
+                            
+                            filterConfig.AddCraftColumn("CraftSettingsColumn",2);
+                            filterConfig.AddCraftColumn("CraftSimpleColumn",3);
+                        }
+                    }
+                }                                
+                ConfigurationManager.Config.InternalVersion++;
+            }
+
+            if (ConfigurationManager.Config.InternalVersion == 14)
+            {
+                PluginLog.Log("Migrating to version 15");
+                ConfigurationManager.Config.HistoryTrackReasons = new()
+                {
+                    InventoryChangeReason.Added,
+                    InventoryChangeReason.Moved,
+                    InventoryChangeReason.Removed,
+                    InventoryChangeReason.Transferred,
+                    InventoryChangeReason.MarketPriceChanged,
+                    InventoryChangeReason.QuantityChanged
+                };
                 ConfigurationManager.Config.InternalVersion++;
             }
         }
@@ -410,6 +454,11 @@ namespace InventoryTools
 
         private void ConfigOnConfigurationChanged()
         {
+            SyncConfigurationChanges();
+        }
+
+        private static void SyncConfigurationChanges()
+        {
             ConfigurationManager.SaveAsync();
             if (PluginService.MobTracker.Enabled != ConfigurationManager.Config.TrackMobSpawns)
             {
@@ -421,6 +470,24 @@ namespace InventoryTools
                 {
                     PluginService.MobTracker.Disable();
                 }
+            }
+
+            if (PluginService.InventoryHistory.Enabled != ConfigurationManager.Config.HistoryEnabled)
+            {
+                if (ConfigurationManager.Config.HistoryEnabled)
+                {
+                    PluginService.InventoryHistory.Enable();
+                }
+                else
+                {
+                    PluginService.InventoryHistory.Disable();
+                }
+            }
+
+            if (PluginService.InventoryHistory.ReasonsToLog.ToList() != ConfigurationManager.Config.HistoryTrackReasons)
+            {
+                PluginService.InventoryHistory.SetChangeReasonsToLog(
+                    ConfigurationManager.Config.HistoryTrackReasons.Distinct().ToHashSet());
             }
         }
 
@@ -453,6 +520,8 @@ namespace InventoryTools
             AddAllGameItemsFilter();
             
             AddCraftFilter();
+            
+            AddHistoryFilter();
         }
 
         public void AddAllFilter(string newName = "All")
@@ -481,6 +550,17 @@ namespace InventoryTools
             PluginService.FilterService.AddFilter(playerItemsFilter);
         }
 
+        public void AddHistoryFilter(string newName = "History")
+        {
+            var historyFilter = new FilterConfiguration(newName,  FilterType.HistoryFilter);
+            historyFilter.DisplayInTabs = true;
+            historyFilter.SourceAllCharacters = true;
+            historyFilter.SourceAllRetainers = true;
+            historyFilter.SourceAllFreeCompanies = true;
+            historyFilter.SourceAllHouses = true;
+            PluginService.FilterService.AddFilter(historyFilter);
+        }
+
         public void AddFreeCompanyFilter(string newName = "Free Company")
         {
             var newFilter = new FilterConfiguration(newName,  FilterType.SearchFilter);
@@ -498,9 +578,9 @@ namespace InventoryTools
 
         public void AddCraftFilter(string newName = "Craft List")
         {
-            var newFilter = new FilterConfiguration(newName, FilterType.CraftFilter);
+            var newFilter = PluginService.FilterService.AddNewCraftFilter();
+            newFilter.Name = newName;
             newFilter.DisplayInTabs = true;            
-            PluginService.FilterService.AddFilter(newFilter);
         }
 
         public void AddNewCraftFilter()
@@ -562,28 +642,20 @@ namespace InventoryTools
             _nextSaveTime = null;
         }
 
-        private void InventoryMonitorOnOnInventoryChanged(Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>> inventories, InventoryMonitor.ItemChanges itemChanges)
+        private void InventoryMonitorOnOnInventoryChanged(List<InventoryChange> inventoryChanges, InventoryMonitor.ItemChanges? itemChanges)
         {
             PluginLog.Verbose("PluginLogic: Inventory changed, saving to config.");
-            ConfigurationManager.Config.SavedInventories = inventories;
+            var allItems = PluginService.InventoryMonitor.AllItems.ToList();
+            ConfigurationManager.SaveInventories(allItems);
             if (ConfigurationManager.Config.AutomaticallyDownloadMarketPrices)
             {
-                foreach (var inventory in PluginService.InventoryMonitor.AllItems)
+                foreach (var inventory in allItems)
                 {
                     PluginService.MarketCache.RequestCheck(inventory.ItemId);
                 }
             }
-
-            foreach (var item in itemChanges.NewItems)
-            {
-                if (_recentlyAddedSeen.ContainsKey(item.ItemId))
-                {
-                    _recentlyAddedSeen.Remove(item.ItemId);
-                }
-                _recentlyAddedSeen.Add(item.ItemId, item);
-            }
         }
-
+        
         private Dictionary<string,IColumn>? _gridColumns;
         public Dictionary<string,IColumn> GridColumns
         {
@@ -953,6 +1025,11 @@ namespace InventoryTools
                 {
                     textureWrap.Value.Dispose();
                 }
+
+                foreach (var gridColumn in GridColumns)
+                {
+                    gridColumn.Value.Dispose();
+                }
                 PluginService.OnPluginLoaded -= PluginServiceOnOnPluginLoaded;
                 PluginService.GameInterface.AcquiredItemsUpdated -= GameInterfaceOnAcquiredItemsUpdated;
                 ConfigurationManager.Config.SavedCharacters = PluginService.CharacterMonitor.Characters;
@@ -963,6 +1040,9 @@ namespace InventoryTools
                 PluginService.CraftMonitor.CraftFailed -= CraftMonitorOnCraftFailed ;
                 PluginService.CraftMonitor.CraftCompleted -= CraftMonitorOnCraftCompleted ;
                 ConfigurationManager.Config.ConfigurationChanged -= ConfigOnConfigurationChanged;
+                ConfigurationManager.Save();
+                ConfigurationManager.SaveInventories(PluginService.InventoryMonitor.AllItems.ToList());
+                ConfigurationManager.SaveHistory(PluginService.InventoryHistory.GetHistory());
                 if (ConfigurationManager.Config.TrackMobSpawns)
                 {
                     PluginService.MobTracker.SaveCsv(ConfigurationManager.MobSpawnFile,

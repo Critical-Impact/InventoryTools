@@ -4,13 +4,14 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Logic.Columns;
+using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Logic.Filters.Abstract;
 using OtterGui;
 using OtterGui.Raii;
 
 namespace InventoryTools.Logic.Filters
 {
-    public class ColumnsFilter : SortedListFilter<string>
+    public class ColumnsFilter : SortedListFilter<string, IColumn>
     {
         public override Dictionary<string, (string, string?)> CurrentValue(FilterConfiguration configuration)
         {
@@ -37,6 +38,7 @@ namespace InventoryTools.Logic.Filters
         public override string HelpText { get; set; } = "";
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Columns;
         public override bool ShowReset { get; set; } = false;
+        public override Dictionary<string, (string, string?)> DefaultValue { get; set; } = new();
 
         public override bool HasValueSet(FilterConfiguration configuration)
         {
@@ -44,7 +46,7 @@ namespace InventoryTools.Logic.Filters
         }
 
         public override FilterType AvailableIn { get; set; } =
-            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.CraftFilter;
+            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.CraftFilter | FilterType.HistoryFilter;
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
             return null;
@@ -56,7 +58,27 @@ namespace InventoryTools.Logic.Filters
         }
 
         public override bool CanRemove { get; set; } = true;
-        
+
+        public override bool CanRemoveItem(FilterConfiguration configuration, string item)
+        {
+            var column = GetItem(configuration, item);
+            if (column != null)
+            {
+                if (!column.CanBeRemoved)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public override IColumn? GetItem(FilterConfiguration configuration, string item)
+        {
+            var availableItems = GetAvailableItems(configuration);
+            return availableItems.TryGetValue(item, out var value) ? value : null;
+        }
+
         public void AddItem(FilterConfiguration configuration, string item)
         {
             var value = CurrentValue(configuration);
@@ -74,9 +96,21 @@ namespace InventoryTools.Logic.Filters
             return value.Where(c => c.Value.CraftOnly != true && c.Value.AvailableInType(configuration.FilterType) && !currentValue.ContainsKey(c.Key)).ToDictionary(c => c.Key, c => c.Value);
         }
 
+        private List<IGrouping<ColumnCategory, KeyValuePair<string, IColumn>>>? _groupedItems;
+        public List<IGrouping<ColumnCategory, KeyValuePair<string, IColumn>>> GetGroupedItems(FilterConfiguration configuration)
+        {
+            var availableItems = GetAvailableItems(configuration).OrderBy(c => c.Value.RenderName ?? c.Value.Name);
+            if (_groupedItems == null)
+            {
+                _groupedItems = availableItems.GroupBy(c => c.Value.ColumnCategory).ToList();
+            }
+
+            return _groupedItems;
+        }
+
         public override void DrawTable(FilterConfiguration configuration)
         {
-            var value = GetAvailableItems(configuration);
+            var groupedItems = GetGroupedItems(configuration);
             base.DrawTable(configuration);
             
             var currentAddColumn = "";
@@ -84,18 +118,30 @@ namespace InventoryTools.Logic.Filters
             ImGui.LabelText("##" + Key + "Label", "Add new column: ");
             ImGui.SameLine();
             ImGui.SetNextItemWidth(InputSize);
-            using (var combo = ImRaii.Combo("Add##" + Key, currentAddColumn))
+            using (var combo = ImRaii.Combo("Add##" + Key, currentAddColumn, ImGuiComboFlags.HeightLarge))
             {
                 if (combo.Success)
                 {
-                    foreach (var column in value.OrderBy(c => c.Value.Name))
+                    var count = 0;
+                    foreach (var group in groupedItems)
                     {
-                        if (ImGui.Selectable(column.Value.Name, currentAddColumn == column.Value.Name))
+                        ImGui.TextUnformatted(group.Key.ToString());
+                        ImGui.Separator();
+                        foreach (var column in group)
                         {
-                            AddItem(configuration, column.Key);
+                            if (ImGui.Selectable(column.Value.Name, currentAddColumn == column.Value.Name))
+                            {
+                                AddItem(configuration, column.Key);
+                            }
+
+                            ImGuiUtil.HoverTooltip(column.Value.HelpText);
+                        }
+                        count++;
+                        if (count != groupedItems.Count)
+                        {
+                            ImGui.NewLine();
                         }
 
-                        ImGuiUtil.HoverTooltip(column.Value.HelpText);
                     }
                 }
             }

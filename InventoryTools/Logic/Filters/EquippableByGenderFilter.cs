@@ -30,7 +30,7 @@ namespace InventoryTools.Logic.Filters
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
 
         public override FilterType AvailableIn { get; set; } =
-            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter;
+            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter;
         
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
@@ -49,7 +49,7 @@ namespace InventoryTools.Logic.Filters
             return item.CanBeEquippedByRaceGender(CharacterRace.Any, sex);
         }
 
-        public override uint? EmptyValue { get; set; } = null;
+        public override uint? DefaultValue { get; set; } = null;
 
         public override List<uint?> GetChoices(FilterConfiguration configuration)
         {

@@ -7,6 +7,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class SellToVendorPriceColumn : GilColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override int? CurrentValue(InventoryItem item)
         {
             return (int)item.SellToVendorPrice;

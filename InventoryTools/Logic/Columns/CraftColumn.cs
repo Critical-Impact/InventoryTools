@@ -7,6 +7,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class CraftColumn : CheckboxColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override bool? CurrentValue(InventoryItem item)
         {
             return Service.ExcelCache.CanCraftItem(item.ItemId);
@@ -23,7 +24,7 @@ namespace InventoryTools.Logic.Columns
         }
         
 
-        public override string Name { get; set; } = "Craftable";
+        public override string Name { get; set; } = "Is Craftable?";
         public override float Width { get; set; } = 125.0f;
         public override string HelpText { get; set; } = "Can this item be crafted?";
         public override bool HasFilter { get; set; } = true;

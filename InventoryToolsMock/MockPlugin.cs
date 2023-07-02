@@ -4,6 +4,7 @@ using CriticalCommonLib.Services;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface;
 using Dalamud.Interface.ImGuiFileDialog;
+using Dalamud.Interface.Windowing;
 using Dalamud.Logging;
 using ImGuiNET;
 using InventoryTools;
@@ -16,6 +17,7 @@ using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using Veldrid;
+using Window = InventoryTools.Ui.Window;
 
 namespace InventoryToolsMock;
 
@@ -46,11 +48,13 @@ public class MockPlugin : IDisposable
     private ICommandService _commandService;
     private IKeyStateService _keyStateService;
     private IHotkeyService _hotkeyService;
+    private InventoryHistory _inventoryHistory;
+    private WindowSystem _windowSystem;
 
-    public MockPlugin(GameData gameData, string gameDirectory, string configDirectory, string configFile, string? inventoriesFile)
+    public MockPlugin(GameData gameData, string configDirectory)
     {
-        var stopWatch = new Stopwatch();
-        stopWatch.Start();
+        var configFile = Path.Combine(configDirectory, "InventoryTools.json");        
+        var configFolder = Path.Combine(configDirectory,"InventoryTools");             
         ConfigurationManager.Config = new InventoryToolsConfiguration();
         var levelSwitch = new LoggingLevelSwitch
         {
@@ -58,24 +62,27 @@ public class MockPlugin : IDisposable
         };
         var lumina = gameData;
 
-
         Log.Logger = new LoggerConfiguration()
             .WriteTo.Console(standardErrorFromLevel: LogEventLevel.Verbose)
             .MinimumLevel.ControlledBy(levelSwitch)
             .CreateLogger();
         
+        
+        var stopWatch = new Stopwatch();
+        stopWatch.Start();
         _characterMonitor = new MockCharacterMonitor();
         _craftMonitor = new MockCraftMonitor();
         _inventoryScanner = new MockInventoryScanner();
         _frameworkService = new MockFrameworkService();
         _chatUtilities = new MockChatUtilities();
         _inventoryMonitor = new InventoryMonitor(_characterMonitor, _craftMonitor, _inventoryScanner, _frameworkService );
+        _inventoryHistory = new InventoryHistory(_inventoryMonitor);
         _iconService = new MockIconService(lumina);
         _universalis = new MockUniversalis();
         _gameUiManager = new MockGameUiManager();
         _gameInterface = new MockGameInterface();
         _marketCache = new MockMarketCache();
-        _mockPluginInterfaceService = new MockPluginInterfaceService(new FileInfo(configFile), new DirectoryInfo(configDirectory));
+        _mockPluginInterfaceService = new MockPluginInterfaceService(new FileInfo(configFile), new DirectoryInfo(configFolder));
         _dataService = new MockDataService(lumina);
         _fileDialogManager = new FileDialogManager();
         _mockMobTracker = new MockMobTracker();
@@ -84,6 +91,7 @@ public class MockPlugin : IDisposable
         _keyStateService = new MockKeyStateService();
         _hotkeyService = new HotkeyService(_frameworkService, _keyStateService);
         Service.ExcelCache = new ExcelCache(lumina);
+        Service.ExcelCache.PreCacheItemData();
         PluginService.InitaliseExplicit(new MockServices()
         {
             CharacterMonitor = _characterMonitor,
@@ -103,18 +111,20 @@ public class MockPlugin : IDisposable
             TooltipService = _tooltipService,
             CommandService =  _commandService,
             HotkeyService = _hotkeyService,
-            KeyStateService = _keyStateService
+            KeyStateService = _keyStateService,
+            InventoryHistory = _inventoryHistory
             
         }, false);
-        ConfigurationManager.LoadFromFile(configFile, inventoriesFile);
-        PluginService.InventoryMonitor.LoadExistingData(ConfigurationManager.Config.GetSavedInventory());
+        ConfigurationManager.Load(configFile);
+        var inventories = ConfigurationManager.LoadInventory();
         PluginService.CharacterMonitor.LoadExistingRetainers(ConfigurationManager.Config.GetSavedRetainers());
-        _pluginLogic = new PluginLogic();
+        PluginService.InventoryMonitor.LoadExistingData(inventories);
+
+        PluginService.InventoryHistory.LoadExistingHistory(ConfigurationManager.LoadHistoryFromCsv(out _));
         PluginService.InitaliseExplicit(new MockServices()
         {
-            PluginLogic = _pluginLogic,
         }, false);
-        _filterService = new FilterService(_characterMonitor, _inventoryMonitor);
+        _filterService = new FilterService(_characterMonitor, _inventoryMonitor, _inventoryHistory);
         _windowService = new WindowService(_filterService);
         _overlayService = new OverlayService(_filterService, _gameUiManager, _frameworkService);
         PluginService.InitaliseExplicit(new MockServices()
@@ -123,7 +133,12 @@ public class MockPlugin : IDisposable
             WindowService = _windowService,
             OverlayService = _overlayService,
             DataService = _dataService
-        });
+        }, false);
+        _pluginLogic = new PluginLogic();
+        PluginService.InitaliseExplicit(new MockServices()
+        {
+            PluginLogic = _pluginLogic,
+        }, true);
         PluginService.PluginLogic.RunMigrations();
             
         if (ConfigurationManager.Config.FirstRun)
@@ -285,5 +300,6 @@ public class MockPlugin : IDisposable
         _pluginLogic.Dispose();
         _craftMonitor.Dispose();
         _gameInterface.Dispose();
+        Service.ExcelCache.Dispose();
     }
 }

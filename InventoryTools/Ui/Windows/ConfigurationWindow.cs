@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using Dalamud.Interface.Colors;
 using ImGuiNET;
-using ImGuiScene;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Sections;
@@ -21,8 +19,8 @@ namespace InventoryTools.Ui
         private HoverButton _addIcon { get; } = new(PluginService.IconStorage.LoadIcon(66315),  new Vector2(22, 22));
         private HoverButton _lightBulbIcon { get; } = new(PluginService.IconStorage.LoadIcon(66318),  new Vector2(22, 22));
         private static HoverButton _menuIcon { get; } = new(PluginService.IconStorage.LoadImage("menu"),  new Vector2(22, 22));
-        private PopupMenu _addFilterMenu;
-        private PopupMenu _addSampleMenu;
+        private PopupMenu _addFilterMenu = null!;
+        private PopupMenu _addSampleMenu = null!;
         private PopupMenu _settingsMenu = new PopupMenu("configMenu", PopupMenu.PopupMenuButtons.All,
             new List<PopupMenu.IPopupMenuItem>()
             {
@@ -103,6 +101,7 @@ namespace InventoryTools.Ui
             _configPages.Add(new SettingPage(SettingCategory.ToolTips));
             _configPages.Add(new SettingPage(SettingCategory.Hotkeys));
             _configPages.Add(new SettingPage(SettingCategory.MarketBoard));
+            _configPages.Add(new SettingPage(SettingCategory.History));
             _configPages.Add(new SeparatorPageItem("Data", true));
             _configPages.Add(new FiltersPage());
             _configPages.Add(new CraftFiltersPage());
@@ -114,7 +113,8 @@ namespace InventoryTools.Ui
                 {
                     new PopupMenu.PopupMenuItemSelectableAskName("Search Filter", "adf1", "New Search Filter", AddSearchFilter, "This will create a new filter that let's you search for specific items within your characters and retainers inventories."),
                     new PopupMenu.PopupMenuItemSelectableAskName("Sort Filter", "af2", "New Sort Filter", AddSortFilter, "This will create a new filter that let's you search for specific items within your characters and retainers inventories then determine where they should be moved to."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Game Item Filter", "af3", "New Game Item Filter", AddGameItemFilter, "This will create a filter that lets you search for all items in the game.")
+                    new PopupMenu.PopupMenuItemSelectableAskName("Game Item Filter", "af3", "New Game Item Filter", AddGameItemFilter, "This will create a filter that lets you search for all items in the game."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("History Filter", "af4", "New History Item Filter", AddHistoryFilter, "This will create a filter that lets you view historical data of how your inventory has changed."),
                 });
             
             _addSampleMenu = new PopupMenu("addSampleFilter", PopupMenu.PopupMenuButtons.LeftRight,
@@ -253,6 +253,13 @@ namespace InventoryTools.Ui
             SetNewFilterActive();
         }
 
+        private void AddHistoryFilter(string newName, string id)
+        {
+            PluginService.FilterService.AddFilter(new FilterConfiguration(newName,
+                Guid.NewGuid().ToString("N"), FilterType.HistoryFilter));
+            SetNewFilterActive();
+        }
+
         private void AddGameItemFilter(string newName, string id)
         {
             PluginService.FilterService.AddFilter(new FilterConfiguration(newName,Guid.NewGuid().ToString("N"), FilterType.GameItemFilter));
@@ -304,7 +311,7 @@ namespace InventoryTools.Ui
         public override Vector2 MaxSize { get; } = new(2000, 2000);
         public override Vector2 MinSize { get; } = new(200, 200);
         public override bool DestroyOnClose => true;
-        private List<IConfigPage> _configPages;
+        private List<IConfigPage> _configPages = null!;
         public Dictionary<string, IConfigPage> _filterPages = new Dictionary<string,IConfigPage>();
 
         private void SetNewFilterActive()

@@ -1,6 +1,5 @@
 using Dalamud.Plugin.Ipc;
 using ImGuiScene;
-using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
 using StbiSharp;
 using Veldrid;

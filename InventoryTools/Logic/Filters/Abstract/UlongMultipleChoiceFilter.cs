@@ -4,6 +4,7 @@ namespace InventoryTools.Logic.Filters.Abstract
 {
     public abstract class UlongMultipleChoiceFilter : MultipleChoiceFilter<ulong>
     {
+        public override List<ulong> DefaultValue { get; set; } = new();
         public override List<ulong> CurrentValue(FilterConfiguration configuration)
         {
             return configuration.GetUlongChoiceFilter(Key);
@@ -16,7 +17,7 @@ namespace InventoryTools.Logic.Filters.Abstract
         
         public override void ResetFilter(FilterConfiguration configuration)
         {
-            UpdateFilterConfiguration(configuration, new List<ulong>());
+            UpdateFilterConfiguration(configuration, DefaultValue);
         }
     }
 }

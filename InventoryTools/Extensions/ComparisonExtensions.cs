@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using Dalamud.Game.Text;
 using Dalamud.Utility;
 
 namespace InventoryTools.Extensions
@@ -17,7 +17,6 @@ namespace InventoryTools.Extensions
             public bool StartsWithFuzzy = false;
             public string SearchText;
 
-            //TODO: Allow this to have sub comparisons
             public FilterComparisonText(string filterString)
             {
                 SearchText = filterString.ToLower().Trim();
@@ -122,6 +121,98 @@ namespace InventoryTools.Extensions
             }
 
             return text.Contains(filterString, StringComparison.Ordinal);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public static bool PassesFilter(this DateTime date, string filterString)
+        {
+            filterString = filterString.Trim();
+            if (filterString.Contains("||", StringComparison.Ordinal))
+            {
+                var ors = filterString.Split("||");
+                return ors.Select(c => PassesFilter(date, c)).Any(c => c);
+            }
+            if (filterString.Contains("&&", StringComparison.Ordinal))
+            {
+                var ands = filterString.Split("&&");
+                return ands.Select(c => PassesFilter(date, c)).All(c => c);
+            }
+            if (filterString.StartsWith("=", StringComparison.Ordinal) && filterString.Length >= 2)
+            {
+                var filter = filterString.Substring(1);
+                if (date.ToString(CultureInfo.CurrentCulture) == filter)
+                {
+                    return true;
+                }
+
+                if (date.Date.ToShortDateString() == filter)
+                {
+                    return true;
+                }
+            }
+            else if (filterString.StartsWith("<=") && filterString.Length >= 3)
+            {
+                var filter = filterString.Substring(2);
+                if (DateTime.TryParse(filter, CultureInfo.CurrentCulture, out var filterDate))
+                {
+                    if (filterDate >= date)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if(filterString.StartsWith(">=") && filterString.Length >= 3)
+            {
+                var filter = filterString.Substring(2);
+                if (DateTime.TryParse(filter, CultureInfo.CurrentCulture, out var filterDate))
+                {
+                    if (filterDate <= date)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (filterString.StartsWith("<") && filterString.Length >= 2)
+            {
+                var filter = filterString.Substring(1);
+                if (DateTime.TryParse(filter, CultureInfo.CurrentCulture, out var filterDate))
+                {
+                    if (filterDate > date)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (filterString.StartsWith(">") && filterString.Length >= 2)
+            {
+                var filter = filterString.Substring(1);
+                if (DateTime.TryParse(filter, CultureInfo.CurrentCulture, out var filterDate))
+                {
+                    if (filterDate < date)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (filterString.StartsWith("!", StringComparison.Ordinal))
+            {
+                if (filterString.Length >= 2)
+                {
+                    var filter = filterString.Substring(1);
+                    return !date.ToString(CultureInfo.CurrentCulture).Contains(filter);
+                }
+                else if (filterString.Length == 1)
+                {
+                    return !date.ToString(CultureInfo.CurrentCulture).IsNullOrEmpty();
+                }
+            }
+            else if (filterString.StartsWith("~", StringComparison.Ordinal) && filterString.Length >= 2)
+            {
+                var filter = filterString.Substring(1).Split(" ");
+                var splitText = date.ToString(CultureInfo.CurrentCulture).Split(" ");
+                return filter.All(c => splitText.Any(d => d.Contains(c)));
+            }
+
+            return date.ToString(CultureInfo.CurrentCulture).Contains(filterString, StringComparison.Ordinal);
         }
 
         public static bool PassesFilter(this uint number, string filterString)

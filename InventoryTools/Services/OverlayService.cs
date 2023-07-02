@@ -40,6 +40,7 @@ namespace InventoryTools.Services
             AddOverlay(new FreeCompanyChestOverlay());
             AddOverlay(new InventoryMiragePrismBoxOverlay());
             AddOverlay(new CabinetWithdrawOverlay());
+            //AddOverlay(new SelectIconStringOverlay()); //TODO: Finish this
             frameworkService.Update += FrameworkOnUpdate;
             PluginService.OnPluginLoaded += PluginServiceOnOnPluginLoaded;
         }
@@ -90,11 +91,11 @@ namespace InventoryTools.Services
             PluginLog.Debug("Overlays refreshing, active filter is " + (activeFilter?.Name ?? "no filter"));
             if (activeFilter != null && _filterService.HasFilterTable(activeFilter))
             {
-                UpdateState(new FilterState(){FilterConfiguration = activeFilter, FilterTable = _filterService.GetFilterTable(activeFilter)});
+                UpdateState(new FilterState(activeFilter){FilterTable = _filterService.GetFilterTable(activeFilter)});
             }
             else if (activeBackgroundFilter != null)
             {
-                UpdateState(new FilterState(){FilterConfiguration = activeBackgroundFilter});
+                UpdateState(new FilterState(activeBackgroundFilter));
             }
             else
             {
@@ -337,7 +338,6 @@ namespace InventoryTools.Services
             _disposed = true;         
         }
         
-            
         ~OverlayService()
         {
 #if DEBUG

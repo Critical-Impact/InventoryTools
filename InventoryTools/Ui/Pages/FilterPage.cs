@@ -15,7 +15,7 @@ namespace InventoryTools.Sections
             }
         }
         public FilterConfiguration FilterConfiguration;
-        private bool _isSeparator;
+        private bool _isSeparator = false;
 
         public FilterPage(FilterConfiguration filterConfiguration)
         {
@@ -97,6 +97,10 @@ namespace InventoryTools.Sections
                          filterConfiguration.FilterType.HasFlag(FilterType
                              .CraftFilter))
                         ||
+                        (filter.AvailableIn.HasFlag(FilterType.HistoryFilter) &&
+                         filterConfiguration.FilterType.HasFlag(FilterType
+                             .HistoryFilter))
+                        ||
                         (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
                          filterConfiguration.FilterType.HasFlag(FilterType
                              .GameItemFilter)));
@@ -113,6 +117,9 @@ namespace InventoryTools.Sections
                                  ||
                                  (filter.AvailableIn.HasFlag(FilterType.CraftFilter) &&
                                   filterConfiguration.FilterType.HasFlag(FilterType.CraftFilter))
+                                 ||
+                                 (filter.AvailableIn.HasFlag(FilterType.HistoryFilter) &&
+                                  filterConfiguration.FilterType.HasFlag(FilterType.HistoryFilter))
                                  ||
                                  (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
                                   filterConfiguration.FilterType.HasFlag(FilterType.GameItemFilter))

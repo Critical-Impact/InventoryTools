@@ -7,6 +7,8 @@ namespace InventoryTools.Logic.Columns
 {
     public class RecentlySeenColumn : TextColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Tools;
+
         public override string? CurrentValue(InventoryItem item)
         {
             return PluginService.PluginLogic.GetLastSeenTime(item.ItemId)?.ToHumanReadableString() ?? "";
@@ -22,7 +24,8 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "Last Seen";
+        public override string Name { get; set; } = "Last Seen Date/Time";
+        public override string RenderName => "Last Seen";
         public override float Width { get; set; } = 100;
         public override string HelpText { get; set; } = "Displays the last time an item was seen.";
         public override bool HasFilter { get; set; } = true;

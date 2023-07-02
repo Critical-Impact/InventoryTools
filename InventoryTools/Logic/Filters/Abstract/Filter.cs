@@ -5,11 +5,16 @@ namespace InventoryTools.Logic.Filters.Abstract
 {
     public abstract class Filter<T> : IFilter
     {
-        public virtual int LabelSize { get; set; } = 200;
+        public virtual int LabelSize { get; set; } = 220;
         public virtual int InputSize { get; set; } = 250;
         public abstract T CurrentValue(FilterConfiguration configuration);
         public abstract void Draw(FilterConfiguration configuration);
         public abstract void ResetFilter(FilterConfiguration configuration);
+        public void ResetFilter(FilterConfiguration fromConfiguration, FilterConfiguration toConfiguration)
+        {
+            var currentValue = CurrentValue(fromConfiguration);
+            UpdateFilterConfiguration(toConfiguration, currentValue);
+        }
 
         public abstract void UpdateFilterConfiguration(FilterConfiguration configuration, T newValue);
 
@@ -21,10 +26,17 @@ namespace InventoryTools.Logic.Filters.Abstract
 
         public virtual int Order { get; set; } = 0;
         public virtual bool ShowReset { get; set; } = true;
+        public abstract T DefaultValue { get; set; }
 
         public abstract bool HasValueSet(FilterConfiguration configuration);
         public abstract FilterType AvailableIn { get; set; }
         public abstract bool? FilterItem(FilterConfiguration configuration,InventoryItem item);
         public abstract bool? FilterItem(FilterConfiguration configuration, ItemEx item);
+
+        public virtual bool? FilterItem(FilterConfiguration configuration, InventoryChange item)
+        {
+            return FilterItem(configuration,item.InventoryItem);
+        }
+
     }
 }

@@ -29,6 +29,11 @@ namespace InventoryTools.Logic.Columns.Abstract
             return CurrentValue(currentValue.Item);
         }
         
+        public override (string,ushort,bool)? CurrentValue(InventoryChange currentValue)
+        {
+            return CurrentValue(currentValue.InventoryItem);
+        }
+        
         public override IEnumerable<CraftItem> Filter(IEnumerable<CraftItem> items)
         {
             return items;
@@ -65,7 +70,10 @@ namespace InventoryTools.Logic.Columns.Abstract
             var result = DoDraw(CurrentValue(item), rowIndex, configuration);
             result?.HandleEvent(configuration, item);
         }
-
+        public override void Draw(FilterConfiguration configuration, InventoryChange item, int rowIndex)
+        {
+            DoDraw(CurrentValue(item), rowIndex, configuration);
+        }
         public override IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items)
         {
             return items;
@@ -77,6 +85,11 @@ namespace InventoryTools.Logic.Columns.Abstract
         }
 
         public override IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items)
+        {
+            return items;
+        }
+
+        public override IEnumerable<InventoryChange> Filter(IEnumerable<InventoryChange> items)
         {
             return items;
         }
@@ -96,6 +109,11 @@ namespace InventoryTools.Logic.Columns.Abstract
             return items;
         }
 
+        public override IEnumerable<InventoryChange> Sort(ImGuiSortDirection direction, IEnumerable<InventoryChange> items)
+        {
+            return items;
+        }
+
         public override IColumnEvent? DoDraw((string, ushort, bool)? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration)
         {
@@ -104,14 +122,21 @@ namespace InventoryTools.Logic.Columns.Abstract
             {
                 PluginService.PluginLogic.DrawIcon(currentValue.Value.Item2, new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) * ImGui.GetIO().FontGlobalScale, currentValue.Value.Item3);
                 ImGui.SameLine();
-                ImGui.Text(currentValue.Value.Item1);
+                if (filterConfiguration.FilterType == Logic.FilterType.CraftFilter)
+                {
+                    ImGui.TextWrapped(currentValue.Value.Item1);
+                }
+                else
+                {
+                    ImGui.Text(currentValue.Value.Item1);
+                }
             }
             return null;
         }
 
         public override void Setup(int columnIndex)
         {
-            ImGui.TableSetupColumn(Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
+            ImGui.TableSetupColumn(RenderName ?? Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
         }
     }
 }

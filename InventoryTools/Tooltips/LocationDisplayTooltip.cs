@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib;
@@ -62,22 +63,26 @@ public class LocationDisplayTooltip : TooltipService.TooltipTweak
                         {
                             if (filterConfiguration.FilterType == FilterType.CraftFilter)
                             {
-                                var filterResult = filterConfiguration.FilterResult;
-                                if (filterResult != null)
+                                var craftItem = filterConfiguration.CraftList.GetItemById((uint)id, isHq);
+                                if (craftItem != null)
                                 {
-                                    var neededItems = filterConfiguration.CraftList.GetMissingMaterialsList();
-                                    uint? neededItemQty = neededItems.ContainsKey((uint)id) ? neededItems[(uint)id] : null;
-                                    if (neededItemQty != null && neededItemQty != 0)
+                                    var filterResult = filterConfiguration.FilterResult;
+                                    var missingOverall = craftItem.QuantityMissingOverall;
+                                    var willRetrieve = craftItem.QuantityWillRetrieve;
+                                    if (missingOverall != 0 || willRetrieve != 0)
                                     {
-                                        var sortedItems = filterResult.SortedItems.Where(c =>
-                                            c.InventoryItem.ItemId == id && c.InventoryItem.IsHQ == isHq).ToList();
-                                        var needText = "Need: " + neededItemQty;
-                                        if (sortedItems.Any())
+                                        var needText = "Need: " + missingOverall;
+                                        if (filterResult != null)
                                         {
-                                            var sortedItem = sortedItems.First();
-                                            if (sortedItem.Quantity != 0)
+                                            var sortedItems = filterResult.SortedItems.Where(c =>
+                                                c.InventoryItem.ItemId == id && c.InventoryItem.IsHQ == isHq).ToList();
+                                            if (sortedItems.Any())
                                             {
-                                                needText += " / (" + sortedItem.Quantity + " can be retrieved)";
+                                                var sortedItem = sortedItems.First();
+                                                if (sortedItem.Quantity != 0)
+                                                {
+                                                    needText += " / (" + Math.Min(willRetrieve,sortedItem.Quantity) + " can be retrieved)";
+                                                }
                                             }
                                         }
 

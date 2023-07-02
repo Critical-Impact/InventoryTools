@@ -1,4 +1,5 @@
 using System;
+using CriticalCommonLib;
 using Dalamud.ContextMenu;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
@@ -110,6 +111,13 @@ public class ContextMenuService : IDisposable
             "ChatLog"            => GetObjectItemId("ChatLog",               ChatLogContextItemId),
             _                    => null,
         };
+        if (item == null)
+        {
+            var guiHoveredItem = Service.Gui.HoveredItem;
+            if (guiHoveredItem >= 2000000 || guiHoveredItem == 0) return null;
+            item = (uint)guiHoveredItem % 500_000;
+        }
+
         return item;
     }
 

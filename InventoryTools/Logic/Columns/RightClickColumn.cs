@@ -11,6 +11,8 @@ namespace InventoryTools.Logic.Columns
 {
     public class RightClickColumn : TextColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Tools;
+
         public override string? CurrentValue(InventoryItem item)
         {
             return null;
@@ -44,10 +46,15 @@ namespace InventoryTools.Logic.Columns
             Draw(configuration, item.InventoryItem.Item, rowIndex);
         }
 
+        public override void Draw(FilterConfiguration configuration, InventoryChange item, int rowIndex)
+        {
+            Draw(configuration, item.InventoryItem, rowIndex);
+        }
+
         public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
         {
             var hoveredRow = -1;
-            ImGui.Selectable("", false, ImGuiSelectableFlags.SpanAllColumns, new Vector2(0, 32) * ImGui.GetIO().FontGlobalScale);
+            ImGui.Selectable("", false, ImGuiSelectableFlags.SpanAllColumns, new Vector2(0, configuration.TableHeight) * ImGui.GetIO().FontGlobalScale);
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow)) {
                 hoveredRow = rowIndex;
             }
@@ -70,7 +77,7 @@ namespace InventoryTools.Logic.Columns
         public override void Draw(FilterConfiguration configuration, ItemEx item, int rowIndex)
         {
             var hoveredRow = -1;
-            ImGui.Selectable("", false, ImGuiSelectableFlags.SpanAllColumns, new Vector2(0, 32) * ImGui.GetIO().FontGlobalScale);
+            ImGui.Selectable("", false, ImGuiSelectableFlags.SpanAllColumns, new Vector2(0, configuration.TableHeight) * ImGui.GetIO().FontGlobalScale);
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow)) {
                 hoveredRow = rowIndex;
             }
@@ -81,6 +88,7 @@ namespace InventoryTools.Logic.Columns
 
             using (var popup = ImRaii.Popup("RightClick" + rowIndex))
             {
+                using var _ = ImRaii.PushId("RightClick" + rowIndex);
                 if (popup.Success)
                 {
                     item.DrawRightClickPopup();

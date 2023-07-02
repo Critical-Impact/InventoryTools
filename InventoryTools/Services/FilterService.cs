@@ -16,10 +16,11 @@ namespace InventoryTools.Services
     {
         private ICharacterMonitor _characterMonitor;
         private IInventoryMonitor _inventoryMonitor;
+        private InventoryHistory _history;
         private ConcurrentDictionary<string, FilterConfiguration> _filters;
         private ConcurrentDictionary<string, FilterTable> _filterTables;
         private ConcurrentDictionary<string, CraftItemTable> _craftItemTables;
-        public FilterService(ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor)
+        public FilterService(ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, InventoryHistory history)
         {
             _filters = new ConcurrentDictionary<string, FilterConfiguration>(ConfigurationManager.Config.GetSavedFilters().ToDictionary(c => c.Key, c => c));
             _filterTables = new ConcurrentDictionary<string, FilterTable>();
@@ -32,8 +33,15 @@ namespace InventoryTools.Services
             _characterMonitor.OnActiveRetainerChanged += CharacterMonitorOnOnActiveRetainerChanged;
             _inventoryMonitor = inventoryMonitor;
             _inventoryMonitor.OnInventoryChanged += InventoryMonitorOnOnInventoryChanged;
+            _history = history;
+            _history.OnHistoryLogged += HistoryOnOnHistoryLogged; 
             WatchFilterChanges();
             PluginService.OnPluginLoaded += PluginServiceOnOnPluginLoaded;
+        }
+
+        private void HistoryOnOnHistoryLogged(List<InventoryChange> inventorychanges)
+        {
+            InvalidateFilters(FilterType.HistoryFilter);
         }
 
         private void PluginServiceOnOnPluginLoaded()
@@ -50,7 +58,7 @@ namespace InventoryTools.Services
             _craftItemTables = new ConcurrentDictionary<string, CraftItemTable>();
         }
 
-        private void InventoryMonitorOnOnInventoryChanged(Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>> inventories, InventoryMonitor.ItemChanges changeditems)
+        private void InventoryMonitorOnOnInventoryChanged(List<InventoryChange> inventoryChanges, InventoryMonitor.ItemChanges? itemChanges)
         {
             if (PluginService.PluginLoaded)
             {
@@ -204,7 +212,7 @@ namespace InventoryTools.Services
 
         public FilterConfiguration DuplicateFilter(FilterConfiguration configuration, string newName)
         {
-            var newConfiguration = configuration.Clone();
+            var newConfiguration = configuration.Clone() ?? new FilterConfiguration();
             newConfiguration.Key = Guid.NewGuid().ToString("N");
             newConfiguration.Name = newName;
             AddFilter(newConfiguration);
@@ -593,11 +601,12 @@ namespace InventoryTools.Services
             }
         }
 
-        public void InvalidateFilters()
+        public void InvalidateFilters(FilterType? filterType = null)
         {
             PluginService.ChatUtilities.PrintLog("Filters invalidated");
             foreach (var filter in _filters)
             {
+                if(filterType != null && filter.Value.FilterType != filterType) continue;
                 filter.Value.NeedsRefresh = true;
                 if (_filterTables.ContainsKey(filter.Key))
                 {
@@ -714,12 +723,16 @@ namespace InventoryTools.Services
             {
                 PluginService.OnPluginLoaded -= PluginServiceOnOnPluginLoaded;
                 ConfigurationManager.Config.ConfigurationChanged -= ConfigOnConfigurationChanged;
-                _characterMonitor.OnCharacterRemoved -= CharacterMonitorOnOnCharacterRemoved;
-                _characterMonitor.OnCharacterUpdated -= CharacterMonitorOnOnCharacterUpdated;
-                _characterMonitor.OnCharacterJobChanged -= CharacterMonitorOnOnCharacterJobChanged;
-                _characterMonitor.OnActiveRetainerChanged -= CharacterMonitorOnOnActiveRetainerChanged;
-                _inventoryMonitor.OnInventoryChanged -= InventoryMonitorOnOnInventoryChanged;                
-                
+                if (_characterMonitor != null)
+                {
+                    _characterMonitor.OnCharacterRemoved -= CharacterMonitorOnOnCharacterRemoved;
+                    _characterMonitor.OnCharacterUpdated -= CharacterMonitorOnOnCharacterUpdated;
+                    _characterMonitor.OnCharacterJobChanged -= CharacterMonitorOnOnCharacterJobChanged;
+                    _characterMonitor.OnActiveRetainerChanged -= CharacterMonitorOnOnActiveRetainerChanged;
+                    _inventoryMonitor.OnInventoryChanged -= InventoryMonitorOnOnInventoryChanged;
+                }
+                _history.OnHistoryLogged -= HistoryOnOnHistoryLogged; 
+
                 foreach (var filterConfiguration in _filters)
                 {
                     UnWatchFilter(filterConfiguration.Value);

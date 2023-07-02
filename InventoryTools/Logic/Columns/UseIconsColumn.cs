@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Models.ItemSources;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Extensions;
@@ -15,6 +16,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class UseIconsColumn : Column<List<IItemSource>?>
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override List<IItemSource>? CurrentValue(InventoryItem item)
         {
             return CurrentValue(item.Item);
@@ -34,6 +36,11 @@ namespace InventoryTools.Logic.Columns
         {
             return item.Item.Uses;
         }
+        
+        public override List<IItemSource>? CurrentValue(InventoryChange currentValue)
+        {
+            return CurrentValue(currentValue.InventoryItem);
+        }
 
         public override IColumnEvent? DoDraw(List<IItemSource>? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration)
@@ -41,7 +48,8 @@ namespace InventoryTools.Logic.Columns
             ImGui.TableNextColumn();
             if (currentValue != null)
             {
-                UiHelpers.WrapTableColumnElements("ScrollContainer" + rowIndex,currentValue, filterConfiguration.TableHeight * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X, item =>
+                var uses = FilterText != "" ? currentValue.Where(c => c.FormattedName.ToLower().PassesFilter(FilterText)) : currentValue;
+                UiHelpers.WrapTableColumnElements("UseIconContainer" + rowIndex,uses, filterConfiguration.TableHeight * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X, item =>
                 {
                     var sourceIcon = PluginService.IconStorage[item.Icon];
                     if (item is ItemSource source && source.ItemId != null && source.HasItem && source.Item != null)
@@ -111,7 +119,7 @@ namespace InventoryTools.Logic.Columns
 
         public override void Setup(int columnIndex)
         {
-            ImGui.TableSetupColumn(Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
+            ImGui.TableSetupColumn(RenderName ?? Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
         }
 
         public override string CsvExport(InventoryItem item)
@@ -154,47 +162,141 @@ namespace InventoryTools.Logic.Columns
 
         public override string HelpText { get; set; } =
             "Shows icons indicating what the items drop/can be used for";
-        public override bool HasFilter { get; set; } = false;
+        public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
         public override IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items)
         {
-            return items;
+            return FilterText == "" ? items : items.Where(c =>
+            {
+                var currentValue = CurrentValue(c);
+                if (currentValue == null)
+                {
+                    return false;
+                }
+
+                return currentValue.Any(c => c.FormattedName.ToLower().PassesFilter(FilterComparisonText));
+            });
         }
 
         public override IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items)
         {
-            return items;
+            return FilterText == "" ? items : items.Where(c =>
+            {
+                var currentValue = CurrentValue(c);
+                if (currentValue == null)
+                {
+                    return false;
+                }
+
+                return currentValue.Any(c => c.FormattedName.ToLower().PassesFilter(FilterComparisonText));
+            });
         }
 
         public override IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items)
         {
-            //return implement me
-            return items;
+            return FilterText == "" ? items : items.Where(c =>
+            {
+                var currentValue = CurrentValue(c);
+                if (currentValue == null)
+                {
+                    return false;
+                }
+
+                return currentValue.Any(c => c.FormattedName.ToLower().PassesFilter(FilterComparisonText));
+            });
         }
 
         public override IEnumerable<CraftItem> Filter(IEnumerable<CraftItem> items)
         {
-            return items;
+            return FilterText == "" ? items : items.Where(c =>
+            {
+                var currentValue = CurrentValue(c);
+                if (currentValue == null)
+                {
+                    return false;
+                }
+
+                return currentValue.Any(c => c.FormattedName.ToLower().PassesFilter(FilterComparisonText));
+            });
+        }
+        
+        public override IEnumerable<InventoryChange> Filter(IEnumerable<InventoryChange> items)
+        {
+            return FilterText == "" ? items : items.Where(c =>
+            {
+                var currentValue = CurrentValue(c.InventoryItem);
+                if (currentValue == null)
+                {
+                    return false;
+                }
+
+                return currentValue.Any(c => c.FormattedName.ToLower().PassesFilter(FilterComparisonText));
+            });
         }
 
         public override IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
         {
-            return items;
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(item =>
+            {
+                var currentValue = CurrentValue(item);
+                return currentValue?.Count ?? 0;
+            }) : items.OrderByDescending(item =>
+            {
+                var currentValue = CurrentValue(item);
+                return currentValue?.Count ?? 0;
+            });
         }
 
         public override IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items)
         {
-            return items;
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(item =>
+            {
+                var currentValue = CurrentValue(item);
+                return currentValue?.Count ?? 0;
+            }) : items.OrderByDescending(item =>
+            {
+                var currentValue = CurrentValue(item);
+                return currentValue?.Count ?? 0;
+            });
         }
 
         public override IEnumerable<ItemEx> Sort(ImGuiSortDirection direction, IEnumerable<ItemEx> items)
         {
-            return items;
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(item =>
+            {
+                var currentValue = CurrentValue(item);
+                return currentValue?.Count ?? 0;
+            }) : items.OrderByDescending(item =>
+            {
+                var currentValue = CurrentValue(item);
+                return currentValue?.Count ?? 0;
+            });
         }
 
         public override IEnumerable<CraftItem> Sort(ImGuiSortDirection direction, IEnumerable<CraftItem> items)
         {
-            return items;
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(item =>
+            {
+                var currentValue = CurrentValue(item);
+                return currentValue?.Count ?? 0;
+            }) : items.OrderByDescending(item =>
+            {
+                var currentValue = CurrentValue(item);
+                return currentValue?.Count ?? 0;
+            });
+        }
+        
+        public override IEnumerable<InventoryChange> Sort(ImGuiSortDirection direction, IEnumerable<InventoryChange> items)
+        {
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(item =>
+            {
+                var currentValue = CurrentValue(item.InventoryItem);
+                return currentValue?.Count ?? 0;
+            }) : items.OrderByDescending(item =>
+            {
+                var currentValue = CurrentValue(item.InventoryItem);
+                return currentValue?.Count ?? 0;
+            });
         }
 
         public override void Draw(FilterConfiguration configuration, InventoryItem item, int rowIndex)

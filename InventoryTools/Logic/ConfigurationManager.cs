@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Resolvers;
 using Dalamud.Logging;
@@ -51,21 +50,36 @@ namespace InventoryTools.Logic
                 return Path.Join(PluginService.PluginInterfaceService.ConfigDirectory.FullName, "mob_spawns.csv");
             }
         }
-        public static void Load()
+        public static string HistoryCsv
+        {
+            get
+            {
+                return Path.Join(PluginService.PluginInterfaceService.ConfigDirectory.FullName, "history.csv");
+            }
+        }
+        
+
+        /// <summary>
+        /// Loads the primary configuration file
+        /// </summary>
+        /// <param name="file">An alternate file to load</param>
+        public static void Load(string? file = null)
         {
             PluginLog.Verbose("Loading configuration");
             Stopwatch loadConfigStopwatch = new Stopwatch();
             loadConfigStopwatch.Start();
-            if (!File.Exists(ConfigurationFile))
+            if (!File.Exists(file ?? ConfigurationFile))
             {
                 Config = new InventoryToolsConfiguration();
                 Config.MarkReloaded();
                 return;
             }
-
-            string jsonText = File.ReadAllText(ConfigurationFile);
+            string jsonText = File.ReadAllText(file ?? ConfigurationFile);
             var inventoryToolsConfiguration = JsonConvert.DeserializeObject<InventoryToolsConfiguration>(jsonText, new JsonSerializerSettings()
             {
+                TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
+                TypeNameHandling = TypeNameHandling.None,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                 DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
                 ContractResolver = MinifyResolver
             });
@@ -76,129 +90,84 @@ namespace InventoryTools.Logic
                 return;
             }
             loadConfigStopwatch.Stop();
-            PluginLog.Verbose("Took " + loadConfigStopwatch.Elapsed.TotalSeconds + " to load configuration.");
-            loadConfigStopwatch.Restart();
-            if (!inventoryToolsConfiguration.InventoriesMigrated)
-            {
-                PluginLog.Verbose("Migrating inventories");
-                var temp =  JObject.Parse(jsonText);
-                if (temp.ContainsKey("SavedInventories"))
-                {
-                    var inventories = temp["SavedInventories"]?.ToObject<Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>>();
-                    inventoryToolsConfiguration.SavedInventories = inventories ??
-                                                                   new Dictionary<ulong, Dictionary<InventoryCategory,
-                                                                       List<InventoryItem>>>();
-                }
-
-                inventoryToolsConfiguration.InventoriesMigrated = true;
-            }
-            if (!inventoryToolsConfiguration.InventoriesMigratedToCsv)
-            {
-                PluginLog.Verbose("Marked inventories to now load from CSV");
-                inventoryToolsConfiguration.SavedInventories = LoadInventories(InventoryFile) ?? new();
-                inventoryToolsConfiguration.InventoriesMigratedToCsv = true;
-            }
-            else
-            {
-                var items = LoadInventoriesFromCsv(out bool success);
-                if (success)
-                {
-                    var parsedItems =
-                        new Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>();
-                    foreach (var item in items)
-                    {
-                        parsedItems.TryAdd(item.RetainerId, new Dictionary<InventoryCategory, List<InventoryItem>>());
-                        parsedItems[item.RetainerId].TryAdd(item.SortedCategory, new List<InventoryItem>());
-                        parsedItems[item.RetainerId][item.SortedCategory].Add(item);
-                    }
-
-                    inventoryToolsConfiguration.SavedInventories = parsedItems;
-                }
-                else
-                {
-                    inventoryToolsConfiguration.SavedInventories = new Dictionary<ulong, Dictionary<InventoryCategory,
-                        List<InventoryItem>>>();
-                }
-            }
-            loadConfigStopwatch.Stop();
-            PluginLog.Verbose("Took " + loadConfigStopwatch.Elapsed.TotalSeconds + " to load inventories.");
+            PluginLog.Verbose("Took " + loadConfigStopwatch.Elapsed.TotalSeconds + " to load main configuration file.");
             Config = inventoryToolsConfiguration;
             Config.MarkReloaded();
         }
-        public static void LoadFromFile(string file, string? inventoryFileName)
+
+        public static List<InventoryItem> LoadInventory(string? file = null)
         {
-            PluginLog.Verbose("Loading configuration");
+            PluginLog.Verbose("Loading inventory");
             Stopwatch loadConfigStopwatch = new Stopwatch();
             loadConfigStopwatch.Start();
-            if (!File.Exists(file))
-            {
-                Config = new InventoryToolsConfiguration();
-                Config.MarkReloaded();
-                return;
-            }
 
-            string jsonText = File.ReadAllText(file);
-            var inventoryToolsConfiguration = JsonConvert.DeserializeObject<InventoryToolsConfiguration>(jsonText, new JsonSerializerSettings()
+            var inventories = new List<InventoryItem>();
+
+
+            if (!Config.InventoriesMigrated)
             {
-                DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
-                ContractResolver = MinifyResolver
-            });
-            if (inventoryToolsConfiguration == null)
-            {
-                Config = new InventoryToolsConfiguration();
-                Config.MarkReloaded();
-                return;
-            }
-            loadConfigStopwatch.Stop();
-            PluginLog.Verbose("Took " + loadConfigStopwatch.Elapsed.TotalSeconds + " to load configuration.");
-            loadConfigStopwatch.Restart();
-            if (!inventoryToolsConfiguration.InventoriesMigrated)
-            {
-                PluginLog.Verbose("Marked inventories to now load from json.");
-                var temp =  JObject.Parse(jsonText);
-                if (temp.ContainsKey("SavedInventories"))
+                if (File.Exists(ConfigurationFile))
                 {
-                    var inventories = temp["SavedInventories"]?.ToObject<Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>>();
-                    inventoryToolsConfiguration.SavedInventories = inventories ??
-                                                                   new Dictionary<ulong, Dictionary<InventoryCategory,
-                                                                       List<InventoryItem>>>();
+                    string jsonText = File.ReadAllText(ConfigurationFile);
+                    var inventoryToolsConfiguration = JsonConvert.DeserializeObject<InventoryToolsConfiguration>(
+                        jsonText, new JsonSerializerSettings()
+                        {
+                            DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
+                            ContractResolver = MinifyResolver
+                        });
+                    if (inventoryToolsConfiguration != null)
+                    {
+                        PluginLog.Verbose("Migrating inventories");
+                        var temp = JObject.Parse(jsonText);
+                        if (temp.ContainsKey("SavedInventories"))
+                        {
+                            var savedInventories = temp["SavedInventories"]
+                                ?.ToObject<Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>>();
+
+                            var parsedInventories = savedInventories ??
+                                                    new Dictionary<ulong, Dictionary<
+                                                        InventoryCategory,
+                                                        List<InventoryItem>>>();
+                            foreach (var parsedInventory in parsedInventories)
+                            {
+                                foreach (var category in parsedInventory.Value)
+                                {
+                                    foreach (var item in category.Value)
+                                    {
+                                        inventories.Add(item);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
 
-                inventoryToolsConfiguration.InventoriesMigrated = true;
-                inventoryToolsConfiguration.InventoriesMigratedToCsv = true;
+                Config.InventoriesMigrated = true;
             }
-            if (!inventoryToolsConfiguration.InventoriesMigratedToCsv)
+            else if (!Config.InventoriesMigratedToCsv)
             {
                 PluginLog.Verbose("Marked inventories to now load from CSV");
-                inventoryToolsConfiguration.SavedInventories = LoadInventories(inventoryFileName) ?? new();
-                inventoryToolsConfiguration.InventoriesMigratedToCsv = true;
+                var parsedInventories = LoadInventoriesJson(InventoryFile) ?? new();
+                foreach (var parsedInventory in parsedInventories)
+                {
+                    foreach (var category in parsedInventory.Value)
+                    {
+                        foreach (var item in category.Value)
+                        {
+                            inventories.Add(item);
+                        }
+                    }
+                }
+                Config.InventoriesMigratedToCsv = true;
             }
             else
             {
-                var items = LoadInventoriesFromCsv(out bool success, inventoryFileName);
-                if (success)
-                {
-                    var parsedItems =
-                        new Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>();
-                    foreach (var item in items)
-                    {
-                        parsedItems.TryAdd(item.RetainerId, new Dictionary<InventoryCategory, List<InventoryItem>>());
-                        parsedItems[item.RetainerId].TryAdd(item.SortedCategory, new List<InventoryItem>());
-                        parsedItems[item.RetainerId][item.SortedCategory].Add(item);
-                    }
-
-                    inventoryToolsConfiguration.SavedInventories = parsedItems;
-                }
-                else
-                {
-                    inventoryToolsConfiguration.SavedInventories = new Dictionary<ulong, Dictionary<InventoryCategory,
-                                                                       List<InventoryItem>>>();
-                }
+                inventories = LoadInventoriesFromCsv(out bool success);
             }
             loadConfigStopwatch.Stop();
             PluginLog.Verbose("Took " + loadConfigStopwatch.Elapsed.TotalSeconds + " to load inventories.");
-            Config = inventoryToolsConfiguration;
-            Config.MarkReloaded();
+            loadConfigStopwatch.Restart();
+            return inventories;
         }
         
         public static void Save()
@@ -211,15 +180,13 @@ namespace InventoryTools.Logic
                 File.WriteAllText(ConfigurationFile, JsonConvert.SerializeObject(Config, Formatting.None, new JsonSerializerSettings()
                 {
                     TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
-                    TypeNameHandling = TypeNameHandling.Objects,
+                    TypeNameHandling = TypeNameHandling.None,
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                     DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
                     ContractResolver = MinifyResolver
                 }));
                 loadConfigStopwatch.Stop();
                 PluginLog.Verbose("Took " + loadConfigStopwatch.Elapsed.TotalSeconds + " to save configuration.");
-
-                SaveInventories(Config.SavedInventories);
             }
             catch (Exception e)
             {
@@ -227,20 +194,28 @@ namespace InventoryTools.Logic
             }
         }
 
-        private static SerialQueue _saveQueue = new SerialQueue();
+        private static SerialQueue? _saveQueue = new SerialQueue();
         
         public static void SaveAsync()
         {
-            _saveQueue.DispatchAsync(Save);
+            if (PluginService.PluginLoaded)
+            {
+                _saveQueue?.DispatchAsync(Save);
+            }
         }
 
         public static void ClearQueue()
         {
-            _saveQueue.Dispose();
+            _saveQueue?.Dispose();
             _saveQueue = null!;
         }
 
-        public static Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>? LoadInventories(string? fileName = null)
+        /// <summary>
+        /// Load a inventories json file, this is no longer the preferred format to store inventories in.
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+        public static Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>? LoadInventoriesJson(string? fileName = null)
         {
             try
             {
@@ -264,7 +239,8 @@ namespace InventoryTools.Logic
         public static MinifyResolver MinifyResolver => _minifyResolver ??= new();
         private static MinifyResolver? _minifyResolver;
 
-        public static void SaveInventories(
+        [Obsolete]
+        public static void SaveInventoriesToJson(
             Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>> savedInventories)
         {
             PluginLog.Verbose("Saving inventory data");
@@ -273,7 +249,7 @@ namespace InventoryTools.Logic
             try
             {
                 var items = savedInventories.SelectMany(c => c.Value.SelectMany(d => d.Value)).ToList();
-                if (!SaveInventoriesToCsv(items))
+                if (!SaveInventories(items))
                 {
                     PluginLog.Error($"Failed to save inventories due to a parsing error.");
                 }
@@ -287,28 +263,70 @@ namespace InventoryTools.Logic
 
         }
 
-        public static bool SaveInventoriesToCsv(List<InventoryItem> items)
+        public static bool SaveInventories(List<InventoryItem> items)
         {
             return CsvLoader.ToCsvRaw<InventoryItem>(items, Path.Join(PluginService.PluginInterfaceService.ConfigDirectory.FullName, "inventories.csv"));
         }
-
+        
         public static List<InventoryItem> LoadInventoriesFromCsv(out bool success, string? csvPath = null)
         {
-            try
+            var inventoryCsv = csvPath ?? InventoryCsv;
+            if (Path.Exists(inventoryCsv))
             {
-                var items = CsvLoader.LoadCsv<InventoryItem>(csvPath ?? InventoryCsv);
-                success = true;
-                return items;
+                try
+                {
+                    var items = CsvLoader.LoadCsv<InventoryItem>(inventoryCsv);
+                    success = true;
+                    return items;
+                }
+                catch (Exception e)
+                {
+                    success = false;
+                    PluginLog.Error("Failed to load inventories from CSV");
+                    PluginLog.Error(e.Message);
+                }
             }
-            catch (Exception e)
+            else
             {
-                success = false;
-                PluginLog.Error("Failed to load inventories from CSV");
-                PluginLog.Error(e.Message);
+                success = true;
+                PluginLog.Verbose("Not loading inventories, file does not exist.");
             }
 
 
             return new List<InventoryItem>();
+        }
+        
+        public static List<InventoryChange> LoadHistoryFromCsv(out bool success, string? csvPath = null)
+        {
+            var historyCsv = csvPath ?? HistoryCsv;
+            if (Path.Exists(historyCsv))
+            {
+                try
+                {
+                    var items = CsvLoader.LoadCsv<InventoryChange>(historyCsv);
+                    success = true;
+                    return items;
+                }
+                catch (Exception e)
+                {
+                    success = false;
+                    PluginLog.Error("Failed to load history from CSV");
+                    PluginLog.Error(e.Message);
+                }
+            }
+            else
+            {
+                success = true;
+                PluginLog.Verbose("Not loading history, file does not exist.");
+            }
+
+
+            return new List<InventoryChange>();
+        }
+        
+        public static bool SaveHistory(List<InventoryChange> changes)
+        {
+            return CsvLoader.ToCsvRaw<InventoryChange>(changes, Path.Join(PluginService.PluginInterfaceService.ConfigDirectory.FullName, "history.csv"));
         }
 
         public static void Dereference()

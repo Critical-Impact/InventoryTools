@@ -7,6 +7,7 @@ namespace InventoryTools.Logic.Columns;
 
 public class PatchColumn : DecimalColumn
 {
+    public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
     public override decimal? CurrentValue(InventoryItem item)
     {
         return Service.ExcelCache.GetItemPatch(item.ItemId);
@@ -22,7 +23,8 @@ public class PatchColumn : DecimalColumn
         return Service.ExcelCache.GetItemPatch(item.InventoryItem.ItemId);
     }
 
-    public override string Name { get; set; } = "Patch";
+    public override string Name { get; set; } = "Patch Added";
+    public override string RenderName => "Patch";
     public override float Width { get; set; } = 100;
     public override string HelpText { get; set; } = "Shows the patch in which the item was added.";
     public override bool HasFilter { get; set; } = true;

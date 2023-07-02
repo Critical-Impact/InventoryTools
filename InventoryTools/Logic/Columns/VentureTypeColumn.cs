@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
@@ -10,6 +6,7 @@ namespace InventoryTools.Logic.Columns;
 
 public class VentureTypeColumn : TextColumn
 {
+    public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
     public override string? CurrentValue(InventoryItem item)
     {
         return CurrentValue(item.Item);

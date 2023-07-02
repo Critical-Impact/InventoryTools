@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
-using CriticalCommonLib.Collections;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Ui;
@@ -13,6 +12,10 @@ namespace InventoryTools.Logic
 {
     public class FilterState
     {
+        public FilterState(FilterConfiguration filterConfiguration)
+        {
+            FilterConfiguration = filterConfiguration;
+        }
         public FilterConfiguration FilterConfiguration;
         public RenderTableBase? FilterTable;
         public ulong? ActiveRetainerId => PluginService.CharacterMonitor.ActiveRetainer == 0 ? null : PluginService.CharacterMonitor.ActiveRetainer;
@@ -154,6 +157,81 @@ namespace InventoryTools.Logic
                     return bagHighlights.Any(c => c.Any(d => d.Value != null)) ? TabHighlightColor : null;
                 }
             }
+        }
+
+        public List<Vector4?> GetSelectIconStringItems(FilterResult? resultOverride = null)
+        {
+            var itemHighlights = new List<Vector4?>();
+            if (PluginService.CharacterMonitor.ActiveCharacterId == 0)
+            {
+                return itemHighlights;
+            }
+            var filterResult = resultOverride ?? FilterResult;
+            if (filterResult != null)
+            {
+                HashSet<uint> requiredItems;
+                if (FilterConfiguration.FilterType == FilterType.CraftFilter)
+                {
+                    PluginLog.Verbose("Craft filter, getting flattened materials");
+                    requiredItems = FilterConfiguration.CraftList.GetFlattenedMaterials().Select(c => c.Item.RowId).Distinct()
+                        .ToHashSet();
+                }
+                else if (filterResult.AllItems.Count != 0)
+                {
+                    requiredItems = filterResult.AllItems.Select(c => c.RowId).Distinct().ToHashSet();
+                }
+                else if (filterResult.SortedItems.Count != 0)
+                {
+                    requiredItems = filterResult.SortedItems.Select(c => c.InventoryItem.ItemId).Distinct().ToHashSet();
+                }
+                else
+                {
+                    return itemHighlights;
+                }
+                
+
+                var target = Service.Targets.Target;
+                    if (target != null)
+                    {
+                        PluginLog.Verbose("Target found for SelectIconString");
+
+                        var npcId = target.DataId;
+                        var npc = Service.ExcelCache.ENpcCollection.Get(npcId);
+                        if (npc.Base != null)
+                        {
+                            PluginLog.Verbose("NPC found for SelectIconString");
+                            //TODO: Probably need to deal with custom talk and shit
+                            for (var index = 0; index < npc.Base.ENpcData.Length; index++)
+                            {
+                                var talkItem = npc.Base.ENpcData[index];
+                                var preHandler = Service.ExcelCache.GetPreHandlerSheet().GetRow(talkItem);
+                                if (preHandler != null)
+                                {
+                                    talkItem = preHandler.Target;
+                                }
+                                var shop = Service.ExcelCache.ShopCollection.GetShop(talkItem);
+                                if (shop != null)
+                                {
+                                    PluginLog.Verbose("Shop found for SelectIconString");
+                                    var shouldHighlight = shop.Items.Any(c => requiredItems.Contains(c.Row));
+                                    if (shouldHighlight)
+                                    {
+                                        PluginLog.Verbose("Found item for shop" + shop.RowId);
+                                        itemHighlights.Add(FilterConfiguration.RetainerListColor ?? ConfigurationManager.Config.RetainerListColor);
+                                    }
+                                    else
+                                    {
+                                        PluginLog.Verbose("Did not find item for shop" + shop.RowId);
+                                        itemHighlights.Add(null);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return itemHighlights;
+            }
+
+            return itemHighlights;
         }
 
         public Dictionary<string, Vector4?> GetArmoireHighlights(FilterResult? resultOverride = null)
@@ -743,7 +821,7 @@ namespace InventoryTools.Logic
                 
                 if (activeTable != null)
                 {
-                    filteredList = new FilterResult(activeTable.SortedItems, new List<InventoryItem>(), activeTable.Items);
+                    filteredList = new FilterResult(activeTable.SortedItems, new List<InventoryItem>(), activeTable.Items, activeTable.InventoryChanges);
                 }
                 else if (activeFilter.FilterResult != null)
                 {

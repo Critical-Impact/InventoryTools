@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using ImGuiNET;
 using OtterGui.Raii;

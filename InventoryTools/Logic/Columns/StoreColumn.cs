@@ -6,6 +6,7 @@ namespace InventoryTools.Logic.Columns;
 
 public class StoreColumn : CheckboxColumn
 {
+    public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
     public override bool? CurrentValue(InventoryItem item)
     {
         return CurrentValue(item.Item);
@@ -21,7 +22,8 @@ public class StoreColumn : CheckboxColumn
         return CurrentValue(item.InventoryItem);
     }
 
-    public override string Name { get; set; } = "Sold in Square Store";
+    public override string Name { get; set; } = "Is sold in Square Store?";
+    public override string RenderName => "Is Square Store Item?";
     public override float Width { get; set; } = 80;
     public override string HelpText { get; set; } = "Is this item sold in the square store?";
     public override bool HasFilter { get; set; } = true;

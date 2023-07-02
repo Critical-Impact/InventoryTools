@@ -6,6 +6,8 @@ namespace InventoryTools.Logic.Columns
 {
     public class EquippableColumn : TextColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
+
         public override string? CurrentValue(InventoryItem item)
         {
             return CurrentValue(item.Item);
@@ -21,7 +23,7 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "Equippable By";
+        public override string Name { get; set; } = "Equipped By (Class/Job)";
         public override float Width { get; set; } = 200;
         public override string HelpText { get; set; } = "Shows what class/job an item can be equipped by";
         public override bool HasFilter { get; set; } = true;

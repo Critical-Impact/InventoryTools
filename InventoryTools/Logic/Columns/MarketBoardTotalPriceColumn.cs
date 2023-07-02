@@ -1,11 +1,13 @@
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
+using InventoryTools.Logic.Columns.Abstract;
 
 namespace InventoryTools.Logic.Columns
 {
     public class MarketBoardTotalPriceColumn : MarketBoardPriceColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Market;
         public override FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter;
 
         public override IColumnEvent? DoDraw((int, int)? currentValue, int rowIndex,
@@ -49,7 +51,8 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "MB Average Total Price";
+        public override string Name { get; set; } = "Market Board Average Total Price(Qty * Price) NQ/HQ";
+        public override string RenderName => "MB Avg. Total NQ/HQ";
         public override float Width { get; set; } = 250.0f;
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;

@@ -7,7 +7,7 @@ namespace InventoryTools.Sections
 {
     public class ImportExportPage : IConfigPage
     {
-        private bool _isSeparator;
+        private bool _isSeparator = false;
         public string Name { get; } =  "Import/Export";
         public void Draw()
         {

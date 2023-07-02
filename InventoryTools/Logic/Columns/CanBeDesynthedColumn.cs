@@ -6,6 +6,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class CanBeDesynthedColumn : CheckboxColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override bool? CurrentValue(InventoryItem item)
         {
             return CurrentValue(item.Item);
@@ -21,7 +22,7 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "Can be Desynthed?";
+        public override string Name { get; set; } = "Is Desynthable?";
         public override float Width { get; set; } = 100;
         public override string HelpText { get; set; } = "Can the item by desynthed?";
         public override bool HasFilter { get; set; } = true;

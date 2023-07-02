@@ -106,7 +106,7 @@ namespace InventoryTools.Logic
                 }
                 catch (Exception e)
                 {
-                    PluginLog.Verbose("Could not register with Wotsit IPC. This is normal if you do not have it installed.");
+                    PluginLog.LogVerbose(e , "Could not register with Wotsit IPC. This is normal if you do not have it installed.");
                     _wotsItRegistered = false;
                     return;
                 }
@@ -133,7 +133,7 @@ namespace InventoryTools.Logic
                     }
                     catch (Exception e)
                     {
-                        PluginLog.Verbose("Could not register filter with Wotsit IPC. This is normal if you do not have it installed.");
+                        PluginLog.LogVerbose(e , "Could not register with Wotsit IPC. This is normal if you do not have it installed.");
                     }
                 }
             }

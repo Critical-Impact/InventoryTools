@@ -123,6 +123,5 @@ public class MockMobTracker : IMobTracker
 
     public void ClearSavedData()
     {
-        throw new NotImplementedException();
     }
 }

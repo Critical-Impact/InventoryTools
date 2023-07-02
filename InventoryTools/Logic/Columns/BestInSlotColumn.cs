@@ -11,11 +11,13 @@ namespace InventoryTools.Logic.Columns
 {
     public class BestInSlotColumn : IntegerColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Tools;
+        
         public override bool IsDebug { get; set; } = true;
         private ClippedSelectableCombo<KeyValuePair<ulong, Character>>? _characters;
         private ulong? _selectedCharacter;
 
-        public override IFilterEvent? DrawFooterFilter(FilterConfiguration configuration)
+        public override IFilterEvent? DrawFooterFilter(FilterConfiguration configuration, FilterTable table)
         {
             ImGui.SameLine();
             var characterDictionary = PluginService.CharacterMonitor.Characters;

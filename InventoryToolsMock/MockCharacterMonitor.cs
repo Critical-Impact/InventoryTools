@@ -70,7 +70,6 @@ public class MockCharacterMonitor : ICharacterMonitor
     public event CharacterMonitor.CharacterUpdatedDelegate? OnCharacterUpdated;
     public event CharacterMonitor.CharacterRemovedDelegate? OnCharacterRemoved;
     public event CharacterMonitor.CharacterJobChangedDelegate? OnCharacterJobChanged;
-    public event CharacterMonitor.GilUpdatedDelegate? OnGilUpdated;
     
     public KeyValuePair<ulong, Character>[] GetPlayerCharacters()
     {
@@ -134,7 +133,7 @@ public class MockCharacterMonitor : ICharacterMonitor
         
     public KeyValuePair<ulong, Character>[] GetCharacterHouses()
     {
-        return Characters.Where(c => c.Value.Owners.Count != 0 && c.Value.CharacterType == CharacterType.Housing && c.Key != 0 && c.Value.Name != "").ToArray();
+        return Characters.Where(c => c.Value.Owners.Count != 0 && c.Value.CharacterType == CharacterType.Housing && c.Key != 0 && c.Value.HousingName != "").ToArray();
     }
 
     public bool IsCharacter(ulong characterId)

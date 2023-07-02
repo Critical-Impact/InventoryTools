@@ -6,6 +6,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class CanBeDyedColumn : CheckboxColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override bool? CurrentValue(InventoryItem item)
         {
             return CurrentValue(item.Item);
@@ -21,7 +22,7 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "Can be Dyed?";
+        public override string Name { get; set; } = "Is Dyeable?";
         public override float Width { get; set; } = 80.0f;
         public override string HelpText { get; set; } = "Can the item be dyed?";
         public override bool HasFilter { get; set; } = true;

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using ImGuiNET;
-using Action = Lumina.Excel.GeneratedSheets.Action;
 
 namespace InventoryTools.Ui;
 
@@ -24,7 +23,7 @@ public class TableColumn<T>
     public Func<string?, IEnumerable<T>, IEnumerable<T>>? Filter { get; set; }
     public Func<bool?, IEnumerable<T>, IEnumerable<T>>? FilterBool { get; set; }
     
-    public Action<T, uint> Draw { get; set; }
+    public Action<T, uint>? Draw { get; set; }
     public string FilterText = "";
     public bool? FilterBoolean = null;
     public bool AllTabOnly;

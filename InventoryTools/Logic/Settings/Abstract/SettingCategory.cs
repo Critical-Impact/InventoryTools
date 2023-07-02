@@ -6,6 +6,7 @@ namespace InventoryTools.Logic.Settings.Abstract
         Visuals = 1,
         MarketBoard = 2,
         ToolTips = 3,
-        Hotkeys = 4
+        Hotkeys = 4,
+        History = 5,
     }
 }

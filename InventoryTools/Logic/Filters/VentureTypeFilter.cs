@@ -13,7 +13,7 @@ public class VentureTypeFilter : StringFilter
     public override FilterCategory FilterCategory { get; set; } = FilterCategory.Acquisition;
 
     public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter |
-                                                           FilterType.GameItemFilter | FilterType.CraftFilter;
+                                                           FilterType.GameItemFilter;
     public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
     {
         return FilterItem(configuration, item.Item);

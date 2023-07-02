@@ -6,6 +6,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class IsGearSetColumn : CheckboxColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override bool? CurrentValue(InventoryItem item)
         {
             if (item.GearSets == null)

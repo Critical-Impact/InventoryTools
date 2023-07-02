@@ -1,13 +1,12 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
+using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
-using InventoryTools.Ui.Widgets;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 
 namespace InventoryTools.Ui;
@@ -33,7 +32,7 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
                 OnLeftClick = OnLeftClick,
                 Draw = (ex, contentTypeId) =>
                 {
-                    if (ImGui.ImageButton(PluginService.IconStorage[65035].ImGuiHandle,
+                    if (ImGui.ImageButton(PluginService.IconStorage[Icons.AirshipIcon].ImGuiHandle,
                             new Vector2(RowSize, RowSize)))
                     {
                         _columns[0].OnLeftClick?.Invoke(ex);
@@ -286,10 +285,10 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
 
     public override List<TableColumn<AirshipExplorationPointEx>> Columns => _columns;
     
-    private List<TableColumn<AirshipExplorationPointEx>> _columns;
-    private Dictionary<uint, List<AirshipExplorationPointEx>> _items;
-    private Dictionary<uint, List<AirshipExplorationPointEx>> _filteredItems;
-    private Dictionary<uint, string> _tabs;
+    private List<TableColumn<AirshipExplorationPointEx>> _columns = null!;
+    private Dictionary<uint, List<AirshipExplorationPointEx>> _items = null!;
+    private Dictionary<uint, List<AirshipExplorationPointEx>> _filteredItems = null!;
+    private Dictionary<uint, string> _tabs = null!;
 
     public override ImGuiTableFlags TableFlags => _flags;
     
@@ -316,7 +315,7 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
             var unfilteredList = _items[tabId];
             if (SortColumn != null && _columns[(int)SortColumn].Sort != null)
             {
-                unfilteredList = _columns[(int)SortColumn].Sort?.Invoke(SortDirection, unfilteredList).ToList();
+                unfilteredList = _columns[(int)SortColumn].Sort?.Invoke(SortDirection, unfilteredList).ToList() ?? unfilteredList;
             }
 
             foreach (var column in _columns)

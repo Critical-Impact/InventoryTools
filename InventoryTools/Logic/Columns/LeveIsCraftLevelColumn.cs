@@ -7,6 +7,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class LeveIsCraftLevelColumn : CheckboxColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override bool? CurrentValue(InventoryItem item)
         {
             return Service.ExcelCache.IsItemCraftLeve(item.ItemId);
@@ -22,7 +23,8 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "Leves: For Craft Leve?";
+        public override string Name { get; set; } = "Is Leve(Craft) Item?";
+        public override string RenderName => "Leve (Craft)";
         public override float Width { get; set; } = 100.0f;
         public override string HelpText { get; set; } = "Is this item used in a craft leve?";
         public override bool HasFilter { get; set; } = true;

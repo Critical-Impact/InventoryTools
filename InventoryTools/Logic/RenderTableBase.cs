@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using Dalamud.Logging;
 using ImGuiNET;
@@ -22,6 +23,9 @@ namespace InventoryTools.Logic
         public List<SortingResult> RenderSortedItems { get; set; } = new List<SortingResult>();
         public List<ItemEx> Items { get; set; } = new List<ItemEx>();
         public List<ItemEx> RenderItems { get; set; } = new List<ItemEx>();
+        
+        public List<InventoryChange> InventoryChanges { get; set; } = new List<InventoryChange>();
+        public List<InventoryChange> RenderInventoryChanges { get; set; } = new List<InventoryChange>();
 
         public RenderTableBase(FilterConfiguration filterConfiguration)
         {
@@ -58,6 +62,8 @@ namespace InventoryTools.Logic
         public bool IsSearching { get; set; }
         public FilterConfiguration FilterConfiguration { get; set; }
         public bool HighlightItems => ConfigurationManager.Config.ActiveUiFilter == FilterConfiguration.Key;
+
+        public bool Disposed => _disposed;
 
         protected void FilterConfigurationOnTableConfigurationChanged(FilterConfiguration filterconfiguration)
         {
@@ -97,7 +103,7 @@ namespace InventoryTools.Logic
         
         protected virtual void Dispose(bool disposing)
         {
-            if(!_disposed && disposing)
+            if(!Disposed && disposing)
             {
                 FilterConfiguration.ConfigurationChanged -= FilterConfigurationUpdated;
                 FilterConfiguration.ListUpdated -= FilterConfigurationOnListUpdated;
@@ -112,7 +118,7 @@ namespace InventoryTools.Logic
             // In debug-builds, make sure that a warning is displayed when the Disposable object hasn't been
             // disposed by the programmer.
 
-            if( _disposed == false )
+            if( Disposed == false )
             {
                 PluginLog.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
             }

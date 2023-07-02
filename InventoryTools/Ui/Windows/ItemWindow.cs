@@ -5,16 +5,13 @@ using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Interfaces;
-using CriticalCommonLib.Models;
+using CriticalCommonLib.Models.ItemSources;
 using CriticalCommonLib.Sheets;
 using Dalamud.Game.Text;
-using Dalamud.Utility;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
-using Lumina.Excel;
 using Lumina.Excel.GeneratedSheets;
-using LuminaSupplemental.Excel.Model;
 using OtterGui;
 using OtterGui.Raii;
 using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
@@ -119,7 +116,9 @@ namespace InventoryTools.Ui
                 ImGui.TextUnformatted("Item Level " + Item.LevelItem.Row.ToString());
                 if (Item.DescriptionString != "")
                 {
-                    ImGui.TextWrapped(Item.DescriptionString);
+                    ImGui.PushTextWrapPos();
+                    ImGui.TextUnformatted(Item.DescriptionString);
+                    ImGui.PopTextWrapPos();
                 }
 
                 if (Item.CanBeAcquired)
@@ -196,16 +195,19 @@ namespace InventoryTools.Ui
                                 c.FilterType == Logic.FilterType.CraftFilter && !c.CraftListDefault);
                         foreach (var filter in craftFilters)
                         {
-                            if (ImGui.Selectable("Add item to craft list - " + filter.Name))
+                            using (ImRaii.PushId(filter.Key))
                             {
-                                PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                if (ImGui.Selectable("Add item to craft list - " + filter.Name))
                                 {
-                                    filter.CraftList.AddCraftItem(_itemId, 1, InventoryItem.ItemFlags.None);
-                                    filter.NeedsRefresh = true;
-                                    filter.StartRefresh();
-                                    PluginService.WindowService.OpenCraftsWindow();
-                                    PluginService.WindowService.GetCraftsWindow().FocusFilter(filter);
-                                });
+                                    PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                    {
+                                        filter.CraftList.AddCraftItem(_itemId, 1, InventoryItem.ItemFlags.None);
+                                        filter.NeedsRefresh = true;
+                                        filter.StartRefresh();
+                                        PluginService.WindowService.OpenCraftsWindow();
+                                        PluginService.WindowService.GetCraftsWindow().FocusFilter(filter);
+                                    });
+                                }
                             }
                         }
                         ImGui.EndPopup();
@@ -472,6 +474,68 @@ namespace InventoryTools.Ui
                     }
                 }
 
+                if (Item.IsIshgardCraft)
+                {
+                    if (ImGui.CollapsingHeader("Ishgard Restoration", ImGuiTreeNodeFlags.CollapsingHeader | ImGuiTreeNodeFlags.DefaultOpen))
+                    {
+                        var crafterSupplyEx = Item.GetHwdCrafterSupply();
+                        if (crafterSupplyEx != null)
+                        {
+                            var supplyItem = crafterSupplyEx.GetSupplyItem(_itemId);
+                            if (supplyItem != null)
+                            {
+                                using (var table = ImRaii.Table("SupplyItems", 4 ,ImGuiTableFlags.None))
+                                {
+                                    if (table.Success)
+                                    {
+                                        ImGui.TableNextColumn();
+                                        ImGui.TableHeader("Level");
+                                        ImGui.TableNextColumn();
+                                        ImGui.TableHeader("Collectable Rating");
+                                        ImGui.TableNextColumn();
+                                        ImGui.TableHeader("XP");
+                                        ImGui.TableNextColumn();
+                                        ImGui.TableHeader("Scrip");
+
+                                        ImGui.TableNextRow();
+                                        ImGui.TableNextColumn();
+                                        ImGui.TextWrapped("Base");
+                                        ImGui.TableNextColumn();
+                                        ImGui.TextWrapped(supplyItem.BaseCollectableRating.ToString());
+                                        ImGui.TableNextColumn();
+                                        ImGui.TextWrapped((supplyItem.BaseReward.Value?.ExpReward ?? 0).ToString());
+                                        ImGui.TableNextColumn();
+                                        ImGui.TextWrapped((supplyItem.BaseReward.Value?.ScriptRewardAmount ?? 0)
+                                            .ToString());
+
+                                        ImGui.TableNextRow();
+                                        ImGui.TableNextColumn();
+                                        ImGui.TextWrapped("Mid");
+                                        ImGui.TableNextColumn();
+                                        ImGui.TextWrapped(supplyItem.MidCollectableRating.ToString());
+                                        ImGui.TableNextColumn();
+                                        ImGui.TextWrapped((supplyItem.MidReward.Value?.ExpReward ?? 0).ToString());
+                                        ImGui.TableNextColumn();
+                                        ImGui.TextWrapped((supplyItem.MidReward.Value?.ScriptRewardAmount ?? 0)
+                                            .ToString());
+
+                                        ImGui.TableNextRow();
+                                        ImGui.TableNextColumn();
+                                        ImGui.TextWrapped("High");
+                                        ImGui.TableNextColumn();
+                                        ImGui.TextWrapped(supplyItem.HighCollectableRating.ToString());
+                                        ImGui.TableNextColumn();
+                                        ImGui.TextWrapped((supplyItem.HighReward.Value?.ExpReward ?? 0).ToString());
+                                        ImGui.TableNextColumn();
+                                        ImGui.TextWrapped((supplyItem.HighReward.Value?.ScriptRewardAmount ?? 0)
+                                            .ToString());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 void DrawSupplierRow((IShop shop, ENpc? npc, ILocation? location) tuple)
                 {
                     ImGui.TableNextColumn();
@@ -481,7 +545,7 @@ namespace InventoryTools.Ui
                         ImGui.TableNextColumn();
                         ImGui.TextWrapped(tuple.npc?.Resident?.Singular ?? "");
                     }
-                    if (tuple.location != null)
+                    if (tuple.npc != null && tuple.location != null)
                     {
                         ImGui.TableNextColumn();
                         ImGui.TextWrapped(tuple.location + " ( " + Math.Round(tuple.location.MapX, 2) + "/" +
@@ -624,7 +688,9 @@ namespace InventoryTools.Ui
                     hasInformation = true;
                     if (_craftItem == null)
                     {
-                        _craftItem = new CraftItem(Item.RowId, InventoryItem.ItemFlags.None, 1, true);
+                        var craftList = new CraftList();
+                        craftList.AddCraftItem(Item.RowId, 1);
+                        _craftItem = craftList.CraftItems.First();
                     }
                     if (ImGui.CollapsingHeader("Company Craft Recipe (" + _craftItem.ChildCrafts.Count + ")"))
                     {
@@ -634,33 +700,42 @@ namespace InventoryTools.Ui
                         foreach(var craftItem in _craftItem.ChildCrafts)
                         {
                             var item = Service.ExcelCache.GetItemExSheet().GetRow(craftItem.ItemId);
-                            ImGui.PushID(index);
-                            var icon = PluginService.IconStorage.LoadIcon(item.Icon);
-                            if (ImGui.ImageButton(icon.ImGuiHandle, new(32, 32)))
+                            if (item != null)
                             {
-                                PluginService.WindowService.OpenItemWindow(item.RowId);
-                            }
-                            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right)) 
-                            {
-                                ImGui.OpenPopup("RightClick" + item.RowId);
-                            }
-                
-                            if (ImGui.BeginPopup("RightClick"+ item.RowId))
-                            {
-                                item.DrawRightClickPopup();
-                                ImGui.EndPopup();
-                            }
+                                ImGui.PushID(index);
+                                var icon = PluginService.IconStorage.LoadIcon(item.Icon);
+                                if (ImGui.ImageButton(icon.ImGuiHandle, new(32, 32)))
+                                {
+                                    PluginService.WindowService.OpenItemWindow(item.RowId);
+                                }
 
-                            float lastButtonX2 = ImGui.GetItemRectMax().X;
-                            float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
-                            ImGuiUtil.HoverTooltip(item.NameString + " - " + craftItem.QuantityRequired);
-                            if (index + 1 < _craftItem.ChildCrafts.Count && nextButtonX2 < windowVisibleX2)
-                            {
-                                ImGui.SameLine();
-                            }
+                                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
+                                                        ImGuiHoveredFlags.AllowWhenOverlapped &
+                                                        ImGuiHoveredFlags.AllowWhenBlockedByPopup &
+                                                        ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
+                                                        ImGuiHoveredFlags.AnyWindow) &&
+                                    ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                                {
+                                    ImGui.OpenPopup("RightClick" + item.RowId);
+                                }
 
-                            ImGui.PopID();
-                            index++;
+                                if (ImGui.BeginPopup("RightClick" + item.RowId))
+                                {
+                                    item.DrawRightClickPopup();
+                                    ImGui.EndPopup();
+                                }
+
+                                float lastButtonX2 = ImGui.GetItemRectMax().X;
+                                float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
+                                ImGuiUtil.HoverTooltip(item.NameString + " - " + craftItem.QuantityRequired);
+                                if (index + 1 < _craftItem.ChildCrafts.Count && nextButtonX2 < windowVisibleX2)
+                                {
+                                    ImGui.SameLine();
+                                }
+
+                                ImGui.PopID();
+                                index++;
+                            }
                         }
                     }
                 }
@@ -714,16 +789,13 @@ namespace InventoryTools.Ui
                                     new Vector2(32 * ImGui.GetIO().FontGlobalScale, 32 * ImGui.GetIO().FontGlobalScale),
                                     new Vector2(0, 0), new Vector2(1, 1), 0))
                             {
-                                PluginService.ChatUtilities.PrintFullMapLink(
-                                    new GenericMapLocation(position.Position.X, position.Position.Y,
-                                        territory.Value.MapEx,
-                                        territory.Value.PlaceNameEx), position.FormattedPosition);
+                                PluginService.ChatUtilities.PrintFullMapLink(position, position.FormattedName);
                             }
 
                             if (ImGui.IsItemHovered())
                             {
                                 using var tt = ImRaii.Tooltip();
-                                ImGui.TextUnformatted(position.FormattedPosition);
+                                ImGui.TextUnformatted(position.FormattedName);
                             }
 
                             if ((count + 1) % maxItems != 0)

@@ -20,8 +20,10 @@ namespace InventoryTools.Logic.Filters
         private Dictionary<uint, string> _choices = new();
         private bool _choicesLoaded = false;
 
+        public override List<uint> DefaultValue { get; set; } = new();
+
         public override FilterType AvailableIn { get; set; } =
-            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter;
+            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter;
         
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {

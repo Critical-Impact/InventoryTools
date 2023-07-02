@@ -4,6 +4,8 @@ namespace InventoryTools.Logic.Filters.Abstract
 {
     public abstract class StringMultipleChoiceFilter : MultipleChoiceFilter<string>
     {
+        public override List<string> DefaultValue { get; set; } = new();
+
         public override List<string> CurrentValue(FilterConfiguration configuration)
         {
             return configuration.GetStringChoiceFilter(Key);
@@ -16,7 +18,7 @@ namespace InventoryTools.Logic.Filters.Abstract
         
         public override void ResetFilter(FilterConfiguration configuration)
         {
-            UpdateFilterConfiguration(configuration, new List<string>());
+            UpdateFilterConfiguration(configuration, DefaultValue);
         }
     }
 }

@@ -22,9 +22,6 @@ namespace InventoryTools.Ui
         private static HoverButton _menuIcon { get; } = new(PluginService.IconStorage.LoadImage("menu"),  new Vector2(22, 22));
         private static HoverButton _filtersIcon { get; } = new(PluginService.IconStorage.LoadImage("filters"),  new Vector2(22,22));
         
-        private List<FilterConfiguration>? _filters;
-        private PopupMenu _addFilterMenu;
-
         private PopupMenu _settingsMenu = new PopupMenu("configMenu", PopupMenu.PopupMenuButtons.All,
             new List<PopupMenu.IPopupMenuItem>()
             {
@@ -88,7 +85,6 @@ namespace InventoryTools.Ui
         }
 
         private string _filterKey;
-        private string _activeFilter;
 
         public static string AsKey(string filterKey)
         {
@@ -120,8 +116,8 @@ namespace InventoryTools.Ui
                 var table = PluginService.FilterService.GetFilterTable(_filterKey);
                 if (table != null)
                 {
-                    var activeFilter = DrawFilter(table, SelectedConfiguration);
-                    if (_activeFilter != activeFilter && ImGui.IsWindowFocused())
+                    DrawFilter(table, SelectedConfiguration);
+                    if (ImGui.IsWindowFocused())
                     {
                         if (ConfigurationManager.Config.SwitchFiltersAutomatically &&
                             ConfigurationManager.Config.ActiveUiFilter != SelectedConfiguration.Key &&
@@ -319,6 +315,11 @@ namespace InventoryTools.Ui
                     if (SelectedConfiguration != null && SelectedConfiguration.FilterType == FilterType.GameItemFilter)
                     {
                         totalItems =  itemTable.RenderItems.Count + " items";
+                    }
+
+                    if (SelectedConfiguration != null && SelectedConfiguration.FilterType == FilterType.HistoryFilter)
+                    {
+                        totalItems =  itemTable.InventoryChanges.Count + " historical records";
                     }
 
                     var calcTextSize = ImGui.CalcTextSize(totalItems);

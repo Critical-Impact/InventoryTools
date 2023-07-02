@@ -4,14 +4,12 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Addons;
-using Dalamud.Interface;
+using CriticalCommonLib.Services;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
-using ImGuiScene;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
-using InventoryTools.Services;
 using InventoryTools.Ui.Widgets;
 using OtterGui.Raii;
 using ImGuiUtil = OtterGui.ImGuiUtil;
@@ -46,7 +44,7 @@ namespace InventoryTools.Ui
 
         
         private List<FilterConfiguration>? _filters;
-        private PopupMenu _addFilterMenu;
+        private PopupMenu _addFilterMenu = null!;
 
         private PopupMenu _settingsMenu = new PopupMenu("configMenu", PopupMenu.PopupMenuButtons.All,
             new List<PopupMenu.IPopupMenuItem>()
@@ -230,7 +228,8 @@ namespace InventoryTools.Ui
                 {
                     new PopupMenu.PopupMenuItemSelectableAskName("Search Filter", "adf1", "New Search Filter", AddSearchFilter, "This will create a new filter that let's you search for specific items within your characters and retainers inventories."),
                     new PopupMenu.PopupMenuItemSelectableAskName("Sort Filter", "af2", "New Sort Filter", AddSortFilter, "This will create a new filter that let's you search for specific items within your characters and retainers inventories then determine where they should be moved to."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Game Item Filter", "af3", "New Game Item Filter", AddGameItemFilter, "This will create a filter that lets you search for all items in the game.")
+                    new PopupMenu.PopupMenuItemSelectableAskName("Game Item Filter", "af3", "New Game Item Filter", AddGameItemFilter, "This will create a filter that lets you search for all items in the game."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("History Filter", "af4", "New History Item Filter", AddHistoryFilter, "This will create a filter that lets you view historical data of how your inventory has changed."),
                 });
         }
         
@@ -238,6 +237,18 @@ namespace InventoryTools.Ui
         {
             var filterConfiguration = new FilterConfiguration(newName,
                 Guid.NewGuid().ToString("N"), FilterType.SearchFilter);
+            PluginService.FilterService.AddFilter(filterConfiguration);
+            Invalidate();
+            var configWindow = PluginService.WindowService.GetWindow<ConfigurationWindow>(ConfigurationWindow.AsKey);
+            configWindow.Open();
+            configWindow.BringToFront();
+            configWindow.SetActiveFilter(filterConfiguration);
+        }
+        
+        private void AddHistoryFilter(string newName, string id)
+        {
+            var filterConfiguration = new FilterConfiguration(newName,
+                Guid.NewGuid().ToString("N"), FilterType.HistoryFilter);
             PluginService.FilterService.AddFilter(filterConfiguration);
             Invalidate();
             var configWindow = PluginService.WindowService.GetWindow<ConfigurationWindow>(ConfigurationWindow.AsKey);
@@ -288,6 +299,44 @@ namespace InventoryTools.Ui
         
         public override unsafe void Draw()
         {
+            if (SelectedConfiguration != null && SelectedConfiguration.FilterType == FilterType.HistoryFilter && !ConfigurationManager.Config.HasSeenNotification(NotificationPopup.HistoryNotice) && ImGui.IsWindowFocused())
+            {
+                ImGui.OpenPopup("historynotice");
+                ConfigurationManager.Config.MarkNotificationSeen(NotificationPopup.HistoryNotice);
+            }
+            var choice = InventoryTools.Ui.Widgets.ImGuiUtil.ConfirmPopup("historynotice", new Vector2(800,340) * ImGui.GetIO().FontGlobalScale, () =>
+            {
+                ImGui.TextUnformatted("History Filter Notice");
+                ImGui.Separator();
+                ImGui.NewLine();
+
+                ImGui.PushTextWrapPos();
+                ImGui.Bullet();
+                ImGui.Text("This is a new module that helps you track changes to your inventory.");
+                ImGui.PopTextWrapPos();
+
+                ImGui.BulletText("By default it will track the following events:");
+
+                ImGui.Indent();
+                ImGui.BulletText("Items added");
+                ImGui.BulletText("Items removed");
+                ImGui.BulletText("Items moved");
+                ImGui.BulletText("Items quantities changing");
+                ImGui.BulletText("Retainer sale item price changes");
+                ImGui.Unindent();
+
+                ImGui.BulletText("It is not limited to tracking just these events and can track most changes to individual items.");
+
+                ImGui.BulletText("To change what is tracking, check out the History tab inside the main configuration section(gear icon).");
+                ImGui.BulletText("Please note that this module is experimental so it may sometimes track single events as 2 events.");
+                ImGui.NewLine();
+                ImGui.Text("By default the history module is turned off, would you like to turn it on?");
+            });
+            if (choice != null)
+            {
+                ConfigurationManager.Config.HistoryEnabled = choice.Value;
+            }
+            
             if (ConfigurationManager.Config.FiltersLayout == WindowLayout.Sidebar)
             {
                 DrawSidebar();
@@ -551,17 +600,19 @@ namespace InventoryTools.Ui
                 {
                 }
                 
+                ImGuiUtil.HoverTooltip("Add a new filter");
+                
                 _addFilterMenu.Draw();
             }
         }
-        
+        private string? _newName = null;
         private void DrawSettingsPanel(FilterConfiguration filterConfiguration)
         {
             using (var contentChild = ImRaii.Child("Content", new Vector2(0, -44) * ImGui.GetIO().FontGlobalScale, true))
             {
                 if (contentChild.Success)
                 {
-                    var filterName = filterConfiguration.Name;
+                    var filterName = _newName ?? filterConfiguration.Name;
                     var labelName = "##" + filterConfiguration.Key;
                     if (ImGui.CollapsingHeader("General",
                             ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
@@ -570,9 +621,20 @@ namespace InventoryTools.Ui
                         ImGui.LabelText(labelName + "FilterNameLabel", "Name: ");
                         ImGui.SameLine();
                         ImGui.InputText(labelName + "FilterName", ref filterName, 100);
-                        if (filterName != filterConfiguration.Name)
+                        if (filterName != _newName && filterName != filterConfiguration.Name)
                         {
-                            filterConfiguration.Name = filterName;
+                            _newName = filterName;
+                        }
+
+                        if (_newName != null)
+                        {
+                            ImGui.SameLine();
+                            if (ImGui.Button("Save"))
+                            {
+                                filterConfiguration.Name = _newName;
+                                Invalidate();
+                                _newName = null;
+                            }
                         }
 
                         ImGui.NewLine();
@@ -623,6 +685,10 @@ namespace InventoryTools.Ui
                                      filterConfiguration.FilterType.HasFlag(FilterType
                                          .CraftFilter))
                                     ||
+                                    (filter.AvailableIn.HasFlag(FilterType.HistoryFilter) &&
+                                     filterConfiguration.FilterType.HasFlag(FilterType
+                                         .HistoryFilter))
+                                    ||
                                     (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
                                      filterConfiguration.FilterType.HasFlag(FilterType
                                          .GameItemFilter)));
@@ -643,6 +709,9 @@ namespace InventoryTools.Ui
                                                      ||
                                                      (filter.AvailableIn.HasFlag(FilterType.CraftFilter) &&
                                                       filterConfiguration.FilterType.HasFlag(FilterType.CraftFilter))
+                                                     ||
+                                                     (filter.AvailableIn.HasFlag(FilterType.HistoryFilter) &&
+                                                      filterConfiguration.FilterType.HasFlag(FilterType.HistoryFilter))
                                                      ||
                                                      (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
                                                       filterConfiguration.FilterType.HasFlag(FilterType.GameItemFilter))
@@ -760,6 +829,11 @@ namespace InventoryTools.Ui
                         {
                             PluginService.Universalis.QueuePriceCheck(item.RowId);
                         }
+
+                        foreach (var item in itemTable.InventoryChanges)
+                        {
+                            PluginService.Universalis.QueuePriceCheck(item.InventoryItem.ItemId);
+                        }
                     }
 
                     ImGuiUtil.HoverTooltip("Refresh Market Prices");
@@ -867,11 +941,47 @@ namespace InventoryTools.Ui
 
                     ImGuiUtil.HoverTooltip("Open the craft window.");
 
+                    if (SelectedConfiguration != null && SelectedConfiguration.FilterType == FilterType.HistoryFilter)
+                    {
+                        ImGui.SetCursorPosY(0);
+                        width -= 30 * ImGui.GetIO().FontGlobalScale;
+                        ImGui.SetCursorPosX(width);
+                        UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                        if (_clearIcon.Draw("clearHistory"))
+                        {
+                            ImGui.OpenPopup("confirmHistoryDelete");
+                        }
+                        
+                        var result = InventoryTools.Ui.Widgets.ImGuiUtil.ConfirmPopup("confirmHistoryDelete", new Vector2(300, 100),
+                            () =>
+                            {
+                                ImGui.TextWrapped("Are you sure you want to clear all your stored history?");
+                            });
+                        if (result == true)
+                        {
+                            PluginService.InventoryHistory.ClearHistory();
+                        }
+
+                        ImGuiUtil.HoverTooltip("Clear your history.");
+                    }
+
                     var totalItems =  itemTable.RenderSortedItems.Count + " items";
 
                     if (SelectedConfiguration != null && SelectedConfiguration.FilterType == FilterType.GameItemFilter)
                     {
                         totalItems =  itemTable.RenderItems.Count + " items";
+                    }
+                    
+                    if (SelectedConfiguration != null && SelectedConfiguration.FilterType == FilterType.HistoryFilter)
+                    {
+                        if (ConfigurationManager.Config.HistoryEnabled)
+                        {
+                            totalItems = itemTable.InventoryChanges.Count + " historical records";
+                        }
+                        else
+                        {
+                            totalItems = "History tracking is currently disabled";
+                        }
                     }
 
                     var calcTextSize = ImGui.CalcTextSize(totalItems);

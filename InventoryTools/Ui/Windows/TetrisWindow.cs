@@ -2,7 +2,6 @@ using System.Numerics;
 using ImGuiNET;
 using InventoryTools.Logic;
 using InventoryTools.Misc;
-using OtterGui.Raii;
 using Tetris.GameEngine;
 
 namespace InventoryTools.Ui

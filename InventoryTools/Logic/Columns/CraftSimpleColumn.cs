@@ -1,15 +1,23 @@
 using System;
+using System.Linq;
+using System.Numerics;
+using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
+using Dalamud.Interface;
 using Dalamud.Interface.Colors;
+using Dalamud.Interface.Components;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Ui.Widgets;
+using OtterGui.Raii;
 
 namespace InventoryTools.Logic.Columns
 {
     public class CraftSimpleColumn : TextColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Crafting;
         public override string? CurrentValue(CraftItem currentValue)
         {
             return "";
@@ -18,47 +26,31 @@ namespace InventoryTools.Logic.Columns
         public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
         {
             ImGui.TableNextColumn();
-            var unavailable = Math.Max(0, (int)item.QuantityUnavailable - (int)item.QuantityCanCraft);
-            if (unavailable != 0)
+            var nextStep = configuration.CraftList.GetNextStep(item);
+            ImGuiUtil.VerticalAlignTextColored(nextStep.Item2, nextStep.Item1, configuration.TableHeight, true);
+            if (item.MissingIngredients.Count != 0)
             {
-                if (item.Item.ObtainedGathering)
+                ImGui.SameLine();
+                ImGui.PushFont(UiBuilder.IconFont);
+                ImGuiUtil.VerticalAlignTextDisabled(FontAwesomeIcon.InfoCircle.ToIconString(), configuration.TableHeight, false);
+                ImGui.PopFont();
+                if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
                 {
-                    ImGui.TextColored(ImGuiColors.DalamudYellow, "Gather " + unavailable);
+                    using var tt = ImRaii.Tooltip();
+                    ImGui.Text("Missing Ingredients: ");
+                    foreach (var missingIngredient in item.MissingIngredients)
+                    {
+                        var itemId = missingIngredient.Key.Item1;
+                        var quantity = missingIngredient.Value;
+                        var isHq = missingIngredient.Key.Item2;
+                        var actualItem = Service.ExcelCache.GetItemExSheet().GetRow(itemId);
+                        if (actualItem != null)
+                        {
+                            ImGui.Text(actualItem.NameString + " : " + quantity);
+                        }
+                    }
                 }
-                else if (item.Item.ObtainedGil)
-                {
-                    ImGui.TextColored(ImGuiColors.DalamudYellow, "Buy " + unavailable);
-                }
-                else
-                {
-                    ImGui.TextColored(ImGuiColors.DalamudRed, "Missing " + unavailable);
-                }
-
-                return;
             }
-            var canCraft = item.QuantityCanCraft;
-            if (canCraft != 0)
-            {
-                if (item.Item.CanBeCrafted)
-                {
-                    ImGui.TextColored(ImGuiColors.ParsedBlue, "Craft " + (uint)Math.Ceiling((double)canCraft / item.Yield));
-                }
-                return;
-            }
-
-            var retrieve = Math.Min((int)item.QuantityAvailable, (int)item.QuantityNeeded);
-            if (!item.IsOutputItem && retrieve != 0)
-            {
-                ImGui.TextColored(ImGuiColors.DalamudOrange, "Retrieve " + retrieve);
-                return;
-            }
-
-            if (item.IsOutputItem)
-            {
-                ImGui.TextColored(ImGuiColors.DalamudWhite, "Waiting");
-                return;
-            }
-            ImGui.TextColored(ImGuiColors.HealerGreen, "Done");
         }
 
         public override string? CurrentValue(InventoryItem item)
@@ -76,8 +68,10 @@ namespace InventoryTools.Logic.Columns
             return "";
         }
 
-        public override string Name { get; set; } = "Next Step";
-        public override float Width { get; set; } = 100;
+        public override string Name { get; set; } = "Next Step in Craft";
+        public override string RenderName => "Next Step";
+
+        public override float Width { get; set; } = 200;
         public override bool? CraftOnly => true;
 
         public override string HelpText { get; set; } =

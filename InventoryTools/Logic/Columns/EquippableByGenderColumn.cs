@@ -8,6 +8,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class EquippableByGenderColumn : TextColumn
     {
+        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override string? CurrentValue(InventoryItem item)
         {
             return item.Item.EquippableByGender.FormattedName();
@@ -23,7 +24,7 @@ namespace InventoryTools.Logic.Columns
             return CurrentValue(item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "Equippable By Gender";
+        public override string Name { get; set; } = "Equipped By (Gender)";
         public override float Width { get; set; } = 200;
         public override string HelpText { get; set; } = "Shows if an item can be equipped by a specific gender.";
         public override bool HasFilter { get; set; } = true;

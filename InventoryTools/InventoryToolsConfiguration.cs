@@ -4,9 +4,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib.Models;
 using Dalamud.Configuration;
-using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Colors;
-using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
 using Newtonsoft.Json;
@@ -32,7 +30,7 @@ namespace InventoryTools
 
         private Vector4 _retainerListColor = ImGuiColors.HealerGreen;
 
-        private string _highlightWhen = "Always";
+        private string _highlightWhen = "When Searching";
         private bool _invertHighlighting = true;
         private bool _invertDestinationHighlighting = false;
         private bool _invertTabHighlighting = false;
@@ -44,6 +42,7 @@ namespace InventoryTools
         private int _marketRefreshTimeHours = 24;
         private int _marketSaleHistoryLimit = 7;
         private bool _showItemNumberRetainerList = true;
+        private bool _historyEnabled = false;
 
         private Vector4 _tabHighlightColor = new (0.007f, 0.008f,
             0.007f, 1.0f);
@@ -53,15 +52,34 @@ namespace InventoryTools
         public Dictionary<ulong, Character> SavedCharacters = new();
 
         private Dictionary<ulong, HashSet<uint>> _acquiredItems = new();
-
-        [JsonIgnore]
-        public Dictionary<ulong, Dictionary<InventoryCategory,List<InventoryItem>>> SavedInventories = new ();
-
         public bool InventoriesMigrated { get; set; } = false;
         public bool InventoriesMigratedToCsv { get; set; } = false;
 
         private HashSet<string>? _openWindows = new();
         private Dictionary<string, Vector2>? _savedWindowPositions = new();
+        private List<InventoryChangeReason> _historyTrackReasons = new();
+        public bool HistoryEnabled
+        {
+            get => _historyEnabled;
+            set
+            {
+                _historyEnabled = value;
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+            }
+        }
+
+        public List<InventoryChangeReason> HistoryTrackReasons
+        {
+            get
+            {
+                return _historyTrackReasons;
+            }
+            set
+            {
+                _historyTrackReasons = value;
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+            }
+        }
 
         public bool IsVisible
         {
@@ -88,8 +106,8 @@ namespace InventoryTools
         public bool SwitchFiltersAutomatically { get; set; } = true;
         private bool _tooltipCurrentCharacter = false;
         private bool _tooltipDisplayAmountOwned = true;
-        private bool _tooltipDisplayMarketAveragePrice = true;
-        private bool _tooltipDisplayMarketLowestPrice = false;
+        private bool _tooltipDisplayMarketAveragePrice = false;
+        private bool _tooltipDisplayMarketLowestPrice = true;
         private bool _tooltipAddCharacterNameOwned = false;
         private bool _tooltipDisplayRetrieveAmount = false;
         private int _tooltipLocationLimit = 10;
@@ -100,6 +118,7 @@ namespace InventoryTools
         private WindowLayout _craftWindowLayout =  WindowLayout.Tabs;
         private WindowLayout _filtersLayout = WindowLayout.Tabs;
         private uint? _tooltipColor = null;
+        private HashSet<NotificationPopup>? _notificationsSeen = new ();
         public Vector4 HighlightColor
         {
             get => _highlightColor;
@@ -394,6 +413,27 @@ namespace InventoryTools
             }
         }
         
+        public HashSet<NotificationPopup> NotificationsSeen
+        {
+            get => _notificationsSeen ??= new HashSet<NotificationPopup>();
+            set
+            {
+                _notificationsSeen = value;
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+            }
+        }
+
+        public bool HasSeenNotification(NotificationPopup popup)
+        {
+            return NotificationsSeen.Contains(popup);
+        }
+
+        public void MarkNotificationSeen(NotificationPopup popup)
+        {
+            NotificationsSeen.Add(popup);
+            PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+        }
+        
         public Dictionary<ulong, HashSet<uint>> AcquiredItems
         {
             get => _acquiredItems ?? new Dictionary<ulong, HashSet<uint>>();
@@ -508,10 +548,6 @@ namespace InventoryTools
         public event ConfigurationChangedDelegate? ConfigurationChanged;
 
         //Configuration Helpers
-        public Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>> GetSavedInventory()
-        {
-            return SavedInventories;
-        }
 
         public Dictionary<ulong, Character> GetSavedRetainers()
         {
