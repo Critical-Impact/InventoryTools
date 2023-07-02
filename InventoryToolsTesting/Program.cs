@@ -58,7 +58,7 @@ if (inventories != null)
     sampleFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
     sampleFilter.HighlightWhen = "Always";
 
-    var filterState = new FilterState() { FilterConfiguration = sampleFilter };
+    var filterState = new FilterState(sampleFilter);
     // var filteredList = sampleFilter.GenerateFilteredList(inventories).Result;
     // var bagHighlights = filterState.GetBagHighlights(InventoryType.RetainerBag0,filteredList);
     //

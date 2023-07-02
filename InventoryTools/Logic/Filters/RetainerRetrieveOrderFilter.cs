@@ -63,7 +63,6 @@ public class RetainerRetrieveOrderFilter : ChoiceFilter<RetainerRetrieveOrder>
         {
             case RetainerRetrieveOrder.RetrieveFirst:
                 return "Retrieve First";
-                break;
             case RetainerRetrieveOrder.RetrieveLast:
                 return "Retrieve Last";
         }

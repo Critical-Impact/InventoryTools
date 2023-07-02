@@ -50,8 +50,8 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
                     }
 
                     return specs == ImGuiSortDirection.Ascending
-                        ? exes.OrderBy(c => c.Resident.FormattedSingular)
-                        : exes.OrderByDescending(c => c.Resident.FormattedSingular);
+                        ? exes.OrderBy(c => c.Resident?.FormattedSingular ?? "")
+                        : exes.OrderByDescending(c => c.Resident?.FormattedSingular ?? "");
                 },
                 Filter = (s, exes) =>
                 {
@@ -60,11 +60,11 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
                         return exes;
                     }
 
-                    return s == "" ? exes : exes.Where(c => c.Resident.FormattedSingular.ToLower().PassesFilter(s.ToLower()));
+                    return s == "" ? exes : exes.Where(c => (c.Resident?.FormattedSingular ?? "").ToLower().PassesFilter(s.ToLower()));
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    ImGui.TextUnformatted(ex.Resident.FormattedSingular);
+                    ImGui.TextUnformatted(ex.Resident?.FormattedSingular ?? "");
                 }
             },
             new("Locations", 200, ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoSort)
@@ -79,13 +79,13 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
                                     RowSize * ImGui.GetIO().FontGlobalScale), new Vector2(0, 0),
                                 new Vector2(1, 1), 0))
                         {
-                            PluginService.ChatUtilities.PrintFullMapLink(position, ex.Resident.FormattedSingular);
+                            PluginService.ChatUtilities.PrintFullMapLink(position, ex.Resident?.FormattedSingular ?? "");
                         }
 
                         if (ImGui.IsItemHovered())
                         {
                             using var tt = ImRaii.Tooltip();
-                            ImGui.TextUnformatted(position.PlaceNameEx.Value.FormattedName + " - " +
+                            ImGui.TextUnformatted((position.PlaceNameEx.Value?.FormattedName ?? "Unknown") + " - " +
                                                   position.MapX +
                                                   " : " + position.MapY);
                         }
@@ -120,7 +120,7 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
                 }
             },
         };
-        _tabs = Service.ExcelCache.ENpcCollection.Where(c => c.Resident.FormattedSingular != "").SelectMany(c => c.Locations.Select(c => c.PlaceNameEx)).DistinctBy(c => c.Row).ToDictionary(c => c.Row, c => c.Value.Name.ToDalamudString().ToString());
+        _tabs = Service.ExcelCache.ENpcCollection.Where(c => (c.Resident?.FormattedSingular ?? "") != "").SelectMany(c => c.Locations.Select(c => c.PlaceNameEx)).DistinctBy(c => c.Row).ToDictionary(c => c.Row, c => c.Value?.Name.ToDalamudString().ToString() ?? "");
         _items = new Dictionary<uint, List<ENpc>>();
         _filteredItems = new Dictionary<uint, List<ENpc>>();
     }
@@ -137,12 +137,12 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
         {
             if (placeNameId == 0)
             {
-                var enpcs = Service.ExcelCache.ENpcCollection.Where(c => c.Resident.FormattedSingular != "").ToList();
+                var enpcs = Service.ExcelCache.ENpcCollection.Where(c => (c.Resident?.FormattedSingular ?? "") != "").ToList();
                 _items.Add(placeNameId, enpcs);
             }
             else
             {
-                var enpcs = Service.ExcelCache.ENpcCollection.Where(c => c.Resident.FormattedSingular != "" && c.Locations.Any(c => c.PlaceNameEx.Row == placeNameId)).ToList();
+                var enpcs = Service.ExcelCache.ENpcCollection.Where(c => (c.Resident?.FormattedSingular ?? "") != "" && c.Locations.Any(c => c.PlaceNameEx.Row == placeNameId)).ToList();
                 _items.Add(placeNameId, enpcs);
             }
         }
@@ -152,7 +152,7 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
             var unfilteredList = _items[placeNameId];
             if (SortColumn != null && _columns[(int)SortColumn].Sort != null)
             {
-                unfilteredList = _columns[(int)SortColumn].Sort?.Invoke(SortDirection, unfilteredList).ToList();
+                unfilteredList = _columns[(int)SortColumn].Sort?.Invoke(SortDirection, unfilteredList).ToList() ?? unfilteredList;
             }
 
             foreach (var column in _columns)
@@ -200,18 +200,17 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
         return (int)item.Key;
     }
 
-    public override Dictionary<uint, List<ENpc>> Items => _items;
+    public override Dictionary<uint, List<ENpc>> Items => _items = null!;
 
-    public override Dictionary<uint, List<ENpc>> FilteredItems => _filteredItems;
+    public override Dictionary<uint, List<ENpc>> FilteredItems => _filteredItems = null!;
 
-    public override List<TableColumn<ENpc>> Columns => _columns;
+    public override List<TableColumn<ENpc>> Columns => _columns = null!;
 
     public override ImGuiTableFlags TableFlags => _flags;
 
-    private List<TableColumn<ENpc>> _columns;
-    private Dictionary<uint, List<ENpc>> _items;
-    private Dictionary<uint, List<ENpc>> _filteredItems;
-    private List<TableColumn<ENpc>> _columns1;
+    private List<TableColumn<ENpc>> _columns = null!;
+    private Dictionary<uint, List<ENpc>> _items = null!;
+    private Dictionary<uint, List<ENpc>> _filteredItems = null!;
     private ImGuiTableFlags _flags = ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersV |
                                                    ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.BordersInnerV |
                                                    ImGuiTableFlags.BordersH | ImGuiTableFlags.BordersOuterH |
@@ -219,8 +218,8 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
                                                    ImGuiTableFlags.Resizable | ImGuiTableFlags.Sortable |
                                                    ImGuiTableFlags.Hideable | ImGuiTableFlags.ScrollX |
                                                    ImGuiTableFlags.ScrollY;
-    private Dictionary<uint, string> _tabs;
-    private string _tableName;
+    private Dictionary<uint, string> _tabs = null!;
+    private string _tableName = "enpcs";
     private bool _useClipper = false;
 
     public override void Invalidate()

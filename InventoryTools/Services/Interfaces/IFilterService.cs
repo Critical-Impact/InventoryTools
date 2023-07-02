@@ -83,6 +83,6 @@ namespace InventoryTools.Services.Interfaces
         event FilterTableRefreshedDelegate FilterTableRefreshed;
         event FilterRepositionedDelegate FilterRepositioned;
 
-        FilterConfiguration? GetDefaultCraftList();
+        FilterConfiguration GetDefaultCraftList();
     }
 }

@@ -285,10 +285,10 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
 
     public override List<TableColumn<AirshipExplorationPointEx>> Columns => _columns;
     
-    private List<TableColumn<AirshipExplorationPointEx>> _columns;
-    private Dictionary<uint, List<AirshipExplorationPointEx>> _items;
-    private Dictionary<uint, List<AirshipExplorationPointEx>> _filteredItems;
-    private Dictionary<uint, string> _tabs;
+    private List<TableColumn<AirshipExplorationPointEx>> _columns = null!;
+    private Dictionary<uint, List<AirshipExplorationPointEx>> _items = null!;
+    private Dictionary<uint, List<AirshipExplorationPointEx>> _filteredItems = null!;
+    private Dictionary<uint, string> _tabs = null!;
 
     public override ImGuiTableFlags TableFlags => _flags;
     
@@ -315,7 +315,7 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
             var unfilteredList = _items[tabId];
             if (SortColumn != null && _columns[(int)SortColumn].Sort != null)
             {
-                unfilteredList = _columns[(int)SortColumn].Sort?.Invoke(SortDirection, unfilteredList).ToList();
+                unfilteredList = _columns[(int)SortColumn].Sort?.Invoke(SortDirection, unfilteredList).ToList() ?? unfilteredList;
             }
 
             foreach (var column in _columns)

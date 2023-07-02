@@ -39,7 +39,7 @@ namespace Tetris.GameEngine
         {
             _gameBoard = new Board(_default_board_width, _default_board_height);
             
-            _currPiece = null;
+            _currPiece = null!;
             _nextPiece = null;
             _status = GameStatus.ReadyToStart;
             ShadowPieceMode = true;

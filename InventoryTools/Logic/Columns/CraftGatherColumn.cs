@@ -37,25 +37,25 @@ namespace InventoryTools.Logic.Columns
             ImGui.TableNextColumn();
             if (CurrentValue(item) == true)
             {
-                if (item.IngredientPreference.Type == IngredientPreferenceType.Buy)
-                {
-                    //TODO: Rework this
-                    if (item.Item.Vendors.Any() && ImGui.SmallButton("Buy##Buy" + rowIndex))
-                    {
-                        var vendor = item.Item.Vendors.FirstOrDefault(c => c.ENpcs.Any());
-                        if (vendor != null)
-                        {
-                            var shopListing = vendor.ENpcs.First();
-                            if (shopListing.Locations.Any())
-                            {
-                                var location = shopListing.Locations.First();
-                                location.TeleportToNearestAetheryte();
-                            }
-                        }
-                    }
-                    
-                }
-                else if (item.Item.ObtainedGathering)
+                // if (item.IngredientPreference.Type == IngredientPreferenceType.Buy)
+                // {
+                //     //TODO: Rework this
+                //     if (item.Item.Vendors.Any() && ImGui.SmallButton("Buy##Buy" + rowIndex))
+                //     {
+                //         var vendor = item.Item.Vendors.FirstOrDefault(c => c.ENpcs.Any());
+                //         if (vendor != null)
+                //         {
+                //             var shopListing = vendor.ENpcs.First();
+                //             if (shopListing.Locations.Any())
+                //             {
+                //                 var location = shopListing.Locations.First();
+                //                 location.TeleportToNearestAetheryte();
+                //             }
+                //         }
+                //     }
+                //     
+                // }
+                if (item.Item.ObtainedGathering)
                 {
                     if (ImGui.SmallButton("Gather##Gather" + rowIndex))
                     {

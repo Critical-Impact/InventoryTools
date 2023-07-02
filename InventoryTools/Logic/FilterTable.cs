@@ -462,7 +462,7 @@ namespace InventoryTools.Logic
                     newLine["id"] = item.InventoryItem.ItemId;
                     foreach (var column in Columns)
                     {
-                        newLine[column.Name.ToLower()] = column.JsonExport(item);
+                        newLine[column.Name.ToLower()] = column.JsonExport(item) ?? "";
                     }
                     lines.Add(newLine);
                 }
@@ -475,7 +475,7 @@ namespace InventoryTools.Logic
                     newLine["id"] = item.RowId;
                     foreach (var column in Columns)
                     {
-                        newLine[column.Name.ToLower()] = column.JsonExport(item);
+                        newLine[column.Name.ToLower()] = column.JsonExport(item) ?? "";
                     }
                     lines.Add(newLine);
                 }
@@ -488,7 +488,7 @@ namespace InventoryTools.Logic
                     newLine["id"] = item.InventoryItem.ItemId;
                     foreach (var column in Columns)
                     {
-                        newLine[column.Name.ToLower()] = column.JsonExport(item);
+                        newLine[column.Name.ToLower()] = column.JsonExport(item) ?? "";
                     }
                     lines.Add(newLine);
                 }

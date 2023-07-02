@@ -24,7 +24,7 @@ namespace InventoryTools.Logic.Filters
             UpdateFilterConfiguration(configuration, DefaultValue);
         }
 
-        public override string DefaultValue { get; set; } = "N/A";
+        public override string? DefaultValue { get; set; } = "N/A";
 
 
         public override string Key { get; set; } = "HighlightWhen";

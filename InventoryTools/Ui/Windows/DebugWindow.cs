@@ -32,11 +32,6 @@ namespace InventoryTools.Ui
         public override Vector2 MinSize { get; } = new(200, 200);
         public override bool DestroyOnClose => false;
         private List<MobSpawnPosition> _spawnPositions = new List<MobSpawnPosition>();
-        private InventoryType inventoryType;
-        private FilterState? _filterState;
-        private FilterResult? _filterResult;
-        private float CurrentX;
-        private float CurrentZ;
 
         public DebugWindow(string name = "Allagan Tools - Debug") : base(name)
         {
@@ -687,7 +682,11 @@ namespace InventoryTools.Ui
                                                         for (int i = 0; i < bag.Length; i++)
                                                         {
                                                             var item = bag[i];
-                                                            Utils.PrintOutObject(item, (ulong)i, new List<string>());
+                                                            if (item != null)
+                                                            {
+                                                                Utils.PrintOutObject(item, (ulong)i,
+                                                                    new List<string>());
+                                                            }
                                                         }
                                                     }
                                                 }

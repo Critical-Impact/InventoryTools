@@ -8,7 +8,7 @@ namespace InventoryTools.Ui
 {
     public class IntroWindow : Window
     {
-        private TextureWrap _allaganToolsIcon;
+        private TextureWrap _allaganToolsIcon = null!;
         public IntroWindow(string name = "Allagan Tools") : base(name)
         {
             Flags =
@@ -62,7 +62,9 @@ namespace InventoryTools.Ui
                             {
                                 ImGui.Bullet();
                                 ImGui.Text("Track your inventories");
+                                ImGui.Bullet();
                                 ImGui.Text("Plan your crafts");
+                                ImGui.Bullet();
                                 ImGui.Text("Provide information about items, monsters, duties and much more");
                             }
                             
@@ -96,9 +98,9 @@ namespace InventoryTools.Ui
             }
         }
 
-        public override Vector2 DefaultSize { get; } = new Vector2(600, 350);
-        public override Vector2 MaxSize { get; } = new Vector2(600, 360);
-        public override Vector2 MinSize { get; } = new Vector2(600, 360);
+        public override Vector2 DefaultSize { get; } = new Vector2(800, 300);
+        public override Vector2 MaxSize { get; } = new Vector2(800, 300);
+        public override Vector2 MinSize { get; } = new Vector2(800, 300);
         public override bool SaveState => false;
     }
 }

@@ -10,7 +10,7 @@ namespace Tetris
         /// <summary>
         /// List of Tetris Pieces
         /// </summary>
-        private static List<Piece> _pieces;
+        private static List<Piece> _pieces = null!;
 
         #endregion
 

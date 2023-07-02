@@ -7,7 +7,7 @@ namespace InventoryTools.Sections
 {
     public class CraftFiltersPage : IConfigPage
     {
-        private bool _isSeparator;
+        private bool _isSeparator = false;
         public string Name { get; } = "Craft Lists";
         public void Draw()
         {

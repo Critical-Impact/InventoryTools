@@ -236,7 +236,8 @@ public abstract class GenericTabbedTable<T> : Window, IGenericTabbedTable<T>
                     }
                     ImGui.PushID(columnIndex);
                     ImGui.TableNextColumn();
-                    column.Draw(ex, contentTypeId);
+                    column.Draw?.Invoke(ex, contentTypeId);
+
                     ImGui.PopID();
                     columnIndex++;
                 }

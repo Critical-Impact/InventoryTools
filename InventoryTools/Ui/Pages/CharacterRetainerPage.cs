@@ -11,7 +11,7 @@ namespace InventoryTools.Sections
 {
     public class CharacterRetainerPage : IConfigPage
     {
-        private bool _isSeparator;
+        private bool _isSeparator = false;
         public string Name { get; } = "Characters/Retainers";
         
         public void Draw()

@@ -212,7 +212,7 @@ namespace InventoryTools.Services
 
         public FilterConfiguration DuplicateFilter(FilterConfiguration configuration, string newName)
         {
-            var newConfiguration = configuration.Clone();
+            var newConfiguration = configuration.Clone() ?? new FilterConfiguration();
             newConfiguration.Key = Guid.NewGuid().ToString("N");
             newConfiguration.Name = newName;
             AddFilter(newConfiguration);

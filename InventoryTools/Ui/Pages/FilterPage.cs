@@ -15,7 +15,7 @@ namespace InventoryTools.Sections
             }
         }
         public FilterConfiguration FilterConfiguration;
-        private bool _isSeparator;
+        private bool _isSeparator = false;
 
         public FilterPage(FilterConfiguration filterConfiguration)
         {

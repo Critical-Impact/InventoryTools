@@ -17,11 +17,11 @@ namespace InventoryToolsTesting
     [TestFixture]
     public class InventoryHistoryTests
     {
-        private PluginLogic _pluginLogic;
-        private ICharacterMonitor _characterMonitor;
-        private IInventoryMonitor _inventoryMonitor;
-        private InventoryHistory _inventoryHistory;
-        private IFrameworkService _frameworkService;
+        private PluginLogic _pluginLogic = null!;
+        private ICharacterMonitor _characterMonitor = null!;
+        private IInventoryMonitor _inventoryMonitor = null!;
+        private InventoryHistory _inventoryHistory = null!;
+        private IFrameworkService _frameworkService = null!;
 
         [OneTimeSetUp]
         public void Setup()

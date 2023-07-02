@@ -382,6 +382,7 @@ namespace InventoryTools.Ui
                     {
                         openPopup = true;
                     }
+                    ImGuiUtil.HoverTooltip("Add a new craft list");
                 }
             }
         }
@@ -1007,12 +1008,12 @@ namespace InventoryTools.Ui
                         UiHelpers.VerticalCenter(
                             "You are currently editing the craft list's configuration. Press the tick on the right hand side to save configuration.");
                     }
+                    float width = ImGui.GetWindowSize().X;
 
                     if (!filterConfiguration.CraftListDefault)
                     {
                         ImGui.SameLine();
-                        float width = ImGui.GetWindowSize().X;
-                        width -= 42 * ImGui.GetIO().FontGlobalScale;
+                        width -= 30 * ImGui.GetIO().FontGlobalScale;
                         ImGui.SetCursorPosX(width);
                         UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                         if (_closeSettingsIcon.Draw("bb_settings"))
@@ -1027,6 +1028,15 @@ namespace InventoryTools.Ui
                         UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                         if (_resetButton.Draw("bb_reset"))
                         {
+                            ImGui.OpenPopup("confirmReset");
+                        }
+
+                        var result = InventoryTools.Ui.Widgets.ImGuiUtil.ConfirmPopup("confirmReset", new Vector2(400, 100), () =>
+                        {
+                            ImGui.TextWrapped("Are you sure you want to reset your configuration to the default?");
+                        });
+                        if (result == true)
+                        {
                             filterConfiguration.ResetCraftFilter();
                         }
                         ImGuiUtil.HoverTooltip("Reset craft list to default configuration (keeps items).");
@@ -1034,8 +1044,8 @@ namespace InventoryTools.Ui
                     else
                     {
                         ImGui.SameLine();
-                        float width = ImGui.GetWindowSize().X;
-                        ImGui.SetCursorPosX(width - 42 * ImGui.GetIO().FontGlobalScale);
+                        width -= 30 * ImGui.GetIO().FontGlobalScale;
+                        ImGui.SetCursorPosX(width);
                         UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                         if (_resetButton.Draw("bb_reset"))
                         {
@@ -1064,6 +1074,35 @@ namespace InventoryTools.Ui
                                 {
                                     ImGui.CloseCurrentPopup();
                                 }
+                            }
+                        }
+                    }
+                    ImGui.SameLine();
+                    width -= 30 * ImGui.GetIO().FontGlobalScale;
+                    ImGui.SetCursorPosX(width);
+                    UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                    if (_clipboardIcon.Draw("copyFilterBtn"))
+                    {
+                        ImGui.OpenPopup("copyFilter");
+                    }
+                    ImGuiUtil.HoverTooltip("Copy existing filter's settings");
+
+                    using (var popup = ImRaii.ContextPopup("copyFilter"))
+                    {
+                        if (popup.Success)
+                        {
+                            var filterConfigurations = Filters.Where(c => c != SelectedConfiguration).ToList();
+                            foreach (var filter in filterConfigurations)
+                            {
+                                if (ImGui.Selectable("Copy configuration from '" + filter.Name + "'"))
+                                {
+                                    SelectedConfiguration?.ResetFilter(filter);
+                                }
+                            }
+
+                            if (filterConfigurations.Count == 0)
+                            {
+                                ImGui.Text("No other configurations available to copy from.");
                             }
                         }
                     }

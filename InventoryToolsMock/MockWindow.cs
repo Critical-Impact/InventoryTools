@@ -324,12 +324,6 @@ public class MockWindow : Window
                 PluginService.WindowService.ToggleWindow<MockGameItemsWindow>(MockGameItemsWindow.AsKey);
             }
 
-            if (ImGui.Button("Inventory History Window"))
-            {
-                PluginService.WindowService.ToggleWindow<InventoryHistoryWindow>(InventoryHistoryWindow.AsKey);
-            }
-
-
             ImGui.EndTabItem();
         }
     }

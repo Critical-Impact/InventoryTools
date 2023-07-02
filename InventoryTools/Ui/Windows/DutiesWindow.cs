@@ -315,7 +315,7 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
             var unfilteredList = _items[contentTypeId];
             if (SortColumn != null && _columns[(int)SortColumn].Sort != null)
             {
-                unfilteredList = _columns[(int)SortColumn].Sort?.Invoke(SortDirection, unfilteredList).ToList();
+                unfilteredList = _columns[(int)SortColumn].Sort?.Invoke(SortDirection, unfilteredList).ToList() ?? unfilteredList;
             }
 
             foreach (var column in _columns)
@@ -371,10 +371,9 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
 
     public override ImGuiTableFlags TableFlags => _flags;
 
-    private List<TableColumn<ContentFinderConditionEx>> _columns;
-    private Dictionary<uint, List<ContentFinderConditionEx>> _items;
-    private Dictionary<uint, List<ContentFinderConditionEx>> _filteredItems;
-    private List<TableColumn<ContentFinderConditionEx>> _columns1;
+    private List<TableColumn<ContentFinderConditionEx>> _columns = null!;
+    private Dictionary<uint, List<ContentFinderConditionEx>> _items = null!;
+    private Dictionary<uint, List<ContentFinderConditionEx>> _filteredItems = null!;
     private ImGuiTableFlags _flags = ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersV |
                                                    ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.BordersInnerV |
                                                    ImGuiTableFlags.BordersH | ImGuiTableFlags.BordersOuterH |
@@ -382,8 +381,8 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
                                                    ImGuiTableFlags.Resizable | ImGuiTableFlags.Sortable |
                                                    ImGuiTableFlags.Hideable | ImGuiTableFlags.ScrollX |
                                                    ImGuiTableFlags.ScrollY;
-    private Dictionary<uint, string> _tabs;
-    private string _tableName;
+    private Dictionary<uint, string> _tabs = null!;
+    private string _tableName = "duties";
     private bool _useClipper = false;
 
     public override void Invalidate()

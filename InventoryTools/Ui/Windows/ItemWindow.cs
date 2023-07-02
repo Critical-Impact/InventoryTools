@@ -545,7 +545,7 @@ namespace InventoryTools.Ui
                         ImGui.TableNextColumn();
                         ImGui.TextWrapped(tuple.npc?.Resident?.Singular ?? "");
                     }
-                    if (tuple.location != null)
+                    if (tuple.npc != null && tuple.location != null)
                     {
                         ImGui.TableNextColumn();
                         ImGui.TextWrapped(tuple.location + " ( " + Math.Round(tuple.location.MapX, 2) + "/" +
@@ -700,33 +700,42 @@ namespace InventoryTools.Ui
                         foreach(var craftItem in _craftItem.ChildCrafts)
                         {
                             var item = Service.ExcelCache.GetItemExSheet().GetRow(craftItem.ItemId);
-                            ImGui.PushID(index);
-                            var icon = PluginService.IconStorage.LoadIcon(item.Icon);
-                            if (ImGui.ImageButton(icon.ImGuiHandle, new(32, 32)))
+                            if (item != null)
                             {
-                                PluginService.WindowService.OpenItemWindow(item.RowId);
-                            }
-                            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right)) 
-                            {
-                                ImGui.OpenPopup("RightClick" + item.RowId);
-                            }
-                
-                            if (ImGui.BeginPopup("RightClick"+ item.RowId))
-                            {
-                                item.DrawRightClickPopup();
-                                ImGui.EndPopup();
-                            }
+                                ImGui.PushID(index);
+                                var icon = PluginService.IconStorage.LoadIcon(item.Icon);
+                                if (ImGui.ImageButton(icon.ImGuiHandle, new(32, 32)))
+                                {
+                                    PluginService.WindowService.OpenItemWindow(item.RowId);
+                                }
 
-                            float lastButtonX2 = ImGui.GetItemRectMax().X;
-                            float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
-                            ImGuiUtil.HoverTooltip(item.NameString + " - " + craftItem.QuantityRequired);
-                            if (index + 1 < _craftItem.ChildCrafts.Count && nextButtonX2 < windowVisibleX2)
-                            {
-                                ImGui.SameLine();
-                            }
+                                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
+                                                        ImGuiHoveredFlags.AllowWhenOverlapped &
+                                                        ImGuiHoveredFlags.AllowWhenBlockedByPopup &
+                                                        ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
+                                                        ImGuiHoveredFlags.AnyWindow) &&
+                                    ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                                {
+                                    ImGui.OpenPopup("RightClick" + item.RowId);
+                                }
 
-                            ImGui.PopID();
-                            index++;
+                                if (ImGui.BeginPopup("RightClick" + item.RowId))
+                                {
+                                    item.DrawRightClickPopup();
+                                    ImGui.EndPopup();
+                                }
+
+                                float lastButtonX2 = ImGui.GetItemRectMax().X;
+                                float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
+                                ImGuiUtil.HoverTooltip(item.NameString + " - " + craftItem.QuantityRequired);
+                                if (index + 1 < _craftItem.ChildCrafts.Count && nextButtonX2 < windowVisibleX2)
+                                {
+                                    ImGui.SameLine();
+                                }
+
+                                ImGui.PopID();
+                                index++;
+                            }
                         }
                     }
                 }

@@ -12,6 +12,10 @@ namespace InventoryTools.Logic
 {
     public class FilterState
     {
+        public FilterState(FilterConfiguration filterConfiguration)
+        {
+            FilterConfiguration = filterConfiguration;
+        }
         public FilterConfiguration FilterConfiguration;
         public RenderTableBase? FilterTable;
         public ulong? ActiveRetainerId => PluginService.CharacterMonitor.ActiveRetainer == 0 ? null : PluginService.CharacterMonitor.ActiveRetainer;

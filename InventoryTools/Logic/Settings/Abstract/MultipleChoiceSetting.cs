@@ -9,7 +9,7 @@ using OtterGui.Raii;
 
 namespace InventoryTools.Logic.Settings.Abstract;
 
-public abstract class MultipleChoiceSetting<T> : Setting<List<T>>
+public abstract class MultipleChoiceSetting<T> : Setting<List<T>> where T:notnull
 {
     public override void Draw(InventoryToolsConfiguration configuration)
     {

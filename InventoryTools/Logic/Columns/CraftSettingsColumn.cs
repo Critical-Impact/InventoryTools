@@ -276,7 +276,7 @@ public class CraftSettingsColumn : IColumn
         }
         var ingredientPreferenceDefault = configuration.CraftList.GetIngredientPreference(item.ItemId);
         var retainerRetrievalDefault = configuration.CraftList.GetCraftRetainerRetrieval(item.ItemId);
-        var retainerRetrieval = retainerRetrievalDefault ?? (item.IsOutputItem ? CraftRetainerRetrieval.No : CraftRetainerRetrieval.Yes);
+        var retainerRetrieval = retainerRetrievalDefault ?? (item.IsOutputItem ? configuration.CraftList.CraftRetainerRetrievalOutput : configuration.CraftList.CraftRetainerRetrieval);
         var hqRequired = configuration.CraftList.GetHQRequired(item.ItemId);
 
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
@@ -348,8 +348,9 @@ public class CraftSettingsColumn : IColumn
         }
         ImGui.SameLine();
         
+        hqRequired ??= configuration.CraftList.HQRequired;
 
-        if(hqRequired == true)
+        if(hqRequired == true && item.Item.CanBeHq)
         {
             ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
             ImGui.Image(_hqIcon.ImGuiHandle,new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale,new System.Numerics.Vector2(0,0), new System.Numerics.Vector2(1,1), new Vector4(0.9f,0.75f,0.14f,1f));

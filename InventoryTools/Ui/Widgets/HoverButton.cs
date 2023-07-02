@@ -52,7 +52,6 @@ public class HoverButton
 
         return success;
     }
-    private string _id;
     private TextureWrap _textureWrap;
     private Vector2 _size;
     private int _framePadding;

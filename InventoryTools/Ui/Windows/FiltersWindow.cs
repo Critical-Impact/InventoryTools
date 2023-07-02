@@ -44,7 +44,7 @@ namespace InventoryTools.Ui
 
         
         private List<FilterConfiguration>? _filters;
-        private PopupMenu _addFilterMenu;
+        private PopupMenu _addFilterMenu = null!;
 
         private PopupMenu _settingsMenu = new PopupMenu("configMenu", PopupMenu.PopupMenuButtons.All,
             new List<PopupMenu.IPopupMenuItem>()
@@ -56,15 +56,8 @@ namespace InventoryTools.Ui
                 new PopupMenu.PopupMenuItemSelectable("Retainer Ventures Window", "ventures", OpenRetainerVenturesWindow,"Open the retainer ventures window."),
                 new PopupMenu.PopupMenuItemSelectable("Tetris", "tetris", OpenTetrisWindow,"Open the tetris window.", () => ConfigurationManager.Config.TetrisEnabled),
                 new PopupMenu.PopupMenuItemSeparator(),
-                new PopupMenu.PopupMenuItemSelectable("Inventory History Window", "inventoryhistory", OpenInventoryHistoryWindow,"Open the inventory history window."),
-                new PopupMenu.PopupMenuItemSeparator(),
                 new PopupMenu.PopupMenuItemSelectable("Help", "help", OpenHelpWindow,"Open the help window."),
             });
-
-        private static void OpenInventoryHistoryWindow(string obj)
-        {
-            PluginService.WindowService.OpenWindow<InventoryHistoryWindow>(InventoryHistoryWindow.AsKey);
-        }
 
         private static void OpenHelpWindow(string obj)
         {
@@ -606,6 +599,8 @@ namespace InventoryTools.Ui
                 if (ImGui.TabItemButton("+", ImGuiTabItemFlags.Trailing | ImGuiTabItemFlags.NoTooltip))
                 {
                 }
+                
+                ImGuiUtil.HoverTooltip("Add a new filter");
                 
                 _addFilterMenu.Draw();
             }

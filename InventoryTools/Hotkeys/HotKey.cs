@@ -15,7 +15,7 @@ public abstract class Hotkey : IHotkey
         {
             if (ModifiableHotkey != _currentHotkey)
             {
-                _currentHotkey = _currentHotkey;
+                _currentHotkey = ModifiableHotkey;
                 _keys = null;
             }
             if (_keys != null)

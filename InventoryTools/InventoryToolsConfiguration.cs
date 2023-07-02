@@ -7,6 +7,7 @@ using Dalamud.Configuration;
 using Dalamud.Interface.Colors;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
+using Newtonsoft.Json;
 using OtterGui.Classes;
 
 namespace InventoryTools
@@ -56,7 +57,7 @@ namespace InventoryTools
 
         private HashSet<string>? _openWindows = new();
         private Dictionary<string, Vector2>? _savedWindowPositions = new();
-        private List<InventoryChangeReason>? _historyTrackReasons = new();
+        private List<InventoryChangeReason> _historyTrackReasons = new();
         public bool HistoryEnabled
         {
             get => _historyEnabled;
@@ -66,22 +67,11 @@ namespace InventoryTools
                 PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
+
         public List<InventoryChangeReason> HistoryTrackReasons
         {
             get
             {
-                if (_historyTrackReasons == null)
-                {
-                    _historyTrackReasons = new List<InventoryChangeReason>()
-                    {
-                        InventoryChangeReason.Added,
-                        InventoryChangeReason.Moved,
-                        InventoryChangeReason.Removed,
-                        InventoryChangeReason.Transferred,
-                        InventoryChangeReason.MarketPriceChanged,
-                        InventoryChangeReason.QuantityChanged
-                    };
-                }
                 return _historyTrackReasons;
             }
             set

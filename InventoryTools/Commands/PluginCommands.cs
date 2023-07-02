@@ -252,7 +252,7 @@ namespace InventoryTools.Commands
             }
             else
             {
-                item = Service.ExcelCache.GetItemExSheet().FirstOrDefault(c => c.SearchString == args.ToParseable(), null);
+                item = Service.ExcelCache.GetItemExSheet().FirstOrDefault(c => c!.SearchString == args.ToParseable(), null);
             }
             if (item != null && item.RowId != 0)
             {

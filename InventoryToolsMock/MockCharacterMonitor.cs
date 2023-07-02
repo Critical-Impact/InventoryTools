@@ -70,7 +70,6 @@ public class MockCharacterMonitor : ICharacterMonitor
     public event CharacterMonitor.CharacterUpdatedDelegate? OnCharacterUpdated;
     public event CharacterMonitor.CharacterRemovedDelegate? OnCharacterRemoved;
     public event CharacterMonitor.CharacterJobChangedDelegate? OnCharacterJobChanged;
-    public event CharacterMonitor.GilUpdatedDelegate? OnGilUpdated;
     
     public KeyValuePair<ulong, Character>[] GetPlayerCharacters()
     {

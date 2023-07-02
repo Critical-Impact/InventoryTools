@@ -115,7 +115,7 @@ public class TeamCraftImportWindow
                     }
                     var item = builder.ToString().Trim();
 
-                    var itemEx = Service.ExcelCache.GetItemExSheet().FirstOrDefault(c => c.NameString == item, null);
+                    var itemEx = Service.ExcelCache.GetItemExSheet().FirstOrDefault(c => c!.NameString == item, null);
 
                     if (itemEx != null && Service.ExcelCache.CanCraftItem(itemEx.RowId))
                     {

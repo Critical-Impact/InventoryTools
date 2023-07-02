@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
+using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
@@ -379,7 +380,7 @@ namespace InventoryTools
             {
                 PluginLog.Log("Migrating to version 13");
                 ConfigurationManager.Config.FiltersLayout = WindowLayout.Tabs;
-                ConfigurationManager.Config.CraftWindowLayout = WindowLayout.Sidebar;
+                ConfigurationManager.Config.CraftWindowLayout = WindowLayout.Tabs;
                 ConfigurationManager.Config.InternalVersion++;
             }
 
@@ -388,7 +389,10 @@ namespace InventoryTools
                 PluginLog.Log("Migrating to version 14");
                 var toReset = AvailableFilters.Where(c =>
                     c is CraftCrystalGroupFilter or CraftCurrencyGroupFilter or CraftPrecraftGroupFilter
-                        or CraftRetrieveGroupFilter or CraftEverythingElseGroupFilter or CraftIngredientPreferenceFilter).ToList();
+                        or CraftRetrieveGroupFilter or CraftEverythingElseGroupFilter or CraftIngredientPreferenceFilter
+                        or CraftDefaultHQRequiredFilter or CraftDefaultRetrieveFromRetainerFilter
+                        or CraftDefaultRetrieveFromRetainerOutputFilter).ToList();
+                PluginService.FilterService.GetDefaultCraftList();
                 foreach (var configuration in PluginService.FilterService.Filters)
                 {
                     foreach (var filterConfig in PluginService.FilterService.FiltersList)
@@ -410,6 +414,21 @@ namespace InventoryTools
                         }
                     }
                 }                                
+                ConfigurationManager.Config.InternalVersion++;
+            }
+
+            if (ConfigurationManager.Config.InternalVersion == 14)
+            {
+                PluginLog.Log("Migrating to version 15");
+                ConfigurationManager.Config.HistoryTrackReasons = new()
+                {
+                    InventoryChangeReason.Added,
+                    InventoryChangeReason.Moved,
+                    InventoryChangeReason.Removed,
+                    InventoryChangeReason.Transferred,
+                    InventoryChangeReason.MarketPriceChanged,
+                    InventoryChangeReason.QuantityChanged
+                };
                 ConfigurationManager.Config.InternalVersion++;
             }
         }
@@ -468,7 +487,7 @@ namespace InventoryTools
             if (PluginService.InventoryHistory.ReasonsToLog.ToList() != ConfigurationManager.Config.HistoryTrackReasons)
             {
                 PluginService.InventoryHistory.SetChangeReasonsToLog(
-                    ConfigurationManager.Config.HistoryTrackReasons.ToHashSet());
+                    ConfigurationManager.Config.HistoryTrackReasons.Distinct().ToHashSet());
             }
         }
 
@@ -559,9 +578,9 @@ namespace InventoryTools
 
         public void AddCraftFilter(string newName = "Craft List")
         {
-            var newFilter = new FilterConfiguration(newName, FilterType.CraftFilter);
+            var newFilter = PluginService.FilterService.AddNewCraftFilter();
+            newFilter.Name = newName;
             newFilter.DisplayInTabs = true;            
-            PluginService.FilterService.AddFilter(newFilter);
         }
 
         public void AddNewCraftFilter()
@@ -970,7 +989,7 @@ namespace InventoryTools
 
         public TextureWrap LoadImage(string imageName)
         {
-            var assemblyLocation = PluginService.PluginInterfaceService!.AssemblyLocation.DirectoryName;
+            var assemblyLocation = PluginService.PluginInterfaceService!.AssemblyLocation.DirectoryName!;
             var imagePath = Path.Combine(assemblyLocation, $@"Images\{imageName}.png");
 
             return  PluginService.PluginInterfaceService!.LoadImage(imagePath);

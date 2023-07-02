@@ -42,6 +42,22 @@ namespace InventoryTools.Logic.Filters.Abstract
             UpdateFilterConfiguration(configuration, list.ToDictionary(c => c, c => value[c]));
         }
 
+        public void MoveItemTop(FilterConfiguration configuration, T item)
+        {
+            var value = CurrentValue(configuration);
+            var list = value.Select(c => c.Key).ToList();
+            list = list.MoveTop( item);
+            UpdateFilterConfiguration(configuration, list.ToDictionary(c => c, c => value[c]));
+        }
+
+        public void MoveItemBottom(FilterConfiguration configuration, T item)
+        {
+            var value = CurrentValue(configuration);
+            var list = value.Select(c => c.Key).ToList();
+            list = list.MoveBottom( item);
+            UpdateFilterConfiguration(configuration, list.ToDictionary(c => c, c => value[c]));
+        }
+
         public virtual void DrawTable(FilterConfiguration configuration)
         {
             var value = CurrentValue(configuration);
@@ -59,6 +75,7 @@ namespace InventoryTools.Logic.Filters.Abstract
                         string? helpText = item.Value.Item2;
                         ImGui.TableNextColumn();
                         ImGui.Text(name);
+                        ImGuiUtil.HoverTooltip(name);
                         ImGui.TableNextColumn();
 
                         if (CanRemove && CanRemoveItem(configuration, item.Key))
@@ -69,7 +86,11 @@ namespace InventoryTools.Logic.Filters.Abstract
                             }
                             ImGui.SameLine();
                         }
-
+                        if (ImGui.Button("Top##Column" + index))
+                        {
+                            MoveItemTop(configuration, item.Key);
+                        }
+                        ImGui.SameLine();
                         if (ImGui.Button("Up##Column" + index))
                         {
                             MoveItemUp(configuration, item.Key);
@@ -79,6 +100,11 @@ namespace InventoryTools.Logic.Filters.Abstract
                         if (ImGui.Button("Down##Column" + index))
                         {
                             MoveItemDown(configuration, item.Key);
+                        }
+                        ImGui.SameLine();
+                        if (ImGui.Button("Bottom##Column" + index))
+                        {
+                            MoveItemBottom(configuration, item.Key);
                         }
 
                         index++;

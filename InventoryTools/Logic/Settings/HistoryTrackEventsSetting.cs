@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using InventoryTools.Logic.Settings.Abstract;
@@ -7,7 +8,15 @@ namespace InventoryTools.Logic.Settings;
 
 public class HistoryTrackEventsSetting : MultipleChoiceSetting<InventoryChangeReason>
 {
-    public override List<InventoryChangeReason> DefaultValue { get; set; } = new();
+    public override List<InventoryChangeReason> DefaultValue { get; set; } = new()
+    {
+        InventoryChangeReason.Added,
+        InventoryChangeReason.Moved,
+        InventoryChangeReason.Removed,
+        InventoryChangeReason.Transferred,
+        InventoryChangeReason.MarketPriceChanged,
+        InventoryChangeReason.QuantityChanged
+    };
     public override List<InventoryChangeReason> CurrentValue(InventoryToolsConfiguration configuration)
     {
         return configuration.HistoryTrackReasons;
@@ -15,7 +24,7 @@ public class HistoryTrackEventsSetting : MultipleChoiceSetting<InventoryChangeRe
 
     public override void UpdateFilterConfiguration(InventoryToolsConfiguration configuration, List<InventoryChangeReason> newValue)
     {
-        configuration.HistoryTrackReasons = newValue;
+        configuration.HistoryTrackReasons = newValue.Distinct().ToList();
     }
 
     public override string Key { get; set; } = "HistoryTrackEvents";

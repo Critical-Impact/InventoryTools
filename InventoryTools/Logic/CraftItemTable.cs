@@ -231,39 +231,6 @@ namespace InventoryTools.Logic
                 }
             }
         }
-
-        public bool ImportFromJson(string json)
-        {
-            try
-            {
-                var decodedBase64 = Convert.FromBase64String(json);
-                var decodedString = Encoding.UTF8.GetString(decodedBase64);
-                var craftSets = JsonConvert.DeserializeObject<CraftImportItem[]>(decodedString);
-                if (craftSets != null)
-                {
-                    foreach (var craftSet in craftSets)
-                    {
-                        var item = Service.ExcelCache.GetItemExSheet()
-                            .SingleOrDefault(c => c!.NameString == craftSet.name, null);
-                        if (item != null)
-                        {
-                            FilterConfiguration.CraftList.AddCraftItem(item.RowId, craftSet.required);
-                            FilterConfiguration.NeedsRefresh = true;
-                            FilterConfiguration.StartRefresh();
-                        }
-                    }
-                }
-
-                return false;
-
-            }
-            catch (Exception e)
-            {
-                PluginLog.Error(e.Message);
-                return false;
-            }
-            return true;
-        }
         
         public string ExportToJson()
         {
@@ -277,7 +244,7 @@ namespace InventoryTools.Logic
                     newLine["Id"] = item.ItemId;
                     foreach (var column in Columns)
                     {
-                        newLine[column.Name] = column.JsonExport(item);
+                        newLine[column.Name] = column.JsonExport(item) ?? "";
                     }
                     lines.Add(newLine);
                 }

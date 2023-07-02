@@ -19,8 +19,8 @@ namespace InventoryTools.Ui
         private HoverButton _addIcon { get; } = new(PluginService.IconStorage.LoadIcon(66315),  new Vector2(22, 22));
         private HoverButton _lightBulbIcon { get; } = new(PluginService.IconStorage.LoadIcon(66318),  new Vector2(22, 22));
         private static HoverButton _menuIcon { get; } = new(PluginService.IconStorage.LoadImage("menu"),  new Vector2(22, 22));
-        private PopupMenu _addFilterMenu;
-        private PopupMenu _addSampleMenu;
+        private PopupMenu _addFilterMenu = null!;
+        private PopupMenu _addSampleMenu = null!;
         private PopupMenu _settingsMenu = new PopupMenu("configMenu", PopupMenu.PopupMenuButtons.All,
             new List<PopupMenu.IPopupMenuItem>()
             {
@@ -311,7 +311,7 @@ namespace InventoryTools.Ui
         public override Vector2 MaxSize { get; } = new(2000, 2000);
         public override Vector2 MinSize { get; } = new(200, 200);
         public override bool DestroyOnClose => true;
-        private List<IConfigPage> _configPages;
+        private List<IConfigPage> _configPages = null!;
         public Dictionary<string, IConfigPage> _filterPages = new Dictionary<string,IConfigPage>();
 
         private void SetNewFilterActive()

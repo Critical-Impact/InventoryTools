@@ -302,10 +302,10 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>
 
     public override List<TableColumn<RetainerTaskEx>> Columns => _columns;
     
-    private List<TableColumn<RetainerTaskEx>> _columns;
-    private Dictionary<uint, List<RetainerTaskEx>> _items;
-    private Dictionary<uint, List<RetainerTaskEx>> _filteredItems;
-    private Dictionary<uint, string> _tabs;
+    private List<TableColumn<RetainerTaskEx>> _columns = null!;
+    private Dictionary<uint, List<RetainerTaskEx>> _items= null!;
+    private Dictionary<uint, List<RetainerTaskEx>> _filteredItems= null!;
+    private Dictionary<uint, string> _tabs= null!;
 
     public override ImGuiTableFlags TableFlags => _flags;
     
@@ -337,7 +337,7 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>
             var unfilteredList = _items[tabId];
             if (SortColumn != null && _columns[(int)SortColumn].Sort != null)
             {
-                unfilteredList = _columns[(int)SortColumn].Sort?.Invoke(SortDirection, unfilteredList).ToList();
+                unfilteredList = _columns[(int)SortColumn].Sort?.Invoke(SortDirection, unfilteredList).ToList() ?? unfilteredList;
             }
 
             foreach (var column in _columns)

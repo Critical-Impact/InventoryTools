@@ -5,7 +5,7 @@ namespace InventoryTools.Logic.Filters.Abstract
 {
     public abstract class Filter<T> : IFilter
     {
-        public virtual int LabelSize { get; set; } = 200;
+        public virtual int LabelSize { get; set; } = 220;
         public virtual int InputSize { get; set; } = 250;
         public abstract T CurrentValue(FilterConfiguration configuration);
         public abstract void Draw(FilterConfiguration configuration);

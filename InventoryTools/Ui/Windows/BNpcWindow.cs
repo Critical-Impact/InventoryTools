@@ -149,23 +149,28 @@ public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
                     {
                         var territory = Service.ExcelCache.GetTerritoryTypeExSheet()
                             .GetRow(position.TerritoryTypeId);
-                        if (ImGui.ImageButton(PluginService.IconStorage[60561].ImGuiHandle,
-                                new Vector2(RowSize * ImGui.GetIO().FontGlobalScale,
-                                    RowSize * ImGui.GetIO().FontGlobalScale), new Vector2(0, 0),
-                                new Vector2(1, 1), 0))
+                        if (territory != null)
                         {
-                            PluginService.ChatUtilities.PrintFullMapLink(
-                                new GenericMapLocation(position.Position.X, position.Position.Y,
-                                    territory.MapEx,
-                                    territory.PlaceNameEx, new LazyRow<TerritoryTypeEx>(Service.ExcelCache.GameData, territory.RowId, territory.SheetLanguage)), ex.Item1.FormattedName);
-                        }
+                            if (ImGui.ImageButton(PluginService.IconStorage[60561].ImGuiHandle,
+                                    new Vector2(RowSize * ImGui.GetIO().FontGlobalScale,
+                                        RowSize * ImGui.GetIO().FontGlobalScale), new Vector2(0, 0),
+                                    new Vector2(1, 1), 0))
+                            {
+                                PluginService.ChatUtilities.PrintFullMapLink(
+                                    new GenericMapLocation(position.Position.X, position.Position.Y,
+                                        territory.MapEx,
+                                        territory.PlaceNameEx,
+                                        new LazyRow<TerritoryTypeEx>(Service.ExcelCache.GameData, territory.RowId,
+                                            territory.SheetLanguage)), ex.Item1.FormattedName);
+                            }
 
-                        if (ImGui.IsItemHovered())
-                        {
-                            using var tt = ImRaii.Tooltip();
-                            ImGui.TextUnformatted(territory.PlaceName.Value.Name + " - " +
-                                                  position.Position.X +
-                                                  " : " + position.Position.Y);
+                            if (ImGui.IsItemHovered())
+                            {
+                                using var tt = ImRaii.Tooltip();
+                                ImGui.TextUnformatted((territory.PlaceName.Value?.Name ?? "Unknown") + " - " +
+                                                      position.Position.X +
+                                                      " : " + position.Position.Y);
+                            }
                         }
 
                         return true;
@@ -257,7 +262,7 @@ public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
             var unfilteredList = _items[placeNameId];
             if (SortColumn != null && _columns[(int)SortColumn].Sort != null)
             {
-                unfilteredList = _columns[(int)SortColumn].Sort?.Invoke(SortDirection, unfilteredList).ToList();
+                unfilteredList = _columns[(int)SortColumn].Sort?.Invoke(SortDirection, unfilteredList).ToList() ?? unfilteredList;
             }
 
             foreach (var column in _columns)
@@ -314,9 +319,9 @@ public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
 
     public override bool UseClipper => _useClipper;
 
-    private List<TableColumn<(BNpcNameEx, BNpcBaseEx)>> _columns;
-    private Dictionary<uint, List<(BNpcNameEx, BNpcBaseEx)>> _items;
-    private Dictionary<uint, List<(BNpcNameEx, BNpcBaseEx)>> _filteredItems;
+    private List<TableColumn<(BNpcNameEx, BNpcBaseEx)>> _columns = null!;
+    private Dictionary<uint, List<(BNpcNameEx, BNpcBaseEx)>> _items = null!;
+    private Dictionary<uint, List<(BNpcNameEx, BNpcBaseEx)>> _filteredItems = null!;
     private ImGuiTableFlags _flags = ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersV |
                                                    ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.BordersInnerV |
                                                    ImGuiTableFlags.BordersH | ImGuiTableFlags.BordersOuterH |
@@ -324,9 +329,9 @@ public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
                                                    ImGuiTableFlags.Resizable | ImGuiTableFlags.Sortable |
                                                    ImGuiTableFlags.Hideable | ImGuiTableFlags.ScrollX |
                                                    ImGuiTableFlags.ScrollY;
-    private Dictionary<uint, string> _tabs;
-    private string _tableName;
-    private Dictionary<uint, HashSet<uint>> _mappedMobs;
+    private Dictionary<uint, string> _tabs = null!;
+    private string _tableName = "bnpc";
+    private Dictionary<uint, HashSet<uint>> _mappedMobs = null!;
     private bool _useClipper => true;
 
     public override void Invalidate()

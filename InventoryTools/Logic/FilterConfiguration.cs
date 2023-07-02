@@ -209,11 +209,11 @@ namespace InventoryTools.Logic
             if (_refreshing)
             {
                 _refreshQueue?.Enqueue(null);
-                PluginLog.Debug("Not refreshing filter: " + this.Name);
+                PluginLog.Verbose("Not refreshing filter: " + this.Name);
                 return;
             }
 
-            PluginLog.Debug("Refreshing filter: " + this.Name);
+            PluginLog.Verbose("Refreshing filter: " + this.Name);
             _refreshing = true;
             CraftList.BeenUpdated = false;
 
@@ -268,20 +268,20 @@ namespace InventoryTools.Logic
                 }
                 CraftList.Update(characterSources, externalSources);
                 CraftList.CalculateCosts(PluginService.MarketCache);
-                PluginLog.Debug("Generating filtered list for filter: " + this.Name);
+                PluginLog.Verbose("Generating filtered list for filter: " + this.Name);
                 _filterResult = await GenerateFilteredList(PluginService.InventoryMonitor.Inventories.Select(c => c.Value).ToList());
-                PluginLog.Debug("Finished generating filtered list for filter: " + this.Name);
+                PluginLog.Verbose("Finished generating filtered list for filter: " + this.Name);
             }
             else
             {
-                PluginLog.Debug("Generating filtered list for filter: " + this.Name);
+                PluginLog.Verbose("Generating filtered list for filter: " + this.Name);
                 _filterResult = await GenerateFilteredList(PluginService.InventoryMonitor.Inventories.Select(c => c.Value).ToList());
-                PluginLog.Debug("Finished generating filtered list for filter: " + this.Name);
+                PluginLog.Verbose("Finished generating filtered list for filter: " + this.Name);
             }
             
             NeedsRefresh = false;
             await PluginService.FrameworkService.RunOnFrameworkThread(() => { ListUpdated?.Invoke(this); });
-            PluginLog.Debug("Finished refreshing filter: " + this.Name);
+            PluginLog.Verbose("Finished refreshing filter: " + this.Name);
             if (_refreshQueue.Contains(null))
             {
                 _refreshQueue.Clear();
@@ -455,6 +455,19 @@ namespace InventoryTools.Logic
                     {
                         filter.ResetFilter(defaultConfiguration, this);
                     }
+                }
+            }
+        }
+
+        public void ResetFilter(FilterConfiguration existingConfiguration)
+        {
+            CraftColumns = new List<string>();
+            Columns = new List<string>();
+            foreach (var filter in PluginService.PluginLogic.AvailableFilters)
+            {
+                if (filter.AvailableIn.HasFlag(FilterType.CraftFilter))
+                {
+                    filter.ResetFilter(existingConfiguration, this);
                 }
             }
         }

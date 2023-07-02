@@ -360,7 +360,20 @@ namespace InventoryToolsTesting
             list.Update(characterMaterials, externalSources);
             flattenedMergedMaterials = list.GetFlattenedMergedMaterials();
             Assert.AreEqual(false, flattenedMergedMaterials.Any(c => c.ItemId == 5106 && c.QuantityNeeded != 0));
+        }
 
+        [Test]
+        public void TestMissingIngredients()
+        {
+            CraftList list = new CraftList();
+            CraftItemSourceStore store = new CraftItemSourceStore();
+            list.AddCraftItem("Shark-class Bow", 1);
+            list.GenerateCraftChildren();
+            list.Update(store);
+            var flattenedMergedMaterials = list.GetFlattenedMergedMaterials();
+            var venture = flattenedMergedMaterials.First(c => c.ItemId == 21072);
+            Assert.AreEqual(20,venture.MissingIngredients.First().Key.Item1);
+            Assert.AreEqual(1800,venture.MissingIngredients.First().Value);
         }
     }
 }

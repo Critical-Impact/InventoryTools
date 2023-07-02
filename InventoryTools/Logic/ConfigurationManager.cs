@@ -194,23 +194,27 @@ namespace InventoryTools.Logic
             }
         }
 
-        private static SerialQueue _saveQueue = new SerialQueue();
+        private static SerialQueue? _saveQueue = new SerialQueue();
         
         public static void SaveAsync()
         {
             if (PluginService.PluginLoaded)
             {
-                _saveQueue.DispatchAsync(Save);
+                _saveQueue?.DispatchAsync(Save);
             }
         }
 
         public static void ClearQueue()
         {
-            _saveQueue.Dispose();
+            _saveQueue?.Dispose();
             _saveQueue = null!;
         }
 
-        [Obsolete]
+        /// <summary>
+        /// Load a inventories json file, this is no longer the preferred format to store inventories in.
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
         public static Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>? LoadInventoriesJson(string? fileName = null)
         {
             try
