@@ -2500,7 +2500,7 @@ namespace InventoryTools.Logic
             var inventoryHistory = new List<InventoryChange>();
             var characterMonitor = PluginService.CharacterMonitor;
             var activeCharacter = characterMonitor.ActiveCharacterId;
-            var activeRetainer = characterMonitor.ActiveRetainer;
+            var activeRetainer = characterMonitor.ActiveRetainerId;
             var displaySourceCrossCharacter = filter.SourceIncludeCrossCharacter ?? ConfigurationManager.Config.DisplayCrossCharacter;
             var displayDestinationCrossCharacter = filter.DestinationIncludeCrossCharacter ?? ConfigurationManager.Config.DisplayCrossCharacter;
             

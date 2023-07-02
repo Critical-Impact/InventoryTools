@@ -7,7 +7,7 @@ namespace InventoryToolsMock;
 
 public class MockCharacterMonitor : ICharacterMonitor
 {
-    private ulong _activeRetainer;
+    private ulong _activeRetainerId;
     private ulong _activeCharacterId;
     private ulong _activeFreeCompanyId;
     private ulong _activeHouseId;
@@ -189,11 +189,11 @@ public class MockCharacterMonitor : ICharacterMonitor
         }
     }
 
-    public ulong ActiveRetainer
+    public ulong ActiveRetainerId
     {
         get
         {
-            return _activeRetainer;
+            return _activeRetainerId;
         }
     }
 
@@ -227,6 +227,9 @@ public class MockCharacterMonitor : ICharacterMonitor
 
     public Character? ActiveFreeCompany =>
         _characters.ContainsKey(_activeFreeCompanyId) ? _characters[_activeFreeCompanyId] : null;
+    
+    public Character? ActiveRetainer =>
+        _characters.ContainsKey(_activeRetainerId) ? _characters[_activeRetainerId] : null;    
 
     public bool IsLoggedIn
     {
@@ -250,7 +253,7 @@ public class MockCharacterMonitor : ICharacterMonitor
 
     public void OverrideActiveRetainer(ulong activeRetainer)
     {
-        _activeRetainer = activeRetainer;
+        _activeRetainerId = activeRetainer;
     }
 
     public void OverrideActiveFreeCompany(ulong activeFreeCompanyId)

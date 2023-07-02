@@ -156,6 +156,19 @@ public class MockWindow : Window
                         }
                     }
                 }
+                using (var combo = ImRaii.Combo("Active Retainer", PluginService.CharacterMonitor.ActiveRetainer?.FormattedName ?? "N/A"))
+                {
+                    if (combo.Success)
+                    {
+                        foreach (var character in PluginService.CharacterMonitor.GetRetainerCharacters())
+                        {
+                            if (ImGui.Selectable(character.Value.FormattedName + "##" + character.Key, PluginService.CharacterMonitor.ActiveRetainerId == character.Key))
+                            {
+                                PluginService.CharacterMonitor.OverrideActiveRetainer(character.Key);
+                            }
+                        }
+                    }
+                }
             }
         }
     }

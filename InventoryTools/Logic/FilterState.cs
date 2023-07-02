@@ -18,7 +18,7 @@ namespace InventoryTools.Logic
         }
         public FilterConfiguration FilterConfiguration;
         public RenderTableBase? FilterTable;
-        public ulong? ActiveRetainerId => PluginService.CharacterMonitor.ActiveRetainer == 0 ? null : PluginService.CharacterMonitor.ActiveRetainer;
+        public ulong? ActiveRetainerId => PluginService.CharacterMonitor.ActiveRetainerId == 0 ? null : PluginService.CharacterMonitor.ActiveRetainerId;
         public ulong? ActiveFreeCompanyId => PluginService.CharacterMonitor.ActiveFreeCompanyId == 0 ? null : PluginService.CharacterMonitor.ActiveFreeCompanyId;
         public ulong? ActiveHousingId => PluginService.CharacterMonitor.ActiveHouseId == 0 ? null : PluginService.CharacterMonitor.ActiveHouseId;
 
@@ -79,7 +79,7 @@ namespace InventoryTools.Logic
 
                             if (activeFilter.FilterItemsInRetainersEnum == FilterItemsRetainerEnum.Only)
                             {
-                                if (PluginService.CharacterMonitor.ActiveRetainer == 0 && !PluginService.GameUi.IsWindowVisible(WindowName.RetainerList))
+                                if (PluginService.CharacterMonitor.ActiveRetainerId == 0 && !PluginService.GameUi.IsWindowVisible(WindowName.RetainerList))
                                 {
                                     return false;
                                 }
@@ -92,7 +92,7 @@ namespace InventoryTools.Logic
                     shouldHighlight = true;
                     if (activeFilter.FilterItemsInRetainersEnum == FilterItemsRetainerEnum.Only)
                     {
-                        if (PluginService.CharacterMonitor.ActiveRetainer == 0 && !PluginService.GameUi.IsWindowVisible(WindowName.RetainerList))
+                        if (PluginService.CharacterMonitor.ActiveRetainerId == 0 && !PluginService.GameUi.IsWindowVisible(WindowName.RetainerList))
                         {
                             shouldHighlight = false;
                         }
@@ -683,7 +683,7 @@ namespace InventoryTools.Logic
         private bool MatchesRetainerFilter(FilterConfiguration activeFilter, SortingResult item, bool invertHighlighting = false, bool destinationFilter = false)
         {
             bool matches = (activeFilter.FilterType.HasFlag(FilterType.SearchFilter) || activeFilter.FilterType.HasFlag(FilterType.SortingFilter) || activeFilter.FilterType.HasFlag(FilterType.CraftFilter));
-            if (item.SourceRetainerId != PluginService.CharacterMonitor.ActiveRetainer)
+            if (item.SourceRetainerId != PluginService.CharacterMonitor.ActiveRetainerId)
             {
                 return false;
             }
