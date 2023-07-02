@@ -194,10 +194,10 @@ namespace InventoryTools.Logic
 
         public override void Refresh(InventoryToolsConfiguration configuration)
         {
-            if (FilterConfiguration.FilterResult != null)
+            if (FilterConfiguration.FilterResult != null && FilterConfiguration.CraftList.BeenGenerated && FilterConfiguration.CraftList.BeenUpdated)
             {
                 PluginLog.Verbose("CraftTable: Refreshing");
-                CraftItems = FilterConfiguration.CraftList.GetFlattenedMergedMaterials();
+                CraftItems = FilterConfiguration.CraftList.GetFlattenedMergedMaterials(true);
                 FilterConfiguration.CraftList.ClearGroupCache();
                 IsSearching = false;
                 NeedsRefresh = false;

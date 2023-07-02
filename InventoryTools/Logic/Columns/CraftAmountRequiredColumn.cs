@@ -53,7 +53,7 @@ namespace InventoryTools.Logic.Columns
                                 parsedNumber = 0;
                             }
                             var number = item.GetRoundedQuantity((uint)parsedNumber);
-                            if (number != item.QuantityRequired)
+                            if (number != item.QuantityRequired && configuration.CraftList.BeenGenerated && configuration.CraftList.BeenUpdated)
                             {
                                 configuration.CraftList.SetCraftRequiredQuantity(item.ItemId, number,
                                     item.Flags,
