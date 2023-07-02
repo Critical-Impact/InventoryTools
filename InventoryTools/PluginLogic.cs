@@ -109,7 +109,7 @@ namespace InventoryTools
                 LoadDefaultData();
                 ConfigurationManager.Config.FirstRun = false;
             }
-            SyncConfigurationChanges();
+            SyncConfigurationChanges(false);
         }
 
 #pragma warning disable CS8618
@@ -456,9 +456,13 @@ namespace InventoryTools
             SyncConfigurationChanges();
         }
 
-        private static void SyncConfigurationChanges()
+        private static void SyncConfigurationChanges(bool save = true)
         {
-            ConfigurationManager.SaveAsync();
+            if (save)
+            {
+                ConfigurationManager.SaveAsync();
+            }
+
             if (PluginService.MobTracker.Enabled != ConfigurationManager.Config.TrackMobSpawns)
             {
                 if (ConfigurationManager.Config.TrackMobSpawns)
