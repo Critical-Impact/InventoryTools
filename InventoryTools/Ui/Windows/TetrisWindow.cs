@@ -69,9 +69,9 @@ namespace InventoryTools.Ui
             }
         }
 
-        public override Vector2 DefaultSize { get; } = new Vector2(800, 300);
-        public override Vector2 MaxSize => new Vector2(5000, 5000);
-        public override Vector2 MinSize => new Vector2(300, 300);
+        public override Vector2? DefaultSize { get; } = new Vector2(800, 300);
+        public override Vector2? MaxSize => new Vector2(5000, 5000);
+        public override Vector2? MinSize => new Vector2(300, 300);
 
         public override void Invalidate()
         {

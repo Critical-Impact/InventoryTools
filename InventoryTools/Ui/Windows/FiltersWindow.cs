@@ -27,9 +27,9 @@ namespace InventoryTools.Ui
         private string _tabLayout = "";
         private int _selectedFilterTab = 0;
         private bool _settingsActive = false;
-        public override Vector2 MaxSize { get; } = new(2000, 2000);
-        public override Vector2 MinSize { get; } = new(200, 200);
-        public override Vector2 DefaultSize { get; } = new(600, 600);
+        public override Vector2? MaxSize { get; } = new(2000, 2000);
+        public override Vector2? MinSize { get; } = new(200, 200);
+        public override Vector2? DefaultSize { get; } = new(600, 600);
         public override bool DestroyOnClose => false;
         private HoverButton _editIcon { get; } = new(PluginService.IconStorage.LoadImage("edit"),  new Vector2(22, 22));
         private HoverButton _settingsIcon { get; } = new(PluginService.IconStorage.LoadIcon(66319),  new Vector2(22, 22));

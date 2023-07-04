@@ -25,9 +25,9 @@ namespace InventoryTools.Ui
         public static string AsKey => "crafts";
         public override string Key => AsKey;
         
-        public override Vector2 DefaultSize { get; } = new(600, 600);
-        public override Vector2 MaxSize => new Vector2(5000, 5000);
-        public override Vector2 MinSize => new Vector2(300, 300);
+        public override Vector2? DefaultSize { get; } = new(600, 600);
+        public override Vector2? MaxSize => new Vector2(5000, 5000);
+        public override Vector2? MinSize => new Vector2(300, 300);
         public override bool DestroyOnClose => false;
         private int _selectedFilterTab = 0;
         private bool _settingsActive = false;

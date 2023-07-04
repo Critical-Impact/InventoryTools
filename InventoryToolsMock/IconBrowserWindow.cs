@@ -43,9 +43,9 @@ public class IconBrowserWindow : Window
     public override string Key { get; } = AsKey;
     public override bool DestroyOnClose { get; }
     public override bool SaveState { get; }
-    public override Vector2 DefaultSize { get; } = new Vector2(300, 300);
-    public override Vector2 MaxSize { get; } = new Vector2(2000, 2000);
-    public override Vector2 MinSize { get; } = new Vector2(300, 300);
+    public override Vector2? DefaultSize { get; } = new Vector2(300, 300);
+    public override Vector2? MaxSize { get; } = new Vector2(2000, 2000);
+    public override Vector2? MinSize { get; } = new Vector2(300, 300);
 
     public override void Draw()
     {

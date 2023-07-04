@@ -312,6 +312,22 @@ namespace InventoryTools.Services
             return GetActiveBackgroundFilter();
         }
 
+        public bool HasActiveFilter()
+        {
+            return ConfigurationManager.Config.ActiveUiFilter != null ||
+                   ConfigurationManager.Config.ActiveBackgroundFilter != null;
+        }
+
+        public bool HasActiveUiFilter()
+        {
+            return ConfigurationManager.Config.ActiveUiFilter != null;
+        }
+
+        public bool HasActiveBackgroundFilter()
+        {
+            return ConfigurationManager.Config.ActiveBackgroundFilter != null;
+        }
+
         public FilterConfiguration GetDefaultCraftList()
         {
             if (_filters.Any(c => c.Value.FilterType == FilterType.CraftFilter && c.Value.CraftListDefault))

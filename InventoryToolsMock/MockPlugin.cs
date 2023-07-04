@@ -92,6 +92,7 @@ public class MockPlugin : IDisposable
         _hotkeyService = new HotkeyService(_frameworkService, _keyStateService);
         Service.ExcelCache = new ExcelCache(lumina);
         Service.ExcelCache.PreCacheItemData();
+        Service.SeTime = new MockSeTime(); 
         PluginService.InitaliseExplicit(new MockServices()
         {
             CharacterMonitor = _characterMonitor,
@@ -300,6 +301,7 @@ public class MockPlugin : IDisposable
         _pluginLogic.Dispose();
         _craftMonitor.Dispose();
         _gameInterface.Dispose();
+        Service.SeTime.Dispose();
         Service.ExcelCache.Dispose();
     }
 }

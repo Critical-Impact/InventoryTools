@@ -1,6 +1,7 @@
 using System.Numerics;
 using ImGuiNET;
 using InventoryTools.Logic;
+// ReSharper disable VirtualMemberCallInConstructor
 
 namespace InventoryTools.Ui
 {
@@ -8,13 +9,20 @@ namespace InventoryTools.Ui
     {
         protected Window(string name, ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
         {
-            SizeConstraints = new WindowSizeConstraints()
+            if (MinSize != null && MaxSize != null)
             {
-                MinimumSize = MinSize,
-                MaximumSize = MaxSize
-            };
+                SizeConstraints = new WindowSizeConstraints()
+                {
+                    MinimumSize = MinSize.Value,
+                    MaximumSize = MaxSize.Value
+                };
+            }
+
             SizeCondition = ImGuiCond.FirstUseEver;
-            Size = DefaultSize;
+            if (DefaultSize != null)
+            {
+                Size = DefaultSize.Value;
+            }
         }
 
         public override void OnOpen()
@@ -54,8 +62,8 @@ namespace InventoryTools.Ui
 
         public abstract bool SaveState { get; }
         
-        public abstract Vector2 DefaultSize { get; }
-        public abstract Vector2 MaxSize { get; }
-        public abstract Vector2 MinSize { get; }
+        public abstract Vector2? DefaultSize { get; }
+        public abstract Vector2? MaxSize { get; }
+        public abstract Vector2? MinSize { get; }
     }
 }

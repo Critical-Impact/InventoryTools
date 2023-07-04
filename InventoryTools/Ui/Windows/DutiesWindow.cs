@@ -350,9 +350,9 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
     public override string Key => AsKey;
     public override bool DestroyOnClose => false;
     public override bool SaveState => true;
-    public override Vector2 MaxSize { get; } = new(2000, 2000);
-    public override Vector2 MinSize { get; } = new(200, 200);
-    public override Vector2 DefaultSize { get; } = new(600, 600);
+    public override Vector2? MaxSize { get; } = new(2000, 2000);
+    public override Vector2? MinSize { get; } = new(200, 200);
+    public override Vector2? DefaultSize { get; } = new(600, 600);
     public override void Draw()
     {
         DrawTabs();

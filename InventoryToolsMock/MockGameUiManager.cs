@@ -43,4 +43,20 @@ public class MockGameUiManager : IGameUiManager
     {
         return false;
     }
+
+    public bool IsWindowFocused(WindowName windowName)
+    {
+        return false;
+    }
+
+    public bool IsWindowFocused(string windowName)
+    {
+        return false;
+    }
+
+    public unsafe bool TryGetAddonByName<T>(string Addon, out T* AddonPtr) where T : unmanaged
+    {
+        AddonPtr = null;
+        return false;
+    }
 }

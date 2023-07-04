@@ -4,6 +4,7 @@ using CriticalCommonLib.Crafting;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
+using CriticalCommonLib.Time;
 using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Logging;
 using Dalamud.Plugin;
@@ -87,6 +88,7 @@ namespace InventoryTools
         {
             Stopwatch loadConfigStopwatch = new Stopwatch();
             loadConfigStopwatch.Start();
+            Service.SeTime = new SeTime();
             Service.ExcelCache = new ExcelCache(Service.Data);
             Service.ExcelCache.PreCacheItemData();
             FrameworkService = new FrameworkService(Service.Framework);
@@ -190,6 +192,7 @@ namespace InventoryTools
             CharacterMonitor.Dispose();
             Service.ExcelCache.Destroy();
             Service.ExcelCache.Dispose();
+            Service.SeTime.Dispose();
             MarketCache.SaveCache(true);
             MarketCache.Dispose();
             Universalis.Dispose();

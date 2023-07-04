@@ -9,6 +9,7 @@ using ImGuiNET;
 using InventoryTools;
 using InventoryTools.Logic;
 using InventoryTools.Ui;
+using InventoryTools.Ui.Overlays;
 using LuminaSupplemental.Excel.Model;
 using Newtonsoft.Json;
 using OtterGui.Raii;
@@ -39,9 +40,9 @@ public class MockWindow : Window
     public override string Key => AsKey;
     public override bool DestroyOnClose { get; } = false;
     public override bool SaveState { get; } = true;
-    public override Vector2 DefaultSize => new Vector2(200, 200);
-    public override Vector2 MaxSize => new Vector2(2000, 2000);
-    public override Vector2 MinSize => new Vector2(200, 200);
+    public override Vector2? DefaultSize => new Vector2(200, 200);
+    public override Vector2? MaxSize => new Vector2(2000, 2000);
+    public override Vector2? MinSize => new Vector2(200, 200);
     private Random _rng;
 
     public override void Draw()

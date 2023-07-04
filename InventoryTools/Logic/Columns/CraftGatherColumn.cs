@@ -1,8 +1,10 @@
 using System.Linq;
+using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
+using CriticalCommonLib.Time;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 
@@ -37,6 +39,7 @@ namespace InventoryTools.Logic.Columns
             ImGui.TableNextColumn();
             if (CurrentValue(item) == true)
             {
+                var hasButton = false;
                 // if (item.IngredientPreference.Type == IngredientPreferenceType.Buy)
                 // {
                 //     //TODO: Rework this
@@ -57,6 +60,7 @@ namespace InventoryTools.Logic.Columns
                 // }
                 if (item.Item.ObtainedGathering)
                 {
+                    hasButton = true;
                     if (ImGui.SmallButton("Gather##Gather" + rowIndex))
                     {
                         PluginService.CommandService.ProcessCommand("/gather " + item.Name);
@@ -64,9 +68,33 @@ namespace InventoryTools.Logic.Columns
                 }
                 else if(item.Item.ObtainedFishing)
                 {
+                    hasButton = true;
                     if (ImGui.SmallButton("Gather##Gather" + rowIndex))
                     {
                         PluginService.CommandService.ProcessCommand("/gatherfish " + item.Name);
+                    }
+                }
+                if (item.UpTime != null)
+                {
+                    if (hasButton)
+                    {
+                        ImGui.SameLine();
+                    }
+                    var nextUptime = item.UpTime.Value.NextUptime(Service.SeTime.ServerTime);
+                    if (nextUptime.Equals(TimeInterval.Always)
+                        || nextUptime.Equals(TimeInterval.Invalid)
+                        || nextUptime.Equals(TimeInterval.Never)) return;
+                    if (nextUptime.Start > TimeStamp.UtcNow)
+                    {
+                        ImGui.Text(" (Up in " +
+                                          TimeInterval.DurationString(nextUptime.Start, TimeStamp.UtcNow,
+                                              true) + ")");
+                    }
+                    else
+                    {
+                        ImGui.Text(" (Up for " +
+                                   TimeInterval.DurationString( nextUptime.End,TimeStamp.UtcNow,
+                                       true) + ")");
                     }
                 }
             }

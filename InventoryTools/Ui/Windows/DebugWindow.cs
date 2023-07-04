@@ -27,9 +27,9 @@ namespace InventoryTools.Ui
 
         public static string AsKey => "debug";
         public override string Key => AsKey;
-        public override Vector2 DefaultSize { get; } = new(700, 700);
-        public override Vector2 MaxSize { get; } = new(2000, 2000);
-        public override Vector2 MinSize { get; } = new(200, 200);
+        public override Vector2? DefaultSize { get; } = new(700, 700);
+        public override Vector2? MaxSize { get; } = new(2000, 2000);
+        public override Vector2? MinSize { get; } = new(200, 200);
         public override bool DestroyOnClose => false;
         private List<MobSpawnPosition> _spawnPositions = new List<MobSpawnPosition>();
 

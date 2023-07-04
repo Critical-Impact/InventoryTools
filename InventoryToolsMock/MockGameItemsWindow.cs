@@ -176,7 +176,7 @@ public class MockGameItemsWindow : Window
     public override string Key { get; } = AsKey;
     public override bool DestroyOnClose { get; } = true;
     public override bool SaveState { get; } = false;
-    public override Vector2 DefaultSize { get; } = new Vector2(1000, 1000);
-    public override Vector2 MaxSize { get; } = new Vector2(2000, 2000);
-    public override Vector2 MinSize { get; } = new Vector2(300, 300);
+    public override Vector2? DefaultSize { get; } = new Vector2(1000, 1000);
+    public override Vector2? MaxSize { get; } = new Vector2(2000, 2000);
+    public override Vector2? MinSize { get; } = new Vector2(300, 300);
 }

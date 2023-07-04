@@ -17,12 +17,12 @@ namespace InventoryTools.Logic.Filters
             var currentValue = CurrentValue(configuration);
             if (currentValue == null) return true;
             
-            if(currentValue.Value && item.IsItemAvailableAtTimedNode)
+            if(currentValue.Value && item.Item.IsItemAvailableAtTimedNode)
             {
                 return true;
             }
                 
-            return !currentValue.Value && !item.IsItemAvailableAtTimedNode;
+            return !currentValue.Value && !item.Item.IsItemAvailableAtTimedNode;
 
         }
 

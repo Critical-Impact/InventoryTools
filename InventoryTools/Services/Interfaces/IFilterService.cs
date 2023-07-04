@@ -22,6 +22,9 @@ namespace InventoryTools.Services.Interfaces
         FilterConfiguration? GetActiveBackgroundFilter();
 
         FilterConfiguration? GetActiveFilter();
+        bool HasActiveFilter();
+        bool HasActiveUiFilter();
+        bool HasActiveBackgroundFilter();
 
         FilterConfiguration? GetFilter(string name);
         FilterConfiguration? GetFilterByKey(string key);

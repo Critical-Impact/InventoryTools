@@ -11,9 +11,9 @@ namespace InventoryTools.Ui
         public override bool SaveState => false;
         public static string AsKey => "help";
         public override  string Key => AsKey;
-        public override Vector2 DefaultSize { get; } = new Vector2(700, 700);
-        public override  Vector2 MaxSize { get; } = new Vector2(2000, 2000);
-        public override  Vector2 MinSize { get; } = new Vector2(200, 200);
+        public override Vector2? DefaultSize { get; } = new Vector2(700, 700);
+        public override  Vector2? MaxSize { get; } = new Vector2(2000, 2000);
+        public override  Vector2? MinSize { get; } = new Vector2(200, 200);
         public override bool DestroyOnClose => true;
 
         public HelpWindow(string name = "Allagan Tools - Help") : base(name)

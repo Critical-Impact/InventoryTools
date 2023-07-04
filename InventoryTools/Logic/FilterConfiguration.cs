@@ -260,9 +260,8 @@ namespace InventoryTools.Logic
                 
                 foreach (var inventory in sourceInventories)
                 {
-                    if (InActiveInventories(PluginService.CharacterMonitor.ActiveCharacterId,
-                            PluginService.CharacterMonitor.ActiveRetainerId,
-                            inventory.Key.Item1, PluginService.CharacterMonitor.ActiveCharacterId))
+                    //Assume we have no retainer active because we want all the possible items 
+                    if (InActiveInventories(PluginService.CharacterMonitor.ActiveCharacterId, 0, inventory.Key.Item1, PluginService.CharacterMonitor.ActiveCharacterId))
                     {
                         foreach (var item in inventory.Value)
                         {

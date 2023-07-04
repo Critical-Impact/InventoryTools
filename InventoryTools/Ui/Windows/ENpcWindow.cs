@@ -168,9 +168,9 @@ namespace InventoryTools.Ui
         }
         
         public override FilterConfiguration? SelectedConfiguration => null;
-        public override Vector2 DefaultSize { get; } = new Vector2(500, 800);
-        public override Vector2 MaxSize => new (800, 1500);
-        public override Vector2 MinSize => new (100, 100);
+        public override Vector2? DefaultSize { get; } = new Vector2(500, 800);
+        public override Vector2? MaxSize => new (800, 1500);
+        public override Vector2? MinSize => new (100, 100);
 
         public override bool SavePosition => true;
 
