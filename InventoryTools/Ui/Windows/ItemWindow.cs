@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
+using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Models.ItemSources;
 using CriticalCommonLib.Sheets;
@@ -67,7 +68,7 @@ namespace InventoryTools.Ui
                         }
                     }
                 }
-
+                Vendors = Vendors.OrderByDescending(c => c.npc != null && c.location != null).ToList();
                 GatheringSources = Item.GetGatheringSources().ToList();
                 SharedModels = Item.GetSharedModels();
                 MobDrops = Item.MobDrops.ToArray();
@@ -551,7 +552,17 @@ namespace InventoryTools.Ui
                         ImGui.TextWrapped(tuple.location + " ( " + Math.Round(tuple.location.MapX, 2) + "/" +
                                           Math.Round(tuple.location.MapY, 2) + ")");
                         ImGui.TableNextColumn();
-                        if (ImGui.Button("Open Map Link##" + tuple.shop.RowId + "_" + tuple.npc.Key + "_" +
+                        if (ImGui.Button("Teleport##t" + tuple.shop.RowId + "_" + tuple.npc.Key + "_" +
+                                         tuple.location.MapEx.Row))
+                        {
+                            var nearestAetheryte = tuple.location.GetNearestAetheryte();
+                            if (nearestAetheryte != null)
+                            {
+                                PluginService.TeleporterIpc.Teleport(nearestAetheryte.RowId);
+                            }
+                            PluginService.ChatUtilities.PrintFullMapLink(tuple.location, Item.NameString);
+                        }
+                        if (ImGui.Button("Map Link##ml" + tuple.shop.RowId + "_" + tuple.npc.Key + "_" +
                                          tuple.location.MapEx.Row))
                         {
                             PluginService.ChatUtilities.PrintFullMapLink(tuple.location, Item.NameString);
