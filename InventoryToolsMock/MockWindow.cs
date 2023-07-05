@@ -9,7 +9,6 @@ using ImGuiNET;
 using InventoryTools;
 using InventoryTools.Logic;
 using InventoryTools.Ui;
-using InventoryTools.Ui.Overlays;
 using LuminaSupplemental.Excel.Model;
 using Newtonsoft.Json;
 using OtterGui.Raii;
