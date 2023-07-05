@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
+using CriticalCommonLib.Interfaces;
+using CriticalCommonLib.Ipc;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
@@ -42,6 +44,7 @@ namespace InventoryTools
         public IHotkeyService? HotkeyService;
         public IKeyStateService? KeyStateService;
         public InventoryHistory? InventoryHistory;
+        public ITeleporterIpc? TeleporterIpc;
     }
 
     public static class PluginService
@@ -79,6 +82,7 @@ namespace InventoryTools
         public static IMobTracker MobTracker { get; private set; } = null!;
         public static IHotkeyService HotkeyService { get; private set; } = null!;
         public static InventoryHistory InventoryHistory { get; private set; } = null!;
+        public static ITeleporterIpc TeleporterIpc { get; private set; } = null!;
         public static bool PluginLoaded { get; private set; } = false;
 
         public delegate void PluginLoadedDelegate();
@@ -123,6 +127,7 @@ namespace InventoryTools
             HotkeyService = new HotkeyService(FrameworkService, KeyStateService);
             PluginLogic = new PluginLogic(  );
             WotsitIpc = new WotsitIpc(  );
+            TeleporterIpc = new TeleporterIpc( pluginInterface );
             PluginCommands = new();
             CommandManager = new PluginCommandManager<PluginCommands>(PluginCommands);
             FileDialogManager = new FileDialogManager();
@@ -160,6 +165,7 @@ namespace InventoryTools
             if (mockServices.HotkeyService != null) HotkeyService = mockServices.HotkeyService;
             if (mockServices.KeyStateService != null) KeyStateService = mockServices.KeyStateService;
             if (mockServices.InventoryHistory != null) InventoryHistory = mockServices.InventoryHistory;
+            if (mockServices.TeleporterIpc != null) TeleporterIpc = mockServices.TeleporterIpc;
             if (finishLoading)
             {
                 PluginLoaded = true;
@@ -236,6 +242,7 @@ namespace InventoryTools
             OverlayService = null!;
             WindowService = null!;
             WotsitIpc = null!;
+            TeleporterIpc = null!;
             FileDialogManager = null!;
             CraftMonitor = null!;
             IconStorage = null!;

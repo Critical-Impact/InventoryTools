@@ -90,6 +90,7 @@ public class MockPlugin : IDisposable
         _commandService = new MockCommandService();
         _keyStateService = new MockKeyStateService();
         _hotkeyService = new HotkeyService(_frameworkService, _keyStateService);
+        var mockTeleporter = new MockTeleporterIpc();
         Service.ExcelCache = new ExcelCache(lumina);
         Service.ExcelCache.PreCacheItemData();
         Service.SeTime = new MockSeTime(); 
@@ -113,7 +114,8 @@ public class MockPlugin : IDisposable
             CommandService =  _commandService,
             HotkeyService = _hotkeyService,
             KeyStateService = _keyStateService,
-            InventoryHistory = _inventoryHistory
+            InventoryHistory = _inventoryHistory,
+            TeleporterIpc = mockTeleporter
             
         }, false);
         ConfigurationManager.Load(configFile);
