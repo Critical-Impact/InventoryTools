@@ -82,17 +82,13 @@ public class AmountOwnedTooltip : TooltipService.TooltipTweak
                                 if (locations.Count >= ConfigurationManager.Config.TooltipLocationLimit)
                                     continue;
 
-                                var characterMonitorCharacter = PluginService.CharacterMonitor.Characters[oItem.RetainerId];
-                                var name = characterMonitorCharacter?.FormattedName ?? "Unknown";
-                                name = name.Trim().Length == 0 ? "Unknown" : name.Trim();
-                                if (characterMonitorCharacter != null && characterMonitorCharacter.OwnerId != 0 &&
-                                    ConfigurationManager.Config.TooltipAddCharacterNameOwned &&
-                                    PluginService.CharacterMonitor.Characters.ContainsKey(characterMonitorCharacter
-                                        .OwnerId))
+                                var name = PluginService.CharacterMonitor.GetCharacterNameById(oItem.RetainerId);
+                                if (ConfigurationManager.Config.TooltipAddCharacterNameOwned)
                                 {
-                                    var owner = PluginService.CharacterMonitor.Characters[
-                                        characterMonitorCharacter.OwnerId];
-                                    name += " (" + owner.FormattedName + ")";
+                                    var owner = PluginService.CharacterMonitor.GetCharacterNameById(
+                                        oItem.RetainerId, true);
+                                    if (owner.Trim().Length != 0)
+                                        name += " (" + owner + ")";
                                 }
 
                                 var typeIcon = "";
@@ -122,17 +118,13 @@ public class AmountOwnedTooltip : TooltipService.TooltipTweak
                                 if (locations.Count >= ConfigurationManager.Config.TooltipLocationLimit)
                                     continue;
 
-                                var characterMonitorCharacter = PluginService.CharacterMonitor.Characters[oItem.RetainerId];
-                                var name = characterMonitorCharacter?.FormattedName ?? "Unknown";
-                                name = name.Trim().Length == 0 ? "Unknown" : name.Trim();
-                                if (characterMonitorCharacter != null && characterMonitorCharacter.OwnerId != 0 &&
-                                    ConfigurationManager.Config.TooltipAddCharacterNameOwned &&
-                                    PluginService.CharacterMonitor.Characters.ContainsKey(characterMonitorCharacter
-                                        .OwnerId))
+                                var name = PluginService.CharacterMonitor.GetCharacterNameById(oItem.RetainerId);
+                                if (ConfigurationManager.Config.TooltipAddCharacterNameOwned)
                                 {
-                                    var owner = PluginService.CharacterMonitor.Characters[
-                                        characterMonitorCharacter.OwnerId];
-                                    name += " (" + owner.FormattedName + ")";
+                                    var owner = PluginService.CharacterMonitor.GetCharacterNameById(
+                                        oItem.RetainerId, true);
+                                    if (owner.Trim().Length != 0)
+                                        name += " (" + owner + ")";
                                 }
 
                                 locations.Add($"{name} - {oItem.FormattedBagLocation} - {+ oItem.Quantity} ");
@@ -153,17 +145,13 @@ public class AmountOwnedTooltip : TooltipService.TooltipTweak
                                 if (locations.Count >= ConfigurationManager.Config.TooltipLocationLimit)
                                     continue;
 
-                                var characterMonitorCharacter = PluginService.CharacterMonitor.Characters[oGroup.Key.RetainerId];
-                                var name = characterMonitorCharacter?.FormattedName ?? "Unknown";
-                                name = name.Trim().Length == 0 ? "Unknown" : name.Trim();
-                                if (characterMonitorCharacter != null && characterMonitorCharacter.OwnerId != 0 &&
-                                    ConfigurationManager.Config.TooltipAddCharacterNameOwned &&
-                                    PluginService.CharacterMonitor.Characters.ContainsKey(characterMonitorCharacter
-                                        .OwnerId))
+                                var name = PluginService.CharacterMonitor.GetCharacterNameById(oGroup.Key.RetainerId);
+                                if (ConfigurationManager.Config.TooltipAddCharacterNameOwned)
                                 {
-                                    var owner = PluginService.CharacterMonitor.Characters[
-                                        characterMonitorCharacter.OwnerId];
-                                    name += " (" + owner.FormattedName + ")";
+                                    var owner = PluginService.CharacterMonitor.GetCharacterNameById(
+                                        oGroup.Key.RetainerId, true);
+                                    if (owner.Trim().Length != 0)
+                                        name += " (" + owner + ")";
                                 }
 
                                 var typeIcon = "";
@@ -194,17 +182,13 @@ public class AmountOwnedTooltip : TooltipService.TooltipTweak
                                 if (locations.Count >= ConfigurationManager.Config.TooltipLocationLimit)
                                     continue;
 
-                                var characterMonitorCharacter = PluginService.CharacterMonitor.Characters[oGroup.Key.RetainerId];
-                                var name = characterMonitorCharacter?.FormattedName ?? "Unknown";
-                                name = name.Trim().Length == 0 ? "Unknown" : name.Trim();
-                                if (characterMonitorCharacter != null && characterMonitorCharacter.OwnerId != 0 &&
-                                    ConfigurationManager.Config.TooltipAddCharacterNameOwned &&
-                                    PluginService.CharacterMonitor.Characters.ContainsKey(characterMonitorCharacter
-                                        .OwnerId))
+                                var name = PluginService.CharacterMonitor.GetCharacterNameById(oGroup.Key.RetainerId);
+                                if (ConfigurationManager.Config.TooltipAddCharacterNameOwned)
                                 {
-                                    var owner = PluginService.CharacterMonitor.Characters[
-                                        characterMonitorCharacter.OwnerId];
-                                    name += " (" + owner.FormattedName + ")";
+                                    var owner = PluginService.CharacterMonitor.GetCharacterNameById(
+                                        oGroup.Key.RetainerId, true);
+                                    if (owner.Trim().Length != 0)
+                                        name += " (" + owner + ")";
                                 }
 
                                 var typeIcon = "";
