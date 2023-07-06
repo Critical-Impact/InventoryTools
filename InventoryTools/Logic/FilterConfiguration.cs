@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -13,6 +14,7 @@ using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using Dalamud.Logging;
+using InventoryTools.Attributes;
 using InventoryTools.Extensions;
 using Newtonsoft.Json;
 
@@ -94,6 +96,7 @@ namespace InventoryTools.Logic
         private string? _icon;
         private static readonly byte CurrentVersion = 1;
         private HashSet<uint>? _sourceWorlds;
+        private Vector4 _craftHeaderColour = new (0.0f, 0.439f, 1f, 1f);
         
         //Crafting
         private CraftList? _craftList = null;
@@ -182,6 +185,8 @@ namespace InventoryTools.Logic
 
         private string? _tableId = null;
         private string? _craftTableId = null;
+        [JsonIgnore]
+        [DefaultValue(true)]
         public bool NeedsRefresh { get; set; } = true;
         public HighlightMode HighlightMode { get; set; } = HighlightMode.Never;
 
@@ -535,6 +540,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [DefaultValue(24)]
         public int TableHeight
         {
             get => _tableHeight;
@@ -544,11 +550,21 @@ namespace InventoryTools.Logic
             }
         }
 
-
+        [DefaultValue(24)]
         public int CraftTableHeight
         {
             get => _craftTableHeight;
             set { _craftTableHeight = value;
+                NeedsRefresh = true;
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+            }
+        }
+
+        [Vector4Default("0.0, 0.439, 1, 1")]
+        public Vector4 CraftHeaderColour
+        {
+            get => _craftHeaderColour;
+            set { _craftHeaderColour = value;
                 NeedsRefresh = true;
                 PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }

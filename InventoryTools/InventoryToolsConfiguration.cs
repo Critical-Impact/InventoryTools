@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Numerics;
 using CriticalCommonLib.Models;
 using Dalamud.Configuration;
 using Dalamud.Interface.Colors;
+using InventoryTools.Attributes;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
 using Newtonsoft.Json;
@@ -119,6 +121,8 @@ namespace InventoryTools
         private WindowLayout _filtersLayout = WindowLayout.Tabs;
         private uint? _tooltipColor = null;
         private HashSet<NotificationPopup>? _notificationsSeen = new ();
+        
+        [Vector4Default("0.007, 0.008,0.007, 0.212")]
         public Vector4 HighlightColor
         {
             get => _highlightColor;
@@ -128,6 +132,8 @@ namespace InventoryTools
                 PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
+        
+        [Vector4Default("0.321, 0.239, 0.03, 1")]
         public Vector4 DestinationHighlightColor
         {
             get => _destinationHighlightColor;
@@ -148,6 +154,7 @@ namespace InventoryTools
             }
         }
 
+        [Vector4Default("0.007, 0.008,0.007, 1.0")]
         public Vector4 TabHighlightColor
         {
             get => _tabHighlightColor;
@@ -238,6 +245,7 @@ namespace InventoryTools
             }
         }
 
+        [DefaultValue(10)]
         public int TooltipLocationLimit
         {
             get => _tooltipLocationLimit;
@@ -285,30 +293,24 @@ namespace InventoryTools
             }
         }
 
+        [DefaultValue(24)]
         public int MarketRefreshTimeHours
         {
             get => _marketRefreshTimeHours;
             set
             {
                 _marketRefreshTimeHours = value;
-                if (_marketRefreshTimeHours == 0)
-                {
-                    _marketRefreshTimeHours = 24;
-                }
                 PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }
 
+        [DefaultValue(7)]
         public int MarketSaleHistoryLimit
         {
             get => _marketSaleHistoryLimit;
             set
             {
                 _marketSaleHistoryLimit = value;
-                if (_marketSaleHistoryLimit == 0)
-                {
-                    _marketSaleHistoryLimit = 7;
-                }
                 PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }

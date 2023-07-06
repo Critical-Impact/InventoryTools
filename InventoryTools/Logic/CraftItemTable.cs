@@ -140,7 +140,7 @@ namespace InventoryTools.Logic
                                         if (Columns.Count >= 2)
                                         {
                                             ImGui.TableNextColumn();
-                                            ImGui.TextColored(ImGuiColors.ParsedBlue, groupedCraft.FormattedName());
+                                            ImGui.TextColored(FilterConfiguration.CraftHeaderColour, groupedCraft.FormattedName());
                                         }
 
                                         if (treeNode.Success)
