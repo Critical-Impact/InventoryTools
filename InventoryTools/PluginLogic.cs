@@ -133,11 +133,11 @@ namespace InventoryTools
 
         private void CraftMonitorOnCraftCompleted(uint itemid, FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags flags, uint quantity)
         {
-            var activeFilter = PluginService.FilterService.GetActiveFilter();
-            if (activeFilter != null && activeFilter.FilterType == FilterType.CraftFilter)
+            var activeCraftList = PluginService.FilterService.GetActiveCraftList();
+            if (activeCraftList != null && activeCraftList.FilterType == FilterType.CraftFilter)
             {
-                activeFilter.CraftList.MarkCrafted(itemid, FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None, quantity);
-                activeFilter.StartRefresh();
+                activeCraftList.CraftList.MarkCrafted(itemid, FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None, quantity);
+                activeCraftList.StartRefresh();
             }
         }
 
@@ -395,27 +395,24 @@ namespace InventoryTools
                         or CraftDefaultHQRequiredFilter or CraftDefaultRetrieveFromRetainerFilter
                         or CraftDefaultRetrieveFromRetainerOutputFilter).ToList();
                 PluginService.FilterService.GetDefaultCraftList();
-                foreach (var configuration in PluginService.FilterService.Filters)
+                foreach (var filterConfig in PluginService.FilterService.FiltersList)
                 {
-                    foreach (var filterConfig in PluginService.FilterService.FiltersList)
+                    if (filterConfig.FilterType == FilterType.CraftFilter)
                     {
-                        if (filterConfig.FilterType == FilterType.CraftFilter)
+                        if (filterConfig.CraftListDefault)
                         {
-                            if (filterConfig.CraftListDefault)
-                            {
-                                filterConfig.AddDefaultColumns();
-                            }
-
-                            foreach (var filter in toReset)
-                            {
-                                filter.ResetFilter(filterConfig);
-                            }
-                            
-                            filterConfig.AddCraftColumn("CraftSettingsColumn",2);
-                            filterConfig.AddCraftColumn("CraftSimpleColumn",3);
+                            filterConfig.AddDefaultColumns();
                         }
+
+                        foreach (var filter in toReset)
+                        {
+                            filter.ResetFilter(filterConfig);
+                        }
+                        
+                        filterConfig.AddCraftColumn("CraftSettingsColumn",2);
+                        filterConfig.AddCraftColumn("CraftSimpleColumn",3);
                     }
-                }                                
+                }
                 ConfigurationManager.Config.InternalVersion++;
             }
 

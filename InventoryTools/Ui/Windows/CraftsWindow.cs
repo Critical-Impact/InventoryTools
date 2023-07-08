@@ -36,6 +36,7 @@ namespace InventoryTools.Ui
         private bool _itemsExpanded = true;
 
         private HoverButton _editIcon { get; } = new(PluginService.IconStorage.LoadImage("edit"),  new Vector2(22, 22));
+        private HoverButton _toggleIcon { get; } = new(PluginService.IconStorage.LoadImage("toggle"),  new Vector2(22, 22));
         private HoverButton _settingsIcon { get; } = new(PluginService.IconStorage.LoadIcon(66319),  new Vector2(22, 22));
 
         private HoverButton _addIcon { get; } = new(PluginService.IconStorage.LoadIcon(66315),  new Vector2(22, 22));
@@ -603,6 +604,7 @@ namespace InventoryTools.Ui
                                 PluginService.FilterService.ToggleActiveUiFilter(itemTable.FilterConfiguration);
                             });
                         }
+                        ImGuiUtil.HoverTooltip("When checked, any items you need to retrieve from external sources will be highlighted.");
 
                         ImGui.SameLine();
                         if (_clearIcon.Draw("tb_cf"))
@@ -643,8 +645,47 @@ namespace InventoryTools.Ui
                         {
                             _settingsActive = !_settingsActive;
                         }
-
+                        
                         ImGuiUtil.HoverTooltip("Edit the craft list's configuration.");
+                        
+                        ImGui.SameLine();
+                        width -= 28 * ImGui.GetIO().FontGlobalScale;
+                        ImGui.SetCursorPosX(width);
+                        if (_toggleIcon.Draw("set_active"))
+                        {
+                            PluginService.FilterService.ToggleActiveCraftList(filterConfiguration);
+                        }
+                        ImGuiUtil.HoverTooltip("Toggle the current craft list.");
+
+                        ImGui.SameLine();
+                        width -= 156 * ImGui.GetIO().FontGlobalScale;
+                        ImGui.SetCursorPosX(width);
+                        ImGui.SetNextItemWidth(150);
+                        var activeCraftList = PluginService.FilterService.GetActiveCraftList();
+                        using (var combo = ImRaii.Combo("##ActiveCraftList",activeCraftList != null ? activeCraftList.Name : "None"))
+                        {
+                            if (combo.Success)
+                            {
+                                if (ImGui.Selectable("None"))
+                                {
+                                    PluginService.FilterService.ClearActiveCraftList();
+                                }
+                                foreach (var filter in PluginService.FilterService.FiltersList.Where(c =>
+                                             c.FilterType == FilterType.CraftFilter && !c.CraftListDefault))
+                                {
+                                    if (ImGui.Selectable(filter.Name + "##" + filter.Key))
+                                    {
+                                        PluginService.FilterService.SetActiveCraftList(filter);
+                                    }
+                                }
+                            }
+                        }
+                        ImGuiUtil.HoverTooltip("This is the craft list that finished crafts will count towards.");
+                        ImGui.SameLine();
+                        var textSize = ImGui.CalcTextSize("Active: ");
+                        width -= textSize.X * ImGui.GetIO().FontGlobalScale;
+                        ImGui.SetCursorPosX(width);
+                        ImGui.Text("Active: ");
                     }
                 }
 

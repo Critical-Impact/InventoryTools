@@ -20,29 +20,33 @@ namespace InventoryTools.Services.Interfaces
 
         FilterConfiguration? GetActiveUiFilter(bool ignoreWindowState);
         FilterConfiguration? GetActiveBackgroundFilter();
+        FilterConfiguration? GetActiveCraftList();
 
         FilterConfiguration? GetActiveFilter();
         bool HasActiveFilter();
         bool HasActiveUiFilter();
         bool HasActiveBackgroundFilter();
+        bool HasActiveCraftList();
 
         FilterConfiguration? GetFilter(string name);
         FilterConfiguration? GetFilterByKey(string key);
-        
         FilterConfiguration? GetFilterByKeyOrName(string keyOrName);
-        
         bool SetActiveUiFilter(string name);
         bool SetActiveUiFilter(FilterConfiguration configuration);
         bool SetActiveUiFilterByKey(string key);
         bool SetActiveBackgroundFilter(string name);
         bool SetActiveBackgroundFilter(FilterConfiguration configuration);
         bool SetActiveBackgroundFilterByKey(string key);
+        bool SetActiveCraftList(FilterConfiguration configuration);
+        bool SetActiveCraftListByKey(string key);
         bool ClearActiveUiFilter();
         bool ClearActiveBackgroundFilter();
+        bool ClearActiveCraftList();
         bool ToggleActiveUiFilter(string name);
         bool ToggleActiveUiFilter(FilterConfiguration configuration);
         bool ToggleActiveBackgroundFilter(string name);
         bool ToggleActiveBackgroundFilter(FilterConfiguration configuration);
+        bool ToggleActiveCraftList(FilterConfiguration configuration);
 
         bool MoveFilterUp(FilterConfiguration configuration);
 
@@ -83,6 +87,7 @@ namespace InventoryTools.Services.Interfaces
         event FilterRecalculatedDelegate FilterRecalculated;
         event FilterToggledDelegate UiFilterToggled;
         event FilterToggledDelegate BackgroundFilterToggled;
+        event FilterToggledDelegate CraftListToggled;
         event FilterTableRefreshedDelegate FilterTableRefreshed;
         event FilterRepositionedDelegate FilterRepositioned;
 

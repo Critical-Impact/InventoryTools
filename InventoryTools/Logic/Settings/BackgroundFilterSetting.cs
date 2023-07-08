@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using InventoryTools.Logic.Settings.Abstract;
 
 namespace InventoryTools.Logic.Settings
@@ -37,7 +38,7 @@ namespace InventoryTools.Logic.Settings
             get
             {
                 var filterItems = new Dictionary<string, string> {{"", "None"}};
-                foreach (var config in PluginService.FilterService.FiltersList)
+                foreach (var config in PluginService.FilterService.FiltersList.Where(c => !c.CraftListDefault))
                 {
                     filterItems.Add(config.Key, config.Name);
                 }

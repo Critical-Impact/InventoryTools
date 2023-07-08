@@ -508,6 +508,9 @@ namespace InventoryTools
         public bool TetrisEnabled { get; set; } = false;
 
         public string? ActiveBackgroundFilter { get; set; } = null;
+        
+        public string? ActiveCraftList { get; set; } = null;
+
         public bool SaveBackgroundFilter { get; set; } = false;
 
         public bool FirstRun { get; set; } = true;

@@ -109,19 +109,6 @@ namespace InventoryTools.Extensions
         {
             DrawMenuItems(item.Item);
             bool firstItem = true;
-            if (item.Item.CanOpenCraftLog)
-            {
-                if (firstItem)
-                {
-                    ImGui.Separator();
-                    firstItem = false;
-                }
-                if (ImGui.Selectable("Open in Crafting Log"))
-                {
-                    PluginService.GameInterface.OpenCraftingLog(item.ItemId, item.RecipeId);
-                }
-            }
-
             if (item.IsOutputItem)
             {
                 if (firstItem)

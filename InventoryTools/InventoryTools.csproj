@@ -148,6 +148,10 @@
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <TargetPath>Images\hq.png</TargetPath>
         </ContentWithTargetPath>
+        <ContentWithTargetPath Include="Images\toggle.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>Images\toggle.png</TargetPath>
+        </ContentWithTargetPath>
     </ItemGroup>
 
     <ProjectExtensions>

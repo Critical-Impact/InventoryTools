@@ -24,6 +24,9 @@ public class IPCService : IDisposable
     private readonly ICallGateProvider<string, bool>? _enableBackgroundFilter;
     private readonly ICallGateProvider<bool>? _disableBackgroundFilter;
     private readonly ICallGateProvider<string, bool>? _toggleBackgroundFilter;
+    private readonly ICallGateProvider<string, bool>? _enableCraftList;
+    private readonly ICallGateProvider<bool>? _disableCraftList;
+    private readonly ICallGateProvider<string, bool>? _toggleCraftList;
     private readonly ICallGateProvider<string, uint, uint, bool>? _addItemToCraftList;
     private readonly ICallGateProvider<string, uint, uint, bool>? _removeItemFromCraftList;
     private readonly ICallGateProvider<string, Dictionary<uint, uint>>? _getFilterItems;
@@ -75,6 +78,15 @@ public class IPCService : IDisposable
 
         _toggleBackgroundFilter = pluginInterface.GetIpcProvider<string, bool>("AllaganTools.ToggleBackgroundFilter");
         _toggleBackgroundFilter.RegisterFunc(ToggleBackgroundFilter);
+
+        _enableCraftList = pluginInterface.GetIpcProvider<string, bool>("AllaganTools.EnableCraftList");
+        _enableCraftList.RegisterFunc(EnableCraftList);
+
+        _disableCraftList = pluginInterface.GetIpcProvider<bool>("AllaganTools.DisableCraftList");
+        _disableCraftList.RegisterFunc(DisableCraftList);
+
+        _toggleCraftList = pluginInterface.GetIpcProvider<string, bool>("AllaganTools.ToggleCraftList");
+        _toggleCraftList.RegisterFunc(ToggleCraftList);
 
         _addItemToCraftList = pluginInterface.GetIpcProvider<string, uint, uint, bool>("AllaganTools.AddItemToCraftList");
         _addItemToCraftList.RegisterFunc(AddItemToCraftList);
@@ -357,6 +369,43 @@ public class IPCService : IDisposable
         return false;
     }
 
+    private bool ToggleCraftList(string filterKey)
+    {
+        var filter = _filterService.GetFilterByKeyOrName(filterKey);
+
+        if (filter == null)
+        {
+            filter = _filterService.GetFilter(filterKey);
+        }
+        
+        if (filter != null)
+        {
+            _filterService.ToggleActiveCraftList(filter);
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool DisableCraftList()
+    {
+        _filterService.ClearActiveCraftList();
+        return true;
+    }
+
+    private bool EnableCraftList(string filterKey)
+    {
+        var filter = _filterService.GetFilterByKeyOrName(filterKey);
+        
+        if (filter != null)
+        {
+            _filterService.SetActiveCraftList(filter);
+            return true;
+        }
+
+        return false;
+    }
+
     private void CharacterMonitorOnOnActiveRetainerChanged(ulong retainerId)
     {
         _retainerChanged?.SendMessage(retainerId);
@@ -394,6 +443,9 @@ public class IPCService : IDisposable
             _enableBackgroundFilter?.UnregisterFunc();
             _disableBackgroundFilter?.UnregisterFunc();
             _toggleBackgroundFilter?.UnregisterFunc();
+            _enableCraftList?.UnregisterFunc();
+            _disableCraftList?.UnregisterFunc();
+            _toggleCraftList?.UnregisterFunc();
             _addItemToCraftList?.UnregisterFunc();
             _removeItemFromCraftList?.UnregisterFunc();
             _getFilterItems?.UnregisterFunc();

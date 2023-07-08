@@ -301,6 +301,19 @@ namespace InventoryTools.Services
             return null;
         }
 
+        public FilterConfiguration? GetActiveCraftList()
+        {
+            if (ConfigurationManager.Config.ActiveCraftList != null)
+            {
+                if (_filters.Any(c => c.Value.Key == ConfigurationManager.Config.ActiveCraftList))
+                {
+                    return _filters.First(c => c.Value.Key == ConfigurationManager.Config.ActiveCraftList).Value;
+                }
+            }
+
+            return null;
+        }
+
         public FilterConfiguration? GetActiveFilter()
         {
             var activeUiFilter = GetActiveUiFilter(false);
@@ -326,6 +339,11 @@ namespace InventoryTools.Services
         public bool HasActiveBackgroundFilter()
         {
             return ConfigurationManager.Config.ActiveBackgroundFilter != null;
+        }
+
+        public bool HasActiveCraftList()
+        {
+            return ConfigurationManager.Config.ActiveCraftList != null;
         }
 
         public FilterConfiguration GetDefaultCraftList()
@@ -449,6 +467,28 @@ namespace InventoryTools.Services
             return false;
         }
 
+        public bool SetActiveCraftList(FilterConfiguration configuration)
+        {
+            if (ConfigurationManager.Config.ActiveCraftList != configuration.Key)
+            {
+                ConfigurationManager.Config.ActiveCraftList = configuration.Key;
+                CraftListToggled?.Invoke(configuration, true);
+            }
+
+            return true;
+        }
+
+        public bool SetActiveCraftListByKey(string key)
+        {
+            var filter = GetFilterByKey(key);
+            if (filter != null)
+            {
+                return SetActiveCraftList(filter);
+            }
+
+            return false;
+        }
+
         public bool ClearActiveUiFilter()
         {
             if (ConfigurationManager.Config.ActiveUiFilter != null)
@@ -474,6 +514,22 @@ namespace InventoryTools.Services
                 if (activeBackgroundFilter != null)
                 {
                     BackgroundFilterToggled?.Invoke(activeBackgroundFilter, false);
+                }
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool ClearActiveCraftList()
+        {
+            if (ConfigurationManager.Config.ActiveCraftList != null)
+            {
+                var activeCraftList = GetActiveCraftList();
+                ConfigurationManager.Config.ActiveCraftList = null;
+                if (activeCraftList != null)
+                {
+                    CraftListToggled?.Invoke(activeCraftList, false);
                 }
                 return true;
             }
@@ -545,6 +601,22 @@ namespace InventoryTools.Services
                 return true;
             }
             SetActiveBackgroundFilter(configuration);
+            return true;
+        }
+
+        public bool ToggleActiveCraftList(FilterConfiguration configuration)
+        {
+            var activeCraftList = GetActiveCraftList();
+            if (activeCraftList != null)
+            {
+                ClearActiveCraftList();
+                if (activeCraftList != configuration)
+                {
+                    SetActiveCraftList(configuration);
+                }
+                return true;
+            }
+            SetActiveCraftList(configuration);
             return true;
         }
 
@@ -723,6 +795,7 @@ namespace InventoryTools.Services
         public event IFilterService.FilterInvalidatedDelegate? FilterInvalidated;
         public event IFilterService.FilterToggledDelegate? UiFilterToggled;
         public event IFilterService.FilterToggledDelegate? BackgroundFilterToggled;
+        public event IFilterService.FilterToggledDelegate? CraftListToggled;
         public event IFilterService.FilterTableRefreshedDelegate? FilterTableRefreshed;
         
                             

@@ -769,6 +769,19 @@ namespace InventoryTools.Ui
                         });
                     }
 
+                    if ((filterConfiguration.HighlightWhen ?? ConfigurationManager.Config.HighlightWhen) ==
+                        "When Searching")
+                    {
+                        ImGuiUtil.HoverTooltip(
+                            "When checked, any items matching the filter will be highlighted once you search in any of the columns.");
+                    }
+                    else
+                    {
+                        ImGuiUtil.HoverTooltip(
+                            "When checked, any items matching the filter will be highlighted.");
+                    }
+
+
                     ImGui.SameLine();
                     UiHelpers.CenterElement(20 * ImGui.GetIO().FontGlobalScale);
                     if(_clearIcon.Draw("clearSearch"))
