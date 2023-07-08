@@ -60,12 +60,32 @@ namespace InventoryTools
         private HashSet<string>? _openWindows = new();
         private Dictionary<string, Vector2>? _savedWindowPositions = new();
         private List<InventoryChangeReason> _historyTrackReasons = new();
+        private List<uint>? _tooltipWhitelistCategories = new();
+        private bool _tooltipWhitelistBlacklist = false;
         public bool HistoryEnabled
         {
             get => _historyEnabled;
             set
             {
                 _historyEnabled = value;
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+            }
+        }
+        public bool TooltipWhitelistBlacklist
+        {
+            get => _tooltipWhitelistBlacklist;
+            set
+            {
+                _tooltipWhitelistBlacklist = value;
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+            }
+        }
+        public List<uint> TooltipWhitelistCategories
+        {
+            get => _tooltipWhitelistCategories ??= new();
+            set
+            {
+                _tooltipWhitelistCategories = value;
                 PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
         }

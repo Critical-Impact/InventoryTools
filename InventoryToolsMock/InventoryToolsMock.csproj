@@ -62,6 +62,7 @@
       <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
       <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="8.0.0-preview.5.23280.8" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3-beta1" />
+      <PackageReference Include="StbiSharp" Version="1.2.1" />
       <PackageReference Include="Veldrid" Version="4.9.0" />
       <PackageReference Include="Veldrid.SDL2" Version="4.9.0" />
       <PackageReference Include="Veldrid.StartupUtilities" Version="4.9.0" />

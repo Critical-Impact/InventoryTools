@@ -11,120 +11,111 @@ using InventoryTools.Logic;
 
 namespace InventoryTools.Tooltips;
 
-public class LocationDisplayTooltip : TooltipService.TooltipTweak
+public class LocationDisplayTooltip : BaseTooltip
 {
-    
     public override bool IsEnabled =>
         ConfigurationManager.Config.DisplayTooltip && ConfigurationManager.Config.TooltipDisplayRetrieveAmount;
     public override unsafe void OnGenerateItemTooltip(NumberArrayData* numberArrayData, StringArrayData* stringArrayData)
     {
-        if (!ConfigurationManager.Config.DisplayTooltip)
-        {
-            return;
-        }
-        var id = Service.Gui.HoveredItem;
-        if (id < 2000000)
-        {
-            bool isHq = id > 1000000;
-            id %= 500000;
+        if (!ShouldShow()) return;
+
+        var item = HoverItem;
+        if (item != null) {
+            var textLines = new List<string>();
             
+            TooltipService.ItemTooltipField itemTooltipField;
+            var tooltipVisibility = GetTooltipVisibility((int**)numberArrayData);
+            if (tooltipVisibility.HasFlag(ItemTooltipFieldVisibility.Description))
+            {
+                itemTooltipField = TooltipService.ItemTooltipField.ItemDescription;
+            }
+            else if (tooltipVisibility.HasFlag(ItemTooltipFieldVisibility.Effects))
+            {
+                itemTooltipField = TooltipService.ItemTooltipField.Effects;
+            }
+            else if (tooltipVisibility.HasFlag(ItemTooltipFieldVisibility.Levels))
+            {
+                itemTooltipField = TooltipService.ItemTooltipField.Levels;
+            }
+            else
+            {
+                return;
+            }
+            
+            var seStr = GetTooltipString(stringArrayData, itemTooltipField);
 
-            var item = Service.ExcelCache.GetItemExSheet().GetRow((uint)id);
-            if (item != null) {
-                var textLines = new List<string>();
-                
-                TooltipService.ItemTooltipField itemTooltipField;
-                var tooltipVisibility = GetTooltipVisibility((int**)numberArrayData);
-                if (tooltipVisibility.HasFlag(ItemTooltipFieldVisibility.Description))
+            if (seStr != null && seStr.Payloads.Count > 0)
+            {
+                if (ConfigurationManager.Config.TooltipDisplayRetrieveAmount)
                 {
-                    itemTooltipField = TooltipService.ItemTooltipField.ItemDescription;
-                }
-                else if (tooltipVisibility.HasFlag(ItemTooltipFieldVisibility.Effects))
-                {
-                    itemTooltipField = TooltipService.ItemTooltipField.Effects;
-                }
-                else if (tooltipVisibility.HasFlag(ItemTooltipFieldVisibility.Levels))
-                {
-                    itemTooltipField = TooltipService.ItemTooltipField.Levels;
-                }
-                else
-                {
-                    return;
-                }
-                
-                var seStr = GetTooltipString(stringArrayData, itemTooltipField);
-
-                if (seStr != null && seStr.Payloads.Count > 0)
-                {
-                    if (ConfigurationManager.Config.TooltipDisplayRetrieveAmount)
+                    var filterConfiguration = PluginService.FilterService.GetActiveFilter();
+                    if (filterConfiguration != null)
                     {
-                        var filterConfiguration = PluginService.FilterService.GetActiveFilter();
-                        if (filterConfiguration != null)
+                        if (filterConfiguration.FilterType == FilterType.CraftFilter)
                         {
-                            if (filterConfiguration.FilterType == FilterType.CraftFilter)
+                            var hoverItemIsHq = HoverItemIsHq;
+                            var hoverItemId = HoverItemId;
+                            var craftItem = filterConfiguration.CraftList.GetItemById(hoverItemId, hoverItemIsHq);
+                            if (craftItem != null)
                             {
-                                var craftItem = filterConfiguration.CraftList.GetItemById((uint)id, isHq);
-                                if (craftItem != null)
+                                var filterResult = filterConfiguration.FilterResult;
+                                var missingOverall = craftItem.QuantityMissingOverall;
+                                var willRetrieve = craftItem.QuantityWillRetrieve;
+                                if (missingOverall != 0 || willRetrieve != 0)
                                 {
-                                    var filterResult = filterConfiguration.FilterResult;
-                                    var missingOverall = craftItem.QuantityMissingOverall;
-                                    var willRetrieve = craftItem.QuantityWillRetrieve;
-                                    if (missingOverall != 0 || willRetrieve != 0)
+                                    var needText = "Need: " + missingOverall;
+                                    if (filterResult != null)
                                     {
-                                        var needText = "Need: " + missingOverall;
-                                        if (filterResult != null)
+                                        var sortedItems = filterResult.SortedItems.Where(c =>
+                                            c.InventoryItem.ItemId == hoverItemId && c.InventoryItem.IsHQ == hoverItemIsHq).ToList();
+                                        if (sortedItems.Any())
                                         {
-                                            var sortedItems = filterResult.SortedItems.Where(c =>
-                                                c.InventoryItem.ItemId == id && c.InventoryItem.IsHQ == isHq).ToList();
-                                            if (sortedItems.Any())
+                                            var sortedItem = sortedItems.First();
+                                            if (sortedItem.Quantity != 0)
                                             {
-                                                var sortedItem = sortedItems.First();
-                                                if (sortedItem.Quantity != 0)
-                                                {
-                                                    needText += " / (" + Math.Min(willRetrieve,sortedItem.Quantity) + " can be retrieved)";
-                                                }
+                                                needText += " / (" + Math.Min(willRetrieve,sortedItem.Quantity) + " can be retrieved)";
                                             }
                                         }
-
-                                        textLines.Add(needText + "\n");
                                     }
+
+                                    textLines.Add(needText + "\n");
                                 }
                             }
                         }
                     }
+                }
 
-                    var newText = "";
-                    if (textLines.Count != 0)
+                var newText = "";
+                if (textLines.Count != 0)
+                {
+                    newText += "\n";
+                    for (var index = 0; index < textLines.Count; index++)
                     {
-                        newText += "\n";
-                        for (var index = 0; index < textLines.Count; index++)
+                        var line = textLines[index];
+                        if (index == textLines.Count)
                         {
-                            var line = textLines[index];
-                            if (index == textLines.Count)
-                            {
-                                line = line.TrimEnd('\n');
-                            }
-                            newText += line;
+                            line = line.TrimEnd('\n');
                         }
+                        newText += line;
+                    }
+                }
+
+                if (newText != "")
+                {
+                    var lines = new List<Payload>()
+                    {
+                        new UIForegroundPayload((ushort)(ConfigurationManager.Config.TooltipColor ?? 1)),
+                        new UIGlowPayload(0),
+                        new TextPayload(newText),
+                        new UIGlowPayload(0),
+                        new UIForegroundPayload(0),
+                    };
+                    foreach (var line in lines)
+                    {
+                        seStr.Payloads.Add(line);
                     }
 
-                    if (newText != "")
-                    {
-                        var lines = new List<Payload>()
-                        {
-                            new UIForegroundPayload((ushort)(ConfigurationManager.Config.TooltipColor ?? 1)),
-                            new UIGlowPayload(0),
-                            new TextPayload(newText),
-                            new UIGlowPayload(0),
-                            new UIForegroundPayload(0),
-                        };
-                        foreach (var line in lines)
-                        {
-                            seStr.Payloads.Add(line);
-                        }
-
-                        SetTooltipString(stringArrayData, itemTooltipField, seStr);
-                    }
+                    SetTooltipString(stringArrayData, itemTooltipField, seStr);
                 }
             }
         }
