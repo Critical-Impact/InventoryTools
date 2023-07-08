@@ -28,12 +28,14 @@ namespace InventoryToolsTesting
         {
             CraftList list = new CraftList();
             list.AddCraftItem(31922, 2);
+            list.GenerateCraftChildren();
             var requiredMaterialsList = list.GetRequiredMaterialsList();
             Assert.AreEqual( 10, requiredMaterialsList[32014]);
             
             list = new CraftList();
             //Skybuilders bed
             list.AddCraftItem(31945, 1);
+            list.GenerateCraftChildren();
             requiredMaterialsList = list.GetRequiredMaterialsList();
             Assert.AreEqual( 10, requiredMaterialsList[32028]);
         }
@@ -44,6 +46,7 @@ namespace InventoryToolsTesting
             {
                 CraftList list = new CraftList();
                 list.AddCraftItem("Cotton Yarn", 3);
+                list.GenerateCraftChildren();
                 var requiredMaterialsList = list.GetRequiredMaterialsListNamed();
                 Assert.AreEqual(4, requiredMaterialsList["Cotton Boll"]);
 
@@ -62,6 +65,7 @@ namespace InventoryToolsTesting
             {
                 CraftList list = new CraftList();
                 list.AddCraftItem("Cotton Yarn", 3);
+                list.GenerateCraftChildren();
                 var requiredMaterialsList = list.GetRequiredMaterialsListNamed();
                 Assert.AreEqual(4, requiredMaterialsList["Cotton Boll"]);
                 var sourceStore = new CraftItemSourceStore()
@@ -99,6 +103,7 @@ namespace InventoryToolsTesting
             CraftList list = new CraftList();
             list.AddCraftItem(38930, 300);
             list.AddCraftItem(38929, 300);
+            list.GenerateCraftChildren();
             var requiredMaterialsList = list.GetQuantityNeededList();
             Assert.AreEqual( 600, requiredMaterialsList[36085]);
         }
@@ -110,7 +115,7 @@ namespace InventoryToolsTesting
                 CraftList list = new CraftList();
                 //Rivera Bed
                 list.AddCraftItem(6542, 2);
-
+                list.GenerateCraftChildren();
                 var requiredMaterialsList = list.GetRequiredMaterialsList();
                 //undyed cotton cloth
                 Assert.AreEqual(4, requiredMaterialsList[5325]);
@@ -137,6 +142,7 @@ namespace InventoryToolsTesting
 
                 list = new CraftList();
                 list.AddCraftItem(27877, 1);
+                list.GenerateCraftChildren();
                 requiredMaterialsList = list.GetRequiredMaterialsList();
                 Assert.AreEqual(2, requiredMaterialsList[27830]);
             }
@@ -182,6 +188,7 @@ namespace InventoryToolsTesting
             //Check the amount of available materials is 4 when provided with 4 externally
             list = new CraftList()
                 .AddCraftItem("Riviera Bed", 2);
+            list.GenerateCraftChildren();
             sourceStore = new CraftItemSourceStore()
                 .AddExternalSource("Undyed Cotton Cloth", 4, false);
             list.Update(sourceStore);
@@ -211,6 +218,7 @@ namespace InventoryToolsTesting
             //Check the amount of missing materials is 4 for each item when provided with 2 externally
             list = new CraftList()
                 .AddCraftItem("Riviera Bed", 2);
+            list.GenerateCraftChildren();
             sourceStore = new CraftItemSourceStore()
                 .AddExternalSource("Undyed Cotton Cloth", 2, false);
             list.Update(sourceStore);
@@ -240,6 +248,7 @@ namespace InventoryToolsTesting
             //Crafting 2 riveria bed, 2 maple lumber in inventory
             list = new CraftList()
                 .AddCraftItem("Riviera Bed", 2);
+            list.GenerateCraftChildren();
             sourceStore = new CraftItemSourceStore()
                 .AddCharacterSource("Maple Lumber", 2, false);
             list.Update(sourceStore);
@@ -275,6 +284,7 @@ namespace InventoryToolsTesting
             //Crafting 2 riveria bed, 2 lumber available, 6 logs available , plenty of wind shards, should craft 2, already have 2
             list = new CraftList()
                 .AddCraftItem("Riviera Bed", 2);
+            list.GenerateCraftChildren();
             sourceStore = new CraftItemSourceStore()
                 .AddCharacterSource("Maple Lumber", 2, false)
                 .AddCharacterSource("Maple Log", 6, false)
@@ -303,6 +313,7 @@ namespace InventoryToolsTesting
             CraftList list = new CraftList();
             //Rivera Bed
             list.AddCraftItem(6542, 2);
+            list.GenerateCraftChildren();
             list.Update(characterMaterials, externalSources);
 
             var requiredMaterialsList = list.GetReadyMaterialsList();
@@ -321,6 +332,7 @@ namespace InventoryToolsTesting
             CraftList list = new CraftList();
             //Rivera Bed
             list.AddCraftItem(6542, 2);
+            list.GenerateCraftChildren();
             list.Update(characterMaterials, externalSources);
 
             var retrieveList = list.GetQuantityToRetrieveList();
@@ -374,6 +386,24 @@ namespace InventoryToolsTesting
             var venture = flattenedMergedMaterials.First(c => c.ItemId == 21072);
             Assert.AreEqual(20,venture.MissingIngredients.First().Key.Item1);
             Assert.AreEqual(1800,venture.MissingIngredients.First().Value);
+        }
+
+        [Test]
+        public void TestIngredientReturn()
+        {
+            CraftList list = new CraftList();
+            CraftItemSourceStore store = new CraftItemSourceStore();
+            store = new CraftItemSourceStore()
+                .AddExternalSource("Cotton Boll", 100, false)
+                .AddExternalSource("Cotton Yarn", 5, false)
+                .AddCharacterSource("Wind Shard", 999, false)
+                .AddCharacterSource("Lightning Shard", 999, false);
+            
+            list.AddCraftItem("Riviera Bed", 2);
+            list.GenerateCraftChildren();
+            list.Update(store);
+            var flattenedMergedMaterials = list.GetQuantityToRetrieveList();
+            Assert.AreEqual(4, flattenedMergedMaterials[(5334, false)]);
         }
     }
 }
