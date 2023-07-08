@@ -1,4 +1,4 @@
-## Allagan Tools - Mocked
+## Mocked
 
 This project allows you to run significant parts of the plugin from within an external window. 
 No active instance of the game is required to run it though the game's data files are required to be referenced.

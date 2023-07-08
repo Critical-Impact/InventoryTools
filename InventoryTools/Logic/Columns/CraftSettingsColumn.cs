@@ -110,7 +110,7 @@ public class CraftSettingsColumn : IColumn
 
     public void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
     {
-         ImGui.TableNextColumn();
+        ImGui.TableNextColumn();
 
         using (var popup = ImRaii.Popup("ConfigureItemSettings" + rowIndex))
         {
@@ -119,166 +119,192 @@ public class CraftSettingsColumn : IColumn
                 ImGui.Text("Configure Sourcing:");
                 ImGui.Separator();
 
+                DrawRecipeSelector(configuration, item, rowIndex);
+                DrawHqSelector(configuration, item, rowIndex);
+                DrawRetainerRetrievalSelector(configuration, item, rowIndex);
+                DrawSourceSelector(configuration, item, rowIndex);
+            }
+        }
 
-                if (Service.ExcelCache.ItemRecipes.ContainsKey(item.ItemId))
+        using (var popup = ImRaii.Popup("ConfigureRecipeSettings" + rowIndex))
+        {
+            if (popup.Success)
+            {
+                ImGui.Text("Configure Recipe:");
+                ImGui.Separator();
+                if (DrawRecipeSelector(configuration, item, rowIndex))
                 {
-                    var itemRecipes = Service.ExcelCache.ItemRecipes[item.ItemId];
-                    if (itemRecipes.Count != 1)
-                    {
-                        var actualRecipes = itemRecipes.Select(c =>
-                                Service.ExcelCache.GetRecipeExSheet().GetRow(c)!)
-                            .OrderBy(c => c.CraftType.Value?.Name ?? "").ToList();
-                        var recipeName = item.Recipe?.CraftType.Value?.Name ?? "";
-                        using (var combo = ImRaii.Combo("##SetRecipe" + rowIndex, recipeName))
-                        {
-                            if (combo.Success)
-                            {
-                                foreach (var recipe in actualRecipes)
-                                {
-                                    if (ImGui.Selectable(recipe.CraftType.Value?.Name ?? "",
-                                            recipeName == (recipe.CraftType.Value?.Name ?? "")))
-                                    {
-                                        if (item.IsOutputItem)
-                                        {
-                                            configuration.CraftList.SetCraftRecipe(item.ItemId,
-                                                recipe.RowId);
-                                            configuration.StartRefresh();
-                                        }
-                                        else
-                                        {
-                                            configuration.CraftList.UpdateCraftRecipePreference(item.ItemId,
-                                                recipe.RowId);
-                                            configuration.StartRefresh();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    ImGui.CloseCurrentPopup();
                 }
+            }
+        }
 
-                if (item.Item.CanBeHq)
+        using (var popup = ImRaii.Popup("ConfigureHQSettings" + rowIndex))
+        {
+            if (popup.Success)
+            {
+                ImGui.Text("Configure HQ Required:");
+                ImGui.Separator();
+                if (DrawHqSelector(configuration, item, rowIndex))
                 {
-                    var currentHQRequired = configuration.CraftList.GetHQRequired(item.ItemId);
-                    var previewValue = "Use Default";
-                    if (currentHQRequired != null)
-                    {
-                        previewValue = currentHQRequired.Value ? "Yes" : "No";
-                    }
-                    ImGui.Text("HQ Required:");
-                    using (var combo = ImRaii.Combo("##SetHQRequired" + rowIndex, previewValue))
-                    {
-                        if (combo.Success)
-                        {
-                            if (ImGui.Selectable("Use Default"))
-                            {
-                                configuration.CraftList.UpdateHQRequired(item.ItemId, null);
-                                configuration.NeedsRefresh = true;
-                                configuration.NotifyConfigurationChange();
-                            }
-                            if (ImGui.Selectable("Yes"))
-                            {
-                                configuration.CraftList.UpdateHQRequired(item.ItemId, true);
-                                configuration.NeedsRefresh = true;
-                                configuration.NotifyConfigurationChange();
-                            }
-                            if (ImGui.Selectable("No"))
-                            {
-                                configuration.CraftList.UpdateHQRequired(item.ItemId, false);
-                                configuration.NeedsRefresh = true;
-                                configuration.NotifyConfigurationChange();
-                            }
-                        }
-                    }
+                    ImGui.CloseCurrentPopup();
                 }
+            }
+        }
 
-                //Retrieve from retainer combo
+        using (var popup = ImRaii.Popup("ConfigureRetainerSettings" + rowIndex))
+        {
+            if (popup.Success)
+            {
+                ImGui.Text("Retrieve from Retainer:");
+                ImGui.Separator();
+                if (DrawRetainerRetrievalSelector(configuration, item, rowIndex))
                 {
-                    var craftRetainerRetrieval = configuration.CraftList.GetCraftRetainerRetrieval(item.ItemId);
-                    var previewValue = "Use Default";
-                    if (craftRetainerRetrieval != null)
-                    {
-                        switch (craftRetainerRetrieval.Value)
-                        {
-                            case CraftRetainerRetrieval.Yes:
-                                previewValue = "Yes";
-                                break;
-                            case CraftRetainerRetrieval.No:
-                                previewValue = "No";
-                                break;
-                            case CraftRetainerRetrieval.HQOnly:
-                                previewValue = "HQ Only";
-                                break;
-                        }
-                    }
-                    ImGui.Text("Retrieve from Retainer:");
-                    using (var combo = ImRaii.Combo("##SetRetrieveRetainer" + rowIndex, previewValue))
-                    {
-                        if (combo.Success)
-                        {
-                            if (ImGui.Selectable("Use Default"))
-                            {
-                                configuration.CraftList.UpdateCraftRetainerRetrieval(item.ItemId, null);
-                                configuration.NeedsRefresh = true;
-                                configuration.NotifyConfigurationChange();
-                            }
-                            if (ImGui.Selectable("Yes"))
-                            {
-                                configuration.CraftList.UpdateCraftRetainerRetrieval(item.ItemId, CraftRetainerRetrieval.Yes);
-                                configuration.NeedsRefresh = true;
-                                configuration.NotifyConfigurationChange();
-                            }
-                            if (ImGui.Selectable("No"))
-                            {
-                                configuration.CraftList.UpdateCraftRetainerRetrieval(item.ItemId, CraftRetainerRetrieval.No);
-                                configuration.NeedsRefresh = true;
-                                configuration.NotifyConfigurationChange();
-                            }
-                            if (ImGui.Selectable("HQ Only"))
-                            {
-                                configuration.CraftList.UpdateCraftRetainerRetrieval(item.ItemId, CraftRetainerRetrieval.HQOnly);
-                                configuration.NeedsRefresh = true;
-                                configuration.NotifyConfigurationChange();
-                            }
-                        }
-                    }
-                }
-
-                if (item.Item.IngredientPreferences.Count != 0)
-                {
-                    var currentIngredientPreference =
-                        configuration.CraftList.GetIngredientPreference(item.ItemId);
-                    var previewValue = currentIngredientPreference?.FormattedName ?? "Use Default";
-                    ImGui.Text("Source Preference:");
-                    using (var combo = ImRaii.Combo("##SetIngredients" + rowIndex, previewValue))
-                    {
-                        if (combo.Success)
-                        {
-                            if (ImGui.Selectable("Use Default"))
-                            {
-                                configuration.CraftList.UpdateIngredientPreference(item.ItemId, null);
-                                configuration.NeedsRefresh = true;
-                                configuration.NotifyConfigurationChange();
-                            }
-                            foreach (var ingredientPreference in item.Item.IngredientPreferences)
-                            {
-                                if (ImGui.Selectable(ingredientPreference.FormattedName))
-                                {
-                                    configuration.CraftList.UpdateIngredientPreference(item.ItemId, ingredientPreference);
-                                    configuration.NeedsRefresh = true;
-                                    configuration.NotifyConfigurationChange();
-                                }
-                            }
-                        }
-                    }
+                    ImGui.CloseCurrentPopup();
                 }
             }
         }
         var ingredientPreferenceDefault = configuration.CraftList.GetIngredientPreference(item.ItemId);
         var retainerRetrievalDefault = configuration.CraftList.GetCraftRetainerRetrieval(item.ItemId);
         var retainerRetrieval = retainerRetrievalDefault ?? (item.IsOutputItem ? configuration.CraftList.CraftRetainerRetrievalOutput : configuration.CraftList.CraftRetainerRetrieval);
+
+        DrawRecipeIcon(configuration,rowIndex, item);
+        DrawHqIcon(configuration, rowIndex, item);
+        DrawRetainerIcon(configuration, rowIndex, item, retainerRetrievalDefault, retainerRetrieval);
+
+        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
+
+        if (_settingsIcon.Draw("cnf_" + rowIndex))
+        {
+            ImGui.OpenPopup("ConfigureItemSettings" + rowIndex);
+        }
+
+        if (ImGui.IsItemHovered())
+        {
+            using (var tooltip = ImRaii.Tooltip())
+            {
+                if (tooltip.Success)
+                {
+
+                    ImGui.TextUnformatted("Sourcing: " + (ingredientPreferenceDefault?.FormattedName ?? "Use Default"));
+                    ImGui.TextUnformatted("Retainer: " + (retainerRetrievalDefault?.FormattedName() ?? "Use Default"));
+                }
+            }
+        }
+    }
+
+    private void DrawRetainerIcon(FilterConfiguration configuration, int rowIndex, CraftItem item, CraftRetainerRetrieval? defaultRetainerRetrieval, CraftRetainerRetrieval retainerRetrieval)
+    {
+        if (retainerRetrieval is CraftRetainerRetrieval.HQOnly or CraftRetainerRetrieval.Yes)
+        {
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
+            ImGui.Image(_retainerIcon.ImGuiHandle, new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale,
+                new System.Numerics.Vector2(0, 0), new System.Numerics.Vector2(1, 1),
+                retainerRetrieval == CraftRetainerRetrieval.HQOnly
+                    ? new Vector4(0.9f, 0.75f, 0.14f, 1f)
+                    : new Vector4(1f, 1f, 1f, 1f));
+            ImGuiUtil.HoverTooltip((retainerRetrieval == CraftRetainerRetrieval.HQOnly ? "HQ Only" : "Yes") + (defaultRetainerRetrieval == null ? " (Default)" : ""));
+            ImGui.SameLine();
+        }
+        else
+        {
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
+            ImGui.Image(_retainerIcon.ImGuiHandle, new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale,
+                new System.Numerics.Vector2(0, 0), new System.Numerics.Vector2(1, 1), new Vector4(1f, 1f, 1f, 0.2f));
+            ImGuiUtil.HoverTooltip("No" + (defaultRetainerRetrieval == null ? " (Default)" : ""));
+            ImGui.SameLine();
+        }
+        if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
+        {
+            CraftRetainerRetrieval? newRetainerRetrieval;
+            if (defaultRetainerRetrieval != null && retainerRetrieval == CraftRetainerRetrieval.No)
+            {
+                newRetainerRetrieval = CraftRetainerRetrieval.Yes;
+            }
+            else if (defaultRetainerRetrieval != null && retainerRetrieval == CraftRetainerRetrieval.Yes)
+            {
+                newRetainerRetrieval = CraftRetainerRetrieval.HQOnly;
+            }
+            else if (defaultRetainerRetrieval != null && retainerRetrieval == CraftRetainerRetrieval.HQOnly)
+            {
+                newRetainerRetrieval = null;
+            }
+            else
+            {
+                newRetainerRetrieval = CraftRetainerRetrieval.No;
+            }
+            configuration.CraftList.UpdateCraftRetainerRetrieval(item.ItemId, newRetainerRetrieval);
+        }
+        else if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
+        {
+            ImGui.OpenPopup("ConfigureRetainerSettings" + rowIndex);
+        }
+    }
+
+    private void DrawHqIcon(FilterConfiguration configuration, int rowIndex, CraftItem item)
+    {
         var hqRequired = configuration.CraftList.GetHQRequired(item.ItemId);
 
+        var calculatedHqRequired = hqRequired ?? configuration.CraftList.HQRequired;
+
+        if (calculatedHqRequired == true && item.Item.CanBeHq)
+        {
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
+            ImGui.Image(_hqIcon.ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale,
+                new System.Numerics.Vector2(0, 0), new System.Numerics.Vector2(1, 1), new Vector4(0.9f, 0.75f, 0.14f, 1f));
+            if (item.Item.CanBeHq && ImGui.IsItemClicked(ImGuiMouseButton.Left))
+            {
+                if (hqRequired != null)
+                {
+                    configuration.CraftList.UpdateHQRequired(item.ItemId, false);
+                    configuration.StartRefresh();
+                }
+                else
+                {
+                    configuration.CraftList.UpdateHQRequired(item.ItemId, true);
+                    configuration.StartRefresh();
+                }
+
+            }
+            else if (item.Item.CanBeHq && ImGui.IsItemClicked(ImGuiMouseButton.Right))
+            {
+                ImGui.OpenPopup("ConfigureHQSettings" + rowIndex);
+            }
+            ImGuiUtil.HoverTooltip("HQ" + (hqRequired == null ? " (Default)" : ""));
+            ImGui.SameLine();
+        }
+        else
+        {
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
+            ImGui.Image(_hqIcon.ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale,
+                new System.Numerics.Vector2(0, 0), new System.Numerics.Vector2(1, 1),
+                new Vector4(0.9f, 0.75f, 0.14f, 0.2f));
+            if (item.Item.CanBeHq && ImGui.IsItemClicked(ImGuiMouseButton.Left))
+            {
+                if (hqRequired != null)
+                {
+                    configuration.CraftList.UpdateHQRequired(item.ItemId, null);
+                    configuration.StartRefresh();
+                }
+                else
+                {
+                    configuration.CraftList.UpdateHQRequired(item.ItemId, true);
+                    configuration.StartRefresh();
+                }
+            }
+            else if (item.Item.CanBeHq && ImGui.IsItemClicked(ImGuiMouseButton.Right))
+            {
+                ImGui.OpenPopup("ConfigureHQSettings" + rowIndex);
+            }
+
+            ImGuiUtil.HoverTooltip(item.Item.CanBeHq ? "No" + (hqRequired == null ? " (Default)" : "") : "Cannot be HQ");
+            ImGui.SameLine();
+        }
+        
+    }
+
+    private static void DrawRecipeIcon(FilterConfiguration configuration, int rowIndex, CraftItem item)
+    {
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
         var icon = item.SourceIcon;
         ImGui.Image(PluginService.IconStorage[icon].ImGuiHandle,
@@ -288,6 +314,41 @@ public class CraftSettingsColumn : IColumn
         {
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
             {
+                var itemRecipes = Service.ExcelCache.ItemRecipes[item.ItemId];
+                if (itemRecipes.Count != 1)
+                {
+                    var actualRecipes = itemRecipes.Select(c =>
+                            Service.ExcelCache.GetRecipeExSheet().GetRow(c)!)
+                        .OrderBy(c => c.CraftType.Value?.Name ?? "").ToList();
+                    if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+                    {
+                        var currentRecipeIndex = actualRecipes.IndexOf(itemRecipe);
+                        currentRecipeIndex++;
+                        if (actualRecipes.Count <= currentRecipeIndex)
+                        {
+                            currentRecipeIndex = 0;
+                        }
+
+                        var newRecipe = actualRecipes[currentRecipeIndex];
+                        if (item.IsOutputItem)
+                        {
+                            configuration.CraftList.SetCraftRecipe(item.ItemId,
+                                newRecipe.RowId);
+                            configuration.StartRefresh();
+                        }
+                        else
+                        {
+                            configuration.CraftList.UpdateCraftRecipePreference(item.ItemId,
+                                newRecipe.RowId);
+                            configuration.StartRefresh();
+                        }
+                    }
+                    else if (ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+                    {
+                        ImGui.OpenPopup("ConfigureRecipeSettings" + rowIndex);
+                    }
+                }
+
                 using var tt = ImRaii.Tooltip();
                 ImGui.Text($"Recipe ({itemRecipe.CraftTypeEx.Value?.FormattedName ?? "Unknown"}): ");
                 foreach (var ingredient in itemRecipe.Ingredients)
@@ -299,9 +360,16 @@ public class CraftSettingsColumn : IColumn
                         ImGui.Text(actualItem.NameString + " : " + quantity);
                     }
                 }
+
+                if (Service.ExcelCache.GetItemRecipes(item.ItemId).Count > 1)
+                {
+                    ImGui.NewLine();
+                    ImGui.Text("Left Click: Next Recipe");
+                    ImGui.Text("Right Click: Select Recipe");
+                }
             }
         }
-        else if(item.Item.CompanyCraftSequenceEx != null)
+        else if (item.Item.CompanyCraftSequenceEx != null)
         {
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
             {
@@ -319,7 +387,7 @@ public class CraftSettingsColumn : IColumn
                 }
             }
         }
-        else if(item.IngredientPreference.Type == IngredientPreferenceType.Item)
+        else if (item.IngredientPreference.Type == IngredientPreferenceType.Item)
         {
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
             {
@@ -327,16 +395,27 @@ public class CraftSettingsColumn : IColumn
                 ImGui.Text($"Items: ");
                 if (item.IngredientPreference.LinkedItemId != null && item.IngredientPreference.LinkedItemQuantity != null)
                 {
-                    var itemName =Service.ExcelCache.GetItemExSheet().GetRow(item.IngredientPreference.LinkedItemId.Value)?.NameString ?? "Unknown Item" + " : " + item.IngredientPreference.LinkedItemQuantity.Value;
+                    var itemName =
+                        Service.ExcelCache.GetItemExSheet().GetRow(item.IngredientPreference.LinkedItemId.Value)
+                            ?.NameString ?? "Unknown Item" + " : " + item.IngredientPreference.LinkedItemQuantity.Value;
                     ImGui.Text(itemName);
-                    if (item.IngredientPreference.LinkedItem2Id != null && item.IngredientPreference.LinkedItem2Quantity != null)
+                    if (item.IngredientPreference.LinkedItem2Id != null &&
+                        item.IngredientPreference.LinkedItem2Quantity != null)
                     {
-                        var itemName2 = (Service.ExcelCache.GetItemExSheet().GetRow(item.IngredientPreference.LinkedItem2Id.Value)?.NameString ?? "Unknown Item") + " : " + item.IngredientPreference.LinkedItem2Quantity.Value;
+                        var itemName2 =
+                            (Service.ExcelCache.GetItemExSheet().GetRow(item.IngredientPreference.LinkedItem2Id.Value)
+                                ?.NameString ?? "Unknown Item") + " : " +
+                            item.IngredientPreference.LinkedItem2Quantity.Value;
                         ImGui.Text(itemName2);
                     }
-                    if (item.IngredientPreference.LinkedItem3Id != null && item.IngredientPreference.LinkedItem3Quantity != null)
+
+                    if (item.IngredientPreference.LinkedItem3Id != null &&
+                        item.IngredientPreference.LinkedItem3Quantity != null)
                     {
-                        var itemName3 = (Service.ExcelCache.GetItemExSheet().GetRow(item.IngredientPreference.LinkedItem3Id.Value)?.NameString ?? "Unknown Item")  + " : " + item.IngredientPreference.LinkedItem3Quantity.Value;
+                        var itemName3 =
+                            (Service.ExcelCache.GetItemExSheet().GetRow(item.IngredientPreference.LinkedItem3Id.Value)
+                                ?.NameString ?? "Unknown Item") + " : " +
+                            item.IngredientPreference.LinkedItem3Quantity.Value;
                         ImGui.Text(itemName3);
                     }
                 }
@@ -346,58 +425,193 @@ public class CraftSettingsColumn : IColumn
         {
             ImGuiUtil.HoverTooltip(item.SourceName);
         }
+
         ImGui.SameLine();
-        
-        hqRequired ??= configuration.CraftList.HQRequired;
+    }
 
-        if(hqRequired == true && item.Item.CanBeHq)
+    private static void DrawSourceSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
+    {
+        if (item.Item.IngredientPreferences.Count != 0)
         {
-            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
-            ImGui.Image(_hqIcon.ImGuiHandle,new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale,new System.Numerics.Vector2(0,0), new System.Numerics.Vector2(1,1), new Vector4(0.9f,0.75f,0.14f,1f));
-            ImGuiUtil.HoverTooltip("HQ");
-            ImGui.SameLine();
-        }
-        else
-        {
-            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
-            ImGui.Image(_hqIcon.ImGuiHandle,new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale,new System.Numerics.Vector2(0,0), new System.Numerics.Vector2(1,1), new Vector4(0.9f,0.75f,0.14f,0.2f));
-            ImGuiUtil.HoverTooltip(item.Item.CanBeHq ? "No" : "Cannot be HQ");
-            ImGui.SameLine();
-        }
-        if(retainerRetrieval is CraftRetainerRetrieval.HQOnly or CraftRetainerRetrieval.Yes)
-        {
-            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
-            ImGui.Image(_retainerIcon.ImGuiHandle,new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale,new System.Numerics.Vector2(0,0), new System.Numerics.Vector2(1,1), retainerRetrieval == CraftRetainerRetrieval.HQOnly ? new Vector4(0.9f,0.75f,0.14f,1f) : new Vector4(1f,1f,1f,1f));
-            ImGuiUtil.HoverTooltip(retainerRetrieval == CraftRetainerRetrieval.HQOnly ? "HQ Only" : "Yes");
-            ImGui.SameLine();
-        }
-        else
-        {
-            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
-            ImGui.Image(_retainerIcon.ImGuiHandle,new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale,new System.Numerics.Vector2(0,0), new System.Numerics.Vector2(1,1), new Vector4(1f,1f,1f,0.2f));
-            ImGuiUtil.HoverTooltip("No");
-            ImGui.SameLine();
-        }
-        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
-
-        if(_settingsIcon.Draw("cnf_" + rowIndex))
-        {
-            ImGui.OpenPopup("ConfigureItemSettings" + rowIndex);
-        }
-
-        
-        if (ImGui.IsItemHovered())
-        {
-            using (var tooltip = ImRaii.Tooltip())
+            var currentIngredientPreference =
+                configuration.CraftList.GetIngredientPreference(item.ItemId);
+            var previewValue = currentIngredientPreference?.FormattedName ?? "Use Default";
+            ImGui.Text("Source Preference:");
+            using (var combo = ImRaii.Combo("##SetIngredients" + rowIndex, previewValue))
             {
-                if (tooltip.Success)
+                if (combo.Success)
                 {
+                    if (ImGui.Selectable("Use Default"))
+                    {
+                        configuration.CraftList.UpdateIngredientPreference(item.ItemId, null);
+                        configuration.NeedsRefresh = true;
+                        configuration.NotifyConfigurationChange();
+                    }
 
-                    ImGui.TextUnformatted("Sourcing: " + (ingredientPreferenceDefault?.FormattedName ?? "Use Default"));
-                    ImGui.TextUnformatted("Retainer: " + (retainerRetrievalDefault?.FormattedName() ?? "Use Default"));
+                    foreach (var ingredientPreference in item.Item.IngredientPreferences)
+                    {
+                        if (ImGui.Selectable(ingredientPreference.FormattedName))
+                        {
+                            configuration.CraftList.UpdateIngredientPreference(item.ItemId, ingredientPreference);
+                            configuration.NeedsRefresh = true;
+                            configuration.NotifyConfigurationChange();
+                        }
+                    }
                 }
             }
         }
+    }
+
+    private static bool DrawRetainerRetrievalSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
+    {
+        //Retrieve from retainer combo
+        var craftRetainerRetrieval = configuration.CraftList.GetCraftRetainerRetrieval(item.ItemId);
+        var previewValue = "Use Default";
+        if (craftRetainerRetrieval != null)
+        {
+            switch (craftRetainerRetrieval.Value)
+            {
+                case CraftRetainerRetrieval.Yes:
+                    previewValue = "Yes";
+                    break;
+                case CraftRetainerRetrieval.No:
+                    previewValue = "No";
+                    break;
+                case CraftRetainerRetrieval.HQOnly:
+                    previewValue = "HQ Only";
+                    break;
+            }
+        }
+
+        ImGui.Text("Retrieve from Retainer:");
+        using (var combo = ImRaii.Combo("##SetRetrieveRetainer" + rowIndex, previewValue))
+        {
+            if (combo.Success)
+            {
+                if (ImGui.Selectable("Use Default"))
+                {
+                    configuration.CraftList.UpdateCraftRetainerRetrieval(item.ItemId, null);
+                    configuration.NeedsRefresh = true;
+                    configuration.NotifyConfigurationChange();
+                    return true;
+                }
+
+                if (ImGui.Selectable("Yes"))
+                {
+                    configuration.CraftList.UpdateCraftRetainerRetrieval(item.ItemId, CraftRetainerRetrieval.Yes);
+                    configuration.NeedsRefresh = true;
+                    configuration.NotifyConfigurationChange();
+                    return true;
+                }
+
+                if (ImGui.Selectable("No"))
+                {
+                    configuration.CraftList.UpdateCraftRetainerRetrieval(item.ItemId, CraftRetainerRetrieval.No);
+                    configuration.NeedsRefresh = true;
+                    configuration.NotifyConfigurationChange();
+                    return true;
+                }
+
+                if (ImGui.Selectable("HQ Only"))
+                {
+                    configuration.CraftList.UpdateCraftRetainerRetrieval(item.ItemId, CraftRetainerRetrieval.HQOnly);
+                    configuration.NeedsRefresh = true;
+                    configuration.NotifyConfigurationChange();
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static bool DrawHqSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
+    {
+        if (item.Item.CanBeHq)
+        {
+            var currentHQRequired = configuration.CraftList.GetHQRequired(item.ItemId);
+            var previewValue = "Use Default";
+            if (currentHQRequired != null)
+            {
+                previewValue = currentHQRequired.Value ? "Yes" : "No";
+            }
+
+            ImGui.Text("HQ Required:");
+            using (var combo = ImRaii.Combo("##SetHQRequired" + rowIndex, previewValue))
+            {
+                if (combo.Success)
+                {
+                    if (ImGui.Selectable("Use Default"))
+                    {
+                        configuration.CraftList.UpdateHQRequired(item.ItemId, null);
+                        configuration.NeedsRefresh = true;
+                        configuration.NotifyConfigurationChange();
+                        return true;
+                    }
+
+                    if (ImGui.Selectable("Yes"))
+                    {
+                        configuration.CraftList.UpdateHQRequired(item.ItemId, true);
+                        configuration.NeedsRefresh = true;
+                        configuration.NotifyConfigurationChange();
+                        return true;
+                    }
+
+                    if (ImGui.Selectable("No"))
+                    {
+                        configuration.CraftList.UpdateHQRequired(item.ItemId, false);
+                        configuration.NeedsRefresh = true;
+                        configuration.NotifyConfigurationChange();
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private static bool DrawRecipeSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
+    {
+        if (Service.ExcelCache.ItemRecipes.ContainsKey(item.ItemId))
+        {
+            var itemRecipes = Service.ExcelCache.ItemRecipes[item.ItemId];
+            if (itemRecipes.Count != 1)
+            {
+                var actualRecipes = itemRecipes.Select(c =>
+                        Service.ExcelCache.GetRecipeExSheet().GetRow(c)!)
+                    .OrderBy(c => c.CraftType.Value?.Name ?? "").ToList();
+                var recipeName = item.Recipe?.CraftType.Value?.Name ?? "";
+                using (var combo = ImRaii.Combo("##SetRecipe" + rowIndex, recipeName))
+                {
+                    if (combo.Success)
+                    {
+                        foreach (var recipe in actualRecipes)
+                        {
+                            if (ImGui.Selectable(recipe.CraftType.Value?.Name ?? "",
+                                    recipeName == (recipe.CraftType.Value?.Name ?? "")))
+                            {
+                                if (item.IsOutputItem)
+                                {
+                                    configuration.CraftList.SetCraftRecipe(item.ItemId,
+                                        recipe.RowId);
+                                    configuration.StartRefresh();
+                                    return true;
+                                }
+                                else
+                                {
+                                    configuration.CraftList.UpdateCraftRecipePreference(item.ItemId,
+                                        recipe.RowId);
+                                    configuration.StartRefresh();
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     public void Draw(FilterConfiguration configuration, InventoryChange item, int rowIndex)
