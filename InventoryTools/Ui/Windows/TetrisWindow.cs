@@ -10,11 +10,11 @@ namespace InventoryTools.Ui
     {
         public override bool SaveState => false;
 
-        public TetrisWindow(string name = "Allagan Tools - Tetris") : base(name)
+        public TetrisWindow(string name = "Tetris") : base(name)
         {
             
         }
-        public TetrisWindow() : base("Allagan Tools - Tetris")
+        public TetrisWindow() : base("Tetris")
         {
             
         }

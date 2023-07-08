@@ -14,12 +14,12 @@ namespace InventoryTools.Ui;
 
 public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>
 {
-    public SubmarinesWindow(string name = "Allagan Tools - Submarines", ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
+    public SubmarinesWindow(string name = "Submarines", ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
     {
         SetupWindow();
     }
 
-    public SubmarinesWindow() : base("Allagan Tools - Submarines")
+    public SubmarinesWindow() : base("Submarines")
     {
         SetupWindow();
     }

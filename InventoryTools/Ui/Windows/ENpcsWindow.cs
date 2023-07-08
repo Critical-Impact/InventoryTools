@@ -13,12 +13,12 @@ namespace InventoryTools.Ui;
 
 public class ENpcsWindow : GenericTabbedTable<ENpc>
 {
-    public ENpcsWindow(string name = "Allagan Tools - NPCs", ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
+    public ENpcsWindow(string name = "NPCs", ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
     {
         SetupWindow();
     }
 
-    public ENpcsWindow() : base("Allagan Tools - NPCs")
+    public ENpcsWindow() : base("NPCs")
     {
         SetupWindow();
     }

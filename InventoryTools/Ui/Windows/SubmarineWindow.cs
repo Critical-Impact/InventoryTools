@@ -22,12 +22,12 @@ namespace InventoryTools.Ui
         private List<ItemEx> _drops;
         private SubmarineExplorationEx? SubmarineExplorationEx => Service.ExcelCache.GetSubmarineExplorationExSheet().GetRow(_submarineExplorationPointId);
 
-        public SubmarineWindow(uint submarineExplorationPointId, string name = "Allagan Tools - Invalid Submarine Exploration") : base(name)
+        public SubmarineWindow(uint submarineExplorationPointId, string name = "Invalid Submarine Exploration") : base(name)
         {
             _submarineExplorationPointId = submarineExplorationPointId;
             if (SubmarineExplorationEx != null)
             {
-                WindowName = "Allagan Tools - " + SubmarineExplorationEx.FormattedNameShort;
+                WindowName = "" + SubmarineExplorationEx.FormattedNameShort;
                 _drops = SubmarineExplorationEx.Drops.Where(c => c.Value != null).Select(c => c.Value!).ToList();
             }
             else

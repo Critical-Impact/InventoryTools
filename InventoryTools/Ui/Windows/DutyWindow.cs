@@ -66,6 +66,11 @@ namespace InventoryTools.Ui
                 DungeonChestItems = new HashSet<uint>();
             }
         }
+
+        public DutyWindow() : base("Duty Information")
+        {
+            
+        }
         public override string Key => AsKey(_contentFinderConditionId);
         public override bool DestroyOnClose => true;
         public override void Draw()

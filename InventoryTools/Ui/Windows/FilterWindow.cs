@@ -70,13 +70,18 @@ namespace InventoryTools.Ui
             PluginService.WindowService.OpenWindow<TetrisWindow>(TetrisWindow.AsKey);
         }
         
-        public FilterWindow(string filterKey, string name = "Allagan Tools - Filter") : base(name)
+        public FilterWindow(string filterKey, string name = "Filter") : base(name)
         {
             _filterKey = filterKey;
             if (SelectedConfiguration != null)
             {
                 WindowName = "Allagan Tools - " + SelectedConfiguration.Name;
             }
+        }
+
+        public FilterWindow() : base("Individual Filter")
+        {
+            
         }
         
         public override void Invalidate()

@@ -27,6 +27,17 @@ namespace InventoryTools.Services
             PluginService.OnPluginLoaded += PluginServiceOnOnPluginLoaded;
         }
 
+        public void UpdateRespectCloseHotkey(Type windowType, bool newSetting)
+        {
+            foreach (var window in _windows)
+            {
+                if (window.Value.GetType() == windowType)
+                {
+                    window.Value.RespectCloseHotkey = newSetting;
+                }
+            }
+        }
+
         private void FilterServiceOnFilterInvalidated(FilterConfiguration configuration)
         {
             if (_windows.ContainsKey(CraftsWindow.AsKey))

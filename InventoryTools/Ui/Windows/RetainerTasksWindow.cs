@@ -14,12 +14,12 @@ namespace InventoryTools.Ui;
 
 public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>
 {
-    public RetainerTasksWindow(string name = "Allagan Tools - Retainer Ventures", ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
+    public RetainerTasksWindow(string name = "Retainer Ventures", ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
     {
         SetupWindow();
     }
 
-    public RetainerTasksWindow() : base("Allagan Tools - Retainer Ventures")
+    public RetainerTasksWindow() : base("Retainer Ventures")
     {
         SetupWindow();
     }

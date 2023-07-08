@@ -98,12 +98,12 @@ namespace InventoryTools.Ui
             PluginService.WindowService.OpenWindow<ENpcsWindow>(ENpcsWindow.AsKey);
         }
 
-        public FiltersWindow(string name = "Allagan Tools - Filters") : base(name)
+        public FiltersWindow(string name = "Filters") : base(name)
         {
             SetupWindow();
         }
 
-        public FiltersWindow() : base("Allagan Tools - Filters")
+        public FiltersWindow() : base("Filters")
         {
             SetupWindow();
         }

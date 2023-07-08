@@ -24,12 +24,12 @@ namespace InventoryTools.Ui
         private List<ItemEx> _drops;
         private AirshipExplorationPointEx? AirshipExplorationPointEx => Service.ExcelCache.GetAirshipExplorationPointExSheet().GetRow(_airshipExplorationPointId);
 
-        public AirshipWindow(uint airshipExplorationPointId, string name = "Allagan Tools - Invalid Airship Exploration") : base(name)
+        public AirshipWindow(uint airshipExplorationPointId, string name = "Invalid Airship Exploration") : base(name)
         {
             _airshipExplorationPointId = airshipExplorationPointId;
             if (AirshipExplorationPointEx != null)
             {
-                WindowName = "Allagan Tools - " + AirshipExplorationPointEx.FormattedNameShort;
+                WindowName = "" + AirshipExplorationPointEx.FormattedNameShort;
                 _drops = AirshipExplorationPointEx.Drops.Where(c => c.Value != null).Select(c => c.Value!).ToList();
             }
             else

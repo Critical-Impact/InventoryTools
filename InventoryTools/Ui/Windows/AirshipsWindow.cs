@@ -13,12 +13,12 @@ namespace InventoryTools.Ui;
 
 public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
 {
-    public AirshipsWindow(string name = "Allagan Tools - Airships", ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
+    public AirshipsWindow(string name = "Airships", ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
     {
         SetupWindow();
     }
 
-    public AirshipsWindow() : base("Allagan Tools - Airships")
+    public AirshipsWindow() : base("Airships")
     {
         SetupWindow();
     }

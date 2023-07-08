@@ -15,5 +15,6 @@ namespace InventoryTools.Logic.Settings.Abstract
         WindowLayout,
         General,
         Subsetting,
+        IgnoreEscape,
     }
 }

@@ -110,12 +110,12 @@ namespace InventoryTools.Ui
             PluginService.WindowService.OpenWindow<TetrisWindow>(TetrisWindow.AsKey);
         }
 
-        public CraftsWindow(string name = "Allagan Tools - Crafts") : base(name)
+        public CraftsWindow(string name = "Crafts") : base(name)
         {
             SetupWindow();
         }
         
-        public CraftsWindow() : base("Allagan Tools - Crafts")
+        public CraftsWindow() : base("Crafts")
         {
             SetupWindow();
         }

@@ -15,12 +15,12 @@ namespace InventoryTools.Ui;
 
 public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
 {
-    public BNpcWindow(string name = "Allagan Tools - Mobs", ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
+    public BNpcWindow(string name = "Mobs", ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
     {
         SetupWindow();
     }
 
-    public BNpcWindow() : base("Allagan Tools - Mobs")
+    public BNpcWindow() : base("Mobs")
     {
         SetupWindow();
     }

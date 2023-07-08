@@ -16,11 +16,11 @@ namespace InventoryTools.Ui
         public override  Vector2? MinSize { get; } = new Vector2(200, 200);
         public override bool DestroyOnClose => true;
 
-        public HelpWindow(string name = "Allagan Tools - Help") : base(name)
+        public HelpWindow(string name = "Help") : base(name)
         {
             
         }
-        public HelpWindow() : base("Allagan Tools - Help")
+        public HelpWindow() : base("Help")
         {
             
         }

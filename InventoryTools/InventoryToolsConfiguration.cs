@@ -62,6 +62,18 @@ namespace InventoryTools
         private List<InventoryChangeReason> _historyTrackReasons = new();
         private List<uint>? _tooltipWhitelistCategories = new();
         private bool _tooltipWhitelistBlacklist = false;
+        private HashSet<string>? _windowsIgnoreEscape = new HashSet<string>();
+
+        public HashSet<string> WindowsIgnoreEscape
+        {
+            get => _windowsIgnoreEscape ??= new();
+            set
+            {
+                _windowsIgnoreEscape = value;
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+            }
+        }
+
         public bool HistoryEnabled
         {
             get => _historyEnabled;
@@ -121,6 +133,35 @@ namespace InventoryTools
                 _addMoreInformationContextMenu = value;
                 PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
             }
+        }
+
+        public void AddWindowToIgnoreEscape(Type windowType)
+        {
+            WindowsIgnoreEscape.Add(windowType.Name);
+            PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+        }
+
+        public void RemoveWindowFromIgnoreEscape(Type windowType)
+        {
+            WindowsIgnoreEscape.Remove(windowType.Name);
+            PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+        }
+
+        public void SetWindowIgnoreEscape(Type windowType, bool ignoreEscape)
+        {
+            if (ignoreEscape)
+            {
+                AddWindowToIgnoreEscape(windowType);
+            }
+            else
+            {
+                RemoveWindowFromIgnoreEscape(windowType);
+            }
+        }
+
+        public bool DoesWindowIgnoreEscape(Type windowName)
+        {
+            return WindowsIgnoreEscape.Contains(windowName.Name);
         }
 
         public int SelectedConfigurationPage { get; set; }

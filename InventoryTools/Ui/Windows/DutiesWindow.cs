@@ -13,12 +13,12 @@ namespace InventoryTools.Ui;
 
 public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
 {
-    public DutiesWindow(string name = "Allagan Tools - Duties", ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
+    public DutiesWindow(string name = "Duties", ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
     {
         SetupWindow();
     }
 
-    public DutiesWindow() : base("Allagan Tools - Duties")
+    public DutiesWindow() : base("Duties")
     {
         SetupWindow();
     }

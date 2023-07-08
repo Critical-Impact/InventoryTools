@@ -20,6 +20,8 @@ namespace InventoryTools.Extensions
                     return "Hotkeys";
                 case SettingCategory.History:
                     return "History";
+                case SettingCategory.Windows:
+                    return "Windows";
             }
             return settingCategory.ToString();
         }

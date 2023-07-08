@@ -33,11 +33,11 @@ namespace InventoryTools.Ui
         public override bool DestroyOnClose => false;
         private List<MobSpawnPosition> _spawnPositions = new List<MobSpawnPosition>();
 
-        public DebugWindow(string name = "Allagan Tools - Debug") : base(name)
+        public DebugWindow(string name = "Debug") : base(name)
         {
         }
         
-        public DebugWindow() : base("Allagan Tools - Debug")
+        public DebugWindow() : base("Debug")
         {
         }
         

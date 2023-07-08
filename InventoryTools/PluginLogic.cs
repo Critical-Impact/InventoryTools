@@ -721,7 +721,7 @@ namespace InventoryTools
                     var types = Assembly.GetExecutingAssembly().GetLoadableTypes().Where(columnType.IsAssignableFrom).ToList();
                     foreach (var type in types)
                     {
-                        if (type.IsClass && !type.IsAbstract)
+                        if (type.IsClass && !type.IsAbstract && !type.ContainsGenericParameters)
                         {
                             ISetting? instance = (ISetting?)Activator.CreateInstance(type);
                             if (instance != null)

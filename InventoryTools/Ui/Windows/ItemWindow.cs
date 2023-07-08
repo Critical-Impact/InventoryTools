@@ -19,7 +19,7 @@ using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 
 namespace InventoryTools.Ui
 {
-    class ItemWindow : Window
+    public class ItemWindow : Window
     {
         public override bool SaveState => false;
         public static string AsKey(uint itemId)
@@ -29,7 +29,7 @@ namespace InventoryTools.Ui
         private uint _itemId;
         private ItemEx? Item => Service.ExcelCache.GetItemExSheet().GetRow(_itemId);
         private CraftItem? _craftItem = null;
-        public ItemWindow(uint itemId, string name = "Allagan Tools - Invalid Item") : base(name)
+        public ItemWindow(uint itemId, string name = "Invalid Item") : base(name)
         {
             Flags = ImGuiWindowFlags.NoSavedSettings;
             _itemId = itemId;
@@ -83,6 +83,11 @@ namespace InventoryTools.Ui
                 SharedModels = new();
                 MobDrops = Array.Empty<MobDropEx>();
             }
+        }
+
+        public ItemWindow() : base("Item Information")
+        {
+            
         }
 
         public List<ItemEx> SharedModels { get; }

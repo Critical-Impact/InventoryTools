@@ -82,12 +82,12 @@ namespace InventoryTools.Ui
             PluginService.WindowService.OpenWindow<TetrisWindow>(TetrisWindow.AsKey);
         }
 
-        public ConfigurationWindow(string name = "Allagan Tools - Configuration") : base(name)
+        public ConfigurationWindow(string name = "Configuration") : base(name)
         {
             SetupWindow();
         }
         
-        public ConfigurationWindow() : base("Allagan Tools - Configuration")
+        public ConfigurationWindow() : base("Configuration")
         {
             SetupWindow();
         }
@@ -102,6 +102,7 @@ namespace InventoryTools.Ui
             _configPages.Add(new SettingPage(SettingCategory.Hotkeys));
             _configPages.Add(new SettingPage(SettingCategory.MarketBoard));
             _configPages.Add(new SettingPage(SettingCategory.History));
+            _configPages.Add(new SettingPage(SettingCategory.Windows));
             _configPages.Add(new SeparatorPageItem("Data", true));
             _configPages.Add(new FiltersPage());
             _configPages.Add(new CraftFiltersPage());

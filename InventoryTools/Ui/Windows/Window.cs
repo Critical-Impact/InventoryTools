@@ -23,6 +23,10 @@ namespace InventoryTools.Ui
             {
                 Size = DefaultSize.Value;
             }
+
+            WindowName = "Allagan Tools - " + name;
+            OriginalWindowName = name;
+            RespectCloseHotkey = !ConfigurationManager.Config.DoesWindowIgnoreEscape(this.GetType());
         }
 
         public override void OnOpen()
@@ -65,5 +69,6 @@ namespace InventoryTools.Ui
         public abstract Vector2? DefaultSize { get; }
         public abstract Vector2? MaxSize { get; }
         public abstract Vector2? MinSize { get; }
+        public string OriginalWindowName;
     }
 }

@@ -34,6 +34,8 @@ namespace InventoryTools.Extensions
                     return "Context/Right Click Menu";
                 case SettingSubCategory.Hotkeys:
                     return "Hotkeys";
+                case SettingSubCategory.IgnoreEscape:
+                    return "Ignore Escape Key";
             }
             return settingSubCategory.ToString();
         }

@@ -8,5 +8,6 @@ namespace InventoryTools.Logic.Settings.Abstract
         ToolTips = 3,
         Hotkeys = 4,
         History = 5,
+        Windows = 6,
     }
 }
