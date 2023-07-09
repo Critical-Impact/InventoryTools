@@ -196,7 +196,8 @@ namespace InventoryTools.Logic.Columns
                 ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 0.0f);
                 if (ImGui.Button("Buy##Buy" + rowIndex))
                 {
-                    var vendor = GetLocations(item.Item).FirstOrDefault();
+                    int mapId = item.MapId == null ? -1 : (int) item.MapId;
+                    var vendor = GetLocations(item.Item).OrderBy(c => (c.location?.MapEx.Row ?? 0) == mapId ? 0 : 1).FirstOrDefault();
                     if (vendor.location != null)
                     {
                         var nearestAetheryte = vendor.location.GetNearestAetheryte();

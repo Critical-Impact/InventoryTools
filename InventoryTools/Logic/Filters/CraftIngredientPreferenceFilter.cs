@@ -124,7 +124,7 @@ public class CraftIngredientPreferenceFilter : SortedListFilter<(IngredientPrefe
         ImGui.LabelText("##" + Key + "Label", "Add new preference: ");
         ImGui.SameLine();
         var currentValue = CurrentValue(configuration);
-        using (var combo = ImRaii.Combo("Add##" + Key, currentAddColumn, ImGuiComboFlags.HeightLarge))
+        using (var combo = ImRaii.Combo("##Add" + Key, currentAddColumn, ImGuiComboFlags.HeightLarge))
         {
             if (combo.Success)
             {
@@ -145,7 +145,7 @@ public class CraftIngredientPreferenceFilter : SortedListFilter<(IngredientPrefe
         ImGui.LabelText("##" + Key + "Label", "Add new item preference: ");
         ImGui.SameLine();
         var currentAddItem = "";
-        using (var combo = ImRaii.Combo("AddItem##" + Key, currentAddItem, ImGuiComboFlags.HeightLarge))
+        using (var combo = ImRaii.Combo("##AddItem" + Key, currentAddItem, ImGuiComboFlags.HeightLarge))
         {
             if (combo.Success)
             {

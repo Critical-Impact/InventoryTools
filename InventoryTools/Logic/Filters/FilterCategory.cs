@@ -14,5 +14,6 @@ namespace InventoryTools.Logic.Filters
         Advanced = 9,
         CraftColumns = 10,
         IngredientSourcing = 11,
+        ZonePreference = 12,
     }
 }

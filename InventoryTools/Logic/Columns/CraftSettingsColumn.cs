@@ -112,7 +112,7 @@ public class CraftSettingsColumn : IColumn
     {
         ImGui.TableNextColumn();
 
-        using (var popup = ImRaii.Popup("ConfigureItemSettings" + rowIndex))
+        using (var popup = ImRaii.Popup("ConfigureItemSettings" + item.ItemId))
         {
             if (popup.Success)
             {
@@ -123,6 +123,7 @@ public class CraftSettingsColumn : IColumn
                 DrawHqSelector(configuration, item, rowIndex);
                 DrawRetainerRetrievalSelector(configuration, item, rowIndex);
                 DrawSourceSelector(configuration, item, rowIndex);
+                DrawZoneSelector(configuration, item, rowIndex);
             }
         }
 
@@ -167,7 +168,7 @@ public class CraftSettingsColumn : IColumn
         var ingredientPreferenceDefault = configuration.CraftList.GetIngredientPreference(item.ItemId);
         var retainerRetrievalDefault = configuration.CraftList.GetCraftRetainerRetrieval(item.ItemId);
         var retainerRetrieval = retainerRetrievalDefault ?? (item.IsOutputItem ? configuration.CraftList.CraftRetainerRetrievalOutput : configuration.CraftList.CraftRetainerRetrieval);
-
+        var zonePreference = configuration.CraftList.GetZonePreference(item.IngredientPreference.Type, item.ItemId);
         DrawRecipeIcon(configuration,rowIndex, item);
         DrawHqIcon(configuration, rowIndex, item);
         DrawRetainerIcon(configuration, rowIndex, item, retainerRetrievalDefault, retainerRetrieval);
@@ -176,7 +177,7 @@ public class CraftSettingsColumn : IColumn
 
         if (_settingsIcon.Draw("cnf_" + rowIndex))
         {
-            ImGui.OpenPopup("ConfigureItemSettings" + rowIndex);
+            ImGui.OpenPopup("ConfigureItemSettings" + item.ItemId);
         }
 
         if (ImGui.IsItemHovered())
@@ -188,6 +189,7 @@ public class CraftSettingsColumn : IColumn
 
                     ImGui.TextUnformatted("Sourcing: " + (ingredientPreferenceDefault?.FormattedName ?? "Use Default"));
                     ImGui.TextUnformatted("Retainer: " + (retainerRetrievalDefault?.FormattedName() ?? "Use Default"));
+                    ImGui.TextUnformatted("Zone: " + (zonePreference != null ? Service.ExcelCache.GetMapSheet().GetRow(zonePreference.Value)?.FormattedName ?? "Use Default" : "Use Default"));
                 }
             }
         }
@@ -429,7 +431,7 @@ public class CraftSettingsColumn : IColumn
         ImGui.SameLine();
     }
 
-    private static void DrawSourceSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
+    private static bool DrawSourceSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
     {
         if (item.Item.IngredientPreferences.Count != 0)
         {
@@ -446,6 +448,7 @@ public class CraftSettingsColumn : IColumn
                         configuration.CraftList.UpdateIngredientPreference(item.ItemId, null);
                         configuration.NeedsRefresh = true;
                         configuration.NotifyConfigurationChange();
+                        return true;
                     }
 
                     foreach (var ingredientPreference in item.Item.IngredientPreferences)
@@ -455,11 +458,57 @@ public class CraftSettingsColumn : IColumn
                             configuration.CraftList.UpdateIngredientPreference(item.ItemId, ingredientPreference);
                             configuration.NeedsRefresh = true;
                             configuration.NotifyConfigurationChange();
+                            return true;
                         }
                     }
                 }
             }
         }
+
+        return false;
+    }
+    
+    private static bool DrawZoneSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
+    {
+        if (item.IngredientPreference.Type is IngredientPreferenceType.Buy or IngredientPreferenceType.Item or IngredientPreferenceType.Mobs or IngredientPreferenceType.Mining or IngredientPreferenceType.Botany )
+        {
+            var mapIds = item.Item.GetSourceMaps(item.IngredientPreference.Type, item.IngredientPreference.LinkedItemId);
+            if (mapIds.Count != 0)
+            {
+                var mapId = configuration.CraftList.GetZonePreference(item.IngredientPreference.Type,item.ItemId);
+                var currentMap = mapId != null ? Service.ExcelCache.GetMapSheet().GetRow(mapId.Value) : null;
+                var previewValue = currentMap?.FormattedName ?? "Use Default";
+                ImGui.Text("Zone Preference:");
+                using (var combo = ImRaii.Combo("##ZonePreference" + rowIndex, previewValue))
+                {
+                    if (combo.Success)
+                    {
+                        if (ImGui.Selectable("Use Default"))
+                        {
+                            configuration.CraftList.UpdateZonePreference(item.IngredientPreference.Type, item.ItemId, null);
+                            configuration.NeedsRefresh = true;
+                            configuration.NotifyConfigurationChange();
+                            return true;
+                        }
+
+                        var maps = mapIds.Select(c => Service.ExcelCache.GetMapSheet().GetRow(c)).Where(c => c != null);
+                        foreach (var map in maps)
+                        {
+                            if (map == null) continue;
+                            if (ImGui.Selectable(map.FormattedName))
+                            {
+                                configuration.CraftList.UpdateZonePreference(item.IngredientPreference.Type, item.ItemId, map.RowId);
+                                configuration.NeedsRefresh = true;
+                                configuration.NotifyConfigurationChange();
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     private static bool DrawRetainerRetrievalSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
