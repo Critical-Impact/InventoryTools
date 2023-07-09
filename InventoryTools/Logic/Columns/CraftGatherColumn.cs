@@ -121,7 +121,7 @@ namespace InventoryTools.Logic.Columns
             {
                 bool hasVendors;
                 bool hasGather;
-                if (item.IngredientPreference.Type == IngredientPreferenceType.Buy)
+                if (item.IngredientPreference.Type is IngredientPreferenceType.Buy or IngredientPreferenceType.HouseVendor)
                 {
                     hasVendors = DrawVendorButton(item, rowIndex);
                     if (hasVendors)

@@ -200,11 +200,11 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
         return (int)item.Key;
     }
 
-    public override Dictionary<uint, List<ENpc>> Items => _items = null!;
+    public override Dictionary<uint, List<ENpc>> Items => _items;
 
-    public override Dictionary<uint, List<ENpc>> FilteredItems => _filteredItems = null!;
+    public override Dictionary<uint, List<ENpc>> FilteredItems => _filteredItems;
 
-    public override List<TableColumn<ENpc>> Columns => _columns = null!;
+    public override List<TableColumn<ENpc>> Columns => _columns;
 
     public override ImGuiTableFlags TableFlags => _flags;
 

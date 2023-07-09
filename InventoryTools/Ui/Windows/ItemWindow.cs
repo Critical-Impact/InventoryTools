@@ -54,6 +54,7 @@ namespace InventoryTools.Ui
                     {
                         foreach (var npc in vendor.ENpcs)
                         {
+                            if ((Service.ExcelCache.GetHouseVendor(npc.Key)?.ParentId ?? 0) != 0) continue;
                             if (!npc.Locations.Any())
                             {
                                 Vendors.Add(new (vendor, npc, null));
@@ -572,6 +573,13 @@ namespace InventoryTools.Ui
                         {
                             PluginService.ChatUtilities.PrintFullMapLink(tuple.location, Item.NameString);
                         }
+                    }
+                    else if (tuple.npc != null && tuple.npc.IsHouseVendor)
+                    {
+                        ImGui.TableNextColumn();
+                        ImGui.TextWrapped("Housing Vendor");
+                        ImGuiUtil.LabeledHelpMarker("", "This is a vendor that can be placed inside your house/apartment.");
+                        ImGui.TableNextColumn();
                     }
                     else
                     {

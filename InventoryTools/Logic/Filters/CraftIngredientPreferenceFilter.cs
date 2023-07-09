@@ -99,7 +99,8 @@ public class CraftIngredientPreferenceFilter : SortedListFilter<(IngredientPrefe
         IngredientPreferenceType.Mobs,
         IngredientPreferenceType.Reduction,
         IngredientPreferenceType.Venture,
-        IngredientPreferenceType.ResourceInspection
+        IngredientPreferenceType.ResourceInspection,
+        IngredientPreferenceType.HouseVendor,
     };
     
     public void AddItem(FilterConfiguration configuration, IngredientPreferenceType type, uint? itemId = null)
