@@ -107,7 +107,7 @@ namespace InventoryTools.Extensions
         }
         public static void DrawRightClickPopup(this CraftItem item, FilterConfiguration configuration)
         {
-            DrawMenuItems(item.Item);
+            DrawMenuItems(item.Item, item.RecipeId);
             bool firstItem = true;
             if (item.IsOutputItem)
             {
@@ -197,7 +197,7 @@ namespace InventoryTools.Extensions
 
         }
         
-        public static void DrawMenuItems(ItemEx item)
+        public static void DrawMenuItems(ItemEx item, uint? recipeId = null)
         {
             ImGui.Text(item.NameString);
             ImGui.Separator();
@@ -231,7 +231,14 @@ namespace InventoryTools.Extensions
 
             if (item.CanOpenCraftLog && ImGui.Selectable("Open Crafting Log"))
             {
-                PluginService.GameInterface.OpenCraftingLog(item.RowId);
+                if (recipeId != null)
+                {
+                    PluginService.GameInterface.OpenCraftingLog(item.RowId, recipeId.Value);
+                }
+                else
+                {
+                    PluginService.GameInterface.OpenCraftingLog(item.RowId);
+                }
             }
 
             if (item.CanOpenGatheringLog && ImGui.Selectable("Open Gathering Log"))
