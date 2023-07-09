@@ -52,6 +52,10 @@ public abstract class BaseTooltip : TooltipService.TooltipTweak
             var item = Service.ExcelCache.GetItemExSheet().GetRow((uint) itemId);
             if (item != null)
             {
+                if (ConfigurationManager.Config.TooltipWhitelistCategories.Count == 0)
+                {
+                    return true;
+                }
                 if (ConfigurationManager.Config.TooltipWhitelistBlacklist)
                 {
                     if (ConfigurationManager.Config.TooltipWhitelistCategories.Contains(item.ItemUICategory.Row))
