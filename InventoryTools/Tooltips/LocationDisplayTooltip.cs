@@ -55,7 +55,7 @@ public class LocationDisplayTooltip : BaseTooltip
                         {
                             var hoverItemIsHq = HoverItemIsHq;
                             var hoverItemId = HoverItemId;
-                            var craftItem = filterConfiguration.CraftList.GetItemById(hoverItemId, hoverItemIsHq);
+                            var craftItem = filterConfiguration.CraftList.GetItemById(hoverItemId, hoverItemIsHq, HoverItem?.CanBeHq ?? false);
                             if (craftItem != null)
                             {
                                 var filterResult = filterConfiguration.FilterResult;
