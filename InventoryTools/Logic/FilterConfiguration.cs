@@ -1171,7 +1171,7 @@ namespace InventoryTools.Logic
             uint? requiredAmount = null;
             if (FilterType == FilterType.CraftFilter)
             {
-                var requiredMaterial = CraftList.GetItemById(item.ItemId, item.IsHQ);
+                var requiredMaterial = CraftList.GetItemById(item.ItemId, item.IsHQ, item.Item.CanBeHq);
                 if (requiredMaterial == null)
                 {
                     return null;
