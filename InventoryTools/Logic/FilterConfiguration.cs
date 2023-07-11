@@ -3251,6 +3251,12 @@ namespace InventoryTools.Logic
         {
             FilterResult = null;
             var clone = this.Copy();
+            FilterResult = null;
+            if (clone != null && this.FilterType == FilterType.CraftFilter)
+            {
+                var clonedCraftList = CraftList.Clone();
+                clone._craftList = clonedCraftList;
+            }
             return clone;
         }
     }
