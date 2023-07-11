@@ -383,9 +383,9 @@ namespace InventoryToolsTesting
             list.GenerateCraftChildren();
             list.Update(store);
             var flattenedMergedMaterials = list.GetFlattenedMergedMaterials();
-            var venture = flattenedMergedMaterials.First(c => c.ItemId == 21072);
+            var venture = flattenedMergedMaterials.First(c => c.ItemId == 5530);
             Assert.AreEqual(20,venture.MissingIngredients.First().Key.Item1);
-            Assert.AreEqual(1800,venture.MissingIngredients.First().Value);
+            Assert.AreEqual(21600,venture.MissingIngredients.First().Value);
         }
 
         [Test]
