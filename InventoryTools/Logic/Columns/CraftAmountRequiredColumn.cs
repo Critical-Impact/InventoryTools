@@ -41,7 +41,7 @@ namespace InventoryTools.Logic.Columns
             {
                 var value = CurrentValue(item)?.Item2.ToString() ?? "";
                 ImGuiUtil.VerticalAlignButton(configuration.TableHeight);
-                if (ImGui.InputText("##"+rowIndex+"RequiredInput", ref value, 4, ImGuiInputTextFlags.CharsDecimal))
+                if (ImGui.InputText("##"+item.ItemId+"RequiredInput", ref value, 4, ImGuiInputTextFlags.CharsDecimal))
                 {
                     if (value != (CurrentValue(item)?.Item2.ToString() ?? ""))
                     {

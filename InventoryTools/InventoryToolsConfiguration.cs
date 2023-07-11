@@ -167,6 +167,7 @@ namespace InventoryTools
         public int SelectedConfigurationPage { get; set; }
         public bool ShowFilterTab { get; set; } = true;
         public bool SwitchFiltersAutomatically { get; set; } = true;
+        public bool SwitchCraftListsAutomatically { get; set; } = true;
         private bool _tooltipCurrentCharacter = false;
         private bool _tooltipDisplayAmountOwned = true;
         private bool _tooltipDisplayMarketAveragePrice = false;

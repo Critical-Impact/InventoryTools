@@ -450,6 +450,15 @@ namespace InventoryTools.Ui
                                         PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
                                     });
                                 }
+                                if (ConfigurationManager.Config.SwitchCraftListsAutomatically &&
+                                    ConfigurationManager.Config.ActiveCraftList != filterConfiguration.Key &&
+                                    ConfigurationManager.Config.ActiveCraftList != null && filterConfiguration.FilterType == FilterType.CraftFilter)
+                                {
+                                    PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                    {
+                                        PluginService.FilterService.ToggleActiveCraftList(filterConfiguration);
+                                    });
+                                }
                             }
 
                             if (_settingsActive)
@@ -543,6 +552,15 @@ namespace InventoryTools.Ui
                                         PluginService.FrameworkService.RunOnFrameworkThread(() =>
                                         {
                                             PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
+                                        });
+                                    }
+                                    if (ConfigurationManager.Config.SwitchCraftListsAutomatically &&
+                                        ConfigurationManager.Config.ActiveCraftList != filterConfiguration.Key &&
+                                        ConfigurationManager.Config.ActiveCraftList != null && filterConfiguration.FilterType == FilterType.CraftFilter)
+                                    {
+                                        PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                        {
+                                            PluginService.FilterService.ToggleActiveCraftList(filterConfiguration);
                                         });
                                     }
                                 }

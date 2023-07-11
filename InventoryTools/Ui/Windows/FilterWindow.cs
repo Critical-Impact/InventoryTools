@@ -117,6 +117,15 @@ namespace InventoryTools.Ui
                             PluginService.FilterService.ToggleActiveUiFilter(SelectedConfiguration);
                         });
                     }
+                    if (ConfigurationManager.Config.SwitchCraftListsAutomatically &&
+                        ConfigurationManager.Config.ActiveCraftList != SelectedConfiguration.Key &&
+                        ConfigurationManager.Config.ActiveCraftList != null && SelectedConfiguration.FilterType == FilterType.CraftFilter)
+                    {
+                        PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                        {
+                            PluginService.FilterService.ToggleActiveCraftList(SelectedConfiguration);
+                        });
+                    }
                 }
                 var table = PluginService.FilterService.GetFilterTable(_filterKey);
                 if (table != null)
@@ -131,6 +140,15 @@ namespace InventoryTools.Ui
                             PluginService.FrameworkService.RunOnFrameworkThread(() =>
                             {
                                 PluginService.FilterService.ToggleActiveUiFilter(SelectedConfiguration);
+                            });
+                        }
+                        if (ConfigurationManager.Config.SwitchCraftListsAutomatically &&
+                            ConfigurationManager.Config.ActiveCraftList != SelectedConfiguration.Key &&
+                            ConfigurationManager.Config.ActiveCraftList != null && SelectedConfiguration.FilterType == FilterType.CraftFilter)
+                        {
+                            PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                            {
+                                PluginService.FilterService.ToggleActiveCraftList(SelectedConfiguration);
                             });
                         }
                     }
