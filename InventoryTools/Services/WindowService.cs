@@ -390,6 +390,11 @@ namespace InventoryTools.Services
         {
             return ToggleWindow<BNpcWindow>(BNpcWindow.AsKey);
         }
+        
+        public bool ToggleENpcsWindow()
+        {
+            return ToggleWindow<ENpcsWindow>(ENpcsWindow.AsKey);
+        }
 
         public bool ToggleHelpWindow()
         {

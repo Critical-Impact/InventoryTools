@@ -33,6 +33,12 @@ namespace InventoryTools.Commands
         {
             PluginService.WindowService.ToggleMobWindow();
         }
+        [Command("/atnpcs")]
+        [HelpMessage("Shows the allagan tools npcs window.")]
+        public void ShowHideNpcsWindow(string command, string args)
+        {
+            PluginService.WindowService.ToggleENpcsWindow();
+        }
  
         [Command("/inv")]
         [Aliases("/inventorytools")]

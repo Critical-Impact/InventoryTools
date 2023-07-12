@@ -28,6 +28,7 @@ namespace InventoryTools.Ui
                 new PopupMenu.PopupMenuItemSelectable("Crafts Window", "crafts", OpenCraftsWindow,"Open the crafts window."),
                 new PopupMenu.PopupMenuItemSeparator(),
                 new PopupMenu.PopupMenuItemSelectable("Mob Window", "mobs", OpenMobsWindow,"Open the mobs window."),
+                new PopupMenu.PopupMenuItemSelectable("Npcs Window", "npcs", OpenNpcsWindow,"Open the npcs window."),
                 new PopupMenu.PopupMenuItemSelectable("Duties Window", "duties", OpenDutiesWindow,"Open the duties window."),
                 new PopupMenu.PopupMenuItemSelectable("Airships Window", "airships", OpenAirshipsWindow,"Open the airships window."),
                 new PopupMenu.PopupMenuItemSelectable("Submarines Window", "submarines", OpenSubmarinesWindow,"Open the submarines window."),
@@ -75,6 +76,11 @@ namespace InventoryTools.Ui
         private static void OpenMobsWindow(string obj)
         {
             PluginService.WindowService.OpenWindow<BNpcWindow>(BNpcWindow.AsKey);
+        }
+
+        private static void OpenNpcsWindow(string obj)
+        {
+            PluginService.WindowService.OpenWindow<ENpcsWindow>(ENpcsWindow.AsKey);
         }
         
         private static void OpenTetrisWindow(string obj)

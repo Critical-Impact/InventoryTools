@@ -7,6 +7,8 @@ using Dalamud.Utility;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
+using Lumina.Excel;
+using OtterGui;
 using OtterGui.Raii;
 
 namespace InventoryTools.Ui;
@@ -119,10 +121,106 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
                     }
                 }
             },
+            new("Vendor Items", 200, ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoSort)
+            {
+                Sort = (specs, exes) =>
+                {
+                    if (specs == null)
+                    {
+                        return exes;
+                    }
+
+                    return specs == ImGuiSortDirection.Ascending
+                        ? exes.OrderBy(c => GetShopItems(c)?.Count ?? 999)
+                        : exes.OrderByDescending(c => GetShopItems(c)?.Count ?? 999);
+                },
+                Filter = (s, npcs) =>
+                {
+                    return s == null ? npcs : npcs.Where(c =>
+                    {
+                        var currentValue = GetShopItems(c);
+                        if (currentValue == null)
+                        {
+                            return false;
+                        }
+
+                        return currentValue.Any(c => c.Value!.NameString.ToLower().PassesFilter(s));
+                    });
+                },
+                Draw = (ex, contentTypeId) =>
+                {
+                    
+                    var drops = GetShopItems(ex);
+                    if (drops != null)
+                    {
+                        UiHelpers.WrapTableColumnElements("ScrollDrops" + ex.Key, drops,
+                            RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X,
+                            drop =>
+                            {
+                                var sourceIcon = PluginService.IconStorage[drop.Value!.Icon];
+                                ImGui.Image(sourceIcon.ImGuiHandle,
+                                    new Vector2(RowSize, RowSize) * ImGui.GetIO().FontGlobalScale);
+                                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
+                                                        ImGuiHoveredFlags.AllowWhenOverlapped &
+                                                        ImGuiHoveredFlags.AllowWhenBlockedByPopup &
+                                                        ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
+                                                        ImGuiHoveredFlags.AnyWindow) &&
+                                    ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                                {
+                                    ImGui.OpenPopup("RightClick" + drop.Row);
+                                }
+
+                                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
+                                                        ImGuiHoveredFlags.AllowWhenOverlapped &
+                                                        ImGuiHoveredFlags.AllowWhenBlockedByPopup &
+                                                        ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
+                                                        ImGuiHoveredFlags.AnyWindow) &&
+                                    ImGui.IsMouseReleased(ImGuiMouseButton.Left))
+                                {
+                                    PluginService.WindowService.OpenItemWindow(drop.Row);
+                                }
+
+                                if (ImGui.BeginPopup("RightClick" + drop.Row))
+                                {
+                                    drop.Value?.DrawRightClickPopup();
+                                    ImGui.EndPopup();
+                                }
+
+
+                                ImGuiUtil.HoverTooltip(drop.Value!.NameString);
+                                return true;
+                            });
+                    }
+                }
+            },
         };
         _tabs = Service.ExcelCache.ENpcCollection.Where(c => (c.Resident?.FormattedSingular ?? "") != "").SelectMany(c => c.Locations.Select(c => c.PlaceNameEx)).DistinctBy(c => c.Row).ToDictionary(c => c.Row, c => c.Value?.Name.ToDalamudString().ToString() ?? "");
         _items = new Dictionary<uint, List<ENpc>>();
         _filteredItems = new Dictionary<uint, List<ENpc>>();
+    }
+
+    private Dictionary<uint, List<LazyRow<ItemEx>>?> _shopItems = new();
+
+    private List<LazyRow<ItemEx>>? GetShopItems(ENpc npc)
+    {
+        if (_shopItems.TryGetValue(npc.Key, out List<LazyRow<ItemEx>>? value))
+        {
+            return value;
+        }
+        if (npc.Shops != null)
+        {
+            IEnumerable<LazyRow<ItemEx>> items = new List<LazyRow<ItemEx>>();
+            foreach (var shop in npc.Shops)
+            {
+                items = items.Concat(shop.Items);
+            }
+            var shopItems = items.ToList();
+            _shopItems[npc.Key] = shopItems;
+            return shopItems;
+        }
+
+        _shopItems[npc.Key] = null;
+        return null;
     }
 
     private bool OnLeftClick(ENpc arg)
@@ -169,7 +267,7 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
 
             _filteredItems.Add(placeNameId, unfilteredList);
         }
-
+        
         return _filteredItems[placeNameId];
     }
 
