@@ -112,7 +112,7 @@ public class CraftSettingsColumn : IColumn
     {
         ImGui.TableNextColumn();
 
-        using (var popup = ImRaii.Popup("ConfigureItemSettings" + item.ItemId))
+        using (var popup = ImRaii.Popup("ConfigureItemSettings" + item.ItemId + (item.IsOutputItem ? "o" : "")))
         {
             if (popup.Success)
             {
@@ -177,7 +177,7 @@ public class CraftSettingsColumn : IColumn
 
         if (_settingsIcon.Draw("cnf_" + rowIndex))
         {
-            ImGui.OpenPopup("ConfigureItemSettings" + item.ItemId);
+            ImGui.OpenPopup("ConfigureItemSettings" + item.ItemId + (item.IsOutputItem ? "o" : ""));
         }
 
         if (ImGui.IsItemHovered())

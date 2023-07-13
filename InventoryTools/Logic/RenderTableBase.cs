@@ -91,7 +91,7 @@ namespace InventoryTools.Logic
         
         public abstract void RefreshColumns();
 
-        public abstract bool Draw(Vector2 size);
+        public abstract bool Draw(Vector2 size, bool shouldDraw = true);
         public abstract void DrawFooterItems();
 
         private bool _disposed;

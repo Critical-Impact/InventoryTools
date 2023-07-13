@@ -149,10 +149,9 @@ namespace InventoryTools.Logic
 
 
         private bool _refreshing = false;
-        public override bool Draw(Vector2 size)
+        public override bool Draw(Vector2 size, bool shouldDraw = true)
         {
             var highlightItems = HighlightItems;
-
             
             if (Columns.Count == 0)
             {
@@ -164,216 +163,210 @@ namespace InventoryTools.Logic
                 return true;
             }
 
-            var isExpanded = false;
+            if (!shouldDraw)
+            {
+                if (NeedsRefresh)
+                {
+                    Refresh(ConfigurationManager.Config);
+                }
+                return true;
+            }
+
 
             using (var filterTableChild = ImRaii.Child("FilterTableContent", size * ImGui.GetIO().FontGlobalScale, false,
                        ImGuiWindowFlags.HorizontalScrollbar))
             {
                 if (filterTableChild.Success)
                 {
-                    if ((FilterConfiguration.FilterType != FilterType.CraftFilter ||
-                         FilterConfiguration.FilterType == FilterType.CraftFilter && ImGui.CollapsingHeader(
-                             "Items in Retainers/Bags",
-                             ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader)))
+                    using var table = ImRaii.Table(Key, Columns.Count, _tableFlags);
+                    if (table.Success)
                     {
-                        using var table = ImRaii.Table(Key, Columns.Count, _tableFlags);
-                        if (table.Success)
+                        var refresh = false;
+                        ImGui.TableSetupScrollFreeze(Math.Min(FreezeCols ?? 0, Columns.Count),
+                            FreezeRows ?? (ShowFilterRow ? 2 : 1));
+                        for (var index = 0; index < Columns.Count; index++)
                         {
-                            isExpanded = true;
-                            var refresh = false;
-                            ImGui.TableSetupScrollFreeze(Math.Min(FreezeCols ?? 0, Columns.Count),
-                                FreezeRows ?? (ShowFilterRow ? 2 : 1));
-                            for (var index = 0; index < Columns.Count; index++)
+                            var column = Columns[index];
+                            column.Setup(index);
+                        }
+                        
+                        ImGui.TableHeadersRow();
+                        
+                        for (var index = 0; index < Columns.Count; index++)
+                        {
+                            var column = Columns[index];
+                            ImGui.TableSetColumnIndex(index);
+                            using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGrey))
                             {
-                                var column = Columns[index];
-                                column.Setup(index);
+                                ImGuiUtil.RightAlign("?", SortColumn == index ? 8 : 0);
                             }
-                            
-                            ImGui.TableHeadersRow();
-                            
-                            for (var index = 0; index < Columns.Count; index++)
+                            ImGuiUtil.HoverTooltip(column.HelpText);
+                        }
+
+                        var currentSortSpecs = ImGui.TableGetSortSpecs();
+                        if (currentSortSpecs.SpecsDirty)
+                        {
+                            var actualSpecs = currentSortSpecs.Specs;
+                            if (SortColumn != actualSpecs.ColumnIndex)
                             {
-                                var column = Columns[index];
-                                ImGui.TableSetColumnIndex(index);
-                                using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGrey))
-                                {
-                                    ImGuiUtil.RightAlign("?", SortColumn == index ? 8 : 0);
-                                }
-                                ImGuiUtil.HoverTooltip(column.HelpText);
-                            }
-
-                            var currentSortSpecs = ImGui.TableGetSortSpecs();
-                            if (currentSortSpecs.SpecsDirty)
-                            {
-                                var actualSpecs = currentSortSpecs.Specs;
-                                if (SortColumn != actualSpecs.ColumnIndex)
-                                {
-                                    SortColumn = actualSpecs.ColumnIndex;
-                                    refresh = true;
-                                }
-
-                                if (SortDirection != actualSpecs.SortDirection)
-                                {
-                                    SortDirection = actualSpecs.SortDirection;
-                                    refresh = true;
-                                }
-                            }
-                            else
-                            {
-                                if (SortColumn != null)
-                                {
-                                    SortColumn = null;
-                                    refresh = true;
-                                }
-
-                                if (SortDirection != null)
-                                {
-                                    SortDirection = null;
-                                    refresh = true;
-                                }
-
+                                SortColumn = actualSpecs.ColumnIndex;
+                                refresh = true;
                             }
 
-                            if (ShowFilterRow)
+                            if (SortDirection != actualSpecs.SortDirection)
                             {
-                                ImGui.TableNextRow(ImGuiTableRowFlags.Headers);
-                                foreach (var column in Columns)
-                                {
-                                    column.SetupFilter(Key);
-                                }
-
-
-                                for (var index = 0; index < Columns.Count; index++)
-                                {
-                                    var column = Columns[index];
-                                    if (column.HasFilter && column.DrawFilter(Key, index))
-                                    {
-                                        refresh = true;
-                                    }
-                                }
-                            }
-
-                            if (refresh || NeedsRefresh)
-                            {
-                                Refresh(ConfigurationManager.Config);
-                            }
-
-                            if (FilterConfiguration.FilterType == FilterType.SearchFilter ||
-                                FilterConfiguration.FilterType == FilterType.SortingFilter ||
-                                FilterConfiguration.FilterType == FilterType.CraftFilter)
-                            {
-                                ImGuiListClipperPtr clipper;
-                                unsafe
-                                {
-                                    clipper = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper_ImGuiListClipper());
-                                    clipper.ItemsHeight = 32;
-                                }
-
-                                clipper.Begin(RenderSortedItems.Count);
-                                while (clipper.Step())
-                                {
-                                    for (var index = clipper.DisplayStart; index < clipper.DisplayEnd; index++)
-                                    {
-                                        var item = RenderSortedItems[index];
-                                        ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
-                                        ImGui.PushID(index);
-                                        for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
-                                        {
-                                            var column = Columns[columnIndex];
-                                            column.Draw(FilterConfiguration, item, index);
-                                            ImGui.SameLine();
-                                            if (columnIndex == Columns.Count - 1)
-                                            {
-                                                PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration,
-                                                    item,
-                                                    index);
-                                            }
-                                        }
-
-                                        ImGui.PopID();
-                                    }
-                                }
-
-                                clipper.End();
-                                clipper.Destroy();
-                            }
-                            else if(FilterConfiguration.FilterType == FilterType.GameItemFilter)
-                            {
-                                ImGuiListClipperPtr clipper;
-                                unsafe
-                                {
-                                    clipper = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper_ImGuiListClipper());
-                                    clipper.ItemsHeight = 32;
-                                }
-
-                                clipper.Begin(RenderItems.Count);
-                                while (clipper.Step())
-                                {
-                                    for (var index = clipper.DisplayStart; index < clipper.DisplayEnd; index++)
-                                    {
-                                        var item = RenderItems[index];
-                                        ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
-                                        for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
-                                        {
-                                            var column = Columns[columnIndex];
-                                            column.Draw(FilterConfiguration, (ItemEx)item, index);
-                                            ImGui.SameLine();
-                                            if (columnIndex == Columns.Count - 1)
-                                            {
-                                                PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration,
-                                                    (ItemEx)item, index);
-                                            }
-                                        }
-                                    }
-                                }
-
-                                clipper.End();
-                                clipper.Destroy();
-                            }
-                            else
-                            {
-                                ImGuiListClipperPtr clipper;
-                                unsafe
-                                {
-                                    clipper = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper_ImGuiListClipper());
-                                    clipper.ItemsHeight = 32;
-                                }
-
-                                clipper.Begin(InventoryChanges.Count);
-                                while (clipper.Step())
-                                {
-                                    for (var index = clipper.DisplayStart; index < clipper.DisplayEnd; index++)
-                                    {
-                                        var item = RenderInventoryChanges[index];
-                                        ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
-                                        for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
-                                        {
-                                            var column = Columns[columnIndex];
-                                            column.Draw(FilterConfiguration, item, index);
-                                            ImGui.SameLine();
-                                            if (columnIndex == Columns.Count - 1)
-                                            {
-                                                PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration,item, index);
-                                            }
-                                        }
-                                    }
-                                }
-
-                                clipper.End();
-                                clipper.Destroy();
+                                SortDirection = actualSpecs.SortDirection;
+                                refresh = true;
                             }
                         }
-                    }
-                    else
-                    {
-                        if (NeedsRefresh)
+                        else
+                        {
+                            if (SortColumn != null)
+                            {
+                                SortColumn = null;
+                                refresh = true;
+                            }
+
+                            if (SortDirection != null)
+                            {
+                                SortDirection = null;
+                                refresh = true;
+                            }
+
+                        }
+
+                        if (ShowFilterRow)
+                        {
+                            ImGui.TableNextRow(ImGuiTableRowFlags.Headers);
+                            foreach (var column in Columns)
+                            {
+                                column.SetupFilter(Key);
+                            }
+
+
+                            for (var index = 0; index < Columns.Count; index++)
+                            {
+                                var column = Columns[index];
+                                if (column.HasFilter && column.DrawFilter(Key, index))
+                                {
+                                    refresh = true;
+                                }
+                            }
+                        }
+
+                        if (refresh || NeedsRefresh)
                         {
                             Refresh(ConfigurationManager.Config);
+                        }
+
+                        if (FilterConfiguration.FilterType == FilterType.SearchFilter ||
+                            FilterConfiguration.FilterType == FilterType.SortingFilter ||
+                            FilterConfiguration.FilterType == FilterType.CraftFilter)
+                        {
+                            ImGuiListClipperPtr clipper;
+                            unsafe
+                            {
+                                clipper = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper_ImGuiListClipper());
+                                clipper.ItemsHeight = 32;
+                            }
+
+                            clipper.Begin(RenderSortedItems.Count);
+                            while (clipper.Step())
+                            {
+                                for (var index = clipper.DisplayStart; index < clipper.DisplayEnd; index++)
+                                {
+                                    var item = RenderSortedItems[index];
+                                    ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
+                                    ImGui.PushID(index);
+                                    for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+                                    {
+                                        var column = Columns[columnIndex];
+                                        column.Draw(FilterConfiguration, item, index);
+                                        ImGui.SameLine();
+                                        if (columnIndex == Columns.Count - 1)
+                                        {
+                                            PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration,
+                                                item,
+                                                index);
+                                        }
+                                    }
+
+                                    ImGui.PopID();
+                                }
+                            }
+
+                            clipper.End();
+                            clipper.Destroy();
+                        }
+                        else if(FilterConfiguration.FilterType == FilterType.GameItemFilter)
+                        {
+                            ImGuiListClipperPtr clipper;
+                            unsafe
+                            {
+                                clipper = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper_ImGuiListClipper());
+                                clipper.ItemsHeight = 32;
+                            }
+
+                            clipper.Begin(RenderItems.Count);
+                            while (clipper.Step())
+                            {
+                                for (var index = clipper.DisplayStart; index < clipper.DisplayEnd; index++)
+                                {
+                                    var item = RenderItems[index];
+                                    ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
+                                    for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+                                    {
+                                        var column = Columns[columnIndex];
+                                        column.Draw(FilterConfiguration, (ItemEx)item, index);
+                                        ImGui.SameLine();
+                                        if (columnIndex == Columns.Count - 1)
+                                        {
+                                            PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration,
+                                                (ItemEx)item, index);
+                                        }
+                                    }
+                                }
+                            }
+
+                            clipper.End();
+                            clipper.Destroy();
+                        }
+                        else
+                        {
+                            ImGuiListClipperPtr clipper;
+                            unsafe
+                            {
+                                clipper = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper_ImGuiListClipper());
+                                clipper.ItemsHeight = 32;
+                            }
+
+                            clipper.Begin(InventoryChanges.Count);
+                            while (clipper.Step())
+                            {
+                                for (var index = clipper.DisplayStart; index < clipper.DisplayEnd; index++)
+                                {
+                                    var item = RenderInventoryChanges[index];
+                                    ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
+                                    for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+                                    {
+                                        var column = Columns[columnIndex];
+                                        column.Draw(FilterConfiguration, item, index);
+                                        ImGui.SameLine();
+                                        if (columnIndex == Columns.Count - 1)
+                                        {
+                                            PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration,item, index);
+                                        }
+                                    }
+                                }
+                            }
+
+                            clipper.End();
+                            clipper.Destroy();
                         }
                     }
                 }
             }
-            return isExpanded;
+            return true;
         }
 
         public override void DrawFooterItems()

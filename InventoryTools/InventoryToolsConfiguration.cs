@@ -63,6 +63,10 @@ namespace InventoryTools
         private List<uint>? _tooltipWhitelistCategories = new();
         private bool _tooltipWhitelistBlacklist = false;
         private HashSet<string>? _windowsIgnoreEscape = new HashSet<string>();
+        
+        [JsonProperty]
+        [DefaultValue(600)]
+        public int CraftWindowSplitterPosition { get; set; }
 
         public HashSet<string> WindowsIgnoreEscape
         {

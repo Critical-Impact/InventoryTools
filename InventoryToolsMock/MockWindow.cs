@@ -11,6 +11,7 @@ using InventoryTools.Logic;
 using InventoryTools.Ui;
 using LuminaSupplemental.Excel.Model;
 using Newtonsoft.Json;
+using OtterGui;
 using OtterGui.Raii;
 using QoLBar;
 
@@ -53,6 +54,7 @@ public class MockWindow : Window
             DrawCharacterTab();
             DrawGameUiTab();
             DrawImGuiTab();
+            DrawCraftMonitor();
             ImGui.EndTabBar();
         }
     }
@@ -92,6 +94,37 @@ public class MockWindow : Window
                 if (ImGui.Button("36pt##DalamudSettingsGlobalUiScaleReset36"))
                 {
                     ImGui.GetIO().FontGlobalScale = 36.0f / 12.0f;
+                }
+            }
+        }
+
+    }
+
+    private int _selectedItemId = 0;
+    private bool _isHq = false;
+    private void DrawCraftMonitor()
+    {
+        using (var tab = ImRaii.TabItem("Craft Monitor"))
+        {
+            if (tab.Success)
+            {
+                var selectedItemId = _selectedItemId;
+                if (ImGui.InputInt("Item ID", ref selectedItemId))
+                {
+                    _selectedItemId = selectedItemId;
+                }
+                var isHq = _isHq;
+                if (ImGui.Checkbox("Is HQ?", ref isHq))
+                {
+                    _isHq = isHq;
+                }
+
+                if (ImGui.Button("Send Event"))
+                {
+                    if (PluginService.CraftMonitor is MockCraftMonitor craftMonitor)
+                    {
+                        craftMonitor.CompleteCraft((uint)_selectedItemId, isHq);
+                    }
                 }
             }
         }

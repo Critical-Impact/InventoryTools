@@ -136,7 +136,7 @@ namespace InventoryTools
             var activeCraftList = PluginService.FilterService.GetActiveCraftList();
             if (activeCraftList != null && activeCraftList.FilterType == FilterType.CraftFilter)
             {
-                activeCraftList.CraftList.MarkCrafted(itemid, FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None, quantity);
+                activeCraftList.CraftList.MarkCrafted(itemid, flags, quantity);
                 activeCraftList.StartRefresh();
             }
         }

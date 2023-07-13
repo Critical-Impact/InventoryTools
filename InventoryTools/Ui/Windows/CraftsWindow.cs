@@ -120,11 +120,13 @@ namespace InventoryTools.Ui
         public CraftsWindow(string name = "Crafts") : base(name)
         {
             SetupWindow();
+            _splitter = new(ConfigurationManager.Config.CraftWindowSplitterPosition, new(100, 100), true);
         }
         
         public CraftsWindow() : base("Crafts")
         {
             SetupWindow();
+            _splitter = new(ConfigurationManager.Config.CraftWindowSplitterPosition, new(100, 100), true);
         }
 
         public void SetupWindow()
@@ -608,6 +610,8 @@ namespace InventoryTools.Ui
             ImGui.SameLine();
         }
 
+        private readonly HorizontalSplitter _splitter;
+
         private unsafe void DrawCraftPanel(FilterConfiguration filterConfiguration)
         {
             var itemTable = PluginService.FilterService.GetFilterTable(filterConfiguration.Key);
@@ -717,13 +721,19 @@ namespace InventoryTools.Ui
                 {
                     if (contentChild.Success)
                     {
-                        //Move footer and header drawing to tables to allow each to bring extra detail
-                        _craftsExpanded = craftTable?.Draw(new Vector2(0,
-                                              _itemsExpanded
-                                                  ? -300
-                                                  : -50)) ??
-                                          true;
-                        _itemsExpanded = itemTable.Draw(new Vector2(0, 0));
+                        var result = _splitter.Draw((shouldDraw) =>
+                        {
+                            _craftsExpanded = craftTable?.Draw(new Vector2(0,0), shouldDraw) ??
+                                              true;
+                        }, (shouldDraw) =>
+                        {
+                            _itemsExpanded = itemTable.Draw(new Vector2(0, 0), shouldDraw);
+                        }, "To Craft", "Items in Retainers/Bags");
+                        if (result != null)
+                        {
+                            ConfigurationManager.Config.CraftWindowSplitterPosition = (int)result.Value;
+                            ConfigurationManager.SaveAsync();
+                        }
                     }
                 }
 
@@ -1161,7 +1171,7 @@ namespace InventoryTools.Ui
                             {
                                 if (ImGui.Selectable("Copy configuration from '" + filter.Name + "'"))
                                 {
-                                    SelectedConfiguration?.ResetFilter(filter);
+                                    filterConfiguration.ResetFilter(filter);
                                 }
                             }
 

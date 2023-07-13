@@ -102,6 +102,7 @@ public class CraftIngredientPreferenceFilter : SortedListFilter<(IngredientPrefe
         IngredientPreferenceType.ExplorationVenture,
         IngredientPreferenceType.ResourceInspection,
         IngredientPreferenceType.HouseVendor,
+        IngredientPreferenceType.Empty,
     };
     
     public void AddItem(FilterConfiguration configuration, IngredientPreferenceType type, uint? itemId = null)

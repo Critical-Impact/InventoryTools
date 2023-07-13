@@ -60,7 +60,7 @@ namespace InventoryTools.Logic
 
         public List<CraftItem> CraftItems = new();
 
-        public override bool Draw(Vector2 size)
+        public override bool Draw(Vector2 size, bool shouldDraw = true)
         {
             if (Columns.Count == 0)
             {
@@ -71,100 +71,100 @@ namespace InventoryTools.Logic
                 return true;
             }
 
-            var isExpanded = false;
-            if(ImGui.CollapsingHeader("To Craft", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
+            if (!shouldDraw)
             {
-                isExpanded = true;
-                using (var craftContentChild = ImRaii.Child("CraftContent", size * ImGui.GetIO().FontGlobalScale))
+                return true;
+            }
+
+            using (var craftContentChild = ImRaii.Child("CraftContent", size * ImGui.GetIO().FontGlobalScale))
+            {
+                if (craftContentChild.Success)
                 {
-                    if (craftContentChild.Success)
+                    if (FilterConfiguration.FilterType == FilterType.CraftFilter)
                     {
-                        if (FilterConfiguration.FilterType == FilterType.CraftFilter)
+                        using (var table = ImRaii.Table(Key + "CraftTable", Columns.Count, _tableFlags))
                         {
-                            using (var table = ImRaii.Table(Key + "CraftTable", Columns.Count, _tableFlags))
+                            if (!table || !table.Success) return true;
+                            var refresh = false;
+                            ImGui.TableSetupScrollFreeze(Math.Min(FreezeCols ?? 0, Columns.Count),
+                                FreezeRows ?? (ShowFilterRow ? 2 : 1));
+                            for (var index = 0; index < Columns.Count; index++)
                             {
-                                if (!table || !table.Success) return isExpanded;
-                                var refresh = false;
-                                ImGui.TableSetupScrollFreeze(Math.Min(FreezeCols ?? 0, Columns.Count),
-                                    FreezeRows ?? (ShowFilterRow ? 2 : 1));
-                                for (var index = 0; index < Columns.Count; index++)
+                                var column = Columns[index];
+                                column.Setup(index);
+                            }
+                            
+                            ImGui.TableHeadersRow();
+                            for (var index = 0; index < Columns.Count; index++)
+                            {
+                                var column = Columns[index];
+                                ImGui.TableSetColumnIndex(index);
+                                using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGrey))
                                 {
-                                    var column = Columns[index];
-                                    column.Setup(index);
+                                    ImGuiUtil.RightAlign("?", SortColumn == index ? 8 : 0);
                                 }
-                                
-                                ImGui.TableHeadersRow();
-                                for (var index = 0; index < Columns.Count; index++)
+
+                                ImGuiUtil.HoverTooltip(column.HelpText);
+                            }
+
+                            if (refresh || NeedsRefresh)
+                            {
+                                Refresh(ConfigurationManager.Config);
+                            }
+
+
+                            var overallIndex = 0;
+                            var groupedCrafts = FilterConfiguration.CraftList.GetOutputList();
+                            if (groupedCrafts.Count == 0)
+                            {
+                                ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
+                                for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                                 {
-                                    var column = Columns[index];
-                                    ImGui.TableSetColumnIndex(index);
-                                    using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGrey))
+                                    ImGui.TableNextColumn();
+                                    if (columnIndex == 1)
                                     {
-                                        ImGuiUtil.RightAlign("?", SortColumn == index ? 8 : 0);
+                                        ImGui.TextWrapped(
+                                            "No items have been added to the list. Add items via the search menu button at the top right of the screen or by right clicking on an item anywhere within the plugin.");
                                     }
-
-                                    ImGuiUtil.HoverTooltip(column.HelpText);
                                 }
-
-                                if (refresh || NeedsRefresh)
+                            }
+                            foreach (var groupedCraft in groupedCrafts)
+                            {
+                                if(!groupedCraft.CraftItems.Any()) continue;
+                                ImGui.TableNextRow(ImGuiTableRowFlags.Headers, FilterConfiguration.TableHeight);
+                                ImGui.TableNextColumn();
+                                var headerColor = ImRaii.PushColor(ImGuiCol.Header, new Vector4(0, 0, 0, 0));
+                                using (var treeNode = ImRaii.TreeNode("##" + groupedCraft.FormattedName(),
+                                           ImGuiTreeNodeFlags.SpanFullWidth | ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
-                                    Refresh(ConfigurationManager.Config);
-                                }
-
-
-                                var overallIndex = 0;
-                                var groupedCrafts = FilterConfiguration.CraftList.GetOutputList();
-                                if (groupedCrafts.Count == 0)
-                                {
-                                    ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
-                                    for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+                                    headerColor.Pop();
+                                    if (Columns.Count >= 2)
                                     {
                                         ImGui.TableNextColumn();
-                                        if (columnIndex == 1)
-                                        {
-                                            ImGui.TextWrapped(
-                                                "No items have been added to the list. Add items via the search menu button at the top right of the screen or by right clicking on an item anywhere within the plugin.");
-                                        }
+                                        ImGui.TextColored(FilterConfiguration.CraftHeaderColour, groupedCraft.FormattedName());
                                     }
-                                }
-                                foreach (var groupedCraft in groupedCrafts)
-                                {
-                                    if(!groupedCraft.CraftItems.Any()) continue;
-                                    ImGui.TableNextRow(ImGuiTableRowFlags.Headers, FilterConfiguration.TableHeight);
-                                    ImGui.TableNextColumn();
-                                    var headerColor = ImRaii.PushColor(ImGuiCol.Header, new Vector4(0, 0, 0, 0));
-                                    using (var treeNode = ImRaii.TreeNode("##" + groupedCraft.FormattedName(),
-                                               ImGuiTreeNodeFlags.SpanFullWidth | ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
+
+                                    if (treeNode.Success)
                                     {
-                                        headerColor.Pop();
-                                        if (Columns.Count >= 2)
+                                        for (var index = 0; index < groupedCraft.CraftItems.Count; index++)
                                         {
-                                            ImGui.TableNextColumn();
-                                            ImGui.TextColored(FilterConfiguration.CraftHeaderColour, groupedCraft.FormattedName());
-                                        }
-
-                                        if (treeNode.Success)
-                                        {
-                                            for (var index = 0; index < groupedCraft.CraftItems.Count; index++)
+                                            var item = groupedCraft.CraftItems[index];
+                                            ImGui.TableNextRow(ImGuiTableRowFlags.None,
+                                                FilterConfiguration.TableHeight);
+                                            for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                                             {
-                                                var item = groupedCraft.CraftItems[index];
-                                                ImGui.TableNextRow(ImGuiTableRowFlags.None,
-                                                    FilterConfiguration.TableHeight);
-                                                for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+                                                var column = Columns[columnIndex];
+                                                column.Draw(FilterConfiguration, item, overallIndex);
+                                                ImGui.SameLine();
+                                                if (columnIndex == Columns.Count - 1)
                                                 {
-                                                    var column = Columns[columnIndex];
-                                                    column.Draw(FilterConfiguration, item, overallIndex);
-                                                    ImGui.SameLine();
-                                                    if (columnIndex == Columns.Count - 1)
-                                                    {
-                                                        PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration,
-                                                            item,
-                                                            overallIndex);
-                                                    }
+                                                    PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration,
+                                                        item,
+                                                        overallIndex);
                                                 }
-
-                                                overallIndex++;
                                             }
+
+                                            overallIndex++;
                                         }
                                     }
                                 }
@@ -174,7 +174,7 @@ namespace InventoryTools.Logic
                 }
             }
 
-            return isExpanded;
+            return true;
         }
 
         private List<CraftItem> GetOutputItemList()
