@@ -138,7 +138,7 @@ namespace InventoryTools.Ui
                     ImGui.TextUnformatted("Sell to Vendor: " + Item.SellToVendorPrice + SeIconChar.Gil.ToIconString());
                 }
 
-                if (Item.BuyFromVendorPrice != 0)
+                if (Item.BuyFromVendorPrice != 0 && Item.ObtainedGil)
                 {
                     ImGui.TextUnformatted("Buy from Vendor: " + Item.BuyFromVendorPrice + SeIconChar.Gil.ToIconString());
                 }
