@@ -65,7 +65,7 @@ namespace InventoryTools
         private HashSet<string>? _windowsIgnoreEscape = new HashSet<string>();
         
         [JsonProperty]
-        [DefaultValue(600)]
+        [DefaultValue(300)]
         public int CraftWindowSplitterPosition { get; set; }
 
         public HashSet<string> WindowsIgnoreEscape

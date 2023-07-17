@@ -9,6 +9,7 @@ using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using CriticalCommonLib.Time;
+using Dalamud.Interface.Colors;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
@@ -152,15 +153,21 @@ namespace InventoryTools.Logic.Columns
                         || nextUptime.Equals(TimeInterval.Never)) return;
                     if (nextUptime.Start > TimeStamp.UtcNow)
                     {
-                        ImGui.Text(" (Up in " +
-                                          TimeInterval.DurationString(nextUptime.Start, TimeStamp.UtcNow,
-                                              true) + ")");
+                        using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudRed))
+                        {
+                            ImGui.Text(" (Up in " +
+                                       TimeInterval.DurationString(nextUptime.Start, TimeStamp.UtcNow,
+                                           true) + ")");
+                        }
                     }
                     else
                     {
-                        ImGui.Text(" (Up for " +
-                                   TimeInterval.DurationString( nextUptime.End,TimeStamp.UtcNow,
-                                       true) + ")");
+                        using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.HealerGreen))
+                        {
+                            ImGui.Text(" (Up for " +
+                                       TimeInterval.DurationString(nextUptime.End, TimeStamp.UtcNow,
+                                           true) + ")");
+                        }
                     }
                 }
             }

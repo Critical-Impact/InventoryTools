@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.Numerics;
+using Dalamud.Interface.Colors;
 using Dalamud.Logging;
 using ImGuiNET;
 using OtterGui.Raii;
@@ -158,6 +159,7 @@ public class HorizontalSplitter
         {
             if (_splitterResizeBuffer != null)
             {
+                _splitterResizeBuffer = null;
                 Height = currentHeight;
                 _currentOffset = 0;
                 returnValue = Height;
@@ -203,26 +205,40 @@ public class HorizontalSplitter
                 }
             }
         }
-        using (var dragger = ImRaii.Child("Dragger", new System.Numerics.Vector2(0, DraggerSize), false))
+
+        var availableWidth = ImGui.GetContentRegionAvail().X;
+        var splitterSize = availableWidth * 0.80f;
+        var splitterOffset = availableWidth * 0.10f;
+        using (ImRaii.PushStyle(ImGuiStyleVar.ChildRounding, 100.0f))
         {
-            if (dragger.Success)
+            using (ImRaii.PushColor(ImGuiCol.Button, ImGuiColors.DalamudGrey))
             {
-                ImGui.Button("DraggerBtn", new(-1, -1));
-                if (ImGui.IsItemActive())
+                ImGui.SetCursorPosX(splitterOffset + ImGui.GetCursorPosX());
+                using (var dragger = ImRaii.Child("Dragger", new System.Numerics.Vector2(splitterSize, DraggerSize),
+                           false))
                 {
-                    ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeEW);
-                    if (ImGui.IsMouseDown(ImGuiMouseButton.Left))
+                    if (dragger.Success)
                     {
-                        if (_splitterResizeBuffer == null)
+                        ImGui.Button("DraggerBtn", new(-1, -1));
+                        if (ImGui.IsItemActive())
                         {
-                            _splitterResizeBuffer = Height;
+                            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeEW);
+                            if (ImGui.IsMouseDown(ImGuiMouseButton.Left))
+                            {
+                                if (_splitterResizeBuffer == null)
+                                {
+                                    _splitterResizeBuffer = Height;
+                                }
+
+                                var mouseDragDelta = ImGui.GetMouseDragDelta(ImGuiMouseButton.Left, 0);
+                                _currentOffset = mouseDragDelta.Y;
+                            }
                         }
-                        var mouseDragDelta = ImGui.GetMouseDragDelta(ImGuiMouseButton.Left, 0);
-                        _currentOffset = mouseDragDelta.Y;
                     }
                 }
             }
         }
+
         using (var bottomChild = ImRaii.Child("Bottom##Bottom", new Vector2(-1, -1) * ImGui.GetIO().FontGlobalScale, false))
         {
             if (bottomChild.Success)
