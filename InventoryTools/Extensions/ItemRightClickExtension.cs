@@ -126,16 +126,16 @@ namespace InventoryTools.Extensions
 
             if (item.Item.CanBeCrafted && item.IsOutputItem && Service.ExcelCache.IsCompanyCraft(item.ItemId))
             {
-                if (item.Item.CompanyCraftSequenceEx != null)
+                if (item.Item.CompanyCraftSequenceEx != null && item.Item.CompanyCraftSequenceEx.ActiveCompanyCraftParts.Length > 1)
                 {
                     if (item.Phase != null && ImGui.Selectable("Switch to All Phases"))
                     {
-                        configuration.CraftList.SetCraftPhase(item.ItemId, null);
+                        configuration.CraftList.SetCraftPhase(item.ItemId, null, item.Phase);
                         configuration.StartRefresh();
                     }
-                    for (var index = 0u; index < item.Item.CompanyCraftSequenceEx.CompanyCraftPart.Length; index++)
+                    for (var index = 0u; index < item.Item.CompanyCraftSequenceEx.ActiveCompanyCraftParts.Length; index++)
                     {
-                        var part = item.Item.CompanyCraftSequenceEx.CompanyCraftPart[index];
+                        var part = item.Item.CompanyCraftSequenceEx.ActiveCompanyCraftParts[index];
                         if (part.Row == 0) continue;
                         if (item.Phase != index)
                         {
@@ -146,7 +146,7 @@ namespace InventoryTools.Extensions
                             }
                             if (ImGui.Selectable("Switch to " + ((part.Value?.CompanyCraftType.Value?.Name ?? "") + " (Phase " + (index + 1) + ")")))
                             {
-                                configuration.CraftList.SetCraftPhase(item.ItemId, index);
+                                configuration.CraftList.SetCraftPhase(item.ItemId, index, item.Phase);
                                 configuration.StartRefresh();
                             }
                         }
