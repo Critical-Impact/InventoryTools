@@ -1044,10 +1044,14 @@ namespace InventoryTools
                     textureWrap.Value.Dispose();
                 }
 
-                foreach (var gridColumn in GridColumns)
+                if (_gridColumns != null)
                 {
-                    gridColumn.Value.Dispose();
+                    foreach (var gridColumn in _gridColumns)
+                    {
+                        gridColumn.Value.Dispose();
+                    }
                 }
+
                 PluginService.OnPluginLoaded -= PluginServiceOnOnPluginLoaded;
                 PluginService.GameInterface.AcquiredItemsUpdated -= GameInterfaceOnAcquiredItemsUpdated;
                 ConfigurationManager.Config.SavedCharacters = PluginService.CharacterMonitor.Characters;
