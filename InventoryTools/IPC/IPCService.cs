@@ -18,6 +18,7 @@ public class IPCService : IDisposable
     private readonly ICallGateProvider<uint, ulong?, uint>? _inventoryCountByType;
     private readonly ICallGateProvider<uint[], ulong?, uint>? _inventoryCountByTypes;
     private readonly ICallGateProvider<uint, ulong, int, uint>? _itemCount;
+    private readonly ICallGateProvider<uint, ulong, int, uint>? _itemCountHQ;
     private readonly ICallGateProvider<string, bool>? _enableUiFilter;
     private readonly ICallGateProvider<bool>? _disableUiFilter;
     private readonly ICallGateProvider<string, bool>? _toggleUiFilter;
@@ -60,6 +61,9 @@ public class IPCService : IDisposable
         
         _itemCount = pluginInterface.GetIpcProvider<uint, ulong, int, uint>("AllaganTools.ItemCount");
         _itemCount.RegisterFunc(ItemCount);
+
+        _itemCountHQ = pluginInterface.GetIpcProvider<uint, ulong, int, uint>("AllaganTools.ItemCountHQ");
+        _itemCountHQ.RegisterFunc(ItemCountHQ);
 
         _enableUiFilter = pluginInterface.GetIpcProvider<string, bool>("AllaganTools.EnableUiFilter");
         _enableUiFilter.RegisterFunc(EnableUiFilter);
@@ -155,6 +159,11 @@ public class IPCService : IDisposable
     private uint ItemCount(uint itemId, ulong characterId, int inventoryType)
     {
         return (uint)_inventoryMonitor.AllItems.Where(c => c.ItemId == itemId && (inventoryType == -1 || (uint)c.SortedContainer == inventoryType) && (c.RetainerId == characterId)).Sum(c => c.Quantity);
+    }
+
+    private uint ItemCountHQ(uint itemId, ulong characterId, int inventoryType)
+    {
+        return (uint)_inventoryMonitor.AllItems.Where(c => c.ItemId == itemId && c.Flags == InventoryItem.ItemFlags.HQ && (inventoryType == -1 || (uint)c.SortedContainer == inventoryType) && (c.RetainerId == characterId)).Sum(c => c.Quantity);
     }
 
     private bool IsInitialized()
@@ -437,6 +446,7 @@ public class IPCService : IDisposable
             _inventoryCountByType?.UnregisterFunc();
             _inventoryCountByTypes?.UnregisterFunc();
             _itemCount?.UnregisterFunc();
+            _itemCountHQ?.UnregisterFunc();
             _enableUiFilter?.UnregisterFunc();
             _disableUiFilter?.UnregisterFunc();
             _toggleUiFilter?.UnregisterFunc();
