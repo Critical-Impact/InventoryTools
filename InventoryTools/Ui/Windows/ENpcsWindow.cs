@@ -194,7 +194,7 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
                 }
             },
         };
-        _tabs = Service.ExcelCache.ENpcCollection.Where(c => (c.Resident?.FormattedSingular ?? "") != "").SelectMany(c => c.Locations.Select(c => c.PlaceNameEx)).DistinctBy(c => c.Row).ToDictionary(c => c.Row, c => c.Value?.Name.ToDalamudString().ToString() ?? "");
+        _tabs = Service.ExcelCache.ENpcCollection?.Where(c => (c.Resident?.FormattedSingular ?? "") != "").SelectMany(c => c.Locations.Select(c => c.PlaceNameEx)).DistinctBy(c => c.Row).ToDictionary(c => c.Row, c => c.Value?.Name.ToDalamudString().ToString() ?? "");
         _items = new Dictionary<uint, List<ENpc>>();
         _filteredItems = new Dictionary<uint, List<ENpc>>();
     }
@@ -235,13 +235,19 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
         {
             if (placeNameId == 0)
             {
-                var enpcs = Service.ExcelCache.ENpcCollection.Where(c => (c.Resident?.FormattedSingular ?? "") != "").ToList();
-                _items.Add(placeNameId, enpcs);
+                var enpcs = Service.ExcelCache.ENpcCollection?.Where(c => (c.Resident?.FormattedSingular ?? "") != "").ToList();
+                if (enpcs != null)
+                {
+                    _items.Add(placeNameId, enpcs);
+                }
             }
             else
             {
-                var enpcs = Service.ExcelCache.ENpcCollection.Where(c => (c.Resident?.FormattedSingular ?? "") != "" && c.Locations.Any(c => c.PlaceNameEx.Row == placeNameId)).ToList();
-                _items.Add(placeNameId, enpcs);
+                var enpcs = Service.ExcelCache.ENpcCollection?.Where(c => (c.Resident?.FormattedSingular ?? "") != "" && c.Locations.Any(c => c.PlaceNameEx.Row == placeNameId)).ToList();
+                if (enpcs != null)
+                {
+                    _items.Add(placeNameId, enpcs);
+                }
             }
         }
 

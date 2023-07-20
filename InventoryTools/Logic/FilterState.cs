@@ -196,8 +196,8 @@ namespace InventoryTools.Logic
                         PluginLog.Verbose("Target found for SelectIconString");
 
                         var npcId = target.DataId;
-                        var npc = Service.ExcelCache.ENpcCollection.Get(npcId);
-                        if (npc.Base != null)
+                        var npc = Service.ExcelCache.ENpcCollection?.Get(npcId);
+                        if (npc != null && npc.Base != null)
                         {
                             PluginLog.Verbose("NPC found for SelectIconString");
                             //TODO: Probably need to deal with custom talk and shit
@@ -209,7 +209,7 @@ namespace InventoryTools.Logic
                                 {
                                     talkItem = preHandler.Target;
                                 }
-                                var shop = Service.ExcelCache.ShopCollection.GetShop(talkItem);
+                                var shop = Service.ExcelCache.ShopCollection?.GetShop(talkItem);
                                 if (shop != null)
                                 {
                                     PluginLog.Verbose("Shop found for SelectIconString");

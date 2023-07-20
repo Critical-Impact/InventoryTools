@@ -19,7 +19,7 @@ namespace InventoryTools.Ui
             return "enpc_" + eNpcId;
         }
         private uint _eNpcId;
-        private ENpc? eNpc => Service.ExcelCache.ENpcCollection.Get(_eNpcId);
+        private ENpc? eNpc => Service.ExcelCache.ENpcCollection?.Get(_eNpcId);
         public List<IShop>? Shops;
 
         public ENpcWindow(uint eNpcId, string name = "Allagan Tools - Invalid NPC") : base(name)
@@ -29,7 +29,7 @@ namespace InventoryTools.Ui
             if (eNpc != null)
             {
                 WindowName = "Allagan Tools - " + eNpc.Resident!.FormattedSingular + "##" + eNpcId;
-                Shops = Service.ExcelCache.ENpcCollection.FindShops(eNpc)?.Select(c => Service.ExcelCache.ShopCollection.Get(c)).Where(c => c != null).Select(c => c!).ToList();
+                Shops = Service.ExcelCache.ENpcCollection?.FindShops(eNpc)?.Select(c => Service.ExcelCache.ShopCollection?.Get(c)).Where(c => c != null).Select(c => c!).ToList();
             }
             else
             {
