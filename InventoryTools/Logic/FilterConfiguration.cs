@@ -15,6 +15,7 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using Dalamud.Logging;
 using InventoryTools.Attributes;
+using InventoryTools.Enums;
 using InventoryTools.Extensions;
 using Newtonsoft.Json;
 
@@ -97,6 +98,7 @@ namespace InventoryTools.Logic
         private static readonly byte CurrentVersion = 1;
         private HashSet<uint>? _sourceWorlds;
         private Vector4 _craftHeaderColour = new (0.0f, 0.439f, 1f, 1f);
+        private CraftDisplayMode _craftDisplayMode = CraftDisplayMode.SingleTable;
         
         //Crafting
         private CraftList? _craftList = null;
@@ -1083,6 +1085,15 @@ namespace InventoryTools.Logic
         {
             get => _sourceWorlds;
             set { _sourceWorlds = value;
+                NeedsRefresh = true;
+                PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
+            }            
+        }
+        
+        public CraftDisplayMode CraftDisplayMode
+        {
+            get => _craftDisplayMode;
+            set { _craftDisplayMode = value;
                 NeedsRefresh = true;
                 PluginService.FrameworkService.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(this); });
             }            

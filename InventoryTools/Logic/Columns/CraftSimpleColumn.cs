@@ -28,6 +28,25 @@ namespace InventoryTools.Logic.Columns
             ImGui.TableNextColumn();
             var nextStep = configuration.CraftList.GetNextStep(item);
             ImGuiUtil.VerticalAlignTextColored(nextStep.Item2, nextStep.Item1, configuration.TableHeight, true);
+            if (item.IsOutputItem && item.IsCompleted)
+            {
+                ImGui.SameLine();
+                ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
+                ImGui.Image(PluginService.IconStorage[Icons.RedXIcon].ImGuiHandle, new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale,
+                    new System.Numerics.Vector2(0, 0), new System.Numerics.Vector2(1, 1));
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+                }
+
+                if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+                {
+                    configuration.CraftList.RemoveCraftItem(item.ItemId);
+                    configuration.NeedsRefresh = true;
+                }
+                OtterGui.ImGuiUtil.HoverTooltip("Delete item");
+
+            }
             if (item.MissingIngredients.Count != 0)
             {
                 ImGui.SameLine();

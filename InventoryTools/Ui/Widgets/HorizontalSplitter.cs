@@ -79,7 +79,7 @@ public class HorizontalSplitter
 
         if (CollapsedTop && !CollapsedBottom)
         {
-            using (var top = ImRaii.Child("Top##Top"))
+            using (var top = ImRaii.Child("Bottom##Bottom"))
             {
                 if (top.Success)
                 {
@@ -88,12 +88,18 @@ public class HorizontalSplitter
                             ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
                     {
                         CollapsedTop = false;
-                        drawTop.Invoke(true);
+                        using (ImRaii.Child("##Spacer", new Vector2(0, 0)))
+                        {
+                            drawTop.Invoke(true);
+                        }
                     }
                     else
                     {
                         CollapsedTop = true;
-                        drawTop.Invoke(false);
+                        using (ImRaii.Child("##Spacer", new Vector2(0, 0)))
+                        {
+                            drawTop.Invoke(false);
+                        }
                     }
 
                     ImGui.SetNextItemOpen(!CollapsedBottom);
@@ -101,12 +107,18 @@ public class HorizontalSplitter
                             ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
                     {
                         CollapsedBottom = false;
-                        drawBottom.Invoke(true);
+                        using (ImRaii.Child("##Spacer", new Vector2(0, 0)))
+                        {
+                            drawBottom.Invoke(true);
+                        }
                     }
                     else
                     {
                         CollapsedBottom = true;
-                        drawBottom.Invoke(false);
+                        using (ImRaii.Child("##Spacer", new Vector2(0, 0)))
+                        {
+                            drawBottom.Invoke(false);
+                        }
                     }
                 }
             }
@@ -114,7 +126,7 @@ public class HorizontalSplitter
         }
         else if (CollapsedBottom && !CollapsedTop)
         {
-            using (var bottom = ImRaii.Child("Bottom##Bottom"))
+            using (var bottom = ImRaii.Child("Top##Top"))
             {
                 if (bottom.Success)
                 {
@@ -125,7 +137,7 @@ public class HorizontalSplitter
                     {
                         var framePadding = ImGui.CalcTextSize(headerTextTop).Y + (ImGui.GetStyle().FramePadding.Y * 2) +
                                            (ImGui.GetStyle().CellPadding.Y * 2) * ImGui.GetIO().FontGlobalScale;
-                        using (ImRaii.Child("##HeaderSpacer", new Vector2(0, -framePadding)))
+                        using (ImRaii.Child("##Spacer", new Vector2(0, -framePadding)))
                         {
                             drawTop.Invoke(true);
                         }
@@ -133,7 +145,10 @@ public class HorizontalSplitter
                     else
                     {
                         CollapsedTop = true;
-                        drawTop.Invoke(false);
+                        using (ImRaii.Child("##Spacer", new Vector2(0, 0)))
+                        {
+                            drawTop.Invoke(false);
+                        }
                     }
 
                     ImGui.SetNextItemOpen(!CollapsedBottom);
@@ -141,12 +156,18 @@ public class HorizontalSplitter
                             ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
                     {
                         CollapsedBottom = false;
-                        drawBottom.Invoke(true);
+                        using (ImRaii.Child("##Spacer", new Vector2(0, 0)))
+                        {
+                            drawBottom.Invoke(true);
+                        }
                     }
                     else
                     {
                         CollapsedBottom = true;
-                        drawBottom.Invoke(false);
+                        using (ImRaii.Child("##Spacer", new Vector2(0, 0)))
+                        {
+                            drawBottom.Invoke(false);
+                        }
                     }
                 }
             }
@@ -191,17 +212,26 @@ public class HorizontalSplitter
                     if(ImGui.CollapsingHeader(headerTextTop + "##headerTextTop", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
                     {
                         CollapsedTop = false;
-                        drawTop.Invoke(true);
+                        using (ImRaii.Child("##Spacer", new Vector2(0, 0)))
+                        {
+                            drawTop.Invoke(true);
+                        }
                     }
                     else
                     {
                         CollapsedTop = true;
-                        drawTop.Invoke(false);
+                        using (ImRaii.Child("##Spacer", new Vector2(0, 0)))
+                        {
+                            drawTop.Invoke(false);
+                        }
                     }
                 }
                 else
                 {
-                    drawTop.Invoke(true);
+                    using (ImRaii.Child("##Spacer", new Vector2(0, 0)))
+                    {
+                        drawTop.Invoke(true);
+                    }
                 }
             }
         }
@@ -253,17 +283,26 @@ public class HorizontalSplitter
                     if(ImGui.CollapsingHeader(headerTextBottom + "##headerTextBottom", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
                     {
                         CollapsedBottom = false;
-                        drawBottom.Invoke(true);
+                        using (ImRaii.Child("##Spacer", new Vector2(0, 0)))
+                        {
+                            drawBottom.Invoke(true);
+                        }
                     }
                     else
                     {
                         CollapsedBottom = true;
-                        drawBottom.Invoke(false);
+                        using (ImRaii.Child("##Spacer", new Vector2(0, 0)))
+                        {
+                            drawBottom.Invoke(false);
+                        }
                     }
                 }
                 else
                 {
-                    drawBottom.Invoke(true);
+                    using (ImRaii.Child("##Spacer", new Vector2(0, 0)))
+                    {
+                        drawBottom.Invoke(true);
+                    }
                 }
             }
             else

@@ -12,9 +12,9 @@ public class MockCraftMonitor : ICraftMonitor
         
     }
 
-    public void CompleteCraft(uint itemId, bool isHq)
+    public void CompleteCraft(uint itemId, bool isHq, uint quantity)
     {
-        CraftCompleted?.Invoke(itemId, isHq ? InventoryItem.ItemFlags.HQ : InventoryItem.ItemFlags.None, 1);
+        CraftCompleted?.Invoke(itemId, isHq ? InventoryItem.ItemFlags.HQ : InventoryItem.ItemFlags.None, quantity);
     }
 
     public event CraftMonitor.CraftStartedDelegate? CraftStarted;

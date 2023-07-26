@@ -13,6 +13,7 @@ using LuminaSupplemental.Excel.Model;
 using Newtonsoft.Json;
 using OtterGui;
 using OtterGui.Raii;
+using OtterGui.Widgets;
 using QoLBar;
 
 namespace InventoryToolsMock;
@@ -47,6 +48,7 @@ public class MockWindow : Window
 
     public override void Draw()
     {
+        ImGui.ShowStackToolWindow();
         if (ImGui.BeginTabBar("MockTabs"))
         {
             DrawWindowTab();
@@ -101,6 +103,7 @@ public class MockWindow : Window
     }
 
     private int _selectedItemId = 0;
+    private int _quantity = 1;
     private bool _isHq = false;
     private void DrawCraftMonitor()
     {
@@ -113,6 +116,11 @@ public class MockWindow : Window
                 {
                     _selectedItemId = selectedItemId;
                 }
+                var quantity = _quantity;
+                if (ImGui.InputInt("Quantity", ref quantity))
+                {
+                    _quantity = quantity;
+                }
                 var isHq = _isHq;
                 if (ImGui.Checkbox("Is HQ?", ref isHq))
                 {
@@ -123,14 +131,14 @@ public class MockWindow : Window
                 {
                     if (PluginService.CraftMonitor is MockCraftMonitor craftMonitor)
                     {
-                        craftMonitor.CompleteCraft((uint)_selectedItemId, isHq);
+                        craftMonitor.CompleteCraft((uint)_selectedItemId, isHq, (uint)quantity);
                     }
                 }
             }
         }
 
     }
-
+    
     private void DrawGameUiTab()
     {
         using (var gameUiTab = ImRaii.TabItem("Game UI"))
@@ -368,6 +376,11 @@ public class MockWindow : Window
             if (ImGui.Button("Mock Items Window"))
             {
                 PluginService.WindowService.ToggleWindow<MockGameItemsWindow>(MockGameItemsWindow.AsKey);
+            }
+
+            if (ImGui.Button("Stack Tool"))
+            {
+                ImGui.ShowStackToolWindow();
             }
 
             ImGui.EndTabItem();

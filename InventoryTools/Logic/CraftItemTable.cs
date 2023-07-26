@@ -8,10 +8,12 @@ using System.Numerics;
 using System.Text;
 using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
+using CriticalCommonLib.Enums;
 using CsvHelper;
 using Dalamud.Interface.Colors;
 using Dalamud.Logging;
 using ImGuiNET;
+using InventoryTools.Enums;
 using InventoryTools.Logic.Columns;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -76,11 +78,98 @@ namespace InventoryTools.Logic
                 return true;
             }
 
-            using (var craftContentChild = ImRaii.Child("CraftContent", size * ImGui.GetIO().FontGlobalScale))
+            var tabMode = FilterConfiguration.CraftDisplayMode == CraftDisplayMode.Tabs;
+
+            if (tabMode)
             {
-                if (craftContentChild.Success)
+                using (var craftContentChild = ImRaii.Child("CraftContent", size * ImGui.GetIO().FontGlobalScale))
                 {
-                    if (FilterConfiguration.FilterType == FilterType.CraftFilter)
+                    if (craftContentChild.Success)
+                    {
+                        using var tabBar = ImRaii.TabBar("CraftTabs", ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.TabListPopupButton);
+                        if (!tabBar.Success) return true;
+
+                        var groupedCrafts = FilterConfiguration.CraftList.GetOutputList();
+                        if (groupedCrafts.Count == 0)
+                        {
+                            using var tabItem = ImRaii.TabItem("No Items");
+                            if (!tabItem.Success) return true;
+                            if (NeedsRefresh)
+                            {
+                                Refresh(ConfigurationManager.Config);
+                            }
+                            ImGui.TextWrapped(
+                                "No items have been added to the list. Add items via the search menu button at the top right of the screen or by right clicking on an item anywhere within the plugin.");
+                        }
+                        else
+                        {
+                            foreach (var groupedCraft in groupedCrafts)
+                            {
+                                using var tabItem = ImRaii.TabItem( groupedCraft.FormattedName());
+                                if (!tabItem.Success) continue;
+
+                                using var table = ImRaii.Table(Key + "CraftTable", Columns.Count, _tableFlags);
+                                if (!table.Success || Columns.Count == 0) continue;
+                                var refresh = false;
+                                ImGui.TableSetupScrollFreeze(Math.Min(FreezeCols ?? 0, Columns.Count),
+                                    FreezeRows ?? (ShowFilterRow ? 2 : 1));
+                                for (var index = 0; index < Columns.Count; index++)
+                                {
+                                    var column = Columns[index];
+                                    column.Setup(index);
+                                }
+                                
+                                ImGui.TableHeadersRow();
+                                for (var index = 0; index < Columns.Count; index++)
+                                {
+                                    var column = Columns[index];
+                                    ImGui.TableSetColumnIndex(index);
+                                    using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGrey))
+                                    {
+                                        ImGuiUtil.RightAlign("?", SortColumn == index ? 8 : 0);
+                                    }
+
+                                    ImGuiUtil.HoverTooltip(column.HelpText);
+                                }
+
+                                if (refresh || NeedsRefresh || FilterConfiguration.NeedsRefresh)
+                                {
+                                    Refresh(ConfigurationManager.Config);
+                                }
+
+                                if (!groupedCraft.CraftItems.Any()) continue;
+                                ImGui.TableNextRow(ImGuiTableRowFlags.Headers, FilterConfiguration.TableHeight);
+                                ImGui.TableNextColumn();
+
+                                for (var index = 0; index < groupedCraft.CraftItems.Count; index++)
+                                {
+                                    var item = groupedCraft.CraftItems[index];
+                                    ImGui.TableNextRow(ImGuiTableRowFlags.None,
+                                        FilterConfiguration.TableHeight);
+                                    for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+                                    {
+                                        var column = Columns[columnIndex];
+                                        column.Draw(FilterConfiguration, item, index);
+                                        ImGui.SameLine();
+                                        if (columnIndex == Columns.Count - 1)
+                                        {
+                                            PluginService.PluginLogic.RightClickColumn.Draw(
+                                                FilterConfiguration,
+                                                item,
+                                                index);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                using (var craftContentChild = ImRaii.Child("CraftContent", size * ImGui.GetIO().FontGlobalScale))
+                {
+                    if (craftContentChild.Success)
                     {
                         using (var table = ImRaii.Table(Key + "CraftTable", Columns.Count, _tableFlags))
                         {
@@ -128,20 +217,23 @@ namespace InventoryTools.Logic
                                     }
                                 }
                             }
+
                             foreach (var groupedCraft in groupedCrafts)
                             {
-                                if(!groupedCraft.CraftItems.Any()) continue;
+                                if (!groupedCraft.CraftItems.Any()) continue;
                                 ImGui.TableNextRow(ImGuiTableRowFlags.Headers, FilterConfiguration.TableHeight);
                                 ImGui.TableNextColumn();
                                 var headerColor = ImRaii.PushColor(ImGuiCol.Header, new Vector4(0, 0, 0, 0));
                                 using (var treeNode = ImRaii.TreeNode("##" + groupedCraft.FormattedName(),
-                                           ImGuiTreeNodeFlags.SpanFullWidth | ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
+                                           ImGuiTreeNodeFlags.SpanFullWidth | ImGuiTreeNodeFlags.DefaultOpen |
+                                           ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
                                     headerColor.Pop();
                                     if (Columns.Count >= 2)
                                     {
                                         ImGui.TableNextColumn();
-                                        ImGui.TextColored(FilterConfiguration.CraftHeaderColour, groupedCraft.FormattedName());
+                                        ImGui.TextColored(FilterConfiguration.CraftHeaderColour,
+                                            groupedCraft.FormattedName());
                                     }
 
                                     if (treeNode.Success)
@@ -158,7 +250,8 @@ namespace InventoryTools.Logic
                                                 ImGui.SameLine();
                                                 if (columnIndex == Columns.Count - 1)
                                                 {
-                                                    PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration,
+                                                    PluginService.PluginLogic.RightClickColumn.Draw(
+                                                        FilterConfiguration,
                                                         item,
                                                         overallIndex);
                                                 }
