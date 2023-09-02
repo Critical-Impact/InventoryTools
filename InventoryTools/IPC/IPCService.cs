@@ -19,6 +19,7 @@ public class IPCService : IDisposable
     private readonly ICallGateProvider<uint[], ulong?, uint>? _inventoryCountByTypes;
     private readonly ICallGateProvider<uint, ulong, int, uint>? _itemCount;
     private readonly ICallGateProvider<uint, ulong, int, uint>? _itemCountHQ;
+    private readonly ICallGateProvider<uint, bool, uint[], uint>? _itemCountOwned;
     private readonly ICallGateProvider<string, bool>? _enableUiFilter;
     private readonly ICallGateProvider<bool>? _disableUiFilter;
     private readonly ICallGateProvider<string, bool>? _toggleUiFilter;
@@ -64,6 +65,9 @@ public class IPCService : IDisposable
 
         _itemCountHQ = pluginInterface.GetIpcProvider<uint, ulong, int, uint>("AllaganTools.ItemCountHQ");
         _itemCountHQ.RegisterFunc(ItemCountHQ);
+
+        _itemCountOwned = pluginInterface.GetIpcProvider<uint, bool, uint[], uint>("AllaganTools.ItemCountOwned");
+        _itemCountOwned.RegisterFunc(ItemCountOwned);
 
         _enableUiFilter = pluginInterface.GetIpcProvider<string, bool>("AllaganTools.EnableUiFilter");
         _enableUiFilter.RegisterFunc(EnableUiFilter);
@@ -164,6 +168,16 @@ public class IPCService : IDisposable
     private uint ItemCountHQ(uint itemId, ulong characterId, int inventoryType)
     {
         return (uint)_inventoryMonitor.AllItems.Where(c => c.ItemId == itemId && c.Flags == InventoryItem.ItemFlags.HQ && (inventoryType == -1 || (uint)c.SortedContainer == inventoryType) && (c.RetainerId == characterId)).Sum(c => c.Quantity);
+    }
+
+    private uint ItemCountOwned(uint itemId, bool currentCharacterOnly, uint[] inventoryTypes)
+    {
+        return (uint)_inventoryMonitor.AllItems.Where(item =>
+                item.ItemId == itemId
+                && inventoryTypes.Contains((uint)item.SortedContainer)
+                && _characterMonitor.Characters.ContainsKey(item.RetainerId)
+                && (!currentCharacterOnly || _characterMonitor.BelongsToActiveCharacter(item.RetainerId)))
+            .Sum(c => c.Quantity);
     }
 
     private bool IsInitialized()
@@ -447,6 +461,7 @@ public class IPCService : IDisposable
             _inventoryCountByTypes?.UnregisterFunc();
             _itemCount?.UnregisterFunc();
             _itemCountHQ?.UnregisterFunc();
+            _itemCountOwned?.UnregisterFunc();
             _enableUiFilter?.UnregisterFunc();
             _disableUiFilter?.UnregisterFunc();
             _toggleUiFilter?.UnregisterFunc();
