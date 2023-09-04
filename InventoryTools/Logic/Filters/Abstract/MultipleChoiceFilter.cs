@@ -115,9 +115,8 @@ namespace InventoryTools.Logic.Filters.Abstract
                                 selectedChoices.Add(item.Key);
                             }
                         }
-
-                        _cachedChoices = null;
                         UpdateFilterConfiguration(configuration, selectedChoices);
+                        _cachedChoices = null;
                     }
                     ImGui.Separator();
                     using (ImRaii.Child("searchBox", new Vector2(0, 250)))
@@ -151,6 +150,7 @@ namespace InventoryTools.Logic.Filters.Abstract
                 if (ImGui.Button("Reset##" + Key + "Reset"))
                 {
                     ResetFilter(configuration);
+                    _cachedChoices = null;
                 }
             }
         }
@@ -175,6 +175,7 @@ namespace InventoryTools.Logic.Filters.Abstract
                         {
                             selectedChoices.Remove(item);
                             UpdateFilterConfiguration(configuration, selectedChoices);
+                            _cachedChoices = null;
                         }
                     }
                 }
