@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Dalamud.Game.Command;
 using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using DalamudPluginProjectTemplate;
 using DalamudPluginProjectTemplate.Attributes;
 using static Dalamud.Game.Command.CommandInfo;
@@ -16,13 +17,15 @@ namespace InventoryTools.Commands
     {
         private readonly (string, CommandInfo)[] _pluginCommands;
         private readonly T _host;
+        private readonly ICommandManager _commandManager;
 
-        public PluginCommandManager(T host)
+        public PluginCommandManager(T host, ICommandManager commandManager)
         {
             this._host = host;
+            _commandManager = commandManager;
 
             this._pluginCommands = host.GetType().GetMethods(BindingFlags.NonPublic | BindingFlags.Public |
-                                                            BindingFlags.Static | BindingFlags.Instance)
+                                                             BindingFlags.Static | BindingFlags.Instance)
                 .Where(method => method.GetCustomAttribute<CommandAttribute>() != null)
                 .SelectMany(GetCommandInfoTuple)
                 .ToArray();
@@ -35,7 +38,7 @@ namespace InventoryTools.Commands
             for (var i = 0; i < this._pluginCommands.Length; i++)
             {
                 var (command, commandInfo) = this._pluginCommands[i];
-                PluginService.CommandService.AddHandler(command, commandInfo);
+                _commandManager.AddHandler(command, commandInfo);
             }
         }
 
@@ -44,7 +47,7 @@ namespace InventoryTools.Commands
             for (var i = 0; i < this._pluginCommands.Length; i++)
             {
                 var (command, _) = this._pluginCommands[i];
-                PluginService.CommandService.RemoveHandler(command);
+                _commandManager.RemoveHandler(command);
             }
         }
 

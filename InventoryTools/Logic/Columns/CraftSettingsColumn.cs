@@ -6,6 +6,7 @@ using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
+using Dalamud.Interface.Internal;
 using ImGuiNET;
 using ImGuiScene;
 using InventoryTools.Logic.Columns.Abstract;
@@ -20,8 +21,8 @@ public class CraftSettingsColumn : IColumn
 {
     public ColumnCategory ColumnCategory => ColumnCategory.Crafting;
     private HoverButton _settingsIcon { get; } = new(PluginService.IconStorage.LoadIcon(66319),  new Vector2(22, 22));
-    private TextureWrap _hqIcon { get; } = PluginService.IconStorage.LoadImage("hq");
-    private TextureWrap _retainerIcon { get; } = PluginService.IconStorage.LoadIcon(60425);
+    private IDalamudTextureWrap _hqIcon { get; } = PluginService.IconStorage.LoadImage("hq");
+    private IDalamudTextureWrap _retainerIcon { get; } = PluginService.IconStorage.LoadIcon(60425);
 
 
     public string Name { get; set; } = "Settings";

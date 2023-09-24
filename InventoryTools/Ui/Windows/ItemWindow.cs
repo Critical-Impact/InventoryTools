@@ -239,7 +239,7 @@ namespace InventoryTools.Ui
                     if (ImGui.ImageButton(gbIcon.ImGuiHandle,
                             new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                     {
-                        PluginService.CommandService.ProcessCommand("/gather " + Item.NameString);
+                        Service.Commands.ProcessCommand("/gather " + Item.NameString);
                     }
 
                     ImGuiUtil.HoverTooltip("Gatherable - Gather with Gatherbuddy");
@@ -262,7 +262,7 @@ namespace InventoryTools.Ui
                     if (ImGui.ImageButton(gbIcon.ImGuiHandle,
                             new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                     {
-                        PluginService.CommandService.ProcessCommand("/gatherfish " + Item.NameString);
+                        Service.Commands.ProcessCommand("/gatherfish " + Item.NameString);
                     }
 
                     ImGuiUtil.HoverTooltip("Gatherable - Gather with Gatherbuddy");

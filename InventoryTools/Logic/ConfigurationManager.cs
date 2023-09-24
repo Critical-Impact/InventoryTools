@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Resolvers;
 using Dalamud.Logging;
@@ -26,35 +27,35 @@ namespace InventoryTools.Logic
         {
             get
             {
-                return PluginService.PluginInterfaceService.ConfigFile.ToString();
+                return Service.Interface.ConfigFile.ToString();
             }
         }
         public static string InventoryFile
         {
             get
             {
-                return Path.Join(PluginService.PluginInterfaceService.ConfigDirectory.FullName, "inventories.json");
+                return Path.Join(Service.Interface.ConfigDirectory.FullName, "inventories.json");
             }
         }
         public static string InventoryCsv
         {
             get
             {
-                return Path.Join(PluginService.PluginInterfaceService.ConfigDirectory.FullName, "inventories.csv");
+                return Path.Join(Service.Interface.ConfigDirectory.FullName, "inventories.csv");
             }
         }
         public static string MobSpawnFile
         {
             get
             {
-                return Path.Join(PluginService.PluginInterfaceService.ConfigDirectory.FullName, "mob_spawns.csv");
+                return Path.Join(Service.Interface.ConfigDirectory.FullName, "mob_spawns.csv");
             }
         }
         public static string HistoryCsv
         {
             get
             {
-                return Path.Join(PluginService.PluginInterfaceService.ConfigDirectory.FullName, "history.csv");
+                return Path.Join(Service.Interface.ConfigDirectory.FullName, "history.csv");
             }
         }
         
@@ -265,7 +266,7 @@ namespace InventoryTools.Logic
 
         public static bool SaveInventories(List<InventoryItem> items)
         {
-            return CsvLoader.ToCsvRaw<InventoryItem>(items, Path.Join(PluginService.PluginInterfaceService.ConfigDirectory.FullName, "inventories.csv"));
+            return CsvLoader.ToCsvRaw<InventoryItem>(items, Path.Join(Service.Interface.ConfigDirectory.FullName, "inventories.csv"));
         }
         
         public static List<InventoryItem> LoadInventoriesFromCsv(out bool success, string? csvPath = null)
@@ -326,7 +327,7 @@ namespace InventoryTools.Logic
         
         public static bool SaveHistory(List<InventoryChange> changes)
         {
-            return CsvLoader.ToCsvRaw<InventoryChange>(changes, Path.Join(PluginService.PluginInterfaceService.ConfigDirectory.FullName, "history.csv"));
+            return CsvLoader.ToCsvRaw<InventoryChange>(changes, Path.Join(Service.Interface.ConfigDirectory.FullName, "history.csv"));
         }
 
         public static void Dereference()

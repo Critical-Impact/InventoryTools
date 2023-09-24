@@ -1,7 +1,9 @@
 using System.Numerics;
+using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 
@@ -51,7 +53,7 @@ namespace InventoryTools.Logic.Columns
             ImGui.TableNextColumn();
             if (currentValue != null)
             {
-                var textureWrap = PluginService.PluginLogic.GetIcon(currentValue.Value.Item1, currentValue.Value.Item2);
+                var textureWrap = Service.TextureProvider.GetIcon(currentValue.Value.Item1, currentValue.Value.Item2 ? ITextureProvider.IconFlags.ItemHighQuality : ITextureProvider.IconFlags.HiRes);
                 if (textureWrap != null)
                 {
                     ImGui.PushID("icon" + rowIndex);

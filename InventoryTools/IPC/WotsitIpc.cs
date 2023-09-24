@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Timers;
+using CriticalCommonLib;
 using Dalamud.Logging;
 using Dalamud.Plugin.Ipc;
 
@@ -24,7 +25,7 @@ namespace InventoryTools.Logic
         public WotsitIpc()
         {
             InitForWotsit();
-            _wotsitAvailable = PluginService.PluginInterfaceService.GetIpcSubscriber<bool>("FA.Available");
+            _wotsitAvailable = Service.Interface.GetIpcSubscriber<bool>("FA.Available");
             _wotsitAvailable.Subscribe(FaAvailable);
             
             PluginService.FilterService.FilterAdded += FilterAddedRemoved;
@@ -81,18 +82,18 @@ namespace InventoryTools.Logic
         {
             if (_wotsitUnregister == null)
             {
-                _wotsitUnregister = PluginService.PluginInterfaceService.GetIpcSubscriber<string, bool>("FA.UnregisterAll");
+                _wotsitUnregister = Service.Interface.GetIpcSubscriber<string, bool>("FA.UnregisterAll");
             }
             
             if (_wotsitRegister == null)
             {
                 _wotsitRegister =
-                    PluginService.PluginInterfaceService.GetIpcSubscriber<string, string, string, uint, string>("FA.RegisterWithSearch");
+                    Service.Interface.GetIpcSubscriber<string, string, string, uint, string>("FA.RegisterWithSearch");
             }
 
             if (_callGateSubscriber == null)
             {
-                _callGateSubscriber = PluginService.PluginInterfaceService.GetIpcSubscriber<string, bool>("FA.Invoke");
+                _callGateSubscriber = Service.Interface.GetIpcSubscriber<string, bool>("FA.Invoke");
                 _callGateSubscriber.Subscribe(WotsitInvoke);
             }
             

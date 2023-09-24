@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Numerics;
+using Dalamud.Interface.Internal;
 using ImGuiNET;
 using ImGuiScene;
 using OtterGui.Raii;
@@ -8,7 +9,7 @@ namespace InventoryTools.Ui.Widgets;
 
 public class HoverButton
 {
-    public HoverButton(TextureWrap textureWrap, Vector2 size, int framePadding = 0, Vector2? uv0 = null, Vector2? uv1 = null, Vector4? bgColor = null, Vector4? tintColor = null, Vector4? bgColorHover = null, Vector4? tintColorHover = null)
+    public HoverButton(IDalamudTextureWrap textureWrap, Vector2 size, int framePadding = 0, Vector2? uv0 = null, Vector2? uv1 = null, Vector4? bgColor = null, Vector4? tintColor = null, Vector4? bgColorHover = null, Vector4? tintColorHover = null)
     {
         _framePadding = framePadding;
         Size = size;
@@ -52,7 +53,7 @@ public class HoverButton
 
         return success;
     }
-    private TextureWrap _textureWrap;
+    private IDalamudTextureWrap _textureWrap;
     private Vector2 _size;
     private int _framePadding;
     private readonly Vector2 _uv0;

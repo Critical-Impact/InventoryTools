@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LuminaSupplemental.Excel", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryToolsMock", "InventoryToolsMock\InventoryToolsMock.csproj", "{71F3D03A-C28B-4A92-830D-1591AABBCCD6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DalaMock", "DalaMock\DalaMock.csproj", "{8D6F4AFA-ACBB-435D-A111-094538623C3F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,5 +66,11 @@ Global
 		{71F3D03A-C28B-4A92-830D-1591AABBCCD6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{71F3D03A-C28B-4A92-830D-1591AABBCCD6}.FullDebug|Any CPU.ActiveCfg = Debug|Any CPU
 		{71F3D03A-C28B-4A92-830D-1591AABBCCD6}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
+		{8D6F4AFA-ACBB-435D-A111-094538623C3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D6F4AFA-ACBB-435D-A111-094538623C3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D6F4AFA-ACBB-435D-A111-094538623C3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D6F4AFA-ACBB-435D-A111-094538623C3F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D6F4AFA-ACBB-435D-A111-094538623C3F}.FullDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D6F4AFA-ACBB-435D-A111-094538623C3F}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 EndGlobal

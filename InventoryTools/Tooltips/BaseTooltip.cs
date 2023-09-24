@@ -11,7 +11,7 @@ public abstract class BaseTooltip : TooltipService.TooltipTweak
     {
         get
         {
-            var itemId = Service.Gui.HoveredItem;
+            var itemId = Service.GameGui.HoveredItem;
             if (itemId < 2000000)
             {
                 return  itemId > 1000000;
@@ -24,7 +24,7 @@ public abstract class BaseTooltip : TooltipService.TooltipTweak
     {
         get
         {
-            var itemId = Service.Gui.HoveredItem;
+            var itemId = Service.GameGui.HoveredItem;
             if (itemId < 2000000)
             {
                 bool isHq = itemId > 1000000;
@@ -44,7 +44,7 @@ public abstract class BaseTooltip : TooltipService.TooltipTweak
         {
             return false;
         }
-        var itemId = Service.Gui.HoveredItem;
+        var itemId = Service.GameGui.HoveredItem;
         if (itemId < 2000000)
         {
             itemId %= 500000;

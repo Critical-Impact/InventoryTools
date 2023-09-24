@@ -35,6 +35,7 @@
         <PackageReference Include="SerialQueue" Version="2.1.0" />
         <PackageReference Include="System.Reactive" Version="5.0.0" />
         <ProjectReference Include="..\CriticalCommonLib\CriticalCommonLib.csproj" />
+        <ProjectReference Include="..\DalaMock\DalaMock.csproj" />
         <ProjectReference Include="..\OtterGui\OtterGui.csproj" />
         <ProjectReference Include="..\Tetris\Tetris.csproj" />
         <Reference Include="Dalamud">

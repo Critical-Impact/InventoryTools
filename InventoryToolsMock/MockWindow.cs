@@ -163,7 +163,7 @@ public class MockWindow : Window
                 {
                     if (Enum.TryParse(_windowName, out WindowName actualWindowName))
                     {
-                        Program._mockPlugin._gameUiManager.ManualInvokeUiVisibilityChanged(actualWindowName, true);
+                        //Program.MockPlugin._gameUiManager.ManualInvokeUiVisibilityChanged(actualWindowName, true);
                     }
                 }
 
@@ -171,7 +171,7 @@ public class MockWindow : Window
                 {
                     if (Enum.TryParse(_windowName, out WindowName actualWindowName))
                     {
-                        Program._mockPlugin._gameUiManager.ManualInvokeUiVisibilityChanged(actualWindowName, false);
+                        //Program.MockPlugin._gameUiManager.ManualInvokeUiVisibilityChanged(actualWindowName, false);
                     }
                 }
             }

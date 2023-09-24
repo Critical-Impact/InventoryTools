@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Timers;
+using CriticalCommonLib;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
@@ -54,11 +55,11 @@ namespace InventoryTools.Misc
         }
         
         private bool isKeyPressed(VirtualKey[] keys) {
-            foreach (var vk in PluginService.KeyStateService.GetValidVirtualKeys()) {
+            foreach (var vk in Service.KeyState.GetValidVirtualKeys()) {
                 if (keys.Contains(vk)) {
-                    if (!PluginService.KeyStateService[vk]) return false;
+                    if (!Service.KeyState[vk]) return false;
                 } else {
-                    if (PluginService.KeyStateService[vk]) return false;
+                    if (Service.KeyState[vk]) return false;
                 }
             }
             return true;
@@ -72,7 +73,7 @@ namespace InventoryTools.Misc
 
             if (lastMoveTime != null && lastMoveTime.Value.AddMilliseconds(100) >= DateTime.Now)
             {
-                PluginService.KeyStateService.ClearAll();
+                Service.KeyState.ClearAll();
                 return;
             }                
 
@@ -106,7 +107,7 @@ namespace InventoryTools.Misc
                 lastMoveTime = DateTime.Now;
             }
             PluginService.OverlayService.RefreshOverlayStates();
-            PluginService.KeyStateService.ClearAll();
+            Service.KeyState.ClearAll();
             
 
         } catch (Exception) {

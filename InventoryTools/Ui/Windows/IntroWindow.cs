@@ -1,4 +1,5 @@
 using System.Numerics;
+using Dalamud.Interface.Internal;
 using ImGuiNET;
 using ImGuiScene;
 using InventoryTools.Logic;
@@ -8,7 +9,7 @@ namespace InventoryTools.Ui
 {
     public class IntroWindow : Window
     {
-        private TextureWrap _allaganToolsIcon = null!;
+        private IDalamudTextureWrap _allaganToolsIcon = null!;
         public IntroWindow(string name = "Allagan Tools") : base(name)
         {
             Flags =

@@ -1,12 +1,13 @@
 using Dalamud.Game.Gui;
+using Dalamud.Plugin.Services;
 using InventoryTools.Services.Interfaces;
 
 namespace InventoryTools.Services;
 
 public class GuiService : IGuiService
 {
-    private GameGui _gameGui;
-    public GuiService(GameGui gameGui)
+    private IGameGui _gameGui;
+    public GuiService(IGameGui gameGui)
     {
         _gameGui = gameGui;
     }

@@ -10,3 +10,6 @@
 [submodule "LuminaSupplemental"]
 	path = LuminaSupplemental
 	url = https://github.com/Critical-Impact/LuminaSupplemental
+[submodule "DalaMock"]
+	path = DalaMock
+	url = git@github.com:Critical-Impact/DalaMock.git

@@ -1,3 +1,8 @@
+using CriticalCommonLib;
+using DalaMock;
+using DalaMock.Dalamud;
+using DalaMock.Mock;
+using Dalamud.Interface.Internal;
 using Dalamud.Utility;
 using ImGuiScene;
 using InventoryTools;
@@ -12,34 +17,39 @@ public class MockIconService : IIconService
 {
 
     private Lumina.GameData _gameData;
-    public MockIconService(Lumina.GameData gameData)
+    private readonly GraphicsDevice _graphicsDevice;
+    private readonly ImGuiController _imGuiController;
+
+    public MockIconService(Lumina.GameData gameData, MockProgram mockProgram)
     {
         _gameData = gameData;
-        _icons = new Dictionary<uint, TextureWrap>();
-        _images    = new Dictionary<string, TextureWrap>();
+        _graphicsDevice = mockProgram.GraphicsDevice;
+        _imGuiController = mockProgram.Controller;
+        _icons = new Dictionary<uint, IDalamudTextureWrap>();
+        _images    = new Dictionary<string, IDalamudTextureWrap>();
     }
     
     public void Dispose()
     {
     }
     
-    private readonly Dictionary<uint, TextureWrap> _icons;
-    private readonly Dictionary<string, TextureWrap> _images;
+    private readonly Dictionary<uint, IDalamudTextureWrap> _icons;
+    private readonly Dictionary<string, IDalamudTextureWrap> _images;
 
-    public TextureWrap this[int id] => LoadIcon(id);
+    public IDalamudTextureWrap this[int id] => LoadIcon(id);
 
-    public TextureWrap LoadIcon(int id)
+    public IDalamudTextureWrap LoadIcon(int id)
     {
         if (_icons.TryGetValue((uint)id, out var ret))
             return ret;
 
         var icon     = LoadIconHq((uint)id) ?? _gameData.GetIcon((uint)id)!;
         var iconData = icon.GetRgbaImageData();
-        var texture = Program._gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D((uint)icon.TextureBuffer.Width, (uint)icon.TextureBuffer.Height, 1, 1, PixelFormat.R8_G8_B8_A8_UNorm, TextureUsage.Sampled));
-        var CPUframeBufferTextureId = Program._controller.GetOrCreateImGuiBinding(Program._gd.ResourceFactory, texture);
-        Program._gd.UpdateTexture(texture, iconData, 0,0,0, (uint)icon.TextureBuffer.Width, (uint)icon.TextureBuffer.Height, 1, 0,0);
+        var texture = _graphicsDevice.ResourceFactory.CreateTexture(TextureDescription.Texture2D((uint)icon.TextureBuffer.Width, (uint)icon.TextureBuffer.Height, 1, 1, PixelFormat.R8_G8_B8_A8_UNorm, TextureUsage.Sampled));
+        var CPUframeBufferTextureId = _imGuiController.GetOrCreateImGuiBinding(_graphicsDevice.ResourceFactory, texture);
+        _graphicsDevice.UpdateTexture(texture, iconData, 0,0,0, (uint)icon.TextureBuffer.Width, (uint)icon.TextureBuffer.Height, 1, 0,0);
         var veldridTextureWrap =
-            new VeldridTextureMap(CPUframeBufferTextureId, icon.TextureBuffer.Width, icon.TextureBuffer.Height);
+            new MockTextureMap(CPUframeBufferTextureId, icon.TextureBuffer.Width, icon.TextureBuffer.Height);
         _icons[(uint)id] = veldridTextureWrap;
         return veldridTextureWrap;
     }
@@ -47,16 +57,17 @@ public class MockIconService : IIconService
     private HashSet<int> _availableIcons = new HashSet<int>();
     private HashSet<int> _unAvailableIcons = new HashSet<int>();
 
-    public TextureWrap LoadImage(string imageName)
+    public IDalamudTextureWrap LoadImage(string imageName)
     {
         if (_images.TryGetValue(imageName, out var ret))
             return ret;
         
-        var assemblyLocation = PluginService.PluginInterfaceService!.AssemblyLocation.DirectoryName!;
+        var assemblyLocation = Service.Interface!.AssemblyLocation.DirectoryName!;
         var imagePath = Path.Combine(assemblyLocation, $@"Images\{imageName}.png");
-        var textureWrap = PluginService.PluginInterfaceService!.LoadImage(imagePath);
-        _images[imageName] = textureWrap;
-        return  textureWrap;
+        var loadedImage = Service.TextureProvider.GetTextureFromFile(new FileInfo(imagePath));
+        var dalamudTextureWrap = new MockTextureMap(loadedImage.ImGuiHandle, loadedImage.Width, loadedImage.Height);
+        _images[imageName] = dalamudTextureWrap;
+        return  dalamudTextureWrap;
     }
 
     public bool IconExists(int id)
@@ -87,7 +98,7 @@ public class MockIconService : IIconService
         return _gameData.GetFile<TexFile>(path);
     }
 
-    public TextureWrap LoadIcon(uint id)
+    public IDalamudTextureWrap LoadIcon(uint id)
     {
         return LoadIcon((int)id);
     }

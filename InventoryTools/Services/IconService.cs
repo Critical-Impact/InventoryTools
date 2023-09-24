@@ -1,4 +1,7 @@
 using System.IO;
+using CriticalCommonLib;
+using Dalamud.Interface.Internal;
+using Dalamud.Plugin.Services;
 using InventoryTools.Services.Interfaces;
 
 namespace InventoryTools.Services;
@@ -12,52 +15,42 @@ using Lumina.Data.Files;
 
 public class IconService : IIconService
 {
-    private readonly DalamudPluginInterface        _pi;
-    private readonly DataManager                   _gameData;
-    private readonly Dictionary<uint, TextureWrap> _icons;
-    private readonly Dictionary<string, TextureWrap> _images;
+    private readonly ITextureProvider _textureProvider;
+    private readonly Dictionary<uint, IDalamudTextureWrap> _icons;
+    private readonly Dictionary<string, IDalamudTextureWrap> _images;
 
-    public IconService(DalamudPluginInterface pi, DataManager gameData, int size = 0)
+    public IconService(ITextureProvider textureProvider, int size = 0)
     {
-        _pi       = pi;
-        _gameData = gameData;
-        _icons    = new Dictionary<uint, TextureWrap>(size);
-        _images    = new Dictionary<string, TextureWrap>(size);
+        _textureProvider = textureProvider;
+        _icons    = new Dictionary<uint, IDalamudTextureWrap>(size);
+        _images    = new Dictionary<string, IDalamudTextureWrap>(size);
     }
 
-    public TextureWrap this[int id]
+    public IDalamudTextureWrap this[int id]
         => LoadIcon(id);
 
-    private TexFile? LoadIconHq(uint id)
-    {
-        var path = $"ui/icon/{id / 1000 * 1000:000000}/{id:000000}_hr1.tex";
-        return _gameData.GetFile<TexFile>(path);
-    }
-
-    public TextureWrap LoadIcon(int id)
+    public IDalamudTextureWrap LoadIcon(int id)
         => LoadIcon((uint)id);
 
-    public TextureWrap LoadIcon(uint id)
+    public IDalamudTextureWrap LoadIcon(uint id)
     {
         if (_icons.TryGetValue(id, out var ret))
             return ret;
 
-        var icon     = LoadIconHq(id) ?? _gameData.GetIcon(id)!;
-        var iconData = icon.GetRgbaImageData();
+        var icon     = _textureProvider.GetIcon(id, ITextureProvider.IconFlags.ItemHighQuality) ?? _textureProvider.GetIcon(id)!;
 
-        ret        = _pi.UiBuilder.LoadImageRaw(iconData, icon.Header.Width, icon.Header.Height, 4);
-        _icons[id] = ret;
-        return ret;
+        _icons[id] = icon;
+        return icon;
     }
 
-    public TextureWrap LoadImage(string imageName)
+    public IDalamudTextureWrap LoadImage(string imageName)
     {
         if (_images.TryGetValue(imageName, out var ret))
             return ret;
         
-        var assemblyLocation = PluginService.PluginInterfaceService!.AssemblyLocation.DirectoryName!;
+        var assemblyLocation = Service.Interface!.AssemblyLocation.DirectoryName!;
         var imagePath = Path.Combine(assemblyLocation, $@"Images\{imageName}.png");
-        var textureWrap = PluginService.PluginInterfaceService!.LoadImage(imagePath);
+        var textureWrap = _textureProvider.GetTextureFromFile(new FileInfo(imagePath))!;
         _images[imageName] = textureWrap;
         return  textureWrap;
     }
@@ -75,7 +68,7 @@ public class IconService : IIconService
         {
             return true;
         }
-        var icon     = LoadIconHq((uint)id) ?? _gameData.GetIcon((uint)id);
+        var icon     = _textureProvider.GetIcon((uint)id, ITextureProvider.IconFlags.ItemHighQuality) ?? _textureProvider.GetIcon((uint)id);
         if (icon == null)
         {
             _unAvailableIcons.Add(id);

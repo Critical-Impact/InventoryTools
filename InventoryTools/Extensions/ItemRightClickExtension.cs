@@ -253,12 +253,12 @@ namespace InventoryTools.Extensions
 
             if (item.CanOpenGatheringLog && ImGui.Selectable("Gather with Gatherbuddy"))
             {
-                PluginService.CommandService.ProcessCommand("/gather " + item.NameString);
+                Service.Commands.ProcessCommand("/gather " + item.NameString);
             }
 
             if (item.ObtainedFishing && ImGui.Selectable("Gather with Gatherbuddy"))
             {
-                PluginService.CommandService.ProcessCommand("/gatherfish " + item.NameString);
+                Service.Commands.ProcessCommand("/gatherfish " + item.NameString);
             }
 
             if (ImGui.Selectable("More Information"))

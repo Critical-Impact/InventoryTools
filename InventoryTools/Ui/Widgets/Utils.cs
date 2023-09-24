@@ -1,7 +1,10 @@
 using System;
 using Dalamud.Interface;
+using Dalamud.Interface.Internal;
+using Dalamud.Interface.Utility;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using ImGuiNET;
+using ImGuiScene;
 using InventoryTools.Services.Interfaces;
 using OtterGui.Raii;
 
@@ -71,7 +74,7 @@ public static class ImGuiUtil
         return pressed;
     }
     
-    private static void DrawIcon(ImGuiScene.TextureWrap icon, IconSettings settings) => ImGui.GetWindowDrawList().AddIcon(icon, ImGui.GetItemRectMin(), settings);
+    private static void DrawIcon(IDalamudTextureWrap icon, IconSettings settings) => ImGui.GetWindowDrawList().AddIcon((TextureWrap)icon, ImGui.GetItemRectMin(), settings);
 
     public class IconSettings
     {
