@@ -179,7 +179,7 @@ namespace InventoryTools.Logic.Columns
             {
                 if (ImGui.Button("Gather##Gather" + rowIndex))
                 {
-                    PluginService.CommandService.ProcessCommand("/gather " + item.Name);
+                    Service.Commands.ProcessCommand("/gather " + item.Name);
                 }
 
                 return true;
@@ -188,7 +188,7 @@ namespace InventoryTools.Logic.Columns
             {
                 if (ImGui.Button("Gather##Gather" + rowIndex))
                 {
-                    PluginService.CommandService.ProcessCommand("/gatherfish " + item.Name);
+                    Service.Commands.ProcessCommand("/gatherfish " + item.Name);
                 }
                 return true;
             }
@@ -260,14 +260,14 @@ namespace InventoryTools.Logic.Columns
                 {
                     if (ImGui.SmallButton("Gather##Gather" + rowIndex))
                     {
-                        PluginService.CommandService.ProcessCommand("/gather " + item.Item.NameString);
+                        Service.Commands.ProcessCommand("/gather " + item.Item.NameString);
                     }
                 }
                 else if (item.Item.ObtainedFishing)
                 {
                     if (ImGui.SmallButton("Gather##Gather" + rowIndex))
                     {
-                        PluginService.CommandService.ProcessCommand("/gatherfish " + item.Item.NameString);
+                        Service.Commands.ProcessCommand("/gatherfish " + item.Item.NameString);
                     }
                 }
             }
@@ -282,14 +282,14 @@ namespace InventoryTools.Logic.Columns
                 {
                     if (ImGui.SmallButton("Gather##Gather" + rowIndex))
                     {
-                        PluginService.CommandService.ProcessCommand("/gather " + item.NameString);
+                        Service.Commands.ProcessCommand("/gather " + item.NameString);
                     }
                 }
                 else if (item.ObtainedFishing)
                 {
                     if (ImGui.SmallButton("Gather##Gather" + rowIndex))
                     {
-                        PluginService.CommandService.ProcessCommand("/gatherfish " + item.NameString);
+                        Service.Commands.ProcessCommand("/gatherfish " + item.NameString);
                     }
                 }
             }

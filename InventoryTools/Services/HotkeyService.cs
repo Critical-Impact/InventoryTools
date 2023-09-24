@@ -5,6 +5,7 @@ using Dalamud.Game.ClientState.Keys;
 using Dalamud.Logging;
 using InventoryTools.Hotkeys;
 using System.Linq;
+using Dalamud.Plugin.Services;
 using InventoryTools.Services.Interfaces;
 
 namespace InventoryTools.Services;
@@ -12,13 +13,13 @@ namespace InventoryTools.Services;
 public class HotkeyService : IHotkeyService
 {
     private IFrameworkService _frameworkService;
-    private IKeyStateService _keyStateService;
+    private IKeyState _keyStateService;
     private List<Hotkey> _hotKeys;
-    public HotkeyService(IFrameworkService framework, IKeyStateService keyStateService)
+    public HotkeyService(IFrameworkService framework, IKeyState keyState)
     {
         _hotKeys = new List<Hotkey>();
         _frameworkService = framework;
-        _keyStateService = keyStateService;
+        _keyStateService = keyState;
         _frameworkService.Update += FrameworkServiceOnUpdate;
     }
 

@@ -1,13 +1,14 @@
 using System;
+using Dalamud.Interface.Internal;
 using ImGuiScene;
 
 namespace InventoryTools.Services.Interfaces;
 
 public interface IIconService : IDisposable
 {
-    TextureWrap this[int id] { get; }
-    TextureWrap LoadIcon(int id);
-    TextureWrap LoadIcon(uint id);
-    TextureWrap LoadImage(string imageName);
+    IDalamudTextureWrap this[int id] { get; }
+    IDalamudTextureWrap LoadIcon(int id);
+    IDalamudTextureWrap LoadIcon(uint id);
+    IDalamudTextureWrap LoadImage(string imageName);
     bool IconExists(int id);
 }

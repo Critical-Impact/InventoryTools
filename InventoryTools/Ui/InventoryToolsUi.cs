@@ -11,8 +11,8 @@ namespace InventoryTools.Ui
         
         public InventoryToolsUi()
         {
-            PluginService.PluginInterfaceService.Draw += Draw;
-            PluginService.PluginInterfaceService.OpenConfigUi += UiBuilderOnOpenConfigUi;
+            Service.Interface.Draw += Draw;
+            Service.Interface.OpenConfigUi += UiBuilderOnOpenConfigUi;
         }
 
 
@@ -55,8 +55,8 @@ namespace InventoryTools.Ui
         {
             if(!_disposed && disposing)
             {
-                PluginService.PluginInterfaceService.Draw -= Draw;
-                PluginService.PluginInterfaceService.OpenConfigUi -= UiBuilderOnOpenConfigUi;
+                Service.Interface.Draw -= Draw;
+                Service.Interface.OpenConfigUi -= UiBuilderOnOpenConfigUi;
             }
             _disposed = true;         
         }

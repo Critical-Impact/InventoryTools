@@ -1,4 +1,5 @@
 using Dalamud.Game.Gui;
+using Dalamud.Plugin.Services;
 
 namespace InventoryTools.Services.Interfaces;
 
@@ -9,9 +10,9 @@ public interface IChatService
 
 public class ChatService : IChatService
 {
-    private ChatGui _chatGui;
+    private IChatGui _chatGui;
     
-    public ChatService(ChatGui chatGui)
+    public ChatService(IChatGui chatGui)
     {
         _chatGui = chatGui;
     }

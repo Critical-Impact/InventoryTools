@@ -10,7 +10,7 @@ public class MoreInfoWindowHotkey : Hotkey
 
     public override bool OnHotKey()
     {
-        var id = Service.Gui.HoveredItem;
+        var id = Service.GameGui.HoveredItem;
         if (id >= 2000000 || id == 0) return false;
         id %= 500000;
         var item = Service.ExcelCache.GetItemExSheet().GetRow((uint) id);

@@ -113,7 +113,7 @@ public class ContextMenuService : IDisposable
         };
         if (item == null)
         {
-            var guiHoveredItem = Service.Gui.HoveredItem;
+            var guiHoveredItem = Service.GameGui.HoveredItem;
             if (guiHoveredItem >= 2000000 || guiHoveredItem == 0) return null;
             item = (uint)guiHoveredItem % 500_000;
         }

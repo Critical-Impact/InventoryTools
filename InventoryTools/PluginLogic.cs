@@ -13,10 +13,13 @@ using CriticalCommonLib.Services.Ui;
 using CriticalCommonLib.Sheets;
 using CriticalCommonLib.Time;
 using Dalamud.Interface.Colors;
+using Dalamud.Interface.Internal;
 using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using ImGuiNET;
 using ImGuiScene;
+using InventoryTools.Extensions;
 using InventoryTools.Hotkeys;
 using InventoryTools.Images;
 using InventoryTools.Logic;
@@ -58,9 +61,9 @@ namespace InventoryTools
 
         private RightClickColumn _rightClickColumn = new();
         
-        public readonly ConcurrentDictionary<ushort, TextureWrap> TextureDictionary = new ConcurrentDictionary<ushort, TextureWrap>();
-        public readonly ConcurrentDictionary<ushort, TextureWrap> HQTextureDictionary = new ConcurrentDictionary<ushort, TextureWrap>();
-        public readonly ConcurrentDictionary<string, TextureWrap> UldTextureDictionary = new ConcurrentDictionary<string, TextureWrap>();
+        public readonly ConcurrentDictionary<ushort, IDalamudTextureWrap> TextureDictionary = new ConcurrentDictionary<ushort, IDalamudTextureWrap>();
+        public readonly ConcurrentDictionary<ushort, IDalamudTextureWrap> HQTextureDictionary = new ConcurrentDictionary<ushort, IDalamudTextureWrap>();
+        public readonly ConcurrentDictionary<string, IDalamudTextureWrap> UldTextureDictionary = new ConcurrentDictionary<string, IDalamudTextureWrap>();
         
         public PluginLogic()
         {
@@ -802,41 +805,6 @@ namespace InventoryTools
             return instance;
         }
 
-        internal TextureWrap? GetIcon(ushort icon, bool hqIcon = false)
-        {
-            if (icon <= 65103)
-            {
-                var textureDictionary = hqIcon ? HQTextureDictionary : TextureDictionary;
-                
-                if (textureDictionary.ContainsKey(icon)) {
-                    var tex = textureDictionary[icon];
-                    if (tex.ImGuiHandle != IntPtr.Zero)
-                    {
-                        return tex;
-                    }
-                } else {
-                    try {
-                        var iconTex = hqIcon ?  PluginService.DataService.GetHqIcon(icon) : PluginService.DataService.GetIcon(icon);
-                        if (iconTex != null)
-                        {
-                            var tex = PluginService.PluginInterfaceService.LoadImageRaw(iconTex.GetRgbaImageData(),
-                                iconTex.Header.Width, iconTex.Header.Height, 4);
-                            if (tex.ImGuiHandle != IntPtr.Zero)
-                            {
-                                textureDictionary[icon] = tex;
-                                return tex;
-                            }
-                        }
-                    } catch {
-                        PluginLog.Error("Failed to load icon correctly - " + icon + (hqIcon ? "hq" : "nq"));
-                        return null;
-                    }
-                }
-            }
-
-            return null;
-        }
-        
         internal void DrawIcon(ushort icon, Vector2 size, bool hqIcon = false) {
             if (icon <= 65103)
             {
@@ -854,14 +822,12 @@ namespace InventoryTools
                     ImGui.EndChild();
 
                     try {
-                        var iconTex = hqIcon ?  PluginService.DataService.GetHqIcon(icon) : PluginService.DataService.GetIcon(icon);
+                        var iconTex = hqIcon ?  Service.TextureProvider.GetIcon(icon, ITextureProvider.IconFlags.ItemHighQuality) : Service.TextureProvider.GetIcon(icon);
                         if (iconTex != null)
                         {
-                            var tex = PluginService.PluginInterfaceService.LoadImageRaw(iconTex.GetRgbaImageData(),
-                                iconTex.Header.Width, iconTex.Header.Height, 4);
-                            if (tex.ImGuiHandle != IntPtr.Zero)
+                            if (iconTex.ImGuiHandle != IntPtr.Zero)
                             {
-                                textureDictionary[icon] = tex;
+                                textureDictionary[icon] = iconTex;
                             }
                         }
                     } 
@@ -920,14 +886,12 @@ namespace InventoryTools
 
                 try
                 {
-                    var iconTex = PluginService.DataService.GetUldIcon(name);
+                    var iconTex = Service.TextureProvider.GetUldIcon(name);
                     if (iconTex != null)
                     {
-                        var tex = PluginService.PluginInterfaceService.LoadImageRaw(iconTex.GetRgbaImageData(),
-                            iconTex.Header.Width, iconTex.Header.Height, 4);
-                        if (tex.ImGuiHandle != IntPtr.Zero)
+                        if (iconTex.ImGuiHandle != IntPtr.Zero)
                         {
-                            UldTextureDictionary[name] = tex;
+                            UldTextureDictionary[name] = iconTex;
                         }
                     }
                 }
@@ -974,14 +938,12 @@ namespace InventoryTools
                 ImGui.EndChild();
 
                 try {
-                    var iconTex = PluginService.DataService.GetUldIcon(name);
+                    var iconTex = Service.TextureProvider.GetUldIcon(name);
                     if (iconTex != null)
                     {
-                        var tex = PluginService.PluginInterfaceService.LoadImageRaw(iconTex.GetRgbaImageData(),
-                            iconTex.Header.Width, iconTex.Header.Height, 4);
-                        if (tex.ImGuiHandle != IntPtr.Zero)
+                        if (iconTex.ImGuiHandle != IntPtr.Zero)
                         {
-                            UldTextureDictionary[name] = tex;
+                            UldTextureDictionary[name] = iconTex;
                         }
                     }
                 } catch {
@@ -1005,12 +967,11 @@ namespace InventoryTools
             return false;
         }
 
-        public TextureWrap LoadImage(string imageName)
+        public IDalamudTextureWrap LoadImage(string imageName)
         {
-            var assemblyLocation = PluginService.PluginInterfaceService!.AssemblyLocation.DirectoryName!;
+            var assemblyLocation = Service.Interface!.AssemblyLocation.DirectoryName!;
             var imagePath = Path.Combine(assemblyLocation, $@"Images\{imageName}.png");
-
-            return  PluginService.PluginInterfaceService!.LoadImage(imagePath);
+            return Service.TextureProvider.GetTextureFromFile(new FileInfo(imagePath));
         }
                                 
         private bool _disposed;

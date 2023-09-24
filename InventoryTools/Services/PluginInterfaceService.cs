@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using DalaMock.Interfaces;
+using Dalamud.Interface.Internal;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
@@ -55,12 +57,12 @@ public class PluginInterfaceService : IPluginInterfaceService, IDisposable
         }
     }
 
-    public TextureWrap LoadImageRaw(byte[] imageData, int width, int height, int numChannels)
+    public IDalamudTextureWrap LoadImageRaw(byte[] imageData, int width, int height, int numChannels)
     {
         return _dalamudPluginInterface.UiBuilder.LoadImageRaw(imageData, width, height, numChannels);
     }
 
-    public TextureWrap LoadImage(string filePath)
+    public IDalamudTextureWrap LoadImage(string filePath)
     {
         return _dalamudPluginInterface.UiBuilder.LoadImage(filePath);
     }

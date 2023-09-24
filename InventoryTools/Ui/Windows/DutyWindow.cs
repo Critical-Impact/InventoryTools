@@ -3,6 +3,7 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
+using Dalamud.Interface.Internal;
 using Dalamud.Utility;
 using ImGuiNET;
 using ImGuiScene;
@@ -121,7 +122,7 @@ namespace InventoryTools.Ui
                                         var item = items[index];
                                         if (item.Item1 == null) continue;
                                         ImGui.PushID("dbc" + dungeonBoss.RowId + "_" + chest.Key + "_" + index);
-                                        TextureWrap? useIcon = PluginService.IconStorage[item.Item1.Icon];
+                                        IDalamudTextureWrap? useIcon = PluginService.IconStorage[item.Item1.Icon];
                                         if (useIcon != null)
                                         {
                                             if (ImGui.ImageButton(useIcon.ImGuiHandle,
