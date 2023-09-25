@@ -4,6 +4,7 @@ using Dalamud.ContextMenu;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Logging;
+using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using InventoryTools.Logic;
@@ -29,11 +30,12 @@ public class ContextMenuService : IDisposable
     public const int HWDSupplyContextItemId            = 0x38C;
     public const int GrandCompanySupplyListContextItemId            = 0x54;
     public const int GrandCompanyExchangeContextItemId            = 0x54;
-    private readonly DalamudContextMenu _contextMenu = new();
+    private readonly DalamudContextMenu _contextMenu;
     
 
-    public ContextMenuService()
+    public ContextMenuService(DalamudPluginInterface dalamudPluginInterface)
     {
+        _contextMenu = new DalamudContextMenu(dalamudPluginInterface);
         _contextMenu.OnOpenGameObjectContextMenu += AddGameObjectItem;
         _contextMenu.OnOpenInventoryContextMenu  += AddInventoryItem;
     }
@@ -177,7 +179,7 @@ public class ContextMenuService : IDisposable
 
         if( _disposed == false )
         {
-            PluginLog.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
+            Service.Log.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
         }
 #endif
         Dispose (true);

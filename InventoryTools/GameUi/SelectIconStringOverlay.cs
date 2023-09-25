@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Numerics;
+using CriticalCommonLib;
 using CriticalCommonLib.Services.Ui;
 using Dalamud.Logging;
 using InventoryTools.Logic;
@@ -14,13 +15,13 @@ namespace InventoryTools.GameUi
         {
             if (!HasState || !HasAddon)
             {
-                PluginLog.Verbose("no state and no addon");
+                Service.Log.Verbose("no state and no addon");
                 return false;
             }
             var atkUnitBase = AtkUnitBase;
             if (atkUnitBase != null)
             {
-                PluginLog.Verbose("has atk base, setting colors");
+                Service.Log.Verbose("has atk base, setting colors");
                 this.SetColors(SelectItems);
                 return true;
             }
@@ -50,7 +51,7 @@ namespace InventoryTools.GameUi
                 var filterResult = newState.FilterResult;
                 if (filterResult != null)
                 {
-                    PluginLog.Verbose("Attempting to update state for SelectIconString");
+                    Service.Log.Verbose("Attempting to update state for SelectIconString");
 
                     SelectItems = newState.GetSelectIconStringItems();
                     Draw();
@@ -60,7 +61,7 @@ namespace InventoryTools.GameUi
             
             if (HasState)
             {
-                PluginLog.Verbose("Clearing select items");
+                Service.Log.Verbose("Clearing select items");
                 SelectItems = new List<Vector4?>();
                 Clear();
             }

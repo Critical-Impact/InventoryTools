@@ -2,8 +2,10 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using CriticalCommonLib;
 using Dalamud.Interface.Windowing;
 using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic;
 using InventoryTools.Services.Interfaces;
@@ -17,9 +19,12 @@ namespace InventoryTools.Services
         private readonly WindowSystem windowSystem = new("AllaganTools");
 
         private IFilterService _filterService;
-        public WindowService(IFilterService filterService)
+        private readonly IPluginLog _pluginLog;
+
+        public WindowService(IFilterService filterService, IPluginLog pluginLog)
         {
             _filterService = filterService;
+            _pluginLog = pluginLog;
             _filterService.FilterRemoved += FilterServiceAddedRemoved;
             _filterService.FilterAdded += FilterServiceAddedRemoved;
             _filterService.FilterRepositioned += FilterServiceOnFilterRepositioned;
@@ -310,6 +315,7 @@ namespace InventoryTools.Services
 
         private bool AddWindow(Window window)
         {
+            window.PluginLog = _pluginLog;
             if (_windows.TryAdd(window.Key, window))
             {
                 windowSystem.AddWindow(window);
@@ -507,7 +513,7 @@ namespace InventoryTools.Services
 
             if( _disposed == false )
             {
-                PluginLog.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
+                Service.Log.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
             }
 #endif
             Dispose (true);

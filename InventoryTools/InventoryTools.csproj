@@ -17,7 +17,10 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <DalamudLibPath>$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+        <DalamudLibPath Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+        <DalamudLibPath Condition="$([MSBuild]::IsOSPlatform('Linux'))">$(HOME)/.xlcore/dalamud/Hooks/dev/</DalamudLibPath>
+        <DalamudLibPath Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(HOME)/Library/Application Support/XIV on Mac/dalamud/Hooks/dev/</DalamudLibPath>
+        <DalamudLibPath Condition="$(DALAMUD_HOME) != ''">$(DALAMUD_HOME)/</DalamudLibPath>
     </PropertyGroup>
     
     <PropertyGroup>
@@ -30,8 +33,8 @@
 
     <ItemGroup>
         <PackageReference Include="CsvHelper" Version="30.0.1" />
-        <PackageReference Include="Dalamud.ContextMenu" Version="1.2.3" />
-        <PackageReference Include="DalamudPackager" Version="2.1.7" />
+        <PackageReference Include="Dalamud.ContextMenu" Version="1.3.1" />
+        <PackageReference Include="DalamudPackager" Version="2.1.12" />
         <PackageReference Include="SerialQueue" Version="2.1.0" />
         <PackageReference Include="System.Reactive" Version="5.0.0" />
         <ProjectReference Include="..\CriticalCommonLib\CriticalCommonLib.csproj" />
@@ -154,23 +157,4 @@
             <TargetPath>Images\toggle.png</TargetPath>
         </ContentWithTargetPath>
     </ItemGroup>
-
-    <ProjectExtensions>
-        <DalamudPlugin>
-            <ApiLevel>8</ApiLevel>
-            <Author>Critical-Impact</Author>
-            <Name>Allagan Tools</Name>
-            <Punchline>Get organized in FFXIV, easily locate/show where to sort items, plan your crafting, and search for mobs, duties, airships, and submarines!</Punchline>
-            <Description>Allagan Tool's primary purpose is to keep track of items across your characters/retainers/free company. With it's filter system you'll never lose track of items or not know where they should be sorted.\n\nWhile this is it's primary purpose, it has quite an exhaustive list of other features including:\n\t- Craft planning\n\t- Market board integration\n\t- Item highlighting in inventories when searching/sorting and picking ingredients for crafts\n\t- Item window that includes vendor and source information among other things\n\t- Duty/mob/airship/submarine windows that are fully searchable\n\t- A filtering system that lets you setup complex searches for specific items \n\t- Tooltip integration that'll let you see where the items are on hover</Description>
-            <IconUrl>https://raw.githubusercontent.com/Critical-Impact/InventoryTools/main/InventoryTools/Images/icon.png</IconUrl>
-            <Tags>
-                <Tag>Inventory</Tag>
-                <Tag>Sorting</Tag>
-                <Tag>Crafting</Tag>
-                <Tag>Items</Tag>
-            </Tags>
-            <Hidden>False</Hidden>
-        </DalamudPlugin>
-    </ProjectExtensions>
-    
 </Project>

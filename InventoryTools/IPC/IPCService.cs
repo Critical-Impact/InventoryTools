@@ -479,7 +479,7 @@ public class IPCService : IDisposable
 
         if( _disposed == false )
         {
-            PluginLog.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
+            Service.Log.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
         }
 #endif
         Dispose (true);

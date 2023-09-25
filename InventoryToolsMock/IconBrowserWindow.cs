@@ -3,6 +3,7 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility;
 using ImGuiNET;
 using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using InventoryTools;
 using InventoryTools.Logic;
 using InventoryTools.Ui;
@@ -37,7 +38,6 @@ public class IconBrowserWindow : Window
 
     public IconBrowserWindow() : base("Icon Browser", ImGuiWindowFlags.None, false)
     {
-        
     }
 
     public static string AsKey => "IconBrowser";
@@ -326,7 +326,7 @@ public class IconBrowserWindow : Window
     {
         _iconExistsCache = new HashSet<int>();
         if (_iconCache.ContainsKey(_name)) return;
-        PluginLog.LogInformation($"Building Icon Browser cache for tab \"{_name}\"");
+        PluginLog.Info($"Building Icon Browser cache for tab \"{_name}\"");
 
         var cache = _iconCache[_name] = new();
         foreach (var (start, end) in _iconList)
@@ -338,12 +338,12 @@ public class IconBrowserWindow : Window
             }
         }
 
-        PluginLog.LogInformation($"Done building tab cache! {cache.Count} icons found.");
+        PluginLog.Info($"Done building tab cache! {cache.Count} icons found.");
     }
     
     public void BuildCache(bool rebuild)
     {
-        PluginLog.LogInformation("Building Icon Browser cache");
+        PluginLog.Info("Building Icon Browser cache");
 
         _iconCache.Clear();
         _iconExistsCache = new();
@@ -358,7 +358,7 @@ public class IconBrowserWindow : Window
             _iconExistsCache.Remove(125052); // Remove broken image (TextureFormat R8G8B8X8 is not supported for image conversion)
         }
 
-        PluginLog.LogInformation($"Done building cache! {_iconExistsCache.Count} icons found.");
+        PluginLog.Info($"Done building cache! {_iconExistsCache.Count} icons found.");
     }
     
 }

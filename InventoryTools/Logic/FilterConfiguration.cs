@@ -216,16 +216,16 @@ namespace InventoryTools.Logic
             if (_refreshing)
             {
                 _refreshQueue?.Enqueue(null);
-                PluginLog.Verbose("Not refreshing filter: " + this.Name);
+                Service.Log.Verbose("Not refreshing filter: " + this.Name);
                 return;
             }
 
-            PluginLog.Verbose("Refreshing filter: " + this.Name);
+            Service.Log.Verbose("Refreshing filter: " + this.Name);
             _refreshing = true;
 
             if (this.FilterType == FilterType.CraftFilter)
             {
-                PluginLog.Verbose("Starting craft list refresh");
+                Service.Log.Verbose("Starting craft list refresh");
                 CraftList.BeenGenerated = false;
                 CraftList.BeenUpdated = false;
                 //Clean up this sloppy function
@@ -285,20 +285,20 @@ namespace InventoryTools.Logic
                 CraftList.GenerateCraftChildren();
                 CraftList.Update(characterSources, externalSources);
                 CraftList.CalculateCosts(PluginService.MarketCache);
-                PluginLog.Verbose("Generating filtered list for filter: " + this.Name);
+                Service.Log.Verbose("Generating filtered list for filter: " + this.Name);
                 _filterResult = await GenerateFilteredList(PluginService.InventoryMonitor.Inventories.Select(c => c.Value).ToList());
-                PluginLog.Verbose("Finished generating filtered list for filter: " + this.Name);
+                Service.Log.Verbose("Finished generating filtered list for filter: " + this.Name);
             }
             else
             {
-                PluginLog.Verbose("Generating filtered list for filter: " + this.Name);
+                Service.Log.Verbose("Generating filtered list for filter: " + this.Name);
                 _filterResult = await GenerateFilteredList(PluginService.InventoryMonitor.Inventories.Select(c => c.Value).ToList());
-                PluginLog.Verbose("Finished generating filtered list for filter: " + this.Name);
+                Service.Log.Verbose("Finished generating filtered list for filter: " + this.Name);
             }
             
             NeedsRefresh = false;
             await PluginService.FrameworkService.RunOnFrameworkThread(() => { ListUpdated?.Invoke(this); });
-            PluginLog.Verbose("Finished refreshing filter: " + this.Name);
+            Service.Log.Verbose("Finished refreshing filter: " + this.Name);
             if (_refreshQueue.Contains(null))
             {
                 _refreshQueue.Clear();
@@ -2538,8 +2538,8 @@ namespace InventoryTools.Logic
             var displaySourceCrossCharacter = filter.SourceIncludeCrossCharacter ?? ConfigurationManager.Config.DisplayCrossCharacter;
             var displayDestinationCrossCharacter = filter.DestinationIncludeCrossCharacter ?? ConfigurationManager.Config.DisplayCrossCharacter;
             
-            PluginLog.Verbose("Filter Information:");
-            PluginLog.Verbose("Filter Type: " + filter.FilterType);
+            Service.Log.Verbose("Filter Information:");
+            Service.Log.Verbose("Filter Type: " + filter.FilterType);
 
             if (filter.FilterType == FilterType.SortingFilter || filter.FilterType == FilterType.CraftFilter)
             {
@@ -2550,7 +2550,7 @@ namespace InventoryTools.Logic
                 Dictionary<(ulong, InventoryType), List<FilteredItem>> filteredSources = new();
                 //Dictionary<(ulong, InventoryCategory), List<InventoryItem>> filteredDestinations = new();
                 var sourceKeys = sourceInventories.Select(c => c.Key);
-                PluginLog.Verbose(sourceInventories.Count() + " inventories to examine.");
+                Service.Log.Verbose(sourceInventories.Count() + " inventories to examine.");
                 if (filter.FilterType == FilterType.CraftFilter)
                 {
                     filter.CraftList.GetFlattenedMergedMaterials(true);
@@ -2608,7 +2608,7 @@ namespace InventoryTools.Logic
 
                 foreach (var sourceInventory in filteredSources)
                 {
-                    //PluginLog.Verbose("Found " + sourceInventory.Value.Count + " items in " + sourceInventory.Key + " " + sourceInventory.Key.Item2.ToString());
+                    //Service.Log.Verbose("Found " + sourceInventory.Value.Count + " items in " + sourceInventory.Key + " " + sourceInventory.Key.Item2.ToString());
                     for (var index = 0; index < sourceInventory.Value.Count; index++)
                     {
                         var filteredItem = sourceInventory.Value[index];
@@ -2707,7 +2707,7 @@ namespace InventoryTools.Logic
                                                         if (filter.InActiveInventories(activeCharacter, activeRetainer,
                                                             sourceInventory.Key.Item1, seenInventoryLocation.Item1))
                                                         {
-                                                            //PluginLog.Verbose(
+                                                            //Service.Log.Verbose(
                                                             //    "Added item to filter result as we've seen the item before: " +
                                                             //    sourceItem.FormattedName);
                                                             sortedItems.Add(new SortingResult(sourceInventory.Key.Item1,
@@ -2799,7 +2799,7 @@ namespace InventoryTools.Logic
                         }
                         else
                         {
-                            // PluginLog.Verbose("Added item to unsortable list, maybe I should show these somewhere: " +
+                            // Service.Log.Verbose("Added item to unsortable list, maybe I should show these somewhere: " +
                             //                  sourceItem.FormattedName);
                             unsortableItems.Add(sourceItem);
                         }
@@ -2817,7 +2817,7 @@ namespace InventoryTools.Logic
                 //Filter the source and destination inventories based on the applicable items so we have less to sort
                 Dictionary<(ulong, InventoryType), List<FilteredItem>> filteredSources = new();
                 //Dictionary<(ulong, InventoryCategory), List<InventoryItem>> filteredDestinations = new();
-                PluginLog.Verbose(sourceInventories.Count() + " inventories to examine.");
+                Service.Log.Verbose(sourceInventories.Count() + " inventories to examine.");
                 foreach (var sourceInventory in sourceInventories)
                 {
                     if (!filteredSources.ContainsKey(sourceInventory.Key))

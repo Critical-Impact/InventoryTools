@@ -38,7 +38,7 @@ public class MockCharacterMonitor : ICharacterMonitor
     {
         if (IsLoggedIn && LocalContentId != 0)
         {
-            PluginLog.Verbose("CharacterMonitor: Character has changed to " + LocalContentId);
+            Service.Log.Verbose("CharacterMonitor: Character has changed to " + LocalContentId);
             Character character;
             if (_characters.ContainsKey(LocalContentId))
             {

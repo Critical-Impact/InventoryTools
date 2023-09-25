@@ -5,6 +5,7 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Resolvers;
 using CriticalCommonLib.Services.Ui;
 using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools;
 using InventoryTools.Logic;
@@ -12,7 +13,7 @@ using InventoryTools.Ui;
 using LuminaSupplemental.Excel.Model;
 using Newtonsoft.Json;
 using OtterGui;
-using OtterGui.Raii;
+using Dalamud.Interface.Utility.Raii;
 using OtterGui.Widgets;
 using QoLBar;
 

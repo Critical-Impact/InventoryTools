@@ -13,6 +13,12 @@ namespace InventoryTools.Ui
         {
             Service.Interface.Draw += Draw;
             Service.Interface.OpenConfigUi += UiBuilderOnOpenConfigUi;
+            Service.Interface.OpenMainUi += InterfaceOnOpenMainUi;
+        }
+
+        private void InterfaceOnOpenMainUi()
+        {
+            PluginService.WindowService.ToggleFiltersWindow();
         }
 
 
@@ -57,6 +63,7 @@ namespace InventoryTools.Ui
             {
                 Service.Interface.Draw -= Draw;
                 Service.Interface.OpenConfigUi -= UiBuilderOnOpenConfigUi;
+                Service.Interface.OpenMainUi -= InterfaceOnOpenMainUi;
             }
             _disposed = true;         
         }

@@ -14,7 +14,7 @@ using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using Lumina.Excel.GeneratedSheets;
 using OtterGui;
-using OtterGui.Raii;
+using Dalamud.Interface.Utility.Raii;
 using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 
 namespace InventoryTools.Ui

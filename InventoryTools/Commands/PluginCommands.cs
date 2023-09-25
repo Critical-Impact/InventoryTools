@@ -55,8 +55,8 @@ namespace InventoryTools.Commands
         [HelpMessage("Toggles the specified filter on/off and turns off any other filters.")]
         public  void FilterToggleCommand(string command, string args)
         {
-            PluginLog.Verbose(command);
-            PluginLog.Verbose(args);
+            Service.Log.Verbose(command);
+            Service.Log.Verbose(args);
             if (args.Trim() == "")
             {
                 PluginService.ChatUtilities.PrintError("You must enter the name of a filter.");
@@ -80,8 +80,8 @@ namespace InventoryTools.Commands
         [HelpMessage("Toggles the specified filter on/off and turns off any other filters.")]
         public  void FilterToggleCommand3(string command, string args)
         {
-            PluginLog.Verbose(command);
-            PluginLog.Verbose(args);
+            Service.Log.Verbose(command);
+            Service.Log.Verbose(args);
             if (args.Trim() == "")
             {
                 PluginService.ChatUtilities.PrintError("You must enter the name of a filter.");

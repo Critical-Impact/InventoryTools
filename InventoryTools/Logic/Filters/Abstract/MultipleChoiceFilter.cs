@@ -5,7 +5,7 @@ using CriticalCommonLib.Extensions;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 using InventoryTools.Extensions;
-using OtterGui.Raii;
+using Dalamud.Interface.Utility.Raii;
 
 namespace InventoryTools.Logic.Filters.Abstract
 {

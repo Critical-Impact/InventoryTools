@@ -3,15 +3,22 @@ using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 
 namespace InventoryToolsMock;
 
 public class MockChatUtilities : IChatUtilities
 {
+    private readonly IPluginLog _pluginLog;
+
+    public MockChatUtilities(IPluginLog pluginLog)
+    {
+        _pluginLog = pluginLog;
+    }
     public bool LogsEnabled { get; set; }
     public void PrintLog(string message)
     {
-        PluginLog.Log("Chat Log Output: " + message);
+        _pluginLog.Info("Chat Log Output: " + message);
     }
 
     public void Print(SeString message)
@@ -36,7 +43,7 @@ public class MockChatUtilities : IChatUtilities
 
     public void PrintError(string message)
     {
-        PluginLog.Log(message);
+        _pluginLog.Info(message);
     }
 
     public void PrintError(string left, string center, int color, string right)
@@ -46,16 +53,16 @@ public class MockChatUtilities : IChatUtilities
 
     public void PrintClipboardMessage(string objectType, string name, Exception? e = null)
     {
-        PluginLog.Log("Clipboard Message:");
-        PluginLog.Log(name);
-        PluginLog.Log(objectType);
+        _pluginLog.Info("Clipboard Message:");
+        _pluginLog.Info(name);
+        _pluginLog.Info(objectType);
     }
 
     public void PrintGeneralMessage(string objectType, string name)
     {
-        PluginLog.Log("General Message:");
-        PluginLog.Log(name);
-        PluginLog.Log(objectType);
+        _pluginLog.Info("General Message:");
+        _pluginLog.Info(name);
+        _pluginLog.Info(objectType);
     }
 
     public void PrintFullMapLink(ILocation location, string? textOverride = null)
@@ -65,15 +72,15 @@ public class MockChatUtilities : IChatUtilities
             var name = location.ToString();
             if (name != null)
             {
-                PluginLog.Log(textOverride ?? name, location.MapEx.Value.TerritoryType.Value);
-                PluginLog.Log((float)(location.MapX) + ":" + (float)(location.MapY));
+                _pluginLog.Info(textOverride ?? name, location.MapEx.Value.TerritoryType.Value);
+                _pluginLog.Info((float)(location.MapX) + ":" + (float)(location.MapY));
             }
         }
     }
 
     public void LinkItem(ItemEx item)
     {
-        PluginLog.Log("Item Link:");
-        PluginLog.Log(item.NameString);
+        _pluginLog.Info("Item Link:");
+        _pluginLog.Info(item.NameString);
     }
 }

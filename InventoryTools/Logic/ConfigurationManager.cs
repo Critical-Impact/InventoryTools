@@ -66,7 +66,7 @@ namespace InventoryTools.Logic
         /// <param name="file">An alternate file to load</param>
         public static void Load(string? file = null)
         {
-            PluginLog.Verbose("Loading configuration");
+            Service.Log.Verbose("Loading configuration");
             Stopwatch loadConfigStopwatch = new Stopwatch();
             loadConfigStopwatch.Start();
             if (!File.Exists(file ?? ConfigurationFile))
@@ -91,14 +91,14 @@ namespace InventoryTools.Logic
                 return;
             }
             loadConfigStopwatch.Stop();
-            PluginLog.Verbose("Took " + loadConfigStopwatch.Elapsed.TotalSeconds + " to load main configuration file.");
+            Service.Log.Verbose("Took " + loadConfigStopwatch.Elapsed.TotalSeconds + " to load main configuration file.");
             Config = inventoryToolsConfiguration;
             Config.MarkReloaded();
         }
 
         public static List<InventoryItem> LoadInventory(string? file = null)
         {
-            PluginLog.Verbose("Loading inventory");
+            Service.Log.Verbose("Loading inventory");
             Stopwatch loadConfigStopwatch = new Stopwatch();
             loadConfigStopwatch.Start();
 
@@ -118,7 +118,7 @@ namespace InventoryTools.Logic
                         });
                     if (inventoryToolsConfiguration != null)
                     {
-                        PluginLog.Verbose("Migrating inventories");
+                        Service.Log.Verbose("Migrating inventories");
                         var temp = JObject.Parse(jsonText);
                         if (temp.ContainsKey("SavedInventories"))
                         {
@@ -147,7 +147,7 @@ namespace InventoryTools.Logic
             }
             else if (!Config.InventoriesMigratedToCsv)
             {
-                PluginLog.Verbose("Marked inventories to now load from CSV");
+                Service.Log.Verbose("Marked inventories to now load from CSV");
                 var parsedInventories = LoadInventoriesJson(InventoryFile) ?? new();
                 foreach (var parsedInventory in parsedInventories)
                 {
@@ -166,7 +166,7 @@ namespace InventoryTools.Logic
                 inventories = LoadInventoriesFromCsv(out bool success);
             }
             loadConfigStopwatch.Stop();
-            PluginLog.Verbose("Took " + loadConfigStopwatch.Elapsed.TotalSeconds + " to load inventories.");
+            Service.Log.Verbose("Took " + loadConfigStopwatch.Elapsed.TotalSeconds + " to load inventories.");
             loadConfigStopwatch.Restart();
             return inventories;
         }
@@ -175,7 +175,7 @@ namespace InventoryTools.Logic
         {
             Stopwatch loadConfigStopwatch = new Stopwatch();
             loadConfigStopwatch.Start();
-            PluginLog.Verbose("Saving allagan tools configuration");
+            Service.Log.Verbose("Saving allagan tools configuration");
             try
             {
                 File.WriteAllText(ConfigurationFile, JsonConvert.SerializeObject(Config, Formatting.None, new JsonSerializerSettings()
@@ -187,11 +187,11 @@ namespace InventoryTools.Logic
                     ContractResolver = MinifyResolver
                 }));
                 loadConfigStopwatch.Stop();
-                PluginLog.Verbose("Took " + loadConfigStopwatch.Elapsed.TotalSeconds + " to save configuration.");
+                Service.Log.Verbose("Took " + loadConfigStopwatch.Elapsed.TotalSeconds + " to save configuration.");
             }
             catch (Exception e)
             {
-                PluginLog.Error($"Failed to save allagan tools configuration due to {e.Message}");
+                Service.Log.Error($"Failed to save allagan tools configuration due to {e.Message}");
             }
         }
 
@@ -221,7 +221,7 @@ namespace InventoryTools.Logic
             try
             {
                 fileName ??= InventoryFile;
-                PluginLog.Verbose("Loading inventories from " + fileName);
+                Service.Log.Verbose("Loading inventories from " + fileName);
                 var cacheFile = new FileInfo(fileName);
                 string json = File.ReadAllText(cacheFile.FullName, Encoding.UTF8);
                 return JsonConvert.DeserializeObject<Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>>(json, new JsonSerializerSettings()
@@ -232,7 +232,7 @@ namespace InventoryTools.Logic
             }
             catch (Exception e)
             {
-                PluginLog.Error("Error while parsing saved saved inventory data, " + e.Message);
+                Service.Log.Error("Error while parsing saved saved inventory data, " + e.Message);
                 return null;
             }
         }
@@ -244,7 +244,7 @@ namespace InventoryTools.Logic
         public static void SaveInventoriesToJson(
             Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>> savedInventories)
         {
-            PluginLog.Verbose("Saving inventory data");
+            Service.Log.Verbose("Saving inventory data");
             Stopwatch loadConfigStopwatch = new Stopwatch();
             loadConfigStopwatch.Start();            
             try
@@ -252,15 +252,15 @@ namespace InventoryTools.Logic
                 var items = savedInventories.SelectMany(c => c.Value.SelectMany(d => d.Value)).ToList();
                 if (!SaveInventories(items))
                 {
-                    PluginLog.Error($"Failed to save inventories due to a parsing error.");
+                    Service.Log.Error($"Failed to save inventories due to a parsing error.");
                 }
             }
             catch (Exception e)
             {
-                PluginLog.Error($"Failed to save inventories due to {e.Message}");
+                Service.Log.Error($"Failed to save inventories due to {e.Message}");
             }
             loadConfigStopwatch.Stop();
-            PluginLog.Verbose("Took " + loadConfigStopwatch.Elapsed.TotalSeconds + " to save inventories.");
+            Service.Log.Verbose("Took " + loadConfigStopwatch.Elapsed.TotalSeconds + " to save inventories.");
 
         }
 
@@ -283,14 +283,14 @@ namespace InventoryTools.Logic
                 catch (Exception e)
                 {
                     success = false;
-                    PluginLog.Error("Failed to load inventories from CSV");
-                    PluginLog.Error(e.Message);
+                    Service.Log.Error("Failed to load inventories from CSV");
+                    Service.Log.Error(e.Message);
                 }
             }
             else
             {
                 success = true;
-                PluginLog.Verbose("Not loading inventories, file does not exist.");
+                Service.Log.Verbose("Not loading inventories, file does not exist.");
             }
 
 
@@ -311,14 +311,14 @@ namespace InventoryTools.Logic
                 catch (Exception e)
                 {
                     success = false;
-                    PluginLog.Error("Failed to load history from CSV");
-                    PluginLog.Error(e.Message);
+                    Service.Log.Error("Failed to load history from CSV");
+                    Service.Log.Error(e.Message);
                 }
             }
             else
             {
                 success = true;
-                PluginLog.Verbose("Not loading history, file does not exist.");
+                Service.Log.Verbose("Not loading history, file does not exist.");
             }
 
 

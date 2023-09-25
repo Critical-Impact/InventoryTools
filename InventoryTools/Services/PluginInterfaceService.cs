@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using CriticalCommonLib;
 using DalaMock.Interfaces;
 using Dalamud.Interface.Internal;
 using Dalamud.Logging;
@@ -18,6 +19,12 @@ public class PluginInterfaceService : IPluginInterfaceService, IDisposable
         _dalamudPluginInterface = dalamudPluginInterface;
         _dalamudPluginInterface.UiBuilder.Draw += UiBuilderOnDraw;
         _dalamudPluginInterface.UiBuilder.OpenConfigUi += UiBuilderOnOpenConfigUi;
+        _dalamudPluginInterface.UiBuilder.OpenMainUi += UiBuilderOnOpenMainUi;
+    }
+
+    private void UiBuilderOnOpenMainUi()
+    {
+        OpenMainUi?.Invoke();
     }
 
     private void UiBuilderOnOpenConfigUi()
@@ -32,6 +39,7 @@ public class PluginInterfaceService : IPluginInterfaceService, IDisposable
 
     public event Action? Draw;
     public event Action? OpenConfigUi;
+    public event Action? OpenMainUi;
 
     public FileInfo ConfigFile
     {
@@ -171,6 +179,7 @@ public class PluginInterfaceService : IPluginInterfaceService, IDisposable
         {
             _dalamudPluginInterface.UiBuilder.Draw -= UiBuilderOnDraw;
             _dalamudPluginInterface.UiBuilder.OpenConfigUi -= UiBuilderOnOpenConfigUi;
+            _dalamudPluginInterface.UiBuilder.OpenMainUi -= UiBuilderOnOpenMainUi;
         }
         _disposed = true;         
     }
@@ -184,7 +193,7 @@ public class PluginInterfaceService : IPluginInterfaceService, IDisposable
 
         if( _disposed == false )
         {
-            PluginLog.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
+            Service.Log.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
         }
 #endif
         Dispose (true);

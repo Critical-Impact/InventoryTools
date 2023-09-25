@@ -42,7 +42,7 @@ public class AmountOwnedTooltip : BaseTooltip
             }
             else
             {
-                PluginLog.Verbose("No where to put the tooltip data.");
+                Service.Log.Verbose("No where to put the tooltip data.");
                 return;
             }
                 
@@ -241,7 +241,7 @@ public class AmountOwnedTooltip : BaseTooltip
                     {
                         seStr.Payloads.Add(line);
                     }
-                    PluginLog.Verbose("Updating tooltip with amount owned on field " + itemTooltipField.ToString());
+                    Service.Log.Verbose("Updating tooltip with amount owned on field " + itemTooltipField.ToString());
                     SetTooltipString(stringArrayData, itemTooltipField, seStr);
                 }
             }

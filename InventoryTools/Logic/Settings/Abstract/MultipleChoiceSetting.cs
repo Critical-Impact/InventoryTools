@@ -5,7 +5,7 @@ using Dalamud.Interface.Colors;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using ImGuiNET;
 using InventoryTools.Extensions;
-using OtterGui.Raii;
+using Dalamud.Interface.Utility.Raii;
 
 namespace InventoryTools.Logic.Settings.Abstract;
 

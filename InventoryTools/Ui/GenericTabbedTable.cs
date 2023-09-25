@@ -3,7 +3,7 @@ using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using InventoryTools.Images;
-using OtterGui.Raii;
+using Dalamud.Interface.Utility.Raii;
 
 namespace InventoryTools.Ui;
 

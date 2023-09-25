@@ -172,7 +172,7 @@ namespace InventoryTools.Logic
                 HashSet<uint> requiredItems;
                 if (FilterConfiguration.FilterType == FilterType.CraftFilter)
                 {
-                    PluginLog.Verbose("Craft filter, getting flattened materials");
+                    Service.Log.Verbose("Craft filter, getting flattened materials");
                     requiredItems = FilterConfiguration.CraftList.GetFlattenedMaterials().Select(c => c.Item.RowId).Distinct()
                         .ToHashSet();
                 }
@@ -193,13 +193,13 @@ namespace InventoryTools.Logic
                 var target = Service.Targets.Target;
                     if (target != null)
                     {
-                        PluginLog.Verbose("Target found for SelectIconString");
+                        Service.Log.Verbose("Target found for SelectIconString");
 
                         var npcId = target.DataId;
                         var npc = Service.ExcelCache.ENpcCollection?.Get(npcId);
                         if (npc != null && npc.Base != null)
                         {
-                            PluginLog.Verbose("NPC found for SelectIconString");
+                            Service.Log.Verbose("NPC found for SelectIconString");
                             //TODO: Probably need to deal with custom talk and shit
                             for (var index = 0; index < npc.Base.ENpcData.Length; index++)
                             {
@@ -212,16 +212,16 @@ namespace InventoryTools.Logic
                                 var shop = Service.ExcelCache.ShopCollection?.GetShop(talkItem);
                                 if (shop != null)
                                 {
-                                    PluginLog.Verbose("Shop found for SelectIconString");
+                                    Service.Log.Verbose("Shop found for SelectIconString");
                                     var shouldHighlight = shop.Items.Any(c => requiredItems.Contains(c.Row));
                                     if (shouldHighlight)
                                     {
-                                        PluginLog.Verbose("Found item for shop" + shop.RowId);
+                                        Service.Log.Verbose("Found item for shop" + shop.RowId);
                                         itemHighlights.Add(FilterConfiguration.RetainerListColor ?? ConfigurationManager.Config.RetainerListColor);
                                     }
                                     else
                                     {
-                                        PluginLog.Verbose("Did not find item for shop" + shop.RowId);
+                                        Service.Log.Verbose("Did not find item for shop" + shop.RowId);
                                         itemHighlights.Add(null);
                                     }
                                 }

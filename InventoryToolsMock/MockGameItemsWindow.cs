@@ -7,7 +7,7 @@ using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Ui;
 using OtterGui;
-using OtterGui.Raii;
+using Dalamud.Interface.Utility.Raii;
 
 namespace InventoryToolsMock;
 

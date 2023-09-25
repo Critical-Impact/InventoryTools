@@ -9,7 +9,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using ImGuiNET;
 using InventoryTools.Logic;
 using LuminaSupplemental.Excel.Model;
-using OtterGui.Raii;
+using Dalamud.Interface.Utility.Raii;
 
 namespace InventoryTools.Ui
 {
@@ -143,8 +143,8 @@ namespace InventoryTools.Ui
                             if (infoProxy != null)
                             {
                                 var freeCompanyInfoProxy = (InfoProxyFreeCompany*)infoProxy;
-                                PluginLog.Log(freeCompanyInfoProxy->ID.ToString());
-                                PluginLog.Log(SeString.Parse(freeCompanyInfoProxy->Name, 22).TextValue);
+                                Service.Log.Info(freeCompanyInfoProxy->ID.ToString());
+                                Service.Log.Info(SeString.Parse(freeCompanyInfoProxy->Name, 22).TextValue);
                             }
                         }
 
@@ -173,7 +173,7 @@ namespace InventoryTools.Ui
                                             if (textNode != null)
                                             {
                                                 var seString = MemoryHelper.ReadSeString(&textNode->NodeText);
-                                                PluginLog.Log(seString.ToString());
+                                                Service.Log.Info(seString.ToString());
                                             }
                                         }
                                     }
@@ -196,9 +196,9 @@ namespace InventoryTools.Ui
                             _spawnPositions = entries;
                             foreach (var entry in entries)
                             {
-                                PluginLog.Log(entry.BNpcNameId.ToString());
-                                PluginLog.Log(entry.Position.X.ToString());
-                                PluginLog.Log(entry.Position.Z.ToString());
+                                Service.Log.Info(entry.BNpcNameId.ToString());
+                                Service.Log.Info(entry.Position.X.ToString());
+                                Service.Log.Info(entry.Position.Z.ToString());
                             }
                         }
 
@@ -216,14 +216,14 @@ namespace InventoryTools.Ui
                                 .Client
                                 .Game
                                 .InventoryType.Inventory1);
-                            PluginLog.Log($"first item, first bag : {(ulong)position:X}", $"{(ulong)position:X}");
+                            Service.Log.Info($"first item, first bag : {(ulong)position:X}", $"{(ulong)position:X}");
                         }
 
                         if (ImGui.Button("Convert Inventory Type"))
                         {
                             var saddle1 = FFXIVClientStructs.FFXIV.Client.Game.InventoryType.SaddleBag1;
-                            PluginLog.Log(saddle1.ToString());
-                            PluginLog.Log(saddle1.Convert().ToString());
+                            Service.Log.Info(saddle1.ToString());
+                            Service.Log.Info(saddle1.Convert().ToString());
                         }
 
                         if (ImGui.Button("is loaded"))
@@ -231,7 +231,7 @@ namespace InventoryTools.Ui
                             var retainer =
                                 InventoryManager.Instance()->GetInventoryContainer(FFXIVClientStructs.FFXIV.Client.Game
                                     .InventoryType.RetainerPage1);
-                            PluginLog.Log(retainer->Loaded != 0 ? "True" : "False");
+                            Service.Log.Info(retainer->Loaded != 0 ? "True" : "False");
                         }
 
                         ImGui.TextUnformatted("Inventory Information:");
@@ -251,7 +251,7 @@ namespace InventoryTools.Ui
                             var module = clientInterfaceUiModule;
                             if (module != null)
                             {
-                                PluginLog.Log($"item order module : {(ulong)module:X}", $"{(ulong)module:X}");
+                                Service.Log.Info($"item order module : {(ulong)module:X}", $"{(ulong)module:X}");
                             }
                         }
 
@@ -260,7 +260,7 @@ namespace InventoryTools.Ui
                             var instance = InventoryManager.Instance();
                             if (instance != null)
                             {
-                                PluginLog.Log($"Manager pointer: {(ulong)instance:X}", $"{(ulong)instance:X}");
+                                Service.Log.Info($"Manager pointer: {(ulong)instance:X}", $"{(ulong)instance:X}");
                             }
                         }
 
@@ -273,10 +273,10 @@ namespace InventoryTools.Ui
                                     .InventoryType
                                     .Inventory1);
                                 var inventoryItem = (IntPtr)inv->GetInventorySlot(0);
-                                PluginLog.Log($"first item pointer: {(ulong)inventoryItem:X}",
+                                Service.Log.Info($"first item pointer: {(ulong)inventoryItem:X}",
                                     $"{(ulong)inventoryItem:X}");
                                 var inventoryItem1 = (IntPtr)inv->GetInventorySlot(1);
-                                PluginLog.Log($"second item pointer: {(ulong)inventoryItem1:X}",
+                                Service.Log.Info($"second item pointer: {(ulong)inventoryItem1:X}",
                                     $"{(ulong)inventoryItem1:X}");
                             }
                         }
@@ -289,14 +289,14 @@ namespace InventoryTools.Ui
                             if (agent->IsAgentActive())
                             {
                                 var armouryAgent = (ArmouryBoard*)agent;
-                                PluginLog.Log(armouryAgent->SelectedTab.ToString());
+                                Service.Log.Info(armouryAgent->SelectedTab.ToString());
                             }
 
                             var inventoryLarge = PluginService.GameUi.GetWindow("InventoryLarge");
                             if (inventoryLarge != null)
                             {
                                 var inventoryAddon = (InventoryLargeAddon*)inventoryLarge;
-                                PluginLog.Log(inventoryAddon->CurrentTab.ToString());
+                                Service.Log.Info(inventoryAddon->CurrentTab.ToString());
 
                             }
                         }
@@ -307,8 +307,8 @@ namespace InventoryTools.Ui
                             var saddleBag = InventoryManager.Instance();
                             var fcChest =
                                 InventoryManager.Instance()->GetInventoryContainer(InventoryType.FreeCompanyPage1);
-                            PluginLog.Log($"saddle bag: {(ulong)saddleBag:X}", $"{(ulong)saddleBag:X}");
-                            PluginLog.Log($"fcChest: {(ulong)fcChest:X}", $"{(ulong)fcChest:X}");
+                            Service.Log.Info($"saddle bag: {(ulong)saddleBag:X}", $"{(ulong)saddleBag:X}");
+                            Service.Log.Info($"fcChest: {(ulong)fcChest:X}", $"{(ulong)fcChest:X}");
 
                         }
 
@@ -318,26 +318,26 @@ namespace InventoryTools.Ui
                             if (subMarinePartsMenu != null)
                             {
                                 var subAddon = (SubmarinePartsMenuAddon*)subMarinePartsMenu;
-                                PluginLog.Log("Current Phase: " + subAddon->Phase.ToString());
-                                PluginLog.Log("Item 1: " + subAddon->AmountHandedIn(0).ToString());
-                                PluginLog.Log("Item 2: " + subAddon->AmountHandedIn(1).ToString());
-                                PluginLog.Log("Item 3: " + subAddon->AmountHandedIn(2).ToString());
-                                PluginLog.Log("Item 4: " + subAddon->AmountHandedIn(3).ToString());
-                                PluginLog.Log("Item 5: " + subAddon->AmountHandedIn(4).ToString());
-                                PluginLog.Log("Item 6: " + subAddon->AmountHandedIn(5).ToString());
-                                PluginLog.Log("Item 1: " + subAddon->AmountNeeded(0).ToString());
-                                PluginLog.Log("Item 2: " + subAddon->AmountNeeded(1).ToString());
-                                PluginLog.Log("Item 3: " + subAddon->AmountNeeded(2).ToString());
-                                PluginLog.Log("Item 4: " + subAddon->AmountNeeded(3).ToString());
-                                PluginLog.Log("Item 5: " + subAddon->AmountNeeded(4).ToString());
-                                PluginLog.Log("Item 6: " + subAddon->AmountNeeded(5).ToString());
-                                PluginLog.Log("Crafting: " + subAddon->ResultItemId.ToString());
-                                PluginLog.Log("Item Required: " + subAddon->RequiredItemId(0).ToString());
-                                PluginLog.Log("Item Required: " + subAddon->RequiredItemId(1).ToString());
-                                PluginLog.Log("Item Required: " + subAddon->RequiredItemId(2).ToString());
-                                PluginLog.Log("Item Required: " + subAddon->RequiredItemId(3).ToString());
-                                PluginLog.Log("Item Required: " + subAddon->RequiredItemId(4).ToString());
-                                PluginLog.Log("Item Required: " + subAddon->RequiredItemId(5).ToString());
+                                Service.Log.Info("Current Phase: " + subAddon->Phase.ToString());
+                                Service.Log.Info("Item 1: " + subAddon->AmountHandedIn(0).ToString());
+                                Service.Log.Info("Item 2: " + subAddon->AmountHandedIn(1).ToString());
+                                Service.Log.Info("Item 3: " + subAddon->AmountHandedIn(2).ToString());
+                                Service.Log.Info("Item 4: " + subAddon->AmountHandedIn(3).ToString());
+                                Service.Log.Info("Item 5: " + subAddon->AmountHandedIn(4).ToString());
+                                Service.Log.Info("Item 6: " + subAddon->AmountHandedIn(5).ToString());
+                                Service.Log.Info("Item 1: " + subAddon->AmountNeeded(0).ToString());
+                                Service.Log.Info("Item 2: " + subAddon->AmountNeeded(1).ToString());
+                                Service.Log.Info("Item 3: " + subAddon->AmountNeeded(2).ToString());
+                                Service.Log.Info("Item 4: " + subAddon->AmountNeeded(3).ToString());
+                                Service.Log.Info("Item 5: " + subAddon->AmountNeeded(4).ToString());
+                                Service.Log.Info("Item 6: " + subAddon->AmountNeeded(5).ToString());
+                                Service.Log.Info("Crafting: " + subAddon->ResultItemId.ToString());
+                                Service.Log.Info("Item Required: " + subAddon->RequiredItemId(0).ToString());
+                                Service.Log.Info("Item Required: " + subAddon->RequiredItemId(1).ToString());
+                                Service.Log.Info("Item Required: " + subAddon->RequiredItemId(2).ToString());
+                                Service.Log.Info("Item Required: " + subAddon->RequiredItemId(3).ToString());
+                                Service.Log.Info("Item Required: " + subAddon->RequiredItemId(4).ToString());
+                                Service.Log.Info("Item Required: " + subAddon->RequiredItemId(5).ToString());
 
                             }
                         }
@@ -349,11 +349,11 @@ namespace InventoryTools.Ui
                             if (inventoryLarge != null)
                             {
                                 var inventoryAddon = (AddonSelectString*)inventoryLarge;
-                                PluginLog.Log(inventoryAddon->PopupMenu.PopupMenu.EntryCount.ToString());
+                                Service.Log.Info(inventoryAddon->PopupMenu.PopupMenu.EntryCount.ToString());
                                 for (int i = 0; i < inventoryAddon->PopupMenu.PopupMenu.EntryCount; i++)
                                 {
                                     var popupMenuEntryName = inventoryAddon->PopupMenu.PopupMenu.EntryNames[i];
-                                    PluginLog.Log(popupMenuEntryName->ToString());
+                                    Service.Log.Info(popupMenuEntryName->ToString());
                                 }
 
                             }
@@ -368,7 +368,7 @@ namespace InventoryTools.Ui
                             if (inventoryLarge != null)
                             {
                                 var inventoryAddon = (InventoryFreeCompanyChestAddon*)inventoryLarge;
-                                PluginLog.Log(inventoryAddon->CurrentTab.ToString());
+                                Service.Log.Info(inventoryAddon->CurrentTab.ToString());
 
                             }
                         }
@@ -376,10 +376,10 @@ namespace InventoryTools.Ui
                         if (ImGui.Button("Check prism box"))
                         {
                             var prismBox = new AtkInventoryMiragePrismBox();
-                            PluginLog.Log(prismBox.CurrentPage.ToString());
-                            PluginLog.Log(prismBox.CurrentTab.ToString());
-                            PluginLog.Log(prismBox.ClassJobSelected.ToString());
-                            PluginLog.Log(prismBox.OnlyDisplayRaceGenderItems.ToString());
+                            Service.Log.Info(prismBox.CurrentPage.ToString());
+                            Service.Log.Info(prismBox.CurrentTab.ToString());
+                            Service.Log.Info(prismBox.ClassJobSelected.ToString());
+                            Service.Log.Info(prismBox.OnlyDisplayRaceGenderItems.ToString());
                         }
 
                         if (ImGui.Button("Check prism box agent"))
@@ -390,16 +390,16 @@ namespace InventoryTools.Ui
                             InventoryMiragePrismBoxAgent* dresserAgent =
                                 (InventoryMiragePrismBoxAgent*)agents->GetAgentByInternalId(
                                     AgentId.MiragePrismPrismBox);
-                            PluginLog.Log(dresserAgent->SearchGender.ToString());
-                            PluginLog.Log(dresserAgent->SearchLevel.ToString());
-                            PluginLog.Log(dresserAgent->SearchText.ToString());
-                            PluginLog.Log(dresserAgent->QuickSearchText.ToString());
-                            PluginLog.Log(dresserAgent->SearchOrder.ToString());
-                            PluginLog.Log($"Search Gender Pointer: {(ulong)dresserAgent->SearchGenderPtr:X}");
+                            Service.Log.Info(dresserAgent->SearchGender.ToString());
+                            Service.Log.Info(dresserAgent->SearchLevel.ToString());
+                            Service.Log.Info(dresserAgent->SearchText.ToString());
+                            Service.Log.Info(dresserAgent->QuickSearchText.ToString());
+                            Service.Log.Info(dresserAgent->SearchOrder.ToString());
+                            Service.Log.Info($"Search Gender Pointer: {(ulong)dresserAgent->SearchGenderPtr:X}");
 
                             foreach (var glamourItem in dresserAgent->GlamourItems)
                             {
-                                //PluginLog.Log(glamourItem.CorrectedItemId.ToString());
+                                //Service.Log.Info(glamourItem.CorrectedItemId.ToString());
                             }
                         }
                     }

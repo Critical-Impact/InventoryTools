@@ -18,7 +18,7 @@ using InventoryTools.Logic.Columns;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using OtterGui;
-using OtterGui.Raii;
+using Dalamud.Interface.Utility.Raii;
 
 namespace InventoryTools.Logic
 {
@@ -289,7 +289,7 @@ namespace InventoryTools.Logic
         {
             if (FilterConfiguration.FilterResult != null && FilterConfiguration.CraftList.BeenGenerated && FilterConfiguration.CraftList.BeenUpdated)
             {
-                PluginLog.Verbose("CraftTable: Refreshing");
+                Service.Log.Verbose("CraftTable: Refreshing");
                 CraftItems = FilterConfiguration.CraftList.GetFlattenedMergedMaterials(true);
                 FilterConfiguration.CraftList.ClearGroupCache();
                 IsSearching = false;

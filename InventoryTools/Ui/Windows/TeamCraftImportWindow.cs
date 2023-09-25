@@ -6,7 +6,7 @@ using System.Text;
 using CriticalCommonLib;
 using Dalamud.Interface.Components;
 using ImGuiNET;
-using OtterGui.Raii;
+using Dalamud.Interface.Utility.Raii;
 
 namespace InventoryTools.Ui;
 

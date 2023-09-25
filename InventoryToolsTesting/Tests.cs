@@ -516,10 +516,10 @@ namespace InventoryToolsTesting
             Match match = regex.Match("Bluespirit Alembic. Gather: 3 Stiperstone, 12 Bluespirit Ore, 4 Manasilver Sand, Silver Ore. Craft: 3 Bluespirit Tile, Manasilver Nugget.");
             if (match.Success)
             {
-                PluginLog.Log(match.Captures.Count.ToString());
+                Service.Log.Info(match.Captures.Count.ToString());
                 if (match.Groups.Count == 3)
                 {
-                    PluginLog.Log("matched with 3 groups");
+                    Service.Log.Info("matched with 3 groups");
                     var gather = match.Groups[1].Value;
                     var craft = match.Groups[2].Value;
                         
