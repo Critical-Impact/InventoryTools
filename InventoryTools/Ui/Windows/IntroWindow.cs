@@ -3,7 +3,7 @@ using Dalamud.Interface.Internal;
 using ImGuiNET;
 using ImGuiScene;
 using InventoryTools.Logic;
-using OtterGui.Raii;
+using Dalamud.Interface.Utility.Raii;
 
 namespace InventoryTools.Ui
 {

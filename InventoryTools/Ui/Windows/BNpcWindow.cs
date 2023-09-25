@@ -9,7 +9,7 @@ using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using Lumina.Excel;
 using OtterGui;
-using OtterGui.Raii;
+using Dalamud.Interface.Utility.Raii;
 
 namespace InventoryTools.Ui;
 

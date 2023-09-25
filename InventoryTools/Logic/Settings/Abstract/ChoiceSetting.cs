@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
-using OtterGui.Raii;
+using Dalamud.Interface.Utility.Raii;
 
 namespace InventoryTools.Logic.Settings.Abstract
 {

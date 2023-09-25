@@ -8,7 +8,6 @@ namespace InventoryTools
     public class InventoryToolsPlugin : IDalamudPlugin
     {
         private Ui.InventoryToolsUi _ui;
-        public string Name => "Allagan Tools";
         internal DalamudPluginInterface PluginInterface { get; private set; }
         
         public InventoryToolsPlugin(DalamudPluginInterface pluginInterface)
@@ -22,7 +21,7 @@ namespace InventoryTools
         protected virtual void Dispose(bool disposing)
         {
             if (!disposing) return;
-            PluginLog.Verbose("Starting dispose of InventoryToolsPlugin");
+            Service.Log.Verbose("Starting dispose of InventoryToolsPlugin");
             _ui.Dispose();
             PluginService.Dispose();            
         }

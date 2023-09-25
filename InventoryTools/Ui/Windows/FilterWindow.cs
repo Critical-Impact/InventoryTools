@@ -6,7 +6,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using ImGuiNET;
 using InventoryTools.Logic;
 using InventoryTools.Ui.Widgets;
-using OtterGui.Raii;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 
 namespace InventoryTools.Ui

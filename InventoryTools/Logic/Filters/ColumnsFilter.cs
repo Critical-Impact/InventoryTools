@@ -7,7 +7,7 @@ using InventoryTools.Logic.Columns;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Logic.Filters.Abstract;
 using OtterGui;
-using OtterGui.Raii;
+using Dalamud.Interface.Utility.Raii;
 
 namespace InventoryTools.Logic.Filters
 {

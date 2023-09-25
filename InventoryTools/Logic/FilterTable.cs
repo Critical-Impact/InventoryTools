@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using CriticalCommonLib;
 using CriticalCommonLib.Sheets;
 using CsvHelper;
 using Dalamud.Interface.Colors;
@@ -15,7 +16,7 @@ using InventoryTools.Logic.Columns;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using OtterGui;
-using OtterGui.Raii;
+using Dalamud.Interface.Utility.Raii;
 
 namespace InventoryTools.Logic
 {
@@ -40,7 +41,7 @@ namespace InventoryTools.Logic
                     || FilterConfiguration.FilterType == FilterType.SortingFilter 
                     || FilterConfiguration.FilterType == FilterType.CraftFilter)
                 {
-                    PluginLog.Verbose("FilterTable: Refreshing");
+                    Service.Log.Verbose("FilterTable: Refreshing");
                     var items = FilterConfiguration.FilterResult.SortedItems.AsEnumerable();
                     items = PreFilterSortedItems != null ? PreFilterSortedItems.Invoke(items) : items;
                     IsSearching = false;
@@ -67,7 +68,7 @@ namespace InventoryTools.Logic
                 }
                 else if(FilterConfiguration.FilterType == FilterType.GameItemFilter)
                 {
-                    PluginLog.Verbose("FilterTable: Refreshing");
+                    Service.Log.Verbose("FilterTable: Refreshing");
                     var items = FilterConfiguration.FilterResult.AllItems.AsEnumerable();
                     items = PreFilterItems != null ? PreFilterItems.Invoke(items) : items;
                     IsSearching = false;
@@ -94,7 +95,7 @@ namespace InventoryTools.Logic
                 }
                 else
                 {
-                    PluginLog.Verbose("FilterTable: Refreshing");
+                    Service.Log.Verbose("FilterTable: Refreshing");
                     var items = FilterConfiguration.FilterResult.InventoryHistory.AsEnumerable();
                     //items = PreFilterItems != null ? PreFilterItems.Invoke(items) : items;
                     IsSearching = false;

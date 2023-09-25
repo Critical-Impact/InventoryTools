@@ -1,11 +1,19 @@
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 
 namespace InventoryToolsMock;
 
 public class MockGameInterface : IGameInterface
 {
+    private readonly IPluginLog _pluginLog;
+
+    public MockGameInterface(IPluginLog pluginLog)
+    {
+        _pluginLog = pluginLog;
+    }
+    
     public void Dispose()
     {
     }
@@ -36,12 +44,12 @@ public class MockGameInterface : IGameInterface
 
     public unsafe void OpenGatheringLog(uint itemId)
     {
-        PluginLog.Log("Game Event: Gathering Log Opened for Item #" + itemId);
+        _pluginLog.Info("Game Event: Gathering Log Opened for Item #" + itemId);
     }
 
     public unsafe void OpenFishingLog(uint itemId, bool isSpearFishing)
     {
-        PluginLog.Log("Game Event: Fishing Log Opened for Item #" + itemId);
+        _pluginLog.Info("Game Event: Fishing Log Opened for Item #" + itemId);
     }
 
     public unsafe bool HasAcquired(ItemEx item, bool debug = false)
@@ -61,11 +69,11 @@ public class MockGameInterface : IGameInterface
 
     public unsafe void OpenCraftingLog(uint itemId)
     {
-        PluginLog.Log("Game Event: Crafting Log Opened for Item #" + itemId);
+        _pluginLog.Info("Game Event: Crafting Log Opened for Item #" + itemId);
     }
 
     public unsafe void OpenCraftingLog(uint itemId, uint recipeId)
     {
-        PluginLog.Log("Game Event: Crafting Log Opened for Item #" + itemId + " and recipe " + recipeId);
+        _pluginLog.Info("Game Event: Crafting Log Opened for Item #" + itemId + " and recipe " + recipeId);
     }
 }

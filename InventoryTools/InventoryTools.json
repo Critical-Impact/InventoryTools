@@ -5,10 +5,8 @@
   "Description": "Allagan Tool's primary purpose is to keep track of items across your characters/retainers/free company. With it's filter system you'll never lose track of items or not know where they should be sorted.\n\nWhile this is it's primary purpose, it has quite an exhaustive list of other features including:\n\t- Craft planning\n\t- Market board integration\n\t- Item highlighting in inventories when searching/sorting and picking ingredients for crafts\n\t- Item window that includes vendor and source information among other things\n\t- Duty/mob/airship/submarine windows that are fully searchable\n\t- A filtering system that lets you setup complex searches for specific items \n\t- Tooltip integration that'll let you see where the items are on hover",
   "Tags": ["Inventory", "Sorting", "Filtering"],
   "InternalName": "InventoryTools",
-  "AssemblyVersion": "1.2.0.11",
   "RepoUrl": "https://github.com/Critical-Impact/InventoryTools",
-  "ApplicableVersion": "any",
-  "DalamudApiLevel": 8,
+  "DalamudApiLevel": 9,
   "LoadPriority": 0,
   "CanUnloadAsync": false,
   "IconUrl": "https://raw.githubusercontent.com/Critical-Impact/InventoryTools/main/InventoryTools/Images/icon.png",
@@ -18,6 +16,5 @@
     "https://raw.githubusercontent.com/Critical-Impact/InventoryTools/main/InventoryTools/Images/screenshot2.png",
     "https://raw.githubusercontent.com/Critical-Impact/InventoryTools/main/InventoryTools/Images/screenshot3.png",
     "https://raw.githubusercontent.com/Critical-Impact/InventoryTools/main/InventoryTools/Images/screenshot4.png",
-    "https://raw.githubusercontent.com/Critical-Impact/InventoryTools/main/InventoryTools/Images/screenshot5.png"
   ]
 }

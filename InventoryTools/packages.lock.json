@@ -10,15 +10,15 @@
       },
       "Dalamud.ContextMenu": {
         "type": "Direct",
-        "requested": "[1.2.3, )",
-        "resolved": "1.2.3",
-        "contentHash": "ydemplF7DNcA/LLeongDVzWUD/JV0Fw3EwA2+P0jYq3Le2ZYSt4U8qyJq4FyoChqt0lFG8BxYCAzfeWp4Jmnqw=="
+        "requested": "[1.3.1, )",
+        "resolved": "1.3.1",
+        "contentHash": "ptAxut5PiLnzZ4G/KQdHJVcyklC/BF3otHJ7zYVUPiKBjsOCoF0n/6h2jK7e+8ev2Y1yAY3Wtx2GuXLFQgt9Uw=="
       },
       "DalamudPackager": {
         "type": "Direct",
-        "requested": "[2.1.7, )",
-        "resolved": "2.1.7",
-        "contentHash": "jnZ/sdInyn07ycuWI+pPOtP/xE3v+c4+jYJfDt36FWnBF9NKqkpzfviJtPl/jGLgbaCmFIXu+Yid0N8GvdKefg=="
+        "requested": "[2.1.12, )",
+        "resolved": "2.1.12",
+        "contentHash": "Sc0PVxvgg4NQjcI8n10/VfUQBAS4O+Fw2pZrAqBdRMbthYGeogzu5+xmIGCGmsEZ/ukMOBuAqiNiB5qA3MRalg=="
       },
       "SerialQueue": {
         "type": "Direct",
@@ -327,7 +327,7 @@
         "type": "Project",
         "dependencies": {
           "DalaMock": "[1.0.0, )",
-          "Dalamud.ContextMenu": "[1.2.3, )",
+          "Dalamud.ContextMenu": "[1.3.1, )",
           "LuminaSupplemental.Excel": "[6.0.2, )",
           "NaturalSort.Extension": "[3.2.0, )",
           "SerialQueue": "[2.1.0, )",
@@ -343,7 +343,6 @@
           "Microsoft.Extensions.Configuration.Json": "[7.0.0, )",
           "Microsoft.Extensions.DependencyModel": "[8.0.0-preview.5.23280.8, )",
           "Newtonsoft.Json": "[13.0.3-beta1, )",
-          "OtterGui": "[1.0.0, )",
           "Serilog": "[2.11.0, )",
           "Serilog.Sinks.Async": "[1.5.0, )",
           "Serilog.Sinks.Console": "[4.0.1, )",
@@ -367,7 +366,7 @@
       "tetris": {
         "type": "Project",
         "dependencies": {
-          "Dalamud.ContextMenu": "[1.2.2, )"
+          "Dalamud.ContextMenu": "[1.3.1, )"
         }
       }
     }

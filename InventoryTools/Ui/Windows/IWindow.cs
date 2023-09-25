@@ -1,4 +1,5 @@
 using System.Numerics;
+using Dalamud.Plugin.Services;
 using InventoryTools.Logic;
 
 namespace InventoryTools.Ui
@@ -18,6 +19,8 @@ namespace InventoryTools.Ui
         public void Invalidate();
         
         public FilterConfiguration? SelectedConfiguration { get;  }
+        
+        public IPluginLog PluginLog { get; }
 
         public delegate void ClosedDelegate(string windowKey);
         public delegate void OpenedDelegate(string windowKey);

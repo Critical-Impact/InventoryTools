@@ -5,7 +5,7 @@ using System.Numerics;
 using CriticalCommonLib.Models;
 using ImGuiNET;
 using InventoryTools.Logic;
-using OtterGui.Raii;
+using Dalamud.Interface.Utility.Raii;
 
 namespace InventoryTools.Sections
 {

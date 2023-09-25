@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using ImGuiNET;
-using OtterGui.Raii;
+using Dalamud.Interface.Utility.Raii;
 
 namespace InventoryTools
 {

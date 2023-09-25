@@ -4,7 +4,7 @@ using System.Numerics;
 using Dalamud.Interface.Colors;
 using Dalamud.Logging;
 using ImGuiNET;
-using OtterGui.Raii;
+using Dalamud.Interface.Utility.Raii;
 
 namespace InventoryTools.Ui.Widgets;
 

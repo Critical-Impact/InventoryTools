@@ -1,9 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CriticalCommonLib;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
+using Dalamud.Game.Addon.Lifecycle;
+using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using InventoryTools.GameUi;
 using InventoryTools.Logic;
 using InventoryTools.Services.Interfaces;
@@ -88,7 +92,7 @@ namespace InventoryTools.Services
         {
             var activeFilter = _filterService.GetActiveUiFilter(false);
             var activeBackgroundFilter = _filterService.GetActiveBackgroundFilter();
-            PluginLog.Debug("Overlays refreshing, active filter is " + (activeFilter?.Name ?? "no filter"));
+            Service.Log.Debug("Overlays refreshing, active filter is " + (activeFilter?.Name ?? "no filter"));
             if (activeFilter != null && _filterService.HasFilterTable(activeFilter))
             {
                 UpdateState(new FilterState(activeFilter){FilterTable = _filterService.GetFilterTable(activeFilter)});
@@ -179,7 +183,7 @@ namespace InventoryTools.Services
             }
             else
             {
-                PluginLog.Error("Attempted to add an overlay that is already registered.");
+                Service.Log.Error("Attempted to add an overlay that is already registered.");
             }
         }
 
@@ -247,7 +251,7 @@ namespace InventoryTools.Services
 
                         if (windowstate != null)
                         {
-                            PluginLog.Verbose("All extra windows of " + windowname +
+                            Service.Log.Verbose("All extra windows of " + windowname +
                                               " are now active, entire overlay is now " +
                                               (windowstate.Value ? "visible" : "invisible"));
                         }
@@ -261,14 +265,14 @@ namespace InventoryTools.Services
                         SetupUpdateHook(overlay);
                         if (_lastState != null && !overlay.HasState)
                         {
-                            PluginLog.Verbose("Applying last known state to " + windowname);
+                            Service.Log.Verbose("Applying last known state to " + windowname);
                             overlay.UpdateState(_lastState);
                         }
                     }
 
                     if (windowstate.HasValue && !windowstate.Value)
                     {
-                        PluginLog.Verbose("Applying empty state to " + windowname);
+                        Service.Log.Verbose("Applying empty state to " + windowname);
                         overlay.UpdateState(null);
                     }
 
@@ -346,7 +350,7 @@ namespace InventoryTools.Services
 
             if( _disposed == false )
             {
-                PluginLog.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
+                Service.Log.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
             }
 #endif
             Dispose (true);

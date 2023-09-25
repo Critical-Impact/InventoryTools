@@ -83,6 +83,7 @@ namespace InventoryTools
 
         public static void Initialise(DalamudPluginInterface pluginInterface)
         {
+            Service.Interface = new PluginInterfaceService(pluginInterface);
             Stopwatch loadConfigStopwatch = new Stopwatch();
             loadConfigStopwatch.Start();
             Service.SeTime = new SeTime();
@@ -109,9 +110,9 @@ namespace InventoryTools
             InventoryHistory = new InventoryHistory(InventoryMonitor);
             FilterService = new FilterService( CharacterMonitor, InventoryMonitor, InventoryHistory);
             OverlayService = new OverlayService(FilterService, GameUi, FrameworkService);
-            ContextMenuService = new ContextMenuService();
+            ContextMenuService = new ContextMenuService(pluginInterface);
             IconStorage = new IconService(Service.TextureProvider);
-            WindowService = new WindowService(FilterService);
+            WindowService = new WindowService(FilterService, Service.Log);
             TooltipService = new TooltipService(Service.GameInteropProvider);
             HotkeyService = new HotkeyService(FrameworkService, Service.KeyState);
             PluginLogic = new PluginLogic(  );
@@ -125,7 +126,7 @@ namespace InventoryTools
             PluginLoaded = true;
             OnPluginLoaded?.Invoke();
             loadConfigStopwatch.Stop();
-            PluginLog.Verbose("Allagan Tools has finished loading. Total load time was " + loadConfigStopwatch.Elapsed.TotalSeconds + " seconds.");
+            Service.Log.Verbose("Allagan Tools has finished loading. Total load time was " + loadConfigStopwatch.Elapsed.TotalSeconds + " seconds.");
         }
         
         public static void InitaliseExplicit(MockServices mockServices, bool finishLoading = true)

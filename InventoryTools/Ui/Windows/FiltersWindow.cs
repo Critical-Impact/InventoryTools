@@ -11,7 +11,7 @@ using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Ui.Widgets;
-using OtterGui.Raii;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 

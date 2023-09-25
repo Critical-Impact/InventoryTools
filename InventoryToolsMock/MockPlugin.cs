@@ -90,24 +90,25 @@ public class MockPlugin : IMockPlugin, IDisposable
 
     public void Start(MockProgram program, MockService mockService, MockPluginInterfaceService mockPluginInterfaceService)
     {
+        Service.Interface = mockPluginInterfaceService;
         var gameData = Service.Data.GameData;
         var clientLanguage = ClientLanguage.English;
         var configFile = Path.Combine(mockPluginInterfaceService.ConfigDirectory.FullName, mockPluginInterfaceService.ConfigFile.FullName);        
         ConfigurationManager.Config = new InventoryToolsConfiguration();
         var stopWatch = new Stopwatch();
         stopWatch.Start();
-        var mockTeleporter = new MockTeleporterIpc();
+        var mockTeleporter = new MockTeleporterIpc(Service.Log);
         _characterMonitor = new MockCharacterMonitor();
         _craftMonitor = new MockCraftMonitor();
         _inventoryScanner = new MockInventoryScanner();
         _frameworkService = new MockFrameworkService();
-        _chatUtilities = new MockChatUtilities();
+        _chatUtilities = new MockChatUtilities(Service.Log);
         _inventoryMonitor = new InventoryMonitor(_characterMonitor, _craftMonitor, _inventoryScanner, _frameworkService );
         _inventoryHistory = new InventoryHistory(_inventoryMonitor);
         _iconService = new MockIconService(gameData, program);
         _universalis = new MockUniversalis();
         _gameUiManager = new MockGameUiManager();
-        _gameInterface = new MockGameInterface();
+        _gameInterface = new MockGameInterface(Service.Log);
         _marketCache = new MockMarketCache();
         _fileDialogManager = new FileDialogManager();
         _mockMobTracker = new MockMobTracker();
@@ -147,7 +148,7 @@ public class MockPlugin : IMockPlugin, IDisposable
         {
         }, false);
         _filterService = new FilterService(_characterMonitor, _inventoryMonitor, _inventoryHistory);
-        _windowService = new WindowService(_filterService);
+        _windowService = new WindowService(_filterService, Service.Log);
         _overlayService = new OverlayService(_filterService, _gameUiManager, _frameworkService);
         PluginService.InitaliseExplicit(new MockServices()
         {
@@ -169,7 +170,7 @@ public class MockPlugin : IMockPlugin, IDisposable
         }
 
         stopWatch.Stop();
-        PluginLog.Verbose("Allagan Tools has finished loading. Total load time was " + stopWatch.Elapsed.TotalSeconds + " seconds.");
+        Service.Log.Verbose("Allagan Tools has finished loading. Total load time was " + stopWatch.Elapsed.TotalSeconds + " seconds.");
         var mockGameGuiWindow = new MockGameGuiWindow(mockService.MockGameGui, "Mock Game Gui");
         mockGameGuiWindow.IsOpen = true;
         _windowService.WindowSystem.AddWindow(mockGameGuiWindow);

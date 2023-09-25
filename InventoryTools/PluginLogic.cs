@@ -167,7 +167,7 @@ namespace InventoryTools
             
             if (ConfigurationManager.Config.InternalVersion == 0)
             {
-                PluginLog.Log("Migrating to version 1");
+                Service.Log.Info("Migrating to version 1");
                 var highlight = ConfigurationManager.Config.HighlightColor;
                 if (highlight.W == 0.0f)
                 {
@@ -199,7 +199,7 @@ namespace InventoryTools
             }
             if (ConfigurationManager.Config.InternalVersion == 1)
             {
-                PluginLog.Log("Migrating to version 2");
+                Service.Log.Info("Migrating to version 2");
                 ConfigurationManager.Config.InvertTabHighlighting = ConfigurationManager.Config.InvertHighlighting;
 
                 foreach (var filterConfig in PluginService.FilterService.FiltersList)
@@ -214,7 +214,7 @@ namespace InventoryTools
             }
             if (ConfigurationManager.Config.InternalVersion == 2)
             {
-                PluginLog.Log("Migrating to version 3");
+                Service.Log.Info("Migrating to version 3");
                 foreach (var filterConfig in PluginService.FilterService.FiltersList)
                 {
                     filterConfig.GenerateNewTableId();
@@ -238,7 +238,7 @@ namespace InventoryTools
             }
             if (ConfigurationManager.Config.InternalVersion == 3)
             {
-                PluginLog.Log("Migrating to version 4");
+                Service.Log.Info("Migrating to version 4");
                 
                 foreach (var filterConfig in PluginService.FilterService.FiltersList)
                 {
@@ -263,14 +263,14 @@ namespace InventoryTools
 
             if (ConfigurationManager.Config.InternalVersion == 4)
             {
-                PluginLog.Log("Migrating to version 5");
+                Service.Log.Info("Migrating to version 5");
                 ConfigurationManager.Config.RetainerListColor = ImGuiColors.HealerGreen;
                 ConfigurationManager.Config.InternalVersion++;
             }
 
             if (ConfigurationManager.Config.InternalVersion == 5)
             {
-                PluginLog.Log("Migrating to version 6");
+                Service.Log.Info("Migrating to version 6");
                 ConfigurationManager.Config.TooltipDisplayAmountOwned = true;
                 ConfigurationManager.Config.TooltipDisplayMarketAveragePrice = true;
                 ConfigurationManager.Config.InternalVersion++;
@@ -278,7 +278,7 @@ namespace InventoryTools
 
             if (ConfigurationManager.Config.InternalVersion == 6)
             {
-                PluginLog.Log("Migrating to version 7");
+                Service.Log.Info("Migrating to version 7");
                 ConfigurationManager.Config.HighlightDestination = true;
                 ConfigurationManager.Config.DestinationHighlightColor = new Vector4(0.321f, 0.239f, 0.03f, 1f);
                 ConfigurationManager.Config.InternalVersion++;
@@ -291,7 +291,7 @@ namespace InventoryTools
 
             if (ConfigurationManager.Config.InternalVersion == 8)
             {
-                PluginLog.Log("Migrating to version 9");
+                Service.Log.Info("Migrating to version 9");
                 var order = 0u;
                 foreach (var configuration in PluginService.FilterService.Filters)
                 {
@@ -315,7 +315,7 @@ namespace InventoryTools
 
             if (ConfigurationManager.Config.InternalVersion == 9)
             {
-                PluginLog.Log("Migrating to version 10");
+                Service.Log.Info("Migrating to version 10");
                 foreach (var configuration in PluginService.FilterService.Filters)
                 {
 #pragma warning disable CS0612
@@ -334,7 +334,7 @@ namespace InventoryTools
 
             if (ConfigurationManager.Config.InternalVersion == 10)
             {
-                PluginLog.Log("Migrating to version 11");
+                Service.Log.Info("Migrating to version 11");
                 foreach (var configuration in PluginService.FilterService.Filters)
                 {
                     foreach (var filterConfig in PluginService.FilterService.FiltersList)
@@ -374,7 +374,7 @@ namespace InventoryTools
 
             if (ConfigurationManager.Config.InternalVersion == 11)
             {
-                PluginLog.Log("Migrating to version 12");
+                Service.Log.Info("Migrating to version 12");
                 ConfigurationManager.Config.TooltipLocationLimit = 10;                
                 ConfigurationManager.Config.TooltipLocationDisplayMode =
                     TooltipLocationDisplayMode.CharacterCategoryQuantityQuality;
@@ -383,7 +383,7 @@ namespace InventoryTools
 
             if (ConfigurationManager.Config.InternalVersion == 12)
             {
-                PluginLog.Log("Migrating to version 13");
+                Service.Log.Info("Migrating to version 13");
                 ConfigurationManager.Config.FiltersLayout = WindowLayout.Tabs;
                 ConfigurationManager.Config.CraftWindowLayout = WindowLayout.Tabs;
                 ConfigurationManager.Config.InternalVersion++;
@@ -391,7 +391,7 @@ namespace InventoryTools
 
             if (ConfigurationManager.Config.InternalVersion == 13)
             {
-                PluginLog.Log("Migrating to version 14");
+                Service.Log.Info("Migrating to version 14");
                 var toReset = AvailableFilters.Where(c =>
                     c is CraftCrystalGroupFilter or CraftCurrencyGroupFilter or CraftPrecraftGroupFilter
                         or CraftRetrieveGroupFilter or CraftEverythingElseGroupFilter or CraftIngredientPreferenceFilter
@@ -421,7 +421,7 @@ namespace InventoryTools
 
             if (ConfigurationManager.Config.InternalVersion == 14)
             {
-                PluginLog.Log("Migrating to version 15");
+                Service.Log.Info("Migrating to version 15");
                 ConfigurationManager.Config.HistoryTrackReasons = new()
                 {
                     InventoryChangeReason.Added,
@@ -436,7 +436,7 @@ namespace InventoryTools
 
             if (ConfigurationManager.Config.InternalVersion == 15)
             {
-                PluginLog.Log("Migrating to version 16");
+                Service.Log.Info("Migrating to version 16");
                 var historyFilter = PluginService.FilterService.GetFilter("History");
                 if (historyFilter == null && !ConfigurationManager.Config.FirstRun)
                 {
@@ -665,7 +665,7 @@ namespace InventoryTools
 
         private void InventoryMonitorOnOnInventoryChanged(List<InventoryChange> inventoryChanges, InventoryMonitor.ItemChanges? itemChanges)
         {
-            PluginLog.Verbose("PluginLogic: Inventory changed, saving to config.");
+            Service.Log.Verbose("PluginLogic: Inventory changed, saving to config.");
             var allItems = PluginService.InventoryMonitor.AllItems.ToList();
             ConfigurationManager.SaveInventories(allItems);
             if (ConfigurationManager.Config.AutomaticallyDownloadMarketPrices)
@@ -833,7 +833,7 @@ namespace InventoryTools
                     } 
                     catch
                     {
-                        PluginLog.Error("Failed to load icon correctly - " + icon + (hqIcon ? "hq" : "nq"));
+                        Service.Log.Error("Failed to load icon correctly - " + icon + (hqIcon ? "hq" : "nq"));
                     }
                 }
             } else {
@@ -897,7 +897,7 @@ namespace InventoryTools
                 }
                 catch
                 {
-                    PluginLog.Error("Failed to load icon correctly - " + name);
+                    Service.Log.Error("Failed to load icon correctly - " + name);
                 }
             }
         }
@@ -947,7 +947,7 @@ namespace InventoryTools
                         }
                     }
                 } catch {
-                    PluginLog.Error("Failed to load icon correctly - " + name);
+                    Service.Log.Error("Failed to load icon correctly - " + name);
                 }
             }
 
@@ -1044,7 +1044,7 @@ namespace InventoryTools
 
             if( _disposed == false )
             {
-                PluginLog.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
+                Service.Log.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
             }
 #endif
             Dispose (true);

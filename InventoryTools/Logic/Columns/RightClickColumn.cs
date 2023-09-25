@@ -5,7 +5,7 @@ using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Columns.Abstract;
-using OtterGui.Raii;
+using Dalamud.Interface.Utility.Raii;
 
 namespace InventoryTools.Logic.Columns
 {

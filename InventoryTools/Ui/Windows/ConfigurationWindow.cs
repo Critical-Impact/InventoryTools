@@ -9,7 +9,7 @@ using InventoryTools.Sections;
 using InventoryTools.Ui.MenuItems;
 using InventoryTools.Ui.Widgets;
 using OtterGui;
-using OtterGui.Raii;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 
 namespace InventoryTools.Ui

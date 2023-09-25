@@ -1,3 +1,4 @@
+using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using Dalamud.Logging;
@@ -51,7 +52,7 @@ namespace InventoryTools.Logic.Columns
                     }
                     else
                     {
-                        PluginLog.Error("Something went wrong while attempting to try on " + item.Item.NameString);
+                        Service.Log.Error("Something went wrong while attempting to try on " + item.Item.NameString);
                     }
                 }
             }
@@ -80,7 +81,7 @@ namespace InventoryTools.Logic.Columns
                     }
                     else
                     {
-                        PluginLog.Error("Something went wrong while attempting to try on " + item.NameString);
+                        Service.Log.Error("Something went wrong while attempting to try on " + item.NameString);
                     }
                 }
             }

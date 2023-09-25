@@ -1,4 +1,5 @@
 using System.Numerics;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic;
 // ReSharper disable VirtualMemberCallInConstructor
@@ -52,6 +53,7 @@ namespace InventoryTools.Ui
         public abstract void Invalidate();
         
         public abstract FilterConfiguration? SelectedConfiguration { get; }
+        public IPluginLog PluginLog { get; set; }
 
         public event IWindow.ClosedDelegate? Closed;
         public event IWindow.OpenedDelegate? Opened;

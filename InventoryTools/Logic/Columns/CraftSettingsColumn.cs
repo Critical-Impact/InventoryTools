@@ -11,7 +11,7 @@ using ImGuiNET;
 using ImGuiScene;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Ui.Widgets;
-using OtterGui.Raii;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 using Vector2 = FFXIVClientStructs.FFXIV.Common.Math.Vector2;
 

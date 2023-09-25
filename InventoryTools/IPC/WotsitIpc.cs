@@ -59,7 +59,7 @@ namespace InventoryTools.Logic
             }
             catch (Exception)
             {
-                PluginLog.Error("Something went wrong while trying to unregister and reregister with wotsit's IPC.");
+                Service.Log.Error("Something went wrong while trying to unregister and reregister with wotsit's IPC.");
             }
         }
 
@@ -74,7 +74,7 @@ namespace InventoryTools.Logic
             }
             catch (Exception)
             {
-                PluginLog.Error("Something went wrong while trying to unregister and reregister with wotsit's IPC.");
+                Service.Log.Error("Something went wrong while trying to unregister and reregister with wotsit's IPC.");
             }
         }
 
@@ -107,7 +107,7 @@ namespace InventoryTools.Logic
                 }
                 catch (Exception e)
                 {
-                    PluginLog.LogVerbose(e , "Could not register with Wotsit IPC. This is normal if you do not have it installed.");
+                    Service.Log.Verbose(e , "Could not register with Wotsit IPC. This is normal if you do not have it installed.");
                     _wotsItRegistered = false;
                     return;
                 }
@@ -134,12 +134,12 @@ namespace InventoryTools.Logic
                     }
                     catch (Exception e)
                     {
-                        PluginLog.LogVerbose(e , "Could not register with Wotsit IPC. This is normal if you do not have it installed.");
+                        Service.Log.Verbose(e , "Could not register with Wotsit IPC. This is normal if you do not have it installed.");
                     }
                 }
             }
 
-            PluginLog.Debug($"Registered {_wotsitToggleFilterGuids.Count} filters with Wotsit");
+            Service.Log.Debug($"Registered {_wotsitToggleFilterGuids.Count} filters with Wotsit");
         }
 
         public void WotsitInvoke(string guid)
@@ -193,7 +193,7 @@ namespace InventoryTools.Logic
 
             if( _disposed == false )
             {
-                PluginLog.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
+                Service.Log.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
             }
 #endif
             Dispose (true);
