@@ -6,7 +6,6 @@
   "Tags": ["Inventory", "Sorting", "Filtering"],
   "InternalName": "InventoryTools",
   "RepoUrl": "https://github.com/Critical-Impact/InventoryTools",
-  "DalamudApiLevel": 9,
   "LoadPriority": 0,
   "CanUnloadAsync": false,
   "IconUrl": "https://raw.githubusercontent.com/Critical-Impact/InventoryTools/main/InventoryTools/Images/icon.png",
