@@ -8,7 +8,6 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Internal;
 using ImGuiNET;
-using ImGuiScene;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Ui.Widgets;
 using Dalamud.Interface.Utility.Raii;

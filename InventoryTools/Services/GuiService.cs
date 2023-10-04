@@ -1,4 +1,3 @@
-using Dalamud.Game.Gui;
 using Dalamud.Plugin.Services;
 using InventoryTools.Services.Interfaces;
 

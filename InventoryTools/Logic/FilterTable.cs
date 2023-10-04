@@ -10,7 +10,6 @@ using CriticalCommonLib;
 using CriticalCommonLib.Sheets;
 using CsvHelper;
 using Dalamud.Interface.Colors;
-using Dalamud.Logging;
 using ImGuiNET;
 using InventoryTools.Logic.Columns;
 using Newtonsoft.Json;

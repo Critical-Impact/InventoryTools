@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Numerics;
 using Dalamud.Interface.Internal;
 using ImGuiNET;
-using ImGuiScene;
 using Dalamud.Interface.Utility.Raii;
 
 namespace InventoryTools.Ui.Widgets;

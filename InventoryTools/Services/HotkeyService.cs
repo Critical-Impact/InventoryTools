@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using CriticalCommonLib.Services;
 using Dalamud.Game.ClientState.Keys;
-using Dalamud.Logging;
 using InventoryTools.Hotkeys;
 using System.Linq;
 using CriticalCommonLib;

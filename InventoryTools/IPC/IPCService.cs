@@ -4,7 +4,6 @@ using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
-using Dalamud.Logging;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
 using InventoryTools.Logic;

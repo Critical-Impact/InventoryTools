@@ -7,7 +7,6 @@ using System.Text;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Resolvers;
-using Dalamud.Logging;
 using Dispatch;
 using LuminaSupplemental.Excel.Model;
 using Newtonsoft.Json;

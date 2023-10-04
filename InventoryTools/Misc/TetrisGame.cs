@@ -8,7 +8,6 @@ using CriticalCommonLib.Enums;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
 using Dalamud.Game.ClientState.Keys;
-using Dalamud.Logging;
 using InventoryTools.GameUi;
 using Tetris.GameEngine;
 

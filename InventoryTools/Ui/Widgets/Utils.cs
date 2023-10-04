@@ -1,5 +1,4 @@
 using System;
-using Dalamud.Interface;
 using Dalamud.Interface.Internal;
 using Dalamud.Interface.Utility;
 using FFXIVClientStructs.FFXIV.Common.Math;

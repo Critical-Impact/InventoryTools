@@ -6,6 +6,7 @@ using DalaMock;
 using DalaMock.Dalamud;
 using DalaMock.Extensions;
 using DalaMock.Interfaces;
+using DalaMock.Mock;
 using DalaMock.Windows;
 using Dalamud;
 using Dalamud.Game.ClientState.Keys;

@@ -5,7 +5,6 @@ using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
-using Dalamud.Logging;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Services.Interfaces;

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib;
 using Dalamud.Interface.Windowing;
-using Dalamud.Logging;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic;

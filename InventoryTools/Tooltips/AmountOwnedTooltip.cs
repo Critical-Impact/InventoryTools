@@ -6,7 +6,6 @@ using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Services;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
-using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;

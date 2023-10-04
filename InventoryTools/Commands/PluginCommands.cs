@@ -3,7 +3,6 @@ using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Sheets;
-using Dalamud.Logging;
 using DalamudPluginProjectTemplate;
 using DalamudPluginProjectTemplate.Attributes;
 using InventoryTools.Ui;

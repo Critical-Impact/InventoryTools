@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using CriticalCommonLib;
 using Dalamud.Game.Command;
-using Dalamud.Logging;
 using Dalamud.Plugin.Services;
 using DalamudPluginProjectTemplate;
 using DalamudPluginProjectTemplate.Attributes;

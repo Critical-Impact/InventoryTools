@@ -1,13 +1,10 @@
 using System;
 using System.IO;
 using CriticalCommonLib;
-using DalaMock.Interfaces;
+using DalaMock.Shared.Interfaces;
 using Dalamud.Interface.Internal;
-using Dalamud.Logging;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
-using ImGuiScene;
-using InventoryTools.Services.Interfaces;
 
 namespace InventoryTools.Services;
 

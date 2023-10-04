@@ -1,6 +1,5 @@
 using System;
 using Dalamud.Interface.Internal;
-using ImGuiScene;
 
 namespace InventoryTools.Services.Interfaces;
 

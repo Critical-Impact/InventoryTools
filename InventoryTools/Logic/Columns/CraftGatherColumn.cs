@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
@@ -10,11 +9,8 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using CriticalCommonLib.Time;
 using Dalamud.Interface.Colors;
-using FFXIVClientStructs.FFXIV.Common.Math;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
-using InventoryTools.Ui.Widgets;
-using Lumina.Excel.GeneratedSheets;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
 

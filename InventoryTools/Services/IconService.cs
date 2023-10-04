@@ -7,11 +7,6 @@ using InventoryTools.Services.Interfaces;
 namespace InventoryTools.Services;
 
 using System.Collections.Generic;
-using Dalamud.Data;
-using Dalamud.Plugin;
-using Dalamud.Utility;
-using ImGuiScene;
-using Lumina.Data.Files;
 
 public class IconService : IIconService
 {

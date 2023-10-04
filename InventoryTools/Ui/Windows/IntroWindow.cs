@@ -1,7 +1,6 @@
 using System.Numerics;
 using Dalamud.Interface.Internal;
 using ImGuiNET;
-using ImGuiScene;
 using InventoryTools.Logic;
 using Dalamud.Interface.Utility.Raii;
 

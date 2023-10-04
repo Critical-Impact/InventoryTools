@@ -4,7 +4,6 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Addons;
-using CriticalCommonLib.Services;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 using InventoryTools.Extensions;

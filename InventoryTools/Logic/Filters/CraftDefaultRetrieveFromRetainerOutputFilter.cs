@@ -4,7 +4,6 @@ using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
-using InventoryTools.Logic.Settings.Abstract;
 
 namespace InventoryTools.Logic.Filters;
 

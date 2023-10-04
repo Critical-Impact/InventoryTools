@@ -1,7 +1,5 @@
-using Dalamud.Data;
 using Dalamud.Interface.Internal;
 using Dalamud.Plugin.Services;
-using Lumina.Data.Files;
 
 namespace InventoryTools.Extensions
 {

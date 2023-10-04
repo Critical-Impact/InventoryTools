@@ -2,9 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
-using InventoryTools.Extensions;
 using InventoryTools.Logic.Filters.Abstract;
 
 namespace InventoryTools.Logic.Filters;

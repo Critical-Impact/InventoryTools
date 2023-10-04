@@ -5,7 +5,6 @@ using CriticalCommonLib;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Ui;
-using Dalamud.Logging;
 using Lumina.Excel.GeneratedSheets;
 
 namespace InventoryTools.Logic

@@ -6,7 +6,6 @@ using CriticalCommonLib.Models;
 using Dalamud.Interface.Internal;
 using Dalamud.Utility;
 using ImGuiNET;
-using ImGuiScene;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using Lumina.Excel.GeneratedSheets;
