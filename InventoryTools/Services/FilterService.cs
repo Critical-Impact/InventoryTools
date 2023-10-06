@@ -218,22 +218,38 @@ namespace InventoryTools.Services
             return newConfiguration;
         }
 
-        public FilterConfiguration AddNewCraftFilter()
+        public FilterConfiguration AddNewCraftFilter(string? newName = null, bool? isEphemeral = false)
         {
+            var isEphemeralNN = isEphemeral ?? false;
+            var newNameNN = newName ?? (isEphemeralNN ? "New Ephemeral List" : "New Craft List");
+
+            var names = FiltersList.Where(c =>
+                c.FilterType == FilterType.CraftFilter && !c.CraftListDefault &&
+                c.IsEphemeralCraftList == isEphemeralNN).Select(c => c.Name).Distinct().ToHashSet();
+            var count = 1;
+            var fixedName = newNameNN;
+            while (names.Contains(fixedName))
+            {
+                count++;
+                fixedName = newNameNN + " " + count;
+            }
+            
             var clonedFilter = GetDefaultCraftList().Clone();
             if (clonedFilter == null)
             {
-                var filter = new FilterConfiguration("New Craft List",
+                var filter = new FilterConfiguration(fixedName,
                     Guid.NewGuid().ToString("N"), FilterType.CraftFilter);
+                filter.IsEphemeralCraftList = isEphemeralNN;
                 PluginService.FilterService.AddFilter(filter);
                 return filter;
             }
 
-            clonedFilter.Name = "New Craft List";
+            clonedFilter.Name = fixedName;
             clonedFilter.GenerateNewTableId();
             clonedFilter.GenerateNewCraftTableId();
             clonedFilter.CraftListDefault = false;
             clonedFilter.Key = Guid.NewGuid().ToString("N");
+            clonedFilter.IsEphemeralCraftList = isEphemeralNN;
             PluginService.FilterService.AddFilter(clonedFilter);
             return clonedFilter;
         }

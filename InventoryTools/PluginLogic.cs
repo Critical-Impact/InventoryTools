@@ -66,7 +66,7 @@ namespace InventoryTools
             PluginService.InventoryMonitor.OnInventoryChanged += InventoryMonitorOnOnInventoryChanged;
             PluginService.CharacterMonitor.OnCharacterUpdated += CharacterMonitorOnOnCharacterUpdated;
             ConfigurationManager.Config.ConfigurationChanged += ConfigOnConfigurationChanged;
-            PluginService.FrameworkService.Update += FrameworkOnUpdate;
+            Service.Framework.Update += FrameworkOnUpdate;
 
             PluginService.CharacterMonitor.LoadExistingRetainers(ConfigurationManager.Config.GetSavedRetainers());
             PluginService.InventoryMonitor.LoadExistingData(ConfigurationManager.LoadInventory());
@@ -135,7 +135,15 @@ namespace InventoryTools
             if (activeCraftList != null && activeCraftList.FilterType == FilterType.CraftFilter)
             {
                 activeCraftList.CraftList.MarkCrafted(itemid, flags, quantity);
-                activeCraftList.StartRefresh();
+                if (activeCraftList is { IsEphemeralCraftList: true, CraftList.IsCompleted: true })
+                {
+                    PluginService.ChatService.Print("Ephemeral craft list '" + activeCraftList.Name + "' completed. List has been removed.");
+                    PluginService.FilterService.RemoveFilter(activeCraftList);
+                }
+                else
+                {
+                    activeCraftList.StartRefresh();
+                }
             }
         }
 
@@ -441,7 +449,7 @@ namespace InventoryTools
             }
         }
 
-        private void FrameworkOnUpdate(IFrameworkService framework)
+        private void FrameworkOnUpdate(IFramework framework)
         {
             if (ConfigurationManager.Config.AutoSave)
             {
@@ -594,8 +602,7 @@ namespace InventoryTools
 
         public void AddCraftFilter(string newName = "Craft List")
         {
-            var newFilter = PluginService.FilterService.AddNewCraftFilter();
-            newFilter.Name = newName;
+            var newFilter = PluginService.FilterService.AddNewCraftFilter(newName);
             newFilter.DisplayInTabs = true;            
         }
 
@@ -1011,7 +1018,7 @@ namespace InventoryTools
                 PluginService.OnPluginLoaded -= PluginServiceOnOnPluginLoaded;
                 PluginService.GameInterface.AcquiredItemsUpdated -= GameInterfaceOnAcquiredItemsUpdated;
                 ConfigurationManager.Config.SavedCharacters = PluginService.CharacterMonitor.Characters;
-                PluginService.FrameworkService.Update -= FrameworkOnUpdate;
+                Service.Framework.Update -= FrameworkOnUpdate;
                 PluginService.InventoryMonitor.OnInventoryChanged -= InventoryMonitorOnOnInventoryChanged;
                 PluginService.CharacterMonitor.OnCharacterUpdated -= CharacterMonitorOnOnCharacterUpdated;
                 PluginService.CraftMonitor.CraftStarted -= CraftMonitorOnCraftStarted;

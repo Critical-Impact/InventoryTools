@@ -332,21 +332,47 @@ namespace InventoryTools.Ui
         }
 
         private string _newCraftName = "";
-        private bool openPopup = false;
+        private bool openNewFilterNamePopup = false;
+        private bool openNewTypePopup = false;
+        private bool _ephemeralList = false;
         private unsafe void DrawTabBar()
         {
-            if (openPopup)
+            if (openNewFilterNamePopup)
             {
                 ImGui.OpenPopup("addCraftFilterName");
-                openPopup = false;
+                openNewFilterNamePopup = false;
             }
             if (ImGuiUtil.OpenNameField("addCraftFilterName", ref _newCraftName))
             {
-                PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                Service.Framework.RunOnFrameworkThread(() =>
                 {
-                    AddCraftFilter(_newCraftName);
+                    AddCraftFilter(_newCraftName, _ephemeralList);
                     _newCraftName = "";
                 });
+            }
+            if (openNewTypePopup)
+            {
+                ImGui.OpenPopup("addCraftFilterType");
+                openNewTypePopup = false;
+            }
+            using(var popup = ImRaii.Popup("addCraftFilterType"))
+            {
+                if (popup.Success)
+                {
+                    if (ImGui.Selectable("Normal List"))
+                    {
+                        _ephemeralList = false;
+                        openNewFilterNamePopup = true;
+                    }
+                    ImGuiUtil.HoverTooltip("Add a new craft list.");
+
+                    if (ImGui.Selectable("Ephemeral List"))
+                    {
+                        _ephemeralList = true;
+                        openNewFilterNamePopup = true;
+                    }
+                    ImGuiUtil.HoverTooltip("Add a new ephemeral craft list that will be deleted once all the items in it are completed.");
+                }
             }
 
             using (var tabbar = ImRaii.TabBar("CraftTabs", ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.TabListPopupButton))
@@ -389,17 +415,16 @@ namespace InventoryTools.Ui
                     }
                     if (ImGui.TabItemButton("+", ImGuiTabItemFlags.Trailing | ImGuiTabItemFlags.NoTooltip))
                     {
-                        openPopup = true;
+                        openNewTypePopup = true;
                     }
                     ImGuiUtil.HoverTooltip("Add a new craft list");
                 }
             }
         }
 
-        private void AddCraftFilter(string newName)
+        private void AddCraftFilter(string newName, bool ephemeralList = false)
         {
-            var filterConfiguration = PluginService.FilterService.AddNewCraftFilter();
-            filterConfiguration.Name = newName;
+            var filterConfiguration = PluginService.FilterService.AddNewCraftFilter(newName, ephemeralList);
             Invalidate();
             this.SetActiveFilter(filterConfiguration);
         }
@@ -453,7 +478,7 @@ namespace InventoryTools.Ui
                                     ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
                                     ConfigurationManager.Config.ActiveUiFilter != null)
                                 {
-                                    PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                    Service.Framework.RunOnFrameworkThread(() =>
                                     {
                                         PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
                                     });
@@ -462,7 +487,7 @@ namespace InventoryTools.Ui
                                     ConfigurationManager.Config.ActiveCraftList != filterConfiguration.Key &&
                                     ConfigurationManager.Config.ActiveCraftList != null && filterConfiguration.FilterType == FilterType.CraftFilter)
                                 {
-                                    PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                    Service.Framework.RunOnFrameworkThread(() =>
                                     {
                                         PluginService.FilterService.ToggleActiveCraftList(filterConfiguration);
                                     });
@@ -549,7 +574,12 @@ namespace InventoryTools.Ui
                             for (var index = 0; index < filterConfigurations.Count; index++)
                             {
                                 var filterConfiguration = filterConfigurations[index];
-                                if (ImGui.Selectable(filterConfiguration.Name + "###fl" + filterConfiguration.Key,
+                                var actualName = filterConfiguration.Name;
+                                if (filterConfiguration.IsEphemeralCraftList)
+                                {
+                                    actualName += " (*)";
+                                }
+                                if (ImGui.Selectable(actualName + "###fl" + filterConfiguration.Key,
                                         index == _selectedFilterTab))
                                 {
                                     _selectedFilterTab = index;
@@ -557,7 +587,7 @@ namespace InventoryTools.Ui
                                         ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
                                         ConfigurationManager.Config.ActiveUiFilter != null)
                                     {
-                                        PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                        Service.Framework.RunOnFrameworkThread(() =>
                                         {
                                             PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
                                         });
@@ -566,7 +596,7 @@ namespace InventoryTools.Ui
                                         ConfigurationManager.Config.ActiveCraftList != filterConfiguration.Key &&
                                         ConfigurationManager.Config.ActiveCraftList != null && filterConfiguration.FilterType == FilterType.CraftFilter)
                                     {
-                                        PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                        Service.Framework.RunOnFrameworkThread(() =>
                                         {
                                             PluginService.FilterService.ToggleActiveCraftList(filterConfiguration);
                                         });
@@ -627,7 +657,7 @@ namespace InventoryTools.Ui
                         ImGui.Checkbox("Highlight?" + "###" + itemTable.Key + "VisibilityCheckbox", ref highlightItems);
                         if (highlightItems != itemTable.HighlightItems)
                         {
-                            PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                            Service.Framework.RunOnFrameworkThread(() =>
                             {
                                 PluginService.FilterService.ToggleActiveUiFilter(itemTable.FilterConfiguration);
                             });
@@ -714,6 +744,15 @@ namespace InventoryTools.Ui
                         width -= textSize.X * ImGui.GetIO().FontGlobalScale;
                         ImGui.SetCursorPosX(width);
                         ImGui.Text("Active: ");
+                        if (SelectedConfiguration?.IsEphemeralCraftList ?? false)
+                        {
+                            ImGui.SameLine();
+                            width -= 28 * ImGui.GetIO().FontGlobalScale;
+                            ImGui.SetCursorPosX(width);
+                            ImGui.Image(PluginService.IconStorage.LoadImage("recycle").ImGuiHandle,
+                                new Vector2(22, 22));
+                            ImGuiUtil.HoverTooltip("This is the ephemeral craft list, once all items in it are completed, the list will delete itself.");
+                        }
                     }
                 }
 
@@ -870,7 +909,7 @@ namespace InventoryTools.Ui
                                                 0);
                                             if (amountLeft > 0)
                                             {
-                                                PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                                Service.Framework.RunOnFrameworkThread(() =>
                                                 {
                                                     filterConfiguration.CraftList.AddCraftItem(itemRequired,
                                                         (uint)amountLeft, InventoryItem.ItemFlags.None);
@@ -1208,7 +1247,7 @@ namespace InventoryTools.Ui
             {
                 if (_addIcon.Draw("bbadd_" + item.RowId, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale))
                 {
-                    PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                    Service.Framework.RunOnFrameworkThread(() =>
                     {
                         filterConfiguration.CraftList.AddCraftItem(item.RowId, 1, InventoryItem.ItemFlags.None);
                         filterConfiguration.NeedsRefresh = true;

@@ -63,7 +63,7 @@ namespace InventoryTools.Logic
                     RenderSortedItems = SortedItems.Where(item => !item.InventoryItem.IsEmpty).ToList();
                     NeedsRefresh = false;
                     _refreshing = false;
-                    PluginService.FrameworkService.RunOnFrameworkThread(() => { Refreshed?.Invoke(this); });
+                    Service.Framework.RunOnFrameworkThread(() => { Refreshed?.Invoke(this); });
                 }
                 else if(FilterConfiguration.FilterType == FilterType.GameItemFilter)
                 {
@@ -90,7 +90,7 @@ namespace InventoryTools.Logic
                     RenderItems = Items.ToList();
                     NeedsRefresh = false;
                     _refreshing = false;
-                    PluginService.FrameworkService.RunOnFrameworkThread(() => { Refreshed?.Invoke(this); });
+                    Service.Framework.RunOnFrameworkThread(() => { Refreshed?.Invoke(this); });
                 }
                 else
                 {
@@ -116,7 +116,7 @@ namespace InventoryTools.Logic
                     RenderInventoryChanges = InventoryChanges.ToList();
                     NeedsRefresh = false;
                     _refreshing = false;
-                    PluginService.FrameworkService.RunOnFrameworkThread(() => { Refreshed?.Invoke(this); });
+                    Service.Framework.RunOnFrameworkThread(() => { Refreshed?.Invoke(this); });
                 }
             }
             else
@@ -158,7 +158,7 @@ namespace InventoryTools.Logic
                 if (NeedsRefresh && !_refreshing)
                 {
                     _refreshing = true;
-                    PluginService.FrameworkService.RunOnFrameworkThread(() => Refresh(ConfigurationManager.Config));
+                    Service.Framework.RunOnFrameworkThread(() => Refresh(ConfigurationManager.Config));
                 }
                 return true;
             }

@@ -5,9 +5,9 @@ using System.Numerics;
 using System.Timers;
 using CriticalCommonLib;
 using CriticalCommonLib.Enums;
-using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
 using Dalamud.Game.ClientState.Keys;
+using Dalamud.Plugin.Services;
 using InventoryTools.GameUi;
 using Tetris.GameEngine;
 
@@ -49,7 +49,7 @@ namespace InventoryTools.Misc
             Game = new Game();
             _gameTimer = new System.Timers.Timer(800);
             _gameTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
-            PluginService.FrameworkService.Update += FrameworkOnOnUpdateEvent;
+            Service.Framework.Update += FrameworkOnOnUpdateEvent;
             _gameTimer.Start();
         }
         
@@ -66,7 +66,7 @@ namespace InventoryTools.Misc
 
         private DateTime? lastMoveTime = null;
         
-        private void FrameworkOnOnUpdateEvent(IFrameworkService framework) {
+        private void FrameworkOnOnUpdateEvent(IFramework framework) {
         try {
             if (Game.Status != Game.GameStatus.InProgress) return;
 
@@ -306,7 +306,7 @@ namespace InventoryTools.Misc
             if(!_disposed && disposing)
             {
                 _gameTimer?.Dispose();
-                PluginService.FrameworkService.Update -= FrameworkOnOnUpdateEvent;
+                Service.Framework.Update -= FrameworkOnOnUpdateEvent;
             }
             _disposed = true;         
         }

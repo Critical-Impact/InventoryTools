@@ -22,7 +22,7 @@ public class MockCharacterMonitor : ICharacterMonitor
 
     public void UpdateCharacter(Character character)
     {
-        PluginService.FrameworkService.RunOnFrameworkThread(() => { OnCharacterUpdated?.Invoke(character); });
+        Service.Framework.RunOnFrameworkThread(() => { OnCharacterUpdated?.Invoke(character); });
     }
 
     public void RemoveCharacter(ulong characterId)
@@ -30,7 +30,7 @@ public class MockCharacterMonitor : ICharacterMonitor
         if (_characters.ContainsKey(characterId))
         {
             _characters.Remove(characterId);
-            PluginService.FrameworkService.RunOnFrameworkThread(() => { OnCharacterRemoved?.Invoke(characterId); });
+            Service.Framework.RunOnFrameworkThread(() => { OnCharacterRemoved?.Invoke(characterId); });
         }
     }
 
@@ -51,11 +51,11 @@ public class MockCharacterMonitor : ICharacterMonitor
                 _characters[character.CharacterId] = character;
             }
             //character.UpdateFromCurrentPlayer(Service.ClientState.LocalPlayer);
-            PluginService.FrameworkService.RunOnFrameworkThread(() => { OnCharacterUpdated?.Invoke(character); });
+            Service.Framework.RunOnFrameworkThread(() => { OnCharacterUpdated?.Invoke(character); });
         }
         else
         {
-            PluginService.FrameworkService.RunOnFrameworkThread(() => { OnCharacterUpdated?.Invoke(null); });
+            Service.Framework.RunOnFrameworkThread(() => { OnCharacterUpdated?.Invoke(null); });
         }
     }
     

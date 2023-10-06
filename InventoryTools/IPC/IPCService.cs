@@ -191,8 +191,7 @@ public class IPCService : IDisposable
 
     private string AddNewCraftList(string craftListName, Dictionary<uint, uint> items)
     {
-        var newCraftFilter = _filterService.AddNewCraftFilter();
-        newCraftFilter.Name = craftListName;
+        var newCraftFilter = _filterService.AddNewCraftFilter(craftListName);
         foreach (var item in items)
         {
             newCraftFilter.CraftList.AddCraftItem(item.Key, item.Value);

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using CriticalCommonLib.Services;
 using Dalamud.Game.ClientState.Keys;
 using InventoryTools.Hotkeys;
 using System.Linq;
@@ -12,10 +11,10 @@ namespace InventoryTools.Services;
 
 public class HotkeyService : IHotkeyService
 {
-    private IFrameworkService _frameworkService;
+    private IFramework _frameworkService;
     private IKeyState _keyStateService;
     private List<Hotkey> _hotKeys;
-    public HotkeyService(IFrameworkService framework, IKeyState keyState)
+    public HotkeyService(IFramework framework, IKeyState keyState)
     {
         _hotKeys = new List<Hotkey>();
         _frameworkService = framework;
@@ -30,7 +29,7 @@ public class HotkeyService : IHotkeyService
         _hotKeys = hotKeys;
     }
 
-    private void FrameworkServiceOnUpdate(IFrameworkService framework)
+    private void FrameworkServiceOnUpdate(IFramework framework)
     {
         foreach (var hotkey in _hotKeys)
         {

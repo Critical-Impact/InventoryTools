@@ -25,7 +25,6 @@ namespace InventoryTools
         public WindowService? WindowService;
         public IUniversalis? Universalis;
         public IIconService? IconService;
-        public IFrameworkService? FrameworkService;
         public IFilterService? FilterService;
         public PluginLogic? PluginLogic;
         public IInventoryMonitor? InventoryMonitor;
@@ -44,7 +43,6 @@ namespace InventoryTools
 
     public static class PluginService
     {
-        public static IFrameworkService FrameworkService { get; private set; } = null!;
         public static IGuiService GuiService { get; private set; } = null!;
         public static IChatService ChatService { get; private set; } = null!;
         public static IInventoryMonitor InventoryMonitor { get; private set; } = null!;
@@ -87,7 +85,6 @@ namespace InventoryTools
             Service.SeTime = new SeTime();
             Service.ExcelCache = new ExcelCache(Service.Data);
             Service.ExcelCache.PreCacheItemData();
-            FrameworkService = new FrameworkService(Service.Framework);
             GuiService = new GuiService(Service.GameGui);
             ChatService = new ChatService(Service.Chat);
             ChatUtilities = new ChatUtilities();
@@ -103,16 +100,16 @@ namespace InventoryTools
             CraftMonitor = new CraftMonitor(GameUi);
             OdrScanner = new OdrScanner(CharacterMonitor);
             InventoryScanner = new InventoryScanner(CharacterMonitor, GameUi, GameInterface, OdrScanner,Service.GameInteropProvider);
-            InventoryMonitor = new InventoryMonitor( CharacterMonitor,  CraftMonitor, InventoryScanner, FrameworkService);
+            InventoryMonitor = new InventoryMonitor( CharacterMonitor,  CraftMonitor, InventoryScanner, Service.Framework);
             InventoryScanner.Enable();
             InventoryHistory = new InventoryHistory(InventoryMonitor);
             FilterService = new FilterService( CharacterMonitor, InventoryMonitor, InventoryHistory);
-            OverlayService = new OverlayService(FilterService, GameUi, FrameworkService);
+            OverlayService = new OverlayService(FilterService, GameUi, Service.Framework);
             ContextMenuService = new ContextMenuService(pluginInterface);
             IconStorage = new IconService(Service.TextureProvider);
             WindowService = new WindowService(FilterService, Service.Log);
             TooltipService = new TooltipService(Service.GameInteropProvider);
-            HotkeyService = new HotkeyService(FrameworkService, Service.KeyState);
+            HotkeyService = new HotkeyService(Service.Framework, Service.KeyState);
             PluginLogic = new PluginLogic(  );
             WotsitIpc = new WotsitIpc(  );
             TeleporterIpc = new TeleporterIpc( pluginInterface );
@@ -121,19 +118,17 @@ namespace InventoryTools
             FileDialogManager = new FileDialogManager();
             ConfigurationManager.Config.RestoreServiceSettings();
             IpcService = new IPCService(pluginInterface, CharacterMonitor, FilterService, InventoryMonitor);
-            PluginLoaded = true;
-            OnPluginLoaded?.Invoke();
+            MarkLoaded();
             loadConfigStopwatch.Stop();
             Service.Log.Verbose("Allagan Tools has finished loading. Total load time was " + loadConfigStopwatch.Elapsed.TotalSeconds + " seconds.");
         }
         
-        public static void InitaliseExplicit(MockServices mockServices, bool finishLoading = true)
+        public static void InitaliseExplicit(MockServices mockServices, bool finishLoading = false)
         {
             if (mockServices.CharacterMonitor != null) CharacterMonitor = mockServices.CharacterMonitor;
             if (mockServices.InventoryMonitor != null) InventoryMonitor = mockServices.InventoryMonitor;
             if (mockServices.PluginLogic != null) PluginLogic = mockServices.PluginLogic;
             if (mockServices.FilterService != null) FilterService = mockServices.FilterService;
-            if (mockServices.FrameworkService != null) FrameworkService = mockServices.FrameworkService;
             if (mockServices.IconService != null) IconStorage = mockServices.IconService;
             if (mockServices.Universalis != null) Universalis = mockServices.Universalis;
             if (mockServices.WindowService != null) WindowService = mockServices.WindowService;
@@ -151,6 +146,14 @@ namespace InventoryTools
             if (mockServices.InventoryHistory != null) InventoryHistory = mockServices.InventoryHistory;
             if (mockServices.TeleporterIpc != null) TeleporterIpc = mockServices.TeleporterIpc;
             if (finishLoading)
+            {
+                MarkLoaded();
+            }
+        }
+
+        public static void MarkLoaded()
+        {
+            if (!PluginLoaded)
             {
                 PluginLoaded = true;
                 OnPluginLoaded?.Invoke();
@@ -196,7 +199,6 @@ namespace InventoryTools
             ConfigurationManager.ClearQueue();
             ConfigurationManager.Save();
             ConfigurationManager.Dereference();
-            FrameworkService.Dispose();
 
             Service.Dereference();
 
@@ -205,7 +207,6 @@ namespace InventoryTools
 
         public static void Dereference()
         {
-            FrameworkService = null!;
             GuiService = null!;
             ChatService = null!;
             InventoryMonitor = null!;

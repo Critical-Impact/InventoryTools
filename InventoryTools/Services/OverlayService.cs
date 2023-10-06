@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib;
-using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
+using Dalamud.Plugin.Services;
 using InventoryTools.GameUi;
 using InventoryTools.Logic;
 using InventoryTools.Services.Interfaces;
@@ -14,9 +14,9 @@ namespace InventoryTools.Services
     {
         private IFilterService _filterService;
         private IGameUiManager _gameUiManager;
-        private IFrameworkService _frameworkService;
+        private IFramework _frameworkService;
         
-        public OverlayService(IFilterService filterService, IGameUiManager gameUiManager, IFrameworkService frameworkService)
+        public OverlayService(IFilterService filterService, IGameUiManager gameUiManager, IFramework frameworkService)
         {
             _gameUiManager = gameUiManager;
             _gameUiManager.UiVisibilityChanged += GameUiOnUiVisibilityChanged;
@@ -110,7 +110,7 @@ namespace InventoryTools.Services
             
         }
 
-        private void FrameworkOnUpdate(IFrameworkService framework)
+        private void FrameworkOnUpdate(IFramework framework)
         {
             foreach (var overlay in _overlays)
             {

@@ -146,7 +146,15 @@ namespace InventoryTools.Ui
                 if (itemIcon != null)
                 {
                     ImGui.Image(itemIcon.ImGuiHandle, new Vector2(100, 100) * ImGui.GetIO().FontGlobalScale);
-                    if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right)) 
+                    if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
+                                            ImGuiHoveredFlags.AllowWhenOverlapped &
+                                            ImGuiHoveredFlags.AllowWhenBlockedByPopup &
+                                            ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
+                                            ImGuiHoveredFlags.AnyWindow))
+                    {
+                        ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+                    }
+                    if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && (ImGui.IsMouseReleased(ImGuiMouseButton.Right) || ImGui.IsMouseReleased(ImGuiMouseButton.Left)))
                     {
                         ImGui.OpenPopup("RightClick" + _itemId);
                     }
@@ -206,7 +214,7 @@ namespace InventoryTools.Ui
                             {
                                 if (ImGui.Selectable("Add item to craft list - " + filter.Name))
                                 {
-                                    PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                    Service.Framework.RunOnFrameworkThread(() =>
                                     {
                                         filter.CraftList.AddCraftItem(_itemId, 1, InventoryItem.ItemFlags.None);
                                         filter.NeedsRefresh = true;
@@ -267,7 +275,7 @@ namespace InventoryTools.Ui
 
                     ImGuiUtil.HoverTooltip("Gatherable - Gather with Gatherbuddy");
                 }
-
+                
                 ImGui.Separator();
                 if (ImGui.CollapsingHeader("Sources (" + Item.Sources.Count + ")", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
                 {
@@ -289,7 +297,7 @@ namespace InventoryTools.Ui
                                             new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1),
                                             0))
                                     {
-                                        PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                        Service.Framework.RunOnFrameworkThread(() =>
                                         {
                                             PluginService.WindowService.OpenItemWindow(itemSource.ItemId.Value);
                                         });

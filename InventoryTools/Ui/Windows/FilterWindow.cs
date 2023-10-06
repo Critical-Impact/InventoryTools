@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using CriticalCommonLib;
 using CriticalCommonLib.Addons;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using ImGuiNET;
@@ -118,7 +119,7 @@ namespace InventoryTools.Ui
                         ConfigurationManager.Config.ActiveUiFilter != SelectedConfiguration.Key &&
                         ConfigurationManager.Config.ActiveUiFilter != null)
                     {
-                        PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                        Service.Framework.RunOnFrameworkThread(() =>
                         {
                             PluginService.FilterService.ToggleActiveUiFilter(SelectedConfiguration);
                         });
@@ -127,7 +128,7 @@ namespace InventoryTools.Ui
                         ConfigurationManager.Config.ActiveCraftList != SelectedConfiguration.Key &&
                         ConfigurationManager.Config.ActiveCraftList != null && SelectedConfiguration.FilterType == FilterType.CraftFilter)
                     {
-                        PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                        Service.Framework.RunOnFrameworkThread(() =>
                         {
                             PluginService.FilterService.ToggleActiveCraftList(SelectedConfiguration);
                         });
@@ -143,7 +144,7 @@ namespace InventoryTools.Ui
                             ConfigurationManager.Config.ActiveUiFilter != SelectedConfiguration.Key &&
                             ConfigurationManager.Config.ActiveUiFilter != null)
                         {
-                            PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                            Service.Framework.RunOnFrameworkThread(() =>
                             {
                                 PluginService.FilterService.ToggleActiveUiFilter(SelectedConfiguration);
                             });
@@ -152,7 +153,7 @@ namespace InventoryTools.Ui
                             ConfigurationManager.Config.ActiveCraftList != SelectedConfiguration.Key &&
                             ConfigurationManager.Config.ActiveCraftList != null && SelectedConfiguration.FilterType == FilterType.CraftFilter)
                         {
-                            PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                            Service.Framework.RunOnFrameworkThread(() =>
                             {
                                 PluginService.FilterService.ToggleActiveCraftList(SelectedConfiguration);
                             });
@@ -175,7 +176,7 @@ namespace InventoryTools.Ui
                         ref highlightItems);
                     if (highlightItems != itemTable.HighlightItems)
                     {
-                        PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                        Service.Framework.RunOnFrameworkThread(() =>
                         {
                             PluginService.FilterService.ToggleActiveUiFilter(itemTable.FilterConfiguration);
                         });
@@ -263,7 +264,7 @@ namespace InventoryTools.Ui
                                             0);
                                         if (amountLeft > 0)
                                         {
-                                            PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                            Service.Framework.RunOnFrameworkThread(() =>
                                             {
                                                 filterConfiguration.CraftList.AddCraftItem(itemRequired,
                                                     (uint)amountLeft, InventoryItem.ItemFlags.None);

@@ -39,7 +39,6 @@ public class MockPlugin : IMockPlugin, IDisposable
     private IInventoryMonitor? _inventoryMonitor;
     private IInventoryScanner? _inventoryScanner;
     private FilterService? _filterService;
-    private MockFrameworkService? _frameworkService;
     private MockIconService? _iconService;
     private MockUniversalis? _universalis;
     private WindowService? _windowService;
@@ -56,8 +55,6 @@ public class MockPlugin : IMockPlugin, IDisposable
     private IHotkeyService? _hotkeyService;
     private InventoryHistory? _inventoryHistory;
     private bool _isStarted;
-
-    public MockFrameworkService? MockFrameworkService => _frameworkService;
 
     public void Draw()
     {
@@ -102,9 +99,8 @@ public class MockPlugin : IMockPlugin, IDisposable
         _characterMonitor = new MockCharacterMonitor();
         _craftMonitor = new MockCraftMonitor();
         _inventoryScanner = new MockInventoryScanner();
-        _frameworkService = new MockFrameworkService();
         _chatUtilities = new MockChatUtilities(Service.Log);
-        _inventoryMonitor = new InventoryMonitor(_characterMonitor, _craftMonitor, _inventoryScanner, _frameworkService );
+        _inventoryMonitor = new InventoryMonitor(_characterMonitor, _craftMonitor, _inventoryScanner, Service.Framework );
         _inventoryHistory = new InventoryHistory(_inventoryMonitor);
         _iconService = new MockIconService(gameData, program);
         _universalis = new MockUniversalis();
@@ -114,7 +110,7 @@ public class MockPlugin : IMockPlugin, IDisposable
         _fileDialogManager = new FileDialogManager();
         _mockMobTracker = new MockMobTracker();
         _tooltipService = new MockTooltipService();
-        _hotkeyService = new HotkeyService(_frameworkService, Service.KeyState);
+        _hotkeyService = new HotkeyService(Service.Framework, Service.KeyState);
         Service.ExcelCache = new ExcelCache(gameData);
         Service.ExcelCache.PreCacheItemData();
         Service.SeTime = new MockSeTime(); 
@@ -124,7 +120,6 @@ public class MockPlugin : IMockPlugin, IDisposable
             InventoryMonitor = _inventoryMonitor,
             InventoryScanner = _inventoryScanner,
             CraftMonitor = _craftMonitor,
-            FrameworkService = _frameworkService,
             IconService = _iconService,
             Universalis = _universalis,
             GameUiManager = _gameUiManager,
@@ -138,7 +133,7 @@ public class MockPlugin : IMockPlugin, IDisposable
             InventoryHistory = _inventoryHistory,
             TeleporterIpc = mockTeleporter
             
-        }, false);
+        });
         ConfigurationManager.Load(configFile);
         var inventories = ConfigurationManager.LoadInventory();
         PluginService.CharacterMonitor.LoadExistingRetainers(ConfigurationManager.Config.GetSavedRetainers());
@@ -147,21 +142,21 @@ public class MockPlugin : IMockPlugin, IDisposable
         PluginService.InventoryHistory.LoadExistingHistory(ConfigurationManager.LoadHistoryFromCsv(out _));
         PluginService.InitaliseExplicit(new MockServices()
         {
-        }, false);
+        });
         _filterService = new FilterService(_characterMonitor, _inventoryMonitor, _inventoryHistory);
         _windowService = new WindowService(_filterService, Service.Log);
-        _overlayService = new OverlayService(_filterService, _gameUiManager, _frameworkService);
+        _overlayService = new OverlayService(_filterService, _gameUiManager, Service.Framework);
         PluginService.InitaliseExplicit(new MockServices()
         {
             FilterService = _filterService,
             WindowService = _windowService,
             OverlayService = _overlayService,
-        }, false);
+        });
         _pluginLogic = new PluginLogic();
         PluginService.InitaliseExplicit(new MockServices()
         {
             PluginLogic = _pluginLogic,
-        }, true);
+        });
         PluginService.PluginLogic.RunMigrations();
             
         if (ConfigurationManager.Config.FirstRun)
@@ -169,6 +164,8 @@ public class MockPlugin : IMockPlugin, IDisposable
             PluginService.PluginLogic.LoadDefaultData();
             ConfigurationManager.Config.FirstRun = false;
         }
+        
+        PluginService.MarkLoaded();
 
         stopWatch.Stop();
         Service.Log.Verbose("Allagan Tools has finished loading. Total load time was " + stopWatch.Elapsed.TotalSeconds + " seconds.");

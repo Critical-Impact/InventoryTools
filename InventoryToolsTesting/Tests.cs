@@ -7,6 +7,7 @@ using CriticalCommonLib.Enums;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
+using DalaMock.Dalamud;
 using Dalamud.Logging;
 using InventoryTools;
 using InventoryTools.Logic;
@@ -35,10 +36,7 @@ namespace InventoryToolsTesting
                 PanicOnSheetChecksumMismatch = false
             } );
             Service.ExcelCache = new ExcelCache(lumina);
-            PluginService.InitaliseExplicit(new MockServices()
-            {
-                FrameworkService = new MockFrameworkService()
-            });
+            Service.Framework = new MockFramework();
         }
         
         [SetUp]

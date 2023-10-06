@@ -38,7 +38,7 @@ namespace InventoryTools.Logic
 
         private void FaAvailable()
         {
-            PluginService.FrameworkService.RunOnTick(InitForWotsit);
+            Service.Framework.RunOnTick(InitForWotsit);
         }
 
         private void DelayTimerOnElapsed(object? sender, ElapsedEventArgs e)
@@ -143,7 +143,7 @@ namespace InventoryTools.Logic
 
         public void WotsitInvoke(string guid)
         {
-            PluginService.FrameworkService.RunOnFrameworkThread(() =>
+            Service.Framework.RunOnFrameworkThread(() =>
             {
                 if (_wotsitToggleFilterGuids.TryGetValue(guid, out var filter))
                 {

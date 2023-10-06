@@ -5,6 +5,8 @@ using CriticalCommonLib.Enums;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
+using DalaMock.Dalamud;
+using Dalamud.Plugin.Services;
 using InventoryTools;
 using InventoryTools.Logic;
 using InventoryToolsMock;
@@ -21,7 +23,6 @@ namespace InventoryToolsTesting
         private ICharacterMonitor _characterMonitor = null!;
         private IInventoryMonitor _inventoryMonitor = null!;
         private InventoryHistory _inventoryHistory = null!;
-        private IFrameworkService _frameworkService = null!;
 
         [OneTimeSetUp]
         public void Setup()
@@ -32,10 +33,7 @@ namespace InventoryToolsTesting
                     PanicOnSheetChecksumMismatch = false
                 });
             Service.ExcelCache = new ExcelCache(lumina);
-            PluginService.InitaliseExplicit(new MockServices()
-            {
-                FrameworkService = new MockFrameworkService()
-            });
+            Service.Framework = new MockFramework();
         }
 
         [SetUp]
@@ -43,12 +41,11 @@ namespace InventoryToolsTesting
         {
             _pluginLogic = new PluginLogic(true);
             _characterMonitor = new MockCharacterMonitor();
-            _frameworkService = new MockFrameworkService();
-            _inventoryMonitor = new InventoryMonitor(_characterMonitor, new MockCraftMonitor(), new MockInventoryScanner(), _frameworkService);
+            Service.Framework = new MockFramework();
+            _inventoryMonitor = new InventoryMonitor(_characterMonitor, new MockCraftMonitor(), new MockInventoryScanner(), Service.Framework);
             _inventoryHistory = new InventoryHistory(_inventoryMonitor);
             PluginService.InitaliseExplicit(new MockServices()
             {
-                FrameworkService = _frameworkService,
                 CharacterMonitor = _characterMonitor,
                 InventoryMonitor = _inventoryMonitor,
                 PluginLogic = _pluginLogic

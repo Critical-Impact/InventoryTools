@@ -51,6 +51,11 @@ namespace InventoryTools.Logic.Filters.Abstract
 
         private readonly string[] Choices = new []{"N/A", "Yes", "No"};
 
+        public virtual string[] GetChoices()
+        {
+            return Choices;
+        }
+
         public override void Draw(FilterConfiguration configuration)
         {
             var currentValue = CurrentSelection(configuration);
@@ -72,7 +77,7 @@ namespace InventoryTools.Logic.Filters.Abstract
             {
                 if (combo.Success)
                 {
-                    foreach (var item in Choices)
+                    foreach (var item in GetChoices())
                     {
                         if (ImGui.Selectable(item, currentValue == item))
                         {

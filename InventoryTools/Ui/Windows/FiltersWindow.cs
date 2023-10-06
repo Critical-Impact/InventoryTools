@@ -386,7 +386,7 @@ namespace InventoryTools.Ui
                                     ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
                                     ConfigurationManager.Config.ActiveUiFilter != null)
                                 {
-                                    PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                    Service.Framework.RunOnFrameworkThread(() =>
                                     {
                                         PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
                                     });
@@ -412,7 +412,7 @@ namespace InventoryTools.Ui
                                         ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
                                         ConfigurationManager.Config.ActiveUiFilter != null)
                                     {
-                                        PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                        Service.Framework.RunOnFrameworkThread(() =>
                                         {
                                             PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
                                         });
@@ -447,7 +447,7 @@ namespace InventoryTools.Ui
                                         ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
                                         ConfigurationManager.Config.ActiveUiFilter != null)
                                     {
-                                        PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                        Service.Framework.RunOnFrameworkThread(() =>
                                         {
                                             PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
                                         });
@@ -526,7 +526,7 @@ namespace InventoryTools.Ui
                                             ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
                                             ConfigurationManager.Config.ActiveUiFilter != null)
                                         {
-                                            PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                            Service.Framework.RunOnFrameworkThread(() =>
                                             {
                                                 PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
                                             });
@@ -554,7 +554,7 @@ namespace InventoryTools.Ui
                                     if (ConfigurationManager.Config.SwitchFiltersAutomatically &&
                                         ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key)
                                     {
-                                        PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                        Service.Framework.RunOnFrameworkThread(() =>
                                         {
                                             PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
                                         });
@@ -586,7 +586,7 @@ namespace InventoryTools.Ui
                                                 ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
                                                 ConfigurationManager.Config.ActiveUiFilter != null)
                                             {
-                                                PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                                Service.Framework.RunOnFrameworkThread(() =>
                                                 {
                                                     PluginService.FilterService.ToggleActiveUiFilter(
                                                         filterConfiguration);
@@ -769,7 +769,7 @@ namespace InventoryTools.Ui
                         ref highlightItems);
                     if (highlightItems != itemTable.HighlightItems)
                     {
-                        PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                        Service.Framework.RunOnFrameworkThread(() =>
                         {
                             PluginService.FilterService.ToggleActiveUiFilter(itemTable.FilterConfiguration);
                         });
@@ -895,7 +895,7 @@ namespace InventoryTools.Ui
                                             0);
                                         if (amountLeft > 0)
                                         {
-                                            PluginService.FrameworkService.RunOnFrameworkThread(() =>
+                                            Service.Framework.RunOnFrameworkThread(() =>
                                             {
                                                 filterConfiguration.CraftList.AddCraftItem(itemRequired,
                                                     (uint)amountLeft, InventoryItem.ItemFlags.None);

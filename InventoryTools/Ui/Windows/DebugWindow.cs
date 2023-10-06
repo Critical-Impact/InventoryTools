@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
+using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using ImGuiNET;
@@ -19,7 +20,8 @@ namespace InventoryTools.Ui
         Inventories = 1,
         InventoryScanner = 2,
         InventoryMonitor = 3,
-        Random = 4
+        Random = 4,
+        CraftAgents = 5
     }
     public class DebugWindow : Window
     {
@@ -73,6 +75,11 @@ namespace InventoryTools.Ui
                         ConfigurationManager.Config.SelectedDebugPage = (int)DebugMenu.Random;
                     }
 
+                    if (ImGui.Selectable("Craft Agents", ConfigurationManager.Config.SelectedDebugPage == (int)DebugMenu.CraftAgents))
+                    {
+                        ConfigurationManager.Config.SelectedDebugPage = (int)DebugMenu.CraftAgents;
+                    }
+
                 }
             }
             ImGui.SameLine();
@@ -92,6 +99,10 @@ namespace InventoryTools.Ui
                     else if (ConfigurationManager.Config.SelectedDebugPage == (int)DebugMenu.Random)
                     {
                         DrawRandomTab();
+                    }
+                    else if (ConfigurationManager.Config.SelectedDebugPage == (int)DebugMenu.CraftAgents)
+                    {
+                        DrawCraftAgentTab();
                     }
 /*
                     else if (ConfigurationManager.Config.SelectedDebugPage == 2)
@@ -1410,6 +1421,64 @@ namespace InventoryTools.Ui
             if (ImGui.Button("Clear notices"))
             {
                 ConfigurationManager.Config.NotificationsSeen.Clear();
+            }
+        }
+
+        public void DrawCraftAgentTab()
+        {
+            var craftMonitorAgent = PluginService.CraftMonitor.Agent;
+            var simpleCraftMonitorAgent = PluginService.CraftMonitor.SimpleAgent;
+            if (craftMonitorAgent != null)
+            {
+                ImGui.TextUnformatted("Progress: " + craftMonitorAgent.Progress);
+                ImGui.TextUnformatted("Total Progress Required: " +
+                    PluginService.CraftMonitor.RecipeLevelTable?.ProgressRequired(PluginService.CraftMonitor
+                        .CurrentRecipe) ?? "Unknown");
+                ImGui.TextUnformatted("Quality: " + craftMonitorAgent.Quality);
+                ImGui.TextUnformatted("Status: " + craftMonitorAgent.Status);
+                ImGui.TextUnformatted("Step: " + craftMonitorAgent.Step);
+                ImGui.TextUnformatted("Durability: " + craftMonitorAgent.Durability);
+                ImGui.TextUnformatted("HQ Chance: " + craftMonitorAgent.HqChance);
+                ImGui.TextUnformatted("Item: " +
+                           (Service.ExcelCache.GetItemExSheet().GetRow(craftMonitorAgent.ResultItemId)
+                               ?.NameString ?? "Unknown"));
+                ImGui.TextUnformatted(
+                    "Current Recipe: " + PluginService.CraftMonitor.CurrentRecipe?.RowId ?? "Unknown");
+                ImGui.TextUnformatted(
+                    "Recipe Difficulty: " + PluginService.CraftMonitor.RecipeLevelTable?.Difficulty ??
+                    "Unknown");
+                ImGui.TextUnformatted(
+                    "Recipe Difficulty Factor: " +
+                    PluginService.CraftMonitor.CurrentRecipe?.DifficultyFactor ??
+                    "Unknown");
+                ImGui.TextUnformatted(
+                    "Recipe Durability: " + PluginService.CraftMonitor.RecipeLevelTable?.Durability ??
+                    "Unknown");
+                ImGui.TextUnformatted("Suggested Control: " +
+                           PluginService.CraftMonitor.RecipeLevelTable?.SuggestedControl ??
+                           "Unknown");
+                ImGui.TextUnformatted("Suggested Craftsmanship: " +
+                    PluginService.CraftMonitor.RecipeLevelTable?.SuggestedCraftsmanship ?? "Unknown");
+                ImGui.TextUnformatted(
+                    "Current Craft Type: " + PluginService.CraftMonitor.Agent?.CraftType ?? "Unknown");
+            }
+            else if (simpleCraftMonitorAgent != null)
+            {
+                ImGui.TextUnformatted("NQ Complete: " + simpleCraftMonitorAgent.NqCompleted);
+                ImGui.TextUnformatted("HQ Complete: " + simpleCraftMonitorAgent.HqCompleted);
+                ImGui.TextUnformatted("Failed: " + simpleCraftMonitorAgent.TotalFailed);
+                ImGui.TextUnformatted("Total Completed: " + simpleCraftMonitorAgent.TotalCompleted);
+                ImGui.TextUnformatted("Total: " + simpleCraftMonitorAgent.Total);
+                ImGui.TextUnformatted("Item: " + Service.ExcelCache.GetItemExSheet()
+                    .GetRow(simpleCraftMonitorAgent.ResultItemId)?.NameString.ToString() ?? "Unknown");
+                ImGui.TextUnformatted(
+                    "Current Recipe: " + PluginService.CraftMonitor.CurrentRecipe?.RowId ?? "Unknown");
+                ImGui.TextUnformatted(
+                    "Current Craft Type: " + PluginService.CraftMonitor.Agent?.CraftType ?? "Unknown");
+            }
+            else
+            {
+                ImGui.TextUnformatted("Not crafting.");
             }
         }
         private void DrawInventoriesDebugTab()

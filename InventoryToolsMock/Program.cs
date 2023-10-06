@@ -26,7 +26,6 @@ namespace InventoryToolsMock
     {
         private static MockProgram _program;
         private static MockPlugin? _mockPlugin;
-        private static MockService? _mockService;
         private static MockSettingsWindow? _mockSettingsWindow;
         private static GameData? _gameData;
 
@@ -67,7 +66,7 @@ namespace InventoryToolsMock
 
         private static void PreUpdate()
         {
-            MockPlugin?.MockFrameworkService?.FireUpdate();
+            _program.MockService?.MockFramework.FireUpdate();
         }
 
     }

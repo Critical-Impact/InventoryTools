@@ -156,5 +156,9 @@
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <TargetPath>Images\toggle.png</TargetPath>
         </ContentWithTargetPath>
+        <ContentWithTargetPath Include="Images\recycle.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>Images\recycle.png</TargetPath>
+        </ContentWithTargetPath>
     </ItemGroup>
 </Project>

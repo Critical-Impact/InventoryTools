@@ -68,9 +68,21 @@ namespace InventoryTools.Extensions
             {
                 if (ImGui.Selectable("Add to new craft list"))
                 {
-                    PluginService.FrameworkService.RunOnTick(() =>
+                    Service.Framework.RunOnTick(() =>
                     {
                         var filter = PluginService.FilterService.AddNewCraftFilter();
+                        filter.CraftList.AddCraftItem(item.RowId);
+                        PluginService.WindowService.OpenCraftsWindow();
+                        PluginService.WindowService.GetCraftsWindow().FocusFilter(filter);
+                        filter.NeedsRefresh = true;
+                        filter.StartRefresh();
+                    });
+                }
+                if (ImGui.Selectable("Add to new craft list (ephemeral)"))
+                {
+                    Service.Framework.RunOnTick(() =>
+                    {
+                        var filter = PluginService.FilterService.AddNewCraftFilter(null,true);
                         filter.CraftList.AddCraftItem(item.RowId);
                         PluginService.WindowService.OpenCraftsWindow();
                         PluginService.WindowService.GetCraftsWindow().FocusFilter(filter);
@@ -91,9 +103,23 @@ namespace InventoryTools.Extensions
                         if (ImGui.Selectable("Add " + (part.Value?.CompanyCraftType.Value?.Name ?? "Unknown") + " to new craft list"))
                         {
                             var newPhase = index;
-                            PluginService.FrameworkService.RunOnTick(() =>
+                            Service.Framework.RunOnTick(() =>
                             {
                                 var filter = PluginService.FilterService.AddNewCraftFilter();
+                                filter.CraftList.AddCraftItem(item.RowId,1, InventoryItem.ItemFlags.None, newPhase);
+                                PluginService.WindowService.OpenCraftsWindow();
+                                PluginService.WindowService.GetCraftsWindow().FocusFilter(filter);
+                                filter.NeedsRefresh = true;
+                                filter.StartRefresh();
+                            });
+                        }
+                        if (ImGui.Selectable("Add " + (part.Value?.CompanyCraftType.Value?.Name ?? "Unknown") + " to new craft list (ephemeral)"))
+                        {
+                            var newPhase = index;
+                            Service.Framework.RunOnTick(() =>
+                            {
+                                var filter = PluginService.FilterService.AddNewCraftFilter(null,true);
+                                filter.IsEphemeralCraftList = true;
                                 filter.CraftList.AddCraftItem(item.RowId,1, InventoryItem.ItemFlags.None, newPhase);
                                 PluginService.WindowService.OpenCraftsWindow();
                                 PluginService.WindowService.GetCraftsWindow().FocusFilter(filter);
@@ -181,9 +207,22 @@ namespace InventoryTools.Extensions
                     }
                     if (ImGui.Selectable("Add " + item.QuantityNeeded + " item to new craft list"))
                     {
-                        PluginService.FrameworkService.RunOnTick(() =>
+                        Service.Framework.RunOnTick(() =>
                         {
                             var filter = PluginService.FilterService.AddNewCraftFilter();
+                            filter.CraftList.AddCraftItem(item.Item.RowId, item.QuantityNeeded,
+                                InventoryItem.ItemFlags.None);
+                            PluginService.WindowService.OpenCraftsWindow();
+                            PluginService.WindowService.GetCraftsWindow().FocusFilter(filter);
+                            configuration.NeedsRefresh = true;
+                            configuration.StartRefresh();
+                        });
+                    }
+                    if (ImGui.Selectable("Add " + item.QuantityNeeded + " item to new craft list (ephemeral)"))
+                    {
+                        Service.Framework.RunOnTick(() =>
+                        {
+                            var filter = PluginService.FilterService.AddNewCraftFilter(null,true);
                             filter.CraftList.AddCraftItem(item.Item.RowId, item.QuantityNeeded,
                                 InventoryItem.ItemFlags.None);
                             PluginService.WindowService.OpenCraftsWindow();
