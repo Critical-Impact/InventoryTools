@@ -184,6 +184,15 @@ public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
                 {
                     return exes;
                 },
+                Filter = (s, npcs) =>
+                {
+                    return s == null ? npcs : npcs.Where(c =>
+                    {
+                        var currentValue = GetDrops(c.Item1.RowId);
+
+                        return currentValue.Any(c => c.NameString.ToLower().PassesFilter(s));
+                    });
+                },
                 Draw = (ex, contentTypeId) =>
                 {
                     var drops = GetDrops(ex.Item1.RowId);

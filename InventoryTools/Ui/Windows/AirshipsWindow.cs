@@ -192,6 +192,15 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
                 {
                     return exes;
                 },
+                Filter = (s, npcs) =>
+                {
+                    return s == null ? npcs : npcs.Where(c =>
+                    {
+                        var currentValue = c.Drops.Where(c => c.Value != null);
+
+                        return currentValue.Any(c => c.Value!.NameString.ToLower().PassesFilter(s));
+                    });
+                },
                 Draw = (ex, contentTypeId) =>
                 {
                     var drops = ex.Drops.Where(c => c.Value != null);

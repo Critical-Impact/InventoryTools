@@ -215,6 +215,15 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>
                 {
                     return exes;
                 },
+                Filter = (s, npcs) =>
+                {
+                    return s == null ? npcs : npcs.Where(c =>
+                    {
+                        var currentValue = c.Drops;
+
+                        return currentValue.Any(c => c.NameString.ToLower().PassesFilter(s));
+                    });
+                },
                 Draw = (ex, contentTypeId) =>
                 {
                     var drops = ex.Drops;
