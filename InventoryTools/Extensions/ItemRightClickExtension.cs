@@ -52,7 +52,7 @@ namespace InventoryTools.Extensions
 
                             if (ImGui.Selectable("Add " + (part.Value?.CompanyCraftType.Value?.Name ?? "Unknown") + " to craft list - " + filter.Name))
                             {
-                                filter.CraftList.AddCraftItem(item.RowId, 1, InventoryItem.ItemFlags.None, index);
+                                filter.CraftList.AddCraftItem(item.RowId, 1, InventoryItem.ItemFlags.None);
                                 PluginService.WindowService.OpenCraftsWindow();
                                 PluginService.WindowService.GetCraftsWindow().FocusFilter(filter);
                                 filter.NeedsRefresh = true;
