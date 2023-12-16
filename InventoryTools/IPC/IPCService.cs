@@ -32,6 +32,8 @@ public class IPCService : IDisposable
     private readonly ICallGateProvider<string, uint, uint, bool>? _removeItemFromCraftList;
     private readonly ICallGateProvider<string, Dictionary<uint, uint>>? _getFilterItems;
     private readonly ICallGateProvider<string, Dictionary<uint, uint>>? _getCraftItems;
+    private readonly ICallGateProvider<ulong, HashSet<ulong[]>> _getCharacterItems;
+    private readonly ICallGateProvider<bool, HashSet<ulong>> _getCharactersOwnedByActive;
     private readonly ICallGateProvider<(uint, InventoryItem.ItemFlags, ulong, uint), bool>? _itemAdded;
     private readonly ICallGateProvider<(uint, InventoryItem.ItemFlags, ulong, uint), bool>? _itemRemoved;
     private readonly ICallGateProvider<Dictionary<string,string>>? _getCraftLists;
@@ -106,6 +108,12 @@ public class IPCService : IDisposable
 
         _getCraftItems = pluginInterface.GetIpcProvider<string, Dictionary<uint, uint>>("AllaganTools.GetCraftItems");
         _getCraftItems.RegisterFunc(GetCraftItems);
+
+        _getCharacterItems = pluginInterface.GetIpcProvider<ulong, HashSet<ulong[]>>("AllaganTools.GetCharacterItems");
+        _getCharacterItems.RegisterFunc(GetCharacterItems);
+
+        _getCharactersOwnedByActive = pluginInterface.GetIpcProvider<bool, HashSet<ulong>>("AllaganTools.GetCharactersOwnedByActive");
+        _getCharactersOwnedByActive.RegisterFunc(GetCharactersOwnedByActive);
 
         _getCraftLists = pluginInterface.GetIpcProvider<Dictionary<string,string>>("AllaganTools.GetCraftLists");
         _getCraftLists.RegisterFunc(GetCraftLists);
@@ -238,6 +246,22 @@ public class IPCService : IDisposable
         return craftItems;
     }
 
+    private HashSet<ulong> GetCharactersOwnedByActive(bool includeOwner)
+        => PluginService.InventoryMonitor.Inventories.Select(pair => pair.Key)
+            .Where(characterId => PluginService.CharacterMonitor.BelongsToActiveCharacter(characterId) && (includeOwner || characterId != PluginService.CharacterMonitor.ActiveCharacterId))
+            .ToHashSet();
+
+    private HashSet<ulong[]> GetCharacterItems(ulong characterId)
+    {
+        var items = PluginService.InventoryMonitor.Inventories
+            .First(pair => pair.Key == characterId).Value
+            .GetAllInventories().SelectMany(item => item)
+            .Where(item => item != null);
+
+        if (items == null) return new();
+        return items.Select(item => item!.ToNumeric())
+            .ToHashSet();
+    }
     private Dictionary<uint, uint> GetFilterItems(string filterKey)
     {
         var filter = _filterService.GetFilterByKeyOrName(filterKey);
