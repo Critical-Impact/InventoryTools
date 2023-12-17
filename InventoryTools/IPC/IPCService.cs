@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib;
+using CriticalCommonLib.Enums;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using Dalamud.Plugin;
@@ -34,6 +35,7 @@ public class IPCService : IDisposable
     private readonly ICallGateProvider<string, Dictionary<uint, uint>>? _getCraftItems;
     private readonly ICallGateProvider<ulong, HashSet<ulong[]>> _getCharacterItems;
     private readonly ICallGateProvider<bool, HashSet<ulong>> _getCharactersOwnedByActive;
+    private readonly ICallGateProvider<ulong, uint, HashSet<ulong[]>> _getCharacterItemsByType;
     private readonly ICallGateProvider<(uint, InventoryItem.ItemFlags, ulong, uint), bool>? _itemAdded;
     private readonly ICallGateProvider<(uint, InventoryItem.ItemFlags, ulong, uint), bool>? _itemRemoved;
     private readonly ICallGateProvider<Dictionary<string,string>>? _getCraftLists;
@@ -114,6 +116,10 @@ public class IPCService : IDisposable
 
         _getCharactersOwnedByActive = pluginInterface.GetIpcProvider<bool, HashSet<ulong>>("AllaganTools.GetCharactersOwnedByActive");
         _getCharactersOwnedByActive.RegisterFunc(GetCharactersOwnedByActive);
+        _getCraftItems.RegisterFunc(GetCraftItems);
+
+        _getCharacterItemsByType = pluginInterface.GetIpcProvider<ulong,uint, HashSet<ulong[]>>("AllaganTools.GetCharacterItemsByType");
+        _getCharacterItemsByType.RegisterFunc(GetCharacterItemsByType);
 
         _getCraftLists = pluginInterface.GetIpcProvider<Dictionary<string,string>>("AllaganTools.GetCraftLists");
         _getCraftLists.RegisterFunc(GetCraftLists);
@@ -259,6 +265,19 @@ public class IPCService : IDisposable
             .Where(item => item != null);
 
         if (items == null) return new();
+        return items.Select(item => item!.ToNumeric())
+            .ToHashSet();
+    }
+
+    private HashSet<ulong[]> GetCharacterItemsByType(ulong characterId, uint inventoryType)
+    {
+        var characterInventories = PluginService.InventoryMonitor.Inventories
+            .First(pair => pair.Key == characterId).Value;
+        
+        var items = (characterInventories
+                .GetInventoryByType((InventoryType)inventoryType) ?? Array.Empty<CriticalCommonLib.Models.InventoryItem?>())
+            .Where(item => item != null);
+
         return items.Select(item => item!.ToNumeric())
             .ToHashSet();
     }
@@ -502,6 +521,9 @@ public class IPCService : IDisposable
             _addNewCraftList?.UnregisterFunc();
             _currentCharacter?.UnregisterFunc();
             _retainerChanged?.UnregisterFunc();
+            _getCharacterItems?.UnregisterFunc();
+            _getCharacterItemsByType?.UnregisterFunc();
+            _getCharactersOwnedByActive?.UnregisterFunc();
             _isInitialized?.UnregisterFunc();
         }
         _disposed = true;         
