@@ -33,12 +33,14 @@ public class IPCService : IDisposable
     private readonly ICallGateProvider<string, uint, uint, bool>? _removeItemFromCraftList;
     private readonly ICallGateProvider<string, Dictionary<uint, uint>>? _getFilterItems;
     private readonly ICallGateProvider<string, Dictionary<uint, uint>>? _getCraftItems;
+    private readonly ICallGateProvider<string, Dictionary<uint, uint>>? _getRetrievalItems;
     private readonly ICallGateProvider<ulong, HashSet<ulong[]>> _getCharacterItems;
     private readonly ICallGateProvider<bool, HashSet<ulong>> _getCharactersOwnedByActive;
     private readonly ICallGateProvider<ulong, uint, HashSet<ulong[]>> _getCharacterItemsByType;
     private readonly ICallGateProvider<(uint, InventoryItem.ItemFlags, ulong, uint), bool>? _itemAdded;
     private readonly ICallGateProvider<(uint, InventoryItem.ItemFlags, ulong, uint), bool>? _itemRemoved;
     private readonly ICallGateProvider<Dictionary<string,string>>? _getCraftLists;
+    private readonly ICallGateProvider<Dictionary<string,string>>? _getSearchFilters;
     private readonly ICallGateProvider<string, Dictionary<uint, uint>, string>? _addNewCraftList;
     private readonly ICallGateProvider<ulong>? _currentCharacter;
     private readonly ICallGateProvider<ulong?, bool>? _retainerChanged;
@@ -111,6 +113,9 @@ public class IPCService : IDisposable
         _getCraftItems = pluginInterface.GetIpcProvider<string, Dictionary<uint, uint>>("AllaganTools.GetCraftItems");
         _getCraftItems.RegisterFunc(GetCraftItems);
 
+        _getRetrievalItems = pluginInterface.GetIpcProvider<string, Dictionary<uint, uint>>("AllaganTools.GetRetrievalItems");
+        _getRetrievalItems.RegisterFunc(GetRetrievalItems);
+
         _getCharacterItems = pluginInterface.GetIpcProvider<ulong, HashSet<ulong[]>>("AllaganTools.GetCharacterItems");
         _getCharacterItems.RegisterFunc(GetCharacterItems);
 
@@ -120,6 +125,9 @@ public class IPCService : IDisposable
 
         _getCharacterItemsByType = pluginInterface.GetIpcProvider<ulong,uint, HashSet<ulong[]>>("AllaganTools.GetCharacterItemsByType");
         _getCharacterItemsByType.RegisterFunc(GetCharacterItemsByType);
+
+        _getSearchFilters = pluginInterface.GetIpcProvider<Dictionary<string,string>>("AllaganTools.GetSearchFilters");
+        _getSearchFilters.RegisterFunc(GetSearchFilters);
 
         _getCraftLists = pluginInterface.GetIpcProvider<Dictionary<string,string>>("AllaganTools.GetCraftLists");
         _getCraftLists.RegisterFunc(GetCraftLists);
@@ -203,6 +211,17 @@ public class IPCService : IDisposable
         return _characterMonitor.ActiveCharacterId;
     }
 
+    private Dictionary<string, string> GetSearchFilters()
+    {
+        var filters = _filterService.FiltersList.Where(c => c.FilterType == FilterType.SearchFilter);
+        var keyNameDict = new Dictionary<string, string>();
+        foreach (var filter in filters)
+        {
+            keyNameDict.Add(filter.Key, filter.Name);
+        }
+        return keyNameDict;
+    }
+
     private string AddNewCraftList(string craftListName, Dictionary<uint, uint> items)
     {
         var newCraftFilter = _filterService.AddNewCraftFilter(craftListName);
@@ -250,6 +269,29 @@ public class IPCService : IDisposable
         }
 
         return craftItems;
+    }
+
+    private Dictionary<uint, uint> GetRetrievalItems(string filterKey)
+    {
+        var filter = _filterService.GetFilterByKeyOrName(filterKey);
+        var retrievalItems = new Dictionary<uint, uint>();
+
+        if (filter != null && filter.FilterType == FilterType.CraftFilter)
+        {
+            foreach (var craftItem in filter.CraftList.CraftItems)
+            {
+                if (craftItem.QuantityWillRetrieve > 0) {
+                    if (retrievalItems.ContainsKey(craftItem.ItemId))
+                    {
+                        retrievalItems[craftItem.ItemId] += craftItem.QuantityWillRetrieve;
+                    } else {
+                        retrievalItems.Add(craftItem.ItemId, craftItem.QuantityWillRetrieve);
+                    }
+                }
+            }
+        }
+
+        return retrievalItems;
     }
 
     private HashSet<ulong> GetCharactersOwnedByActive(bool includeOwner)
@@ -516,8 +558,10 @@ public class IPCService : IDisposable
             _removeItemFromCraftList?.UnregisterFunc();
             _getFilterItems?.UnregisterFunc();
             _getCraftItems?.UnregisterFunc();
+            _getRetrievalItems?.UnregisterFunc();
             _itemAdded?.UnregisterFunc();
             _getCraftLists?.UnregisterFunc();
+            _getSearchFilters?.UnregisterFunc();
             _addNewCraftList?.UnregisterFunc();
             _currentCharacter?.UnregisterFunc();
             _retainerChanged?.UnregisterFunc();
