@@ -33,7 +33,7 @@ public class IPCService : IDisposable
     private readonly ICallGateProvider<string, uint, uint, bool>? _removeItemFromCraftList;
     private readonly ICallGateProvider<string, Dictionary<uint, uint>>? _getFilterItems;
     private readonly ICallGateProvider<string, Dictionary<uint, uint>>? _getCraftItems;
-    private readonly ICallGateProvider<string, Dictionary<uint, uint>>? _getRetrievalItems;
+    private readonly ICallGateProvider<Dictionary<uint, uint>>? _getRetrievalItems;
     private readonly ICallGateProvider<ulong, HashSet<ulong[]>> _getCharacterItems;
     private readonly ICallGateProvider<bool, HashSet<ulong>> _getCharactersOwnedByActive;
     private readonly ICallGateProvider<ulong, uint, HashSet<ulong[]>> _getCharacterItemsByType;
@@ -113,7 +113,7 @@ public class IPCService : IDisposable
         _getCraftItems = pluginInterface.GetIpcProvider<string, Dictionary<uint, uint>>("AllaganTools.GetCraftItems");
         _getCraftItems.RegisterFunc(GetCraftItems);
 
-        _getRetrievalItems = pluginInterface.GetIpcProvider<string, Dictionary<uint, uint>>("AllaganTools.GetRetrievalItems");
+        _getRetrievalItems = pluginInterface.GetIpcProvider<Dictionary<uint, uint>>("AllaganTools.GetRetrievalItems");
         _getRetrievalItems.RegisterFunc(GetRetrievalItems);
 
         _getCharacterItems = pluginInterface.GetIpcProvider<ulong, HashSet<ulong[]>>("AllaganTools.GetCharacterItems");
@@ -271,9 +271,9 @@ public class IPCService : IDisposable
         return craftItems;
     }
 
-    private Dictionary<uint, uint> GetRetrievalItems(string filterKey)
+    private Dictionary<uint, uint> GetRetrievalItems()
     {
-        var filter = _filterService.GetFilterByKeyOrName(filterKey);
+        var filter = _filterService.GetActiveCraftList();
         var retrievalItems = new Dictionary<uint, uint>();
 
         if (filter != null && filter.FilterType == FilterType.CraftFilter)
