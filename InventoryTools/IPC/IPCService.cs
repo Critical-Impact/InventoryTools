@@ -278,15 +278,15 @@ public class IPCService : IDisposable
 
         if (filter != null && filter.FilterType == FilterType.CraftFilter)
         {
-            foreach (var craftItem in filter.CraftList.CraftItems)
+            foreach (((var itemId, _), var quantity) in filter.CraftList.GetQuantityToRetrieveList())
             {
-                if (craftItem.QuantityWillRetrieve > 0) {
-                    if (retrievalItems.ContainsKey(craftItem.ItemId))
-                    {
-                        retrievalItems[craftItem.ItemId] += craftItem.QuantityWillRetrieve;
-                    } else {
-                        retrievalItems.Add(craftItem.ItemId, craftItem.QuantityWillRetrieve);
-                    }
+                if (quantity == 0) continue;
+
+                if (retrievalItems.ContainsKey(itemId))
+                {
+                    retrievalItems[itemId] += quantity;
+                } else {
+                    retrievalItems.Add(itemId, quantity);
                 }
             }
         }
