@@ -2,10 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using CriticalCommonLib;
+using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Logic;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Extensions;
+using InventoryTools.Ui.Widgets;
+using Lumina.Excel.GeneratedSheets;
+using ImGuiUtil = OtterGui.ImGuiUtil;
 
 namespace InventoryTools.Sections
 {
@@ -13,145 +20,421 @@ namespace InventoryTools.Sections
     {
         private bool _isSeparator = false;
         public string Name { get; } = "Characters/Retainers";
+
+        private ulong _selectedCharacter = 0;
+        private uint _currentWorld = 0;
         
+        private Dictionary<Character, PopupMenu> _popupMenus = new();
+        public PopupMenu GetCharacterMenu(Character character)
+        {
+            if (!_popupMenus.ContainsKey(character))
+            {
+                _popupMenus[character] = new PopupMenu("cm_" + character.CharacterId, PopupMenu.PopupMenuButtons.Right,
+                    new List<PopupMenu.IPopupMenuItem>()
+                    {
+                        new PopupMenu.PopupMenuItemSelectableConfirm("Clear Inventories", "ci_" + character.CharacterId, "Are you sure you want to clear the inventories of this " + character.CharacterType.FormattedName() + "?", ClearInventories, "Clear the inventories of this " + character.CharacterType.FormattedName() + "?"),
+                        new PopupMenu.PopupMenuItemSelectableConfirm("Delete " + character.CharacterType.FormattedName(), "dc_" + character.CharacterId, "Are you sure you want to delete this " + character.CharacterType.FormattedName() + "?", DeleteCharacter, "Delete the " + character.CharacterType.FormattedName() + "?"),
+                    }
+                );
+            }
+
+            return _popupMenus[character];
+        }
+
+        private void DeleteCharacter(string arg1, bool arg2)
+        {
+            if (arg2)
+            {
+                var characterId = ulong.Parse(arg1.Split("dc_", StringSplitOptions.RemoveEmptyEntries)[0]);
+                PluginService.CharacterMonitor.RemoveCharacter(characterId);
+                PluginService.InventoryMonitor.ClearCharacterInventories(characterId);
+            }
+        }
+
+        private void ClearInventories(string arg1, bool arg2)
+        {
+            if (arg2)
+            {
+                var characterId = ulong.Parse(arg1.Split("ci_", StringSplitOptions.RemoveEmptyEntries)[0]);
+                PluginService.InventoryMonitor.ClearCharacterInventories(characterId);
+            }
+        }
+
         public void Draw()
         {
-            if (ImGui.CollapsingHeader("Characters", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
+            using (var sidebar = ImRaii.Child("charactersBar", new Vector2(160, 0) * ImGui.GetIO().FontGlobalScale, true))
             {
-                ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(5, 5) * ImGui.GetIO().FontGlobalScale);
-                if (ImGui.BeginTable("CharacterTable", 5, ImGuiTableFlags.BordersV |
-                                                             ImGuiTableFlags.BordersOuterV |
-                                                             ImGuiTableFlags.BordersInnerV |
-                                                             ImGuiTableFlags.BordersH |
-                                                             ImGuiTableFlags.BordersOuterH |
-                                                             ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.Resizable))
+                if (sidebar.Success)
                 {
-                    ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint) 0);
-                    ImGui.TableSetupColumn("World", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint) 1);
-                    ImGui.TableSetupColumn("Free Company", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint) 2);
-                    ImGui.TableSetupColumn("Display Name", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint) 3);
-                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint) 4);
-                    ImGui.TableHeadersRow();
-                    var characters = PluginService.CharacterMonitor.GetPlayerCharacters();
-                    if (characters.Length == 0)
+                    var worldIds = PluginService.CharacterMonitor.GetWorldIds();
+                    var characters = PluginService.CharacterMonitor.GetPlayerCharacters().Where(c => _currentWorld == 0 || _currentWorld == c.Value.WorldId).ToList();
+                    ImGui.TextUnformatted("Characters (" + characters.Count + ")");
+                    ImGui.Separator();
+                    for (var index = 0; index < characters.Count; index++)
                     {
-                        ImGui.TableNextRow();
-                        ImGui.TextUnformatted("No characters available.");
-                        ImGui.TableNextColumn();
-                        ImGui.TableNextColumn();
-                        ImGui.TableNextColumn();
-                        ImGui.TableNextColumn();
-                        ImGui.TableNextColumn();
+                        var character = characters[index];
+                        if (ImGui.Selectable(character.Value.FormattedName))
+                        {
+                            _selectedCharacter = character.Key;
+                        }
+
+                        if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
+                        {
+                            ImGui.OpenPopup("cm_" + character.Key);
+                        }
+                        
+                        GetCharacterMenu(character.Value).Draw();
+
+                        var tooltip = character.Value.FormattedName;
+                        if (character.Value.ActualClassJob != null)
+                        {
+                            tooltip += "\n" + character.Value.ActualClassJob?.FormattedNameEnglish;
+                        }
+
+                        tooltip += "\n\nRight Click: Options";
+                        ImGuiUtil.HoverTooltip(tooltip);
+                        ImGui.SameLine();
+                        if (character.Value.ActualClassJob != null)
+                        {
+                            var icon = PluginService.IconStorage[character.Value.Icon];
+                            ImGui.Image(icon.ImGuiHandle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale);
+                        }
+                    }
+                    ImGui.NewLine();
+                    
+                    var freeCompanies = PluginService.CharacterMonitor.GetFreeCompanies().Where(c => _currentWorld == 0 || _currentWorld == c.Value.WorldId).ToList();
+                    ImGui.TextUnformatted("Free Companies (" + freeCompanies.Count + ")");
+                    ImGui.Separator();
+                    for (var index = 0; index < freeCompanies.Count; index++)
+                    {
+                        var freeCompany = freeCompanies[index];
+                        if (ImGui.Selectable(freeCompany.Value.FormattedName))
+                        {
+                            _selectedCharacter = freeCompany.Key;
+                        }
+                        
+                        if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
+                        {
+                            ImGui.OpenPopup("cm_" + freeCompany.Key);
+                        }
+                        
+                        GetCharacterMenu(freeCompany.Value).Draw();
+                        var tooltip = freeCompany.Value.FormattedName;
+
+                        tooltip += "\n\nRight Click: Options";
+                        ImGuiUtil.HoverTooltip(tooltip);
+                        if (freeCompany.Value.ActualClassJob != null)
+                        {
+                            ImGui.SameLine();
+                            var icon = PluginService.IconStorage[freeCompany.Value.Icon];
+                            ImGui.Image(icon.ImGuiHandle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale);
+                        }
+                    }
+                    ImGui.NewLine();
+                    
+                    var houses = PluginService.CharacterMonitor.GetHouses().Where(c => _currentWorld == 0 || _currentWorld == c.Value.WorldId).ToList();
+                    ImGui.TextUnformatted("Residences (" + houses.Count + ")");
+                    ImGui.Separator();
+                    for (var index = 0; index < houses.Count; index++)
+                    {
+                        var house = houses[index];
+                        if (ImGui.Selectable(house.Value.FormattedName))
+                        {
+                            _selectedCharacter = house.Key;
+                        }
+                        if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
+                        {
+                            ImGui.OpenPopup("cm_" + house.Key);
+                        }
+                        
+                        GetCharacterMenu(house.Value).Draw();
+                        var tooltip = house.Value.FormattedName;
+                        tooltip += "\n" + house.Value.GetPlotSize().ToString();
+
+                        tooltip += "\n\nRight Click: Options";
+                        ImGuiUtil.HoverTooltip(tooltip);
+
+                        if (house.Value.ActualClassJob != null)
+                        {
+                            ImGui.SameLine();
+                            var icon = PluginService.IconStorage[house.Value.Icon];
+                            ImGui.Image(icon.ImGuiHandle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale);
+                        }
+                    }
+                    ImGui.NewLine();
+                    
+                    var retainers = PluginService.CharacterMonitor.GetRetainerCharacters().Where(c => _currentWorld == 0 || _currentWorld == c.Value.WorldId).ToList();
+                    ImGui.TextUnformatted("Retainers (" + retainers.Count + ")");
+                    ImGui.Separator();
+
+                    for (var index = 0; index < characters.Count; index++)
+                    {
+                        var character = characters[index];
+                        var characterRetainers = PluginService.CharacterMonitor.GetRetainerCharacters(character.Key).Where(c => _currentWorld == 0 || _currentWorld == c.Value.WorldId).ToList();
+                        ImGui.TextUnformatted(character.Value.FormattedName + " (" + characterRetainers.Count + ")");
+                        ImGui.Separator();
+                        for (var index2 = 0; index2 < characterRetainers.Count; index2++)
+                        {
+                            var characterRetainer = characterRetainers[index2];
+                            retainers.Remove(characterRetainer);
+                            if (ImGui.Selectable(characterRetainer.Value.FormattedName))
+                            {
+                                _selectedCharacter = characterRetainer.Key;
+                            }
+                            if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
+                            {
+                                ImGui.OpenPopup("cm_" + characterRetainer.Key);
+                            }
+                        
+                            GetCharacterMenu(characterRetainer.Value).Draw();
+                            var tooltip = characterRetainer.Value.FormattedName;
+                            if (characterRetainer.Value.ActualClassJob != null)
+                            {
+                                tooltip += "\n" + characterRetainer.Value.ActualClassJob?.FormattedNameEnglish;
+                            }
+
+                            tooltip += "\n\nRight Click: Options";
+                            ImGuiUtil.HoverTooltip(tooltip);
+                            if (characterRetainer.Value.ActualClassJob != null)
+                            {
+                                ImGui.SameLine();
+                                var icon = PluginService.IconStorage[characterRetainer.Value.Icon];
+                                ImGui.Image(icon.ImGuiHandle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale);
+                            }
+                        }
+                        ImGui.NewLine();
                     }
 
-                    for (var index = 0; index < characters.Length; index++)
+                    if (retainers.Count != 0)
                     {
-                        ImGui.TableNextRow();
-                        var character = characters[index].Value;
-                        ImGui.TableNextColumn();
-                        if (character.Name != "")
+                        ImGui.TextUnformatted("Orphaned Retainers:");
+                        ImGui.Separator();
+                        for (var index2 = 0; index2 < retainers.Count; index2++)
                         {
-                            ImGui.TextUnformatted(character.Name);
-                            ImGui.SameLine();
-                        }
-
-                        ImGui.TableNextColumn();
-                        if (character.WorldId != 0)
-                        {
-                            ImGui.TextUnformatted(character.World?.Name ?? "Unknown");
-                            ImGui.SameLine();
-                        }
-
-                        ImGui.TableNextColumn();
-                        ImGui.TextUnformatted(character.FreeCompanyName);
-
-                        ImGui.TableNextColumn();
-                        var value = character.AlternativeName ?? "";
-                        if (ImGui.InputText("##"+index+"Input", ref value, 150))
-                        {
-                            if (value == "")
+                            var characterRetainer = retainers[index2];
+                            if (ImGui.Selectable(characterRetainer.Value.FormattedName))
                             {
-                                character.AlternativeName = null;
-                                PluginService.CharacterMonitor.UpdateCharacter(character);
+                                _selectedCharacter = characterRetainer.Key;
+                            }
+
+                            if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
+                            {
+                                ImGui.OpenPopup("cm_" + characterRetainer.Key);
+                            }
+
+                            GetCharacterMenu(characterRetainer.Value).Draw();
+                            var tooltip = characterRetainer.Value.FormattedName;
+                            if (characterRetainer.Value.ActualClassJob != null)
+                            {
+                                tooltip += "\n" + characterRetainer.Value.ActualClassJob?.FormattedNameEnglish;
+                            }
+
+                            tooltip += "\n\nRight Click: Options";
+                            ImGuiUtil.HoverTooltip(tooltip);
+                            if (characterRetainer.Value.ActualClassJob != null)
+                            {
+                                ImGui.SameLine();
+                                var icon = PluginService.IconStorage[characterRetainer.Value.Icon];
+                                ImGui.Image(icon.ImGuiHandle, new Vector2(16, 16) * ImGui.GetIO().FontGlobalScale);
+                            }
+                        }
+
+                        ImGui.NewLine();
+                    }
+
+                    WorldEx? selectedWorld = null;
+                    if (_currentWorld != 0)
+                    {
+                        selectedWorld = Service.ExcelCache.GetWorldSheet().GetRow(_currentWorld);
+                    }
+
+                    ImGui.Text("World: ");
+                    using var combo = ImRaii.Combo("##activeWorld", selectedWorld?.FormattedName ?? "All");
+                    if (combo.Success)
+                    {
+                        if (ImGui.Selectable("All"))
+                        {
+                            _currentWorld = 0;
+                        }
+
+                        var worlds = Service.ExcelCache.GetWorldSheet().Where(c => worldIds.Contains(c.RowId)).ToList();
+                        foreach (var world in worlds)
+                        {
+                            if (ImGui.Selectable(world.FormattedName))
+                            {
+                                _currentWorld = world.RowId;
+                                _selectedCharacter = 0;
+                            }
+                        }
+                    }
+                }
+            }
+            ImGui.SameLine();
+            using (var main = ImRaii.Child("characterMain", new Vector2(0, 0), true))
+            {
+                if (main.Success)
+                {
+                    if (_selectedCharacter != 0)
+                    {
+                        var character = PluginService.CharacterMonitor.GetCharacterById(_selectedCharacter);
+                        if (character != null)
+                        {
+                            ImGui.Text(character.FormattedName.ToString());
+                            if (character.ActualClassJob != null)
+                            {
+                                ImGui.SameLine();
+                                var icon = PluginService.IconStorage[character.Icon];
+                                ImGui.Image(icon.ImGuiHandle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale);
+                            }
+                            ImGui.Separator();
+                            if (character.CharacterType is CharacterType.Character or CharacterType.Retainer )
+                            {
+                                ImGui.Text("Level: " + character.Level);
+                                ImGui.Text("Gil: " + character.Gil);
+                                ImGui.Text("Gender: " + character.Gender);
+                                ImGui.Text("Free Company: " + character.FreeCompanyName);
+                                ImGui.Text("World: " + (character.World?.FormattedName ?? "Unknown"));
+                                ImGui.Text("Class/Job: " +
+                                           (character.ActualClassJob?.NameEnglish.ToString() ?? "Unknown"));
+                            }
+                            else if (character.CharacterType is CharacterType.Housing)
+                            {
+                                ImGui.Text("World: " + (character.World?.FormattedName ?? "Unknown"));
+                                ImGui.Text("Plot Size: " + character.GetPlotSize());
+                                ImGui.Text("Location: " + character.HousingName);
+                                ImGui.Text("Owners: ");
+                                foreach (var ownerId in character.Owners)
+                                {
+                                    var owner = PluginService.CharacterMonitor.GetCharacterById(ownerId);
+                                    var ownerName = owner?.FormattedName ?? "Missing Character";
+                                    ImGui.Text(ownerName);
+                                }
+                            }
+                            else if (character.CharacterType is CharacterType.FreeCompanyChest)
+                            {
+                                ImGui.Text("World: " + (character.World?.FormattedName ?? "Unknown"));
+                                ImGui.Text("Related Characters: ");
+                                foreach (var relatedCharacter in PluginService.CharacterMonitor.GetFreeCompanyCharacters(character.CharacterId))
+                                {
+                                    var relatedCharacterName = relatedCharacter.Value.FormattedName;
+                                    ImGui.Text(relatedCharacterName);
+                                }
+                            }
+                            
+                            ImGui.NewLine();
+                            ImGui.Text("Inventories: ");
+                            ImGui.Separator();
+                            var inventories =
+                                PluginService.InventoryMonitor.Inventories.ContainsKey(character.CharacterId)
+                                    ? PluginService.InventoryMonitor.Inventories[character.CharacterId]
+                                    : null;
+                            if (inventories != null)
+                            {
+                                var categories = inventories.GetAllInventoriesByCategory();
+
+                                using (var tabBar = ImRaii.TabBar("categories", ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.TabListPopupButton))
+                                {
+                                    if (tabBar.Success)
+                                    {
+                                        foreach (var category in categories)
+                                        {
+                                            var inventoryWidth = 5;
+                                            using (var tabItem = ImRaii.TabItem(category.Key.FormattedName()))
+                                            {
+                                                if (tabItem.Success)
+                                                {
+                                                    using (var tabBar2 = ImRaii.TabBar("types", ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.TabListPopupButton))
+                                                    {
+                                                        if (tabBar2.Success)
+                                                        {
+                                                            var itemsByType = category.Value.GroupBy(c => c.SortedContainer);
+                                                            foreach (var type in itemsByType)
+                                                            {
+                                                                using (var typeChild = ImRaii.TabItem(type.Key.FormattedName()))
+                                                                {
+                                                                    if (typeChild.Success)
+                                                                    {
+                                                                        var chunkedItems = type.OrderBy(c => c.Slot).Chunk(inventoryWidth);
+                                                                        var realSlot = 1;
+                                                                        foreach (var itemChunk in chunkedItems)
+                                                                        {
+                                                                            for (var index = 0;
+                                                                                 index < itemChunk.Length;
+                                                                                 index++)
+                                                                            {
+                                                                                var item = itemChunk[index];
+                                                                                using (ImRaii.PushId(item.Slot))
+                                                                                {
+                                                                                    if (ImGui.ImageButton(item.ItemId == 0
+                                                                                                ? PluginService
+                                                                                                    .IconStorage[62574]
+                                                                                                    .ImGuiHandle
+                                                                                                : PluginService
+                                                                                                    .IconStorage[item.Icon]
+                                                                                                    .ImGuiHandle,
+                                                                                            new Vector2(32, 32)))
+                                                                                    {
+                                                                                        
+                                                                                    }
+
+                                                                                    ImGuiUtil.HoverTooltip(item.FormattedName +
+                                                                                        " - " + item.Quantity + " in slot " +
+                                                                                        realSlot);
+                                                                                    ImGui.SameLine();
+                                                                                    
+                                                                                    var hoveredRow = -1;
+                                                                                    
+                                                                                    if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow)) {
+                                                                                        hoveredRow = realSlot;
+                                                                                    }
+                                                                                    
+                                                                                    if (hoveredRow == realSlot && item.ItemId != 0 && ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                                                                                    {
+                                                                                        ImGui.OpenPopup("RightClick" + realSlot);
+                                                                                    }
+                                                                                    
+                                                                                    if (hoveredRow == realSlot && item.ItemId != 0 && ImGui.IsMouseReleased(ImGuiMouseButton.Left))
+                                                                                    {
+                                                                                        PluginService.WindowService.OpenItemWindow(item.ItemId);   
+                                                                                    }
+
+                                                                                    using (var popup = ImRaii.Popup("RightClick" + realSlot))
+                                                                                    {
+                                                                                        using var _ = ImRaii.PushId("RightClick" + realSlot);
+                                                                                        if (popup.Success)
+                                                                                        {
+                                                                                            item.Item.DrawRightClickPopup();
+                                                                                        }
+                                                                                    }
+                                                                                }
+
+                                                                                realSlot++;
+                                                                            }
+
+                                                                            ImGui.NewLine();
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                
+
                             }
                             else
                             {
-                                character.AlternativeName = value;
-                                PluginService.CharacterMonitor.UpdateCharacter(character);
-                            }
-                        }
-                        ImGui.TableNextColumn();
-                        if (character.CharacterId != PluginService.CharacterMonitor.ActiveCharacterId)
-                        {
-                            if (ImGui.SmallButton("Remove##" + index))
-                            {
-                                PluginService.CharacterMonitor.RemoveCharacter(character.CharacterId);
+                                ImGui.Text("No inventories found.");
                             }
 
                         }
-
-                        if (ImGui.SmallButton("Clear All Bags##" + index))
+                        else
                         {
-                            ImGui.OpenPopup("Are you sure?##" + index);
-                        }
-                        if (ImGui.BeginPopupModal("Are you sure?##" + index))
-                        {
-                            ImGui.TextUnformatted(
-                                "Are you sure you want to clear all the bags stored for this character?.\nThis operation cannot be undone!\n\n");
-                            ImGui.Separator();
-
-                            if (ImGui.Button("OK", new Vector2(120, 0) * ImGui.GetIO().FontGlobalScale))
-                            {
-                                PluginService.InventoryMonitor.ClearCharacterInventories(character.CharacterId);
-                                ImGui.CloseCurrentPopup();
-                            }
-
-                            ImGui.SetItemDefaultFocus();
-                            ImGui.SameLine();
-                            if (ImGui.Button("Cancel", new Vector2(120, 0) * ImGui.GetIO().FontGlobalScale))
-                            {
-                                ImGui.CloseCurrentPopup();
-                            }
-
-                            ImGui.EndPopup();
-                        }
-                    }
-
-                    ImGui.EndTable();
-                }
-
-                ImGui.PopStyleVar();
-            }
-            ImGui.NewLine();
-            if (ImGui.CollapsingHeader("Free Companies", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
-            {
-                RenderFreeCompanyTable();
-            }
-            ImGui.NewLine();
-            if (ImGui.CollapsingHeader("Houses", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
-            {
-                RenderHouseTable();
-            }
-            ImGui.NewLine();
-            if (ImGui.CollapsingHeader("Retainers", ImGuiTreeNodeFlags.DefaultOpen))
-            {
-                using (var tabBar = ImRaii.TabBar("Retainers", ImGuiTabBarFlags.TabListPopupButton))
-                {
-                    if (tabBar.Success)
-                    {
-                        foreach (var retainerGroup in PluginService.CharacterMonitor.GetRetainerCharacters().GroupBy(c => c.Value.OwnerId))
-                        {
-                            var mainCharacter = PluginService.CharacterMonitor.GetCharacterById(retainerGroup.Key);
-                            if (mainCharacter != null)
-                            {
-                                using (var tabItem = ImRaii.TabItem(mainCharacter.FormattedName))
-                                {
-                                    if (tabItem.Success)
-                                    {
-                                        RenderRetainerTable(retainerGroup.ToList());
-                                    }
-                                }
-                            }
+                            ImGui.Text("Invalid character selected.");
                         }
                     }
                 }
@@ -511,5 +794,6 @@ namespace InventoryTools.Sections
         }
 
         public bool IsMenuItem => _isSeparator;
+        public bool DrawBorder => false;
     }
 }

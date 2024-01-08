@@ -60,5 +60,6 @@ namespace InventoryTools.Sections
         }
 
         public bool IsMenuItem => _isSeparator;
+        public bool DrawBorder => true;
     }
 }

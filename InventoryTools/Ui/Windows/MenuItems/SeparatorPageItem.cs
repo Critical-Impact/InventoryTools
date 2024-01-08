@@ -30,4 +30,5 @@ public class SeparatorPageItem : IConfigPage
     }
 
     public bool IsMenuItem => true;
+    public bool DrawBorder { get; }
 }

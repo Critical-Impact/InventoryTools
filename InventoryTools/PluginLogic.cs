@@ -111,6 +111,7 @@ namespace InventoryTools
                 ConfigurationManager.Config.FirstRun = false;
             }
             SyncConfigurationChanges(false);
+            ClearOrphans();
         }
 
 #pragma warning disable CS8618
@@ -162,6 +163,20 @@ namespace InventoryTools
             if (activeCharacter != 0)
             {
                 ConfigurationManager.Config.AcquiredItems[activeCharacter] = PluginService.GameInterface.AcquiredItems;
+            }
+        }
+
+        public void ClearOrphans()
+        {
+            var keys = PluginService.InventoryMonitor.Inventories.Keys;
+            foreach (var key in keys)
+            {
+                var character = PluginService.CharacterMonitor.GetCharacterById(key);
+                if (character == null)
+                {
+                    Service.Log.Info("Removing inventories for " + key + " from inventory cache as there is no character associated with this inventory.");
+                    PluginService.InventoryMonitor.ClearCharacterInventories(key);
+                }
             }
         }
 

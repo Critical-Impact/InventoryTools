@@ -430,34 +430,43 @@ namespace InventoryTools.Ui
 
             ImGui.SameLine();
 
+            IConfigPage? currentConfigPage = null;
+
+            {
+                var count = 0;
+                for (var index = 0; index < _configPages.Count; index++)
+                {
+                    if (_configPages[index].IsMenuItem)
+                    {
+                        count++;
+                        continue;
+                    }
+
+                    if (ConfigSelectedConfigurationPage == index - count)
+                    {
+                        currentConfigPage = _configPages[index];
+                    }
+                }
+
+                var filterIndex2 = _configPages.Count - count;
+                foreach (var filter in _filterPages)
+                {
+                    filterIndex2++;
+                    if (ConfigSelectedConfigurationPage == filterIndex2)
+                    {
+                        currentConfigPage = filter.Value;
+                    }
+                }
+            }
+
             using (var mainChild =
-                   ImRaii.Child("Main", new Vector2(-1, -1), true, ImGuiWindowFlags.HorizontalScrollbar))
+                   ImRaii.Child("Main", new Vector2(-1, -1), currentConfigPage?.DrawBorder ?? false, ImGuiWindowFlags.HorizontalScrollbar))
             {
                 if (mainChild.Success)
                 {
-                    var count = 0;
-                    for (var index = 0; index < _configPages.Count; index++)
+                    if (currentConfigPage != null)
                     {
-                        if (_configPages[index].IsMenuItem)
-                        {
-                            count++;
-                            continue;
-                        }
-
-                        if (ConfigSelectedConfigurationPage == index - count)
-                        {
-                            _configPages[index].Draw();
-                        }
-                    }
-
-                    var filterIndex2 = _configPages.Count - count;
-                    foreach (var filter in _filterPages)
-                    {
-                        filterIndex2++;
-                        if (ConfigSelectedConfigurationPage == filterIndex2)
-                        {
-                            filter.Value.Draw();
-                        }
+                        currentConfigPage.Draw();
                     }
                 }
             }

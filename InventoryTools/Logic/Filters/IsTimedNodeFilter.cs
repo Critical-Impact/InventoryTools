@@ -31,12 +31,12 @@ namespace InventoryTools.Logic.Filters
             var currentValue = CurrentValue(configuration);
             if (currentValue == null) return true;
             
-            if(currentValue.Value && item.IsCollectable)
+            if(currentValue.Value && item.IsItemAvailableAtTimedNode)
             {
                 return true;
             }
                 
-            return !currentValue.Value && !item.IsCollectable;
+            return !currentValue.Value && !item.IsItemAvailableAtTimedNode;
         }
     }
 }
