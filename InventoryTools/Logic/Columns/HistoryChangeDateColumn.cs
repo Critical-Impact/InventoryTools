@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
@@ -26,6 +27,11 @@ public class HistoryChangeDateColumn : DateTimeColumn
     public override DateTime? CurrentValue(InventoryChange currentValue)
     {
         return currentValue.ChangeDate;
+    }
+    
+    public override string CsvExport(InventoryChange item)
+    {
+        return CurrentValue(item)?.ToString(CultureInfo.InvariantCulture) ?? "";
     }
 
     public override string Name { get; set; } = "History Event Date/Time";

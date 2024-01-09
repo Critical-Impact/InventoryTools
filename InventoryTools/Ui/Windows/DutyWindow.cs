@@ -89,7 +89,7 @@ namespace InventoryTools.Ui
                 var itemIcon = PluginService.IconStorage[(int)(ContentFinderCondition.ContentType?.Value?.IconDutyFinder ?? Icons.DutyIcon)];
                 ImGui.Image(itemIcon.ImGuiHandle, new Vector2(100, 100) * ImGui.GetIO().FontGlobalScale);
                 
-                var garlandIcon = PluginService.IconStorage[65090];
+                var garlandIcon = PluginService.IconStorage.LoadImage("garlandtools");
                 if (ImGui.ImageButton(garlandIcon.ImGuiHandle,
                         new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                 {

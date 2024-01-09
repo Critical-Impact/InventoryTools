@@ -28,6 +28,11 @@ public class HistoryChangeAmountColumn : TextColumn
         return item.GetFormattedAmount().ToString();
     }
 
+    public override string CsvExport(InventoryChange item)
+    {
+        return CurrentValue(item) ?? "";
+    }
+
 
     public override string Name { get; set; } = "History Event Amount";
     public override string RenderName => "Amount";

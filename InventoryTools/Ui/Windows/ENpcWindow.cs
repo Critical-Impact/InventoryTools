@@ -52,7 +52,7 @@ namespace InventoryTools.Ui
             }
             else
             {
-                var garlandIcon = PluginService.IconStorage[65090];
+                var garlandIcon = PluginService.IconStorage.LoadImage("garlandtools");
                 if (ImGui.ImageButton(garlandIcon.ImGuiHandle,
                         new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                 {
@@ -60,7 +60,7 @@ namespace InventoryTools.Ui
                 }
                 ImGuiUtil.HoverTooltip("Open in Garland Tools");
                 ImGui.SameLine();
-                var tcIcon = PluginService.IconStorage[60046];
+                var tcIcon = PluginService.IconStorage.LoadImage("teamcraft");
                 if (ImGui.ImageButton(tcIcon.ImGuiHandle,
                         new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                 {

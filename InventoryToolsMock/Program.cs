@@ -37,7 +37,6 @@ namespace InventoryToolsMock
             _mockPlugin = new MockPlugin();
             _program.SetPlugin(_mockPlugin);
             _mockSettingsWindow = new MockSettingsWindow(_program);
-            
 
             if (AppSettings.Default.AutoStart)
             {

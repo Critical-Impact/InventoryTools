@@ -5,11 +5,11 @@ using InventoryTools.Logic.Filters.Abstract;
 
 namespace InventoryTools.Logic.Filters
 {
-    public class ItemLevelFilter : StringFilter
+    public class CanBeEquippedFilter : BooleanFilter
     {
-        public override string Key { get; set; } = "ILvl";
-        public override string Name { get; set; } = "Item Level";
-        public override string HelpText { get; set; } = "The item level of the item";
+        public override string Key { get; set; } = "CanBeEquipped";
+        public override string Name { get; set; } = "Can be Equipped?";
+        public override string HelpText { get; set; } = "Can the item be equipped?";
         public override FilterType AvailableIn { get; set; }  = FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter;
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
 
@@ -21,16 +21,17 @@ namespace InventoryTools.Logic.Filters
         public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
         {
             var currentValue = CurrentValue(configuration);
-            if (!string.IsNullOrEmpty(currentValue))
+            if (currentValue == null)
             {
-                if (((int)item.LevelItem.Row).PassesFilter(currentValue.ToLower()))
-                {
-                    return true;
-                }
-
-                return false;
+                return null;
             }
-            return true;
+
+            if (currentValue.Value && item.EquipSlotCategory.Row != 0)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

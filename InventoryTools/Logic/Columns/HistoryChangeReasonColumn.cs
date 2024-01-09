@@ -27,7 +27,11 @@ public class HistoryChangeReasonColumn : TextColumn
     {
         return item.GetFormattedChange();
     }
-
+    
+    public override string CsvExport(InventoryChange item)
+    {
+        return CurrentValue(item) ?? "";
+    }
 
     public override string Name { get; set; } = "History Event Reason";
     public override string RenderName => "Event";

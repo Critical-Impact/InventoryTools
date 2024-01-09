@@ -389,6 +389,7 @@ public class IPCService : IDisposable
         if (filter is { FilterType: FilterType.CraftFilter })
         {
             filter.CraftList.RemoveCraftItem(itemId, quantity, InventoryItem.ItemFlags.None);
+            filter.NeedsRefresh = true;
         }
 
         return false;
@@ -401,6 +402,7 @@ public class IPCService : IDisposable
         if (filter is { FilterType: FilterType.CraftFilter })
         {
             filter.CraftList.AddCraftItem(itemId, quantity, InventoryItem.ItemFlags.None);
+            filter.NeedsRefresh = true;
         }
 
         return false;

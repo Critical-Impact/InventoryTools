@@ -37,7 +37,7 @@ namespace InventoryTools.Logic.Columns.Abstract
             return CsvExport(item.Item);
         }
 
-        public string CsvExport(InventoryChange item)
+        public virtual string CsvExport(InventoryChange item)
         {
             return CsvExport(item.InventoryItem);
         }

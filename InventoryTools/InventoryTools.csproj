@@ -160,5 +160,21 @@
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <TargetPath>Images\recycle.png</TargetPath>
         </ContentWithTargetPath>
+        <ContentWithTargetPath Include="Images\gamerescape.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>Images\gamerescape.png</TargetPath>
+        </ContentWithTargetPath>
+        <ContentWithTargetPath Include="Images\consolegameswiki.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>Images\consolegameswiki.png</TargetPath>
+        </ContentWithTargetPath>
+        <ContentWithTargetPath Include="Images\teamcraft.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>Images\teamcraft.png</TargetPath>
+        </ContentWithTargetPath>
+        <ContentWithTargetPath Include="Images\garlandtools.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>Images\garlandtools.png</TargetPath>
+        </ContentWithTargetPath>
     </ItemGroup>
 </Project>

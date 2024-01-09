@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Web;
 using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Sheets;
@@ -251,6 +252,24 @@ namespace InventoryTools.Extensions
             if (ImGui.Selectable("Open in Universalis"))
             {
                 $"https://universalis.app/market/{item.RowId}".OpenBrowser();
+            }
+            if (ImGui.Selectable("Open in Gamer Escape"))
+            {
+                var name = item.NameString.Replace(' ', '_');
+                name = name.Replace('–', '-');
+
+                if (name.StartsWith("_")) // "level sync" icon
+                    name = name.Substring(2);
+                $"https://ffxiv.gamerescape.com/wiki/{HttpUtility.UrlEncode(name)}?useskin=Vector".OpenBrowser();
+            }
+            if (ImGui.Selectable("Open in Console Games Wiki"))
+            {
+                var name = item.NameString.Replace(' ', '_');
+                name = name.Replace('–', '-');
+
+                if (name.StartsWith("_")) // "level sync" icon
+                    name = name.Substring(2);
+                $"https://ffxiv.consolegameswiki.com/wiki/{HttpUtility.UrlEncode(name)}".OpenBrowser();
             }
             if (ImGui.Selectable("Copy Name"))
             {

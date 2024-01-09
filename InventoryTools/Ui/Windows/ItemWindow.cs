@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Web;
 using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
@@ -166,7 +167,7 @@ namespace InventoryTools.Ui
                     }
                 }
                 
-                var garlandIcon = PluginService.IconStorage[65090];
+                var garlandIcon = PluginService.IconStorage.LoadImage("garlandtools");
                 if (ImGui.ImageButton(garlandIcon.ImGuiHandle,
                         new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                 {
@@ -174,13 +175,42 @@ namespace InventoryTools.Ui
                 }
                 ImGuiUtil.HoverTooltip("Open in Garland Tools");
                 ImGui.SameLine();
-                var tcIcon = PluginService.IconStorage[60046];
+                var tcIcon = PluginService.IconStorage.LoadImage("teamcraft");
                 if (ImGui.ImageButton(tcIcon.ImGuiHandle,
                         new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                 {
                     $"https://ffxivteamcraft.com/db/en/item/{_itemId}".OpenBrowser();
                 }
                 ImGuiUtil.HoverTooltip("Open in Teamcraft");
+                
+                ImGui.SameLine();
+                var gamerEscapeIcon = PluginService.IconStorage.LoadImage("gamerescape");
+                if (ImGui.ImageButton(gamerEscapeIcon.ImGuiHandle,
+                        new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
+                {
+                    var name = Item.NameString.Replace(' ', '_');
+                    name = name.Replace('–', '-');
+
+                    if (name.StartsWith("_")) // "level sync" icon
+                        name = name.Substring(2);
+                    $"https://ffxiv.gamerescape.com/wiki/{HttpUtility.UrlEncode(name)}?useskin=Vector".OpenBrowser();
+                }
+                ImGuiUtil.HoverTooltip("Open in Gamer Escape");
+                
+                ImGui.SameLine();
+                var consoleGamesWikiIcon = PluginService.IconStorage.LoadImage("consolegameswiki");
+                if (ImGui.ImageButton(consoleGamesWikiIcon.ImGuiHandle,
+                        new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
+                {
+                    var name = Item.NameString.Replace(' ', '_');
+                    name = name.Replace('–', '-');
+
+                    if (name.StartsWith("_")) // "level sync" icon
+                        name = name.Substring(2);
+                    $"https://ffxiv.consolegameswiki.com/wiki/{HttpUtility.UrlEncode(name)}".OpenBrowser();
+                }
+                ImGuiUtil.HoverTooltip("Open in Console Games Wiki");
+                
                 if (Item.CanOpenCraftLog)
                 {
                     ImGui.SameLine();
