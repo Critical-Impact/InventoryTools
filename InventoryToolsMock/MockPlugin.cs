@@ -7,6 +7,7 @@ using DalaMock.Dalamud;
 using DalaMock.Extensions;
 using DalaMock.Interfaces;
 using DalaMock.Mock;
+using DalaMock.Shared.Interfaces;
 using DalaMock.Windows;
 using Dalamud;
 using Dalamud.Game.ClientState.Keys;
@@ -54,6 +55,7 @@ public class MockPlugin : IMockPlugin, IDisposable
     private ITooltipService? _tooltipService;
     private IHotkeyService? _hotkeyService;
     private InventoryHistory? _inventoryHistory;
+    private IFont? _font;
     private bool _isStarted;
 
     public void Draw()
@@ -96,6 +98,7 @@ public class MockPlugin : IMockPlugin, IDisposable
         var stopWatch = new Stopwatch();
         stopWatch.Start();
         var mockTeleporter = new MockTeleporterIpc(Service.Log);
+        _font = new MockFont();
         _characterMonitor = new MockCharacterMonitor();
         _craftMonitor = new MockCraftMonitor();
         _inventoryScanner = new MockInventoryScanner();
@@ -131,8 +134,8 @@ public class MockPlugin : IMockPlugin, IDisposable
             TooltipService = _tooltipService,
             HotkeyService = _hotkeyService,
             InventoryHistory = _inventoryHistory,
-            TeleporterIpc = mockTeleporter
-            
+            TeleporterIpc = mockTeleporter,
+            Font = _font
         });
         ConfigurationManager.Load(configFile);
         var inventories = ConfigurationManager.LoadInventory();

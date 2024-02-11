@@ -46,7 +46,7 @@ namespace InventoryTools.Logic.Columns
             if (item.MissingIngredients.Count != 0)
             {
                 ImGui.SameLine();
-                ImGui.PushFont(UiBuilder.IconFont);
+                ImGui.PushFont(PluginService.Font.IconFont);
                 ImGuiUtil.VerticalAlignTextDisabled(FontAwesomeIcon.InfoCircle.ToIconString(), configuration.TableHeight, false);
                 ImGui.PopFont();
                 if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))

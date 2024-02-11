@@ -24,6 +24,11 @@ namespace InventoryTools.Sections
         private ulong _selectedCharacter = 0;
         private uint _currentWorld = 0;
         
+        private bool _editMode = false;
+        private string _newName = "";
+        
+        private HoverButton _editIcon { get; } = new(PluginService.IconStorage.LoadImage("edit"),  new Vector2(16, 16));
+        
         private Dictionary<Character, PopupMenu> _popupMenus = new();
         public PopupMenu GetCharacterMenu(Character character)
         {
@@ -280,12 +285,56 @@ namespace InventoryTools.Sections
                         if (character != null)
                         {
                             ImGui.Text(character.FormattedName.ToString());
+                            
                             if (character.ActualClassJob != null)
                             {
                                 ImGui.SameLine();
                                 var icon = PluginService.IconStorage[character.Icon];
                                 ImGui.Image(icon.ImGuiHandle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale);
                             }
+                            
+                            ImGui.SameLine();
+                            if(_editIcon.Draw("editName"))
+                            {
+                                _editMode = true;
+                                _newName = character.AlternativeName ?? "";
+                            }
+                            
+                            ImGuiUtil.HoverTooltip("Edit name, set the name to blank to return it to the original name.");
+
+                            if (_editMode)
+                            {
+                                var newName = _newName;
+                                ImGui.Text("Custom Name: ");
+                                ImGui.SameLine();
+                                if (ImGui.InputText("##customName", ref newName, 100))
+                                {
+                                    _newName = newName;
+                                }
+                                
+                                if (character.AlternativeName != null && character.AlternativeName != character.Name)
+                                {
+                                    ImGui.Text("Original Name: " + character.Name);
+                                }
+
+                                if (ImGui.Button("Save"))
+                                {
+                                    if (_newName == "" || _newName == character.Name)
+                                    {
+                                        character.AlternativeName = null;
+                                        PluginService.CharacterMonitor.UpdateCharacter(character);
+                                        _editMode = false;
+                                    }
+                                    else
+                                    {
+                                        character.AlternativeName = _newName;
+                                        PluginService.CharacterMonitor.UpdateCharacter(character);
+                                        _editMode = false;
+                                    }
+                                }
+                            }
+                            
+
                             ImGui.Separator();
                             if (character.CharacterType is CharacterType.Character or CharacterType.Retainer )
                             {

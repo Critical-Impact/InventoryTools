@@ -8,6 +8,7 @@ using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
 using CriticalCommonLib.Time;
 using DalaMock.Shared.Classes;
+using DalaMock.Shared.Interfaces;
 using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Plugin;
 using InventoryTools.Commands;
@@ -40,6 +41,7 @@ namespace InventoryTools
         public IHotkeyService? HotkeyService;
         public InventoryHistory? InventoryHistory;
         public ITeleporterIpc? TeleporterIpc;
+        public IFont? Font;
     }
 
     public static class PluginService
@@ -73,6 +75,7 @@ namespace InventoryTools
         public static IHotkeyService HotkeyService { get; private set; } = null!;
         public static InventoryHistory InventoryHistory { get; private set; } = null!;
         public static ITeleporterIpc TeleporterIpc { get; private set; } = null!;
+        public static IFont Font { get; private set; } = null!;
         public static bool PluginLoaded { get; private set; } = false;
 
         public delegate void PluginLoadedDelegate();
@@ -93,8 +96,8 @@ namespace InventoryTools
             ConfigurationManager.Load();
             Universalis = new Universalis();
             GameInterface = new GameInterface(Service.GameInteropProvider);
+            Font = new Font();
             MarketCache = new MarketCache(Universalis,Service.Interface.ConfigDirectory.FullName + "/universalis.json");
-            
             CharacterMonitor = new CharacterMonitor(Service.Framework, Service.ClientState, Service.ExcelCache);
             GameUi = new GameUiManager(Service.GameInteropProvider);
             TryOn = new TryOn();
@@ -146,6 +149,7 @@ namespace InventoryTools
             if (mockServices.HotkeyService != null) HotkeyService = mockServices.HotkeyService;
             if (mockServices.InventoryHistory != null) InventoryHistory = mockServices.InventoryHistory;
             if (mockServices.TeleporterIpc != null) TeleporterIpc = mockServices.TeleporterIpc;
+            if (mockServices.Font != null) Font = mockServices.Font;
             if (finishLoading)
             {
                 MarkLoaded();
@@ -237,6 +241,7 @@ namespace InventoryTools
             OdrScanner = null!;
             MobTracker = null!;
             HotkeyService = null!;
+            Font = null!;
             OnPluginLoaded = null;
         }
     }
