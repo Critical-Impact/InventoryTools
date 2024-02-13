@@ -62,7 +62,15 @@ public class MockPlugin : IMockPlugin, IDisposable
     {
         if (_isStarted)
         {
-            _windowService?.WindowSystem.Draw();
+            if (_windowService != null)
+            {
+                foreach (var window in _windowService.WindowSystem.Windows)
+                {
+                    window.AllowPinning = false;
+                    window.AllowClickthrough = false;
+                }
+                _windowService.WindowSystem.Draw();
+            }
             PluginService.FileDialogManager.Draw();
         }
     }
