@@ -22,7 +22,7 @@ public class MockInventoryScanner : IInventoryScanner
     {
     }
 
-    public void LogBagChanges(List<BagChange> bagChanges)
+    public void LogBagChanges(BagChangeContainer bagChanges)
     {
     }
 
@@ -114,43 +114,43 @@ public class MockInventoryScanner : IInventoryScanner
         return new();
     }
 
-    public unsafe void ParseCharacterBags(InventorySortOrder currentSortOrder, List<BagChange> changeSet)
+    public unsafe void ParseCharacterBags(InventorySortOrder currentSortOrder, BagChangeContainer changeSet)
     {
     }
 
-    public unsafe void ParseSaddleBags(InventorySortOrder currentSortOrder, List<BagChange> changeSet)
+    public unsafe void ParseSaddleBags(InventorySortOrder currentSortOrder, BagChangeContainer changeSet)
     {
     }
 
-    public unsafe void ParsePremiumSaddleBags(InventorySortOrder currentSortOrder, List<BagChange> changeSet)
+    public unsafe void ParsePremiumSaddleBags(InventorySortOrder currentSortOrder, BagChangeContainer changeSet)
     {
     }
 
-    public unsafe void ParseArmouryChest(InventorySortOrder currentSortOrder, List<BagChange> changeSet)
+    public unsafe void ParseArmouryChest(InventorySortOrder currentSortOrder, BagChangeContainer changeSet)
     {
     }
 
-    public unsafe void ParseCharacterEquipped(InventorySortOrder currentSortOrder, List<BagChange> changeSet)
+    public unsafe void ParseCharacterEquipped(InventorySortOrder currentSortOrder, BagChangeContainer changeSet)
     {
     }
 
-    public unsafe void ParseFreeCompanyBags(InventorySortOrder currentSortOrder, List<BagChange> changeSet)
+    public unsafe void ParseFreeCompanyBags(InventorySortOrder currentSortOrder, BagChangeContainer changeSet)
     {
     }
 
-    public unsafe void ParseArmoire(InventorySortOrder currentSortOrder, List<BagChange> changeSet)
+    public unsafe void ParseArmoire(InventorySortOrder currentSortOrder, BagChangeContainer changeSet)
     {
     }
 
-    public unsafe void ParseGlamourChest(InventorySortOrder currentSortOrder, List<BagChange> changeSet)
+    public unsafe void ParseGlamourChest(InventorySortOrder currentSortOrder, BagChangeContainer changeSet)
     {
     }
 
-    public unsafe void ParseRetainerBags(InventorySortOrder currentSortOrder, List<BagChange> changeSet)
+    public unsafe void ParseRetainerBags(InventorySortOrder currentSortOrder, BagChangeContainer changeSet)
     {
     }
 
-    public unsafe void ParseGearSets(InventorySortOrder currentSortOrder, List<BagChange> changeSet)
+    public unsafe void ParseGearSets(InventorySortOrder currentSortOrder, BagChangeContainer changeSet)
     {
     }
 }
