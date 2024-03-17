@@ -48,7 +48,7 @@ namespace InventoryTools
         private bool _historyEnabled = false;
 
         private Vector4 _tabHighlightColor = new (0.007f, 0.008f,
-            0.007f, 1.0f);
+            0.007f, 0.2f);
 
         public List<FilterConfiguration> FilterConfigurations = new();
 
@@ -221,7 +221,7 @@ namespace InventoryTools
             }
         }
 
-        [Vector4Default("0.007, 0.008,0.007, 1.0")]
+        [Vector4Default("0.007, 0.008,0.007, 0.2")]
         public Vector4 TabHighlightColor
         {
             get => _tabHighlightColor;

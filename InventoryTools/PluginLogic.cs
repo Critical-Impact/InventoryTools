@@ -77,15 +77,6 @@ namespace InventoryTools
                 PluginService.MobTracker.SetEntries(entries);
             }
 
-            PluginService.GameUi.WatchWindowState(WindowName.RetainerGrid0);
-            PluginService.GameUi.WatchWindowState(WindowName.InventoryGrid0E);
-            PluginService.GameUi.WatchWindowState(WindowName.RetainerList);
-            PluginService.GameUi.WatchWindowState(WindowName.Inventory);
-            PluginService.GameUi.WatchWindowState(WindowName.InventoryLarge);
-            PluginService.GameUi.WatchWindowState(WindowName.InventoryRetainerLarge);
-            PluginService.GameUi.WatchWindowState(WindowName.InventoryRetainer);
-            PluginService.GameUi.WatchWindowState(WindowName.InventoryBuddy);
-            PluginService.GameUi.WatchWindowState(WindowName.InventoryBuddy2);
             PluginService.HotkeyService.AddHotkey(new AirshipsWindowHotkey());
             PluginService.HotkeyService.AddHotkey(new ConfigurationWindowHotkey());
             PluginService.HotkeyService.AddHotkey(new CraftWindowHotkey());
@@ -128,6 +119,8 @@ namespace InventoryTools
                 PluginService.WindowService.OpenWindow<IntroWindow>(IntroWindow.AsKey);
                 ConfigurationManager.Config.IntroShown = true;
             }
+
+            PluginService.InventoryMonitor.Start();
         }
 
         private void CraftMonitorOnCraftCompleted(uint itemid, FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags flags, uint quantity)

@@ -1,3 +1,4 @@
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 

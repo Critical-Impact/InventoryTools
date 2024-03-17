@@ -99,7 +99,7 @@ namespace InventoryTools
             Font = new Font();
             MarketCache = new MarketCache(Universalis,Service.Interface.ConfigDirectory.FullName + "/universalis.json");
             CharacterMonitor = new CharacterMonitor(Service.Framework, Service.ClientState, Service.ExcelCache);
-            GameUi = new GameUiManager(Service.GameInteropProvider);
+            GameUi = new GameUiManager(Service.GameInteropProvider,Service.GameGui);
             TryOn = new TryOn();
             CraftMonitor = new CraftMonitor(GameUi);
             OdrScanner = new OdrScanner(CharacterMonitor);
@@ -108,7 +108,7 @@ namespace InventoryTools
             InventoryScanner.Enable();
             InventoryHistory = new InventoryHistory(InventoryMonitor);
             FilterService = new FilterService( CharacterMonitor, InventoryMonitor, InventoryHistory);
-            OverlayService = new OverlayService(FilterService, GameUi, Service.Framework);
+            OverlayService = new OverlayService(Service.AddonLifecycle, FilterService, Service.Framework);
             ContextMenuService = new ContextMenuService(pluginInterface);
             IconStorage = new IconService(Service.TextureProvider);
             WindowService = new WindowService(FilterService, Service.Log);

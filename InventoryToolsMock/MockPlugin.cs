@@ -156,7 +156,7 @@ public class MockPlugin : IMockPlugin, IDisposable
         });
         _filterService = new FilterService(_characterMonitor, _inventoryMonitor, _inventoryHistory);
         _windowService = new WindowService(_filterService, Service.Log);
-        _overlayService = new OverlayService(_filterService, _gameUiManager, Service.Framework);
+        _overlayService = new OverlayService(Service.AddonLifecycle,_filterService, Service.Framework);
         PluginService.InitaliseExplicit(new MockServices()
         {
             FilterService = _filterService,

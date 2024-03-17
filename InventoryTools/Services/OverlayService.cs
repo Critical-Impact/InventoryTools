@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Services.Ui;
+using Dalamud.Game.Addon.Lifecycle;
+using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 using InventoryTools.GameUi;
 using InventoryTools.Logic;
 using InventoryTools.Services.Interfaces;
@@ -12,15 +16,17 @@ namespace InventoryTools.Services
 {
     public class OverlayService : IDisposable, IOverlayService
     {
-        private IFilterService _filterService;
-        private IGameUiManager _gameUiManager;
-        private IFramework _frameworkService;
-        
-        public OverlayService(IFilterService filterService, IGameUiManager gameUiManager, IFramework frameworkService)
+        private readonly IFilterService _filterService;
+        private readonly IAddonLifecycle _addonLifecycle;
+        private readonly IFramework _frameworkService;
+        private readonly Dictionary<string, bool> _windowVisible = new();
+        private readonly HashSet<string> _windowsToTrack = new();
+        private readonly Dictionary<string, IAtkOverlayState> _overlays = new();
+        private FilterState? _lastState;
+
+        public OverlayService(IAddonLifecycle addonLifecycle, IFilterService filterService, IFramework frameworkService)
         {
-            _gameUiManager = gameUiManager;
-            _gameUiManager.UiVisibilityChanged += GameUiOnUiVisibilityChanged;
-            _gameUiManager.UiUpdated += GameUiOnUiUpdated;
+            _addonLifecycle = addonLifecycle;
             _filterService = filterService;
             _frameworkService = frameworkService;
             filterService.FilterModified += FilterServiceOnFilterModified;
@@ -40,9 +46,85 @@ namespace InventoryTools.Services
             AddOverlay(new FreeCompanyChestOverlay());
             AddOverlay(new InventoryMiragePrismBoxOverlay());
             AddOverlay(new CabinetWithdrawOverlay());
-            //AddOverlay(new SelectIconStringOverlay()); //TODO: Finish this
+            _addonLifecycle.RegisterListener(AddonEvent.PostRefresh, PostRefresh);
+            _addonLifecycle.RegisterListener(AddonEvent.PostSetup, PostSetup);
+            _addonLifecycle.RegisterListener(AddonEvent.PreFinalize, PreFinalize);
+            _addonLifecycle.RegisterListener(AddonEvent.PostRequestedUpdate,PostRequestedUpdate );
             frameworkService.Update += FrameworkOnUpdate;
             PluginService.OnPluginLoaded += PluginServiceOnOnPluginLoaded;
+        }
+        
+        public FilterState? LastState => _lastState;
+
+        public Dictionary<string, IAtkOverlayState> Overlays
+        {
+            get => _overlays;
+        }
+
+        private void PostRequestedUpdate(AddonEvent type, AddonArgs args)
+        {
+            if (_windowsToTrack.Contains(args.AddonName))
+            {
+                DrawOverlays(args.AddonName);
+            }
+        }
+
+        private void PreFinalize(AddonEvent type, AddonArgs args)
+        {
+            //Window destroyed
+            if (_windowsToTrack.Contains(args.AddonName))
+            {
+                _windowVisible[args.AddonName] = false;
+                DrawOverlays(args.AddonName);
+            }
+        }
+
+        private void PostSetup(AddonEvent type, AddonArgs args)
+        {
+            //Window loaded
+            if (_windowsToTrack.Contains(args.AddonName))
+            {
+                _windowVisible[args.AddonName] = true;
+                UpdateState(_lastState);
+                DrawOverlays(args.AddonName);
+            }
+        }
+
+        private unsafe void PostRefresh(AddonEvent type, AddonArgs args)
+        {
+            //Window shown/hidden/needs redraw
+            var addon = (AtkUnitBase*)args.Addon;
+            if (_windowsToTrack.Contains(args.AddonName))
+            {
+                var newState = addon->IsVisible;
+                var oldState = _windowVisible.ContainsKey(args.AddonName) && _windowVisible[args.AddonName];
+                if (oldState != newState)
+                {
+                    _windowVisible[args.AddonName] = newState;
+                    UpdateState(_lastState);
+                }
+
+                DrawOverlays(args.AddonName);
+            }
+        }
+
+        private void DrawOverlays(string addonName)
+        {
+            foreach (var overlay in Overlays)
+            {
+                if (addonName == overlay.Key)
+                {
+                    if (overlay.Value.NeedsStateRefresh)
+                    {
+                        overlay.Value.UpdateState(_lastState);
+                        overlay.Value.NeedsStateRefresh = false;
+                    }
+                    if (_windowVisible.ContainsKey(overlay.Key) && _windowVisible[overlay.Key] && overlay.Value.Draw())
+                    {
+                        
+                    }
+                }
+            }
         }
 
         private void FilterServiceOnFilterRecalculated(FilterConfiguration configuration)
@@ -103,13 +185,6 @@ namespace InventoryTools.Services
             }
         }
 
-#pragma warning disable CS8618
-        public OverlayService(bool test)
-#pragma warning restore CS8618
-        {
-            
-        }
-
         private void FrameworkOnUpdate(IFramework framework)
         {
             foreach (var overlay in _overlays)
@@ -127,18 +202,6 @@ namespace InventoryTools.Services
             }
         }
 
-        private Dictionary<WindowName, IAtkOverlayState> _overlays = new();
-        private HashSet<WindowName> _setupHooks = new();
-        private Dictionary<WindowName, DateTime> _lastUpdate = new();
-        private FilterState? _lastState;
-
-        public FilterState? LastState => _lastState;
-
-        public Dictionary<WindowName, IAtkOverlayState> Overlays
-        {
-            get => _overlays;
-        }
-
         public void UpdateState(FilterState? filterState)
         {
             foreach (var overlay in _overlays)
@@ -148,32 +211,22 @@ namespace InventoryTools.Services
             }
         }
 
-        public void SetupUpdateHook(IAtkOverlayState overlayState)
-        {
-            if (_setupHooks.Contains(overlayState.WindowName))
-            {
-                return;
-            }
-            var result = PluginService.GameUi.WatchWindowState(overlayState.WindowName);
-            if (result)
-            {
-                _setupHooks.Add(overlayState.WindowName);
-            }
-        }
 
         public void AddOverlay(IAtkOverlayState overlayState)
         {
-            if (!Overlays.ContainsKey(overlayState.WindowName))
+            _windowsToTrack.Add(overlayState.WindowName.ToString());
+            if (overlayState.ExtraWindows != null)
             {
-                if (overlayState.ExtraWindows != null)
+                foreach (var extraWindow in overlayState.ExtraWindows)
                 {
-                    foreach (var extraWindow in overlayState.ExtraWindows)
-                    {
-                        _windowOverlayMap[extraWindow] = overlayState.WindowName;
-                    }
+                    _windowsToTrack.Add(overlayState.WindowName.ToString());
                 }
-
-                Overlays.Add(overlayState.WindowName, overlayState);
+            }
+            
+            
+            if (!Overlays.ContainsKey(overlayState.WindowName.ToString()))
+            {
+                Overlays.Add(overlayState.WindowName.ToString(), overlayState);
                 overlayState.Setup();
                 overlayState.Draw();
             }
@@ -185,20 +238,11 @@ namespace InventoryTools.Services
 
         public void RemoveOverlay(WindowName windowName)
         {
-            if (Overlays.ContainsKey(windowName))
+            if (Overlays.ContainsKey(windowName.ToString()))
             {
-                var atkOverlayState = Overlays[windowName];
-
-                if (atkOverlayState.ExtraWindows != null)
-                {
-                    foreach (var extraWindow in atkOverlayState.ExtraWindows)
-                    {
-                        _windowOverlayMap.Remove(extraWindow);
-                    }
-                }
-
+                var atkOverlayState = Overlays[windowName.ToString()];
                 atkOverlayState.Clear();
-                Overlays.Remove(windowName);
+                Overlays.Remove(windowName.ToString());
             }
         }
 
@@ -215,103 +259,7 @@ namespace InventoryTools.Services
             }
         }
 
-        private Dictionary<WindowName, WindowName> _windowOverlayMap = new();
-        private Dictionary<WindowName, bool> _windowStatuses = new();
-        private void GameUiOnUiVisibilityChanged(WindowName windowname, bool? windowstate)
-        {
-            if (PluginService.PluginLoaded)
-            {
-                var extraWindowChange = false;
-                if (_windowOverlayMap.ContainsKey(windowname) && windowstate != null)
-                {
-                    var originalWindow = windowname;
-                    _windowStatuses[windowname] = windowstate.Value;
-                    windowname = _windowOverlayMap[windowname];
-                    extraWindowChange = true;
-                }
-                //As some overlays represent multiple windows we need to track each window and whether or not it's active, once the entire "group" of windows is active we update the overlay accordingly
-                if (_overlays.ContainsKey(windowname))
-                {
-                    if (windowstate != null && !extraWindowChange)
-                    {
-                        _windowStatuses[windowname] = windowstate.Value;
-                    }
-                    var overlay = _overlays[windowname];
-                    if (overlay.ExtraWindows != null)
-                    {
-                        var extraWindowsReady = overlay.ExtraWindows.All(c => _windowStatuses.ContainsKey(c) && _windowStatuses[c] == windowstate) && _windowStatuses.ContainsKey(windowname) && _windowStatuses[windowname] == windowstate;
-                        if (!extraWindowsReady)
-                        {
-                            return;
-                        }
-
-                        if (windowstate != null)
-                        {
-                            Service.Log.Verbose("All extra windows of " + windowname +
-                                              " are now active, entire overlay is now " +
-                                              (windowstate.Value ? "visible" : "invisible"));
-                        }
-                    }
-                    if (windowstate == true)
-                    {
-                        RefreshOverlayStates();
-                    }
-                    if (windowstate.HasValue && windowstate.Value)
-                    {
-                        SetupUpdateHook(overlay);
-                        if (_lastState != null && !overlay.HasState)
-                        {
-                            Service.Log.Verbose("Applying last known state to " + windowname);
-                            overlay.UpdateState(_lastState);
-                        }
-                    }
-
-                    if (windowstate.HasValue && !windowstate.Value)
-                    {
-                        Service.Log.Verbose("Applying empty state to " + windowname);
-                        overlay.UpdateState(null);
-                    }
-
-                    overlay.Draw();
-                }
-            }
-        }
         
-        private void GameUiOnUiUpdated(WindowName windowname)
-        {
-            if (PluginService.PluginLoaded)
-            {
-                if (_overlays.ContainsKey(windowname))
-                {
-                    var overlay = _overlays[windowname];
-                    if (!_lastUpdate.ContainsKey(windowname))
-                    {
-                        _lastUpdate[windowname] = DateTime.Now.AddMilliseconds(50);
-                        if (_lastState != null && !overlay.HasState)
-                        {
-                            overlay.UpdateState(_lastState);
-                        }
-                        else
-                        {
-                            overlay.Draw();
-                        }
-                    }
-                    else if (_lastUpdate[windowname] <= DateTime.Now)
-                    {
-                        if (_lastState != null && !overlay.HasState)
-                        {
-                            overlay.UpdateState(_lastState);
-                        }
-                        else
-                        {
-                            overlay.Draw();
-                        }
-
-                        _lastUpdate[windowname] = DateTime.Now.AddMilliseconds(50);
-                    }
-                }
-            }
-        }
         
         private bool _disposed;
         public void Dispose()
@@ -324,6 +272,10 @@ namespace InventoryTools.Services
         {
             if(!_disposed && disposing)
             {
+                _addonLifecycle.UnregisterListener(AddonEvent.PostRefresh, PostRefresh);
+                _addonLifecycle.UnregisterListener(AddonEvent.PostSetup, PostSetup);
+                _addonLifecycle.UnregisterListener(AddonEvent.PreFinalize, PreFinalize);                
+                _addonLifecycle.UnregisterListener(AddonEvent.PostRequestedUpdate, PostRequestedUpdate);                
                 _frameworkService.Update -= FrameworkOnUpdate;
                 _filterService.FilterTableRefreshed -= FilterServiceOnFilterTableRefreshed;
                 _filterService.FilterRecalculated -= FilterServiceOnFilterRecalculated;
@@ -331,8 +283,6 @@ namespace InventoryTools.Services
                 _filterService.FilterModified -= FilterServiceOnFilterModified;
                 _filterService.UiFilterToggled -= FilterServiceOnFilterToggled;
                 _filterService.BackgroundFilterToggled -= FilterServiceOnFilterToggled;
-                PluginService.GameUi.UiVisibilityChanged -= GameUiOnUiVisibilityChanged;
-                PluginService.GameUi.UiUpdated -= GameUiOnUiUpdated;
                 PluginService.OnPluginLoaded -= PluginServiceOnOnPluginLoaded;
             }
             _disposed = true;         
