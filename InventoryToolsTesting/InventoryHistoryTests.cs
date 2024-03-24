@@ -9,6 +9,7 @@ using DalaMock.Dalamud;
 using Dalamud.Plugin.Services;
 using InventoryTools;
 using InventoryTools.Logic;
+using InventoryTools.Services;
 using InventoryToolsMock;
 using Lumina;
 using NUnit.Framework;
@@ -32,7 +33,7 @@ namespace InventoryToolsTesting
                 {
                     PanicOnSheetChecksumMismatch = false
                 });
-            Service.ExcelCache = new ExcelCache(lumina);
+            _excelCache = new ExcelCache(lumina);
             Service.Framework = new MockFramework();
         }
 
@@ -56,7 +57,7 @@ namespace InventoryToolsTesting
         [SetUp]
         public void SetupTests()
         {
-            ConfigurationManager.Config.DisplayCrossCharacter = false;
+            Configuration.DisplayCrossCharacter = false;
         }
 
         [Test]

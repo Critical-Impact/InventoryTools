@@ -2,29 +2,39 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Images;
 using InventoryTools.Logic;
+using InventoryTools.Mediator;
+using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Ui;
 
 public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
 {
-    public DutiesWindow(string name = "Duties", ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
-    {
-        SetupWindow();
-    }
+    private readonly IIconService _iconService;
+    private readonly ImGuiService _imGuiService;
+    private readonly ExcelCache _excelCache;
 
-    public DutiesWindow() : base("Duties")
+    public DutiesWindow(ILogger<DutiesWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IIconService iconService, ExcelCache excelCache, string name = "Duties Window") : base(logger, mediator, imGuiService, configuration, name)
     {
-        SetupWindow();
+        _iconService = iconService;
+        _imGuiService = imGuiService;
+        _excelCache = excelCache;
     }
-
-    public void SetupWindow()
+    public override void Initialize()
     {
+        WindowName = "Duties";
+        Key = "duties";
+        
         _columns = new List<TableColumn<ContentFinderConditionEx>>()
         {
             new("Icon", 32, ImGuiTableColumnFlags.WidthFixed)
@@ -32,7 +42,7 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
                 OnLeftClick = OnLeftClick,
                 Draw = (ex, contentTypeId) =>
                 {
-                    if (ImGui.ImageButton(PluginService.IconStorage[(int)ex.ContentType.Value!.IconDutyFinder].ImGuiHandle,
+                    if (ImGui.ImageButton(_iconService[(int)ex.ContentType.Value!.IconDutyFinder].ImGuiHandle,
                             new Vector2(RowSize, RowSize)))
                     {
                         _columns[0].OnLeftClick?.Invoke(ex);
@@ -205,7 +215,7 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
                 Draw = (ex, contentTypeId) =>
                 {
                     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetContentRegionAvail().X / 2) - RowSize / 2.0f);
-                    PluginService.PluginLogic.DrawUldIcon(ex.AllowUndersized ? GameIcon.TickIcon : GameIcon.CrossIcon, new Vector2(RowSize, RowSize));
+                    _imGuiService.DrawUldIcon(ex.AllowUndersized ? _imGuiService.TickIcon : _imGuiService.CrossIcon, new Vector2(RowSize, RowSize));
                 }
             },
             new("Allows Explorer Mode", 80, ImGuiTableColumnFlags.WidthFixed)
@@ -230,7 +240,7 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
                 Draw = (ex, contentTypeId) =>
                 {
                     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetContentRegionAvail().X / 2) - RowSize / 2.0f);
-                    PluginService.PluginLogic.DrawUldIcon(ex.AllowExplorerMode ? GameIcon.TickIcon : GameIcon.CrossIcon, new Vector2(RowSize, RowSize));
+                    _imGuiService.DrawUldIcon(ex.AllowExplorerMode ? _imGuiService.TickIcon : _imGuiService.CrossIcon, new Vector2(RowSize, RowSize));
                 }
             },
             new("PVP", 50, ImGuiTableColumnFlags.WidthFixed)
@@ -255,7 +265,7 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
                 Draw = (ex, contentTypeId) =>
                 {
                     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetContentRegionAvail().X / 2) - RowSize / 2.0f);
-                    PluginService.PluginLogic.DrawUldIcon(ex.PvP ? GameIcon.TickIcon : GameIcon.CrossIcon, new Vector2(RowSize, RowSize));
+                    _imGuiService.DrawUldIcon(ex.PvP ? _imGuiService.TickIcon : _imGuiService.CrossIcon, new Vector2(RowSize, RowSize));
                 }
             },
             new("Accepted Classes", 100, ImGuiTableColumnFlags.WidthFixed)
@@ -283,14 +293,14 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
                 }
             },
         };
-        _tabs = Service.ExcelCache.GetContentTypeSheet().Where(c => c.Name.ToDalamudString().ToString() != "" && c.IconDutyFinder != 0).ToDictionary(c => c.RowId, c =>c.Name.ToString());
+        _tabs = _excelCache.GetContentTypeSheet().Where(c => c.Name.ToDalamudString().ToString() != "" && c.IconDutyFinder != 0).ToDictionary(c => c.RowId, c =>c.Name.ToString());
         _items = new Dictionary<uint, List<ContentFinderConditionEx>>();
         _filteredItems = new Dictionary<uint, List<ContentFinderConditionEx>>();
     }
 
     private bool OnLeftClick(ContentFinderConditionEx arg)
     {
-        PluginService.WindowService.OpenDutyWindow(arg.RowId);
+        MediatorService.Publish(new OpenUintWindowMessage(typeof(DutyWindow), arg.RowId));
         return true;
     }
 
@@ -300,12 +310,12 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
         {
             if (contentTypeId == 0)
             {
-                var duties = Service.ExcelCache.GetContentFinderConditionExSheet().Where(c => c.Name.ToDalamudString().ToString() != "").ToList();
+                var duties = _excelCache.GetContentFinderConditionExSheet().Where(c => c.Name.ToDalamudString().ToString() != "").ToList();
                 _items.Add(contentTypeId, duties);
             }
             else
             {
-                var duties = Service.ExcelCache.GetContentFinderConditionExSheet().Where(c => c.Name.ToDalamudString().ToString() != "" && c.ContentType.Row == contentTypeId).ToList();
+                var duties = _excelCache.GetContentFinderConditionExSheet().Where(c => c.Name.ToDalamudString().ToString() != "" && c.ContentType.Row == contentTypeId).ToList();
                 _items.Add(contentTypeId, duties);
             }
         }
@@ -341,13 +351,8 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
     public override string TableName => _tableName;
 
     public override bool UseClipper => _useClipper;
-
-    public static string AsKey
-    {
-        get { return "duties"; }
-    }
-
-    public override string Key => AsKey;
+    public override string GenericKey => "duties";
+    public override string GenericName => "Duties";
     public override bool DestroyOnClose => false;
     public override bool SaveState => true;
     public override Vector2? MaxSize { get; } = new(2000, 2000);
@@ -390,5 +395,4 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
     }
 
     public override FilterConfiguration? SelectedConfiguration => null;
-
 }

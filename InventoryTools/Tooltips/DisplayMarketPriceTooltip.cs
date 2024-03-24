@@ -2,22 +2,34 @@ using System;
 using System.Collections.Generic;
 using CriticalCommonLib;
 using CriticalCommonLib.Enums;
+using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Services;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
+using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using InventoryTools.Logic;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Tooltips;
 
 public class DisplayMarketPriceTooltip : BaseTooltip
 {
+    private readonly ICharacterMonitor _characterMonitor;
+    private readonly IMarketCache _marketCache;
+
+    public DisplayMarketPriceTooltip(ILogger<DisplayMarketPriceTooltip> logger, ExcelCache excelCache, InventoryToolsConfiguration configuration, IGameGui gameGui, ICharacterMonitor characterMonitor, IMarketCache marketCache) : base(logger, excelCache, configuration, gameGui)
+    {
+        _characterMonitor = characterMonitor;
+        _marketCache = marketCache;
+    }
     private const string indentation = "      ";
 
     public override bool IsEnabled =>
-        ConfigurationManager.Config.DisplayTooltip &&
-        (ConfigurationManager.Config.TooltipDisplayMarketAveragePrice ||
-         ConfigurationManager.Config.TooltipDisplayMarketLowestPrice);
+        Configuration.DisplayTooltip &&
+        (Configuration.TooltipDisplayMarketAveragePrice ||
+         Configuration.TooltipDisplayMarketLowestPrice);
 
     public override unsafe void OnGenerateItemTooltip(NumberArrayData* numberArrayData, StringArrayData* stringArrayData)
     {
@@ -48,27 +60,34 @@ public class DisplayMarketPriceTooltip : BaseTooltip
 
             if (seStr != null && seStr.Payloads.Count > 0)
             {
-                if (ConfigurationManager.Config.TooltipDisplayMarketAveragePrice ||
-                    ConfigurationManager.Config.TooltipDisplayMarketLowestPrice)
+                if (Configuration.TooltipDisplayMarketAveragePrice ||
+                    Configuration.TooltipDisplayMarketLowestPrice)
                 {
                     var hoverItemId = HoverItemId;
-                    if (!(Service.ExcelCache.GetItemExSheet().GetRow((uint)hoverItemId)?.IsUntradable ?? true))
+                    if (!(ExcelCache.GetItemExSheet().GetRow((uint)hoverItemId)?.IsUntradable ?? true))
                     {
-                        var marketData = PluginService.MarketCache.GetPricing((uint)hoverItemId, false);
-                        if (marketData != null)
+                        var activeCharacter = _characterMonitor.ActiveCharacter;
+                        if (activeCharacter != null)
                         {
-                            textLines.Add("Market Board Data:\n");
-                            if (ConfigurationManager.Config.TooltipDisplayMarketAveragePrice)
+                            var marketData = _marketCache.GetPricing((uint)hoverItemId, activeCharacter.WorldId, false);
+                            if (marketData != null)
                             {
-                                textLines.Add($"{indentation}Average Price: {Math.Round(marketData.averagePriceNQ, 0)}\n");
-                                textLines.Add(
-                                    $"{indentation}Average Price (HQ): {Math.Round(marketData.averagePriceHQ, 0)}\n");
-                            }
+                                textLines.Add("Market Board Data:\n");
+                                if (Configuration.TooltipDisplayMarketAveragePrice)
+                                {
+                                    textLines.Add(
+                                        $"{indentation}Average Price: {Math.Round(marketData.AveragePriceNq, 0)}\n");
+                                    textLines.Add(
+                                        $"{indentation}Average Price (HQ): {Math.Round(marketData.AveragePriceHq, 0)}\n");
+                                }
 
-                            if (ConfigurationManager.Config.TooltipDisplayMarketLowestPrice)
-                            {
-                                textLines.Add($"{indentation}Minimum Price: {Math.Round(marketData.minPriceNQ, 0)}\n");
-                                textLines.Add($"{indentation}Minimum Price (HQ): {Math.Round(marketData.minPriceHQ, 0)}\n");
+                                if (Configuration.TooltipDisplayMarketLowestPrice)
+                                {
+                                    textLines.Add(
+                                        $"{indentation}Minimum Price: {Math.Round(marketData.MinPriceNq, 0)}\n");
+                                    textLines.Add(
+                                        $"{indentation}Minimum Price (HQ): {Math.Round(marketData.MinPriceHq, 0)}\n");
+                                }
                             }
                         }
                     }
@@ -93,7 +112,7 @@ public class DisplayMarketPriceTooltip : BaseTooltip
                 {
                     var lines = new List<Payload>()
                     {
-                        new UIForegroundPayload((ushort)(ConfigurationManager.Config.TooltipColor ?? 1)),
+                        new UIForegroundPayload((ushort)(Configuration.TooltipColor ?? 1)),
                         new UIGlowPayload(0),
                         new TextPayload(newText),
                         new UIGlowPayload(0),

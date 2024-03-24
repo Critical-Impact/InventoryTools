@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using CriticalCommonLib.Services.Ui;
 using InventoryTools.GameUi;
@@ -5,15 +6,13 @@ using InventoryTools.Logic;
 
 namespace InventoryTools.Services.Interfaces;
 
-public interface IOverlayService
+public interface IOverlayService : IDisposable
 {
     void RefreshOverlayStates();
     FilterState? LastState { get; }
-    Dictionary<string, IAtkOverlayState> Overlays { get; }
+    List<IGameOverlay> Overlays { get; }
     void UpdateState(FilterState? filterState);
-    void AddOverlay(IAtkOverlayState overlayState);
-    void RemoveOverlay(WindowName windowName);
-    void RemoveOverlay(IAtkOverlayState overlayState);
+    void EnableOverlay(IGameOverlay overlayState);
+    void DisableOverlay(IGameOverlay overlayState);
     void ClearOverlays();
-    void Dispose();
 }

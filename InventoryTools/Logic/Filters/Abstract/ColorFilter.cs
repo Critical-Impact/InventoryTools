@@ -1,6 +1,8 @@
 using System.Numerics;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters.Abstract
 {
@@ -49,7 +51,7 @@ namespace InventoryTools.Logic.Filters.Abstract
                 ImGui.TextColored(ImGuiColors.DalamudRed, "The alpha is currently set to 0, this will be invisible.");
             }
             ImGui.SameLine();
-            UiHelpers.HelpMarker(HelpText);
+            ImGuiService.HelpMarker(HelpText);
             if (HasValueSet(configuration) && ShowReset)
             {
                 ImGui.SameLine();
@@ -75,6 +77,10 @@ namespace InventoryTools.Logic.Filters.Abstract
         public override void ResetFilter(FilterConfiguration configuration)
         {
             UpdateFilterConfiguration(configuration, DefaultValue);
+        }
+
+        protected ColorFilter(ILogger logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
         }
     }
 }

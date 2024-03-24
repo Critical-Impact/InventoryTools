@@ -1,6 +1,8 @@
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -30,6 +32,10 @@ namespace InventoryTools.Logic.Filters
         public override void UpdateFilterConfiguration(FilterConfiguration configuration, bool? newValue)
         {
             configuration.SourceAllHouses = newValue;
+        }
+
+        public SourceAllHousingFilter(ILogger<SourceAllHousingFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
         }
     }
 }

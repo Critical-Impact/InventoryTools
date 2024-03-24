@@ -1,13 +1,22 @@
+using System.Collections.Generic;
+using CriticalCommonLib.Interfaces;
+using CriticalCommonLib.Services.Mediator;
 using Dalamud.Game.Text;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 using ImGuiUtil = InventoryTools.Ui.Widgets.ImGuiUtil;
 
 namespace InventoryTools.Logic.Columns.Abstract
 {
     public abstract class DoubleGilColumn : DoubleIntegerColumn
     {
-        public override IColumnEvent? DoDraw((int, int)? currentValue, int rowIndex,
-            FilterConfiguration filterConfiguration)
+        public DoubleGilColumn(ILogger logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
+        public override List<MessageBase>? DoDraw(IItem item, (int, int)? currentValue, int rowIndex,
+            FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
             ImGui.TableNextColumn();
             if (currentValue != null)

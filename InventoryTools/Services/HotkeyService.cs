@@ -4,28 +4,50 @@ using Dalamud.Game.ClientState.Keys;
 using InventoryTools.Hotkeys;
 using System.Linq;
 using CriticalCommonLib;
+using CriticalCommonLib.Services.Mediator;
 using Dalamud.Plugin.Services;
 using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Services;
 
-public class HotkeyService : IHotkeyService
+public class HotkeyService : DisposableMediatorSubscriberBase, IHotkeyService
 {
     private IFramework _frameworkService;
     private IKeyState _keyStateService;
-    private List<Hotkey> _hotKeys;
-    public HotkeyService(IFramework framework, IKeyState keyState)
+    private readonly ILogger _logger;
+    private readonly MediatorService _mediatorService;
+    private List<IHotkey> _hotKeys;
+    public HotkeyService(ILogger<HotkeyService> logger, MediatorService mediatorService, IFramework framework, IKeyState keyState, IEnumerable<IHotkey> hotkeys) : base(logger, mediatorService)
     {
-        _hotKeys = new List<Hotkey>();
+        _hotKeys = new List<IHotkey>();
         _frameworkService = framework;
         _keyStateService = keyState;
+        _logger = logger;
+        _mediatorService = mediatorService;
+        _hotKeys = hotkeys.ToList();
         _frameworkService.Update += FrameworkServiceOnUpdate;
     }
 
-    public void AddHotkey(Hotkey hotkey)
+    public void AddHotkey<T>() where T : IHotkey, new()
     {
         var hotKeys = _hotKeys.ToList();
-        hotKeys.Add(hotkey);
+        var hotKey = new T();
+        hotKeys.Add(hotKey);
+        _hotKeys = hotKeys;
+    }
+
+    public void AddHotkey(IHotkey instance)
+    {
+        var hotKeys = _hotKeys.ToList();
+        hotKeys.Add(instance);
+        _hotKeys = hotKeys;
+    }
+
+    public void AddHotkey<T>(T instance) where T : IHotkey
+    {
+        var hotKeys = _hotKeys.ToList();
+        hotKeys.Add(instance);
         _hotKeys = hotKeys;
     }
 
@@ -89,7 +111,7 @@ public class HotkeyService : IHotkeyService
 #if DEBUG
         if( _disposed == false )
         {
-            Service.Log.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
+            _logger.LogError("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
         }
 #endif
         Dispose (true);

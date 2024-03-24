@@ -4,114 +4,167 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Addons;
+using CriticalCommonLib.MarketBoard;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
+using CriticalCommonLib.Services.Ui;
 using Dalamud.Interface.Colors;
+using Dalamud.Interface.ImGuiFileDialog;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Ui.Widgets;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin.Services;
+using InventoryTools.Mediator;
+using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.Logging;
+using OtterGui.Classes;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 
 namespace InventoryTools.Ui
 {
-    public class FiltersWindow : Window
+    public class FiltersWindow : GenericWindow
     {
+        private readonly IIconService _iconService;
+        private readonly IListService _listService;
+        private readonly IFilterService _filterService;
+        private readonly TableService _tableService;
+        private readonly IChatUtilities _chatUtilities;
+        private readonly ICharacterMonitor _characterMonitor;
+        private readonly IUniversalis _universalis;
+        private readonly FileDialogManager _fileDialogManager;
+        private readonly IGameUiManager _gameUiManager;
+        private readonly InventoryHistory _inventoryHistory;
+        private readonly InventoryToolsConfiguration _configuration;
+
+        public FiltersWindow(ILogger<FiltersWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IIconService iconService, IListService listService, IFilterService filterService, TableService tableService, IChatUtilities chatUtilities, ICharacterMonitor characterMonitor, IUniversalis universalis, FileDialogManager fileDialogManager, IGameUiManager gameUiManager, InventoryHistory inventoryHistory) : base(logger, mediator, imGuiService, configuration, "Filters Window")
+        {
+            _iconService = iconService;
+            _listService = listService;
+            _filterService = filterService;
+            _tableService = tableService;
+            _chatUtilities = chatUtilities;
+            _characterMonitor = characterMonitor;
+            _universalis = universalis;
+            _fileDialogManager = fileDialogManager;
+            _gameUiManager = gameUiManager;
+            _inventoryHistory = inventoryHistory;
+            _configuration = configuration;
+            _editIcon = new(_iconService.LoadImage("edit"),  new Vector2(22, 22));
+            _settingsIcon = new(_iconService.LoadIcon(66319),  new Vector2(22, 22));
+            _craftIcon = new(_iconService.LoadImage("craft"),  new Vector2(22, 22));
+            _csvIcon = new(_iconService.LoadImage("export2"),  new Vector2(22,22));
+            _clipboardIcon = new(_iconService.LoadImage("clipboard"),  new Vector2(22,22));
+            _clearIcon = new(_iconService.LoadIcon(66308),  new Vector2(22, 22));
+            _closeSettingsIcon = new(_iconService.LoadIcon(66311),  new Vector2(22, 22));
+            _marketIcon = new(_iconService.LoadImage("refresh-web"),  new Vector2(22, 22));
+            _addIcon = new(_iconService.LoadIcon(66315),  new Vector2(22, 22));
+            _menuIcon = new(_iconService.LoadImage("menu"),  new Vector2(22, 22));
+        }
+        public override void Initialize()
+        {
+            Key = "filters";
+            WindowName = "Items";
+            _settingsMenu  = new PopupMenu("configMenu", PopupMenu.PopupMenuButtons.All,
+                new List<PopupMenu.IPopupMenuItem>()
+                {
+                    new PopupMenu.PopupMenuItemSelectable("Mob Window", "mobs", OpenMobsWindow,"Open the mobs window."),
+                    new PopupMenu.PopupMenuItemSelectable("Npcs Window", "npcs", OpenNpcsWindow,"Open the npcs window."),
+                    new PopupMenu.PopupMenuItemSelectable("Duties Window", "duties", OpenDutiesWindow,"Open the duties window."),
+                    new PopupMenu.PopupMenuItemSelectable("Airships Window", "airships", OpenAirshipsWindow,"Open the airships window."),
+                    new PopupMenu.PopupMenuItemSelectable("Submarines Window", "submarines", OpenSubmarinesWindow,"Open the submarines window."),
+                    new PopupMenu.PopupMenuItemSelectable("Retainer Ventures Window", "ventures", OpenRetainerVenturesWindow,"Open the retainer ventures window."),
+                    new PopupMenu.PopupMenuItemSelectable("Tetris", "tetris", OpenTetrisWindow,"Open the tetris window.", () => _configuration.TetrisEnabled),
+                    new PopupMenu.PopupMenuItemSeparator(),
+                    new PopupMenu.PopupMenuItemSelectable("Help", "help", OpenHelpWindow,"Open the help window."),
+                });
+            
+            _tabLayout = Utils.GenerateRandomId();
+            _addFilterMenu = new PopupMenu("addFilter", PopupMenu.PopupMenuButtons.LeftRight,
+                new List<PopupMenu.IPopupMenuItem>()
+                {
+                    new PopupMenu.PopupMenuItemSelectableAskName("Search Filter", "adf1", "New Search Filter", AddSearchFilter, "This will create a new filter that let's you search for specific items within your characters and retainers inventories."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Sort Filter", "af2", "New Sort Filter", AddSortFilter, "This will create a new filter that let's you search for specific items within your characters and retainers inventories then determine where they should be moved to."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Game Item Filter", "af3", "New Game Item Filter", AddGameItemFilter, "This will create a filter that lets you search for all items in the game."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("History Filter", "af4", "New History Item Filter", AddHistoryFilter, "This will create a filter that lets you view historical data of how your inventory has changed."),
+                });
+            MediatorService.Subscribe<ListInvalidatedMessage>(this, _ => Invalidate());
+            MediatorService.Subscribe<ListRepositionedMessage>(this, _ => Invalidate());
+            MediatorService.Subscribe<ListAddedMessage>(this, _ => Invalidate());
+            MediatorService.Subscribe<ListRemovedMessage>(this, _ => Invalidate());
+        }
+
         public override bool SaveState => true;
 
-        public static string AsKey = "filters";
-        public override string Key => AsKey;
         private string _activeFilter = "";
         private string _tabLayout = "";
-        private int _selectedFilterTab = 0;
-        private bool _settingsActive = false;
+        private int _selectedFilterTab;
+        private bool _settingsActive;
         public override Vector2? MaxSize { get; } = new(2000, 2000);
         public override Vector2? MinSize { get; } = new(200, 200);
         public override Vector2? DefaultSize { get; } = new(600, 600);
+        public override string GenericKey => "filters";
+        public override string GenericName => "Filters";
         public override bool DestroyOnClose => false;
-        private HoverButton _editIcon { get; } = new(PluginService.IconStorage.LoadImage("edit"),  new Vector2(22, 22));
-        private HoverButton _settingsIcon { get; } = new(PluginService.IconStorage.LoadIcon(66319),  new Vector2(22, 22));
-        private HoverButton _craftIcon { get; } = new(PluginService.IconStorage.LoadImage("craft"),  new Vector2(22, 22));
-        private HoverButton _csvIcon { get; } = new(PluginService.IconStorage.LoadImage("export2"),  new Vector2(22,22));
-        private HoverButton _clipboardIcon { get; } = new(PluginService.IconStorage.LoadImage("clipboard"),  new Vector2(22,22));
-        private HoverButton _clearIcon { get; } = new(PluginService.IconStorage.LoadIcon(66308),  new Vector2(22, 22));
-        private HoverButton _closeSettingsIcon { get; } = new(PluginService.IconStorage.LoadIcon(66311),  new Vector2(22, 22));
-        private static HoverButton _marketIcon { get; } = new(PluginService.IconStorage.LoadImage("refresh-web"),  new Vector2(22, 22));
-        private HoverButton _addIcon { get; } = new(PluginService.IconStorage.LoadIcon(66315),  new Vector2(22, 22));
-        private static HoverButton _menuIcon { get; } = new(PluginService.IconStorage.LoadImage("menu"),  new Vector2(22, 22));
+        private HoverButton _editIcon { get; }
+        private HoverButton _settingsIcon { get; }
+        private HoverButton _craftIcon { get; }
+        private HoverButton _csvIcon { get; }
+        private HoverButton _clipboardIcon { get; }
+        private HoverButton _clearIcon { get; }
+        private HoverButton _closeSettingsIcon { get; }
+        private HoverButton _marketIcon { get; }
+        private HoverButton _addIcon { get; }
+        private HoverButton _menuIcon { get; }
 
         
         private List<FilterConfiguration>? _filters;
         private PopupMenu _addFilterMenu = null!;
 
-        private PopupMenu _settingsMenu = new PopupMenu("configMenu", PopupMenu.PopupMenuButtons.All,
-            new List<PopupMenu.IPopupMenuItem>()
-            {
-                new PopupMenu.PopupMenuItemSelectable("Mob Window", "mobs", OpenMobsWindow,"Open the mobs window."),
-                new PopupMenu.PopupMenuItemSelectable("Npcs Window", "npcs", OpenNpcsWindow,"Open the npcs window."),
-                new PopupMenu.PopupMenuItemSelectable("Duties Window", "duties", OpenDutiesWindow,"Open the duties window."),
-                new PopupMenu.PopupMenuItemSelectable("Airships Window", "airships", OpenAirshipsWindow,"Open the airships window."),
-                new PopupMenu.PopupMenuItemSelectable("Submarines Window", "submarines", OpenSubmarinesWindow,"Open the submarines window."),
-                new PopupMenu.PopupMenuItemSelectable("Retainer Ventures Window", "ventures", OpenRetainerVenturesWindow,"Open the retainer ventures window."),
-                new PopupMenu.PopupMenuItemSelectable("Tetris", "tetris", OpenTetrisWindow,"Open the tetris window.", () => ConfigurationManager.Config.TetrisEnabled),
-                new PopupMenu.PopupMenuItemSeparator(),
-                new PopupMenu.PopupMenuItemSelectable("Help", "help", OpenHelpWindow,"Open the help window."),
-            });
+        private PopupMenu _settingsMenu;
 
-        private static void OpenHelpWindow(string obj)
+        private void OpenHelpWindow(string obj)
         {
-            PluginService.WindowService.OpenWindow<HelpWindow>(HelpWindow.AsKey);
+            MediatorService.Publish(new Mediator.OpenGenericWindowMessage(typeof(HelpWindow)));
         }
 
-        private static void OpenDutiesWindow(string obj)
+        private void OpenDutiesWindow(string obj)
         {
-            PluginService.WindowService.OpenWindow<DutiesWindow>(DutiesWindow.AsKey);
+            MediatorService.Publish(new Mediator.OpenGenericWindowMessage(typeof(DutiesWindow)));
         }
 
-        private static void OpenAirshipsWindow(string obj)
+        private void OpenAirshipsWindow(string obj)
         {
-            PluginService.WindowService.OpenWindow<AirshipsWindow>(AirshipsWindow.AsKey);
+            MediatorService.Publish(new Mediator.OpenGenericWindowMessage(typeof(AirshipsWindow)));
         }
 
-        private static void OpenSubmarinesWindow(string obj)
+        private void OpenSubmarinesWindow(string obj)
         {
-            PluginService.WindowService.OpenWindow<SubmarinesWindow>(SubmarinesWindow.AsKey);
+            MediatorService.Publish(new Mediator.OpenGenericWindowMessage(typeof(SubmarinesWindow)));
         }
 
-        private static void OpenRetainerVenturesWindow(string obj)
+        private void OpenRetainerVenturesWindow(string obj)
         {
-            PluginService.WindowService.OpenWindow<RetainerTasksWindow>(RetainerTasksWindow.AsKey);
+            MediatorService.Publish(new Mediator.OpenGenericWindowMessage(typeof(RetainerTasksWindow)));
         }
 
-        private static void OpenTetrisWindow(string obj)
+        private void OpenTetrisWindow(string obj)
         {
-            PluginService.WindowService.OpenWindow<TetrisWindow>(TetrisWindow.AsKey);
+            MediatorService.Publish(new Mediator.OpenGenericWindowMessage(typeof(TetrisWindow)));
         }
 
-        private static void OpenMobsWindow(string obj)
+        private void OpenMobsWindow(string obj)
         {
-            PluginService.WindowService.OpenWindow<BNpcWindow>(BNpcWindow.AsKey);
+            MediatorService.Publish(new Mediator.OpenGenericWindowMessage(typeof(BNpcsWindow)));
         }        
         
-        private static void OpenNpcsWindow(string obj)
+        private void OpenNpcsWindow(string obj)
         {
-            PluginService.WindowService.OpenWindow<ENpcsWindow>(ENpcsWindow.AsKey);
-        }
-        
-        private static void OpenNPCsWindow(string obj)
-        {
-            PluginService.WindowService.OpenWindow<ENpcsWindow>(ENpcsWindow.AsKey);
-        }
-
-        public FiltersWindow(string name = "Filters") : base(name)
-        {
-            SetupWindow();
-        }
-
-        public FiltersWindow() : base("Filters")
-        {
-            SetupWindow();
+            MediatorService.Publish(new Mediator.OpenGenericWindowMessage(typeof(ENpcsWindow)));
         }
         
         private Dictionary<FilterConfiguration, PopupMenu> _popupMenus = new();
@@ -138,7 +191,7 @@ namespace InventoryTools.Ui
         private void EditFilter(string id)
         {
             id = id.Replace("ef_", "");
-            var existingFilter = PluginService.FilterService.GetFilterByKey(id);
+            var existingFilter = _listService.GetListByKey(id);
             if (existingFilter != null)
             {
                 FocusFilter(existingFilter);
@@ -152,10 +205,10 @@ namespace InventoryTools.Ui
             if (confirmed)
             {
                 id = id.Replace("rf_", "");
-                var existingFilter = PluginService.FilterService.GetFilterByKey(id);
+                var existingFilter = _listService.GetListByKey(id);
                 if (existingFilter != null)
                 {
-                    PluginService.FilterService.RemoveFilter(existingFilter);
+                    _listService.RemoveList(existingFilter);
                 }
             }
         }
@@ -163,11 +216,11 @@ namespace InventoryTools.Ui
         private void MoveFilterDown(string id)
         {
             id = id.Replace("md_", "");
-            var existingFilter = PluginService.FilterService.GetFilterByKey(id);
+            var existingFilter = _listService.GetListByKey(id);
             if (existingFilter != null)
             {
                 var currentFilter = this.SelectedConfiguration;
-                PluginService.FilterService.MoveFilterDown(existingFilter);
+                _listService.MoveListDown(existingFilter);
                 if (currentFilter != null)
                 {
                     FocusFilter(currentFilter);
@@ -178,11 +231,11 @@ namespace InventoryTools.Ui
         private void MoveFilterUp(string id)
         {
             id = id.Replace("mu_", "");
-            var existingFilter = PluginService.FilterService.GetFilterByKey(id);
+            var existingFilter = _listService.GetListByKey(id);
             if (existingFilter != null)
             {
                 var currentFilter = this.SelectedConfiguration;
-                PluginService.FilterService.MoveFilterUp(existingFilter);
+                _listService.MoveListUp(existingFilter);
                 if (currentFilter != null)
                 {
                     FocusFilter(currentFilter);
@@ -193,14 +246,11 @@ namespace InventoryTools.Ui
         private void DuplicateFilter(string filterName, string id)
         {
             id = id.Replace("df_", "");
-            var existingFilter = PluginService.FilterService.GetFilterByKey(id);
+            var existingFilter = _listService.GetListByKey(id);
             if (existingFilter != null)
             {
-                var newFilter = PluginService.FilterService.DuplicateFilter(existingFilter, filterName);
-                var configWindow = PluginService.WindowService.GetWindow<ConfigurationWindow>(ConfigurationWindow.AsKey);
-                configWindow.Open();
-                configWindow.BringToFront();
-                configWindow.SetActiveFilter(newFilter);
+                var newFilter = _listService.DuplicateList(existingFilter, filterName);
+                MediatorService.Publish(new Mediator.OpenConfigurationWindowAndEditFilterMessage(newFilter));
                 FocusFilter(newFilter);
             }
         }
@@ -224,65 +274,39 @@ namespace InventoryTools.Ui
                 }
             }
         }
-
-
-        public void SetupWindow()
-        {
-            _tabLayout = Utils.GenerateRandomId();
-            _addFilterMenu = new PopupMenu("addFilter", PopupMenu.PopupMenuButtons.LeftRight,
-                new List<PopupMenu.IPopupMenuItem>()
-                {
-                    new PopupMenu.PopupMenuItemSelectableAskName("Search Filter", "adf1", "New Search Filter", AddSearchFilter, "This will create a new filter that let's you search for specific items within your characters and retainers inventories."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Sort Filter", "af2", "New Sort Filter", AddSortFilter, "This will create a new filter that let's you search for specific items within your characters and retainers inventories then determine where they should be moved to."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Game Item Filter", "af3", "New Game Item Filter", AddGameItemFilter, "This will create a filter that lets you search for all items in the game."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("History Filter", "af4", "New History Item Filter", AddHistoryFilter, "This will create a filter that lets you view historical data of how your inventory has changed."),
-                });
-        }
         
         private void AddSearchFilter(string newName, string id)
         {
             var filterConfiguration = new FilterConfiguration(newName,
                 Guid.NewGuid().ToString("N"), FilterType.SearchFilter);
-            PluginService.FilterService.AddFilter(filterConfiguration);
+            _listService.AddList(filterConfiguration);
             Invalidate();
-            var configWindow = PluginService.WindowService.GetWindow<ConfigurationWindow>(ConfigurationWindow.AsKey);
-            configWindow.Open();
-            configWindow.BringToFront();
-            configWindow.SetActiveFilter(filterConfiguration);
+            MediatorService.Publish(new Mediator.OpenConfigurationWindowAndEditFilterMessage(filterConfiguration));
         }
         
         private void AddHistoryFilter(string newName, string id)
         {
             var filterConfiguration = new FilterConfiguration(newName,
                 Guid.NewGuid().ToString("N"), FilterType.HistoryFilter);
-            PluginService.FilterService.AddFilter(filterConfiguration);
+            _listService.AddList(filterConfiguration);
             Invalidate();
-            var configWindow = PluginService.WindowService.GetWindow<ConfigurationWindow>(ConfigurationWindow.AsKey);
-            configWindow.Open();
-            configWindow.BringToFront();
-            configWindow.SetActiveFilter(filterConfiguration);
+            MediatorService.Publish(new Mediator.OpenConfigurationWindowAndEditFilterMessage(filterConfiguration));
         }
 
         private void AddGameItemFilter(string newName, string id)
         {
             var filterConfiguration = new FilterConfiguration(newName,Guid.NewGuid().ToString("N"), FilterType.GameItemFilter);
-            PluginService.FilterService.AddFilter(filterConfiguration);
+            _listService.AddList(filterConfiguration);
             Invalidate();
-            var configWindow = PluginService.WindowService.GetWindow<ConfigurationWindow>(ConfigurationWindow.AsKey);
-            configWindow.Open();
-            configWindow.BringToFront();
-            configWindow.SetActiveFilter(filterConfiguration);
+            MediatorService.Publish(new Mediator.OpenConfigurationWindowAndEditFilterMessage(filterConfiguration));
         }
 
         private void AddSortFilter(string newName, string id)
         {
             var filterConfiguration = new FilterConfiguration(newName,Guid.NewGuid().ToString("N"), FilterType.SortingFilter);
-            PluginService.FilterService.AddFilter(filterConfiguration);
+            _listService.AddList(filterConfiguration);
             Invalidate();
-            var configWindow = PluginService.WindowService.GetWindow<ConfigurationWindow>(ConfigurationWindow.AsKey);
-            configWindow.Open();
-            configWindow.BringToFront();
-            configWindow.SetActiveFilter(filterConfiguration);
+            MediatorService.Publish(new Mediator.OpenConfigurationWindowAndEditFilterMessage(filterConfiguration));
         }
 
         private List<FilterConfiguration> Filters
@@ -291,7 +315,7 @@ namespace InventoryTools.Ui
             {
                 if (_filters == null)
                 {
-                    _filters = PluginService.FilterService.FiltersList.Where(c => c.FilterType != FilterType.CraftFilter).ToList();
+                    _filters = _listService.Lists.Where(c => c.FilterType != FilterType.CraftFilter).ToList();
                 }
 
                 return _filters;
@@ -302,13 +326,32 @@ namespace InventoryTools.Ui
         private DateTime? _applyNewTabTime;
 
         private bool SwitchNewTab => _newTab != null && _applyNewTabTime != null && _applyNewTabTime.Value <= DateTime.Now;
-        
+
+        public override void OnClose()
+        {
+            if (SelectedConfiguration != null)
+            {
+                SelectedConfiguration.Active = false;
+            }
+        }
+
         public override unsafe void Draw()
         {
-            if (SelectedConfiguration != null && SelectedConfiguration.FilterType == FilterType.HistoryFilter && !ConfigurationManager.Config.HasSeenNotification(NotificationPopup.HistoryNotice) && ImGui.IsWindowFocused())
+            foreach (var filter in Filters)
+            {
+                if (SelectedConfiguration == filter && ImGui.IsWindowFocused())
+                {
+                    filter.Active = true;
+                }
+                else
+                {
+                    filter.Active = false;
+                }
+            }
+            if (SelectedConfiguration != null && SelectedConfiguration.FilterType == FilterType.HistoryFilter && !_configuration.HasSeenNotification(NotificationPopup.HistoryNotice) && ImGui.IsWindowFocused())
             {
                 ImGui.OpenPopup("historynotice");
-                ConfigurationManager.Config.MarkNotificationSeen(NotificationPopup.HistoryNotice);
+                _configuration.MarkNotificationSeen(NotificationPopup.HistoryNotice);
             }
             var choice = InventoryTools.Ui.Widgets.ImGuiUtil.ConfirmPopup("historynotice", new Vector2(800,340) * ImGui.GetIO().FontGlobalScale, () =>
             {
@@ -340,10 +383,10 @@ namespace InventoryTools.Ui
             });
             if (choice != null)
             {
-                ConfigurationManager.Config.HistoryEnabled = choice.Value;
+                _configuration.HistoryEnabled = choice.Value;
             }
             
-            if (ConfigurationManager.Config.FiltersLayout == WindowLayout.Sidebar)
+            if (_configuration.FiltersLayout == WindowLayout.Sidebar)
             {
                 DrawSidebar();
                 DrawMainWindow();
@@ -382,22 +425,18 @@ namespace InventoryTools.Ui
                             var filterConfiguration = filterConfigurations[index];
                             if (isWindowFocused)
                             {
-                                if (ConfigurationManager.Config.SwitchFiltersAutomatically &&
-                                    ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
-                                    ConfigurationManager.Config.ActiveUiFilter != null)
+                                if (_configuration.SwitchFiltersAutomatically &&
+                                    _configuration.ActiveUiFilter != filterConfiguration.Key &&
+                                    _configuration.ActiveUiFilter != null)
                                 {
                                     Service.Framework.RunOnFrameworkThread(() =>
                                     {
-                                        PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
+                                        _listService.ToggleActiveUiList(filterConfiguration);
                                     });
                                 }
                             }
 
-                            var itemTable = PluginService.FilterService.GetFilterTable(filterConfiguration);
-                            if (itemTable == null)
-                            {
-                                continue;
-                            }
+                            var itemTable = _tableService.GetListTable(filterConfiguration);
 
                             if (_settingsActive)
                             {
@@ -408,13 +447,13 @@ namespace InventoryTools.Ui
                                 var activeFilter = DrawFilter(itemTable, filterConfiguration);
                                 if (_activeFilter != activeFilter && ImGui.IsWindowFocused())
                                 {
-                                    if (ConfigurationManager.Config.SwitchFiltersAutomatically &&
-                                        ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
-                                        ConfigurationManager.Config.ActiveUiFilter != null)
+                                    if (_configuration.SwitchFiltersAutomatically &&
+                                        _configuration.ActiveUiFilter != filterConfiguration.Key &&
+                                        _configuration.ActiveUiFilter != null)
                                     {
                                         Service.Framework.RunOnFrameworkThread(() =>
                                         {
-                                            PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
+                                            _listService.ToggleActiveUiList(filterConfiguration);
                                         });
                                     }
                                 }
@@ -443,13 +482,13 @@ namespace InventoryTools.Ui
                                         index == _selectedFilterTab))
                                 {
                                     _selectedFilterTab = index;
-                                    if (ConfigurationManager.Config.SwitchFiltersAutomatically &&
-                                        ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
-                                        ConfigurationManager.Config.ActiveUiFilter != null)
+                                    if (_configuration.SwitchFiltersAutomatically &&
+                                        _configuration.ActiveUiFilter != filterConfiguration.Key &&
+                                        _configuration.ActiveUiFilter != null)
                                     {
                                         Service.Framework.RunOnFrameworkThread(() =>
                                         {
-                                            PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
+                                            _listService.ToggleActiveUiList(filterConfiguration);
                                         });
                                     }
                                 }
@@ -489,11 +528,7 @@ namespace InventoryTools.Ui
                 for (var index = 0; index < filterConfigurations.Count; index++)
                 {
                     var filterConfiguration = filterConfigurations[index];
-                    var itemTable = PluginService.FilterService.GetFilterTable(filterConfiguration);
-                    if (itemTable == null)
-                    {
-                        continue;
-                    }
+                    var itemTable = _tableService.GetListTable(filterConfiguration);
 
                     if (filterConfiguration.DisplayInTabs)
                     {
@@ -522,13 +557,13 @@ namespace InventoryTools.Ui
                                     var activeFilter = DrawFilter(itemTable, filterConfiguration);
                                     if (_activeFilter != activeFilter && ImGui.IsWindowFocused())
                                     {
-                                        if (ConfigurationManager.Config.SwitchFiltersAutomatically &&
-                                            ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
-                                            ConfigurationManager.Config.ActiveUiFilter != null)
+                                        if (_configuration.SwitchFiltersAutomatically &&
+                                            _configuration.ActiveUiFilter != filterConfiguration.Key &&
+                                            _configuration.ActiveUiFilter != null)
                                         {
                                             Service.Framework.RunOnFrameworkThread(() =>
                                             {
-                                                PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
+                                                _listService.ToggleActiveUiList(filterConfiguration);
                                             });
                                         }
                                     }
@@ -538,7 +573,7 @@ namespace InventoryTools.Ui
                     }
                 }
                 
-                if (ConfigurationManager.Config.ShowFilterTab && ImGui.BeginTabItem("Filters"))
+                if (_configuration.ShowFilterTab && ImGui.BeginTabItem("All Lists"))
                 {
                     using (var child = ImRaii.Child("filterLeft", new Vector2(100, -1) * ImGui.GetIO().FontGlobalScale,
                                true))
@@ -551,12 +586,12 @@ namespace InventoryTools.Ui
                                 if (ImGui.Selectable(filterConfiguration.Name + "###fl" + filterConfiguration.Key,
                                         index == _selectedFilterTab))
                                 {
-                                    if (ConfigurationManager.Config.SwitchFiltersAutomatically &&
-                                        ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key)
+                                    if (_configuration.SwitchFiltersAutomatically &&
+                                        _configuration.ActiveUiFilter != filterConfiguration.Key)
                                     {
                                         Service.Framework.RunOnFrameworkThread(() =>
                                         {
-                                            PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
+                                            _listService.ToggleActiveUiList(filterConfiguration);
                                         });
                                     }
 
@@ -576,22 +611,19 @@ namespace InventoryTools.Ui
                                 if (_selectedFilterTab == index)
                                 {
                                     var filterConfiguration = filterConfigurations[index];
-                                    var table = PluginService.FilterService.GetFilterTable(filterConfiguration.Key);
-                                    if (table != null)
+                                    var table = _tableService.GetListTable(filterConfiguration);
+                                    var activeFilter = DrawFilter(table, filterConfiguration);
+                                    if (_activeFilter != activeFilter)
                                     {
-                                        var activeFilter = DrawFilter(table, filterConfiguration);
-                                        if (_activeFilter != activeFilter)
+                                        if (_configuration.SwitchFiltersAutomatically &&
+                                            _configuration.ActiveUiFilter != filterConfiguration.Key &&
+                                            _configuration.ActiveUiFilter != null)
                                         {
-                                            if (ConfigurationManager.Config.SwitchFiltersAutomatically &&
-                                                ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
-                                                ConfigurationManager.Config.ActiveUiFilter != null)
+                                            Service.Framework.RunOnFrameworkThread(() =>
                                             {
-                                                Service.Framework.RunOnFrameworkThread(() =>
-                                                {
-                                                    PluginService.FilterService.ToggleActiveUiFilter(
-                                                        filterConfiguration);
-                                                });
-                                            }
+                                                _listService.ToggleActiveUiList(
+                                                    filterConfiguration);
+                                            });
                                         }
                                     }
                                 }
@@ -611,7 +643,7 @@ namespace InventoryTools.Ui
                 _addFilterMenu.Draw();
             }
         }
-        private string? _newName = null;
+        private string? _newName;
         private void DrawSettingsPanel(FilterConfiguration filterConfiguration)
         {
             using (var contentChild = ImRaii.Child("Content", new Vector2(0, -44) * ImGui.GetIO().FontGlobalScale, true))
@@ -648,7 +680,7 @@ namespace InventoryTools.Ui
                         {
                             var base64 = filterConfiguration.ExportBase64();
                             ImGui.SetClipboardText(base64);
-                            PluginService.ChatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
+                            _chatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
                         }
 
                         var filterType = filterConfiguration.FormattedFilterType;
@@ -663,7 +695,7 @@ namespace InventoryTools.Ui
                     {
                         if (tabBar.Success)
                         {
-                            foreach (var group in PluginService.PluginLogic.GroupedFilters)
+                            foreach (var group in _filterService.GroupedFilters)
                             {
                                 var hasValuesSet = false;
                                 foreach (var filter in group.Value)
@@ -739,13 +771,13 @@ namespace InventoryTools.Ui
             {
                 if (bottomBarChild.Success)
                 {
-                    UiHelpers.VerticalCenter(
+                    ImGuiService.VerticalCenter(
                         "You are currently editing the filter's configuration. Press the tick on the right hand side to save configuration.");
 
                     ImGui.SameLine();
                     float width = ImGui.GetWindowSize().X;
                     ImGui.SetCursorPosX(width - 42 * ImGui.GetIO().FontGlobalScale);
-                    UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                    ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                     if (_closeSettingsIcon.Draw("bb_settings"))
                     {
                         _settingsActive = false;
@@ -764,18 +796,18 @@ namespace InventoryTools.Ui
                 if (topBarChild.Success)
                 {
                     var highlightItems = itemTable.HighlightItems;
-                    UiHelpers.CenterElement(20 * ImGui.GetIO().FontGlobalScale);
+                    ImGuiService.CenterElement(20 * ImGui.GetIO().FontGlobalScale);
                     ImGui.Checkbox("Highlight?" + "###" + itemTable.Key + "VisibilityCheckbox",
                         ref highlightItems);
                     if (highlightItems != itemTable.HighlightItems)
                     {
                         Service.Framework.RunOnFrameworkThread(() =>
                         {
-                            PluginService.FilterService.ToggleActiveUiFilter(itemTable.FilterConfiguration);
+                            _listService.ToggleActiveUiList(itemTable.FilterConfiguration);
                         });
                     }
 
-                    if ((filterConfiguration.HighlightWhen ?? ConfigurationManager.Config.HighlightWhen) ==
+                    if ((filterConfiguration.HighlightWhen ?? _configuration.HighlightWhen) ==
                         "When Searching")
                     {
                         ImGuiUtil.HoverTooltip(
@@ -789,7 +821,7 @@ namespace InventoryTools.Ui
 
 
                     ImGui.SameLine();
-                    UiHelpers.CenterElement(20 * ImGui.GetIO().FontGlobalScale);
+                    ImGuiService.CenterElement(20 * ImGui.GetIO().FontGlobalScale);
                     if(_clearIcon.Draw("clearSearch"))
                     {
                         itemTable.ClearFilters();
@@ -818,13 +850,13 @@ namespace InventoryTools.Ui
                 {
                     if (filterConfiguration.FilterType == FilterType.CraftFilter)
                     {
-                        var craftTable = PluginService.FilterService.GetCraftTable(filterConfiguration);
-                        craftTable?.Draw(new Vector2(0, -400));
-                        itemTable.Draw(new Vector2(0, 0));
+                        var craftTable = _tableService.GetCraftTable(filterConfiguration);
+                        MediatorService.Publish(craftTable.Draw(new Vector2(0, -400)));
+                        MediatorService.Publish(itemTable.Draw(new Vector2(0, 0)));
                     }
                     else
                     {
-                        itemTable.Draw(new Vector2(0, 0));
+                        MediatorService.Publish(itemTable.Draw(new Vector2(0, 0)));
                     }
 
                 }
@@ -836,37 +868,41 @@ namespace InventoryTools.Ui
             {
                 if (bottomBarChild.Success)
                 {
-                    UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                    ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                     if(_marketIcon.Draw("refreshMarket"))
                     {
-                        foreach (var item in itemTable.RenderSortedItems)
+                        var activeCharacter = _characterMonitor.ActiveCharacter;
+                        if (activeCharacter != null)
                         {
-                            PluginService.Universalis.QueuePriceCheck(item.InventoryItem.ItemId);
-                        }
+                            foreach (var item in itemTable.RenderSortedItems)
+                            {
+                                _universalis.QueuePriceCheck(item.InventoryItem.ItemId, activeCharacter.WorldId);
+                            }
 
-                        foreach (var item in itemTable.RenderItems)
-                        {
-                            PluginService.Universalis.QueuePriceCheck(item.RowId);
-                        }
+                            foreach (var item in itemTable.RenderItems)
+                            {
+                                _universalis.QueuePriceCheck(item.RowId, activeCharacter.WorldId);
+                            }
 
-                        foreach (var item in itemTable.InventoryChanges)
-                        {
-                            PluginService.Universalis.QueuePriceCheck(item.InventoryItem.ItemId);
+                            foreach (var item in itemTable.InventoryChanges)
+                            {
+                                _universalis.QueuePriceCheck(item.InventoryItem.ItemId, activeCharacter.WorldId);
+                            }
                         }
                     }
 
                     ImGuiUtil.HoverTooltip("Refresh Market Prices");
                     ImGui.SameLine();
-                    UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                    ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                     if (_csvIcon.Draw("exportCsv"))
                     {
-                        PluginService.FileDialogManager.SaveFileDialog("Save to csv", "*.csv", "export.csv", ".csv",
+                        _fileDialogManager.SaveFileDialog("Save to csv", "*.csv", "export.csv", ".csv",
                             (b, s) => { SaveCallback(itemTable, b, s); }, null, true);
                     }
 
                     ImGuiUtil.HoverTooltip("Export to CSV");
                     ImGui.SameLine();
-                    UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                    ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                     if (_clipboardIcon.Draw("copyJson"))
                     {
                         itemTable.ExportToJson().ToClipboard();
@@ -874,10 +910,10 @@ namespace InventoryTools.Ui
 
                     ImGuiUtil.HoverTooltip("Copy JSON to clipboard");
                     if (filterConfiguration.FilterType == FilterType.CraftFilter &&
-                        PluginService.GameUi.IsWindowVisible(
+                        _gameUiManager.IsWindowVisible(
                             CriticalCommonLib.Services.Ui.WindowName.SubmarinePartsMenu))
                     {
-                        var subMarinePartsMenu = PluginService.GameUi.GetWindow("SubmarinePartsMenu");
+                        var subMarinePartsMenu = _gameUiManager.GetWindow("SubmarinePartsMenu");
                         if (subMarinePartsMenu != null)
                         {
                             ImGui.SameLine();
@@ -900,7 +936,6 @@ namespace InventoryTools.Ui
                                                 filterConfiguration.CraftList.AddCraftItem(itemRequired,
                                                     (uint)amountLeft, InventoryItem.ItemFlags.None);
                                                 filterConfiguration.NeedsRefresh = true;
-                                                filterConfiguration.StartRefresh();
                                             });
                                         }
                                     }
@@ -910,7 +945,7 @@ namespace InventoryTools.Ui
                     }
 
                     ImGui.SameLine();
-                    UiHelpers.VerticalCenter("Pending Market Requests: " + PluginService.Universalis.QueuedCount);
+                    ImGuiService.VerticalCenter("Pending Market Requests: " + _universalis.QueuedCount);
                     if (filterConfiguration.FilterType == FilterType.CraftFilter)
                     {
                         ImGui.SameLine();
@@ -921,8 +956,8 @@ namespace InventoryTools.Ui
 
                     if (filterConfiguration.FilterType == FilterType.CraftFilter)
                     {
-                        var craftTable = PluginService.FilterService.GetCraftTable(filterConfiguration);
-                        craftTable?.DrawFooterItems();
+                        var craftTable = _tableService.GetCraftTable(filterConfiguration);
+                        craftTable.DrawFooterItems();
                         itemTable.DrawFooterItems();
                     }
                     else
@@ -933,18 +968,18 @@ namespace InventoryTools.Ui
                     var width = ImGui.GetWindowSize().X;
                     width -= 30 * ImGui.GetIO().FontGlobalScale;
                     ImGui.SetCursorPosX(width);
-                    UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                    ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                     if (_menuIcon.Draw("openMenu"))
                     {
                     }
                     _settingsMenu.Draw();
                     
                     width -= 30 * ImGui.GetIO().FontGlobalScale;
-                    UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                    ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                     ImGui.SetCursorPosX(width);
                     if (_settingsIcon.Draw("openConfig"))
                     {
-                        PluginService.WindowService.ToggleConfigurationWindow();
+                        MediatorService.Publish(new ToggleGenericWindowMessage(typeof(ConfigurationWindow)));
                     }
 
                     ImGuiUtil.HoverTooltip("Open the configuration window.");
@@ -952,10 +987,10 @@ namespace InventoryTools.Ui
                     ImGui.SetCursorPosY(0);
                     width -= 30 * ImGui.GetIO().FontGlobalScale;
                     ImGui.SetCursorPosX(width);
-                    UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                    ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                     if (_craftIcon.Draw("openCraft"))
                     {
-                        PluginService.WindowService.ToggleCraftsWindow();
+                        MediatorService.Publish(new ToggleGenericWindowMessage(typeof(CraftsWindow)));
                     }
 
                     ImGuiUtil.HoverTooltip("Open the craft window.");
@@ -965,7 +1000,7 @@ namespace InventoryTools.Ui
                         ImGui.SetCursorPosY(0);
                         width -= 30 * ImGui.GetIO().FontGlobalScale;
                         ImGui.SetCursorPosX(width);
-                        UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                        ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                         if (_clearIcon.Draw("clearHistory"))
                         {
                             ImGui.OpenPopup("confirmHistoryDelete");
@@ -978,7 +1013,7 @@ namespace InventoryTools.Ui
                             });
                         if (result == true)
                         {
-                            PluginService.InventoryHistory.ClearHistory();
+                            _inventoryHistory.ClearHistory();
                         }
 
                         ImGuiUtil.HoverTooltip("Clear your history.");
@@ -993,7 +1028,7 @@ namespace InventoryTools.Ui
                     
                     if (SelectedConfiguration != null && SelectedConfiguration.FilterType == FilterType.HistoryFilter)
                     {
-                        if (ConfigurationManager.Config.HistoryEnabled)
+                        if (_configuration.HistoryEnabled)
                         {
                             totalItems = itemTable.InventoryChanges.Count + " historical records";
                         }
@@ -1006,7 +1041,7 @@ namespace InventoryTools.Ui
                     var calcTextSize = ImGui.CalcTextSize(totalItems);
                     width -= calcTextSize.X + 15;
                     ImGui.SetCursorPosX(width);
-                    UiHelpers.VerticalCenter(totalItems);
+                    ImGuiService.VerticalCenter(totalItems);
                 }
             }
 
@@ -1022,7 +1057,7 @@ namespace InventoryTools.Ui
             }
         }
 
-        private static void SaveCallback(FilterTable filterTable, bool arg1, string arg2)
+        private void SaveCallback(FilterTable filterTable, bool arg1, string arg2)
         {
             if (arg1)
             {

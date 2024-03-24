@@ -6,18 +6,28 @@ using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Services;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
+using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Tooltips;
 
 public class AmountOwnedTooltip : BaseTooltip
 {
+    private readonly ICharacterMonitor _characterMonitor;
+    private readonly IInventoryMonitor _inventoryMonitor;
+
+    public AmountOwnedTooltip(ILogger<AmountOwnedTooltip> logger,ExcelCache excelCache, InventoryToolsConfiguration configuration, IGameGui gameGui, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor) : base(logger, excelCache, configuration, gameGui)
+    {
+        _characterMonitor = characterMonitor;
+        _inventoryMonitor = inventoryMonitor;
+    }
     private const string indentation = "      ";
     
-    public override bool IsEnabled =>
-        ConfigurationManager.Config.DisplayTooltip && ConfigurationManager.Config.TooltipDisplayAmountOwned;
+    public override bool IsEnabled => Configuration.DisplayTooltip && Configuration.TooltipDisplayAmountOwned;
     public override unsafe void OnGenerateItemTooltip(NumberArrayData* numberArrayData, StringArrayData* stringArrayData)
     {
         if (!ShouldShow()) return;
@@ -41,7 +51,7 @@ public class AmountOwnedTooltip : BaseTooltip
             }
             else
             {
-                Service.Log.Verbose("No where to put the tooltip data.");
+                Logger.LogTrace("No where to put the tooltip data.");
                 return;
             }
                 
@@ -49,32 +59,32 @@ public class AmountOwnedTooltip : BaseTooltip
                 
             if (seStr != null && seStr.Payloads.Count > 0)
             {
-                if (ConfigurationManager.Config.TooltipDisplayAmountOwned)
+                if (Configuration.TooltipDisplayAmountOwned)
                 {
-                    var ownedItems = PluginService.InventoryMonitor.AllItems.Where(item => 
+                    var ownedItems = _inventoryMonitor.AllItems.Where(item => 
                             item.ItemId == HoverItemId && 
-                            PluginService.CharacterMonitor.Characters.ContainsKey(item.RetainerId) &&
-                            ((ConfigurationManager.Config.TooltipCurrentCharacter && PluginService.CharacterMonitor.BelongsToActiveCharacter(item.RetainerId)) ||  !ConfigurationManager.Config.TooltipCurrentCharacter)
+                            _characterMonitor.Characters.ContainsKey(item.RetainerId) &&
+                            ((Configuration.TooltipCurrentCharacter && _characterMonitor.BelongsToActiveCharacter(item.RetainerId)) ||  !Configuration.TooltipCurrentCharacter)
                         )
                         .ToList();
                             
                     uint storageCount = 0;
                     List<string> locations = new List<string>();
                         
-                    if (ConfigurationManager.Config.TooltipLocationDisplayMode ==
+                    if (Configuration.TooltipLocationDisplayMode ==
                         TooltipLocationDisplayMode.CharacterBagSlotQuality)
                     {
                         foreach (var oItem in ownedItems)
                         {
                             storageCount += oItem.Quantity;
                                 
-                            if (locations.Count >= ConfigurationManager.Config.TooltipLocationLimit)
+                            if (locations.Count >= Configuration.TooltipLocationLimit)
                                 continue;
 
-                            var name = PluginService.CharacterMonitor.GetCharacterNameById(oItem.RetainerId);
-                            if (ConfigurationManager.Config.TooltipAddCharacterNameOwned)
+                            var name = _characterMonitor.GetCharacterNameById(oItem.RetainerId);
+                            if (Configuration.TooltipAddCharacterNameOwned)
                             {
-                                var owner = PluginService.CharacterMonitor.GetCharacterNameById(
+                                var owner = _characterMonitor.GetCharacterNameById(
                                     oItem.RetainerId, true);
                                 if (owner.Trim().Length != 0)
                                     name += " (" + owner + ")";
@@ -92,25 +102,25 @@ public class AmountOwnedTooltip : BaseTooltip
 
                             locations.Add($"{name} - {oItem.FormattedBagLocation} " + typeIcon);
                         }
-                        if (ownedItems.Count > ConfigurationManager.Config.TooltipLocationLimit)
+                        if (ownedItems.Count > Configuration.TooltipLocationLimit)
                         {
-                            locations.Add(ownedItems.Count - ConfigurationManager.Config.TooltipLocationLimit + " other locations.");
+                            locations.Add(ownedItems.Count - Configuration.TooltipLocationLimit + " other locations.");
                         }                        
                     }
-                    if (ConfigurationManager.Config.TooltipLocationDisplayMode ==
+                    if (Configuration.TooltipLocationDisplayMode ==
                         TooltipLocationDisplayMode.CharacterBagSlotQuantity)
                     {
                         foreach (var oItem in ownedItems)
                         {
                             storageCount += oItem.Quantity;
                                 
-                            if (locations.Count >= ConfigurationManager.Config.TooltipLocationLimit)
+                            if (locations.Count >= Configuration.TooltipLocationLimit)
                                 continue;
 
-                            var name = PluginService.CharacterMonitor.GetCharacterNameById(oItem.RetainerId);
-                            if (ConfigurationManager.Config.TooltipAddCharacterNameOwned)
+                            var name = _characterMonitor.GetCharacterNameById(oItem.RetainerId);
+                            if (Configuration.TooltipAddCharacterNameOwned)
                             {
-                                var owner = PluginService.CharacterMonitor.GetCharacterNameById(
+                                var owner = _characterMonitor.GetCharacterNameById(
                                     oItem.RetainerId, true);
                                 if (owner.Trim().Length != 0)
                                     name += " (" + owner + ")";
@@ -118,12 +128,12 @@ public class AmountOwnedTooltip : BaseTooltip
 
                             locations.Add($"{name} - {oItem.FormattedBagLocation} - {+ oItem.Quantity} ");
                         }
-                        if (ownedItems.Count > ConfigurationManager.Config.TooltipLocationLimit)
+                        if (ownedItems.Count > Configuration.TooltipLocationLimit)
                         {
-                            locations.Add(ownedItems.Count - ConfigurationManager.Config.TooltipLocationLimit + " other locations.");
+                            locations.Add(ownedItems.Count - Configuration.TooltipLocationLimit + " other locations.");
                         }                        
                     }
-                    else if (ConfigurationManager.Config.TooltipLocationDisplayMode == TooltipLocationDisplayMode.CharacterCategoryQuantityQuality)
+                    else if (Configuration.TooltipLocationDisplayMode == TooltipLocationDisplayMode.CharacterCategoryQuantityQuality)
                     {
                         var groupedItems = ownedItems.GroupBy(c => (c.RetainerId, c.SortedCategory, c.Flags)).ToList();
                         foreach (var oGroup in groupedItems)
@@ -131,13 +141,13 @@ public class AmountOwnedTooltip : BaseTooltip
                             var quantity = oGroup.Sum(c => c.Quantity);
                             storageCount += (uint)quantity;
                                 
-                            if (locations.Count >= ConfigurationManager.Config.TooltipLocationLimit)
+                            if (locations.Count >= Configuration.TooltipLocationLimit)
                                 continue;
 
-                            var name = PluginService.CharacterMonitor.GetCharacterNameById(oGroup.Key.RetainerId);
-                            if (ConfigurationManager.Config.TooltipAddCharacterNameOwned)
+                            var name = _characterMonitor.GetCharacterNameById(oGroup.Key.RetainerId);
+                            if (Configuration.TooltipAddCharacterNameOwned)
                             {
-                                var owner = PluginService.CharacterMonitor.GetCharacterNameById(
+                                var owner = _characterMonitor.GetCharacterNameById(
                                     oGroup.Key.RetainerId, true);
                                 if (owner.Trim().Length != 0)
                                     name += " (" + owner + ")";
@@ -155,12 +165,12 @@ public class AmountOwnedTooltip : BaseTooltip
 
                             locations.Add($"{name} - {oGroup.Key.SortedCategory.FormattedName()} - " + quantity + " " + typeIcon);
                         }
-                        if (groupedItems.Count > ConfigurationManager.Config.TooltipLocationLimit)
+                        if (groupedItems.Count > Configuration.TooltipLocationLimit)
                         {
-                            locations.Add(groupedItems.Count - ConfigurationManager.Config.TooltipLocationLimit + " other locations.");
+                            locations.Add(groupedItems.Count - Configuration.TooltipLocationLimit + " other locations.");
                         }  
                     }
-                    else if (ConfigurationManager.Config.TooltipLocationDisplayMode == TooltipLocationDisplayMode.CharacterQuantityQuality)
+                    else if (Configuration.TooltipLocationDisplayMode == TooltipLocationDisplayMode.CharacterQuantityQuality)
                     {
                         var groupedItems = ownedItems.GroupBy(c => (c.RetainerId, c.Flags)).ToList();
                         foreach (var oGroup in groupedItems)
@@ -168,13 +178,13 @@ public class AmountOwnedTooltip : BaseTooltip
                             var quantity = oGroup.Sum(c => c.Quantity);
                             storageCount += (uint)quantity;
                                 
-                            if (locations.Count >= ConfigurationManager.Config.TooltipLocationLimit)
+                            if (locations.Count >= Configuration.TooltipLocationLimit)
                                 continue;
 
-                            var name = PluginService.CharacterMonitor.GetCharacterNameById(oGroup.Key.RetainerId);
-                            if (ConfigurationManager.Config.TooltipAddCharacterNameOwned)
+                            var name = _characterMonitor.GetCharacterNameById(oGroup.Key.RetainerId);
+                            if (Configuration.TooltipAddCharacterNameOwned)
                             {
-                                var owner = PluginService.CharacterMonitor.GetCharacterNameById(
+                                var owner = _characterMonitor.GetCharacterNameById(
                                     oGroup.Key.RetainerId, true);
                                 if (owner.Trim().Length != 0)
                                     name += " (" + owner + ")";
@@ -192,9 +202,9 @@ public class AmountOwnedTooltip : BaseTooltip
 
                             locations.Add($"{name} - " + quantity + " " + typeIcon);
                         }
-                        if (groupedItems.Count > ConfigurationManager.Config.TooltipLocationLimit)
+                        if (groupedItems.Count > Configuration.TooltipLocationLimit)
                         {
-                            locations.Add(groupedItems.Count - ConfigurationManager.Config.TooltipLocationLimit + " other locations.");
+                            locations.Add(groupedItems.Count - Configuration.TooltipLocationLimit + " other locations.");
                         }  
                     }
 
@@ -229,7 +239,7 @@ public class AmountOwnedTooltip : BaseTooltip
                 {
                     var lines = new List<Payload>()
                     {
-                        new UIForegroundPayload((ushort)(ConfigurationManager.Config.TooltipColor ?? 1)),
+                        new UIForegroundPayload((ushort)(Configuration.TooltipColor ?? 1)),
                         new UIGlowPayload(0),
                         new TextPayload(newText),
                         new UIGlowPayload(0),
@@ -240,7 +250,7 @@ public class AmountOwnedTooltip : BaseTooltip
                     {
                         seStr.Payloads.Add(line);
                     }
-                    Service.Log.Verbose("Updating tooltip with amount owned on field " + itemTooltipField.ToString());
+                    Logger.LogTrace("Updating tooltip with amount owned on field " + itemTooltipField.ToString());
                     SetTooltipString(stringArrayData, itemTooltipField, seStr);
                 }
             }

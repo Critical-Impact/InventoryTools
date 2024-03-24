@@ -2,15 +2,23 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib;
+using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
+using InventoryTools.Extensions;
 using InventoryTools.Logic.Columns;
+using InventoryTools.Services;
 
 namespace InventoryTools.Logic
 {
-    public abstract class RenderTableBase : IRenderTableBase, IDisposable
+    public abstract class RenderTableBase : IRenderTableBase
     {
+        private readonly RightClickService _rightClickService;
+        private readonly InventoryToolsConfiguration _configuration;
+
         protected ImGuiTableFlags _tableFlags = ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersV |
                                                 ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.BordersInnerV |
                                                 ImGuiTableFlags.BordersH | ImGuiTableFlags.BordersOuterH |
@@ -23,16 +31,19 @@ namespace InventoryTools.Logic
         public List<SortingResult> RenderSortedItems { get; set; } = new List<SortingResult>();
         public List<ItemEx> Items { get; set; } = new List<ItemEx>();
         public List<ItemEx> RenderItems { get; set; } = new List<ItemEx>();
-        
         public List<InventoryChange> InventoryChanges { get; set; } = new List<InventoryChange>();
         public List<InventoryChange> RenderInventoryChanges { get; set; } = new List<InventoryChange>();
+        public bool InitialColumnSetupDone { get; set; }
 
-        public RenderTableBase(FilterConfiguration filterConfiguration)
+        public RenderTableBase(RightClickService rightClickService, InventoryToolsConfiguration configuration)
+        {
+            _rightClickService = rightClickService;
+            _configuration = configuration;
+        }
+
+        public virtual void Initialize(FilterConfiguration filterConfiguration)
         {
             FilterConfiguration = filterConfiguration;
-            filterConfiguration.ConfigurationChanged += FilterConfigurationUpdated;
-            filterConfiguration.TableConfigurationChanged += FilterConfigurationOnTableConfigurationChanged;
-            filterConfiguration.ListUpdated += FilterConfigurationOnListUpdated;
         }
 
         public string Name
@@ -50,80 +61,99 @@ namespace InventoryTools.Logic
                 return FilterConfiguration.TableId;
             }
         }
+        
+        public virtual List<MessageBase>? DrawMenu(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            InventoryItem item, int rowIndex)
+        {
+            return DrawMenu(configuration, columnConfiguration, item.Item, rowIndex);
+        }
 
-        public virtual List<IColumn> Columns { get; set; } = new ();
+        public virtual List<MessageBase>? DrawMenu(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            SortingResult item, int rowIndex)
+        {
+            return DrawMenu(configuration, columnConfiguration, item.InventoryItem.Item, rowIndex);
+        }
+
+        public virtual List<MessageBase>? DrawMenu(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            InventoryChange item, int rowIndex)
+        {
+            return DrawMenu(configuration, columnConfiguration, item.InventoryItem, rowIndex);
+        }
+
+        public virtual List<MessageBase>? DrawMenu(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            CraftItem item, int rowIndex)
+        {
+            var messages = new List<MessageBase>();
+            var hoveredRow = -1;
+            ImGui.Selectable("", false, ImGuiSelectableFlags.SpanAllColumns, new Vector2(0, configuration.TableHeight) * ImGui.GetIO().FontGlobalScale);
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow)) {
+                hoveredRow = rowIndex;
+            }
+            if (hoveredRow == rowIndex && ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+            {
+                ImGui.OpenPopup("RightClick" + rowIndex);
+            }
+
+            using (var popup = ImRaii.Popup("RightClick" + rowIndex))
+            {
+                if (popup.Success)
+                {
+                    _rightClickService.DrawRightClickPopup(item, configuration, messages);
+                }
+            }
+
+            return messages;
+        }
+
+        
+
+        public virtual List<MessageBase>? DrawMenu(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            ItemEx item, int rowIndex)
+        {
+            var messages = new List<MessageBase>();
+            var hoveredRow = -1;
+            ImGui.Selectable("", false, ImGuiSelectableFlags.SpanAllColumns, new Vector2(0, configuration.TableHeight) * ImGui.GetIO().FontGlobalScale);
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow)) {
+                hoveredRow = rowIndex;
+            }
+            if (hoveredRow == rowIndex && ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+            {
+                ImGui.OpenPopup("RightClick" + rowIndex);
+            }
+
+            using (var popup = ImRaii.Popup("RightClick" + rowIndex))
+            {
+                using var _ = ImRaii.PushId("RightClick" + rowIndex);
+                if (popup.Success)
+                {
+                    _rightClickService.DrawRightClickPopup(item, messages);
+                }
+            }
+
+            return messages;
+        }
+
+        public virtual List<ColumnConfiguration> Columns { get; set; } = new ();
         public int? SortColumn { get; set; }
         public ImGuiSortDirection? SortDirection { get; set; }
         public int? FreezeCols { get; set; }
         public int? FreezeRows { get; set; }
-        public abstract void Refresh(InventoryToolsConfiguration configuration);
         public bool ShowFilterRow { get; set; }
         public bool NeedsRefresh { get; set; }
+        public bool NeedsColumnRefresh { get; set; }
+        public bool Refreshing { get; set; } 
         public bool IsSearching { get; set; }
         public FilterConfiguration FilterConfiguration { get; set; }
-        public bool HighlightItems => ConfigurationManager.Config.ActiveUiFilter == FilterConfiguration.Key;
+        public bool HighlightItems => _configuration.ActiveUiFilter == FilterConfiguration.Key;
 
-        public bool Disposed => _disposed;
-
-        protected void FilterConfigurationOnTableConfigurationChanged(FilterConfiguration filterconfiguration)
-        {
-            RefreshColumns();
-        }
-
-        protected void FilterConfigurationUpdated(FilterConfiguration filterconfiguration, bool filterInvalidated)
-        {
-        }
-        
-        private void FilterConfigurationOnListUpdated(FilterConfiguration filterconfiguration)
-        {
-            this.NeedsRefresh = true;
-        }
-
-        public delegate IEnumerable<SortingResult> PreFilterSortedItemsDelegate(IEnumerable<SortingResult> items);
-
-        public delegate IEnumerable<ItemEx> PreFilterItemsDelegate(IEnumerable<ItemEx> items);
-
-        public delegate void ChangedDelegate(RenderTableBase itemTable);
-
-        public virtual event PreFilterSortedItemsDelegate? PreFilterSortedItems;
-        public virtual event PreFilterItemsDelegate? PreFilterItems;
-        public virtual event ChangedDelegate? Refreshed;
-        
         public abstract void RefreshColumns();
 
-        public abstract bool Draw(Vector2 size, bool shouldDraw = true);
+        public abstract List<MessageBase> Draw(Vector2 size, bool shouldDraw = true);
         public abstract void DrawFooterItems();
-
-        private bool _disposed;
-        public virtual void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        
-        protected virtual void Dispose(bool disposing)
-        {
-            if(!Disposed && disposing)
-            {
-                FilterConfiguration.ConfigurationChanged -= FilterConfigurationUpdated;
-                FilterConfiguration.ListUpdated -= FilterConfigurationOnListUpdated;
-                FilterConfiguration.TableConfigurationChanged += FilterConfigurationOnTableConfigurationChanged;
-            }
-            _disposed = true;         
-        }
-        
-        ~RenderTableBase()
-        {
-#if DEBUG
-            // In debug-builds, make sure that a warning is displayed when the Disposable object hasn't been
-            // disposed by the programmer.
-
-            if( Disposed == false )
-            {
-                Service.Log.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
-            }
-#endif
-            Dispose (true);
-        }
     }
 }

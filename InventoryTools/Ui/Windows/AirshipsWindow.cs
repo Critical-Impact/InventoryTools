@@ -3,28 +3,35 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
+using InventoryTools.Mediator;
+using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 
 namespace InventoryTools.Ui;
 
 public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
 {
-    public AirshipsWindow(string name = "Airships", ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
-    {
-        SetupWindow();
-    }
+    private readonly IIconService _iconService;
+    private readonly ExcelCache _excelCache;
 
-    public AirshipsWindow() : base("Airships")
+    public AirshipsWindow(ILogger<AirshipsWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IIconService iconService, ExcelCache excelCache, string name = "Airships Window") : base(logger, mediator, imGuiService, configuration, name)
     {
-        SetupWindow();
+        _iconService = iconService;
+        _excelCache = excelCache;
     }
-
-    private void SetupWindow()
+    public override void Initialize()
     {
+        WindowName = GenericName;
+        Key = GenericKey;
         _columns = new List<TableColumn<AirshipExplorationPointEx>>()
         {
             new("Icon", 32, ImGuiTableColumnFlags.WidthFixed)
@@ -32,7 +39,7 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
                 OnLeftClick = OnLeftClick,
                 Draw = (ex, contentTypeId) =>
                 {
-                    if (ImGui.ImageButton(PluginService.IconStorage[Icons.AirshipIcon].ImGuiHandle,
+                    if (ImGui.ImageButton(_iconService[Icons.AirshipIcon].ImGuiHandle,
                             new Vector2(RowSize, RowSize)))
                     {
                         _columns[0].OnLeftClick?.Invoke(ex);
@@ -204,13 +211,13 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
                 Draw = (ex, contentTypeId) =>
                 {
                     var drops = ex.Drops.Where(c => c.Value != null);
-                    UiHelpers.WrapTableColumnElements("Drops" + ex.RowId, drops,
+                    ImGuiService.WrapTableColumnElements("Drops" + ex.RowId, drops,
                     RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X,
                     drop =>
                     {
                         if (drop.Value != null)
                         {
-                            var sourceIcon = PluginService.IconStorage[drop.Value.Icon];
+                            var sourceIcon = _iconService[drop.Value.Icon];
                             ImGui.Image(sourceIcon.ImGuiHandle,
                                 new Vector2(RowSize, RowSize) * ImGui.GetIO().FontGlobalScale);
                             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
@@ -230,12 +237,12 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
                                                     ImGuiHoveredFlags.AnyWindow) &&
                                 ImGui.IsMouseReleased(ImGuiMouseButton.Left))
                             {
-                                PluginService.WindowService.OpenItemWindow(drop.Value.RowId);
+                                MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), drop.Value.RowId));
                             }
 
                             if (ImGui.BeginPopup("RightClick" + drop.Value.RowId))
                             {
-                                drop.Value.DrawRightClickPopup();
+                                MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(drop.Value));
                                 ImGui.EndPopup();
                             }
                             ImGuiUtil.HoverTooltip(drop.Value.NameString);
@@ -254,14 +261,15 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
         _items = new Dictionary<uint, List<AirshipExplorationPointEx>>();
         _filteredItems = new Dictionary<uint, List<AirshipExplorationPointEx>>();        
     }
-    
+
     private bool OnLeftClick(AirshipExplorationPointEx arg)
     {
-        PluginService.WindowService.OpenAirshipWindow(arg.RowId);
+        MediatorService.Publish(new OpenUintWindowMessage(typeof(AirshipWindow), arg.RowId));
         return true;
     }
 
-    public override string Key => AsKey;
+    public override string GenericKey => "airships";
+    public override string GenericName => "Airships";
     public override bool DestroyOnClose => false;
     public override bool SaveState => true;
     public override Vector2? MaxSize { get; } = new(2000, 2000);
@@ -272,17 +280,13 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
     {
         DrawTabs();
     }
-    
-    public static string AsKey
-    {
-        get { return "airships"; }
-    }
 
     public override void Invalidate()
     {
     }
 
-    public override FilterConfiguration? SelectedConfiguration { get; } = null;
+    public override FilterConfiguration? SelectedConfiguration => null;
+
     public override int GetRowId(AirshipExplorationPointEx item)
     {
         return (int)item.RowId;
@@ -314,7 +318,7 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
         {
             if (tabId == 0)
             {
-                var duties = Service.ExcelCache.GetAirshipExplorationPointExSheet().Where(c => c.FormattedName.ToString() != "" && c.Passengers == false).ToList();
+                var duties = _excelCache.GetAirshipExplorationPointExSheet().Where(c => c.FormattedName.ToString() != "" && c.Passengers == false).ToList();
                 _items.Add(tabId, duties);
             }
         }

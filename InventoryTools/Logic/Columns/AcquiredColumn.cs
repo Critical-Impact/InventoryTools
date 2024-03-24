@@ -1,30 +1,40 @@
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
 {
     public class AcquiredColumn : CheckboxColumn
     {
+        private readonly IGameInterface _gameInterface;
+
+        public AcquiredColumn(ILogger<AcquiredColumn> logger, ImGuiService imGuiService, IGameInterface gameInterface) : base(logger, imGuiService)
+        {
+            _gameInterface = gameInterface;
+        }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
 
-        public override bool? CurrentValue(InventoryItem item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
         {
-            return CurrentValue(item.Item);
+            return CurrentValue(columnConfiguration, item.Item);
         }
 
-        public override bool? CurrentValue(ItemEx item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
             var action = item.ItemAction?.Value;
             if (!ActionTypeExt.IsValidAction(action)) {
                 return null;
             }
-            return PluginService.GameInterface.HasAcquired(item);
+            return _gameInterface.HasAcquired(item);
         }
 
-        public override bool? CurrentValue(SortingResult item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
         {
-            return CurrentValue(item.InventoryItem.Item);
+            return CurrentValue(columnConfiguration, item.InventoryItem.Item);
         }
 
         public override string Name { get; set; } = "Has Been Acquired?";

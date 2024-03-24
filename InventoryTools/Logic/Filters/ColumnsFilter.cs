@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
@@ -8,37 +9,45 @@ using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Logic.Filters.Abstract;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
-    public class ColumnsFilter : SortedListFilter<string, IColumn>
+    public class ColumnsFilter : SortedListFilter<ColumnConfiguration, IColumn>
     {
-        public override Dictionary<string, (string, string?)> CurrentValue(FilterConfiguration configuration)
+        private readonly IEnumerable<IColumn> _columns;
+
+        public ColumnsFilter(ILogger<ColumnsFilter> logger, ImGuiService imGuiService, IEnumerable<IColumn> columns) : base(logger, imGuiService)
         {
-            (string, string?) GetColumnDetails(string c)
+            _columns = columns;
+        }
+        public override Dictionary<ColumnConfiguration, (string, string?)> CurrentValue(FilterConfiguration configuration)
+        {
+            (string, string?) GetColumnDetails(ColumnConfiguration c)
             {
-                return PluginService.PluginLogic.GridColumns.ContainsKey(c) ? (PluginService.PluginLogic.GridColumns[c].Name, PluginService.PluginLogic.GridColumns[c].HelpText): (c, null);
+                return (c.Name ?? c.Column.Name, c.Column.HelpText);
             }
 
-            return (configuration.Columns ?? new List<string>()).ToDictionary(c => c, GetColumnDetails);
+            return (configuration.Columns ?? new List<ColumnConfiguration>()).ToDictionary(c => c, GetColumnDetails);
         }
         
         public override void ResetFilter(FilterConfiguration configuration)
         {
-            UpdateFilterConfiguration(configuration, new Dictionary<string, (string, string?)>());
+            UpdateFilterConfiguration(configuration, new Dictionary<ColumnConfiguration, (string, string?)>());
         }
 
-        public override void UpdateFilterConfiguration(FilterConfiguration configuration, Dictionary<string, (string, string?)> newValue)
+        public override void UpdateFilterConfiguration(FilterConfiguration configuration, Dictionary<ColumnConfiguration, (string, string?)> newValue)
         {
             configuration.Columns = newValue.Select(c => c.Key).ToList();
         }
 
         public override string Key { get; set; } = "Columns";
         public override string Name { get; set; } = "Columns";
-        public override string HelpText { get; set; } = "";
+        public override string HelpText { get; set; } = "Add a new column. Leave the column name blank if you want to use the default.";
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Columns;
         public override bool ShowReset { get; set; } = false;
-        public override Dictionary<string, (string, string?)> DefaultValue { get; set; } = new();
+        public override Dictionary<ColumnConfiguration, (string, string?)> DefaultValue { get; set; } = new();
 
         public override bool HasValueSet(FilterConfiguration configuration)
         {
@@ -59,12 +68,11 @@ namespace InventoryTools.Logic.Filters
 
         public override bool CanRemove { get; set; } = true;
 
-        public override bool CanRemoveItem(FilterConfiguration configuration, string item)
+        public override bool CanRemoveItem(FilterConfiguration configuration, ColumnConfiguration item)
         {
-            var column = GetItem(configuration, item);
-            if (column != null)
+            if (item.Column != null)
             {
-                if (!column.CanBeRemoved)
+                if (!item.Column.CanBeRemoved)
                 {
                     return false;
                 }
@@ -73,27 +81,22 @@ namespace InventoryTools.Logic.Filters
             return true;
         }
 
-        public override IColumn? GetItem(FilterConfiguration configuration, string item)
+        public override IColumn? GetItem(FilterConfiguration configuration, ColumnConfiguration item)
         {
-            var availableItems = GetAvailableItems(configuration);
-            return availableItems.TryGetValue(item, out var value) ? value : null;
+            return item.Column;
         }
 
-        public void AddItem(FilterConfiguration configuration, string item)
+        public void AddItem(FilterConfiguration configuration, ColumnConfiguration item)
         {
             var value = CurrentValue(configuration);
-            if (!value.ContainsKey(item))
-            {
-                value.Add(item, ("", null));
-            }
+            value.Add(item, ("", null));
             UpdateFilterConfiguration(configuration, value);
         }
 
         public Dictionary<string, IColumn> GetAvailableItems(FilterConfiguration configuration)
         {
-            var value = PluginService.PluginLogic.GridColumns;
-            var currentValue = CurrentValue(configuration);
-            return value.Where(c => c.Value.CraftOnly != true && c.Value.AvailableInType(configuration.FilterType) && !currentValue.ContainsKey(c.Key)).ToDictionary(c => c.Key, c => c.Value);
+            var value = _columns;
+            return value.Where(c => c.CraftOnly != true && c.AvailableInType(configuration.FilterType)).ToDictionary(c => c.GetType().ToString(), c => c);
         }
 
         private List<IGrouping<ColumnCategory, KeyValuePair<string, IColumn>>>? _groupedItems;
@@ -108,43 +111,160 @@ namespace InventoryTools.Logic.Filters
             return _groupedItems;
         }
 
+        private string _selectedColumnKey = "";
+        private string _selectedColumnName = "";
+        private string _customName = "";
+        private string _exportName = "";
+        private bool _editMode = false;
+        private ColumnConfiguration? _selectedColumn;
+
+        public override void DrawItem(FilterConfiguration configuration, KeyValuePair<ColumnConfiguration, (string, string?)> item, int index)
+        {
+            base.DrawItem(configuration, item, index);
+            if (item.Key.Name != null)
+            {
+                ImGui.SameLine();
+                ImGuiService.HelpMarker("Original Column Name: " + item.Key.Column.Name);
+            }
+        }
+
+        public override void DrawButtons(FilterConfiguration configuration, KeyValuePair<ColumnConfiguration, (string, string?)> item, int index)
+        {
+            base.DrawButtons(configuration, item, index);
+            ImGui.SameLine();
+            if (ImGui.Button("Edit##Column" + index))
+            {
+                EditItem(configuration, item.Key);
+            }
+        }
+
+        private void EditItem(FilterConfiguration configuration, ColumnConfiguration item)
+        {
+            _editMode = true;
+            _selectedColumn = item;
+            _selectedColumnKey = item.Key;
+            _selectedColumnName = item.Column.Name;
+            _customName = item.Name ?? "";
+            _exportName = item.ExportName ?? "";
+        }
+
         public override void DrawTable(FilterConfiguration configuration)
         {
             var groupedItems = GetGroupedItems(configuration);
             base.DrawTable(configuration);
             
-            var currentAddColumn = "";
+            var currentAddColumn = _selectedColumnName;
+            ImGui.Separator();
             ImGui.SetNextItemWidth(LabelSize);
-            ImGui.LabelText("##" + Key + "Label", "Add new column: ");
+            ImGui.LabelText("##" + Key + "Label",  _editMode ? "Edit column: " : "Add new column: ");
             ImGui.SameLine();
             ImGui.SetNextItemWidth(InputSize);
-            using (var combo = ImRaii.Combo("Add##" + Key, currentAddColumn, ImGuiComboFlags.HeightLarge))
+            if (_editMode)
             {
-                if (combo.Success)
+                ImGui.Text(_selectedColumnName);
+            }
+            else
+            {
+                using (var combo = ImRaii.Combo("##Add" + Key, currentAddColumn, ImGuiComboFlags.HeightLarge))
                 {
-                    var count = 0;
-                    foreach (var group in groupedItems)
+                    if (combo.Success)
                     {
-                        ImGui.TextUnformatted(group.Key.ToString());
-                        ImGui.Separator();
-                        foreach (var column in group)
+                        var count = 0;
+                        foreach (var group in groupedItems)
                         {
-                            if (ImGui.Selectable(column.Value.Name, currentAddColumn == column.Value.Name))
+                            ImGui.TextUnformatted(group.Key.ToString());
+                            ImGui.Separator();
+                            foreach (var column in group)
                             {
-                                AddItem(configuration, column.Key);
+                                if (ImGui.Selectable(column.Value.Name, currentAddColumn == column.Value.Name))
+                                {
+                                    _selectedColumnName = column.Value.Name;
+                                    _selectedColumnKey = column.Key;
+                                    _selectedColumn = new ColumnConfiguration(column.Key);
+                                    _customName = "";
+                                }
+
+                                ImGuiUtil.HoverTooltip(column.Value.HelpText);
                             }
 
-                            ImGuiUtil.HoverTooltip(column.Value.HelpText);
-                        }
-                        count++;
-                        if (count != groupedItems.Count)
-                        {
-                            ImGui.NewLine();
-                        }
+                            count++;
+                            if (count != groupedItems.Count)
+                            {
+                                ImGui.NewLine();
+                            }
 
+                        }
                     }
                 }
             }
+
+            if (_selectedColumnKey != "")
+            {
+                string customName = _customName;
+                ImGui.SetNextItemWidth(LabelSize);
+                ImGui.LabelText("##" + Key + "Custom", "Column Name: ");
+                ImGui.SetNextItemWidth(InputSize);
+                ImGui.SameLine();
+                if (ImGui.InputTextWithHint("##CustomColumnName",_selectedColumnName, ref customName, 100, ImGuiInputTextFlags.None))
+                {
+                    _customName = customName;
+                }
+                string exportName = _exportName;
+                ImGui.SetNextItemWidth(LabelSize);
+                ImGui.LabelText("##" + Key + "Export", "Export Name: ");
+                ImGui.SetNextItemWidth(InputSize);
+                ImGui.SameLine();
+                if (ImGui.InputTextWithHint("##CustomExportName",_selectedColumnName, ref exportName, 100, ImGuiInputTextFlags.None))
+                {
+                    _exportName = exportName;
+                }
+                ImGui.SameLine();
+                var posX = ImGui.GetCursorPosX();
+
+                if (_selectedColumn != null)
+                {
+                    _selectedColumn.Column.DrawEditor(_selectedColumn, configuration);
+                }
+                
+                
+                ImGui.NewLine();
+                ImGui.SetCursorPosX(posX - ImGui.GetStyle().ItemSpacing.X - 40);
+                if (ImGui.Button(_editMode ? "Save" : "Add", new Vector2(40, 20)))
+                {
+                    if (_editMode)
+                    {
+                        var columnConfiguration = configuration.GetColumn(_selectedColumnKey);
+                        if (columnConfiguration != null)
+                        {
+                            columnConfiguration.Name = _customName == "" ? null : _customName;
+                            columnConfiguration.ExportName = _exportName == "" ? null : _exportName;
+                            UpdateFilterConfiguration(configuration, CurrentValue(configuration));
+                        }
+
+                        _selectedColumnName = "";
+                        _selectedColumnKey = "";
+                        _customName = "";
+                        _editMode = false;
+                    }
+                    else
+                    {
+                        var columnConfiguration = _selectedColumn ?? new ColumnConfiguration(_selectedColumnKey);
+                        columnConfiguration.Name = _customName == "" ? null : _customName;
+                        columnConfiguration.ExportName = _exportName == "" ? null : _exportName;
+                        AddItem(configuration, columnConfiguration);
+
+                        _selectedColumnName = "";
+                        _selectedColumnKey = "";
+                        _customName = "";
+                    }
+                };
+            }
+        }
+
+        public override void Draw(FilterConfiguration configuration)
+        {
+            base.Draw(configuration);
+            ImGui.Separator();
         }
     }
 }

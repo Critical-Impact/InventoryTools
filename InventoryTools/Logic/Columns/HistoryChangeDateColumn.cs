@@ -2,36 +2,42 @@ using System;
 using System.Globalization;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns;
 
 public class HistoryChangeDateColumn : DateTimeColumn
 {
+    public HistoryChangeDateColumn(ILogger<HistoryChangeDateColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+    {
+    }
     public override ColumnCategory ColumnCategory => ColumnCategory.History;
-    public override DateTime? CurrentValue(InventoryItem item)
+    public override DateTime? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
     {
         return null;
     }
 
-    public override DateTime? CurrentValue(ItemEx item)
+    public override DateTime? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
     {
         return null;
     }
 
-    public override DateTime? CurrentValue(SortingResult item)
+    public override DateTime? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
     {
         return null;
     }
 
-    public override DateTime? CurrentValue(InventoryChange currentValue)
+    public override DateTime? CurrentValue(ColumnConfiguration columnConfiguration, InventoryChange currentValue)
     {
         return currentValue.ChangeDate;
     }
     
-    public override string CsvExport(InventoryChange item)
+    public override string CsvExport(ColumnConfiguration columnConfiguration, InventoryChange item)
     {
-        return CurrentValue(item)?.ToString(CultureInfo.InvariantCulture) ?? "";
+        return CurrentValue(columnConfiguration, item)?.ToString(CultureInfo.InvariantCulture) ?? "";
     }
 
     public override string Name { get; set; } = "History Event Date/Time";

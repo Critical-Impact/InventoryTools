@@ -1,28 +1,34 @@
 ﻿using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
 {
     public class LocationColumn : TextColumn
     {
+        public LocationColumn(ILogger<LocationColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
         public override ColumnCategory ColumnCategory => ColumnCategory.Inventory;
 
         public override FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter | Logic.FilterType.CraftFilter;
 
-        public override string? CurrentValue(InventoryItem item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
         {
             return item.FormattedBagLocation;
         }
 
-        public override string? CurrentValue(ItemEx item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
             return null;
         }
 
-        public override string? CurrentValue(SortingResult item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
         {
-            return CurrentValue(item.InventoryItem);
+            return CurrentValue(columnConfiguration, item.InventoryItem);
         }
 
         public override string Name { get; set; } = "Inventory Location";

@@ -1,9 +1,15 @@
 using System.Numerics;
 using System.Text;
+using CriticalCommonLib;
+using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Resolvers;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Services.Ui;
+using DalaMock.Dalamud;
+using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Logging;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
@@ -14,38 +20,67 @@ using LuminaSupplemental.Excel.Model;
 using Newtonsoft.Json;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Mediator;
+using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.Logging;
+using OtterGui.Log;
 using OtterGui.Widgets;
 using QoLBar;
 
 namespace InventoryToolsMock;
 
-public class MockWindow : Window
+public class MockWindow : GenericWindow
 {
-    private List<InventoryItem> _items;
+    private readonly Logger _otterLogger;
+    private readonly ICraftMonitor _craftMonitor;
+    private readonly ICharacterMonitor _characterMonitor;
+    private readonly IMobTracker _mobTracker;
+    private readonly FileDialogManager _fileDialogManager;
+    private readonly IInventoryMonitor _inventoryMonitor;
+    private readonly IOverlayService _overlayService;
+    private readonly InventoryHistory _inventoryHistory;
+    private readonly ExcelCache _excelCache;
 
-    public MockWindow(string name = "Mock Tools", ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
+    public MockWindow(ILogger<MockWindow> logger, MediatorService mediator,ImGuiService imGuiService, InventoryToolsConfiguration configuration, Logger otterLogger, ICraftMonitor craftMonitor, ICharacterMonitor characterMonitor, IMobTracker mobTracker, FileDialogManager fileDialogManager, IInventoryMonitor inventoryMonitor, IOverlayService overlayService, InventoryHistory inventoryHistory, ExcelCache excelCache, string name = "Mock Tools") : base(logger, mediator, imGuiService, configuration, name)
     {
-        _rng = new Random();
+        _otterLogger = otterLogger;
+        _craftMonitor = craftMonitor;
+        _characterMonitor = characterMonitor;
+        _mobTracker = mobTracker;
+        _fileDialogManager = fileDialogManager;
+        _inventoryMonitor = inventoryMonitor;
+        _overlayService = overlayService;
+        _inventoryHistory = inventoryHistory;
+        _excelCache = excelCache;
     }
+    private List<InventoryItem> _items;
     
-    public MockWindow() : base("Mock Tools")
+    public override void Initialize()
     {
+        WindowName = "Mock Tools";
+        Key = "mock";
         _rng = new Random();
+        _activeWorldPicker = new WorldPicker(_excelCache.GetWorldSheet().Where(c => c.IsPublic).ToList(), false, _otterLogger);
+        _homeWorldPicker = new WorldPicker(_excelCache.GetWorldSheet().Where(c => c.IsPublic).ToList(), false, _otterLogger);
     }
+
 
     public override void OnClose()
     {
         IsOpen = true;
     }
 
-    public static string AsKey => "mock";
-    public override string Key => AsKey;
+    public override string GenericKey { get; } = "mockwindow";
+    public override string GenericName { get; } = "Mock Window";
     public override bool DestroyOnClose { get; } = false;
     public override bool SaveState { get; } = true;
     public override Vector2? DefaultSize => new Vector2(200, 200);
     public override Vector2? MaxSize => new Vector2(2000, 2000);
     public override Vector2? MinSize => new Vector2(200, 200);
     private Random _rng;
+    private WorldPicker _activeWorldPicker;
+    private WorldPicker _homeWorldPicker;
 
     public override void Draw()
     {
@@ -130,7 +165,7 @@ public class MockWindow : Window
 
                 if (ImGui.Button("Send Event"))
                 {
-                    if (PluginService.CraftMonitor is MockCraftMonitor craftMonitor)
+                    if (_craftMonitor is MockCraftMonitor craftMonitor)
                     {
                         craftMonitor.CompleteCraft((uint)_selectedItemId, isHq, (uint)quantity);
                     }
@@ -185,32 +220,66 @@ public class MockWindow : Window
         {
             if (characterTab.Success)
             {
-                using (var combo = ImRaii.Combo("Active Character", PluginService.CharacterMonitor.ActiveCharacter?.FormattedName ?? "N/A"))
+                using (var combo = ImRaii.Combo("Active Character", _characterMonitor.ActiveCharacter?.FormattedName ?? "N/A"))
                 {
                     if (combo.Success)
                     {
-                        foreach (var character in PluginService.CharacterMonitor.GetPlayerCharacters())
+                        foreach (var character in _characterMonitor.GetPlayerCharacters())
                         {
-                            if (ImGui.Selectable(character.Value.FormattedName + "##" + character.Key, PluginService.CharacterMonitor.ActiveCharacterId == character.Key))
+                            if (ImGui.Selectable(character.Value.FormattedName + "##" + character.Key, _characterMonitor.ActiveCharacterId == character.Key))
                             {
-                                PluginService.CharacterMonitor.OverrideActiveCharacter(character.Key);
+                                _characterMonitor.OverrideActiveCharacter(character.Key);
+                                if (_characterMonitor is MockCharacterMonitor mockCharacterMonitor)
+                                {
+                                    mockCharacterMonitor.OverrideIsLoggedIn(true);
+                                }
                             }
                         }
                     }
                 }
-                using (var combo = ImRaii.Combo("Active Retainer", PluginService.CharacterMonitor.ActiveRetainer?.FormattedName ?? "N/A"))
+                using (var combo = ImRaii.Combo("Active Retainer", _characterMonitor.ActiveRetainer?.FormattedName ?? "N/A"))
                 {
                     if (combo.Success)
                     {
-                        foreach (var character in PluginService.CharacterMonitor.GetRetainerCharacters())
+                        foreach (var character in _characterMonitor.GetRetainerCharacters())
                         {
-                            if (ImGui.Selectable(character.Value.FormattedName + "##" + character.Key, PluginService.CharacterMonitor.ActiveRetainerId == character.Key))
+                            if (ImGui.Selectable(character.Value.FormattedName + "##" + character.Key, _characterMonitor.ActiveRetainerId == character.Key))
                             {
-                                PluginService.CharacterMonitor.OverrideActiveRetainer(character.Key);
+                                _characterMonitor.OverrideActiveRetainer(character.Key);
                             }
                         }
                     }
                 }
+
+                var activeCharacter = _characterMonitor.ActiveCharacter;
+                if (activeCharacter != null)
+                {
+                    int homeWorldId = (int)(activeCharacter.WorldId);
+
+                    if (_homeWorldPicker.Draw("Home World",
+                            _characterMonitor.ActiveCharacter?.World?.FormattedName ?? "Not Set",
+                            "Set the home world of the active character", ref homeWorldId, 100, 32,
+                            ImGuiComboFlags.None))
+                    {
+                            var newWorld = _homeWorldPicker.Items[homeWorldId];
+                            activeCharacter.WorldId = newWorld.RowId;
+                            _characterMonitor.UpdateCharacter(activeCharacter);
+                    }
+
+                    int activeWorldId = (int)(activeCharacter.ActiveWorldId);
+
+                    if (_activeWorldPicker.Draw("Active World",
+                            _characterMonitor.ActiveCharacter?.ActiveWorld?.FormattedName ?? "Not Set",
+                            "Set the active world of the active character", ref activeWorldId, 100, 32,
+                            ImGuiComboFlags.None))
+                    {
+                        var newWorld = _activeWorldPicker.Items[activeWorldId];
+                        activeCharacter.ActiveWorldId = newWorld.RowId;
+                        _characterMonitor.UpdateCharacter(activeCharacter);
+                    }
+
+                }
+
             }
         }
     }
@@ -221,15 +290,15 @@ public class MockWindow : Window
         {
             if (ImGui.Button("Add fake spawn data"))
             {
-                PluginService.MobTracker.AddEntry(new MobSpawnPosition(1,1,1,new Vector3(1,1,1), 1));
+                _mobTracker.AddEntry(new MobSpawnPosition(1,1,1,new Vector3(1,1,1), 1));
             }
             if (ImGui.Button("Load existing inventories.json"))
             {
-                PluginService.FileDialogManager.OpenFileDialog("Pick a file", "*.*", ConvertFile);
+                _fileDialogManager.OpenFileDialog("Pick a file", "*.*", ConvertFile);
             }
             if (ImGui.Button("Save loaded json to csv"))
             {
-                PluginService.FileDialogManager.SaveFileDialog("Pick a file", "*.csv", "inventories", ".csv",
+                _fileDialogManager.SaveFileDialog("Pick a file", "*.csv", "inventories", ".csv",
                     (b, s) =>
                     {
                         if (b)
@@ -240,17 +309,17 @@ public class MockWindow : Window
             }
             if (ImGui.Button("Refresh overlay states"))
             {
-                PluginService.CharacterMonitor.OverrideActiveCharacter(PluginService.CharacterMonitor.GetPlayerCharacters().First().Key);
-                PluginService.OverlayService.RefreshOverlayStates();
+                _characterMonitor.OverrideActiveCharacter(_characterMonitor.GetPlayerCharacters().First().Key);
+                _overlayService.RefreshOverlayStates();
             }
             if (ImGui.Button("Refresh item counts for inventory"))
             {
-                PluginService.InventoryMonitor.GenerateItemCounts();
+                _inventoryMonitor.GenerateItemCounts();
             }
             if (ImGui.Button("Push random item to player bag"))
             {
-                var currentHistory = PluginService.InventoryHistory.GetHistory();
-                var activeCharacter = PluginService.CharacterMonitor.ActiveCharacter;
+                var currentHistory = _inventoryHistory.GetHistory();
+                var activeCharacter = _characterMonitor.ActiveCharacter;
                 if (activeCharacter != null)
                 {
                     var fromItem = new InventoryItem();
@@ -273,7 +342,7 @@ public class MockWindow : Window
                     
                     currentHistory.Add(new InventoryChange(fromItem, toItem, InventoryChangeReason.Added, (uint)currentHistory.Count + 1));
                 }
-                PluginService.InventoryHistory.LoadExistingHistory(currentHistory);
+                _inventoryHistory.LoadExistingHistory(currentHistory);
             }
             
             ImGui.EndTabItem();
@@ -286,7 +355,7 @@ public class MockWindow : Window
         {
             try
             {
-                PluginLog.Verbose("Loading inventories from " + fileName);
+                Logger.LogDebug("Loading inventories from " + fileName);
                 var cacheFile = new FileInfo(fileName);
                 string json = File.ReadAllText(cacheFile.FullName, Encoding.UTF8);
                 MinifyResolver minifyResolver = new();
@@ -299,84 +368,94 @@ public class MockWindow : Window
             }
             catch (Exception e)
             {
-                PluginLog.Error("Error while parsing saved saved inventory data, " + e.Message);
+                Logger.LogError("Error while parsing saved saved inventory data, " + e.Message);
             }
         }
     }
 
-    private static void DrawWindowTab()
+    private void DrawWindowTab()
     {
         if (ImGui.BeginTabItem("Windows"))
         {
             if (ImGui.Button("Craft Window"))
             {
-                PluginService.WindowService.ToggleCraftsWindow();
+                MediatorService.Publish(new OpenGenericWindowMessage(typeof(CraftsWindow)));
             }
 
-            if (ImGui.Button("Filters Window"))
+            if (ImGui.Button("Items Window"))
             {
-                PluginService.WindowService.ToggleFiltersWindow();
+                MediatorService.Publish(new OpenGenericWindowMessage(typeof(FiltersWindow)));
             }
 
             if (ImGui.Button("Help Window"))
             {
-                PluginService.WindowService.ToggleHelpWindow();
+                MediatorService.Publish(new OpenGenericWindowMessage(typeof(HelpWindow)));
             }
 
             if (ImGui.Button("Debug Window"))
             {
-                PluginService.WindowService.ToggleDebugWindow();
+                MediatorService.Publish(new OpenGenericWindowMessage(typeof(DebugWindow)));
             }
 
             if (ImGui.Button("Configuration Window"))
             {
-                PluginService.WindowService.ToggleConfigurationWindow();
+                MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
             }
 
             if (ImGui.Button("Duties Window"))
             {
-                PluginService.WindowService.ToggleDutiesWindow();
+                MediatorService.Publish(new OpenGenericWindowMessage(typeof(DutiesWindow)));
             }
 
             if (ImGui.Button("Mobs Window"))
             {
-                PluginService.WindowService.ToggleMobWindow();
+                MediatorService.Publish(new OpenGenericWindowMessage(typeof(BNpcsWindow)));
             }
 
             if (ImGui.Button("Airships Window"))
             {
-                PluginService.WindowService.ToggleAirshipsWindow();
+                MediatorService.Publish(new OpenGenericWindowMessage(typeof(AirshipsWindow)));
             }
 
             if (ImGui.Button("Submarines Window"))
             {
-                PluginService.WindowService.ToggleSubmarinesWindow();
+                MediatorService.Publish(new OpenGenericWindowMessage(typeof(SubmarinesWindow)));
             }
 
             if (ImGui.Button("Retainer Ventures Window"))
             {
-                PluginService.WindowService.ToggleSubmarinesWindow();
+                MediatorService.Publish(new OpenGenericWindowMessage(typeof(RetainerTasksWindow)));
             }
 
 
             if (ImGui.Button("NPCs Window"))
             {
-                PluginService.WindowService.ToggleWindow<ENpcsWindow>(ENpcsWindow.AsKey);
+                MediatorService.Publish(new OpenGenericWindowMessage(typeof(ENpcsWindow)));
             }
 
             if (ImGui.Button("Icons Window"))
             {
-                PluginService.WindowService.ToggleWindow<IconBrowserWindow>(IconBrowserWindow.AsKey);
+                MediatorService.Publish(new OpenGenericWindowMessage(typeof(IconBrowserWindow)));
             }
 
             if (ImGui.Button("Intro Window"))
             {
-                PluginService.WindowService.ToggleWindow<IntroWindow>(IntroWindow.AsKey);
+                MediatorService.Publish(new OpenGenericWindowMessage(typeof(IntroWindow)));
             }
 
             if (ImGui.Button("Mock Items Window"))
             {
-                PluginService.WindowService.ToggleWindow<MockGameItemsWindow>(MockGameItemsWindow.AsKey);
+                MediatorService.Publish(new OpenGenericWindowMessage(typeof(MockGameItemsWindow)));
+            }
+
+            if (ImGui.Button("Configuration Wizard"))
+            {
+                MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWizard)));
+            }
+
+            if (ImGui.Button("ListDebugWindow"))
+            {
+                MediatorService.Publish(new OpenGenericWindowMessage(typeof(ListDebugWindow)));
             }
 
             if (ImGui.Button("Stack Tool"))
@@ -393,4 +472,5 @@ public class MockWindow : Window
     }
 
     public override FilterConfiguration? SelectedConfiguration => null;
+    
 }

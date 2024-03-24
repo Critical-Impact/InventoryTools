@@ -1,19 +1,25 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using CriticalCommonLib.Services.Mediator;
 using ImGuiNET;
 using InventoryTools.Images;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin.Services;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Ui;
 
-public abstract class GenericTabbedTable<T> : Window, IGenericTabbedTable<T>
+public abstract class GenericTabbedTable<T> : GenericWindow, IGenericTabbedTable<T>
 {
-    protected GenericTabbedTable(string name, ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
+    private readonly ImGuiService _imGuiService;
+
+    protected GenericTabbedTable(ILogger logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, string name) : base(logger, mediator, imGuiService, configuration, name)
     {
+        _imGuiService = imGuiService;
     }
     
-
     private uint _currentTab = 0;
     
     public uint CurrentTab
@@ -166,8 +172,8 @@ public abstract class GenericTabbedTable<T> : Window, IGenericTabbedTable<T>
                 ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(0, 0));
                 var isChecked = column.FilterBoolean;
                 var checkboxUnChecked = isChecked.HasValue
-                    ? (isChecked.Value ? GameIcon.CheckboxChecked : GameIcon.CheckboxUnChecked)
-                    : GameIcon.CheckboxUnChecked;
+                    ? (isChecked.Value ? _imGuiService.CheckboxChecked : _imGuiService.CheckboxUnChecked)
+                    : _imGuiService.CheckboxUnChecked;
                 ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetContentRegionAvail().X / 2) -
                                     checkboxUnChecked.Size.X / 2);
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 2);
@@ -176,7 +182,7 @@ public abstract class GenericTabbedTable<T> : Window, IGenericTabbedTable<T>
                     ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0, 0, 0, 0.1f));
                 }
 
-                if (PluginService.PluginLogic.DrawUldIconButton(checkboxUnChecked))
+                if (_imGuiService.DrawUldIconButton(checkboxUnChecked))
                 {
                     if (!isChecked.HasValue)
                     {
@@ -274,4 +280,5 @@ public abstract class GenericTabbedTable<T> : Window, IGenericTabbedTable<T>
     public abstract bool UseClipper { get; }
 
     public float RowSize => _rowSize;
+    
 }

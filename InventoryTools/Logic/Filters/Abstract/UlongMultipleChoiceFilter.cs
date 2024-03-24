@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters.Abstract
 {
@@ -18,6 +20,10 @@ namespace InventoryTools.Logic.Filters.Abstract
         public override void ResetFilter(FilterConfiguration configuration)
         {
             UpdateFilterConfiguration(configuration, DefaultValue);
+        }
+
+        protected UlongMultipleChoiceFilter(ILogger logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
         }
     }
 }

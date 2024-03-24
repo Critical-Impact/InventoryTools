@@ -1,25 +1,31 @@
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
 {
     public class CanBeTradedColumn : CheckboxColumn
     {
+        public CanBeTradedColumn(ILogger<CanBeTradedColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override bool? CurrentValue(InventoryItem item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
         {
             return item.CanBeTraded;
         }
 
-        public override bool? CurrentValue(ItemEx item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
             return item.CanBeTraded;
         }
 
-        public override bool? CurrentValue(SortingResult item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
         {
-            return CurrentValue(item.InventoryItem);
+            return CurrentValue(columnConfiguration, item.InventoryItem);
         }
 
         public override string Name { get; set; } = "Is Tradable?";

@@ -1,26 +1,32 @@
 using System;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
 {
     public class SellToVendorPriceColumn : GilColumn
     {
+        public SellToVendorPriceColumn(ILogger<SellToVendorPriceColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override int? CurrentValue(InventoryItem item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
         {
             return (int)item.SellToVendorPrice;
         }
 
-        public override int? CurrentValue(ItemEx item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
             return (int)item.PriceLow;
         }
 
-        public override int? CurrentValue(SortingResult item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
         {
-            return CurrentValue(item.InventoryItem);
+            return CurrentValue(columnConfiguration, item.InventoryItem);
         }
 
         public override string Name { get; set; } = "Sell to Vendor Price";

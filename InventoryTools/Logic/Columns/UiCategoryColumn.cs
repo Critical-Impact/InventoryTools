@@ -1,14 +1,20 @@
 ﻿using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
 {
     public class UiCategoryColumn : TextColumn
     {
+        public UiCategoryColumn(ILogger<UiCategoryColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override string? CurrentValue(InventoryItem item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
         {
             if (item.ItemUICategory == null)
             {
@@ -18,7 +24,7 @@ namespace InventoryTools.Logic.Columns
             return item.FormattedUiCategory;
         }
 
-        public override string? CurrentValue(ItemEx item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
             var itemItemUiCategory = item.ItemUICategory;
             if (itemItemUiCategory == null)
@@ -29,9 +35,9 @@ namespace InventoryTools.Logic.Columns
             return itemItemUiCategory.Value?.Name.ToDalamudString().ToString() ?? "";
         }
 
-        public override string? CurrentValue(SortingResult item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
         {
-            return CurrentValue(item.InventoryItem);
+            return CurrentValue(columnConfiguration, item.InventoryItem);
         }
 
         public override string Name { get; set; } = "Category (Basic)";

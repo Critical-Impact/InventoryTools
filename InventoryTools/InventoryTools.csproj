@@ -13,7 +13,7 @@
         <Configurations>Debug;Release;FullDebug</Configurations>
         <Platforms>AnyCPU</Platforms>
         <Nullable>enable</Nullable>
-        <TargetFramework>net7.0-windows</TargetFramework>
+        <TargetFramework>net8.0-windows</TargetFramework>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -32,6 +32,11 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Autofac" Version="8.0.0" />
+        <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="9.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.11" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="7.0.11" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
         <PackageReference Include="CsvHelper" Version="30.0.1" />
         <PackageReference Include="Dalamud.ContextMenu" Version="1.3.1" />
         <PackageReference Include="DalamudPackager" Version="2.1.12" />
@@ -176,5 +181,21 @@
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <TargetPath>Images\garlandtools.png</TargetPath>
         </ContentWithTargetPath>
+        <ContentWithTargetPath Include="Images\craft_display.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>Images\craft_display.png</TargetPath>
+        </ContentWithTargetPath>
+        <ContentWithTargetPath Include="Images\items_display.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>Images\items_display.png</TargetPath>
+        </ContentWithTargetPath>
+        <ContentWithTargetPath Include="Images\wizard.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>Images\wizard.png</TargetPath>
+        </ContentWithTargetPath>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Configuration" />
     </ItemGroup>
 </Project>

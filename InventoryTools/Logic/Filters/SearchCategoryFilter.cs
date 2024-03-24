@@ -2,14 +2,18 @@ using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using Dalamud.Utility;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
     public class SearchCategoryFilter : UintMultipleChoiceFilter
     {
+        private readonly ExcelCache _excelCache;
         public override string Key { get; set; } = "SchCategory";
         
         public override string Name { get; set; } = "Market Board Categories";
@@ -45,7 +49,7 @@ namespace InventoryTools.Logic.Filters
         {
             if (!_choicesLoaded)
             {
-                _choices = Service.ExcelCache.GetAllItemSearchCategories()
+                _choices = _excelCache.GetAllItemSearchCategories()
                     .ToDictionary(c => c.Key, c => c.Value.Name.ToDalamudString().ToString());
                 _choicesLoaded = true;
             }
@@ -66,5 +70,10 @@ namespace InventoryTools.Logic.Filters
         }
 
         public override bool HideAlreadyPicked { get; set; } = true;
+
+        public SearchCategoryFilter(ILogger<SearchCategoryFilter> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
+        {
+            _excelCache = excelCache;
+        }
     }
 }

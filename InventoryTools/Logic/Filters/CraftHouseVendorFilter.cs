@@ -3,6 +3,8 @@ using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters;
 
@@ -52,8 +54,12 @@ public class CraftHouseVendorFilter : ChoiceFilter<HouseVendorSetting>
         };
     }
 
-    public override string GetFormattedChoice(HouseVendorSetting choice)
+    public override string GetFormattedChoice(FilterConfiguration filterConfiguration, HouseVendorSetting choice)
     {
         return choice.ToString();
+    }
+
+    public CraftHouseVendorFilter(ILogger<CraftHouseVendorFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+    {
     }
 }

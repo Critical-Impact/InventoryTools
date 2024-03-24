@@ -1,9 +1,14 @@
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.GameUi
 {
-    public class InventoryBuddyOverlay2 : InventoryBuddyOverlay
+    public class InventoryBuddyOverlay2: InventoryBuddyOverlay
     {
-        public override WindowName WindowName { get; set; } = WindowName.InventoryBuddy2;
+        public InventoryBuddyOverlay2(ILogger<InventoryBuddyOverlay2> logger, AtkInventoryBuddy2 overlay, ICharacterMonitor characterMonitor) : base(logger,overlay, characterMonitor)
+        {
+        }
+        
     }
 }

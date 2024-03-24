@@ -2,351 +2,236 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
+using CriticalCommonLib.Extensions;
+using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
+using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
+using InventoryTools.Mediator;
+using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
 using Lumina.Excel;
+using Microsoft.Extensions.Logging;
 using OtterGui;
-using Dalamud.Interface.Utility.Raii;
 
-namespace InventoryTools.Ui;
-
-public class BNpcWindow : GenericTabbedTable<(BNpcNameEx, BNpcBaseEx)>
+namespace InventoryTools.Ui
 {
-    public BNpcWindow(string name = "Mobs", ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
+    class BNpcWindow : UintWindow
     {
-        SetupWindow();
-    }
+        private readonly IIconService _iconService;
+        private readonly IChatUtilities _chatUtilities;
+        private readonly ExcelCache _excelCache;
 
-    public BNpcWindow() : base("Mobs")
-    {
-        SetupWindow();
-    }
-
-    public HashSet<uint>? GetTerritory(uint bNpcNameId)
-    {
-        if (_mappedMobs.ContainsKey(bNpcNameId))
+        public BNpcWindow(ILogger<BNpcWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IIconService iconService, IChatUtilities chatUtilities, ExcelCache excelCache,  string name = "Mob Window") : base(logger, mediator, imGuiService, configuration, name)
         {
-            return _mappedMobs[bNpcNameId];
+            _iconService = iconService;
+            _chatUtilities = chatUtilities;
+            _excelCache = excelCache;
         }
-
-        return null;
-    }
-
-    private Dictionary<uint, List<MobSpawnPositionEx>> _spawnPositions = new Dictionary<uint, List<MobSpawnPositionEx>>();
-    private Dictionary<uint, List<ItemEx>> _mobDrops = new Dictionary<uint, List<ItemEx>>();
-
-    public List<MobSpawnPositionEx> GetPositions(uint bNpcNameId)
-    {
-        if (_spawnPositions.ContainsKey(bNpcNameId))
+        public override void Initialize(uint bNpcId)
         {
-            return _spawnPositions[bNpcNameId];
+            Flags = ImGuiWindowFlags.NoSavedSettings;
+            _bNpcId = bNpcId;
+            if (bNpc != null)
+            {
+                WindowName = bNpc.FormattedName + "##" + bNpcId;
+                Key = "bNpc_" + bNpcId;
+                _mobDrops = bNpc.MobDrops;
+                _mobSpawns = bNpc.MobSpawns;
+            }
+            else
+            {
+                WindowName = "Unknown Mob";
+            }
         }
+        
+        public override bool SaveState => false;
+        private uint _bNpcId;
+        private List<MobDropEx>? _mobDrops;
+        private List<MobSpawnPositionEx>? _mobSpawns;
 
-        var spawns = Service.ExcelCache.MobSpawns.Where(c => c.BNpcNameId == bNpcNameId).ToList();
-        _spawnPositions[bNpcNameId] = spawns;
-        return _spawnPositions[bNpcNameId];
-    }
-
-    public List<ItemEx> GetDrops(uint bNpcNameId)
-    {
-        if (_mobDrops.ContainsKey(bNpcNameId))
+        private BNpcNameEx? bNpc => _excelCache.GetBNpcNameExSheet().GetRow(_bNpcId);
+        public override string GenericName => "Mob";
+        public override bool DestroyOnClose => true;
+        public override void Draw()
         {
-            return _mobDrops[bNpcNameId];
-        }
-
-        var mobDrops = Service.ExcelCache.MobDrops.Where(c => c.BNpcNameId == bNpcNameId).Select(c => Service.ExcelCache.GetItemExSheet().GetRow(c.ItemId)).Where(c => c != null).Select(c => c!).ToList();
-        _mobDrops[bNpcNameId] = mobDrops;
-        return _mobDrops[bNpcNameId];
-    }
-    
-    public void SetupWindow()
-    {
-        var availableTerritories = Service.ExcelCache.MobSpawns.Select(c => c.TerritoryTypeId).ToHashSet();
-        _mappedMobs = Service.ExcelCache.MobSpawns.Select(c => (c.BNpcNameId, c.TerritoryTypeId)).GroupBy(c => c.BNpcNameId).ToDictionary(c => c.Key, c => c.Select(c => c.TerritoryTypeId).ToHashSet());
-        _columns = new List<TableColumn<(BNpcNameEx, BNpcBaseEx)>>()
-        {
-            new("ID", 50, ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.DefaultHide)
+            if (ImGui.GetWindowPos() != CurrentPosition)
             {
-                Sort = (specs, exes) =>
-                {
-                    if (specs == null)
-                    {
-                        return exes;
-                    }
+                CurrentPosition = ImGui.GetWindowPos();
+            }
 
-                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.Item1.RowId) : exes.OrderByDescending(c => c.Item1.RowId);
-                },
-                Filter = (s, exes) =>
+            if (bNpc == null)
+            {
+                ImGui.TextUnformatted("bNpc with the ID " + _bNpcId + " could not be found.");   
+            }
+            else
+            {
+                ImGui.Text("Type: " + bNpc.MobTypes);
+
+                if (bNpc.NotoriousMonster != null)
                 {
-                    if (s == null)
-                    {
-                        return exes;
-                    }
-                    return s == "" ? exes : exes.Where(c => (c.Item1.RowId + "," + c.Item2.RowId).ToLower().PassesFilter(s.ToLower()));
-                },
-                Draw = (ex, contentTypeId) =>
-                {
-                    ImGui.TextUnformatted((ex.Item1.RowId + "," + ex.Item2.RowId).ToString());
+                    ImGui.Text("Rank: " + bNpc.NotoriousMonster.RankFormatted());
                 }
-            },
-            new("Name", 150, ImGuiTableColumnFlags.WidthFixed)
-            {
-                Sort = (specs, exes) =>
+                
+                var garlandId = bNpc.GarlandToolsId;
+                if (garlandId != null)
                 {
-                    if (specs == null)
+                    var garlandIcon = _iconService.LoadImage("garlandtools");
+                    if (ImGui.ImageButton(garlandIcon.ImGuiHandle,
+                            new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                     {
-                        return exes;
+                        $"https://www.garlandtools.org/db/#mob/{garlandId}".OpenBrowser();
                     }
 
-                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.Item1.FormattedName) : exes.OrderByDescending(c => c.Item1.FormattedName);
-                },
-                Filter = (s, exes) =>
-                {
-                    if (s == null)
-                    {
-                        return exes;
-                    }
-                    return s == "" ? exes : exes.Where(c => c.Item1.FormattedName.ToLower().PassesFilter(s.ToLower()));
-                },
-                Draw = (ex, contentTypeId) =>
-                {
-                    ImGui.TextUnformatted(ex.Item1.FormattedName);
+                    ImGuiUtil.HoverTooltip("Open in Garland Tools");
+                    ImGui.SameLine();
                 }
-            },
-            new("Type", 70, ImGuiTableColumnFlags.WidthFixed)
-            {
-                Sort = (specs, exes) =>
-                {
-                    if (specs == null)
-                    {
-                        return exes;
-                    }
 
-                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.Item2.NpcType.ToString()) : exes.OrderByDescending(c => c.Item2.NpcType.ToString());
-                },
-                Filter = (s, exes) =>
+                var tcIcon = _iconService.LoadImage("teamcraft");
+                if (ImGui.ImageButton(tcIcon.ImGuiHandle,
+                        new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                 {
-                    if (s == null)
-                    {
-                        return exes;
-                    }
-                    return s == "" ? exes : exes.Where(c => c.Item2.NpcType.ToString().ToLower().PassesFilter(s.ToLower()));
-                },
-                Draw = (ex, contentTypeId) =>
-                {
-                    ImGui.TextUnformatted(ex.Item2.NpcType.ToString().ToString() ?? "");
+                    $"https://ffxivteamcraft.com/db/en/mob/{_bNpcId}".OpenBrowser();
                 }
-            },
-            new("Locations", 200, ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoSort)
-            {
-                Draw = (ex, contentTypeId) =>
+                ImGuiUtil.HoverTooltip("Open in Teamcraft");
+                
+                ImGui.Separator();
+                
+                
+                if (_mobDrops != null && ImGui.CollapsingHeader("Drops (" + _mobDrops.Count + ")", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
                 {
-                    var positions = GetPositions(ex.Item1.RowId).Where(c => c.TerritoryType.Value != null && c.TerritoryType.Value.PlaceName.Value != null && (c.TerritoryTypeId == contentTypeId || contentTypeId == 0));
-                    UiHelpers.WrapTableColumnElements("Scroll" + ex.Item1.RowId,positions, RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X, position =>
+                    ImGuiStylePtr style = ImGui.GetStyle();
+                    float windowVisibleX2 = ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
+                    for (var index = 0; index < _mobDrops.Count; index++)
                     {
-                        var territory = Service.ExcelCache.GetTerritoryTypeExSheet()
-                            .GetRow(position.TerritoryTypeId);
+                        ImGui.PushID("Drop"+index);
+                        var drop = _mobDrops[index];
+                        var listingCount = 0;
+
+                        if (drop.ItemEx.Value != null)
+                        {
+                            var useIcon = _iconService[drop.ItemEx.Value.Icon];
+                            if (useIcon != null)
+                            {
+                                if (ImGui.ImageButton(useIcon.ImGuiHandle,
+                                        new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale,
+                                        new(0, 0), new(1, 1),
+                                        0))
+                                {
+                                    MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), drop.ItemEx.Row));
+                                }
+
+                                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
+                                                        ImGuiHoveredFlags.AllowWhenOverlapped &
+                                                        ImGuiHoveredFlags.AllowWhenBlockedByPopup &
+                                                        ImGuiHoveredFlags
+                                                            .AllowWhenBlockedByActiveItem &
+                                                        ImGuiHoveredFlags.AnyWindow) &&
+                                    ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                                {
+                                    ImGui.OpenPopup("RightClickUse" + drop.ItemEx.Row);
+                                }
+
+                                if (ImGui.BeginPopup("RightClickUse" + drop.ItemEx.Row))
+                                {
+                                    MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(drop.ItemEx.Value));
+                                    ImGui.EndPopup();
+                                }
+
+                                float lastButtonX2 = ImGui.GetItemRectMax().X;
+                                float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
+                                ImGuiUtil.HoverTooltip(drop.ItemEx.Value.NameString);
+                                if (listingCount < _mobDrops.Count && nextButtonX2 < windowVisibleX2)
+                                {
+                                    ImGui.SameLine();
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                ImGui.NewLine();
+                
+                if (_mobSpawns != null && ImGui.CollapsingHeader("Locations (" + _mobSpawns.Count + ")", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
+                {
+                    ImGuiStylePtr style = ImGui.GetStyle();
+                    float windowVisibleX2 = ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
+                    for (var index = 0; index < _mobSpawns.Count; index++)
+                    {
+                        ImGui.PushID("Location"+index);
+                        var spawn = _mobSpawns[index];
+                        var listingCount = 0;
+                        
+                        var territory = _excelCache.GetTerritoryTypeExSheet()
+                            .GetRow(spawn.TerritoryTypeId);
                         if (territory != null)
                         {
-                            if (ImGui.ImageButton(PluginService.IconStorage[60561].ImGuiHandle,
-                                    new Vector2(RowSize * ImGui.GetIO().FontGlobalScale,
-                                        RowSize * ImGui.GetIO().FontGlobalScale), new Vector2(0, 0),
+                            if (ImGui.ImageButton(_iconService[60561].ImGuiHandle,
+                                    new Vector2(32 * ImGui.GetIO().FontGlobalScale,32 * ImGui.GetIO().FontGlobalScale), new Vector2(0, 0),
                                     new Vector2(1, 1), 0))
                             {
-                                PluginService.ChatUtilities.PrintFullMapLink(
-                                    new GenericMapLocation(position.Position.X, position.Position.Y,
+                                _chatUtilities.PrintFullMapLink(
+                                    new GenericMapLocation(spawn.Position.X, spawn.Position.Y,
                                         territory.MapEx,
                                         territory.PlaceNameEx,
-                                        new LazyRow<TerritoryTypeEx>(Service.ExcelCache.GameData, territory.RowId,
-                                            territory.SheetLanguage)), ex.Item1.FormattedName);
+                                        new LazyRow<TerritoryTypeEx>(_excelCache.GameData, territory.RowId,
+                                            territory.SheetLanguage)), bNpc.FormattedName);
                             }
 
                             if (ImGui.IsItemHovered())
                             {
                                 using var tt = ImRaii.Tooltip();
                                 ImGui.TextUnformatted((territory.PlaceName.Value?.Name ?? "Unknown") + " - " +
-                                                      position.Position.X +
-                                                      " : " + position.Position.Y);
+                                                      spawn.Position.X +
+                                                      " : " + spawn.Position.Y);
+                            }
+                            float lastButtonX2 = ImGui.GetItemRectMax().X;
+                            float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
+                            ImGuiUtil.HoverTooltip(bNpc.FormattedName);
+                            if (listingCount < _mobSpawns.Count && nextButtonX2 < windowVisibleX2)
+                            {
+                                ImGui.SameLine();
                             }
                         }
-
-                        return true;
-                    });
-                        
+                    }
                 }
-            },
-            new("Drops", 200, ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoSort)
-            {
-                Sort = (specs, exes) =>
+                
+                ImGui.NewLine();
+                
+                #if DEBUG
+                if (ImGui.CollapsingHeader("Debug"))
                 {
-                    return exes;
-                },
-                Filter = (s, npcs) =>
-                {
-                    return s == null ? npcs : npcs.Where(c =>
+                    ImGui.TextUnformatted("bNpc ID: " + _bNpcId);
+                    if (ImGui.Button("Copy"))
                     {
-                        var currentValue = GetDrops(c.Item1.RowId);
+                        ImGui.SetClipboardText(_bNpcId.ToString());
+                    }
 
-                        return currentValue.Any(c => c.NameString.ToLower().PassesFilter(s));
-                    });
-                },
-                Draw = (ex, contentTypeId) =>
-                {
-                    var drops = GetDrops(ex.Item1.RowId);
-                    UiHelpers.WrapTableColumnElements("ScrollDrops" + ex.Item1.RowId, drops,
-                        RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X,
-                        drop =>
-                    {
-                        var sourceIcon = PluginService.IconStorage[drop.Icon];
-                        ImGui.Image(sourceIcon.ImGuiHandle,
-                            new Vector2(RowSize, RowSize) * ImGui.GetIO().FontGlobalScale);
-                        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
-                                                ImGuiHoveredFlags.AllowWhenOverlapped &
-                                                ImGuiHoveredFlags.AllowWhenBlockedByPopup &
-                                                ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
-                                                ImGuiHoveredFlags.AnyWindow) &&
-                            ImGui.IsMouseReleased(ImGuiMouseButton.Right))
-                        {
-                            ImGui.OpenPopup("RightClick" + drop.RowId);
-                        }
-
-                        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
-                                                ImGuiHoveredFlags.AllowWhenOverlapped &
-                                                ImGuiHoveredFlags.AllowWhenBlockedByPopup &
-                                                ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
-                                                ImGuiHoveredFlags.AnyWindow) &&
-                            ImGui.IsMouseReleased(ImGuiMouseButton.Left))
-                        {
-                            PluginService.WindowService.OpenItemWindow(drop.RowId);
-                        }
-
-                        if (ImGui.BeginPopup("RightClick" + drop.RowId))
-                        {
-                            drop.DrawRightClickPopup();
-                            ImGui.EndPopup();
-                        }
-
-
-                        ImGuiUtil.HoverTooltip(drop.NameString);
-                        return true;
-                    });
+                    Utils.PrintOutObject(bNpc, 0, new List<string>());
                 }
-            },
-        };
-        _tabs = Service.ExcelCache.GetTerritoryTypeExSheet().Where(c => availableTerritories.Contains(c.RowId)).OrderBy(c => c.PlaceNameEx.Value?.FormattedName ?? "Unknown").ToDictionary(c => c.RowId, c =>c.PlaceNameEx.Value?.FormattedName ?? "Unknown");
-        _items = new Dictionary<uint, List<(BNpcNameEx, BNpcBaseEx)>>();
-        _filteredItems = new Dictionary<uint, List<(BNpcNameEx, BNpcBaseEx)>>();
-    }
+                #endif
 
-    public override List<(BNpcNameEx, BNpcBaseEx)> GetItems(uint placeNameId)
-    {
-        if (!_items.ContainsKey(placeNameId))
-        {
-            if (placeNameId == 0)
-            {
-                var availableMobs = Service.ExcelCache.MobSpawns.Select(c => (c.BNpcNameId, c.BNpcBaseId)).ToHashSet();
-                var actualMobs = availableMobs.Select(c => (Service.ExcelCache.GetBNpcNameExSheet().GetRow(c.BNpcNameId),
-                    Service.ExcelCache.GetBNpcBaseExSheet().GetRow(c.BNpcBaseId))).Where(c => c.Item1 != null && c.Item1.FormattedName != "" && c.Item2 != null).Select(c => (c.Item1!, c.Item2!)).ToList();
-                _items.Add(placeNameId, actualMobs);
-            }
-            else
-            {
-                bool FilterNpcs(BNpcNameEx c)
-                {
-                    var territory = GetTerritory(c.RowId);
-                    return c.FormattedName != "" && territory != null && territory.Contains(placeNameId);
-                }
-                var availableMobs = Service.ExcelCache.MobSpawns.Select(c => (c.BNpcNameId, c.BNpcBaseId)).ToHashSet();
-                var actualMobs = availableMobs.Select(c => (Service.ExcelCache.GetBNpcNameExSheet().GetRow(c.BNpcNameId),
-                    Service.ExcelCache.GetBNpcBaseExSheet().GetRow(c.BNpcBaseId))).Where(c => c.Item1 != null && FilterNpcs(c.Item1) && c.Item1.FormattedName != "" && c.Item2 != null).Select(c => (c.Item1!, c.Item2!)).ToList();
-                _items.Add(placeNameId, actualMobs);
             }
         }
 
-        if (!_filteredItems.ContainsKey(placeNameId))
+        public override void Invalidate()
         {
-            var unfilteredList = _items[placeNameId];
-            if (SortColumn != null && _columns[(int)SortColumn].Sort != null)
-            {
-                unfilteredList = _columns[(int)SortColumn].Sort?.Invoke(SortDirection, unfilteredList).ToList() ?? unfilteredList;
-            }
-
-            foreach (var column in _columns)
-            {
-                if (column.Filter != null && column.FilterText != "")
-                {
-                    unfilteredList = column.Filter(column.FilterText, unfilteredList).ToList();
-                }
-                if (column.FilterBool != null && column.FilterBoolean != null)
-                {
-                    unfilteredList = column.FilterBool(column.FilterBoolean, unfilteredList).ToList();
-                }
-            }
-
-            _filteredItems.Add(placeNameId, unfilteredList);
+            
         }
+        
+        public override FilterConfiguration? SelectedConfiguration => null;
+        public override Vector2? DefaultSize { get; } = new Vector2(500, 800);
+        public override Vector2? MaxSize => new (800, 1500);
+        public override Vector2? MinSize => new (100, 100);
 
-        return _filteredItems[placeNameId];
+        public override bool SavePosition => true;
+
+        public override string GenericKey => "bNpc";
     }
-
-    public override Dictionary<uint, string> Tabs => _tabs;
-
-    public override string TableName => _tableName;
-
-    public static string AsKey
-    {
-        get { return "mobs"; }
-    }
-
-    public override string Key => AsKey;
-    public override bool DestroyOnClose => false;
-    public override bool SaveState => true;
-    public override Vector2? MaxSize { get; } = new(2000, 2000);
-    public override Vector2? MinSize { get; } = new(200, 200);
-    public override Vector2? DefaultSize { get; } = new(600, 600);
-    
-    public override void Draw()
-    {
-        DrawTabs();
-    }
-
-    public override int GetRowId((BNpcNameEx, BNpcBaseEx) item)
-    {
-        return item.GetHashCode();
-    }
-
-    public override Dictionary<uint, List<(BNpcNameEx, BNpcBaseEx)>> Items => _items;
-
-    public override Dictionary<uint, List<(BNpcNameEx, BNpcBaseEx)>> FilteredItems => _filteredItems;
-
-    public override List<TableColumn<(BNpcNameEx, BNpcBaseEx)>> Columns => _columns;
-
-    public override ImGuiTableFlags TableFlags => _flags;
-
-    public override bool UseClipper => _useClipper;
-
-    private List<TableColumn<(BNpcNameEx, BNpcBaseEx)>> _columns = null!;
-    private Dictionary<uint, List<(BNpcNameEx, BNpcBaseEx)>> _items = null!;
-    private Dictionary<uint, List<(BNpcNameEx, BNpcBaseEx)>> _filteredItems = null!;
-    private ImGuiTableFlags _flags = ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersV |
-                                                   ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.BordersInnerV |
-                                                   ImGuiTableFlags.BordersH | ImGuiTableFlags.BordersOuterH |
-                                                   ImGuiTableFlags.BordersInnerH |
-                                                   ImGuiTableFlags.Resizable | ImGuiTableFlags.Sortable |
-                                                   ImGuiTableFlags.Hideable | ImGuiTableFlags.ScrollX |
-                                                   ImGuiTableFlags.ScrollY;
-    private Dictionary<uint, string> _tabs = null!;
-    private string _tableName = "bnpc";
-    private Dictionary<uint, HashSet<uint>> _mappedMobs = null!;
-    private bool _useClipper => true;
-
-    public override void Invalidate()
-    {
-    }
-
-    public override FilterConfiguration? SelectedConfiguration => null;
-
 }

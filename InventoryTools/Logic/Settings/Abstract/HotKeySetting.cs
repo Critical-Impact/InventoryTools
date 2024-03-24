@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using Dalamud.Game.ClientState.Keys;
 using ImGuiNET;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 using OtterGui.Classes;
 using OtterGui.Widgets;
 
@@ -8,6 +10,9 @@ namespace InventoryTools.Logic.Settings.Abstract
 {
     public abstract class HotKeySetting : Setting<ModifiableHotkey>
     {
+        public HotKeySetting(ILogger logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
         private readonly List<VirtualKey> _virtualKeys = new() { VirtualKey.A, VirtualKey.B, VirtualKey.C, VirtualKey.D, VirtualKey.E, VirtualKey.F, VirtualKey.G, VirtualKey.H, VirtualKey.I, VirtualKey.J, VirtualKey.K, VirtualKey.L, VirtualKey.M, VirtualKey.N, VirtualKey.O, VirtualKey.P, VirtualKey.Q, VirtualKey.R, VirtualKey.S, VirtualKey.T, VirtualKey.U, VirtualKey.V, VirtualKey.W, VirtualKey.X, VirtualKey.Y, VirtualKey.Z, VirtualKey.NO_KEY };
 
 
@@ -37,8 +42,8 @@ namespace InventoryTools.Logic.Settings.Abstract
                 }, _virtualKeys);
             
             ImGui.SameLine();
-            UiHelpers.HelpMarker(HelpText);
-            if (HasValueSet(configuration))
+            ImGuiService.HelpMarker(HelpText, Image, ImageSize);
+            if (!HideReset && HasValueSet(configuration))
             {
                 ImGui.SameLine();
                 if (ImGui.Button("Reset##" + Key + "Reset"))

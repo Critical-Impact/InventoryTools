@@ -3,41 +3,53 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Interfaces;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
+using InventoryTools.Mediator;
+using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using OtterGui;
 
 namespace InventoryTools.Ui
 {
-    class ENpcWindow : Window
+    class ENpcWindow : UintWindow
     {
-        public override bool SaveState => false;
-        public static string AsKey(uint eNpcId)
-        {
-            return "enpc_" + eNpcId;
-        }
-        private uint _eNpcId;
-        private ENpc? eNpc => Service.ExcelCache.ENpcCollection?.Get(_eNpcId);
-        public List<IShop>? Shops;
+        private readonly ExcelCache _excelCache;
+        private readonly IIconService _iconService;
 
-        public ENpcWindow(uint eNpcId, string name = "Allagan Tools - Invalid NPC") : base(name)
+        public ENpcWindow(ILogger<ENpcWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ExcelCache excelCache, IIconService iconService, string name = "NPC Window") : base(logger, mediator, imGuiService, configuration, name)
+        {
+            _excelCache = excelCache;
+            _iconService = iconService;
+        }
+        public override void Initialize(uint eNpcId)
         {
             Flags = ImGuiWindowFlags.NoSavedSettings;
             _eNpcId = eNpcId;
             if (eNpc != null)
             {
+                Key = "enpc_" + eNpcId;
                 WindowName = "Allagan Tools - " + eNpc.Resident!.FormattedSingular + "##" + eNpcId;
-                Shops = Service.ExcelCache.ENpcCollection?.FindShops(eNpc)?.Select(c => Service.ExcelCache.ShopCollection?.Get(c)).Where(c => c != null).Select(c => c!).ToList();
+                Shops = _excelCache.ENpcCollection?.FindShops(eNpc)?.Select(c => _excelCache.ShopCollection?.Get(c)).Where(c => c != null).Select(c => c!).ToList();
             }
             else
             {
-             
+                WindowName = "Invalid NPC";
+                Key = "enpc_unknown";
             }
         }
-
-        public override string Key => AsKey(_eNpcId);
+        
+        public override bool SaveState => false;
+        private uint _eNpcId;
+        private ENpc? eNpc => _excelCache.ENpcCollection?.Get(_eNpcId);
+        public List<IShop>? Shops;
+        public override string GenericName => "Npcs";
         public override bool DestroyOnClose => true;
         public override void Draw()
         {
@@ -52,7 +64,7 @@ namespace InventoryTools.Ui
             }
             else
             {
-                var garlandIcon = PluginService.IconStorage.LoadImage("garlandtools");
+                var garlandIcon = _iconService.LoadImage("garlandtools");
                 if (ImGui.ImageButton(garlandIcon.ImGuiHandle,
                         new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                 {
@@ -60,7 +72,7 @@ namespace InventoryTools.Ui
                 }
                 ImGuiUtil.HoverTooltip("Open in Garland Tools");
                 ImGui.SameLine();
-                var tcIcon = PluginService.IconStorage.LoadImage("teamcraft");
+                var tcIcon = _iconService.LoadImage("teamcraft");
                 if (ImGui.ImageButton(tcIcon.ImGuiHandle,
                         new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                 {
@@ -91,7 +103,7 @@ namespace InventoryTools.Ui
                                 {
                                     if (item.ItemEx.Value != null)
                                     {
-                                        var useIcon = PluginService.IconStorage[item.ItemEx.Value.Icon];
+                                        var useIcon = _iconService[item.ItemEx.Value.Icon];
                                         if (useIcon != null)
                                         {
                                             if (ImGui.ImageButton(useIcon.ImGuiHandle,
@@ -99,7 +111,7 @@ namespace InventoryTools.Ui
                                                     new(0, 0), new(1, 1),
                                                     0))
                                             {
-                                                PluginService.WindowService.OpenItemWindow(item.ItemEx.Row);
+                                                MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), item.ItemEx.Row));
                                             }
 
                                             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
@@ -115,8 +127,7 @@ namespace InventoryTools.Ui
 
                                             if (ImGui.BeginPopup("RightClickUse" + item.ItemEx.Row))
                                             {
-                                                item.ItemEx.Value.DrawRightClickPopup();
-
+                                                MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(item.ItemEx.Value));
                                                 ImGui.EndPopup();
                                             }
 

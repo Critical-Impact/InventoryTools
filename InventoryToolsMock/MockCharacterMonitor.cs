@@ -1,5 +1,6 @@
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using Dalamud.Logging;
 using InventoryTools;
 
@@ -60,6 +61,7 @@ public class MockCharacterMonitor : ICharacterMonitor
     }
     
     private Dictionary<ulong, Character> _characters;
+    private bool _isLoggedIn;
     public Dictionary<ulong, Character> Characters => _characters;
 
 
@@ -267,7 +269,7 @@ public class MockCharacterMonitor : ICharacterMonitor
     {
         get
         {
-            return false;
+            return _isLoggedIn;
         }
     }
 
@@ -277,6 +279,11 @@ public class MockCharacterMonitor : ICharacterMonitor
         {
             return 0;
         }
+    }
+
+    public void OverrideIsLoggedIn(bool newValue)
+    {
+        _isLoggedIn = newValue;
     }
     public void OverrideActiveCharacter(ulong activeCharacter)
     {

@@ -2,12 +2,13 @@ namespace InventoryTools.Logic.Settings.Abstract
 {
     public enum SettingCategory
     {
-        General = 0,
-        Visuals = 1,
-        MarketBoard = 2,
-        ToolTips = 3,
-        Hotkeys = 4,
-        History = 5,
-        Windows = 6,
+        None = 0,
+        General = 1,
+        Visuals = 2,
+        MarketBoard = 3,
+        ToolTips = 4,
+        Hotkeys = 5,
+        History = 6,
+        Windows = 7,
     }
 }

@@ -3,29 +3,36 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
+using InventoryTools.Mediator;
+using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 
 namespace InventoryTools.Ui;
 
 public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>
 {
-    public SubmarinesWindow(string name = "Submarines", ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
-    {
-        SetupWindow();
-    }
+    private readonly ImGuiService _imGuiService;
+    private readonly ExcelCache _excelCache;
 
-    public SubmarinesWindow() : base("Submarines")
+    public SubmarinesWindow(ILogger<SubmarinesWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ExcelCache excelCache, string name = "Submarines Window") : base(logger, mediator, imGuiService, configuration, name)
     {
-        SetupWindow();
+        _imGuiService = imGuiService;
+        _excelCache = excelCache;
     }
-
-    private void SetupWindow()
+    public override void Initialize()
     {
+        Key = "submarines";
+        WindowName = "Submarines";
         _columns = new List<TableColumn<SubmarineExplorationEx>>()
         {
             new("Icon", 32, ImGuiTableColumnFlags.WidthFixed)
@@ -33,7 +40,7 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>
                 OnLeftClick = OnLeftClick,
                 Draw = (ex, contentTypeId) =>
                 {
-                    if (ImGui.ImageButton(PluginService.IconStorage[Icons.AirshipIcon].ImGuiHandle,
+                    if (ImGui.ImageButton(_imGuiService.IconService[Icons.AirshipIcon].ImGuiHandle,
                             new Vector2(RowSize, RowSize)))
                     {
                         _columns[0].OnLeftClick?.Invoke(ex);
@@ -136,13 +143,13 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>
                 Draw = (ex, contentTypeId) =>
                 {
                     var drops = ex.Drops.Where(c => c.Value != null);
-                    UiHelpers.WrapTableColumnElements("Drops" + ex.RowId, drops,
+                    _imGuiService.WrapTableColumnElements("Drops" + ex.RowId, drops,
                     RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X,
                     drop =>
                     {
                         if (drop.Value != null)
                         {
-                            var sourceIcon = PluginService.IconStorage[drop.Value.Icon];
+                            var sourceIcon = _imGuiService.IconService[drop.Value.Icon];
                             ImGui.Image(sourceIcon.ImGuiHandle,
                                 new Vector2(RowSize, RowSize) * ImGui.GetIO().FontGlobalScale);
                             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
@@ -162,12 +169,12 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>
                                                     ImGuiHoveredFlags.AnyWindow) &&
                                 ImGui.IsMouseReleased(ImGuiMouseButton.Left))
                             {
-                                PluginService.WindowService.OpenItemWindow(drop.Value.RowId);
+                                MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), drop.Value.RowId));
                             }
 
                             if (ImGui.BeginPopup("RightClick" + drop.Value.RowId))
                             {
-                                drop.Value.DrawRightClickPopup();
+                                MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(drop.Value));
                                 ImGui.EndPopup();
                             }
                             ImGuiUtil.HoverTooltip(drop.Value.NameString);
@@ -179,18 +186,19 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>
                 }
             },
         };
-        _tabs = Service.ExcelCache.GetSubmarineMapSheet().Where(c => c.Name.ToDalamudString().ToString() != "").ToDictionary(c => c.RowId, c =>c.Name.ToString());
+        _tabs = _excelCache.GetSubmarineMapSheet().Where(c => c.Name.ToDalamudString().ToString() != "").ToDictionary(c => c.RowId, c =>c.Name.ToString());
         _items = new Dictionary<uint, List<SubmarineExplorationEx>>();
         _filteredItems = new Dictionary<uint, List<SubmarineExplorationEx>>();        
     }
     
     private bool OnLeftClick(SubmarineExplorationEx arg)
     {
-        PluginService.WindowService.OpenSubmarineWindow(arg.RowId);
+        MediatorService.Publish(new OpenGenericWindowMessage(typeof(SubmarineWindow)));
         return true;
     }
 
-    public override string Key => AsKey;
+    public override string GenericKey { get; } = "submarines";
+    public override string GenericName { get; } = "Submarines";
     public override bool DestroyOnClose => false;
     public override bool SaveState => true;
     public override Vector2? MaxSize { get; } = new(2000, 2000);
@@ -202,16 +210,12 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>
         DrawTabs();
     }
     
-    public static string AsKey
-    {
-        get { return "submarines"; }
-    }
-
     public override void Invalidate()
     {
     }
 
-    public override FilterConfiguration? SelectedConfiguration { get; } = null;
+    public override FilterConfiguration? SelectedConfiguration => null;
+
     public override int GetRowId(SubmarineExplorationEx item)
     {
         return (int)item.RowId;
@@ -243,12 +247,12 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>
         {
             if (tabId == 0)
             {
-                var duties = Service.ExcelCache.GetSubmarineExplorationExSheet().Where(c => c.FormattedName.ToString() != "").ToList();
+                var duties = _excelCache.GetSubmarineExplorationExSheet().Where(c => c.FormattedName.ToString() != "").ToList();
                 _items.Add(tabId, duties);
             }
             else
             {
-                var duties = Service.ExcelCache.GetSubmarineExplorationExSheet().Where(c => c.FormattedName.ToString() != "" && c.Map.Row == tabId).ToList();
+                var duties = _excelCache.GetSubmarineExplorationExSheet().Where(c => c.FormattedName.ToString() != "" && c.Map.Row == tabId).ToList();
                 _items.Add(tabId, duties);
             }
         }
@@ -286,4 +290,5 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>
     
     private string _tableName = "submarines";
     private bool _useClipper = false;
+    
 }

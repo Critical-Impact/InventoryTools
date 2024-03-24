@@ -1,6 +1,8 @@
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -35,6 +37,10 @@ namespace InventoryTools.Logic.Filters
         public override int? CurrentValue(FilterConfiguration configuration)
         {
             return configuration.FreezeCraftColumns;
+        }
+
+        public TableCraftFreezeRowsFilter(ILogger<TableCraftFreezeRowsFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
         }
     }
 }

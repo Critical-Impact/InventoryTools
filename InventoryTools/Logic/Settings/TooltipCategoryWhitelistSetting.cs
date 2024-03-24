@@ -1,13 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib;
+using CriticalCommonLib.Services;
 using Dalamud.Utility;
 using InventoryTools.Logic.Settings.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Settings;
 
 public class TooltipCategoryWhitelistSetting : MultipleChoiceSetting<uint>
 {
+    private readonly ExcelCache _excelCache;
     public override List<uint> DefaultValue { get; set; } = new();
     public override List<uint> CurrentValue(InventoryToolsConfiguration configuration)
     {
@@ -26,9 +30,15 @@ public class TooltipCategoryWhitelistSetting : MultipleChoiceSetting<uint>
     public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
     public override Dictionary<uint, string> GetChoices(InventoryToolsConfiguration configuration)
     {
-        return Service.ExcelCache.GetItemUICategorySheet()
+        return _excelCache.GetItemUICategorySheet()
             .ToDictionary(c => c.RowId, c => c.Name.ToDalamudString().ToString());
     }
 
     public override bool HideAlreadyPicked { get; set; } = true;
+    public override string Version => "1.6.2.5";
+
+    public TooltipCategoryWhitelistSetting(ILogger<TooltipCategoryWhitelistSetting> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
+    {
+        _excelCache = excelCache;
+    }
 }

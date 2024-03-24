@@ -2,106 +2,93 @@ using System;
 using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Extensions;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using DalamudPluginProjectTemplate;
 using DalamudPluginProjectTemplate.Attributes;
+using InventoryTools.Mediator;
+using InventoryTools.Services.Interfaces;
 using InventoryTools.Ui;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Commands
 {
     public class PluginCommands
     {
+        public ILogger<PluginCommands> Logger { get; }
+        private readonly MediatorService _mediatorService;
+        private readonly IChatUtilities _chatUtilities;
+        private readonly ExcelCache _excelCache;
+        private readonly IListService _listService;
+
+        public PluginCommands(MediatorService mediatorService, IChatUtilities chatUtilities, ExcelCache excelCache, IListService listService, ILogger<PluginCommands> logger)
+        {
+            Logger = logger;
+            _mediatorService = mediatorService;
+            _chatUtilities = chatUtilities;
+            _excelCache = excelCache;
+            _listService = listService;
+        }
+        
         [Command("/allagantools")]
         [Aliases("/atools")]
-        [HelpMessage("Shows the allagan tools filter window.")]
+        [HelpMessage("Shows the allagan tools items list window.")]
         public void ShowHideInventoryToolsCommand(string command, string args)
         {
-            PluginService.WindowService.ToggleFiltersWindow();
+            _mediatorService.Publish(new OpenGenericWindowMessage(typeof(FiltersWindow)));
         }
         [Command("/duties")]
         [Aliases("/atduties")]
         [HelpMessage("Shows the allagan tools duties window.")]
         public void ShowHideDutiesWindow(string command, string args)
         {
-            PluginService.WindowService.ToggleDutiesWindow();
+            _mediatorService.Publish(new OpenGenericWindowMessage(typeof(DutiesWindow)));
         }
         [Command("/mobs")]
         [Aliases("/atmobs")]
         [HelpMessage("Shows the allagan tools mobs window.")]
         public void ShowHideMobsWindow(string command, string args)
         {
-            PluginService.WindowService.ToggleMobWindow();
+            _mediatorService.Publish(new OpenGenericWindowMessage(typeof(BNpcsWindow)));
         }
         [Command("/atnpcs")]
         [HelpMessage("Shows the allagan tools npcs window.")]
         public void ShowHideNpcsWindow(string command, string args)
         {
-            PluginService.WindowService.ToggleENpcsWindow();
+            _mediatorService.Publish(new OpenGenericWindowMessage(typeof(ENpcsWindow)));
         }
  
-        [Command("/inv")]
-        [Aliases("/inventorytools")]
-        [DoNotShowInHelp]
-        [HelpMessage("Shows the allagan tools filter window.")]
-        public  void ShowHideInventoryToolsCommand2(string command, string args)
-        {
-            PluginService.WindowService.ToggleFiltersWindow();
-        }
 
-
-        [Command("/atfiltertoggle")]
+        [Command("/athighlight")]
         [Aliases("/atf")]
-        [HelpMessage("Toggles the specified filter on/off and turns off any other filters.")]
+        [HelpMessage("Toggles the specified list's highlight on/off, turning off any other highlighting in the process.")]
         public  void FilterToggleCommand(string command, string args)
         {
-            Service.Log.Verbose(command);
-            Service.Log.Verbose(args);
+            Logger.LogTrace(command);
+            Logger.LogTrace(args);
             if (args.Trim() == "")
             {
-                PluginService.ChatUtilities.PrintError("You must enter the name of a filter.");
+                Service.Chat.PrintError("You must enter the name of an list.");
             }
             else
             {
-                PluginService.FilterService.ToggleActiveBackgroundFilter(args);
+                _listService.ToggleActiveBackgroundList(args);
             }
         }
 
-        [Command("/invf")]
-        [DoNotShowInHelp]
-        [HelpMessage("Toggles the specified filter on/off and turns off any other filters.")]
-        public  void FilterToggleCommandIT(string command, string args)
-        {
-            FilterToggleCommand(command, args);
-        }
-
-        [Command("/ifilter")]
-        [DoNotShowInHelp]
-        [HelpMessage("Toggles the specified filter on/off and turns off any other filters.")]
-        public  void FilterToggleCommand3(string command, string args)
-        {
-            Service.Log.Verbose(command);
-            Service.Log.Verbose(args);
-            if (args.Trim() == "")
-            {
-                PluginService.ChatUtilities.PrintError("You must enter the name of a filter.");
-            }
-            else
-            {
-                PluginService.FilterService.ToggleActiveBackgroundFilter(args);
-            }
-        }
-
-        [Command("/openfilter")]
-        [HelpMessage("Toggles the specified filter as it's own window.")]
+        [Command("/openlist")]
+        [HelpMessage("Open/closes a window displaying the contents of a single list.")]
         public  void OpenFilterCommand(string command, string args)
         {
             if (args.Trim() == "")
             {
-                PluginService.ChatUtilities.PrintError("You must enter the name of a filter.");
+                Service.Chat.PrintError("You must enter the name of a list.");
             }
             else
             {
-                PluginService.PluginLogic.ToggleWindowFilterByName(args);
+                _mediatorService.Publish(new ToggleStringWindowMessage(typeof(FilterWindow), args));
             }
         }
 
@@ -109,130 +96,83 @@ namespace InventoryTools.Commands
         [HelpMessage("Opens the allagan tools crafts window")]
         public  void OpenCraftsWindow(string command, string args)
         {
-            PluginService.WindowService.ToggleCraftsWindow();
+            _mediatorService.Publish(new OpenGenericWindowMessage(typeof(CraftsWindow)));
         }
 
         [Command("/airships")]
         [HelpMessage("Opens the allagan tools airships window")]
         public  void ToggleAirshipsWindow(string command, string args)
         {
-            PluginService.WindowService.ToggleAirshipsWindow();
+            _mediatorService.Publish(new ToggleGenericWindowMessage(typeof(AirshipsWindow)));
         }
 
         [Command("/submarines")]
         [HelpMessage("Opens the allagan tools submarines window")]
         public  void ToggleSubmarinesWindow(string command, string args)
         {
-            PluginService.WindowService.ToggleSubmarinesWindow();
+            _mediatorService.Publish(new ToggleGenericWindowMessage(typeof(SubmarinesWindow)));
         }
 
         [Command("/retainerventures")]
         [HelpMessage("Opens the allagan tools retainer ventures window")]
         public  void ToggleToggleRetainerTasksWindow(string command, string args)
         {
-            PluginService.WindowService.ToggleRetainerTasksWindow();
+            _mediatorService.Publish(new ToggleGenericWindowMessage(typeof(RetainerTasksWindow)));
         }
 
         [Command("/atconfig")]
         [HelpMessage("Opens the allagan tools configuration window")]
         public  void OpenConfigurationWindow(string command, string args)
         {
-            PluginService.WindowService.ToggleConfigurationWindow();
-        }
-
-        [Command("/itconfig")]
-        [DoNotShowInHelp]
-        [HelpMessage("Opens the allagan tools configuration window")]
-        public void OpenConfigurationWindowIT(string command, string args)
-        {
-            OpenConfigurationWindow(command, args);
-        }
-
-        [Command("/invconfig")]
-        [DoNotShowInHelp]
-        [HelpMessage("Opens the allagan tools configuration window")]
-        public  void OpenConfigurationWindow2(string command, string args)
-        {
-            PluginService.WindowService.ToggleConfigurationWindow();
+            _mediatorService.Publish(new ToggleGenericWindowMessage(typeof(ConfigurationWindow)));
         }
 
         [Command("/athelp")]
         [HelpMessage("Opens the allagan tools help window")]
         public  void OpenHelpWindow(string command, string args)
         {
-            PluginService.WindowService.ToggleHelpWindow();
+            _mediatorService.Publish(new ToggleGenericWindowMessage(typeof(HelpWindow)));
         }
 
-        [Command("/invhelp")]
-        [Aliases("/ithelp")]
-        [DoNotShowInHelp]
-        [HelpMessage("Opens the allagan tools help window")]
-        public  void OpenHelpWindow2(string command, string args)
-        {
-            PluginService.WindowService.ToggleHelpWindow();
-        }
-        
         #if DEBUG
 
         [Command("/atdebug")]
         [HelpMessage("Opens the allagan tools debug window")]
         public  void ToggleDebugWindow(string command, string args)
         {
-            PluginService.WindowService.ToggleDebugWindow();
+            _mediatorService.Publish(new ToggleGenericWindowMessage(typeof(DebugWindow)));
         }
+#endif
 
-        [Command("/itdebug")]
-        [DoNotShowInHelp]
-        [HelpMessage("Opens the allagan tools debug window")]
-        public  void ToggleDebugWindowIT(string command, string args)
-        {
-            PluginService.WindowService.ToggleDebugWindow();
-        }
-
-        [Command("/atintro")]
-        [HelpMessage("Opens the allagan tools debug window")]
-        public void ToggleIntroWindow(string command, string args)
-        {
-            PluginService.WindowService.OpenWindow<IntroWindow>(IntroWindow.AsKey);
-        }
-
-        [Command("/itintro")]
-        [DoNotShowInHelp]
-        [HelpMessage("Opens the allagan tools debug window")]
-        public void ToggleIntroWindowIT(string command, string args)
-        {
-            ToggleIntroWindow(command,args);
-        }
-
-        [Command("/atclearfilter")]
-        [HelpMessage("Clears the active filter. Pass in background or ui to close just the background or ui filters respectively.")]
+        [Command("/atclearhighlights", "/atclearfilter")]
+        [HelpMessage("Clears the currently active highlighting. Pass in background or ui to turn off highlighting for the background and ui highlighting respectively.")]
         public void ClearFilter(string command, string args)
         {
             args = args.Trim();
             if (args == "")
             {
-                PluginService.FilterService.ClearActiveBackgroundFilter();
-                PluginService.FilterService.ClearActiveUiFilter();
+                _listService.ClearActiveBackgroundList();
+                _listService.ClearActiveUiList();
             }
             else if (args == "background")
             {
-                PluginService.FilterService.ClearActiveBackgroundFilter();
+                _listService.ClearActiveBackgroundList();
             }
             else if (args == "ui")
             {
-                PluginService.FilterService.ClearActiveUiFilter();
+                _listService.ClearActiveUiList();
             }
         }
 
-        [Command("/atclosefilters")]
-        [HelpMessage("Closes all filter windows.")]
+        [Command("/atcloselists", "/atclosefilters")]
+        [HelpMessage("Closes all list windows.")]
         public void CloseFilterWindows(string command, string args)
         {
-            PluginService.WindowService.CloseFilterWindows();
+            _mediatorService.Publish(new CloseWindowsMessage(typeof(FilterWindow)));
         }
 
         [Command("/atclearall")]
-        [HelpMessage("Closes all filter windows and clears all active filters. Pass in background or ui to close just the background or ui filters respectively.")]
+        [HelpMessage("Closes all list windows and clears all active highlighting. Pass in background or ui to close just the background or ui highlighting respectively.")]
         public void ClearAll(string command, string args)
         {
             ClearFilter(command, args);
@@ -253,22 +193,22 @@ namespace InventoryTools.Commands
             ItemEx? item;
             if (UInt32.TryParse(args, out uint itemId))
             {
-                item = Service.ExcelCache.GetItemExSheet().GetRow(itemId);
+                item = _excelCache.GetItemExSheet().GetRow(itemId);
             }
             else
             {
-                item = Service.ExcelCache.GetItemExSheet().FirstOrDefault(c => c!.SearchString == args.ToParseable(), null);
+                item = _excelCache.GetItemExSheet().FirstOrDefault(c => c!.SearchString == args.ToParseable(), null);
             }
             if (item != null && item.RowId != 0)
             {
-                PluginService.WindowService.OpenItemWindow(item.RowId);
+                _mediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), item.RowId));
             }
             else
             {
-                PluginService.ChatUtilities.PrintError("The item " + args + " could not be found.");
+                _chatUtilities.PrintError("The item " + args + " could not be found.");
             }
         }
 
-        #endif
+        
     }
 }

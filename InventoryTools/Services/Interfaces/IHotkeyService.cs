@@ -5,5 +5,6 @@ namespace InventoryTools.Services.Interfaces;
 
 public interface IHotkeyService : IDisposable
 {
-    void AddHotkey(Hotkey hotkey);
+    void AddHotkey<T>() where T : IHotkey, new();
+    void AddHotkey<T>(T instance) where T : IHotkey;
 }

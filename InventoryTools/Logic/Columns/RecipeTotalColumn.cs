@@ -1,31 +1,41 @@
 ﻿using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns;
 
 public class RecipeTotalColumn : IntegerColumn
 {
+    private readonly ExcelCache _excelCache;
+
+    public RecipeTotalColumn(ILogger<RecipeTotalColumn> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
+    {
+        _excelCache = excelCache;
+    }
     public override ColumnCategory ColumnCategory { get; } = ColumnCategory.Crafting;
     public override bool HasFilter { get; set; } = true;
     public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
 
-    public override int? CurrentValue(InventoryItem item)
+    public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
     {
-        return CurrentValue(item.Item);
+        return CurrentValue(columnConfiguration, item.Item);
     }
 
-    public override int? CurrentValue(ItemEx item)
+    public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
     {
         item.RecipesAsRequirement.Count();
-        return Service.ExcelCache.ItemRecipeCount(item.RowId);
+        return _excelCache.ItemRecipeCount(item.RowId);
     }
 
-    public override int? CurrentValue(SortingResult item)
+    public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
     {
-        return CurrentValue(item.InventoryItem);
+        return CurrentValue(columnConfiguration, item.InventoryItem);
     }
 
     public override string Name { get; set; } = "Recipe Total Count";

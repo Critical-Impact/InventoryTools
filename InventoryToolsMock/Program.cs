@@ -11,14 +11,8 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility;
 using ImGuiNET;
 using InventoryTools.Logic;
+using InventoryTools.Services;
 using Lumina;
-using Serilog;
-using Serilog.Core;
-using Serilog.Events;
-using Veldrid;
-using Veldrid.Sdl2;
-using Veldrid.StartupUtilities;
-using ILogger = Lumina.ILogger;
 
 namespace InventoryToolsMock
 {
@@ -51,7 +45,6 @@ namespace InventoryToolsMock
             if (MockPlugin != null)
             {
                 MockPlugin.Dispose();
-                ConfigurationManager.Save();
             }
 
             _program.Dispose();

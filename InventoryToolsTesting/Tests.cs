@@ -35,7 +35,7 @@ namespace InventoryToolsTesting
             {
                 PanicOnSheetChecksumMismatch = false
             } );
-            Service.ExcelCache = new ExcelCache(lumina);
+            _excelCache = new ExcelCache(lumina);
             Service.Framework = new MockFramework();
         }
         
@@ -65,13 +65,13 @@ namespace InventoryToolsTesting
         [SetUp]
         public void SetupTests()
         {
-            ConfigurationManager.Config.DisplayCrossCharacter = false;
+            Configuration.DisplayCrossCharacter = false;
         }
         
         [Test]
         public void TestSearchFilter()
         {
-            var filterManager = new FilterService();
+            var filterManager = new ListService();
             
             var searchFilter = new FilterConfiguration();
             searchFilter.SourceAllCharacters = true;
@@ -92,7 +92,7 @@ namespace InventoryToolsTesting
         [Test]
         public void TestSortFilter()
         {
-            var filterManager = new FilterService();
+            var filterManager = new ListService();
             
             var searchFilter = new FilterConfiguration();
             searchFilter.SourceAllCharacters = true;
@@ -100,9 +100,9 @@ namespace InventoryToolsTesting
             searchFilter.FilterType = FilterType.SortingFilter;
             
             //Flour, just cause
-            var ryeFlour = Service.ExcelCache.GetItemExSheet().GetRow(4825);
-            var wheatFlour = Service.ExcelCache.GetItemExSheet().GetRow(4826);
-            var cinnamon = Service.ExcelCache.GetItemExSheet().GetRow(4828);
+            var ryeFlour = _excelCache.GetItemExSheet().GetRow(4825);
+            var wheatFlour = _excelCache.GetItemExSheet().GetRow(4826);
+            var cinnamon = _excelCache.GetItemExSheet().GetRow(4828);
             
             
             if (_character != null && _retainer != null && _retainer2 != null && ryeFlour != null && wheatFlour != null && cinnamon != null)
@@ -184,16 +184,16 @@ namespace InventoryToolsTesting
         [Test]
         public void TestDestinationInventory()
         {
-            var filterManager = new FilterService();
+            var filterManager = new ListService();
             
             var searchFilter = new FilterConfiguration();
             searchFilter.SourceAllCharacters = true;
             searchFilter.FilterType = FilterType.SortingFilter;
             
             //Flour, just cause
-            var ryeFlour = Service.ExcelCache.GetItemExSheet().GetRow(4825);
-            var wheatFlour = Service.ExcelCache.GetItemExSheet().GetRow(4826);
-            var cinnamon = Service.ExcelCache.GetItemExSheet().GetRow(4828);
+            var ryeFlour = _excelCache.GetItemExSheet().GetRow(4825);
+            var wheatFlour = _excelCache.GetItemExSheet().GetRow(4826);
+            var cinnamon = _excelCache.GetItemExSheet().GetRow(4828);
             
             
             if (_character != null && ryeFlour != null && wheatFlour != null && cinnamon != null)
@@ -220,7 +220,7 @@ namespace InventoryToolsTesting
         [Test]
         public void TestCraftItemFilter()
         {
-            var filterManager = new FilterService();
+            var filterManager = new ListService();
             
             var searchFilter = new FilterConfiguration();
             searchFilter.SourceAllCharacters = true;
@@ -238,7 +238,7 @@ namespace InventoryToolsTesting
         [Test]
         public void TestDuplicates()
         {
-            var filterManager = new FilterService();
+            var filterManager = new ListService();
             
             var searchFilter = new FilterConfiguration();
             searchFilter.SourceAllCharacters = true;
@@ -248,9 +248,9 @@ namespace InventoryToolsTesting
             searchFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
             
             //Flour, just cause
-            var ryeFlour = Service.ExcelCache.GetItemExSheet().GetRow(4825);
-            var wheatFlour = Service.ExcelCache.GetItemExSheet().GetRow(4826);
-            var cinnamon = Service.ExcelCache.GetItemExSheet().GetRow(4828);
+            var ryeFlour = _excelCache.GetItemExSheet().GetRow(4825);
+            var wheatFlour = _excelCache.GetItemExSheet().GetRow(4826);
+            var cinnamon = _excelCache.GetItemExSheet().GetRow(4828);
             
             if (_character != null && _retainer != null && _retainer2 != null && ryeFlour != null && wheatFlour != null && cinnamon != null)
             {
@@ -290,7 +290,7 @@ namespace InventoryToolsTesting
         [Test]
         public void TestCrossCharacterSearching()
         {
-            var filterManager = new FilterService();
+            var filterManager = new ListService();
             
             var searchFilter = new FilterConfiguration();
             searchFilter.SourceCategories = new HashSet<InventoryCategory>()
@@ -300,9 +300,9 @@ namespace InventoryToolsTesting
             searchFilter.FilterType = FilterType.SearchFilter;
             
             //Flour, just cause
-            var ryeFlour = Service.ExcelCache.GetItemExSheet().GetRow(4825);
-            var wheatFlour = Service.ExcelCache.GetItemExSheet().GetRow(4826);
-            var cinnamon = Service.ExcelCache.GetItemExSheet().GetRow(4828);
+            var ryeFlour = _excelCache.GetItemExSheet().GetRow(4825);
+            var wheatFlour = _excelCache.GetItemExSheet().GetRow(4826);
+            var cinnamon = _excelCache.GetItemExSheet().GetRow(4828);
             
             if (_character != null && _retainer != null && _retainer2 != null && _character2 != null && ryeFlour != null && wheatFlour != null && cinnamon != null)
             {
@@ -325,11 +325,11 @@ namespace InventoryToolsTesting
                 Assert.AreEqual(3, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 
                 //Cross character on, should pick up 4
-                ConfigurationManager.Config.DisplayCrossCharacter = true;
+                Configuration.DisplayCrossCharacter = true;
                 Assert.AreEqual(4, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 
                 //Test cross character source filter setting
-                ConfigurationManager.Config.DisplayCrossCharacter = false;
+                Configuration.DisplayCrossCharacter = false;
                 searchFilter.SourceIncludeCrossCharacter = true;
                 Assert.AreEqual(4, searchFilter.GenerateFilteredList( inventories).Result.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
                 
@@ -355,7 +355,7 @@ namespace InventoryToolsTesting
                 {
                     InventoryCategory.CharacterBags
                 };
-                ConfigurationManager.Config.DisplayCrossCharacter = true;
+                Configuration.DisplayCrossCharacter = true;
                 searchFilter.DestinationIncludeCrossCharacter = false;
                 searchFilter.SourceIncludeCrossCharacter = true;
 
@@ -366,7 +366,7 @@ namespace InventoryToolsTesting
         [Test]
         public void TestInventoryCategoryFilters()
         {
-            var filterManager = new FilterService();
+            var filterManager = new ListService();
             
             var searchFilter = new FilterConfiguration();
             searchFilter.FilterType = FilterType.SearchFilter;
@@ -378,9 +378,9 @@ namespace InventoryToolsTesting
             sortFilter.DestinationCategories = new HashSet<InventoryCategory>() {InventoryCategory.RetainerBags};
             
             //Flour, just cause
-            var ryeFlour = Service.ExcelCache.GetItemExSheet().GetRow(4825);
-            var wheatFlour = Service.ExcelCache.GetItemExSheet().GetRow(4826);
-            var cinnamon = Service.ExcelCache.GetItemExSheet().GetRow(4828);
+            var ryeFlour = _excelCache.GetItemExSheet().GetRow(4825);
+            var wheatFlour = _excelCache.GetItemExSheet().GetRow(4826);
+            var cinnamon = _excelCache.GetItemExSheet().GetRow(4828);
             
             if (_character != null && _retainer != null && _retainer2 != null && _character2 != null && ryeFlour != null && wheatFlour != null && cinnamon != null)
             {
@@ -498,8 +498,8 @@ namespace InventoryToolsTesting
         [Test]
         public void TestCompanyCraftRequirements()
         {
-            Assert.IsTrue(Service.ExcelCache.IsCompanyCraft(10157));
-            var item = Service.ExcelCache.GetItemExSheet().GetRow(10157);
+            Assert.IsTrue(_excelCache.IsCompanyCraft(10157));
+            var item = _excelCache.GetItemExSheet().GetRow(10157);
             if (item != null)
             {
                 var craftItems = item.GetFlattenedCraftItems(true, 1);

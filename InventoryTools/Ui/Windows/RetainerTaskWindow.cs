@@ -2,39 +2,55 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
+using InventoryTools.Mediator;
+using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using OtterGui;
 
 namespace InventoryTools.Ui
 {
-    class RetainerTaskWindow : Window
+    class RetainerTaskWindow : UintWindow
     {
-        public override bool SaveState => false;
-        public static string AsKey(uint retainerTaskId)
-        {
-            return "rt_" + retainerTaskId;
-        }
-        private uint _retainerTaskId;
-        private List<ItemEx> _drops;
-        private RetainerTaskEx? RetainerTaskEx => Service.ExcelCache.GetRetainerTaskExSheet().GetRow(_retainerTaskId);
+        private readonly IIconService _iconService;
+        private readonly ExcelCache _excelCache;
 
-        public RetainerTaskWindow(uint retainerTaskId, string name = "Allagan Tools - Invalid Retainer Task") : base(name)
+        public RetainerTaskWindow(ILogger<RetainerTaskWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IIconService iconService, ExcelCache excelCache, string name = "Retainer Venture") : base(logger, mediator, imGuiService, configuration, name)
+        {
+            _iconService = iconService;
+            _excelCache = excelCache;
+        }
+        public override void Initialize(uint retainerTaskId)
         {
             _retainerTaskId = retainerTaskId;
             if (RetainerTaskEx != null)
             {
+                Key = "rt_" + retainerTaskId;
                 WindowName = "Allagan Tools - " + RetainerTaskEx.NameString + " - Venture";
                 _drops = RetainerTaskEx.Drops.ToList();
             }
             else
             {
+                Key = "rt_invalid";
+                WindowName = "Allagan Tools - Invalid Retainer Task";
                 _drops = new List<ItemEx>();
             }
         }
-        public override string Key => AsKey(_retainerTaskId);
+        public override bool SaveState => false;
+        private uint _retainerTaskId;
+        private List<ItemEx> _drops;
+        private RetainerTaskEx? RetainerTaskEx => _excelCache.GetRetainerTaskExSheet().GetRow(_retainerTaskId);
+
+
+        public override string GenericKey { get; } = "retainertask";
+        public override string GenericName { get; } = "Retainer Task";
         public override bool DestroyOnClose => true;
         public override void Draw()
         {
@@ -51,7 +67,7 @@ namespace InventoryTools.Ui
                 ImGui.TextUnformatted("Venture Cost: " + RetainerTaskEx.VentureCost);
                 ImGui.TextUnformatted("Average iLvl: " + RetainerTaskEx.RequiredItemLevel);
                 ;
-                var itemIcon = PluginService.IconStorage[65049];
+                var itemIcon = _iconService[65049];
                 ImGui.Image(itemIcon.ImGuiHandle, new Vector2(100, 100) * ImGui.GetIO().FontGlobalScale);
                 
                 
@@ -65,13 +81,13 @@ namespace InventoryTools.Ui
                         ImGui.PushID("Reward"+index);
                         var drop = _drops[index];
                         
-                        var useIcon = PluginService.IconStorage[drop.Icon];
+                        var useIcon = _iconService[drop.Icon];
                         if (useIcon != null)
                         {
                             if (ImGui.ImageButton(useIcon.ImGuiHandle,
                                     new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1), 0))
                             {
-                                PluginService.WindowService.OpenItemWindow(drop.RowId);
+                                MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), drop.RowId));
                             }
                             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right)) 
                             {
@@ -80,10 +96,10 @@ namespace InventoryTools.Ui
                 
                             if (ImGui.BeginPopup("RightClickUse"+ drop.RowId))
                             {
-                                var itemEx = Service.ExcelCache.GetItemExSheet().GetRow(drop.RowId);
+                                var itemEx = _excelCache.GetItemExSheet().GetRow(drop.RowId);
                                 if (itemEx != null)
                                 {
-                                    itemEx.DrawRightClickPopup();
+                                    MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(itemEx));
                                 }
 
                                 ImGui.EndPopup();

@@ -1,6 +1,8 @@
 using System.Numerics;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
 using ImGuiNET;
 using InventoryTools;
 using InventoryTools.Extensions;
@@ -8,18 +10,29 @@ using InventoryTools.Logic;
 using InventoryTools.Ui;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin.Services;
+using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryToolsMock;
 
-public class MockGameItemsWindow : Window
+public class MockGameItemsWindow : GenericWindow
 {
-    public MockGameItemsWindow(string name = "Item Viewer", ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
+    private readonly IInventoryMonitor _inventoryMonitor;
+    private readonly ICharacterMonitor _characterMonitor;
+    private readonly IListService _listService;
+
+    public MockGameItemsWindow(ILogger<MockGameItemsWindow> logger, MediatorService mediator, ImGuiService imGuiService,InventoryToolsConfiguration configuration, IInventoryMonitor inventoryMonitor, ICharacterMonitor characterMonitor, IListService listService, string name = "Item Viewer") : base(logger, mediator, imGuiService, configuration, name)
     {
-        _selectedCategory = new Dictionary<ulong, InventoryCategory>();
+        _inventoryMonitor = inventoryMonitor;
+        _characterMonitor = characterMonitor;
+        _listService = listService;
     }
-    
-    public MockGameItemsWindow() : base("Item Viewer", ImGuiWindowFlags.None, false)
+    public override void Initialize()
     {
+        WindowName = "Item Viewer";
+        Key = "itemviewer";
         _selectedCategory = new Dictionary<ulong, InventoryCategory>();
     }
 
@@ -32,9 +45,9 @@ public class MockGameItemsWindow : Window
         {
             if (tabBar.Success)
             {
-                foreach (var inventory in PluginService.InventoryMonitor.Inventories)
+                foreach (var inventory in _inventoryMonitor.Inventories)
                 {
-                    var character = PluginService.CharacterMonitor.GetCharacterById(inventory.Key);
+                    var character = _characterMonitor.GetCharacterById(inventory.Key);
                     var characterName = character?.Name ?? "Unknown"; 
                     using (var tabItem = ImRaii.TabItem(characterName + "##" + inventory.Key))
                     {
@@ -84,13 +97,13 @@ public class MockGameItemsWindow : Window
                                                                 var item = itemChunk[index];
                                                                 using (ImRaii.PushId(item.Slot))
                                                                 {
-                                                                    if(ImGui.ImageButton(item.ItemId == 0 ? PluginService.IconStorage[62574].ImGuiHandle :
-                                                                        PluginService.IconStorage[item.Icon]
+                                                                    if(ImGui.ImageButton(item.ItemId == 0 ? ImGuiService.IconService[62574].ImGuiHandle :
+                                                                               ImGuiService.IconService[item.Icon]
                                                                             .ImGuiHandle,
                                                                         new Vector2(32, 32)))
                                                                     {
                                                                         item.ItemId = 0;
-                                                                        PluginService.FilterService.InvalidateFilters();
+                                                                        _listService.InvalidateLists();
                                                                     }
                                                                     ImGuiUtil.HoverTooltip(item.FormattedName + " - " + item.Quantity + " in slot " + item.Slot);
                                                                     ImGui.SameLine();
@@ -104,7 +117,7 @@ public class MockGameItemsWindow : Window
                                                                     {
                                                                         if (popup.Success)
                                                                         {
-                                                                            item.Item.DrawRightClickPopup();
+                                                                            MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(item.Item));
                                                                             ImGui.Separator();
                                                                             if (ImGui.Selectable("Copy item"))
                                                                             {
@@ -134,13 +147,13 @@ public class MockGameItemsWindow : Window
                                                                                         item.RetainerId;
                                                                                     inventory.Value.AddItem(_copyItem);
                                                                                     _copyItem = null;
-                                                                                    PluginService.InventoryMonitor.SignalRefresh();
+                                                                                    _inventoryMonitor.SignalRefresh();
                                                                                 }
                                                                                 else if (_cutItem != null)
                                                                                 {
                                                                                     inventory.Value.AddItem(_cutItem);
                                                                                     _cutItem = null;
-                                                                                    PluginService.InventoryMonitor.SignalRefresh();
+                                                                                    _inventoryMonitor.SignalRefresh();
                                                                                 }
                                                                             }
                                                                         }
@@ -171,12 +184,13 @@ public class MockGameItemsWindow : Window
         
     }
 
-    public static string AsKey => "ItemViewer";
     public override FilterConfiguration? SelectedConfiguration { get; } = null;
-    public override string Key { get; } = AsKey;
+    public override string GenericKey { get; } = "mockgameitems";
+    public override string GenericName { get; } = "Mock Game Items";
     public override bool DestroyOnClose { get; } = true;
     public override bool SaveState { get; } = false;
     public override Vector2? DefaultSize { get; } = new Vector2(1000, 1000);
     public override Vector2? MaxSize { get; } = new Vector2(2000, 2000);
     public override Vector2? MinSize { get; } = new Vector2(300, 300);
+    
 }

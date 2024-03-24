@@ -2,6 +2,8 @@ using System.Numerics;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters;
 
@@ -33,5 +35,9 @@ public class CraftHeaderColourFilter : ColorFilter
         {
             configuration.CraftHeaderColour = newValue.Value;
         }
+    }
+
+    public CraftHeaderColourFilter(ILogger<CraftHeaderColourFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+    {
     }
 }

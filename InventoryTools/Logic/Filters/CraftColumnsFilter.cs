@@ -8,23 +8,31 @@ using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Logic.Filters.Abstract;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
-    public class CraftColumnsFilter : SortedListFilter<string, IColumn>
+    public class CraftColumnsFilter : SortedListFilter<ColumnConfiguration, IColumn>
     {
-        public override Dictionary<string, (string, string?)> CurrentValue(FilterConfiguration configuration)
+        private readonly IEnumerable<IColumn> _columns;
+
+        public CraftColumnsFilter(ILogger<CraftColumnsFilter> logger, ImGuiService imGuiService, IEnumerable<IColumn> columns) : base(logger, imGuiService)
         {
-            (string, string?) GetColumnDetails(string c)
+            _columns = columns;
+        }
+        public override Dictionary<ColumnConfiguration, (string, string?)> CurrentValue(FilterConfiguration configuration)
+        {
+            (string, string?) GetColumnDetails(ColumnConfiguration c)
             {
-                return PluginService.PluginLogic.GridColumns.ContainsKey(c) ? (PluginService.PluginLogic.GridColumns[c].Name, PluginService.PluginLogic.GridColumns[c].HelpText): (c, null);
+                return c.Column != null ? (c.Column.Name, c.Column.HelpText): (c.ColumnName, null);
             }
 
-            return (configuration.CraftColumns ?? new List<string>()).ToDictionary(c => c, GetColumnDetails);
+            return (configuration.CraftColumns ?? new List<ColumnConfiguration>()).ToDictionary(c => c, GetColumnDetails);
         }
         
 
-        public override void UpdateFilterConfiguration(FilterConfiguration configuration, Dictionary<string, (string, string?)> newValue)
+        public override void UpdateFilterConfiguration(FilterConfiguration configuration, Dictionary<ColumnConfiguration, (string, string?)> newValue)
         {
             configuration.CraftColumns = newValue.Select(c => c.Key).ToList();
             _availableItems = null;
@@ -34,7 +42,7 @@ namespace InventoryTools.Logic.Filters
         
         public override void ResetFilter(FilterConfiguration configuration)
         {
-            UpdateFilterConfiguration(configuration, new Dictionary<string, (string, string?)>());
+            UpdateFilterConfiguration(configuration, new Dictionary<ColumnConfiguration, (string, string?)>());
         }
 
         public override string Key { get; set; } = "Craft Columns";
@@ -42,7 +50,7 @@ namespace InventoryTools.Logic.Filters
         public override string HelpText { get; set; } = "";
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.CraftColumns;
         public override bool ShowReset { get; set; } = false;
-        public override Dictionary<string, (string, string?)> DefaultValue { get; set; } = new();
+        public override Dictionary<ColumnConfiguration, (string, string?)> DefaultValue { get; set; } = new();
 
         public override bool HasValueSet(FilterConfiguration configuration)
         {
@@ -61,7 +69,7 @@ namespace InventoryTools.Logic.Filters
         }
 
         public override bool CanRemove { get; set; } = true;
-        public override bool CanRemoveItem(FilterConfiguration configuration, string item)
+        public override bool CanRemoveItem(FilterConfiguration configuration, ColumnConfiguration item)
         {
             var column = GetItem(configuration, item);
             if (column != null)
@@ -75,22 +83,15 @@ namespace InventoryTools.Logic.Filters
             return true;
         }
 
-        public override IColumn? GetItem(FilterConfiguration configuration, string item)
+        public override IColumn? GetItem(FilterConfiguration configuration, ColumnConfiguration item)
         {
-            var availableItems = GetAllItems(configuration);
-            return availableItems.TryGetValue(item, out var value) ? value : null;
+            return item.Column;
         }
 
         public void AddItem(FilterConfiguration configuration, string item)
         {
             var value = CurrentValue(configuration);
-            if (!value.ContainsKey(item))
-            {
-                value.Add(item, ("", null));
-            }
-
-            _availableItems = null;
-            _allItems = null;
+            value.Add(new ColumnConfiguration(item), ("", null));
             UpdateFilterConfiguration(configuration, value);
         }
 
@@ -101,9 +102,9 @@ namespace InventoryTools.Logic.Filters
             //TODO: Fix this so that it invalidates per filter
             if (_availableItems == null)
             {
-                var value = PluginService.PluginLogic.GridColumns;
+                var value = _columns;
                 var currentValue = CurrentValue(configuration);
-                _availableItems = value.Where(c => c.Value.CraftOnly != false && c.Value.AvailableInType(configuration.FilterType) && !currentValue.ContainsKey(c.Key)).ToDictionary(c => c.Key, c => c.Value);
+                _availableItems = value.Where(c => c.CraftOnly != false && c.AvailableInType(configuration.FilterType)).ToDictionary(c => c.GetType().ToString(), c => c);
             }
 
             return _availableItems;
@@ -115,8 +116,8 @@ namespace InventoryTools.Logic.Filters
         {
             if (_allItems == null)
             {
-                var value = PluginService.PluginLogic.GridColumns;
-                _allItems = value.Where(c => c.Value.CraftOnly != false && c.Value.AvailableInType(configuration.FilterType)).ToDictionary(c => c.Key, c => c.Value);
+                var value = _columns;
+                _allItems = value.Where(c => c.CraftOnly != false && c.AvailableInType(configuration.FilterType)).ToDictionary(c => c.GetType().ToString(), c => c);
             }
 
             return _allItems;

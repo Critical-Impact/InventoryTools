@@ -6,6 +6,8 @@ using Dalamud.Interface.Colors;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters.Abstract
 {
@@ -143,7 +145,7 @@ namespace InventoryTools.Logic.Filters.Abstract
                 }
             }
             ImGui.SameLine();
-            UiHelpers.HelpMarker(HelpText);
+            ImGuiService.HelpMarker(HelpText);
             if (HasValueSet(configuration) && ShowReset)
             {
                 ImGui.SameLine();
@@ -193,6 +195,9 @@ namespace InventoryTools.Logic.Filters.Abstract
             DrawSearchBox(configuration);
             DrawResults(configuration);
         }
-        
+
+        protected MultipleChoiceFilter(ILogger logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
     }
 }

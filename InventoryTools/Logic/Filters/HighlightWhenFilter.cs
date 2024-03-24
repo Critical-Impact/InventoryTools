@@ -3,6 +3,8 @@ using System.Linq;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -50,9 +52,13 @@ namespace InventoryTools.Logic.Filters
             return HighlightWhenItemsFilter.ToList();
         }
 
-        public override string GetFormattedChoice(string choice)
+        public override string GetFormattedChoice(FilterConfiguration filterConfiguration, string choice)
         {
             return choice;
+        }
+
+        public HighlightWhenFilter(ILogger<HighlightWhenFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
         }
     }
 }

@@ -4,24 +4,30 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using CriticalCommonLib;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
 using Dalamud.Interface.Components;
 using ImGuiNET;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin.Services;
+using InventoryTools.Logic;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Ui;
 
-public class TeamCraftImportWindow
+public class TeamCraftImportWindow : GenericWindow
 {
-    private string _windowName;
+    private readonly ExcelCache _excelCache;
     private string _importListItems = "";
-    private bool _hasError = false;
-    private bool _hasResult = false;
-    private List<(uint, uint)>? _parseResult = null;
-    private bool _openImportWindow = false;
+    private bool _hasError;
+    private bool _hasResult;
+    private List<(uint, uint)>? _parseResult;
+    private bool _openImportWindow;
 
-    public TeamCraftImportWindow(string windowName)
+    public TeamCraftImportWindow(ILogger<TeamCraftImportWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ExcelCache excelCache, string name = "Teamcraft Import") : base(logger, mediator, imGuiService, configuration, name)
     {
-        _windowName = windowName;
+        _excelCache = excelCache;
     }
 
     public bool OpenImportWindow
@@ -43,7 +49,19 @@ public class TeamCraftImportWindow
     public List<(uint, uint)>? ParseResult => _parseResult;
 
 
-    public void Draw()
+    public override string GenericKey { get; } = "tcimport";
+    public override string GenericName { get; } = "Teamcraft Import";
+    public override bool DestroyOnClose { get; }
+    public override bool SaveState { get; }
+    public override Vector2? DefaultSize { get; }
+    public override Vector2? MaxSize { get; }
+    public override Vector2? MinSize { get; }
+    public override void Initialize()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void Draw()
     {
         if (!OpenImportWindow) return;
         bool isOpen = OpenImportWindow;
@@ -91,6 +109,13 @@ public class TeamCraftImportWindow
         }
     }
 
+    public override void Invalidate()
+    {
+        
+    }
+
+    public override FilterConfiguration? SelectedConfiguration { get; }
+
     private List<(uint, uint)>? ParseImport()
     {
         if (string.IsNullOrEmpty(_importListItems)) return null;
@@ -115,9 +140,9 @@ public class TeamCraftImportWindow
                     }
                     var item = builder.ToString().Trim();
 
-                    var itemEx = Service.ExcelCache.GetItemExSheet().FirstOrDefault(c => c!.NameString == item, null);
+                    var itemEx = _excelCache.GetItemExSheet().FirstOrDefault(c => c!.NameString == item, null);
 
-                    if (itemEx != null && Service.ExcelCache.CanCraftItem(itemEx.RowId))
+                    if (itemEx != null && _excelCache.CanCraftItem(itemEx.RowId))
                     {
                         output.Add((itemEx.RowId, (uint)numberOfItem));
                     }

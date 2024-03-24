@@ -2,13 +2,17 @@ using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters;
 
 public class GatheredByFilter : UintMultipleChoiceFilter
 {
+    private readonly ExcelCache _excelCache;
     public override string Key { get; set; } = "GatheredByFilter";
     public override string Name { get; set; } = "Gathered By?";
     public override string HelpText { get; set; } = "How is this item gathered?";
@@ -44,10 +48,15 @@ public class GatheredByFilter : UintMultipleChoiceFilter
 
     public override Dictionary<uint, string> GetChoices(FilterConfiguration configuration)
     {
-        var dictionary = Service.ExcelCache.GetSheet<GatheringTypeEx>().Where(c => c.RowId < 4).ToDictionary(c => c.RowId, c => c.FormattedName);
+        var dictionary = _excelCache.GetSheet<GatheringTypeEx>().Where(c => c.RowId < 4).ToDictionary(c => c.RowId, c => c.FormattedName);
         dictionary.Add(10, "Fishing");
         return dictionary;
     }
 
     public override bool HideAlreadyPicked { get; set; } = true;
+
+    public GatheredByFilter(ILogger<GatheredByFilter> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
+    {
+        _excelCache = excelCache;
+    }
 }

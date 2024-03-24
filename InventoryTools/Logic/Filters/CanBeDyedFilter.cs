@@ -1,6 +1,8 @@
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -24,6 +26,10 @@ namespace InventoryTools.Logic.Filters
             var currentValue = CurrentValue(configuration);
             var canByDyed = item.IsDyeable;
             return currentValue == null || currentValue.Value && canByDyed || !currentValue.Value && !canByDyed;
+        }
+
+        public CanBeDyedFilter(ILogger<CanBeDyedFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
         }
     }
 }

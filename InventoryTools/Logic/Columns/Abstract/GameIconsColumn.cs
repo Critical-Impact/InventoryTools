@@ -1,44 +1,55 @@
 using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib.Crafting;
+using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns.Abstract
 {
     public abstract class GameIconsColumn : Column<List<ushort>?>
     {
-        public override string CsvExport(InventoryItem item)
+        public GameIconsColumn(ILogger logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
+        public override string CsvExport(ColumnConfiguration columnConfiguration, InventoryItem item)
         {
             return "";
         }
 
-        public override string CsvExport(ItemEx item)
+        public override string CsvExport(ColumnConfiguration columnConfiguration, ItemEx item)
         {
             return "";
         }
 
-        public override string CsvExport(SortingResult item)
+        public override string CsvExport(ColumnConfiguration columnConfiguration, SortingResult item)
         {
             return "";
         }
-        public override List<ushort>? CurrentValue(CraftItem currentValue)
+        public override List<ushort>? CurrentValue(ColumnConfiguration columnConfiguration, CraftItem currentValue)
         {
-            return CurrentValue(currentValue.Item);
+            return CurrentValue(columnConfiguration, currentValue.Item);
         }
         
-        public override List<ushort>? CurrentValue(InventoryChange currentValue)
+        public override List<ushort>? CurrentValue(ColumnConfiguration columnConfiguration,
+            InventoryChange currentValue)
         {
-            return CurrentValue(currentValue.InventoryItem);
+            return CurrentValue(columnConfiguration, currentValue.InventoryItem);
         }
         
-        public override IEnumerable<CraftItem> Filter(IEnumerable<CraftItem> items)
+        public override IEnumerable<CraftItem> Filter(ColumnConfiguration columnConfiguration,
+            IEnumerable<CraftItem> items)
         {
             return items;
         }
 
-        public override IEnumerable<CraftItem> Sort(ImGuiSortDirection direction, IEnumerable<CraftItem> items)
+        public override IEnumerable<CraftItem> Sort(ColumnConfiguration columnConfiguration,
+            ImGuiSortDirection direction, IEnumerable<CraftItem> items)
         {
             return items;
         }
@@ -49,58 +60,72 @@ namespace InventoryTools.Logic.Columns.Abstract
                 return "N/A";
             }
         }
-        public override void Draw(FilterConfiguration configuration, InventoryItem item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
+            InventoryItem item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex, configuration);
+            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
         }
-        public override void Draw(FilterConfiguration configuration, SortingResult item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            SortingResult item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex, configuration);
+            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
         }
-        public override void Draw(FilterConfiguration configuration, ItemEx item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            ItemEx item, int rowIndex)
         {
-            DoDraw(CurrentValue((ItemEx)item), rowIndex, configuration);
+            return DoDraw(item, CurrentValue(columnConfiguration, (ItemEx)item), rowIndex, configuration, columnConfiguration);
         }
-        public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            CraftItem item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex, configuration);
+            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
         }
-        public override void Draw(FilterConfiguration configuration, InventoryChange item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            InventoryChange item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex, configuration);
+            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
         }
-        public override IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items)
-        {
-            return items;
-        }
-
-        public override IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items)
-        {
-            return items;
-        }
-
-        public override IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items)
-        {
-            return items;
-        }
-
-        public override IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
+        public override IEnumerable<ItemEx> Filter(ColumnConfiguration columnConfiguration, IEnumerable<ItemEx> items)
         {
             return items;
         }
 
-        public override IEnumerable<ItemEx> Sort(ImGuiSortDirection direction, IEnumerable<ItemEx> items)
+        public override IEnumerable<InventoryItem> Filter(ColumnConfiguration columnConfiguration,
+            IEnumerable<InventoryItem> items)
         {
             return items;
         }
 
-        public override IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items)
+        public override IEnumerable<SortingResult> Filter(ColumnConfiguration columnConfiguration,
+            IEnumerable<SortingResult> items)
         {
             return items;
         }
 
-        public override IColumnEvent? DoDraw(List<ushort>? currentValue, int rowIndex,
-            FilterConfiguration filterConfiguration)
+        public override IEnumerable<InventoryItem> Sort(ColumnConfiguration columnConfiguration,
+            ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
+        {
+            return items;
+        }
+
+        public override IEnumerable<ItemEx> Sort(ColumnConfiguration columnConfiguration, ImGuiSortDirection direction,
+            IEnumerable<ItemEx> items)
+        {
+            return items;
+        }
+
+        public override IEnumerable<SortingResult> Sort(ColumnConfiguration columnConfiguration,
+            ImGuiSortDirection direction, IEnumerable<SortingResult> items)
+        {
+            return items;
+        }
+
+        public override List<MessageBase>? DoDraw(IItem item1, List<ushort>? currentValue, int rowIndex,
+            FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
             ImGui.TableNextColumn();
             if (currentValue != null)
@@ -108,7 +133,7 @@ namespace InventoryTools.Logic.Columns.Abstract
                 for (var index = 0; index < currentValue.Count; index++)
                 {
                     var item = currentValue[index];
-                    PluginService.PluginLogic.DrawIcon(item, new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) * ImGui.GetIO().FontGlobalScale);
+                    ImGuiService.DrawIcon(item, new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) * ImGui.GetIO().FontGlobalScale);
                     if (index != currentValue.Count)
                     {
                         ImGui.SameLine();
@@ -118,9 +143,6 @@ namespace InventoryTools.Logic.Columns.Abstract
             return null;
         }
 
-        public override void Setup(int columnIndex)
-        {
-            ImGui.TableSetupColumn(RenderName ?? Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
-        }
+
     }
 }

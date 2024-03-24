@@ -2,6 +2,8 @@ using System.Numerics;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -42,6 +44,10 @@ namespace InventoryTools.Logic.Filters
         public override void UpdateFilterConfiguration(FilterConfiguration configuration, Vector4? newValue)
         {
             configuration.HighlightColor = newValue;
+        }
+
+        public HighlightDestinationColourFilter(ILogger<HighlightDestinationColourFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
         }
     }
 }

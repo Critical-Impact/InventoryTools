@@ -1,26 +1,36 @@
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns;
 
 public class SourceWorldColumn : TextColumn
 {
-    public override ColumnCategory ColumnCategory => ColumnCategory.Inventory;
-    public override string? CurrentValue(InventoryItem item)
+    private readonly ICharacterMonitor _characterMonitor;
+
+    public SourceWorldColumn(ILogger<SourceWorldColumn> logger, ImGuiService imGuiService, ICharacterMonitor characterMonitor) : base(logger, imGuiService)
     {
-        var character = PluginService.CharacterMonitor.GetCharacterById(item.RetainerId);
+        _characterMonitor = characterMonitor;
+    }
+    public override ColumnCategory ColumnCategory => ColumnCategory.Inventory;
+    public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+    {
+        var character = _characterMonitor.GetCharacterById(item.RetainerId);
         return character != null ? character.World?.FormattedName ?? "" : "";
     }
 
-    public override string? CurrentValue(ItemEx item)
+    public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
     {
         return "";
     }
 
-    public override string? CurrentValue(SortingResult item)
+    public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
     {
-        return CurrentValue(item.InventoryItem);
+        return CurrentValue(columnConfiguration, item.InventoryItem);
     }
 
     public override string Name { get; set; } = "Source World";

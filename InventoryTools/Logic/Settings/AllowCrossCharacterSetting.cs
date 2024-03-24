@@ -1,4 +1,6 @@
 using InventoryTools.Logic.Settings.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Settings
 {
@@ -17,11 +19,17 @@ namespace InventoryTools.Logic.Settings
 
         public override string Key { get; set; } = "DisplayCrossCharacter";
         public override string Name { get; set; } = "Allow Cross-Character Inventories?";
+        public override string WizardName { get; } = "Cross-Character Inventories?";
 
         public override string HelpText { get; set; } =
-            "This is an experimental feature, should characters not currently logged in and their associated retainers be shown in filter configurations?";
+            "Should characters not currently logged in and their associated retainers be available to view/search and filter against?";
 
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.General;
-        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Experimental;
+        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
+        public override string Version => "1.6.2.5";
+
+        public AllowCrossCharacterSetting(ILogger<AllowCrossCharacterSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
     }
 }

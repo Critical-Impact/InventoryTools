@@ -2,6 +2,8 @@ using System;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters;
 
@@ -37,5 +39,9 @@ public class TableRowHeightFilter : IntegerFilter
     public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
     {
         return null;
+    }
+
+    public TableRowHeightFilter(ILogger<TableRowHeightFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+    {
     }
 }

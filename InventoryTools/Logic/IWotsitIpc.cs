@@ -1,6 +1,8 @@
+using Microsoft.Extensions.Hosting;
+
 namespace InventoryTools.Logic;
 
-public interface IWotsitIpc
+public interface IWotsitIpc : IHostedService
 {
     void InitForWotsit();
     void RegisterFilters();

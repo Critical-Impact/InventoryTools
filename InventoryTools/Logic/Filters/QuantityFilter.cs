@@ -1,12 +1,21 @@
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
     public class QuantityFilter : StringFilter
     {
+        private readonly IInventoryMonitor _inventoryMonitor;
+
+        public QuantityFilter(ILogger<QuantityFilter> logger, ImGuiService imGuiService, IInventoryMonitor inventoryMonitor) : base(logger, imGuiService)
+        {
+            _inventoryMonitor = inventoryMonitor;
+        }
         public override string Key { get; set; } = "Qty";
         public override string Name { get; set; } = "Quantity";
         public override string HelpText { get; set; } = "The quantity of the item.";
@@ -33,16 +42,16 @@ namespace InventoryTools.Logic.Filters
             if (!string.IsNullOrEmpty(currentValue))
             {
                 var qty = 0;
-                if (PluginService.InventoryMonitor.ItemCounts.ContainsKey((item.RowId,
+                if (_inventoryMonitor.ItemCounts.ContainsKey((item.RowId,
                         FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None)))
                 {
-                    qty += PluginService.InventoryMonitor.ItemCounts[(item.RowId,
+                    qty += _inventoryMonitor.ItemCounts[(item.RowId,
                         FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None)];
                 }
-                if (PluginService.InventoryMonitor.ItemCounts.ContainsKey((item.RowId,
+                if (_inventoryMonitor.ItemCounts.ContainsKey((item.RowId,
                         FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HQ)))
                 {
-                    qty += PluginService.InventoryMonitor.ItemCounts[(item.RowId,
+                    qty += _inventoryMonitor.ItemCounts[(item.RowId,
                         FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HQ)];
                 }
                 if (!qty.PassesFilter(currentValue.ToLower()))

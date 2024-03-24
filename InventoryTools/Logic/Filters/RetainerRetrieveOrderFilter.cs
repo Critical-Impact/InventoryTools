@@ -3,6 +3,8 @@ using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters;
 
@@ -57,7 +59,7 @@ public class RetainerRetrieveOrderFilter : ChoiceFilter<RetainerRetrieveOrder>
         };
     }
 
-    public override string GetFormattedChoice(RetainerRetrieveOrder choice)
+    public override string GetFormattedChoice(FilterConfiguration filterConfiguration, RetainerRetrieveOrder choice)
     {
         switch (choice)
         {
@@ -67,5 +69,9 @@ public class RetainerRetrieveOrderFilter : ChoiceFilter<RetainerRetrieveOrder>
                 return "Retrieve Last";
         }
         return "Unknown";
+    }
+
+    public RetainerRetrieveOrderFilter(ILogger<RetainerRetrieveOrderFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+    {
     }
 }

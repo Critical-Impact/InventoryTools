@@ -1,4 +1,6 @@
 using InventoryTools.Logic.Settings.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Settings
 {
@@ -24,6 +26,10 @@ namespace InventoryTools.Logic.Settings
 
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Subsetting;
+        public override string Version => "1.6.2.5";
 
+        public TooltipAddCharacterNameSetting(ILogger<TooltipAddCharacterNameSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
     }
 }

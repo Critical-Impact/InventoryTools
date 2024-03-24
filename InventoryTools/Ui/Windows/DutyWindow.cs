@@ -3,53 +3,59 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
 using Dalamud.Interface.Internal;
+using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
+using InventoryTools.Mediator;
+using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
 using Lumina.Excel.GeneratedSheets;
 using LuminaSupplemental.Excel.Model;
+using Microsoft.Extensions.Logging;
 using OtterGui;
 
 namespace InventoryTools.Ui
 {
-    class DutyWindow : Window
+    class DutyWindow : UintWindow
     {
-        public override bool SaveState => false;
-        public static string AsKey(uint contentFinderConditionId)
+        private readonly IIconService _iconService;
+        private readonly ExcelCache _excelCache;
+
+        public DutyWindow(ILogger<DutyWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IIconService iconService, ExcelCache excelCache, string name = "Duty Window") : base(logger, mediator, imGuiService, configuration, name)
         {
-            return "cfcid_" + contentFinderConditionId;
+            _iconService = iconService;
+            _excelCache = excelCache;
         }
-        private uint _contentFinderConditionId;
-        private ContentFinderCondition? ContentFinderCondition => Service.ExcelCache.GetContentFinderConditionExSheet().GetRow(_contentFinderConditionId);
-
-        private HashSet<uint> DungeonChestItems { get; } = null!;
-        private HashSet<uint> DungeonRewards { get; } = null!;
-        private List<DungeonBoss> DungeonBosses { get; } = null!;
-        private Dictionary<uint, List<DungeonBossDrop>> DungeonBossDrops { get; } = null!;
-
-        private Dictionary<uint, List<DungeonBossChest>> DungeonBossChests { get; } = null!;
-        public DutyWindow(uint contentFinderConditionId, string name = "Allagan Tools - Invalid Duty") : base(name)
+        public override void Initialize(uint contentFinderConditionId)
         {
             _contentFinderConditionId = contentFinderConditionId;
             if (ContentFinderCondition != null)
             {
                 WindowName = "Allagan Tools - " + ContentFinderCondition.Name.ToDalamudString();
+                Key = "cfcid_" + contentFinderConditionId;
                 DungeonChestItems = new HashSet<uint>();
                 DungeonRewards = new HashSet<uint>();
-                foreach (var dungeonChest in Service.ExcelCache.DungeonChests)
+                var dungeonChests = _excelCache.DungeonChests ?? new List<DungeonChest>();
+                foreach (var dungeonChest in dungeonChests)
                 {
                     if (dungeonChest.ContentFinderConditionId == _contentFinderConditionId)
                     {
-                        var items = Service.ExcelCache.DungeonChestItems.Where(c => c.ChestId == dungeonChest.RowId);
+                        var dungeonChestItems = _excelCache.DungeonChestItems ?? new List<DungeonChestItem>();
+                        var items = dungeonChestItems.Where(c => c.ChestId == dungeonChest.RowId);
                         foreach (var item in items)
                         {
                             DungeonChestItems.Add(item.ItemId);
                         }
                     }
                 }
-                foreach (var dungeonDrop in Service.ExcelCache.DungeonDrops)
+
+                var excelCacheDungeonDrops = _excelCache.DungeonDrops ?? new List<DungeonDrop>();
+                foreach (var dungeonDrop in excelCacheDungeonDrops)
                 {
                     if (dungeonDrop.ContentFinderConditionId == _contentFinderConditionId)
                     {
@@ -57,21 +63,33 @@ namespace InventoryTools.Ui
                     }
                 }
 
-                DungeonBossDrops = Service.ExcelCache.DungeonBossDrops.Where(c => c.ContentFinderConditionId == _contentFinderConditionId).GroupBy(c => c.FightNo).ToDictionary(c => c.Key, c => c.ToList());
-                DungeonBosses = Service.ExcelCache.DungeonBosses.Where(c => c.ContentFinderConditionId == _contentFinderConditionId).ToList();
-                DungeonBossChests =  Service.ExcelCache.DungeonBossChests.Where(c => c.ContentFinderConditionId == _contentFinderConditionId).GroupBy(c => c.FightNo).ToDictionary(c => c.Key, c => c.ToList());
+                var dungeonBossDrops = _excelCache.DungeonBossDrops ?? new List<DungeonBossDrop>();
+                DungeonBossDrops = dungeonBossDrops.Where(c => c.ContentFinderConditionId == _contentFinderConditionId).GroupBy(c => c.FightNo).ToDictionary(c => c.Key, c => c.ToList());
+                var dungeonBosses = _excelCache.DungeonBosses ?? new List<DungeonBoss>();
+                DungeonBosses = dungeonBosses.Where(c => c.ContentFinderConditionId == _contentFinderConditionId).ToList();
+                var dungeonBossChests = _excelCache.DungeonBossChests ?? new List<DungeonBossChest>();
+                DungeonBossChests =  dungeonBossChests.Where(c => c.ContentFinderConditionId == _contentFinderConditionId).GroupBy(c => c.FightNo).ToDictionary(c => c.Key, c => c.ToList());
             }
             else
             {
+                WindowName = "Invalid Duty";
+                Key = "cfcid_unknown";
                 DungeonChestItems = new HashSet<uint>();
             }
         }
+        public override bool SaveState => false;
+        
+        private uint _contentFinderConditionId;
+        private ContentFinderCondition? ContentFinderCondition => _excelCache.GetContentFinderConditionExSheet().GetRow(_contentFinderConditionId);
 
-        public DutyWindow() : base("Duty Information")
-        {
-            
-        }
-        public override string Key => AsKey(_contentFinderConditionId);
+        private HashSet<uint> DungeonChestItems { get; set; } = null!;
+        private HashSet<uint> DungeonRewards { get; set; } = null!;
+        private List<DungeonBoss> DungeonBosses { get; set; } = null!;
+        private Dictionary<uint, List<DungeonBossDrop>> DungeonBossDrops { get; set; } = null!;
+
+        private Dictionary<uint, List<DungeonBossChest>> DungeonBossChests { get; set; } = null!;
+        public override string GenericKey => "duty";
+        public override string GenericName => "Duty";
         public override bool DestroyOnClose => true;
         public override void Draw()
         {
@@ -86,10 +104,10 @@ namespace InventoryTools.Ui
                 ImGui.TextUnformatted("Level Required: " + ContentFinderCondition.ClassJobLevelRequired);
                 ImGui.TextUnformatted("Item Level Required: " + ContentFinderCondition.ItemLevelRequired);
                 ;
-                var itemIcon = PluginService.IconStorage[(int)(ContentFinderCondition.ContentType?.Value?.IconDutyFinder ?? Icons.DutyIcon)];
+                var itemIcon = _iconService[(int)(ContentFinderCondition.ContentType?.Value?.IconDutyFinder ?? Icons.DutyIcon)];
                 ImGui.Image(itemIcon.ImGuiHandle, new Vector2(100, 100) * ImGui.GetIO().FontGlobalScale);
                 
-                var garlandIcon = PluginService.IconStorage.LoadImage("garlandtools");
+                var garlandIcon = _iconService.LoadImage("garlandtools");
                 if (ImGui.ImageButton(garlandIcon.ImGuiHandle,
                         new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                 {
@@ -98,7 +116,7 @@ namespace InventoryTools.Ui
                 foreach (var dungeonBoss in DungeonBosses)
                 {
                     if (ImGui.CollapsingHeader(
-                            Service.ExcelCache.GetBNpcNameExSheet().GetRow(dungeonBoss.BNpcNameId)?.FormattedName + " - Fight " + (dungeonBoss.FightNo + 1) ??
+                            _excelCache.GetBNpcNameExSheet().GetRow(dungeonBoss.BNpcNameId)?.FormattedName + " - Fight " + (dungeonBoss.FightNo + 1) ??
                             "Unknown Boss",
                             ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
                     {
@@ -114,21 +132,21 @@ namespace InventoryTools.Ui
                                     float windowVisibleX2 =
                                         ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
                                     var items = chest.Select(c =>
-                                        (Service.ExcelCache.GetItemExSheet().GetRow(c.ItemId), c.Quantity)).ToList();
+                                        (_excelCache.GetItemExSheet().GetRow(c.ItemId), c.Quantity)).ToList();
 
                                     for (var index = 0; index < items.Count; index++)
                                     {
                                         var item = items[index];
                                         if (item.Item1 == null) continue;
                                         ImGui.PushID("dbc" + dungeonBoss.RowId + "_" + chest.Key + "_" + index);
-                                        IDalamudTextureWrap? useIcon = PluginService.IconStorage[item.Item1.Icon];
+                                        IDalamudTextureWrap? useIcon = _iconService[item.Item1.Icon];
                                         if (useIcon != null)
                                         {
                                             if (ImGui.ImageButton(useIcon.ImGuiHandle,
                                                     new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0),
                                                     new(1, 1), 0))
                                             {
-                                                PluginService.WindowService.OpenItemWindow(item.Item1.RowId);
+                                                MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), item.Item1.RowId));
                                             }
 
                                             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
@@ -143,11 +161,11 @@ namespace InventoryTools.Ui
 
                                             if (ImGui.BeginPopup("RightClickUse" + item.Item1.RowId))
                                             {
-                                                var itemEx = Service.ExcelCache.GetItemExSheet()
+                                                var itemEx = _excelCache.GetItemExSheet()
                                                     .GetRow(item.Item1.RowId);
                                                 if (itemEx != null)
                                                 {
-                                                    itemEx.DrawRightClickPopup();
+                                                    MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(itemEx));
                                                 }
 
                                                 ImGui.EndPopup();
@@ -168,7 +186,7 @@ namespace InventoryTools.Ui
                         }
                         if (DungeonBossDrops.ContainsKey(dungeonBoss.FightNo))
                         {
-                            var drops = DungeonBossDrops[dungeonBoss.FightNo].Select(c => Service.ExcelCache.GetItemExSheet().GetRow(c.ItemId)).Where(c => c != null).Select(c => c!).ToList();
+                            var drops = DungeonBossDrops[dungeonBoss.FightNo].Select(c => _excelCache.GetItemExSheet().GetRow(c.ItemId)).Where(c => c != null).Select(c => c!).ToList();
                             if (ImGui.CollapsingHeader("Drops", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
                             {
                                 ImGuiStylePtr style = ImGui.GetStyle();
@@ -177,7 +195,7 @@ namespace InventoryTools.Ui
                                 for (var index = 0; index < drops.Count; index++)
                                 {
                                     var item = drops[index];
-                                    var useIcon = PluginService.IconStorage[item.Icon];
+                                    var useIcon = _iconService[item.Icon];
                                     if (useIcon != null)
                                     {
                                         ImGui.PushID("dbd" + dungeonBoss.RowId + "_" + index);
@@ -185,7 +203,7 @@ namespace InventoryTools.Ui
                                                 new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0),
                                                 new(1, 1), 0))
                                         {
-                                            PluginService.WindowService.OpenItemWindow(item.RowId);
+                                            MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), item.RowId));
                                         }
 
                                         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
@@ -200,11 +218,11 @@ namespace InventoryTools.Ui
 
                                         if (ImGui.BeginPopup("RightClickUse" + item.RowId))
                                         {
-                                            var itemEx = Service.ExcelCache.GetItemExSheet()
+                                            var itemEx = _excelCache.GetItemExSheet()
                                                 .GetRow(item.RowId);
                                             if (itemEx != null)
                                             {
-                                                itemEx.DrawRightClickPopup();
+                                                MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(itemEx));
                                             }
 
                                             ImGui.EndPopup();
@@ -229,18 +247,18 @@ namespace InventoryTools.Ui
                 {
                     ImGuiStylePtr style = ImGui.GetStyle();
                     float windowVisibleX2 = ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
-                    var uses = DungeonChestItems.Select(c => Service.ExcelCache.GetItemExSheet().GetRow(c)).Where(c => c != null).Select(c => c!).ToList();
+                    var uses = DungeonChestItems.Select(c => _excelCache.GetItemExSheet().GetRow(c)).Where(c => c != null).Select(c => c!).ToList();
                     for (var index = 0; index < uses.Count; index++)
                     {
                         ImGui.PushID("Use"+index);
                         var use = uses[index];
-                        var useIcon = PluginService.IconStorage[use.Icon];
+                        var useIcon = _iconService[use.Icon];
                         if (useIcon != null)
                         {
                             if (ImGui.ImageButton(useIcon.ImGuiHandle,
                                     new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1), 0))
                             {
-                                PluginService.WindowService.OpenItemWindow(use.RowId);
+                                MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), use.RowId));
                             }
                             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right)) 
                             {
@@ -249,10 +267,10 @@ namespace InventoryTools.Ui
                 
                             if (ImGui.BeginPopup("RightClickUse"+ use.RowId))
                             {
-                                var itemEx = Service.ExcelCache.GetItemExSheet().GetRow(use.RowId);
+                                var itemEx = _excelCache.GetItemExSheet().GetRow(use.RowId);
                                 if (itemEx != null)
                                 {
-                                    itemEx.DrawRightClickPopup();
+                                    MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(itemEx));
                                 }
 
                                 ImGui.EndPopup();
@@ -275,19 +293,19 @@ namespace InventoryTools.Ui
                 {
                     ImGuiStylePtr style = ImGui.GetStyle();
                     float windowVisibleX2 = ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
-                    var uses = DungeonRewards.Select(c => Service.ExcelCache.GetItemExSheet().GetRow(c)).Where(c => c != null).Select(c => c!).ToList();
+                    var uses = DungeonRewards.Select(c => _excelCache.GetItemExSheet().GetRow(c)).Where(c => c != null).Select(c => c!).ToList();
                     for (var index = 0; index < uses.Count; index++)
                     {
                         ImGui.PushID("Use"+index);
                         var use = uses[index];
                         
-                        var useIcon = PluginService.IconStorage[use.Icon];
+                        var useIcon = _iconService[use.Icon];
                         if (useIcon != null)
                         {
                             if (ImGui.ImageButton(useIcon.ImGuiHandle,
                                     new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1), 0))
                             {
-                                PluginService.WindowService.OpenItemWindow(use.RowId);
+                                MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), use.RowId));
                             }
                             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right)) 
                             {
@@ -296,10 +314,10 @@ namespace InventoryTools.Ui
                 
                             if (ImGui.BeginPopup("RightClickUse"+ use.RowId))
                             {
-                                var itemEx = Service.ExcelCache.GetItemExSheet().GetRow(use.RowId);
+                                var itemEx = _excelCache.GetItemExSheet().GetRow(use.RowId);
                                 if (itemEx != null)
                                 {
-                                    itemEx.DrawRightClickPopup();
+                                    MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(itemEx));
                                 }
 
                                 ImGui.EndPopup();

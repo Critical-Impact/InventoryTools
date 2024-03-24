@@ -8,22 +8,24 @@ namespace InventoryTools.Ui
     {
         public string Key { get;  }
         public string GenericKey { get;  }
+        public string GenericName { get;  }
         public bool DestroyOnClose { get;}
         public bool SavePosition { get;}
         public Vector2 CurrentPosition { get; set; }
+        public bool IsOpen { get; set; }
         
         public void Draw();
         public void Close();
         public void Open();
         public void Toggle();
         public void Invalidate();
+
+        public void SetPosition(Vector2 newPosition, bool isAppearing);
         
         public FilterConfiguration? SelectedConfiguration { get;  }
         
-        public IPluginLog PluginLog { get; }
-
-        public delegate void ClosedDelegate(string windowKey);
-        public delegate void OpenedDelegate(string windowKey);
+        public delegate void ClosedDelegate(IWindow window);
+        public delegate void OpenedDelegate(IWindow window);
 
         public event ClosedDelegate Closed;
         public event OpenedDelegate Opened;

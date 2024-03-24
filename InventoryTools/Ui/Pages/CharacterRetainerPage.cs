@@ -5,29 +5,51 @@ using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
-using ImGuiNET;
-using InventoryTools.Logic;
 using Dalamud.Interface.Utility.Raii;
+using ImGuiNET;
 using InventoryTools.Extensions;
+using InventoryTools.Logic;
+using InventoryTools.Mediator;
+using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
 using InventoryTools.Ui.Widgets;
-using Lumina.Excel.GeneratedSheets;
+using Microsoft.Extensions.Logging;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 
-namespace InventoryTools.Sections
+namespace InventoryTools.Ui.Pages
 {
-    public class CharacterRetainerPage : IConfigPage
+    public class CharacterRetainerPage : Page
     {
+        private readonly IIconService _iconService;
+        private readonly ICharacterMonitor _characterMonitor;
+        private readonly IInventoryMonitor _inventoryMonitor;
+        private readonly ExcelCache _excelCache;
+
+        public CharacterRetainerPage(ILogger<CharacterRetainerPage> logger, ImGuiService imGuiService, IIconService iconService, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, ExcelCache excelCache) : base(logger, imGuiService)
+        {
+            _iconService = iconService;
+            _characterMonitor = characterMonitor;
+            _inventoryMonitor = inventoryMonitor;
+            _excelCache = excelCache;
+        }
         private bool _isSeparator = false;
-        public string Name { get; } = "Characters/Retainers";
+        public override void Initialize()
+        {
+            _editIcon = new(_iconService.LoadImage("edit"), new Vector2(16, 16));
+        }
+
+        public override string Name { get; } = "Characters/Retainers";
 
         private ulong _selectedCharacter = 0;
         private uint _currentWorld = 0;
         
         private bool _editMode = false;
         private string _newName = "";
-        
-        private HoverButton _editIcon { get; } = new(PluginService.IconStorage.LoadImage("edit"),  new Vector2(16, 16));
+
+        private HoverButton _editIcon;
         
         private Dictionary<Character, PopupMenu> _popupMenus = new();
         public PopupMenu GetCharacterMenu(Character character)
@@ -51,8 +73,8 @@ namespace InventoryTools.Sections
             if (arg2)
             {
                 var characterId = ulong.Parse(arg1.Split("dc_", StringSplitOptions.RemoveEmptyEntries)[0]);
-                PluginService.CharacterMonitor.RemoveCharacter(characterId);
-                PluginService.InventoryMonitor.ClearCharacterInventories(characterId);
+                _characterMonitor.RemoveCharacter(characterId);
+                _inventoryMonitor.ClearCharacterInventories(characterId);
             }
         }
 
@@ -61,18 +83,19 @@ namespace InventoryTools.Sections
             if (arg2)
             {
                 var characterId = ulong.Parse(arg1.Split("ci_", StringSplitOptions.RemoveEmptyEntries)[0]);
-                PluginService.InventoryMonitor.ClearCharacterInventories(characterId);
+                _inventoryMonitor.ClearCharacterInventories(characterId);
             }
         }
 
-        public void Draw()
+        public override List<MessageBase>? Draw()
         {
+            var messages = new List<MessageBase>();
             using (var sidebar = ImRaii.Child("charactersBar", new Vector2(160, 0) * ImGui.GetIO().FontGlobalScale, true))
             {
                 if (sidebar.Success)
                 {
-                    var worldIds = PluginService.CharacterMonitor.GetWorldIds();
-                    var characters = PluginService.CharacterMonitor.GetPlayerCharacters().Where(c => _currentWorld == 0 || _currentWorld == c.Value.WorldId).ToList();
+                    var worldIds = _characterMonitor.GetWorldIds();
+                    var characters = _characterMonitor.GetPlayerCharacters().Where(c => _currentWorld == 0 || _currentWorld == c.Value.WorldId).ToList();
                     ImGui.TextUnformatted("Characters (" + characters.Count + ")");
                     ImGui.Separator();
                     for (var index = 0; index < characters.Count; index++)
@@ -101,13 +124,13 @@ namespace InventoryTools.Sections
                         ImGui.SameLine();
                         if (character.Value.ActualClassJob != null)
                         {
-                            var icon = PluginService.IconStorage[character.Value.Icon];
+                            var icon = _iconService[character.Value.Icon];
                             ImGui.Image(icon.ImGuiHandle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale);
                         }
                     }
                     ImGui.NewLine();
                     
-                    var freeCompanies = PluginService.CharacterMonitor.GetFreeCompanies().Where(c => _currentWorld == 0 || _currentWorld == c.Value.WorldId).ToList();
+                    var freeCompanies = _characterMonitor.GetFreeCompanies().Where(c => _currentWorld == 0 || _currentWorld == c.Value.WorldId).ToList();
                     ImGui.TextUnformatted("Free Companies (" + freeCompanies.Count + ")");
                     ImGui.Separator();
                     for (var index = 0; index < freeCompanies.Count; index++)
@@ -131,13 +154,13 @@ namespace InventoryTools.Sections
                         if (freeCompany.Value.ActualClassJob != null)
                         {
                             ImGui.SameLine();
-                            var icon = PluginService.IconStorage[freeCompany.Value.Icon];
+                            var icon = _iconService[freeCompany.Value.Icon];
                             ImGui.Image(icon.ImGuiHandle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale);
                         }
                     }
                     ImGui.NewLine();
                     
-                    var houses = PluginService.CharacterMonitor.GetHouses().Where(c => _currentWorld == 0 || _currentWorld == c.Value.WorldId).ToList();
+                    var houses = _characterMonitor.GetHouses().Where(c => _currentWorld == 0 || _currentWorld == c.Value.WorldId).ToList();
                     ImGui.TextUnformatted("Residences (" + houses.Count + ")");
                     ImGui.Separator();
                     for (var index = 0; index < houses.Count; index++)
@@ -162,20 +185,20 @@ namespace InventoryTools.Sections
                         if (house.Value.ActualClassJob != null)
                         {
                             ImGui.SameLine();
-                            var icon = PluginService.IconStorage[house.Value.Icon];
+                            var icon = _iconService[house.Value.Icon];
                             ImGui.Image(icon.ImGuiHandle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale);
                         }
                     }
                     ImGui.NewLine();
                     
-                    var retainers = PluginService.CharacterMonitor.GetRetainerCharacters().Where(c => _currentWorld == 0 || _currentWorld == c.Value.WorldId).ToList();
+                    var retainers = _characterMonitor.GetRetainerCharacters().Where(c => _currentWorld == 0 || _currentWorld == c.Value.WorldId).ToList();
                     ImGui.TextUnformatted("Retainers (" + retainers.Count + ")");
                     ImGui.Separator();
 
                     for (var index = 0; index < characters.Count; index++)
                     {
                         var character = characters[index];
-                        var characterRetainers = PluginService.CharacterMonitor.GetRetainerCharacters(character.Key).Where(c => _currentWorld == 0 || _currentWorld == c.Value.WorldId).ToList();
+                        var characterRetainers = _characterMonitor.GetRetainerCharacters(character.Key).Where(c => _currentWorld == 0 || _currentWorld == c.Value.WorldId).ToList();
                         ImGui.TextUnformatted(character.Value.FormattedName + " (" + characterRetainers.Count + ")");
                         ImGui.Separator();
                         for (var index2 = 0; index2 < characterRetainers.Count; index2++)
@@ -203,7 +226,7 @@ namespace InventoryTools.Sections
                             if (characterRetainer.Value.ActualClassJob != null)
                             {
                                 ImGui.SameLine();
-                                var icon = PluginService.IconStorage[characterRetainer.Value.Icon];
+                                var icon = _iconService[characterRetainer.Value.Icon];
                                 ImGui.Image(icon.ImGuiHandle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale);
                             }
                         }
@@ -239,7 +262,7 @@ namespace InventoryTools.Sections
                             if (characterRetainer.Value.ActualClassJob != null)
                             {
                                 ImGui.SameLine();
-                                var icon = PluginService.IconStorage[characterRetainer.Value.Icon];
+                                var icon = _iconService[characterRetainer.Value.Icon];
                                 ImGui.Image(icon.ImGuiHandle, new Vector2(16, 16) * ImGui.GetIO().FontGlobalScale);
                             }
                         }
@@ -250,7 +273,7 @@ namespace InventoryTools.Sections
                     WorldEx? selectedWorld = null;
                     if (_currentWorld != 0)
                     {
-                        selectedWorld = Service.ExcelCache.GetWorldSheet().GetRow(_currentWorld);
+                        selectedWorld = _excelCache.GetWorldSheet().GetRow(_currentWorld);
                     }
 
                     ImGui.Text("World: ");
@@ -262,7 +285,7 @@ namespace InventoryTools.Sections
                             _currentWorld = 0;
                         }
 
-                        var worlds = Service.ExcelCache.GetWorldSheet().Where(c => worldIds.Contains(c.RowId)).ToList();
+                        var worlds = _excelCache.GetWorldSheet().Where(c => worldIds.Contains(c.RowId)).ToList();
                         foreach (var world in worlds)
                         {
                             if (ImGui.Selectable(world.FormattedName))
@@ -281,7 +304,7 @@ namespace InventoryTools.Sections
                 {
                     if (_selectedCharacter != 0)
                     {
-                        var character = PluginService.CharacterMonitor.GetCharacterById(_selectedCharacter);
+                        var character = _characterMonitor.GetCharacterById(_selectedCharacter);
                         if (character != null)
                         {
                             ImGui.Text(character.FormattedName.ToString());
@@ -289,7 +312,7 @@ namespace InventoryTools.Sections
                             if (character.ActualClassJob != null)
                             {
                                 ImGui.SameLine();
-                                var icon = PluginService.IconStorage[character.Icon];
+                                var icon = _iconService[character.Icon];
                                 ImGui.Image(icon.ImGuiHandle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale);
                             }
                             
@@ -322,13 +345,13 @@ namespace InventoryTools.Sections
                                     if (_newName == "" || _newName == character.Name)
                                     {
                                         character.AlternativeName = null;
-                                        PluginService.CharacterMonitor.UpdateCharacter(character);
+                                        _characterMonitor.UpdateCharacter(character);
                                         _editMode = false;
                                     }
                                     else
                                     {
                                         character.AlternativeName = _newName;
-                                        PluginService.CharacterMonitor.UpdateCharacter(character);
+                                        _characterMonitor.UpdateCharacter(character);
                                         _editMode = false;
                                     }
                                 }
@@ -354,7 +377,7 @@ namespace InventoryTools.Sections
                                 ImGui.Text("Owners: ");
                                 foreach (var ownerId in character.Owners)
                                 {
-                                    var owner = PluginService.CharacterMonitor.GetCharacterById(ownerId);
+                                    var owner = _characterMonitor.GetCharacterById(ownerId);
                                     var ownerName = owner?.FormattedName ?? "Missing Character";
                                     ImGui.Text(ownerName);
                                 }
@@ -363,7 +386,7 @@ namespace InventoryTools.Sections
                             {
                                 ImGui.Text("World: " + (character.World?.FormattedName ?? "Unknown"));
                                 ImGui.Text("Related Characters: ");
-                                foreach (var relatedCharacter in PluginService.CharacterMonitor.GetFreeCompanyCharacters(character.CharacterId))
+                                foreach (var relatedCharacter in _characterMonitor.GetFreeCompanyCharacters(character.CharacterId))
                                 {
                                     var relatedCharacterName = relatedCharacter.Value.FormattedName;
                                     ImGui.Text(relatedCharacterName);
@@ -374,8 +397,8 @@ namespace InventoryTools.Sections
                             ImGui.Text("Inventories: ");
                             ImGui.Separator();
                             var inventories =
-                                PluginService.InventoryMonitor.Inventories.ContainsKey(character.CharacterId)
-                                    ? PluginService.InventoryMonitor.Inventories[character.CharacterId]
+                                _inventoryMonitor.Inventories.ContainsKey(character.CharacterId)
+                                    ? _inventoryMonitor.Inventories[character.CharacterId]
                                     : null;
                             if (inventories != null)
                             {
@@ -415,11 +438,11 @@ namespace InventoryTools.Sections
                                                                                 using (ImRaii.PushId(item.Slot))
                                                                                 {
                                                                                     if (ImGui.ImageButton(item.ItemId == 0
-                                                                                                ? PluginService
-                                                                                                    .IconStorage[62574]
+                                                                                                ? ImGuiService
+                                                                                                    .IconService[62574]
                                                                                                     .ImGuiHandle
-                                                                                                : PluginService
-                                                                                                    .IconStorage[item.Icon]
+                                                                                                : ImGuiService
+                                                                                                    .IconService[item.Icon]
                                                                                                     .ImGuiHandle,
                                                                                             new Vector2(32, 32)))
                                                                                     {
@@ -444,7 +467,7 @@ namespace InventoryTools.Sections
                                                                                     
                                                                                     if (hoveredRow == realSlot && item.ItemId != 0 && ImGui.IsMouseReleased(ImGuiMouseButton.Left))
                                                                                     {
-                                                                                        PluginService.WindowService.OpenItemWindow(item.ItemId);   
+                                                                                        messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), item.ItemId));
                                                                                     }
 
                                                                                     using (var popup = ImRaii.Popup("RightClick" + realSlot))
@@ -452,7 +475,7 @@ namespace InventoryTools.Sections
                                                                                         using var _ = ImRaii.PushId("RightClick" + realSlot);
                                                                                         if (popup.Success)
                                                                                         {
-                                                                                            item.Item.DrawRightClickPopup();
+                                                                                            ImGuiService.RightClickService.DrawRightClickPopup(item.Item, messages);
                                                                                         }
                                                                                     }
                                                                                 }
@@ -488,361 +511,10 @@ namespace InventoryTools.Sections
                     }
                 }
             }
+            return messages;
         }
 
-        private static void RenderFreeCompanyTable()
-        {
-            ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(5, 5) * ImGui.GetIO().FontGlobalScale);
-            if (ImGui.BeginTable("FreeCompanyTable", 4, ImGuiTableFlags.BordersV |
-                                                        ImGuiTableFlags.BordersOuterV |
-                                                        ImGuiTableFlags.BordersInnerV |
-                                                        ImGuiTableFlags.BordersH |
-                                                        ImGuiTableFlags.BordersOuterH |
-                                                        ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.Resizable))
-            {
-                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)0);
-                ImGui.TableSetupColumn("World", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)1);
-                ImGui.TableSetupColumn("Display Name", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)3);
-                ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)4);
-                ImGui.TableHeadersRow();
-                var characters = PluginService.CharacterMonitor.GetFreeCompanies();
-                if (characters.Length == 0)
-                {
-                    ImGui.TableNextRow();
-                    ImGui.TextUnformatted("No free companies available.");
-                    ImGui.TableNextColumn();
-                    ImGui.TableNextColumn();
-                    ImGui.TableNextColumn();
-                    ImGui.TableNextColumn();
-                }
-
-                for (var index = 0; index < characters.Length; index++)
-                {
-                    ImGui.TableNextRow();
-                    var character = characters[index].Value;
-                    ImGui.TableNextColumn();
-                    if (character.Name != "")
-                    {
-                        ImGui.TextUnformatted(character.Name);
-                        ImGui.SameLine();
-                    }
-
-                    ImGui.TableNextColumn();
-                    if (character.WorldId != 0)
-                    {
-                        ImGui.TextUnformatted(character.World?.Name ?? "Unknown");
-                        ImGui.SameLine();
-                    }
-
-                    ImGui.TableNextColumn();
-                    var value = character.AlternativeName ?? "";
-                    if (ImGui.InputText("##" + index + "Input", ref value, 150))
-                    {
-                        if (value == "")
-                        {
-                            character.AlternativeName = null;
-                            PluginService.CharacterMonitor.UpdateCharacter(character);
-                        }
-                        else
-                        {
-                            character.AlternativeName = value;
-                            PluginService.CharacterMonitor.UpdateCharacter(character);
-                        }
-                    }
-
-                    ImGui.TableNextColumn();
-                    if (character.CharacterId != PluginService.CharacterMonitor.ActiveCharacterId)
-                    {
-                        if (ImGui.SmallButton("Remove##" + index))
-                        {
-                            PluginService.CharacterMonitor.RemoveCharacter(character.CharacterId);
-                        }
-
-                    }
-
-                    if (ImGui.SmallButton("Clear All Bags##" + index))
-                    {
-                        ImGui.OpenPopup("Are you sure?##" + index);
-                    }
-
-                    if (ImGui.BeginPopupModal("Are you sure?##" + index))
-                    {
-                        ImGui.TextUnformatted(
-                            "Are you sure you want to clear all the bags stored for this free company?.\nThis operation cannot be undone!\n\n");
-                        ImGui.Separator();
-
-                        if (ImGui.Button("OK", new Vector2(120, 0) * ImGui.GetIO().FontGlobalScale))
-                        {
-                            PluginService.InventoryMonitor.ClearCharacterInventories(character.CharacterId);
-                            ImGui.CloseCurrentPopup();
-                        }
-
-                        ImGui.SetItemDefaultFocus();
-                        ImGui.SameLine();
-                        if (ImGui.Button("Cancel", new Vector2(120, 0) * ImGui.GetIO().FontGlobalScale))
-                        {
-                            ImGui.CloseCurrentPopup();
-                        }
-
-                        ImGui.EndPopup();
-                    }
-                }
-
-                ImGui.EndTable();
-            }
-            ImGui.PopStyleVar();
-        }
-        private static void RenderHouseTable()
-        {
-            ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(5, 5) * ImGui.GetIO().FontGlobalScale);
-            if (ImGui.BeginTable("HouseTable", 6, ImGuiTableFlags.BordersV |
-                                                        ImGuiTableFlags.BordersOuterV |
-                                                        ImGuiTableFlags.BordersInnerV |
-                                                        ImGuiTableFlags.BordersH |
-                                                        ImGuiTableFlags.BordersOuterH |
-                                                        ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.Resizable))
-            {
-                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)0);
-                ImGui.TableSetupColumn("World", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)1);
-                ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)2);
-                ImGui.TableSetupColumn("Owners", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)3);
-                ImGui.TableSetupColumn("Display Name", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)4);
-                ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)5);
-                ImGui.TableHeadersRow();
-                var houses = PluginService.CharacterMonitor.GetCharacterHouses();
-                if (houses.Length == 0)
-                {
-                    ImGui.TableNextRow();
-                    ImGui.TextUnformatted("No houses available.");
-                    ImGui.TableNextColumn();
-                    ImGui.TableNextColumn();
-                    ImGui.TableNextColumn();
-                    ImGui.TableNextColumn();
-                    ImGui.TableNextColumn();
-                    ImGui.TableNextColumn();
-                }
-
-                for (var index = 0; index < houses.Length; index++)
-                {
-                    ImGui.TableNextRow();
-                    var character = houses[index].Value;
-                    ImGui.TableNextColumn();
-                    if (character.HousingName != "")
-                    {
-                        ImGui.TextUnformatted(character.HousingName);
-                        ImGui.SameLine();
-                    }
-
-                    ImGui.TableNextColumn();
-                    if (character.WorldId != 0)
-                    {
-                        ImGui.TextUnformatted(character.World?.Name ?? "Unknown");
-                        ImGui.SameLine();
-                    }
-                    
-                    ImGui.TableNextColumn();
-                    ImGui.TextUnformatted(character.GetPlotSize().ToString());
-                    ImGui.SameLine();
-
-                    ImGui.TableNextColumn();
-                    if (character.Owners.Count != 0)
-                    {
-                        ImGui.TextUnformatted(String.Join(",",character.Owners.Select(c => PluginService.CharacterMonitor.GetCharacterById(c)).Where(c => c != null).Select(c => c!.FormattedName).ToList()));
-                        ImGui.SameLine();
-                    }
-                    
-                    ImGui.TableNextColumn();
-                    var value = character.AlternativeName ?? "";
-                    if (ImGui.InputText("##" + index + "Input", ref value, 150))
-                    {
-                        if (value == "")
-                        {
-                            character.AlternativeName = null;
-                            PluginService.CharacterMonitor.UpdateCharacter(character);
-                        }
-                        else
-                        {
-                            character.AlternativeName = value;
-                            PluginService.CharacterMonitor.UpdateCharacter(character);
-                        }
-                    }
-
-                    ImGui.TableNextColumn();
-                    if (character.CharacterId != PluginService.CharacterMonitor.ActiveCharacterId)
-                    {
-                        if (ImGui.SmallButton("Remove##" + index))
-                        {
-                            PluginService.CharacterMonitor.RemoveCharacter(character.CharacterId);
-                        }
-
-                        ImGui.SameLine();
-                    }
-
-                    if (ImGui.SmallButton("Clear All Bags##" + index))
-                    {
-                        ImGui.OpenPopup("Are you sure?##" + index);
-                    }
-
-                    if (ImGui.BeginPopupModal("Are you sure?##" + index))
-                    {
-                        ImGui.TextUnformatted(
-                            "Are you sure you want to clear all storage for this house?.\nThis operation cannot be undone!\n\n");
-                        ImGui.Separator();
-
-                        if (ImGui.Button("OK", new Vector2(120, 0) * ImGui.GetIO().FontGlobalScale))
-                        {
-                            PluginService.InventoryMonitor.ClearCharacterInventories(character.CharacterId);
-                            ImGui.CloseCurrentPopup();
-                        }
-
-                        ImGui.SetItemDefaultFocus();
-                        ImGui.SameLine();
-                        if (ImGui.Button("Cancel", new Vector2(120, 0) * ImGui.GetIO().FontGlobalScale))
-                        {
-                            ImGui.CloseCurrentPopup();
-                        }
-
-                        ImGui.EndPopup();
-                    }
-                }
-
-                ImGui.EndTable();
-            }
-            ImGui.PopStyleVar();
-        }
-
-        public void RenderRetainerTable(List<KeyValuePair<ulong, Character>> retainers)
-        {
-            ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(5, 5) * ImGui.GetIO().FontGlobalScale);
-            if (ImGui.BeginTable("RetainerTable", 8, ImGuiTableFlags.BordersV |
-                                                         ImGuiTableFlags.BordersOuterV |
-                                                         ImGuiTableFlags.BordersInnerV |
-                                                         ImGuiTableFlags.BordersH |
-                                                         ImGuiTableFlags.BordersOuterH |
-                                                         ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.Resizable))
-            {
-                ImGui.TableSetupColumn("Hire Order", ImGuiTableColumnFlags.WidthStretch, 30.0f, (uint) 0);
-                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.WidthStretch, 70.0f, (uint) 1);
-                ImGui.TableSetupColumn("World", ImGuiTableColumnFlags.WidthStretch, 70.0f, (uint) 2);
-                ImGui.TableSetupColumn("Gil", ImGuiTableColumnFlags.WidthStretch, 30.0f, (uint) 3);
-                ImGui.TableSetupColumn("Level", ImGuiTableColumnFlags.WidthStretch, 40.0f, (uint) 4);
-                ImGui.TableSetupColumn("Owner", ImGuiTableColumnFlags.WidthStretch, 60.0f, (uint) 5);
-                ImGui.TableSetupColumn("Display Name", ImGuiTableColumnFlags.WidthStretch, 80.0f, (uint) 6);
-                ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch, 80.0f, (uint) 7);
-                ImGui.TableHeadersRow();
-                if (retainers.Count == 0)
-                {
-                    ImGui.TableNextRow();
-                    ImGui.TextUnformatted("No retainers available.");
-                    ImGui.TableNextColumn();
-                    ImGui.TableNextColumn();
-                    ImGui.TableNextColumn();
-                    ImGui.TableNextColumn();
-                    ImGui.TableNextColumn();
-                    ImGui.TableNextColumn();
-                    ImGui.TableNextColumn();
-                    ImGui.TableNextColumn();
-                }
-
-                for (var index = 0; index < retainers.Count; index++)
-                {
-                    ImGui.TableNextRow();
-                    var character = retainers[index].Value;
-                    
-                    ImGui.TableNextColumn();
-                    {
-                        ImGui.TextUnformatted((character.HireOrder + 1).ToString());
-                        ImGui.SameLine();
-                    }
-                    
-                    ImGui.TableNextColumn();
-                    ImGui.TextUnformatted(character.Name);
-                    ImGui.SameLine();
-                    
-                    ImGui.TableNextColumn();
-                    if (character.WorldId != 0)
-                    {
-                        ImGui.TextUnformatted(character.World?.Name ?? "Unknown");
-                        ImGui.SameLine();
-                    }
-                    
-                    ImGui.TableNextColumn();
-                    ImGui.TextUnformatted(character.Gil.ToString());
-                    ImGui.SameLine();
-                    
-                    ImGui.TableNextColumn();
-                    ImGui.TextUnformatted(character.Level.ToString());
-                    ImGui.SameLine();
-                    
-                    ImGui.TableNextColumn();
-                    var characterName = "Unknown";
-                    if (PluginService.CharacterMonitor.Characters.ContainsKey(character.OwnerId))
-                    {
-                        var owner = PluginService.CharacterMonitor.Characters[character.OwnerId];
-                        characterName = owner.FormattedName;
-                    }
-
-                    ImGui.TextUnformatted(characterName);
-                    
-                    ImGui.TableNextColumn();
-                    var value = character.AlternativeName ?? "";
-                    if (ImGui.InputText("##"+index+"Input", ref value, 150))
-                    {
-                        if (value == "")
-                        {
-                            character.AlternativeName = null;
-                            PluginService.CharacterMonitor.UpdateCharacter(character);
-                        }
-                        else
-                        {
-                            character.AlternativeName = value;
-                            PluginService.CharacterMonitor.UpdateCharacter(character);
-                        }
-                    }
-                    ImGui.TableNextColumn();
-                    if (character.CharacterId != PluginService.CharacterMonitor.LocalContentId)
-                    {
-                        if (ImGui.SmallButton("Remove##" + index))
-                        {
-                            PluginService.CharacterMonitor.RemoveCharacter(character.CharacterId);
-                        }
-
-                    }
-
-                    if (ImGui.SmallButton("Clear All Bags##" + index))
-                    {
-                        ImGui.OpenPopup("Are you sure?##" + index);
-                    }
-                    if (ImGui.BeginPopupModal("Are you sure?##" + index))
-                    {
-                        ImGui.TextUnformatted(
-                            "Are you sure you want to clear all the bags stored for this retainer?.\nThis operation cannot be undone!\n\n");
-                        ImGui.Separator();
-
-                        if (ImGui.Button("OK", new Vector2(120, 0) * ImGui.GetIO().FontGlobalScale))
-                        {
-                            PluginService.InventoryMonitor.ClearCharacterInventories(character.CharacterId);
-                            ImGui.CloseCurrentPopup();
-                        }
-
-                        ImGui.SetItemDefaultFocus();
-                        ImGui.SameLine();
-                        if (ImGui.Button("Cancel", new Vector2(120, 0) * ImGui.GetIO().FontGlobalScale))
-                        {
-                            ImGui.CloseCurrentPopup();
-                        }
-
-                        ImGui.EndPopup();
-                    }
-                }
-
-                ImGui.EndTable();
-            }
-
-            ImGui.PopStyleVar();            
-        }
-
-        public bool IsMenuItem => _isSeparator;
-        public bool DrawBorder => false;
+        public override bool IsMenuItem => _isSeparator;
+        public override bool DrawBorder => false;
     }
 }
