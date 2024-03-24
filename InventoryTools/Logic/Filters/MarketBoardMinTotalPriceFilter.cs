@@ -1,11 +1,18 @@
+using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Extensions;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
     public class MarketBoardMinTotalPriceFilter : MarketBoardTotalPriceFilter
     {
+        public MarketBoardMinTotalPriceFilter(ILogger<MarketBoardMinTotalPriceFilter> logger, ImGuiService imGuiService, ICharacterMonitor characterMonitor, IMarketCache marketCache) : base(logger, imGuiService, characterMonitor, marketCache)
+        {
+        }
         public override string Key { get; set; } = "MBMinTotalPrice";
         public override string Name { get; set; } = "Market Board Total Minimum Price";
         public override string HelpText { get; set; } = "The total market board price of the item(minimum price * quantity). For this to work you need to have automatic pricing enabled and also note that any background price updates will not be evaluated until an event that refreshes the inventory occurs(this happens fairly often).";
@@ -23,21 +30,25 @@ namespace InventoryTools.Logic.Filters
                 {
                     return false;
                 }
-                var marketBoardData = PluginService.MarketCache.GetPricing(item.ItemId, false);
-                if (marketBoardData != null)
+                var activeCharacter = CharacterMonitor.ActiveCharacter;
+                if (activeCharacter != null)
                 {
-                    float price;
-                    if (item.IsHQ)
+                    var marketBoardData = MarketCache.GetPricing(item.ItemId, activeCharacter.WorldId, false);
+                    if (marketBoardData != null)
                     {
-                        price = marketBoardData.minPriceHQ;
-                    }
-                    else
-                    {
-                        price = marketBoardData.minPriceNQ;
-                    }
+                        float price;
+                        if (item.IsHQ)
+                        {
+                            price = marketBoardData.MinPriceHq;
+                        }
+                        else
+                        {
+                            price = marketBoardData.MinPriceNq;
+                        }
 
-                    price *= item.Quantity;
-                    return price.PassesFilter(currentValue.ToLower());
+                        price *= item.Quantity;
+                        return price.PassesFilter(currentValue.ToLower());
+                    }
                 }
 
                 return false;

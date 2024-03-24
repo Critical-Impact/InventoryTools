@@ -1,14 +1,26 @@
 using System;
 using System.Collections.Generic;
 using CriticalCommonLib.Extensions;
+using CriticalCommonLib.Services;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
+using InventoryTools.Lists;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
     public class DestinationsFilter : DisplayFilter
     {
+        private readonly ICharacterMonitor _characterMonitor;
+        private readonly ListCategoryService _listCategoryService;
+
+        public DestinationsFilter(ILogger<DestinationsFilter> logger, ImGuiService imGuiService, ICharacterMonitor characterMonitor, ListCategoryService listCategoryService) : base(logger, imGuiService)
+        {
+            _characterMonitor = characterMonitor;
+            _listCategoryService = listCategoryService;
+        }
         public override int Order { get; set; } = 2;
         public override string Key { get; set; } = "Destinations";
         public override string Name { get; set; } = "Destinations";
@@ -30,12 +42,12 @@ namespace InventoryTools.Logic.Filters
             ImGui.NewLine();
             ImGui.Text("Destination Information: ");
             ImGui.SameLine();
-            UiHelpers.HelpMarker(HelpText);
-            var allCharacters = PluginService.CharacterMonitor.Characters;
+            ImGuiService.HelpMarker(HelpText);
+            var allCharacters = _characterMonitor.Characters;
             
             //Retainers
             List<string> destinations = new();
-            foreach (var retainerCategories in configuration.DestinationRetainerCategories)
+            foreach (var retainerCategories in _listCategoryService.DestinationRetainerCategories(configuration))
             {
                 foreach (var retainerCategory in retainerCategories.Value)
                 {
@@ -63,7 +75,7 @@ namespace InventoryTools.Logic.Filters
             
             //Characters
             destinations = new();
-            foreach (var characterCategories in configuration.DestinationCharacterCategories)
+            foreach (var characterCategories in _listCategoryService.DestinationCharacterCategories(configuration))
             {
                 foreach (var characterCategory in characterCategories.Value)
                 {
@@ -91,7 +103,7 @@ namespace InventoryTools.Logic.Filters
             
             //Free Companies
             destinations = new();
-            foreach (var characterCategories in configuration.DestinationFreeCompanyCategories)
+            foreach (var characterCategories in _listCategoryService.DestinationFreeCompanyCategories(configuration))
             {
                 foreach (var characterCategory in characterCategories.Value)
                 {
@@ -119,7 +131,7 @@ namespace InventoryTools.Logic.Filters
             
             //Houses
             destinations = new();
-            foreach (var characterCategories in configuration.DestinationHouseCategories)
+            foreach (var characterCategories in _listCategoryService.DestinationHouseCategories(configuration))
             {
                 foreach (var characterCategory in characterCategories.Value)
                 {

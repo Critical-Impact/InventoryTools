@@ -1,6 +1,8 @@
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters;
 
@@ -27,5 +29,9 @@ public class StoreFilter : BooleanFilter
         }
 
         return currentValue.Value && item.PurchasedSQStore || !currentValue.Value && !item.PurchasedSQStore;
+    }
+
+    public StoreFilter(ILogger<StoreFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+    {
     }
 }

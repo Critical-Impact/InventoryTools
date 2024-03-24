@@ -3,6 +3,8 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Enums;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters;
 
@@ -51,7 +53,7 @@ public class CraftDisplayModeFilter : ChoiceFilter<CraftDisplayMode>
         };
     }
 
-    public override string GetFormattedChoice(CraftDisplayMode choice)
+    public override string GetFormattedChoice(FilterConfiguration filterConfiguration, CraftDisplayMode choice)
     {
         switch (choice)
         {
@@ -62,5 +64,9 @@ public class CraftDisplayModeFilter : ChoiceFilter<CraftDisplayMode>
         }
 
         return choice.ToString();
+    }
+
+    public CraftDisplayModeFilter(ILogger<CraftDisplayModeFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+    {
     }
 }

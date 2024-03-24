@@ -1,4 +1,6 @@
 using InventoryTools.Logic.Settings.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Settings
 {
@@ -22,6 +24,10 @@ namespace InventoryTools.Logic.Settings
             "Should the active craft list automatically change when moving between each craft list? The active craft list will only change if there is an active craft list already selected.";
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.General;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.FilterSettings;
+        public override string Version => "1.6.2.5";
 
+        public SwitchCraftListsAutomaticallySetting(ILogger<SwitchCraftListsAutomaticallySetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
     }
 }

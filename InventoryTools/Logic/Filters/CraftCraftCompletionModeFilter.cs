@@ -3,6 +3,8 @@ using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters;
 
@@ -51,7 +53,7 @@ public class CraftCraftCompletionModeFilter : ChoiceFilter<CraftCompletionMode>
         };
     }
 
-    public override string GetFormattedChoice(CraftCompletionMode choice)
+    public override string GetFormattedChoice(FilterConfiguration filterConfiguration, CraftCompletionMode choice)
     {
         switch (choice)
         {
@@ -62,5 +64,9 @@ public class CraftCraftCompletionModeFilter : ChoiceFilter<CraftCompletionMode>
         }
 
         return choice.ToString();
+    }
+
+    public CraftCraftCompletionModeFilter(ILogger<CraftCraftCompletionModeFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+    {
     }
 }

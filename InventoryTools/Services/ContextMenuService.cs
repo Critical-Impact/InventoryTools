@@ -1,17 +1,25 @@
 using System;
 using CriticalCommonLib;
+using CriticalCommonLib.Services.Mediator;
 using Dalamud.ContextMenu;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using InventoryTools.Logic;
+using InventoryTools.Mediator;
+using InventoryTools.Services.Interfaces;
+using InventoryTools.Ui;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Services;
 
-public class ContextMenuService : IDisposable
+public class ContextMenuService : DisposableMediatorSubscriberBase
 {
+    private readonly IGuiService _guiService;
+    private readonly InventoryToolsConfiguration _configuration;
     public const int SatisfactionSupplyItemIdx       = 0x54;
     public const int SatisfactionSupplyItem1Id       = 0x80 + 1 * 0x3C;
     public const int SatisfactionSupplyItem2Id       = 0x80 + 2 * 0x3C;
@@ -32,8 +40,10 @@ public class ContextMenuService : IDisposable
     private readonly DalamudContextMenu _contextMenu;
     
 
-    public ContextMenuService(DalamudPluginInterface dalamudPluginInterface)
+    public ContextMenuService(ILogger<ContextMenuService> logger, MediatorService mediatorService, DalamudPluginInterface dalamudPluginInterface, IGuiService guiService, InventoryToolsConfiguration configuration) : base(logger, mediatorService)
     {
+        _guiService = guiService;
+        _configuration = configuration;
         _contextMenu = new DalamudContextMenu(dalamudPluginInterface);
         _contextMenu.OnOpenGameObjectContextMenu += AddGameObjectItem;
         _contextMenu.OnOpenInventoryContextMenu  += AddInventoryItem;
@@ -41,7 +51,7 @@ public class ContextMenuService : IDisposable
 
     private void AddInventoryItem(InventoryContextMenuOpenArgs args)
     {
-        if (ConfigurationManager.Config.AddMoreInformationContextMenu)
+        if (_configuration.AddMoreInformationContextMenu)
         {
             InventoryContextMenuItem moreInformation =
                 new InventoryContextMenuItem(new SeString(new TextPayload("(AT) More Information")), selectedArgs => MoreInformationAction(selectedArgs.ItemId));
@@ -61,11 +71,11 @@ public class ContextMenuService : IDisposable
         => agent != IntPtr.Zero ? GetObjectItemId(*(uint*)(agent + offset)) : null;
 
     private uint? GetObjectItemId(string name, int offset)
-        => GetObjectItemId(PluginService.GuiService.FindAgentInterface(name), offset);
+        => GetObjectItemId(_guiService.FindAgentInterface(name), offset);
 
     private unsafe uint? HandleSatisfactionSupply()
     {
-        var agent = PluginService.GuiService.FindAgentInterface("SatisfactionSupply");
+        var agent = _guiService.FindAgentInterface("SatisfactionSupply");
         if (agent == IntPtr.Zero)
             return null;
 
@@ -79,7 +89,7 @@ public class ContextMenuService : IDisposable
     }
     private unsafe uint? HandleHWDSupply()
     {
-        var agent = PluginService.GuiService.FindAgentInterface("HWDSupply");
+        var agent = _guiService.FindAgentInterface("HWDSupply");
         if (agent == IntPtr.Zero)
             return null;
 
@@ -127,7 +137,7 @@ public class ContextMenuService : IDisposable
         var gameObjectItemId = GetGameObjectItemId(args);
         if (gameObjectItemId != null)
         {
-            if (ConfigurationManager.Config.AddMoreInformationContextMenu)
+            if (_configuration.AddMoreInformationContextMenu)
             {
                 GameObjectContextMenuItem moreInformation =
                     new GameObjectContextMenuItem(new SeString(new TextPayload("(AT) More Information")),
@@ -137,9 +147,9 @@ public class ContextMenuService : IDisposable
         }
     }
     
-    private static unsafe IntPtr AgentById(AgentId id)
+    private unsafe IntPtr AgentById(AgentId id)
     {
-        var uiModule = (UIModule*)PluginService.GuiService.GetUIModule();
+        var uiModule = (UIModule*)_guiService.GetUIModule();
         var agents   = uiModule->GetAgentModule();
         var agent    = agents->GetAgentByInternalId(id);
         return (IntPtr)agent;
@@ -149,7 +159,7 @@ public class ContextMenuService : IDisposable
     {
         if (itemId >= 2000000 || itemId == 0) return ;
         itemId %= 500000;
-        PluginService.WindowService.OpenItemWindow(itemId);
+        MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), itemId));
     }
             
     private bool _disposed;
@@ -178,7 +188,7 @@ public class ContextMenuService : IDisposable
 
         if( _disposed == false )
         {
-            Service.Log.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
+            Logger.LogError("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
         }
 #endif
         Dispose (true);

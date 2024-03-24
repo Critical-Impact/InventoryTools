@@ -1,4 +1,6 @@
 using InventoryTools.Logic.Settings.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Settings
 {
@@ -16,12 +18,16 @@ namespace InventoryTools.Logic.Settings
         }
 
         public override string Key { get; set; } = "SwitchFiltersAutomatically";
-        public override string Name { get; set; } = "Switch filters automatically?";
+        public override string Name { get; set; } = "Switch lists automatically?";
 
         public override string HelpText { get; set; } =
-            "Should the active window filter automatically change when moving between each filter tab? The active filter will only change if there is an active filter already selected.";
+            "When you view a different list, should highlighting automatically switch to the list you are viewing? Highlighting will only change to the new list if highlighting is already active.";
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.General;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.FilterSettings;
+        public override string Version => "1.6.2.5";
 
+        public SwitchFiltersAutomaticallySetting(ILogger<SwitchFiltersAutomaticallySetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
     }
 }

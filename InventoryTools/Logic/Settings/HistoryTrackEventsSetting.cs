@@ -3,6 +3,8 @@ using System.Linq;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using InventoryTools.Logic.Settings.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Settings;
 
@@ -58,4 +60,9 @@ public class HistoryTrackEventsSetting : MultipleChoiceSetting<InventoryChangeRe
     }
 
     public override bool HideAlreadyPicked { get; set; } = true;
+    public override string Version => "1.6.2.5";
+
+    public HistoryTrackEventsSetting(ILogger<HistoryTrackEventsSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+    {
+    }
 }

@@ -4,29 +4,51 @@ using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
+using InventoryTools.Services;
 using Lumina.Excel.GeneratedSheets;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic
 {
     public class FilterState
     {
-        public FilterState(FilterConfiguration filterConfiguration)
+        public FilterState(ILogger<FilterState> logger, ICharacterMonitor characterMonitor, WindowService windowService, IGameUiManager gameUiManager, IInventoryMonitor inventoryMonitor, ExcelCache excelCache, InventoryToolsConfiguration configuration)
+        {
+            _logger = logger;
+            _characterMonitor = characterMonitor;
+            _windowService = windowService;
+            _gameUiManager = gameUiManager;
+            _inventoryMonitor = inventoryMonitor;
+            _excelCache = excelCache;
+            _configuration = configuration;
+        }
+
+        public void Initialize(FilterConfiguration filterConfiguration)
         {
             FilterConfiguration = filterConfiguration;
         }
+        
         public FilterConfiguration FilterConfiguration;
+        private readonly ILogger<FilterState> _logger;
+        private readonly ICharacterMonitor _characterMonitor;
+        private readonly WindowService _windowService;
+        private readonly IGameUiManager _gameUiManager;
+        private readonly IInventoryMonitor _inventoryMonitor;
+        private readonly ExcelCache _excelCache;
+        private readonly InventoryToolsConfiguration _configuration;
         public RenderTableBase? FilterTable;
-        public ulong? ActiveRetainerId => PluginService.CharacterMonitor.ActiveRetainerId == 0 ? null : PluginService.CharacterMonitor.ActiveRetainerId;
-        public ulong? ActiveFreeCompanyId => PluginService.CharacterMonitor.ActiveFreeCompanyId == 0 ? null : PluginService.CharacterMonitor.ActiveFreeCompanyId;
-        public ulong? ActiveHousingId => PluginService.CharacterMonitor.ActiveHouseId == 0 ? null : PluginService.CharacterMonitor.ActiveHouseId;
+        public ulong? ActiveRetainerId => _characterMonitor.ActiveRetainerId == 0 ? null : _characterMonitor.ActiveRetainerId;
+        public ulong? ActiveFreeCompanyId => _characterMonitor.ActiveFreeCompanyId == 0 ? null : _characterMonitor.ActiveFreeCompanyId;
+        public ulong? ActiveHousingId => _characterMonitor.ActiveHouseId == 0 ? null : _characterMonitor.ActiveHouseId;
 
         public bool InvertHighlighting
         {
             get
             {
                 var activeFilter = FilterConfiguration;
-                return activeFilter.InvertHighlighting ?? ConfigurationManager.Config.InvertHighlighting;
+                return activeFilter.InvertHighlighting ?? _configuration.InvertHighlighting;
             }
         }
 
@@ -35,7 +57,7 @@ namespace InventoryTools.Logic
             get
             {
                 var activeFilter = FilterConfiguration;
-                return activeFilter.InvertDestinationHighlighting ?? ConfigurationManager.Config.InvertDestinationHighlighting;
+                return activeFilter.InvertDestinationHighlighting ?? _configuration.InvertDestinationHighlighting;
             }
         }
 
@@ -44,13 +66,13 @@ namespace InventoryTools.Logic
             get
             {
                 var activeFilter = FilterConfiguration;
-                return activeFilter.InvertTabHighlighting ?? ConfigurationManager.Config.InvertTabHighlighting;
+                return activeFilter.InvertTabHighlighting ?? _configuration.InvertTabHighlighting;
             }
         }
 
-        public Vector4 BagHighlightColor => FilterConfiguration.HighlightColor ?? ConfigurationManager.Config.HighlightColor;
-        public Vector4 BagDestinationHighlightColor => FilterConfiguration.DestinationHighlightColor ?? ConfigurationManager.Config.DestinationHighlightColor;
-        public Vector4 TabHighlightColor => FilterConfiguration.TabHighlightColor ?? ConfigurationManager.Config.TabHighlightColor;
+        public Vector4 BagHighlightColor => FilterConfiguration.HighlightColor ?? _configuration.HighlightColor;
+        public Vector4 BagDestinationHighlightColor => FilterConfiguration.DestinationHighlightColor ?? _configuration.DestinationHighlightColor;
+        public Vector4 TabHighlightColor => FilterConfiguration.TabHighlightColor ?? _configuration.TabHighlightColor;
 
         public bool ShouldHighlight
         {
@@ -59,7 +81,7 @@ namespace InventoryTools.Logic
                 var activeFilter = FilterConfiguration;
                 RenderTableBase? activeTable = FilterTable;
                 bool shouldHighlight = false;
-                if (PluginService.WindowService.HasFilterWindowOpen)
+                if (_windowService.HasFilterWindowOpen)
                 {
                     if (activeTable != null)
                     {
@@ -68,7 +90,7 @@ namespace InventoryTools.Logic
                         if (activeTableHighlightItems)
                         {
                             shouldHighlight = activeTableHighlightItems;
-                            if (activeFilter.HighlightWhen is "When Searching" || activeFilter.HighlightWhen == null && ConfigurationManager.Config.HighlightWhen == "When Searching")
+                            if (activeFilter.HighlightWhen is "When Searching" || activeFilter.HighlightWhen == null && _configuration.HighlightWhen == "When Searching")
                             {
                                 if (!activeTable.IsSearching)
                                 {
@@ -78,7 +100,7 @@ namespace InventoryTools.Logic
 
                             if (activeFilter.FilterItemsInRetainersEnum == FilterItemsRetainerEnum.Only)
                             {
-                                if (PluginService.CharacterMonitor.ActiveRetainerId == 0 && !PluginService.GameUi.IsWindowVisible(WindowName.RetainerList))
+                                if (_characterMonitor.ActiveRetainerId == 0 && !_gameUiManager.IsWindowVisible(WindowName.RetainerList))
                                 {
                                     return false;
                                 }
@@ -91,7 +113,7 @@ namespace InventoryTools.Logic
                     shouldHighlight = true;
                     if (activeFilter.FilterItemsInRetainersEnum == FilterItemsRetainerEnum.Only)
                     {
-                        if (PluginService.CharacterMonitor.ActiveRetainerId == 0 && !PluginService.GameUi.IsWindowVisible(WindowName.RetainerList))
+                        if (_characterMonitor.ActiveRetainerId == 0 && !_gameUiManager.IsWindowVisible(WindowName.RetainerList))
                         {
                             shouldHighlight = false;
                         }
@@ -103,8 +125,8 @@ namespace InventoryTools.Logic
             }
         }
 
-        public bool ShouldHighlightDestination => ShouldHighlight && FilterConfiguration.HighlightDestination != null && FilterConfiguration.HighlightDestination.Value || FilterConfiguration.HighlightDestination == null && ConfigurationManager.Config.HighlightDestination;
-        public bool ShouldHighlightDestinationEmpty => ShouldHighlight && FilterConfiguration.HighlightDestinationEmpty != null && FilterConfiguration.HighlightDestinationEmpty.Value || FilterConfiguration.HighlightDestinationEmpty == null && ConfigurationManager.Config.HighlightDestinationEmpty;
+        public bool ShouldHighlightDestination => ShouldHighlight && FilterConfiguration.HighlightDestination != null && FilterConfiguration.HighlightDestination.Value || FilterConfiguration.HighlightDestination == null && _configuration.HighlightDestination;
+        public bool ShouldHighlightDestinationEmpty => ShouldHighlight && FilterConfiguration.HighlightDestinationEmpty != null && FilterConfiguration.HighlightDestinationEmpty.Value || FilterConfiguration.HighlightDestinationEmpty == null && _configuration.HighlightDestinationEmpty;
 
         public Vector4? GetTabHighlight(Dictionary<Vector2, Vector4?> bagHighlights)
         {
@@ -161,7 +183,7 @@ namespace InventoryTools.Logic
         public List<Vector4?> GetSelectIconStringItems(FilterResult? resultOverride = null)
         {
             var itemHighlights = new List<Vector4?>();
-            if (PluginService.CharacterMonitor.ActiveCharacterId == 0)
+            if (_characterMonitor.ActiveCharacterId == 0)
             {
                 return itemHighlights;
             }
@@ -171,7 +193,7 @@ namespace InventoryTools.Logic
                 HashSet<uint> requiredItems;
                 if (FilterConfiguration.FilterType == FilterType.CraftFilter)
                 {
-                    Service.Log.Verbose("Craft filter, getting flattened materials");
+                    _logger.LogTrace("Craft filter, getting flattened materials");
                     requiredItems = FilterConfiguration.CraftList.GetFlattenedMaterials().Select(c => c.Item.RowId).Distinct()
                         .ToHashSet();
                 }
@@ -192,35 +214,35 @@ namespace InventoryTools.Logic
                 var target = Service.Targets.Target;
                     if (target != null)
                     {
-                        Service.Log.Verbose("Target found for SelectIconString");
+                        _logger.LogTrace("Target found for SelectIconString");
 
                         var npcId = target.DataId;
-                        var npc = Service.ExcelCache.ENpcCollection?.Get(npcId);
+                        var npc = _excelCache.ENpcCollection?.Get(npcId);
                         if (npc != null && npc.Base != null)
                         {
-                            Service.Log.Verbose("NPC found for SelectIconString");
+                            _logger.LogTrace("NPC found for SelectIconString");
                             //TODO: Probably need to deal with custom talk and shit
                             for (var index = 0; index < npc.Base.ENpcData.Length; index++)
                             {
                                 var talkItem = npc.Base.ENpcData[index];
-                                var preHandler = Service.ExcelCache.GetPreHandlerSheet().GetRow(talkItem);
+                                var preHandler = _excelCache.GetPreHandlerSheet().GetRow(talkItem);
                                 if (preHandler != null)
                                 {
                                     talkItem = preHandler.Target;
                                 }
-                                var shop = Service.ExcelCache.ShopCollection?.GetShop(talkItem);
+                                var shop = _excelCache.ShopCollection?.GetShop(talkItem);
                                 if (shop != null)
                                 {
-                                    Service.Log.Verbose("Shop found for SelectIconString");
+                                    _logger.LogTrace("Shop found for SelectIconString");
                                     var shouldHighlight = shop.Items.Any(c => requiredItems.Contains(c.Row));
                                     if (shouldHighlight)
                                     {
-                                        Service.Log.Verbose("Found item for shop" + shop.RowId);
-                                        itemHighlights.Add(FilterConfiguration.RetainerListColor ?? ConfigurationManager.Config.RetainerListColor);
+                                        _logger.LogTrace("Found item for shop" + shop.RowId);
+                                        itemHighlights.Add(FilterConfiguration.RetainerListColor ?? _configuration.RetainerListColor);
                                     }
                                     else
                                     {
-                                        Service.Log.Verbose("Did not find item for shop" + shop.RowId);
+                                        _logger.LogTrace("Did not find item for shop" + shop.RowId);
                                         itemHighlights.Add(null);
                                     }
                                 }
@@ -236,7 +258,7 @@ namespace InventoryTools.Logic
         public Dictionary<string, Vector4?> GetArmoireHighlights(FilterResult? resultOverride = null)
         {
             var bagHighlights = new Dictionary<string, Vector4?>();
-            if (PluginService.CharacterMonitor.ActiveCharacterId == 0)
+            if (_characterMonitor.ActiveCharacterId == 0)
             {
                 return bagHighlights;
             }
@@ -251,7 +273,7 @@ namespace InventoryTools.Logic
                 else
                 {
                     var fullInventory =
-                        PluginService.InventoryMonitor.GetSpecificInventory(PluginService.CharacterMonitor
+                        _inventoryMonitor.GetSpecificInventory(_characterMonitor
                             .ActiveCharacterId, InventoryCategory.Armoire);
                     
                     var filteredItems = filterResult.SortedItems.Where(c => c.SourceBag == InventoryType.Armoire);
@@ -294,7 +316,7 @@ namespace InventoryTools.Logic
         public Dictionary<uint, Vector4?> GetArmoireTabHighlights(CabinetCategory? currentCategory, FilterResult? resultOverride = null)
         {
             var bagHighlights = new Dictionary<uint, Vector4?>();
-            if (PluginService.CharacterMonitor.ActiveCharacterId == 0)
+            if (_characterMonitor.ActiveCharacterId == 0)
             {
                 return bagHighlights;
             }
@@ -309,7 +331,7 @@ namespace InventoryTools.Logic
                 else
                 {
                     var filteredItems = filterResult.SortedItems.Where(c => c.SourceBag == InventoryType.Armoire);
-                    var cabinetDictionary = Service.ExcelCache.GetCabinetCategorySheet().Where(c => c.Category.Row != 0).ToDictionary(c => c.Category.Row, c => (uint)c.MenuOrder - 1);
+                    var cabinetDictionary = _excelCache.GetCabinetCategorySheet().Where(c => c.Category.Row != 0).ToDictionary(c => c.Category.Row, c => (uint)c.MenuOrder - 1);
                     foreach (var item in filteredItems)
                     {
                         if(item.SourceBag == InventoryType.Armoire && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting)))
@@ -357,7 +379,7 @@ namespace InventoryTools.Logic
         public Dictionary<Vector2, Vector4?> GetGlamourHighlights(AtkInventoryMiragePrismBox.DresserTab dresserTab, int page, bool displayEquippableOnly,uint classJobSelected, FilterResult? resultOverride = null)
         {
             var bagHighlights = new Dictionary<Vector2, Vector4?>();
-            if (PluginService.CharacterMonitor.ActiveCharacterId == 0)
+            if (_characterMonitor.ActiveCharacterId == 0)
             {
                 return bagHighlights;
             }
@@ -378,7 +400,7 @@ namespace InventoryTools.Logic
                 else
                 {
                     var fullInventory =
-                        PluginService.InventoryMonitor.GetSpecificInventory(PluginService.CharacterMonitor
+                        _inventoryMonitor.GetSpecificInventory(_characterMonitor
                             .ActiveCharacterId, InventoryCategory.GlamourChest);
                     
                     var filteredItems = fullInventory.Where(c =>
@@ -387,13 +409,13 @@ namespace InventoryTools.Logic
                     
                     if (classJobSelected != 0)
                     {
-                        filteredItems = filteredItems.Where(c => Service.ExcelCache.IsItemEquippableBy(c.Item.ClassJobCategory.Row, classJobSelected));
+                        filteredItems = filteredItems.Where(c => _excelCache.IsItemEquippableBy(c.Item.ClassJobCategory.Row, classJobSelected));
                     }
 
-                    if (displayEquippableOnly && PluginService.CharacterMonitor.ActiveCharacter != null)
+                    if (displayEquippableOnly && _characterMonitor.ActiveCharacter != null)
                     {
-                        var race = PluginService.CharacterMonitor.ActiveCharacter.Race;
-                        var gender = PluginService.CharacterMonitor.ActiveCharacter.Gender;
+                        var race = _characterMonitor.ActiveCharacter.Race;
+                        var gender = _characterMonitor.ActiveCharacter.Gender;
                         filteredItems = filteredItems.Where(c => c.Item.CanBeEquippedByRaceGender(race, gender));
                         
                     }
@@ -482,17 +504,17 @@ namespace InventoryTools.Logic
                     
                     //Hack until I work out somewhere else to push this
 
-                    var characterId = PluginService.CharacterMonitor.ActiveCharacterId;
+                    var characterId = _characterMonitor.ActiveCharacterId;
 
                     if (bag == InventoryType.FreeCompanyBag0 || bag == InventoryType.FreeCompanyBag1 ||
                         bag == InventoryType.FreeCompanyBag2 || bag == InventoryType.FreeCompanyBag3 ||
                         bag == InventoryType.FreeCompanyBag4 || bag == InventoryType.FreeCompanyBag5)
                     {
-                        characterId = PluginService.CharacterMonitor.ActiveFreeCompanyId;
+                        characterId = _characterMonitor.ActiveFreeCompanyId;
                     }
                     
                     
-                    foreach (var item in PluginService.InventoryMonitor.GetSpecificInventory(characterId, bag))
+                    foreach (var item in _inventoryMonitor.GetSpecificInventory(characterId, bag))
                     {
                         if (!availableItems.ContainsKey(item.ItemId))
                         {
@@ -682,7 +704,7 @@ namespace InventoryTools.Logic
         private bool MatchesRetainerFilter(FilterConfiguration activeFilter, SortingResult item, bool invertHighlighting = false, bool destinationFilter = false)
         {
             bool matches = (activeFilter.FilterType.HasFlag(FilterType.SearchFilter) || activeFilter.FilterType.HasFlag(FilterType.SortingFilter) || activeFilter.FilterType.HasFlag(FilterType.CraftFilter));
-            if (item.SourceRetainerId != PluginService.CharacterMonitor.ActiveRetainerId)
+            if (item.SourceRetainerId != _characterMonitor.ActiveRetainerId)
             {
                 return false;
             }
@@ -710,7 +732,7 @@ namespace InventoryTools.Logic
         private bool MatchesFreeCompanyFilter(FilterConfiguration activeFilter, SortingResult item, bool invertHighlighting = false, bool destinationFilter = false)
         {
             bool matches = (activeFilter.FilterType.HasFlag(FilterType.SearchFilter) || activeFilter.FilterType.HasFlag(FilterType.SortingFilter) || activeFilter.FilterType.HasFlag(FilterType.CraftFilter));
-            if (item.SourceRetainerId != PluginService.CharacterMonitor.ActiveFreeCompanyId)
+            if (item.SourceRetainerId != _characterMonitor.ActiveFreeCompanyId)
             {
                 return false;
             }
@@ -738,7 +760,7 @@ namespace InventoryTools.Logic
         private bool MatchesHousingFilter(FilterConfiguration activeFilter, SortingResult item, bool invertHighlighting = false, bool destinationFilter = false)
         {
             bool matches = (activeFilter.FilterType.HasFlag(FilterType.SearchFilter) || activeFilter.FilterType.HasFlag(FilterType.SortingFilter) || activeFilter.FilterType.HasFlag(FilterType.CraftFilter));
-            if (item.SourceRetainerId != PluginService.CharacterMonitor.ActiveHouseId)
+            if (item.SourceRetainerId != _characterMonitor.ActiveHouseId)
             {
                 return false;
             }
@@ -767,7 +789,7 @@ namespace InventoryTools.Logic
         {
             bool matches = false;
             if (activeFilter.FilterType == FilterType.SearchFilter &&
-                item.SourceRetainerId == PluginService.CharacterMonitor.ActiveCharacterId)
+                item.SourceRetainerId == _characterMonitor.ActiveCharacterId)
             {
                 matches = true;
             }
@@ -776,7 +798,7 @@ namespace InventoryTools.Logic
                 matches = true;
             }
             
-            if (item.SourceRetainerId == PluginService.CharacterMonitor.ActiveCharacterId && (ActiveRetainerId == null ||
+            if (item.SourceRetainerId == _characterMonitor.ActiveCharacterId && (ActiveRetainerId == null ||
                 ActiveRetainerId != null &&
                 item.DestinationRetainerId ==
                 ActiveRetainerId))

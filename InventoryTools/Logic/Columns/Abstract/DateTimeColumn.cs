@@ -3,45 +3,55 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using CriticalCommonLib.Crafting;
+using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Extensions;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns.Abstract
 {
     public abstract class DateTimeColumn : Column<DateTime?>
     {
-        public override string CsvExport(InventoryItem item)
+        public DateTimeColumn(ILogger logger, ImGuiService imGuiService) : base(logger, imGuiService)
         {
-            return CurrentValue(item)?.ToString(CultureInfo.CurrentCulture) ?? "";
+        }
+        public override string CsvExport(ColumnConfiguration columnConfiguration, InventoryItem item)
+        {
+            return CurrentValue(columnConfiguration, item)?.ToString(CultureInfo.CurrentCulture) ?? "";
         }
 
-        public override string CsvExport(ItemEx item)
+        public override string CsvExport(ColumnConfiguration columnConfiguration, ItemEx item)
         {
-            return CurrentValue(item)?.ToString(CultureInfo.CurrentCulture) ?? "";
+            return CurrentValue(columnConfiguration, item)?.ToString(CultureInfo.CurrentCulture) ?? "";
         }
 
-        public override string CsvExport(SortingResult item)
+        public override string CsvExport(ColumnConfiguration columnConfiguration, SortingResult item)
         {
-            return CurrentValue(item)?.ToString(CultureInfo.CurrentCulture) ?? "";
+            return CurrentValue(columnConfiguration, item)?.ToString(CultureInfo.CurrentCulture) ?? "";
         }
-        public override DateTime? CurrentValue(CraftItem currentValue)
+        public override DateTime? CurrentValue(ColumnConfiguration columnConfiguration, CraftItem currentValue)
         {
-            return CurrentValue(currentValue.Item);
-        }
-        
-        public override DateTime? CurrentValue(InventoryChange currentValue)
-        {
-            return CurrentValue(currentValue.InventoryItem);
+            return CurrentValue(columnConfiguration, currentValue.Item);
         }
         
-        public override IEnumerable<CraftItem> Filter(IEnumerable<CraftItem> items)
+        public override DateTime? CurrentValue(ColumnConfiguration columnConfiguration, InventoryChange currentValue)
+        {
+            return CurrentValue(columnConfiguration, currentValue.InventoryItem);
+        }
+        
+        public override IEnumerable<CraftItem> Filter(ColumnConfiguration columnConfiguration,
+            IEnumerable<CraftItem> items)
         {
             return items;
         }
 
-        public override IEnumerable<CraftItem> Sort(ImGuiSortDirection direction, IEnumerable<CraftItem> items)
+        public override IEnumerable<CraftItem> Sort(ColumnConfiguration columnConfiguration,
+            ImGuiSortDirection direction, IEnumerable<CraftItem> items)
         {
             return items;
         }
@@ -53,32 +63,41 @@ namespace InventoryTools.Logic.Columns.Abstract
                 return "N/A";
             }
         }
-        public override void Draw(FilterConfiguration configuration, InventoryItem item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
+            InventoryItem item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex, configuration);
+            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
         }
-        public override void Draw(FilterConfiguration configuration, SortingResult item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            SortingResult item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex, configuration);
+            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
         }
-        public override void Draw(FilterConfiguration configuration, ItemEx item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            ItemEx item, int rowIndex)
         {
-            DoDraw(CurrentValue((ItemEx)item), rowIndex, configuration);
+            return DoDraw(item, CurrentValue(columnConfiguration, (ItemEx)item), rowIndex, configuration, columnConfiguration);
         }
-        public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            CraftItem item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex, configuration);
+            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
         }
-        public override void Draw(FilterConfiguration configuration, InventoryChange item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            InventoryChange item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex, configuration);
+            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
         }
 
-        public override IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items)
+        public override IEnumerable<ItemEx> Filter(ColumnConfiguration columnConfiguration, IEnumerable<ItemEx> items)
         {
             return FilterText == "" ? items : items.Where(c =>
             {
-                var currentValue = CurrentValue( c);
+                var currentValue = CurrentValue(columnConfiguration, c);
                 if (currentValue == null)
                 {
                     return false;
@@ -87,12 +106,13 @@ namespace InventoryTools.Logic.Columns.Abstract
             });
         }
 
-        public override IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items)
+        public override IEnumerable<InventoryItem> Filter(ColumnConfiguration columnConfiguration,
+            IEnumerable<InventoryItem> items)
         {
             var isChecked = FilterText != "";
             return FilterText == "" ? items : items.Where(c =>
             {
-                var currentValue = CurrentValue(c);
+                var currentValue = CurrentValue(columnConfiguration, c);
                 if (currentValue == null)
                 {
                     return false;
@@ -101,12 +121,13 @@ namespace InventoryTools.Logic.Columns.Abstract
             });
         }
 
-        public override IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items)
+        public override IEnumerable<SortingResult> Filter(ColumnConfiguration columnConfiguration,
+            IEnumerable<SortingResult> items)
         {
             var isChecked = FilterText != "";
             return FilterText == "" ? items : items.Where(c =>
             {
-                var currentValue = CurrentValue(c);
+                var currentValue = CurrentValue(columnConfiguration, c);
                 if (currentValue == null)
                 {
                     return false;
@@ -115,12 +136,13 @@ namespace InventoryTools.Logic.Columns.Abstract
             });
         }
         
-        public override IEnumerable<InventoryChange> Filter(IEnumerable<InventoryChange> items)
+        public override IEnumerable<InventoryChange> Filter(ColumnConfiguration columnConfiguration,
+            IEnumerable<InventoryChange> items)
         {
             var isChecked = FilterText != "";
             return FilterText == "" ? items : items.Where(c =>
             {
-                var currentValue = CurrentValue(c);
+                var currentValue = CurrentValue(columnConfiguration, c);
                 if (currentValue == null)
                 {
                     return false;
@@ -129,28 +151,32 @@ namespace InventoryTools.Logic.Columns.Abstract
             });
         }
 
-        public override IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
+        public override IEnumerable<InventoryItem> Sort(ColumnConfiguration columnConfiguration,
+            ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(CurrentValue) : items.OrderByDescending(CurrentValue);
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(item => CurrentValue(columnConfiguration, item)) : items.OrderByDescending(item => CurrentValue(columnConfiguration, item));
         }
 
-        public override IEnumerable<ItemEx> Sort(ImGuiSortDirection direction, IEnumerable<ItemEx> items)
+        public override IEnumerable<ItemEx> Sort(ColumnConfiguration columnConfiguration, ImGuiSortDirection direction,
+            IEnumerable<ItemEx> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(CurrentValue) : items.OrderByDescending(CurrentValue);
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(item => CurrentValue(columnConfiguration, item)) : items.OrderByDescending(item => CurrentValue(columnConfiguration, item));
         }
 
-        public override IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items)
+        public override IEnumerable<SortingResult> Sort(ColumnConfiguration columnConfiguration,
+            ImGuiSortDirection direction, IEnumerable<SortingResult> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(CurrentValue) : items.OrderByDescending(CurrentValue);
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(item => CurrentValue(columnConfiguration, item)) : items.OrderByDescending(item => CurrentValue(columnConfiguration, item));
         }
         
-        public override IEnumerable<InventoryChange> Sort(ImGuiSortDirection direction, IEnumerable<InventoryChange> items)
+        public override IEnumerable<InventoryChange> Sort(ColumnConfiguration columnConfiguration,
+            ImGuiSortDirection direction, IEnumerable<InventoryChange> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(CurrentValue) : items.OrderByDescending(CurrentValue);
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(currentValue => CurrentValue(columnConfiguration, currentValue)) : items.OrderByDescending(currentValue => CurrentValue(columnConfiguration, currentValue));
         }
 
-        public override IColumnEvent? DoDraw(DateTime? currentValue, int rowIndex,
-            FilterConfiguration filterConfiguration)
+        public override List<MessageBase>? DoDraw(IItem item, DateTime? currentValue, int rowIndex,
+            FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
             ImGui.TableNextColumn();
             if (currentValue != null)
@@ -171,9 +197,10 @@ namespace InventoryTools.Logic.Columns.Abstract
             return null;
         }
 
-        public override void Setup(int columnIndex)
+        public override void Setup(FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration,
+            int columnIndex)
         {
-            ImGui.TableSetupColumn(RenderName ?? Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
+            ImGui.TableSetupColumn(columnConfiguration.Name ?? (RenderName ?? Name) ?? Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
         }
     }
 }

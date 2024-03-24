@@ -4,17 +4,22 @@ using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Filters.Abstract;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters;
 
 public class CraftIngredientPreferenceFilter : SortedListFilter<(IngredientPreferenceType, uint?), (IngredientPreferenceType, uint?)>
 {
+    private readonly ExcelCache _excelCache;
+
     public override Dictionary<(IngredientPreferenceType, uint?), (string, string?)> CurrentValue(FilterConfiguration configuration)
     {
         (string, string?) GetIngredientPreferenceDetails((IngredientPreferenceType, uint?) c)
@@ -22,7 +27,7 @@ public class CraftIngredientPreferenceFilter : SortedListFilter<(IngredientPrefe
             var itemName = "";
             if (c.Item2 != null)
             {
-                var itemEx = Service.ExcelCache.GetItemExSheet().GetRow((uint)c.Item2);
+                var itemEx = _excelCache.GetItemExSheet().GetRow((uint)c.Item2);
                 if (itemEx != null)
                 {
                     itemName = " (" + itemEx.NameString + ")";
@@ -120,7 +125,7 @@ public class CraftIngredientPreferenceFilter : SortedListFilter<(IngredientPrefe
         ImGui.Separator();
         DrawTable(configuration);
         ImGui.SameLine();
-        UiHelpers.HelpMarker(HelpText);
+        ImGuiService.HelpMarker(HelpText);
         
         var currentAddColumn = "";
         ImGui.SetNextItemWidth(LabelSize);
@@ -189,8 +194,8 @@ public class CraftIngredientPreferenceFilter : SortedListFilter<(IngredientPrefe
             }
             if (_searchItems == null)
             {
-                _searchItems = Service.ExcelCache.ItemNamesById.Where(c => c.Value.ToParseable().PassesFilter(SearchString.ToParseable())).Take(100)
-                    .Select(c => Service.ExcelCache.GetItemExSheet().GetRow(c.Key)!).ToList();
+                _searchItems = _excelCache.ItemNamesById.Where(c => c.Value.ToParseable().PassesFilter(SearchString.ToParseable())).Take(100)
+                    .Select(c => _excelCache.GetItemExSheet().GetRow(c.Key)!).ToList();
             }
 
             return _searchItems;
@@ -205,5 +210,10 @@ public class CraftIngredientPreferenceFilter : SortedListFilter<(IngredientPrefe
             _searchString = value;
             _searchItems = null;
         }
+    }
+
+    public CraftIngredientPreferenceFilter(ILogger<CraftIngredientPreferenceFilter> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
+    {
+        _excelCache = excelCache;
     }
 }

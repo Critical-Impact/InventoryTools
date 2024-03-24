@@ -1,13 +1,38 @@
+using System.Collections.Generic;
 using System.Linq;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 using InventoryTools.Logic;
+using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 
-namespace InventoryTools.Sections
+namespace InventoryTools.Ui.Pages
 {
-    public class FilterPage : IConfigPage
+    public class FilterPage : Page
     {
-        public string Name
+        private readonly IFilterService _filterService;
+        private readonly IChatUtilities _chatUtilities;
+
+        public FilterPage(ILogger<FilterPage> logger, ImGuiService imGuiService, IFilterService filterService, IChatUtilities chatUtilities) : base(logger, imGuiService)
+        {
+            _filterService = filterService;
+            _chatUtilities = chatUtilities;
+        }
+        public override void Initialize()
+        {
+            
+        }
+
+        public void Initialize(FilterConfiguration filterConfiguration)
+        {
+            FilterConfiguration = filterConfiguration;
+            Initialize();
+        }
+
+        public override string Name
         {
             get
             {
@@ -17,12 +42,7 @@ namespace InventoryTools.Sections
         public FilterConfiguration FilterConfiguration;
         private bool _isSeparator = false;
 
-        public FilterPage(FilterConfiguration filterConfiguration)
-        {
-            FilterConfiguration = filterConfiguration;
-        }
-
-        public void Draw()
+        public override List<MessageBase>? Draw()
         {
             var filterConfiguration = FilterConfiguration;
             var filterName = filterConfiguration.Name;
@@ -43,7 +63,7 @@ namespace InventoryTools.Sections
                 {
                     var base64 = filterConfiguration.ExportBase64();
                     ImGui.SetClipboardText(base64);
-                    PluginService.ChatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
+                    _chatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
                 }
 
                 var filterType = filterConfiguration.FormattedFilterType;
@@ -67,7 +87,7 @@ namespace InventoryTools.Sections
 
             if (ImGui.BeginTabBar("###FilterConfigTabs", ImGuiTabBarFlags.FittingPolicyScroll))
             {
-                foreach (var group in PluginService.PluginLogic.GroupedFilters)
+                foreach (var group in _filterService.GroupedFilters)
                 {
                     var hasValuesSet = false;
                     foreach (var filter in group.Value)
@@ -140,9 +160,11 @@ namespace InventoryTools.Sections
 
                 ImGui.EndTabBar();
             }
+
+            return null;
         }
 
-        public bool IsMenuItem => _isSeparator;
-        public bool DrawBorder => true;
+        public override bool IsMenuItem => _isSeparator;
+        public override bool DrawBorder => true;
     }
 }

@@ -20,7 +20,7 @@ namespace InventoryToolsTesting
             {
                 PanicOnSheetChecksumMismatch = false
             } );
-            Service.ExcelCache = new ExcelCache(lumina);
+            _excelCache = new ExcelCache(lumina);
         }
 
         [Test]

@@ -1,20 +1,41 @@
+using System.Collections.Generic;
 using System.Numerics;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 using InventoryTools.Logic;
+using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 
-namespace InventoryTools.Sections
+namespace InventoryTools.Ui.Pages
 {
-    public class ImportExportPage : IConfigPage
+    public class ImportExportPage : Page
     {
+        private readonly IListService _listService;
+        private readonly IChatUtilities _chatUtilities;
+        private readonly PluginLogic _pluginLogic;
+
+        public ImportExportPage(ILogger<ImportExportPage> logger, ImGuiService imGuiService, IListService listService, IChatUtilities chatUtilities, PluginLogic pluginLogic) : base(logger, imGuiService)
+        {
+            _listService = listService;
+            _chatUtilities = chatUtilities;
+            _pluginLogic = pluginLogic;
+        }
         private bool _isSeparator = false;
-        public string Name { get; } =  "Import/Export";
-        public void Draw()
+        public override void Initialize()
+        {
+            
+        }
+
+        public override string Name { get; } =  "Import/Export";
+        public override List<MessageBase>? Draw()
         {
             ImGui.PushID("ImportSection");
             if (ImGui.CollapsingHeader("Export", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
             {
-                var filterConfigurations = PluginService.FilterService.FiltersList;
+                var filterConfigurations = _listService.Lists;
                 ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(5, 5) * ImGui.GetIO().FontGlobalScale);
                 if (ImGui.BeginTable("FilterConfigTable", 3, ImGuiTableFlags.BordersV |
                                                              ImGuiTableFlags.BordersOuterV |
@@ -31,7 +52,7 @@ namespace InventoryTools.Sections
                     {
                         ImGui.TableNextRow();
                         ImGui.TableNextColumn();
-                        ImGui.TextUnformatted("No filters available.");
+                        ImGui.TextUnformatted("No lists created yet!");
                         ImGui.TableNextColumn();
                         ImGui.TableNextColumn();
                     }
@@ -61,7 +82,7 @@ namespace InventoryTools.Sections
                         {
                             var base64 = filterConfiguration.ExportBase64();
                             ImGui.SetClipboardText(base64);
-                            PluginService.ChatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
+                            _chatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
                         }
                     }
 
@@ -92,7 +113,7 @@ namespace InventoryTools.Sections
                     {
                         if (FilterConfiguration.FromBase64(ImportData, out FilterConfiguration newFilter))
                         {
-                            PluginService.PluginLogic.AddFilter(newFilter);
+                            _pluginLogic.AddFilter(newFilter);
                         }
                         else
                         {
@@ -108,11 +129,12 @@ namespace InventoryTools.Sections
                     ImGui.TextColored(ImGuiColors.DalamudRed, FailedReason);
                 }
             }
-            ImGui.PopID();                
+            ImGui.PopID();       
+            return null;
         }
 
-        public bool IsMenuItem => _isSeparator;
-        public bool DrawBorder => true;
+        public override bool IsMenuItem => _isSeparator;
+        public override bool DrawBorder => true;
 
         public string FailedReason { get; set; } = "";
 

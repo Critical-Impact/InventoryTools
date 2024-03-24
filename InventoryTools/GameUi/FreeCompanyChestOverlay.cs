@@ -2,47 +2,58 @@ using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib.Addons;
 using CriticalCommonLib.Enums;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
 using InventoryTools.Logic;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.GameUi
 {
-    public class FreeCompanyChestOverlay : AtkFreeCompanyChest, IAtkOverlayState
+    public class FreeCompanyChestOverlay: GameOverlay<AtkFreeCompanyChest>, IAtkOverlayState
     {
+        private readonly ICharacterMonitor _characterMonitor;
+
+        public FreeCompanyChestOverlay(ILogger<FreeCompanyChestOverlay> logger, AtkFreeCompanyChest overlay, ICharacterMonitor characterMonitor) : base(logger,overlay)
+        {
+            _characterMonitor = characterMonitor;
+        }
+        
+        public override bool ShouldDraw { get; set; }
+
         public override bool Draw()
         {
-            if (!HasState || !HasAddon)
+            if (!HasState || !AtkOverlay.HasAddon)
             {
                 return false;
             }
-            var atkUnitBase = AtkUnitBase;
+            var atkUnitBase = AtkOverlay.AtkUnitBase;
             if (atkUnitBase != null)
             {
-                if (CurrentTab == FreeCompanyTab.One)
+                if (AtkOverlay.CurrentTab == FreeCompanyTab.One)
                 {
-                    this.SetColors(Bag1InventoryColours);
+                    AtkOverlay.SetColors(Bag1InventoryColours);
                 }
-                else if (CurrentTab == FreeCompanyTab.Two)
+                else if (AtkOverlay.CurrentTab == FreeCompanyTab.Two)
                 {
-                    this.SetColors(Bag2InventoryColours);
+                    AtkOverlay.SetColors(Bag2InventoryColours);
                 }
-                else if (CurrentTab == FreeCompanyTab.Three)
+                else if (AtkOverlay.CurrentTab == FreeCompanyTab.Three)
                 {
-                    this.SetColors( Bag3InventoryColours);
+                    AtkOverlay.SetColors( Bag3InventoryColours);
                 }
-                else if (CurrentTab == FreeCompanyTab.Four)
+                else if (AtkOverlay.CurrentTab == FreeCompanyTab.Four)
                 {
-                    this.SetColors(Bag4InventoryColours);
+                    AtkOverlay.SetColors(Bag4InventoryColours);
                 }
-                else if (CurrentTab == FreeCompanyTab.Five)
+                else if (AtkOverlay.CurrentTab == FreeCompanyTab.Five)
                 {
-                    this.SetColors(Bag5InventoryColours);
+                    AtkOverlay.SetColors(Bag5InventoryColours);
                 }
                 else
                 {
-                    this.Clear();
+                    Clear();
                 }
-                this.SetTabColors(TabColours);
+                AtkOverlay.SetTabColors(TabColours);
 
                 return true;
             }
@@ -71,16 +82,16 @@ namespace InventoryTools.GameUi
 
         }
 
-        public bool HasState { get; set; }
-        public bool NeedsStateRefresh { get; set; }
+        public override bool HasState { get; set; }
+        public override bool NeedsStateRefresh { get; set; }
 
-        public void UpdateState(FilterState? newState)
+        public override void UpdateState(FilterState? newState)
         {
-            if (PluginService.CharacterMonitor.ActiveCharacterId == 0)
+            if (_characterMonitor.ActiveCharacterId == 0)
             {
                 return;
             }
-            if (newState != null && HasAddon && newState.ShouldHighlight && newState.HasFilterResult)
+            if (newState != null && AtkOverlay.HasAddon && newState.ShouldHighlight && newState.HasFilterResult)
             {
                 HasState = true;
                 var filterResult = newState.FilterResult;
@@ -119,13 +130,13 @@ namespace InventoryTools.GameUi
             HasState = false;
         }
 
-        public void Clear()
+        public override void Clear()
         {
-            var atkUnitBase = AtkUnitBase;
+            var atkUnitBase = AtkOverlay.AtkUnitBase;
             if (atkUnitBase != null)
             {
-                this.SetColors(EmptyDictionary);
-                this.SetTabColors(EmptyTabs);
+                this.AtkOverlay.SetColors(EmptyDictionary);
+                this.AtkOverlay.SetTabColors(EmptyTabs);
             }
         }
     }

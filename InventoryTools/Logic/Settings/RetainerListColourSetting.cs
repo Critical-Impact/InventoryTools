@@ -1,6 +1,8 @@
 using System.Numerics;
 using Dalamud.Interface.Colors;
 using InventoryTools.Logic.Settings.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Settings
 {
@@ -25,6 +27,10 @@ namespace InventoryTools.Logic.Settings
 
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.Visuals;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Highlighting;
+        public override string Version => "1.6.2.5";
 
+        public RetainerListColourSetting(ILogger<RetainerListColourSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
     }
 }

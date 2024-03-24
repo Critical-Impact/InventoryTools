@@ -4,58 +4,141 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Addons;
+using CriticalCommonLib.MarketBoard;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
+using CriticalCommonLib.Services.Ui;
 using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
+using Dalamud.Interface.ImGuiFileDialog;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Ui.Widgets;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin.Services;
+using InventoryTools.Mediator;
+using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 using PopupMenu = InventoryTools.Ui.Widgets.PopupMenu;
 
 namespace InventoryTools.Ui
 {
-    public class CraftsWindow : Window
+    public class CraftsWindow : GenericWindow
     {
+        private readonly IIconService _iconService;
+        private readonly TableService _tableService;
+        private readonly InventoryToolsConfiguration _configuration;
+        private readonly ConfigurationManager _configurationManager;
+        private readonly IListService _listService;
+        private readonly IFilterService _filterService;
+        private readonly PluginLogic _pluginLogic;
+        private readonly IUniversalis _universalis;
+        private readonly ICharacterMonitor _characterMonitor;
+        private readonly FileDialogManager _fileDialogManager;
+        private readonly IGameUiManager _gameUiManager;
+        private readonly IChatUtilities _chatUtilities;
+        private readonly ExcelCache _excelCache;
+
+        public CraftsWindow(ILogger<CraftsWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration,IIconService iconService, TableService tableService, ConfigurationManager configurationManager, IListService listService, IFilterService filterService, PluginLogic pluginLogic, IUniversalis universalis, ICharacterMonitor characterMonitor, FileDialogManager fileDialogManager, IGameUiManager gameUiManager, IChatUtilities chatUtilities, ExcelCache excelCache, string name = "Crafts Window") : base(logger, mediator, imGuiService, configuration, name)
+        {
+            _iconService = iconService;
+            _tableService = tableService;
+            _configuration = configuration;
+            _configurationManager = configurationManager;
+            _listService = listService;
+            _filterService = filterService;
+            _pluginLogic = pluginLogic;
+            _universalis = universalis;
+            _characterMonitor = characterMonitor;
+            _fileDialogManager = fileDialogManager;
+            _gameUiManager = gameUiManager;
+            _chatUtilities = chatUtilities;
+            _excelCache = excelCache;
+        }
+        public override void Initialize()
+        {
+            WindowName = "Crafts";
+            Key = "crafts";
+            _splitter = new(_configuration.CraftWindowSplitterPosition, new(100, 100), true);
+            _settingsMenu = new PopupMenu("configMenu", PopupMenu.PopupMenuButtons.All,
+                new List<PopupMenu.IPopupMenuItem>()
+                {
+                    new PopupMenu.PopupMenuItemSelectable("Mob Window", "mobs", OpenMobsWindow,
+                        "Open the mobs window."),
+                    new PopupMenu.PopupMenuItemSelectable("Npcs Window", "npcs", OpenNpcsWindow,
+                        "Open the npcs window."),
+                    new PopupMenu.PopupMenuItemSelectable("Duties Window", "duties", OpenDutiesWindow,
+                        "Open the duties window."),
+                    new PopupMenu.PopupMenuItemSelectable("Airships Window", "airships", OpenAirshipsWindow,
+                        "Open the airships window."),
+                    new PopupMenu.PopupMenuItemSelectable("Submarines Window", "submarines", OpenSubmarinesWindow,
+                        "Open the submarines window."),
+                    new PopupMenu.PopupMenuItemSelectable("Retainer Ventures Window", "ventures",
+                        OpenRetainerVenturesWindow, "Open the retainer ventures window."),
+                    new PopupMenu.PopupMenuItemSelectable("Tetris", "tetris", OpenTetrisWindow,
+                        "Open the tetris window.", () => _configuration.TetrisEnabled),
+                    new PopupMenu.PopupMenuItemSeparator(),
+                    new PopupMenu.PopupMenuItemSelectable("Help", "help", OpenHelpWindow, "Open the help window."),
+                });
+            _editIcon = new(_iconService.LoadImage("edit"),  new Vector2(22, 22));
+            _toggleIcon = new(_iconService.LoadImage("toggle"),  new Vector2(22, 22));
+            _settingsIcon = new(_iconService.LoadIcon(66319),  new Vector2(22, 22));
+
+            _addIcon = new(_iconService.LoadIcon(66315),  new Vector2(22, 22));
+
+            _searchIcon = new(_iconService.LoadIcon(66320),  new Vector2(22, 22));
+
+            _closeSettingsIcon = new(_iconService.LoadIcon(66311),  new Vector2(22, 22));
+            _resetButton = new(_iconService.LoadImage("nuke"),  new Vector2(22, 22));
+
+            _marketIcon = new(_iconService.LoadImage("refresh-web"),  new Vector2(22, 22));
+
+            _clearIcon = new(_iconService.LoadIcon(66308),  new Vector2(22, 22));
+
+            _export2Icon = new(_iconService.LoadImage("export2"),  new Vector2(22,22));
+            _clipboardIcon = new(_iconService.LoadImage("clipboard"),  new Vector2(22,22));
+            _importTcIcon = new(_iconService.LoadImage("import_tc"),  new Vector2(22,22));
+            _filtersIcon = new(_iconService.LoadImage("filters"),  new Vector2(22,22));
+            
+            _menuIcon = new(_iconService.LoadImage("menu"),  new Vector2(22, 22));
+            MediatorService.Subscribe<ListInvalidatedMessage>(this, _ => Invalidate());
+            MediatorService.Subscribe<ListRepositionedMessage>(this, _ => Invalidate());
+            MediatorService.Subscribe<ListAddedMessage>(this, _ => Invalidate());
+            MediatorService.Subscribe<ListRemovedMessage>(this, _ => Invalidate());
+        }
+
         public override bool SaveState => true;
 
-        public static string AsKey => "crafts";
-        public override string Key => AsKey;
         
         public override Vector2? DefaultSize { get; } = new(600, 600);
         public override Vector2? MaxSize => new Vector2(5000, 5000);
         public override Vector2? MinSize => new Vector2(300, 300);
+        public override string GenericKey => "crafts";
+        public override string GenericName => "Crafts";
         public override bool DestroyOnClose => false;
-        private int _selectedFilterTab = 0;
-        private bool _settingsActive = false;
-        private bool _addItemBarOpen = false;
-        private bool _craftsExpanded = true;
-        private bool _itemsExpanded = true;
+        private int _selectedFilterTab;
+        private bool _settingsActive;
+        private bool _addItemBarOpen;
 
-        private HoverButton _editIcon { get; } = new(PluginService.IconStorage.LoadImage("edit"),  new Vector2(22, 22));
-        private HoverButton _toggleIcon { get; } = new(PluginService.IconStorage.LoadImage("toggle"),  new Vector2(22, 22));
-        private HoverButton _settingsIcon { get; } = new(PluginService.IconStorage.LoadIcon(66319),  new Vector2(22, 22));
-
-        private HoverButton _addIcon { get; } = new(PluginService.IconStorage.LoadIcon(66315),  new Vector2(22, 22));
-
-        private HoverButton _searchIcon { get; } = new(PluginService.IconStorage.LoadIcon(66320),  new Vector2(22, 22));
-
-        private HoverButton _closeSettingsIcon { get; } = new(PluginService.IconStorage.LoadIcon(66311),  new Vector2(22, 22));
-        private HoverButton _resetButton { get; } = new(PluginService.IconStorage.LoadImage("nuke"),  new Vector2(22, 22));
-
-        private static HoverButton _marketIcon { get; } = new(PluginService.IconStorage.LoadImage("refresh-web"),  new Vector2(22, 22));
-
-        private HoverButton _clearIcon { get; } = new(PluginService.IconStorage.LoadIcon(66308),  new Vector2(22, 22));
-
-        private static HoverButton _export2Icon { get; } = new(PluginService.IconStorage.LoadImage("export2"),  new Vector2(22,22));
-        private static HoverButton _clipboardIcon { get; } = new(PluginService.IconStorage.LoadImage("clipboard"),  new Vector2(22,22));
-        private static HoverButton _importTcIcon { get; } = new(PluginService.IconStorage.LoadImage("import_tc"),  new Vector2(22,22));
-        private static HoverButton _filtersIcon { get; } = new(PluginService.IconStorage.LoadImage("filters"),  new Vector2(22,22));
-        
-        private static HoverButton _menuIcon { get; } = new(PluginService.IconStorage.LoadImage("menu"),  new Vector2(22, 22));
+        private HoverButton _editIcon;
+        private HoverButton _toggleIcon;
+        private HoverButton _settingsIcon;
+        private HoverButton _addIcon;
+        private HoverButton _searchIcon;
+        private HoverButton _closeSettingsIcon;
+        private HoverButton _resetButton;
+        private HoverButton _marketIcon;
+        private HoverButton _clearIcon;
+        private HoverButton _export2Icon;
+        private HoverButton _clipboardIcon;
+        private HoverButton _importTcIcon;
+        private HoverButton _filtersIcon;
+        private HoverButton _menuIcon;
 
 
         private TeamCraftImportWindow? _teamCraftImportWindow;
@@ -63,75 +146,46 @@ namespace InventoryTools.Ui
         private FilterConfiguration? _defaultFilter;
         private Dictionary<FilterConfiguration, Widgets.PopupMenu> _popupMenus = new();
         
-        private PopupMenu _settingsMenu = new PopupMenu("configMenu", PopupMenu.PopupMenuButtons.All,
-            new List<PopupMenu.IPopupMenuItem>()
-            {
-                new PopupMenu.PopupMenuItemSelectable("Mob Window", "mobs", OpenMobsWindow,"Open the mobs window."),
-                new PopupMenu.PopupMenuItemSelectable("Npcs Window", "npcs", OpenNpcsWindow,"Open the npcs window."),
-                new PopupMenu.PopupMenuItemSelectable("Duties Window", "duties", OpenDutiesWindow,"Open the duties window."),
-                new PopupMenu.PopupMenuItemSelectable("Airships Window", "airships", OpenAirshipsWindow,"Open the airships window."),
-                new PopupMenu.PopupMenuItemSelectable("Submarines Window", "submarines", OpenSubmarinesWindow,"Open the submarines window."),
-                new PopupMenu.PopupMenuItemSelectable("Retainer Ventures Window", "ventures", OpenRetainerVenturesWindow,"Open the retainer ventures window."),
-                new PopupMenu.PopupMenuItemSelectable("Tetris", "tetris", OpenTetrisWindow,"Open the tetris window.", () => ConfigurationManager.Config.TetrisEnabled),
-                new PopupMenu.PopupMenuItemSeparator(),
-                new PopupMenu.PopupMenuItemSelectable("Help", "help", OpenHelpWindow,"Open the help window."),
-            });
+        private PopupMenu _settingsMenu = null!;
         
-        private static void OpenHelpWindow(string obj)
+        private void OpenHelpWindow(string obj)
         {
-            PluginService.WindowService.OpenWindow<HelpWindow>(HelpWindow.AsKey);
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(HelpWindow)));
         }
 
-        private static void OpenDutiesWindow(string obj)
+        private void OpenDutiesWindow(string obj)
         {
-            PluginService.WindowService.OpenWindow<DutiesWindow>(DutiesWindow.AsKey);
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(DutiesWindow)));
         }
 
-        private static void OpenAirshipsWindow(string obj)
+        private void OpenAirshipsWindow(string obj)
         {
-            PluginService.WindowService.OpenWindow<AirshipsWindow>(AirshipsWindow.AsKey);
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(AirshipsWindow)));
         }
 
-        private static void OpenSubmarinesWindow(string obj)
+        private void OpenSubmarinesWindow(string obj)
         {
-            PluginService.WindowService.OpenWindow<SubmarinesWindow>(SubmarinesWindow.AsKey);
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(SubmarinesWindow)));
         }
         
-        private static void OpenRetainerVenturesWindow(string obj)
+        private void OpenRetainerVenturesWindow(string obj)
         {
-            PluginService.WindowService.OpenWindow<RetainerTasksWindow>(RetainerTasksWindow.AsKey);
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(RetainerTasksWindow)));
         }
 
-        private static void OpenMobsWindow(string obj)
+        private void OpenMobsWindow(string obj)
         {
-            PluginService.WindowService.OpenWindow<BNpcWindow>(BNpcWindow.AsKey);
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(BNpcsWindow)));
         }
         
-        private static void OpenNpcsWindow(string obj)
+        private void OpenNpcsWindow(string obj)
         {
-            PluginService.WindowService.OpenWindow<ENpcsWindow>(ENpcsWindow.AsKey);
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(ENpcsWindow)));
         }
         
-        private static void OpenTetrisWindow(string obj)
+        private void OpenTetrisWindow(string obj)
         {
-            PluginService.WindowService.OpenWindow<TetrisWindow>(TetrisWindow.AsKey);
-        }
-
-        public CraftsWindow(string name = "Crafts") : base(name)
-        {
-            SetupWindow();
-            _splitter = new(ConfigurationManager.Config.CraftWindowSplitterPosition, new(100, 100), true);
-        }
-        
-        public CraftsWindow() : base("Crafts")
-        {
-            SetupWindow();
-            _splitter = new(ConfigurationManager.Config.CraftWindowSplitterPosition, new(100, 100), true);
-        }
-
-        public void SetupWindow()
-        {
-
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(TetrisWindow)));
         }
         
         public Widgets.PopupMenu GetFilterMenu(FilterConfiguration configuration, WindowLayout layout)
@@ -156,7 +210,7 @@ namespace InventoryTools.Ui
         private void EditFilter(string id)
         {
             id = id.Replace("ef_", "");
-            var existingFilter = PluginService.FilterService.GetFilterByKey(id);
+            var existingFilter = _listService.GetListByKey(id);
             if (existingFilter != null)
             {
                 SetActiveFilter(existingFilter);
@@ -170,10 +224,10 @@ namespace InventoryTools.Ui
             if (confirmed)
             {
                 id = id.Replace("rf_", "");
-                var existingFilter = PluginService.FilterService.GetFilterByKey(id);
+                var existingFilter = _listService.GetListByKey(id);
                 if (existingFilter != null)
                 {
-                    PluginService.FilterService.RemoveFilter(existingFilter);
+                    _listService.RemoveList(existingFilter);
                 }
             }
         }
@@ -181,11 +235,11 @@ namespace InventoryTools.Ui
         private void MoveFilterDown(string id)
         {
             id = id.Replace("md_", "");
-            var existingFilter = PluginService.FilterService.GetFilterByKey(id);
+            var existingFilter = _listService.GetListByKey(id);
             if (existingFilter != null)
             {
                 var currentFilter = this.SelectedConfiguration;
-                PluginService.FilterService.MoveFilterDown(existingFilter);
+                _listService.MoveListDown(existingFilter);
                 if (currentFilter != null)
                 {
                     SetActiveFilter(currentFilter);
@@ -197,11 +251,11 @@ namespace InventoryTools.Ui
         private void MoveFilterUp(string id)
         {
             id = id.Replace("mu_", "");
-            var existingFilter = PluginService.FilterService.GetFilterByKey(id);
+            var existingFilter = _listService.GetListByKey(id);
             if (existingFilter != null)
             {
                 var currentFilter = this.SelectedConfiguration;
-                PluginService.FilterService.MoveFilterUp(existingFilter);
+                _listService.MoveListUp(existingFilter);
                 if (currentFilter != null)
                 {
                     SetActiveFilter(currentFilter);
@@ -213,10 +267,10 @@ namespace InventoryTools.Ui
         private void DuplicateFilter(string filterName, string id)
         {
             id = id.Replace("df_", "");
-            var existingFilter = PluginService.FilterService.GetFilterByKey(id);
+            var existingFilter = _listService.GetListByKey(id);
             if (existingFilter != null)
             {
-                var newFilter = PluginService.FilterService.DuplicateFilter(existingFilter, filterName);
+                var newFilter = _listService.DuplicateList(existingFilter, filterName);
                 SetActiveFilter(newFilter);
             }
         }
@@ -228,7 +282,7 @@ namespace InventoryTools.Ui
             {
                 if (_filters == null)
                 {
-                    _filters = PluginService.FilterService.FiltersList.Where(c => c.FilterType == FilterType.CraftFilter && c.CraftListDefault == false).ToList();
+                    _filters = _listService.Lists.Where(c => c.FilterType == FilterType.CraftFilter && c.CraftListDefault == false).ToList();
                 }
 
                 return _filters;
@@ -241,7 +295,7 @@ namespace InventoryTools.Ui
             {
                 if (_defaultFilter == null)
                 {
-                    _defaultFilter = PluginService.FilterService.GetDefaultCraftList();
+                    _defaultFilter = _listService.GetDefaultCraftList();
                 }
 
                 return _defaultFilter;
@@ -269,10 +323,10 @@ namespace InventoryTools.Ui
         }
         public override unsafe void Draw()
         {
-            if (!ConfigurationManager.Config.HasSeenNotification(NotificationPopup.CraftNotice) && ImGui.IsWindowFocused())
+            if (!_configuration.HasSeenNotification(NotificationPopup.CraftNotice) && ImGui.IsWindowFocused())
             {
                 ImGui.OpenPopup("notification");
-                ConfigurationManager.Config.MarkNotificationSeen(NotificationPopup.CraftNotice);
+                _configuration.MarkNotificationSeen(NotificationPopup.CraftNotice);
             }
 
             ImGuiUtil.HelpPopup("notification", new Vector2(750,340) * ImGui.GetIO().FontGlobalScale, () =>
@@ -316,11 +370,10 @@ namespace InventoryTools.Ui
                 {
                     SelectedConfiguration.CraftList.AddCraftItem(item.Item1, item.Item2);
                     SelectedConfiguration.NeedsRefresh = true;
-                    SelectedConfiguration.StartRefresh();
                     _teamCraftImportWindow = null;
                 }
             }
-            if (ConfigurationManager.Config.CraftWindowLayout == WindowLayout.Sidebar)
+            if (_configuration.CraftWindowLayout == WindowLayout.Sidebar)
             {
                 DrawSidebar();
                 DrawMainWindow();
@@ -332,9 +385,9 @@ namespace InventoryTools.Ui
         }
 
         private string _newCraftName = "";
-        private bool openNewFilterNamePopup = false;
-        private bool openNewTypePopup = false;
-        private bool _ephemeralList = false;
+        private bool openNewFilterNamePopup;
+        private bool openNewTypePopup;
+        private bool _ephemeralList;
         private unsafe void DrawTabBar()
         {
             if (openNewFilterNamePopup)
@@ -424,7 +477,7 @@ namespace InventoryTools.Ui
 
         private void AddCraftFilter(string newName, bool ephemeralList = false)
         {
-            var filterConfiguration = PluginService.FilterService.AddNewCraftFilter(newName, ephemeralList);
+            var filterConfiguration = _listService.AddNewCraftList(newName, ephemeralList);
             Invalidate();
             this.SetActiveFilter(filterConfiguration);
         }
@@ -474,22 +527,22 @@ namespace InventoryTools.Ui
                             var filterConfiguration = filterConfigurations[index];
                             if (isWindowFocused)
                             {
-                                if (ConfigurationManager.Config.SwitchFiltersAutomatically &&
-                                    ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
-                                    ConfigurationManager.Config.ActiveUiFilter != null)
+                                if (_configuration.SwitchFiltersAutomatically &&
+                                    _configuration.ActiveUiFilter != filterConfiguration.Key &&
+                                    _configuration.ActiveUiFilter != null)
                                 {
                                     Service.Framework.RunOnFrameworkThread(() =>
                                     {
-                                        PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
+                                        _listService.ToggleActiveUiList(filterConfiguration);
                                     });
                                 }
-                                if (ConfigurationManager.Config.SwitchCraftListsAutomatically &&
-                                    ConfigurationManager.Config.ActiveCraftList != filterConfiguration.Key &&
-                                    ConfigurationManager.Config.ActiveCraftList != null && filterConfiguration.FilterType == FilterType.CraftFilter)
+                                if (_configuration.SwitchCraftListsAutomatically &&
+                                    _configuration.ActiveCraftList != filterConfiguration.Key &&
+                                    _configuration.ActiveCraftList != null && filterConfiguration.FilterType == FilterType.CraftFilter)
                                 {
                                     Service.Framework.RunOnFrameworkThread(() =>
                                     {
-                                        PluginService.FilterService.ToggleActiveCraftList(filterConfiguration);
+                                        _listService.ToggleActiveCraftList(filterConfiguration);
                                     });
                                 }
                             }
@@ -583,22 +636,22 @@ namespace InventoryTools.Ui
                                         index == _selectedFilterTab))
                                 {
                                     _selectedFilterTab = index;
-                                    if (ConfigurationManager.Config.SwitchFiltersAutomatically &&
-                                        ConfigurationManager.Config.ActiveUiFilter != filterConfiguration.Key &&
-                                        ConfigurationManager.Config.ActiveUiFilter != null)
+                                    if (_configuration.SwitchFiltersAutomatically &&
+                                        _configuration.ActiveUiFilter != filterConfiguration.Key &&
+                                        _configuration.ActiveUiFilter != null)
                                     {
                                         Service.Framework.RunOnFrameworkThread(() =>
                                         {
-                                            PluginService.FilterService.ToggleActiveUiFilter(filterConfiguration);
+                                            _listService.ToggleActiveUiList(filterConfiguration);
                                         });
                                     }
-                                    if (ConfigurationManager.Config.SwitchCraftListsAutomatically &&
-                                        ConfigurationManager.Config.ActiveCraftList != filterConfiguration.Key &&
-                                        ConfigurationManager.Config.ActiveCraftList != null && filterConfiguration.FilterType == FilterType.CraftFilter)
+                                    if (_configuration.SwitchCraftListsAutomatically &&
+                                        _configuration.ActiveCraftList != filterConfiguration.Key &&
+                                        _configuration.ActiveCraftList != null && filterConfiguration.FilterType == FilterType.CraftFilter)
                                     {
                                         Service.Framework.RunOnFrameworkThread(() =>
                                         {
-                                            PluginService.FilterService.ToggleActiveCraftList(filterConfiguration);
+                                            _listService.ToggleActiveCraftList(filterConfiguration);
                                         });
                                     }
                                 }
@@ -628,7 +681,7 @@ namespace InventoryTools.Ui
                             ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
                             if (_addIcon.Draw("cb_acf"))
                             {
-                                PluginService.PluginLogic.AddNewCraftFilter();
+                                _pluginLogic.AddNewCraftFilter();
                             }
 
                             ImGuiUtil.HoverTooltip("Add a new craft list.");
@@ -640,343 +693,333 @@ namespace InventoryTools.Ui
             ImGui.SameLine();
         }
 
-        private readonly HorizontalSplitter _splitter;
+        private HorizontalSplitter _splitter;
 
         private unsafe void DrawCraftPanel(FilterConfiguration filterConfiguration)
         {
-            var itemTable = PluginService.FilterService.GetFilterTable(filterConfiguration.Key);
-            var craftTable = PluginService.FilterService.GetCraftTable(filterConfiguration.Key);
-            if (itemTable != null)
+            var itemTable = _tableService.GetListTable(filterConfiguration);
+            var craftTable = _tableService.GetCraftTable(filterConfiguration);
+            using (var topBarChild = ImRaii.Child("TopBar", new Vector2(0, 40) * ImGui.GetIO().FontGlobalScale, true, ImGuiWindowFlags.NoScrollbar))
             {
-                using (var topBarChild = ImRaii.Child("TopBar", new Vector2(0, 40) * ImGui.GetIO().FontGlobalScale, true, ImGuiWindowFlags.NoScrollbar))
+                if (topBarChild.Success)
                 {
-                    if (topBarChild.Success)
+                    var highlightItems = itemTable.HighlightItems;
+                    ImGuiService.CenterElement(22 * ImGui.GetIO().FontGlobalScale);
+                    ImGui.Checkbox("Highlight?" + "###" + itemTable.Key + "VisibilityCheckbox", ref highlightItems);
+                    if (highlightItems != itemTable.HighlightItems)
                     {
-                        var highlightItems = itemTable.HighlightItems;
-                        UiHelpers.CenterElement(22 * ImGui.GetIO().FontGlobalScale);
-                        ImGui.Checkbox("Highlight?" + "###" + itemTable.Key + "VisibilityCheckbox", ref highlightItems);
-                        if (highlightItems != itemTable.HighlightItems)
+                        Service.Framework.RunOnFrameworkThread(() =>
                         {
-                            Service.Framework.RunOnFrameworkThread(() =>
+                            _listService.ToggleActiveUiList(itemTable.FilterConfiguration);
+                        });
+                    }
+                    ImGuiUtil.HoverTooltip("When checked, any items you need to retrieve from external sources will be highlighted.");
+
+                    ImGui.SameLine();
+                    if (_clearIcon.Draw("tb_cf"))
+                    {
+                        itemTable.ClearFilters();
+                    }
+
+                    ImGuiUtil.HoverTooltip("Clear the current search.");
+
+                    ImGui.SameLine();
+                    ImGuiService.CenterElement(22 * ImGui.GetIO().FontGlobalScale);
+                    var hideCompleted = filterConfiguration.CraftList.HideComplete;
+                    ImGui.Checkbox("Hide Completed?" + "###" + itemTable.Key + "HideCompleted", ref hideCompleted);
+                    if (hideCompleted != filterConfiguration.CraftList.HideComplete)
+                    {
+                        filterConfiguration.CraftList.HideComplete = hideCompleted;
+                        filterConfiguration.NeedsRefresh = true;
+                    }
+
+                    ImGuiUtil.HoverTooltip("Hide any precrafts/gather/buy items once completed?");
+
+                    ImGui.SameLine();
+                    float width = ImGui.GetWindowSize().X;
+                    width -= 28 * ImGui.GetIO().FontGlobalScale;
+                    ImGui.SetCursorPosX(width);
+                    if (_searchIcon.Draw("tb_oib"))
+                    {
+                        _addItemBarOpen = !_addItemBarOpen;
+                    }
+
+                    ImGuiUtil.HoverTooltip("Toggles the add item side bar.");
+
+                    ImGui.SameLine();
+                    width -= 28 * ImGui.GetIO().FontGlobalScale;
+                    ImGui.SetCursorPosX(width);
+                    if (_editIcon.Draw("tb_edit"))
+                    {
+                        _settingsActive = !_settingsActive;
+                    }
+                    
+                    ImGuiUtil.HoverTooltip("Edit the craft list's configuration.");
+                    
+                    ImGui.SameLine();
+                    width -= 28 * ImGui.GetIO().FontGlobalScale;
+                    ImGui.SetCursorPosX(width);
+                    if (_toggleIcon.Draw("set_active"))
+                    {
+                        _listService.ToggleActiveCraftList(filterConfiguration);
+                    }
+                    ImGuiUtil.HoverTooltip("Toggle the current craft list.");
+
+                    ImGui.SameLine();
+                    width -= 156 * ImGui.GetIO().FontGlobalScale;
+                    ImGui.SetCursorPosX(width);
+                    ImGui.SetNextItemWidth(150);
+                    var activeCraftList = _listService.GetActiveCraftList();
+                    using (var combo = ImRaii.Combo("##ActiveCraftList",activeCraftList != null ? activeCraftList.Name : "None"))
+                    {
+                        if (combo.Success)
+                        {
+                            if (ImGui.Selectable("None"))
                             {
-                                PluginService.FilterService.ToggleActiveUiFilter(itemTable.FilterConfiguration);
-                            });
-                        }
-                        ImGuiUtil.HoverTooltip("When checked, any items you need to retrieve from external sources will be highlighted.");
-
-                        ImGui.SameLine();
-                        if (_clearIcon.Draw("tb_cf"))
-                        {
-                            itemTable.ClearFilters();
-                        }
-
-                        ImGuiUtil.HoverTooltip("Clear the current search.");
-
-                        ImGui.SameLine();
-                        UiHelpers.CenterElement(22 * ImGui.GetIO().FontGlobalScale);
-                        var hideCompleted = filterConfiguration.CraftList.HideComplete;
-                        ImGui.Checkbox("Hide Completed?" + "###" + itemTable.Key + "HideCompleted", ref hideCompleted);
-                        if (hideCompleted != filterConfiguration.CraftList.HideComplete)
-                        {
-                            filterConfiguration.CraftList.HideComplete = hideCompleted;
-                            filterConfiguration.NeedsRefresh = true;
-                            filterConfiguration.StartRefresh();
-                        }
-
-                        ImGuiUtil.HoverTooltip("Hide any precrafts/gather/buy items once completed?");
-
-                        ImGui.SameLine();
-                        float width = ImGui.GetWindowSize().X;
-                        width -= 28 * ImGui.GetIO().FontGlobalScale;
-                        ImGui.SetCursorPosX(width);
-                        if (_searchIcon.Draw("tb_oib"))
-                        {
-                            _addItemBarOpen = !_addItemBarOpen;
-                        }
-
-                        ImGuiUtil.HoverTooltip("Toggles the add item side bar.");
-
-                        ImGui.SameLine();
-                        width -= 28 * ImGui.GetIO().FontGlobalScale;
-                        ImGui.SetCursorPosX(width);
-                        if (_editIcon.Draw("tb_edit"))
-                        {
-                            _settingsActive = !_settingsActive;
-                        }
-                        
-                        ImGuiUtil.HoverTooltip("Edit the craft list's configuration.");
-                        
-                        ImGui.SameLine();
-                        width -= 28 * ImGui.GetIO().FontGlobalScale;
-                        ImGui.SetCursorPosX(width);
-                        if (_toggleIcon.Draw("set_active"))
-                        {
-                            PluginService.FilterService.ToggleActiveCraftList(filterConfiguration);
-                        }
-                        ImGuiUtil.HoverTooltip("Toggle the current craft list.");
-
-                        ImGui.SameLine();
-                        width -= 156 * ImGui.GetIO().FontGlobalScale;
-                        ImGui.SetCursorPosX(width);
-                        ImGui.SetNextItemWidth(150);
-                        var activeCraftList = PluginService.FilterService.GetActiveCraftList();
-                        using (var combo = ImRaii.Combo("##ActiveCraftList",activeCraftList != null ? activeCraftList.Name : "None"))
-                        {
-                            if (combo.Success)
+                                _listService.ClearActiveCraftList();
+                            }
+                            foreach (var filter in _listService.Lists.Where(c =>
+                                         c.FilterType == FilterType.CraftFilter && !c.CraftListDefault))
                             {
-                                if (ImGui.Selectable("None"))
+                                if (ImGui.Selectable(filter.Name + "##" + filter.Key))
                                 {
-                                    PluginService.FilterService.ClearActiveCraftList();
-                                }
-                                foreach (var filter in PluginService.FilterService.FiltersList.Where(c =>
-                                             c.FilterType == FilterType.CraftFilter && !c.CraftListDefault))
-                                {
-                                    if (ImGui.Selectable(filter.Name + "##" + filter.Key))
-                                    {
-                                        PluginService.FilterService.SetActiveCraftList(filter);
-                                    }
+                                    _listService.SetActiveCraftList(filter);
                                 }
                             }
                         }
-                        ImGuiUtil.HoverTooltip("This is the craft list that finished crafts will count towards.");
+                    }
+                    ImGuiUtil.HoverTooltip("This is the craft list that finished crafts will count towards.");
+                    ImGui.SameLine();
+                    var textSize = ImGui.CalcTextSize("Active: ");
+                    width -= textSize.X * ImGui.GetIO().FontGlobalScale;
+                    ImGui.SetCursorPosX(width);
+                    ImGui.Text("Active: ");
+                    if (SelectedConfiguration?.IsEphemeralCraftList ?? false)
+                    {
                         ImGui.SameLine();
-                        var textSize = ImGui.CalcTextSize("Active: ");
-                        width -= textSize.X * ImGui.GetIO().FontGlobalScale;
+                        width -= 28 * ImGui.GetIO().FontGlobalScale;
                         ImGui.SetCursorPosX(width);
-                        ImGui.Text("Active: ");
-                        if (SelectedConfiguration?.IsEphemeralCraftList ?? false)
-                        {
-                            ImGui.SameLine();
-                            width -= 28 * ImGui.GetIO().FontGlobalScale;
-                            ImGui.SetCursorPosX(width);
-                            ImGui.Image(PluginService.IconStorage.LoadImage("recycle").ImGuiHandle,
-                                new Vector2(22, 22));
-                            ImGuiUtil.HoverTooltip("This is the ephemeral craft list, once all items in it are completed, the list will delete itself.");
-                        }
+                        ImGui.Image(_iconService.LoadImage("recycle").ImGuiHandle,
+                            new Vector2(22, 22));
+                        ImGuiUtil.HoverTooltip("This is the ephemeral craft list, once all items in it are completed, the list will delete itself.");
                     }
                 }
+            }
 
-                using (var contentChild = ImRaii.Child("Content", new Vector2(0, -44) * ImGui.GetIO().FontGlobalScale, true))
+            using (var contentChild = ImRaii.Child("Content", new Vector2(0, -44) * ImGui.GetIO().FontGlobalScale, true))
+            {
+                if (contentChild.Success)
                 {
-                    if (contentChild.Success)
+                    var result = _splitter.Draw((shouldDraw) =>
                     {
-                        var result = _splitter.Draw((shouldDraw) =>
-                        {
-                            _craftsExpanded = craftTable?.Draw(new Vector2(0,0), shouldDraw) ??
-                                              true;
-                        }, (shouldDraw) =>
-                        {
-                            _itemsExpanded = itemTable.Draw(new Vector2(0, 0), shouldDraw);
-                        }, "To Craft", "Items in Retainers/Bags");
-                        if (result != null)
-                        {
-                            ConfigurationManager.Config.CraftWindowSplitterPosition = (int)result.Value;
-                            ConfigurationManager.SaveAsync();
-                        }
+                        MediatorService.Publish(craftTable.Draw(new Vector2(0,0), shouldDraw));
+                    }, (shouldDraw) =>
+                    {
+                        MediatorService.Publish(itemTable.Draw(new Vector2(0, 0), shouldDraw));
+                    }, "To Craft", "Items in Retainers/Bags");
+                    if (result != null)
+                    {
+                        _configuration.CraftWindowSplitterPosition = (int)result.Value;
+                        _configuration.IsDirty = true;
                     }
                 }
+            }
 
-                
-                //Need to have these buttons be determined dynamically or moved elsewhere
-                using (var bottomBarChild = ImRaii.Child("BottomBar", new Vector2(0, 0) * ImGui.GetIO().FontGlobalScale,
-                           true, ImGuiWindowFlags.NoScrollbar))
+            
+            //Need to have these buttons be determined dynamically or moved elsewhere
+            using (var bottomBarChild = ImRaii.Child("BottomBar", new Vector2(0, 0) * ImGui.GetIO().FontGlobalScale,
+                       true, ImGuiWindowFlags.NoScrollbar))
+            {
+                if (bottomBarChild.Success)
                 {
-                    if (bottomBarChild.Success)
+                    ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                    if (_marketIcon.Draw("bb_market"))
                     {
-                        UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                        if (_marketIcon.Draw("bb_market"))
+                        var activeCharacter = _characterMonitor.ActiveCharacter;
+                        if (activeCharacter != null)
                         {
                             foreach (var item in itemTable.RenderSortedItems)
                             {
-                                PluginService.Universalis.QueuePriceCheck(item.InventoryItem.ItemId);
+                                _universalis.QueuePriceCheck(item.InventoryItem.ItemId, activeCharacter.WorldId);
                             }
 
                             foreach (var item in itemTable.RenderItems)
                             {
-                                PluginService.Universalis.QueuePriceCheck(item.RowId);
+                                _universalis.QueuePriceCheck(item.RowId, activeCharacter.WorldId);
                             }
 
                             if (craftTable != null)
                             {
                                 foreach (var item in craftTable.CraftItems)
                                 {
-                                    PluginService.Universalis.QueuePriceCheck(item.ItemId);
+                                    _universalis.QueuePriceCheck(item.ItemId, activeCharacter.WorldId);
                                 }
 
                                 foreach (var item in craftTable.RenderItems)
                                 {
-                                    PluginService.Universalis.QueuePriceCheck(item.RowId);
+                                    _universalis.QueuePriceCheck(item.RowId, activeCharacter.WorldId);
                                 }
                             }
                         }
+                    }
 
-                        ImGuiUtil.HoverTooltip("Refresh Market Prices");
-                        ImGui.SameLine();
-                        //Export CSV
-                        UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                        if (_export2Icon.Draw("bb_csv"))
-                        {
-                            ImGui.OpenPopup("SaveToCsv");
-                        }
-                        
-                        if (ImGui.BeginPopup("SaveToCsv"))
-                        {
-                            if (ImGui.Selectable("Export Craft List CSV"))
-                            {
-                                if (craftTable != null)
-                                {
-                                    PluginService.FileDialogManager.SaveFileDialog("Save to csv", "*.csv",
-                                        "export-craft-list.csv", ".csv",
-                                        (b, s) => { SaveCraftCallback(craftTable, b, s); }, null, true);
-                                }
-                            }
-
-                            if (ImGui.Selectable("Export Retainer List CSV"))
-                            {
-                                PluginService.FileDialogManager.SaveFileDialog("Save to csv", "*.csv", "export.csv", ".csv",
-                                    (b, s) => { SaveCallback(itemTable, b, s); }, null, true);
-                            }
-                            ImGui.EndPopup();
-                        }
-
-                        ImGuiUtil.HoverTooltip("Export to CSV");
-                        ImGui.SameLine();
-                        //Export Json
-                        UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                        if (_clipboardIcon.Draw("bb_json"))
-                        {
-                            ImGui.OpenPopup("SaveToJson");
-                        }
-                        
-                        if (ImGui.BeginPopup("SaveToJson"))
-                        {
-                            if (ImGui.Selectable("Copy Craft List"))
-                            {
-                                if (craftTable != null)
-                                {
-                                    craftTable.ExportToJson().ToClipboard();
-                                }
-                            }
-
-                            if (ImGui.Selectable("Copy Retainer List"))
-                            {
-                                itemTable.ExportToJson().ToClipboard();
-                            }
-                            ImGui.EndPopup();
-                        }
-
-                        ImGuiUtil.HoverTooltip("Copy JSON to clipboard");
-                        ImGui.SameLine();
-                        
-                        UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                        if (_importTcIcon.Draw("bb_import_tc_json"))
+                    ImGuiUtil.HoverTooltip("Refresh Market Prices");
+                    ImGui.SameLine();
+                    //Export CSV
+                    ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                    if (_export2Icon.Draw("bb_csv"))
+                    {
+                        ImGui.OpenPopup("SaveToCsv");
+                    }
+                    
+                    if (ImGui.BeginPopup("SaveToCsv"))
+                    {
+                        if (ImGui.Selectable("Export Craft List CSV"))
                         {
                             if (craftTable != null)
                             {
-                                if(_teamCraftImportWindow == null)
-                                {
-                                    _teamCraftImportWindow = new TeamCraftImportWindow("craftsTCImport");
-                                    _teamCraftImportWindow.OpenImportWindow = true;
-                                }
-                                else
-                                {
-                                    _teamCraftImportWindow.OpenImportWindow = true;
-                                }
+                                _fileDialogManager.SaveFileDialog("Save to csv", "*.csv",
+                                    "export-craft-list.csv", ".csv",
+                                    (b, s) => { SaveCraftCallback(craftTable, b, s); }, null, true);
                             }
                         }
 
-                        ImGuiUtil.HoverTooltip("Import TC List");
-                        ImGui.SameLine();
-
-                        if (PluginService.GameUi.IsWindowVisible(
-                                CriticalCommonLib.Services.Ui.WindowName.SubmarinePartsMenu))
+                        if (ImGui.Selectable("Export Retainer List CSV"))
                         {
-                            var subMarinePartsMenu = PluginService.GameUi.GetWindow("SubmarinePartsMenu");
-                            if (subMarinePartsMenu != null)
+                            _fileDialogManager.SaveFileDialog("Save to csv", "*.csv", "export.csv", ".csv",
+                                (b, s) => { SaveCallback(itemTable, b, s); }, null, true);
+                        }
+                        ImGui.EndPopup();
+                    }
+
+                    ImGuiUtil.HoverTooltip("Export to CSV");
+                    ImGui.SameLine();
+                    //Export Json
+                    ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                    if (_clipboardIcon.Draw("bb_json"))
+                    {
+                        ImGui.OpenPopup("SaveToJson");
+                    }
+                    
+                    if (ImGui.BeginPopup("SaveToJson"))
+                    {
+                        if (ImGui.Selectable("Copy Craft List"))
+                        {
+                            if (craftTable != null)
                             {
-                                if (ImGui.Button("Add Company Craft to List"))
+                                craftTable.ExportToJson().ToClipboard();
+                            }
+                        }
+
+                        if (ImGui.Selectable("Copy Retainer List"))
+                        {
+                            itemTable.ExportToJson().ToClipboard();
+                        }
+                        ImGui.EndPopup();
+                    }
+
+                    ImGuiUtil.HoverTooltip("Copy JSON to clipboard");
+                    ImGui.SameLine();
+                    
+                    ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                    if (_importTcIcon.Draw("bb_import_tc_json"))
+                    {
+                        if (craftTable != null)
+                        {
+                            MediatorService.Publish(new OpenGenericWindowMessage(typeof(TeamCraftImportWindow)));
+                        }
+                    }
+
+                    ImGuiUtil.HoverTooltip("Import TC List");
+                    ImGui.SameLine();
+
+                    if (_gameUiManager.IsWindowVisible(
+                            CriticalCommonLib.Services.Ui.WindowName.SubmarinePartsMenu))
+                    {
+                        var subMarinePartsMenu = _gameUiManager.GetWindow("SubmarinePartsMenu");
+                        if (subMarinePartsMenu != null)
+                        {
+                            if (ImGui.Button("Add Company Craft to List"))
+                            {
+                                var subAddon = (SubmarinePartsMenuAddon*)subMarinePartsMenu;
+                                for (int i = 0; i < 6; i++)
                                 {
-                                    var subAddon = (SubmarinePartsMenuAddon*)subMarinePartsMenu;
-                                    for (int i = 0; i < 6; i++)
+                                    var itemRequired = subAddon->RequiredItemId(i);
+                                    if (itemRequired != 0)
                                     {
-                                        var itemRequired = subAddon->RequiredItemId(i);
-                                        if (itemRequired != 0)
+                                        var amountHandedIn = subAddon->AmountHandedIn(i);
+                                        var amountNeeded = subAddon->AmountNeeded(i);
+                                        var amountLeft = Math.Max(
+                                            (int)amountNeeded - (int)amountHandedIn,
+                                            0);
+                                        if (amountLeft > 0)
                                         {
-                                            var amountHandedIn = subAddon->AmountHandedIn(i);
-                                            var amountNeeded = subAddon->AmountNeeded(i);
-                                            var amountLeft = Math.Max(
-                                                (int)amountNeeded - (int)amountHandedIn,
-                                                0);
-                                            if (amountLeft > 0)
+                                            Service.Framework.RunOnFrameworkThread(() =>
                                             {
-                                                Service.Framework.RunOnFrameworkThread(() =>
-                                                {
-                                                    filterConfiguration.CraftList.AddCraftItem(itemRequired,
-                                                        (uint)amountLeft, InventoryItem.ItemFlags.None);
-                                                    filterConfiguration.NeedsRefresh = true;
-                                                    filterConfiguration.StartRefresh();
-                                                });
-                                            }
+                                                filterConfiguration.CraftList.AddCraftItem(itemRequired,
+                                                    (uint)amountLeft, InventoryItem.ItemFlags.None);
+                                                filterConfiguration.NeedsRefresh = true;
+                                            });
                                         }
                                     }
                                 }
                             }
-
-                            ImGui.SameLine();
                         }
 
-                        UiHelpers.VerticalCenter("Pending Market Requests: " + PluginService.Universalis.QueuedCount);
-
-                        craftTable?.DrawFooterItems();
-                        itemTable.DrawFooterItems();
                         ImGui.SameLine();
+                    }
+
+                    ImGuiService.VerticalCenter("Pending Market Requests: " + _universalis.QueuedCount);
+
+                    craftTable?.DrawFooterItems();
+                    itemTable.DrawFooterItems();
+                    ImGui.SameLine();
 
 
-                        var width = ImGui.GetWindowSize().X;
-                        
-                        width -= 30 * ImGui.GetIO().FontGlobalScale;
+                    var width = ImGui.GetWindowSize().X;
+                    
+                    width -= 30 * ImGui.GetIO().FontGlobalScale;
+                    ImGui.SetCursorPosX(width);
+                    ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                    if (_menuIcon.Draw("openMenu"))
+                    {
+                    }
+                    _settingsMenu.Draw();
+                    
+                    width -= 30 * ImGui.GetIO().FontGlobalScale;
+                    ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                    ImGui.SetCursorPosX(width);
+                    if (_settingsIcon.Draw("bb_ocw"))
+                    {
+                        MediatorService.Publish(new ToggleGenericWindowMessage(typeof(ConfigurationWindow)));
+                    }
+
+                    ImGuiUtil.HoverTooltip("Open the configuration window.");
+                    
+                    ImGui.SetCursorPosY(0);
+                    width -= 30 * ImGui.GetIO().FontGlobalScale;
+                    ImGui.SetCursorPosX(width);
+                    ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                    if (_filtersIcon.Draw("openFilters"))
+                    {
+                        MediatorService.Publish(new ToggleGenericWindowMessage(typeof(FiltersWindow)));
+                    }
+
+                    ImGuiUtil.HoverTooltip("Open the items window.");
+
+                    if (craftTable != null)
+                    {
+                        var totalItems =  itemTable.RenderSortedItems.Count + " items / " + craftTable.GetCraftListCount() + " craft items";
+                        var calcTextSize = ImGui.CalcTextSize(totalItems);
+                        width -= calcTextSize.X + 15;
                         ImGui.SetCursorPosX(width);
-                        UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                        if (_menuIcon.Draw("openMenu"))
-                        {
-                        }
-                        _settingsMenu.Draw();
-                        
-                        width -= 30 * ImGui.GetIO().FontGlobalScale;
-                        UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                        ImGui.SetCursorPosX(width);
-                        if (_settingsIcon.Draw("bb_ocw"))
-                        {
-                            PluginService.WindowService.ToggleConfigurationWindow();
-                        }
-
-                        ImGuiUtil.HoverTooltip("Open the configuration window.");
-                        
-                        ImGui.SetCursorPosY(0);
-                        width -= 30 * ImGui.GetIO().FontGlobalScale;
-                        ImGui.SetCursorPosX(width);
-                        UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                        if (_filtersIcon.Draw("openFilters"))
-                        {
-                            PluginService.WindowService.ToggleFiltersWindow();
-                        }
-
-                        ImGuiUtil.HoverTooltip("Open the filters window.");
-
-                        if (craftTable != null)
-                        {
-                            var totalItems =  itemTable.RenderSortedItems.Count + " items / " + craftTable.GetCraftListCount() + " craft items";
-                            var calcTextSize = ImGui.CalcTextSize(totalItems);
-                            width -= calcTextSize.X + 15;
-                            ImGui.SetCursorPosX(width);
-                            UiHelpers.VerticalCenter(totalItems);
-                        }
+                        ImGuiService.VerticalCenter(totalItems);
                     }
                 }
             }
         }
 
-        private string? _newName = null;
+        private string? _newName;
         private void DrawSettingsPanel(FilterConfiguration filterConfiguration)
         {
             using (var contentChild = ImRaii.Child("Content", new Vector2(0, -44) * ImGui.GetIO().FontGlobalScale, true))
@@ -1015,7 +1058,7 @@ namespace InventoryTools.Ui
                             {
                                 var base64 = filterConfiguration.ExportBase64();
                                 ImGui.SetClipboardText(base64);
-                                PluginService.ChatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
+                                _chatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
                             }
                         }
                         else
@@ -1036,7 +1079,7 @@ namespace InventoryTools.Ui
                     {
                         if (tabBar.Success)
                         {
-                            foreach (var group in PluginService.PluginLogic.GroupedFilters)
+                            foreach (var group in _filterService.GroupedFilters)
                             {
                                 var hasValuesSet = false;
                                 foreach (var filter in group.Value)
@@ -1114,12 +1157,12 @@ namespace InventoryTools.Ui
                 {
                     if (filterConfiguration.CraftListDefault)
                     {
-                        UiHelpers.VerticalCenter(
+                        ImGuiService.VerticalCenter(
                             "You are currently editing default craft list configuration.");
                     }
                     else
                     {
-                        UiHelpers.VerticalCenter(
+                        ImGuiService.VerticalCenter(
                             "You are currently editing the craft list's configuration. Press the tick on the right hand side to save configuration.");
                     }
                     float width = ImGui.GetWindowSize().X;
@@ -1129,7 +1172,7 @@ namespace InventoryTools.Ui
                         ImGui.SameLine();
                         width -= 30 * ImGui.GetIO().FontGlobalScale;
                         ImGui.SetCursorPosX(width);
-                        UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                        ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                         if (_closeSettingsIcon.Draw("bb_settings"))
                         {
                             _settingsActive = false;
@@ -1139,7 +1182,7 @@ namespace InventoryTools.Ui
                         ImGui.SameLine();
                         width -= 30 * ImGui.GetIO().FontGlobalScale;
                         ImGui.SetCursorPosX(width);
-                        UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                        ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                         if (_resetButton.Draw("bb_reset"))
                         {
                             ImGui.OpenPopup("confirmReset");
@@ -1151,7 +1194,7 @@ namespace InventoryTools.Ui
                         });
                         if (result == true)
                         {
-                            filterConfiguration.ResetCraftFilter();
+                            _listService.ResetFilter(_filterService.AvailableFilters, filterConfiguration);
                         }
                         ImGuiUtil.HoverTooltip("Reset craft list to default configuration (keeps items).");
                     }
@@ -1160,7 +1203,7 @@ namespace InventoryTools.Ui
                         ImGui.SameLine();
                         width -= 30 * ImGui.GetIO().FontGlobalScale;
                         ImGui.SetCursorPosX(width);
-                        UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                        ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                         if (_resetButton.Draw("bb_reset"))
                         {
                             ImGui.OpenPopup("Reset the default craft list?##defaultReset");
@@ -1178,7 +1221,7 @@ namespace InventoryTools.Ui
 
                                 if (ImGui.Button("OK", new Vector2(120, 0) * ImGui.GetIO().FontGlobalScale))
                                 {
-                                    DefaultConfiguration.ResetCraftFilter();
+                                    _listService.ResetFilter(_filterService.AvailableFilters, DefaultConfiguration);
                                     ImGui.CloseCurrentPopup();
                                 }
 
@@ -1194,7 +1237,7 @@ namespace InventoryTools.Ui
                     ImGui.SameLine();
                     width -= 30 * ImGui.GetIO().FontGlobalScale;
                     ImGui.SetCursorPosX(width);
-                    UiHelpers.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                    ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                     if (_clipboardIcon.Draw("copyFilterBtn"))
                     {
                         ImGui.OpenPopup("copyFilter");
@@ -1210,7 +1253,7 @@ namespace InventoryTools.Ui
                             {
                                 if (ImGui.Selectable("Copy configuration from '" + filter.Name + "'"))
                                 {
-                                    filterConfiguration.ResetFilter(filter);
+                                    _listService.ResetFilter(_filterService.AvailableFilters, filterConfiguration, filter);
                                 }
                             }
 
@@ -1239,7 +1282,7 @@ namespace InventoryTools.Ui
             {
                 if (popup.Success)
                 {
-                    item.DrawRightClickPopup();
+                    MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(item));
                 }
             }
             ImGui.TableNextColumn();
@@ -1251,7 +1294,6 @@ namespace InventoryTools.Ui
                     {
                         filterConfiguration.CraftList.AddCraftItem(item.RowId, 1, InventoryItem.ItemFlags.None);
                         filterConfiguration.NeedsRefresh = true;
-                        filterConfiguration.StartRefresh();
                     });
                 }
 
@@ -1263,7 +1305,7 @@ namespace InventoryTools.Ui
         }
 
         private string _searchString = "";
-        private List<ItemEx>? _searchItems = null;
+        private List<ItemEx>? _searchItems;
         public List<ItemEx> SearchItems
         {
             get
@@ -1275,8 +1317,8 @@ namespace InventoryTools.Ui
                 }
                 if (_searchItems == null)
                 {
-                    _searchItems = Service.ExcelCache.ItemNamesById.Where(c => c.Value.ToLower().PassesFilter(SearchString.ToLower())).Take(100)
-                        .Select(c => Service.ExcelCache.GetItemExSheet().GetRow(c.Key)!).ToList();
+                    _searchItems = _excelCache.ItemNamesById.Where(c => c.Value.ToLower().PassesFilter(SearchString.ToLower())).Take(100)
+                        .Select(c => _excelCache.GetItemExSheet().GetRow(c.Key)!).ToList();
                 }
 
                 return _searchItems;
@@ -1327,5 +1369,7 @@ namespace InventoryTools.Ui
                 FocusFilter(selectedConfiguration);
             }
         }
+
+
     }
 }

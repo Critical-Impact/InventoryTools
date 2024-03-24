@@ -1,25 +1,35 @@
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns;
 
 public class HasBeenGatheredColumn : CheckboxColumn
 {
+    private readonly IGameInterface _gameInterface;
+
+    public HasBeenGatheredColumn(ILogger<HasBeenGatheredColumn> logger, ImGuiService imGuiService, IGameInterface gameInterface) : base(logger, imGuiService)
+    {
+        _gameInterface = gameInterface;
+    }
     public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-    public override bool? CurrentValue(InventoryItem item)
+    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
     {
-        return CurrentValue(item.Item);
+        return CurrentValue(columnConfiguration, item.Item);
     }
 
-    public override bool? CurrentValue(ItemEx item)
+    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
     {
-        return PluginService.GameInterface.IsItemGathered(item.RowId);
+        return _gameInterface.IsItemGathered(item.RowId);
     }
 
-    public override bool? CurrentValue(SortingResult item)
+    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
     {
-        return CurrentValue(item.InventoryItem);
+        return CurrentValue(columnConfiguration, item.InventoryItem);
     }
 
     public override string Name { get; set; } = "Logged in Gathering Log?";

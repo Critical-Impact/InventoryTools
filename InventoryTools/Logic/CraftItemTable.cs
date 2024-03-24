@@ -8,6 +8,7 @@ using System.Numerics;
 using System.Text;
 using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
+using CriticalCommonLib.Services.Mediator;
 using CsvHelper;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
@@ -17,12 +18,13 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Services;
 
 namespace InventoryTools.Logic
 {
     public class CraftItemTable : RenderTableBase
     {
-        public CraftItemTable(FilterConfiguration filterConfiguration) : base(filterConfiguration)
+        public CraftItemTable(RightClickService rightClickService, InventoryToolsConfiguration configuration) : base(rightClickService, configuration)
         {
             _tableFlags = ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersV |
                           ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.BordersInnerV |
@@ -31,11 +33,15 @@ namespace InventoryTools.Logic
                           ImGuiTableFlags.Resizable |
                           ImGuiTableFlags.Hideable | ImGuiTableFlags.ScrollX |
                           ImGuiTableFlags.ScrollY;
-            filterConfiguration.CraftList.GenerateCraftChildren();
-            filterConfiguration.StartRefresh();
-
         }
-        
+
+        public override void Initialize(FilterConfiguration filterConfiguration)
+        {
+            base.Initialize(filterConfiguration);
+            filterConfiguration.CraftList.GenerateCraftChildren();
+            filterConfiguration.NeedsRefresh = true;
+        }
+
         public override void RefreshColumns()
         {
             if (FilterConfiguration.FreezeCraftColumns != FreezeCols)
@@ -44,36 +50,19 @@ namespace InventoryTools.Logic
             }
             if (FilterConfiguration.CraftColumns != null)
             {
-                var newColumns = new List<IColumn>();
-                foreach (var column in FilterConfiguration.CraftColumns)
-                {
-                    var newColumn = PluginLogic.GetClassFromString(column);
-                    if (newColumn != null && newColumn is IColumn)
-                    {
-                        newColumns.Add(newColumn);
-                    }
-                }
-
-                this.Columns = newColumns;
+                this.Columns = FilterConfiguration.CraftColumns.ToList();
             }
         }
 
         public List<CraftItem> CraftItems = new();
 
-        public override bool Draw(Vector2 size, bool shouldDraw = true)
+        public override List<MessageBase> Draw(Vector2 size, bool shouldDraw = true)
         {
-            if (Columns.Count == 0)
+            var messages = new List<MessageBase>();
+            FilterConfiguration.AllowRefresh = true;
+            if (Columns.Count == 0 || !shouldDraw)
             {
-                if (NeedsRefresh)
-                {
-                    Refresh(ConfigurationManager.Config);
-                }
-                return true;
-            }
-
-            if (!shouldDraw)
-            {
-                return true;
+                return messages;
             }
 
             var tabMode = FilterConfiguration.CraftDisplayMode == CraftDisplayMode.Tabs;
@@ -85,17 +74,13 @@ namespace InventoryTools.Logic
                     if (craftContentChild.Success)
                     {
                         using var tabBar = ImRaii.TabBar("CraftTabs", ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.TabListPopupButton);
-                        if (!tabBar.Success) return true;
+                        if (!tabBar.Success) return messages;
 
                         var groupedCrafts = FilterConfiguration.CraftList.GetOutputList();
                         if (groupedCrafts.Count == 0)
                         {
                             using var tabItem = ImRaii.TabItem("No Items");
-                            if (!tabItem.Success) return true;
-                            if (NeedsRefresh)
-                            {
-                                Refresh(ConfigurationManager.Config);
-                            }
+                            if (!tabItem.Success) return messages;
                             ImGui.TextWrapped(
                                 "No items have been added to the list. Add items via the search menu button at the top right of the screen or by right clicking on an item anywhere within the plugin.");
                         }
@@ -114,7 +99,7 @@ namespace InventoryTools.Logic
                                 for (var index = 0; index < Columns.Count; index++)
                                 {
                                     var column = Columns[index];
-                                    column.Setup(index);
+                                    column.Column.Setup(FilterConfiguration, column, index);
                                 }
                                 
                                 ImGui.TableHeadersRow();
@@ -127,12 +112,12 @@ namespace InventoryTools.Logic
                                         ImGuiUtil.RightAlign("?", SortColumn == index ? 8 : 0);
                                     }
 
-                                    ImGuiUtil.HoverTooltip(column.HelpText);
+                                    ImGuiUtil.HoverTooltip(column.Column.HelpText);
                                 }
 
-                                if (refresh || NeedsRefresh || FilterConfiguration.NeedsRefresh)
+                                if (refresh && !Refreshing)
                                 {
-                                    Refresh(ConfigurationManager.Config);
+                                    NeedsRefresh = true;
                                 }
 
                                 if (!groupedCraft.CraftItems.Any()) continue;
@@ -147,14 +132,22 @@ namespace InventoryTools.Logic
                                     for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                                     {
                                         var column = Columns[columnIndex];
-                                        column.Draw(FilterConfiguration, item, index);
+                                        var columnMessages = column.Column.Draw(FilterConfiguration, column, item, index);
+                                        if (columnMessages != null)
+                                        {
+                                            messages.AddRange(columnMessages);
+                                        }
                                         ImGui.SameLine();
                                         if (columnIndex == Columns.Count - 1)
                                         {
-                                            PluginService.PluginLogic.RightClickColumn.Draw(
-                                                FilterConfiguration,
+                                            var menuItems = DrawMenu(
+                                                FilterConfiguration, column,
                                                 item,
                                                 index);
+                                            if (menuItems != null)
+                                            {
+                                                messages.AddRange(menuItems);
+                                            }
                                         }
                                     }
                                 }
@@ -171,14 +164,14 @@ namespace InventoryTools.Logic
                     {
                         using (var table = ImRaii.Table(Key + "CraftTable", Columns.Count, _tableFlags))
                         {
-                            if (!table || !table.Success) return true;
+                            if (!table || !table.Success) return messages;
                             var refresh = false;
                             ImGui.TableSetupScrollFreeze(Math.Min(FreezeCols ?? 0, Columns.Count),
                                 FreezeRows ?? (ShowFilterRow ? 2 : 1));
                             for (var index = 0; index < Columns.Count; index++)
                             {
                                 var column = Columns[index];
-                                column.Setup(index);
+                                column.Column.Setup(FilterConfiguration, column, index);
                             }
                             
                             ImGui.TableHeadersRow();
@@ -191,12 +184,12 @@ namespace InventoryTools.Logic
                                     ImGuiUtil.RightAlign("?", SortColumn == index ? 8 : 0);
                                 }
 
-                                ImGuiUtil.HoverTooltip(column.HelpText);
+                                ImGuiUtil.HoverTooltip(column.Column.HelpText);
                             }
 
-                            if (refresh || NeedsRefresh)
+                            if (refresh && !Refreshing)
                             {
-                                Refresh(ConfigurationManager.Config);
+                                NeedsRefresh = true;
                             }
 
 
@@ -244,14 +237,22 @@ namespace InventoryTools.Logic
                                             for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                                             {
                                                 var column = Columns[columnIndex];
-                                                column.Draw(FilterConfiguration, item, overallIndex);
+                                                var columnMessages = column.Column.Draw(FilterConfiguration, column, item, overallIndex);
+                                                if (columnMessages != null)
+                                                {
+                                                    messages.AddRange(columnMessages);
+                                                }
                                                 ImGui.SameLine();
                                                 if (columnIndex == Columns.Count - 1)
                                                 {
-                                                    PluginService.PluginLogic.RightClickColumn.Draw(
-                                                        FilterConfiguration,
+                                                    var menuMessages = DrawMenu(
+                                                        FilterConfiguration, column,
                                                         item,
                                                         overallIndex);
+                                                    if (menuMessages != null)
+                                                    {
+                                                        messages.AddRange(menuMessages);
+                                                    }
                                                 }
                                             }
 
@@ -265,7 +266,7 @@ namespace InventoryTools.Logic
                 }
             }
 
-            return true;
+            return messages;
         }
 
         private List<CraftItem> GetOutputItemList()
@@ -283,18 +284,6 @@ namespace InventoryTools.Logic
             
         }
 
-        public override void Refresh(InventoryToolsConfiguration configuration)
-        {
-            if (FilterConfiguration.FilterResult != null && FilterConfiguration.CraftList.BeenGenerated && FilterConfiguration.CraftList.BeenUpdated)
-            {
-                Service.Log.Verbose("CraftTable: Refreshing");
-                CraftItems = FilterConfiguration.CraftList.GetFlattenedMergedMaterials(true);
-                FilterConfiguration.CraftList.ClearGroupCache();
-                IsSearching = false;
-                NeedsRefresh = false;
-            }
-        }
-
         public void ExportToCsv(string fileName)
         {
             using (var writer = new StreamWriter(fileName,Encoding.UTF8, new FileStreamOptions()
@@ -306,7 +295,7 @@ namespace InventoryTools.Logic
             {
                 foreach (var column in Columns)
                 {
-                    csv.WriteField(column.Name);
+                    csv.WriteField(column.ExportName ?? column.Column.Name);
                 }
                 csv.NextRecord();
                 if (FilterConfiguration.FilterType == FilterType.CraftFilter)
@@ -315,7 +304,7 @@ namespace InventoryTools.Logic
                     {
                         foreach (var column in Columns)
                         {
-                            csv.WriteField(column.CsvExport(item));
+                            csv.WriteField(column.Column.CsvExport(column, item));
                         }
                         csv.NextRecord();
                     }
@@ -335,7 +324,7 @@ namespace InventoryTools.Logic
                     newLine["Id"] = item.ItemId;
                     foreach (var column in Columns)
                     {
-                        newLine[column.Name] = column.JsonExport(item) ?? "";
+                        newLine[column.Column.Name] = column.Column.JsonExport(column, item) ?? "";
                     }
                     lines.Add(newLine);
                 }
@@ -353,15 +342,6 @@ namespace InventoryTools.Logic
                         converter
                     }
                 });
-        }
-
-        public override void Dispose()
-        {
-            if (!base.Disposed)
-            {
-                Columns.ForEach(c => c.Dispose());
-                base.Dispose();
-            }
         }
     }
 }

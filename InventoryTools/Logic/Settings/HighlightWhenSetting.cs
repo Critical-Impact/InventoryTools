@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using InventoryTools.Logic.Settings.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Settings
 {
@@ -34,6 +36,11 @@ namespace InventoryTools.Logic.Settings
             {
                 return StaticChoices;
             }
+        }
+        public override string Version => "1.6.2.5";
+
+        public HighlightWhenSetting(ILogger<HighlightWhenSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
         }
     }
 }

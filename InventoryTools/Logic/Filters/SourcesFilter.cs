@@ -1,14 +1,26 @@
 using System;
 using System.Collections.Generic;
 using CriticalCommonLib.Extensions;
+using CriticalCommonLib.Services;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
+using InventoryTools.Lists;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
     public class SourcesFilter : DisplayFilter
     {
+        private readonly ICharacterMonitor _characterMonitor;
+        private readonly ListCategoryService _listCategoryService;
+
+        public SourcesFilter(ILogger<SourcesFilter> logger, ImGuiService imGuiService, ICharacterMonitor characterMonitor, ListCategoryService listCategoryService) : base(logger, imGuiService)
+        {
+            _characterMonitor = characterMonitor;
+            _listCategoryService = listCategoryService;
+        }
         public override int Order { get; set; } = 1;
         public override string Key { get; set; } = "Sources";
         public override string Name { get; set; } = "Sources";
@@ -32,12 +44,12 @@ namespace InventoryTools.Logic.Filters
             ImGui.NewLine();
             ImGui.Text("Source Information: ");
             ImGui.SameLine();
-            UiHelpers.HelpMarker(HelpText);
-            var allCharacters = PluginService.CharacterMonitor.Characters;
+            ImGuiService.HelpMarker(HelpText);
+            var allCharacters = _characterMonitor.Characters;
             
             //Retainer Sources
             List<string> sources = new();
-            foreach (var retainerCategories in configuration.SourceRetainerCategories)
+            foreach (var retainerCategories in _listCategoryService.SourceRetainerCategories(configuration))
             {
                 foreach (var retainerCategory in retainerCategories.Value)
                 {
@@ -66,7 +78,7 @@ namespace InventoryTools.Logic.Filters
             
             //Character Sources
             sources = new();
-            foreach (var characterCategories in configuration.SourceCharacterCategories)
+            foreach (var characterCategories in _listCategoryService.SourceCharacterCategories(configuration))
             {
                 foreach (var characterCategory in characterCategories.Value)
                 {
@@ -94,7 +106,7 @@ namespace InventoryTools.Logic.Filters
             
             //Free Company Sources
             sources = new();
-            foreach (var characterCategories in configuration.SourceFreeCompanyCategories)
+            foreach (var characterCategories in _listCategoryService.SourceFreeCompanyCategories(configuration))
             {
                 foreach (var characterCategory in characterCategories.Value)
                 {
@@ -122,7 +134,7 @@ namespace InventoryTools.Logic.Filters
             
             //House Sources
             sources = new();
-            foreach (var characterCategories in configuration.SourceHouseCategories)
+            foreach (var characterCategories in _listCategoryService.SourceHouseCategories(configuration))
             {
                 foreach (var characterCategory in characterCategories.Value)
                 {

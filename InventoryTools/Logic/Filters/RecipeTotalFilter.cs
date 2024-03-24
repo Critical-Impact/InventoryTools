@@ -1,13 +1,17 @@
 ﻿using CriticalCommonLib;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters;
 
 public class RecipeTotalFilter : IntegerFilter
 {
+    private readonly ExcelCache _excelCache;
     public override string Key { get; set; } = "RecipeTotalFilter";
     public override string Name { get; set; } = "Recipe Total Count";
     public override string HelpText { get; set; } = "The number of recipes the item is a component of.";
@@ -27,11 +31,16 @@ public class RecipeTotalFilter : IntegerFilter
         {
             return null;
         }
-        if (!Service.ExcelCache.ItemRecipeCount(item.RowId).PassesFilter(currentValue.Value.ToString()))
+        if (!_excelCache.ItemRecipeCount(item.RowId).PassesFilter(currentValue.Value.ToString()))
         {
             return false;
         }
 
         return true;
+    }
+
+    public RecipeTotalFilter(ILogger<RecipeTotalFilter> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
+    {
+        _excelCache = excelCache;
     }
 }

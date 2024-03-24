@@ -1,21 +1,40 @@
 using System.Collections.Generic;
 using System.Linq;
+using CriticalCommonLib.Services.Mediator;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
-namespace InventoryTools.Sections
+namespace InventoryTools.Ui.Pages
 {
-    public class SettingPage : IConfigPage
+    public class SettingPage : Page
     {
-      
-        public SettingPage(SettingCategory category)
+        private readonly IEnumerable<ISetting> _settings;
+        private readonly InventoryToolsConfiguration _configuration;
+
+        public SettingPage(ILogger<SettingPage> logger, ImGuiService imGuiService, IEnumerable<ISetting> settings, InventoryToolsConfiguration configuration) : base(logger, imGuiService)
         {
-            Category = category;
+            _settings = settings;
+            _configuration = configuration;
         }
 
-        public string Name
+        public void Initialize(SettingCategory settingCategory)
+        {
+            Category = settingCategory;
+            Settings = _settings.Where(c => c.SettingCategory == Category && c.SettingCategory != SettingCategory.None)
+                .GroupBy(c => c.SettingSubCategory).OrderBy(c => ISetting.SettingSubCategoryOrder.IndexOf(c.Key))
+                .ToDictionary(c => c.Key, c => c.OrderBy(s => s.Name).ToList());
+        }
+
+        public override void Initialize()
+        {
+            
+        }
+
+        public override string Name
         {
             get
             {
@@ -24,28 +43,11 @@ namespace InventoryTools.Sections
         }
 
         public SettingCategory Category { get; set; }
-        private Dictionary<SettingSubCategory, List<ISetting>>? _settings;
         private bool _isSeparator = false;
 
-        public Dictionary<SettingSubCategory, List<ISetting>> Settings
-        {
-            get
-            {
-                if (_settings == null)
-                {
-                    _settings = GenerateSettings();
-                }
-                return _settings;
-            }
-        }
+        public Dictionary<SettingSubCategory, List<ISetting>> Settings;
 
-        public Dictionary<SettingSubCategory, List<ISetting>> GenerateSettings()
-        {
-            return PluginService.PluginLogic.AvailableSettings.Where(c => c.SettingCategory == Category).GroupBy(c => c.SettingSubCategory).OrderBy(c => ISetting.SettingSubCategoryOrder.IndexOf(c.Key)).ToDictionary(c => c.Key, c => c.OrderBy(s => s.Name).ToList());
-        }
-
-
-        public void Draw()
+        public override List<MessageBase>? Draw()
         {
             foreach (var groupedSettings in Settings)
             {
@@ -53,13 +55,15 @@ namespace InventoryTools.Sections
                 {
                     foreach (var setting in groupedSettings.Value)
                     {
-                        setting.Draw(ConfigurationManager.Config);
+                        setting.Draw(_configuration);
                     }
                 }
             }
+
+            return null;
         }
 
-        public bool IsMenuItem => _isSeparator;
-        public bool DrawBorder => true;
+        public override bool IsMenuItem => _isSeparator;
+        public override bool DrawBorder => true;
     }
 }

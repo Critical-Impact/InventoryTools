@@ -3,23 +3,28 @@ using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Filters.Abstract;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters;
 
 public class ZonePreferenceFilter : SortedListFilter<uint, uint>
 {
+    private readonly ExcelCache _excelCache;
+
     public override Dictionary<uint, (string, string?)> CurrentValue(FilterConfiguration configuration)
     {
         (string, string?) GetIngredientPreferenceDetails(uint c)
         {
             var itemName = "";
-            var mapEx = Service.ExcelCache.GetMapSheet().GetRow(c);
+            var mapEx = _excelCache.GetMapSheet().GetRow(c);
             if (mapEx != null)
             {
                 itemName = mapEx.FormattedName;
@@ -97,7 +102,7 @@ public class ZonePreferenceFilter : SortedListFilter<uint, uint>
         {
             if (_territories == null)
             {
-                _territories = Service.ExcelCache.GetMapSheet().ToDictionary(c => c.RowId, c => c.FormattedName);
+                _territories = _excelCache.GetMapSheet().ToDictionary(c => c.RowId, c => c.FormattedName);
             }
 
             return _territories;
@@ -111,7 +116,7 @@ public class ZonePreferenceFilter : SortedListFilter<uint, uint>
         ImGui.Separator();
         DrawTable(configuration);
         ImGui.SameLine();
-        UiHelpers.HelpMarker(HelpText);
+        ImGuiService.HelpMarker(HelpText);
         
         var currentValue = CurrentValue(configuration);
         ImGui.SetNextItemWidth(LabelSize);
@@ -159,8 +164,8 @@ public class ZonePreferenceFilter : SortedListFilter<uint, uint>
             }
             if (_searchTerritories == null)
             {
-                _searchTerritories = Service.ExcelCache.GetMapSheet().Where(c => c.FormattedName.ToParseable().PassesFilter(SearchString.ToParseable())).Take(100)
-                    .Select(c => Service.ExcelCache.GetMapSheet().GetRow(c.RowId)!).ToList();
+                _searchTerritories = _excelCache.GetMapSheet().Where(c => c.FormattedName.ToParseable().PassesFilter(SearchString.ToParseable())).Take(100)
+                    .Select(c => _excelCache.GetMapSheet().GetRow(c.RowId)!).ToList();
             }
 
             return _searchTerritories;
@@ -175,5 +180,10 @@ public class ZonePreferenceFilter : SortedListFilter<uint, uint>
             _searchString = value;
             _searchTerritories = null;
         }
+    }
+
+    public ZonePreferenceFilter(ILogger<ZonePreferenceFilter> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
+    {
+        _excelCache = excelCache;
     }
 }

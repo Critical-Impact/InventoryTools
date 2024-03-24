@@ -1,45 +1,55 @@
+using System.Collections.Generic;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
 using InventoryTools.Ui.Widgets;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
 {
     public class CraftAmountCanCraftColumn : IntegerColumn
     {
+        public CraftAmountCanCraftColumn(ILogger<CraftAmountCanCraftColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
         public override ColumnCategory ColumnCategory => ColumnCategory.Crafting;
-        public override int? CurrentValue(InventoryItem item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
         {
             return 0;
         }
 
-        public override int? CurrentValue(ItemEx item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
             return 0;
         }
 
-        public override int? CurrentValue(SortingResult item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
         {
             return 0;
         }
 
-        public override int? CurrentValue(CraftItem currentValue)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, CraftItem currentValue)
         {
             return (int?) (currentValue.CraftOperationsRequired);
         }
         
-        public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            CraftItem item, int rowIndex)
         {
             ImGui.TableNextColumn();
-            if (CurrentValue(item) > 0)
+            if (CurrentValue(columnConfiguration, item) > 0)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.ParsedBlue);
             }
 
-            var currentValue = CurrentValue(item);
+            var currentValue = CurrentValue(columnConfiguration, item);
             if (currentValue != null)
             {
                 var fmt = $"{currentValue.Value:n0}";
@@ -54,10 +64,11 @@ namespace InventoryTools.Logic.Columns
                 ImGuiUtil.VerticalAlignText(EmptyText, configuration.TableHeight, false);
             }
 
-            if (CurrentValue(item) > 0)
+            if (CurrentValue(columnConfiguration, item) > 0)
             {
                 ImGui.PopStyleColor();
             }
+            return null;
         }
 
         public override string Name { get; set; } = "Amount can Craft";

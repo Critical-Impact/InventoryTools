@@ -1,25 +1,35 @@
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
+using InventoryTools.Extensions;
+using InventoryTools.Images;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.Logging;
+using OtterGui.Classes;
 
 namespace InventoryTools.Logic.Columns
 {
     public class IsAquariumItemColumn : CheckboxColumn
     {
-        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override bool? CurrentValue(InventoryItem item)
+        public IsAquariumItemColumn(ILogger<IsAquariumItemColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
         {
-            return CurrentValue(item.Item);
+        }
+        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        {
+            return CurrentValue(columnConfiguration, item.Item);
         }
 
-        public override bool? CurrentValue(ItemEx item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
             return item.IsAquariumItem;
         }
 
-        public override bool? CurrentValue(SortingResult item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
         {
-            return CurrentValue(item.InventoryItem);
+            return CurrentValue(columnConfiguration, item.InventoryItem);
         }
 
         public override string Name { get; set; } = "Is Aquarium Item?";

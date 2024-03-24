@@ -1,12 +1,16 @@
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
     public class LeveIsCraftLeveFilter : BooleanFilter
     {
+        private readonly ExcelCache _excelCache;
         public override string Key { get; set; } = "LeveIsCraftLeve";
         public override string Name { get; set; } = "Is Craft Leve Item?";
         public override string HelpText { get; set; } = "Is this item craftable and a hand-in for a leve?";
@@ -21,8 +25,8 @@ namespace InventoryTools.Logic.Filters
             return currentValue switch
             {
                 null => true,
-                true => Service.ExcelCache.IsItemCraftLeve(item.ItemId),
-                _ => !Service.ExcelCache.IsItemCraftLeve(item.ItemId)
+                true => _excelCache.IsItemCraftLeve(item.ItemId),
+                _ => !_excelCache.IsItemCraftLeve(item.ItemId)
             };
         }
 
@@ -32,9 +36,14 @@ namespace InventoryTools.Logic.Filters
             return currentValue switch
             {
                 null => true,
-                true => Service.ExcelCache.IsItemCraftLeve(item.RowId),
-                _ => !Service.ExcelCache.IsItemCraftLeve(item.RowId)
+                true => _excelCache.IsItemCraftLeve(item.RowId),
+                _ => !_excelCache.IsItemCraftLeve(item.RowId)
             };
+        }
+
+        public LeveIsCraftLeveFilter(ILogger<LeveIsCraftLeveFilter> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
+        {
+            _excelCache = excelCache;
         }
     }
 }

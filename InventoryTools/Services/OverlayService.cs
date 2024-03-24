@@ -11,52 +11,49 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 using InventoryTools.GameUi;
 using InventoryTools.Logic;
 using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Services
 {
-    public class OverlayService : IDisposable, IOverlayService
+    public class OverlayService : IOverlayService
     {
-        private readonly IFilterService _filterService;
+        private readonly IListService _listService;
+        private readonly TableService _tableService;
         private readonly IAddonLifecycle _addonLifecycle;
         private readonly IFramework _frameworkService;
+        private readonly Func<FilterConfiguration, FilterState> _filterStateFactory;
+        private readonly ILogger<OverlayService> _logger;
         private readonly Dictionary<string, bool> _windowVisible = new();
         private readonly HashSet<string> _windowsToTrack = new();
-        private readonly Dictionary<string, IAtkOverlayState> _overlays = new();
+        private readonly List<IGameOverlay> _overlays = new();
         private FilterState? _lastState;
 
-        public OverlayService(IAddonLifecycle addonLifecycle, IFilterService filterService, IFramework frameworkService)
+        public OverlayService(IAddonLifecycle addonLifecycle, IListService listService,TableService tableService, IFramework frameworkService, Func<FilterConfiguration, FilterState> filterStateFactory, IEnumerable<IGameOverlay> gameOverlays, ILogger<OverlayService> logger)
         {
             _addonLifecycle = addonLifecycle;
-            _filterService = filterService;
+            _listService = listService;
+            _tableService = tableService;
             _frameworkService = frameworkService;
-            filterService.FilterModified += FilterServiceOnFilterModified;
-            filterService.UiFilterToggled += FilterServiceOnFilterToggled;
-            filterService.BackgroundFilterToggled += FilterServiceOnFilterToggled;
-            filterService.FilterRecalculated += FilterServiceOnFilterRecalculated;
-            filterService.FilterTableRefreshed += FilterServiceOnFilterTableRefreshed;
-            AddOverlay(new RetainerListOverlay());
-            AddOverlay(new InventoryExpansionOverlay());
-            AddOverlay(new ArmouryBoardOverlay());
-            AddOverlay(new InventoryLargeOverlay());
-            AddOverlay(new InventoryGridOverlay());
-            AddOverlay(new InventoryRetainerLargeOverlay());
-            AddOverlay(new InventoryRetainerOverlay());
-            AddOverlay(new InventoryBuddyOverlay());
-            AddOverlay(new InventoryBuddyOverlay2());
-            AddOverlay(new FreeCompanyChestOverlay());
-            AddOverlay(new InventoryMiragePrismBoxOverlay());
-            AddOverlay(new CabinetWithdrawOverlay());
+            _filterStateFactory = filterStateFactory;
+            _logger = logger;
+            listService.ListConfigurationChanged += ListServiceOnListModified;
+            listService.UiListToggled += ListServiceOnListToggled;
+            listService.BackgroundListToggled += ListServiceOnListToggled;
+            _tableService.TableRefreshed += TableRefreshed;
+            foreach (var overlay in gameOverlays)
+            {
+                AddOverlay(overlay);
+            }
             _addonLifecycle.RegisterListener(AddonEvent.PostRefresh, PostRefresh);
             _addonLifecycle.RegisterListener(AddonEvent.PostSetup, PostSetup);
             _addonLifecycle.RegisterListener(AddonEvent.PreFinalize, PreFinalize);
             _addonLifecycle.RegisterListener(AddonEvent.PostRequestedUpdate,PostRequestedUpdate );
             frameworkService.Update += FrameworkOnUpdate;
-            PluginService.OnPluginLoaded += PluginServiceOnOnPluginLoaded;
         }
         
         public FilterState? LastState => _lastState;
 
-        public Dictionary<string, IAtkOverlayState> Overlays
+        public List<IGameOverlay> Overlays
         {
             get => _overlays;
         }
@@ -112,14 +109,15 @@ namespace InventoryTools.Services
         {
             foreach (var overlay in Overlays)
             {
-                if (addonName == overlay.Key)
+                if (!overlay.Enabled) continue;
+                if (addonName == overlay.WindowName.ToString())
                 {
-                    if (overlay.Value.NeedsStateRefresh)
+                    if (overlay.NeedsStateRefresh)
                     {
-                        overlay.Value.UpdateState(_lastState);
-                        overlay.Value.NeedsStateRefresh = false;
+                        overlay.UpdateState(_lastState);
+                        overlay.NeedsStateRefresh = false;
                     }
-                    if (_windowVisible.ContainsKey(overlay.Key) && _windowVisible[overlay.Key] && overlay.Value.Draw())
+                    if (_windowVisible.ContainsKey(overlay.WindowName.ToString()) && _windowVisible[overlay.WindowName.ToString()] && overlay.Draw())
                     {
                         
                     }
@@ -127,57 +125,36 @@ namespace InventoryTools.Services
             }
         }
 
-        private void FilterServiceOnFilterRecalculated(FilterConfiguration configuration)
-        {
-            if (PluginService.PluginLoaded)
-            {
-                RefreshOverlayStates();
-            }
-        }        
-        
-        private void FilterServiceOnFilterTableRefreshed(RenderTableBase tableBase)
-        {
-            if (PluginService.PluginLoaded)
-            {
-                RefreshOverlayStates();
-            }
-        }
-
-        private void PluginServiceOnOnPluginLoaded()
+        private void TableRefreshed(RenderTableBase tableBase)
         {
             RefreshOverlayStates();
         }
-        
-        
 
-        private void FilterServiceOnFilterToggled(FilterConfiguration configuration, bool newstate)
+        private void ListServiceOnListToggled(FilterConfiguration configuration, bool newstate)
         {
-            if (PluginService.PluginLoaded)
-            {
-                RefreshOverlayStates();
-            }
+            RefreshOverlayStates();
         }
 
-        private void FilterServiceOnFilterModified(FilterConfiguration configuration)
+        private void ListServiceOnListModified(FilterConfiguration configuration)
         {
-            if (PluginService.PluginLoaded)
-            {
-                RefreshOverlayStates();
-            }
+            RefreshOverlayStates();
         }
 
         public void RefreshOverlayStates()
         {
-            var activeFilter = _filterService.GetActiveUiFilter(false);
-            var activeBackgroundFilter = _filterService.GetActiveBackgroundFilter();
-            Service.Log.Debug("Overlays refreshing, active filter is " + (activeFilter?.Name ?? "no filter"));
-            if (activeFilter != null && _filterService.HasFilterTable(activeFilter))
+            var activeFilter = _listService.GetActiveUiList(false);
+            var activeBackgroundFilter = _listService.GetActiveBackgroundList();
+            _logger.LogDebug("Overlays refreshing, active filter is " + (activeFilter?.Name ?? "no filter"));
+            if (activeFilter != null && _tableService.HasListTable(activeFilter))
             {
-                UpdateState(new FilterState(activeFilter){FilterTable = _filterService.GetFilterTable(activeFilter)});
+                var newState = _filterStateFactory.Invoke(activeFilter);
+                newState.FilterTable = _tableService.GetListTable(activeFilter);
+                UpdateState(newState);
             }
             else if (activeBackgroundFilter != null)
             {
-                UpdateState(new FilterState(activeBackgroundFilter));
+                var newState = _filterStateFactory.Invoke(activeBackgroundFilter);
+                UpdateState(newState);
             }
             else
             {
@@ -189,15 +166,16 @@ namespace InventoryTools.Services
         {
             foreach (var overlay in _overlays)
             {
-                if (overlay.Value.NeedsStateRefresh)
+                if (!overlay.Enabled) continue;
+                if (overlay.NeedsStateRefresh)
                 {
-                    overlay.Value.UpdateState(_lastState);
-                    overlay.Value.NeedsStateRefresh = false;
+                    overlay.UpdateState(_lastState);
+                    overlay.NeedsStateRefresh = false;
                 }
 
-                if (overlay.Value.HasAddon)
+                if (overlay.HasAddon)
                 {
-                    overlay.Value.Update();
+                    overlay.Update();
                 }
             }
         }
@@ -206,60 +184,55 @@ namespace InventoryTools.Services
         {
             foreach (var overlay in _overlays)
             {
-                overlay.Value.UpdateState(filterState);
+                if (!overlay.Enabled) continue;
+                overlay.UpdateState(filterState);
                 _lastState = filterState;
             }
         }
 
-
-        public void AddOverlay(IAtkOverlayState overlayState)
+        public void EnableOverlay(IGameOverlay overlayState)
         {
-            _windowsToTrack.Add(overlayState.WindowName.ToString());
-            if (overlayState.ExtraWindows != null)
+            overlayState.Enabled = true;
+            overlayState.NeedsStateRefresh = true;
+        }
+
+        public void DisableOverlay(IGameOverlay overlayState)
+        {
+            overlayState.Enabled = false;
+            overlayState.Clear();
+        }
+
+
+        public void AddOverlay(IGameOverlay overlay)
+        {
+            _windowsToTrack.Add(overlay.WindowName.ToString());
+            if (overlay.ExtraWindows != null)
             {
-                foreach (var extraWindow in overlayState.ExtraWindows)
+                foreach (var extraWindow in overlay.ExtraWindows)
                 {
-                    _windowsToTrack.Add(overlayState.WindowName.ToString());
+                    _windowsToTrack.Add(extraWindow.ToString());
                 }
             }
             
-            
-            if (!Overlays.ContainsKey(overlayState.WindowName.ToString()))
+            if (!Overlays.Contains(overlay))
             {
-                Overlays.Add(overlayState.WindowName.ToString(), overlayState);
-                overlayState.Setup();
-                overlayState.Draw();
+                Overlays.Add(overlay);
+                overlay.Setup();
+                overlay.Draw();
             }
             else
             {
-                Service.Log.Error("Attempted to add an overlay that is already registered.");
+                _logger.LogError("Attempted to add an overlay that is already registered.");
             }
-        }
-
-        public void RemoveOverlay(WindowName windowName)
-        {
-            if (Overlays.ContainsKey(windowName.ToString()))
-            {
-                var atkOverlayState = Overlays[windowName.ToString()];
-                atkOverlayState.Clear();
-                Overlays.Remove(windowName.ToString());
-            }
-        }
-
-        public void RemoveOverlay(IAtkOverlayState overlayState)
-        {
-            RemoveOverlay(overlayState.WindowName);
         }
 
         public void ClearOverlays()
         {
             foreach (var overlay in _overlays)
             {
-                RemoveOverlay(overlay.Value);
+                overlay.Clear();
             }
         }
-
-        
         
         private bool _disposed;
         public void Dispose()
@@ -277,29 +250,13 @@ namespace InventoryTools.Services
                 _addonLifecycle.UnregisterListener(AddonEvent.PreFinalize, PreFinalize);                
                 _addonLifecycle.UnregisterListener(AddonEvent.PostRequestedUpdate, PostRequestedUpdate);                
                 _frameworkService.Update -= FrameworkOnUpdate;
-                _filterService.FilterTableRefreshed -= FilterServiceOnFilterTableRefreshed;
-                _filterService.FilterRecalculated -= FilterServiceOnFilterRecalculated;
+                _tableService.TableRefreshed -= TableRefreshed;
                 ClearOverlays();
-                _filterService.FilterModified -= FilterServiceOnFilterModified;
-                _filterService.UiFilterToggled -= FilterServiceOnFilterToggled;
-                _filterService.BackgroundFilterToggled -= FilterServiceOnFilterToggled;
-                PluginService.OnPluginLoaded -= PluginServiceOnOnPluginLoaded;
+                _listService.ListConfigurationChanged -= ListServiceOnListModified;
+                _listService.UiListToggled -= ListServiceOnListToggled;
+                _listService.BackgroundListToggled -= ListServiceOnListToggled;
             }
             _disposed = true;         
-        }
-        
-        ~OverlayService()
-        {
-#if DEBUG
-            // In debug-builds, make sure that a warning is displayed when the Disposable object hasn't been
-            // disposed by the programmer.
-
-            if( _disposed == false )
-            {
-                Service.Log.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
-            }
-#endif
-            Dispose (true);
         }
     }
 }

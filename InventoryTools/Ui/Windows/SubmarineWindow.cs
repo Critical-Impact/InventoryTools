@@ -3,39 +3,54 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
+using InventoryTools.Mediator;
+using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using OtterGui;
 
 namespace InventoryTools.Ui
 {
-    class SubmarineWindow : Window
+    class SubmarineWindow : UintWindow
     {
-        public override bool SaveState => false;
-        public static string AsKey(uint submarineExplorationPointId)
-        {
-            return "aepid_" + submarineExplorationPointId;
-        }
-        private uint _submarineExplorationPointId;
-        private List<ItemEx> _drops;
-        private SubmarineExplorationEx? SubmarineExplorationEx => Service.ExcelCache.GetSubmarineExplorationExSheet().GetRow(_submarineExplorationPointId);
+        private readonly ExcelCache _excelCache;
+        private readonly IIconService _iconService;
 
-        public SubmarineWindow(uint submarineExplorationPointId, string name = "Invalid Submarine Exploration") : base(name)
+        public SubmarineWindow(ILogger<SubmarineWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ExcelCache excelCache, IIconService iconService, string name = "Submarine Window") : base(logger, mediator, imGuiService, configuration, name)
+        {
+            _excelCache = excelCache;
+            _iconService = iconService;
+        }
+        public override void Initialize(uint submarineExplorationPointId)
         {
             _submarineExplorationPointId = submarineExplorationPointId;
             if (SubmarineExplorationEx != null)
             {
+                Key = "sepid_" + submarineExplorationPointId;
                 WindowName = "" + SubmarineExplorationEx.FormattedNameShort;
                 _drops = SubmarineExplorationEx.Drops.Where(c => c.Value != null).Select(c => c.Value!).ToList();
             }
             else
             {
+                WindowName = "Invalid Submarine Exploration";
+                Key = "sepid_invalid";
                 _drops = new List<ItemEx>();
             }
         }
-        public override string Key => AsKey(_submarineExplorationPointId);
+        public override bool SaveState => false;
+        private uint _submarineExplorationPointId;
+        private List<ItemEx> _drops;
+        private SubmarineExplorationEx? SubmarineExplorationEx => _excelCache.GetSubmarineExplorationExSheet().GetRow(_submarineExplorationPointId);
+
+        public override string GenericKey { get; } = "submarine";
+        public override string GenericName { get; } = "Submarines";
         public override bool DestroyOnClose => true;
         public override void Draw()
         {
@@ -49,7 +64,7 @@ namespace InventoryTools.Ui
                 ImGui.TextUnformatted("Unlocked Via: " + SubmarineExplorationEx.SubmarineUnlock?.SubmarineExplorationUnlockEx.Value?.FormattedNameShort ?? "N/A");
                 ImGui.TextUnformatted("Rank Required: " + SubmarineExplorationEx.RankReq);
                 ;
-                var itemIcon = PluginService.IconStorage[Icons.AirshipIcon];
+                var itemIcon = _iconService[Icons.AirshipIcon];
                 ImGui.Image(itemIcon.ImGuiHandle, new Vector2(100, 100) * ImGui.GetIO().FontGlobalScale);
                 
                 
@@ -63,13 +78,13 @@ namespace InventoryTools.Ui
                         ImGui.PushID("Reward"+index);
                         var drop = _drops[index];
                         
-                        var useIcon = PluginService.IconStorage[drop.Icon];
+                        var useIcon = _iconService[drop.Icon];
                         if (useIcon != null)
                         {
                             if (ImGui.ImageButton(useIcon.ImGuiHandle,
                                     new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1), 0))
                             {
-                                PluginService.WindowService.OpenItemWindow(drop.RowId);
+                                MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), drop.RowId));
                             }
                             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right)) 
                             {
@@ -78,10 +93,10 @@ namespace InventoryTools.Ui
                 
                             if (ImGui.BeginPopup("RightClickUse"+ drop.RowId))
                             {
-                                var itemEx = Service.ExcelCache.GetItemExSheet().GetRow(drop.RowId);
+                                var itemEx = _excelCache.GetItemExSheet().GetRow(drop.RowId);
                                 if (itemEx != null)
                                 {
-                                    itemEx.DrawRightClickPopup();
+                                    MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(itemEx));
                                 }
 
                                 ImGui.EndPopup();

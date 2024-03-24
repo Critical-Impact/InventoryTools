@@ -3,16 +3,22 @@ using CriticalCommonLib.Enums;
 using CriticalCommonLib.Services;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
+using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using InventoryTools.Logic;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Tooltips;
 
 public class HeaderTextTooltip : BaseTooltip
 {
+    public HeaderTextTooltip(ILogger<HeaderTextTooltip> logger, ExcelCache excelCache, InventoryToolsConfiguration configuration, IGameGui gameGui) : base(logger, excelCache, configuration, gameGui)
+    {
+    }
     public override bool IsEnabled =>
-        ConfigurationManager.Config.DisplayTooltip && (ConfigurationManager.Config.TooltipHeaderLines != 0 ||
-                                                       ConfigurationManager.Config.TooltipDisplayHeader);
+        Configuration.DisplayTooltip && (Configuration.TooltipHeaderLines != 0 ||
+                                         Configuration.TooltipDisplayHeader);
 
     public override unsafe void OnGenerateItemTooltip(NumberArrayData* numberArrayData, StringArrayData* stringArrayData)
     {
@@ -46,14 +52,14 @@ public class HeaderTextTooltip : BaseTooltip
             if (seStr != null && seStr.Payloads.Count > 0)
             {
                 var newText = "";
-                if (ConfigurationManager.Config.TooltipHeaderLines != 0)
+                if (Configuration.TooltipHeaderLines != 0)
                 {
-                    for (int i = 0; i < ConfigurationManager.Config.TooltipHeaderLines; i++)
+                    for (int i = 0; i < Configuration.TooltipHeaderLines; i++)
                     {
                         newText += "\n";
                     }
                 }
-                if (ConfigurationManager.Config.TooltipDisplayHeader)
+                if (Configuration.TooltipDisplayHeader)
                 {
                     newText += "\n[Allagan Tools]";
                 }
@@ -62,7 +68,7 @@ public class HeaderTextTooltip : BaseTooltip
                 {
                     var lines = new List<Payload>()
                     {
-                        new UIForegroundPayload((ushort)(ConfigurationManager.Config.TooltipColor ?? 1)),
+                        new UIForegroundPayload((ushort)(Configuration.TooltipColor ?? 1)),
                         new UIGlowPayload(0),
                         new TextPayload(newText),
                         new UIGlowPayload(0),

@@ -5,12 +5,16 @@ using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Internal;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Ui.Widgets;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 using Vector2 = FFXIVClientStructs.FFXIV.Common.Math.Vector2;
 
@@ -18,10 +22,23 @@ namespace InventoryTools.Logic.Columns;
 
 public class CraftSettingsColumn : IColumn
 {
+    private readonly ILogger<CraftSettingsColumn> _logger;
+    private readonly ExcelCache _excelCache;
+    public ImGuiService ImGuiService { get; }
+
+    public CraftSettingsColumn(ILogger<CraftSettingsColumn> logger, ImGuiService imGuiService, ExcelCache excelCache)
+    {
+        _logger = logger;
+        _excelCache = excelCache;
+        ImGuiService = imGuiService;
+         _settingsIcon = new(imGuiService.IconService.LoadIcon(66319),  new Vector2(22, 22));
+        _hqIcon = imGuiService.IconService.LoadImage("hq");
+        _retainerIcon = imGuiService.IconService.LoadIcon(60425);
+    }
     public ColumnCategory ColumnCategory => ColumnCategory.Crafting;
-    private HoverButton _settingsIcon { get; } = new(PluginService.IconStorage.LoadIcon(66319),  new Vector2(22, 22));
-    private IDalamudTextureWrap _hqIcon { get; } = PluginService.IconStorage.LoadImage("hq");
-    private IDalamudTextureWrap _retainerIcon { get; } = PluginService.IconStorage.LoadIcon(60425);
+    private HoverButton _settingsIcon { get; }
+    private IDalamudTextureWrap _hqIcon { get; }
+    private IDalamudTextureWrap _retainerIcon { get; }
 
 
     public string Name { get; set; } = "Settings";
@@ -43,72 +60,86 @@ public class CraftSettingsColumn : IColumn
     }
 
     public bool? CraftOnly { get; } = true;
-    public IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items)
+    public IEnumerable<InventoryItem> Filter(ColumnConfiguration columnConfiguration, IEnumerable<InventoryItem> items)
     {
         return items;
     }
 
-    public IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items)
+    public IEnumerable<SortingResult> Filter(ColumnConfiguration columnConfiguration, IEnumerable<SortingResult> items)
     {
         return items;
     }
 
-    public IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items)
+    public IEnumerable<ItemEx> Filter(ColumnConfiguration columnConfiguration, IEnumerable<ItemEx> items)
     {
         return items;
     }
 
-    public IEnumerable<CraftItem> Filter(IEnumerable<CraftItem> items)
+    public IEnumerable<CraftItem> Filter(ColumnConfiguration columnConfiguration, IEnumerable<CraftItem> items)
     {
         return items;
     }
 
-    public IEnumerable<InventoryChange> Filter(IEnumerable<InventoryChange> items)
+    public IEnumerable<InventoryChange> Filter(ColumnConfiguration columnConfiguration,
+        IEnumerable<InventoryChange> items)
     {
         return items;
     }
 
-    public IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
+    public IEnumerable<InventoryItem> Sort(ColumnConfiguration columnConfiguration, ImGuiSortDirection direction,
+        IEnumerable<InventoryItem> items)
     {
         return items;
     }
 
-    public IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items)
+    public IEnumerable<SortingResult> Sort(ColumnConfiguration columnConfiguration, ImGuiSortDirection direction,
+        IEnumerable<SortingResult> items)
     {
         return items;
     }
 
-    public IEnumerable<ItemEx> Sort(ImGuiSortDirection direction, IEnumerable<ItemEx> items)
+    public IEnumerable<ItemEx> Sort(ColumnConfiguration columnConfiguration, ImGuiSortDirection direction,
+        IEnumerable<ItemEx> items)
     {
         return items;
     }
 
-    public IEnumerable<CraftItem> Sort(ImGuiSortDirection direction, IEnumerable<CraftItem> items)
+    public IEnumerable<CraftItem> Sort(ColumnConfiguration columnConfiguration, ImGuiSortDirection direction,
+        IEnumerable<CraftItem> items)
     {
         return items;
     }
 
-    public IEnumerable<InventoryChange> Sort(ImGuiSortDirection direction, IEnumerable<InventoryChange> items)
+    public IEnumerable<InventoryChange> Sort(ColumnConfiguration columnConfiguration, ImGuiSortDirection direction,
+        IEnumerable<InventoryChange> items)
     {
         return items;
     }
 
-    public void Draw(FilterConfiguration configuration, InventoryItem item, int rowIndex)
+    public List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
+        InventoryItem item,
+        int rowIndex)
     {
-        return;
+        return null;
     }
 
-    public void Draw(FilterConfiguration configuration, SortingResult item, int rowIndex)
+    public List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
+        SortingResult item,
+        int rowIndex)
     {
-        return;
+        return null;
     }
 
-    public void Draw(FilterConfiguration configuration, ItemEx item, int rowIndex)
+    public List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
+        ItemEx item,
+        int rowIndex)
     {
-        return;
+        return null;
     }
 
-    public void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
+    public List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
+        CraftItem item,
+        int rowIndex)
     {
         ImGui.TableNextColumn();
 
@@ -189,10 +220,11 @@ public class CraftSettingsColumn : IColumn
 
                     ImGui.TextUnformatted("Sourcing: " + (ingredientPreferenceDefault?.FormattedName ?? "Use Default"));
                     ImGui.TextUnformatted("Retainer: " + (retainerRetrievalDefault?.FormattedName() ?? "Use Default"));
-                    ImGui.TextUnformatted("Zone: " + (zonePreference != null ? Service.ExcelCache.GetMapSheet().GetRow(zonePreference.Value)?.FormattedName ?? "Use Default" : "Use Default"));
+                    ImGui.TextUnformatted("Zone: " + (zonePreference != null ? _excelCache.GetMapSheet().GetRow(zonePreference.Value)?.FormattedName ?? "Use Default" : "Use Default"));
                 }
             }
         }
+        return null;
     }
 
     private void DrawRetainerIcon(FilterConfiguration configuration, int rowIndex, CraftItem item, CraftRetainerRetrieval? defaultRetainerRetrieval, CraftRetainerRetrieval retainerRetrieval)
@@ -259,12 +291,12 @@ public class CraftSettingsColumn : IColumn
                 if (hqRequired != null)
                 {
                     configuration.CraftList.UpdateHQRequired(item.ItemId, false);
-                    configuration.StartRefresh();
+                    configuration.NeedsRefresh = true;
                 }
                 else
                 {
                     configuration.CraftList.UpdateHQRequired(item.ItemId, true);
-                    configuration.StartRefresh();
+                    configuration.NeedsRefresh = true;
                 }
 
             }
@@ -286,12 +318,12 @@ public class CraftSettingsColumn : IColumn
                 if (hqRequired != null)
                 {
                     configuration.CraftList.UpdateHQRequired(item.ItemId, null);
-                    configuration.StartRefresh();
+                    configuration.NeedsRefresh = true;
                 }
                 else
                 {
                     configuration.CraftList.UpdateHQRequired(item.ItemId, true);
-                    configuration.StartRefresh();
+                    configuration.NeedsRefresh = true;
                 }
             }
             else if (item.Item.CanBeHq && ImGui.IsItemClicked(ImGuiMouseButton.Right))
@@ -305,22 +337,22 @@ public class CraftSettingsColumn : IColumn
         
     }
 
-    private static void DrawRecipeIcon(FilterConfiguration configuration, int rowIndex, CraftItem item)
+    private void DrawRecipeIcon(FilterConfiguration configuration, int rowIndex, CraftItem item)
     {
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
         var icon = item.SourceIcon;
-        ImGui.Image(PluginService.IconStorage[icon].ImGuiHandle,
+        ImGui.Image(ImGuiService.IconService[icon].ImGuiHandle,
             new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
         var itemRecipe = item.Recipe;
         if (itemRecipe != null)
         {
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
             {
-                var itemRecipes = Service.ExcelCache.ItemRecipes[item.ItemId];
+                var itemRecipes = _excelCache.ItemRecipes[item.ItemId];
                 if (itemRecipes.Count != 1)
                 {
                     var actualRecipes = itemRecipes.Select(c =>
-                            Service.ExcelCache.GetRecipeExSheet().GetRow(c)!)
+                            _excelCache.GetRecipeExSheet().GetRow(c)!)
                         .OrderBy(c => c.CraftType.Value?.Name ?? "").ToList();
                     if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
                     {
@@ -336,13 +368,13 @@ public class CraftSettingsColumn : IColumn
                         {
                             configuration.CraftList.SetCraftRecipe(item.ItemId,
                                 newRecipe.RowId);
-                            configuration.StartRefresh();
+                            configuration.NeedsRefresh = true;
                         }
                         else
                         {
                             configuration.CraftList.UpdateCraftRecipePreference(item.ItemId,
                                 newRecipe.RowId);
-                            configuration.StartRefresh();
+                            configuration.NeedsRefresh = true;
                         }
                     }
                     else if (ImGui.IsMouseClicked(ImGuiMouseButton.Right))
@@ -363,7 +395,7 @@ public class CraftSettingsColumn : IColumn
                     }
                 }
 
-                if (Service.ExcelCache.GetItemRecipes(item.ItemId).Count > 1)
+                if (_excelCache.GetItemRecipes(item.ItemId).Count > 1)
                 {
                     ImGui.NewLine();
                     ImGui.Text("Left Click: Next Recipe");
@@ -380,7 +412,7 @@ public class CraftSettingsColumn : IColumn
                 foreach (var ingredient in item.Item.CompanyCraftSequenceEx.MaterialsRequired(item.Phase))
                 {
                     var itemId = ingredient.ItemId;
-                    var actualItem = Service.ExcelCache.GetItemExSheet().GetRow(itemId);
+                    var actualItem = _excelCache.GetItemExSheet().GetRow(itemId);
                     var quantity = ingredient.Quantity;
                     if (actualItem != null)
                     {
@@ -398,14 +430,14 @@ public class CraftSettingsColumn : IColumn
                 if (item.IngredientPreference.LinkedItemId != null && item.IngredientPreference.LinkedItemQuantity != null)
                 {
                     var itemName =
-                        Service.ExcelCache.GetItemExSheet().GetRow(item.IngredientPreference.LinkedItemId.Value)
+                        _excelCache.GetItemExSheet().GetRow(item.IngredientPreference.LinkedItemId.Value)
                             ?.NameString ?? "Unknown Item" + " : " + item.IngredientPreference.LinkedItemQuantity.Value;
                     ImGui.Text(itemName);
                     if (item.IngredientPreference.LinkedItem2Id != null &&
                         item.IngredientPreference.LinkedItem2Quantity != null)
                     {
                         var itemName2 =
-                            (Service.ExcelCache.GetItemExSheet().GetRow(item.IngredientPreference.LinkedItem2Id.Value)
+                            (_excelCache.GetItemExSheet().GetRow(item.IngredientPreference.LinkedItem2Id.Value)
                                 ?.NameString ?? "Unknown Item") + " : " +
                             item.IngredientPreference.LinkedItem2Quantity.Value;
                         ImGui.Text(itemName2);
@@ -415,7 +447,7 @@ public class CraftSettingsColumn : IColumn
                         item.IngredientPreference.LinkedItem3Quantity != null)
                     {
                         var itemName3 =
-                            (Service.ExcelCache.GetItemExSheet().GetRow(item.IngredientPreference.LinkedItem3Id.Value)
+                            (_excelCache.GetItemExSheet().GetRow(item.IngredientPreference.LinkedItem3Id.Value)
                                 ?.NameString ?? "Unknown Item") + " : " +
                             item.IngredientPreference.LinkedItem3Quantity.Value;
                         ImGui.Text(itemName3);
@@ -431,7 +463,7 @@ public class CraftSettingsColumn : IColumn
         ImGui.SameLine();
     }
 
-    private static bool DrawSourceSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
+    private bool DrawSourceSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
     {
         if (item.Item.IngredientPreferences.Count != 0)
         {
@@ -468,7 +500,7 @@ public class CraftSettingsColumn : IColumn
         return false;
     }
     
-    private static bool DrawZoneSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
+    private  bool DrawZoneSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
     {
         if (item.IngredientPreference.Type is IngredientPreferenceType.Buy or IngredientPreferenceType.Item or IngredientPreferenceType.Mobs or IngredientPreferenceType.Mining or IngredientPreferenceType.Botany or IngredientPreferenceType.HouseVendor )
         {
@@ -476,7 +508,7 @@ public class CraftSettingsColumn : IColumn
             if (mapIds.Count != 0)
             {
                 var mapId = configuration.CraftList.GetZonePreference(item.IngredientPreference.Type,item.ItemId);
-                var currentMap = mapId != null ? Service.ExcelCache.GetMapSheet().GetRow(mapId.Value) : null;
+                var currentMap = mapId != null ? _excelCache.GetMapSheet().GetRow(mapId.Value) : null;
                 var previewValue = currentMap?.FormattedName ?? "Use Default";
                 ImGui.Text("Zone Preference:");
                 using (var combo = ImRaii.Combo("##ZonePreference" + rowIndex, previewValue))
@@ -491,7 +523,7 @@ public class CraftSettingsColumn : IColumn
                             return true;
                         }
 
-                        var maps = mapIds.Select(c => Service.ExcelCache.GetMapSheet().GetRow(c)).Where(c => c != null);
+                        var maps = mapIds.Select(c => _excelCache.GetMapSheet().GetRow(c)).Where(c => c != null);
                         foreach (var map in maps)
                         {
                             if (map == null) continue;
@@ -511,7 +543,7 @@ public class CraftSettingsColumn : IColumn
         return false;
     }
 
-    private static bool DrawRetainerRetrievalSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
+    private bool DrawRetainerRetrievalSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
     {
         //Retrieve from retainer combo
         var craftRetainerRetrieval = configuration.CraftList.GetCraftRetainerRetrieval(item.ItemId);
@@ -574,7 +606,7 @@ public class CraftSettingsColumn : IColumn
         return false;
     }
 
-    private static bool DrawHqSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
+    private bool DrawHqSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
     {
         if (item.Item.CanBeHq)
         {
@@ -619,15 +651,15 @@ public class CraftSettingsColumn : IColumn
         return false;
     }
 
-    private static bool DrawRecipeSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
+    private bool DrawRecipeSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
     {
-        if (Service.ExcelCache.ItemRecipes.ContainsKey(item.ItemId))
+        if (_excelCache.ItemRecipes.ContainsKey(item.ItemId))
         {
-            var itemRecipes = Service.ExcelCache.ItemRecipes[item.ItemId];
+            var itemRecipes = _excelCache.ItemRecipes[item.ItemId];
             if (itemRecipes.Count != 1)
             {
                 var actualRecipes = itemRecipes.Select(c =>
-                        Service.ExcelCache.GetRecipeExSheet().GetRow(c)!)
+                        _excelCache.GetRecipeExSheet().GetRow(c)!)
                     .OrderBy(c => c.CraftType.Value?.Name ?? "").ToList();
                 var recipeName = item.Recipe?.CraftType.Value?.Name ?? "";
                 using (var combo = ImRaii.Combo("##SetRecipe" + rowIndex, recipeName))
@@ -643,14 +675,14 @@ public class CraftSettingsColumn : IColumn
                                 {
                                     configuration.CraftList.SetCraftRecipe(item.ItemId,
                                         recipe.RowId);
-                                    configuration.StartRefresh();
+                                    configuration.NeedsRefresh = true;
                                     return true;
                                 }
                                 else
                                 {
                                     configuration.CraftList.UpdateCraftRecipePreference(item.ItemId,
                                         recipe.RowId);
-                                    configuration.StartRefresh();
+                                    configuration.NeedsRefresh = true;
                                     return true;
                                 }
                             }
@@ -663,62 +695,69 @@ public class CraftSettingsColumn : IColumn
         return false;
     }
 
-    public void Draw(FilterConfiguration configuration, InventoryChange item, int rowIndex)
+    public List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
+        InventoryChange item,
+        int rowIndex)
     {
-        Draw(configuration, item.InventoryItem, rowIndex);
+        return Draw(configuration, columnConfiguration, item.InventoryItem, rowIndex);
     }
 
-    public string CsvExport(InventoryItem item)
+    public void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)
     {
-        return "";
+        
     }
 
-    public string CsvExport(SortingResult item)
-    {
-        return "";
-    }
-
-    public string CsvExport(ItemEx item)
+    public string CsvExport(ColumnConfiguration columnConfiguration, InventoryItem item)
     {
         return "";
     }
 
-    public string CsvExport(CraftItem item)
+    public string CsvExport(ColumnConfiguration columnConfiguration, SortingResult item)
     {
         return "";
     }
 
-    public string CsvExport(InventoryChange item)
+    public string CsvExport(ColumnConfiguration columnConfiguration, ItemEx item)
     {
         return "";
     }
 
-    public dynamic? JsonExport(InventoryItem item)
+    public string CsvExport(ColumnConfiguration columnConfiguration, CraftItem item)
+    {
+        return "";
+    }
+
+    public string CsvExport(ColumnConfiguration columnConfiguration, InventoryChange item)
+    {
+        return "";
+    }
+
+    public dynamic? JsonExport(ColumnConfiguration columnConfiguration, InventoryItem item)
     {
         return null;
     }
 
-    public dynamic? JsonExport(SortingResult item)
+    public dynamic? JsonExport(ColumnConfiguration columnConfiguration, SortingResult item)
     {
         return null;
     }
 
-    public dynamic? JsonExport(ItemEx item)
+    public dynamic? JsonExport(ColumnConfiguration columnConfiguration, ItemEx item)
     {
         return null;
     }
 
-    public dynamic? JsonExport(CraftItem item)
+    public dynamic? JsonExport(ColumnConfiguration columnConfiguration, CraftItem item)
     {
         return null;
     }
 
-    public dynamic? JsonExport(InventoryChange item)
+    public dynamic? JsonExport(ColumnConfiguration columnConfiguration, InventoryChange item)
     {
         return null;
     }
 
-    public void Setup(int columnIndex)
+    public void Setup(FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration, int columnIndex)
     {
         ImGui.TableSetupColumn(RenderName ?? Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
     }

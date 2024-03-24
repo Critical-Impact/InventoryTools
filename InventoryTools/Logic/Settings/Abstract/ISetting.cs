@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace InventoryTools.Logic.Settings.Abstract
 {
@@ -9,8 +10,18 @@ namespace InventoryTools.Logic.Settings.Abstract
         public string Name { get; set; }
         public string HelpText { get; set; }
         
+        public string WizardName { get; }
+        
+        public bool HideReset { get; set; }
+        
+        public bool ColourModified { get; set; }
+        public string? Image { get; }
+        public Vector2? ImageSize { get; }
+        
         public SettingCategory SettingCategory { get; set; }
         public SettingSubCategory SettingSubCategory { get; }
+        
+        public string Version { get; }
 
         public bool HasValueSet(InventoryToolsConfiguration configuration);
         

@@ -1,26 +1,36 @@
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
 {
     public class CraftColumn : CheckboxColumn
     {
+        private readonly ExcelCache _excelCache;
+
+        public CraftColumn(ILogger<CraftColumn> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
+        {
+            _excelCache = excelCache;
+        }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override bool? CurrentValue(InventoryItem item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
         {
-            return Service.ExcelCache.CanCraftItem(item.ItemId);
+            return _excelCache.CanCraftItem(item.ItemId);
         }
 
-        public override bool? CurrentValue(ItemEx item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
-            return Service.ExcelCache.CanCraftItem(item.RowId);
+            return _excelCache.CanCraftItem(item.RowId);
         }
 
-        public override bool? CurrentValue(SortingResult item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
         {
-            return Service.ExcelCache.CanCraftItem(item.InventoryItem.ItemId);
+            return _excelCache.CanCraftItem(item.InventoryItem.ItemId);
         }
         
 

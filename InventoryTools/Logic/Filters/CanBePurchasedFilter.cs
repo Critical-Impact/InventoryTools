@@ -1,6 +1,8 @@
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -25,6 +27,10 @@ namespace InventoryTools.Logic.Filters
             var currentValue = CurrentValue(configuration);
             var canBePurchased = item.ObtainedGil;
             return currentValue == null || currentValue.Value && canBePurchased || !currentValue.Value && !canBePurchased;
+        }
+
+        public CanBePurchasedFilter(ILogger<CanBePurchasedFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
         }
     }
 }

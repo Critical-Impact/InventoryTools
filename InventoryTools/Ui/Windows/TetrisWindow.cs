@@ -1,27 +1,34 @@
 using System.Numerics;
+using CriticalCommonLib.Services.Mediator;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic;
 using InventoryTools.Misc;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 using Tetris.GameEngine;
 
 namespace InventoryTools.Ui
 {
-    public class TetrisWindow : Window
+    public class TetrisWindow : GenericWindow
     {
-        public override bool SaveState => false;
+        private readonly TetrisGame _tetrisGame;
 
-        public TetrisWindow(string name = "Tetris") : base(name)
+        public TetrisWindow(ILogger<TetrisWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, TetrisGame tetrisGame, string name = "Tetris Window") : base(logger, mediator, imGuiService, configuration, name)
         {
-            
+            _tetrisGame = tetrisGame;
         }
-        public TetrisWindow() : base("Tetris")
+        public override void Initialize()
         {
-            
+            WindowName = "Tetris";
+            Key = "tetris";
         }
+        
+        public override bool SaveState => false;
 
         public override void Draw()
         {
-            var tetrisGame = Misc.TetrisGame.Instance.Game;
+            var tetrisGame = _tetrisGame.Game;
             ImGui.PushTextWrapPos();
             ImGui.TextUnformatted("Welcome to Tetris. ");
             ImGui.TextUnformatted("Please turn on the tetris overlay, this will overwrite the contents of your main inventory window.");
@@ -37,18 +44,18 @@ namespace InventoryTools.Ui
             ImGui.PopTextWrapPos();
             ImGui.Separator();
 
-            if (ImGui.Button(TetrisGame.TetrisEnabled ? "Disable Tetris Overlay" : "Enable Tetris Overlay"))
+            if (ImGui.Button(_tetrisGame.TetrisEnabled ? "Disable Tetris Overlay" : "Enable Tetris Overlay"))
             {
-                TetrisGame.ToggleTetris();
+                _tetrisGame.ToggleTetris();
             }
             
-            ImGui.TextUnformatted("Overlay: " + (TetrisGame.TetrisEnabled ? "Enabled" : "Disabled"));
+            ImGui.TextUnformatted("Overlay: " + (_tetrisGame.TetrisEnabled ? "Enabled" : "Disabled"));
             ImGui.TextUnformatted("Current Status: " + tetrisGame.Status.ToString());
             if ((tetrisGame.Status == Game.GameStatus.ReadyToStart || tetrisGame.Status == Game.GameStatus.Finished) && ImGui.Button("Start"))
             {
                 if (tetrisGame.Status == Game.GameStatus.Finished)
                 {
-                    TetrisGame.Restart();
+                    _tetrisGame.Restart();
                 }
                 else
                 {
@@ -78,9 +85,8 @@ namespace InventoryTools.Ui
             
         }
         public override FilterConfiguration? SelectedConfiguration => null;
-
-        public static string AsKey => "tetris";
-        public override string Key => AsKey;
+        public override string GenericKey { get; } = "tetris";
+        public override string GenericName { get; } = "Tetris";
         public override bool DestroyOnClose => true;
     }
 }

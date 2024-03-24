@@ -2,6 +2,8 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -32,6 +34,10 @@ namespace InventoryTools.Logic.Filters
             }
 
             return false;
+        }
+
+        public CanBeEquippedFilter(ILogger<CanBeEquippedFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
         }
     }
 }

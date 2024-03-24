@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
@@ -10,6 +11,7 @@ using Dalamud.Interface.Colors;
 using InventoryTools.Attributes;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using OtterGui.Classes;
 
@@ -18,7 +20,8 @@ namespace InventoryTools
     [Serializable]
     public class InventoryToolsConfiguration : IPluginConfiguration
     {
-        public delegate void ConfigurationChangedDelegate();
+        [JsonIgnore]
+        public bool IsDirty { get; set; }
 
         private bool _automaticallyDownloadMarketPrices = false;
         private bool _colorRetainerList = true;
@@ -64,10 +67,19 @@ namespace InventoryTools
         private List<uint>? _tooltipWhitelistCategories = new();
         private bool _tooltipWhitelistBlacklist = false;
         private HashSet<string>? _windowsIgnoreEscape = new HashSet<string>();
-        
-        [JsonProperty]
-        [DefaultValue(300)]
-        public int CraftWindowSplitterPosition { get; set; }
+        private HashSet<uint>? _favouriteItemsList = new HashSet<uint>();
+
+        [JsonProperty] [DefaultValue(300)] public int CraftWindowSplitterPosition { get; set; } = 300;
+
+        public void ClearDirtyFlags()
+        {
+            this.IsDirty = false;
+            foreach (var filter in FilterConfigurations)
+            {
+                filter.ConfigurationDirty = false;
+                filter.TableConfigurationDirty = false;
+            }
+        }
 
         public HashSet<string> WindowsIgnoreEscape
         {
@@ -75,9 +87,52 @@ namespace InventoryTools
             set
             {
                 _windowsIgnoreEscape = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
+
+        public HashSet<uint> FavouriteItemsList
+        {
+            get => _favouriteItemsList ??= new();
+            set
+            {
+                _favouriteItemsList = value;
+                IsDirty = true;
+            }
+        }
+
+        public bool IsFavouriteItem(uint itemId)
+        {
+            return FavouriteItemsList.Contains(itemId);
+        }
+
+        public void FavouriteItem(uint itemId)
+        {
+            FavouriteItemsList.Add(itemId);
+            IsDirty = true;
+        }
+
+        public void UnfavouriteItem(uint itemId)
+        {
+            FavouriteItemsList.Remove(itemId);
+            IsDirty = true;
+        }
+
+        public void ToggleFavouriteItem(uint itemId)
+        {
+            if (FavouriteItemsList.Contains(itemId))
+            {
+                FavouriteItemsList.Remove(itemId);
+            }
+            else
+            {
+                FavouriteItemsList.Add(itemId);
+            }
+            IsDirty = true;
+        }
+        
+        
+        
 
         public bool HistoryEnabled
         {
@@ -85,7 +140,7 @@ namespace InventoryTools
             set
             {
                 _historyEnabled = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
         public bool TooltipWhitelistBlacklist
@@ -94,7 +149,7 @@ namespace InventoryTools
             set
             {
                 _tooltipWhitelistBlacklist = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
         public List<uint> TooltipWhitelistCategories
@@ -103,7 +158,7 @@ namespace InventoryTools
             set
             {
                 _tooltipWhitelistCategories = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -116,7 +171,7 @@ namespace InventoryTools
             set
             {
                 _historyTrackReasons = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -126,7 +181,7 @@ namespace InventoryTools
             set
             {
                 _isVisible = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -136,20 +191,20 @@ namespace InventoryTools
             set
             {
                 _addMoreInformationContextMenu = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
         public void AddWindowToIgnoreEscape(Type windowType)
         {
             WindowsIgnoreEscape.Add(windowType.Name);
-            Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+            IsDirty = true;
         }
 
         public void RemoveWindowFromIgnoreEscape(Type windowType)
         {
             WindowsIgnoreEscape.Remove(windowType.Name);
-            Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+            IsDirty = true;
         }
 
         public void SetWindowIgnoreEscape(Type windowType, bool ignoreEscape)
@@ -196,7 +251,7 @@ namespace InventoryTools
             set
             {
                 _highlightColor = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
         
@@ -207,7 +262,7 @@ namespace InventoryTools
             set
             {
                 _destinationHighlightColor = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -217,7 +272,7 @@ namespace InventoryTools
             set
             {
                 _retainerListColor = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -228,7 +283,7 @@ namespace InventoryTools
             set
             {
                 _tabHighlightColor = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -238,7 +293,7 @@ namespace InventoryTools
             set
             {
                 _displayCrossCharacter = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -248,7 +303,7 @@ namespace InventoryTools
             set
             {
                 _displayTooltip = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -258,7 +313,7 @@ namespace InventoryTools
             set
             {
                 _tooltipCurrentCharacter = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
         
@@ -268,7 +323,7 @@ namespace InventoryTools
             set
             {
                 _tooltipDisplayAmountOwned = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
         
@@ -278,7 +333,7 @@ namespace InventoryTools
             set
             {
                 _tooltipAddCharacterNameOwned = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -288,7 +343,7 @@ namespace InventoryTools
             set
             {
                 _tooltipDisplayMarketAveragePrice = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -298,7 +353,7 @@ namespace InventoryTools
             set
             {
                 _tooltipDisplayMarketLowestPrice = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -308,7 +363,7 @@ namespace InventoryTools
             set
             {
                 _tooltipDisplayRetrieveAmount = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -319,7 +374,7 @@ namespace InventoryTools
             set
             {
                 _tooltipLocationLimit = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
         public TooltipLocationDisplayMode TooltipLocationDisplayMode
@@ -328,7 +383,7 @@ namespace InventoryTools
             set
             {
                 _tooltipLocationDisplayMode = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
         public WindowLayout CraftWindowLayout
@@ -337,7 +392,7 @@ namespace InventoryTools
             set
             {
                 _craftWindowLayout = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
         public WindowLayout FiltersLayout
@@ -346,7 +401,7 @@ namespace InventoryTools
             set
             {
                 _filtersLayout = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -356,7 +411,7 @@ namespace InventoryTools
             set
             {
                 _automaticallyDownloadMarketPrices = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -367,7 +422,7 @@ namespace InventoryTools
             set
             {
                 _marketRefreshTimeHours = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -378,7 +433,7 @@ namespace InventoryTools
             set
             {
                 _marketSaleHistoryLimit = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -388,7 +443,7 @@ namespace InventoryTools
             set
             {
                 _colorRetainerList = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -398,7 +453,7 @@ namespace InventoryTools
             set
             {
                 _showItemNumberRetainerList = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -408,7 +463,7 @@ namespace InventoryTools
             set
             {
                 _invertHighlighting = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -418,7 +473,7 @@ namespace InventoryTools
             set
             {
                 _invertDestinationHighlighting = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -428,7 +483,7 @@ namespace InventoryTools
             set
             {
                 _invertTabHighlighting = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -438,7 +493,7 @@ namespace InventoryTools
             set
             {
                 _highlightWhen = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -448,7 +503,7 @@ namespace InventoryTools
             set
             {
                 _highlightDestination = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -458,7 +513,7 @@ namespace InventoryTools
             set
             {
                 _highlightDestinationEmpty = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -468,7 +523,7 @@ namespace InventoryTools
             set
             {
                 _trackMobSpawns = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
         
@@ -478,7 +533,7 @@ namespace InventoryTools
             set
             {
                 _tooltipDisplayHeader = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
         
@@ -488,7 +543,7 @@ namespace InventoryTools
             set
             {
                 _notificationsSeen = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -500,14 +555,81 @@ namespace InventoryTools
         public void MarkNotificationSeen(NotificationPopup popup)
         {
             NotificationsSeen.Add(popup);
-            Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+            IsDirty = true;
         }
         
         public Dictionary<ulong, HashSet<uint>> AcquiredItems
         {
-            get => _acquiredItems ?? new Dictionary<ulong, HashSet<uint>>();
+            get => _acquiredItems ??= new Dictionary<ulong, HashSet<uint>>();
             set => _acquiredItems = value;
         }
+        
+        public HashSet<string> WizardVersionsSeen
+        {
+            get => _wizardVersionsSeen ??= new();
+            set
+            {
+                _wizardVersionsSeen = value;
+                IsDirty = true;
+            }
+        }
+        
+        [DefaultValue(true)]
+        public bool MarketBoardUseActiveWorld
+        {
+            get => _marketBoardUseActiveWorld;
+            set
+            {
+                _marketBoardUseActiveWorld = value;
+                IsDirty = true;
+            }
+        }
+        
+        [DefaultValue(true)]
+        public bool MarketBoardUseHomeWorld
+        {
+            get => _marketBoardUseHomeWorld;
+            set
+            {
+                _marketBoardUseHomeWorld = value;
+                IsDirty = true;
+            }
+        }
+        
+        public List<uint> MarketBoardWorldIds
+        {
+            get => _marketBoardWorldIds ?? new List<uint>();
+            set
+            {
+                _marketBoardWorldIds = value;
+                IsDirty = true;
+            }
+        }
+
+
+        public bool SeenWizardVersion(string versionNumber)
+        {
+            return WizardVersionsSeen.Contains(versionNumber);
+        }
+
+        public void MarkWizardVersionSeen(string versionNumber)
+        {
+            WizardVersionsSeen.Add(versionNumber);
+            IsDirty = true;
+        }
+        
+        [DefaultValue(true)]
+        public bool ShowWizardNewFeatures
+        {
+            get => _showWizardNewFeatures;
+            set
+            {
+                _showWizardNewFeatures = value;
+                IsDirty = true;
+            }
+        }
+        
+        
 
         public string? ActiveUiFilter { get; set; } = null;
 
@@ -520,7 +642,11 @@ namespace InventoryTools
         public bool SaveBackgroundFilter { get; set; } = false;
 
         public bool FirstRun { get; set; } = true;
-        public bool IntroShown { get; set; } = false;
+
+        [DefaultValue(true)]
+        private bool _showWizardNewFeatures { get; set; } = true;
+
+        private HashSet<string>? _wizardVersionsSeen { get; set; } = null;
         public int SelectedHelpPage { get; set; }
         #if DEBUG
         public int SelectedDebugPage { get; set; }
@@ -561,6 +687,9 @@ namespace InventoryTools
         private ModifiableHotkey? _moreInformationHotKey;
         private ConcurrentDictionary<string,ModifiableHotkey>? _hotkeys;
         private bool _trackMobSpawns = false;
+        private bool _marketBoardUseActiveWorld;
+        private bool _marketBoardUseHomeWorld;
+        private List<uint>? _marketBoardWorldIds;
 
         public ModifiableHotkey? GetHotkey(string hotkey)
         {
@@ -603,7 +732,7 @@ namespace InventoryTools
             set
             {
                 _tooltipHeaderLines = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
 
@@ -613,11 +742,12 @@ namespace InventoryTools
             set
             {
                 _tooltipFooterLines = value;
-                Service.Framework.RunOnFrameworkThread(() => { ConfigurationChanged?.Invoke(); });
+                IsDirty = true;
             }
         }
-        
-        public event ConfigurationChangedDelegate? ConfigurationChanged;
+
+        public LogLevel LogLevel { get; set; } = LogLevel.Information;
+
 
         //Configuration Helpers
 
@@ -638,12 +768,27 @@ namespace InventoryTools
                 ActiveBackgroundFilter = null;
             }
         }
-
-        public void RestoreServiceSettings()
+        
+        public bool HasDefaultCraftList()
         {
-            PluginService.MarketCache.CacheAutoRetrieve = _automaticallyDownloadMarketPrices;
-            PluginService.MarketCache.CacheTimeHours = _marketRefreshTimeHours;
-            PluginService.Universalis.SetSaleHistoryLimit(_marketRefreshTimeHours);
+            if (FilterConfigurations.Any(c => c.FilterType == FilterType.CraftFilter && c.CraftListDefault))
+            {
+                return true;
+            }
+
+            return false;
         }
+
+        public bool HasList(string name)
+        {
+            if (FilterConfigurations.Any(c => c.Name == name))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+
     }
 }

@@ -1,6 +1,8 @@
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -35,6 +37,10 @@ namespace InventoryTools.Logic.Filters
                 true => item.AdditionalData != 0 && item.ItemAction.Row == 0 && item.FilterGroup != 37 && item.FilterGroup != 15 && item.FilterGroup != 39 && item.FilterGroup != 18,
                 _ => !(item.AdditionalData != 0 && item.ItemAction.Row == 0 && item.FilterGroup != 37 && item.FilterGroup != 15 && item.FilterGroup != 39 && item.FilterGroup != 18)
             };
+        }
+
+        public IsHousingItemFilter(ILogger<IsHousingItemFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
         }
     }
 }

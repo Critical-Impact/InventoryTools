@@ -1,63 +1,76 @@
+using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin.Services;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns;
 
 public class NameIconColumn : TextIconColumn
 {
+    private readonly ExcelCache _excelCache;
+
+    public NameIconColumn(ILogger<NameIconColumn> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
+    {
+        _excelCache = excelCache;
+    }
     public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-    public override (string, ushort, bool)? CurrentValue(InventoryItem item)
+    public override (string, ushort, bool)? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
     {
         return (item.Item.NameString, item.Icon, item.IsHQ);
     }
 
-    public override (string, ushort, bool)? CurrentValue(ItemEx item)
+    public override (string, ushort, bool)? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
     {
         return (item.NameString, item.Icon, false);
     }
 
-    public override (string, ushort, bool)? CurrentValue(SortingResult item)
+    public override (string, ushort, bool)? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
     {
         return (item.InventoryItem.Item.NameString, item.InventoryItem.Item.Icon, item.InventoryItem.IsHQ);
     }
     
-    public override dynamic? JsonExport(InventoryItem item)
+    public override dynamic? JsonExport(ColumnConfiguration columnConfiguration, InventoryItem item)
     {
-        return CurrentValue(item)?.Item1 ?? "";
+        return CurrentValue(columnConfiguration, item)?.Item1 ?? "";
     }
 
-    public override dynamic? JsonExport(ItemEx item)
+    public override dynamic? JsonExport(ColumnConfiguration columnConfiguration, ItemEx item)
     {
-        return CurrentValue(item)?.Item1 ?? "";
+        return CurrentValue(columnConfiguration, item)?.Item1 ?? "";
     }
 
-    public override dynamic? JsonExport(SortingResult item)
+    public override dynamic? JsonExport(ColumnConfiguration columnConfiguration, SortingResult item)
     {
-        return CurrentValue(item)?.Item1 ?? "";
+        return CurrentValue(columnConfiguration, item)?.Item1 ?? "";
     }
 
-    public override dynamic? JsonExport(CraftItem item)
+    public override dynamic? JsonExport(ColumnConfiguration columnConfiguration, CraftItem item)
     {
-        return CurrentValue(item)?.Item1 ?? "";
+        return CurrentValue(columnConfiguration, item)?.Item1 ?? "";
     }
     
-    public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
+    public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
+        CraftItem item, int rowIndex)
     {
-        base.Draw(configuration, item, rowIndex);
+        base.Draw(configuration, columnConfiguration, item, rowIndex);
         if (item.IsOutputItem)
         {
-            if (Service.ExcelCache.ItemRecipes.ContainsKey(item.ItemId))
+            if (_excelCache.ItemRecipes.ContainsKey(item.ItemId))
             {
-                var itemRecipes = Service.ExcelCache.ItemRecipes[item.ItemId];
+                var itemRecipes = _excelCache.ItemRecipes[item.ItemId];
                 if (itemRecipes.Count != 1)
                 {
-                    var actualRecipes = itemRecipes.Select(c => Service.ExcelCache.GetRecipeExSheet().GetRow(c)!)
+                    var actualRecipes = itemRecipes.Select(c => _excelCache.GetRecipeExSheet().GetRow(c)!)
                         .OrderBy(c => c.CraftType.Value?.Name ?? "").ToList();
                     var value = item.Recipe?.CraftType.Value?.Name ?? "";
                     ImGui.SameLine();
@@ -71,7 +84,7 @@ public class NameIconColumn : TextIconColumn
                                         value == (recipe.CraftType.Value?.Name ?? "")))
                                 {
                                     configuration.CraftList.SetCraftRecipe(item.ItemId, recipe.RowId);
-                                    configuration.StartRefresh();
+                                    configuration.NeedsRefresh = true;
                                 }
                             }
                         }
@@ -79,6 +92,8 @@ public class NameIconColumn : TextIconColumn
                 }
             }
         }
+
+        return null;
     }
 
     public override string Name { get; set; } = "Name & Icon";

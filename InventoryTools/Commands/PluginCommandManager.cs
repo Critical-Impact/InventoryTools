@@ -2,35 +2,33 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using CriticalCommonLib;
 using Dalamud.Game.Command;
 using Dalamud.Plugin.Services;
 using DalamudPluginProjectTemplate;
 using DalamudPluginProjectTemplate.Attributes;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using static Dalamud.Game.Command.CommandInfo;
 
 // ReSharper disable ForCanBeConvertedToForeach
 
 namespace InventoryTools.Commands
 {
-    public class PluginCommandManager<T> : IDisposable where T : notnull
+    public class PluginCommandManager<T> : IHostedService where T : notnull
     {
-        private readonly (string, CommandInfo)[] _pluginCommands;
+        public ILogger<PluginCommandManager<T>> Logger { get; }
+        private (string, CommandInfo)[] _pluginCommands;
         private readonly T _host;
         private readonly ICommandManager _commandManager;
 
-        public PluginCommandManager(T host, ICommandManager commandManager)
+        public PluginCommandManager(ILogger<PluginCommandManager<T>> logger, T host, ICommandManager commandManager)
         {
+            Logger = logger;
             this._host = host;
             _commandManager = commandManager;
-
-            this._pluginCommands = host.GetType().GetMethods(BindingFlags.NonPublic | BindingFlags.Public |
-                                                             BindingFlags.Static | BindingFlags.Instance)
-                .Where(method => method.GetCustomAttribute<CommandAttribute>() != null)
-                .SelectMany(GetCommandInfoTuple)
-                .ToArray();
-
-            AddCommandHandlers();
         }
 
         private void AddCommandHandlers()
@@ -87,35 +85,25 @@ namespace InventoryTools.Commands
 
             return commandInfoTuples;
         }
-        
-        private bool _disposed;
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        
-        protected virtual void Dispose(bool disposing)
-        {
-            if(!_disposed && disposing)
-            {
-                RemoveCommandHandlers();
-            }
-            _disposed = true;         
-        }
-        
-        ~PluginCommandManager()
-        {
-#if DEBUG
-            // In debug-builds, make sure that a warning is displayed when the Disposable object hasn't been
-            // disposed by the programmer.
 
-            if( _disposed == false )
-            {
-                Service.Log.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
-            }
-#endif
-            Dispose (true);
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            Logger.LogTrace("Starting service {type} ({this})", GetType().Name, this);
+
+            this._pluginCommands = _host.GetType().GetMethods(BindingFlags.NonPublic | BindingFlags.Public |
+                                                             BindingFlags.Static | BindingFlags.Instance)
+                .Where(method => method.GetCustomAttribute<CommandAttribute>() != null)
+                .SelectMany(GetCommandInfoTuple)
+                .ToArray();
+
+            AddCommandHandlers();
+            return Task.CompletedTask;
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            RemoveCommandHandlers();
+            return Task.CompletedTask;
         }
     }
 }

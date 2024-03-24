@@ -7,6 +7,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using CriticalCommonLib;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
 using CsvHelper;
 using Dalamud.Interface.Colors;
@@ -16,113 +17,16 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Extensions;
+using InventoryTools.Services;
 
 namespace InventoryTools.Logic
 {
     public class FilterTable : RenderTableBase
     {
-        public FilterTable(FilterConfiguration filterConfiguration) : base(filterConfiguration)
+        public FilterTable(RightClickService rightClickService, InventoryToolsConfiguration configuration) : base(rightClickService, configuration)
         {
             
-        }
-
-        public override event PreFilterSortedItemsDelegate? PreFilterSortedItems;
-        
-        public override event PreFilterItemsDelegate? PreFilterItems;
-        public override event ChangedDelegate? Refreshed;
-
-        public override void Refresh(InventoryToolsConfiguration configuration)
-        {
-            //Do something with unsortable items
-            if (FilterConfiguration.FilterResult != null)
-            {
-                if (FilterConfiguration.FilterType == FilterType.SearchFilter 
-                    || FilterConfiguration.FilterType == FilterType.SortingFilter 
-                    || FilterConfiguration.FilterType == FilterType.CraftFilter)
-                {
-                    Service.Log.Verbose("FilterTable: Refreshing");
-                    var items = FilterConfiguration.FilterResult.SortedItems.AsEnumerable();
-                    items = PreFilterSortedItems != null ? PreFilterSortedItems.Invoke(items) : items;
-                    IsSearching = false;
-                    for (var index = 0; index < Columns.Count; index++)
-                    {
-                        var column = Columns[index];
-                        if (column.FilterText != "")
-                        {
-                            IsSearching = true;
-                        }
-
-                        items = column.Filter(items);
-                        if (SortColumn != null && index == SortColumn)
-                        {
-                            items = column.Sort(SortDirection ?? ImGuiSortDirection.None, items);
-                        }
-                    }
-
-                    SortedItems = items.ToList();
-                    RenderSortedItems = SortedItems.Where(item => !item.InventoryItem.IsEmpty).ToList();
-                    NeedsRefresh = false;
-                    _refreshing = false;
-                    Service.Framework.RunOnFrameworkThread(() => { Refreshed?.Invoke(this); });
-                }
-                else if(FilterConfiguration.FilterType == FilterType.GameItemFilter)
-                {
-                    Service.Log.Verbose("FilterTable: Refreshing");
-                    var items = FilterConfiguration.FilterResult.AllItems.AsEnumerable();
-                    items = PreFilterItems != null ? PreFilterItems.Invoke(items) : items;
-                    IsSearching = false;
-                    for (var index = 0; index < Columns.Count; index++)
-                    {
-                        var column = Columns[index];
-                        if (column.FilterText != "")
-                        {
-                            IsSearching = true;
-                        }
-
-                        items = column.Filter((IEnumerable<ItemEx>)items);
-                        if (SortColumn != null && index == SortColumn)
-                        {
-                            items = column.Sort(SortDirection ?? ImGuiSortDirection.None, (IEnumerable<ItemEx>)items);
-                        }
-                    }
-
-                    Items = items.Where(c => c.NameString.ToString() != "").ToList();
-                    RenderItems = Items.ToList();
-                    NeedsRefresh = false;
-                    _refreshing = false;
-                    Service.Framework.RunOnFrameworkThread(() => { Refreshed?.Invoke(this); });
-                }
-                else
-                {
-                    Service.Log.Verbose("FilterTable: Refreshing");
-                    var items = FilterConfiguration.FilterResult.InventoryHistory.AsEnumerable();
-                    //items = PreFilterItems != null ? PreFilterItems.Invoke(items) : items;
-                    IsSearching = false;
-                    for (var index = 0; index < Columns.Count; index++)
-                    {
-                        var column = Columns[index];
-                        if (column.FilterText != "")
-                        {
-                            IsSearching = true;
-                        }
-
-                        items = column.Filter(items);
-                        if (SortColumn != null && index == SortColumn)
-                        {
-                            items = column.Sort(SortDirection ?? ImGuiSortDirection.None, items);
-                        }
-                    }
-                    InventoryChanges = items.Where(c => c.InventoryItem.FormattedName != "").ToList();
-                    RenderInventoryChanges = InventoryChanges.ToList();
-                    NeedsRefresh = false;
-                    _refreshing = false;
-                    Service.Framework.RunOnFrameworkThread(() => { Refreshed?.Invoke(this); });
-                }
-            }
-            else
-            {
-                _refreshing = false;
-            }
         }
 
         public override void RefreshColumns()
@@ -131,47 +35,26 @@ namespace InventoryTools.Logic
             {
                 FreezeCols = FilterConfiguration.FreezeColumns;
             }
+            _inititalSortingSetup = false;
             if (FilterConfiguration.Columns != null)
             {
-                var newColumns = new List<IColumn>();
-                foreach (var column in FilterConfiguration.Columns)
-                {
-                    var newColumn = PluginLogic.GetClassFromString(column);
-                    if (newColumn != null && newColumn is IColumn)
-                    {
-                        newColumns.Add(newColumn);
-                    }
-                }
-
-                this.Columns = newColumns;
+                this.Columns = FilterConfiguration.Columns.ToList();
             }
         }
 
-
+        private bool _inititalSortingSetup = false;
         private bool _refreshing = false;
-        public override bool Draw(Vector2 size, bool shouldDraw = true)
+        public override List<MessageBase> Draw(Vector2 size, bool shouldDraw = true)
         {
+            var messages = new List<MessageBase>();
             var highlightItems = HighlightItems;
+
+            FilterConfiguration.AllowRefresh = true;
             
-            if (Columns.Count == 0)
+            if (Columns.Count == 0 || !shouldDraw)
             {
-                if (NeedsRefresh && !_refreshing)
-                {
-                    _refreshing = true;
-                    Service.Framework.RunOnFrameworkThread(() => Refresh(ConfigurationManager.Config));
-                }
-                return true;
+                return messages;
             }
-
-            if (!shouldDraw)
-            {
-                if (NeedsRefresh)
-                {
-                    Refresh(ConfigurationManager.Config);
-                }
-                return true;
-            }
-
 
             using (var filterTableChild = ImRaii.Child("FilterTableContent", size * ImGui.GetIO().FontGlobalScale, false,
                        ImGuiWindowFlags.HorizontalScrollbar))
@@ -187,7 +70,7 @@ namespace InventoryTools.Logic
                         for (var index = 0; index < Columns.Count; index++)
                         {
                             var column = Columns[index];
-                            column.Setup(index);
+                            column.Column.Setup(FilterConfiguration, column, index);
                         }
                         
                         ImGui.TableHeadersRow();
@@ -200,10 +83,18 @@ namespace InventoryTools.Logic
                             {
                                 ImGuiUtil.RightAlign("?", SortColumn == index ? 8 : 0);
                             }
-                            ImGuiUtil.HoverTooltip(column.HelpText);
+                            ImGuiUtil.HoverTooltip(column.Column.HelpText);
                         }
 
                         var currentSortSpecs = ImGui.TableGetSortSpecs();
+                        if (_inititalSortingSetup == false)
+                        {
+                            currentSortSpecs.Specs.SortDirection = FilterConfiguration.DefaultSortOrder ?? ImGuiSortDirection.Ascending;
+                            currentSortSpecs.Specs.ColumnIndex = FilterConfiguration.Columns != null ? (short)FilterConfiguration.Columns.FindIndex(c => c.Key == FilterConfiguration.DefaultSortColumn) : (short)0;
+                            currentSortSpecs.SpecsCount = 1;
+                            currentSortSpecs.SpecsDirty = true;
+                            _inititalSortingSetup = true;
+                        }
                         if (currentSortSpecs.SpecsDirty)
                         {
                             var actualSpecs = currentSortSpecs.Specs;
@@ -218,21 +109,7 @@ namespace InventoryTools.Logic
                                 SortDirection = actualSpecs.SortDirection;
                                 refresh = true;
                             }
-                        }
-                        else
-                        {
-                            if (SortColumn != null)
-                            {
-                                SortColumn = null;
-                                refresh = true;
-                            }
-
-                            if (SortDirection != null)
-                            {
-                                SortDirection = null;
-                                refresh = true;
-                            }
-
+                            currentSortSpecs.SpecsDirty = false;
                         }
 
                         if (ShowFilterRow)
@@ -240,23 +117,23 @@ namespace InventoryTools.Logic
                             ImGui.TableNextRow(ImGuiTableRowFlags.Headers);
                             foreach (var column in Columns)
                             {
-                                column.SetupFilter(Key);
+                                column.Column.SetupFilter(Key);
                             }
 
 
                             for (var index = 0; index < Columns.Count; index++)
                             {
                                 var column = Columns[index];
-                                if (column.HasFilter && column.DrawFilter(Key, index))
+                                if (column.Column.HasFilter && column.Column.DrawFilter(Key, index))
                                 {
                                     refresh = true;
                                 }
                             }
                         }
 
-                        if (refresh || NeedsRefresh)
+                        if (refresh && !Refreshing)
                         {
-                            Refresh(ConfigurationManager.Config);
+                            NeedsRefresh = true;
                         }
 
                         if (FilterConfiguration.FilterType == FilterType.SearchFilter ||
@@ -281,13 +158,21 @@ namespace InventoryTools.Logic
                                     for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                                     {
                                         var column = Columns[columnIndex];
-                                        column.Draw(FilterConfiguration, item, index);
+                                        var columnMessages = column.Column.Draw(FilterConfiguration, column, item, index);
+                                        if (columnMessages != null)
+                                        {
+                                            messages.AddRange(columnMessages);
+                                        }
                                         ImGui.SameLine();
                                         if (columnIndex == Columns.Count - 1)
                                         {
-                                            PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration,
+                                            var menuMessages = DrawMenu(FilterConfiguration, column,
                                                 item,
                                                 index);
+                                            if (menuMessages != null)
+                                            {
+                                                messages.AddRange(menuMessages);
+                                            }
                                         }
                                     }
 
@@ -317,12 +202,20 @@ namespace InventoryTools.Logic
                                     for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                                     {
                                         var column = Columns[columnIndex];
-                                        column.Draw(FilterConfiguration, (ItemEx)item, index);
+                                        var columnMessages = column.Column.Draw(FilterConfiguration, column, (ItemEx)item, index);
+                                        if (columnMessages != null)
+                                        {
+                                            messages.AddRange(columnMessages);
+                                        }
                                         ImGui.SameLine();
                                         if (columnIndex == Columns.Count - 1)
                                         {
-                                            PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration,
+                                            var menuMessages = DrawMenu(FilterConfiguration, column,
                                                 (ItemEx)item, index);
+                                            if (menuMessages != null)
+                                            {
+                                                messages.AddRange(menuMessages);
+                                            }
                                         }
                                     }
                                 }
@@ -350,11 +243,19 @@ namespace InventoryTools.Logic
                                     for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                                     {
                                         var column = Columns[columnIndex];
-                                        column.Draw(FilterConfiguration, item, index);
+                                        var columnMessages = column.Column.Draw(FilterConfiguration, column, item, index);
+                                        if (columnMessages != null)
+                                        {
+                                            messages.AddRange(columnMessages);
+                                        }
                                         ImGui.SameLine();
                                         if (columnIndex == Columns.Count - 1)
                                         {
-                                            PluginService.PluginLogic.RightClickColumn.Draw(FilterConfiguration,item, index);
+                                            var menuMessages = DrawMenu(FilterConfiguration, column,item, index);
+                                            if (menuMessages != null)
+                                            {
+                                                messages.AddRange(menuMessages);
+                                            }
                                         }
                                     }
                                 }
@@ -366,14 +267,14 @@ namespace InventoryTools.Logic
                     }
                 }
             }
-            return true;
+            return messages;
         }
 
         public override void DrawFooterItems()
         {
             foreach (var column in Columns)
             {
-                var result = column.DrawFooterFilter(FilterConfiguration, this);
+                var result = column.Column.DrawFooterFilter(FilterConfiguration, this);
                 if (result != null)
                 {
                     result.HandleEvent(FilterConfiguration);
@@ -400,7 +301,7 @@ namespace InventoryTools.Logic
             {
                 foreach (var column in Columns)
                 {
-                    csv.WriteField(column.Name);
+                    csv.WriteField(column.ExportName ?? column.Column.Name);
                 }
                 csv.NextRecord();
                 if (FilterConfiguration.FilterType == FilterType.SearchFilter ||
@@ -411,7 +312,7 @@ namespace InventoryTools.Logic
                     {
                         foreach (var column in Columns)
                         {
-                            csv.WriteField(column.CsvExport(item));
+                            csv.WriteField(column.Column.CsvExport(column, item));
                         }
                         csv.NextRecord();
                     }
@@ -422,7 +323,7 @@ namespace InventoryTools.Logic
                     {
                         foreach (var column in Columns)
                         {
-                            csv.WriteField(column.CsvExport(item));
+                            csv.WriteField(column.Column.CsvExport(column, item));
                         }
                         csv.NextRecord();
                     }
@@ -433,7 +334,7 @@ namespace InventoryTools.Logic
                     {
                         foreach (var column in Columns)
                         {
-                            csv.WriteField(column.CsvExport(item));
+                            csv.WriteField(column.Column.CsvExport(column, item));
                         }
                         csv.NextRecord();
                     }
@@ -455,7 +356,7 @@ namespace InventoryTools.Logic
                     newLine["id"] = item.InventoryItem.ItemId;
                     foreach (var column in Columns)
                     {
-                        newLine[column.Name.ToLower()] = column.JsonExport(item) ?? "";
+                        newLine[column.Column.Name.ToLower()] = column.Column.JsonExport(column, item) ?? "";
                     }
                     lines.Add(newLine);
                 }
@@ -468,7 +369,7 @@ namespace InventoryTools.Logic
                     newLine["id"] = item.RowId;
                     foreach (var column in Columns)
                     {
-                        newLine[column.Name.ToLower()] = column.JsonExport(item) ?? "";
+                        newLine[column.Column.Name.ToLower()] = column.Column.JsonExport(column, item) ?? "";
                     }
                     lines.Add(newLine);
                 }
@@ -481,7 +382,7 @@ namespace InventoryTools.Logic
                     newLine["id"] = item.InventoryItem.ItemId;
                     foreach (var column in Columns)
                     {
-                        newLine[column.Name.ToLower()] = column.JsonExport(item) ?? "";
+                        newLine[column.Column.Name.ToLower()] = column.Column.JsonExport(column, item) ?? "";
                     }
                     lines.Add(newLine);
                 }
@@ -503,17 +404,8 @@ namespace InventoryTools.Logic
 
         public void ClearFilters()
         {
-            Columns.ForEach(c => c.FilterText = "");
+            Columns.ForEach(c => c.Column.FilterText = "");
             NeedsRefresh = true;
-        }
-        
-        public override void Dispose()
-        {
-            if (!base.Disposed)
-            {
-                Columns.ForEach(c => c.Dispose());
-                base.Dispose();
-            }
         }
     }
 }

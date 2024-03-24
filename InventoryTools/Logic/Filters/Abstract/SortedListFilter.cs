@@ -5,6 +5,8 @@ using ImGuiNET;
 using InventoryTools.Extensions;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters.Abstract
 {
@@ -58,6 +60,45 @@ namespace InventoryTools.Logic.Filters.Abstract
             UpdateFilterConfiguration(configuration, list.ToDictionary(c => c, c => value[c]));
         }
 
+        public virtual void DrawItem(FilterConfiguration configuration, KeyValuePair<T,(string, string?)> item, int index)
+        {
+            string name = item.Value.Item1;
+            ImGui.Text(name);
+            ImGuiUtil.HoverTooltip(name);
+        }
+
+        public virtual void DrawButtons(FilterConfiguration configuration, KeyValuePair<T,(string, string?)> item, int index)
+        {
+            if (CanRemove && CanRemoveItem(configuration, item.Key))
+            {
+                if (ImGui.Button("X##Column" + index))
+                {
+                    RemoveItem(configuration, item.Key);
+                }
+                ImGui.SameLine();
+            }
+            if (ImGui.Button("Top##Column" + index))
+            {
+                MoveItemTop(configuration, item.Key);
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("Up##Column" + index))
+            {
+                MoveItemUp(configuration, item.Key);
+            }
+
+            ImGui.SameLine();
+            if (ImGui.Button("Down##Column" + index))
+            {
+                MoveItemDown(configuration, item.Key);
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("Bottom##Column" + index))
+            {
+                MoveItemBottom(configuration, item.Key);
+            }
+        }
+
         public virtual void DrawTable(FilterConfiguration configuration)
         {
             var value = CurrentValue(configuration);
@@ -71,42 +112,11 @@ namespace InventoryTools.Logic.Filters.Abstract
                     foreach (var item in value)
                     {
                         ImGui.TableNextRow(ImGuiTableRowFlags.None, 10);
-                        string name = item.Value.Item1;
                         string? helpText = item.Value.Item2;
                         ImGui.TableNextColumn();
-                        ImGui.Text(name);
-                        ImGuiUtil.HoverTooltip(name);
+                        DrawItem(configuration, item, index);
                         ImGui.TableNextColumn();
-
-                        if (CanRemove && CanRemoveItem(configuration, item.Key))
-                        {
-                            if (ImGui.Button("X##Column" + index))
-                            {
-                                RemoveItem(configuration, item.Key);
-                            }
-                            ImGui.SameLine();
-                        }
-                        if (ImGui.Button("Top##Column" + index))
-                        {
-                            MoveItemTop(configuration, item.Key);
-                        }
-                        ImGui.SameLine();
-                        if (ImGui.Button("Up##Column" + index))
-                        {
-                            MoveItemUp(configuration, item.Key);
-                        }
-
-                        ImGui.SameLine();
-                        if (ImGui.Button("Down##Column" + index))
-                        {
-                            MoveItemDown(configuration, item.Key);
-                        }
-                        ImGui.SameLine();
-                        if (ImGui.Button("Bottom##Column" + index))
-                        {
-                            MoveItemBottom(configuration, item.Key);
-                        }
-
+                        DrawButtons(configuration, item, index);
                         index++;
                         ImGui.TableNextColumn();
                         ImGui.Selectable("", false, ImGuiSelectableFlags.SpanAllColumns,
@@ -124,7 +134,7 @@ namespace InventoryTools.Logic.Filters.Abstract
         {
             DrawTable(configuration);
             ImGui.SameLine();
-            UiHelpers.HelpMarker(HelpText);
+            ImGuiService.HelpMarker(HelpText);
             if (HasValueSet(configuration) && ShowReset)
             {
                 ImGui.SameLine();
@@ -133,6 +143,10 @@ namespace InventoryTools.Logic.Filters.Abstract
                     ResetFilter(configuration);
                 }
             }
+        }
+
+        protected SortedListFilter(ILogger logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
         }
     }
 }

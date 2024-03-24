@@ -1,7 +1,17 @@
+using System.Numerics;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
+
 namespace InventoryTools.Logic.Settings.Abstract
 {
     public abstract class Setting<T> : ISetting
     {
+        public ImGuiService ImGuiService { get; }
+
+        public Setting(ILogger logger, ImGuiService imGuiService)
+        {
+            ImGuiService = imGuiService;
+        }
         public abstract T DefaultValue { get; set; }
         public virtual int LabelSize { get; set; } = 300;
         public virtual int InputSize { get; set; } = 250;
@@ -12,9 +22,23 @@ namespace InventoryTools.Logic.Settings.Abstract
         public abstract string Key { get; set; }
         public abstract string Name { get; set; }
         public abstract string HelpText { get; set; }
-        
+
+        public bool HideReset { get; set; } = false;
+        public bool ColourModified { get; set; } = true;
         public abstract SettingCategory SettingCategory { get; set; }
         public abstract SettingSubCategory SettingSubCategory { get; }
+        public abstract string Version { get; }
+
+        public virtual string? Image { get; } = null;
+        public virtual Vector2? ImageSize { get; } = null;
+
+        public virtual string WizardName
+        {
+            get
+            {
+                return Name;
+            }
+        }
 
         public virtual bool HasValueSet(InventoryToolsConfiguration configuration)
         {

@@ -2,13 +2,17 @@
 using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters;
 
 public class ItemFilter : UintMultipleChoiceFilter
 {
+    private readonly ExcelCache _excelCache;
     public override string Key { get; set; } = "ItemFilter";
     public override string Name { get; set; } = "Name (Selector)";
 
@@ -43,8 +47,13 @@ public class ItemFilter : UintMultipleChoiceFilter
 
     public override Dictionary<uint, string> GetChoices(FilterConfiguration configuration)
     {
-        return Service.ExcelCache.ItemNamesById;
+        return _excelCache.ItemNamesById;
     }
 
     public override bool HideAlreadyPicked { get; set; }
+
+    public ItemFilter(ILogger<ItemFilter> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
+    {
+        _excelCache = excelCache;
+    }
 }

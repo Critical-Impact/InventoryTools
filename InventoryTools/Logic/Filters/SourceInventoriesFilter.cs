@@ -2,13 +2,24 @@ using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
     public class SourceInventoriesFilter : MultipleChoiceFilter<(ulong, InventoryCategory)>
     {
+        private readonly ICharacterMonitor _characterMonitor;
+        private readonly InventoryToolsConfiguration _configuration;
+
+        public SourceInventoriesFilter(ILogger<SourceInventoriesFilter> logger, ImGuiService imGuiService, ICharacterMonitor characterMonitor, InventoryToolsConfiguration configuration) : base(logger, imGuiService)
+        {
+            _characterMonitor = characterMonitor;
+            _configuration = configuration;
+        }
         public override int LabelSize { get; set; } = 240;
         public override string Key { get; set; } = "SourceInventories";
         public override string Name { get; set; } = "Source - Inventories";
@@ -35,17 +46,17 @@ namespace InventoryTools.Logic.Filters
 
         public override Dictionary<(ulong, InventoryCategory), string> GetChoices(FilterConfiguration configuration)
         {
-            var allCharacters = PluginService.CharacterMonitor.AllCharacters();
-            if (!ConfigurationManager.Config.DisplayCrossCharacter)
+            var allCharacters = _characterMonitor.AllCharacters();
+            if (!_configuration.DisplayCrossCharacter)
             {
                 allCharacters = allCharacters.Where(c =>
-                    PluginService.CharacterMonitor.BelongsToActiveCharacter(c.Key)).ToArray();
+                    _characterMonitor.BelongsToActiveCharacter(c.Key)).ToArray();
             }
 
             var dict = new Dictionary<(ulong, InventoryCategory), string>();
             foreach (var character in allCharacters)
             {
-                if (PluginService.CharacterMonitor.IsRetainer(character.Key))
+                if (_characterMonitor.IsRetainer(character.Key))
                 {
                     dict.Add((character.Key, InventoryCategory.RetainerBags), character.Value.FormattedName + " - " + InventoryCategory.RetainerBags.FormattedName());
                     dict.Add((character.Key, InventoryCategory.RetainerMarket), character.Value.FormattedName + " - " + InventoryCategory.RetainerMarket.FormattedName());
@@ -53,13 +64,13 @@ namespace InventoryTools.Logic.Filters
                     dict.Add((character.Key, InventoryCategory.Currency), character.Value.FormattedName + " - " + InventoryCategory.Currency.FormattedName());
                     dict.Add((character.Key, InventoryCategory.Crystals), character.Value.FormattedName + " - " + InventoryCategory.Crystals.FormattedName());
                 }
-                else if (PluginService.CharacterMonitor.IsFreeCompany(character.Key))
+                else if (_characterMonitor.IsFreeCompany(character.Key))
                 {
                     dict.Add((character.Key, InventoryCategory.FreeCompanyBags), character.Value.FormattedName + " - " + InventoryCategory.FreeCompanyBags.FormattedName());
                     dict.Add((character.Key, InventoryCategory.Currency), character.Value.FormattedName + " - " + InventoryCategory.Currency.FormattedName());
                     dict.Add((character.Key, InventoryCategory.Crystals), character.Value.FormattedName + " - " + InventoryCategory.Crystals.FormattedName());
                 }
-                else if (PluginService.CharacterMonitor.IsHousing(character.Key))
+                else if (_characterMonitor.IsHousing(character.Key))
                 {
                     dict.Add((character.Key, InventoryCategory.HousingInteriorAppearance), character.Value.FormattedName + " - " + InventoryCategory.HousingInteriorAppearance.FormattedName());
                     dict.Add((character.Key, InventoryCategory.HousingInteriorItems), character.Value.FormattedName + " - " + InventoryCategory.HousingInteriorItems.FormattedName());

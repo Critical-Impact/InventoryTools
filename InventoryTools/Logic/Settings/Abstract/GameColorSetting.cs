@@ -4,19 +4,20 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Comparer;
+using CriticalCommonLib.Services;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
+using InventoryTools.Services;
 using Lumina.Excel.GeneratedSheets;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Settings.Abstract
 {
     public abstract class GameColorSetting : Setting<uint?>
     {
-        private readonly Dictionary<uint, UIColor> uiColors;
-
-        public GameColorSetting()
+        public GameColorSetting(ILogger logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
         {
-            var list = new List<UIColor>(Service.ExcelCache.GetUIColorSheet().Distinct(new UIColorComparer()));
+            var list = new List<UIColor>(excelCache.GetUIColorSheet().Distinct(new UIColorComparer()));
             list.Sort((a, b) =>
             {
                 var colorA = Utils.ConvertUIColorToColor(a);
@@ -41,12 +42,14 @@ namespace InventoryTools.Logic.Settings.Abstract
             });
             uiColors = list.ToDictionary(c => c.RowId, c => c);
         }
+        private readonly Dictionary<uint, UIColor> uiColors;
+
 
         public override void Draw(InventoryToolsConfiguration configuration)
         {
             var value = CurrentValue(configuration);
             ImGui.SetNextItemWidth(LabelSize);
-            if (HasValueSet(configuration))
+            if (ColourModified && HasValueSet(configuration))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);
                 ImGui.LabelText("##" + Key + "Label", Name + ":");
@@ -96,8 +99,8 @@ namespace InventoryTools.Logic.Settings.Abstract
                 
             }
 
-            UiHelpers.HelpMarker(HelpText);
-            if (HasValueSet(configuration))
+            ImGuiService.HelpMarker(HelpText, Image, ImageSize);
+            if (!HideReset && HasValueSet(configuration))
             {
                 ImGui.SameLine();
                 if (ImGui.Button("Reset##" + Key + "Reset"))

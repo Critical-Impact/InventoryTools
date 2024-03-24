@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters.Abstract
 {
@@ -15,7 +17,7 @@ namespace InventoryTools.Logic.Filters.Abstract
 
         public abstract List<T> GetChoices(FilterConfiguration configuration);
 
-        public abstract string GetFormattedChoice(T choice);
+        public abstract string GetFormattedChoice(FilterConfiguration filterConfiguration, T choice);
 
         public override void Draw(FilterConfiguration configuration)
         {
@@ -34,7 +36,7 @@ namespace InventoryTools.Logic.Filters.Abstract
             var choices = GetChoices(configuration);
             var activeChoice = CurrentValue(configuration);
 
-            var currentSearchCategory = activeChoice != null ? GetFormattedChoice(activeChoice) : "";
+            var currentSearchCategory = activeChoice != null ? GetFormattedChoice(configuration, activeChoice) : "";
             ImGui.SameLine();
             ImGui.SetNextItemWidth(InputSize);
             using (var combo = ImRaii.Combo("##" + Key + "Combo", currentSearchCategory))
@@ -51,7 +53,7 @@ namespace InventoryTools.Logic.Filters.Abstract
                             }
                         }
 
-                        var text = GetFormattedChoice(item).Replace("\u0002\u001F\u0001\u0003", "-");
+                        var text = GetFormattedChoice(configuration, item).Replace("\u0002\u001F\u0001\u0003", "-");
                         if (text == "")
                         {
                             continue;
@@ -66,7 +68,7 @@ namespace InventoryTools.Logic.Filters.Abstract
             }
 
             ImGui.SameLine();
-            UiHelpers.HelpMarker(HelpText);
+            ImGuiService.HelpMarker(HelpText);
             if (HasValueSet(configuration) && ShowReset)
             {
                 ImGui.SameLine();
@@ -75,6 +77,10 @@ namespace InventoryTools.Logic.Filters.Abstract
                     ResetFilter(configuration);
                 }
             }
+        }
+
+        protected ChoiceFilter(ILogger logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
         }
     }
 }

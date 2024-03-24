@@ -3,6 +3,8 @@ using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters;
 
@@ -52,7 +54,8 @@ public class CraftEverythingElseGroupFilter : ChoiceFilter<EverythingElseGroupSe
         };
     }
 
-    public override string GetFormattedChoice(EverythingElseGroupSetting choice)
+    public override string GetFormattedChoice(FilterConfiguration filterConfiguration,
+        EverythingElseGroupSetting choice)
     {
         switch (choice)
         {
@@ -62,5 +65,9 @@ public class CraftEverythingElseGroupFilter : ChoiceFilter<EverythingElseGroupSe
                 return "Zone";
         }
         return choice.ToString();
+    }
+
+    public CraftEverythingElseGroupFilter(ILogger<CraftEverythingElseGroupFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+    {
     }
 }

@@ -1,26 +1,38 @@
+using System.Collections.Generic;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
 {
     public class ShortcutColumn : TextColumn
     {
+        private readonly TryOn _tryOn;
+
+        public ShortcutColumn(ILogger<ShortcutColumn> logger, ImGuiService imGuiService, TryOn tryOn) : base(logger, imGuiService)
+        {
+            _tryOn = tryOn;
+        }
         public override ColumnCategory ColumnCategory => ColumnCategory.Tools;
-        public override string? CurrentValue(InventoryItem item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
         {
             return null;
         }
 
-        public override string? CurrentValue(ItemEx item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
             return null;
         }
 
-        public override string? CurrentValue(SortingResult item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
         {
             return null;
         }
@@ -33,7 +45,9 @@ namespace InventoryTools.Logic.Columns
         public override bool HasFilter { get; set; } = false;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
         
-        public override void Draw(FilterConfiguration configuration, InventoryItem item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            InventoryItem item, int rowIndex)
         {
             ImGui.TableNextColumn();
             if (ImGui.SmallButton("GT##GT" + rowIndex))
@@ -45,24 +59,30 @@ namespace InventoryTools.Logic.Columns
                 ImGui.SameLine();
                 if (ImGui.SmallButton("Try On##TO" + rowIndex))
                 {
-                    if (PluginService.TryOn.CanUseTryOn)
+                    if (_tryOn.CanUseTryOn)
                     {
-                        PluginService.TryOn.TryOnItem(item.Item, 0, item.IsHQ);
+                        _tryOn.TryOnItem(item.Item, 0, item.IsHQ);
                     }
                     else
                     {
-                        Service.Log.Error("Something went wrong while attempting to try on " + item.Item.NameString);
+                        Logger.LogError("Something went wrong while attempting to try on " + item.Item.NameString);
                     }
                 }
             }
+
+            return null;
         }
 
-        public override void Draw(FilterConfiguration configuration, SortingResult item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            SortingResult item, int rowIndex)
         {
-           Draw(configuration, item.InventoryItem, rowIndex);
+           return Draw(configuration, columnConfiguration, item.InventoryItem, rowIndex);
         }
 
-        public override void Draw(FilterConfiguration configuration, ItemEx item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            ItemEx item, int rowIndex)
         {
             ImGui.TableNextColumn();
             if (ImGui.SmallButton("G##G"+rowIndex))
@@ -74,16 +94,18 @@ namespace InventoryTools.Logic.Columns
                 ImGui.SameLine();
                 if (ImGui.SmallButton("Try On##TO" + rowIndex))
                 {
-                    if (PluginService.TryOn.CanUseTryOn)
+                    if (_tryOn.CanUseTryOn)
                     {
-                        PluginService.TryOn.TryOnItem(item, 0, false);
+                        _tryOn.TryOnItem(item, 0, false);
                     }
                     else
                     {
-                        Service.Log.Error("Something went wrong while attempting to try on " + item.NameString);
+                        Logger.LogError("Something went wrong while attempting to try on " + item.NameString);
                     }
                 }
             }
+
+            return null;
         }
     }
 }

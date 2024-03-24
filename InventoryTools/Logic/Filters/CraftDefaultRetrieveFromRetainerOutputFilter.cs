@@ -4,6 +4,8 @@ using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters;
 
@@ -54,8 +56,12 @@ public class CraftDefaultRetrieveFromRetainerOutputFilter : ChoiceFilter<CraftRe
         };
     }
 
-    public override string GetFormattedChoice(CraftRetainerRetrieval choice)
+    public override string GetFormattedChoice(FilterConfiguration filterConfiguration, CraftRetainerRetrieval choice)
     {
         return choice.FormattedName();
+    }
+
+    public CraftDefaultRetrieveFromRetainerOutputFilter(ILogger<CraftDefaultRetrieveFromRetainerOutputFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+    {
     }
 }

@@ -2,14 +2,18 @@
 using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
     public class EquippableByFilter : UintMultipleChoiceFilter
     {
+        private readonly ExcelCache _excelCache;
         public override string Key { get; set; } = "EquippableBy";
         public override string Name { get; set; } = "Equippable By";
         public override string HelpText { get; set; } = "Which classes can this equipment be equipped by?";
@@ -46,7 +50,7 @@ namespace InventoryTools.Logic.Filters
         public override Dictionary<uint, string> GetChoices(FilterConfiguration configuration)
         {
             var choices = new Dictionary<uint, string>();
-            var sheet = Service.ExcelCache.GetClassJobSheet();
+            var sheet = _excelCache.GetClassJobSheet();
             foreach (var classJob in sheet)
             {
                 choices.Add(classJob.RowId, classJob.Name.ToString().ToTitleCase());
@@ -56,5 +60,10 @@ namespace InventoryTools.Logic.Filters
         }
 
         public override bool HideAlreadyPicked { get; set; } = true;
+
+        public EquippableByFilter(ILogger<EquippableByFilter> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
+        {
+            _excelCache = excelCache;
+        }
     }
 }

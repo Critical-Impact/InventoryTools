@@ -1,6 +1,8 @@
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -37,6 +39,10 @@ namespace InventoryTools.Logic.Filters
             }
                 
             return !currentValue.Value && !item.IsItemAvailableAtTimedNode;
+        }
+
+        public IsTimedNodeFilter(ILogger<IsTimedNodeFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
         }
     }
 }

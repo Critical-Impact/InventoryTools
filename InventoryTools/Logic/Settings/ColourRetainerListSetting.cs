@@ -1,4 +1,6 @@
 using InventoryTools.Logic.Settings.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Settings
 {
@@ -20,5 +22,10 @@ namespace InventoryTools.Logic.Settings
         public override string HelpText { get; set; } = "Should the name of the retainer in the summoning bell list be coloured if a relevant item is to be sorted or is available in their inventory?";
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.Visuals;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Highlighting;
+        public override string Version => "1.6.2.5";
+
+        public ColourRetainerListSetting(ILogger<ColourRetainerListSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
     }
 }

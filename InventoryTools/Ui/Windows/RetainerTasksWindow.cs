@@ -4,28 +4,35 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Extensions;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
+using InventoryTools.Mediator;
+using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 
 namespace InventoryTools.Ui;
 
 public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>
 {
-    public RetainerTasksWindow(string name = "Retainer Ventures", ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
-    {
-        SetupWindow();
-    }
+    private readonly IIconService _iconService;
+    private readonly ExcelCache _excelCache;
 
-    public RetainerTasksWindow() : base("Retainer Ventures")
+    public RetainerTasksWindow(ILogger<RetainerTasksWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IIconService iconService, ExcelCache excelCache, string name = "Retainer Ventures") : base(logger, mediator, imGuiService, configuration, name)
     {
-        SetupWindow();
+        _iconService = iconService;
+        _excelCache = excelCache;
     }
-
-    private void SetupWindow()
+    public override void Initialize()
     {
+        WindowName = "Retainer Ventures";
+        Key = "retainerTasks";
         _columns = new List<TableColumn<RetainerTaskEx>>()
         {
             new("Icon", 32, ImGuiTableColumnFlags.WidthFixed)
@@ -33,7 +40,7 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>
                 OnLeftClick = OnLeftClick,
                 Draw = (ex, contentTypeId) =>
                 {
-                    if (ImGui.ImageButton(PluginService.IconStorage[65049].ImGuiHandle,
+                    if (ImGui.ImageButton(_iconService[65049].ImGuiHandle,
                             new Vector2(RowSize, RowSize)))
                     {
                         _columns[0].OnLeftClick?.Invoke(ex);
@@ -227,11 +234,11 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>
                 Draw = (ex, contentTypeId) =>
                 {
                     var drops = ex.Drops;
-                    UiHelpers.WrapTableColumnElements("Drops" + ex.RowId, drops,
+                    ImGuiService.WrapTableColumnElements("Drops" + ex.RowId, drops,
                     RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X,
                     drop =>
                     {
-                        var sourceIcon = PluginService.IconStorage[drop.Icon];
+                        var sourceIcon = _iconService[drop.Icon];
                         ImGui.Image(sourceIcon.ImGuiHandle,
                             new Vector2(RowSize, RowSize) * ImGui.GetIO().FontGlobalScale);
                         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
@@ -251,12 +258,12 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>
                                                 ImGuiHoveredFlags.AnyWindow) &&
                             ImGui.IsMouseReleased(ImGuiMouseButton.Left))
                         {
-                            PluginService.WindowService.OpenItemWindow(drop.RowId);
+                            MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), drop.RowId));
                         }
 
                         if (ImGui.BeginPopup("RightClick" + drop.RowId))
                         {
-                            drop.DrawRightClickPopup();
+                            MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(drop));
                             ImGui.EndPopup();
                         }
                         ImGuiUtil.HoverTooltip(drop.NameString);
@@ -274,11 +281,12 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>
     
     private bool OnLeftClick(RetainerTaskEx arg)
     {
-        PluginService.WindowService.OpenRetainerTaskWindow(arg.RowId);
+        MediatorService.Publish(new OpenUintWindowMessage(typeof(RetainerTasksWindow), arg.RowId));
         return true;
     }
 
-    public override string Key => AsKey;
+    public override string GenericKey { get; } = "retainerTasks";
+    public override string GenericName { get; } = "Retainer Tasks";
     public override bool DestroyOnClose => false;
     public override bool SaveState => true;
     public override Vector2? MaxSize { get; } = new(2000, 2000);
@@ -289,17 +297,13 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>
     {
         DrawTabs();
     }
-    
-    public static string AsKey
-    {
-        get { return "retainerTasks"; }
-    }
 
     public override void Invalidate()
     {
     }
 
-    public override FilterConfiguration? SelectedConfiguration { get; } = null;
+    public override FilterConfiguration? SelectedConfiguration => null;
+
     public override int GetRowId(RetainerTaskEx item)
     {
         return (int)item.RowId;
@@ -331,12 +335,12 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>
         {
             if (tabId == 0)
             {
-                var duties = Service.ExcelCache.GetRetainerTaskExSheet().Where(c => c.Task != 0).ToList();
+                var duties = _excelCache.GetRetainerTaskExSheet().Where(c => c.Task != 0).ToList();
                 _items.Add(tabId, duties);
             }
             else
             {
-                var duties = Service.ExcelCache.GetRetainerTaskExSheet().Where(c => c.FormattedName.ToString() != "" && (uint)c.RetainerTaskType == tabId && c.Task != 0).ToList();
+                var duties = _excelCache.GetRetainerTaskExSheet().Where(c => c.FormattedName.ToString() != "" && (uint)c.RetainerTaskType == tabId && c.Task != 0).ToList();
                 _items.Add(tabId, duties);
             }
         }

@@ -2,6 +2,8 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -49,6 +51,10 @@ namespace InventoryTools.Logic.Filters
             }
 
             return true;
+        }
+
+        public BuyFromVendorPriceFilter(ILogger<BuyFromVendorPriceFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
         }
     }
 }

@@ -201,6 +201,11 @@ public class PopupMenu
         _openButtons = openButtons;
         _items = items;
     }
+
+    public void Open()
+    {
+        ImGui.OpenPopup("RightClick" + _id);
+    }
     
     public void Draw()
     {

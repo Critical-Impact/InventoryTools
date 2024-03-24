@@ -4,6 +4,8 @@ using System.Linq;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -50,7 +52,8 @@ namespace InventoryTools.Logic.Filters
             return Enum.GetValues<FilterItemsRetainerEnum>().ToList();
         }
 
-        public override string GetFormattedChoice(FilterItemsRetainerEnum choice)
+        public override string GetFormattedChoice(FilterConfiguration filterConfiguration,
+            FilterItemsRetainerEnum choice)
         {
             if (choice == FilterItemsRetainerEnum.No)
             {
@@ -68,6 +71,10 @@ namespace InventoryTools.Logic.Filters
             }
 
             return choice.ToString();
+        }
+
+        public DisplayFilterInRetainersFilter(ILogger<DisplayFilterInRetainersFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
         }
     }
 }

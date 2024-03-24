@@ -1,4 +1,5 @@
 using System.Numerics;
+using CriticalCommonLib.Services.Mediator;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility;
 using ImGuiNET;
@@ -6,13 +7,19 @@ using Dalamud.Logging;
 using Dalamud.Plugin.Services;
 using InventoryTools;
 using InventoryTools.Logic;
+using InventoryTools.Services;
 using InventoryTools.Ui;
+using Microsoft.Extensions.Logging;
 using OtterGui;
 
 namespace QoLBar;
 
-public class IconBrowserWindow : Window
+public class IconBrowserWindow : GenericWindow
 {
+    public IconBrowserWindow(ILogger<IconBrowserWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, string name = "Icon Browser") : base(logger, mediator, imGuiService, configuration, name)
+    {
+    }
+    
     public bool iconBrowserOpen = false;
     public bool doPasteIcon = false;
     public int pasteIcon = 0;
@@ -32,16 +39,14 @@ public class IconBrowserWindow : Window
 
     public void ToggleIconBrowser() => iconBrowserOpen = !iconBrowserOpen;
     
-    public IconBrowserWindow(string name, ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
+    public override void Initialize()
     {
+        WindowName = "Icon Browser";
+        Key = "iconbrowser";
     }
 
-    public IconBrowserWindow() : base("Icon Browser", ImGuiWindowFlags.None, false)
-    {
-    }
-
-    public static string AsKey => "IconBrowser";
-    public override string Key { get; } = AsKey;
+    public override string GenericKey { get; } = "iconbrowser";
+    public override string GenericName { get; } = "Icon Browser";
     public override bool DestroyOnClose { get; }
     public override bool SaveState { get; }
     public override Vector2? DefaultSize { get; } = new Vector2(300, 300);
@@ -259,9 +264,9 @@ public class IconBrowserWindow : Window
         var count = 0;
         for (int index = start; index < end; index++)
         {
-            if (PluginService.IconStorage.IconExists(index))
+            if (ImGuiService.IconService.IconExists(index))
             {
-                ImGui.Image(PluginService.IconStorage[index].ImGuiHandle, new Vector2(64, 64));
+                ImGui.Image(ImGuiService.IconService[index].ImGuiHandle, new Vector2(64, 64));
                 ImGuiUtil.HoverTooltip(index.ToString());
                 if (count % 10 != 0)
                 {
@@ -297,7 +302,7 @@ public class IconBrowserWindow : Window
                 for (int i = start; i < end; i++)
                 {
                     var icon = cache[i];
-                    ImGui.Image(PluginService.IconStorage[icon].ImGuiHandle, iconSize);
+                    ImGui.Image(ImGuiService.IconService[icon].ImGuiHandle, iconSize);
                     if (ImGui.IsItemClicked())
                     {
                         doPasteIcon = true;
@@ -326,7 +331,7 @@ public class IconBrowserWindow : Window
     {
         _iconExistsCache = new HashSet<int>();
         if (_iconCache.ContainsKey(_name)) return;
-        PluginLog.Info($"Building Icon Browser cache for tab \"{_name}\"");
+        Logger.LogDebug($"Building Icon Browser cache for tab \"{_name}\"");
 
         var cache = _iconCache[_name] = new();
         foreach (var (start, end) in _iconList)
@@ -338,12 +343,12 @@ public class IconBrowserWindow : Window
             }
         }
 
-        PluginLog.Info($"Done building tab cache! {cache.Count} icons found.");
+        Logger.LogInformation($"Done building tab cache! {cache.Count} icons found.");
     }
     
     public void BuildCache(bool rebuild)
     {
-        PluginLog.Info("Building Icon Browser cache");
+        Logger.LogInformation("Building Icon Browser cache");
 
         _iconCache.Clear();
         _iconExistsCache = new();
@@ -358,7 +363,6 @@ public class IconBrowserWindow : Window
             _iconExistsCache.Remove(125052); // Remove broken image (TextureFormat R8G8B8X8 is not supported for image conversion)
         }
 
-        PluginLog.Info($"Done building cache! {_iconExistsCache.Count} icons found.");
+        Logger.LogInformation($"Done building cache! {_iconExistsCache.Count} icons found.");
     }
-    
 }

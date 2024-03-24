@@ -2,6 +2,7 @@ namespace InventoryTools.Logic.Settings.Abstract
 {
     public enum SettingSubCategory
     {
+        None,
         AutoSave,
         FilterSettings,
         Experimental,

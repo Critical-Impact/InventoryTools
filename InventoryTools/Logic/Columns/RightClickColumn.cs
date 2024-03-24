@@ -1,29 +1,37 @@
+using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Columns.Abstract;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin.Services;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
 {
     public class RightClickColumn : TextColumn
     {
+        public RightClickColumn(ILogger<RightClickColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
         public override ColumnCategory ColumnCategory => ColumnCategory.Tools;
 
-        public override string? CurrentValue(InventoryItem item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
         {
             return null;
         }
 
-        public override string? CurrentValue(ItemEx item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
             return null;
         }
 
-        public override string? CurrentValue(SortingResult item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
         {
             return null;
         }
@@ -36,23 +44,32 @@ namespace InventoryTools.Logic.Columns
         public override bool HasFilter { get; set; } = false;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
 
-        public override void Draw(FilterConfiguration configuration, InventoryItem item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            InventoryItem item, int rowIndex)
         {
-            Draw(configuration, item.Item, rowIndex);
+            return Draw(configuration, columnConfiguration, item.Item, rowIndex);
         }
 
-        public override void Draw(FilterConfiguration configuration, SortingResult item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            SortingResult item, int rowIndex)
         {
-            Draw(configuration, item.InventoryItem.Item, rowIndex);
+            return Draw(configuration, columnConfiguration, item.InventoryItem.Item, rowIndex);
         }
 
-        public override void Draw(FilterConfiguration configuration, InventoryChange item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            InventoryChange item, int rowIndex)
         {
-            Draw(configuration, item.InventoryItem, rowIndex);
+            return Draw(configuration, columnConfiguration, item.InventoryItem, rowIndex);
         }
 
-        public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            CraftItem item, int rowIndex)
         {
+            var messages = new List<MessageBase>();
             var hoveredRow = -1;
             ImGui.Selectable("", false, ImGuiSelectableFlags.SpanAllColumns, new Vector2(0, configuration.TableHeight) * ImGui.GetIO().FontGlobalScale);
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow)) {
@@ -67,15 +84,20 @@ namespace InventoryTools.Logic.Columns
             {
                 if (popup.Success)
                 {
-                    item.DrawRightClickPopup(configuration);
+                    ImGuiService.RightClickService.DrawRightClickPopup(item, configuration, messages);
                 }
             }
+
+            return messages;
         }
 
         
 
-        public override void Draw(FilterConfiguration configuration, ItemEx item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            ItemEx item, int rowIndex)
         {
+            var messages = new List<MessageBase>();
             var hoveredRow = -1;
             ImGui.Selectable("", false, ImGuiSelectableFlags.SpanAllColumns, new Vector2(0, configuration.TableHeight) * ImGui.GetIO().FontGlobalScale);
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow)) {
@@ -91,9 +113,11 @@ namespace InventoryTools.Logic.Columns
                 using var _ = ImRaii.PushId("RightClick" + rowIndex);
                 if (popup.Success)
                 {
-                    item.DrawRightClickPopup();
+                    ImGuiService.RightClickService.DrawRightClickPopup(item, messages);
                 }
             }
+
+            return messages;
         }
     }
 }

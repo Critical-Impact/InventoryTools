@@ -1,14 +1,30 @@
+using System.Collections.Generic;
+using CriticalCommonLib.Interfaces;
+using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
 using InventoryTools.Ui.Widgets;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
 {
     public class MarketBoardMinPriceNQColumn : GilColumn
     {
+        private readonly ICharacterMonitor _characterMonitor;
+        private readonly IMarketCache _marketCache;
+
+        public MarketBoardMinPriceNQColumn(ILogger<MarketBoardMinPriceNQColumn> logger, ImGuiService imGuiService, ICharacterMonitor characterMonitor, IMarketCache marketCache) : base(logger, imGuiService)
+        {
+            _characterMonitor = characterMonitor;
+            _marketCache = marketCache;
+        }
         public override ColumnCategory ColumnCategory => ColumnCategory.Market;
 
         protected readonly string LoadingString = "loading...";
@@ -16,23 +32,26 @@ namespace InventoryTools.Logic.Columns
         protected readonly int Loading = -1;
         protected readonly int Untradable = -2;
 
-        public override void Draw(FilterConfiguration configuration, InventoryItem item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
+            InventoryItem item, int rowIndex)
         {
-            var result = DoDraw(CurrentValue(item), rowIndex, configuration);
-            result?.HandleEvent(configuration,item);
+            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
         }
-        public override void Draw(FilterConfiguration configuration, SortingResult item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            SortingResult item, int rowIndex)
         {
-            var result = DoDraw(CurrentValue(item), rowIndex, configuration);
-            result?.HandleEvent(configuration,item);
+            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
         }
-        public override void Draw(FilterConfiguration configuration, ItemEx item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            ItemEx item, int rowIndex)
         {
-            var result = DoDraw(CurrentValue((ItemEx)item), rowIndex, configuration);
-            result?.HandleEvent(configuration,item);
+            return DoDraw(item, CurrentValue(columnConfiguration, (ItemEx)item), rowIndex, configuration, columnConfiguration);
         }
 
-        public override IColumnEvent? DoDraw(int? currentValue, int rowIndex, FilterConfiguration filterConfiguration)
+        public override List<MessageBase>? DoDraw(IItem item, int? currentValue, int rowIndex,
+            FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
             if (currentValue.HasValue && currentValue.Value == Loading)
             {
@@ -46,57 +65,67 @@ namespace InventoryTools.Logic.Columns
             }
             else if(currentValue.HasValue)
             {
-                base.DoDraw(currentValue, rowIndex, filterConfiguration);
+                base.DoDraw(item, currentValue, rowIndex, filterConfiguration, columnConfiguration);
                 ImGui.SameLine();
                 if (ImGui.SmallButton("R##" + rowIndex))
                 {
-                    return new RefreshPricingEvent();
+                    var activeCharacter = _characterMonitor.ActiveCharacter;
+                    if (activeCharacter != null)
+                    {
+                        return new List<MessageBase> {new MarketRequestItemUpdate(item.ItemId)};
+                    }
                 }
             }
             else
             {
-                base.DoDraw(currentValue, rowIndex, filterConfiguration);
+                base.DoDraw(item, currentValue, rowIndex, filterConfiguration, columnConfiguration);
             }
             return null;
         }
 
-        public override int? CurrentValue(InventoryItem item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
         {
             if (!item.CanBeTraded)
             {
                 return Untradable;
             }
-
-            var marketBoardData = PluginService.MarketCache.GetPricing(item.ItemId, false);
-            if (marketBoardData != null)
+            var activeCharacter = _characterMonitor.ActiveCharacter;
+            if (activeCharacter != null)
             {
-                var hq = marketBoardData.minPriceNQ;
-                return (int)hq;
+                var marketBoardData = _marketCache.GetPricing(item.ItemId, activeCharacter.WorldId, false);
+                if (marketBoardData != null)
+                {
+                    var hq = marketBoardData.MinPriceNq;
+                    return (int)hq;
+                }
             }
 
             return Loading;
         }
 
-        public override int? CurrentValue(ItemEx item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
             if (!item.CanBeTraded)
             {
                 return Untradable;
             }
-
-            var marketBoardData = PluginService.MarketCache.GetPricing(item.RowId, false);
-            if (marketBoardData != null)
+            var activeCharacter = _characterMonitor.ActiveCharacter;
+            if (activeCharacter != null)
             {
-                var hq = marketBoardData.minPriceNQ;
-                return (int)hq;
+                var marketBoardData = _marketCache.GetPricing(item.RowId, activeCharacter.WorldId, false);
+                if (marketBoardData != null)
+                {
+                    var hq = marketBoardData.MinPriceNq;
+                    return (int)hq;
+                }
             }
 
             return Loading;
         }
 
-        public override int? CurrentValue(SortingResult item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
         {
-            return CurrentValue(item.InventoryItem);
+            return CurrentValue(columnConfiguration, item.InventoryItem);
         }
 
         public override string Name { get; set; } = "Market Board Minimum Price NQ";

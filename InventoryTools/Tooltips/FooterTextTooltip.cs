@@ -3,15 +3,21 @@ using CriticalCommonLib.Enums;
 using CriticalCommonLib.Services;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
+using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using InventoryTools.Logic;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Tooltips;
 
 public class FooterTextTooltip : BaseTooltip
 {
+    public FooterTextTooltip(ILogger<FooterTextTooltip> logger, ExcelCache excelCache, InventoryToolsConfiguration configuration, IGameGui gameGui) : base(logger, excelCache, configuration, gameGui)
+    {
+    }
     public override bool IsEnabled =>
-        ConfigurationManager.Config.DisplayTooltip && ConfigurationManager.Config.TooltipFooterLines != 0;
+        Configuration.DisplayTooltip && Configuration.TooltipFooterLines != 0;
 
     public override unsafe void OnGenerateItemTooltip(NumberArrayData* numberArrayData, StringArrayData* stringArrayData)
     {
@@ -44,9 +50,9 @@ public class FooterTextTooltip : BaseTooltip
             if (seStr != null && seStr.Payloads.Count > 0)
             {
                 var newText = "";
-                if (ConfigurationManager.Config.TooltipFooterLines != 0)
+                if (Configuration.TooltipFooterLines != 0)
                 {
-                    for (int i = 0; i < ConfigurationManager.Config.TooltipHeaderLines; i++)
+                    for (int i = 0; i < Configuration.TooltipHeaderLines; i++)
                     {
                         newText += "\n";
                     }
@@ -56,7 +62,7 @@ public class FooterTextTooltip : BaseTooltip
                 {
                     var lines = new List<Payload>()
                     {
-                        new UIForegroundPayload((ushort)(ConfigurationManager.Config.TooltipColor ?? 1)),
+                        new UIForegroundPayload((ushort)(Configuration.TooltipColor ?? 1)),
                         new UIGlowPayload(0),
                         new TextPayload(newText),
                         new UIGlowPayload(0),

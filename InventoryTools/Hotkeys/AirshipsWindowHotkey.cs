@@ -1,16 +1,25 @@
+using CriticalCommonLib.Services.Mediator;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
+using InventoryTools.Mediator;
+using InventoryTools.Services;
+using InventoryTools.Ui;
+using Lumina;
+using Microsoft.Extensions.Logging;
 using OtterGui.Classes;
 
 namespace InventoryTools.Hotkeys;
 
 public class AirshipsWindowHotkey : Hotkey
 {
+    public AirshipsWindowHotkey(ILogger<AirshipsWindowHotkey> logger, MediatorService mediatorService, InventoryToolsConfiguration configuration) : base(logger, mediatorService, configuration)
+    {
+    }
     public override ModifiableHotkey? ModifiableHotkey =>
-        ConfigurationManager.Config.GetHotkey(HotkeyAirshipWindowSetting.AsKey);
+        Configuration.GetHotkey(HotkeyAirshipWindowSetting.AsKey);
     public override bool OnHotKey()
     {
-        PluginService.WindowService.ToggleAirshipsWindow();
+        MediatorService.Publish(new ToggleGenericWindowMessage(typeof(AirshipsWindow)));
         return true;
     }
 }

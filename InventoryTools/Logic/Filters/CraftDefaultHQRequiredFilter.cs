@@ -1,6 +1,8 @@
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters;
 
@@ -31,5 +33,9 @@ public class CraftDefaultHQRequiredFilter : BooleanFilter
     public override bool? CurrentValue(FilterConfiguration configuration)
     {
         return configuration.CraftList.HQRequired;
+    }
+
+    public CraftDefaultHQRequiredFilter(ILogger<CraftDefaultHQRequiredFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+    {
     }
 }

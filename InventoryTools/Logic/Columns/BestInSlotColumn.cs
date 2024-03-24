@@ -2,15 +2,29 @@ using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 using OtterGui.Widgets;
 
 namespace InventoryTools.Logic.Columns
 {
     public class BestInSlotColumn : IntegerColumn
     {
+        private readonly ICharacterMonitor _characterMonitor;
+        private readonly IInventoryMonitor _inventoryMonitor;
+        private readonly ExcelCache _excelCache;
+
+        public BestInSlotColumn(ILogger<BestInSlotColumn> logger, ImGuiService imGuiService, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, ExcelCache excelCache) : base(logger, imGuiService)
+        {
+            _characterMonitor = characterMonitor;
+            _inventoryMonitor = inventoryMonitor;
+            _excelCache = excelCache;
+        }
         public override ColumnCategory ColumnCategory => ColumnCategory.Tools;
         
         private ClippedSelectableCombo<KeyValuePair<ulong, Character>>? _characters;
@@ -19,8 +33,8 @@ namespace InventoryTools.Logic.Columns
         public override IFilterEvent? DrawFooterFilter(FilterConfiguration configuration, FilterTable table)
         {
             ImGui.SameLine();
-            var characterDictionary = PluginService.CharacterMonitor.Characters;
-            var currentCharacterId = PluginService.CharacterMonitor.ActiveCharacterId;
+            var characterDictionary = _characterMonitor.Characters;
+            var currentCharacterId = _characterMonitor.ActiveCharacterId;
             var allCharacters = characterDictionary.Where(c => c.Value.Name != "" && (c.Value.OwnerId == currentCharacterId || c.Key == currentCharacterId)).ToList();
             var currentCharacterName = _selectedCharacter == null
                 ? ""
@@ -37,16 +51,16 @@ namespace InventoryTools.Logic.Columns
             return null;
         }
 
-        public override int? CurrentValue(InventoryItem item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
         {
             if (item.SortedCategory == InventoryCategory.CharacterEquipped || item.SortedCategory == InventoryCategory.RetainerEquipped || item.SortedCategory == InventoryCategory.Armoire || item.SortedCategory == InventoryCategory.GlamourChest || item.InGearSet)
             {
                 return null;
             }
-            return CurrentValue(item.Item);
+            return CurrentValue(columnConfiguration, item.Item);
         }
 
-        public override int? CurrentValue(ItemEx item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
             if (item.EquipSlotCategory.Row != 0 && CanCurrentJobEquip(item.ClassJobCategory.Row) && CanUse(item.LevelEquip))
             {
@@ -66,9 +80,9 @@ namespace InventoryTools.Logic.Columns
             
         }
 
-        public override int? CurrentValue(SortingResult item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
         {
-            return CurrentValue(item.InventoryItem);
+            return CurrentValue(columnConfiguration, item.InventoryItem);
         }
 
         public override string Name { get; set; } = "Relative Item Level";
@@ -84,18 +98,18 @@ namespace InventoryTools.Logic.Columns
         {
             if (_selectedCharacter != null)
             {
-                if (PluginService.CharacterMonitor.Characters.ContainsKey(_selectedCharacter.Value))
+                if (_characterMonitor.Characters.ContainsKey(_selectedCharacter.Value))
                 {
-                    var character = PluginService.CharacterMonitor.Characters[_selectedCharacter.Value];
+                    var character = _characterMonitor.Characters[_selectedCharacter.Value];
                     if (character.OwnerId != 0)
                     {
                         return character.Level >= itemLevel;
                     }
                 }
             }
-            if (PluginService.CharacterMonitor.ActiveCharacterId != 0)
+            if (_characterMonitor.ActiveCharacterId != 0)
             {
-                var activeCharacter = PluginService.CharacterMonitor.ActiveCharacter;
+                var activeCharacter = _characterMonitor.ActiveCharacter;
                 if (activeCharacter != null)
                 {
                     return activeCharacter.Level >= itemLevel;
@@ -109,12 +123,12 @@ namespace InventoryTools.Logic.Columns
         {
             if (_selectedCharacter != null)
             {
-                if (PluginService.CharacterMonitor.Characters.ContainsKey(_selectedCharacter.Value))
+                if (_characterMonitor.Characters.ContainsKey(_selectedCharacter.Value))
                 {
-                    var character = PluginService.CharacterMonitor.Characters[_selectedCharacter.Value];
+                    var character = _characterMonitor.Characters[_selectedCharacter.Value];
                     if (character.OwnerId != 0)
                     {
-                        if(Service.ExcelCache.IsItemEquippableBy(classJobCategory, character.ClassJob))
+                        if(_excelCache.IsItemEquippableBy(classJobCategory, character.ClassJob))
                         {
                             return true;
                         }
@@ -123,12 +137,12 @@ namespace InventoryTools.Logic.Columns
                     }
                 }
             }
-            if (PluginService.CharacterMonitor.ActiveCharacterId != 0)
+            if (_characterMonitor.ActiveCharacterId != 0)
             {
-                var activeCharacter = PluginService.CharacterMonitor.ActiveCharacter;
+                var activeCharacter = _characterMonitor.ActiveCharacter;
                 if (activeCharacter != null)
                 {
-                    if(Service.ExcelCache.IsItemEquippableBy(classJobCategory, activeCharacter.ClassJob))
+                    if(_excelCache.IsItemEquippableBy(classJobCategory, activeCharacter.ClassJob))
                     {
                         return true;
                     }
@@ -142,19 +156,19 @@ namespace InventoryTools.Logic.Columns
         {
             if (_selectedCharacter != null)
             {
-                if (PluginService.CharacterMonitor.Characters.ContainsKey(_selectedCharacter.Value))
+                if (_characterMonitor.Characters.ContainsKey(_selectedCharacter.Value))
                 {
-                    var character = PluginService.CharacterMonitor.Characters[_selectedCharacter.Value];
+                    var character = _characterMonitor.Characters[_selectedCharacter.Value];
                     if (character.OwnerId != 0)
                     {
-                        var equipped = PluginService.InventoryMonitor.GetSpecificInventory(character.CharacterId,InventoryCategory.RetainerEquipped);
+                        var equipped = _inventoryMonitor.GetSpecificInventory(character.CharacterId,InventoryCategory.RetainerEquipped);
                         return equipped.FirstOrDefault(c => c.Item.EquipSlotCategoryEx?.SimilarSlots(comparingItem) ?? false);
                     }
                 }
             }
-            if (PluginService.CharacterMonitor.ActiveCharacterId != 0)
+            if (_characterMonitor.ActiveCharacterId != 0)
             {
-                var equipped = PluginService.InventoryMonitor.GetSpecificInventory(PluginService.CharacterMonitor.ActiveCharacterId,
+                var equipped = _inventoryMonitor.GetSpecificInventory(_characterMonitor.ActiveCharacterId,
                     InventoryCategory.CharacterEquipped);
                 return equipped.FirstOrDefault(c => c.Item.EquipSlotCategoryEx?.SimilarSlots(comparingItem) ?? false);
             }

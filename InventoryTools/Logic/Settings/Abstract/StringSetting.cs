@@ -1,10 +1,15 @@
 using Dalamud.Interface.Colors;
 using ImGuiNET;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Settings.Abstract
 {
     public abstract class StringSetting : Setting<string>
     {
+        public StringSetting(ILogger logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
         public override bool HasValueSet(InventoryToolsConfiguration configuration)
         {
             return CurrentValue(configuration) != "";
@@ -14,7 +19,7 @@ namespace InventoryTools.Logic.Settings.Abstract
         {
             var value = CurrentValue(configuration) ?? "";
             ImGui.SetNextItemWidth(LabelSize);
-            if (HasValueSet(configuration))
+            if (ColourModified && HasValueSet(configuration))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);
                 ImGui.LabelText("##" + Key + "Label", Name + ":");
@@ -30,8 +35,8 @@ namespace InventoryTools.Logic.Settings.Abstract
                 UpdateFilterConfiguration(configuration, value);
             }
             ImGui.SameLine();
-            UiHelpers.HelpMarker(HelpText);
-            if (HasValueSet(configuration))
+            ImGuiService.HelpMarker(HelpText, Image, ImageSize);
+            if (!HideReset && HasValueSet(configuration))
             {
                 ImGui.SameLine();
                 if (ImGui.Button("Reset##" + Key + "Reset"))

@@ -1,6 +1,8 @@
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -34,6 +36,10 @@ namespace InventoryTools.Logic.Filters
                 case true:
                     return item.SpentSpecialShop;
             }
+        }
+
+        public IsCurrencyFilter(ILogger<IsCurrencyFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
         }
     }
 }

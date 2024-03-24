@@ -5,17 +5,26 @@ using System.Numerics;
 using System.Timers;
 using CriticalCommonLib;
 using CriticalCommonLib.Enums;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Services.Ui;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Plugin.Services;
 using InventoryTools.GameUi;
+using InventoryTools.Mediator;
+using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using Tetris.GameEngine;
 
 namespace InventoryTools.Misc
 {
-    public class TetrisGame : IDisposable
+    public class TetrisGame : MediatorSubscriberBase
     {
-        private static readonly int[,] clearBlock = {
+        public TetrisGame(ILogger<TetrisGame> logger, MediatorService mediatorService) : base(logger, mediatorService)
+        {
+            Initialize();
+        }
+
+        private readonly int[,] clearBlock = {
             {0,0,0,0,0},
             {0,0,0,0,0},
             {0,0,0,0,0},
@@ -38,13 +47,15 @@ namespace InventoryTools.Misc
 
         public int CursorX = 0;
         public int CursorY = 0;
-        private static int _timerCounter = 0;
-        private static readonly int _timerStep = 10;
+        private int _timerCounter = 0;
+        private readonly int _timerStep = 10;
 
         public Game Game;
-        private static Timer? _gameTimer;
+        private Timer? _gameTimer;
 
-        public TetrisGame()
+
+
+        private void Initialize()
         {
             Game = new Game();
             _gameTimer = new System.Timers.Timer(800);
@@ -52,7 +63,7 @@ namespace InventoryTools.Misc
             Service.Framework.Update += FrameworkOnOnUpdateEvent;
             _gameTimer.Start();
         }
-        
+
         private bool isKeyPressed(VirtualKey[] keys) {
             foreach (var vk in Service.KeyState.GetValidVirtualKeys()) {
                 if (keys.Contains(vk)) {
@@ -105,7 +116,7 @@ namespace InventoryTools.Misc
                 Game.MoveRight();
                 lastMoveTime = DateTime.Now;
             }
-            PluginService.OverlayService.RefreshOverlayStates();
+            MediatorService.Publish(new OverlaysRequestRefreshMessage());
             Service.KeyState.ClearAll();
             
 
@@ -114,9 +125,9 @@ namespace InventoryTools.Misc
         }
         }
 
-        public static bool TetrisEnabled { get; set; }
+        public bool TetrisEnabled { get; set; }
 
-        public static void ToggleTetris()
+        public void ToggleTetris()
         {
             if (TetrisEnabled)
             {
@@ -128,20 +139,20 @@ namespace InventoryTools.Misc
             }
         }
 
-        public static void EnableTetris()
+        public void EnableTetris()
         {
             TetrisEnabled = true;
-            PluginService.OverlayService.RemoveOverlay(WindowName.InventoryExpansion);
-            PluginService.OverlayService.AddOverlay(new TetrisOverlay());
-            PluginService.OverlayService.RefreshOverlayStates();
+            //PluginService.OverlayService.RemoveOverlay(WindowName.InventoryExpansion);
+            //PluginService.OverlayService.AddOverlay(new TetrisOverlay());
+            MediatorService.Publish(new OverlaysRequestRefreshMessage());
         }
 
-        public static void DisableTetris()
+        public void DisableTetris()
         {
             TetrisEnabled = false;
-            PluginService.OverlayService.RemoveOverlay(WindowName.InventoryExpansion);
-            PluginService.OverlayService.AddOverlay(new InventoryExpansionOverlay());
-            PluginService.OverlayService.RefreshOverlayStates();
+            //PluginService.OverlayService.RemoveOverlay(WindowName.InventoryExpansion);
+            //PluginService.OverlayService.AddOverlay(new InventoryExpansionOverlay());
+            MediatorService.Publish(new OverlaysRequestRefreshMessage());
         }
         
         private void OnTimedEvent(object? source, ElapsedEventArgs e)
@@ -152,7 +163,7 @@ namespace InventoryTools.Misc
                 {
                     _timerCounter += _timerStep;
                     Game.MoveDown();
-                    PluginService.OverlayService.RefreshOverlayStates();
+                    MediatorService.Publish(new OverlaysRequestRefreshMessage());
                     if (Game.Status == Game.GameStatus.Finished)
                     {
                         _gameTimer?.Stop();
@@ -172,28 +183,10 @@ namespace InventoryTools.Misc
             }
         }
 
-        public static void Restart()
+        public void Restart()
         {
-            _tetrisGame = new TetrisGame();
+            Initialize();
         }
-
-        private static TetrisGame? _tetrisGame;
-
-        public static TetrisGame Instance
-        {
-            get
-            {
-                if (_tetrisGame == null)
-                {
-                    _tetrisGame = new TetrisGame();
-                }
-
-                return _tetrisGame;
-            }
-        }
-
-        public static bool HasInstance => _tetrisGame != null;
-
 
         public Dictionary<InventoryType, Dictionary<Vector2, Vector4?>> DrawScene()
         {
@@ -309,20 +302,6 @@ namespace InventoryTools.Misc
                 Service.Framework.Update -= FrameworkOnOnUpdateEvent;
             }
             _disposed = true;         
-        }
-        
-        ~TetrisGame()
-        {
-#if DEBUG
-            // In debug-builds, make sure that a warning is displayed when the Disposable object hasn't been
-            // disposed by the programmer.
-
-            if( _disposed == false )
-            {
-                Service.Log.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
-            }
-#endif
-            Dispose (true);
         }
     }
 }

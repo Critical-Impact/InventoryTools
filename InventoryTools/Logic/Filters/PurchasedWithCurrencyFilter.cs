@@ -2,13 +2,17 @@ using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
     public class PurchasedWithCurrencyFilter : UintMultipleChoiceFilter
     {
+        private readonly ExcelCache _excelCache;
         public override string Key { get; set; } = "PurchaseWithCurrency";
         public override string Name { get; set; } = "Purchased with Currency";
 
@@ -40,14 +44,19 @@ namespace InventoryTools.Logic.Filters
 
         public override Dictionary<uint, string> GetChoices(FilterConfiguration configuration)
         {
-            var currencies = Service.ExcelCache.GetCurrencies(3);
+            var currencies = _excelCache.GetCurrencies(3);
             currencies.Add(20);
             currencies.Add(21);
             currencies.Add(22);
             
-            return currencies.ToDictionary(c => c, c => Service.ExcelCache.GetItemExSheet().GetRow(c)?.NameString ?? "Unknown").OrderBy(c => c.Value).ToDictionary(c => c.Key, c => c.Value);
+            return currencies.ToDictionary(c => c, c => _excelCache.GetItemExSheet().GetRow(c)?.NameString ?? "Unknown").OrderBy(c => c.Value).ToDictionary(c => c.Key, c => c.Value);
         }
 
         public override bool HideAlreadyPicked { get; set; } = true;
+
+        public PurchasedWithCurrencyFilter(ILogger<PurchasedWithCurrencyFilter> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
+        {
+            _excelCache = excelCache;
+        }
     }
 }

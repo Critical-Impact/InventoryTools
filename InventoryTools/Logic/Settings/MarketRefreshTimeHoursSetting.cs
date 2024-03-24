@@ -1,4 +1,6 @@
 using InventoryTools.Logic.Settings.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Settings
 {
@@ -17,9 +19,15 @@ namespace InventoryTools.Logic.Settings
 
         public override string Key { get; set; } = "MarketRefreshTime";
         public override string Name { get; set; } = "Keep market prices for X hours";
+
+        public override string WizardName { get; } = "Persist for X hours";
         public override string HelpText { get; set; } = "How long should we store the market prices for before refreshing from universalis?";
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.MarketBoard;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Market;
+        public override string Version => "1.6.2.5";
 
+        public MarketRefreshTimeHoursSetting(ILogger<MarketRefreshTimeHoursSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
     }
 }

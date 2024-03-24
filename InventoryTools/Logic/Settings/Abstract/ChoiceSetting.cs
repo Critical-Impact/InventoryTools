@@ -4,11 +4,16 @@ using System.Linq;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Settings.Abstract
 {
     public abstract class ChoiceSetting<T> : Setting<T> where T : IComparable
     {
+        public ChoiceSetting(ILogger logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
         public abstract Dictionary<T, string> Choices { get; }
 
         public virtual string GetFormattedChoice(T choice)
@@ -19,7 +24,7 @@ namespace InventoryTools.Logic.Settings.Abstract
         public override void Draw(InventoryToolsConfiguration configuration)
         {
             ImGui.SetNextItemWidth(LabelSize);
-            if (HasValueSet(configuration))
+            if (ColourModified && HasValueSet(configuration))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.HealerGreen);
                 ImGui.LabelText("##" + Key + "Label", Name + ":");
@@ -35,6 +40,7 @@ namespace InventoryTools.Logic.Settings.Abstract
 
             var currentSearchCategory = GetFormattedChoice(activeChoice);
             ImGui.SameLine();
+            ImGui.SetNextItemWidth(InputSize);
             using (var combo = ImRaii.Combo("##" + Key + "Combo", currentSearchCategory))
             {
                 if (combo.Success)
@@ -56,8 +62,8 @@ namespace InventoryTools.Logic.Settings.Abstract
             }
 
             ImGui.SameLine();
-            UiHelpers.HelpMarker(HelpText);
-            if (HasValueSet(configuration))
+            ImGuiService.HelpMarker(HelpText, Image, ImageSize);
+            if (!HideReset && HasValueSet(configuration))
             {
                 ImGui.SameLine();
                 if (ImGui.Button("Reset##" + Key + "Reset"))
