@@ -2,364 +2,373 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using CriticalCommonLib;
+using CriticalCommonLib.Services.Mediator;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic;
+using InventoryTools.Mediator;
 using InventoryTools.Services.Interfaces;
 using InventoryTools.Ui;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Window = InventoryTools.Ui.Window;
 
 namespace InventoryTools.Services
 {
-    public class WindowService : IDisposable
+    public class WindowService : DisposableMediatorSubscriberBase, IHostedService
     {
         private readonly WindowSystem windowSystem = new("AllaganTools");
 
-        private IFilterService _filterService;
-        private readonly IPluginLog _pluginLog;
+        private readonly Func<Type, uint, UintWindow> _uintWindowFactory;
+        private readonly Func<Type, string, StringWindow> _stringWindowFactory;
+        private readonly Func<Type, GenericWindow> _genericWindowFactory;
+        private readonly InventoryToolsConfiguration _configuration;
+        private readonly MediatorService _mediatorService;
 
-        public WindowService(IFilterService filterService, IPluginLog pluginLog)
+        public WindowService(ILogger<WindowService> logger, MediatorService mediatorService, IEnumerable<Window> windows, Func<Type, uint, UintWindow> uintWindowFactory, Func<Type, string, StringWindow> stringWindowFactory, Func<Type, GenericWindow> genericWindowFactory, InventoryToolsConfiguration configuration) : base(logger, mediatorService)
         {
-            _filterService = filterService;
-            _pluginLog = pluginLog;
-            _filterService.FilterRemoved += FilterServiceAddedRemoved;
-            _filterService.FilterAdded += FilterServiceAddedRemoved;
-            _filterService.FilterRepositioned += FilterServiceOnFilterRepositioned;
-            _filterService.FilterInvalidated += FilterServiceOnFilterInvalidated;
-            PluginService.OnPluginLoaded += PluginServiceOnOnPluginLoaded;
+            _windows = windows.ToDictionary(c => c.GetType(), c => c);
+            _uintWindowFactory = uintWindowFactory;
+            _stringWindowFactory = stringWindowFactory;
+            _genericWindowFactory = genericWindowFactory;
+            _configuration = configuration;
+            _mediatorService = mediatorService;
+        }
+
+        private void UintWindowMessage(OpenUintWindowMessage obj)
+        {
+            OpenWindow(obj.windowType, obj.windowId);
+        }
+
+        private void GenericWindowMessage(OpenGenericWindowMessage obj)
+        {
+            OpenWindow(obj.windowType);
         }
 
         public void UpdateRespectCloseHotkey(Type windowType, bool newSetting)
         {
-            foreach (var window in _windows)
+            foreach (var window in _allWindows)
             {
-                if (window.Value.GetType() == windowType)
+                if (window.GetType() == windowType)
                 {
-                    window.Value.RespectCloseHotkey = newSetting;
+                    window.RespectCloseHotkey = newSetting;
                 }
             }
         }
 
-        private void FilterServiceOnFilterInvalidated(FilterConfiguration configuration)
-        {
-            if (_windows.ContainsKey(CraftsWindow.AsKey))
-            {
-                _windows[CraftsWindow.AsKey].Invalidate();
-            }
-            if (_windows.ContainsKey(FiltersWindow.AsKey))
-            {
-                _windows[FiltersWindow.AsKey].Invalidate();
-            }
-            if (_windows.ContainsKey(ConfigurationWindow.AsKey))
-            {
-                _windows[ConfigurationWindow.AsKey].Invalidate();
-            }
-        }
+        private List<Window> _allWindows = new();
+        private ConcurrentDictionary<(Type,string), IWindow> _stringWindows = new();
+        private ConcurrentDictionary<(Type,uint), IWindow> _uintWindows = new();
+        private ConcurrentDictionary<Type, IWindow> _genericWindows = new();
 
-        private void PluginServiceOnOnPluginLoaded()
-        {
-            RestoreSavedWindows();
-        }
+        private MethodInfo? _openWindowMethod;
+        private readonly Dictionary<Type,Window> _windows;
 
-        private ConcurrentDictionary<string, Window> _windows = new();
-        public ConcurrentDictionary<string, Window> Windows => _windows;
 
         private void RestoreSavedWindows()
         {
-            var openWindows = ConfigurationManager.Config.OpenWindows;
-            ConfigurationManager.Config.OpenWindows = new HashSet<string>();
+            //TODO: Rewrire
+            var openWindows = _configuration.OpenWindows;
+            _configuration.OpenWindows = new HashSet<string>();
             foreach (var openWindow in openWindows)
             {
-                OpenGuessWindow(openWindow);
-            }
-        }
+                Assembly asm = typeof(WindowService).Assembly;
+                Type? type = asm.GetType(openWindow);
 
-        public bool OpenItemWindow(uint itemId)
-        {
-            var asKey = ItemWindow.AsKey(itemId);
-            if (_windows.ContainsKey(asKey))
-            {
-                _windows[asKey].Toggle();
-                return true;
-            }
-            var itemWindow = new ItemWindow(itemId);
-            return AddWindow(itemWindow);
-        }
+                if (type != null)
+                {
+                    try
+                    {
+                        var newWindow = _genericWindowFactory.Invoke(type);
+                        newWindow.Initialize();
+                        AddWindow(newWindow);
 
-        public bool OpenENpcWindow(uint eNpcId)
-        {
-            var asKey = ENpcWindow.AsKey(eNpcId);
-            if (_windows.ContainsKey(asKey))
-            {
-                _windows[asKey].Toggle();
-                return true;
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.LogError("Could not load saved window. Perhaps it was removed.");
+                    }
+                }
             }
-            var eNpcWindow = new ENpcWindow(eNpcId);
-            return AddWindow(eNpcWindow);
-        }
-
-        public bool OpenDutyWindow(uint contentFinderConditionId)
-        {
-            var asKey = DutyWindow.AsKey(contentFinderConditionId);
-            if (_windows.ContainsKey(asKey))
-            {
-                _windows[asKey].Toggle();
-                return true;
-            }
-            var dutyWindow = new DutyWindow(contentFinderConditionId);
-            return AddWindow(dutyWindow);
-        }
-
-        public bool OpenAirshipWindow(uint airshipExplorationPointId)
-        {
-            var asKey = AirshipWindow.AsKey(airshipExplorationPointId);
-            if (_windows.ContainsKey(asKey))
-            {
-                _windows[asKey].Toggle();
-                return true;
-            }
-            var airshipWindow = new AirshipWindow(airshipExplorationPointId);
-            return AddWindow(airshipWindow);
-        }
-
-        public bool OpenSubmarineWindow(uint submarineExplorationPointId)
-        {
-            var asKey = SubmarineWindow.AsKey(submarineExplorationPointId);
-            if (_windows.ContainsKey(asKey))
-            {
-                _windows[asKey].Toggle();
-                return true;
-            }
-            var submarineWindow = new SubmarineWindow(submarineExplorationPointId);
-            return AddWindow(submarineWindow);
-        }
-
-        public bool OpenRetainerTaskWindow(uint retainerTaskId)
-        {
-            var asKey = RetainerTaskWindow.AsKey(retainerTaskId);
-            if (_windows.ContainsKey(asKey))
-            {
-                _windows[asKey].Toggle();
-                return true;
-            }
-            var newWindow = new RetainerTaskWindow(retainerTaskId);
-            return AddWindow(newWindow);
-        }
-
-        public bool OpenFilterWindow(string filterKey)
-        {
-            var asKey = FilterWindow.AsKey(filterKey);
-            if (_windows.ContainsKey(asKey))
-            {
-                _windows[asKey].Toggle();
-                return true;
-            }
-            var filterWindow = new FilterWindow(filterKey);
-            return AddWindow(filterWindow);
         }
 
         public bool HasFilterWindowOpen
         {
             get
             {
-                return _windows.Any(c => c.Value.SelectedConfiguration != null && c.Value.IsOpen);
+                return _allWindows.Any(c => c.SelectedConfiguration != null && c.IsOpen);
             }
         }
 
         public WindowSystem WindowSystem => windowSystem;
 
-        public CraftsWindow GetCraftsWindow()
+        public T GetWindow<T>() where T: GenericWindow 
         {
-            var asKey = CraftsWindow.AsKey;
-            if (_windows.ContainsKey(asKey) && _windows[asKey] is CraftsWindow)
+            if (_genericWindows.ContainsKey(typeof(T)))
             {
-                return (CraftsWindow)_windows[asKey];
+                return (T)_genericWindows[typeof(T)];
             }
-            var craftsWindow = new CraftsWindow();
-            AddWindow(craftsWindow);
-            return craftsWindow;
+            ;
+            var newWindow = _genericWindowFactory.Invoke(typeof(T));
+            newWindow.Initialize();
+            AddWindow(newWindow);
+            return (T)newWindow;
         }
 
-        public T GetWindow<T>(string windowName) where T: Window, new()
+        public GenericWindow GetWindow(Type type)
         {
-            if (_windows.ContainsKey(windowName) && _windows[windowName] is T)
+            if (_genericWindows.ContainsKey(type))
             {
-                return (T)_windows[windowName];
+                return (GenericWindow)_genericWindows[type];
             }
-            var newWindow = new T();
-            AddWindow(newWindow);
+            ;
+            var newWindow = _genericWindowFactory.Invoke(type);
+            newWindow.Initialize();
+            AddWindow(type, newWindow);
+            return newWindow;
+        }
+        
+        public UintWindow GetWindow(Type type, uint windowId)
+        {
+            if (_uintWindows.ContainsKey((type,windowId)))
+            {
+                return (UintWindow)_uintWindows[(type,windowId)];
+            }
+            ;
+            var newWindow = _uintWindowFactory.Invoke(type, windowId);
+            newWindow.Initialize(windowId);
+            AddWindow(type, newWindow, windowId);
             return newWindow;
         }
 
-        public bool ToggleCraftsWindow()
+        public T GetWindow<T>(uint windowId) where T: UintWindow
         {
-            return ToggleWindow<CraftsWindow>(CraftsWindow.AsKey);
+            if(_uintWindows.ContainsKey((typeof(T),windowId)) && _uintWindows[(typeof(T),windowId)] is T)
+            {
+                return (T)_uintWindows[(typeof(T),windowId)];
+            }
+            var newWindow = _uintWindowFactory.Invoke(typeof(T), windowId);
+            newWindow.Initialize(windowId);
+            AddWindow(newWindow, windowId);
+            return (T)newWindow;
         }
 
-        public bool OpenGuessWindow(string windowName)
+        public T GetWindow<T>(string windowId) where T: StringWindow
         {
-            if (windowName == CraftsWindow.AsKey)
+            if(_stringWindows.ContainsKey((typeof(T),windowId)) && _stringWindows[(typeof(T),windowId)] is T)
             {
-                return OpenWindow<CraftsWindow>(CraftsWindow.AsKey);
+                return (T)_stringWindows[(typeof(T),windowId)];
             }
-
-            if (windowName == FiltersWindow.AsKey)
-            {
-                return OpenWindow<FiltersWindow>(FiltersWindow.AsKey);
-            }
-            #if DEBUG
-            if (windowName == DebugWindow.AsKey)
-            {
-                return OpenWindow<DebugWindow>(DebugWindow.AsKey);
-            }
-            #endif
-            if (windowName == HelpWindow.AsKey)
-            {
-                return OpenWindow<HelpWindow>(HelpWindow.AsKey);
-            }
-
-            if (windowName == ConfigurationWindow.AsKey)
-            {
-                return OpenWindow<ConfigurationWindow>(ConfigurationWindow.AsKey);
-            }
-
-            if (windowName == DutiesWindow.AsKey)
-            {
-                return OpenWindow<DutiesWindow>(DutiesWindow.AsKey);
-            }
-
-            if (windowName == BNpcWindow.AsKey)
-            {
-                return OpenWindow<BNpcWindow>(BNpcWindow.AsKey);
-            }
-
-            if (windowName == AirshipsWindow.AsKey)
-            {
-                return OpenWindow<AirshipsWindow>(AirshipsWindow.AsKey);
-            }
-
-            if (windowName == SubmarinesWindow.AsKey)
-            {
-                return OpenWindow<SubmarinesWindow>(SubmarinesWindow.AsKey);
-            }
-
-            if (windowName == RetainerTasksWindow.AsKey)
-            {
-                return OpenWindow<RetainerTasksWindow>(RetainerTasksWindow.AsKey);
-            }
-
-            foreach (var config in ConfigurationManager.Config.FilterConfigurations)
-            {
-                if (windowName == FilterWindow.AsKey(config.Key))
-                {
-                    return OpenFilterWindow(config.Key);
-                }
-            }
-
-            return false;
+            var newWindow = _stringWindowFactory.Invoke(typeof(T), windowId);
+            newWindow.Initialize(windowId);
+            AddWindow(newWindow, windowId);
+            return (T)newWindow;
         }
 
-        public bool OpenCraftsWindow()
+        public bool ToggleWindow<T>() where T: GenericWindow
         {
-            return OpenWindow<CraftsWindow>(CraftsWindow.AsKey);
+            GetWindow<T>().Toggle();
+            return true;
+        }
+        
+        public bool ToggleWindow<T>(uint windowId) where T: UintWindow
+        {
+            GetWindow<T>(windowId).Toggle();
+            return true;
         }
 
-        public bool ToggleTetrisWindow()
+        public bool ToggleWindow<T>(string windowId) where T : StringWindow
         {
-            return ToggleWindow<TetrisWindow>(TetrisWindow.AsKey);
+            GetWindow<T>(windowId).Toggle();
+            return true;
         }
-        #if DEBUG
-        public bool ToggleDebugWindow()
-        {
-            return ToggleWindow<DebugWindow>(DebugWindow.AsKey);
-        }
-        #endif
 
-        public bool ToggleWindow<T>(string windowKey) where T: Window, new()
+        public bool ToggleWindow(Type window)
         {
-            var asKey = windowKey;
-            if (_windows.ContainsKey(asKey))
+            GetWindow(window).Toggle();
+            return true;
+        }
+        public bool OpenWindow(Type type,bool refocus = true)
+        {
+            var window = GetWindow(type);
+            if (window.IsOpen)
             {
-                _windows[asKey].Toggle();
-                return true;
+                window.BringToFront();
             }
-            var window = new T();
-            return AddWindow(window);
-        }
-
-
-        public bool OpenWindow<T>(string windowKey, bool refocus = true) where T: Window, new()
-        {
-            var asKey = windowKey;
-            if (_windows.ContainsKey(asKey))
+            else
             {
-                if (_windows[asKey].IsOpen)
-                {
-                    if (refocus)
-                    {
-                        _windows[asKey].BringToFront();
-                    }
-                }
-                else
-                {
-                    _windows[asKey].Open();
-                }
-                return true;
+                window.Open();
             }
-            var window = new T();
-            return AddWindow(window);
+            return true;
         }
-
-        private bool AddWindow(Window window)
+        public bool OpenWindow(Type type, uint windowId, bool refocus = true)
         {
-            window.PluginLog = _pluginLog;
-            if (_windows.TryAdd(window.Key, window))
+            var window = GetWindow(type, windowId);
+            if (window.IsOpen)
             {
+                window.BringToFront();
+            }
+            else
+            {
+                window.Open();
+            }
+            return true;
+        }
+        public bool OpenWindow<T>(bool refocus = true) where T: GenericWindow
+        {
+            var window = GetWindow<T>();
+            if (window.IsOpen)
+            {
+                window.BringToFront();
+            }
+            else
+            {
+                window.Open();
+            }
+
+            return true;
+        }
+        public bool OpenWindow<T>(uint windowId, bool refocus = true) where T: UintWindow
+        {
+            var window = GetWindow<T>(windowId);
+            if (window.IsOpen)
+            {
+                window.BringToFront();
+            }
+            else
+            {
+                window.Open();
+            }
+
+            return true;
+        }
+        public bool OpenWindow<T>(string windowId, bool refocus = true) where T: StringWindow
+        {
+            var window = GetWindow<T>(windowId);
+            if (window.IsOpen)
+            {
+                window.BringToFront();
+            }
+            else
+            {
+                window.Open();
+            }
+
+            return true;
+        }
+        
+        private bool AddWindow(Type windowType, GenericWindow window)
+        {
+            window.Logger = Logger;
+            if (_genericWindows.TryAdd(windowType, window))
+            {
+                _allWindows.Add(window);
                 windowSystem.AddWindow(window);
                 window.Closed += WindowOnClosed;
                 window.Opened += WindowOnOpened;
                 window.Open();
                 return true;
             }
-
+            return false;
+        }
+        
+        private bool AddWindow(Type windowType, UintWindow window, uint windowId)
+        {
+            window.Logger = Logger;
+            if (_uintWindows.TryAdd((windowType,windowId), window))
+            {
+                _allWindows.Add(window);
+                windowSystem.AddWindow(window);
+                window.Closed += WindowOnClosed;
+                window.Opened += WindowOnOpened;
+                window.Open();
+                return true;
+            }
             return false;
         }
 
-        private void WindowOnOpened(string windowKey)
+        private bool AddWindow<T>(T window) where T: GenericWindow
         {
-            if(!ConfigurationManager.Config.OpenWindows.Contains(windowKey))
+            window.Logger = Logger;
+            if (_genericWindows.TryAdd(window.GetType(), window))
             {
-                ConfigurationManager.Config.OpenWindows.Add(windowKey);
+                _allWindows.Add(window);
+                windowSystem.AddWindow(window);
+                window.Closed += WindowOnClosed;
+                window.Opened += WindowOnOpened;
+                window.Open();
+                return true;
             }
-            var currentWindow = Windows[windowKey];
-            if (currentWindow.SavePosition)
-            {
-                if (ConfigurationManager.Config.SavedWindowPositions.ContainsKey(currentWindow.GenericKey))
-                {
-                    currentWindow.Position = ConfigurationManager.Config.SavedWindowPositions[currentWindow.GenericKey];
-                    currentWindow.PositionCondition = ImGuiCond.Appearing;
-                }
-            }
-            PluginService.OverlayService.RefreshOverlayStates();
+            return false;
         }
 
-        private void WindowOnClosed(string windowKey)
+        private bool AddWindow<T>(T window, uint windowId) where T: UintWindow
         {
-            if(ConfigurationManager.Config.OpenWindows.Contains(windowKey))
+            window.Logger = Logger;
+            if (_uintWindows.TryAdd((typeof(T),windowId), window))
             {
-                ConfigurationManager.Config.OpenWindows.Remove(windowKey);
+                _allWindows.Add(window);
+                windowSystem.AddWindow(window);
+                window.Closed += WindowOnClosed;
+                window.Opened += WindowOnOpened;
+                window.Open();
+                return true;
+            }
+            return false;
+        }
+
+        private bool AddWindow<T>(T window, string windowId) where T: StringWindow
+        {
+            window.Logger = Logger;
+            if (_stringWindows.TryAdd((typeof(T),windowId), window))
+            {
+                _allWindows.Add(window);
+                windowSystem.AddWindow(window);
+                window.Closed += WindowOnClosed;
+                window.Opened += WindowOnOpened;
+                window.Open();
+                return true;
+            }
+            return false;
+        }
+
+        private void WindowOnOpened(IWindow window)
+        {
+            if(!_configuration.OpenWindows.Contains(window.GetType().ToString()))
+            {
+                _configuration.OpenWindows.Add(window.GetType().ToString());
+            }
+            if (window.SavePosition)
+            {
+                if (_configuration.SavedWindowPositions.ContainsKey(window.GetType().ToString()))
+                {
+                    window.SetPosition(_configuration.SavedWindowPositions[window.GetType().ToString()], true);
+                }
+            }
+            //TODO: window should emit event not call overlay
+            //_overlayService.RefreshOverlayStates();
+        }
+
+        private void WindowOnClosed(IWindow window)
+        {
+            if(_configuration.OpenWindows.Contains(window.GetType().ToString()))
+            {
+                _configuration.OpenWindows.Remove(window.GetType().ToString());
             }
 
-            var currentWindow = Windows[windowKey];
-            if (currentWindow.SavePosition)
+            if (window.SavePosition)
             {
                 bool hasOtherWindowOpen = false;
-                foreach (var window in Windows)
+                //Check to see if there are any other instances of the window open, if so don't save the one that was just closed's position
+                foreach (var openWindow in _allWindows)
                 {
-                    if (window.Value != currentWindow && window.Value.GenericKey == currentWindow.GenericKey &&
-                        window.Value.IsOpen)
+                    if (window != openWindow && window.Key == openWindow.GenericKey &&
+                        window.IsOpen)
                     {
                         hasOtherWindowOpen = true;
                     }
@@ -367,155 +376,44 @@ namespace InventoryTools.Services
                 
                 if (hasOtherWindowOpen == false)
                 {
-                    ConfigurationManager.Config.SavedWindowPositions[currentWindow.GenericKey] =
-                        currentWindow.CurrentPosition;
+                    _configuration.SavedWindowPositions[window.GetType().ToString()] = window.CurrentPosition;
                 }
 
             }
-
-            PluginService.OverlayService.RefreshOverlayStates();
-        }
-        
-        public bool ToggleConfigurationWindow()
-        {
-            return ToggleWindow<ConfigurationWindow>(ConfigurationWindow.AsKey);
-        }
-        
-        public bool ToggleDutiesWindow()
-        {
-            return ToggleWindow<DutiesWindow>(DutiesWindow.AsKey);
-        }
-        
-        public bool ToggleAirshipsWindow()
-        {
-            return ToggleWindow<AirshipsWindow>(AirshipsWindow.AsKey);
-        }
-        
-        public bool ToggleMobWindow()
-        {
-            return ToggleWindow<BNpcWindow>(BNpcWindow.AsKey);
-        }
-        
-        public bool ToggleENpcsWindow()
-        {
-            return ToggleWindow<ENpcsWindow>(ENpcsWindow.AsKey);
+            //TODO: window should emit event not call overlay
+            //_overlayService.RefreshOverlayStates();
         }
 
-        public bool ToggleHelpWindow()
-        {
-            return ToggleWindow<HelpWindow>(HelpWindow.AsKey);
-        }
-
-        public bool ToggleFiltersWindow()
-        {
-            return ToggleWindow<FiltersWindow>(FiltersWindow.AsKey);
-        }
-
-        public bool ToggleSubmarinesWindow()
-        {
-            return ToggleWindow<SubmarinesWindow>(SubmarinesWindow.AsKey);
-        }
-
-        public bool ToggleRetainerTasksWindow()
-        {
-            return ToggleWindow<RetainerTasksWindow>(RetainerTasksWindow.AsKey);
-        }
-
-        public bool CloseFilterWindows()
-        {
-            foreach (var window in _windows)
-            {
-                if (window.Value is FilterWindow)
-                {
-                    window.Value.Close();
-                }
-            }
-
-            return true;
-        }
-
-        public bool ToggleFilterWindow(string filterKey)
-        {
-            var asKey = FilterWindow.AsKey(filterKey);
-            if (_windows.ContainsKey(asKey))
-            {
-                _windows[asKey].Toggle();
-                return true;
-            }
-
-            return OpenFilterWindow(filterKey);
-        }
-        
-        private void FilterServiceOnFilterRepositioned(FilterConfiguration configuration)
-        {
-            if (_windows.ContainsKey(CraftsWindow.AsKey))
-            {
-                _windows[CraftsWindow.AsKey].Invalidate();
-            }
-            if (_windows.ContainsKey(FiltersWindow.AsKey))
-            {
-                _windows[FiltersWindow.AsKey].Invalidate();
-            }
-            if (_windows.ContainsKey(ConfigurationWindow.AsKey))
-            {
-                _windows[ConfigurationWindow.AsKey].Invalidate();
-            }
-        }
-
-        private void FilterServiceAddedRemoved(FilterConfiguration configuration)
-        {
-            if (_windows.ContainsKey(CraftsWindow.AsKey))
-            {
-                _windows[CraftsWindow.AsKey].Invalidate();
-            }
-            if (_windows.ContainsKey(FiltersWindow.AsKey))
-            {
-                _windows[FiltersWindow.AsKey].Invalidate();
-            }
-            if (_windows.ContainsKey(ConfigurationWindow.AsKey))
-            {
-                _windows[ConfigurationWindow.AsKey].Invalidate();
-            }
-        }
                 
-        private bool _disposed;
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
         
-        protected virtual void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
-            if(!_disposed && disposing)
-            {
-                PluginService.OnPluginLoaded -= PluginServiceOnOnPluginLoaded;
-                _filterService.FilterRepositioned -= FilterServiceOnFilterRepositioned;
-                _filterService.FilterRemoved -= FilterServiceAddedRemoved;
-                _filterService.FilterAdded -= FilterServiceAddedRemoved;
-                _filterService.FilterInvalidated -= FilterServiceOnFilterInvalidated;
-                foreach (var window in _windows)
-                {
-                    window.Value.Opened -= WindowOnOpened;
-                    window.Value.Closed -= WindowOnClosed;
-                }
-            }
-            _disposed = true;         
-        }
-        
-            
-        ~WindowService()
-        {
-#if DEBUG
-            // In debug-builds, make sure that a warning is displayed when the Disposable object hasn't been
-            // disposed by the programmer.
+            base.Dispose(disposing);
 
-            if( _disposed == false )
+            foreach (var window in _allWindows)
             {
-                Service.Log.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
+                window.Opened -= WindowOnOpened;
+                window.Closed -= WindowOnClosed;
             }
-#endif
-            Dispose (true);
+        }
+
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            Logger.LogTrace("Starting service {type} ({this})", GetType().Name, this);
+            _mediatorService.Subscribe(this, new Action<OpenGenericWindowMessage>(GenericWindowMessage) );
+            _mediatorService.Subscribe(this, new Action<OpenUintWindowMessage>(UintWindowMessage) );
+            _mediatorService.Subscribe(this, new Action<ToggleGenericWindowMessage>(ToggleGenericWindow) );
+            return Task.CompletedTask;
+        }
+
+        private void ToggleGenericWindow(ToggleGenericWindowMessage obj)
+        {
+            ToggleWindow(obj.windowType);
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
         }
     }
 }

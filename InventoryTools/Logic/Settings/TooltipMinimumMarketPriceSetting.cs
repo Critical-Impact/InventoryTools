@@ -1,4 +1,6 @@
 using InventoryTools.Logic.Settings.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Settings
 {
@@ -18,11 +20,18 @@ namespace InventoryTools.Logic.Settings
 
         public override string Key { get; set; } = "TooltipDisplayMBMinimum";
         public override string Name { get; set; } = "Add Market Minimum NQ/HQ Price?";
+        
+        public override string WizardName { get; } = "Market Price";
 
         public override string HelpText { get; set; } =
             "When hovering an item, should the tooltip contain the minimum market price for both NQ and HQ. Please make sure 'Automatically download prices' is enabled.";
 
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Subsetting;
+        public override string Version => "1.6.2.5";
+
+        public TooltipMinimumMarketPriceSetting(ILogger<TooltipMinimumMarketPriceSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
     }
 }

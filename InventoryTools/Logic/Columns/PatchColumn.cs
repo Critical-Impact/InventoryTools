@@ -1,26 +1,36 @@
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns;
 
 public class PatchColumn : DecimalColumn
 {
+    private readonly ExcelCache _excelCache;
+
+    public PatchColumn(ILogger<PatchColumn> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
+    {
+        _excelCache = excelCache;
+    }
     public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-    public override decimal? CurrentValue(InventoryItem item)
+    public override decimal? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
     {
-        return Service.ExcelCache.GetItemPatch(item.ItemId);
+        return _excelCache.GetItemPatch(item.ItemId);
     }
 
-    public override decimal? CurrentValue(ItemEx item)
+    public override decimal? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
     {
-        return Service.ExcelCache.GetItemPatch(item.RowId);
+        return _excelCache.GetItemPatch(item.RowId);
     }
 
-    public override decimal? CurrentValue(SortingResult item)
+    public override decimal? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
     {
-        return Service.ExcelCache.GetItemPatch(item.InventoryItem.ItemId);
+        return _excelCache.GetItemPatch(item.InventoryItem.ItemId);
     }
 
     public override string Name { get; set; } = "Patch Added";

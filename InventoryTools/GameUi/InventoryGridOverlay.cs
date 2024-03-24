@@ -1,42 +1,52 @@
 using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib.Enums;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
 using InventoryTools.Logic;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.GameUi
 {
-    public class InventoryGridOverlay : AtkInventoryGrid, IAtkOverlayState
+    public class InventoryGridOverlay: GameOverlay<AtkInventoryGrid>, IAtkOverlayState
     {
+        private readonly ICharacterMonitor _characterMonitor;
+
+        public InventoryGridOverlay(ILogger<InventoryGridOverlay> logger, AtkInventoryGrid overlay, ICharacterMonitor characterMonitor) : base(logger,overlay)
+        {
+            _characterMonitor = characterMonitor;
+        }
+        public override bool ShouldDraw { get; set; }
+
         public override bool Draw()
         {
-            if (!HasState || !HasAddon)
+            if (!HasState || !AtkOverlay.HasAddon)
             {
                 return false;
             }
-            var atkUnitBase = AtkUnitBase;
+            var atkUnitBase = AtkOverlay.AtkUnitBase;
             if (atkUnitBase != null)
             {
-                this.SetTabColors(TabColours);
-                if (CurrentTab == 0)
+                AtkOverlay.SetTabColors(TabColours);
+                if (AtkOverlay.CurrentTab == 0)
                 {
-                    this.SetColors(Bag1InventoryColours);
+                    AtkOverlay.SetColors(Bag1InventoryColours);
                 }
-                else if (CurrentTab == 1)
+                else if (AtkOverlay.CurrentTab == 1)
                 {
-                    this.SetColors(Bag2InventoryColours);
+                    AtkOverlay.SetColors(Bag2InventoryColours);
                 }
-                else if (CurrentTab == 2)
+                else if (AtkOverlay.CurrentTab == 2)
                 {
-                    this.SetColors( Bag3InventoryColours);
+                    AtkOverlay.SetColors( Bag3InventoryColours);
                 }
-                else if (CurrentTab == 3)
+                else if (AtkOverlay.CurrentTab == 3)
                 {
-                    this.SetColors(Bag4InventoryColours);
+                    AtkOverlay.SetColors(Bag4InventoryColours);
                 }
                 else
                 {
-                    this.SetColors(EmptyDictionary);
+                    AtkOverlay.SetColors(EmptyDictionary);
                 }
 
                 return true;
@@ -65,16 +75,16 @@ namespace InventoryTools.GameUi
 
         }
 
-        public bool HasState { get; set; }
-        public bool NeedsStateRefresh { get; set; }
+        public override bool HasState { get; set; }
+        public override bool NeedsStateRefresh { get; set; }
 
-        public void UpdateState(FilterState? newState)
+        public override void UpdateState(FilterState? newState)
         {
-            if (PluginService.CharacterMonitor.ActiveCharacterId == 0)
+            if (_characterMonitor.ActiveCharacterId == 0)
             {
                 return;
             }
-            if (newState != null && HasAddon && newState.ShouldHighlight && newState.HasFilterResult)
+            if (newState != null && AtkOverlay.HasAddon && newState.ShouldHighlight && newState.HasFilterResult)
             {
                 HasState = true;
                 var filterResult = newState.FilterResult;
@@ -109,14 +119,15 @@ namespace InventoryTools.GameUi
             HasState = false;
         }
 
-        public void Clear()
+        public override void Clear()
         {
-            var atkUnitBase = AtkUnitBase;
+            var atkUnitBase = AtkOverlay.AtkUnitBase;
             if (atkUnitBase != null)
             {
-                this.SetColors(EmptyDictionary);
-                this.SetTabColors(EmptyTabs);
+                AtkOverlay.SetColors(EmptyDictionary);
+                AtkOverlay.SetTabColors(EmptyTabs);
             }
         }
+        
     }
 }

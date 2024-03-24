@@ -1,37 +1,50 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
 using InventoryTools.Logic;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.GameUi
 {
-    public class RetainerListOverlay : AtkRetainerList, IAtkOverlayState 
+    public class RetainerListOverlay: GameOverlay<AtkRetainerList>, IAtkOverlayState
     {
+        private readonly ICharacterMonitor _characterMonitor;
+        private readonly IInventoryMonitor _inventoryMonitor;
+        private readonly InventoryToolsConfiguration _configuration;
+
+        public RetainerListOverlay(ILogger<RetainerListOverlay> logger, AtkRetainerList overlay, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, InventoryToolsConfiguration configuration) : base(logger,overlay)
+        {
+            _characterMonitor = characterMonitor;
+            _inventoryMonitor = inventoryMonitor;
+            _configuration = configuration;
+        }
         public override bool ShouldDraw { get; set; }
 
         public override bool Draw()
         {
-            if (!HasState || !HasAddon)
+            if (!HasState || !AtkOverlay.HasAddon)
             {
                 return false;
             }
-            var atkUnitBase = AtkUnitBase;
+            var atkUnitBase = AtkOverlay.AtkUnitBase;
             if (atkUnitBase != null)
             {
-                this.SetNames(RetainerNames, RetainerColors);
+                this.AtkOverlay.SetNames(RetainerNames, RetainerColors);
                 return true;
             }
 
             return false;
         }
         
-        public void Clear()
+        public override void Clear()
         {
-            var atkUnitBase = AtkUnitBase;
+            var atkUnitBase = AtkOverlay.AtkUnitBase;
             if (atkUnitBase != null)
             {
-                this.SetNames(RetainerNames, new Dictionary<ulong, Vector4>());
+                this.AtkOverlay.SetNames(RetainerNames, new Dictionary<ulong, Vector4>());
             }
         }
 
@@ -45,17 +58,17 @@ namespace InventoryTools.GameUi
         public Dictionary<ulong, Vector4> RetainerColors = new Dictionary<ulong, Vector4>();
         
 
-        public bool HasState { get; set; }
-        public bool NeedsStateRefresh { get; set; }
+        public override bool HasState { get; set; }
+        public override bool NeedsStateRefresh { get; set; }
 
-        public void UpdateState(FilterState? newState)
+        public override void UpdateState(FilterState? newState)
         {
-            if (PluginService.CharacterMonitor.ActiveCharacterId == 0)
+            if (_characterMonitor.ActiveCharacterId == 0)
             {
                 return;
             }
 
-            if (!ConfigurationManager.Config.ShowItemNumberRetainerList)
+            if (!_configuration.ShowItemNumberRetainerList)
             {
                 if (HasState)
                 {
@@ -65,12 +78,12 @@ namespace InventoryTools.GameUi
 
                 return;
             }
-            if (newState != null && HasAddon && newState.ShouldHighlight && newState.HasFilterResult)
+            if (newState != null && AtkOverlay.HasAddon && newState.ShouldHighlight && newState.HasFilterResult)
             {
                 HasState = true;
                 var filterResult = newState.FilterResult;
                 var filterConfiguration = newState.FilterConfiguration;
-                var currentCharacterId = PluginService.CharacterMonitor.LocalContentId;
+                var currentCharacterId = _characterMonitor.LocalContentId;
                 if (filterResult != null)
                 {
                     if (filterResult.AllItems.Count != 0)
@@ -79,13 +92,12 @@ namespace InventoryTools.GameUi
                         Dictionary<ulong, HashSet<uint>> hasItems = new ();
                         Dictionary<ulong, int> characterTotals = new();
 
-                        foreach (var character in PluginService.CharacterMonitor.GetRetainerCharacters(PluginService
-                            .CharacterMonitor.ActiveCharacterId))
+                        foreach (var character in _characterMonitor.GetRetainerCharacters(_characterMonitor.ActiveCharacterId))
                         {
                             hasItems[character.Key] = new HashSet<uint>();
                             characterTotals[character.Key] = 0;
                         }
-                        foreach (var item in PluginService.InventoryMonitor.AllItems)
+                        foreach (var item in _inventoryMonitor.AllItems)
                         {
                             if (item.IsEmpty) continue;
                             if (hasItems.ContainsKey(item.RetainerId))
@@ -110,7 +122,7 @@ namespace InventoryTools.GameUi
                         RetainerNames = finalTotals.ToDictionary(c => c.Key, GenerateNewName);
                         RetainerColors = finalTotals.ToDictionary(c => c.Key,
                             c => filterConfiguration.RetainerListColor ??
-                                 ConfigurationManager.Config.RetainerListColor);
+                                 _configuration.RetainerListColor);
                         Draw();
                         return;
 
@@ -119,11 +131,11 @@ namespace InventoryTools.GameUi
                     if (filterConfiguration.FilterType == FilterType.SortingFilter || filterConfiguration.FilterType == FilterType.CraftFilter)
                     {
                         var grouping = filteredList.Where(c => !c.InventoryItem.IsEmpty && 
-                                (c.SourceRetainerId == currentCharacterId || c.DestinationRetainerId == currentCharacterId || PluginService.CharacterMonitor.BelongsToActiveCharacter(c.SourceRetainerId)) && c.DestinationRetainerId != null)
-                            .GroupBy(c => c.DestinationRetainerId == currentCharacterId || (PluginService.CharacterMonitor.BelongsToActiveCharacter(c.SourceRetainerId) && PluginService.CharacterMonitor.IsHousing(c.DestinationRetainerId!.Value)) ? c.SourceRetainerId : c.DestinationRetainerId!.Value).Where(c => c.Any()).ToList();
+                                (c.SourceRetainerId == currentCharacterId || c.DestinationRetainerId == currentCharacterId || _characterMonitor.BelongsToActiveCharacter(c.SourceRetainerId)) && c.DestinationRetainerId != null)
+                            .GroupBy(c => c.DestinationRetainerId == currentCharacterId || (_characterMonitor.BelongsToActiveCharacter(c.SourceRetainerId) && _characterMonitor.IsHousing(c.DestinationRetainerId!.Value)) ? c.SourceRetainerId : c.DestinationRetainerId!.Value).Where(c => c.Any()).ToList();
                         RetainerColors = grouping.ToDictionary(c => c.Key,
                             c => filterConfiguration.RetainerListColor ??
-                                 ConfigurationManager.Config.RetainerListColor);
+                                 _configuration.RetainerListColor);
                         RetainerNames = grouping.ToDictionary(c => c.Key, GenerateNewName);
                         Draw();
                         return;
@@ -134,7 +146,7 @@ namespace InventoryTools.GameUi
                         RetainerNames = grouping.ToDictionary(c => c.Key, GenerateNewName);
                         RetainerColors = grouping.ToDictionary(c => c.Key,
                             c => filterConfiguration.RetainerListColor ??
-                                 ConfigurationManager.Config.RetainerListColor);
+                                 _configuration.RetainerListColor);
 
                         Draw();
                         return;
@@ -143,7 +155,7 @@ namespace InventoryTools.GameUi
             }
             if (HasState)
             {
-                RetainerNames = PluginService.CharacterMonitor.Characters.Where(c => c.Value.CharacterId == PluginService.CharacterMonitor.ActiveCharacterId).ToDictionary(c => c.Key, c => c.Value.Name);            
+                RetainerNames = _characterMonitor.Characters.Where(c => c.Value.CharacterId == _characterMonitor.ActiveCharacterId).ToDictionary(c => c.Key, c => c.Value.Name);            
                 Clear();
             }
 
@@ -152,20 +164,21 @@ namespace InventoryTools.GameUi
         
         private string GenerateNewName(IGrouping<ulong, SortingResult> c)
         {
-            if (PluginService.CharacterMonitor.Characters.ContainsKey(c.Key))
+            if (_characterMonitor.Characters.ContainsKey(c.Key))
             {
-                return PluginService.CharacterMonitor.Characters[c.Key].FormattedName + " (" + c.Count() + ")";
+                return _characterMonitor.Characters[c.Key].FormattedName + " (" + c.Count() + ")";
             }
             return "Unknown "  + "(" + c.Count() + ")";
         }
         
         private string GenerateNewName(KeyValuePair<ulong, int> c)
         {
-            if (PluginService.CharacterMonitor.Characters.ContainsKey(c.Key))
+            if (_characterMonitor.Characters.ContainsKey(c.Key))
             {
-                return PluginService.CharacterMonitor.Characters[c.Key].FormattedName + " (" + c.Value + ")";
+                return _characterMonitor.Characters[c.Key].FormattedName + " (" + c.Value + ")";
             }
             return "Unknown "  + "(" + c.Value + ")";
         }
+        
     }
 }

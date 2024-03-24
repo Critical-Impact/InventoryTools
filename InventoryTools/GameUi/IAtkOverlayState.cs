@@ -3,7 +3,7 @@ using InventoryTools.Logic;
 
 namespace InventoryTools.GameUi
 {
-    public interface IAtkOverlayState : IAtkOverlay, AtkState<FilterState?>
+    public interface IAtkOverlayState : AtkState<FilterState?>
     {
         
     }

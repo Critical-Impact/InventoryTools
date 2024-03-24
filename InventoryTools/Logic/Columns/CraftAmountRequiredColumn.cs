@@ -1,31 +1,39 @@
+using System.Collections.Generic;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 using ImGuiUtil = InventoryTools.Ui.Widgets.ImGuiUtil;
 
 namespace InventoryTools.Logic.Columns
 {
     public class CraftAmountRequiredColumn : DoubleIntegerColumn
     {
+        public CraftAmountRequiredColumn(ILogger<CraftAmountRequiredColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
         public override ColumnCategory ColumnCategory => ColumnCategory.Crafting;
-        public override (int,int)? CurrentValue(InventoryItem item)
+        public override (int, int)? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
         {
             return null;
         }
 
-        public override (int,int)? CurrentValue(ItemEx item)
+        public override (int, int)? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
             return null;
         }
 
-        public override (int,int)? CurrentValue(SortingResult item)
+        public override (int, int)? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
         {
             return null;
         }
 
-        public override (int,int)? CurrentValue(CraftItem currentValue)
+        public override (int, int)? CurrentValue(ColumnConfiguration columnConfiguration, CraftItem currentValue)
         {
             if (currentValue.IsOutputItem)
             {
@@ -34,16 +42,18 @@ namespace InventoryTools.Logic.Columns
             return ((int)currentValue.QuantityNeeded,(int)currentValue.QuantityRequired);
         }
 
-        public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            CraftItem item, int rowIndex)
         {
             ImGui.TableNextColumn();
             if (item.IsOutputItem)
             {
-                var value = CurrentValue(item)?.Item2.ToString() ?? "";
+                var value = CurrentValue(columnConfiguration, item)?.Item2.ToString() ?? "";
                 ImGuiUtil.VerticalAlignButton(configuration.TableHeight);
                 if (ImGui.InputText("##"+item.ItemId+"RequiredInput", ref value, 4, ImGuiInputTextFlags.CharsDecimal))
                 {
-                    if (value != (CurrentValue(item)?.Item2.ToString() ?? ""))
+                    if (value != (CurrentValue(columnConfiguration, item)?.Item2.ToString() ?? ""))
                     {
                         int parsedNumber;
                         if (int.TryParse(value, out parsedNumber))
@@ -58,7 +68,8 @@ namespace InventoryTools.Logic.Columns
                                 configuration.CraftList.SetCraftRequiredQuantity(item.ItemId, number,
                                     item.Flags,
                                     item.Phase);
-                                configuration.StartRefresh();
+                                item.QuantityRequired = number;
+                                configuration.NeedsRefresh = true;
                             }
                         }
                     }
@@ -68,13 +79,14 @@ namespace InventoryTools.Logic.Columns
             {
                 ImGuiUtil.VerticalAlignText(item.QuantityNeeded + "/" + item.QuantityNeededPreUpdate, configuration.TableHeight, false);
             }
+            return null;
         }
         public override FilterType AvailableIn { get; } = Logic.FilterType.CraftFilter;
         public override string Name { get; set; } = "Amount Required";
         public override string RenderName => "Required";
         public override float Width { get; set; } = 60;
         public override bool? CraftOnly => true;
-        public override string HelpText { get; set; } = "This is the amount required for this item in the craft.";
+        public override string HelpText { get; set; } = "The amount required with inventory and external sources factored in/The amount required without inventory and external sources factored in.";
         public override bool HasFilter { get; set; } = false;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
     }

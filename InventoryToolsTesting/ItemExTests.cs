@@ -17,14 +17,14 @@ namespace InventoryToolsTesting
             {
                 PanicOnSheetChecksumMismatch = false
             } );
-            Service.ExcelCache = new ExcelCache(lumina);
+            _excelCache = new ExcelCache(lumina);
         }
         
         [Test]
         public void TestGatheringSources()
         {
             //Earth Shard
-            var earthShard = Service.ExcelCache.GetItemExSheet().GetRow(5)!;
+            var earthShard = _excelCache.GetItemExSheet().GetRow(5)!;
             var gatheringSources = earthShard.GetGatheringSources();
             //Not the same as garland tools because we don't deal with individual nodes
             Assert.AreEqual(16, gatheringSources.Count);
@@ -34,7 +34,7 @@ namespace InventoryToolsTesting
         [Test]
         public void TestUplandWheatFlour()
         {
-            var uplandWheatFlour = Service.ExcelCache.GetItemExSheet().GetRow(27841)!;
+            var uplandWheatFlour = _excelCache.GetItemExSheet().GetRow(27841)!;
             var gatheringSources = uplandWheatFlour.GetGatheringSources();
             Assert.AreEqual(0, gatheringSources.Count);
             var sources = uplandWheatFlour.Sources;
@@ -46,7 +46,7 @@ namespace InventoryToolsTesting
         public void TestScrip()
         {
             //Handsaint Jacket
-            var handsaintJacket = Service.ExcelCache.GetItemExSheet().GetRow(31794)!;
+            var handsaintJacket = _excelCache.GetItemExSheet().GetRow(31794)!;
             Assert.AreEqual(2, handsaintJacket.Sources.Count);
             Assert.AreEqual(4, handsaintJacket.Vendors.Count);
             var actualVendors = handsaintJacket.Vendors.SelectMany(shop => shop.ENpcs.SelectMany(npc => npc.Locations.Select(location => (shop, npc, location)))).ToList();
@@ -54,7 +54,7 @@ namespace InventoryToolsTesting
             Assert.AreEqual(28, actualVendors.Count);
             
             //Wool Top 16906
-            var woolTop = Service.ExcelCache.GetItemExSheet().GetRow(16906)!;
+            var woolTop = _excelCache.GetItemExSheet().GetRow(16906)!;
             Assert.AreEqual(4, woolTop.Sources.Count);
             Assert.AreEqual(4, woolTop.Vendors.Count);
             actualVendors = woolTop.Vendors.SelectMany(shop => shop.ENpcs.SelectMany(npc => npc.Locations.Select(location => (shop, npc, location)))).ToList();
@@ -66,7 +66,7 @@ namespace InventoryToolsTesting
         public void TestTomestones()
         {
             //Palebloom Kudzu Cloth
-            var item = Service.ExcelCache.GetItemExSheet().GetRow(37829)!;
+            var item = _excelCache.GetItemExSheet().GetRow(37829)!;
             Assert.AreEqual(1, item.Sources.Count);
             
         }
@@ -75,7 +75,7 @@ namespace InventoryToolsTesting
         public void TestMoonwardGear()
         {
             //Moonward Longsword
-            var item = Service.ExcelCache.GetItemExSheet().GetRow(34850)!;
+            var item = _excelCache.GetItemExSheet().GetRow(34850)!;
             Assert.AreEqual(2, item.Sources.Count);
             
         }

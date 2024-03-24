@@ -1,23 +1,34 @@
 using System.Collections.Generic;
 using System.Numerics;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
 using InventoryTools.Logic;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.GameUi
 {
-    public class CabinetWithdrawOverlay : AtkCabinetWithdraw, IAtkOverlayState
+    public class CabinetWithdrawOverlay: GameOverlay<AtkCabinetWithdraw>, IAtkOverlayState
     {
+        private readonly ICharacterMonitor _characterMonitor;
+
+        public CabinetWithdrawOverlay(ILogger<CabinetWithdrawOverlay> logger, AtkCabinetWithdraw overlay, ICharacterMonitor characterMonitor) : base(logger,overlay)
+        {
+            _characterMonitor = characterMonitor;
+        }
+        
+        public override bool ShouldDraw { get; set; }
+
         public override bool Draw()
         {
-            if (!HasState || !HasAddon)
+            if (!HasState || !AtkOverlay.HasAddon)
             {
                 return false;
             }
-            var atkUnitBase = AtkUnitBase;
+            var atkUnitBase = AtkOverlay.AtkUnitBase;
             if (atkUnitBase != null)
             {
-                this.SetColours(Colours);
-                this.SetTabColors(TabColours);
+                this.AtkOverlay.SetColours(Colours);
+                this.AtkOverlay.SetTabColors(TabColours);
                 return true;
             }
 
@@ -33,23 +44,23 @@ namespace InventoryTools.GameUi
 
         }
 
-        public bool HasState { get; set; }
-        public bool NeedsStateRefresh { get; set; }
+        public override bool HasState { get; set; }
+        public override bool NeedsStateRefresh { get; set; }
 
-        public void UpdateState(FilterState? newState)
+        public override void UpdateState(FilterState? newState)
         {
-            if (PluginService.CharacterMonitor.ActiveCharacterId == 0)
+            if (_characterMonitor.ActiveCharacterId == 0)
             {
                 return;
             }
-            if (newState != null && HasAddon && newState.ShouldHighlight && newState.HasFilterResult)
+            if (newState != null && AtkOverlay.HasAddon && newState.ShouldHighlight && newState.HasFilterResult)
             {
                 HasState = true;
                 var filterResult = newState.FilterResult;
                 if (filterResult != null)
                 {
                     Colours = newState.GetArmoireHighlights();
-                    TabColours = newState.GetArmoireTabHighlights(CurrentTab);
+                    TabColours = newState.GetArmoireTabHighlights(AtkOverlay.CurrentTab);
                     Draw();
                     return;
                 }
@@ -62,13 +73,13 @@ namespace InventoryTools.GameUi
             HasState = false;
         }
 
-        public void Clear()
+        public override void Clear()
         {
-            var atkUnitBase = AtkUnitBase;
+            var atkUnitBase = AtkOverlay.AtkUnitBase;
             if (atkUnitBase != null)
             {
-                this.SetColours(new Dictionary<string, Vector4?>());
-                this.SetTabColors(EmptyTabs);
+                this.AtkOverlay.SetColours(new Dictionary<string, Vector4?>());
+                this.AtkOverlay.SetTabColors(EmptyTabs);
             }
         }
     }

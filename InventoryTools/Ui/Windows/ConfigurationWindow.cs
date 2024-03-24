@@ -2,118 +2,71 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
 using ImGuiNET;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings.Abstract;
-using InventoryTools.Sections;
 using InventoryTools.Ui.MenuItems;
 using InventoryTools.Ui.Widgets;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin.Services;
+using InventoryTools.Mediator;
+using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
+using InventoryTools.Ui.Pages;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 
 namespace InventoryTools.Ui
 {
-    public class ConfigurationWindow : Window
+    public class ConfigurationWindow : GenericWindow
     {
-        private HoverButton _addIcon { get; } = new(PluginService.IconStorage.LoadIcon(66315),  new Vector2(22, 22));
-        private HoverButton _lightBulbIcon { get; } = new(PluginService.IconStorage.LoadIcon(66318),  new Vector2(22, 22));
-        private static HoverButton _menuIcon { get; } = new(PluginService.IconStorage.LoadImage("menu"),  new Vector2(22, 22));
-        private PopupMenu _addFilterMenu = null!;
-        private PopupMenu _addSampleMenu = null!;
-        private PopupMenu _settingsMenu = new PopupMenu("configMenu", PopupMenu.PopupMenuButtons.All,
-            new List<PopupMenu.IPopupMenuItem>()
-            {
-                new PopupMenu.PopupMenuItemSelectable("Filters Window", "filters", OpenFiltersWindow,"Open the filters window."),
-                new PopupMenu.PopupMenuItemSelectable("Crafts Window", "crafts", OpenCraftsWindow,"Open the crafts window."),
-                new PopupMenu.PopupMenuItemSeparator(),
-                new PopupMenu.PopupMenuItemSelectable("Mob Window", "mobs", OpenMobsWindow,"Open the mobs window."),
-                new PopupMenu.PopupMenuItemSelectable("Npcs Window", "npcs", OpenNpcsWindow,"Open the npcs window."),
-                new PopupMenu.PopupMenuItemSelectable("Duties Window", "duties", OpenDutiesWindow,"Open the duties window."),
-                new PopupMenu.PopupMenuItemSelectable("Airships Window", "airships", OpenAirshipsWindow,"Open the airships window."),
-                new PopupMenu.PopupMenuItemSelectable("Submarines Window", "submarines", OpenSubmarinesWindow,"Open the submarines window."),
-                new PopupMenu.PopupMenuItemSelectable("Retainer Ventures Window", "ventures", OpenRetainerVenturesWindow,"Open the retainer ventures window."),
-                new PopupMenu.PopupMenuItemSelectable("Tetris", "tetris", OpenTetrisWindow,"Open the tetris window.", () => ConfigurationManager.Config.TetrisEnabled),
-                new PopupMenu.PopupMenuItemSeparator(),
-                new PopupMenu.PopupMenuItemSelectable("Help", "help", OpenHelpWindow,"Open the help window."),
-            });
+        private readonly IIconService _iconService;
+        private readonly ConfigurationWizardService _configurationWizardService;
+        private readonly IChatUtilities _chatUtilities;
+        private readonly PluginLogic _pluginLogic;
+        private readonly IListService _listService;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly Func<SettingCategory,SettingPage> _settingPageFactory;
+        private readonly Func<Type, IConfigPage> _configPageFactory;
+        private readonly Func<FilterConfiguration, FilterPage> _filterPageFactory;
+        private readonly InventoryToolsConfiguration _configuration;
 
-        private static void OpenCraftsWindow(string obj)
+        public ConfigurationWindow(ILogger<ConfigurationWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IIconService iconService, ConfigurationWizardService configurationWizardService, IChatUtilities chatUtilities, PluginLogic pluginLogic, IListService listService,IServiceScopeFactory serviceScopeFactory, Func<SettingCategory,SettingPage> settingPageFactory, Func<Type,IConfigPage> configPageFactory, Func<FilterConfiguration,FilterPage> filterPageFactory, string name = "Configuration Window") : base(logger, mediator, imGuiService, configuration, name)
         {
-            PluginService.WindowService.OpenWindow<CraftsWindow>(CraftsWindow.AsKey);
+            _iconService = iconService;
+            _configurationWizardService = configurationWizardService;
+            _chatUtilities = chatUtilities;
+            _pluginLogic = pluginLogic;
+            _listService = listService;
+            _serviceScopeFactory = serviceScopeFactory;
+            _settingPageFactory = settingPageFactory;
+            _configPageFactory = configPageFactory;
+            _filterPageFactory = filterPageFactory;
+            _configuration = configuration;
         }
-
-        private static void OpenFiltersWindow(string obj)
+        public override void Initialize()
         {
-            PluginService.WindowService.OpenWindow<FiltersWindow>(FiltersWindow.AsKey);
-        }
-
-        private static void OpenHelpWindow(string obj)
-        {
-            PluginService.WindowService.OpenWindow<HelpWindow>(HelpWindow.AsKey);
-        }
-
-        private static void OpenDutiesWindow(string obj)
-        {
-            PluginService.WindowService.OpenWindow<DutiesWindow>(DutiesWindow.AsKey);
-        }
-
-        private static void OpenAirshipsWindow(string obj)
-        {
-            PluginService.WindowService.OpenWindow<AirshipsWindow>(AirshipsWindow.AsKey);
-        }
-
-        private static void OpenSubmarinesWindow(string obj)
-        {
-            PluginService.WindowService.OpenWindow<SubmarinesWindow>(SubmarinesWindow.AsKey);
-        }
-        
-        private static void OpenRetainerVenturesWindow(string obj)
-        {
-            PluginService.WindowService.OpenWindow<RetainerTasksWindow>(RetainerTasksWindow.AsKey);
-        }
-
-        private static void OpenMobsWindow(string obj)
-        {
-            PluginService.WindowService.OpenWindow<BNpcWindow>(BNpcWindow.AsKey);
-        }
-
-        private static void OpenNpcsWindow(string obj)
-        {
-            PluginService.WindowService.OpenWindow<ENpcsWindow>(ENpcsWindow.AsKey);
-        }
-        
-        private static void OpenTetrisWindow(string obj)
-        {
-            PluginService.WindowService.OpenWindow<TetrisWindow>(TetrisWindow.AsKey);
-        }
-
-        public ConfigurationWindow(string name = "Configuration") : base(name)
-        {
-            SetupWindow();
-        }
-        
-        public ConfigurationWindow() : base("Configuration")
-        {
-            SetupWindow();
-        }
-        
-        private void SetupWindow()
-        {
+            WindowName = "Configuration";
+            Key = "configuration";
             _configPages = new List<IConfigPage>();
             _configPages.Add(new SeparatorPageItem("Settings"));
-            _configPages.Add(new SettingPage(SettingCategory.General));
-            _configPages.Add(new SettingPage(SettingCategory.Visuals));
-            _configPages.Add(new SettingPage(SettingCategory.ToolTips));
-            _configPages.Add(new SettingPage(SettingCategory.Hotkeys));
-            _configPages.Add(new SettingPage(SettingCategory.MarketBoard));
-            _configPages.Add(new SettingPage(SettingCategory.History));
-            _configPages.Add(new SettingPage(SettingCategory.Windows));
+            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.General));
+            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.Visuals));
+            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.ToolTips));
+            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.Hotkeys));
+            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.MarketBoard));
+            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.History));
+            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.Windows));
             _configPages.Add(new SeparatorPageItem("Data", true));
-            _configPages.Add(new FiltersPage());
-            _configPages.Add(new CraftFiltersPage());
-            _configPages.Add(new ImportExportPage());
-            _configPages.Add(new CharacterRetainerPage());
+            _configPages.Add(_configPageFactory.Invoke(typeof(FiltersPage)));
+            _configPages.Add(_configPageFactory.Invoke(typeof(CraftFiltersPage)));
+            _configPages.Add(_configPageFactory.Invoke(typeof(ImportExportPage)));
+            _configPages.Add(_configPageFactory.Invoke(typeof(CharacterRetainerPage)));
             
             _addFilterMenu = new PopupMenu("addFilter", PopupMenu.PopupMenuButtons.LeftRight,
                 new List<PopupMenu.IPopupMenuItem>()
@@ -138,36 +91,153 @@ namespace InventoryTools.Ui
                     new PopupMenu.PopupMenuItemSelectableAskName("Duplicated items across characters/retainers +", "af11", "Duplicated items", AddDuplicatedItemsFilter, "This will add a filter that will provide a list of all the distinct stacks that appear in 2 sets of inventories. You can use this to make sure only one retainer has a specific type of item.")
                 });
             
+            _settingsMenu = new PopupMenu("configMenu", PopupMenu.PopupMenuButtons.All,
+                new List<PopupMenu.IPopupMenuItem>()
+                {
+                    new PopupMenu.PopupMenuItemSelectable("Items Window", "filters", OpenFiltersWindow,"Open the items window."),
+                    new PopupMenu.PopupMenuItemSelectable("Craft Window", "crafts", OpenCraftsWindow,"Open the crafts window."),
+                    new PopupMenu.PopupMenuItemSeparator(),
+                    new PopupMenu.PopupMenuItemSelectable("Mob Window", "mobs", OpenMobsWindow,"Open the mobs window."),
+                    new PopupMenu.PopupMenuItemSelectable("Npcs Window", "npcs", OpenNpcsWindow,"Open the npcs window."),
+                    new PopupMenu.PopupMenuItemSelectable("Duties Window", "duties", OpenDutiesWindow,"Open the duties window."),
+                    new PopupMenu.PopupMenuItemSelectable("Airships Window", "airships", OpenAirshipsWindow,"Open the airships window."),
+                    new PopupMenu.PopupMenuItemSelectable("Submarines Window", "submarines", OpenSubmarinesWindow,"Open the submarines window."),
+                    new PopupMenu.PopupMenuItemSelectable("Retainer Ventures Window", "ventures", OpenRetainerVenturesWindow,"Open the retainer ventures window."),
+                    new PopupMenu.PopupMenuItemSelectable("Tetris", "tetris", OpenTetrisWindow,"Open the tetris window.", () => _configuration.TetrisEnabled),
+                    new PopupMenu.PopupMenuItemSeparator(),
+                    new PopupMenu.PopupMenuItemSelectable("Help", "help", OpenHelpWindow,"Open the help window."),
+                });
+            
+            _wizardMenu = new PopupMenu("wizardMenu", PopupMenu.PopupMenuButtons.All,
+                new List<PopupMenu.IPopupMenuItem>()
+                {
+                    new PopupMenu.PopupMenuItemSelectable("Configure new settings", "configureNew", ConfigureNewSettings,"Configure new settings."),
+                    new PopupMenu.PopupMenuItemSelectable("Configure all settings", "configureAll", ConfigureAllSettings,"Configure all settings."),
+                });
+            
+            _addIcon = new( _iconService.LoadIcon(66315),  new Vector2(22, 22));
+            _lightBulbIcon = new( _iconService.LoadIcon(66318),  new Vector2(22, 22));
+            _menuIcon = new( _iconService.LoadImage("menu"),  new Vector2(22, 22));
+            _wizardStart = new( _iconService.LoadImage("wizard"),  new Vector2(22, 22));
+            
             GenerateFilterPages();
+            MediatorService.Subscribe<ListInvalidatedMessage>(this, _ => Invalidate());
+            MediatorService.Subscribe<ListRepositionedMessage>(this, _ => Invalidate());
+            MediatorService.Subscribe<ListAddedMessage>(this, _ => Invalidate());
+            MediatorService.Subscribe<ListRemovedMessage>(this, _ => Invalidate());
+        }
+
+        private void ListInvalidated(ListInvalidatedMessage obj)
+        {
+            Invalidate();
+        }
+
+        private HoverButton _addIcon;
+        private HoverButton _lightBulbIcon;
+        private HoverButton _menuIcon;
+        private HoverButton _wizardStart;
+
+        private PopupMenu _wizardMenu = null!;
+
+        private void ConfigureAllSettings(string obj)
+        {
+            _configurationWizardService.ClearFeaturesSeen();
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWizard)));
+        }
+
+        private void ConfigureNewSettings(string obj)
+        {
+            if (_configurationWizardService.HasNewFeatures)
+            {
+                MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWizard)));
+            }
+            else
+            {
+                _chatUtilities.Print("There are no new settings available to configure.");
+            }
+        }
+
+        private PopupMenu _addFilterMenu = null!;
+        private PopupMenu _addSampleMenu = null!;
+        private PopupMenu _settingsMenu = null!;
+
+        private void OpenCraftsWindow(string obj)
+        {
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(CraftsWindow)));
+        }
+
+        private void OpenFiltersWindow(string obj)
+        {
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(FiltersWindow)));
+        }
+
+        private void OpenHelpWindow(string obj)
+        {
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(HelpWindow)));
+        }
+
+        private void OpenDutiesWindow(string obj)
+        {
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(DutiesWindow)));
+        }
+
+        private void OpenAirshipsWindow(string obj)
+        {
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(AirshipsWindow)));
+        }
+
+        private void OpenSubmarinesWindow(string obj)
+        {
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(SubmarinesWindow)));
+        }
+        
+        private void OpenRetainerVenturesWindow(string obj)
+        {
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(RetainerTasksWindow)));
+        }
+
+        private void OpenMobsWindow(string obj)
+        {
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(BNpcsWindow)));
+        }
+
+        private void OpenNpcsWindow(string obj)
+        {
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(ENpcsWindow)));
+        }
+        
+        private void OpenTetrisWindow(string obj)
+        {
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(TetrisWindow)));
         }
 
         private void AddAllGameItemsFilter(string arg1, string arg2)
         {
-            PluginService.PluginLogic.AddAllGameItemsFilter(arg1);
+            _pluginLogic.AddAllGameItemsFilter(arg1);
             SetNewFilterActive();
         }
 
         private void AddFreeCompanyFilter(string arg1, string arg2)
         {
-            PluginService.PluginLogic.AddFreeCompanyFilter(arg1);
+            _pluginLogic.AddFreeCompanyFilter(arg1);
             SetNewFilterActive();
         }
 
         private void AddRetainersFilter(string arg1, string arg2)
         {
-            PluginService.PluginLogic.AddRetainerFilter(arg1);
+            _pluginLogic.AddRetainerFilter(arg1);
             SetNewFilterActive();
         }
 
         private void AddPlayerFilter(string arg1, string arg2)
         {
-            PluginService.PluginLogic.AddPlayerFilter(arg1);
+            _pluginLogic.AddPlayerFilter(arg1);
             SetNewFilterActive();
         }
 
         private void AddAllFilter(string arg1, string arg2)
         {
-            PluginService.PluginLogic.AddAllFilter(arg1);
+            _pluginLogic.AddAllFilter(arg1);
             SetNewFilterActive();
         }
 
@@ -195,10 +265,10 @@ namespace InventoryTools.Ui
             if (confirmed)
             {
                 id = id.Replace("rf_", "");
-                var existingFilter = PluginService.FilterService.GetFilterByKey(id);
+                var existingFilter = _listService.GetListByKey(id);
                 if (existingFilter != null)
                 {
-                    PluginService.FilterService.RemoveFilter(existingFilter);
+                    _listService.RemoveList(existingFilter);
                     ConfigSelectedConfigurationPage--;
                 }
             }
@@ -207,83 +277,83 @@ namespace InventoryTools.Ui
         private void MoveFilterDown(string id)
         {
             id = id.Replace("md_", "");
-            var existingFilter = PluginService.FilterService.GetFilterByKey(id);
+            var existingFilter = _listService.GetListByKey(id);
             if (existingFilter != null)
             {
-                PluginService.FilterService.MoveFilterDown(existingFilter);
+                _listService.MoveListDown(existingFilter);
             }
         }
 
         private void MoveFilterUp(string id)
         {
             id = id.Replace("mu_", "");
-            var existingFilter = PluginService.FilterService.GetFilterByKey(id);
+            var existingFilter = _listService.GetListByKey(id);
             if (existingFilter != null)
             {
-                PluginService.FilterService.MoveFilterUp(existingFilter);
+                _listService.MoveListUp(existingFilter);
             }
         }
 
         private void DuplicateFilter(string filterName, string id)
         {
             id = id.Replace("df_", "");
-            var existingFilter = PluginService.FilterService.GetFilterByKey(id);
+            var existingFilter = _listService.GetListByKey(id);
             if (existingFilter != null)
             {
-                PluginService.FilterService.DuplicateFilter(existingFilter, filterName);
+                _listService.DuplicateList(existingFilter, filterName);
                 SetNewFilterActive();
             }
         }
 
         private void AddDuplicatedItemsFilter(string newName, string id)
         {
-            PluginService.PluginLogic.AddSampleFilterDuplicatedItems(newName);
+            _pluginLogic.AddSampleFilterDuplicatedItems(newName);
             SetNewFilterActive();
         }
 
         private void AddPutAwayMaterialsFilter(string newName, string id)
         {
-            PluginService.PluginLogic.AddSampleFilterMaterials(newName);
+            _pluginLogic.AddSampleFilterMaterials(newName);
             SetNewFilterActive();
         }
 
         private void AddLessThan100GilFilter(string newName, string id)
         {
-            PluginService.PluginLogic.AddSampleFilter100Gil(newName);
+            _pluginLogic.AddSampleFilter100Gil(newName);
             SetNewFilterActive();
         }
 
         private void AddSearchFilter(string newName, string id)
         {
-            PluginService.FilterService.AddFilter(new FilterConfiguration(newName,
+            _listService.AddList(new FilterConfiguration(newName,
                 Guid.NewGuid().ToString("N"), FilterType.SearchFilter));
             SetNewFilterActive();
         }
 
         private void AddHistoryFilter(string newName, string id)
         {
-            PluginService.FilterService.AddFilter(new FilterConfiguration(newName,
+            _listService.AddList(new FilterConfiguration(newName,
                 Guid.NewGuid().ToString("N"), FilterType.HistoryFilter));
             SetNewFilterActive();
         }
 
         private void AddGameItemFilter(string newName, string id)
         {
-            PluginService.FilterService.AddFilter(new FilterConfiguration(newName,Guid.NewGuid().ToString("N"), FilterType.GameItemFilter));
+            _listService.AddList(new FilterConfiguration(newName,Guid.NewGuid().ToString("N"), FilterType.GameItemFilter));
             SetNewFilterActive();
         }
 
         private void AddSortFilter(string newName, string id)
         {
-            PluginService.FilterService.AddFilter(new FilterConfiguration(newName,Guid.NewGuid().ToString("N"), FilterType.SortingFilter));
+            _listService.AddList(new FilterConfiguration(newName,Guid.NewGuid().ToString("N"), FilterType.SortingFilter));
             SetNewFilterActive();
         }
 
 
         private int ConfigSelectedConfigurationPage
         {
-            get => ConfigurationManager.Config.SelectedConfigurationPage;
-            set => ConfigurationManager.Config.SelectedConfigurationPage = value;
+            get => _configuration.SelectedConfigurationPage;
+            set => _configuration.SelectedConfigurationPage = value;
         }
 
         public void SetActiveFilter(FilterConfiguration configuration)
@@ -298,13 +368,13 @@ namespace InventoryTools.Ui
         public void GenerateFilterPages()
         {
             
-            var filterConfigurations = PluginService.FilterService.FiltersList.Where(c => c.FilterType != FilterType.CraftFilter);
+            var filterConfigurations = _listService.Lists.Where(c => c.FilterType != FilterType.CraftFilter);
             var filterPages = new Dictionary<string, IConfigPage>(); 
             foreach (var filter in filterConfigurations)
             {
                 if (!filterPages.ContainsKey(filter.Key))
                 {
-                    filterPages.Add(filter.Key, new FilterPage(filter));
+                    filterPages.Add(filter.Key, _filterPageFactory.Invoke(filter));
                 }
             }
 
@@ -312,14 +382,15 @@ namespace InventoryTools.Ui
         }
         
         public override bool SaveState => true;
-        public static string AsKey => "configuration";
-        public override string Key => AsKey;
         public override Vector2? DefaultSize { get; } = new(700, 700);
         public override Vector2? MaxSize { get; } = new(2000, 2000);
         public override Vector2? MinSize { get; } = new(200, 200);
+        public override string GenericKey => "configuration";
+        public override string GenericName => "Configuration";
         public override bool DestroyOnClose => true;
         private List<IConfigPage> _configPages = null!;
         public Dictionary<string, IConfigPage> _filterPages = new Dictionary<string,IConfigPage>();
+        
 
         private void SetNewFilterActive()
         {
@@ -328,6 +399,7 @@ namespace InventoryTools.Ui
 
         public override void Draw()
         {
+
             using (var sideBarChild =
                    ImRaii.Child("SideBar", new Vector2(180, 0) * ImGui.GetIO().FontGlobalScale, true))
             {
@@ -345,7 +417,7 @@ namespace InventoryTools.Ui
                                 var configPage = _configPages[index];
                                 if (configPage.IsMenuItem)
                                 {
-                                    configPage.Draw();
+                                    MediatorService.Publish(configPage.Draw());
                                 }
                                 else
                                 {
@@ -359,7 +431,7 @@ namespace InventoryTools.Ui
                             }
 
                             ImGui.NewLine();
-                            ImGui.TextUnformatted("Filters");
+                            ImGui.TextUnformatted("Item Lists");
                             ImGui.Separator();
 
                             var filterIndex = count;
@@ -372,7 +444,7 @@ namespace InventoryTools.Ui
                                     ConfigSelectedConfigurationPage = filterIndex;
                                 }
 
-                                var filter = PluginService.FilterService.GetFilterByKey(item.Key);
+                                var filter = _listService.GetListByKey(item.Key);
                                 if (filter != null)
                                 {
                                     GetFilterMenu(filter).Draw();
@@ -422,10 +494,26 @@ namespace InventoryTools.Ui
                             }
 
                             _settingsMenu.Draw();
+                            
+                            
+                            width -= 26 * ImGui.GetIO().FontGlobalScale;
+                            
+                            ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
+                            ImGui.SetCursorPosX(width * ImGui.GetIO().FontGlobalScale);
+
+                            if (_wizardStart.Draw("openMenu"))
+                            {
+                                _wizardMenu.Open();
+                            }
+                            _wizardMenu.Draw();
+
+                            
+                            ImGuiUtil.HoverTooltip("Start configuration wizard.");
                         }
                     }
                 }
             }
+            
             
 
             ImGui.SameLine();
@@ -466,7 +554,7 @@ namespace InventoryTools.Ui
                 {
                     if (currentConfigPage != null)
                     {
-                        currentConfigPage.Draw();
+                        MediatorService.Publish(currentConfigPage.Draw());
                     }
                 }
             }

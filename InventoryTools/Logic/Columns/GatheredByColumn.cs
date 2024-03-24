@@ -1,22 +1,28 @@
 using System.Linq;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns;
 
 public class GatheredByColumn : TextColumn
 {
+    public GatheredByColumn(ILogger<GatheredByColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+    {
+    }
     public override ColumnCategory ColumnCategory { get; } = ColumnCategory.Basic;
     public override bool HasFilter { get; set; } = true;
     public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
 
-    public override string? CurrentValue(InventoryItem item)
+    public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
     {
-        return CurrentValue(item.Item);
+        return CurrentValue(columnConfiguration, item.Item);
     }
 
-    public override string? CurrentValue(ItemEx item)
+    public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
     {
         var currentValue = item.GatheringTypes.Select(c => c.Value!.FormattedName).ToList();
         if (item.ObtainedFishing)
@@ -27,9 +33,9 @@ public class GatheredByColumn : TextColumn
         return string.Join(",", currentValue);
     }
 
-    public override string? CurrentValue(SortingResult item)
+    public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
     {
-        return CurrentValue(item.InventoryItem);
+        return CurrentValue(columnConfiguration, item.InventoryItem);
     }
 
     public override string Name { get; set; } = "Gathered By?";

@@ -1,26 +1,36 @@
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
 {
     public class LeveIsCraftLevelColumn : CheckboxColumn
     {
+        private readonly ExcelCache _excelCache;
+
+        public LeveIsCraftLevelColumn(ILogger<LeveIsCraftLevelColumn> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
+        {
+            _excelCache = excelCache;
+        }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override bool? CurrentValue(InventoryItem item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
         {
-            return Service.ExcelCache.IsItemCraftLeve(item.ItemId);
+            return _excelCache.IsItemCraftLeve(item.ItemId);
         }
 
-        public override bool? CurrentValue(ItemEx item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
-            return Service.ExcelCache.IsItemCraftLeve(item.RowId);
+            return _excelCache.IsItemCraftLeve(item.RowId);
         }
 
-        public override bool? CurrentValue(SortingResult item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
         {
-            return CurrentValue(item.InventoryItem);
+            return CurrentValue(columnConfiguration, item.InventoryItem);
         }
 
         public override string Name { get; set; } = "Is Leve(Craft) Item?";

@@ -1,10 +1,12 @@
 ﻿using System.Numerics;
 using CriticalCommonLib.Enums;
+using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Sheets;
 
 namespace InventoryTools.Logic
 {
-    public class SortingResult
+    public class SortingResult : IItem
     {
         private ulong _sourceRetainerId;
 
@@ -63,5 +65,15 @@ namespace InventoryTools.Logic
             info += (InventoryItem.Item.ObtainedGil ? "Can be bought" : "Can't be bought") + '\n';
             return info;
         }
+
+        public uint ItemId {
+            get => InventoryItem.ItemId;
+            set
+            {
+                
+            }
+        }
+
+        public ItemEx Item => InventoryItem.Item;
     }
 }

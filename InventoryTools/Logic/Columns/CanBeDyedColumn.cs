@@ -1,25 +1,31 @@
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
 {
     public class CanBeDyedColumn : CheckboxColumn
     {
-        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override bool? CurrentValue(InventoryItem item)
+        public CanBeDyedColumn(ILogger<CanBeDyedColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
         {
-            return CurrentValue(item.Item);
+        }
+        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        {
+            return CurrentValue(columnConfiguration, item.Item);
         }
 
-        public override bool? CurrentValue(ItemEx item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
             return item.IsDyeable;
         }
 
-        public override bool? CurrentValue(SortingResult item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
         {
-            return CurrentValue(item.InventoryItem);
+            return CurrentValue(columnConfiguration, item.InventoryItem);
         }
 
         public override string Name { get; set; } = "Is Dyeable?";

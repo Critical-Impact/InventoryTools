@@ -1,17 +1,31 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Logic.Filters.Abstract;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters;
 
 public class IngredientSearchFilter : UintMultipleChoiceFilter
 {
+    private readonly IListService _listService;
+    private readonly ExcelCache _excelCache;
+
+    public IngredientSearchFilter(ILogger<IngredientSearchFilter> logger, ImGuiService imGuiService,IListService listService, ExcelCache excelCache) : base(logger, imGuiService)
+    {
+        _listService = listService;
+        _excelCache = excelCache;
+    }
     public override string Key { get; set; } = "IngredientSearchFilter";
     public override string Name { get; set; } = "Ingredient Search Filter";
 
@@ -62,28 +76,29 @@ public class IngredientSearchFilter : UintMultipleChoiceFilter
             if (popup.Success)
             {
                 var filters =
-                    PluginService.FilterService.FiltersList.Where(c =>
+                    _listService.Lists.Where(c =>
                         c.FilterType is Logic.FilterType.SearchFilter or FilterType.SortingFilter or FilterType.GameItemFilter && c != configuration).ToArray();
                 foreach (var filter in filters)
                 {
                     if (ImGui.Selectable("Add all from " + filter.Name))
                     {
-                        var filterResult = filter.GenerateFilteredList().Result;
-                        foreach (var item in filterResult.AllItems)
-                        {
-                            if (item.CanBeCrafted && item.SearchString != "")
-                            {
-                                currentValue.Add(item.RowId);
-                            }
-                        }
-                        foreach (var item in filterResult.SortedItems)
-                        {
-                            if (item.InventoryItem.Item.CanBeCrafted && item.InventoryItem.Item.SearchString != "")
-                            {
-                                currentValue.Add(item.InventoryItem.ItemId);
-                            }
-                        }
-                        UpdateFilterConfiguration(configuration,currentValue.ToList());
+                        //TODO: FIX ME
+                        // var filterResult = filter.GenerateFilteredList().Result;
+                        // foreach (var item in filterResult.AllItems)
+                        // {
+                        //     if (item.CanBeCrafted && item.SearchString != "")
+                        //     {
+                        //         currentValue.Add(item.RowId);
+                        //     }
+                        // }
+                        // foreach (var item in filterResult.SortedItems)
+                        // {
+                        //     if (item.InventoryItem.Item.CanBeCrafted && item.InventoryItem.Item.SearchString != "")
+                        //     {
+                        //         currentValue.Add(item.InventoryItem.ItemId);
+                        //     }
+                        // }
+                        // UpdateFilterConfiguration(configuration,currentValue.ToList());
                     }
                 }
             }
@@ -120,7 +135,7 @@ public class IngredientSearchFilter : UintMultipleChoiceFilter
 
     public override bool FilterSearch(uint itemId, string itemName, string searchString)
     {
-        if (!Service.ExcelCache.CanCraftItem(itemId))
+        if (!_excelCache.CanCraftItem(itemId))
         {
             return false;
         }
@@ -129,7 +144,7 @@ public class IngredientSearchFilter : UintMultipleChoiceFilter
 
     public override Dictionary<uint, string> GetChoices(FilterConfiguration configuration)
     {
-        return Service.ExcelCache.ItemNamesById;
+        return _excelCache.ItemNamesById;
     }
 
     public override bool HideAlreadyPicked { get; set; } = true;

@@ -1,25 +1,31 @@
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
 {
     public class DebugColumn : TextColumn
     {
-        public override ColumnCategory ColumnCategory => ColumnCategory.Debug;
-        public override string? CurrentValue(InventoryItem item)
+        public DebugColumn(ILogger<DebugColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
         {
-            return CurrentValue(item.Item);
+        }
+        public override ColumnCategory ColumnCategory => ColumnCategory.Debug;
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        {
+            return CurrentValue(columnConfiguration, item.Item);
         }
 
-        public override string? CurrentValue(ItemEx item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
             return "Item Search: " + item.ItemSearchCategory.Row + " - Ui Category: " + item.ItemUICategory.Row + " - Sort Category: " + item.ItemSortCategory.Row + " - Equip Slot Category: " + item.EquipSlotCategory.Row + " - Class Job Category: " + item.ClassJobCategory.Row + " - Buy: " + item.PriceMid + " - Unknown: " + item.Unknown19;
         }
 
-        public override string? CurrentValue(SortingResult item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
         {
-            return CurrentValue(item.InventoryItem);
+            return CurrentValue(columnConfiguration, item.InventoryItem);
         }
 
         public override string Name { get; set; } = "Debug - General Information";

@@ -3,30 +3,36 @@ using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
+using Dalamud.Plugin.Services;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
 {
     public class NameColumn : ColoredTextColumn
     {
+        public NameColumn(ILogger<NameColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override (string, Vector4)? CurrentValue(InventoryItem item)
+        public override (string, Vector4)? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
         {
             return (item.FormattedName, item.ItemColour);
         }
 
-        public override (string, Vector4)? CurrentValue(ItemEx item)
+        public override (string, Vector4)? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
             return (item.NameString, ImGuiColors.DalamudWhite);
         }
 
-        public override (string, Vector4)? CurrentValue(SortingResult item)
+        public override (string, Vector4)? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
         {
-            return CurrentValue(item.InventoryItem);
+            return CurrentValue(columnConfiguration, item.InventoryItem);
         }
         
 
-        public override (string, Vector4)? CurrentValue(CraftItem currentValue)
+        public override (string, Vector4)? CurrentValue(ColumnConfiguration columnConfiguration, CraftItem currentValue)
         {
             return (currentValue.FormattedName, ImGuiColors.DalamudWhite);
         }

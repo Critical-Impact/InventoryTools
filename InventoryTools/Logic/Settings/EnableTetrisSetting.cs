@@ -1,4 +1,6 @@
 ﻿using InventoryTools.Logic.Settings.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Settings;
 
@@ -23,4 +25,9 @@ public class EnableTetrisSetting : BooleanSetting
 
     public override SettingCategory SettingCategory { get; set; } = SettingCategory.General;
     public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Fun;
+    public override string Version => "1.6.2.5";
+
+    public EnableTetrisSetting(ILogger<EnableTetrisSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+    {
+    }
 }

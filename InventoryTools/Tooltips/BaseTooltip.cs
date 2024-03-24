@@ -1,17 +1,32 @@
-﻿using CriticalCommonLib;
+using CriticalCommonLib;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using InventoryTools.Logic;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Tooltips;
 
 public abstract class BaseTooltip : TooltipService.TooltipTweak
 {
+    public ExcelCache ExcelCache { get; }
+    public InventoryToolsConfiguration Configuration { get; }
+    public IGameGui GameGui { get; }
+    public ILogger Logger { get; }
+
+    public BaseTooltip(ILogger logger, ExcelCache excelCache, InventoryToolsConfiguration configuration, IGameGui gameGui)
+    {
+        ExcelCache = excelCache;
+        Configuration = configuration;
+        GameGui = gameGui;
+        Logger = logger;
+    }
     public bool HoverItemIsHq
     {
         get
         {
-            var itemId = Service.GameGui.HoveredItem;
+            var itemId = GameGui.HoveredItem;
             if (itemId < 2000000)
             {
                 return  itemId > 1000000;
@@ -24,7 +39,7 @@ public abstract class BaseTooltip : TooltipService.TooltipTweak
     {
         get
         {
-            var itemId = Service.GameGui.HoveredItem;
+            var itemId = GameGui.HoveredItem;
             if (itemId < 2000000)
             {
                 bool isHq = itemId > 1000000;
@@ -36,29 +51,29 @@ public abstract class BaseTooltip : TooltipService.TooltipTweak
         }
     }
 
-    public ItemEx? HoverItem => Service.ExcelCache.GetItemExSheet().GetRow(HoverItemId);
+    public ItemEx? HoverItem => ExcelCache.GetItemExSheet().GetRow(HoverItemId);
 
     public bool ShouldShow()
     {
-        if (!ConfigurationManager.Config.DisplayTooltip)
+        if (!Configuration.DisplayTooltip)
         {
             return false;
         }
-        var itemId = Service.GameGui.HoveredItem;
+        var itemId = GameGui.HoveredItem;
         if (itemId < 2000000)
         {
             itemId %= 500000;
 
-            var item = Service.ExcelCache.GetItemExSheet().GetRow((uint) itemId);
+            var item = ExcelCache.GetItemExSheet().GetRow((uint) itemId);
             if (item != null)
             {
-                if (ConfigurationManager.Config.TooltipWhitelistCategories.Count == 0)
+                if (Configuration.TooltipWhitelistCategories.Count == 0)
                 {
                     return true;
                 }
-                if (ConfigurationManager.Config.TooltipWhitelistBlacklist)
+                if (Configuration.TooltipWhitelistBlacklist)
                 {
-                    if (ConfigurationManager.Config.TooltipWhitelistCategories.Contains(item.ItemUICategory.Row))
+                    if (Configuration.TooltipWhitelistCategories.Contains(item.ItemUICategory.Row))
                     {
                         return false;
                     }
@@ -66,7 +81,7 @@ public abstract class BaseTooltip : TooltipService.TooltipTweak
                     return true;
                 }
 
-                if (ConfigurationManager.Config.TooltipWhitelistCategories.Contains(item.ItemUICategory.Row))
+                if (Configuration.TooltipWhitelistCategories.Contains(item.ItemUICategory.Row))
                 {
                     return true;
                 }

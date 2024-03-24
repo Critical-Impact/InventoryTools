@@ -1,11 +1,23 @@
+using CriticalCommonLib.Services;
+using Dalamud.Interface.ImGuiFileDialog;
 using ImGuiNET;
 using InventoryTools.Logic.Settings.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 using OtterGui;
 
 namespace InventoryTools.Logic.Settings;
 
 public class TrackMobSpawnSetting : BooleanSetting
 {
+    private readonly FileDialogManager _fileDialogManager;
+    private readonly IMobTracker _mobTracker;
+
+    public TrackMobSpawnSetting(ILogger<TrackMobSpawnSetting> logger, ImGuiService imGuiService, FileDialogManager fileDialogManager, IMobTracker mobTracker) : base(logger, imGuiService)
+    {
+        _fileDialogManager = fileDialogManager;
+        _mobTracker = mobTracker;
+    }
     public override bool DefaultValue { get; set; } = false;
     public override bool CurrentValue(InventoryToolsConfiguration configuration)
     {
@@ -34,7 +46,7 @@ public class TrackMobSpawnSetting : BooleanSetting
             ImGui.SameLine();
             if (ImGui.Button("Export CSV"))
             {
-                PluginService.FileDialogManager.SaveFileDialog("Save to csv", "*.csv", "mob_spawns.csv", ".csv",
+                _fileDialogManager.SaveFileDialog("Save to csv", "*.csv", "mob_spawns.csv", ".csv",
                     (b, s) => { SaveMobSpawns(b, s); }, null, true);
             }
 
@@ -46,8 +58,9 @@ public class TrackMobSpawnSetting : BooleanSetting
     {
         if (b)
         {
-            var entries = PluginService.MobTracker.GetEntries();
-            PluginService.MobTracker.SaveCsv(s, entries);
+            var entries = _mobTracker.GetEntries();
+            _mobTracker.SaveCsv(s, entries);
         }
     }
+    public override string Version => "1.6.2.5";
 }

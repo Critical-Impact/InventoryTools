@@ -1,13 +1,21 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Timers;
 using CriticalCommonLib;
 using Dalamud.Plugin.Ipc;
+using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Timer = System.Timers.Timer;
 
 namespace InventoryTools.Logic
 {
-    public class WotsitIpc: IDisposable, IWotsitIpc
+    public class WotsitIpc: IWotsitIpc
     {
+        private readonly IListService _listService;
+        public ILogger<WotsitIpc> Logger { get; }
         private const string IpcDisplayName = "Allagan Tools";
         private const uint WotsitIconId = 32;
 
@@ -21,19 +29,10 @@ namespace InventoryTools.Logic
         private Timer? _delayTimer = null;
 
 
-        public WotsitIpc()
+        public WotsitIpc(ILogger<WotsitIpc> logger, IListService listService)
         {
-            InitForWotsit();
-            _wotsitAvailable = Service.Interface.GetIpcSubscriber<bool>("FA.Available");
-            _wotsitAvailable.Subscribe(FaAvailable);
-            
-            PluginService.FilterService.FilterAdded += FilterAddedRemoved;
-            PluginService.FilterService.FilterRemoved += FilterAddedRemoved;
-            PluginService.FilterService.FilterModified += FilterChanged;
-
-            _delayTimer = new Timer(5000);
-            _delayTimer.Elapsed += DelayTimerOnElapsed;
-            _delayTimer.Enabled = true;
+            _listService = listService;
+            Logger = logger;
         }
 
         private void FaAvailable()
@@ -50,7 +49,7 @@ namespace InventoryTools.Logic
             }
         }
 
-        private void FilterAddedRemoved(FilterConfiguration configuration)
+        private void ListAddedRemoved(FilterConfiguration configuration)
         {
             try
             {
@@ -58,11 +57,11 @@ namespace InventoryTools.Logic
             }
             catch (Exception)
             {
-                Service.Log.Error("Something went wrong while trying to unregister and reregister with wotsit's IPC.");
+                Logger.LogError("Something went wrong while trying to unregister and reregister with wotsit's IPC.");
             }
         }
 
-        private void FilterChanged(FilterConfiguration configuration)
+        private void ListChanged(FilterConfiguration configuration)
         {
             try
             {
@@ -73,7 +72,7 @@ namespace InventoryTools.Logic
             }
             catch (Exception)
             {
-                Service.Log.Error("Something went wrong while trying to unregister and reregister with wotsit's IPC.");
+                Logger.LogError("Something went wrong while trying to unregister and reregister with wotsit's IPC.");
             }
         }
 
@@ -106,7 +105,7 @@ namespace InventoryTools.Logic
                 }
                 catch (Exception e)
                 {
-                    Service.Log.Verbose(e , "Could not register with Wotsit IPC. This is normal if you do not have it installed.");
+                    Logger.LogTrace(e , "Could not register with Wotsit IPC. This is normal if you do not have it installed.");
                     _wotsItRegistered = false;
                     return;
                 }
@@ -122,7 +121,7 @@ namespace InventoryTools.Logic
             {
                 _wotsitToggleFilterGuids = new Dictionary<string, FilterConfiguration>();
 
-                foreach (var filter in PluginService.FilterService.FiltersList)
+                foreach (var filter in _listService.Lists)
                 {
                     try
                     {
@@ -133,12 +132,12 @@ namespace InventoryTools.Logic
                     }
                     catch (Exception e)
                     {
-                        Service.Log.Verbose(e , "Could not register with Wotsit IPC. This is normal if you do not have it installed.");
+                        Logger.LogTrace(e , "Could not register with Wotsit IPC. This is normal if you do not have it installed.");
                     }
                 }
             }
 
-            Service.Log.Debug($"Registered {_wotsitToggleFilterGuids.Count} filters with Wotsit");
+            Logger.LogDebug($"Registered {_wotsitToggleFilterGuids.Count} lists with Wotsit");
         }
 
         public void WotsitInvoke(string guid)
@@ -147,55 +146,55 @@ namespace InventoryTools.Logic
             {
                 if (_wotsitToggleFilterGuids.TryGetValue(guid, out var filter))
                 {
-                    PluginService.FilterService.ToggleActiveBackgroundFilter(filter);
+                    _listService.ToggleActiveBackgroundList(filter);
                 }
             });
         }
 
-        private bool _disposed;
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            
         }
-        
-        protected virtual void Dispose(bool disposing)
-        {
-            if(!_disposed && disposing)
-            {
-                try
-                {
-                    _wotsitAvailable.Unsubscribe(FaAvailable);
-                    _wotsitUnregister?.InvokeFunc(IpcDisplayName);
-                }
-                catch (Exception)
-                {
-                    // Wotsit was not installed or too early version
-                }
-                PluginService.FilterService.FilterAdded -= FilterAddedRemoved;
-                PluginService.FilterService.FilterRemoved -= FilterAddedRemoved;
-                PluginService.FilterService.FilterModified -= FilterChanged;
-                if (_delayTimer != null)
-                {
-                    _delayTimer.Elapsed -= DelayTimerOnElapsed;
-                    _delayTimer?.Dispose();
-                }
-            }
-            _disposed = true;         
-        }
-        
-        ~WotsitIpc()
-        {
-#if DEBUG
-            // In debug-builds, make sure that a warning is displayed when the Disposable object hasn't been
-            // disposed by the programmer.
 
-            if( _disposed == false )
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            Logger.LogTrace("Starting service {type} ({this})", GetType().Name, this);
+
+            InitForWotsit();
+            _wotsitAvailable = Service.Interface.GetIpcSubscriber<bool>("FA.Available");
+            _wotsitAvailable.Subscribe(FaAvailable);
+            
+            _listService.ListAdded += ListAddedRemoved;
+            _listService.ListRemoved += ListAddedRemoved;
+            _listService.ListConfigurationChanged += ListChanged;
+
+            _delayTimer = new Timer(5000);
+            _delayTimer.Elapsed += DelayTimerOnElapsed;
+            _delayTimer.Enabled = true;
+
+            return Task.CompletedTask;
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            try
             {
-                Service.Log.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
+                _wotsitAvailable.Unsubscribe(FaAvailable);
+                _wotsitUnregister?.InvokeFunc(IpcDisplayName);
             }
-#endif
-            Dispose (true);
+            catch (Exception)
+            {
+                // Wotsit was not installed or too early version
+            }
+            _listService.ListAdded -= ListAddedRemoved;
+            _listService.ListRemoved -= ListAddedRemoved;
+            _listService.ListConfigurationChanged -= ListChanged;
+            if (_delayTimer != null)
+            {
+                _delayTimer.Elapsed -= DelayTimerOnElapsed;
+                _delayTimer?.Dispose();
+            }
+            return Task.CompletedTask;
         }
     }
     

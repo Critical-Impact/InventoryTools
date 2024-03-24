@@ -1,11 +1,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using InventoryTools.Logic.Settings.Abstract;
+using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Settings
 {
     public class BackgroundFilterSetting : ChoiceSetting<string>
     {
+        private readonly IListService _listService;
+
+        public BackgroundFilterSetting(ILogger<BackgroundFilterSetting> logger, ImGuiService imGuiService, IListService listService) : base(logger, imGuiService)
+        {
+            _listService = listService;
+        }
         public override string DefaultValue { get; set; } = "";
         public override string CurrentValue(InventoryToolsConfiguration configuration)
         {
@@ -16,11 +25,11 @@ namespace InventoryTools.Logic.Settings
         {
             if (newValue == "")
             {
-                PluginService.FilterService.ClearActiveBackgroundFilter();
+                _listService.ClearActiveBackgroundList();
             }
             else
             {
-                PluginService.FilterService.SetActiveBackgroundFilterByKey(newValue);
+                _listService.SetActiveBackgroundListByKey(newValue);
             }
         }
 
@@ -38,12 +47,13 @@ namespace InventoryTools.Logic.Settings
             get
             {
                 var filterItems = new Dictionary<string, string> {{"", "None"}};
-                foreach (var config in PluginService.FilterService.FiltersList.Where(c => !c.CraftListDefault))
+                foreach (var config in _listService.Lists.Where(c => !c.CraftListDefault))
                 {
                     filterItems.Add(config.Key, config.Name);
                 }
                 return filterItems;
             }
         }
+        public override string Version => "1.6.2.5";
     }
 }

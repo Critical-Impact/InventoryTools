@@ -2,6 +2,8 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters;
 
@@ -38,5 +40,9 @@ public class DesynthesisClassFilter : StringFilter
         }
 
         return true;
+    }
+
+    public DesynthesisClassFilter(ILogger<DesynthesisClassFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+    {
     }
 }

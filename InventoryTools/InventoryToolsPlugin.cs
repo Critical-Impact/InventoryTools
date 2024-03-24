@@ -1,5 +1,8 @@
 ﻿using System;
 using CriticalCommonLib;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Time;
+using DalaMock.Shared.Classes;
 using Dalamud.Plugin;
 
 namespace InventoryTools
@@ -9,20 +12,23 @@ namespace InventoryTools
         private Ui.InventoryToolsUi _ui;
         internal DalamudPluginInterface PluginInterface { get; private set; }
         
+        internal PluginLoader _pluginLoader { get; private set; }
+        
         public InventoryToolsPlugin(DalamudPluginInterface pluginInterface)
         {
             PluginInterface = pluginInterface;
-            PluginInterface.Create<Service>();
-            PluginService.Initialise(PluginInterface);
-            _ui = new Ui.InventoryToolsUi();
+            var service = PluginInterface.Create<Service>()!;
+            Service.Interface = new PluginInterfaceService(pluginInterface);
+            Service.SeTime = new SeTime();
+            _pluginLoader = new PluginLoader(new PluginInterfaceService(pluginInterface), service);
+            _pluginLoader.Build();
         }
 
         protected virtual void Dispose(bool disposing)
         {
             if (!disposing) return;
-            Service.Log.Verbose("Starting dispose of InventoryToolsPlugin");
-            _ui.Dispose();
-            PluginService.Dispose();            
+            Service.Log.Debug("Starting dispose of InventoryToolsPlugin");
+            _pluginLoader.Dispose();            
         }
 
         public void Dispose()

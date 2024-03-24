@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using CriticalCommonLib.Services.Mediator;
 using ImGuiNET;
 using InventoryTools.Logic;
 
@@ -13,9 +15,15 @@ public class SeparatorPageItem : IConfigPage
         _includeNewLine = includeNewLine;
         _headerName = headerName;
     }
+
+    public void Initialize()
+    {
+        
+    }
+
     public string Name => "Separator";
 
-    public void Draw()
+    public List<MessageBase>? Draw()
     {
         if (_headerName != null)
         {
@@ -27,6 +35,7 @@ public class SeparatorPageItem : IConfigPage
             ImGui.TextUnformatted(_headerName);
         }
         ImGui.Separator();
+        return null;
     }
 
     public bool IsMenuItem => true;

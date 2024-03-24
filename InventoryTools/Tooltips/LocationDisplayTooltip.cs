@@ -5,15 +5,25 @@ using CriticalCommonLib.Enums;
 using CriticalCommonLib.Services;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
+using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using InventoryTools.Logic;
+using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Tooltips;
 
 public class LocationDisplayTooltip : BaseTooltip
 {
+    private readonly IListService _listService;
+
+    public LocationDisplayTooltip(ILogger<LocationDisplayTooltip> logger,ExcelCache excelCache, InventoryToolsConfiguration configuration, IGameGui gameGui, IListService listService) : base(logger, excelCache, configuration, gameGui)
+    {
+        _listService = listService;
+    }
     public override bool IsEnabled =>
-        ConfigurationManager.Config.DisplayTooltip && ConfigurationManager.Config.TooltipDisplayRetrieveAmount;
+        Configuration.DisplayTooltip && Configuration.TooltipDisplayRetrieveAmount;
     public override unsafe void OnGenerateItemTooltip(NumberArrayData* numberArrayData, StringArrayData* stringArrayData)
     {
         if (!ShouldShow()) return;
@@ -45,9 +55,9 @@ public class LocationDisplayTooltip : BaseTooltip
 
             if (seStr != null && seStr.Payloads.Count > 0)
             {
-                if (ConfigurationManager.Config.TooltipDisplayRetrieveAmount)
+                if (Configuration.TooltipDisplayRetrieveAmount)
                 {
-                    var filterConfiguration = PluginService.FilterService.GetActiveFilter();
+                    var filterConfiguration = _listService.GetActiveList();
                     if (filterConfiguration != null)
                     {
                         if (filterConfiguration.FilterType == FilterType.CraftFilter)
@@ -103,7 +113,7 @@ public class LocationDisplayTooltip : BaseTooltip
                 {
                     var lines = new List<Payload>()
                     {
-                        new UIForegroundPayload((ushort)(ConfigurationManager.Config.TooltipColor ?? 1)),
+                        new UIForegroundPayload((ushort)(Configuration.TooltipColor ?? 1)),
                         new UIGlowPayload(0),
                         new TextPayload(newText),
                         new UIGlowPayload(0),

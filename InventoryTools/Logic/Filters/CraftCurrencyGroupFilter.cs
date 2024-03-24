@@ -3,6 +3,8 @@ using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters;
 
@@ -53,8 +55,12 @@ public class CraftCurrencyGroupFilter : ChoiceFilter<CurrencyGroupSetting>
         };
     }
 
-    public override string GetFormattedChoice(CurrencyGroupSetting choice)
+    public override string GetFormattedChoice(FilterConfiguration filterConfiguration, CurrencyGroupSetting choice)
     {
         return choice.ToString();
+    }
+
+    public CraftCurrencyGroupFilter(ILogger<CraftCurrencyGroupFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+    {
     }
 }

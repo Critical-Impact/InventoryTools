@@ -1,17 +1,34 @@
+using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
     public class MarketBoardSaleCountFilter : StringFilter
     {
-        public override string Key { get; set; } = "MBSaleCount";
-        public override string Name { get; set; } = "Marketboard " + ConfigurationManager.Config.MarketSaleHistoryLimit + " Sale Counter";
+        private readonly InventoryToolsConfiguration _configuration;
+        private readonly ICharacterMonitor _characterMonitor;
+        private readonly IMarketCache _marketCache;
 
-        public override string HelpText { get; set; } = "Shows the number of sales that have been made within " +
-                                                        ConfigurationManager.Config.MarketSaleHistoryLimit + " days.";
+        public MarketBoardSaleCountFilter(ILogger<MarketBoardSaleCountFilter> logger, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ICharacterMonitor characterMonitor, IMarketCache marketCache) : base(logger, imGuiService)
+        {
+            _configuration = configuration;
+            _characterMonitor = characterMonitor;
+            _marketCache = marketCache;
+            Name = "Marketboard " + configuration.MarketSaleHistoryLimit + " Sale Counter";
+            HelpText = "Shows the number of sales that have been made within " + configuration.MarketSaleHistoryLimit +
+                       " days.";
+        }
+
+        public override string Key { get; set; } = "MBSaleCount";
+        public override string Name { get; set; } = "Marketboard Sale Counter";
+
+        public override string HelpText { get; set; } = "Shows the number of sales that have been made within X days.";
 
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Market;
 
@@ -32,10 +49,14 @@ namespace InventoryTools.Logic.Filters
                 {
                     return false;
                 }
-                var marketBoardData = PluginService.MarketCache.GetPricing(item.RowId, false);
-                if (marketBoardData != null)
+                var activeCharacter = _characterMonitor.ActiveCharacter;
+                if (activeCharacter != null)
                 {
-                    return marketBoardData.sevenDaySellCount.PassesFilter(currentValue.ToLower());
+                    var marketBoardData = _marketCache.GetPricing(item.RowId, activeCharacter.WorldId, false);
+                    if (marketBoardData != null)
+                    {
+                        return marketBoardData.SevenDaySellCount.PassesFilter(currentValue.ToLower());
+                    }
                 }
 
                 return false;

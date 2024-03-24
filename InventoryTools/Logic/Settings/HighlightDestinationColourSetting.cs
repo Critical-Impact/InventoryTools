@@ -1,5 +1,7 @@
 using System.Numerics;
 using InventoryTools.Logic.Settings.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Settings
 {
@@ -21,5 +23,10 @@ namespace InventoryTools.Logic.Settings
         public override string HelpText { get; set; } = "The color to set any items in the destination that match your source filter(assuming highlight destination duplicates is on).";
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.Visuals;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.DestinationHighlighting;
+        public override string Version => "1.6.2.5";
+
+        public HighlightDestinationColourSetting(ILogger<HighlightDestinationColourSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
     }
 }

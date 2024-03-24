@@ -1,36 +1,46 @@
 ﻿using CriticalCommonLib.Models;
 using CriticalCommonLib.Extensions;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
 {
     public class DestinationColumn : TextColumn
     {
+        private readonly ICharacterMonitor _characterMonitor;
+
+        public DestinationColumn(ILogger<DestinationColumn> logger, ImGuiService imGuiService, ICharacterMonitor characterMonitor) : base(logger, imGuiService)
+        {
+            _characterMonitor = characterMonitor;
+        }
         public override ColumnCategory ColumnCategory => ColumnCategory.Inventory;
-        public override string? CurrentValue(InventoryItem item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
         {
             return null;
         }
 
-        public override string? CurrentValue(ItemEx item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
             return null;
         }
 
-        public override string? CurrentValue(SortingResult item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
         {
             var destination = item.DestinationRetainerId.HasValue
-                ? PluginService.CharacterMonitor.Characters.ContainsKey(item.DestinationRetainerId.Value) ? PluginService.CharacterMonitor.Characters[item.DestinationRetainerId.Value].FormattedName : ""
+                ? _characterMonitor.Characters.ContainsKey(item.DestinationRetainerId.Value) ? _characterMonitor.Characters[item.DestinationRetainerId.Value].FormattedName : ""
                 : "Unknown";
             var destinationBag = item.DestinationBag?.ToInventoryCategory().FormattedName() ?? "";
             return destination + " - " + destinationBag;
         }
 
-        public override string? CurrentValue(InventoryChange item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryChange item)
         {
             var destination = item.ToItem != null
-                ? PluginService.CharacterMonitor.Characters.ContainsKey(item.ToItem.RetainerId) ? PluginService.CharacterMonitor.Characters[item.ToItem.RetainerId].FormattedName : ""
+                ? _characterMonitor.Characters.ContainsKey(item.ToItem.RetainerId) ? _characterMonitor.Characters[item.ToItem.RetainerId].FormattedName : ""
                 : "Unknown";
             var destinationBag = item.ToItem?.FormattedBagLocation ?? "";
             return destination + " - " + destinationBag;

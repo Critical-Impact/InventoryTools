@@ -1,41 +1,45 @@
 using System.Numerics;
+using CriticalCommonLib.Services.Mediator;
 using Dalamud.Interface.Internal;
 using ImGuiNET;
 using InventoryTools.Logic;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin.Services;
+using InventoryTools.Mediator;
+using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Ui
 {
-    public class IntroWindow : Window
+    public class IntroWindow : GenericWindow
     {
+        private readonly IIconService _iconService;
+
+        public IntroWindow(ILogger<IntroWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IIconService iconService, string name = "Intro Window") : base(logger, mediator, imGuiService, configuration, name)
+        {
+            _iconService = iconService;
+        }
+        public override void Initialize()
+        {
+            WindowName = "Allagan Tools";
+            Flags =
+                ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoScrollbar;
+            _allaganToolsIcon = _iconService.LoadImage("icon-hor");
+            Key = "intro";
+        }
+        
         private IDalamudTextureWrap _allaganToolsIcon = null!;
-        public IntroWindow(string name = "Allagan Tools") : base(name)
-        {
-            Flags =
-                ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoScrollbar;
-            SetupWindow();
-        }
-        
-        public IntroWindow() : base("Allagan Tools")
-        {
-            Flags =
-                ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoScrollbar;
-            SetupWindow();
-        }
-        
-        private void SetupWindow()
-        {
-            _allaganToolsIcon = PluginService.PluginLogic.LoadImage("icon-hor");
-        }
-        
+
         public override void Invalidate()
         {
         }
 
-        public static string AsKey => "Intro";
         public override FilterConfiguration? SelectedConfiguration => null;
-        public override string Key => AsKey;
-        public override bool DestroyOnClose { get; } = true;
+        public override string GenericKey { get; } = "intro";
+        public override string GenericName { get; } = "Intro";
+        public override bool DestroyOnClose => true;
+
         public override void Draw()
         {
             using (var leftChild = ImRaii.Child("Left", new Vector2(200, 0)))
@@ -90,7 +94,7 @@ namespace InventoryTools.Ui
                             if (ImGui.Button("Close & Open Main Window"))
                             {
                                 Close();
-                                PluginService.WindowService.OpenWindow<FiltersWindow>(FiltersWindow.AsKey);
+                                MediatorService.Publish(new OpenGenericWindowMessage(typeof(FiltersWindow)));
                             }
                         }
                     }

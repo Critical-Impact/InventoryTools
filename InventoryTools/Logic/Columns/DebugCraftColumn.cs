@@ -1,30 +1,40 @@
+using System.Collections.Generic;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
 {
     public class DebugCraftColumn : TextColumn
     {
-        public override ColumnCategory ColumnCategory => ColumnCategory.Debug;
-        public override string? CurrentValue(InventoryItem item)
+        public DebugCraftColumn(ILogger<DebugCraftColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
         {
-            return CurrentValue(item.Item);
+        }
+        public override ColumnCategory ColumnCategory => ColumnCategory.Debug;
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        {
+            return CurrentValue(columnConfiguration, item.Item);
         }
 
-        public override string? CurrentValue(ItemEx item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
             return "";
         }
 
-        public override string? CurrentValue(SortingResult item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
         {
-            return CurrentValue(item.InventoryItem);
+            return CurrentValue(columnConfiguration, item.InventoryItem);
         }
 
-        public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            CraftItem item, int rowIndex)
         {
             ImGui.TableNextColumn();
             ImGui.Text("Required: " +  item.QuantityRequired);
@@ -34,6 +44,7 @@ namespace InventoryTools.Logic.Columns
             ImGui.Text("Ready: " +  item.QuantityReady);
             ImGui.Text("Can Craft: " +  item.QuantityCanCraft);
             ImGui.Text("Will Retrieve: " + item.QuantityWillRetrieve);
+            return null;
         }
 
         public override string Name { get; set; } = "Debug - Craft";

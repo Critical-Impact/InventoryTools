@@ -1,27 +1,35 @@
 using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
 using InventoryTools.Logic;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.GameUi
 {
-    public class SelectIconStringOverlay : AtkSelectIconString, IAtkOverlayState
+    public class SelectIconStringOverlay: GameOverlay<AtkSelectIconString>, IAtkOverlayState
     {
+        private readonly ICharacterMonitor _characterMonitor;
+
+        public SelectIconStringOverlay(ILogger<SelectIconStringOverlay> logger, AtkSelectIconString overlay, ICharacterMonitor characterMonitor) : base(logger,overlay)
+        {
+            _characterMonitor = characterMonitor;
+        }
         public override bool ShouldDraw { get; set; }
 
         public override bool Draw()
         {
-            if (!HasState || !HasAddon)
+            if (!HasState || !AtkOverlay.HasAddon)
             {
-                Service.Log.Verbose("no state and no addon");
+                Logger.LogTrace("no state and no addon");
                 return false;
             }
-            var atkUnitBase = AtkUnitBase;
+            var atkUnitBase = AtkOverlay.AtkUnitBase;
             if (atkUnitBase != null)
             {
-                Service.Log.Verbose("has atk base, setting colors");
-                this.SetColors(SelectItems);
+                Logger.LogTrace("has atk base, setting colors");
+                this.AtkOverlay.SetColors(SelectItems);
                 return true;
             }
 
@@ -35,22 +43,22 @@ namespace InventoryTools.GameUi
 
         }
 
-        public bool HasState { get; set; }
-        public bool NeedsStateRefresh { get; set; }
+        public override bool HasState { get; set; }
+        public override bool NeedsStateRefresh { get; set; }
 
-        public void UpdateState(FilterState? newState)
+        public override void UpdateState(FilterState? newState)
         {
-            if (PluginService.CharacterMonitor.ActiveCharacterId == 0)
+            if (_characterMonitor.ActiveCharacterId == 0)
             {
                 return;
             }
-            if (newState != null && HasAddon && newState.ShouldHighlight && newState.HasFilterResult)
+            if (newState != null && AtkOverlay.HasAddon && newState.ShouldHighlight && newState.HasFilterResult)
             {
                 HasState = true;
                 var filterResult = newState.FilterResult;
                 if (filterResult != null)
                 {
-                    Service.Log.Verbose("Attempting to update state for SelectIconString");
+                    Logger.LogTrace("Attempting to update state for SelectIconString");
 
                     SelectItems = newState.GetSelectIconStringItems();
                     Draw();
@@ -60,7 +68,7 @@ namespace InventoryTools.GameUi
             
             if (HasState)
             {
-                Service.Log.Verbose("Clearing select items");
+                Logger.LogTrace("Clearing select items");
                 SelectItems = new List<Vector4?>();
                 Clear();
             }
@@ -68,12 +76,12 @@ namespace InventoryTools.GameUi
             HasState = false;
         }
 
-        public void Clear()
+        public override void Clear()
         {
-            var atkUnitBase = AtkUnitBase;
+            var atkUnitBase = AtkOverlay.AtkUnitBase;
             if (atkUnitBase != null)
             {
-                this.ResetColors();
+                this.AtkOverlay.ResetColors();
             }
         }
     }

@@ -2,46 +2,56 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib.Crafting;
+using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Images;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns.Abstract
 {
     public abstract class CheckboxColumn : Column<bool?>
     {
-        public override string CsvExport(InventoryItem item)
+        public CheckboxColumn(ILogger logger, ImGuiService imGuiService) : base(logger, imGuiService)
         {
-            return CurrentValue(item) ?? false ? "true" : "false";
+        }
+        public override string CsvExport(ColumnConfiguration columnConfiguration, InventoryItem item)
+        {
+            return CurrentValue(columnConfiguration, item) ?? false ? "true" : "false";
         }
 
-        public override string CsvExport(ItemEx item)
+        public override string CsvExport(ColumnConfiguration columnConfiguration, ItemEx item)
         {
-            return CurrentValue((ItemEx)item) ?? false ? "true" : "false";
+            return CurrentValue(columnConfiguration, (ItemEx)item) ?? false ? "true" : "false";
         }
 
-        public override string CsvExport(SortingResult item)
+        public override string CsvExport(ColumnConfiguration columnConfiguration, SortingResult item)
         {
-            return CurrentValue(item) ?? false ? "true" : "false";
+            return CurrentValue(columnConfiguration, item) ?? false ? "true" : "false";
         }
         
-        public override bool? CurrentValue(CraftItem currentValue)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, CraftItem currentValue)
         {
-            return CurrentValue(currentValue.Item);
+            return CurrentValue(columnConfiguration, currentValue.Item);
         }
         
-        public override bool? CurrentValue(InventoryChange currentValue)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryChange currentValue)
         {
-            return CurrentValue(currentValue.InventoryItem);
+            return CurrentValue(columnConfiguration, currentValue.InventoryItem);
         }
 
-        public override IEnumerable<CraftItem> Filter(IEnumerable<CraftItem> items)
+        public override IEnumerable<CraftItem> Filter(ColumnConfiguration columnConfiguration,
+            IEnumerable<CraftItem> items)
         {
             return items;
         }
 
-        public override IEnumerable<CraftItem> Sort(ImGuiSortDirection direction, IEnumerable<CraftItem> items)
+        public override IEnumerable<CraftItem> Sort(ColumnConfiguration columnConfiguration,
+            ImGuiSortDirection direction, IEnumerable<CraftItem> items)
         {
             return items;
         }
@@ -67,7 +77,7 @@ namespace InventoryTools.Logic.Columns.Abstract
             {
                 isChecked = false;
             }
-            var checkboxUnChecked = isChecked.HasValue ? (isChecked.Value  ? GameIcon.CheckboxChecked : GameIcon.CheckboxUnChecked) : GameIcon.CheckboxUnChecked;
+            var checkboxUnChecked = isChecked.HasValue ? (isChecked.Value  ? ImGuiService.CheckboxChecked : ImGuiService.CheckboxUnChecked) : ImGuiService.CheckboxUnChecked;
             ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetContentRegionAvail().X / 2) - checkboxUnChecked.Size.X / 2);
             ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 2);
             if (isChecked == null)
@@ -75,7 +85,7 @@ namespace InventoryTools.Logic.Columns.Abstract
                 ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0, 0, 0, 0.1f));
             }
 
-            if (PluginService.PluginLogic.DrawUldIconButton(checkboxUnChecked))
+            if (ImGuiService.DrawUldIconButton(checkboxUnChecked))
             {
                 if (!isChecked.HasValue)
                 {
@@ -105,27 +115,36 @@ namespace InventoryTools.Logic.Columns.Abstract
             return hasChanged;
         }
 
-        public override void Draw(FilterConfiguration configuration, InventoryItem item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
+            InventoryItem item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex, configuration);
+            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
         }
-        public override void Draw(FilterConfiguration configuration, SortingResult item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            SortingResult item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex, configuration);
+            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
         }
-        public override void Draw(FilterConfiguration configuration, ItemEx item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            ItemEx item, int rowIndex)
         {
-            DoDraw(CurrentValue((ItemEx)item), rowIndex, configuration);
+            return DoDraw(item, CurrentValue(columnConfiguration, (ItemEx)item), rowIndex, configuration, columnConfiguration);
         }
-        public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            CraftItem item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex, configuration);
+            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
         }
-        public override void Draw(FilterConfiguration configuration, InventoryChange item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            InventoryChange item, int rowIndex)
         {
-            DoDraw(CurrentValue(item), rowIndex, configuration);
+            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
         }
-        public override IEnumerable<ItemEx> Filter(IEnumerable<ItemEx> items)
+        public override IEnumerable<ItemEx> Filter(ColumnConfiguration columnConfiguration, IEnumerable<ItemEx> items)
         {
             bool isChecked;
             if (FilterText == "")
@@ -143,7 +162,7 @@ namespace InventoryTools.Logic.Columns.Abstract
             }
             return FilterText == "" ? items : items.Where(c =>
             {
-                var currentValue = CurrentValue((ItemEx)c);
+                var currentValue = CurrentValue(columnConfiguration, (ItemEx)c);
                 if (!currentValue.HasValue)
                 {
                     return false;
@@ -157,7 +176,8 @@ namespace InventoryTools.Logic.Columns.Abstract
             });
         }
 
-        public override IEnumerable<InventoryItem> Filter(IEnumerable<InventoryItem> items)
+        public override IEnumerable<InventoryItem> Filter(ColumnConfiguration columnConfiguration,
+            IEnumerable<InventoryItem> items)
         {
             bool isChecked;
             if (FilterText == "")
@@ -175,7 +195,7 @@ namespace InventoryTools.Logic.Columns.Abstract
             }
             return FilterText == "" ? items : items.Where(c =>
             {
-                var currentValue = CurrentValue(c);
+                var currentValue = CurrentValue(columnConfiguration, c);
                 if (!currentValue.HasValue)
                 {
                     return false;
@@ -185,7 +205,8 @@ namespace InventoryTools.Logic.Columns.Abstract
             });
         }
 
-        public override IEnumerable<SortingResult> Filter(IEnumerable<SortingResult> items)
+        public override IEnumerable<SortingResult> Filter(ColumnConfiguration columnConfiguration,
+            IEnumerable<SortingResult> items)
         {
             bool isChecked;
             if (FilterText == "")
@@ -203,7 +224,7 @@ namespace InventoryTools.Logic.Columns.Abstract
             }
             return FilterText == "" ? items : items.Where(c =>
             {
-                var currentValue = CurrentValue(c);
+                var currentValue = CurrentValue(columnConfiguration, c);
                 if (!currentValue.HasValue)
                 {
                     return false;
@@ -213,7 +234,8 @@ namespace InventoryTools.Logic.Columns.Abstract
             });
         }
 
-        public override IEnumerable<InventoryChange> Filter(IEnumerable<InventoryChange> items)
+        public override IEnumerable<InventoryChange> Filter(ColumnConfiguration columnConfiguration,
+            IEnumerable<InventoryChange> items)
         {
             bool isChecked;
             if (FilterText == "")
@@ -231,7 +253,7 @@ namespace InventoryTools.Logic.Columns.Abstract
             }
             return FilterText == "" ? items : items.Where(c =>
             {
-                var currentValue = CurrentValue(c.InventoryItem);
+                var currentValue = CurrentValue(columnConfiguration, c.InventoryItem);
                 if (!currentValue.HasValue)
                 {
                     return false;
@@ -241,9 +263,9 @@ namespace InventoryTools.Logic.Columns.Abstract
             });
         }
 
-        private int GetSortOrder(ItemEx c)
+        private int GetSortOrder(ColumnConfiguration columnConfiguration, ItemEx c)
         {
-            var currentValue = CurrentValue(c);
+            var currentValue = CurrentValue(columnConfiguration, c);
             return currentValue switch
             {
                 null => 0,
@@ -252,41 +274,43 @@ namespace InventoryTools.Logic.Columns.Abstract
             };
         }
 
-        public override IEnumerable<InventoryItem> Sort(ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
+        public override IEnumerable<InventoryItem> Sort(ColumnConfiguration columnConfiguration,
+            ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => GetSortOrder(c.Item)) : items.OrderByDescending(c => GetSortOrder(c.Item));
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => GetSortOrder(columnConfiguration, c.Item)) : items.OrderByDescending(c => GetSortOrder(columnConfiguration, c.Item));
         }
 
-        public override IEnumerable<ItemEx> Sort(ImGuiSortDirection direction, IEnumerable<ItemEx> items)
+        public override IEnumerable<ItemEx> Sort(ColumnConfiguration columnConfiguration, ImGuiSortDirection direction,
+            IEnumerable<ItemEx> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(GetSortOrder) : items.OrderByDescending(GetSortOrder);
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => GetSortOrder(columnConfiguration, c)) : items.OrderByDescending(c => GetSortOrder(columnConfiguration, c));
         }
 
-        public override IEnumerable<SortingResult> Sort(ImGuiSortDirection direction, IEnumerable<SortingResult> items)
+        public override IEnumerable<SortingResult> Sort(ColumnConfiguration columnConfiguration,
+            ImGuiSortDirection direction, IEnumerable<SortingResult> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => GetSortOrder(c.InventoryItem.Item)) : items.OrderByDescending(c => GetSortOrder(c.InventoryItem.Item));
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => GetSortOrder(columnConfiguration, c.InventoryItem.Item)) : items.OrderByDescending(c => GetSortOrder(columnConfiguration, c.InventoryItem.Item));
         }
 
-        public override IEnumerable<InventoryChange> Sort(ImGuiSortDirection direction, IEnumerable<InventoryChange> items)
+        public override IEnumerable<InventoryChange> Sort(ColumnConfiguration columnConfiguration,
+            ImGuiSortDirection direction, IEnumerable<InventoryChange> items)
         {
-            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => GetSortOrder(c.InventoryItem.Item)) : items.OrderByDescending(c => GetSortOrder(c.InventoryItem.Item));
+            return direction == ImGuiSortDirection.Ascending ? items.OrderBy(c => GetSortOrder(columnConfiguration, c.InventoryItem.Item)) : items.OrderByDescending(c => GetSortOrder(columnConfiguration, c.InventoryItem.Item));
         }
         
 
-        public override IColumnEvent? DoDraw(bool? currentValue, int rowIndex, FilterConfiguration filterConfiguration)
+        public override List<MessageBase>? DoDraw(IItem item, bool? currentValue, int rowIndex,
+            FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
             ImGui.TableNextColumn();
             if (currentValue.HasValue)
             {
                 ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetContentRegionAvail().X / 2) - filterConfiguration.TableHeight / 2.0f);
-                PluginService.PluginLogic.DrawUldIcon(currentValue.Value ? GameIcon.TickIcon : GameIcon.CrossIcon, new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight));
+                ImGuiService.DrawUldIcon(currentValue.Value ? ImGuiService.TickIcon : ImGuiService.CrossIcon, new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight));
             }
             return null;
         }
 
-        public override void Setup(int columnIndex)
-        {
-            ImGui.TableSetupColumn(RenderName ?? Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
-        }
+
     }
 }

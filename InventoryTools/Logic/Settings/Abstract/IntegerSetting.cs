@@ -1,15 +1,20 @@
 using Dalamud.Interface.Colors;
 using ImGuiNET;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Settings.Abstract
 {
     public abstract class IntegerSetting : Setting<int>
     {
+        public IntegerSetting(ILogger logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
         public override void Draw(InventoryToolsConfiguration configuration)
         {
             var value = CurrentValue(configuration).ToString();
             ImGui.SetNextItemWidth(LabelSize);
-            if (HasValueSet(configuration))
+            if (ColourModified && HasValueSet(configuration))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);
                 ImGui.LabelText("##" + Key + "Label", Name + ":");
@@ -20,6 +25,7 @@ namespace InventoryTools.Logic.Settings.Abstract
                 ImGui.LabelText("##" + Key + "Label", Name + ":");
             }
             ImGui.SameLine();
+            ImGui.SetNextItemWidth(InputSize);
             if (ImGui.InputText("##"+Key+"Input", ref value, 100, ImGuiInputTextFlags.CharsDecimal))
             {
                 int parsedNumber;
@@ -29,8 +35,8 @@ namespace InventoryTools.Logic.Settings.Abstract
                 }
             }
             ImGui.SameLine();
-            UiHelpers.HelpMarker(HelpText);
-            if (HasValueSet(configuration))
+            ImGuiService.HelpMarker(HelpText, Image, ImageSize);
+            if (!HideReset && HasValueSet(configuration))
             {
                 ImGui.SameLine();
                 if (ImGui.Button("Reset##" + Key + "Reset"))

@@ -6,6 +6,8 @@ using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
 using CriticalCommonLib.Time;
 using Dalamud.Interface.Colors;
@@ -13,29 +15,39 @@ using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin.Services;
+using InventoryTools.Mediator;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
 {
     public class CraftGatherColumn : CheckboxColumn
     {
+        private readonly IChatUtilities _chatUtilities;
+
+        public CraftGatherColumn(ILogger<CraftGatherColumn> logger, ImGuiService imGuiService, IChatUtilities chatUtilities) : base(logger, imGuiService)
+        {
+            _chatUtilities = chatUtilities;
+        }
         public override ColumnCategory ColumnCategory => ColumnCategory.Tools;
 
-        public override bool? CurrentValue(InventoryItem item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
         {
-            return CurrentValue(item.Item);
+            return CurrentValue(columnConfiguration, item.Item);
         }
 
-        public override bool? CurrentValue(ItemEx item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
             return item.CanBeGathered || item.ObtainedFishing;
         }
 
-        public override bool? CurrentValue(SortingResult item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
         {
-            return CurrentValue(item.InventoryItem);
+            return CurrentValue(columnConfiguration, item.InventoryItem);
         }
 
-        public override bool? CurrentValue(CraftItem currentValue)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, CraftItem currentValue)
         {
             return true;
         }
@@ -76,7 +88,7 @@ namespace InventoryTools.Logic.Columns
             return vendors;
         }
         
-        void DrawSupplierRow(ItemEx item,(IShop shop, ENpc? npc, ILocation? location) tuple)
+        void DrawSupplierRow(ItemEx item,(IShop shop, ENpc? npc, ILocation? location) tuple, List<MessageBase> messages)
         {
             ImGui.TableNextColumn();
             ImGui.TextWrapped(tuple.shop.Name);
@@ -97,9 +109,9 @@ namespace InventoryTools.Logic.Columns
                     var nearestAetheryte = tuple.location.GetNearestAetheryte();
                     if (nearestAetheryte != null)
                     {
-                        PluginService.TeleporterIpc.Teleport(nearestAetheryte.RowId);
+                        messages.Add(new RequestTeleportMessage(nearestAetheryte.RowId));
                     }
-                    PluginService.ChatUtilities.PrintFullMapLink(tuple.location, item.NameString);
+                    _chatUtilities.PrintFullMapLink(tuple.location, item.NameString);
                     ImGui.CloseCurrentPopup();
                 }
             }
@@ -108,19 +120,21 @@ namespace InventoryTools.Logic.Columns
                 ImGui.TableNextColumn();
                 ImGui.TableNextColumn();
             }
-
         }
 
-        public override void Draw(FilterConfiguration configuration, CraftItem item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            CraftItem item, int rowIndex)
         {
+            var messages = new List<MessageBase>();
             ImGui.TableNextColumn();
-            if (CurrentValue(item) == true)
+            if (CurrentValue(columnConfiguration, item) == true)
             {
                 bool hasVendors;
                 bool hasGather;
                 if (item.IngredientPreference.Type is IngredientPreferenceType.Buy or IngredientPreferenceType.HouseVendor)
                 {
-                    hasVendors = DrawVendorButton(item, rowIndex);
+                    hasVendors = DrawVendorButton(item, rowIndex, messages);
                     if (hasVendors)
                     {
                         ImGui.SameLine();
@@ -134,7 +148,7 @@ namespace InventoryTools.Logic.Columns
                     {
                         ImGui.SameLine();
                     }
-                    hasVendors = DrawVendorButton(item, rowIndex);
+                    hasVendors = DrawVendorButton(item, rowIndex, messages);
                 }
 
                 if (item.UpTime != null)
@@ -146,7 +160,7 @@ namespace InventoryTools.Logic.Columns
                     var nextUptime = item.UpTime.Value.NextUptime(Service.SeTime.ServerTime);
                     if (nextUptime.Equals(TimeInterval.Always)
                         || nextUptime.Equals(TimeInterval.Invalid)
-                        || nextUptime.Equals(TimeInterval.Never)) return;
+                        || nextUptime.Equals(TimeInterval.Never)) return null;
                     if (nextUptime.Start > TimeStamp.UtcNow)
                     {
                         using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudRed))
@@ -167,9 +181,10 @@ namespace InventoryTools.Logic.Columns
                     }
                 }
             }
+            return null;
         }
 
-        private static bool DrawGatherButtons(CraftItem item, int rowIndex)
+        private bool DrawGatherButtons(CraftItem item, int rowIndex)
         {
             if (item.Item.ObtainedGathering)
             {
@@ -192,7 +207,7 @@ namespace InventoryTools.Logic.Columns
             return false;
         }
 
-        private bool DrawVendorButton(CraftItem item, int rowIndex)
+        private bool DrawVendorButton(CraftItem item, int rowIndex, List<MessageBase> messages)
         {
             if (item.Item.Vendors.Any())
             {
@@ -206,15 +221,15 @@ namespace InventoryTools.Logic.Columns
                         var nearestAetheryte = vendor.location.GetNearestAetheryte();
                         if (nearestAetheryte != null)
                         {
-                            PluginService.TeleporterIpc.Teleport(nearestAetheryte.RowId);
+                            messages.Add(new RequestTeleportMessage(nearestAetheryte.RowId));
                         }
 
-                        PluginService.ChatUtilities.PrintFullMapLink(vendor.location, vendor.location + " - Buy " + item.QuantityMissingOverall + " " + item.Item.NameString);
+                        _chatUtilities.PrintFullMapLink(vendor.location, vendor.location + " - Buy " + item.QuantityMissingOverall + " " + item.Item.NameString);
                     }
                     else
                     {
                         var shopName = vendor.shop.Name;
-                        PluginService.ChatUtilities.Print("No location available. Shop is called " + shopName);
+                        _chatUtilities.Print("No location available. Shop is called " + shopName);
                     }
                 }
 
@@ -232,8 +247,10 @@ namespace InventoryTools.Logic.Columns
                         {
                             if (scroller.Success)
                             {
-                                ImGuiTable.DrawTable("VendorsText", GetLocations(item.Item),
-                                    tuple => DrawSupplierRow(item.Item, tuple), ImGuiTableFlags.None,
+                                ImGuiTable.DrawTable("VendorsText", GetLocations(item.Item), tuple =>
+                                    {
+                                        DrawSupplierRow(item.Item, tuple, messages);
+                                    }, ImGuiTableFlags.None,
                                     new[] { "Shop Name", "NPC", "Location", "" });
                             }
                         }
@@ -247,10 +264,12 @@ namespace InventoryTools.Logic.Columns
             return false;
         }
 
-        public override void Draw(FilterConfiguration configuration, InventoryItem item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            InventoryItem item, int rowIndex)
         {
             ImGui.TableNextColumn();
-            if (CurrentValue(item) == true)
+            if (CurrentValue(columnConfiguration, item) == true)
             {
                 if (item.Item.ObtainedGathering)
                 {
@@ -267,12 +286,15 @@ namespace InventoryTools.Logic.Columns
                     }
                 }
             }
+            return null;
         }
 
-        public override void Draw(FilterConfiguration configuration, ItemEx item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            ItemEx item, int rowIndex)
         {
             ImGui.TableNextColumn();
-            if (CurrentValue(item) == true)
+            if (CurrentValue(columnConfiguration, item) == true)
             {
                 if (item.ObtainedGathering)
                 {
@@ -289,6 +311,7 @@ namespace InventoryTools.Logic.Columns
                     }
                 }
             }
+            return null;
         }
 
         public override string Name { get; set; } = "Gather";

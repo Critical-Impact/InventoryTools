@@ -1,4 +1,6 @@
 using InventoryTools.Logic.Settings.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Settings
 {
@@ -23,6 +25,10 @@ namespace InventoryTools.Logic.Settings
 
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.Visuals;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.DestinationHighlighting;
+        public override string Version => "1.6.2.5";
 
+        public InvertDestinationHighlightingSetting(ILogger<InvertDestinationHighlightingSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
     }
 }

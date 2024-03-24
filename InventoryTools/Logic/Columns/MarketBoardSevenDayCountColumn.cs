@@ -1,20 +1,39 @@
+using System.Collections.Generic;
+using CriticalCommonLib.Interfaces;
+using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
 {
     public class MarketBoardSevenDayCountColumn : IntegerColumn
     {
+        private readonly ICharacterMonitor _characterMonitor;
+        private readonly IMarketCache _marketCache;
+        private readonly InventoryToolsConfiguration _configuration;
+
+        public MarketBoardSevenDayCountColumn(ILogger<MarketBoardSevenDayCountColumn> logger, ImGuiService imGuiService, ICharacterMonitor characterMonitor, IMarketCache marketCache, InventoryToolsConfiguration configuration) : base(logger, imGuiService)
+        {
+            _characterMonitor = characterMonitor;
+            _marketCache = marketCache;
+            _configuration = configuration;
+        }
         public override ColumnCategory ColumnCategory => ColumnCategory.Market;
         protected readonly string LoadingString = "loading...";
         protected readonly string UntradableString = "untradable";
         protected readonly int Loading = -1;
         protected readonly int Untradable = -2;
         
-        public override IColumnEvent? DoDraw(int? currentValue, int rowIndex, FilterConfiguration filterConfiguration)
+        public override List<MessageBase>? DoDraw(IItem item, int? currentValue, int rowIndex,
+            FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
             if (currentValue.HasValue && currentValue.Value == Loading)
             {
@@ -28,60 +47,77 @@ namespace InventoryTools.Logic.Columns
             }
             else if(currentValue.HasValue)
             {
-                base.DoDraw(currentValue, rowIndex, filterConfiguration);
+                base.DoDraw(item, currentValue, rowIndex, filterConfiguration, columnConfiguration);
 
             }
             else
             {
-                base.DoDraw(currentValue, rowIndex, filterConfiguration);
+                base.DoDraw(item, currentValue, rowIndex, filterConfiguration, columnConfiguration);
             }
 
             return null;
         }
 
 
-        public override int? CurrentValue(InventoryItem item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
         {
             if (!item.CanBeTraded)
             {
                 return Untradable;
             }
-
-            var marketBoardData = PluginService.MarketCache.GetPricing(item.ItemId, false);
-            if (marketBoardData != null)
+            var activeCharacter = _characterMonitor.ActiveCharacter;
+            if (activeCharacter != null)
             {
-                var sevenDaySellCount = marketBoardData.sevenDaySellCount;
-                return sevenDaySellCount;
+                var marketBoardData = _marketCache.GetPricing(item.ItemId, activeCharacter.WorldId, false);
+                if (marketBoardData != null)
+                {
+                    var sevenDaySellCount = marketBoardData.SevenDaySellCount;
+                    return sevenDaySellCount;
+                }
             }
 
             return Loading;
         }
 
-        public override int? CurrentValue(ItemEx item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
             if (!item.CanBeTraded)
             {
                 return Untradable;
             }
-
-            var marketBoardData = PluginService.MarketCache.GetPricing(item.RowId, false);
-            if (marketBoardData != null)
+            var activeCharacter = _characterMonitor.ActiveCharacter;
+            if (activeCharacter != null)
             {
-                return marketBoardData.sevenDaySellCount;
+                var marketBoardData = _marketCache.GetPricing(item.RowId, activeCharacter.WorldId, false);
+                if (marketBoardData != null)
+                {
+                    return marketBoardData.SevenDaySellCount;
+                }
             }
 
             return Loading;
         }
 
-        public override int? CurrentValue(SortingResult item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
         {
-            return CurrentValue(item.InventoryItem);
+            return CurrentValue(columnConfiguration, item.InventoryItem);
         }
 
-        public override string Name { get; set; } = "Market Board " + ConfigurationManager.Config.MarketSaleHistoryLimit + " Day Sale Count";
-        public override string RenderName => "MB " + ConfigurationManager.Config.MarketSaleHistoryLimit + " Day Sales";        
-        public override string HelpText { get; set; } =
-            "Shows the number of sales over a " +  + ConfigurationManager.Config.MarketSaleHistoryLimit + " day period for the item. This data is sourced from universalis.";
+        public override string Name
+        {
+            get => "Market Board " + _configuration.MarketSaleHistoryLimit + " Day Sale Count";
+            set { }
+        }
+
+        public override string RenderName => "MB " + _configuration.MarketSaleHistoryLimit + " Day Sales";        
+        public override string HelpText
+        {
+            get =>
+                "Shows the number of sales over a " + +_configuration.MarketSaleHistoryLimit +
+                " day period for the item. This data is sourced from universalis.";
+            set { }
+        }
+
         public override float Width { get; set; } = 250.0f;
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;

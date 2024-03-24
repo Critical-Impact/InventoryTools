@@ -73,7 +73,10 @@ public class MockChatUtilities : IChatUtilities
             if (name != null)
             {
                 _pluginLog.Info(textOverride ?? name, location.MapEx.Value.TerritoryType.Value);
-                _pluginLog.Info((float)(location.MapX) + ":" + (float)(location.MapY));
+                _pluginLog.Info("Map ID: " + location.MapEx.Row);
+                _pluginLog.Info("Territory Type ID: " + location.TerritoryTypeEx.Row);
+                _pluginLog.Info("Place Name ID: " + location.PlaceNameEx.Row);
+                _pluginLog.Info("Map X & Y: " + (float)(location.MapX) + ":" + (float)(location.MapY));
             }
         }
     }

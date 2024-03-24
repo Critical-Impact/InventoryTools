@@ -1,25 +1,35 @@
 ﻿using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
 {
     public class SourceColumn : TextColumn
     {
-        public override ColumnCategory ColumnCategory => ColumnCategory.Inventory;
-        public override string? CurrentValue(InventoryItem item)
+        private readonly ICharacterMonitor _characterMonitor;
+
+        public SourceColumn(ILogger<SourceColumn> logger, ImGuiService imGuiService, ICharacterMonitor characterMonitor) : base(logger, imGuiService)
         {
-            return PluginService.CharacterMonitor.Characters.ContainsKey(item.RetainerId) ?  PluginService.CharacterMonitor.Characters[item.RetainerId].FormattedName : "Unknown (" + item.RetainerId + ")";
+            _characterMonitor = characterMonitor;
+        }
+        public override ColumnCategory ColumnCategory => ColumnCategory.Inventory;
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        {
+            return _characterMonitor.Characters.ContainsKey(item.RetainerId) ?  _characterMonitor.Characters[item.RetainerId].FormattedName : "Unknown (" + item.RetainerId + ")";
         }
 
-        public override string? CurrentValue(ItemEx item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
             return null;
         }
 
-        public override string? CurrentValue(SortingResult item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
         {
-            return CurrentValue(item.InventoryItem);
+            return CurrentValue(columnConfiguration, item.InventoryItem);
         }
 
         public override string Name { get; set; } = "Source";

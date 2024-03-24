@@ -1,18 +1,39 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
 using ImGuiNET;
 using InventoryTools.Logic;
+using InventoryTools.Mediator;
+using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 
-namespace InventoryTools.Sections
+namespace InventoryTools.Ui.Pages
 {
-    public class CraftFiltersPage : IConfigPage
+    public class CraftFiltersPage : Page
     {
-        private bool _isSeparator = false;
-        public string Name { get; } = "Craft Lists";
-        public void Draw()
+        private readonly IListService _listService;
+        private readonly IChatUtilities _chatUtilities;
+
+        public CraftFiltersPage(ILogger<CraftFiltersPage> logger, ImGuiService imGuiService, IListService listService, IChatUtilities chatUtilities) : base(logger, imGuiService)
         {
-            var filterConfigurations = PluginService.FilterService.FiltersList.Where(c => c.FilterType == FilterType.CraftFilter && !c.CraftListDefault).ToList();
-            if (ImGui.CollapsingHeader("Filters", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
+            _listService = listService;
+            _chatUtilities = chatUtilities;
+        }
+        private bool _isSeparator = false;
+        public override void Initialize()
+        {
+            
+        }
+
+        public override string Name { get; } = "Craft Lists";
+        public override List<MessageBase>? Draw()
+        {
+            var messages = new List<MessageBase>();
+            var filterConfigurations = _listService.Lists.Where(c => c.FilterType == FilterType.CraftFilter && !c.CraftListDefault).ToList();
+            if (ImGui.CollapsingHeader("Craft Lists", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
             {
                 ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(5, 5) * ImGui.GetIO().FontGlobalScale);
                 if (ImGui.BeginTable("FilterConfigTable", 3, ImGuiTableFlags.BordersV |
@@ -30,7 +51,7 @@ namespace InventoryTools.Sections
                     {
                         ImGui.TableNextRow();
                         ImGui.TableNextColumn();
-                        ImGui.TextUnformatted("No lists available.");
+                        ImGui.TextUnformatted("No craft lists created yet!");
                         ImGui.TableNextColumn();
                         ImGui.TableNextColumn();
                     }
@@ -49,12 +70,12 @@ namespace InventoryTools.Sections
                         ImGui.TableNextColumn();
                         if (ImGui.SmallButton("Up##" + index))
                         {
-                            PluginService.FilterService.MoveFilterUp(filterConfiguration);
+                            _listService.MoveListUp(filterConfiguration);
                         }
                         ImGui.SameLine();
                         if (ImGui.SmallButton("Down##" + index))
                         {
-                            PluginService.FilterService.MoveFilterDown(filterConfiguration);
+                            _listService.MoveListDown(filterConfiguration);
                         }
                         
                         ImGui.TableNextColumn();
@@ -62,7 +83,7 @@ namespace InventoryTools.Sections
                         {
                             var base64 = filterConfiguration.ExportBase64();
                             ImGui.SetClipboardText(base64);
-                            PluginService.ChatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
+                            _chatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
                         }
 
                         if (ImGui.SmallButton("Remove##" + index))
@@ -72,7 +93,7 @@ namespace InventoryTools.Sections
 
                         if (ImGui.SmallButton("Open as Window##" + index))
                         {
-                            PluginService.WindowService.OpenFilterWindow(filterConfiguration.Key);
+                            messages.Add(new OpenStringWindowMessage(typeof(FilterWindow), filterConfiguration.Key));
                         }
 
                         if (ImGui.BeginPopupModal("Delete?##" + index))
@@ -83,7 +104,7 @@ namespace InventoryTools.Sections
 
                             if (ImGui.Button("OK", new Vector2(120, 0) * ImGui.GetIO().FontGlobalScale))
                             {
-                                PluginService.FilterService.RemoveFilter(filterConfiguration);
+                                _listService.RemoveList(filterConfiguration);
                                 ImGui.CloseCurrentPopup();
                             }
 
@@ -103,9 +124,11 @@ namespace InventoryTools.Sections
 
                 ImGui.PopStyleVar();
             }
+
+            return messages;
         }
 
-        public bool IsMenuItem => _isSeparator;
-        public bool DrawBorder => true;
+        public override bool IsMenuItem => _isSeparator;
+        public override bool DrawBorder => true;
     }
 }

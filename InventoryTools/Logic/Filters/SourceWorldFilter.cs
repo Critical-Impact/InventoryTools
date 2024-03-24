@@ -2,13 +2,18 @@ using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
     public class SourceWorldFilter : MultipleChoiceFilter<uint>
     {
+        private readonly ExcelCache _excelCache;
+
         public override List<uint> CurrentValue(FilterConfiguration configuration)
         {
             return configuration.SourceWorlds?.ToList() ?? new List<uint>();
@@ -50,12 +55,17 @@ namespace InventoryTools.Logic.Filters
         {
             if (_choices == null)
             {
-                _choices = Service.ExcelCache.GetWorldSheet().Where(c => c.IsPublic).OrderBy(c =>c.FormattedName).ToDictionary(c => c.RowId, c => c.FormattedName);
+                _choices = _excelCache.GetWorldSheet().Where(c => c.IsPublic).OrderBy(c =>c.FormattedName).ToDictionary(c => c.RowId, c => c.FormattedName);
             }
 
             return _choices;
         }
 
         public override bool HideAlreadyPicked { get; set; } = true;
+
+        public SourceWorldFilter(ILogger<SourceWorldFilter> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
+        {
+            _excelCache = excelCache;
+        }
     }
 }

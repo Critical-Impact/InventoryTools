@@ -1,6 +1,8 @@
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -25,6 +27,10 @@ namespace InventoryTools.Logic.Filters
             var currentValue = CurrentValue(configuration);
             var canBeGathered = item.CanBeGathered || item.ObtainedFishing;
             return currentValue == null || currentValue.Value && canBeGathered || !currentValue.Value && !canBeGathered;
+        }
+
+        public CanBeGatheredFilter(ILogger<CanBeGatheredFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
         }
     }
 }

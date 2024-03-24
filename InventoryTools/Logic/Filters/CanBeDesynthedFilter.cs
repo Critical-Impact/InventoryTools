@@ -1,6 +1,8 @@
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -27,6 +29,10 @@ namespace InventoryTools.Logic.Filters
                 return null;
             }
             return currentValue.Value && item.CanBeDesynthed || !currentValue.Value && !item.CanBeDesynthed;
+        }
+
+        public CanBeDesynthedFilter(ILogger<CanBeDesynthedFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
         }
     }
 }

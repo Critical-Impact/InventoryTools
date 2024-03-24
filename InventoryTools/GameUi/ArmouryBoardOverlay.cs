@@ -1,28 +1,36 @@
 using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib.Enums;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
 using InventoryTools.Logic;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.GameUi
 {
-    public class ArmouryBoardOverlay: AtkArmouryBoard, IAtkOverlayState
+    public class ArmouryBoardOverlay: GameOverlay<AtkArmouryBoard>
     {
+        private readonly ICharacterMonitor _characterMonitor;
+
+        public ArmouryBoardOverlay(ILogger<ArmouryBoardOverlay> logger, AtkArmouryBoard overlay, ICharacterMonitor characterMonitor) : base(logger,overlay)
+        {
+            _characterMonitor = characterMonitor;
+        }
         public override bool ShouldDraw { get; set; }
         public override bool Draw()
         {
-            if (!HasState || !HasAddon)
+            if (!HasState || !AtkOverlay.HasAddon)
             {
                 return false;
             }
-            var atkUnitBase = AtkUnitBase;
+            var atkUnitBase = AtkOverlay.AtkUnitBase;
             if (atkUnitBase != null)
             {
-                this.SetTabColors(TabColours);
-                var currentBagLocation = CurrentBagLocation;
+                this.AtkOverlay.SetTabColors(TabColours);
+                var currentBagLocation = AtkOverlay.CurrentBagLocation;
                 if (currentBagLocation != null && BagColours.ContainsKey(currentBagLocation.Value))
                 {
-                    this.SetColors(currentBagLocation.Value, BagColours[currentBagLocation.Value]);
+                    this.AtkOverlay.SetColors(currentBagLocation.Value, BagColours[currentBagLocation.Value]);
                 }
 
                 return true;
@@ -35,7 +43,7 @@ namespace InventoryTools.GameUi
         
         public override void Update()
         {
-            var currentTab = CurrentTab;
+            var currentTab = AtkOverlay.CurrentTab;
             if (currentTab != -1 && currentTab != _storedTab)
             {
                 _storedTab = currentTab;
@@ -56,29 +64,29 @@ namespace InventoryTools.GameUi
             {
                 EmptyDictionary.Add(new Vector2(x,0), null);
             }
-            foreach(var type in this.BagToNumber)
+            foreach(var type in this.AtkOverlay.BagToNumber)
             {
                 EmptyTabs.Add(type.Key, null);
             }
         }
 
-        public bool HasState { get; set; }
-        public bool NeedsStateRefresh { get; set; }
+        public override bool HasState { get; set; }
+        public override bool NeedsStateRefresh { get; set; }
 
-        public void UpdateState(FilterState? newState)
+        public override void UpdateState(FilterState? newState)
         {
-            if (PluginService.CharacterMonitor.ActiveCharacterId == 0)
+            if (_characterMonitor.ActiveCharacterId == 0)
             {
                 return;
             }
 
-            if (newState != null && HasAddon && newState.ShouldHighlight && newState.HasFilterResult)
+            if (newState != null && AtkOverlay.HasAddon && newState.ShouldHighlight && newState.HasFilterResult)
             {
                 HasState = true;
                 var filterResult = newState.FilterResult;
                 if (filterResult != null)
                 {
-                    foreach (var bag in BagToNumber.Keys)
+                    foreach (var bag in AtkOverlay.BagToNumber.Keys)
                     {
                         BagColours[bag] = newState.GetBagHighlights(bag);
                         TabColours[bag] = newState.GetTabHighlight(BagColours[bag]);
@@ -92,7 +100,7 @@ namespace InventoryTools.GameUi
             if (HasState)
             {
                 
-                foreach (var bag in BagToNumber.Keys)
+                foreach (var bag in AtkOverlay.BagToNumber.Keys)
                 {
                     BagColours[bag] = EmptyDictionary;
                 }
@@ -103,16 +111,16 @@ namespace InventoryTools.GameUi
 
         }
 
-        public void Clear()
+        public override void Clear()
         {
-            var atkUnitBase = AtkUnitBase;
+            var atkUnitBase = AtkOverlay.AtkUnitBase;
             if (atkUnitBase != null)
             {
-                var currentBagLocation = CurrentBagLocation;
+                var currentBagLocation = AtkOverlay.CurrentBagLocation;
                 if (currentBagLocation != null && BagColours.ContainsKey(currentBagLocation.Value))
                 {
-                    this.SetColors(currentBagLocation.Value, EmptyDictionary);
-                    this.SetTabColors( EmptyTabs);
+                    this.AtkOverlay.SetColors(currentBagLocation.Value, EmptyDictionary);
+                    this.AtkOverlay.SetTabColors( EmptyTabs);
                 }
             }
         }

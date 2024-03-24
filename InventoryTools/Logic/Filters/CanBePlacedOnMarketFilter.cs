@@ -1,6 +1,8 @@
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -25,6 +27,10 @@ namespace InventoryTools.Logic.Filters
         {
             var currentValue = CurrentValue(configuration);
             return currentValue == null || currentValue.Value && item.CanBePlacedOnMarket || !currentValue.Value && !item.CanBePlacedOnMarket;
+        }
+
+        public CanBePlacedOnMarketFilter(ILogger<CanBePlacedOnMarketFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
         }
     }
 }

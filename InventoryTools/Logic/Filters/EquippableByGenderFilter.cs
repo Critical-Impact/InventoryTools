@@ -1,8 +1,11 @@
 using System.Collections.Generic;
+using CriticalCommonLib.Enums;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
@@ -66,7 +69,7 @@ namespace InventoryTools.Logic.Filters
             return choices;
         }
 
-        public override string GetFormattedChoice(uint? choice)
+        public override string GetFormattedChoice(FilterConfiguration filterConfiguration, uint? choice)
         {
             if (choice == null)
             {
@@ -74,6 +77,10 @@ namespace InventoryTools.Logic.Filters
             }
 
             return ((CharacterSex) choice).FormattedName();
+        }
+
+        public EquippableByGenderFilter(ILogger<EquippableByGenderFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
         }
     }
 }

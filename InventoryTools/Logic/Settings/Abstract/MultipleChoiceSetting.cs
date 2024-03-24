@@ -6,11 +6,16 @@ using FFXIVClientStructs.FFXIV.Common.Math;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Settings.Abstract;
 
 public abstract class MultipleChoiceSetting<T> : Setting<List<T>> where T:notnull
 {
+    public MultipleChoiceSetting(ILogger logger, ImGuiService imGuiService) : base(logger, imGuiService)
+    {
+    }
     public override void Draw(InventoryToolsConfiguration configuration)
     {
         DrawSearchBox(configuration);
@@ -20,7 +25,7 @@ public abstract class MultipleChoiceSetting<T> : Setting<List<T>> where T:notnul
     public virtual void DrawSearchBox(InventoryToolsConfiguration configuration)
     {
         ImGui.SetNextItemWidth(LabelSize);
-        if (HasValueSet(configuration))
+        if (ColourModified && HasValueSet(configuration))
         {
             ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);
             ImGui.LabelText("##" + Key + "Label", Name + ":");
@@ -86,8 +91,8 @@ public abstract class MultipleChoiceSetting<T> : Setting<List<T>> where T:notnul
             }
         }
         ImGui.SameLine();
-        UiHelpers.HelpMarker(HelpText);
-        if (HasValueSet(configuration))
+        ImGuiService.HelpMarker(HelpText, Image, ImageSize);
+        if (!HideReset && HasValueSet(configuration))
         {
             ImGui.SameLine();
             if (ImGui.Button("Reset##" + Key + "Reset"))

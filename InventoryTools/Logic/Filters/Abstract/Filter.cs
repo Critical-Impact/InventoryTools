@@ -1,10 +1,20 @@
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters.Abstract
 {
     public abstract class Filter<T> : IFilter
     {
+        public ILogger Logger { get; }
+        public ImGuiService ImGuiService { get; }
+
+        public Filter(ILogger logger, ImGuiService imGuiService)
+        {
+            Logger = logger;
+            ImGuiService = imGuiService;
+        }
         public virtual int LabelSize { get; set; } = 220;
         public virtual int InputSize { get; set; } = 250;
         public abstract T CurrentValue(FilterConfiguration configuration);

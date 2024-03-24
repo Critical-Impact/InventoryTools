@@ -1,38 +1,48 @@
 ﻿using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
 {
     public class QuantityColumn : IntegerColumn
     {
+        private readonly IInventoryMonitor _inventoryMonitor;
+
+        public QuantityColumn(ILogger<QuantityColumn> logger, ImGuiService imGuiService, IInventoryMonitor inventoryMonitor) : base(logger, imGuiService)
+        {
+            _inventoryMonitor = inventoryMonitor;
+        }
         public override ColumnCategory ColumnCategory => ColumnCategory.Inventory;
-        public override int? CurrentValue(InventoryItem item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
         {
             return (int)item.Quantity;
         }
 
-        public override int? CurrentValue(ItemEx item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
             var qty = 0;
-            if (PluginService.InventoryMonitor.ItemCounts.ContainsKey((item.RowId,
+            if (_inventoryMonitor.ItemCounts.ContainsKey((item.RowId,
                     FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None)))
             {
-                qty += PluginService.InventoryMonitor.ItemCounts[(item.RowId,
+                qty += _inventoryMonitor.ItemCounts[(item.RowId,
                     FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None)];
             }
-            if (PluginService.InventoryMonitor.ItemCounts.ContainsKey((item.RowId,
+            if (_inventoryMonitor.ItemCounts.ContainsKey((item.RowId,
                     FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HQ)))
             {
-                qty += PluginService.InventoryMonitor.ItemCounts[(item.RowId,
+                qty += _inventoryMonitor.ItemCounts[(item.RowId,
                     FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HQ)];
             }
             return qty;
         }
 
-        public override int? CurrentValue(SortingResult item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
         {
-            return CurrentValue(item.InventoryItem);
+            return CurrentValue(columnConfiguration, item.InventoryItem);
         }
 
         public override string Name { get; set; } = "Total Quantity Available";

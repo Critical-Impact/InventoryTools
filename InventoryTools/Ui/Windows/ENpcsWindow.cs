@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
+using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
 using Dalamud.Utility;
 using ImGuiNET;
@@ -10,24 +12,32 @@ using InventoryTools.Logic;
 using Lumina.Excel;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin.Services;
+using InventoryTools.Mediator;
+using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Ui;
 
 public class ENpcsWindow : GenericTabbedTable<ENpc>
 {
-    public ENpcsWindow(string name = "NPCs", ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
-    {
-        SetupWindow();
-    }
+    private readonly IIconService _iconService;
+    private readonly ExcelCache _excelCache;
+    private readonly IChatUtilities _chatUtilities;
 
-    public ENpcsWindow() : base("NPCs")
+    public ENpcsWindow(ILogger<ENpcsWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IIconService iconService,ExcelCache excelCache, IChatUtilities chatUtilities, string name = "NPCs Window") : base(logger, mediator, imGuiService, configuration, name)
     {
-        SetupWindow();
+        _iconService = iconService;
+        _excelCache = excelCache;
+        _chatUtilities = chatUtilities;
     }
-
-    public void SetupWindow()
+    
+    public override void Initialize()
     {
-        _columns = new List<TableColumn<ENpc>>()
+        WindowName = "NPCs";
+        Key = "enpcs";
+         _columns = new List<TableColumn<ENpc>>()
         {
             new("Icon", 32, ImGuiTableColumnFlags.WidthFixed)
             {
@@ -35,7 +45,7 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
                 Draw = (ex, contentTypeId) =>
                 {
                     if (ImGui.ImageButton(
-                            PluginService.IconStorage[62043].ImGuiHandle,
+                            _iconService[62043].ImGuiHandle,
                             new Vector2(RowSize, RowSize)))
                     {
                         _columns[0].OnLeftClick?.Invoke(ex);
@@ -74,14 +84,14 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
                 Draw = (ex, contentTypeId) =>
                 {
                     var positions = ex.Locations;
-                    UiHelpers.WrapTableColumnElements("Scroll" + ex.Key,positions, RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X, position =>
+                    ImGuiService.WrapTableColumnElements("Scroll" + ex.Key,positions, RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X, position =>
                     {
-                        if (ImGui.ImageButton(PluginService.IconStorage[60561].ImGuiHandle,
+                        if (ImGui.ImageButton(_iconService[60561].ImGuiHandle,
                                 new Vector2(RowSize * ImGui.GetIO().FontGlobalScale,
                                     RowSize * ImGui.GetIO().FontGlobalScale), new Vector2(0, 0),
                                 new Vector2(1, 1), 0))
                         {
-                            PluginService.ChatUtilities.PrintFullMapLink(position, ex.Resident?.FormattedSingular ?? "");
+                            _chatUtilities.PrintFullMapLink(position, ex.Resident?.FormattedSingular ?? "");
                         }
 
                         if (ImGui.IsItemHovered())
@@ -153,11 +163,11 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
                     var drops = GetShopItems(ex);
                     if (drops != null)
                     {
-                        UiHelpers.WrapTableColumnElements("ScrollDrops" + ex.Key, drops,
+                        ImGuiService.WrapTableColumnElements("ScrollDrops" + ex.Key, drops,
                             RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X,
                             drop =>
                             {
-                                var sourceIcon = PluginService.IconStorage[drop.Value!.Icon];
+                                var sourceIcon = _iconService[drop.Value!.Icon];
                                 ImGui.Image(sourceIcon.ImGuiHandle,
                                     new Vector2(RowSize, RowSize) * ImGui.GetIO().FontGlobalScale);
                                 if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
@@ -177,12 +187,17 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
                                                         ImGuiHoveredFlags.AnyWindow) &&
                                     ImGui.IsMouseReleased(ImGuiMouseButton.Left))
                                 {
-                                    PluginService.WindowService.OpenItemWindow(drop.Row);
+                                    MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), drop.Row));
                                 }
 
                                 if (ImGui.BeginPopup("RightClick" + drop.Row))
                                 {
-                                    drop.Value?.DrawRightClickPopup();
+                                    if (drop.Value != null)
+                                    {
+                                        MediatorService.Publish(
+                                            ImGuiService.RightClickService.DrawRightClickPopup(drop.Value));
+                                    }
+
                                     ImGui.EndPopup();
                                 }
 
@@ -194,11 +209,12 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
                 }
             },
         };
-        _tabs = Service.ExcelCache.ENpcCollection?.Where(c => (c.Resident?.FormattedSingular ?? "") != "").SelectMany(c => c.Locations.Select(c => c.PlaceNameEx)).DistinctBy(c => c.Row).ToDictionary(c => c.Row, c => c.Value?.Name.ToDalamudString().ToString() ?? "");
+         var eNpcCollection = _excelCache.ENpcCollection;
+         _tabs = eNpcCollection == null ? new Dictionary<uint, string>() : eNpcCollection.Where(c => (c.Resident?.FormattedSingular ?? "") != "").SelectMany(c => c.Locations.Select(c => c.PlaceNameEx)).DistinctBy(c => c.Row).ToDictionary(c => c.Row, c => c.Value?.Name.ToDalamudString().ToString() ?? "");
         _items = new Dictionary<uint, List<ENpc>>();
         _filteredItems = new Dictionary<uint, List<ENpc>>();
     }
-
+    
     private Dictionary<uint, List<LazyRow<ItemEx>>?> _shopItems = new();
 
     private List<LazyRow<ItemEx>>? GetShopItems(ENpc npc)
@@ -225,7 +241,7 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
 
     private bool OnLeftClick(ENpc arg)
     {
-        PluginService.WindowService.OpenENpcWindow(arg.Key);
+        MediatorService.Publish(new OpenUintWindowMessage(typeof(ENpcWindow), arg.Key));
         return true;
     }
 
@@ -235,7 +251,7 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
         {
             if (placeNameId == 0)
             {
-                var enpcs = Service.ExcelCache.ENpcCollection?.Where(c => (c.Resident?.FormattedSingular ?? "") != "").ToList();
+                var enpcs = _excelCache.ENpcCollection?.Where(c => (c.Resident?.FormattedSingular ?? "") != "").ToList();
                 if (enpcs != null)
                 {
                     _items.Add(placeNameId, enpcs);
@@ -243,7 +259,7 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
             }
             else
             {
-                var enpcs = Service.ExcelCache.ENpcCollection?.Where(c => (c.Resident?.FormattedSingular ?? "") != "" && c.Locations.Any(c => c.PlaceNameEx.Row == placeNameId)).ToList();
+                var enpcs = _excelCache.ENpcCollection?.Where(c => (c.Resident?.FormattedSingular ?? "") != "" && c.Locations.Any(c => c.PlaceNameEx.Row == placeNameId)).ToList();
                 if (enpcs != null)
                 {
                     _items.Add(placeNameId, enpcs);
@@ -282,13 +298,8 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
     public override string TableName => _tableName;
 
     public override bool UseClipper => _useClipper;
-
-    public static string AsKey
-    {
-        get { return "enpcs"; }
-    }
-
-    public override string Key => AsKey;
+    public override string GenericKey => "npcs";
+    public override string GenericName => "Npcs";
     public override bool DestroyOnClose => false;
     public override bool SaveState => true;
     public override Vector2? MaxSize { get; } = new(2000, 2000);
@@ -331,5 +342,4 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
     }
 
     public override FilterConfiguration? SelectedConfiguration => null;
-
 }

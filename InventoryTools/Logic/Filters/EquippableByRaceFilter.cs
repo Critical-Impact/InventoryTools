@@ -1,15 +1,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib;
+using CriticalCommonLib.Enums;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
     public class EquippableByRaceFilter : UintMultipleChoiceFilter
     {
+        private readonly ExcelCache _excelCache;
         public override string Key { get; set; } = "EquippableByRace";
         public override string Name { get; set; } = "Equippable By Race";
         public override string HelpText { get; set; } = "Which races can this equipment be equipped by?";
@@ -37,7 +42,7 @@ namespace InventoryTools.Logic.Filters
         public override Dictionary<uint, string> GetChoices(FilterConfiguration configuration)
         {
             var choices = new Dictionary<uint, string>();
-            var sheet = Service.ExcelCache.GetRaceSheet();
+            var sheet = _excelCache.GetRaceSheet();
             foreach (var race in sheet)
             {
                 choices.Add(race.RowId, race.Masculine);
@@ -47,5 +52,10 @@ namespace InventoryTools.Logic.Filters
         }
 
         public override bool HideAlreadyPicked { get; set; } = true;
+
+        public EquippableByRaceFilter(ILogger<EquippableByRaceFilter> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
+        {
+            _excelCache = excelCache;
+        }
     }
 }

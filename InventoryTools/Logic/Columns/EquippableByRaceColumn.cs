@@ -1,28 +1,35 @@
 using System.Collections.Generic;
+using CriticalCommonLib.Enums;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
 {
     public class EquippableByRaceColumn : TextColumn
     {
+        public EquippableByRaceColumn(ILogger<EquippableByRaceColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
 
-        public override string? CurrentValue(InventoryItem item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
         {
-            return CurrentValue(item.Item);
+            return CurrentValue(columnConfiguration, item.Item);
         }
 
-        public override string? CurrentValue(ItemEx item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
             return item.EquipRace.FormattedName();
         }
 
-        public override string? CurrentValue(SortingResult item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
         {
-            return CurrentValue(item.InventoryItem);
+            return CurrentValue(columnConfiguration, item.InventoryItem);
         }
 
         public override string Name { get; set; } = "Equipped By (Race)";

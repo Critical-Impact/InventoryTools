@@ -1,34 +1,48 @@
 using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib.Enums;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
 using InventoryTools.Logic;
 using InventoryTools.Misc;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.GameUi
 {
-    public class TetrisOverlay : AtkInventoryExpansion, IAtkOverlayState
+    public class TetrisOverlay: GameOverlay<AtkInventoryExpansion>, IAtkOverlayState
     {
+        private readonly ICharacterMonitor _characterMonitor;
+        private readonly TetrisGame _tetrisGame;
+
+        public TetrisOverlay(ILogger<TetrisOverlay> logger, AtkInventoryExpansion overlay, ICharacterMonitor characterMonitor, TetrisGame tetrisGame) : base(logger,overlay)
+        {
+            _characterMonitor = characterMonitor;
+            _tetrisGame = tetrisGame;
+            Enabled = false;
+        }
+        
+        public override bool ShouldDraw { get; set; }
+
         public override bool Draw()
         {
-            if (!HasState || !HasAddon)
+            if (!HasState || !AtkOverlay.HasAddon)
             {
                 return false;
             }
-            var atkUnitBase = AtkUnitBase;
+            var atkUnitBase = AtkOverlay.AtkUnitBase;
             if (atkUnitBase != null)
             {
-                var colours = TetrisGame.Instance.DrawScene();
+                var colours = _tetrisGame.DrawScene();
                 foreach (var colour in colours)
                 {
-                    SetColors(colour.Key, colour.Value);
+                    AtkOverlay.SetColors(colour.Key, colour.Value);
                 }
 
-                this.HideIcons(InventoryType.Bag0);
-                this.HideIcons(InventoryType.Bag1);
-                this.HideIcons(InventoryType.Bag2);
-                this.HideIcons(InventoryType.Bag3);
-                this.SetText("Current Score: " + TetrisGame.Instance.Game.Score, "Lines: " + TetrisGame.Instance.Game.Lines);
+                this.AtkOverlay.HideIcons(InventoryType.Bag0);
+                this.AtkOverlay.HideIcons(InventoryType.Bag1);
+                this.AtkOverlay.HideIcons(InventoryType.Bag2);
+                this.AtkOverlay.HideIcons(InventoryType.Bag3);
+                this.AtkOverlay.SetText("Current Score: " + _tetrisGame.Game.Score, "Lines: " + _tetrisGame.Game.Lines);
                 return true;
             }
 
@@ -52,16 +66,16 @@ namespace InventoryTools.GameUi
 
         }
 
-        public bool HasState { get; set; }
-        public bool NeedsStateRefresh { get; set; }
+        public override bool HasState { get; set; }
+        public override bool NeedsStateRefresh { get; set; }
 
-        public void UpdateState(FilterState? newState)
+        public override void UpdateState(FilterState? newState)
         {
-            if (PluginService.CharacterMonitor.ActiveCharacterId == 0)
+            if (_characterMonitor.ActiveCharacterId == 0)
             {
                 return;
             }
-            if (AtkUnitBase == null)
+            if (AtkOverlay.AtkUnitBase == null)
             {
                 return;
             }
@@ -69,15 +83,15 @@ namespace InventoryTools.GameUi
             Draw();
         }
 
-        public void Clear()
+        public override void Clear()
         {
-            var atkUnitBase = AtkUnitBase;
+            var atkUnitBase = AtkOverlay.AtkUnitBase;
             if (atkUnitBase != null)
             {
-                this.SetColors(InventoryType.Bag0, EmptyDictionary);
-                this.SetColors(InventoryType.Bag1, EmptyDictionary);
-                this.SetColors(InventoryType.Bag2, EmptyDictionary);
-                this.SetColors(InventoryType.Bag3, EmptyDictionary);
+                this.AtkOverlay.SetColors(InventoryType.Bag0, EmptyDictionary);
+                this.AtkOverlay.SetColors(InventoryType.Bag1, EmptyDictionary);
+                this.AtkOverlay.SetColors(InventoryType.Bag2, EmptyDictionary);
+                this.AtkOverlay.SetColors(InventoryType.Bag3, EmptyDictionary);
             }
         }
     }

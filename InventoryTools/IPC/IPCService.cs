@@ -7,8 +7,10 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
+using InventoryTools.Lists;
 using InventoryTools.Logic;
 using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 
 namespace InventoryTools.Services;
@@ -48,17 +50,21 @@ public class IPCService : IDisposable
     private readonly ICallGateProvider<bool, bool>? _initialized;
     private readonly bool _initalizedIpc;
 
+    private readonly ILogger<IPCService> _logger;
     private readonly ICharacterMonitor _characterMonitor;
-    private readonly IFilterService _filterService;
+    private readonly IListService _listService;
     private readonly IInventoryMonitor _inventoryMonitor;
+    private readonly ListFilterService _listFilterService;
     private bool _disposed;
 
-    public IPCService(DalamudPluginInterface pluginInterface, ICharacterMonitor characterMonitor, IFilterService filterService, IInventoryMonitor inventoryMonitor)
+    public IPCService(DalamudPluginInterface pluginInterface, ILogger<IPCService> logger, ICharacterMonitor characterMonitor, IListService listService, IInventoryMonitor inventoryMonitor, ListFilterService listFilterService)
     {
+        _logger = logger;
         _characterMonitor = characterMonitor;
-        _filterService = filterService;
+        _listService = listService;
         _inventoryMonitor = inventoryMonitor;
-        
+        _listFilterService = listFilterService;
+
         _inventoryCountByType = pluginInterface.GetIpcProvider<uint, ulong?, uint>("AllaganTools.InventoryCountByType");
         _inventoryCountByType.RegisterFunc(InventoryCountByType);
         
@@ -213,7 +219,7 @@ public class IPCService : IDisposable
 
     private Dictionary<string, string> GetSearchFilters()
     {
-        var filters = _filterService.FiltersList.Where(c => c.FilterType == FilterType.SearchFilter);
+        var filters = _listService.Lists.Where(c => c.FilterType == FilterType.SearchFilter);
         var keyNameDict = new Dictionary<string, string>();
         foreach (var filter in filters)
         {
@@ -224,7 +230,7 @@ public class IPCService : IDisposable
 
     private string AddNewCraftList(string craftListName, Dictionary<uint, uint> items)
     {
-        var newCraftFilter = _filterService.AddNewCraftFilter(craftListName);
+        var newCraftFilter = _listService.AddNewCraftList(craftListName);
         foreach (var item in items)
         {
             newCraftFilter.CraftList.AddCraftItem(item.Key, item.Value);
@@ -235,7 +241,7 @@ public class IPCService : IDisposable
 
     private Dictionary<string, string> GetCraftLists()
     {
-        var craftLists = _filterService.FiltersList.Where(c => c.FilterType == FilterType.CraftFilter && !c.CraftListDefault);
+        var craftLists = _listService.Lists.Where(c => c.FilterType == FilterType.CraftFilter && !c.CraftListDefault);
         var keyNameDict = new Dictionary<string, string>();
         foreach (var craftList in craftLists)
         {
@@ -247,7 +253,7 @@ public class IPCService : IDisposable
 
     private Dictionary<uint, uint> GetCraftItems(string filterKey)
     {
-        var filter = _filterService.GetFilterByKeyOrName(filterKey);
+        var filter = _listService.GetListByKeyOrName(filterKey);
         var craftItems = new Dictionary<uint, uint>();
         
         if (filter != null && filter.FilterType == FilterType.CraftFilter)
@@ -273,7 +279,7 @@ public class IPCService : IDisposable
 
     private Dictionary<uint, uint> GetRetrievalItems()
     {
-        var filter = _filterService.GetActiveCraftList();
+        var filter = _listService.GetActiveCraftList();
         var retrievalItems = new Dictionary<uint, uint>();
 
         if (filter != null && filter.FilterType == FilterType.CraftFilter)
@@ -295,13 +301,13 @@ public class IPCService : IDisposable
     }
 
     private HashSet<ulong> GetCharactersOwnedByActive(bool includeOwner)
-        => PluginService.InventoryMonitor.Inventories.Select(pair => pair.Key)
-            .Where(characterId => PluginService.CharacterMonitor.BelongsToActiveCharacter(characterId) && (includeOwner || characterId != PluginService.CharacterMonitor.ActiveCharacterId))
+        => _inventoryMonitor.Inventories.Select(pair => pair.Key)
+            .Where(characterId => _characterMonitor.BelongsToActiveCharacter(characterId) && (includeOwner || characterId != _characterMonitor.ActiveCharacterId))
             .ToHashSet();
 
     private HashSet<ulong[]> GetCharacterItems(ulong characterId)
     {
-        var items = PluginService.InventoryMonitor.Inventories
+        var items = _inventoryMonitor.Inventories
             .First(pair => pair.Key == characterId).Value
             .GetAllInventories().SelectMany(item => item)
             .Where(item => item != null);
@@ -313,7 +319,7 @@ public class IPCService : IDisposable
 
     private HashSet<ulong[]> GetCharacterItemsByType(ulong characterId, uint inventoryType)
     {
-        var characterInventories = PluginService.InventoryMonitor.Inventories
+        var characterInventories = _inventoryMonitor.Inventories
             .First(pair => pair.Key == characterId).Value;
         
         var items = (characterInventories
@@ -325,7 +331,7 @@ public class IPCService : IDisposable
     }
     private Dictionary<uint, uint> GetFilterItems(string filterKey)
     {
-        var filter = _filterService.GetFilterByKeyOrName(filterKey);
+        var filter = _listService.GetListByKeyOrName(filterKey);
         var filterItems = new Dictionary<uint, uint>();
         
         if (filter != null)
@@ -349,7 +355,7 @@ public class IPCService : IDisposable
             }
             if (filter.FilterType == FilterType.SearchFilter || filter.FilterType == FilterType.SortingFilter)
             {
-                var filterResult = filter.GenerateFilteredList(PluginService.InventoryMonitor.Inventories.Select(c => c.Value).ToList()).Result;
+                var filterResult = _listFilterService.RefreshList(filter);
                 foreach (var sortedItem in filterResult.SortedItems)
                 {
                     if (filterItems.ContainsKey(sortedItem.InventoryItem.ItemId))
@@ -364,7 +370,7 @@ public class IPCService : IDisposable
             }
             if (filter.FilterType == FilterType.GameItemFilter)
             {
-                var filterResult = filter.GenerateFilteredList(PluginService.InventoryMonitor.Inventories.Select(c => c.Value).ToList()).Result;
+                var filterResult = _listFilterService.RefreshList(filter);
                 foreach (var sortedItem in filterResult.AllItems)
                 {
                     if (filterItems.ContainsKey(sortedItem.RowId))
@@ -384,7 +390,7 @@ public class IPCService : IDisposable
 
     private bool RemoveItemFromCraftList(string filterKey, uint itemId, uint quantity)
     {
-        var filter = _filterService.GetFilterByKeyOrName(filterKey);
+        var filter = _listService.GetListByKeyOrName(filterKey);
         
         if (filter is { FilterType: FilterType.CraftFilter })
         {
@@ -397,7 +403,7 @@ public class IPCService : IDisposable
 
     private bool AddItemToCraftList(string filterKey, uint itemId, uint quantity)
     {
-        var filter = _filterService.GetFilterByKeyOrName(filterKey);
+        var filter = _listService.GetListByKeyOrName(filterKey);
         
         if (filter is { FilterType: FilterType.CraftFilter })
         {
@@ -410,16 +416,16 @@ public class IPCService : IDisposable
 
     private bool ToggleUiFilter(string filterKey)
     {
-        var filter = _filterService.GetFilterByKeyOrName(filterKey);
+        var filter = _listService.GetListByKeyOrName(filterKey);
 
         if (filter == null)
         {
-            filter = _filterService.GetFilter(filterKey);
+            filter = _listService.GetList(filterKey);
         }
         
         if (filter != null)
         {
-            _filterService.ToggleActiveUiFilter(filter);
+            _listService.ToggleActiveUiList(filter);
             return true;
         }
 
@@ -428,17 +434,17 @@ public class IPCService : IDisposable
 
     private bool DisableUiFilter()
     {
-        _filterService.ClearActiveUiFilter();
+        _listService.ClearActiveUiList();
         return true;
     }
 
     private bool EnableUiFilter(string filterKey)
     {
-        var filter = _filterService.GetFilterByKeyOrName(filterKey);
+        var filter = _listService.GetListByKeyOrName(filterKey);
         
         if (filter != null)
         {
-            _filterService.SetActiveUiFilter(filter);
+            _listService.SetActiveUiList(filter);
             return true;
         }
 
@@ -447,11 +453,11 @@ public class IPCService : IDisposable
 
     private bool ToggleBackgroundFilter(string filterKey)
     {
-        var filter = _filterService.GetFilterByKeyOrName(filterKey);
+        var filter = _listService.GetListByKeyOrName(filterKey);
         
         if (filter != null)
         {
-            _filterService.ToggleActiveBackgroundFilter(filter);
+            _listService.ToggleActiveBackgroundList(filter);
             return true;
         }
 
@@ -460,17 +466,17 @@ public class IPCService : IDisposable
 
     private bool DisableBackgroundFilter()
     {
-        _filterService.ClearActiveBackgroundFilter();
+        _listService.ClearActiveBackgroundList();
         return true;
     }
 
     private bool EnableBackgroundFilter(string filterKey)
     {
-        var filter = _filterService.GetFilterByKeyOrName(filterKey);
+        var filter = _listService.GetListByKeyOrName(filterKey);
         
         if (filter != null)
         {
-            _filterService.SetActiveBackgroundFilter(filter);
+            _listService.SetActiveBackgroundList(filter);
             return true;
         }
 
@@ -479,16 +485,16 @@ public class IPCService : IDisposable
 
     private bool ToggleCraftList(string filterKey)
     {
-        var filter = _filterService.GetFilterByKeyOrName(filterKey);
+        var filter = _listService.GetListByKeyOrName(filterKey);
 
         if (filter == null)
         {
-            filter = _filterService.GetFilter(filterKey);
+            filter = _listService.GetList(filterKey);
         }
         
         if (filter != null)
         {
-            _filterService.ToggleActiveCraftList(filter);
+            _listService.ToggleActiveCraftList(filter);
             return true;
         }
 
@@ -497,17 +503,17 @@ public class IPCService : IDisposable
 
     private bool DisableCraftList()
     {
-        _filterService.ClearActiveCraftList();
+        _listService.ClearActiveCraftList();
         return true;
     }
 
     private bool EnableCraftList(string filterKey)
     {
-        var filter = _filterService.GetFilterByKeyOrName(filterKey);
+        var filter = _listService.GetListByKeyOrName(filterKey);
         
         if (filter != null)
         {
-            _filterService.SetActiveCraftList(filter);
+            _listService.SetActiveCraftList(filter);
             return true;
         }
 
@@ -584,7 +590,7 @@ public class IPCService : IDisposable
 
         if( _disposed == false )
         {
-            Service.Log.Error("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
+            _logger.LogError("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
         }
 #endif
         Dispose (true);

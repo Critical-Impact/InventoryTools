@@ -1,25 +1,31 @@
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
 {
     public class ItemIdColumn : IntegerColumn
     {
+        public ItemIdColumn(ILogger<ItemIdColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override int? CurrentValue(InventoryItem item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
         {
             return (int)item.ItemId;
         }
 
-        public override int? CurrentValue(ItemEx item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
             return (int)item.RowId;
         }
 
-        public override int? CurrentValue(SortingResult item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
         {
-            return CurrentValue(item.InventoryItem);
+            return CurrentValue(columnConfiguration, item.InventoryItem);
         }
 
         public override string Name { get; set; } = "Item ID";

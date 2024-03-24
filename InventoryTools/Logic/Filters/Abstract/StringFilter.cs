@@ -1,10 +1,16 @@
 using Dalamud.Interface.Colors;
 using ImGuiNET;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters.Abstract
 {
     public abstract class StringFilter : Filter<string>
     {
+
+        public StringFilter(ILogger logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
         public override string DefaultValue { get; set; } = "";
 
         public override bool HasValueSet(FilterConfiguration configuration)
@@ -38,7 +44,7 @@ namespace InventoryTools.Logic.Filters.Abstract
                 UpdateFilterConfiguration(configuration, value);
             }
             ImGui.SameLine();
-            UiHelpers.HelpMarker(HelpText);
+            ImGuiService.HelpMarker(HelpText);
             if (HasValueSet(configuration) && ShowReset)
             {
                 ImGui.SameLine();

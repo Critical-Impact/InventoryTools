@@ -3,30 +3,41 @@ using System.Collections.Generic;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Services;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns;
 
 public class CraftCalculatorColumn : IntegerColumn, IDisposable
 {
+    private readonly IInventoryMonitor _inventoryMonitor;
+    private readonly ICharacterMonitor _characterMonitor;
+
+    public CraftCalculatorColumn(ILogger<CraftCalculatorColumn> logger, ImGuiService imGuiService, IInventoryMonitor inventoryMonitor, ICharacterMonitor characterMonitor) : base(logger, imGuiService)
+    {
+        _inventoryMonitor = inventoryMonitor;
+        _characterMonitor = characterMonitor;
+    }
     public override ColumnCategory ColumnCategory => ColumnCategory.Tools;
     public Dictionary<uint, uint>? _craftable;
     public CraftCalculator? _craftCalculator;
-    public override int? CurrentValue(InventoryItem item)
+    public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
     {
-        return CurrentValue(item.Item);
+        return CurrentValue(columnConfiguration, item.Item);
     }
 
-    public override int? CurrentValue(ItemEx item)
+    public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
     {
         if (_craftable == null) return 0;
         return (int?)(_craftable.ContainsKey(item.RowId) ? _craftable[item.RowId] : 0);
     }
 
-    public override int? CurrentValue(SortingResult item)
+    public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
     {
-        return CurrentValue(item.InventoryItem);
+        return CurrentValue(columnConfiguration, item.InventoryItem);
     }
 
     public override string Name { get; set; } = "Craft Calculator";
@@ -54,19 +65,19 @@ public class CraftCalculatorColumn : IntegerColumn, IDisposable
                 }
 
                 var items = new List<CriticalCommonLib.Models.InventoryItem>();
-                var playerBags = PluginService.InventoryMonitor.GetSpecificInventory(PluginService.CharacterMonitor.ActiveCharacterId,
+                var playerBags = _inventoryMonitor.GetSpecificInventory(_characterMonitor.ActiveCharacterId,
                     InventoryCategory.CharacterBags);
-                var crystalBags = PluginService.InventoryMonitor.GetSpecificInventory(PluginService.CharacterMonitor.ActiveCharacterId,
+                var crystalBags = _inventoryMonitor.GetSpecificInventory(_characterMonitor.ActiveCharacterId,
                     InventoryCategory.Crystals);
-                var currencyBags = PluginService.InventoryMonitor.GetSpecificInventory(PluginService.CharacterMonitor.ActiveCharacterId,
+                var currencyBags = _inventoryMonitor.GetSpecificInventory(_characterMonitor.ActiveCharacterId,
                     InventoryCategory.Currency);
-                var inventories = PluginService.InventoryMonitor.Inventories;
+                var inventories = _inventoryMonitor.Inventories;
                 foreach (var characterId in inventories)
                 {
-                    var character = PluginService.CharacterMonitor.GetCharacterById(characterId.Key);
+                    var character = _characterMonitor.GetCharacterById(characterId.Key);
                     if (character != null)
                     {
-                        if (character.OwnerId == PluginService.CharacterMonitor.ActiveCharacterId)
+                        if (character.OwnerId == _characterMonitor.ActiveCharacterId)
                         {
                             foreach (var inventoryCategory in characterId.Value.GetAllInventories())
                             {
