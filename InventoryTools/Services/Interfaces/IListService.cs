@@ -13,11 +13,16 @@ namespace InventoryTools.Services.Interfaces
 
         bool AddList(FilterConfiguration configuration);
         bool AddList(string name, FilterType filterType);
+        void AddDefaultColumns(FilterConfiguration configuration);
         FilterConfiguration DuplicateList(FilterConfiguration configuration, string newName);
         FilterConfiguration AddNewCraftList(string? name = null,bool? isEphemeral = false);
         bool RemoveList(FilterConfiguration configuration);
         bool RemoveList(string name);
         bool RemoveFilterByKey(string key);
+        ColumnConfiguration AddColumn(FilterConfiguration configuration, Type columnType, bool notify = true);
+
+        ColumnConfiguration AddCraftColumn(FilterConfiguration configuration, Type columnType,
+            bool notify = true);
 
         FilterConfiguration? GetActiveUiList(bool ignoreWindowState);
         FilterConfiguration? GetActiveBackgroundList();
@@ -61,6 +66,8 @@ namespace InventoryTools.Services.Interfaces
 
         void ResetFilter(IEnumerable<IFilter> toReset, FilterConfiguration configuration);
         void ResetFilter(IEnumerable<IFilter> toReset, FilterConfiguration configuration, FilterConfiguration existingConfiguration);
+
+        FilterConfiguration GenerateDefaultCraftList();
         
         delegate void ListAddedDelegate(FilterConfiguration configuration);
         delegate void ListRemovedDelegate(FilterConfiguration configuration);

@@ -4,6 +4,7 @@ using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
+using InventoryTools.Lists;
 using InventoryTools.Logic;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
@@ -16,12 +17,14 @@ namespace InventoryTools.Ui.Pages
         private readonly IListService _listService;
         private readonly IChatUtilities _chatUtilities;
         private readonly PluginLogic _pluginLogic;
+        private readonly ListImportExportService _importExportService;
 
-        public ImportExportPage(ILogger<ImportExportPage> logger, ImGuiService imGuiService, IListService listService, IChatUtilities chatUtilities, PluginLogic pluginLogic) : base(logger, imGuiService)
+        public ImportExportPage(ILogger<ImportExportPage> logger, ImGuiService imGuiService, IListService listService, IChatUtilities chatUtilities, PluginLogic pluginLogic, ListImportExportService importExportService) : base(logger, imGuiService)
         {
             _listService = listService;
             _chatUtilities = chatUtilities;
             _pluginLogic = pluginLogic;
+            _importExportService = importExportService;
         }
         private bool _isSeparator = false;
         public override void Initialize()
@@ -80,7 +83,7 @@ namespace InventoryTools.Ui.Pages
                         ImGui.TableNextColumn();
                         if (ImGui.SmallButton("Export Configuration##" + index))
                         {
-                            var base64 = filterConfiguration.ExportBase64();
+                            var base64 = _importExportService.ToBase64(filterConfiguration);
                             ImGui.SetClipboardText(base64);
                             _chatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
                         }
@@ -111,7 +114,7 @@ namespace InventoryTools.Ui.Pages
                     }
                     else
                     {
-                        if (FilterConfiguration.FromBase64(ImportData, out FilterConfiguration newFilter))
+                        if (_importExportService.FromBase64(ImportData, out FilterConfiguration newFilter))
                         {
                             _pluginLogic.AddFilter(newFilter);
                         }

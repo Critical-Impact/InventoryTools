@@ -10,4 +10,5 @@ public enum ColumnCategory
     Tools,
     Debug,
     History,
+    Buttons,
 }

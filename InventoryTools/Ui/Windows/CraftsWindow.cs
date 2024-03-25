@@ -18,6 +18,7 @@ using InventoryTools.Logic.Settings;
 using InventoryTools.Ui.Widgets;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
+using InventoryTools.Lists;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
@@ -43,8 +44,9 @@ namespace InventoryTools.Ui
         private readonly IGameUiManager _gameUiManager;
         private readonly IChatUtilities _chatUtilities;
         private readonly ExcelCache _excelCache;
+        private readonly ListImportExportService _importExportService;
 
-        public CraftsWindow(ILogger<CraftsWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration,IIconService iconService, TableService tableService, ConfigurationManager configurationManager, IListService listService, IFilterService filterService, PluginLogic pluginLogic, IUniversalis universalis, ICharacterMonitor characterMonitor, FileDialogManager fileDialogManager, IGameUiManager gameUiManager, IChatUtilities chatUtilities, ExcelCache excelCache, string name = "Crafts Window") : base(logger, mediator, imGuiService, configuration, name)
+        public CraftsWindow(ILogger<CraftsWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration,IIconService iconService, TableService tableService, ConfigurationManager configurationManager, IListService listService, IFilterService filterService, PluginLogic pluginLogic, IUniversalis universalis, ICharacterMonitor characterMonitor, FileDialogManager fileDialogManager, IGameUiManager gameUiManager, IChatUtilities chatUtilities, ExcelCache excelCache, ListImportExportService importExportService, string name = "Crafts Window") : base(logger, mediator, imGuiService, configuration, name)
         {
             _iconService = iconService;
             _tableService = tableService;
@@ -59,6 +61,7 @@ namespace InventoryTools.Ui
             _gameUiManager = gameUiManager;
             _chatUtilities = chatUtilities;
             _excelCache = excelCache;
+            _importExportService = importExportService;
         }
         public override void Initialize()
         {
@@ -1056,7 +1059,7 @@ namespace InventoryTools.Ui
                             ImGui.NewLine();
                             if (ImGui.Button("Export Configuration to Clipboard"))
                             {
-                                var base64 = filterConfiguration.ExportBase64();
+                                var base64 = _importExportService.ToBase64(filterConfiguration);
                                 ImGui.SetClipboardText(base64);
                                 _chatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
                             }

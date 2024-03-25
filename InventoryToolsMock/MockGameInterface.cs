@@ -1,6 +1,5 @@
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
-using Dalamud.Logging;
 using Dalamud.Plugin.Services;
 
 namespace InventoryToolsMock;

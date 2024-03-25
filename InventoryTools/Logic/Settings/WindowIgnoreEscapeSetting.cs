@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CriticalCommonLib.Services.Mediator;
 using InventoryTools.Logic.Settings.Abstract;
+using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Ui;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,11 +13,13 @@ namespace InventoryTools.Logic.Settings;
 
 public class WindowIgnoreEscapeSetting<T> : BooleanSetting where T : Window
 {
+    private readonly MediatorService _mediatorService;
     private string _key;
     private string _window;
     private string _helpText;
-    public WindowIgnoreEscapeSetting(ILogger logger, ImGuiService imGuiService, T window) : base(logger, imGuiService)
+    public WindowIgnoreEscapeSetting(ILogger logger,MediatorService mediatorService, ImGuiService imGuiService, T window) : base(logger, imGuiService)
     {
+        _mediatorService = mediatorService;
         _key = window.Key + "Escape";
         _window = window.GenericName + " Window";
         _helpText = "Should the escape key be ignored for the " + window.GenericName + " window?";
@@ -29,8 +33,7 @@ public class WindowIgnoreEscapeSetting<T> : BooleanSetting where T : Window
     public override void UpdateFilterConfiguration(InventoryToolsConfiguration configuration, bool newValue)
     {
         configuration.SetWindowIgnoreEscape(typeof(T),newValue);
-        //TODO: fix me, use configurator service maybe?
-        //_windowService.UpdateRespectCloseHotkey(typeof(T), !newValue);
+        _mediatorService.Publish(new UpdateWindowRespectClose(typeof(T), !newValue));
     }
 
     private Dictionary<Type, Window>? _instances;
@@ -57,28 +60,27 @@ public class WindowIgnoreEscapeSetting<T> : BooleanSetting where T : Window
     public override string Version => "1.6.2.5";
 }
 
-//TODO: Fix me
-// public class CraftWindowIgnoreEscapeSetting : WindowIgnoreEscapeSetting<CraftsWindow>
-// {
-//     public CraftWindowIgnoreEscapeSetting(ILogger<CraftWindowIgnoreEscapeSetting> logger, ImGuiService imGuiService, CraftsWindow windowFactory) : base(logger, imGuiService, windowFactory)
-//     {
-//     }
-// }
-// public class FiltersWindowIgnoreEscapeSetting : WindowIgnoreEscapeSetting<FiltersWindow>
-// {
-//     public FiltersWindowIgnoreEscapeSetting(ILogger<FiltersWindowIgnoreEscapeSetting> logger, ImGuiService imGuiService, FiltersWindow windowFactory) : base(logger, imGuiService, windowFactory)
-//     {
-//     }
-// }
-// public class ItemWindowIgnoreEscapeSetting : WindowIgnoreEscapeSetting<ItemWindow>
-// {
-//     public ItemWindowIgnoreEscapeSetting(ILogger<ItemWindowIgnoreEscapeSetting> logger, ImGuiService imGuiService, ItemWindow windowFactory) : base(logger, imGuiService, windowFactory)
-//     {
-//     }
-// }
-// public class FilterWindowIgnoreEscapeSetting : WindowIgnoreEscapeSetting<FilterWindow>
-// {
-//     public FilterWindowIgnoreEscapeSetting(ILogger<FilterWindowIgnoreEscapeSetting> logger, ImGuiService imGuiService, FilterWindow windowFactory) : base(logger, imGuiService, windowFactory)
-//     {
-//     }
-// }
+ public class CraftWindowIgnoreEscapeSetting : WindowIgnoreEscapeSetting<CraftsWindow>
+ {
+     public CraftWindowIgnoreEscapeSetting(ILogger<CraftWindowIgnoreEscapeSetting> logger,MediatorService mediatorService, ImGuiService imGuiService, CraftsWindow windowFactory) : base(logger,mediatorService, imGuiService, windowFactory)
+     {
+     }
+ }
+ public class FiltersWindowIgnoreEscapeSetting : WindowIgnoreEscapeSetting<FiltersWindow>
+ {
+     public FiltersWindowIgnoreEscapeSetting(ILogger<FiltersWindowIgnoreEscapeSetting> logger,MediatorService mediatorService, ImGuiService imGuiService, FiltersWindow windowFactory) : base(logger,mediatorService, imGuiService, windowFactory)
+     {
+     }
+ }
+ public class ItemWindowIgnoreEscapeSetting : WindowIgnoreEscapeSetting<ItemWindow>
+ {
+     public ItemWindowIgnoreEscapeSetting(ILogger<ItemWindowIgnoreEscapeSetting> logger,MediatorService mediatorService, ImGuiService imGuiService, ItemWindow windowFactory) : base(logger,mediatorService, imGuiService, windowFactory)
+     {
+     }
+ }
+ public class FilterWindowIgnoreEscapeSetting : WindowIgnoreEscapeSetting<FilterWindow>
+ {
+     public FilterWindowIgnoreEscapeSetting(ILogger<FilterWindowIgnoreEscapeSetting> logger,MediatorService mediatorService, ImGuiService imGuiService, FilterWindow windowFactory) : base(logger,mediatorService, imGuiService, windowFactory)
+     {
+     }
+ }

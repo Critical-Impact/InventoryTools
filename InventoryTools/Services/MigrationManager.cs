@@ -9,8 +9,10 @@ using CriticalCommonLib.Models;
 using Dalamud.Interface.Colors;
 using Dalamud.Plugin.Services;
 using InventoryTools.Logic;
+using InventoryTools.Logic.Columns;
 using InventoryTools.Logic.Filters;
 using InventoryTools.Logic.Settings;
+using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -25,14 +27,16 @@ public class MigrationManager : IHostedService
     private readonly IMarketCache _marketCache;
     private readonly IFilterService _filterService;
     private readonly IServiceProvider _serviceProvider;
+    private readonly IListService _listService;
 
-    public MigrationManager(ILogger<MigrationManager> logger, InventoryToolsConfiguration configuration, IMarketCache marketCache, IFilterService filterService, IServiceProvider serviceProvider)
+    public MigrationManager(ILogger<MigrationManager> logger, InventoryToolsConfiguration configuration, IMarketCache marketCache, IFilterService filterService, IServiceProvider serviceProvider, IListService listService)
     {
         _logger = logger;
         _configuration = configuration;
         _marketCache = marketCache;
         _filterService = filterService;
         _serviceProvider = serviceProvider;
+        _listService = listService;
     }
 
     public void RunMigrations()
@@ -91,20 +95,19 @@ public class MigrationManager : IHostedService
             foreach (var filterConfig in config.FilterConfigurations)
             {
                 filterConfig.GenerateNewTableId();
-                filterConfig.Columns = new List<ColumnConfiguration>();
-                filterConfig.AddColumn("IconColumn");
-                filterConfig.AddColumn("NameColumn");
-                filterConfig.AddColumn("TypeColumn");
-                filterConfig.AddColumn("SourceColumn");
-                filterConfig.AddColumn("LocationColumn");
+                _listService.AddColumn(filterConfig, typeof(IconColumn), false);
+                _listService.AddColumn(filterConfig, typeof(NameColumn), false);
+                _listService.AddColumn(filterConfig, typeof(TypeColumn), false);
+                _listService.AddColumn(filterConfig, typeof(SourceColumn), false);
+                _listService.AddColumn(filterConfig, typeof(LocationColumn), false);
                 if (filterConfig.FilterType == FilterType.SortingFilter)
                 {
-                    filterConfig.AddColumn("DestinationColumn");
+                    _listService.AddColumn(filterConfig, typeof(DestinationColumn), false);
                 }
-                filterConfig.AddColumn("QuantityColumn");
-                filterConfig.AddColumn("ItemILevelColumn");
-                filterConfig.AddColumn("SearchCategoryColumn");
-                filterConfig.AddColumn("MarketBoardPriceColumn");
+                _listService.AddColumn(filterConfig, typeof(QuantityColumn), false);
+                _listService.AddColumn(filterConfig, typeof(ItemILevelColumn), false);
+                _listService.AddColumn(filterConfig, typeof(SearchCategoryColumn), false);
+                _listService.AddColumn(filterConfig, typeof(MarketBoardPriceColumn), false);
             }
             _marketCache.ClearCache();
             config.InternalVersion++;
@@ -210,38 +213,34 @@ public class MigrationManager : IHostedService
         if (config.InternalVersion == 10)
         {
             _logger.LogInformation("Migrating to version 11");
-            foreach (var configuration in config.FilterConfigurations)
+            foreach (var filterConfig in config.FilterConfigurations)
             {
-                foreach (var filterConfig in config.FilterConfigurations)
+                filterConfig.TableHeight = 32;
+                filterConfig.CraftTableHeight = 32;
+                if (filterConfig.FilterType == FilterType.CraftFilter)
                 {
-                    filterConfig.TableHeight = 32;
-                    filterConfig.CraftTableHeight = 32;
-                    if (filterConfig.FilterType == FilterType.CraftFilter)
+                    filterConfig.FreezeCraftColumns = 2;
+                    filterConfig.GenerateNewCraftTableId();
+                    _listService.AddCraftColumn(filterConfig, typeof(IconColumn), false);
+                    _listService.AddCraftColumn(filterConfig, typeof(NameColumn), false);
+                    if (filterConfig.SimpleCraftingMode == true)
                     {
-                        filterConfig.FreezeCraftColumns = 2;
-                        filterConfig.GenerateNewCraftTableId();
-                        filterConfig.CraftColumns = new();
-                        filterConfig.AddCraftColumn("IconColumn");
-                        filterConfig.AddCraftColumn("NameColumn");
-                        if (filterConfig.SimpleCraftingMode == true)
-                        {
-                            filterConfig.AddCraftColumn("CraftAmountRequiredColumn");
-                            filterConfig.AddCraftColumn("CraftSimpleColumn");
-                        }
-                        else
-                        {
-                            filterConfig.AddCraftColumn("QuantityAvailableColumn");
-                            filterConfig.AddCraftColumn("CraftAmountRequiredColumn");
-                            filterConfig.AddCraftColumn("CraftAmountReadyColumn");
-                            filterConfig.AddCraftColumn("CraftAmountAvailableColumn");
-                            filterConfig.AddCraftColumn("CraftAmountUnavailableColumn");
-                            filterConfig.AddCraftColumn("CraftAmountCanCraftColumn");
-                        }
-                        filterConfig.AddCraftColumn("MarketBoardMinPriceColumn");
-                        filterConfig.AddCraftColumn("MarketBoardMinTotalPriceColumn");
-                        filterConfig.AddCraftColumn("AcquisitionSourceIconsColumn");
-                        filterConfig.AddCraftColumn("CraftGatherColumn");
+                        _listService.AddCraftColumn(filterConfig, typeof(CraftAmountRequiredColumn), false);
+                        _listService.AddCraftColumn(filterConfig, typeof(CraftSimpleColumn), false);
                     }
+                    else
+                    {
+                        _listService.AddCraftColumn(filterConfig, typeof(QuantityAvailableColumn), false);
+                        _listService.AddCraftColumn(filterConfig, typeof(CraftAmountRequiredColumn), false);
+                        _listService.AddCraftColumn(filterConfig, typeof(CraftAmountReadyColumn), false);
+                        _listService.AddCraftColumn(filterConfig, typeof(CraftAmountAvailableColumn), false);
+                        _listService.AddCraftColumn(filterConfig, typeof(CraftAmountUnavailableColumn), false);
+                        _listService.AddCraftColumn(filterConfig, typeof(CraftAmountCanCraftColumn), false);
+                    }
+                    _listService.AddCraftColumn(filterConfig, typeof(MarketBoardMinPriceColumn), false);
+                    _listService.AddCraftColumn(filterConfig, typeof(MarketBoardMinTotalPriceColumn), false);
+                    _listService.AddCraftColumn(filterConfig, typeof(AcquisitionSourceIconsColumn), false);
+                    _listService.AddCraftColumn(filterConfig, typeof(CraftGatherColumn), false);
                 }
             }
             config.InternalVersion++;
@@ -280,7 +279,7 @@ public class MigrationManager : IHostedService
                 {
                     if (hadDefaultCraftList && filterConfig.CraftListDefault)
                     {
-                        filterConfig.AddDefaultColumns();
+                        _listService.AddDefaultColumns(filterConfig);
                     }
 
                     foreach (var filter in toReset)
@@ -290,8 +289,8 @@ public class MigrationManager : IHostedService
 
                     if (hadDefaultCraftList || !filterConfig.CraftListDefault)
                     {
-                        filterConfig.AddCraftColumn("CraftSettingsColumn", 2);
-                        filterConfig.AddCraftColumn("CraftSimpleColumn", 3);
+                        _listService.AddCraftColumn(filterConfig, typeof(CraftSettingsColumn), false);
+                        _listService.AddCraftColumn(filterConfig, typeof(CraftSimpleColumn), false);
                     }
                 }
             }

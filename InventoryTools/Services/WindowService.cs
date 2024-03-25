@@ -72,7 +72,6 @@ namespace InventoryTools.Services
 
         private void RestoreSavedWindows()
         {
-            //TODO: Rewrire
             var openWindows = _configuration.OpenWindows;
             _configuration.OpenWindows = new HashSet<string>();
             foreach (var openWindow in openWindows)
@@ -87,6 +86,7 @@ namespace InventoryTools.Services
                         var newWindow = _genericWindowFactory.Invoke(type);
                         newWindow.Initialize();
                         AddWindow(newWindow);
+                        newWindow.Open();
 
                     }
                     catch (Exception e)
@@ -145,6 +145,19 @@ namespace InventoryTools.Services
             AddWindow(type, newWindow, windowId);
             return newWindow;
         }
+        
+        public StringWindow GetWindow(Type type, string windowId)
+        {
+            if (_stringWindows.ContainsKey((type,windowId)))
+            {
+                return (StringWindow)_stringWindows[(type,windowId)];
+            }
+            ;
+            var newWindow = _stringWindowFactory.Invoke(type, windowId);
+            newWindow.Initialize(windowId);
+            AddWindow(type, newWindow, windowId);
+            return newWindow;
+        }
 
         public T GetWindow<T>(uint windowId) where T: UintWindow
         {
@@ -193,6 +206,18 @@ namespace InventoryTools.Services
             GetWindow(window).Toggle();
             return true;
         }
+
+        public bool ToggleWindow(Type window, string windowId)
+        {
+            GetWindow(window, windowId).Toggle();
+            return true;
+        }
+
+        public bool ToggleWindow(Type window, uint windowId)
+        {
+            GetWindow(window, windowId).Toggle();
+            return true;
+        }
         public bool OpenWindow(Type type,bool refocus = true)
         {
             var window = GetWindow(type);
@@ -207,6 +232,19 @@ namespace InventoryTools.Services
             return true;
         }
         public bool OpenWindow(Type type, uint windowId, bool refocus = true)
+        {
+            var window = GetWindow(type, windowId);
+            if (window.IsOpen)
+            {
+                window.BringToFront();
+            }
+            else
+            {
+                window.Open();
+            }
+            return true;
+        }
+        public bool OpenWindow(Type type, string windowId, bool refocus = true)
         {
             var window = GetWindow(type, windowId);
             if (window.IsOpen)
@@ -262,6 +300,59 @@ namespace InventoryTools.Services
             return true;
         }
         
+        private bool CloseWindow(Type windowType)
+        {
+            if (_genericWindows.ContainsKey(windowType))
+            {
+                _genericWindows[windowType].Close();
+                return true;
+            }
+            return false;
+        }
+        
+        private bool CloseWindow(Type windowType, uint windowId)
+        {
+            if (_uintWindows.ContainsKey((windowType,windowId)))
+            {
+                _uintWindows[(windowType,windowId)].Close();
+                return true;
+            }
+            return false;
+        }
+        
+        private bool CloseWindow(Type windowType, string windowId)
+        {
+            if (_stringWindows.ContainsKey((windowType,windowId)))
+            {
+                _stringWindows[(windowType,windowId)].Close();
+                return true;
+            }
+            return false;
+        }
+        
+        private bool CloseWindows()
+        {
+            foreach (var window in _allWindows)
+            {
+                window.Close();
+            }
+
+            return true;
+        }
+        
+        private bool CloseWindows(Type type)
+        {
+            foreach (var window in _allWindows)
+            {
+                if (type.IsInstanceOfType(window))
+                {
+                    window.Close();
+                }
+            }
+
+            return true;
+        }
+        
         private bool AddWindow(Type windowType, GenericWindow window)
         {
             window.Logger = Logger;
@@ -271,7 +362,6 @@ namespace InventoryTools.Services
                 windowSystem.AddWindow(window);
                 window.Closed += WindowOnClosed;
                 window.Opened += WindowOnOpened;
-                window.Open();
                 return true;
             }
             return false;
@@ -286,7 +376,20 @@ namespace InventoryTools.Services
                 windowSystem.AddWindow(window);
                 window.Closed += WindowOnClosed;
                 window.Opened += WindowOnOpened;
-                window.Open();
+                return true;
+            }
+            return false;
+        }
+        
+        private bool AddWindow(Type windowType, StringWindow window, string windowId)
+        {
+            window.Logger = Logger;
+            if (_stringWindows.TryAdd((windowType,windowId), window))
+            {
+                _allWindows.Add(window);
+                windowSystem.AddWindow(window);
+                window.Closed += WindowOnClosed;
+                window.Opened += WindowOnOpened;
                 return true;
             }
             return false;
@@ -301,7 +404,6 @@ namespace InventoryTools.Services
                 windowSystem.AddWindow(window);
                 window.Closed += WindowOnClosed;
                 window.Opened += WindowOnOpened;
-                window.Open();
                 return true;
             }
             return false;
@@ -316,7 +418,6 @@ namespace InventoryTools.Services
                 windowSystem.AddWindow(window);
                 window.Closed += WindowOnClosed;
                 window.Opened += WindowOnOpened;
-                window.Open();
                 return true;
             }
             return false;
@@ -331,7 +432,6 @@ namespace InventoryTools.Services
                 windowSystem.AddWindow(window);
                 window.Closed += WindowOnClosed;
                 window.Opened += WindowOnOpened;
-                window.Open();
                 return true;
             }
             return false;
@@ -350,8 +450,7 @@ namespace InventoryTools.Services
                     window.SetPosition(_configuration.SavedWindowPositions[window.GetType().ToString()], true);
                 }
             }
-            //TODO: window should emit event not call overlay
-            //_overlayService.RefreshOverlayStates();
+            MediatorService.Publish(new OverlaysRequestRefreshMessage());
         }
 
         private void WindowOnClosed(IWindow window)
@@ -380,8 +479,7 @@ namespace InventoryTools.Services
                 }
 
             }
-            //TODO: window should emit event not call overlay
-            //_overlayService.RefreshOverlayStates();
+            MediatorService.Publish(new OverlaysRequestRefreshMessage());
         }
 
                 
@@ -400,10 +498,66 @@ namespace InventoryTools.Services
         public Task StartAsync(CancellationToken cancellationToken)
         {
             Logger.LogTrace("Starting service {type} ({this})", GetType().Name, this);
+            _mediatorService.Subscribe(this, new Action<ToggleGenericWindowMessage>(ToggleGenericWindow) );
+            _mediatorService.Subscribe(this, new Action<ToggleUintWindowMessage>(ToggleUintWindowMessage) );
+            _mediatorService.Subscribe(this, new Action<ToggleStringWindowMessage>(ToggleStringWindow));
             _mediatorService.Subscribe(this, new Action<OpenGenericWindowMessage>(GenericWindowMessage) );
             _mediatorService.Subscribe(this, new Action<OpenUintWindowMessage>(UintWindowMessage) );
-            _mediatorService.Subscribe(this, new Action<ToggleGenericWindowMessage>(ToggleGenericWindow) );
+            _mediatorService.Subscribe(this, new Action<OpenStringWindowMessage>(OpenStringWindow) );
+            _mediatorService.Subscribe(this, new Action<CloseWindowMessage>(CloseWindow) );
+            _mediatorService.Subscribe(this, new Action<CloseUintWindowMessage>(CloseUintWindow) );
+            _mediatorService.Subscribe(this, new Action<CloseStringWindowMessage>(CloseStringWindow) );
+            _mediatorService.Subscribe(this, new Action<CloseWindowsByTypeMessage>(CloseWindowsByType) );
+            _mediatorService.Subscribe(this, new Action<CloseWindowsMessage>(CloseWindows) );
+            _mediatorService.Subscribe(this, new Action<OpenSavedWindowsMessage>(OpenSavedWindows) );
+            _mediatorService.Subscribe(this, new Action<UpdateWindowRespectClose>(close => UpdateRespectCloseHotkey(close.windowType, close.newSetting)) );
+            
             return Task.CompletedTask;
+        }
+
+        private void OpenSavedWindows(OpenSavedWindowsMessage obj)
+        {
+            RestoreSavedWindows();
+        }
+
+        private void CloseWindows(CloseWindowsMessage obj)
+        {
+            CloseWindows();
+        }
+
+        private void CloseWindowsByType(CloseWindowsByTypeMessage obj)
+        {
+            CloseWindows(obj.windowType);
+        }
+
+        private void CloseStringWindow(CloseStringWindowMessage obj)
+        {
+            CloseWindow(obj.windowType, obj.windowId);
+        }
+
+        private void CloseUintWindow(CloseUintWindowMessage obj)
+        {
+            CloseWindow(obj.windowType, obj.windowId);
+        }
+
+        private void CloseWindow(CloseWindowMessage obj)
+        {
+            CloseWindow(obj.windowType);
+        }
+
+        private void OpenStringWindow(OpenStringWindowMessage obj)
+        {
+            OpenWindow(obj.windowType, obj.windowId);
+        }
+
+        private void ToggleStringWindow(ToggleStringWindowMessage obj)
+        {
+            ToggleWindow(obj.windowType, obj.windowId);
+        }
+
+        private void ToggleUintWindowMessage(ToggleUintWindowMessage obj)
+        {
+            ToggleWindow(obj.windowType, obj.windowId);
         }
 
         private void ToggleGenericWindow(ToggleGenericWindowMessage obj)

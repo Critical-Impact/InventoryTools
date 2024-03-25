@@ -17,6 +17,7 @@ using InventoryTools.Attributes;
 using InventoryTools.Converters;
 using InventoryTools.Enums;
 using InventoryTools.Extensions;
+using InventoryTools.Logic.Columns;
 using InventoryTools.Logic.Filters;
 using InventoryTools.Services;
 using Newtonsoft.Json;
@@ -26,7 +27,7 @@ namespace InventoryTools.Logic
     public class FilterConfiguration
     {
         private List<(ulong, InventoryCategory)> _destinationInventories = new();
-        private bool _displayInTabs = false;
+        private bool _displayInTabs = true;
         private bool? _duplicatesOnly;
         private List<uint> _equipSlotCategoryId = new();
         private bool? _isCollectible;
@@ -93,7 +94,6 @@ namespace InventoryTools.Logic
         private List<ColumnConfiguration>? _columns;
         private List<ColumnConfiguration>? _craftColumns;
         private string? _icon;
-        private static readonly byte CurrentVersion = 1;
         private HashSet<uint>? _sourceWorlds;
         private Vector4 _craftHeaderColour = new (0.0f, 0.439f, 1f, 1f);
         private CraftDisplayMode _craftDisplayMode = CraftDisplayMode.SingleTable;
@@ -130,43 +130,7 @@ namespace InventoryTools.Logic
         private CraftList? _craftList = null;
         private bool? _simpleCraftingMode = null;
         private bool? _useORFiltering = null;
-        public string ExportBase64()
-        {
-            var toExport = (FilterConfiguration)this.MemberwiseClone();
-            toExport.DestinationInventories = new List<(ulong, InventoryCategory)>();
-            toExport.SourceInventories = new List<(ulong, InventoryCategory)>();
-            var json  = JsonConvert.SerializeObject(toExport);
-            var bytes = Encoding.UTF8.GetBytes(json).Prepend(CurrentVersion).ToArray();
-            return bytes.ToCompressedBase64();
-        }
-        public static bool FromBase64(string data, out FilterConfiguration filterConfiguration)
-        {
-            filterConfiguration = new FilterConfiguration();
-            try
-            {
-                var bytes = data.FromCompressedBase64();
-                if (bytes.Length == 0 || bytes[0] != CurrentVersion)
-                {
-                    return false;
-                }
 
-                var json = Encoding.UTF8.GetString(bytes.AsSpan()[1..]);
-                var deserializeObject = JsonConvert.DeserializeObject<FilterConfiguration>(json);
-                if (deserializeObject == null)
-                {
-                    return false;
-                }
-
-                deserializeObject.Key = Guid.NewGuid().ToString("N");
-                filterConfiguration = deserializeObject;
-
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
 
         public string TableId
         {
@@ -227,7 +191,6 @@ namespace InventoryTools.Logic
             FilterType = filterType;
             Name = name;
             Key = key;
-            AddDefaultColumns();
         }
 
         public FilterConfiguration(string name, FilterType filterType)
@@ -235,16 +198,8 @@ namespace InventoryTools.Logic
             FilterType = filterType;
             Name = name;
             Key = Guid.NewGuid().ToString("N");
-            AddDefaultColumns();
         }
-
-        public static FilterConfiguration GenerateDefaultFilterConfiguration()
-        {
-            var defaultFilter = new FilterConfiguration("Default Craft List", FilterType.CraftFilter);
-            defaultFilter.ApplyDefaultCraftFilterConfiguration();
-            return defaultFilter;
-        }
-
+        
         public void ApplyDefaultCraftFilterConfiguration()
         {
             CraftListDefault = true;
@@ -263,99 +218,8 @@ namespace InventoryTools.Logic
             };
         }
 
-        public void AddDefaultColumns()
-        {
-            if (FilterType == FilterType.SearchFilter)
-            {
-                AddColumn("FavouritesColumn", false);
-                AddColumn("IconColumn", false);
-                var nameColumn = AddColumn("NameColumn", false);
-                AddColumn("TypeColumn", false);
-                AddColumn("QuantityColumn", false);
-                AddColumn("SourceColumn", false);
-                AddColumn("LocationColumn");
-                DefaultSortColumn = nameColumn.Key;
-                DefaultSortOrder = ImGuiSortDirection.Ascending;
-            }
-            else if (FilterType == FilterType.SortingFilter)
-            {
-                AddColumn("FavouritesColumn", false);
-                AddColumn("IconColumn", false);
-                var nameColumn = AddColumn("NameColumn", false);
-                AddColumn("TypeColumn", false);
-                AddColumn("QuantityColumn", false);
-                AddColumn("SourceColumn", false);
-                AddColumn("LocationColumn", false);
-                AddColumn("DestinationColumn");
-                DefaultSortColumn = nameColumn.Key;
-                DefaultSortOrder = ImGuiSortDirection.Ascending;
-            }
-            else if (FilterType == FilterType.GameItemFilter)
-            {
-                AddColumn("FavouritesColumn", false);
-                AddColumn("IconColumn", false);
-                var nameColumn = AddColumn("NameColumn", false);
-                AddColumn("UiCategoryColumn", false);
-                AddColumn("SearchCategoryColumn", false);
-                AddColumn("ItemILevelColumn", false);
-                AddColumn("ItemLevelColumn", false);
-                AddColumn("RarityColumn", false);
-                AddColumn("CraftColumn", false);
-                AddColumn("IsCraftingItemColumn", false);
-                AddColumn("CanBeGatheredColumn", false);
-                AddColumn("CanBePurchasedColumn", false);
-                AddColumn("AcquiredColumn", false);
-                AddColumn("SellToVendorPriceColumn", false);
-                AddColumn("BuyFromVendorPriceColumn", false);
-                AddColumn("AcquisitionSourceIconsColumn", false);
-                DefaultSortColumn = nameColumn.Key;
-                DefaultSortOrder = ImGuiSortDirection.Ascending;
-            }
-            else if (FilterType == FilterType.CraftFilter)
-            {
-                AddColumn("IconColumn", false);
-                var nameColumn = AddColumn("NameColumn", false);
-                AddColumn("CraftAmountAvailableColumn", false);
-                AddColumn("QuantityColumn", false);
-                AddColumn("SourceColumn", false);
-                AddColumn("LocationColumn", false);
-                
-                AddCraftColumn("IconColumn", null, false);
-                AddCraftColumn("NameColumn", null, false);
-                AddCraftColumn("CraftAmountRequiredColumn", null, false);
-                AddCraftColumn("CraftSettingsColumn", null, false);
-                AddCraftColumn("CraftSimpleColumn", null, false);
-                AddCraftColumn("MarketBoardMinPriceColumn", null, false);
-                AddCraftColumn("MarketBoardMinTotalPriceColumn", null, false);
-                AddCraftColumn("AcquisitionSourceIconsColumn", null, false);
-                AddCraftColumn("CraftGatherColumn", null, false);
-                DefaultSortColumn = nameColumn.Key;
-                DefaultSortOrder = ImGuiSortDirection.Ascending;
-            }
-            else if (FilterType == FilterType.HistoryFilter)
-            {
-                AddColumn("IconColumn", false);
-                AddColumn("NameColumn", false);
-                AddColumn("HistoryChangeAmountColumn", false);
-                AddColumn("HistoryChangeReasonColumn", false);
-                var changeDateColumn = AddColumn("HistoryChangeDateColumn", false);
-                AddColumn("TypeColumn", false);
-                AddColumn("QuantityColumn", false);
-                AddColumn("SourceColumn", false);
-                AddColumn("LocationColumn", false);
-                DefaultSortColumn = changeDateColumn.Key;
-                DefaultSortOrder = ImGuiSortDirection.Descending;
-                
-            }
-        }
-
         public FilterConfiguration()
         {
-        }
-
-        public void Refresh()
-        {
-            
         }
 
 
@@ -1122,166 +986,31 @@ namespace InventoryTools.Logic
             return columns.FirstOrDefault(c => c?.Key == columnKey, null);
         }
 
-        public ColumnConfiguration AddColumn(string columnName, bool notify = true)
+        public void AddColumn(ColumnConfiguration column, bool notify = true)
         {
             if (_columns == null)
             {
                 _columns = new List<ColumnConfiguration>();
             }
-
-            var newColumn = new ColumnConfiguration(columnName);
-            _columns.Add(newColumn);
+            _columns.Add(column);
             if (notify)
             {
                 GenerateNewTableId();
                 TableConfigurationDirty = true;
             }
-
-            return newColumn;
         }
 
-        public void AddCraftColumn(string columnName, int? index = null, bool notify = true)
+        public void AddCraftColumn(ColumnConfiguration craftColumn, bool notify = true)
         {
             if (_craftColumns == null)
             {
                 _craftColumns = new List<ColumnConfiguration>();
             }
-
-            if (index != null)
-            {
-                _craftColumns.Insert(Math.Min(index.Value,_craftColumns.Count), new ColumnConfiguration(columnName));
-            }
-            else
-            {
-                _craftColumns.Add(new ColumnConfiguration(columnName));
-            }
-
+            _craftColumns.Add(craftColumn);
             if (notify)
             {
-                GenerateNewCraftTableId();
-                TableConfigurationDirty = true;
-            }
-        }
-        
-        public void UpColumn(string columnKey)
-        {
-            if (this._columns == null)
-            {
-                return;
-            }
-
-            var column = _columns.Find(c => c.Key == columnKey);
-            if (column != null)
-            {
-                _columns = _columns.MoveUp(column);
                 GenerateNewTableId();
                 TableConfigurationDirty = true;
-            }
-        }
-        
-        public void DownColumn(string columnKey)
-        {
-            if (this._columns == null)
-            {
-                return;
-            }
-            var column = _columns.Find(c => c.Key == columnKey);
-            if (column != null)
-            {
-                _columns = _columns.MoveDown(column);
-                GenerateNewTableId();
-                TableConfigurationDirty = true;
-            }
-        }
-
-        public void RemoveColumn(string columnKey)
-        {
-            if (this._columns == null)
-            {
-                return;
-            }
-            _columns = _columns.Where(c => c.Key != columnKey).ToList();
-            GenerateNewTableId();
-            TableConfigurationDirty = true;
-        }
-        
-        public void AddDestinationInventory((ulong, InventoryCategory) inventory)
-        {
-            if (!DestinationInventories.Contains(inventory))
-            {
-                DestinationInventories.Add(inventory);
-                NeedsRefresh = true;
-                ConfigurationDirty = true;
-            }
-        }
-
-        public void RemoveDestinationInventory((ulong, InventoryCategory) inventory)
-        {
-            if (DestinationInventories.Contains(inventory))
-            {
-                DestinationInventories.Remove(inventory);
-                NeedsRefresh = true;
-                ConfigurationDirty = true;
-            }
-        }
-
-        public void AddSourceInventory((ulong, InventoryCategory) inventory)
-        {
-            if (!SourceInventories.Contains(inventory))
-            {
-                SourceInventories.Add(inventory);
-                NeedsRefresh = true;
-                ConfigurationDirty = true;
-            }
-        }
-
-        public void RemoveSourceInventory((ulong, InventoryCategory) inventory)
-        {
-            if (SourceInventories.Contains(inventory))
-            {
-                SourceInventories.Remove(inventory);
-                NeedsRefresh = true;
-                ConfigurationDirty = true;
-            }
-        }
-
-        public void AddItemUiCategory(uint itemUiCategoryId)
-        {
-            if (!ItemUiCategoryId.Contains(itemUiCategoryId))
-            {
-                ItemUiCategoryId.Add(itemUiCategoryId);
-                NeedsRefresh = true;
-                ConfigurationDirty = true;
-            }
-        }
-
-        public void RemoveItemUiCategory(uint itemUiCategoryId)
-        {
-            if (ItemUiCategoryId.Contains(itemUiCategoryId))
-            {
-                ItemUiCategoryId.Remove(itemUiCategoryId);
-                NeedsRefresh = true;
-                ConfigurationDirty = true;
-            }
-        }
-
-        public void AddItemSearchCategory(uint itemSearchCategoryId)
-        {
-            if (!ItemSearchCategoryId.Contains(itemSearchCategoryId))
-            {
-                ItemSearchCategoryId.Add(itemSearchCategoryId);
-                NeedsRefresh = true;
-                ConfigurationDirty = true;
-            }
-        }
-
-        public void RemoveItemSearchCategory(uint itemSearchCategoryId)
-        {
-            if (ItemSearchCategoryId.Contains(itemSearchCategoryId))
-            {
-                ItemSearchCategoryId.Remove(itemSearchCategoryId);
-                NeedsRefresh = true;
-                ConfigurationDirty = true;
             }
         }
 

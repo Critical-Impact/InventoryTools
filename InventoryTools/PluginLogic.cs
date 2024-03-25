@@ -288,6 +288,7 @@ namespace InventoryTools
             allItemsFilter.SourceAllCharacters = true;
             allItemsFilter.SourceAllRetainers = true;
             allItemsFilter.SourceAllFreeCompanies = true;
+            _listService.AddDefaultColumns(allItemsFilter);
             _listService.AddList(allItemsFilter);
         }
 
@@ -296,6 +297,7 @@ namespace InventoryTools
             var retainerItemsFilter = new FilterConfiguration(newName, FilterType.SearchFilter);
             retainerItemsFilter.DisplayInTabs = true;
             retainerItemsFilter.SourceAllRetainers = true;
+            _listService.AddDefaultColumns(retainerItemsFilter);
             _listService.AddList(retainerItemsFilter);
         }
 
@@ -304,6 +306,7 @@ namespace InventoryTools
             var playerItemsFilter = new FilterConfiguration(newName,  FilterType.SearchFilter);
             playerItemsFilter.DisplayInTabs = true;
             playerItemsFilter.SourceAllCharacters = true;
+            _listService.AddDefaultColumns(playerItemsFilter);
             _listService.AddList(playerItemsFilter);
         }
 
@@ -315,6 +318,7 @@ namespace InventoryTools
             historyFilter.SourceAllRetainers = true;
             historyFilter.SourceAllFreeCompanies = true;
             historyFilter.SourceAllHouses = true;
+            _listService.AddDefaultColumns(historyFilter);
             _listService.AddList(historyFilter);
         }
 
@@ -323,13 +327,15 @@ namespace InventoryTools
             var newFilter = new FilterConfiguration(newName,  FilterType.SearchFilter);
             newFilter.DisplayInTabs = true;
             newFilter.SourceAllFreeCompanies = true;
+            _listService.AddDefaultColumns(newFilter);
             _listService.AddList(newFilter);
         }
 
         public void AddAllGameItemsFilter(string newName = "All Game Items")
         {
             var allGameItemsFilter = new FilterConfiguration(newName, FilterType.GameItemFilter);
-            allGameItemsFilter.DisplayInTabs = true;            
+            allGameItemsFilter.DisplayInTabs = true;      
+            _listService.AddDefaultColumns(allGameItemsFilter);
             _listService.AddList(allGameItemsFilter);
         }
 
@@ -339,6 +345,7 @@ namespace InventoryTools
             var favouritesFilter = (FavouritesFilter)_filterFactory.Invoke(typeof(FavouritesFilter));
             favouritesFilter.UpdateFilterConfiguration(newFilter, true);
             newFilter.DisplayInTabs = true;   
+            _listService.AddDefaultColumns(newFilter);
             _listService.AddList(newFilter);
         }
 

@@ -2,6 +2,7 @@ using System.Numerics;
 using CriticalCommonLib.Services.Mediator;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
+using InventoryTools.GameUi;
 using InventoryTools.Logic;
 using InventoryTools.Misc;
 using InventoryTools.Services;
@@ -13,10 +14,12 @@ namespace InventoryTools.Ui
     public class TetrisWindow : GenericWindow
     {
         private readonly TetrisGame _tetrisGame;
+        private readonly TetrisOverlay _tetrisOverlay;
 
-        public TetrisWindow(ILogger<TetrisWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, TetrisGame tetrisGame, string name = "Tetris Window") : base(logger, mediator, imGuiService, configuration, name)
+        public TetrisWindow(ILogger<TetrisWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, TetrisGame tetrisGame, TetrisOverlay tetrisOverlay, string name = "Tetris Window") : base(logger, mediator, imGuiService, configuration, name)
         {
             _tetrisGame = tetrisGame;
+            _tetrisOverlay = tetrisOverlay;
         }
         public override void Initialize()
         {
@@ -46,6 +49,14 @@ namespace InventoryTools.Ui
 
             if (ImGui.Button(_tetrisGame.TetrisEnabled ? "Disable Tetris Overlay" : "Enable Tetris Overlay"))
             {
+                if (_tetrisGame.TetrisEnabled)
+                {
+                    _tetrisOverlay.Enabled = false;
+                }
+                else
+                {
+                    _tetrisOverlay.Enabled = true;
+                }
                 _tetrisGame.ToggleTetris();
             }
             

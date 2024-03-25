@@ -80,6 +80,7 @@ public class SampleFilter1Setting : BooleanSetting, ISampleFilterSetting
         sampleFilter.SourceAllFreeCompanies = true;
         sampleFilter.CanBeBought = true;
         sampleFilter.ShopBuyingPrice = "<=100";
+        _listService.AddDefaultColumns(sampleFilter);
         _listService.AddList(sampleFilter);
     }
 }
@@ -120,6 +121,7 @@ public class SampleFilter2Setting : BooleanSetting, ISampleFilterSetting
         sampleFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
         sampleFilter.DuplicatesOnly = true;
         sampleFilter.HighlightWhen = "Always";
+        _listService.AddDefaultColumns(sampleFilter);
         _listService.AddList(sampleFilter);
     }
 }
@@ -162,6 +164,7 @@ public class SampleFilter3Setting : BooleanSetting, ISampleFilterSetting
         sampleFilter.HighlightWhen = "Always";
         var gatherFilter = _canBeGatheredFilter;
         gatherFilter.UpdateFilterConfiguration(sampleFilter, true);
+        _listService.AddDefaultColumns(sampleFilter);
         _listService.AddList(sampleFilter);
     }
 }

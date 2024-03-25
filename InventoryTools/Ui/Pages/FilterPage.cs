@@ -4,6 +4,7 @@ using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
+using InventoryTools.Lists;
 using InventoryTools.Logic;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
@@ -15,11 +16,13 @@ namespace InventoryTools.Ui.Pages
     {
         private readonly IFilterService _filterService;
         private readonly IChatUtilities _chatUtilities;
+        private readonly ListImportExportService _importExportService;
 
-        public FilterPage(ILogger<FilterPage> logger, ImGuiService imGuiService, IFilterService filterService, IChatUtilities chatUtilities) : base(logger, imGuiService)
+        public FilterPage(ILogger<FilterPage> logger, ImGuiService imGuiService, IFilterService filterService, IChatUtilities chatUtilities, ListImportExportService importExportService) : base(logger, imGuiService)
         {
             _filterService = filterService;
             _chatUtilities = chatUtilities;
+            _importExportService = importExportService;
         }
         public override void Initialize()
         {
@@ -61,7 +64,7 @@ namespace InventoryTools.Ui.Pages
                 ImGui.NewLine();
                 if (ImGui.Button("Export Configuration to Clipboard"))
                 {
-                    var base64 = filterConfiguration.ExportBase64();
+                    var base64 = _importExportService.ToBase64(filterConfiguration);
                     ImGui.SetClipboardText(base64);
                     _chatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
                 }

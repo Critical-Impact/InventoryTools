@@ -18,7 +18,7 @@ public class HoverButton
         _bgColor = bgColor ?? new Vector4(1, 1, 1, 0);
         _tintColor = tintColor ?? new Vector4(1, 1, 1, 1);
         _bgColorHover = bgColorHover ?? _bgColor;
-        _tintColorHover = tintColorHover ?? ImGui.GetStyle().Colors[(int)ImGuiCol.ButtonHovered];
+        _tintColorHover = tintColorHover;
         _buttonState = new Dictionary<string, bool>();
     }
 
@@ -36,7 +36,7 @@ public class HoverButton
         var success = false;
         using var pushId  = ImRaii.PushId(id);
         if (ImGui.ImageButton(_textureWrap.ImGuiHandle, size ?? Size * ImGui.GetIO().FontGlobalScale, _uv0, _uv1, _framePadding,
-                isHovered ? _bgColorHover : _bgColor, isHovered ? _tintColorHover : _tintColor))
+                isHovered ? _bgColorHover : _bgColor, isHovered ? _tintColorHover ?? ImGui.GetStyle().Colors[(int)ImGuiCol.ButtonHovered] : _tintColor))
         {
             success = true;
         }
@@ -60,5 +60,5 @@ public class HoverButton
     private readonly Vector4 _bgColor;
     private readonly Vector4 _tintColor;
     private readonly Vector4 _bgColorHover;
-    private readonly Vector4 _tintColorHover;
+    private readonly Vector4? _tintColorHover;
 }

@@ -9,6 +9,7 @@ using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Logic.Filters.Abstract;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Lists;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,11 +21,13 @@ public class IngredientSearchFilter : UintMultipleChoiceFilter
 {
     private readonly IListService _listService;
     private readonly ExcelCache _excelCache;
+    private readonly Lazy<ListFilterService> _listFilterService;
 
-    public IngredientSearchFilter(ILogger<IngredientSearchFilter> logger, ImGuiService imGuiService,IListService listService, ExcelCache excelCache) : base(logger, imGuiService)
+    public IngredientSearchFilter(ILogger<IngredientSearchFilter> logger, ImGuiService imGuiService,IListService listService, ExcelCache excelCache, Lazy<ListFilterService> listFilterService) : base(logger, imGuiService)
     {
         _listService = listService;
         _excelCache = excelCache;
+        _listFilterService = listFilterService;
     }
     public override string Key { get; set; } = "IngredientSearchFilter";
     public override string Name { get; set; } = "Ingredient Search Filter";
@@ -82,23 +85,22 @@ public class IngredientSearchFilter : UintMultipleChoiceFilter
                 {
                     if (ImGui.Selectable("Add all from " + filter.Name))
                     {
-                        //TODO: FIX ME
-                        // var filterResult = filter.GenerateFilteredList().Result;
-                        // foreach (var item in filterResult.AllItems)
-                        // {
-                        //     if (item.CanBeCrafted && item.SearchString != "")
-                        //     {
-                        //         currentValue.Add(item.RowId);
-                        //     }
-                        // }
-                        // foreach (var item in filterResult.SortedItems)
-                        // {
-                        //     if (item.InventoryItem.Item.CanBeCrafted && item.InventoryItem.Item.SearchString != "")
-                        //     {
-                        //         currentValue.Add(item.InventoryItem.ItemId);
-                        //     }
-                        // }
-                        // UpdateFilterConfiguration(configuration,currentValue.ToList());
+                        var filterResult = _listFilterService.Value.RefreshList(filter);
+                        foreach (var item in filterResult.AllItems)
+                        {
+                            if (item.CanBeCrafted && item.SearchString != "")
+                            {
+                                currentValue.Add(item.RowId);
+                            }
+                        }
+                        foreach (var item in filterResult.SortedItems)
+                        {
+                            if (item.InventoryItem.Item.CanBeCrafted && item.InventoryItem.Item.SearchString != "")
+                            {
+                                currentValue.Add(item.InventoryItem.ItemId);
+                            }
+                        }
+                        UpdateFilterConfiguration(configuration,currentValue.ToList());
                     }
                 }
             }
@@ -119,6 +121,7 @@ public class IngredientSearchFilter : UintMultipleChoiceFilter
             var ingredients = new HashSet<uint>();
             var craftList = new CraftList();
             craftList.AddCraftItem(itemId);
+            craftList.GenerateCraftChildren();
             foreach (var material in craftList.GetFlattenedMaterials())
             {
                 if (!material.IsOutputItem)

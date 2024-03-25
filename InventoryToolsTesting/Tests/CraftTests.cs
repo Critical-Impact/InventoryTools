@@ -1,28 +1,15 @@
 using System.Collections.Generic;
 using System.Linq;
-using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
+using InventoryToolsTesting.Tests.Abstract;
 using NUnit.Framework;
-using Lumina;
 
-namespace InventoryToolsTesting
+namespace InventoryToolsTesting.Tests
 {
     [TestFixture]
-    public class CraftTests
+    public class CraftTests : BaseTest
     {
-
-        [OneTimeSetUp]
-        public void Init()
-        {
-            var lumina = new GameData( "C:/Games/SquareEnix/FINAL FANTASY XIV - A Realm Reborn/game/sqpack", new LuminaOptions()
-            {
-                PanicOnSheetChecksumMismatch = false
-            } );
-            _excelCache = new ExcelCache(lumina);
-        }
-
         [Test]
         public void TestSkybuildersCalculations()
         {
@@ -392,8 +379,7 @@ namespace InventoryToolsTesting
         public void TestIngredientReturn()
         {
             CraftList list = new CraftList();
-            CraftItemSourceStore store = new CraftItemSourceStore();
-            store = new CraftItemSourceStore()
+            var store = new CraftItemSourceStore()
                 .AddExternalSource("Cotton Boll", 100, false)
                 .AddExternalSource("Cotton Yarn", 5, false)
                 .AddCharacterSource("Wind Shard", 999, false)

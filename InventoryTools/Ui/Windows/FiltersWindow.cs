@@ -17,6 +17,7 @@ using InventoryTools.Logic.Settings;
 using InventoryTools.Ui.Widgets;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
+using InventoryTools.Lists;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
@@ -39,9 +40,10 @@ namespace InventoryTools.Ui
         private readonly FileDialogManager _fileDialogManager;
         private readonly IGameUiManager _gameUiManager;
         private readonly InventoryHistory _inventoryHistory;
+        private readonly ListImportExportService _importExportService;
         private readonly InventoryToolsConfiguration _configuration;
 
-        public FiltersWindow(ILogger<FiltersWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IIconService iconService, IListService listService, IFilterService filterService, TableService tableService, IChatUtilities chatUtilities, ICharacterMonitor characterMonitor, IUniversalis universalis, FileDialogManager fileDialogManager, IGameUiManager gameUiManager, InventoryHistory inventoryHistory) : base(logger, mediator, imGuiService, configuration, "Filters Window")
+        public FiltersWindow(ILogger<FiltersWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IIconService iconService, IListService listService, IFilterService filterService, TableService tableService, IChatUtilities chatUtilities, ICharacterMonitor characterMonitor, IUniversalis universalis, FileDialogManager fileDialogManager, IGameUiManager gameUiManager, InventoryHistory inventoryHistory, ListImportExportService importExportService) : base(logger, mediator, imGuiService, configuration, "Filters Window")
         {
             _iconService = iconService;
             _listService = listService;
@@ -53,6 +55,7 @@ namespace InventoryTools.Ui
             _fileDialogManager = fileDialogManager;
             _gameUiManager = gameUiManager;
             _inventoryHistory = inventoryHistory;
+            _importExportService = importExportService;
             _configuration = configuration;
             _editIcon = new(_iconService.LoadImage("edit"),  new Vector2(22, 22));
             _settingsIcon = new(_iconService.LoadIcon(66319),  new Vector2(22, 22));
@@ -250,7 +253,8 @@ namespace InventoryTools.Ui
             if (existingFilter != null)
             {
                 var newFilter = _listService.DuplicateList(existingFilter, filterName);
-                MediatorService.Publish(new Mediator.OpenConfigurationWindowAndEditFilterMessage(newFilter));
+                MediatorService.Publish(new ConfigurationWindowEditFilter(newFilter));
+                MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
                 FocusFilter(newFilter);
             }
         }
@@ -279,34 +283,44 @@ namespace InventoryTools.Ui
         {
             var filterConfiguration = new FilterConfiguration(newName,
                 Guid.NewGuid().ToString("N"), FilterType.SearchFilter);
+            _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
             Invalidate();
-            MediatorService.Publish(new Mediator.OpenConfigurationWindowAndEditFilterMessage(filterConfiguration));
+            MediatorService.Publish(new ConfigurationWindowEditFilter(filterConfiguration));
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
         }
         
         private void AddHistoryFilter(string newName, string id)
         {
             var filterConfiguration = new FilterConfiguration(newName,
                 Guid.NewGuid().ToString("N"), FilterType.HistoryFilter);
+            _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
             Invalidate();
-            MediatorService.Publish(new Mediator.OpenConfigurationWindowAndEditFilterMessage(filterConfiguration));
+            MediatorService.Publish(new ConfigurationWindowEditFilter(filterConfiguration));
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
+
         }
 
         private void AddGameItemFilter(string newName, string id)
         {
             var filterConfiguration = new FilterConfiguration(newName,Guid.NewGuid().ToString("N"), FilterType.GameItemFilter);
+            _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
             Invalidate();
-            MediatorService.Publish(new Mediator.OpenConfigurationWindowAndEditFilterMessage(filterConfiguration));
+            MediatorService.Publish(new ConfigurationWindowEditFilter(filterConfiguration));
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
         }
 
         private void AddSortFilter(string newName, string id)
         {
             var filterConfiguration = new FilterConfiguration(newName,Guid.NewGuid().ToString("N"), FilterType.SortingFilter);
+            _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
             Invalidate();
-            MediatorService.Publish(new Mediator.OpenConfigurationWindowAndEditFilterMessage(filterConfiguration));
+            MediatorService.Publish(new ConfigurationWindowEditFilter(filterConfiguration));
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
+
         }
 
         private List<FilterConfiguration> Filters
@@ -678,7 +692,7 @@ namespace InventoryTools.Ui
                         ImGui.NewLine();
                         if (ImGui.Button("Export Configuration to Clipboard"))
                         {
-                            var base64 = filterConfiguration.ExportBase64();
+                            var base64 = _importExportService.ToBase64(filterConfiguration);
                             ImGui.SetClipboardText(base64);
                             _chatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
                         }
