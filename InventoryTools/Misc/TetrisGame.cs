@@ -21,7 +21,6 @@ namespace InventoryTools.Misc
     {
         public TetrisGame(ILogger<TetrisGame> logger, MediatorService mediatorService) : base(logger, mediatorService)
         {
-            Initialize();
         }
 
         private readonly int[,] clearBlock = {

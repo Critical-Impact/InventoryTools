@@ -8,9 +8,6 @@ using DalaMock.Shared.Interfaces;
 using Dalamud.Plugin.Services;
 using InventoryTools;
 using InventoryTools.Logic;
-using InventoryTools.Ui;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 

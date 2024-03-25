@@ -4,6 +4,7 @@ using System.Numerics;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using ImGuiNET;
+using InventoryTools.Lists;
 using InventoryTools.Logic;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
@@ -16,11 +17,13 @@ namespace InventoryTools.Ui.Pages
     {
         private readonly IListService _listService;
         private readonly IChatUtilities _chatUtilities;
+        private readonly ListImportExportService _importExportService;
 
-        public CraftFiltersPage(ILogger<CraftFiltersPage> logger, ImGuiService imGuiService, IListService listService, IChatUtilities chatUtilities) : base(logger, imGuiService)
+        public CraftFiltersPage(ILogger<CraftFiltersPage> logger, ImGuiService imGuiService, IListService listService, IChatUtilities chatUtilities, ListImportExportService importExportService) : base(logger, imGuiService)
         {
             _listService = listService;
             _chatUtilities = chatUtilities;
+            _importExportService = importExportService;
         }
         private bool _isSeparator = false;
         public override void Initialize()
@@ -81,7 +84,7 @@ namespace InventoryTools.Ui.Pages
                         ImGui.TableNextColumn();
                         if (ImGui.SmallButton("Export Configuration##" + index))
                         {
-                            var base64 = filterConfiguration.ExportBase64();
+                            var base64 = _importExportService.ToBase64(filterConfiguration);
                             ImGui.SetClipboardText(base64);
                             _chatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
                         }

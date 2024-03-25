@@ -181,7 +181,9 @@ namespace InventoryTools.Logic.Filters
                                     _selectedColumnName = column.Value.Name;
                                     _selectedColumnKey = column.Key;
                                     _selectedColumn = new ColumnConfiguration(column.Key);
+                                    _selectedColumn.Column = column.Value;
                                     _customName = "";
+                                    _exportName = "";
                                 }
 
                                 ImGuiUtil.HoverTooltip(column.Value.HelpText);

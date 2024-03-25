@@ -1,10 +1,7 @@
 using System.Numerics;
 using CriticalCommonLib.Services.Mediator;
-using Dalamud.Interface;
 using Dalamud.Interface.Utility;
 using ImGuiNET;
-using Dalamud.Logging;
-using Dalamud.Plugin.Services;
 using InventoryTools;
 using InventoryTools.Logic;
 using InventoryTools.Services;

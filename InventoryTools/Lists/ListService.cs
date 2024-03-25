@@ -11,6 +11,7 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using Dalamud.Plugin.Services;
+using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Lists;
 using InventoryTools.Logic;
@@ -34,9 +35,10 @@ namespace InventoryTools.Services
         private readonly IChatUtilities _chatUtilities;
         private readonly IFramework _framework;
         private readonly Func<string, IColumn?> _columnFactory;
+        private readonly Func<Type, IColumn> _columnTypeFactory;
         private ConcurrentDictionary<string, FilterConfiguration> _lists;
 
-        public ListService(ILogger<ListService> logger, MediatorService mediatorService, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, InventoryHistory history, ConfigurationManager configurationManager, InventoryToolsConfiguration configuration, IChatUtilities chatUtilities, IFramework framework, Func<string, IColumn?> columnFactory) : base(logger, mediatorService)
+        public ListService(ILogger<ListService> logger, MediatorService mediatorService, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, InventoryHistory history, ConfigurationManager configurationManager, InventoryToolsConfiguration configuration, IChatUtilities chatUtilities, IFramework framework, Func<string, IColumn?> columnFactory, Func<Type,IColumn> columnTypeFactory) : base(logger, mediatorService)
         {
             _history = history;
             _configurationManager = configurationManager;
@@ -44,6 +46,7 @@ namespace InventoryTools.Services
             _chatUtilities = chatUtilities;
             _framework = framework;
             _columnFactory = columnFactory;
+            _columnTypeFactory = columnTypeFactory;
             _lists = new ConcurrentDictionary<string, FilterConfiguration>();
 
             configurationManager.ConfigurationChanged += ConfigOnConfigurationChanged;
@@ -252,6 +255,7 @@ namespace InventoryTools.Services
         public bool AddList(string name, FilterType filterType)
         {
             var sampleFilter = new FilterConfiguration(name, filterType);
+            AddDefaultColumns(sampleFilter);
             return AddList(sampleFilter);
         }
 
@@ -285,6 +289,7 @@ namespace InventoryTools.Services
             {
                 var filter = new FilterConfiguration(fixedName,
                     Guid.NewGuid().ToString("N"), FilterType.CraftFilter);
+                AddDefaultColumns(filter);
                 filter.IsEphemeralCraftList = isEphemeralNN;
                 AddList(filter);
                 return filter;
@@ -416,7 +421,7 @@ namespace InventoryTools.Services
                 return _lists.First(c => c.Value.FilterType == FilterType.CraftFilter && c.Value.CraftListDefault).Value;
             }
 
-            var defaultFilter = FilterConfiguration.GenerateDefaultFilterConfiguration();
+            var defaultFilter = GenerateDefaultCraftList();
             AddList(defaultFilter);
             return defaultFilter;
         }
@@ -787,7 +792,7 @@ namespace InventoryTools.Services
                         filter.ResetFilter(configuration);
                     }
                 }
-                configuration.AddDefaultColumns();
+                AddDefaultColumns(configuration);
                 configuration.ApplyDefaultCraftFilterConfiguration();
             }
             else if (configuration.FilterType == FilterType.CraftFilter)
@@ -852,6 +857,117 @@ namespace InventoryTools.Services
             Logger.LogTrace("Starting service {type} ({this})", GetType().Name, this);
             _lists = LoadListsFromConfiguration();
             return Task.CompletedTask;
+        }
+
+        public ColumnConfiguration AddColumn(FilterConfiguration configuration, Type columnType, bool notify = true)
+        {
+            var column = _columnTypeFactory.Invoke(columnType);
+            var newColumn = new ColumnConfiguration(columnType.Name);
+            newColumn.Column = column;
+            configuration.AddColumn(newColumn, notify);
+            return newColumn;
+        }
+
+        public ColumnConfiguration AddCraftColumn(FilterConfiguration configuration, Type columnType, bool notify = true)
+        {
+            var column = _columnTypeFactory.Invoke(columnType);
+            var newColumn = new ColumnConfiguration(columnType.Name);
+            newColumn.Column = column;
+            configuration.AddCraftColumn(newColumn, notify);
+            return newColumn;
+        }
+        
+        public FilterConfiguration GenerateDefaultCraftList()
+        {
+            var defaultFilter = new FilterConfiguration("Default Craft List", FilterType.CraftFilter);
+            AddDefaultColumns(defaultFilter);
+            defaultFilter.ApplyDefaultCraftFilterConfiguration();
+            return defaultFilter;
+        }
+        
+        public void AddDefaultColumns(FilterConfiguration configuration)
+        {
+            if (configuration.FilterType == FilterType.SearchFilter)
+            {
+                AddColumn(configuration, typeof(FavouritesColumn));
+                AddColumn(configuration,typeof(IconColumn), false);
+                AddColumn(configuration,typeof(TypeColumn), false);
+                AddColumn(configuration,typeof(QuantityColumn), false);
+                AddColumn(configuration,typeof(SourceColumn), false);
+                AddColumn(configuration,typeof(LocationColumn),false);
+                var nameColumn = AddColumn(configuration,typeof(NameColumn), false);
+                configuration.DefaultSortColumn = nameColumn.Key;
+                configuration.DefaultSortOrder = ImGuiSortDirection.Ascending;
+            }
+            else if (configuration.FilterType == FilterType.SortingFilter)
+            {
+                AddColumn(configuration,typeof(FavouritesColumn), false);
+                AddColumn(configuration,typeof(IconColumn), false);
+                var nameColumn = AddColumn(configuration,typeof(NameColumn), false);
+                AddColumn(configuration,typeof(TypeColumn), false);
+                AddColumn(configuration,typeof(QuantityColumn), false);
+                AddColumn(configuration,typeof(SourceColumn), false);
+                AddColumn(configuration,typeof(LocationColumn), false);
+                AddColumn(configuration,typeof(DestinationColumn),false);
+                configuration.DefaultSortColumn = nameColumn.Key;
+                configuration.DefaultSortOrder = ImGuiSortDirection.Ascending;
+            }
+            else if (configuration.FilterType == FilterType.GameItemFilter)
+            {
+                AddColumn(configuration,typeof(FavouritesColumn), false);
+                AddColumn(configuration,typeof(IconColumn), false);
+                var nameColumn = AddColumn(configuration,typeof(NameColumn), false);
+                AddColumn(configuration,typeof(UiCategoryColumn), false);
+                AddColumn(configuration,typeof(SearchCategoryColumn), false);
+                AddColumn(configuration,typeof(ItemILevelColumn), false);
+                AddColumn(configuration,typeof(ItemLevelColumn), false);
+                AddColumn(configuration,typeof(RarityColumn), false);
+                AddColumn(configuration,typeof(CraftColumn), false);
+                AddColumn(configuration,typeof(IsCraftingItemColumn), false);
+                AddColumn(configuration,typeof(CanBeGatheredColumn), false);
+                AddColumn(configuration,typeof(CanBePurchasedColumn), false);
+                AddColumn(configuration,typeof(AcquiredColumn), false);
+                AddColumn(configuration,typeof(SellToVendorPriceColumn), false);
+                AddColumn(configuration,typeof(BuyFromVendorPriceColumn), false);
+                AddColumn(configuration,typeof(AcquisitionSourceIconsColumn), false);
+                configuration.DefaultSortColumn = nameColumn.Key;
+                configuration.DefaultSortOrder = ImGuiSortDirection.Ascending;
+            }
+            else if (configuration.FilterType == FilterType.CraftFilter)
+            {
+                AddColumn(configuration,typeof(IconColumn), false);
+                var nameColumn = AddColumn(configuration,typeof(NameColumn), false);
+                AddColumn(configuration,typeof(CraftAmountAvailableColumn), false);
+                AddColumn(configuration,typeof(QuantityColumn), false);
+                AddColumn(configuration,typeof(SourceColumn), false);
+                AddColumn(configuration,typeof(LocationColumn), false);
+                
+                AddCraftColumn(configuration,typeof(IconColumn), false);
+                AddCraftColumn(configuration,typeof(NameColumn), false);
+                AddCraftColumn(configuration,typeof(CraftAmountRequiredColumn), false);
+                AddCraftColumn(configuration,typeof(CraftSettingsColumn), false);
+                AddCraftColumn(configuration,typeof(CraftSimpleColumn), false);
+                AddCraftColumn(configuration,typeof(MarketBoardMinPriceColumn), false);
+                AddCraftColumn(configuration,typeof(MarketBoardMinTotalPriceColumn), false);
+                AddCraftColumn(configuration,typeof(AcquisitionSourceIconsColumn), false);
+                AddCraftColumn(configuration,typeof(CraftGatherColumn), false);
+                configuration.DefaultSortColumn = nameColumn.Key;
+                configuration.DefaultSortOrder = ImGuiSortDirection.Ascending;
+            }
+            else if (configuration.FilterType == FilterType.HistoryFilter)
+            {
+                AddColumn(configuration,typeof(IconColumn), false);
+                AddColumn(configuration,typeof(NameColumn), false);
+                AddColumn(configuration,typeof(HistoryChangeAmountColumn), false);
+                AddColumn(configuration,typeof(HistoryChangeReasonColumn), false);
+                var changeDateColumn = AddColumn(configuration,typeof(HistoryChangeDateColumn), false);
+                AddColumn(configuration,typeof(TypeColumn), false);
+                AddColumn(configuration,typeof(QuantityColumn), false);
+                AddColumn(configuration,typeof(SourceColumn), false);
+                AddColumn(configuration,typeof(LocationColumn), false);
+                configuration.DefaultSortColumn = changeDateColumn.Key;
+                configuration.DefaultSortOrder = ImGuiSortDirection.Descending;
+            }
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

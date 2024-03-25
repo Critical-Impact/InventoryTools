@@ -34,7 +34,6 @@ using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Misc;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
-using InventoryTools.Test;
 using InventoryTools.Tooltips;
 using InventoryTools.Ui;
 using InventoryTools.Ui.Pages;
@@ -235,6 +234,8 @@ public class PluginLoader : IDisposable
                 builder.RegisterType<FilterTable>();
                 builder.RegisterType<CraftItemTable>();
                 builder.RegisterType<InventoryToolsUi>().SingleInstance();
+                builder.RegisterType<ListImportExportService>().SingleInstance();
+                builder.RegisterType<VersionInfo>().SingleInstance();
 
                 //Transient
                 builder.RegisterType<FilterState>();
@@ -248,7 +249,21 @@ public class PluginLoader : IDisposable
                     return configuration;
                 }).As<InventoryToolsConfiguration>().SingleInstance();
 
+                builder.Register<Func<string, ColumnConfiguration?>>(c => {
+                    var context = c.Resolve<IComponentContext>();
+                    return typeName => { 
+                        Type? type = Type.GetType($"InventoryTools.Logic.Columns." + typeName);
+                        if (type == null)
+                        {
+                            return null;
+                        }
+                        var column = (IColumn)context.Resolve(type);
 
+                        var columnConfiguration = new ColumnConfiguration(typeName);
+                        columnConfiguration.Column = column;
+                        return columnConfiguration;
+                    };
+                });
                 
                 builder.Register<Func<string,IColumn?>>(c => {
                     var context = c.Resolve<IComponentContext>();
@@ -261,6 +276,15 @@ public class PluginLoader : IDisposable
 
                         var uintWindow = (IColumn)context.Resolve(type);
                         return uintWindow;
+                    };
+                });
+                
+                builder.Register<Func<Type,IColumn>>(c => {
+                    var context = c.Resolve<IComponentContext>();
+                    return type =>
+                    {
+                        var column = (IColumn)context.Resolve(type);
+                        return column;
                     };
                 });
                 
@@ -335,6 +359,13 @@ public class PluginLoader : IDisposable
                         return configPage;
                     };
                 });
+                builder.Register<Func<Type, IFilter>>(c => {
+                    var context = c.Resolve<IComponentContext>();
+                    return type => { 
+                        var filter = (IFilter)context.Resolve(type);
+                        return filter;
+                    };
+                });
             });
         hostBuilder
             .ConfigureServices(collection =>
@@ -346,11 +377,13 @@ public class PluginLoader : IDisposable
                 collection.AddHostedService(p => p.GetRequiredService<ListFilterService>());
                 collection.AddHostedService(p => p.GetRequiredService<MediatorService>());
                 collection.AddHostedService(p => p.GetRequiredService<PluginLogic>());
-                collection.AddHostedService(p => p.GetRequiredService<PluginBoot>());
                 collection.AddHostedService(p => p.GetRequiredService<WindowService>());
                 collection.AddHostedService(p => p.GetRequiredService<TableService>());
+                collection.AddHostedService(p => p.GetRequiredService<IOverlayService>());
                 collection.AddHostedService(p => p.GetRequiredService<IWotsitIpc>());
                 collection.AddHostedService(p => p.GetRequiredService<PluginCommandManager<PluginCommands>>());
+                collection.AddHostedService(p => p.GetRequiredService<PluginBoot>());
+                collection.AddHostedService(p => p.GetRequiredService<ConfigurationManager>());
                 collection.AddHostedService(p => p.GetRequiredService<InventoryToolsUi>());
             });
             PreBuild(hostBuilder);

@@ -471,8 +471,7 @@ namespace InventoryTools.Extensions
             else if (filterString.StartsWith("<=") && filterString.Length >= 3)
             {
                 var filter = filterString.Substring(2);
-                var numberResult = 0;
-                if (int.TryParse(filter, out numberResult))
+                if (int.TryParse(filter, out var numberResult))
                 {
                     if (numberResult >= number)
                     {
@@ -483,8 +482,7 @@ namespace InventoryTools.Extensions
             else if(filterString.StartsWith(">=") && filterString.Length >= 3)
             {
                 var filter = filterString.Substring(2);
-                var numberResult = 0;
-                if (int.TryParse(filter, out numberResult))
+                if (int.TryParse(filter, out var numberResult))
                 {
                     if (numberResult <= number)
                     {
@@ -495,8 +493,7 @@ namespace InventoryTools.Extensions
             else if (filterString.StartsWith("<") && filterString.Length >= 2)
             {
                 var filter = filterString.Substring(1);
-                var numberResult = 0;
-                if (int.TryParse(filter, out numberResult))
+                if (int.TryParse(filter, out var numberResult))
                 {
                     if (numberResult > number)
                     {
@@ -507,8 +504,7 @@ namespace InventoryTools.Extensions
             else if (filterString.StartsWith(">") && filterString.Length >= 2)
             {
                 var filter = filterString.Substring(1);
-                var numberResult = 0;
-                if (int.TryParse(filter, out numberResult))
+                if (int.TryParse(filter, out var numberResult))
                 {
                     if (numberResult < number)
                     {

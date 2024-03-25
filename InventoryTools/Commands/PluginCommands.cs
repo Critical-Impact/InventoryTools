@@ -168,7 +168,7 @@ namespace InventoryTools.Commands
         [HelpMessage("Closes all list windows.")]
         public void CloseFilterWindows(string command, string args)
         {
-            _mediatorService.Publish(new CloseWindowsMessage(typeof(FilterWindow)));
+            _mediatorService.Publish(new CloseWindowsByTypeMessage(typeof(FilterWindow)));
         }
 
         [Command("/atclearall")]

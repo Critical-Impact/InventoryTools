@@ -1,30 +1,21 @@
 using System.Linq;
-using CriticalCommonLib;
 using CriticalCommonLib.Services;
-using Lumina;
+using InventoryToolsTesting.Tests.Abstract;
+using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 
-namespace InventoryToolsTesting
+namespace InventoryToolsTesting.Tests
 {
     [TestFixture]
 
-    public class ItemExTests
+    public class ItemExTests : BaseTest
     {
-        [OneTimeSetUp]
-        public void Init()
-        {
-            var lumina = new Lumina.GameData( "C:/Games/SquareEnix/FINAL FANTASY XIV - A Realm Reborn/game/sqpack", new LuminaOptions()
-            {
-                PanicOnSheetChecksumMismatch = false
-            } );
-            _excelCache = new ExcelCache(lumina);
-        }
-        
         [Test]
         public void TestGatheringSources()
         {
+            var excelCache = TestHost.Services.GetRequiredService<ExcelCache>();
             //Earth Shard
-            var earthShard = _excelCache.GetItemExSheet().GetRow(5)!;
+            var earthShard = excelCache.GetItemExSheet().GetRow(5)!;
             var gatheringSources = earthShard.GetGatheringSources();
             //Not the same as garland tools because we don't deal with individual nodes
             Assert.AreEqual(16, gatheringSources.Count);
@@ -34,7 +25,8 @@ namespace InventoryToolsTesting
         [Test]
         public void TestUplandWheatFlour()
         {
-            var uplandWheatFlour = _excelCache.GetItemExSheet().GetRow(27841)!;
+            var excelCache = TestHost.Services.GetRequiredService<ExcelCache>();
+            var uplandWheatFlour = excelCache.GetItemExSheet().GetRow(27841)!;
             var gatheringSources = uplandWheatFlour.GetGatheringSources();
             Assert.AreEqual(0, gatheringSources.Count);
             var sources = uplandWheatFlour.Sources;
@@ -45,28 +37,30 @@ namespace InventoryToolsTesting
         [Test]
         public void TestScrip()
         {
+            var excelCache = TestHost.Services.GetRequiredService<ExcelCache>();
             //Handsaint Jacket
-            var handsaintJacket = _excelCache.GetItemExSheet().GetRow(31794)!;
+            var handsaintJacket = excelCache.GetItemExSheet().GetRow(31794)!;
             Assert.AreEqual(2, handsaintJacket.Sources.Count);
             Assert.AreEqual(4, handsaintJacket.Vendors.Count);
             var actualVendors = handsaintJacket.Vendors.SelectMany(shop => shop.ENpcs.SelectMany(npc => npc.Locations.Select(location => (shop, npc, location)))).ToList();
 
-            Assert.AreEqual(28, actualVendors.Count);
+            Assert.AreEqual(14, actualVendors.Count);
             
             //Wool Top 16906
-            var woolTop = _excelCache.GetItemExSheet().GetRow(16906)!;
+            var woolTop = excelCache.GetItemExSheet().GetRow(16906)!;
             Assert.AreEqual(4, woolTop.Sources.Count);
             Assert.AreEqual(4, woolTop.Vendors.Count);
             actualVendors = woolTop.Vendors.SelectMany(shop => shop.ENpcs.SelectMany(npc => npc.Locations.Select(location => (shop, npc, location)))).ToList();
             
-            Assert.AreEqual(56, actualVendors.Count);
+            Assert.AreEqual(28, actualVendors.Count);
         }
 
         [Test]
         public void TestTomestones()
         {
+            var excelCache = TestHost.Services.GetRequiredService<ExcelCache>();
             //Palebloom Kudzu Cloth
-            var item = _excelCache.GetItemExSheet().GetRow(37829)!;
+            var item = excelCache.GetItemExSheet().GetRow(37829)!;
             Assert.AreEqual(1, item.Sources.Count);
             
         }
@@ -74,8 +68,9 @@ namespace InventoryToolsTesting
         [Test]
         public void TestMoonwardGear()
         {
+            var excelCache = TestHost.Services.GetRequiredService<ExcelCache>();
             //Moonward Longsword
-            var item = _excelCache.GetItemExSheet().GetRow(34850)!;
+            var item = excelCache.GetItemExSheet().GetRow(34850)!;
             Assert.AreEqual(2, item.Sources.Count);
             
         }

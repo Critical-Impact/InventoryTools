@@ -23,7 +23,7 @@ public class ZonePreferenceFilter : SortedListFilter<uint, uint>
     {
         (string, string?) GetIngredientPreferenceDetails(uint c)
         {
-            var itemName = "";
+            string itemName;
             var mapEx = _excelCache.GetMapSheet().GetRow(c);
             if (mapEx != null)
             {

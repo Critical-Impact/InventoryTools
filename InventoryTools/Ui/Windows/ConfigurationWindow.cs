@@ -48,7 +48,14 @@ namespace InventoryTools.Ui
             _configPageFactory = configPageFactory;
             _filterPageFactory = filterPageFactory;
             _configuration = configuration;
+            MediatorService.Subscribe<ConfigurationWindowEditFilter>(this, message => SetActiveFilter(message.filter));
+            MediatorService.Subscribe<ListInvalidatedMessage>(this, _ => Invalidate());
+            MediatorService.Subscribe<ListRepositionedMessage>(this, _ => Invalidate());
+            MediatorService.Subscribe<ListAddedMessage>(this, _ => Invalidate());
+            MediatorService.Subscribe<ListRemovedMessage>(this, _ => Invalidate());
         }
+
+
         public override void Initialize()
         {
             WindowName = "Configuration";
@@ -325,27 +332,35 @@ namespace InventoryTools.Ui
 
         private void AddSearchFilter(string newName, string id)
         {
-            _listService.AddList(new FilterConfiguration(newName,
-                Guid.NewGuid().ToString("N"), FilterType.SearchFilter));
+            var filterConfiguration = new FilterConfiguration(newName,
+                Guid.NewGuid().ToString("N"), FilterType.SearchFilter);
+            _listService.AddDefaultColumns(filterConfiguration);
+            _listService.AddList(filterConfiguration);
             SetNewFilterActive();
         }
 
         private void AddHistoryFilter(string newName, string id)
         {
-            _listService.AddList(new FilterConfiguration(newName,
-                Guid.NewGuid().ToString("N"), FilterType.HistoryFilter));
+            var filterConfiguration = new FilterConfiguration(newName,
+                Guid.NewGuid().ToString("N"), FilterType.HistoryFilter);
+            _listService.AddDefaultColumns(filterConfiguration);
+            _listService.AddList(filterConfiguration);
             SetNewFilterActive();
         }
 
         private void AddGameItemFilter(string newName, string id)
         {
-            _listService.AddList(new FilterConfiguration(newName,Guid.NewGuid().ToString("N"), FilterType.GameItemFilter));
+            var filterConfiguration = new FilterConfiguration(newName,Guid.NewGuid().ToString("N"), FilterType.GameItemFilter);
+            _listService.AddDefaultColumns(filterConfiguration);
+            _listService.AddList(filterConfiguration);
             SetNewFilterActive();
         }
 
         private void AddSortFilter(string newName, string id)
         {
-            _listService.AddList(new FilterConfiguration(newName,Guid.NewGuid().ToString("N"), FilterType.SortingFilter));
+            var filterConfiguration = new FilterConfiguration(newName,Guid.NewGuid().ToString("N"), FilterType.SortingFilter);
+            _listService.AddDefaultColumns(filterConfiguration);
+            _listService.AddList(filterConfiguration);
             SetNewFilterActive();
         }
 
@@ -367,7 +382,6 @@ namespace InventoryTools.Ui
 
         public void GenerateFilterPages()
         {
-            
             var filterConfigurations = _listService.Lists.Where(c => c.FilterType != FilterType.CraftFilter);
             var filterPages = new Dictionary<string, IConfigPage>(); 
             foreach (var filter in filterConfigurations)

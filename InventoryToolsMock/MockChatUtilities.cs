@@ -2,7 +2,6 @@ using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.Logging;
 using Dalamud.Plugin.Services;
 
 namespace InventoryToolsMock;
