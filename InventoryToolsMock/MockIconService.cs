@@ -1,11 +1,8 @@
 using CriticalCommonLib;
-using DalaMock;
 using DalaMock.Dalamud;
 using DalaMock.Mock;
 using Dalamud.Interface.Internal;
 using Dalamud.Utility;
-using ImGuiScene;
-using InventoryTools;
 using InventoryTools.Services.Interfaces;
 using Lumina.Data.Files;
 using Lumina.Extensions;

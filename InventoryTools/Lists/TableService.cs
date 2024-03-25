@@ -18,7 +18,7 @@ using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Services;
 
-public class TableService : MediatorBackgroundService
+public class TableService : DisposableMediatorBackgroundService
 {
     private readonly IListService _listService;
     private readonly IFramework _framework;
@@ -312,8 +312,9 @@ public class TableService : MediatorBackgroundService
         }
     }
 
-    public void Dispose()
+    public new void Dispose()
     {
+        base.Dispose();
         _framework.Update -= OnUpdate;
         _listService.ListConfigurationChanged -= ListConfigurationChanged;
         _listService.ListTableConfigurationChanged -= ListTableConfigurationChanged;

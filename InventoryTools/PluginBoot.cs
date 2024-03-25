@@ -13,7 +13,7 @@ namespace InventoryTools;
 public class PluginBoot : DisposableMediatorSubscriberBase, IHostedService
 {
     private readonly IConfigurationWizardService _configurationWizardService;
-    
+
     public PluginBoot(IConfigurationWizardService configurationWizardService, ILogger<PluginBoot> logger, MediatorService mediatorService) : base(logger, mediatorService)
     {
         _configurationWizardService = configurationWizardService;
@@ -27,6 +27,7 @@ public class PluginBoot : DisposableMediatorSubscriberBase, IHostedService
         {
             MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWizard)));
         }
+        MediatorService.Publish(new OpenSavedWindowsMessage());
         return Task.CompletedTask;
     }
 

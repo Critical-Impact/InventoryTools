@@ -30,7 +30,7 @@ namespace InventoryTools.Logic.Columns
         {
             _chatUtilities = chatUtilities;
         }
-        public override ColumnCategory ColumnCategory => ColumnCategory.Tools;
+        public override ColumnCategory ColumnCategory => ColumnCategory.Buttons;
 
         public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
         {
@@ -314,7 +314,8 @@ namespace InventoryTools.Logic.Columns
             return null;
         }
 
-        public override string Name { get; set; } = "Gather";
+        public override string RenderName { get; } = "Gather/Purchase";
+        public override string Name { get; set; } = "Gather/Purchase/Buy";
         public override float Width { get; set; } = 100;
         public override string HelpText { get; set; } = "Shows a button that links to gatherbuddy's /gather function.";
         public override bool HasFilter { get; set; } = false;

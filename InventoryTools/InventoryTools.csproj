@@ -197,5 +197,6 @@
 
     <ItemGroup>
       <Folder Include="Configuration" />
+      <Folder Include="Logic\Columns\Tools\" />
     </ItemGroup>
 </Project>

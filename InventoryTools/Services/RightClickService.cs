@@ -99,29 +99,19 @@ public class RightClickService
         {
             if (ImGui.Selectable("Add to new craft list"))
             {
-                //TODO: FIX ME
-                // Service.Framework.RunOnTick(() =>
-                // {
-                //     var filter = _listService.AddNewCraftList();
-                //     filter.CraftList.AddCraftItem(item.RowId);
-                //     messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                //     messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
-                //     filter.NeedsRefresh = true;
-                //     filter.StartRefresh();
-                // });
+                 var filter = _listService.AddNewCraftList();
+                 filter.CraftList.AddCraftItem(item.RowId);
+                 messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                 messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
+                 filter.NeedsRefresh = true;
             }
             if (ImGui.Selectable("Add to new craft list (ephemeral)"))
             {
-                //TODO: FIX ME
-                // Service.Framework.RunOnTick(() =>
-                // {
-                //     var filter = _listService.AddNewCraftList(null,true);
-                //     filter.CraftList.AddCraftItem(item.RowId);
-                //     messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                //     messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
-                //     filter.NeedsRefresh = true;
-                //     filter.StartRefresh();
-                // });
+                 var filter = _listService.AddNewCraftList(null,true);
+                 filter.CraftList.AddCraftItem(item.RowId);
+                 messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                 messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
+                 filter.NeedsRefresh = true;
             }
         }
 
@@ -136,31 +126,21 @@ public class RightClickService
                     if (ImGui.Selectable("Add " + (part.Value?.CompanyCraftType.Value?.Name ?? "Unknown") + " to new craft list"))
                     {
                         var newPhase = index;
-                        //TODO: FIX ME
-                        // Service.Framework.RunOnTick(() =>
-                        // {
-                        //     var filter = _listService.AddNewCraftList();
-                        //     filter.CraftList.AddCraftItem(item.RowId,1, InventoryItem.ItemFlags.None, newPhase);
-                        //     messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                        //     messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
-                        //     filter.NeedsRefresh = true;
-                        //     filter.StartRefresh();
-                        // });
+                         var filter = _listService.AddNewCraftList();
+                         filter.CraftList.AddCraftItem(item.RowId,1, InventoryItem.ItemFlags.None, newPhase);
+                         messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                         messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
+                         filter.NeedsRefresh = true;
                     }
                     if (ImGui.Selectable("Add " + (part.Value?.CompanyCraftType.Value?.Name ?? "Unknown") + " to new craft list (ephemeral)"))
                     {
                         var newPhase = index;
-                        //TODO: FIX ME
-                        // Service.Framework.RunOnTick(() =>
-                        // {
-                        //     var filter = _listService.AddNewCraftList(null,true);
-                        //     filter.IsEphemeralCraftList = true;
-                        //     filter.CraftList.AddCraftItem(item.RowId,1, InventoryItem.ItemFlags.None, newPhase);
-                        //     messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                        //     messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
-                        //     filter.NeedsRefresh = true;
-                        //     filter.StartRefresh();
-                        // });
+                        var filter = _listService.AddNewCraftList(null,true);
+                        filter.IsEphemeralCraftList = true;
+                        filter.CraftList.AddCraftItem(item.RowId,1, InventoryItem.ItemFlags.None, newPhase);
+                        messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                        messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
+                        filter.NeedsRefresh = true;
                     }
                 }
             }
@@ -233,42 +213,30 @@ public class RightClickService
 
                     if (ImGui.Selectable("Add " + item.QuantityNeeded + " item to craft list - " + filter.Name))
                     {
-                        //TODO: Fix me
-                        // filter.CraftList.AddCraftItem(item.Item.RowId, item.QuantityNeeded,
-                        //     InventoryItem.ItemFlags.None);
-                        // messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                        // messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
-                        // configuration.NeedsRefresh = true;
-                        // configuration.StartRefresh();
+                        filter.CraftList.AddCraftItem(item.Item.RowId, item.QuantityNeeded,
+                            InventoryItem.ItemFlags.None);
+                        messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                        messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
+                        configuration.NeedsRefresh = true;
                     }
                 }
                 if (ImGui.Selectable("Add " + item.QuantityNeeded + " item to new craft list"))
                 {
-                    //TODO: Fix me
-                    // Service.Framework.RunOnTick(() =>
-                    // {
-                    //     var filter = _listService.AddNewCraftList();
-                    //     filter.CraftList.AddCraftItem(item.Item.RowId, item.QuantityNeeded,
-                    //         InventoryItem.ItemFlags.None);
-                    //     messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                    //     messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
-                    //     configuration.NeedsRefresh = true;
-                    //     configuration.StartRefresh();
-                    // });
+                     var filter = _listService.AddNewCraftList();
+                     filter.CraftList.AddCraftItem(item.Item.RowId, item.QuantityNeeded,
+                         InventoryItem.ItemFlags.None);
+                     messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                     messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
+                     configuration.NeedsRefresh = true;
                 }
                 if (ImGui.Selectable("Add " + item.QuantityNeeded + " item to new craft list (ephemeral)"))
                 {
-                    //TODO: Fix me
-                    // Service.Framework.RunOnTick(() =>
-                    // {
-                    //     var filter = _listService.AddNewCraftList(null,true);
-                    //     filter.CraftList.AddCraftItem(item.Item.RowId, item.QuantityNeeded,
-                    //         InventoryItem.ItemFlags.None);
-                    //     messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                    //     messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
-                    //     configuration.NeedsRefresh = true;
-                    //     configuration.StartRefresh();
-                    // });
+                    var filter = _listService.AddNewCraftList(null,true);
+                    filter.CraftList.AddCraftItem(item.Item.RowId, item.QuantityNeeded,
+                        InventoryItem.ItemFlags.None);
+                    messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                    messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
+                    configuration.NeedsRefresh = true;
                 }
             }
         }

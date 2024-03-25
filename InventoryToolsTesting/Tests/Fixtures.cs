@@ -2,7 +2,7 @@ using CriticalCommonLib.Enums;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 
-namespace InventoryToolsTesting
+namespace InventoryToolsTesting.Tests
 {
     public static class Fixtures
     {

@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using CriticalCommonLib.Services.Ui;
 using InventoryTools.GameUi;
 using InventoryTools.Logic;
+using Microsoft.Extensions.Hosting;
 
 namespace InventoryTools.Services.Interfaces;
 
-public interface IOverlayService : IDisposable
+public interface IOverlayService : IHostedService
 {
     void RefreshOverlayStates();
     FilterState? LastState { get; }

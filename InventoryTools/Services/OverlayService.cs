@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using CriticalCommonLib;
+using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Services.Ui;
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
@@ -10,12 +13,13 @@ using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using InventoryTools.GameUi;
 using InventoryTools.Logic;
+using InventoryTools.Mediator;
 using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Services
 {
-    public class OverlayService : IOverlayService
+    public class OverlayService : MediatorSubscriberBase, IOverlayService
     {
         private readonly IListService _listService;
         private readonly TableService _tableService;
@@ -28,7 +32,7 @@ namespace InventoryTools.Services
         private readonly List<IGameOverlay> _overlays = new();
         private FilterState? _lastState;
 
-        public OverlayService(IAddonLifecycle addonLifecycle, IListService listService,TableService tableService, IFramework frameworkService, Func<FilterConfiguration, FilterState> filterStateFactory, IEnumerable<IGameOverlay> gameOverlays, ILogger<OverlayService> logger)
+        public OverlayService(ILogger<OverlayService> logger, MediatorService mediatorService, IAddonLifecycle addonLifecycle, IListService listService,TableService tableService, IFramework frameworkService, Func<FilterConfiguration, FilterState> filterStateFactory, IEnumerable<IGameOverlay> gameOverlays) : base(logger, mediatorService)
         {
             _addonLifecycle = addonLifecycle;
             _listService = listService;
@@ -36,19 +40,11 @@ namespace InventoryTools.Services
             _frameworkService = frameworkService;
             _filterStateFactory = filterStateFactory;
             _logger = logger;
-            listService.ListConfigurationChanged += ListServiceOnListModified;
-            listService.UiListToggled += ListServiceOnListToggled;
-            listService.BackgroundListToggled += ListServiceOnListToggled;
-            _tableService.TableRefreshed += TableRefreshed;
+
             foreach (var overlay in gameOverlays)
             {
                 AddOverlay(overlay);
             }
-            _addonLifecycle.RegisterListener(AddonEvent.PostRefresh, PostRefresh);
-            _addonLifecycle.RegisterListener(AddonEvent.PostSetup, PostSetup);
-            _addonLifecycle.RegisterListener(AddonEvent.PreFinalize, PreFinalize);
-            _addonLifecycle.RegisterListener(AddonEvent.PostRequestedUpdate,PostRequestedUpdate );
-            frameworkService.Update += FrameworkOnUpdate;
         }
         
         public FilterState? LastState => _lastState;
@@ -234,29 +230,40 @@ namespace InventoryTools.Services
             }
         }
         
-        private bool _disposed;
-        public void Dispose()
+        public Task StartAsync(CancellationToken cancellationToken)
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            MediatorService.Subscribe<OverlaysRequestRefreshMessage>(this, RefreshRequested);
+            _listService.ListConfigurationChanged += ListServiceOnListModified;
+            _listService.UiListToggled += ListServiceOnListToggled;
+            _listService.BackgroundListToggled += ListServiceOnListToggled;
+            _tableService.TableRefreshed += TableRefreshed;
+            _addonLifecycle.RegisterListener(AddonEvent.PostRefresh, PostRefresh);
+            _addonLifecycle.RegisterListener(AddonEvent.PostSetup, PostSetup);
+            _addonLifecycle.RegisterListener(AddonEvent.PreFinalize, PreFinalize);
+            _addonLifecycle.RegisterListener(AddonEvent.PostRequestedUpdate,PostRequestedUpdate );
+            _frameworkService.Update += FrameworkOnUpdate;
+            return Task.CompletedTask;
         }
-        
-        protected virtual void Dispose(bool disposing)
+
+        private void RefreshRequested(OverlaysRequestRefreshMessage obj)
         {
-            if(!_disposed && disposing)
-            {
-                _addonLifecycle.UnregisterListener(AddonEvent.PostRefresh, PostRefresh);
-                _addonLifecycle.UnregisterListener(AddonEvent.PostSetup, PostSetup);
-                _addonLifecycle.UnregisterListener(AddonEvent.PreFinalize, PreFinalize);                
-                _addonLifecycle.UnregisterListener(AddonEvent.PostRequestedUpdate, PostRequestedUpdate);                
-                _frameworkService.Update -= FrameworkOnUpdate;
-                _tableService.TableRefreshed -= TableRefreshed;
-                ClearOverlays();
-                _listService.ListConfigurationChanged -= ListServiceOnListModified;
-                _listService.UiListToggled -= ListServiceOnListToggled;
-                _listService.BackgroundListToggled -= ListServiceOnListToggled;
-            }
-            _disposed = true;         
+            RefreshOverlayStates();
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            _addonLifecycle.UnregisterListener(AddonEvent.PostRefresh, PostRefresh);
+            _addonLifecycle.UnregisterListener(AddonEvent.PostSetup, PostSetup);
+            _addonLifecycle.UnregisterListener(AddonEvent.PreFinalize, PreFinalize);                
+            _addonLifecycle.UnregisterListener(AddonEvent.PostRequestedUpdate, PostRequestedUpdate);                
+            _frameworkService.Update -= FrameworkOnUpdate;
+            _tableService.TableRefreshed -= TableRefreshed;
+            ClearOverlays();
+            _listService.ListConfigurationChanged -= ListServiceOnListModified;
+            _listService.UiListToggled -= ListServiceOnListToggled;
+            _listService.BackgroundListToggled -= ListServiceOnListToggled;
+            UnsubscribeAll();
+            return Task.CompletedTask;
         }
     }
 }

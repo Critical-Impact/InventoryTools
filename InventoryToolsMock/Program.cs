@@ -1,17 +1,6 @@
-﻿using System.Numerics;
-using System.Reflection;
-using CriticalCommonLib;
-using DalaMock;
+﻿using CriticalCommonLib;
 using DalaMock.Configuration;
-using DalaMock.Dalamud;
-using DalaMock.Interfaces;
 using DalaMock.Mock;
-using Dalamud;
-using Dalamud.Interface;
-using Dalamud.Interface.Utility;
-using ImGuiNET;
-using InventoryTools.Logic;
-using InventoryTools.Services;
 using Lumina;
 
 namespace InventoryToolsMock

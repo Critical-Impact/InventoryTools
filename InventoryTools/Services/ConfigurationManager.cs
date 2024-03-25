@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using CriticalCommonLib;
 using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Models;
@@ -14,6 +15,7 @@ using Dispatch;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using InventoryTools.Converters;
 using LuminaSupplemental.Excel.Model;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -21,7 +23,7 @@ using Task = System.Threading.Tasks.Task;
 
 namespace InventoryTools.Services
 {
-    public class ConfigurationManager : IDisposable
+    public class ConfigurationManager : BackgroundService
     {
         public ILogger<ConfigurationManager> Logger { get; }
 
@@ -374,6 +376,37 @@ namespace InventoryTools.Services
             return CsvLoader.ToCsvRaw<InventoryChange>(changes, Path.Join(_pluginInterfaceService.ConfigDirectory.FullName, "history.csv"));
         }
 
+
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            await BackgroundProcessing(stoppingToken);
+        }
+        
+        private async Task BackgroundProcessing(CancellationToken stoppingToken)
+        {
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                var workItem = 
+                    await _saveQueue.DequeueAsync(stoppingToken);
+
+                try
+                {
+                    await workItem(stoppingToken);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex, 
+                        "Error occurred executing {WorkItem}.", nameof(workItem));
+                }
+            }
+        }
+        
+        public override async Task StopAsync(CancellationToken stoppingToken)
+        {
+            Logger.LogTrace("Configuration manager save queue is stopping.");
+            Save();
+            await base.StopAsync(stoppingToken);
+        }
 
         public void Dispose()
         {
