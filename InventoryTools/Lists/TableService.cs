@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CriticalCommonLib;
 using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
@@ -13,10 +12,9 @@ using ImGuiNET;
 using InventoryTools.Logic;
 using InventoryTools.Mediator;
 using InventoryTools.Services.Interfaces;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace InventoryTools.Services;
+namespace InventoryTools.Lists;
 
 public class TableService : DisposableMediatorBackgroundService
 {
@@ -123,7 +121,10 @@ public class TableService : DisposableMediatorBackgroundService
             craftItemTable.IsSearching = false;
             craftItemTable.NeedsRefresh = false;
             craftItemTable.Refreshing = false;
+            TableRefreshed?.Invoke(craftItemTable);
         }
+        
+
     }
 
     public async Task RefreshTable(FilterTable filterTable, CancellationToken cancellationToken)
@@ -263,10 +264,12 @@ public class TableService : DisposableMediatorBackgroundService
         if (filterTable is { FilterConfiguration.AllowRefresh: true })
         {
             filterTable.NeedsRefresh = true;
+            filterTable.InitialColumnSetupDone = false;
             if (filterConfiguration.FilterType == FilterType.CraftFilter)
             {
                 var craftItemTable = GetCraftTable(filterConfiguration);
                 craftItemTable.NeedsRefresh = true;
+                craftItemTable.InitialColumnSetupDone = false;
             }
         }
     }
@@ -312,7 +315,7 @@ public class TableService : DisposableMediatorBackgroundService
         }
     }
 
-    public new void Dispose()
+    public override void Dispose()
     {
         base.Dispose();
         _framework.Update -= OnUpdate;

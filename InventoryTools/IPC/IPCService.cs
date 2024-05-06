@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using CriticalCommonLib;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
@@ -13,7 +12,7 @@ using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 
-namespace InventoryTools.Services;
+namespace InventoryTools.IPC;
 
 public class IPCService : IDisposable
 {

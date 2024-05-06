@@ -6,16 +6,17 @@ using CriticalCommonLib.Services.Ui;
 using InventoryTools.Logic;
 using Microsoft.Extensions.Logging;
 
-namespace InventoryTools.GameUi
+namespace InventoryTools.Overlays
 {
-    public class InventoryGridOverlay: GameOverlay<AtkInventoryGrid>, IAtkOverlayState
+    public class InventoryExpansionOverlay: GameOverlay<AtkInventoryExpansion>, IAtkOverlayState
     {
         private readonly ICharacterMonitor _characterMonitor;
 
-        public InventoryGridOverlay(ILogger<InventoryGridOverlay> logger, AtkInventoryGrid overlay, ICharacterMonitor characterMonitor) : base(logger,overlay)
+        public InventoryExpansionOverlay(ILogger<InventoryExpansionOverlay> logger, AtkInventoryExpansion overlay, ICharacterMonitor characterMonitor) : base(logger,overlay)
         {
             _characterMonitor = characterMonitor;
         }
+        
         public override bool ShouldDraw { get; set; }
 
         public override bool Draw()
@@ -27,28 +28,10 @@ namespace InventoryTools.GameUi
             var atkUnitBase = AtkOverlay.AtkUnitBase;
             if (atkUnitBase != null)
             {
-                AtkOverlay.SetTabColors(TabColours);
-                if (AtkOverlay.CurrentTab == 0)
-                {
-                    AtkOverlay.SetColors(Bag1InventoryColours);
-                }
-                else if (AtkOverlay.CurrentTab == 1)
-                {
-                    AtkOverlay.SetColors(Bag2InventoryColours);
-                }
-                else if (AtkOverlay.CurrentTab == 2)
-                {
-                    AtkOverlay.SetColors( Bag3InventoryColours);
-                }
-                else if (AtkOverlay.CurrentTab == 3)
-                {
-                    AtkOverlay.SetColors(Bag4InventoryColours);
-                }
-                else
-                {
-                    AtkOverlay.SetColors(EmptyDictionary);
-                }
-
+                AtkOverlay.SetColors(InventoryType.Bag0, Bag1InventoryColours);
+                AtkOverlay.SetColors(InventoryType.Bag1, Bag2InventoryColours);
+                AtkOverlay.SetColors(InventoryType.Bag2, Bag3InventoryColours);
+                AtkOverlay.SetColors(InventoryType.Bag3, Bag4InventoryColours);
                 return true;
             }
 
@@ -59,9 +42,7 @@ namespace InventoryTools.GameUi
         public Dictionary<Vector2, Vector4?> Bag2InventoryColours = new();
         public Dictionary<Vector2, Vector4?> Bag3InventoryColours = new();
         public Dictionary<Vector2, Vector4?> Bag4InventoryColours = new();
-        public Dictionary<uint, Vector4?> TabColours = new();
         public Dictionary<Vector2, Vector4?> EmptyDictionary = new();
-        public Dictionary<uint, Vector4?> EmptyTabs = new() { {0, null}, {1, null}, {2, null}, {3, null} };
 
         public override void Setup()
         {
@@ -94,14 +75,6 @@ namespace InventoryTools.GameUi
                     Bag2InventoryColours = newState.GetBagHighlights(InventoryType.Bag1);
                     Bag3InventoryColours = newState.GetBagHighlights(InventoryType.Bag2);
                     Bag4InventoryColours = newState.GetBagHighlights(InventoryType.Bag3);
-                    var tab1 = newState.GetTabHighlight(Bag1InventoryColours);
-                    var tab2 = newState.GetTabHighlight(Bag2InventoryColours);
-                    var tab3 = newState.GetTabHighlight(Bag3InventoryColours);
-                    var tab4 = newState.GetTabHighlight(Bag4InventoryColours);
-                    TabColours[0] = tab1;
-                    TabColours[1] = tab2;
-                    TabColours[2] = tab3;
-                    TabColours[3] = tab4;
                     Draw();
                     return;
                 }
@@ -124,10 +97,11 @@ namespace InventoryTools.GameUi
             var atkUnitBase = AtkOverlay.AtkUnitBase;
             if (atkUnitBase != null)
             {
-                AtkOverlay.SetColors(EmptyDictionary);
-                AtkOverlay.SetTabColors(EmptyTabs);
+                AtkOverlay.SetColors(InventoryType.Bag0, EmptyDictionary);
+                AtkOverlay.SetColors(InventoryType.Bag1, EmptyDictionary);
+                AtkOverlay.SetColors(InventoryType.Bag2, EmptyDictionary);
+                AtkOverlay.SetColors(InventoryType.Bag3, EmptyDictionary);
             }
         }
-        
     }
 }

@@ -1,14 +1,10 @@
 using CriticalCommonLib;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-using InventoryTools.Logic;
 using InventoryTools.Mediator;
-using InventoryTools.Services;
 using InventoryTools.Ui;
-using Lumina;
 using Microsoft.Extensions.Logging;
 using OtterGui.Classes;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace InventoryTools.Hotkeys;
 

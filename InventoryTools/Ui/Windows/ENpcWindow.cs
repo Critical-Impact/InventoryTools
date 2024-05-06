@@ -6,7 +6,6 @@ using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
-using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
@@ -30,6 +29,7 @@ namespace InventoryTools.Ui
         }
         public override void Initialize(uint eNpcId)
         {
+            base.Initialize(eNpcId);
             Flags = ImGuiWindowFlags.NoSavedSettings;
             _eNpcId = eNpcId;
             if (eNpc != null)

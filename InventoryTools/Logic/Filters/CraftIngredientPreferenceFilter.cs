@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
@@ -9,7 +8,6 @@ using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Filters.Abstract;
-using OtterGui;
 using Dalamud.Interface.Utility.Raii;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -121,7 +119,6 @@ public class CraftIngredientPreferenceFilter : SortedListFilter<(IngredientPrefe
     public override void Draw(FilterConfiguration configuration)
     {
         ImGui.TextUnformatted(Name);
-        ImGuiUtil.LabeledHelpMarker("", HelpText);
         ImGui.Separator();
         DrawTable(configuration);
         ImGui.SameLine();

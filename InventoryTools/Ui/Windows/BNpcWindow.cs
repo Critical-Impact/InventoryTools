@@ -1,15 +1,12 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Extensions;
-using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
@@ -36,6 +33,7 @@ namespace InventoryTools.Ui
         }
         public override void Initialize(uint bNpcId)
         {
+            base.Initialize(bNpcId);
             Flags = ImGuiWindowFlags.NoSavedSettings;
             _bNpcId = bNpcId;
             if (bNpc != null)

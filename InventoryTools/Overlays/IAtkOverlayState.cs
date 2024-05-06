@@ -1,7 +1,7 @@
 using CriticalCommonLib.Services.Ui;
 using InventoryTools.Logic;
 
-namespace InventoryTools.GameUi
+namespace InventoryTools.Overlays
 {
     public interface IAtkOverlayState : AtkState<FilterState?>
     {

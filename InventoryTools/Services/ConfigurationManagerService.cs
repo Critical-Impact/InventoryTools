@@ -5,14 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using CriticalCommonLib;
 using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Resolvers;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Plugin.Services;
-using Dispatch;
-using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using InventoryTools.Converters;
 using LuminaSupplemental.Excel.Model;
 using Microsoft.Extensions.Hosting;
@@ -23,9 +20,9 @@ using Task = System.Threading.Tasks.Task;
 
 namespace InventoryTools.Services
 {
-    public class ConfigurationManager : BackgroundService
+    public class ConfigurationManagerService : BackgroundService
     {
-        public ILogger<ConfigurationManager> Logger { get; }
+        public ILogger<ConfigurationManagerService> Logger { get; }
 
         public delegate void ConfigurationChangedDelegate();
         private readonly IFramework _framework;
@@ -33,7 +30,7 @@ namespace InventoryTools.Services
 
         public event ConfigurationChangedDelegate? ConfigurationChanged;
         
-        public ConfigurationManager(IFramework framework, IPluginInterfaceService pluginInterfaceService, ILogger<ConfigurationManager> logger, IBackgroundTaskQueue saveQueue)
+        public ConfigurationManagerService(IFramework framework, IPluginInterfaceService pluginInterfaceService, ILogger<ConfigurationManagerService> logger, IBackgroundTaskQueue saveQueue)
         {
             Logger = logger;
             _pluginInterfaceService = pluginInterfaceService;
@@ -408,8 +405,9 @@ namespace InventoryTools.Services
             await base.StopAsync(stoppingToken);
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
+            _framework.Update -= OnUpdate;
         }
     }
 }

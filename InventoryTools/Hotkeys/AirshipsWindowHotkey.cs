@@ -1,10 +1,7 @@
 using CriticalCommonLib.Services.Mediator;
-using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Mediator;
-using InventoryTools.Services;
 using InventoryTools.Ui;
-using Lumina;
 using Microsoft.Extensions.Logging;
 using OtterGui.Classes;
 

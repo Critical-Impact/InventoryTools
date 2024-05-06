@@ -16,13 +16,12 @@ using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Ui.Widgets;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Plugin.Services;
 using InventoryTools.Lists;
+using InventoryTools.Logic.Filters;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using OtterGui.Classes;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 
@@ -347,19 +346,22 @@ namespace InventoryTools.Ui
             {
                 SelectedConfiguration.Active = false;
             }
+            foreach (var filter in Filters)
+            {
+                if (SelectedConfiguration == filter)
+                {
+                    filter.Active = false;
+                }
+            }
         }
 
         public override unsafe void Draw()
         {
             foreach (var filter in Filters)
             {
-                if (SelectedConfiguration == filter && ImGui.IsWindowFocused())
+                if (SelectedConfiguration == filter)
                 {
                     filter.Active = true;
-                }
-                else
-                {
-                    filter.Active = false;
                 }
             }
             if (SelectedConfiguration != null && SelectedConfiguration.FilterType == FilterType.HistoryFilter && !_configuration.HasSeenNotification(NotificationPopup.HistoryNotice) && ImGui.IsWindowFocused())
@@ -751,25 +753,52 @@ namespace InventoryTools.Ui
                                         if (!tabItem.Success) continue;
                                         using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudWhite))
                                         {
-                                            foreach (var filter in group.Value)
+                                            if (group.Key == FilterCategory.CraftColumns)
                                             {
-                                                if ((filter.AvailableIn.HasFlag(FilterType.SearchFilter) &&
-                                                     filterConfiguration.FilterType.HasFlag(FilterType.SearchFilter)
-                                                     ||
-                                                     (filter.AvailableIn.HasFlag(FilterType.SortingFilter) &&
-                                                      filterConfiguration.FilterType.HasFlag(FilterType.SortingFilter))
-                                                     ||
-                                                     (filter.AvailableIn.HasFlag(FilterType.CraftFilter) &&
-                                                      filterConfiguration.FilterType.HasFlag(FilterType.CraftFilter))
-                                                     ||
-                                                     (filter.AvailableIn.HasFlag(FilterType.HistoryFilter) &&
-                                                      filterConfiguration.FilterType.HasFlag(FilterType.HistoryFilter))
-                                                     ||
-                                                     (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
-                                                      filterConfiguration.FilterType.HasFlag(FilterType.GameItemFilter))
-                                                    ))
+                                                using (var craftColumns = ImRaii.Child("craftColumns", new (0, -200)))
                                                 {
-                                                    filter.Draw(filterConfiguration);
+                                                    if (craftColumns.Success)
+                                                    {
+                                                        group.Value.Single(c => c is CraftColumnsFilter or ColumnsFilter).Draw(filterConfiguration);
+                                                    }
+                                                }
+                                                using (var otherFilters = ImRaii.Child("otherFilters", new (0, 0)))
+                                                {
+                                                    if (otherFilters.Success)
+                                                    {
+                                                        foreach (var filter in group.Value.Where(c => c is not CraftColumnsFilter and ColumnsFilter))
+                                                        {
+                                                            filter.Draw(filterConfiguration);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                foreach (var filter in group.Value)
+                                                {
+                                                    if ((filter.AvailableIn.HasFlag(FilterType.SearchFilter) &&
+                                                         filterConfiguration.FilterType.HasFlag(FilterType.SearchFilter)
+                                                         ||
+                                                         (filter.AvailableIn.HasFlag(FilterType.SortingFilter) &&
+                                                          filterConfiguration.FilterType.HasFlag(FilterType
+                                                              .SortingFilter))
+                                                         ||
+                                                         (filter.AvailableIn.HasFlag(FilterType.CraftFilter) &&
+                                                          filterConfiguration.FilterType
+                                                              .HasFlag(FilterType.CraftFilter))
+                                                         ||
+                                                         (filter.AvailableIn.HasFlag(FilterType.HistoryFilter) &&
+                                                          filterConfiguration.FilterType.HasFlag(FilterType
+                                                              .HistoryFilter))
+                                                         ||
+                                                         (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
+                                                          filterConfiguration.FilterType.HasFlag(FilterType
+                                                              .GameItemFilter))
+                                                        ))
+                                                    {
+                                                        filter.Draw(filterConfiguration);
+                                                    }
                                                 }
                                             }
                                         }

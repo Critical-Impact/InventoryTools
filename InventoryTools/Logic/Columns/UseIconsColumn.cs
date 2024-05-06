@@ -13,7 +13,6 @@ using InventoryTools.Extensions;
 using InventoryTools.Logic.Columns.Abstract;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Plugin.Services;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Ui;

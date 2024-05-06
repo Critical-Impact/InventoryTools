@@ -13,7 +13,6 @@ using InventoryTools.Extensions;
 using InventoryTools.Logic.Columns.Abstract;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Plugin.Services;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Ui;
@@ -374,5 +373,8 @@ namespace InventoryTools.Logic.Columns
         {
             return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
         }
+        
+        public override FilterType DefaultIn => Logic.FilterType.GameItemFilter | Logic.FilterType.CraftFilter;
+        
     }
 }

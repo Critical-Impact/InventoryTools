@@ -121,5 +121,7 @@ namespace InventoryTools.Logic.Columns
         public override string HelpText { get; set; } = "Shows the icon of the item, pressing it will open the more information window for the item.";
         public override bool HasFilter { get; set; } = false;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
+        
+        public override FilterType DefaultIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter | Logic.FilterType.GameItemFilter | Logic.FilterType.CraftFilter | Logic.FilterType.HistoryFilter;
     }
 }

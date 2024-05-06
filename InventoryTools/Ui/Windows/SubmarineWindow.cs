@@ -6,9 +6,7 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
-using Dalamud.Plugin.Services;
 using ImGuiNET;
-using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
@@ -30,6 +28,7 @@ namespace InventoryTools.Ui
         }
         public override void Initialize(uint submarineExplorationPointId)
         {
+            base.Initialize(submarineExplorationPointId);
             _submarineExplorationPointId = submarineExplorationPointId;
             if (SubmarineExplorationEx != null)
             {

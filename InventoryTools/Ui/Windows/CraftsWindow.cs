@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
 using CriticalCommonLib;
 using CriticalCommonLib.Addons;
+using CriticalCommonLib.Helpers;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
@@ -17,8 +19,8 @@ using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Ui.Widgets;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Plugin.Services;
 using InventoryTools.Lists;
+using InventoryTools.Logic.Filters;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
@@ -34,7 +36,7 @@ namespace InventoryTools.Ui
         private readonly IIconService _iconService;
         private readonly TableService _tableService;
         private readonly InventoryToolsConfiguration _configuration;
-        private readonly ConfigurationManager _configurationManager;
+        private readonly ConfigurationManagerService _configurationManagerService;
         private readonly IListService _listService;
         private readonly IFilterService _filterService;
         private readonly PluginLogic _pluginLogic;
@@ -45,13 +47,14 @@ namespace InventoryTools.Ui
         private readonly IChatUtilities _chatUtilities;
         private readonly ExcelCache _excelCache;
         private readonly ListImportExportService _importExportService;
+        private ThrottleDispatcher _throttleDispatcher;
 
-        public CraftsWindow(ILogger<CraftsWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration,IIconService iconService, TableService tableService, ConfigurationManager configurationManager, IListService listService, IFilterService filterService, PluginLogic pluginLogic, IUniversalis universalis, ICharacterMonitor characterMonitor, FileDialogManager fileDialogManager, IGameUiManager gameUiManager, IChatUtilities chatUtilities, ExcelCache excelCache, ListImportExportService importExportService, string name = "Crafts Window") : base(logger, mediator, imGuiService, configuration, name)
+        public CraftsWindow(ILogger<CraftsWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration,IIconService iconService, TableService tableService, ConfigurationManagerService configurationManagerService, IListService listService, IFilterService filterService, PluginLogic pluginLogic, IUniversalis universalis, ICharacterMonitor characterMonitor, FileDialogManager fileDialogManager, IGameUiManager gameUiManager, IChatUtilities chatUtilities, ExcelCache excelCache, ListImportExportService importExportService, string name = "Crafts Window") : base(logger, mediator, imGuiService, configuration, name)
         {
             _iconService = iconService;
             _tableService = tableService;
             _configuration = configuration;
-            _configurationManager = configurationManager;
+            _configurationManagerService = configurationManagerService;
             _listService = listService;
             _filterService = filterService;
             _pluginLogic = pluginLogic;
@@ -67,6 +70,7 @@ namespace InventoryTools.Ui
         {
             WindowName = "Crafts";
             Key = "crafts";
+            _throttleDispatcher = new ThrottleDispatcher(5000, true);
             _splitter = new(_configuration.CraftWindowSplitterPosition, new(100, 100), true);
             _settingsMenu = new PopupMenu("configMenu", PopupMenu.PopupMenuButtons.All,
                 new List<PopupMenu.IPopupMenuItem>()
@@ -113,6 +117,20 @@ namespace InventoryTools.Ui
             MediatorService.Subscribe<ListRepositionedMessage>(this, _ => Invalidate());
             MediatorService.Subscribe<ListAddedMessage>(this, _ => Invalidate());
             MediatorService.Subscribe<ListRemovedMessage>(this, _ => Invalidate());
+            MediatorService.Subscribe<MarketCacheUpdatedMessage>(this, _ => RefreshCraftList());
+            MediatorService.Subscribe<TeamCraftDataImported>(this, ImportTeamcraftData);
+        }
+
+        private void ImportTeamcraftData(TeamCraftDataImported data)
+        {
+            if (SelectedConfiguration != null)
+            {
+                foreach (var item in data.listData)
+                {
+                    SelectedConfiguration.CraftList.AddCraftItem(item.Item1, item.Item2);
+                }
+                SelectedConfiguration.NeedsRefresh = true;
+            }
         }
 
         public override bool SaveState => true;
@@ -191,6 +209,21 @@ namespace InventoryTools.Ui
             MediatorService.Publish(new OpenGenericWindowMessage(typeof(TetrisWindow)));
         }
         
+        private void RefreshCraftList()
+        {
+            _throttleDispatcher.ThrottleAsync(RequestRefresh);
+        }
+
+        private Task RequestRefresh()
+        {
+            if (SelectedConfiguration != null)
+            {
+                MediatorService.Publish(new RequestListUpdateMessage(SelectedConfiguration));
+            }
+
+            return Task.CompletedTask;
+        }
+
         public Widgets.PopupMenu GetFilterMenu(FilterConfiguration configuration, WindowLayout layout)
         {
             if (!_popupMenus.ContainsKey(configuration))
@@ -366,16 +399,7 @@ namespace InventoryTools.Ui
                 ImGui.BulletText("You can customize these options further by clicking the pencil icon in the top right corner of a list.");
 
             });
-            _teamCraftImportWindow?.Draw();
-            if (_teamCraftImportWindow != null &&_teamCraftImportWindow.HasResult && _teamCraftImportWindow.ParseResult != null && SelectedConfiguration != null)
-            {
-                foreach (var item in _teamCraftImportWindow.ParseResult)
-                {
-                    SelectedConfiguration.CraftList.AddCraftItem(item.Item1, item.Item2);
-                    SelectedConfiguration.NeedsRefresh = true;
-                    _teamCraftImportWindow = null;
-                }
-            }
+
             if (_configuration.CraftWindowLayout == WindowLayout.Sidebar)
             {
                 DrawSidebar();
@@ -1124,25 +1148,52 @@ namespace InventoryTools.Ui
                                         if (!tabItem.Success) continue;
                                         using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudWhite))
                                         {
-                                            foreach (var filter in group.Value)
+                                            if (group.Key == FilterCategory.CraftColumns)
                                             {
-                                                if ((filter.AvailableIn.HasFlag(FilterType.SearchFilter) &&
-                                                     filterConfiguration.FilterType.HasFlag(FilterType.SearchFilter)
-                                                     ||
-                                                     (filter.AvailableIn.HasFlag(FilterType.SortingFilter) &&
-                                                      filterConfiguration.FilterType.HasFlag(FilterType.SortingFilter))
-                                                     ||
-                                                     (filter.AvailableIn.HasFlag(FilterType.CraftFilter) &&
-                                                      filterConfiguration.FilterType.HasFlag(FilterType.CraftFilter))
-                                                     ||
-                                                     (filter.AvailableIn.HasFlag(FilterType.HistoryFilter) &&
-                                                      filterConfiguration.FilterType.HasFlag(FilterType.HistoryFilter))
-                                                     ||
-                                                     (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
-                                                      filterConfiguration.FilterType.HasFlag(FilterType.GameItemFilter))
-                                                    ))
+                                                using (var craftColumns = ImRaii.Child("craftColumns", new (0, -200)))
                                                 {
-                                                    filter.Draw(filterConfiguration);
+                                                    if (craftColumns.Success)
+                                                    {
+                                                        group.Value.Single(c => c is CraftColumnsFilter or ColumnsFilter).Draw(filterConfiguration);
+                                                    }
+                                                }
+                                                using (var otherFilters = ImRaii.Child("otherFilters", new (0, 0)))
+                                                {
+                                                    if (otherFilters.Success)
+                                                    {
+                                                        foreach (var filter in group.Value.Where(c => c is not CraftColumnsFilter && c is not ColumnsFilter))
+                                                        {
+                                                            filter.Draw(filterConfiguration);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                foreach (var filter in group.Value)
+                                                {
+                                                    if ((filter.AvailableIn.HasFlag(FilterType.SearchFilter) &&
+                                                         filterConfiguration.FilterType.HasFlag(FilterType.SearchFilter)
+                                                         ||
+                                                         (filter.AvailableIn.HasFlag(FilterType.SortingFilter) &&
+                                                          filterConfiguration.FilterType.HasFlag(FilterType
+                                                              .SortingFilter))
+                                                         ||
+                                                         (filter.AvailableIn.HasFlag(FilterType.CraftFilter) &&
+                                                          filterConfiguration.FilterType
+                                                              .HasFlag(FilterType.CraftFilter))
+                                                         ||
+                                                         (filter.AvailableIn.HasFlag(FilterType.HistoryFilter) &&
+                                                          filterConfiguration.FilterType.HasFlag(FilterType
+                                                              .HistoryFilter))
+                                                         ||
+                                                         (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
+                                                          filterConfiguration.FilterType.HasFlag(FilterType
+                                                              .GameItemFilter))
+                                                        ))
+                                                    {
+                                                        filter.Draw(filterConfiguration);
+                                                    }
                                                 }
                                             }
                                         }
@@ -1373,6 +1424,10 @@ namespace InventoryTools.Ui
             }
         }
 
-
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            _throttleDispatcher.Dispose();
+        }
     }
 }

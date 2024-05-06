@@ -3,9 +3,7 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib.Services.Mediator;
 using ImGuiNET;
-using InventoryTools.Images;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Plugin.Services;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 

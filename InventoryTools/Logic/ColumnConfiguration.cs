@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using InventoryTools.Logic.Columns;
 using Newtonsoft.Json;
 
@@ -12,6 +11,8 @@ public class ColumnConfiguration
     private string _key;
     private string? _name;
     private string? _exportName;
+    
+    public bool IsDirty { get; set; }
 
     public string ColumnName
     {
@@ -39,6 +40,8 @@ public class ColumnConfiguration
 
     private Dictionary<string, string>? _stringSettings;
     private Dictionary<string, uint>? _uintSettings;
+    [JsonIgnore]
+    private IColumn _column;
 
     public void SetSetting(string key, string? value)
     {
@@ -89,8 +92,8 @@ public class ColumnConfiguration
     [JsonIgnore]
     public IColumn Column
     {
-        get;
-        set;
+        get => _column;
+        set => _column = value;
     }
 
     public Dictionary<string, string> StringSettings

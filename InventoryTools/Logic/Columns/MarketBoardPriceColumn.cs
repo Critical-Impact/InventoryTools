@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Numerics;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.MarketBoard;
@@ -7,26 +8,26 @@ using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
-using Dalamud.Plugin.Services;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
-using InventoryTools.Logic.Columns.Settings;
-using InventoryTools.Logic.Filters.Abstract;
+using InventoryTools.Logic.Columns.ColumnSettings;
 using InventoryTools.Services;
 using InventoryTools.Ui.Widgets;
 using Microsoft.Extensions.Logging;
-using OtterGui.Raii;
 
 namespace InventoryTools.Logic.Columns
 {
     public class MarketBoardPriceColumn : DoubleGilColumn
     {
         private readonly IMarketCache _marketCache;
+        private readonly ExcelCache _excelCache;
         private readonly ICharacterMonitor _characterMonitor;
 
-        public MarketBoardPriceColumn(ILogger<MarketBoardPriceColumn> logger, ImGuiService imGuiService, MarketboardWorldSetting marketboardWorldSetting, ICharacterMonitor characterMonitor, IMarketCache marketCache) : base(logger, imGuiService)
+        public MarketBoardPriceColumn(ILogger<MarketBoardPriceColumn> logger, ImGuiService imGuiService, MarketboardWorldSetting marketboardWorldSetting, ICharacterMonitor characterMonitor, IMarketCache marketCache, ExcelCache excelCache) : base(logger, imGuiService)
         {
             _marketCache = marketCache;
+            _excelCache = excelCache;
             _characterMonitor = characterMonitor;
             MarketboardWorldSetting = marketboardWorldSetting;
         }
@@ -36,6 +37,8 @@ namespace InventoryTools.Logic.Columns
         protected readonly int Loading = -1;
         protected readonly int Untradable = -2;
         public MarketboardWorldSetting MarketboardWorldSetting { get; }
+        
+        public override bool IsConfigurable => true;
 
         public override void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)
         {
@@ -84,46 +87,63 @@ namespace InventoryTools.Logic.Columns
             else if(currentValue.HasValue)
             {
                 base.DoDraw(item, currentValue, rowIndex, filterConfiguration, columnConfiguration);
-                ImGui.SameLine();
-                if (ImGui.SmallButton("R##" + rowIndex))
-                {
-                    var selectedWorld = MarketboardWorldSetting.CurrentValue(columnConfiguration);
-                    if (selectedWorld != null)
-                    {
-                        return new List<MessageBase> {new MarketRequestItemWorldUpdate(item.ItemId, selectedWorld.RowId)};
-                    }
-                    else
-                    {
-                        return new List<MessageBase> {new MarketRequestItemUpdate(item.ItemId)};
-                    }
-                }
             }
             else
             {
                 base.DoDraw(item, currentValue, rowIndex, filterConfiguration, columnConfiguration);
             }
+            var activeCharacter = _characterMonitor.ActiveCharacter;
+            if (activeCharacter != null)
+            {
+                ImGui.SameLine();
+                ImGui.Image(ImGuiService.IconService[Icons.MarketboardIcon].ImGuiHandle, new Vector2(16, 16));
+                if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
+                {
+                    using (var tooltip = ImRaii.Tooltip())
+                    {
+                        if (tooltip.Success)
+                        {
+                            var selectedWorldId =
+                                MarketboardWorldSetting.SelectedWorldId(columnConfiguration, activeCharacter);
+                            var pricing = _marketCache.GetPricing(item.ItemId, selectedWorldId, false);
+                            if (pricing is { recentHistory: null, listings: null })
+                            {
+                                ImGui.Text("No data available");
+                            }
+
+                            if (pricing is { listings: not null })
+                            {
+                                ImGui.Text("Listings: ");
+                                ImGui.Separator();
+
+                                foreach (var price in pricing.listings)
+                                {
+                                    ImGui.Text(price.quantity + " available at " + price.pricePerUnit +
+                                               (price.hq ? " (HQ)" : ""));
+                                }
+                            }
+                            if (pricing is { recentHistory: not null })
+                            {
+                                ImGui.Text("History: ");
+                                ImGui.Separator();
+
+                                foreach (var price in pricing.recentHistory)
+                                {
+                                    ImGui.Text(price.quantity + " available at " + price.pricePerUnit +
+                                               (price.hq ? " (HQ)" : ""));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             return null;
         }
 
         public override (int, int)? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
         {
-            if (!item.CanBeTraded)
-            {
-                return (Untradable, Untradable);
-            }
-            var activeCharacter = _characterMonitor.ActiveCharacter;
-            if (activeCharacter != null)
-            {
-                var marketBoardData = _marketCache.GetPricing(item.ItemId, activeCharacter.WorldId, false);
-                if (marketBoardData != null)
-                {
-                    var nq = marketBoardData.AveragePriceNq;
-                    var hq = marketBoardData.AveragePriceHq;
-                    return ((int)nq, (int)hq);
-                }
-            }
-
-            return (Loading, Loading);
+            return CurrentValue(columnConfiguration, item.Item);
         }
 
         public override (int, int)? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
@@ -133,20 +153,10 @@ namespace InventoryTools.Logic.Columns
                 return (Untradable, Untradable);
             }
 
-            uint selectedWorldId = 0; 
-            var selectedWorld = MarketboardWorldSetting.CurrentValue(columnConfiguration);
-            if (selectedWorld != null)
-            {
-                selectedWorldId = selectedWorld.RowId;
-            }
             var activeCharacter = _characterMonitor.ActiveCharacter;
-            if (activeCharacter != null && selectedWorldId == 0)
+            if (activeCharacter != null)
             {
-                selectedWorldId = activeCharacter.WorldId;
-            }
-
-            if (selectedWorldId != 0)
-            {
+                var selectedWorldId = MarketboardWorldSetting.SelectedWorldId(columnConfiguration, activeCharacter);
                 var marketBoardData = _marketCache.GetPricing(item.RowId, selectedWorldId, false);
                 if (marketBoardData != null)
                 {
@@ -167,7 +177,7 @@ namespace InventoryTools.Logic.Columns
         public override string Name { get; set; } = "Market Board Average Price NQ/HQ";
         public override string RenderName => "MB Avg. Price NQ/HQ";
         public override string HelpText { get; set; } =
-            "Shows the average price of both the NQ and HQ form of the item. This data is sourced from universalis.";
+            "Shows the average price of both the NQ and HQ form of the item. If no world is selected, your home world is used. This data is sourced from universalis.";
         public override float Width { get; set; } = 200.0f;
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;

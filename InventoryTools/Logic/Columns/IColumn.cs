@@ -33,8 +33,11 @@ namespace InventoryTools.Logic.Columns
         public bool? CraftOnly { get; }
         
         public bool CanBeRemoved { get; }
+        public bool IsConfigurable { get; }
 
         public string? RenderName { get; }
+        
+        public FilterType DefaultIn { get; }
         
         public IEnumerable<InventoryItem> Filter(ColumnConfiguration columnConfiguration,
             IEnumerable<InventoryItem> items);

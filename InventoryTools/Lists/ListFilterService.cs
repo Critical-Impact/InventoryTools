@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Extensions;
@@ -13,15 +12,10 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
-using Dalamud.Plugin.Services;
-using Dispatch;
 using InventoryTools.Logic;
-using InventoryTools.Logic.Filters;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using OtterGui.Tasks;
 
 namespace InventoryTools.Lists;
 
@@ -36,18 +30,20 @@ public class ListFilterService : DisposableMediatorBackgroundService
     private readonly InventoryHistory _inventoryHistory;
     private readonly IInventoryMonitor _inventoryMonitor;
     private readonly IMarketCache _marketCache;
+    private readonly CraftPricer _craftPricer;
     private readonly IFilterService _filterService;
     private readonly ExcelCache _excelCache;
 
     public IBackgroundTaskQueue FilterQueue { get; }
 
-    public ListFilterService(InventoryToolsConfiguration configuration, ICharacterMonitor characterMonitor, InventoryHistory inventoryHistory, IInventoryMonitor inventoryMonitor, IBackgroundTaskQueue filterQueue, ILogger<ListFilterService> logger, IMarketCache marketCache, IFilterService filterService, MediatorService mediatorService, ExcelCache excelCache) : base(logger, mediatorService)
+    public ListFilterService(InventoryToolsConfiguration configuration, ICharacterMonitor characterMonitor, InventoryHistory inventoryHistory, IInventoryMonitor inventoryMonitor, IBackgroundTaskQueue filterQueue, ILogger<ListFilterService> logger, IMarketCache marketCache, CraftPricer craftPricer, IFilterService filterService, MediatorService mediatorService, ExcelCache excelCache) : base(logger, mediatorService)
     {
         _configuration = configuration;
         _characterMonitor = characterMonitor;
         _inventoryHistory = inventoryHistory;
         _inventoryMonitor = inventoryMonitor;
         _marketCache = marketCache;
+        _craftPricer = craftPricer;
         _filterService = filterService;
         _excelCache = excelCache;
         FilterQueue = filterQueue;
@@ -117,15 +113,53 @@ public class ListFilterService : DisposableMediatorBackgroundService
             }
 
             filterConfiguration.CraftList.GenerateCraftChildren();
-            filterConfiguration.CraftList.Update(characterSources, externalSources);
+            var materials = filterConfiguration.CraftList.GetMaterialsList().ToList();
+            var craftListConfiguration = new CraftListConfiguration(characterSources, externalSources, null, _craftPricer);
+            if (filterConfiguration.GetBooleanFilter("CraftWorldPriceUseActiveWorld") == true && _characterMonitor.ActiveCharacter != null)
+            {
+                if (craftListConfiguration.WorldPreferences == null)
+                {
+                    craftListConfiguration.WorldPreferences = new();
+                }
+
+                if (!craftListConfiguration.WorldPreferences.Contains(_characterMonitor.ActiveCharacter.ActiveWorldId))
+                {
+                    craftListConfiguration.WorldPreferences.Add(_characterMonitor.ActiveCharacter.ActiveWorldId);
+                }
+            }
+            if (filterConfiguration.GetBooleanFilter("CraftWorldPriceUseHomeWorld") == true && _characterMonitor.ActiveCharacter != null)
+            {
+                if (craftListConfiguration.WorldPreferences == null)
+                {
+                    craftListConfiguration.WorldPreferences = new();
+                }
+
+                if (!craftListConfiguration.WorldPreferences.Contains(_characterMonitor.ActiveCharacter.ActiveWorldId))
+                {
+                    craftListConfiguration.WorldPreferences.Add(_characterMonitor.ActiveCharacter.ActiveWorldId);
+                }
+            }
+            if (filterConfiguration.GetBooleanFilter("CraftWorldPriceUseDefaults") == true)
+            {
+                if (craftListConfiguration.WorldPreferences == null)
+                {
+                    craftListConfiguration.WorldPreferences = new();
+                }
+
+                foreach (var worldId in _configuration.MarketBoardWorldIds)
+                {
+                    if (!craftListConfiguration.WorldPreferences.Contains(worldId))
+                    {
+                        craftListConfiguration.WorldPreferences.Add(worldId);
+                    }
+                }
+            }
+            var pricingData = _craftPricer.GetItemPricingDictionary(materials, craftListConfiguration.WorldPreferences ?? new());
+            craftListConfiguration.PricingSource = pricingData;
+            filterConfiguration.CraftList.Update(craftListConfiguration, _craftPricer);
             filterConfiguration.CraftList.ClearGroupCache();
             filterConfiguration.CraftList.NeedsRefresh = false;
             filterConfiguration.NeedsRefresh = false;
-            var activeCharacter = _characterMonitor.ActiveCharacter;
-            if (activeCharacter != null)
-            {
-                filterConfiguration.CraftList.CalculateCosts(activeCharacter.WorldId, _marketCache);
-            }
 
             filterResult = GenerateFilterResult(filterConfiguration, inventories.ToList());
             filterConfiguration.NeedsRefresh = false;

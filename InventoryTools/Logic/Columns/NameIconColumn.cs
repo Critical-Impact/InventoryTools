@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
@@ -9,7 +8,6 @@ using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Plugin.Services;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 

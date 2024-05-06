@@ -6,9 +6,9 @@ using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
-using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Logic.Columns.ColumnSettings;
 using InventoryTools.Services;
 using InventoryTools.Ui.Widgets;
 using Microsoft.Extensions.Logging;
@@ -17,11 +17,13 @@ namespace InventoryTools.Logic.Columns
 {
     public class MarketBoardMinPriceHQColumn : GilColumn
     {
+        public MarketboardWorldSetting MarketboardWorldSetting { get; }
         private readonly ICharacterMonitor _characterMonitor;
         private readonly IMarketCache _marketCache;
 
-        public MarketBoardMinPriceHQColumn(ILogger<MarketBoardMinPriceHQColumn> logger, ImGuiService imGuiService, ICharacterMonitor characterMonitor, IMarketCache marketCache) : base(logger, imGuiService)
+        public MarketBoardMinPriceHQColumn(ILogger<MarketBoardMinPriceHQColumn> logger, ImGuiService imGuiService, ICharacterMonitor characterMonitor, IMarketCache marketCache, MarketboardWorldSetting marketboardWorldSetting) : base(logger, imGuiService)
         {
+            MarketboardWorldSetting = marketboardWorldSetting;
             _characterMonitor = characterMonitor;
             _marketCache = marketCache;
         }
@@ -30,6 +32,15 @@ namespace InventoryTools.Logic.Columns
         protected readonly string UntradableString = "untradable";
         protected readonly int Loading = -1;
         protected readonly int Untradable = -2;
+        
+        public override bool IsConfigurable => true;
+        
+        public override void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)
+        {
+            ImGui.NewLine();
+            ImGui.Separator();
+            MarketboardWorldSetting.Draw(columnConfiguration);
+        }
 
         public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
             InventoryItem item, int rowIndex)
@@ -71,7 +82,7 @@ namespace InventoryTools.Logic.Columns
                     var activeCharacter = _characterMonitor.ActiveCharacter;
                     if (activeCharacter != null)
                     {
-                        return new List<MessageBase> {new MarketRequestItemUpdate(item.ItemId)};
+                        return new List<MessageBase> {new MarketRequestItemUpdateMessage(item.ItemId)};
                     }
                 }
             }
@@ -88,18 +99,8 @@ namespace InventoryTools.Logic.Columns
             {
                 return Untradable;
             }
-            var activeCharacter = _characterMonitor.ActiveCharacter;
-            if (activeCharacter != null)
-            {
-                var marketBoardData = _marketCache.GetPricing(item.ItemId, activeCharacter.WorldId, false);
-                if (marketBoardData != null)
-                {
-                    var hq = marketBoardData.MinPriceHq;
-                    return (int)hq;
-                }
-            }
 
-            return Loading;
+            return CurrentValue(columnConfiguration, item.Item);
         }
 
         public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
@@ -109,9 +110,11 @@ namespace InventoryTools.Logic.Columns
                 return Untradable;
             }
             var activeCharacter = _characterMonitor.ActiveCharacter;
+
             if (activeCharacter != null)
             {
-                var marketBoardData = _marketCache.GetPricing(item.RowId, activeCharacter.WorldId, false);
+                var selectedWorldId = MarketboardWorldSetting.SelectedWorldId(columnConfiguration, activeCharacter);
+                var marketBoardData = _marketCache.GetPricing(item.ItemId, selectedWorldId, false);
                 if (marketBoardData != null)
                 {
                     var hq = marketBoardData.MinPriceHq;
@@ -132,7 +135,7 @@ namespace InventoryTools.Logic.Columns
         public override float Width { get; set; } = 250.0f;
 
         public override string HelpText { get; set; } =
-            "Shows the minimum price of the HQ form of the item. This data is sourced from universalis.";
+            "Shows the minimum price of the HQ form of the item. If no world is selected, your home world is used. This data is sourced from universalis.";
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
     }

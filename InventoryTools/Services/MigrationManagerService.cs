@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading;
@@ -7,9 +6,9 @@ using System.Threading.Tasks;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Colors;
-using Dalamud.Plugin.Services;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Columns;
+using InventoryTools.Logic.Columns.Buttons;
 using InventoryTools.Logic.Filters;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Services.Interfaces;
@@ -19,17 +18,16 @@ using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Services;
 
-public class MigrationManager : IHostedService
+public class MigrationManagerService : IHostedService
 {
-    private readonly ILogger _log;
-    private readonly ILogger<MigrationManager> _logger;
+    private readonly ILogger<MigrationManagerService> _logger;
     private readonly InventoryToolsConfiguration _configuration;
     private readonly IMarketCache _marketCache;
     private readonly IFilterService _filterService;
     private readonly IServiceProvider _serviceProvider;
     private readonly IListService _listService;
 
-    public MigrationManager(ILogger<MigrationManager> logger, InventoryToolsConfiguration configuration, IMarketCache marketCache, IFilterService filterService, IServiceProvider serviceProvider, IListService listService)
+    public MigrationManagerService(ILogger<MigrationManagerService> logger, InventoryToolsConfiguration configuration, IMarketCache marketCache, IFilterService filterService, IServiceProvider serviceProvider, IListService listService)
     {
         _logger = logger;
         _configuration = configuration;
@@ -328,6 +326,22 @@ public class MigrationManager : IHostedService
             }
             config.InternalVersion++;
         }
+
+        if (config.InternalVersion == 16)
+        {
+            _logger.LogInformation("Migrating to version 17");
+            foreach (var filterConfig in config.FilterConfigurations)
+            {
+                if (filterConfig.FilterType == FilterType.CraftFilter)
+                {
+                    filterConfig.UpdateBooleanFilter("CraftWorldPriceUseActiveWorld", true);
+                    filterConfig.UpdateBooleanFilter("CraftWorldPriceUseDefaults", true);
+                    filterConfig.UpdateBooleanFilter("CraftWorldPriceUseHomeWorld", true);
+                }
+            }
+
+            config.InternalVersion++;
+        }
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
@@ -339,6 +353,7 @@ public class MigrationManager : IHostedService
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
+        _logger.LogTrace("Stopped service {type} ({this})", GetType().Name, this);
         return Task.CompletedTask;
     }
 }

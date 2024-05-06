@@ -1,9 +1,6 @@
-using CriticalCommonLib;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
 using Dalamud.Plugin.Services;
-using InventoryTools.Logic;
-using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Tooltips;

@@ -13,7 +13,7 @@ using ImGuiNET;
 using InventoryTools.Logic;
 using InventoryTools.Ui.Widgets;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Plugin.Services;
+using InventoryTools.Lists;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
@@ -46,6 +46,7 @@ namespace InventoryTools.Ui
         }
         public override void Initialize(string filterKey)
         {
+            base.Initialize(filterKey);
             _filterKey = filterKey;
             if (SelectedConfiguration != null)
             {
@@ -114,14 +115,24 @@ namespace InventoryTools.Ui
         public override string GenericName { get; } = "Filter";
         public override bool DestroyOnClose => true;
         public override bool SaveState => true;
+
+        public override void OnClose()
+        {
+            if (SelectedConfiguration != null)
+            {
+                SelectedConfiguration.Active = false;
+            }
+        }
+        
         public override void Draw()
         {
             var filterConfiguration = SelectedConfiguration;
             if (filterConfiguration != null)
             {
+                
+                filterConfiguration.Active = true;
                 if (ImGui.IsWindowFocused())
                 {
-                    filterConfiguration.Active = true;
                     if (_configuration.SwitchFiltersAutomatically &&
                         _configuration.ActiveUiFilter != filterConfiguration.Key &&
                         _configuration.ActiveUiFilter != null)
@@ -131,9 +142,11 @@ namespace InventoryTools.Ui
                             _listService.ToggleActiveUiList(filterConfiguration);
                         });
                     }
+
                     if (_configuration.SwitchCraftListsAutomatically &&
                         _configuration.ActiveCraftList != filterConfiguration.Key &&
-                        _configuration.ActiveCraftList != null && filterConfiguration.FilterType == FilterType.CraftFilter)
+                        _configuration.ActiveCraftList != null &&
+                        filterConfiguration.FilterType == FilterType.CraftFilter)
                     {
                         Service.Framework.RunOnFrameworkThread(() =>
                         {
@@ -141,10 +154,7 @@ namespace InventoryTools.Ui
                         });
                     }
                 }
-                else
-                {
-                    filterConfiguration.Active = false;
-                }
+
                 var table = _tableService.GetListTable(filterConfiguration);
                 DrawFilter(table, filterConfiguration);
                 if (ImGui.IsWindowFocused())

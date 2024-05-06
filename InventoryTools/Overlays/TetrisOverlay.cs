@@ -7,7 +7,7 @@ using InventoryTools.Logic;
 using InventoryTools.Misc;
 using Microsoft.Extensions.Logging;
 
-namespace InventoryTools.GameUi
+namespace InventoryTools.Overlays
 {
     public class TetrisOverlay: GameOverlay<AtkInventoryExpansion>, IAtkOverlayState
     {

@@ -4,11 +4,9 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using CriticalCommonLib;
 using Dalamud.Game.Command;
 using Dalamud.Plugin.Services;
-using DalamudPluginProjectTemplate;
-using DalamudPluginProjectTemplate.Attributes;
+using InventoryTools.Attributes;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using static Dalamud.Game.Command.CommandInfo;
@@ -102,6 +100,7 @@ namespace InventoryTools.Commands
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
+            Logger.LogTrace("Stopping service {type} ({this})", GetType().Name, this);
             RemoveCommandHandlers();
             return Task.CompletedTask;
         }

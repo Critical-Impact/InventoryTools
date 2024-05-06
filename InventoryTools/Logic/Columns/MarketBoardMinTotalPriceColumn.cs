@@ -6,10 +6,9 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using Dalamud.Interface.Colors;
-using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
-using InventoryTools.Logic.Columns.Settings;
+using InventoryTools.Logic.Columns.ColumnSettings;
 using InventoryTools.Services;
 using InventoryTools.Ui.Widgets;
 using Microsoft.Extensions.Logging;
@@ -18,12 +17,12 @@ namespace InventoryTools.Logic.Columns
 {
     public class MarketBoardMinTotalPriceColumn : MarketBoardMinPriceColumn
     {
-        public MarketBoardMinTotalPriceColumn(ILogger<MarketBoardMinTotalPriceColumn> logger, ImGuiService imGuiService, MarketboardWorldSetting marketboardWorldSetting, ICharacterMonitor characterMonitor, IMarketCache marketCache) : base(logger, imGuiService, marketboardWorldSetting, characterMonitor, marketCache)
+        public MarketBoardMinTotalPriceColumn(ILogger<MarketBoardMinTotalPriceColumn> logger, ImGuiService imGuiService, MarketboardWorldSetting marketboardWorldSetting, ICharacterMonitor characterMonitor, IMarketCache marketCache, ExcelCache excelCache) : base(logger, imGuiService, marketboardWorldSetting, characterMonitor, marketCache, excelCache)
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Market;
         public override string HelpText { get; set; } =
-            "Shows the minimum price of both the NQ and HQ form of the item and multiplies it by the quantity available. This data is sourced from universalis.";
+            "Shows the minimum price of both the NQ and HQ form of the item and multiplies it by the quantity available. If no world is selected, your home world is used. This data is sourced from universalis.";
         public override FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter;
 
         public override List<MessageBase>? DoDraw(IItem item, (int, int)? currentValue, int rowIndex,
@@ -79,5 +78,7 @@ namespace InventoryTools.Logic.Columns
         
         public override string Name { get; set; } = "Market Board Minimum Total Price(Qty * Price) NQ/HQ";
         public override string RenderName => "MB Min. Total NQ/HQ";
+        
+        public override FilterType DefaultIn => Logic.FilterType.CraftFilter;
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,11 +20,9 @@ using CriticalCommonLib.Time;
 using DalaMock.Shared.Classes;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Interface.ImGuiFileDialog;
-using Dalamud.Plugin.Services;
 using InventoryTools.Commands;
-using InventoryTools.GameUi;
-using InventoryTools.Host;
 using InventoryTools.Hotkeys;
+using InventoryTools.IPC;
 using InventoryTools.Lists;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Columns;
@@ -32,6 +31,7 @@ using InventoryTools.Logic.Features;
 using InventoryTools.Logic.Filters;
 using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Misc;
+using InventoryTools.Overlays;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
 using InventoryTools.Tooltips;
@@ -43,7 +43,7 @@ using Microsoft.Extensions.Logging;
 using OtterGui.Classes;
 using OtterGui.Log;
 
-namespace InventoryTools;
+namespace InventoryTools.Host;
 
 public class PluginLoader : IDisposable
 {
@@ -61,6 +61,10 @@ public class PluginLoader : IDisposable
 
     public IHost Build()
     {
+        if (!_pluginInterfaceService.ConfigDirectory.Exists)
+        {
+            _pluginInterfaceService.ConfigDirectory.Create();
+        }
         var hostBuilder = new HostBuilder();
         hostBuilder
             .UseContentRoot(_pluginInterfaceService.ConfigDirectory.FullName)
@@ -77,7 +81,6 @@ public class PluginLoader : IDisposable
             {
                 Dictionary<Type, Type> singletonPairs = new Dictionary<Type, Type>()
                 {
-                    { typeof(GenericWindow), typeof(Window) },
                     { typeof(CharacterRetainerPage), typeof(IConfigPage) },
                     { typeof(CraftFiltersPage), typeof(IConfigPage) },
                     { typeof(FiltersPage), typeof(IConfigPage) },
@@ -85,10 +88,14 @@ public class PluginLoader : IDisposable
                 };
                 Dictionary<Type, Type> transientPairs = new Dictionary<Type, Type>()
                 {
-                    { typeof(UintWindow), typeof(Window) },
-                    { typeof(StringWindow), typeof(Window) },
                     { typeof(SettingPage), typeof(IConfigPage) },
                     { typeof(FilterPage), typeof(IConfigPage) },
+                };
+                Dictionary<Type, Type> transientExternallyOwnedPairs = new Dictionary<Type, Type>()
+                {
+                    { typeof(GenericWindow), typeof(Window) },
+                    { typeof(UintWindow), typeof(Window) },
+                    { typeof(StringWindow), typeof(Window) },
                 };
 
                 HashSet<Type> singletons = new HashSet<Type>()
@@ -111,6 +118,13 @@ public class PluginLoader : IDisposable
                         if (pair.Key.IsAssignableFrom(type))
                         {
                             builder.RegisterType(type).As(pair.Value).As(pair.Key).As(type).SingleInstance();
+                        }
+                    }
+                    foreach (var pair in transientExternallyOwnedPairs)
+                    {
+                        if (pair.Key.IsAssignableFrom(type))
+                        {
+                            builder.RegisterType(type).As(pair.Value).As(pair.Key).As(type).ExternallyOwned();
                         }
                     }
 
@@ -139,6 +153,7 @@ public class PluginLoader : IDisposable
                     }
                 }
             });
+        
             hostBuilder.ConfigureContainer<ContainerBuilder>(builder =>
             {
                 builder.RegisterType<AtkArmouryBoard>().As<IAtkOverlay>().As<AtkArmouryBoard>();
@@ -155,36 +170,62 @@ public class PluginLoader : IDisposable
                 builder.RegisterType<AtkRetainerList>().As<IAtkOverlay>().As<AtkRetainerList>();
                 builder.RegisterType<AtkSelectIconString>().As<IAtkOverlay>().As<AtkSelectIconString>();
             });
-            //Load Dalamud Services
+            
+            //Dalamud service registrations
             hostBuilder.ConfigureContainer<ContainerBuilder>(builder =>
             {
-                builder.RegisterInstance(Service.AddonLifecycle);
-                builder.RegisterInstance(Service.Chat);
-                builder.RegisterInstance(Service.ClientState);
-                builder.RegisterInstance(Service.Commands);
-                builder.RegisterInstance(Service.Condition);
-                builder.RegisterInstance(Service.Data);
-                builder.RegisterInstance(Service.Framework);
-                builder.RegisterInstance(Service.GameGui);
-                builder.RegisterInstance(Service.GameInteropProvider);
-                builder.RegisterInstance(Service.Interface);
-                builder.RegisterInstance(Service.KeyState);
-                builder.RegisterInstance(Service.LibcFunction);
-                builder.RegisterInstance(Service.Log);
-                builder.RegisterInstance(Service.Network);
-                builder.RegisterInstance(Service.Objects);
-                builder.RegisterInstance(Service.SeTime);
-                builder.RegisterInstance(Service.Targets);
-                builder.RegisterInstance(Service.TextureProvider);
-                builder.RegisterInstance(Service.Toasts);
+                builder.RegisterInstance(Service.AddonLifecycle).ExternallyOwned();
+                builder.RegisterInstance(Service.Chat).ExternallyOwned();
+                builder.RegisterInstance(Service.ClientState).ExternallyOwned();
+                builder.RegisterInstance(Service.Commands).ExternallyOwned();
+                builder.RegisterInstance(Service.Condition).ExternallyOwned();
+                builder.RegisterInstance(Service.Data).ExternallyOwned();
+                builder.RegisterInstance(Service.Framework).ExternallyOwned();
+                builder.RegisterInstance(Service.GameGui).ExternallyOwned();
+                builder.RegisterInstance(Service.GameInteropProvider).ExternallyOwned();
+                builder.RegisterInstance(Service.Interface).ExternallyOwned();
+                builder.RegisterInstance(Service.KeyState).ExternallyOwned();
+                builder.RegisterInstance(Service.LibcFunction).ExternallyOwned();
+                builder.RegisterInstance(Service.Log).ExternallyOwned();
+                builder.RegisterInstance(Service.Network).ExternallyOwned();
+                builder.RegisterInstance(Service.Objects).ExternallyOwned();
+                builder.RegisterInstance(Service.Targets).ExternallyOwned();
+                builder.RegisterInstance(Service.TextureProvider).ExternallyOwned();
+                builder.RegisterInstance(Service.Toasts).ExternallyOwned();
+                builder.RegisterInstance(Service.ContextMenu).ExternallyOwned();
+                builder.RegisterInstance(Service.TitleScreenMenu).ExternallyOwned();
             });
-            //Load Services
+
+            //Hosted service registrations
             hostBuilder.ConfigureContainer<ContainerBuilder>(builder =>
             {
-                builder.RegisterType<ExcelCache>().SingleInstance();
-                builder.RegisterType<ConfigurationManager>().SingleInstance();
+                //Needs to be externally owned as the hosted service causes a second registration in the container which causes it to dispose twice even though it's only constructed once
+                builder.RegisterType<ExcelCache>().SingleInstance().ExternallyOwned();
+                builder.RegisterType<ConfigurationManagerService>().SingleInstance().ExternallyOwned();
+                builder.RegisterType<ContextMenuService>().SingleInstance().ExternallyOwned();
+                builder.RegisterType<ListService>().As<IListService>().SingleInstance().ExternallyOwned();
+                builder.RegisterType<OverlayService>().As<IOverlayService>().SingleInstance().ExternallyOwned();
+                builder.RegisterType<HostedUniversalis>().AsSelf().As<IUniversalis>().SingleInstance().ExternallyOwned();
+                builder.RegisterType<WotsitIpc>().As<IWotsitIpc>().SingleInstance().ExternallyOwned();
+                builder.RegisterType<ListFilterService>().SingleInstance().ExternallyOwned();
+                builder.RegisterType<MediatorService>().SingleInstance().ExternallyOwned();
+                builder.RegisterType<MigrationManagerService>().SingleInstance().ExternallyOwned();
+                builder.RegisterType<PluginCommandManager<PluginCommands>>().SingleInstance().ExternallyOwned();
+                builder.RegisterType<PluginLogic>().SingleInstance().ExternallyOwned();
+                builder.RegisterType<BootService>().SingleInstance().ExternallyOwned();
+                builder.RegisterType<ServiceConfigurator>().ExternallyOwned().SingleInstance();
+                builder.RegisterType<WindowService>().SingleInstance().ExternallyOwned();
+                builder.RegisterType<TableService>().SingleInstance().ExternallyOwned();
+                builder.RegisterType<InventoryToolsUi>().SingleInstance().ExternallyOwned();
+                builder.RegisterType<TeleporterService>().SingleInstance().ExternallyOwned();
+                builder.RegisterType<LaunchButtonService>().SingleInstance().ExternallyOwned();
+            });
+            
+            hostBuilder.ConfigureContainer<ContainerBuilder>(builder =>
+            {
+                builder.Register(c => new HttpClient()).As<HttpClient>();
+                builder.RegisterType<SeTime>().As<ISeTime>().SingleInstance();
                 builder.RegisterType<ConfigurationWizardService>().SingleInstance();
-                builder.RegisterType<ContextMenuService>().SingleInstance();
                 builder.RegisterType<FileDialogManager>().SingleInstance();
                 builder.RegisterType<BackgroundTaskQueue>().As<IBackgroundTaskQueue>();
                 builder.RegisterType<CharacterMonitor>().As<ICharacterMonitor>().SingleInstance();
@@ -195,54 +236,42 @@ public class PluginLoader : IDisposable
                 builder.RegisterType<Font>().As<IFont>().SingleInstance();
                 builder.RegisterType<GameInterface>().As<IGameInterface>().SingleInstance();
                 builder.RegisterType<GameUiManager>().As<IGameUiManager>().SingleInstance();
-                builder.RegisterType<GuiService>().As<IGuiService>().SingleInstance();
                 builder.RegisterType<HotkeyService>().As<IHotkeyService>().SingleInstance();
                 builder.RegisterType<IconService>().As<IIconService>().SingleInstance();
                 builder.RegisterType<InventoryMonitor>().As<IInventoryMonitor>().SingleInstance();
                 builder.RegisterType<InventoryScanner>().As<IInventoryScanner>().SingleInstance();
-                builder.RegisterType<ListService>().As<IListService>().SingleInstance();
                 builder.RegisterType<MarketBoardService>().As<IMarketBoardService>().SingleInstance();
                 builder.RegisterType<MarketCache>().As<IMarketCache>().SingleInstance();
                 builder.RegisterType<MobTracker>().As<IMobTracker>().SingleInstance();
-                builder.RegisterType<OverlayService>().As<IOverlayService>().SingleInstance();
                 builder.RegisterType<IPCService>().SingleInstance();
                 builder.RegisterType<TeleporterIpc>().As<ITeleporterIpc>().SingleInstance();
                 builder.RegisterType<TooltipService>().As<ITooltipService>().SingleInstance();
-                builder.RegisterType<Universalis>().As<IUniversalis>().SingleInstance();
-                builder.RegisterType<WotsitIpc>().As<IWotsitIpc>().SingleInstance();
                 builder.RegisterType<IconStorage>().SingleInstance();
+                builder.RegisterType<MarketboardTaskQueue>().SingleInstance();
                 builder.RegisterType<IconStorage>().SingleInstance();
                 builder.RegisterType<ImGuiService>().SingleInstance();
                 builder.RegisterType<InventoryHistory>().SingleInstance();
-                builder.RegisterType<ListFilterService>().SingleInstance();
                 builder.RegisterType<ListCategoryService>().SingleInstance();
                 builder.RegisterType<Logger>().SingleInstance();
-                builder.RegisterType<MediatorService>().SingleInstance();
-                builder.RegisterType<MigrationManager>().SingleInstance();
                 builder.RegisterType<OdrScanner>().SingleInstance();
-                builder.RegisterType<PluginCommandManager<PluginCommands>>().SingleInstance();
                 builder.RegisterType<PluginCommands>().SingleInstance();
-                builder.RegisterType<PluginLogic>().SingleInstance();
-                builder.RegisterType<PluginBoot>().SingleInstance();
                 builder.RegisterType<RightClickService>().SingleInstance();
-                builder.RegisterType<ServiceConfigurator>().SingleInstance();
                 builder.RegisterType<TryOn>().SingleInstance();
                 builder.RegisterType<TetrisGame>().SingleInstance();
-                builder.RegisterType<WindowService>().SingleInstance();
-                builder.RegisterType<TableService>().SingleInstance();
                 builder.RegisterType<WotsitIpc>().As<IWotsitIpc>().SingleInstance();
                 builder.RegisterType<FilterTable>();
                 builder.RegisterType<CraftItemTable>();
-                builder.RegisterType<InventoryToolsUi>().SingleInstance();
                 builder.RegisterType<ListImportExportService>().SingleInstance();
                 builder.RegisterType<VersionInfo>().SingleInstance();
+                builder.RegisterType<CraftPricer>().SingleInstance();
+                builder.RegisterType<HostedUniversalisConfiguration>().AsSelf().As<IHostedUniversalisConfiguration>().SingleInstance();
 
                 //Transient
                 builder.RegisterType<FilterState>();
 
                 builder.Register(provider =>
                 {
-                    var configurationManager = provider.Resolve<ConfigurationManager>();
+                    var configurationManager = provider.Resolve<ConfigurationManagerService>();
                     configurationManager.Load();
                     var configuration = configurationManager.GetConfig();
                     configuration.ClearDirtyFlags();
@@ -304,10 +333,12 @@ public class PluginLoader : IDisposable
                         return craftItemTable;
                     };
                 });
+                
                 builder.Register<Func<Type,GenericWindow>>(c => {
                     var context = c.Resolve<IComponentContext>();
                     return type => { 
                         var genericWindow = (GenericWindow)context.Resolve(type);
+                        genericWindow.Initialize();
                         return genericWindow;
                     };
                 });
@@ -366,12 +397,18 @@ public class PluginLoader : IDisposable
                         return filter;
                     };
                 });
+                builder.Register<Func<int, IBackgroundTaskQueue>>(c => {
+                    return capacity => { 
+                        var filter = new BackgroundTaskQueue(capacity);
+                        return filter;
+                    };
+                });
             });
         hostBuilder
             .ConfigureServices(collection =>
             {
                 collection.AddHostedService(p => p.GetRequiredService<ExcelCache>());
-                collection.AddHostedService(p => p.GetRequiredService<MigrationManager>());
+                collection.AddHostedService(p => p.GetRequiredService<MigrationManagerService>());
                 collection.AddHostedService(p => p.GetRequiredService<ServiceConfigurator>());
                 collection.AddHostedService(p => p.GetRequiredService<IListService>());
                 collection.AddHostedService(p => p.GetRequiredService<ListFilterService>());
@@ -381,10 +418,14 @@ public class PluginLoader : IDisposable
                 collection.AddHostedService(p => p.GetRequiredService<TableService>());
                 collection.AddHostedService(p => p.GetRequiredService<IOverlayService>());
                 collection.AddHostedService(p => p.GetRequiredService<IWotsitIpc>());
+                collection.AddHostedService(p => p.GetRequiredService<TeleporterService>());
+                collection.AddHostedService(p => p.GetRequiredService<ContextMenuService>());
                 collection.AddHostedService(p => p.GetRequiredService<PluginCommandManager<PluginCommands>>());
-                collection.AddHostedService(p => p.GetRequiredService<PluginBoot>());
-                collection.AddHostedService(p => p.GetRequiredService<ConfigurationManager>());
+                collection.AddHostedService(p => p.GetRequiredService<BootService>());
+                collection.AddHostedService(p => p.GetRequiredService<ConfigurationManagerService>());
                 collection.AddHostedService(p => p.GetRequiredService<InventoryToolsUi>());
+                collection.AddHostedService(p => p.GetRequiredService<HostedUniversalis>());
+                collection.AddHostedService(p => p.GetRequiredService<LaunchButtonService>());
             });
             PreBuild(hostBuilder);
             var builtHost = hostBuilder
@@ -406,9 +447,8 @@ public class PluginLoader : IDisposable
 
     public void Dispose()
     {
+        Service.Log.Debug("Starting dispose of HostBuilder");
         _pluginCts.Cancel();
-        _pluginCts.Dispose();
         _hostBuilderRunTask.Wait();
-        Host?.Dispose();
     }
 }

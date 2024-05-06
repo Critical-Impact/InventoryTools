@@ -10,7 +10,8 @@ public class BasicFeature : Feature
         {
             typeof(AutoSaveSetting),
             typeof(AllowCrossCharacterSetting),
-            typeof(HistoryEnabledSetting)
+            typeof(HistoryEnabledSetting),
+            typeof(AddTitleMenuButtonSetting)
         },
         settings)
     {

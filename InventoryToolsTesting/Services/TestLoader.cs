@@ -2,10 +2,12 @@ using Autofac;
 using CriticalCommonLib;
 using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Services;
+using CriticalCommonLib.Time;
 using DalaMock.Dalamud;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Plugin.Services;
 using InventoryTools;
+using InventoryTools.Host;
 using InventoryTools.Logic;
 using InventoryToolsMock;
 using Microsoft.Extensions.Hosting;
@@ -42,6 +44,7 @@ namespace InventoryToolsTesting.Services
                 container.RegisterType<MockGameInterface>().As<IGameInterface>().SingleInstance();
                 container.RegisterType<MockWotsitIpc>().As<IWotsitIpc>().SingleInstance();
                 container.RegisterType<TestInventoryMonitor>().AsSelf().As<IInventoryMonitor>().SingleInstance();
+                container.RegisterType<MockSeTime>().AsSelf().As<ISeTime>().SingleInstance();
             });
 
         }

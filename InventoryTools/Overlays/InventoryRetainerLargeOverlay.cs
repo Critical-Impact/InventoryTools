@@ -6,17 +6,16 @@ using CriticalCommonLib.Services.Ui;
 using InventoryTools.Logic;
 using Microsoft.Extensions.Logging;
 
-namespace InventoryTools.GameUi
+namespace InventoryTools.Overlays
 {
-    public class InventoryRetainerOverlay: GameOverlay<AtkInventoryRetainer>, IAtkOverlayState
+    public class InventoryRetainerLargeOverlay: GameOverlay<AtkRetainerLarge>, IAtkOverlayState
     {
         private readonly ICharacterMonitor _characterMonitor;
 
-        public InventoryRetainerOverlay(ILogger<InventoryRetainerOverlay> logger, AtkInventoryRetainer overlay, ICharacterMonitor characterMonitor) : base(logger,overlay)
+        public InventoryRetainerLargeOverlay(ILogger<InventoryRetainerLargeOverlay> logger, AtkRetainerLarge overlay, ICharacterMonitor characterMonitor) : base(logger,overlay)
         {
             _characterMonitor = characterMonitor;
         }
-        
         public override bool ShouldDraw { get; set; }
 
         public override bool Draw()
@@ -32,26 +31,16 @@ namespace InventoryTools.GameUi
                 if (AtkOverlay.CurrentTab == 0)
                 {
                     this.AtkOverlay.SetColors(InventoryType.RetainerBag0, Bag1InventoryColours);
+                    this.AtkOverlay.SetColors(InventoryType.RetainerBag1, Bag2InventoryColours);
                 }
                 else if (AtkOverlay.CurrentTab == 1)
                 {
-                    this.AtkOverlay.SetColors(InventoryType.RetainerBag1, Bag2InventoryColours);
-                }
-                else if (AtkOverlay.CurrentTab == 2)
-                {
                     this.AtkOverlay.SetColors(InventoryType.RetainerBag2, Bag3InventoryColours);
-                }
-                else if (AtkOverlay.CurrentTab == 3)
-                {
                     this.AtkOverlay.SetColors(InventoryType.RetainerBag3, Bag4InventoryColours);
                 }
-                else if (AtkOverlay.CurrentTab == 4)
+                else
                 {
                     this.AtkOverlay.SetColors(InventoryType.RetainerBag4, Bag5InventoryColours);
-                }
-                else if (AtkOverlay.CurrentTab == 5)
-                {
-                    this.AtkOverlay.SetColors(InventoryType.RetainerBag0, Bag1InventoryColours);
                 }
 
                 return true;
@@ -101,16 +90,12 @@ namespace InventoryTools.GameUi
                     Bag3InventoryColours = newState.GetBagHighlights(InventoryType.RetainerBag2);
                     Bag4InventoryColours = newState.GetBagHighlights(InventoryType.RetainerBag3);
                     Bag5InventoryColours = newState.GetBagHighlights(InventoryType.RetainerBag4);
-                    var tab1 = newState.GetTabHighlight(Bag1InventoryColours);
-                    var tab2 = newState.GetTabHighlight(Bag2InventoryColours);
-                    var tab3 = newState.GetTabHighlight(Bag3InventoryColours);
-                    var tab4 = newState.GetTabHighlight(Bag4InventoryColours);
-                    var tab5 = newState.GetTabHighlight(Bag5InventoryColours);
+                    var tab1 = newState.GetTabHighlights(new List<Dictionary<Vector2, Vector4?>>() {Bag1InventoryColours, Bag2InventoryColours});
+                    var tab2 = newState.GetTabHighlights(new List<Dictionary<Vector2, Vector4?>>() {Bag3InventoryColours, Bag4InventoryColours});
+                    var tab3 = newState.GetTabHighlight(Bag5InventoryColours);
                     TabColours[0] = tab1;
                     TabColours[1] = tab2;
                     TabColours[2] = tab3;
-                    TabColours[3] = tab4;
-                    TabColours[4] = tab5;
                     Draw();
                     return;
                 }
@@ -135,6 +120,10 @@ namespace InventoryTools.GameUi
             if (atkUnitBase != null)
             {
                 this.AtkOverlay.SetColors(InventoryType.RetainerBag0, EmptyDictionary);
+                this.AtkOverlay.SetColors(InventoryType.RetainerBag1, EmptyDictionary);
+                this.AtkOverlay.SetColors(InventoryType.RetainerBag2, EmptyDictionary);
+                this.AtkOverlay.SetColors(InventoryType.RetainerBag3, EmptyDictionary);
+                this.AtkOverlay.SetColors(InventoryType.RetainerBag4, EmptyDictionary);
                 this.AtkOverlay.SetTabColors(EmptyTabs);
             }
         }

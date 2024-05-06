@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using CriticalCommonLib;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Services;
@@ -8,8 +7,6 @@ using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using InventoryTools.Logic;
-using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Tooltips;

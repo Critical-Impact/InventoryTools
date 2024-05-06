@@ -12,6 +12,8 @@ public abstract class ChoiceColumnSetting<T> : ColumnSetting<T?>
     public ILogger Logger { get; }
     public ImGuiService ImGuiService { get; }
 
+    public virtual string EmptyText { get; } = "";
+
     public ChoiceColumnSetting(ILogger logger, ImGuiService imGuiService)
     {
         Logger = logger;
@@ -44,22 +46,24 @@ public abstract class ChoiceColumnSetting<T> : ColumnSetting<T?>
         var choices = GetChoices(configuration);
         var activeChoice = CurrentValue(configuration);
 
-        var currentSearchCategory = activeChoice != null ? GetFormattedChoice(configuration, activeChoice) : "";
+        var currentSearchCategory = activeChoice != null ? GetFormattedChoice(configuration, activeChoice) : EmptyText;
         ImGui.SameLine();
         ImGui.SetNextItemWidth(InputSize);
         using (var combo = ImRaii.Combo("##" + Key + "Combo", currentSearchCategory))
         {
             if (combo.Success)
             {
+                if (EmptyText != "")
+                {
+                    if (ImGui.Selectable(EmptyText, currentSearchCategory == ""))
+                    {
+                        ResetFilter(configuration);
+                        configuration.IsDirty = true;
+                    }
+                }
                 foreach (var item in choices)
                 {
-                    if (item == null)
-                    {
-                        if (ImGui.Selectable("", currentSearchCategory == ""))
-                        {
-                            UpdateColumnConfiguration(configuration, item);
-                        }
-                    }
+
 
                     var text = GetFormattedChoice(configuration, item).Replace("\u0002\u001F\u0001\u0003", "-");
                     if (text == "")
@@ -70,6 +74,7 @@ public abstract class ChoiceColumnSetting<T> : ColumnSetting<T?>
                     if (ImGui.Selectable(text, currentSearchCategory == text))
                     {
                         UpdateColumnConfiguration(configuration, item);
+                        configuration.IsDirty = true;
                     }
                 }
             }

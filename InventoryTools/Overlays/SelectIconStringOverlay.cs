@@ -1,12 +1,11 @@
 using System.Collections.Generic;
 using System.Numerics;
-using CriticalCommonLib;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
 using InventoryTools.Logic;
 using Microsoft.Extensions.Logging;
 
-namespace InventoryTools.GameUi
+namespace InventoryTools.Overlays
 {
     public class SelectIconStringOverlay: GameOverlay<AtkSelectIconString>, IAtkOverlayState
     {

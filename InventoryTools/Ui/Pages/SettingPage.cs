@@ -3,7 +3,6 @@ using System.Linq;
 using CriticalCommonLib.Services.Mediator;
 using ImGuiNET;
 using InventoryTools.Extensions;
-using InventoryTools.Logic;
 using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;

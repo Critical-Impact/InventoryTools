@@ -8,11 +8,9 @@ using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
 using Dalamud.Utility;
 using ImGuiNET;
-using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Plugin.Services;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
@@ -32,6 +30,7 @@ namespace InventoryTools.Ui
         }
         public override void Initialize(uint airshipExplorationPointId)
         {
+            base.Initialize(airshipExplorationPointId);
             _airshipExplorationPointId = airshipExplorationPointId;
             if (AirshipExplorationPointEx != null)
             {
