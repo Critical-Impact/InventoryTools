@@ -1,23 +1,24 @@
 using System.Collections.Generic;
 using System.Linq;
-using CriticalCommonLib;
+using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
-using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract.ColumnSettings;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 
-namespace InventoryTools.Logic.Columns.Settings;
+namespace InventoryTools.Logic.Columns.ColumnSettings;
 
-public class MarketboardWorldSetting : ChoiceColumnSetting<WorldEx>
+public class MarketboardWorldSetting : ChoiceColumnSetting<(uint,string)?>
 {
     private readonly ExcelCache _excelCache;
+
+    public override string EmptyText => "Home World";
 
     public MarketboardWorldSetting(ILogger<MarketboardWorldSetting> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
     {
         _excelCache = excelCache;
     }
-    public override WorldEx? CurrentValue(ColumnConfiguration configuration)
+    public override (uint,string)? CurrentValue(ColumnConfiguration configuration)
     {
         configuration.GetSetting(Key, out uint? value);
         if (value == null)
@@ -25,8 +26,36 @@ public class MarketboardWorldSetting : ChoiceColumnSetting<WorldEx>
             return null;
         }
 
+        if (value.Value == 0)
+        {
+            return (0, "Active World");
+        }
+        
         var world = _excelCache.GetWorldSheet().GetRow(value.Value);
-        return world;
+        if (world == null)
+        {
+            return null;
+        }
+        return (world.RowId, world.FormattedName);
+    }
+
+    public uint SelectedWorldId(ColumnConfiguration configuration, Character character)
+    {
+        var settingValue = CurrentValue(configuration);
+        var selectedWorld = character.WorldId;
+        if (settingValue != null)
+        {
+            if (settingValue.Value.Item1 == 0)
+            {
+                selectedWorld = character.ActiveWorldId;
+            }
+            else
+            {
+                selectedWorld = settingValue.Value.Item1;
+            }
+        }
+
+        return selectedWorld;
     }
 
     public override void ResetFilter(ColumnConfiguration configuration)
@@ -34,22 +63,24 @@ public class MarketboardWorldSetting : ChoiceColumnSetting<WorldEx>
         configuration.SetSetting(Key, (uint?)null);
     }
 
-    public override void UpdateColumnConfiguration(ColumnConfiguration configuration, WorldEx? newValue)
+    public override void UpdateColumnConfiguration(ColumnConfiguration configuration, (uint,string)? newValue)
     {
-        configuration.SetSetting(Key, newValue?.RowId ?? null);
+        configuration.SetSetting(Key, newValue?.Item1 ?? null);
     }
 
     public override string Key { get; set; } = "MBWorld";
     public override string Name { get; set; } = "World";
     public override string HelpText { get; set; } = "The world for this column to display?";
-    public override WorldEx? DefaultValue { get; set; } = null;
-    public override List<WorldEx> GetChoices(ColumnConfiguration configuration)
+    public override (uint,string)? DefaultValue { get; set; } = null;
+    public override List<(uint,string)?> GetChoices(ColumnConfiguration configuration)
     {
-        return _excelCache.GetWorldSheet().Where(c => c.IsPublic == true).ToList();
+        List<(uint RowId, string FormattedName)?> worlds = _excelCache.GetWorldSheet().Where(c => c.IsPublic).Select(c =>((uint, string)?)(c.RowId, c.FormattedName)).ToList();
+        worlds.Insert(0,(0,"Active World"));
+        return worlds;
     }
 
-    public override string GetFormattedChoice(ColumnConfiguration filterConfiguration, WorldEx choice)
+    public override string GetFormattedChoice(ColumnConfiguration filterConfiguration, (uint,string)? choice)
     {
-        return choice.FormattedName;
+        return choice?.Item2 ?? "Active World";
     }
 }

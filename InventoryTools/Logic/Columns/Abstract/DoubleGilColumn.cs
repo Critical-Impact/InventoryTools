@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Services.Mediator;
 using Dalamud.Game.Text;
-using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -22,13 +21,13 @@ namespace InventoryTools.Logic.Columns.Abstract
             if (currentValue != null)
             {
                 var text = $"{currentValue.Value.Item1:n0}" + SeIconChar.Gil.ToIconString() + Divider + $"{currentValue.Value.Item2:n0}" + SeIconChar.Gil.ToIconString();
-                var xOffset = ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize(text).X;
+                var xOffset = ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize(text).X - 22;
                 ImGuiUtil.VerticalAlignText(text, filterConfiguration.TableHeight, false, xOffset);
             }
             else
             {
                 var text = EmptyText;
-                var xOffset = ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize(text).X;
+                var xOffset = ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize(text).X - 22;
                 ImGuiUtil.VerticalAlignText(text, filterConfiguration.TableHeight, false, xOffset);
             }
             return null;

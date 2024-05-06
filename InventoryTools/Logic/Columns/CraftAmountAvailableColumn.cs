@@ -4,7 +4,6 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
-using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
@@ -75,5 +74,6 @@ namespace InventoryTools.Logic.Columns
         public override FilterType AvailableIn { get; } = Logic.FilterType.CraftFilter | Logic.FilterType.SortingFilter;
         public override bool HasFilter { get; set; } = false;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
+        public override FilterType DefaultIn => Logic.FilterType.CraftFilter;
     }
 }

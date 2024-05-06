@@ -1,6 +1,5 @@
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
-using Dalamud.Plugin.Services;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -34,5 +33,6 @@ namespace InventoryTools.Logic.Columns
         public override string HelpText { get; set; } = "The item's rarity.";
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
+        public override FilterType DefaultIn => Logic.FilterType.GameItemFilter;
     }
 }

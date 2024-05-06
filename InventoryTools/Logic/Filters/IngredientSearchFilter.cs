@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
@@ -12,7 +11,6 @@ using Dalamud.Interface.Utility.Raii;
 using InventoryTools.Lists;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters;

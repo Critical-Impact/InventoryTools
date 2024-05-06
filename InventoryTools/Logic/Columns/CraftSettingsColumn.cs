@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
@@ -54,6 +53,8 @@ public class CraftSettingsColumn : IColumn
     public ColumnFilterType FilterType { get; set; } = ColumnFilterType.None;
     public bool IsDebug { get; set; } = false;
     public FilterType AvailableIn { get; } = Logic.FilterType.CraftFilter;
+    public virtual bool IsConfigurable => false;
+    public bool IsDefault => true;
     public bool AvailableInType(FilterType type)
     {
         return type == Logic.FilterType.CraftFilter;
@@ -776,4 +777,5 @@ public class CraftSettingsColumn : IColumn
     public void Dispose()
     {
     }
+    public virtual FilterType DefaultIn => Logic.FilterType.CraftFilter;
 }

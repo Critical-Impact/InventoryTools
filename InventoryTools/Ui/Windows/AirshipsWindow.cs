@@ -1,12 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
-using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;

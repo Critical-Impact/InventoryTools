@@ -3,7 +3,6 @@ using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
-using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
@@ -89,5 +88,7 @@ namespace InventoryTools.Logic.Columns
         public override string HelpText { get; set; } = "The amount required with inventory and external sources factored in/The amount required without inventory and external sources factored in.";
         public override bool HasFilter { get; set; } = false;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
+        
+        public override FilterType DefaultIn => Logic.FilterType.CraftFilter;
     }
 }

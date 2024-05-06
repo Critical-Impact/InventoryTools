@@ -1,10 +1,8 @@
 using System.Collections.Generic;
-using System.Numerics;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
-using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
@@ -89,4 +87,6 @@ public class FavouritesColumn : CheckboxColumn
     public override string Name { get; set; } = "Favourite?";
     public override float Width { get; set; } = 80;
     public override string HelpText { get; set; } = "Is this item in your list of favourites?";
+
+    public override FilterType DefaultIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter | Logic.FilterType.GameItemFilter;
 }

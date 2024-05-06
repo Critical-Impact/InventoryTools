@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Services;
@@ -13,7 +12,7 @@ using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Mediator;
 
-namespace InventoryTools.Logic.Columns;
+namespace InventoryTools.Logic.Columns.Buttons;
 
 public class CraftBuyColumn : ButtonColumn
 {

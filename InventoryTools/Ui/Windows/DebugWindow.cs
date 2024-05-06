@@ -14,7 +14,6 @@ using ImGuiNET;
 using InventoryTools.Logic;
 using LuminaSupplemental.Excel.Model;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Plugin.Services;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 
@@ -821,9 +820,9 @@ namespace InventoryTools.Ui
                     {
                         if (ImGui.Button("Force Save"))
                         {
-                            ConfigurationManager.SaveAsync();
-                            ConfigurationManager.SaveAsync();
-                            ConfigurationManager.SaveAsync();
+                            ConfigurationManagerService.SaveAsync();
+                            ConfigurationManagerService.SaveAsync();
+                            ConfigurationManagerService.SaveAsync();
                         }
                     }
                     else if (_configuration.SelectedDebugPage == 16)

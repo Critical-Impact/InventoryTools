@@ -3,14 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
-using CriticalCommonLib;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-using Dalamud.Interface.Components;
 using ImGuiNET;
-using Dalamud.Interface.Utility.Raii;
-using Dalamud.Plugin.Services;
 using InventoryTools.Logic;
+using InventoryTools.Mediator;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 
@@ -21,30 +18,13 @@ public class TeamCraftImportWindow : GenericWindow
     private readonly ExcelCache _excelCache;
     private string _importListItems = "";
     private bool _hasError;
-    private bool _hasResult;
     private List<(uint, uint)>? _parseResult;
-    private bool _openImportWindow;
 
     public TeamCraftImportWindow(ILogger<TeamCraftImportWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ExcelCache excelCache, string name = "Teamcraft Import") : base(logger, mediator, imGuiService, configuration, name)
     {
         _excelCache = excelCache;
+        Flags = ImGuiWindowFlags.NoCollapse;
     }
-
-    public bool OpenImportWindow
-    {
-        get => _openImportWindow;
-        set
-        {
-            if (value != _openImportWindow && _openImportWindow == false)
-            {
-                _importListItems = "";
-            }
-            _openImportWindow = value;
-        }
-    }
-
-    public bool HasError => _hasError;
-    public bool HasResult => _hasResult;
 
     public List<(uint, uint)>? ParseResult => _parseResult;
 
@@ -52,60 +32,41 @@ public class TeamCraftImportWindow : GenericWindow
     public override string GenericKey { get; } = "tcimport";
     public override string GenericName { get; } = "Teamcraft Import";
     public override bool DestroyOnClose { get; }
-    public override bool SaveState { get; }
-    public override Vector2? DefaultSize { get; }
+    public override bool SaveState { get; } = false;
+    public override Vector2? DefaultSize { get; } = new Vector2(300, 300);
     public override Vector2? MaxSize { get; }
     public override Vector2? MinSize { get; }
     public override void Initialize()
     {
-        throw new NotImplementedException();
     }
 
     public override void Draw()
     {
-        if (!OpenImportWindow) return;
-        bool isOpen = OpenImportWindow;
-        using var id = ImRaii.PushId("TCImport");
+        ImGui.Text("Import to Craft List: ");
+        ImGui.SameLine();
+        ImGuiService.HelpMarker("Guide to importing lists.\r\n\r\n" +
+                                "Step 1. Open a list on Teamcraft with the items you wish to craft.\r\n\r\n" +
+                                "Step 2. Find the 'Items' \"Copy as Text\" button. You only want to copy the output items.\r\n\r\n" +
+                                "Step 3. Paste into the text box below in this window.\r\n\r\n" +
+                                "Step 4. Click import.");
+        ImGui.Text("Paste text here");
+        ImGui.InputTextMultiline("###FinalItems", ref _importListItems, 10000000, new Vector2(ImGui.GetContentRegionAvail().X, 100));
 
-        if (ImGui.Begin("Teamcraft Import", ref isOpen, ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.AlwaysAutoResize))
+
+        if (ImGui.Button("Import"))
         {
-            ImGui.Text("List Name");
-            ImGui.SameLine();
-            ImGuiComponents.HelpMarker("Guide to importing lists.\r\n\r\n" +
-                "Step 1. Open a list on Teamcraft with the items you wish to craft.\r\n\r\n" +
-                "Step 2. Find the 'Items' \"Copy as Text\" button.\r\n\r\n" +
-                "Step 3. Paste into the Items box in this window.\r\n\r\n" +
-                "Step 4. Click import.");
-            ImGui.Text("Items");
-            ImGui.InputTextMultiline("###FinalItems", ref _importListItems, 10000000, new Vector2(ImGui.GetContentRegionAvail().X, 100));
-
-
-            if (ImGui.Button("Import"))
+            var importedList = ParseImport();
+            if (importedList is not null)
             {
-                var importedList = ParseImport();
-                if (importedList is not null)
-                {
-                    isOpen = false;
-                    _parseResult = importedList;
-                    _hasResult = true;
-                }
-                else
-                {
-                    _hasError = false;
-                }
+                Close();
+                MediatorService.Publish(new TeamCraftDataImported(importedList));
+            }
 
-            }
-            ImGui.SameLine();
-            if (ImGui.Button("Cancel"))
-            {
-                isOpen = false;
-            }
-            ImGui.End();
         }
-
-        if (OpenImportWindow != isOpen)
+        ImGui.SameLine();
+        if (ImGui.Button("Cancel"))
         {
-            OpenImportWindow = isOpen;
+            Close();
         }
     }
 

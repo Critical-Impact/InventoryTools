@@ -1,4 +1,5 @@
 using System;
+using CriticalCommonLib.MarketBoard;
 using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -7,6 +8,12 @@ namespace InventoryTools.Logic.Settings
 {
     public class MarketBoardSaleCountLimitSetting : IntegerSetting
     {
+        public MarketBoardSaleCountLimitSetting(ILogger<MarketBoardSaleCountLimitSetting> logger, ImGuiService imGuiService, IHostedUniversalisConfiguration universalisConfiguration) : base(logger, imGuiService)
+        {
+            _universalisConfiguration = universalisConfiguration;
+        }
+        
+        private readonly IHostedUniversalisConfiguration _universalisConfiguration;
         public override int DefaultValue { get; set; } = 7;
         public override int CurrentValue(InventoryToolsConfiguration configuration)
         {
@@ -17,6 +24,7 @@ namespace InventoryTools.Logic.Settings
         {
             newValue = Math.Min(30, newValue);
             newValue = Math.Max(1, newValue);
+            _universalisConfiguration.SaleHistoryLimit = newValue;
             configuration.MarketSaleHistoryLimit = newValue;
         }
 
@@ -31,9 +39,5 @@ namespace InventoryTools.Logic.Settings
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.MarketBoard;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Market;
         public override string Version => "1.6.2.5";
-
-        public MarketBoardSaleCountLimitSetting(ILogger<MarketBoardSaleCountLimitSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
-        {
-        }
     }
 }

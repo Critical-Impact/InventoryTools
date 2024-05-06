@@ -4,7 +4,6 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
-using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;

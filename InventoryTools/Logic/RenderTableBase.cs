@@ -1,15 +1,11 @@
-using System;
 using System.Collections.Generic;
 using System.Numerics;
-using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
-using InventoryTools.Extensions;
-using InventoryTools.Logic.Columns;
 using InventoryTools.Services;
 
 namespace InventoryTools.Logic
@@ -143,7 +139,7 @@ namespace InventoryTools.Logic
         public ImGuiSortDirection? SortDirection { get; set; }
         public int? FreezeCols { get; set; }
         public int? FreezeRows { get; set; }
-        public bool ShowFilterRow { get; set; }
+        public bool ShowFilterRow { get; set; } = true;
         public bool NeedsRefresh { get; set; }
         public bool NeedsColumnRefresh { get; set; }
         public bool Refreshing { get; set; } 

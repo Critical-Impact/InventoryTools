@@ -388,14 +388,13 @@ namespace InventoryTools.Logic
             {
                 if (filterResult.AllItems.Count != 0)
                 {
-                    /*var correctResults = filterResult.Value.AllItems.Where(c =>
+                    var correctResults = filterResult.AllItems.Where(c =>
                         AtkInventoryMiragePrismBox.EquipSlotCategoryToDresserTab(c.EquipSlotCategory.Value) ==
                         dresserTab).Skip(page * 50).Take(50).ToList();
+                    
                     resultOverride = new FilterResult(new List<SortingResult>(), new List<InventoryItem>(),
-                        correctResults);
-                    //TODO: REDO ME
-                    return GetBagHighlights(InventoryType.GlamourChest, resultOverride);*/
-                    return new Dictionary<Vector2, Vector4?>();
+                        correctResults, new List<InventoryChange>());
+                    return GetBagHighlights(InventoryType.GlamourChest, resultOverride);
                 }
                 else
                 {

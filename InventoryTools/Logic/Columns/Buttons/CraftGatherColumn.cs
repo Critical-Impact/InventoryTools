@@ -11,24 +11,25 @@ using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
 using CriticalCommonLib.Time;
 using Dalamud.Interface.Colors;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
-using OtterGui;
-using Dalamud.Interface.Utility.Raii;
-using Dalamud.Plugin.Services;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
+using OtterGui;
 
-namespace InventoryTools.Logic.Columns
+namespace InventoryTools.Logic.Columns.Buttons
 {
     public class CraftGatherColumn : CheckboxColumn
     {
         private readonly IChatUtilities _chatUtilities;
+        private readonly ISeTime _seTime;
 
-        public CraftGatherColumn(ILogger<CraftGatherColumn> logger, ImGuiService imGuiService, IChatUtilities chatUtilities) : base(logger, imGuiService)
+        public CraftGatherColumn(ILogger<CraftGatherColumn> logger, ImGuiService imGuiService, IChatUtilities chatUtilities, ISeTime seTime) : base(logger, imGuiService)
         {
             _chatUtilities = chatUtilities;
+            _seTime = seTime;
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Buttons;
 
@@ -157,7 +158,7 @@ namespace InventoryTools.Logic.Columns
                     {
                         ImGui.SameLine();
                     }
-                    var nextUptime = item.UpTime.Value.NextUptime(Service.SeTime.ServerTime);
+                    var nextUptime = item.UpTime.Value.NextUptime(_seTime.ServerTime);
                     if (nextUptime.Equals(TimeInterval.Always)
                         || nextUptime.Equals(TimeInterval.Invalid)
                         || nextUptime.Equals(TimeInterval.Never)) return null;
@@ -181,7 +182,7 @@ namespace InventoryTools.Logic.Columns
                     }
                 }
             }
-            return null;
+            return messages;
         }
 
         private bool DrawGatherButtons(CraftItem item, int rowIndex)
@@ -320,5 +321,6 @@ namespace InventoryTools.Logic.Columns
         public override string HelpText { get; set; } = "Shows a button that links to gatherbuddy's /gather function.";
         public override bool HasFilter { get; set; } = false;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
+        public override FilterType DefaultIn => Logic.FilterType.CraftFilter;
     }
 }

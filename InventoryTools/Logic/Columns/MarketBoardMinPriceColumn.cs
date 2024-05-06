@@ -2,9 +2,8 @@
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
-using Dalamud.Plugin.Services;
 using InventoryTools.Logic.Columns.Abstract;
-using InventoryTools.Logic.Columns.Settings;
+using InventoryTools.Logic.Columns.ColumnSettings;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 
@@ -15,7 +14,7 @@ namespace InventoryTools.Logic.Columns
         private readonly ICharacterMonitor _characterMonitor;
         private readonly IMarketCache _marketCache;
 
-        public MarketBoardMinPriceColumn(ILogger<MarketBoardMinPriceColumn> logger, ImGuiService imGuiService, MarketboardWorldSetting marketboardWorldSetting, ICharacterMonitor characterMonitor, IMarketCache marketCache) : base(logger, imGuiService, marketboardWorldSetting, characterMonitor, marketCache)
+        public MarketBoardMinPriceColumn(ILogger<MarketBoardMinPriceColumn> logger, ImGuiService imGuiService, MarketboardWorldSetting marketboardWorldSetting, ICharacterMonitor characterMonitor, IMarketCache marketCache, ExcelCache excelCache) : base(logger, imGuiService, marketboardWorldSetting, characterMonitor, marketCache, excelCache)
         {
             _characterMonitor = characterMonitor;
             _marketCache = marketCache;
@@ -23,7 +22,7 @@ namespace InventoryTools.Logic.Columns
         public override ColumnCategory ColumnCategory => ColumnCategory.Market;
 
         public override string HelpText { get; set; } =
-            "Shows the minimum price of both the NQ and HQ form of the item. This data is sourced from universalis.";
+            "Shows the minimum price of both the NQ and HQ form of the item. If no world is selected, your home world is used. This data is sourced from universalis.";
         
         public override (int, int)? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
         {
@@ -34,7 +33,9 @@ namespace InventoryTools.Logic.Columns
             var activeCharacter = _characterMonitor.ActiveCharacter;
             if (activeCharacter != null)
             {
-                var marketBoardData = _marketCache.GetPricing(item.ItemId, activeCharacter.WorldId, false);
+                var selectedWorldId = MarketboardWorldSetting.SelectedWorldId(columnConfiguration, activeCharacter);
+
+                var marketBoardData = _marketCache.GetPricing(item.ItemId, selectedWorldId, false);
                 if (marketBoardData != null)
                 {
                     var nq = marketBoardData.MinPriceNq;
@@ -55,7 +56,9 @@ namespace InventoryTools.Logic.Columns
             var activeCharacter = _characterMonitor.ActiveCharacter;
             if (activeCharacter != null)
             {
-                var marketBoardData = _marketCache.GetPricing(item.RowId, activeCharacter.WorldId, false);
+                var selectedWorld = MarketboardWorldSetting.CurrentValue(columnConfiguration)?.Item1 ?? activeCharacter.WorldId;
+
+                var marketBoardData = _marketCache.GetPricing(item.RowId, selectedWorld, false);
                 if (marketBoardData != null)
                 {
                     var nq = marketBoardData.MinPriceNq;
@@ -74,5 +77,7 @@ namespace InventoryTools.Logic.Columns
 
         public override string Name { get; set; } = "Market Board Minimum Price NQ/HQ";
         public override string RenderName => "MB Min. Price NQ/HQ";
+        
+        public override FilterType DefaultIn => Logic.FilterType.CraftFilter;
     }
 }

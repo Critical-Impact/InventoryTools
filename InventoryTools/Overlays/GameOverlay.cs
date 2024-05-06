@@ -3,7 +3,7 @@ using CriticalCommonLib.Services.Ui;
 using InventoryTools.Logic;
 using Microsoft.Extensions.Logging;
 
-namespace InventoryTools.GameUi;
+namespace InventoryTools.Overlays;
 
 public interface IGameOverlay : IAtkOverlayState
 {
@@ -45,7 +45,7 @@ public abstract class GameOverlay<T> : IGameOverlay where T : AtkOverlay
             
     }
 
-    public bool Enabled { get; set; }
+    public bool Enabled { get; set; } = true;
     public abstract bool HasState { get; set; }
     public abstract bool NeedsStateRefresh { get; set; }
     public abstract void UpdateState(FilterState? newState);

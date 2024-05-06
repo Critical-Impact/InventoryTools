@@ -1,4 +1,4 @@
-namespace InventoryTools.Enums;
+namespace InventoryTools.Logic;
 
 public enum CraftDisplayMode
 {

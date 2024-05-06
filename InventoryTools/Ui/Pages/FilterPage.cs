@@ -3,11 +3,12 @@ using System.Linq;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using Dalamud.Interface.Colors;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using InventoryTools.Lists;
 using InventoryTools.Logic;
+using InventoryTools.Logic.Filters;
 using InventoryTools.Services;
-using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Ui.Pages
@@ -130,27 +131,51 @@ namespace InventoryTools.Ui.Pages
                     if (hasValues && ImGui.BeginTabItem(group.Key.ToString()))
                     {
                         ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudWhite);
-                        foreach (var filter in group.Value)
+                        if (group.Key == FilterCategory.CraftColumns)
                         {
-                            if ((filter.AvailableIn.HasFlag(FilterType.SearchFilter) &&
-                                 filterConfiguration.FilterType.HasFlag(FilterType.SearchFilter)
-                                 ||
-                                 (filter.AvailableIn.HasFlag(FilterType.SortingFilter) &&
-                                  filterConfiguration.FilterType.HasFlag(FilterType.SortingFilter))
-                                 ||
-                                 (filter.AvailableIn.HasFlag(FilterType.CraftFilter) &&
-                                  filterConfiguration.FilterType.HasFlag(FilterType.CraftFilter))
-                                 ||
-                                 (filter.AvailableIn.HasFlag(FilterType.HistoryFilter) &&
-                                  filterConfiguration.FilterType.HasFlag(FilterType.HistoryFilter))
-                                 ||
-                                 (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
-                                  filterConfiguration.FilterType.HasFlag(FilterType.GameItemFilter))
-                                ))
+                            using (var craftColumns = ImRaii.Child("craftColumns", new (0, -200)))
                             {
-                                filter.Draw(filterConfiguration);
+                                if (craftColumns.Success)
+                                {
+                                    group.Value.Single(c => c is CraftColumnsFilter or ColumnsFilter).Draw(filterConfiguration);
+                                }
+                            }
+                            using (var otherFilters = ImRaii.Child("otherFilters", new (0, 0)))
+                            {
+                                if (otherFilters.Success)
+                                {
+                                    foreach (var filter in group.Value.Where(c => c is not CraftColumnsFilter and ColumnsFilter))
+                                    {
+                                        filter.Draw(filterConfiguration);
+                                    }
+                                }
                             }
                         }
+                        else
+                        {
+                            foreach (var filter in group.Value)
+                            {
+                                if ((filter.AvailableIn.HasFlag(FilterType.SearchFilter) &&
+                                     filterConfiguration.FilterType.HasFlag(FilterType.SearchFilter)
+                                     ||
+                                     (filter.AvailableIn.HasFlag(FilterType.SortingFilter) &&
+                                      filterConfiguration.FilterType.HasFlag(FilterType.SortingFilter))
+                                     ||
+                                     (filter.AvailableIn.HasFlag(FilterType.CraftFilter) &&
+                                      filterConfiguration.FilterType.HasFlag(FilterType.CraftFilter))
+                                     ||
+                                     (filter.AvailableIn.HasFlag(FilterType.HistoryFilter) &&
+                                      filterConfiguration.FilterType.HasFlag(FilterType.HistoryFilter))
+                                     ||
+                                     (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
+                                      filterConfiguration.FilterType.HasFlag(FilterType.GameItemFilter))
+                                    ))
+                                {
+                                    filter.Draw(filterConfiguration);
+                                }
+                            }
+                        }
+
                         ImGui.PopStyleColor();
                         ImGui.EndTabItem();
                     }

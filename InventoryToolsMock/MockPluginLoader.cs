@@ -2,11 +2,13 @@ using Autofac;
 using CriticalCommonLib;
 using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Services;
+using CriticalCommonLib.Time;
 using DalaMock.Dalamud;
 using DalaMock.Mock;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Plugin.Services;
 using InventoryTools;
+using InventoryTools.Host;
 using InventoryTools.Logic;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -34,8 +36,6 @@ public class MockPluginLoader : PluginLoader
         hostBuilder.ConfigureContainer<ContainerBuilder>(container =>
         {
             container.RegisterInstance(_logger).SingleInstance();
-            //container.RegisterInstance(_mockProgram).SingleInstance();
-            //container.RegisterInstance(_mockPlugin).SingleInstance();
             container.RegisterInstance(_mockService).SingleInstance();
             container.RegisterType<MockWindow>().SingleInstance();
             container.RegisterInstance(_mockProgram.Framework).As<IFramework>().SingleInstance();
@@ -45,7 +45,14 @@ public class MockPluginLoader : PluginLoader
             container.RegisterType<MockTeleporterIpc>().As<ITeleporterIpc>().SingleInstance();
             container.RegisterType<MockChatUtilities>().As<IChatUtilities>().SingleInstance();
             container.RegisterType<MockGameInterface>().As<IGameInterface>().SingleInstance();
-            container.RegisterType<MockWotsitIpc>().As<IWotsitIpc>().SingleInstance();
+            container.RegisterType<MockTitleScreenMenu>().As<ITitleScreenMenu>().SingleInstance();
+            container.RegisterType<MockSeTime>().As<ISeTime>().SingleInstance();
+        });
+        
+        //Hosted service registrations
+        hostBuilder.ConfigureContainer<ContainerBuilder>(container =>
+        {
+            container.RegisterType<MockWotsitIpc>().As<IWotsitIpc>().SingleInstance().ExternallyOwned();
         });
     }
 }

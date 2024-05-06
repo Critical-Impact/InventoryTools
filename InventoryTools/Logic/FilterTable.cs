@@ -6,18 +6,15 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
-using CriticalCommonLib;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
 using CsvHelper;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
-using InventoryTools.Logic.Columns;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
-using InventoryTools.Extensions;
 using InventoryTools.Services;
 
 namespace InventoryTools.Logic
@@ -147,12 +144,13 @@ namespace InventoryTools.Logic
                                 clipper.ItemsHeight = 32;
                             }
 
-                            clipper.Begin(RenderSortedItems.Count);
+                            var renderSortedItems = RenderSortedItems;
+                            clipper.Begin(renderSortedItems.Count);
                             while (clipper.Step())
                             {
                                 for (var index = clipper.DisplayStart; index < clipper.DisplayEnd; index++)
                                 {
-                                    var item = RenderSortedItems[index];
+                                    var item = renderSortedItems[index];
                                     ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
                                     ImGui.PushID(index);
                                     for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)

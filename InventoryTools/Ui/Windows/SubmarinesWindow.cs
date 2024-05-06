@@ -1,19 +1,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
-using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
-using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 

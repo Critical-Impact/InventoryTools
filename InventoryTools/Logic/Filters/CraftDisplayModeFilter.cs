@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
-using InventoryTools.Enums;
 using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;

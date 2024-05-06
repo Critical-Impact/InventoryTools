@@ -6,7 +6,7 @@ using CriticalCommonLib.Services.Ui;
 using InventoryTools.Logic;
 using Microsoft.Extensions.Logging;
 
-namespace InventoryTools.GameUi
+namespace InventoryTools.Overlays
 {
     public class ArmouryBoardOverlay: GameOverlay<AtkArmouryBoard>
     {

@@ -2,7 +2,6 @@
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
-using Dalamud.Plugin.Services;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -52,5 +51,8 @@ namespace InventoryTools.Logic.Columns
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
         public override FilterType AvailableIn => Logic.FilterType.SortingFilter | Logic.FilterType.CraftFilter | Logic.FilterType.HistoryFilter;
+        
+        public override FilterType DefaultIn => Logic.FilterType.SortingFilter;
+
     }
 }

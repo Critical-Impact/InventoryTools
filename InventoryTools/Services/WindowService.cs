@@ -5,14 +5,9 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using CriticalCommonLib;
 using CriticalCommonLib.Services.Mediator;
 using Dalamud.Interface.Windowing;
-using Dalamud.Plugin.Services;
-using ImGuiNET;
-using InventoryTools.Logic;
 using InventoryTools.Mediator;
-using InventoryTools.Services.Interfaces;
 using InventoryTools.Ui;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -30,7 +25,7 @@ namespace InventoryTools.Services
         private readonly InventoryToolsConfiguration _configuration;
         private readonly MediatorService _mediatorService;
 
-        public WindowService(ILogger<WindowService> logger, MediatorService mediatorService, IEnumerable<Window> windows, Func<Type, uint, UintWindow> uintWindowFactory, Func<Type, string, StringWindow> stringWindowFactory, Func<Type, GenericWindow> genericWindowFactory, InventoryToolsConfiguration configuration) : base(logger, mediatorService)
+        public WindowService(ILogger<WindowService> logger, MediatorService mediatorService, IEnumerable<Window> windows, Func<Type, uint, UintWindow> uintWindowFactory, Func<Type, string, StringWindow> stringWindowFactory, Func<Type,GenericWindow> genericWindowFactory, InventoryToolsConfiguration configuration) : base(logger, mediatorService)
         {
             _windows = windows.ToDictionary(c => c.GetType(), c => c);
             _uintWindowFactory = uintWindowFactory;
@@ -61,7 +56,7 @@ namespace InventoryTools.Services
             }
         }
 
-        private List<Window> _allWindows = new();
+        private List<IWindow> _allWindows = new();
         private ConcurrentDictionary<(Type,string), IWindow> _stringWindows = new();
         private ConcurrentDictionary<(Type,uint), IWindow> _uintWindows = new();
         private ConcurrentDictionary<Type, IWindow> _genericWindows = new();
@@ -84,9 +79,11 @@ namespace InventoryTools.Services
                     try
                     {
                         var newWindow = _genericWindowFactory.Invoke(type);
-                        newWindow.Initialize();
                         AddWindow(newWindow);
-                        newWindow.Open();
+                        if (newWindow.SaveState)
+                        {
+                            newWindow.Open();
+                        }
 
                     }
                     catch (Exception e)
@@ -115,7 +112,6 @@ namespace InventoryTools.Services
             }
             ;
             var newWindow = _genericWindowFactory.Invoke(typeof(T));
-            newWindow.Initialize();
             AddWindow(newWindow);
             return (T)newWindow;
         }
@@ -128,7 +124,6 @@ namespace InventoryTools.Services
             }
             ;
             var newWindow = _genericWindowFactory.Invoke(type);
-            newWindow.Initialize();
             AddWindow(type, newWindow);
             return newWindow;
         }
@@ -141,7 +136,6 @@ namespace InventoryTools.Services
             }
             ;
             var newWindow = _uintWindowFactory.Invoke(type, windowId);
-            newWindow.Initialize(windowId);
             AddWindow(type, newWindow, windowId);
             return newWindow;
         }
@@ -154,7 +148,6 @@ namespace InventoryTools.Services
             }
             ;
             var newWindow = _stringWindowFactory.Invoke(type, windowId);
-            newWindow.Initialize(windowId);
             AddWindow(type, newWindow, windowId);
             return newWindow;
         }
@@ -166,7 +159,6 @@ namespace InventoryTools.Services
                 return (T)_uintWindows[(typeof(T),windowId)];
             }
             var newWindow = _uintWindowFactory.Invoke(typeof(T), windowId);
-            newWindow.Initialize(windowId);
             AddWindow(newWindow, windowId);
             return (T)newWindow;
         }
@@ -178,7 +170,6 @@ namespace InventoryTools.Services
                 return (T)_stringWindows[(typeof(T),windowId)];
             }
             var newWindow = _stringWindowFactory.Invoke(typeof(T), windowId);
-            newWindow.Initialize(windowId);
             AddWindow(newWindow, windowId);
             return (T)newWindow;
         }
@@ -439,11 +430,11 @@ namespace InventoryTools.Services
 
         private void WindowOnOpened(IWindow window)
         {
-            if(!_configuration.OpenWindows.Contains(window.GetType().ToString()))
+            if(window.SaveState && !_configuration.OpenWindows.Contains(window.GetType().ToString()))
             {
                 _configuration.OpenWindows.Add(window.GetType().ToString());
             }
-            if (window.SavePosition)
+            if (window.SaveState && window.SavePosition)
             {
                 if (_configuration.SavedWindowPositions.ContainsKey(window.GetType().ToString()))
                 {
@@ -455,12 +446,12 @@ namespace InventoryTools.Services
 
         private void WindowOnClosed(IWindow window)
         {
-            if(_configuration.OpenWindows.Contains(window.GetType().ToString()))
+            if(window.SaveState && _configuration.OpenWindows.Contains(window.GetType().ToString()))
             {
                 _configuration.OpenWindows.Remove(window.GetType().ToString());
             }
 
-            if (window.SavePosition)
+            if (window.SaveState && window.SavePosition)
             {
                 bool hasOtherWindowOpen = false;
                 //Check to see if there are any other instances of the window open, if so don't save the one that was just closed's position
@@ -479,9 +470,36 @@ namespace InventoryTools.Services
                 }
 
             }
+
+            if (window.DestroyOnClose)
+            {
+                RemoveWindow(window);
+            }
             MediatorService.Publish(new OverlaysRequestRefreshMessage());
         }
 
+        public void RemoveWindow(IWindow window)
+        {
+            _allWindows.Remove(window);
+            if (window is GenericWindow genericWindow)
+            {
+                _genericWindows.Remove(genericWindow.GetType(), out _);
+            }
+            if (window is UintWindow uintWindow)
+            {
+                _uintWindows.Remove((uintWindow.GetType(), uintWindow.WindowId), out _);
+            }
+            if (window is StringWindow stringWindow)
+            {
+                _stringWindows.Remove((stringWindow.GetType(), stringWindow.WindowId), out _);
+            }
+
+            if (window is Window actualWindow)
+            {
+                WindowSystem.RemoveWindow(actualWindow);
+            }
+            window.Dispose();
+        }
                 
         
         protected override void Dispose(bool disposing)
@@ -567,6 +585,7 @@ namespace InventoryTools.Services
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
+            Logger.LogTrace("Stopping service {type} ({this})", GetType().Name, this);
             return Task.CompletedTask;
         }
     }

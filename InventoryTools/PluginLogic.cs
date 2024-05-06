@@ -1,32 +1,17 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Numerics;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Extensions;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Services.Ui;
-using Dalamud.Interface.Colors;
-using Dalamud.Interface.Internal;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
-using InventoryTools.Extensions;
 using InventoryTools.Hotkeys;
-using InventoryTools.Images;
 using InventoryTools.Logic;
-using InventoryTools.Logic.Columns;
 using InventoryTools.Logic.Filters;
-using InventoryTools.Logic.Settings;
-using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
@@ -39,13 +24,14 @@ namespace InventoryTools
 {
     public partial class PluginLogic : DisposableMediatorSubscriberBase, IHostedService
     {
-        private readonly ConfigurationManager _configurationManager;
+        private readonly ConfigurationManagerService _configurationManagerService;
         private readonly IChatUtilities _chatUtilities;
         private readonly IListService _listService;
         private readonly ILogger<PluginLogic> _logger;
         private readonly IFramework _framework;
         private readonly InventoryHistory _history;
         private readonly IInventoryMonitor _inventoryMonitor;
+        private readonly IInventoryScanner _inventoryScanner;
         private readonly ICharacterMonitor _characterMonitor;
         private readonly InventoryToolsConfiguration _configuration;
         private readonly IMobTracker _mobTracker;
@@ -77,15 +63,16 @@ namespace InventoryTools
 
         private DateTime? _nextSaveTime = null;
         
-        public PluginLogic(ConfigurationManager configurationManager, IChatUtilities chatUtilities, IListService listService, ILogger<PluginLogic> logger, IFramework framework, MediatorService mediatorService, InventoryHistory history, IInventoryMonitor inventoryMonitor, ICharacterMonitor characterMonitor, InventoryToolsConfiguration configuration, IMobTracker mobTracker, IHotkeyService hotkeyService, ICraftMonitor craftMonitor, IGameInterface gameInterface, ITooltipService tooltipService, IEnumerable<BaseTooltip> tooltips, IEnumerable<IHotkey> hotkeys, Func<Type,IFilter> filterFactory, IMarketCache marketCache) : base(logger, mediatorService)
+        public PluginLogic(ConfigurationManagerService configurationManagerService, IChatUtilities chatUtilities, IListService listService, ILogger<PluginLogic> logger, IFramework framework, MediatorService mediatorService, InventoryHistory history, IInventoryMonitor inventoryMonitor, IInventoryScanner inventoryScanner, ICharacterMonitor characterMonitor, InventoryToolsConfiguration configuration, IMobTracker mobTracker, IHotkeyService hotkeyService, ICraftMonitor craftMonitor, IGameInterface gameInterface, ITooltipService tooltipService, IEnumerable<BaseTooltip> tooltips, IEnumerable<IHotkey> hotkeys, Func<Type,IFilter> filterFactory, IMarketCache marketCache) : base(logger, mediatorService)
         {
-            _configurationManager = configurationManager;
+            _configurationManagerService = configurationManagerService;
             _chatUtilities = chatUtilities;
             _listService = listService;
             _logger = logger;
             _framework = framework;
             _history = history;
             _inventoryMonitor = inventoryMonitor;
+            _inventoryScanner = inventoryScanner;
             _characterMonitor = characterMonitor;
             _configuration = configuration;
             _mobTracker = mobTracker;
@@ -124,11 +111,6 @@ namespace InventoryTools
             }
             SyncConfigurationChanges(false);
             ClearOrphans();
-        }
-
-        private void PluginServiceOnOnPluginLoaded()
-        {
-            _inventoryMonitor.Start();
         }
 
         private void CraftMonitorOnCraftCompleted(uint itemid, FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags flags, uint quantity)
@@ -417,7 +399,7 @@ namespace InventoryTools
         {
             _logger.LogTrace("PluginLogic: Inventory changed, saving to config.");
             var allItems = _inventoryMonitor.AllItems.ToList();
-            _configurationManager.SaveInventories(allItems);
+            _configurationManagerService.SaveInventories(allItems);
             if (_configuration.AutomaticallyDownloadMarketPrices)
             {
                 var activeCharacter = _characterMonitor.ActiveCharacter;
@@ -425,67 +407,58 @@ namespace InventoryTools
                 {
                     foreach (var inventory in allItems)
                     {
-                        _marketCache.RequestCheck(inventory.ItemId, activeCharacter.WorldId);
+                        _marketCache.RequestCheck(inventory.ItemId, activeCharacter.WorldId, false);
                     }
                 }
             }
-        }
 
-        private bool _disposed;
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        
-        protected virtual void Dispose(bool disposing)
-        {
-            if(!_disposed && disposing)
+            if (itemChanges != null)
             {
-                _gameInterface.AcquiredItemsUpdated -= GameInterfaceOnAcquiredItemsUpdated;
-                _configuration.SavedCharacters = _characterMonitor.Characters;
-                _framework.Update -= FrameworkOnUpdate;
-                _inventoryMonitor.OnInventoryChanged -= InventoryMonitorOnOnInventoryChanged;
-                _characterMonitor.OnCharacterUpdated -= CharacterMonitorOnOnCharacterUpdated;
-                _craftMonitor.CraftStarted -= CraftMonitorOnCraftStarted;
-                _craftMonitor.CraftFailed -= CraftMonitorOnCraftFailed ;
-                _craftMonitor.CraftCompleted -= CraftMonitorOnCraftCompleted ;
-                _configurationManager.ConfigurationChanged -= ConfigOnConfigurationChanged;
-                _configurationManager.Save();
-                _configurationManager.SaveInventories(_inventoryMonitor.AllItems.ToList());
-                _configurationManager.SaveHistory(_history.GetHistory());
-                if (_configuration.TrackMobSpawns)
+                foreach (var item in itemChanges.NewItems)
                 {
-                    _mobTracker.SaveCsv(_configurationManager.MobSpawnFile,
-                        _mobTracker.GetEntries());
+                    if (_recentlyAddedSeen.ContainsKey(item.ItemId))
+                    {
+                        _recentlyAddedSeen.Remove(item.ItemId);
+                    }
+
+                    _recentlyAddedSeen.Add(item.ItemId, item);
                 }
             }
-            _disposed = true;         
         }
-        
-            
-        ~PluginLogic()
-        {
-#if DEBUG
-            // In debug-builds, make sure that a warning is displayed when the Disposable object hasn't been
-            // disposed by the programmer.
 
-            if( _disposed == false )
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            _gameInterface.AcquiredItemsUpdated -= GameInterfaceOnAcquiredItemsUpdated;
+            _configuration.SavedCharacters = _characterMonitor.Characters;
+            _framework.Update -= FrameworkOnUpdate;
+            _inventoryMonitor.OnInventoryChanged -= InventoryMonitorOnOnInventoryChanged;
+            _characterMonitor.OnCharacterUpdated -= CharacterMonitorOnOnCharacterUpdated;
+            _craftMonitor.CraftStarted -= CraftMonitorOnCraftStarted;
+            _craftMonitor.CraftFailed -= CraftMonitorOnCraftFailed ;
+            _craftMonitor.CraftCompleted -= CraftMonitorOnCraftCompleted ;
+            _configurationManagerService.ConfigurationChanged -= ConfigOnConfigurationChanged;
+            _configurationManagerService.Save();
+            _configurationManagerService.SaveInventories(_inventoryMonitor.AllItems.ToList());
+            _configurationManagerService.SaveHistory(_history.GetHistory());
+            if (_configuration.TrackMobSpawns)
             {
-                _logger.LogError("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
-            }
-#endif
-            Dispose (true);
+                _mobTracker.SaveCsv(_configurationManagerService.MobSpawnFile,
+                    _mobTracker.GetEntries());
+            }       
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
             Logger.LogTrace("Starting service {type} ({this})", GetType().Name, this);
+            _inventoryMonitor.Start();
+            _inventoryScanner.Enable();
             return Task.CompletedTask;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
+            Logger.LogTrace("Stopping service {type} ({this})", GetType().Name, this);
             return Task.CompletedTask;
         }
     }

@@ -1,17 +1,20 @@
+using System;
 using System.Numerics;
-using Dalamud.Plugin.Services;
 using InventoryTools.Logic;
 
 namespace InventoryTools.Ui
 {
-    public interface IWindow
+    public interface IWindow : IDisposable
     {
         public string Key { get;  }
         public string GenericKey { get;  }
         public string GenericName { get;  }
         public bool DestroyOnClose { get;}
         public bool SavePosition { get;}
+        public bool SaveState { get;}
         public Vector2 CurrentPosition { get; set; }
+        
+        public bool RespectCloseHotkey { get; set; }
         public bool IsOpen { get; set; }
         
         public void Draw();

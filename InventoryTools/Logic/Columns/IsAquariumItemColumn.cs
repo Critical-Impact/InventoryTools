@@ -1,13 +1,8 @@
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
-using Dalamud.Plugin.Services;
-using InventoryTools.Extensions;
-using InventoryTools.Images;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
-using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using OtterGui.Classes;
 
 namespace InventoryTools.Logic.Columns
 {

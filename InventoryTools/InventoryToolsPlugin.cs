@@ -1,40 +1,41 @@
 ﻿using System;
 using CriticalCommonLib;
-using CriticalCommonLib.Services;
-using CriticalCommonLib.Time;
 using DalaMock.Shared.Classes;
 using Dalamud.Plugin;
+using InventoryTools.Host;
 
 namespace InventoryTools
 {
     public class InventoryToolsPlugin : IDalamudPlugin
     {
-        private Ui.InventoryToolsUi _ui;
-        internal DalamudPluginInterface PluginInterface { get; private set; }
-        
-        internal PluginLoader _pluginLoader { get; private set; }
+        private Service? _service;
+        private DalamudPluginInterface? PluginInterface { get; set; }
+        private PluginLoader? PluginLoader { get; set; }
         
         public InventoryToolsPlugin(DalamudPluginInterface pluginInterface)
         {
             PluginInterface = pluginInterface;
-            var service = PluginInterface.Create<Service>()!;
+            _service = PluginInterface.Create<Service>()!;
             Service.Interface = new PluginInterfaceService(pluginInterface);
-            Service.SeTime = new SeTime();
-            _pluginLoader = new PluginLoader(new PluginInterfaceService(pluginInterface), service);
-            _pluginLoader.Build();
+            PluginLoader = new PluginLoader(new PluginInterfaceService(pluginInterface), _service);
+            PluginLoader.Build();
         }
 
         protected virtual void Dispose(bool disposing)
         {
             if (!disposing) return;
             Service.Log.Debug("Starting dispose of InventoryToolsPlugin");
-            _pluginLoader.Dispose();            
+            PluginLoader?.Dispose();            
+            _service?.Dispose();
+
+            _service = null;
+            PluginInterface = null;
+            PluginLoader = null;
         }
 
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
     }
 }

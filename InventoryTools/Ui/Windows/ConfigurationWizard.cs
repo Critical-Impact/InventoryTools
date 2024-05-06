@@ -1,9 +1,7 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using CriticalCommonLib.Services.Mediator;
 using Dalamud.Interface.Colors;
-using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Features;

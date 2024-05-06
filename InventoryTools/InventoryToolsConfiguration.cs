@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
-using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using Dalamud.Configuration;
 using Dalamud.Interface.Colors;
@@ -43,12 +42,14 @@ namespace InventoryTools
         private bool _highlightDestination = false;
         private bool _highlightDestinationEmpty = false;
         private bool _addMoreInformationContextMenu = false;
+        private bool _addToCraftListContextMenu = false;
 
         private bool _isVisible;
         private int _marketRefreshTimeHours = 24;
         private int _marketSaleHistoryLimit = 7;
         private bool _showItemNumberRetainerList = true;
         private bool _historyEnabled = false;
+        private bool _addTitleMenuButton = false;
 
         private Vector4 _tabHighlightColor = new (0.007f, 0.008f,
             0.007f, 0.2f);
@@ -143,6 +144,15 @@ namespace InventoryTools
                 IsDirty = true;
             }
         }
+        public bool AddTitleMenuButton
+        {
+            get => _addTitleMenuButton;
+            set
+            {
+                _addTitleMenuButton = value;
+                IsDirty = true;
+            }
+        }
         public bool TooltipWhitelistBlacklist
         {
             get => _tooltipWhitelistBlacklist;
@@ -191,6 +201,17 @@ namespace InventoryTools
             set
             {
                 _addMoreInformationContextMenu = value;
+                IsDirty = true;
+            }
+        }
+
+        [DefaultValue(true)]
+        public bool AddToCraftListContextMenu
+        {
+            get => _addToCraftListContextMenu;
+            set
+            {
+                _addToCraftListContextMenu = value;
                 IsDirty = true;
             }
         }
@@ -598,7 +619,7 @@ namespace InventoryTools
         
         public List<uint> MarketBoardWorldIds
         {
-            get => _marketBoardWorldIds ?? new List<uint>();
+            get => _marketBoardWorldIds ??= new List<uint>();
             set
             {
                 _marketBoardWorldIds = value;

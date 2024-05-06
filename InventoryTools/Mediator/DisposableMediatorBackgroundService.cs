@@ -1,6 +1,5 @@
 using System;
 using CriticalCommonLib.Services.Mediator;
-using Dalamud.Plugin.Services;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Mediator;

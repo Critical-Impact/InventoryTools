@@ -21,18 +21,23 @@ using Lumina.Excel.GeneratedSheets;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
+using Humanizer;
+using Humanizer.Localisation;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
+using InventoryTools.Ui.Widgets;
 using Microsoft.Extensions.Logging;
 using OtterGui.Log;
 using OtterGui.Widgets;
+using ImGuiUtil = OtterGui.ImGuiUtil;
 using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 
 namespace InventoryTools.Ui
 {
     public class WorldPicker : FilterComboBase<WorldEx>
     {
+        public HashSet<uint> SelectedWorldIds { get; set; } = new();
         public WorldPicker(IReadOnlyList<WorldEx> items, bool keepStorage, Logger log) : base(items, keepStorage, log)
         {
             
@@ -50,34 +55,46 @@ namespace InventoryTools.Ui
         private readonly ICommandManager _commandManager;
         private readonly IListService _listService;
         private readonly ExcelCache _excelCache;
-        private readonly ITeleporterIpc _teleporterIpc;
         private readonly IGameInterface _gameInterface;
         private readonly IMarketCache _marketCache;
         private readonly IIconService _iconService;
         private readonly IChatUtilities _chatUtilities;
         private readonly Logger _otterLogger;
+        private HashSet<uint> _marketRefreshing = new();
+        private HoverButton _refreshPricesButton;
 
-        public ItemWindow(ILogger<ItemWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IMarketBoardService marketBoardService, IFramework framework, ICommandManager commandManager, IListService listService, ExcelCache excelCache, ITeleporterIpc teleporterIpc, IGameInterface gameInterface, IMarketCache marketCache, IIconService iconService, IChatUtilities chatUtilities, Logger otterLogger, string name = "Item Window") : base(logger, mediator, imGuiService, configuration, name)
+        public ItemWindow(ILogger<ItemWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IMarketBoardService marketBoardService, IFramework framework, ICommandManager commandManager, IListService listService, ExcelCache excelCache, IGameInterface gameInterface, IMarketCache marketCache, IIconService iconService, IChatUtilities chatUtilities, Logger otterLogger, string name = "Item Window") : base(logger, mediator, imGuiService, configuration, name)
         {
             _marketBoardService = marketBoardService;
             _framework = framework;
             _commandManager = commandManager;
             _listService = listService;
             _excelCache = excelCache;
-            _teleporterIpc = teleporterIpc;
             _gameInterface = gameInterface;
             _marketCache = marketCache;
             _iconService = iconService;
             _chatUtilities = chatUtilities;
             _otterLogger = otterLogger;
         }
-        
+
+        private void MarketCacheUpdated(MarketCacheUpdatedMessage obj)
+        {
+            if (obj.itemId == WindowId)
+            {
+                GetMarketPrices();
+                _marketRefreshing.Remove(obj.worldId);
+            }
+        }
+
         public override void Initialize(uint itemId)
         {
+            base.Initialize(itemId);
              Flags = ImGuiWindowFlags.NoSavedSettings;
             _itemId = itemId;
             var worlds = _excelCache.GetWorldSheet().Where(c => c.IsPublic).ToList();
             _picker = new WorldPicker(worlds, true, _otterLogger);
+            MediatorService.Subscribe<MarketCacheUpdatedMessage>(this, MarketCacheUpdated);
+            _refreshPricesButton = new(_iconService.LoadImage("refresh-web"),  new Vector2(22, 22));
             if (Item != null)
             {
                 WindowName = "Allagan Tools - " + Item.NameString;
@@ -119,6 +136,10 @@ namespace InventoryTools.Ui
                 GatheringSources = Item.GetGatheringSources().ToList();
                 SharedModels = Item.GetSharedModels();
                 MobDrops = Item.MobDrops.ToArray();
+                if (Configuration.AutomaticallyDownloadMarketPrices)
+                {
+                    RequestMarketPrices(false);
+                }
                 GetMarketPrices();
             }
             else
@@ -144,7 +165,35 @@ namespace InventoryTools.Ui
 
         private void GetMarketPrices()
         {
-            _marketPrices = _marketCache.GetPricing(_itemId, _marketBoardService.GetDefaultWorlds(), false);
+            var defaultWorlds = _marketBoardService.GetDefaultWorlds();
+            var worldIds = _picker.SelectedWorldIds.ToHashSet();
+            foreach (var world in defaultWorlds)
+            {
+                worldIds.Add(world);
+            }
+            
+            _marketPrices = _marketCache.GetPricing(_itemId, worldIds.ToList(), true);
+        }
+
+        private void RequestMarketPrices(bool forceCheck = true)
+        {
+            if (Item != null)
+            {
+                var defaultWorlds = _marketBoardService.GetDefaultWorlds();
+                var worldIds = _picker.SelectedWorldIds.ToHashSet();
+                foreach (var world in defaultWorlds)
+                {
+                    worldIds.Add(world);
+                }
+
+                foreach (var worldId in worldIds)
+                {
+                    if (_marketCache.RequestCheck(Item.RowId, worldId, forceCheck))
+                    {
+                        _marketRefreshing.Add(worldId);
+                    }
+                }
+            }
         }
         public List<ItemEx> SharedModels { get;set; }
 
@@ -628,32 +677,85 @@ namespace InventoryTools.Ui
 
                 if (Item.CanBePlacedOnMarket)
                 {
+                    var prePosition = ImGui.GetCursorPos();
                     if (ImGui.CollapsingHeader("Market Pricing",
                             ImGuiTreeNodeFlags.CollapsingHeader | ImGuiTreeNodeFlags.DefaultOpen))
                     {
+                        if(_marketRefreshing.Count != 0)
+                        {
+                            var postPosition = ImGui.GetCursorPos();
+                            prePosition.X = ImGui.GetWindowWidth() - 20;
+                            prePosition.Y = prePosition.Y + 6;
+                            ImGui.SetCursorPos(prePosition);
+                            float nextDot = 3.0f;
+                            if (_marketRefreshing.Count != 0)
+                            {
+                                ImGuiService.SpinnerDots("hai", ref nextDot, 7, 1);
+                            }
+
+                            ImGui.SetCursorPos(postPosition);
+                        }
+
+
                         var selected = 0;
                         if (_picker.Draw("Worlds", "", "", ref selected, 100, 20, ImGuiComboFlags.None))
                         {
-                            
+                            var world = _picker.Items[selected];
+                            _picker.SelectedWorldIds.Add(world.RowId);
+                            RequestMarketPrices();
                         }
-                        ImGui.SetCursorPosX(ImGui.GetWindowSize().X - 32);
-                        if (ImGui.Button("RF"))
+
+                        if (_picker.SelectedWorldIds.Count != 0)
                         {
-                            //TODO: merge in picked worlds
-                            var worlds = _marketBoardService.GetDefaultWorlds();
-                            foreach (var world in worlds)
+                            ImGui.SameLine();
+                        }
+
+                        ImGuiStylePtr style = ImGui.GetStyle();
+                        float windowVisibleX = ImGui.GetWindowContentRegionMax().X - style.ScrollbarSize;
+                        float X = ImGui.GetCursorPosX();
+
+                        var count = 0;
+
+                        foreach (var selectedWorldId in _picker.SelectedWorldIds)
+                        {
+                            var selectedWorld = _excelCache.GetWorldSheet().GetRow((uint)selectedWorldId);
+                            if (selectedWorld != null)
                             {
-                                _marketCache.RequestCheck(Item.RowId,world);
+                                var selectedWorldFormattedName = selectedWorld.FormattedName + " X";
+                                var itemWidth = ImGui.CalcTextSize(selectedWorldFormattedName).X  + (2 * ImGui.GetStyle().FramePadding.X) + 5;
+                                if (windowVisibleX > X + itemWidth)
+                                {
+                                    if (count != 0)
+                                    {
+                                        ImGui.SameLine();
+                                    }
+
+                                    X += itemWidth;
+                                }
+                                else
+                                {
+                                    X = itemWidth;
+                                    ImGui.NewLine();
+                                }
+
+                                count++;
+
+                                if (ImGui.Button(selectedWorldFormattedName))
+                                {
+                                    _picker.SelectedWorldIds.Remove(selectedWorldId);
+                                }
                             }
                         }
+                        
                         ImGui.SameLine();
-                        ImGui.SetCursorPosX(ImGui.GetWindowSize().X - 64);
-                        if (ImGui.Button("RL"))
+                        ImGui.SetCursorPosX(ImGui.GetWindowWidth() - 22 - ImGui.GetStyle().FramePadding.X);
+                        if (_refreshPricesButton.Draw("refreshPrices"))
                         {
-                            GetMarketPrices();
+                            RequestMarketPrices();
                         }
+                        ImGuiUtil.HoverTooltip("Refresh the current prices.");
                         ImGuiTable.DrawTable("MarketPrices", _marketPrices, DrawMarketRow, ImGuiTableFlags.None,
-                            new[] { "Server","Updated At", "Available", "Avg. Price" });
+                            new[] { "Server","Updated At", "Available", "Min. Price" });
                     }
                 }
                 
@@ -662,11 +764,11 @@ namespace InventoryTools.Ui
                     ImGui.TableNextColumn();
                     ImGui.TextWrapped(obj.World.Value?.FormattedName ?? "Unknown");
                     ImGui.TableNextColumn();
-                    ImGui.TextWrapped(obj.LastUpdate.ToString(CultureInfo.CurrentCulture));
+                    ImGui.TextWrapped((obj.LastUpdate - DateTime.Now).Humanize(minUnit: TimeUnit.Minute, maxUnit: TimeUnit.Hour, precision: 1) + " ago");
                     ImGui.TableNextColumn();
                     ImGui.TextWrapped(obj.Available.ToString());
                     ImGui.TableNextColumn();
-                    ImGui.TextWrapped(obj.AveragePriceNq.ToString("N2", CultureInfo.InvariantCulture) + SeIconChar.Gil.ToIconString() + "/" + obj.AveragePriceHq.ToString("N2", CultureInfo.InvariantCulture) + SeIconChar.Gil.ToIconString());
+                    ImGui.TextWrapped(obj.MinPriceNq.ToString("N0", CultureInfo.InvariantCulture) + SeIconChar.Gil.ToIconString() + "/" + obj.MinPriceHq.ToString("N0", CultureInfo.InvariantCulture) + SeIconChar.Gil.ToIconString());
                 }
 
                 void DrawSupplierRow((IShop shop, ENpc? npc, ILocation? location) tuple)
@@ -690,7 +792,7 @@ namespace InventoryTools.Ui
                             var nearestAetheryte = tuple.location.GetNearestAetheryte();
                             if (nearestAetheryte != null)
                             {
-                                _teleporterIpc.Teleport(nearestAetheryte.RowId);
+                                MediatorService.Publish(new RequestTeleportMessage(nearestAetheryte.RowId));
                             }
                             _chatUtilities.PrintFullMapLink(tuple.location, Item.NameString);
                         }

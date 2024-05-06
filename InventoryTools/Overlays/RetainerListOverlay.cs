@@ -4,10 +4,9 @@ using System.Numerics;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
 using InventoryTools.Logic;
-using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 
-namespace InventoryTools.GameUi
+namespace InventoryTools.Overlays
 {
     public class RetainerListOverlay: GameOverlay<AtkRetainerList>, IAtkOverlayState
     {

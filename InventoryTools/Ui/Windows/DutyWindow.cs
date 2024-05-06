@@ -6,7 +6,6 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using Dalamud.Interface.Internal;
-using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using ImGuiNET;
 using InventoryTools.Extensions;
@@ -33,6 +32,7 @@ namespace InventoryTools.Ui
         }
         public override void Initialize(uint contentFinderConditionId)
         {
+            base.Initialize(contentFinderConditionId);
             _contentFinderConditionId = contentFinderConditionId;
             if (ContentFinderCondition != null)
             {

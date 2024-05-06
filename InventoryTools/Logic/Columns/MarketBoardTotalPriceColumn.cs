@@ -5,10 +5,9 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using Dalamud.Interface.Colors;
-using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
-using InventoryTools.Logic.Columns.Settings;
+using InventoryTools.Logic.Columns.ColumnSettings;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 
@@ -16,7 +15,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class MarketBoardTotalPriceColumn : MarketBoardPriceColumn
     {
-        public MarketBoardTotalPriceColumn(ILogger<MarketBoardTotalPriceColumn> logger, ImGuiService imGuiService, MarketboardWorldSetting marketboardWorldSetting, ICharacterMonitor characterMonitor, IMarketCache marketCache) : base(logger, imGuiService, marketboardWorldSetting, characterMonitor, marketCache)
+        public MarketBoardTotalPriceColumn(ILogger<MarketBoardTotalPriceColumn> logger, ImGuiService imGuiService, MarketboardWorldSetting marketboardWorldSetting, ICharacterMonitor characterMonitor, IMarketCache marketCache, ExcelCache excelCache) : base(logger, imGuiService, marketboardWorldSetting, characterMonitor, marketCache, excelCache)
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Market;
@@ -65,6 +64,8 @@ namespace InventoryTools.Logic.Columns
 
         public override string Name { get; set; } = "Market Board Average Total Price(Qty * Price) NQ/HQ";
         public override string RenderName => "MB Avg. Total NQ/HQ";
+        public override string HelpText { get; set; } =
+            "Shows the average price of both the NQ and HQ form of the item and multiplies it by the quantity available. If no world is selected, your home world is used. This data is sourced from universalis.";
         public override float Width { get; set; } = 250.0f;
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;

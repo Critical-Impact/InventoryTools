@@ -1,7 +1,6 @@
 using System;
 using CriticalCommonLib.Services.Mediator;
 using Dalamud.Game.ClientState.Keys;
-using Dalamud.Plugin.Services;
 using InventoryTools.Extensions;
 using Microsoft.Extensions.Logging;
 using OtterGui.Classes;

@@ -17,5 +17,5 @@ public class MarketboardIntegrationFeature : Feature
     }
     public override string Name { get; } = "Marketboard";
     public override string Description { get; } =
-        "Configure the marketboard integration. This downloads data from Universalis on a set timer, allowing you to filter against the minimum and average prices of items on your server.";
+        "Configure the marketboard integration. This downloads data from Universalis on a set timer, allowing you to filter against the minimum and average prices of items across multiple servers.";
 }

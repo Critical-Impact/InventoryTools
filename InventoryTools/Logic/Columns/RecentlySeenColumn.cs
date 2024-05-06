@@ -1,6 +1,5 @@
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
-using Dalamud.Plugin.Services;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
