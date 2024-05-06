@@ -4,7 +4,6 @@ using CriticalCommonLib;
 using DalaMock.Dalamud;
 using DalaMock.Mock;
 using Dalamud;
-using InventoryToolsMock;
 using Lumina;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -18,7 +17,6 @@ namespace InventoryToolsTesting.Services
         public IHost CreateHost()
         {
             var service = new Service();
-            
             var mockProgram = new MockProgram(service, false);
             var pluginInterface = new MockPluginInterfaceService(mockProgram, new FileInfo(Path.Join(Environment.CurrentDirectory,"/","test.json")), new DirectoryInfo(Environment.CurrentDirectory));
             var mockFramework = new MockFramework();
@@ -35,7 +33,6 @@ namespace InventoryToolsTesting.Services
             mockService.InjectMockServices();
 
             Service.Interface = pluginInterface;
-            Service.SeTime = new MockSeTime();
             Service.KeyState = new TestKeyState();
             Service.TextureProvider = new TestTextureProvider();
 

@@ -1,11 +1,7 @@
 using System;
-using Dalamud.Interface.Colors;
-using Dalamud.Interface.Internal;
 using Dalamud.Interface.Utility;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using ImGuiNET;
-using ImGuiScene;
-using InventoryTools.Services.Interfaces;
 using Dalamud.Interface.Utility.Raii;
 
 namespace InventoryTools.Ui.Widgets;

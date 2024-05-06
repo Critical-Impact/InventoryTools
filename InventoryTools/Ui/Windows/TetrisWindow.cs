@@ -1,10 +1,9 @@
 using System.Numerics;
 using CriticalCommonLib.Services.Mediator;
-using Dalamud.Plugin.Services;
 using ImGuiNET;
-using InventoryTools.GameUi;
 using InventoryTools.Logic;
 using InventoryTools.Misc;
+using InventoryTools.Overlays;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 using Tetris.GameEngine;

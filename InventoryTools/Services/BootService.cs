@@ -1,24 +1,21 @@
 using System.Threading;
 using System.Threading.Tasks;
 using CriticalCommonLib.Services.Mediator;
-using Dalamud.Plugin.Services;
 using InventoryTools.Mediator;
-using InventoryTools.Services;
 using InventoryTools.Ui;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace InventoryTools;
+namespace InventoryTools.Services;
 
-public class PluginBoot : DisposableMediatorSubscriberBase, IHostedService
+public class BootService : DisposableMediatorSubscriberBase, IHostedService
 {
     private readonly IConfigurationWizardService _configurationWizardService;
 
-    public PluginBoot(IConfigurationWizardService configurationWizardService, ILogger<PluginBoot> logger, MediatorService mediatorService) : base(logger, mediatorService)
+    public BootService(IConfigurationWizardService configurationWizardService, ILogger<BootService> logger, MediatorService mediatorService) : base(logger, mediatorService)
     {
         _configurationWizardService = configurationWizardService;
     }
-
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -33,6 +30,7 @@ public class PluginBoot : DisposableMediatorSubscriberBase, IHostedService
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
+        Logger.LogTrace("Stopping service {type} ({this})", GetType().Name, this);
         return Task.CompletedTask;
     }
 

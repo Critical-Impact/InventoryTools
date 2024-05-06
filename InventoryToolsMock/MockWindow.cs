@@ -205,6 +205,11 @@ public class MockWindow : GenericWindow
                     }
                 }
             }
+
+            if (ImGui.Button("Test Context Menu"))
+            {
+                MediatorService.Publish(new AddToNewCraftListMessage(1, 1, FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None, false));
+            }
         }
     }
 

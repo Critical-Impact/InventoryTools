@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib.Services.Mediator;
-using Dalamud.Plugin.Services;
 using ImGuiNET;
+using InventoryTools.Lists;
 using InventoryTools.Logic;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;

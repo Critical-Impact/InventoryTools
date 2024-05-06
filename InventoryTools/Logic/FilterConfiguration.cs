@@ -1,25 +1,16 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Enums;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Attributes;
 using InventoryTools.Converters;
-using InventoryTools.Enums;
-using InventoryTools.Extensions;
-using InventoryTools.Logic.Columns;
 using InventoryTools.Logic.Filters;
-using InventoryTools.Services;
 using Newtonsoft.Json;
 
 namespace InventoryTools.Logic
@@ -921,7 +912,6 @@ namespace InventoryTools.Logic
         
         public FilteredItem? FilterItem(List<IFilter> filters, InventoryItem item)
         {
-            //TODO: Make sure this doesn't break shit
             if (item.ItemId == 0)
             {
                 return null;

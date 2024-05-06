@@ -20,8 +20,8 @@ namespace InventoryTools.Logic.Settings.Abstract
             var list = new List<UIColor>(excelCache.GetUIColorSheet().Distinct(new UIColorComparer()));
             list.Sort((a, b) =>
             {
-                var colorA = Utils.ConvertUIColorToColor(a);
-                var colorB = Utils.ConvertUIColorToColor(b);
+                var colorA = Utils.ConvertUiColorToColor(a);
+                var colorB = Utils.ConvertUiColorToColor(b);
                 ImGui.ColorConvertRGBtoHSV(colorA.X, colorA.Y, colorA.Z, out var aH, out var aS, out var aV);
                 ImGui.ColorConvertRGBtoHSV(colorB.X, colorB.Y, colorB.Z, out var bH, out var bS, out var bV);
 
@@ -63,7 +63,7 @@ namespace InventoryTools.Logic.Settings.Abstract
             var currentColour = new Vector4(255, 255, 255, 255);
             if (value != null && uiColors.ContainsKey(value.Value))
             {
-                currentColour = Utils.ConvertUIColorToColor(uiColors[value.Value]);
+                currentColour = Utils.ConvertUiColorToColor(uiColors[value.Value]);
             }
             if (ImGui.ColorButton("##" + Key + "CurrentVal", currentColour))
             {
@@ -78,7 +78,7 @@ namespace InventoryTools.Logic.Settings.Abstract
                     continue;
                 }
 
-                var color = Utils.ConvertUIColorToColor(z);
+                var color = Utils.ConvertUiColorToColor(z);
                 var id = z.RowId.ToString();
                 var imGuiColorEditFlags = ImGuiColorEditFlags.NoBorder;
                 if (value == z.RowId)

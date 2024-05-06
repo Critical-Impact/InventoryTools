@@ -5,9 +5,7 @@ using CriticalCommonLib;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
-using Dalamud.Plugin.Services;
 using ImGuiNET;
-using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
@@ -29,6 +27,7 @@ namespace InventoryTools.Ui
         }
         public override void Initialize(uint retainerTaskId)
         {
+            base.Initialize(retainerTaskId);
             _retainerTaskId = retainerTaskId;
             if (RetainerTaskEx != null)
             {

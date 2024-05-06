@@ -1,19 +1,16 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CriticalCommonLib;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Services.Ui;
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Plugin.Services;
-using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using InventoryTools.GameUi;
+using InventoryTools.Lists;
 using InventoryTools.Logic;
 using InventoryTools.Mediator;
+using InventoryTools.Overlays;
 using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 

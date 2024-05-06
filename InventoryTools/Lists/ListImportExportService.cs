@@ -7,7 +7,6 @@ using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Services;
 using Newtonsoft.Json;
-using InventoryTools.Extensions;
 
 namespace InventoryTools.Lists;
 

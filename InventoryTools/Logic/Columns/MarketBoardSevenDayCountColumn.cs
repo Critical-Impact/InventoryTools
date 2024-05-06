@@ -6,9 +6,9 @@ using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
-using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Logic.Columns.ColumnSettings;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 
@@ -19,18 +19,28 @@ namespace InventoryTools.Logic.Columns
         private readonly ICharacterMonitor _characterMonitor;
         private readonly IMarketCache _marketCache;
         private readonly InventoryToolsConfiguration _configuration;
+        private MarketboardWorldSetting MarketboardWorldSetting { get; }
 
-        public MarketBoardSevenDayCountColumn(ILogger<MarketBoardSevenDayCountColumn> logger, ImGuiService imGuiService, ICharacterMonitor characterMonitor, IMarketCache marketCache, InventoryToolsConfiguration configuration) : base(logger, imGuiService)
+        public MarketBoardSevenDayCountColumn(ILogger<MarketBoardSevenDayCountColumn> logger, ImGuiService imGuiService, ICharacterMonitor characterMonitor, IMarketCache marketCache, InventoryToolsConfiguration configuration, MarketboardWorldSetting marketboardWorldSetting) : base(logger, imGuiService)
         {
             _characterMonitor = characterMonitor;
             _marketCache = marketCache;
             _configuration = configuration;
+            MarketboardWorldSetting = marketboardWorldSetting;
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Market;
         protected readonly string LoadingString = "loading...";
         protected readonly string UntradableString = "untradable";
         protected readonly int Loading = -1;
         protected readonly int Untradable = -2;
+        public override bool IsConfigurable => true;
+        
+        public override void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)
+        {
+            ImGui.NewLine();
+            ImGui.Separator();
+            MarketboardWorldSetting.Draw(columnConfiguration);
+        }
         
         public override List<MessageBase>? DoDraw(IItem item, int? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
@@ -65,18 +75,8 @@ namespace InventoryTools.Logic.Columns
             {
                 return Untradable;
             }
-            var activeCharacter = _characterMonitor.ActiveCharacter;
-            if (activeCharacter != null)
-            {
-                var marketBoardData = _marketCache.GetPricing(item.ItemId, activeCharacter.WorldId, false);
-                if (marketBoardData != null)
-                {
-                    var sevenDaySellCount = marketBoardData.SevenDaySellCount;
-                    return sevenDaySellCount;
-                }
-            }
 
-            return Loading;
+            return CurrentValue(columnConfiguration, item.Item);
         }
 
         public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
@@ -88,10 +88,12 @@ namespace InventoryTools.Logic.Columns
             var activeCharacter = _characterMonitor.ActiveCharacter;
             if (activeCharacter != null)
             {
-                var marketBoardData = _marketCache.GetPricing(item.RowId, activeCharacter.WorldId, false);
+                var selectedWorldId = MarketboardWorldSetting.SelectedWorldId(columnConfiguration, activeCharacter);
+                var marketBoardData = _marketCache.GetPricing(item.ItemId, selectedWorldId, false);
                 if (marketBoardData != null)
                 {
-                    return marketBoardData.SevenDaySellCount;
+                    var sevenDaySellCount = marketBoardData.SevenDaySellCount;
+                    return sevenDaySellCount;
                 }
             }
 
@@ -114,7 +116,7 @@ namespace InventoryTools.Logic.Columns
         {
             get =>
                 "Shows the number of sales over a " + +_configuration.MarketSaleHistoryLimit +
-                " day period for the item. This data is sourced from universalis.";
+                " day period for the item. If no world is selected, your home world is used. This data is sourced from universalis.";
             set { }
         }
 

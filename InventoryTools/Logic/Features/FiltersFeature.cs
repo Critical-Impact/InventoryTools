@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib.Models;
@@ -130,9 +129,10 @@ public class SampleFilter3Setting : BooleanSetting, ISampleFilterSetting
 {
     private readonly IListService _listService;
 
-    public SampleFilter3Setting(ILogger<SampleFilter3Setting> logger, ImGuiService imGuiService, IListService listService) : base(logger, imGuiService)
+    public SampleFilter3Setting(ILogger<SampleFilter3Setting> logger, ImGuiService imGuiService, IListService listService, CanBeGatheredFilter canBeGatheredFilter) : base(logger, imGuiService)
     {
         _listService = listService;
+        _canBeGatheredFilter = canBeGatheredFilter;
     }
     private readonly CanBeGatheredFilter _canBeGatheredFilter;
     private bool _shouldAdd;

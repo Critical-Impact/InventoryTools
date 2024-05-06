@@ -45,6 +45,7 @@ public abstract class ButtonColumn : IColumn
 
     public virtual bool? CraftOnly { get; } = false;
     public virtual bool CanBeRemoved { get; } = true;
+    public bool IsConfigurable => false;
     public virtual string? RenderName { get; }
     public virtual IEnumerable<InventoryItem> Filter(ColumnConfiguration columnConfiguration, IEnumerable<InventoryItem> items)
     {
@@ -206,4 +207,6 @@ public abstract class ButtonColumn : IColumn
     {
         return false;
     }
+
+    public FilterType DefaultIn => Logic.FilterType.None;
 }

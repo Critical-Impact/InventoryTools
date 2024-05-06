@@ -4,7 +4,6 @@ using Dalamud.Interface.Internal;
 using ImGuiNET;
 using InventoryTools.Logic;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Plugin.Services;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;

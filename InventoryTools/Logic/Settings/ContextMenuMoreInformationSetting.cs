@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Settings
 {
-    public class MoreInfoContextMenuSetting : BooleanSetting
+    public class ContextMenuMoreInformationSetting : BooleanSetting
     {
         public override bool DefaultValue { get; set; } = false;
         public override bool CurrentValue(InventoryToolsConfiguration configuration)
@@ -29,7 +29,7 @@ namespace InventoryTools.Logic.Settings
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.ContextMenus;
         public override string Version => "1.6.2.5";
 
-        public MoreInfoContextMenuSetting(ILogger<MoreInfoContextMenuSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        public ContextMenuMoreInformationSetting(ILogger<ContextMenuMoreInformationSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
         {
         }
     }

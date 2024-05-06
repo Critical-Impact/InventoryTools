@@ -6,13 +6,13 @@ using CriticalCommonLib.Services.Ui;
 using InventoryTools.Logic;
 using Microsoft.Extensions.Logging;
 
-namespace InventoryTools.GameUi
+namespace InventoryTools.Overlays
 {
-    public class InventoryBuddyOverlay: GameOverlay<AtkInventoryBuddy>, IAtkOverlayState
+    public class InventoryLargeOverlay: GameOverlay<AtkInventoryLarge>, IAtkOverlayState
     {
         private readonly ICharacterMonitor _characterMonitor;
 
-        public InventoryBuddyOverlay(ILogger<InventoryBuddyOverlay> logger, AtkInventoryBuddy overlay, ICharacterMonitor characterMonitor) : base(logger,overlay)
+        public InventoryLargeOverlay(ILogger<InventoryLargeOverlay> logger, AtkInventoryLarge overlay, ICharacterMonitor characterMonitor) : base(logger,overlay)
         {
             _characterMonitor = characterMonitor;
         }
@@ -30,18 +30,18 @@ namespace InventoryTools.GameUi
                 this.AtkOverlay.SetTabColors(TabColours);
                 if (AtkOverlay.CurrentTab == 0)
                 {
-                    this.AtkOverlay.SetColors(InventoryType.SaddleBag0, Bag1InventoryColours);
-                    this.AtkOverlay.SetColors(InventoryType.SaddleBag1, Bag2InventoryColours);
+                    this.AtkOverlay.SetColors(InventoryType.Bag0, Bag1InventoryColours);
+                    this.AtkOverlay.SetColors(InventoryType.Bag1, Bag2InventoryColours);
                 }
                 else if (AtkOverlay.CurrentTab == 1)
                 {
-                    this.AtkOverlay.SetColors(InventoryType.PremiumSaddleBag0, PBag1InventoryColours);
-                    this.AtkOverlay.SetColors(InventoryType.PremiumSaddleBag1, PBag2InventoryColours);
+                    this.AtkOverlay.SetColors(InventoryType.Bag2, Bag3InventoryColours);
+                    this.AtkOverlay.SetColors(InventoryType.Bag3, Bag4InventoryColours);
                 }
                 else
                 {
-                    this.AtkOverlay.SetColors(InventoryType.SaddleBag0, Bag1InventoryColours);
-                    this.AtkOverlay.SetColors(InventoryType.SaddleBag1, Bag2InventoryColours);
+                    this.AtkOverlay.SetColors(InventoryType.Bag0, EmptyDictionary);
+                    this.AtkOverlay.SetColors(InventoryType.Bag1, EmptyDictionary);
                 }
 
                 return true;
@@ -52,8 +52,8 @@ namespace InventoryTools.GameUi
         
         public Dictionary<Vector2, Vector4?> Bag1InventoryColours = new();
         public Dictionary<Vector2, Vector4?> Bag2InventoryColours = new();
-        public Dictionary<Vector2, Vector4?> PBag1InventoryColours = new();
-        public Dictionary<Vector2, Vector4?> PBag2InventoryColours = new();
+        public Dictionary<Vector2, Vector4?> Bag3InventoryColours = new();
+        public Dictionary<Vector2, Vector4?> Bag4InventoryColours = new();
         public Dictionary<uint, Vector4?> TabColours = new();
         public Dictionary<Vector2, Vector4?> EmptyDictionary = new();
         public Dictionary<uint, Vector4?> EmptyTabs = new() { {0, null}, {1, null}, {2, null}, {3, null} };
@@ -81,16 +81,16 @@ namespace InventoryTools.GameUi
             }
             if (newState != null && AtkOverlay.HasAddon && newState.ShouldHighlight && newState.HasFilterResult)
             {
-                HasState = true;
                 var filterResult = newState.FilterResult;
                 if (filterResult != null)
                 {
-                    Bag1InventoryColours = newState.GetBagHighlights(InventoryType.SaddleBag0);
-                    Bag2InventoryColours = newState.GetBagHighlights(InventoryType.SaddleBag1);
-                    PBag1InventoryColours = newState.GetBagHighlights(InventoryType.PremiumSaddleBag0);
-                    PBag2InventoryColours = newState.GetBagHighlights(InventoryType.PremiumSaddleBag1);
+                    HasState = true;
+                    Bag1InventoryColours = newState.GetBagHighlights(InventoryType.Bag0);
+                    Bag2InventoryColours = newState.GetBagHighlights(InventoryType.Bag1);
+                    Bag3InventoryColours = newState.GetBagHighlights(InventoryType.Bag2);
+                    Bag4InventoryColours = newState.GetBagHighlights(InventoryType.Bag3);
                     var tab1 = newState.GetTabHighlights(new List<Dictionary<Vector2, Vector4?>>() {Bag1InventoryColours, Bag2InventoryColours});
-                    var tab2 = newState.GetTabHighlights(new List<Dictionary<Vector2, Vector4?>>() {PBag1InventoryColours, PBag2InventoryColours});
+                    var tab2 = newState.GetTabHighlights(new List<Dictionary<Vector2, Vector4?>>() {Bag3InventoryColours, Bag4InventoryColours});
                     TabColours[0] = tab1;
                     TabColours[1] = tab2;
                     Draw();
@@ -102,8 +102,8 @@ namespace InventoryTools.GameUi
             {
                 Bag1InventoryColours = EmptyDictionary;
                 Bag2InventoryColours = EmptyDictionary;
-                PBag1InventoryColours = EmptyDictionary;
-                PBag2InventoryColours = EmptyDictionary;
+                Bag3InventoryColours = EmptyDictionary;
+                Bag4InventoryColours = EmptyDictionary;
                 Clear();
             }
 
@@ -115,11 +115,10 @@ namespace InventoryTools.GameUi
             var atkUnitBase = AtkOverlay.AtkUnitBase;
             if (atkUnitBase != null)
             {
-                this.AtkOverlay.SetColors(InventoryType.SaddleBag0, EmptyDictionary);
-                this.AtkOverlay.SetColors(InventoryType.SaddleBag1, EmptyDictionary);
+                this.AtkOverlay.SetColors(InventoryType.Bag0, EmptyDictionary);
+                this.AtkOverlay.SetColors(InventoryType.Bag1, EmptyDictionary);
                 this.AtkOverlay.SetTabColors(EmptyTabs);
             }
         }
-        
     }
 }

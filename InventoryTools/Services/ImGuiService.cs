@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using CriticalCommonLib;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Interface.Internal;
 using Dalamud.Interface.Utility.Raii;
@@ -11,11 +10,17 @@ using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using ImGuiNET;
 using InventoryTools.Extensions;
-using InventoryTools.Images;
 using InventoryTools.Services.Interfaces;
-using OtterGui.Classes;
 
 namespace InventoryTools.Services;
+
+public struct GameIcon
+{
+    public string Name;
+    public Vector2 Size;
+    public Vector2? Uv0;
+    public Vector2? Uv1;
+}
 
 public class ImGuiService
 {
@@ -24,20 +29,21 @@ public class ImGuiService
     public RightClickService RightClickService { get; }
     public IPluginInterfaceService PluginInterfaceService { get; }
 
-    public ImGuiService(ITextureProvider textureProvider, IIconService iconService, RightClickService rightClickService, IPluginInterfaceService pluginInterfaceService)
+    public ImGuiService(ITextureProvider textureProvider, IIconService iconService, RightClickService rightClickService,
+        IPluginInterfaceService pluginInterfaceService)
     {
         TextureProvider = textureProvider;
         IconService = iconService;
         RightClickService = rightClickService;
         PluginInterfaceService = pluginInterfaceService;
     }
-    
+
 
     public readonly GameIcon TickIcon = new GameIcon()
-        {Name = "readycheck", Size = new Vector2(32, 32), Uv0 = new Vector2(0f, 0f), Uv1 = new Vector2(0.5f, 1f)};
+        { Name = "readycheck", Size = new Vector2(32, 32), Uv0 = new Vector2(0f, 0f), Uv1 = new Vector2(0.5f, 1f) };
 
     public readonly GameIcon CrossIcon = new GameIcon()
-        {Name = "readycheck", Size = new Vector2(32, 32), Uv0 = new Vector2(0.5f, 0f), Uv1 = new Vector2(1f, 1f)};
+        { Name = "readycheck", Size = new Vector2(32, 32), Uv0 = new Vector2(0.5f, 0f), Uv1 = new Vector2(1f, 1f) };
 
     public readonly GameIcon CheckboxChecked = new GameIcon()
     {
@@ -49,7 +55,7 @@ public class ImGuiService
         Name = "CheckBoxA_hr1", Size = new Vector2(16, 16), Uv0 = new Vector2(0f, 0f), Uv1 = new Vector2(0.5f, 1f)
     };
 
-    public void DrawUldIcon(GameIcon gameIcon,  Vector2? size = null)
+    public void DrawUldIcon(GameIcon gameIcon, Vector2? size = null)
     {
         DrawUldIcon(gameIcon.Name, size ?? gameIcon.Size, gameIcon.Uv0, gameIcon.Uv1);
     }
@@ -78,7 +84,9 @@ public class ImGuiService
     {
         if (icon <= 65103)
         {
-            var iconTex = hqIcon ?  TextureProvider.GetIcon(icon, ITextureProvider.IconFlags.ItemHighQuality) : TextureProvider.GetIcon(icon);
+            var iconTex = hqIcon
+                ? TextureProvider.GetIcon(icon, ITextureProvider.IconFlags.ItemHighQuality)
+                : TextureProvider.GetIcon(icon);
             if (iconTex != null)
             {
                 if (iconTex.ImGuiHandle != IntPtr.Zero)
@@ -123,7 +131,7 @@ public class ImGuiService
 
         return false;
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void HelpMarker(string helpText, string? imagePath = null, System.Numerics.Vector2? imageSize = null)
     {
@@ -143,9 +151,11 @@ public class ImGuiService
                                                         new Vector2(200, 200) * ImGui.GetIO().FontGlobalScale);
                 }
             }
+
             ImGui.EndTooltip();
         }
     }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void VerticalCenter(string text)
     {
@@ -158,7 +168,7 @@ public class ImGuiService
     {
         ImGui.SetCursorPosY((ImGui.GetWindowSize().Y - height) / 2.0f + (ImGui.GetStyle().FramePadding.Y / 2.0f));
     }
-    
+
     public IDalamudTextureWrap? LoadImage(string imageName)
     {
         var assemblyLocation = PluginInterfaceService.AssemblyLocation.DirectoryName!;
@@ -166,9 +176,12 @@ public class ImGuiService
         return TextureProvider.GetTextureFromFile(new FileInfo(imagePath));
     }
 
-    public void WrapTableColumnElements<T>(string windowId, IEnumerable<T> items, float rowSize, Func<T, bool> drawElement)
+    public void WrapTableColumnElements<T>(string windowId, IEnumerable<T> items, float rowSize,
+        Func<T, bool> drawElement)
     {
-        using (var wrapTableChild = ImRaii.Child(windowId, new Vector2(ImGui.GetContentRegionAvail().X, rowSize + ImGui.GetStyle().CellPadding.Y + ImGui.GetStyle().ItemSpacing.Y), false))
+        using (var wrapTableChild = ImRaii.Child(windowId,
+                   new Vector2(ImGui.GetContentRegionAvail().X,
+                       rowSize + ImGui.GetStyle().CellPadding.Y + ImGui.GetStyle().ItemSpacing.Y), false))
         {
             if (wrapTableChild.Success)
             {
@@ -184,7 +197,6 @@ public class ImGuiService
                     {
                         if (drawElement.Invoke(enumerable[index]))
                         {
-
                             if (count % maxItems != 0)
                             {
                                 ImGui.SameLine();
@@ -195,6 +207,49 @@ public class ImGuiService
                     }
                 }
             }
+        }
+    }
+
+    public void SpinnerDots(string label, ref float nextdot, float radius, float thickness, uint color = 0xFFFFFFFF,
+        float speed = 2.8f, uint dots = 12, float minth = -1f)
+    {
+        double start = ImGui.GetTime() * speed;
+        double bg_angle_offset = Math.PI * 2 / dots;
+        dots = Math.Min(dots, 32u);
+        uint mdots = dots / 2;
+
+        float def_nextdot = 0;
+        ref float ref_nextdot = ref (nextdot >= 0 ? ref nextdot : ref def_nextdot);
+
+        var f = ref_nextdot;
+        System.Func<uint, float> thcorrect = i =>
+        {
+            float nth = minth < 0 ? thickness / 2 : minth;
+            return Math.Max(nth, (float)Math.Sin(((i - f) / mdots) * Math.PI) * thickness);
+        };
+
+        for (uint i = 0; i <= dots; i++)
+        {
+            double a = start + i * bg_angle_offset;
+            a = a % (Math.PI * 2);
+            float th = minth < 0 ? thickness / 2 : minth;
+
+            if (ref_nextdot + mdots < dots)
+            {
+                if (i > ref_nextdot && i < ref_nextdot + mdots)
+                    th = thcorrect(i);
+            }
+            else
+            {
+                if ((i > ref_nextdot && i < dots) || (i < (uint)((ref_nextdot + mdots) % dots)))
+                    th = thcorrect(i);
+            }
+
+            ImGui.GetWindowDrawList().AddCircleFilled(
+                new Vector2(
+                    ImGui.GetCursorScreenPos().X + ImGui.GetStyle().FramePadding.X + radius * (float)Math.Cos(-a),
+                    ImGui.GetCursorScreenPos().Y + ImGui.GetStyle().FramePadding.Y + radius * (float)Math.Sin(-a)), th,
+                color, 8);
         }
     }
 }

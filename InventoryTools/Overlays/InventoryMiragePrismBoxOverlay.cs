@@ -2,11 +2,10 @@ using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 using InventoryTools.Logic;
 using Microsoft.Extensions.Logging;
 
-namespace InventoryTools.GameUi
+namespace InventoryTools.Overlays
 {
     public class InventoryMiragePrismBoxOverlay: GameOverlay<AtkInventoryMiragePrismBox>, IAtkOverlayState
     {

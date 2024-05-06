@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Models;
 using InventoryToolsTesting.Tests.Abstract;
 using NUnit.Framework;
 
@@ -55,10 +54,10 @@ namespace InventoryToolsTesting.Tests
                 list.GenerateCraftChildren();
                 var requiredMaterialsList = list.GetRequiredMaterialsListNamed();
                 Assert.AreEqual(4, requiredMaterialsList["Cotton Boll"]);
-                var sourceStore = new CraftItemSourceStore()
+                var craftListConfiguration = new CraftListConfiguration()
                     .AddCharacterSource("Cotton Boll", 4, false)
                     .AddCharacterSource("Lightning Shard", 4, false);
-                list.Update(sourceStore);
+                list.Update(craftListConfiguration);
                 
                 var cottonBolls = list.GetFlattenedMaterials().First(c => c.Item.NameString == "Cotton Boll");
                 Assert.AreEqual(4, cottonBolls.QuantityRequired);
@@ -166,7 +165,7 @@ namespace InventoryToolsTesting.Tests
         public void TestQuantityAvailableCalculation()
         {
             CraftList list;
-            CraftItemSourceStore sourceStore;
+            CraftListConfiguration sourceStore;
             Dictionary<string, uint> availableMaterialsList;
             Dictionary<string, uint> missingMaterialsList;
             Dictionary<string, uint> readyMaterialsList;
@@ -176,7 +175,7 @@ namespace InventoryToolsTesting.Tests
             list = new CraftList()
                 .AddCraftItem("Riviera Bed", 2);
             list.GenerateCraftChildren();
-            sourceStore = new CraftItemSourceStore()
+            sourceStore = new CraftListConfiguration()
                 .AddExternalSource("Undyed Cotton Cloth", 4, false);
             list.Update(sourceStore);
             availableMaterialsList = list.GetAvailableMaterialsListNamed();
@@ -206,7 +205,7 @@ namespace InventoryToolsTesting.Tests
             list = new CraftList()
                 .AddCraftItem("Riviera Bed", 2);
             list.GenerateCraftChildren();
-            sourceStore = new CraftItemSourceStore()
+            sourceStore = new CraftListConfiguration()
                 .AddExternalSource("Undyed Cotton Cloth", 2, false);
             list.Update(sourceStore);
             availableMaterialsList = list.GetAvailableMaterialsListNamed();
@@ -236,7 +235,7 @@ namespace InventoryToolsTesting.Tests
             list = new CraftList()
                 .AddCraftItem("Riviera Bed", 2);
             list.GenerateCraftChildren();
-            sourceStore = new CraftItemSourceStore()
+            sourceStore = new CraftListConfiguration()
                 .AddCharacterSource("Maple Lumber", 2, false);
             list.Update(sourceStore);
             readyMaterialsList = list.GetReadyMaterialsListNamed();
@@ -272,7 +271,7 @@ namespace InventoryToolsTesting.Tests
             list = new CraftList()
                 .AddCraftItem("Riviera Bed", 2);
             list.GenerateCraftChildren();
-            sourceStore = new CraftItemSourceStore()
+            sourceStore = new CraftListConfiguration()
                 .AddCharacterSource("Maple Lumber", 2, false)
                 .AddCharacterSource("Maple Log", 6, false)
                 .AddCharacterSource("Wind Shard", 999, false);
@@ -301,7 +300,7 @@ namespace InventoryToolsTesting.Tests
             //Rivera Bed
             list.AddCraftItem(6542, 2);
             list.GenerateCraftChildren();
-            list.Update(characterMaterials, externalSources);
+            list.Update(new CraftListConfiguration(characterMaterials, externalSources));
 
             var requiredMaterialsList = list.GetReadyMaterialsList();
             //undyed cotton cloth
@@ -320,7 +319,7 @@ namespace InventoryToolsTesting.Tests
             //Rivera Bed
             list.AddCraftItem(6542, 2);
             list.GenerateCraftChildren();
-            list.Update(characterMaterials, externalSources);
+            list.Update(new CraftListConfiguration(characterMaterials, externalSources));
 
             var retrieveList = list.GetQuantityToRetrieveList();
             //undyed cotton cloth
@@ -340,7 +339,7 @@ namespace InventoryToolsTesting.Tests
             //Glade Drawer Table
             list.AddCraftItem(6624, 10);
             list.GenerateCraftChildren();
-            list.Update(characterMaterials, externalSources);
+            list.Update(new CraftListConfiguration(characterMaterials, externalSources));
 
             var flattenedMergedMaterials = list.GetFlattenedMergedMaterials();
             //Works normally
@@ -356,7 +355,7 @@ namespace InventoryToolsTesting.Tests
             characterMaterials.Add(5062, new List<CraftItemSource>() {copperIngots, copperIngots2});
             
             list.GenerateCraftChildren();
-            list.Update(characterMaterials, externalSources);
+            list.Update(new CraftListConfiguration(characterMaterials, externalSources));
             flattenedMergedMaterials = list.GetFlattenedMergedMaterials();
             Assert.AreEqual(false, flattenedMergedMaterials.Any(c => c.ItemId == 5106 && c.QuantityNeeded != 0));
         }
@@ -365,7 +364,7 @@ namespace InventoryToolsTesting.Tests
         public void TestMissingIngredients()
         {
             CraftList list = new CraftList();
-            CraftItemSourceStore store = new CraftItemSourceStore();
+            CraftListConfiguration store = new CraftListConfiguration();
             list.AddCraftItem("Shark-class Bow", 1);
             list.GenerateCraftChildren();
             list.Update(store);
@@ -379,7 +378,7 @@ namespace InventoryToolsTesting.Tests
         public void TestIngredientReturn()
         {
             CraftList list = new CraftList();
-            var store = new CraftItemSourceStore()
+            var store = new CraftListConfiguration()
                 .AddExternalSource("Cotton Boll", 100, false)
                 .AddExternalSource("Cotton Yarn", 5, false)
                 .AddCharacterSource("Wind Shard", 999, false)

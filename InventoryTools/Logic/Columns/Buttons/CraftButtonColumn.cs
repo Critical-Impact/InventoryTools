@@ -1,13 +1,11 @@
 using System.Collections.Generic;
-using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 
-namespace InventoryTools.Logic.Columns;
+namespace InventoryTools.Logic.Columns.Buttons;
 
 public class CraftButtonColumn : ButtonColumn
 {

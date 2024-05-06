@@ -10,9 +10,9 @@ using Dalamud.Game.Text;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Plugin.Services;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace InventoryTools.Logic.Columns.Abstract
 {
@@ -24,8 +24,8 @@ namespace InventoryTools.Logic.Columns.Abstract
             ImGuiService = imGuiService;
         }
 
-        public ILogger Logger { get; }
-        public ImGuiService ImGuiService { get; }
+        [JsonIgnore] protected ILogger Logger { get; }
+        [JsonIgnore] protected ImGuiService ImGuiService { get; }
         private string _filterText = "";
         public virtual uint MaxFilterLength { get; set; } = 200;
 
@@ -34,6 +34,7 @@ namespace InventoryTools.Logic.Columns.Abstract
 
         public virtual bool? CraftOnly => null;
         public bool CanBeRemoved => true;
+        public virtual bool IsConfigurable => false;
 
         public abstract ColumnCategory ColumnCategory { get; }
         public abstract T CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item);
@@ -86,6 +87,7 @@ namespace InventoryTools.Logic.Columns.Abstract
 
         public abstract string Name { get; set; }
         public virtual string? RenderName { get; } = null;
+        public virtual FilterType DefaultIn { get; } = Logic.FilterType.None;
         public abstract float Width { get; set; }
         public abstract string HelpText { get; set; }
 

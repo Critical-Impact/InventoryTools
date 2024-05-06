@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.CompilerServices;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using ImGuiNET;
@@ -12,7 +11,6 @@ using InventoryTools.Ui.MenuItems;
 using InventoryTools.Ui.Widgets;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Plugin.Services;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
@@ -48,11 +46,6 @@ namespace InventoryTools.Ui
             _configPageFactory = configPageFactory;
             _filterPageFactory = filterPageFactory;
             _configuration = configuration;
-            MediatorService.Subscribe<ConfigurationWindowEditFilter>(this, message => SetActiveFilter(message.filter));
-            MediatorService.Subscribe<ListInvalidatedMessage>(this, _ => Invalidate());
-            MediatorService.Subscribe<ListRepositionedMessage>(this, _ => Invalidate());
-            MediatorService.Subscribe<ListAddedMessage>(this, _ => Invalidate());
-            MediatorService.Subscribe<ListRemovedMessage>(this, _ => Invalidate());
         }
 
 
@@ -128,6 +121,11 @@ namespace InventoryTools.Ui
             _wizardStart = new( _iconService.LoadImage("wizard"),  new Vector2(22, 22));
             
             GenerateFilterPages();
+            MediatorService.Subscribe<ListInvalidatedMessage>(this, _ => Invalidate());
+            MediatorService.Subscribe<ListRepositionedMessage>(this, _ => Invalidate());
+            MediatorService.Subscribe<ListAddedMessage>(this, _ => Invalidate());
+            MediatorService.Subscribe<ListRemovedMessage>(this, _ => Invalidate());
+            MediatorService.Subscribe<ConfigurationWindowEditFilter>(this, message => SetActiveFilter(message.filter));
             MediatorService.Subscribe<ListInvalidatedMessage>(this, _ => Invalidate());
             MediatorService.Subscribe<ListRepositionedMessage>(this, _ => Invalidate());
             MediatorService.Subscribe<ListAddedMessage>(this, _ => Invalidate());

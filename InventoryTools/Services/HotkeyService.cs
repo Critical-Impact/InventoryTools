@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Dalamud.Game.ClientState.Keys;
 using InventoryTools.Hotkeys;
 using System.Linq;
-using CriticalCommonLib;
 using CriticalCommonLib.Services.Mediator;
 using Dalamud.Plugin.Services;
 using InventoryTools.Services.Interfaces;
@@ -89,31 +88,9 @@ public class HotkeyService : DisposableMediatorSubscriberBase, IHotkeyService
         return hotKeyPressed;
     }
 
-    private bool _disposed;
-    public void Dispose()
+    protected override void Dispose(bool disposing)
     {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-        
-    protected virtual void Dispose(bool disposing)
-    {
-        if(!_disposed && disposing)
-        {
-            _frameworkService.Update -= FrameworkServiceOnUpdate;
-        }
-        _disposed = true;         
-    }
-        
-            
-    ~HotkeyService()
-    {
-#if DEBUG
-        if( _disposed == false )
-        {
-            _logger.LogError("There is a disposable object which hasn't been disposed before the finalizer call: " + (this.GetType ().Name));
-        }
-#endif
-        Dispose (true);
+        base.Dispose(disposing);
+        _frameworkService.Update -= FrameworkServiceOnUpdate;
     }
 }

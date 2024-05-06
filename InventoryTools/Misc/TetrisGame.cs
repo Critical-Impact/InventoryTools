@@ -6,12 +6,9 @@ using System.Timers;
 using CriticalCommonLib;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Services.Ui;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Plugin.Services;
-using InventoryTools.GameUi;
 using InventoryTools.Mediator;
-using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using Tetris.GameEngine;
 

@@ -1,13 +1,9 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
-using CriticalCommonLib;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Interface.ImGuiFileDialog;
-using Dalamud.Plugin.Services;
-using InventoryTools.Logic;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using Microsoft.Extensions.Hosting;
@@ -35,13 +31,17 @@ namespace InventoryTools.Ui
 
         private void InterfaceOnOpenMainUi()
         {
-            MediatorService.Publish(new ToggleGenericWindowMessage(typeof(FiltersWindow)));
+            BypassLoginStatus = true;
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(FiltersWindow)));
         }
 
         private void UiBuilderOnOpenConfigUi()
         {
-            MediatorService.Publish(new ToggleGenericWindowMessage(typeof(ConfigurationWindow)));
+            BypassLoginStatus = true;
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
         }
+        
+        public bool BypassLoginStatus { get; set; }
 
         public bool IsVisible
         {
@@ -51,7 +51,7 @@ namespace InventoryTools.Ui
 
         public void Draw()
         {
-            if (!_characterMonitor.IsLoggedIn || _disposing)
+            if (!_characterMonitor.IsLoggedIn && !BypassLoginStatus || _disposing)
                 return;
             _windowService.WindowSystem.Draw();
 
@@ -70,6 +70,7 @@ namespace InventoryTools.Ui
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
+            Logger.LogTrace("Starting service {type} ({this})", GetType().Name, this);
             _pluginInterfaceService.Draw += Draw;
             _pluginInterfaceService.OpenConfigUi += UiBuilderOnOpenConfigUi;
             _pluginInterfaceService.OpenMainUi += InterfaceOnOpenMainUi;
@@ -78,6 +79,7 @@ namespace InventoryTools.Ui
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
+            Logger.LogTrace("Stopping service {type} ({this})", GetType().Name, this);
             _pluginInterfaceService.Draw -= Draw;
             _pluginInterfaceService.OpenConfigUi -= UiBuilderOnOpenConfigUi;
             _pluginInterfaceService.OpenMainUi -= InterfaceOnOpenMainUi;

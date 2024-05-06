@@ -4,7 +4,6 @@ using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Plugin.Services;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 

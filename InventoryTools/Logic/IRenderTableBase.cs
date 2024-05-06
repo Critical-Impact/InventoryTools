@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib.Services.Mediator;
-using InventoryTools.Logic.Columns;
 
 namespace InventoryTools.Logic
 {

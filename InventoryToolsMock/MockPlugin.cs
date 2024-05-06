@@ -6,17 +6,19 @@ using DalaMock.Windows;
 using Dalamud;
 using Dalamud.Interface.ImGuiFileDialog;
 using InventoryTools;
+using InventoryTools.Host;
 using InventoryTools.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace InventoryToolsMock;
 
-public class MockPlugin : IMockPlugin, IDisposable
+public class MockPlugin : IMockPlugin
 {
     private bool _isStarted;
-    private PluginLoader _loader;
-    private WindowService _windowService;
-    private FileDialogManager _fileDialogManager;
+    private PluginLoader? _loader;
+    private WindowService? _windowService;
+    private FileDialogManager? _fileDialogManager;
+    private Service? _service;
 
     public void Draw()
     {
@@ -24,32 +26,48 @@ public class MockPlugin : IMockPlugin, IDisposable
         {
             if (_windowService != null)
             {
-                foreach (var window in _windowService.WindowSystem.Windows)
+                for (var index = 0; index < _windowService.WindowSystem.Windows.Count; index++)
                 {
-                    window.AllowPinning = false;
-                    window.AllowClickthrough = false;
+                    var window = _windowService.WindowSystem.Windows[index];
+                    if (window != null)
+                    {
+                        window.AllowPinning = false;
+                        window.AllowClickthrough = false;
+                        window.AllowClickthrough = false;
+                    }
                 }
-                _windowService.WindowSystem.Draw();
+
+                try
+                {
+                    _windowService.WindowSystem.Draw();
+                }
+                catch (Exception e)
+                {
+                }
             }
-            _fileDialogManager.Draw();
+            _fileDialogManager?.Draw();
         }
     }
 
     public void Dispose()
     {
-
+        _windowService = null!;
+        _fileDialogManager = null!;
+        _loader?.Dispose();
+        _service?.Dispose();
+        _loader = null;
+        _service = null;
     }
 
     public bool IsStarted => _isStarted;
 
     public void Start(MockProgram program, MockService mockService, MockPluginInterfaceService mockPluginInterfaceService)
     {
-        var service = new Service();
+        _service = new Service();
         Service.Interface = mockPluginInterfaceService;
-        Service.SeTime = new MockSeTime();
         var clientLanguage = ClientLanguage.English;
 
-        _loader = new MockPluginLoader(program, this, mockService, mockPluginInterfaceService, service, program.SeriLog);
+        _loader = new MockPluginLoader(program, this, mockService, mockPluginInterfaceService, _service, program.SeriLog);
         var host = _loader.Build();
         
         _windowService = host.Services.GetRequiredService<WindowService>();
@@ -65,9 +83,6 @@ public class MockPlugin : IMockPlugin, IDisposable
     public void Stop(MockProgram program, MockService mockService, MockPluginInterfaceService mockPluginInterfaceService)
     {
         _isStarted = false;
-        _windowService = null!;
-        _fileDialogManager = null!;
-        _loader.Dispose();
         Dispose();
     }
 }

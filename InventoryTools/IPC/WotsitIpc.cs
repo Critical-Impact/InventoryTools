@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 using System.Timers;
 using CriticalCommonLib;
 using Dalamud.Plugin.Ipc;
+using InventoryTools.Logic;
 using InventoryTools.Services.Interfaces;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Timer = System.Timers.Timer;
 
-namespace InventoryTools.Logic
+namespace InventoryTools.IPC
 {
     public class WotsitIpc: IWotsitIpc
     {
@@ -23,8 +23,8 @@ namespace InventoryTools.Logic
         private ICallGateSubscriber<string, bool>? _wotsitUnregister;
         private ICallGateSubscriber<string, bool>? _callGateSubscriber;
         private ICallGateSubscriber<bool> _wotsitAvailable;
-        private Dictionary<string, FilterConfiguration> _wotsitToggleFilterGuids = new();
-        private Dictionary<FilterConfiguration, string> _wotsitFilterNames = new();
+        private Dictionary<string, string> _wotsitToggleFilterGuids = new();
+        private Dictionary<string, string> _wotsitFilterNames = new();
         private bool _wotsItRegistered = false;
         private Timer? _delayTimer = null;
 
@@ -65,7 +65,7 @@ namespace InventoryTools.Logic
         {
             try
             {
-                if (_wotsitFilterNames.ContainsKey(configuration) && _wotsitFilterNames[configuration] != configuration.Name)
+                if (_wotsitFilterNames.ContainsKey(configuration.Key) && _wotsitFilterNames[configuration.Key] != configuration.Name)
                 {
                     InitForWotsit();
                 }
@@ -119,7 +119,7 @@ namespace InventoryTools.Logic
         {
             if (_wotsitRegister != null)
             {
-                _wotsitToggleFilterGuids = new Dictionary<string, FilterConfiguration>();
+                _wotsitToggleFilterGuids = new Dictionary<string, string>();
 
                 foreach (var filter in _listService.Lists)
                 {
@@ -127,8 +127,8 @@ namespace InventoryTools.Logic
                     {
                         var guid = _wotsitRegister.InvokeFunc(IpcDisplayName, $"Toggle Filter - {filter.Name}",
                             $"Toggle the filter on/off {filter.Name} as a background filter. ", WotsitIconId);
-                        _wotsitToggleFilterGuids.Add(guid, filter);
-                        _wotsitFilterNames.Add(filter, filter.Name);
+                        _wotsitToggleFilterGuids.Add(guid, filter.Key);
+                        _wotsitFilterNames.Add(filter.Key, filter.Name);
                     }
                     catch (Exception e)
                     {
@@ -144,9 +144,13 @@ namespace InventoryTools.Logic
         {
             Service.Framework.RunOnFrameworkThread(() =>
             {
-                if (_wotsitToggleFilterGuids.TryGetValue(guid, out var filter))
+                if (_wotsitToggleFilterGuids.TryGetValue(guid, out var filterKey))
                 {
-                    _listService.ToggleActiveBackgroundList(filter);
+                    var filter = _listService.GetListByKey(filterKey);
+                    if (filter != null)
+                    {
+                        _listService.ToggleActiveBackgroundList(filter);
+                    }
                 }
             });
         }
@@ -181,6 +185,7 @@ namespace InventoryTools.Logic
             {
                 _wotsitAvailable.Unsubscribe(FaAvailable);
                 _wotsitUnregister?.InvokeFunc(IpcDisplayName);
+                _callGateSubscriber?.Unsubscribe(WotsitInvoke);
             }
             catch (Exception)
             {

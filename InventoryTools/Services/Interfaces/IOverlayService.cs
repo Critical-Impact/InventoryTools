@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Generic;
-using CriticalCommonLib.Services.Ui;
-using InventoryTools.GameUi;
 using InventoryTools.Logic;
+using InventoryTools.Overlays;
 using Microsoft.Extensions.Hosting;
 
 namespace InventoryTools.Services.Interfaces;

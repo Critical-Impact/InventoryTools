@@ -2,27 +2,24 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using CriticalCommonLib;
-using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Extensions;
-using InventoryTools.Lists;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Columns;
+using InventoryTools.Logic.Columns.Buttons;
 using InventoryTools.Logic.Filters;
 using InventoryTools.Mediator;
+using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace InventoryTools.Services
+namespace InventoryTools.Lists
 {
     public class ListService : DisposableMediatorSubscriberBase, IListService
     {
@@ -30,7 +27,7 @@ namespace InventoryTools.Services
         private ICharacterMonitor _characterMonitor;
         private IInventoryMonitor _inventoryMonitor;
         private InventoryHistory _history;
-        private readonly ConfigurationManager _configurationManager;
+        private readonly ConfigurationManagerService _configurationManagerService;
         private readonly InventoryToolsConfiguration _configuration;
         private readonly IChatUtilities _chatUtilities;
         private readonly IFramework _framework;
@@ -38,10 +35,10 @@ namespace InventoryTools.Services
         private readonly Func<Type, IColumn> _columnTypeFactory;
         private ConcurrentDictionary<string, FilterConfiguration> _lists;
 
-        public ListService(ILogger<ListService> logger, MediatorService mediatorService, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, InventoryHistory history, ConfigurationManager configurationManager, InventoryToolsConfiguration configuration, IChatUtilities chatUtilities, IFramework framework, Func<string, IColumn?> columnFactory, Func<Type,IColumn> columnTypeFactory) : base(logger, mediatorService)
+        public ListService(ILogger<ListService> logger, MediatorService mediatorService, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, InventoryHistory history, ConfigurationManagerService configurationManagerService, InventoryToolsConfiguration configuration, IChatUtilities chatUtilities, IFramework framework, Func<string, IColumn?> columnFactory, Func<Type,IColumn> columnTypeFactory) : base(logger, mediatorService)
         {
             _history = history;
-            _configurationManager = configurationManager;
+            _configurationManagerService = configurationManagerService;
             _configuration = configuration;
             _chatUtilities = chatUtilities;
             _framework = framework;
@@ -49,7 +46,7 @@ namespace InventoryTools.Services
             _columnTypeFactory = columnTypeFactory;
             _lists = new ConcurrentDictionary<string, FilterConfiguration>();
 
-            configurationManager.ConfigurationChanged += ConfigOnConfigurationChanged;
+            configurationManagerService.ConfigurationChanged += ConfigOnConfigurationChanged;
             _mediatorService = mediatorService;
             _characterMonitor = characterMonitor;
             _characterMonitor.OnCharacterRemoved += CharacterMonitorOnOnCharacterRemoved;
@@ -60,7 +57,24 @@ namespace InventoryTools.Services
             _inventoryMonitor.OnInventoryChanged += InventoryMonitorOnOnInventoryChanged;
             _history.OnHistoryLogged += HistoryOnOnHistoryLogged;
             _mediatorService.Subscribe<ListUpdatedMessage>(this, message => ListUpdated(message.FilterConfiguration) );
+            _mediatorService.Subscribe<AddToCraftListMessage>(this, AddToCraftListMessageRecv );
+            _mediatorService.Subscribe<AddToNewCraftListMessage>(this, AddToNewCraftListMessageRecv );
             _framework.Update += OnUpdate;
+        }
+
+        private void AddToCraftListMessageRecv(AddToCraftListMessage obj)
+        {
+            var filter = GetListByKey(obj.FilterKey);
+            if (filter != null)
+            {
+                filter.CraftList.AddCraftItem(obj.ItemId, obj.Quantity, obj.Flags);
+            }
+        }
+
+        private void AddToNewCraftListMessageRecv(AddToNewCraftListMessage obj)
+        {
+            var craftList = AddNewCraftList(null, obj.IsEphemeral);
+            craftList.CraftList.AddCraftItem(obj.ItemId, obj.Quantity, obj.Flags);
         }
 
         private ConcurrentDictionary<string, FilterConfiguration> LoadListsFromConfiguration()
@@ -136,6 +150,42 @@ namespace InventoryTools.Services
                     FilterTableConfigurationChanged(filter.Value);
                 }
 
+                if (filter.Value.Columns != null)
+                {
+                    var isDirty = false;
+                    foreach (var column in filter.Value.Columns)
+                    {
+                        if (column.IsDirty)
+                        {
+                            column.IsDirty = false;
+                            isDirty = true;
+                        }
+                    }
+
+                    if (isDirty)
+                    {
+                        FilterTableConfigurationChanged(filter.Value);
+                    }
+                }
+
+                if (filter.Value.CraftColumns != null)
+                {
+                    var isDirty = false;
+                    foreach (var column in filter.Value.CraftColumns)
+                    {
+                        if (column.IsDirty)
+                        {
+                            column.IsDirty = false;
+                            isDirty = true;
+                        }
+                    }
+
+                    if (isDirty)
+                    {
+                        FilterTableConfigurationChanged(filter.Value);
+                    }
+                }
+
                 if (filter.Value is { } configuration)
                 {
                     if ((configuration.NeedsRefresh || configuration.FilterType == FilterType.CraftFilter && configuration.CraftList.NeedsRefresh) && !configuration.Refreshing && configuration.AllowRefresh)
@@ -184,19 +234,19 @@ namespace InventoryTools.Services
             _configuration.IsDirty = true;
         }
         
-        private void FilterTableConfigurationChanged(FilterConfiguration filterconfiguration)
+        private void FilterTableConfigurationChanged(FilterConfiguration filterConfiguration)
         {
-            _mediatorService.Publish(new ListModifiedMessage(filterconfiguration));
-            ListTableConfigurationChanged?.Invoke(filterconfiguration);
-            InvalidateList(filterconfiguration);
+            _mediatorService.Publish(new ListModifiedMessage(filterConfiguration));
+            ListTableConfigurationChanged?.Invoke(filterConfiguration);
+            InvalidateList(filterConfiguration);
             _configuration.IsDirty = true;
         }
 
-        private void FilterConfigurationChanged(FilterConfiguration filterconfiguration)
+        private void FilterConfigurationChanged(FilterConfiguration filterConfiguration)
         {
-            _mediatorService.Publish(new ListModifiedMessage(filterconfiguration));
-            ListConfigurationChanged?.Invoke(filterconfiguration);
-            InvalidateList(filterconfiguration);
+            _mediatorService.Publish(new ListModifiedMessage(filterConfiguration));
+            ListConfigurationChanged?.Invoke(filterConfiguration);
+            InvalidateList(filterConfiguration);
             _configuration.IsDirty = true;
         }
         
@@ -843,7 +893,7 @@ namespace InventoryTools.Services
         {
             base.Dispose(disposing);
             _framework.Update -= OnUpdate;
-            _configurationManager.ConfigurationChanged -= ConfigOnConfigurationChanged;
+            _configurationManagerService.ConfigurationChanged -= ConfigOnConfigurationChanged;
             _characterMonitor.OnCharacterRemoved -= CharacterMonitorOnOnCharacterRemoved;
             _characterMonitor.OnCharacterUpdated -= CharacterMonitorOnOnCharacterUpdated;
             _characterMonitor.OnCharacterJobChanged -= CharacterMonitorOnOnCharacterJobChanged;
@@ -891,11 +941,11 @@ namespace InventoryTools.Services
             {
                 AddColumn(configuration, typeof(FavouritesColumn));
                 AddColumn(configuration,typeof(IconColumn), false);
+                var nameColumn = AddColumn(configuration,typeof(NameColumn), false);
                 AddColumn(configuration,typeof(TypeColumn), false);
                 AddColumn(configuration,typeof(QuantityColumn), false);
                 AddColumn(configuration,typeof(SourceColumn), false);
                 AddColumn(configuration,typeof(LocationColumn),false);
-                var nameColumn = AddColumn(configuration,typeof(NameColumn), false);
                 configuration.DefaultSortColumn = nameColumn.Key;
                 configuration.DefaultSortOrder = ImGuiSortDirection.Ascending;
             }
@@ -941,7 +991,6 @@ namespace InventoryTools.Services
                 AddColumn(configuration,typeof(QuantityColumn), false);
                 AddColumn(configuration,typeof(SourceColumn), false);
                 AddColumn(configuration,typeof(LocationColumn), false);
-                
                 AddCraftColumn(configuration,typeof(IconColumn), false);
                 AddCraftColumn(configuration,typeof(NameColumn), false);
                 AddCraftColumn(configuration,typeof(CraftAmountRequiredColumn), false);
@@ -949,6 +998,7 @@ namespace InventoryTools.Services
                 AddCraftColumn(configuration,typeof(CraftSimpleColumn), false);
                 AddCraftColumn(configuration,typeof(MarketBoardMinPriceColumn), false);
                 AddCraftColumn(configuration,typeof(MarketBoardMinTotalPriceColumn), false);
+                AddCraftColumn(configuration,typeof(CraftMarketPriceColumn), false);
                 AddCraftColumn(configuration,typeof(AcquisitionSourceIconsColumn), false);
                 AddCraftColumn(configuration,typeof(CraftGatherColumn), false);
                 configuration.DefaultSortColumn = nameColumn.Key;
