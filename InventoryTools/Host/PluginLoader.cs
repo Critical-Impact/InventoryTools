@@ -426,6 +426,7 @@ public class PluginLoader : IDisposable
                 collection.AddHostedService(p => p.GetRequiredService<InventoryToolsUi>());
                 collection.AddHostedService(p => p.GetRequiredService<HostedUniversalis>());
                 collection.AddHostedService(p => p.GetRequiredService<LaunchButtonService>());
+                collection.AddHostedService(p => p.GetRequiredService<IPCService>());
             });
             PreBuild(hostBuilder);
             var builtHost = hostBuilder
