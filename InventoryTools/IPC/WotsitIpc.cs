@@ -181,6 +181,7 @@ namespace InventoryTools.IPC
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
+            Logger.LogTrace("Stopping service {type} ({this})", GetType().Name, this);
             try
             {
                 _wotsitAvailable.Unsubscribe(FaAvailable);
