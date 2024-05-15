@@ -25,7 +25,7 @@ public class TooltipFooterLinesSetting : IntegerSetting
 
     public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
     public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Visuals;
-    public override string Version => "1.6.2.5";
+    public override string Version => "1.7.0.0";
 
     public TooltipFooterLinesSetting(ILogger<TooltipFooterLinesSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
     {

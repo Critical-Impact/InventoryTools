@@ -34,7 +34,7 @@ public class TooltipCategoryWhitelistSetting : MultipleChoiceSetting<uint>
     }
 
     public override bool HideAlreadyPicked { get; set; } = true;
-    public override string Version => "1.6.2.5";
+    public override string Version => "1.7.0.0";
 
     public TooltipCategoryWhitelistSetting(ILogger<TooltipCategoryWhitelistSetting> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
     {

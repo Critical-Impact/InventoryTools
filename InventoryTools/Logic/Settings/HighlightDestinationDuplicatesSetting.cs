@@ -25,7 +25,7 @@ namespace InventoryTools.Logic.Settings
 
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.Lists;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.DestinationHighlighting;
-        public override string Version => "1.6.2.5";
+        public override string Version => "1.7.0.0";
 
         public HighlightDestinationSetting(ILogger<HighlightDestinationSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
         {

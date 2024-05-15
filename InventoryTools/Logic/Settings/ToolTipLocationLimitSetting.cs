@@ -22,7 +22,7 @@ public class ToolTipLocationLimitSetting : IntegerSetting
     public override string HelpText { get; set; } = "The maximum amount of locations to list on the tooltip. This requires 'Display Amount Owned?' to be enabled.";
     public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
     public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Visuals;
-    public override string Version => "1.6.2.5";
+    public override string Version => "1.7.0.0";
 
     public ToolTipLocationLimitSetting(ILogger<ToolTipLocationLimitSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
     {

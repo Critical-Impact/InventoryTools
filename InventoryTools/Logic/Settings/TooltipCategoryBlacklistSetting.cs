@@ -22,7 +22,7 @@ public class TooltipCategoryBlacklistSetting : BooleanSetting
     public override string HelpText { get; set; } = "Makes the Tooltip Category Whitelist into a Blacklist if checked.";
     public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
     public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
-    public override string Version => "1.6.2.5";
+    public override string Version => "1.7.0.0";
 
     public TooltipCategoryBlacklistSetting(ILogger<TooltipCategoryBlacklistSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
     {

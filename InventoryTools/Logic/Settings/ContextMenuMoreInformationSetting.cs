@@ -27,7 +27,7 @@ namespace InventoryTools.Logic.Settings
 
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.ContextMenu;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
-        public override string Version => "1.6.2.5";
+        public override string Version => "1.7.0.0";
 
         public ContextMenuMoreInformationSetting(ILogger<ContextMenuMoreInformationSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
         {
