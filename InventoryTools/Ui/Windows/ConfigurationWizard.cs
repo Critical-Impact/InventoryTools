@@ -160,8 +160,10 @@ public class ConfigurationWizard : GenericWindow
                                     ImGui.Separator();
                                     foreach (var setting in feature.RelatedSettings)
                                     {
+                                        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
                                         setting.LabelSize = 200;
                                         setting.Draw(_configuration);
+                                        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
                                     }
                                 }
                             }

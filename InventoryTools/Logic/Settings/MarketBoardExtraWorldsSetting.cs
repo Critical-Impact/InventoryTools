@@ -32,7 +32,7 @@ public class MarketBoardExtraWorldsSetting : MultipleChoiceSetting<uint>
     {
         if (_worldNames == null)
         {
-            _worldNames = _excelCache.GetWorldSheet().Where(c => c.IsPublic)
+            _worldNames = _excelCache.GetWorldSheet().Where(c => c.IsPublic).OrderBy(c => c.FormattedName)
                 .ToDictionary(c => c.RowId, c => c.FormattedName);
         }
 

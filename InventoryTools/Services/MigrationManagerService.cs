@@ -90,24 +90,6 @@ public class MigrationManagerService : IHostedService
         if (config.InternalVersion == 2)
         {
             _logger.LogInformation("Migrating to version 3");
-            foreach (var filterConfig in config.FilterConfigurations)
-            {
-                filterConfig.GenerateNewTableId();
-                _listService.AddColumn(filterConfig, typeof(IconColumn), false);
-                _listService.AddColumn(filterConfig, typeof(NameColumn), false);
-                _listService.AddColumn(filterConfig, typeof(TypeColumn), false);
-                _listService.AddColumn(filterConfig, typeof(SourceColumn), false);
-                _listService.AddColumn(filterConfig, typeof(LocationColumn), false);
-                if (filterConfig.FilterType == FilterType.SortingFilter)
-                {
-                    _listService.AddColumn(filterConfig, typeof(DestinationColumn), false);
-                }
-                _listService.AddColumn(filterConfig, typeof(QuantityColumn), false);
-                _listService.AddColumn(filterConfig, typeof(ItemILevelColumn), false);
-                _listService.AddColumn(filterConfig, typeof(SearchCategoryColumn), false);
-                _listService.AddColumn(filterConfig, typeof(MarketBoardPriceColumn), false);
-            }
-            _marketCache.ClearCache();
             config.InternalVersion++;
         }
         if (config.InternalVersion == 3)
@@ -132,7 +114,6 @@ public class MigrationManagerService : IHostedService
                 _serviceProvider.GetRequiredService<IsTimedNodeFilter>().UpdateFilterConfiguration(filterConfig, filterConfig.IsAvailableAtTimedNode);
                 _serviceProvider.GetRequiredService<ItemUiCategoryFilter>().UpdateFilterConfiguration(filterConfig, filterConfig.ItemUiCategoryId);
                 _serviceProvider.GetRequiredService<SearchCategoryFilter>().UpdateFilterConfiguration(filterConfig, filterConfig.ItemSearchCategoryId);
-                filterConfig.FilterType++;
             }
             config.InternalVersion++;
         }
@@ -283,12 +264,6 @@ public class MigrationManagerService : IHostedService
                     foreach (var filter in toReset)
                     {
                         filter.ResetFilter(filterConfig);
-                    }
-
-                    if (hadDefaultCraftList || !filterConfig.CraftListDefault)
-                    {
-                        _listService.AddCraftColumn(filterConfig, typeof(CraftSettingsColumn), false);
-                        _listService.AddCraftColumn(filterConfig, typeof(CraftSimpleColumn), false);
                     }
                 }
             }

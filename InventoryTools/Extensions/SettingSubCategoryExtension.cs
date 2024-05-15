@@ -16,6 +16,8 @@ namespace InventoryTools.Extensions
                     return "Highlighting";
                 case SettingSubCategory.DestinationHighlighting:
                     return "Destination Highlighting";
+                case SettingSubCategory.RetainerHighlighting:
+                    return "Retainer Highlighting";
                 case SettingSubCategory.Market:
                     return "Market";
                 case SettingSubCategory.General:
@@ -29,7 +31,9 @@ namespace InventoryTools.Extensions
                 case SettingSubCategory.AutoSave:
                     return "Auto Save";
                 case SettingSubCategory.FilterSettings:
-                    return "Filter Settings";
+                    return "List Settings";
+                case SettingSubCategory.ActiveLists:
+                    return "Active Lists";
                 case SettingSubCategory.ContextMenus:
                     return "Context/Right Click Menu";
                 case SettingSubCategory.Hotkeys:

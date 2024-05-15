@@ -12,19 +12,22 @@ namespace InventoryTools.Logic.Settings.Abstract
         }
         public override void Draw(InventoryToolsConfiguration configuration)
         {
+            var currentX = ImGui.GetCursorPosX();
+            currentX += ImGui.GetFontSize() + ImGui.GetStyle().FramePadding.X * 3.0f + ImGui.GetStyle().ItemInnerSpacing.X;
+            ImGui.SetCursorPosX(currentX);
             var value = CurrentValue(configuration).ToString();
             ImGui.SetNextItemWidth(LabelSize);
             if (ColourModified && HasValueSet(configuration))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);
-                ImGui.LabelText("##" + Key + "Label", Name + ":");
+                ImGui.LabelText("##" + Key + "Label", Name);
                 ImGui.PopStyleColor();
             }
             else
             {
-                ImGui.LabelText("##" + Key + "Label", Name + ":");
+                ImGui.LabelText("##" + Key + "Label", Name);
             }
-            ImGui.SameLine();
+            ImGui.SetCursorPosX(currentX + ImGui.GetStyle().FramePadding.X);
             ImGui.SetNextItemWidth(InputSize);
             if (ImGui.InputText("##"+Key+"Input", ref value, 100, ImGuiInputTextFlags.CharsDecimal))
             {

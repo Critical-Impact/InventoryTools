@@ -125,7 +125,7 @@ namespace InventoryTools.Logic.Columns.Buttons
 
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            CraftItem item, int rowIndex)
+            CraftItem item, int rowIndex, int columnIndex)
         {
             var messages = new List<MessageBase>();
             ImGui.TableNextColumn();
@@ -267,7 +267,7 @@ namespace InventoryTools.Logic.Columns.Buttons
 
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            InventoryItem item, int rowIndex)
+            InventoryItem item, int rowIndex, int columnIndex)
         {
             ImGui.TableNextColumn();
             if (CurrentValue(columnConfiguration, item) == true)
@@ -292,7 +292,7 @@ namespace InventoryTools.Logic.Columns.Buttons
 
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            ItemEx item, int rowIndex)
+            ItemEx item, int rowIndex, int columnIndex)
         {
             ImGui.TableNextColumn();
             if (CurrentValue(columnConfiguration, item) == true)

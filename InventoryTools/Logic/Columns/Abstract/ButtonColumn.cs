@@ -44,7 +44,6 @@ public abstract class ButtonColumn : IColumn
          type.HasFlag(InventoryTools.Logic.FilterType.HistoryFilter));
 
     public virtual bool? CraftOnly { get; } = false;
-    public virtual bool CanBeRemoved { get; } = true;
     public bool IsConfigurable => false;
     public virtual string? RenderName { get; }
     public virtual IEnumerable<InventoryItem> Filter(ColumnConfiguration columnConfiguration, IEnumerable<InventoryItem> items)
@@ -99,31 +98,32 @@ public abstract class ButtonColumn : IColumn
 
     public virtual List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
         InventoryItem item,
-        int rowIndex)
+        int rowIndex, int columnIndex)
     {
-        return Draw(configuration, columnConfiguration, item.Item, rowIndex);
+        return Draw(configuration, columnConfiguration, item.Item, rowIndex, columnIndex);
     }
 
     public virtual List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
         SortingResult item,
-        int rowIndex)
+        int rowIndex, int columnIndex)
     {
-        return Draw(configuration, columnConfiguration, item.Item, rowIndex);
+        return Draw(configuration, columnConfiguration, item.Item, rowIndex, columnIndex);
     }
 
-    public abstract List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration, ItemEx item, int rowIndex);
+    public abstract List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
+        ItemEx item, int rowIndex, int columnIndex);
 
     public virtual List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
-        CraftItem item, int rowIndex)
+        CraftItem item, int rowIndex, int columnIndex)
     {
-        return Draw(configuration, columnConfiguration, item.Item, rowIndex);
+        return Draw(configuration, columnConfiguration, item.Item, rowIndex, columnIndex);
     }
 
     public virtual List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
         InventoryChange item,
-        int rowIndex)
+        int rowIndex, int columnIndex)
     {
-        return Draw(configuration, columnConfiguration, item.Item, rowIndex);
+        return Draw(configuration, columnConfiguration, item.Item, rowIndex, columnIndex);
     }
 
     public virtual void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)

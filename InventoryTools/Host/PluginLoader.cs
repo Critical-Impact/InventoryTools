@@ -185,7 +185,6 @@ public class PluginLoader : IDisposable
                 builder.RegisterInstance(Service.GameInteropProvider).ExternallyOwned();
                 builder.RegisterInstance(Service.Interface).ExternallyOwned();
                 builder.RegisterInstance(Service.KeyState).ExternallyOwned();
-                builder.RegisterInstance(Service.LibcFunction).ExternallyOwned();
                 builder.RegisterInstance(Service.Log).ExternallyOwned();
                 builder.RegisterInstance(Service.Network).ExternallyOwned();
                 builder.RegisterInstance(Service.Objects).ExternallyOwned();
@@ -219,6 +218,7 @@ public class PluginLoader : IDisposable
                 builder.RegisterType<InventoryToolsUi>().SingleInstance().ExternallyOwned();
                 builder.RegisterType<TeleporterService>().SingleInstance().ExternallyOwned();
                 builder.RegisterType<LaunchButtonService>().SingleInstance().ExternallyOwned();
+                builder.RegisterType<HostedInventoryHistory>().SingleInstance().ExternallyOwned();
             });
             
             hostBuilder.ConfigureContainer<ContainerBuilder>(builder =>
@@ -426,6 +426,7 @@ public class PluginLoader : IDisposable
                 collection.AddHostedService(p => p.GetRequiredService<InventoryToolsUi>());
                 collection.AddHostedService(p => p.GetRequiredService<HostedUniversalis>());
                 collection.AddHostedService(p => p.GetRequiredService<LaunchButtonService>());
+                collection.AddHostedService(p => p.GetRequiredService<HostedInventoryHistory>());
                 collection.AddHostedService(p => p.GetRequiredService<IPCService>());
             });
             PreBuild(hostBuilder);

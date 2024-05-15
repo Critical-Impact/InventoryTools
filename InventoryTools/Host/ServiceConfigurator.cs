@@ -19,11 +19,11 @@ public class ServiceConfigurator : IHostedService
     private readonly IMarketCache _marketCache;
     private readonly ICharacterMonitor _characterMonitor;
     private readonly IInventoryMonitor _inventoryMonitor;
-    private readonly InventoryHistory _inventoryHistory;
     private readonly IMobTracker _mobTracker;
     private readonly IHostedUniversalisConfiguration _hostedUniversalisConfiguration;
+    private readonly HostedInventoryHistory _hostedInventoryHistory;
 
-    public ServiceConfigurator(ILogger<ServiceConfigurator> logger, ConfigurationManagerService configurationManagerService, InventoryToolsConfiguration configuration, IMarketCache marketCache, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, InventoryHistory inventoryHistory, IMobTracker mobTracker, IHostedUniversalisConfiguration hostedUniversalisConfiguration)
+    public ServiceConfigurator(ILogger<ServiceConfigurator> logger, ConfigurationManagerService configurationManagerService, InventoryToolsConfiguration configuration, IMarketCache marketCache, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, IMobTracker mobTracker, IHostedUniversalisConfiguration hostedUniversalisConfiguration, HostedInventoryHistory hostedInventoryHistory)
     {
         _logger = logger;
         _configurationManagerService = configurationManagerService;
@@ -31,16 +31,16 @@ public class ServiceConfigurator : IHostedService
         _marketCache = marketCache;
         _characterMonitor = characterMonitor;
         _inventoryMonitor = inventoryMonitor;
-        _inventoryHistory = inventoryHistory;
         _mobTracker = mobTracker;
         _hostedUniversalisConfiguration = hostedUniversalisConfiguration;
+        _hostedInventoryHistory = hostedInventoryHistory;
     }
 
     public void ConfigureServices()
     {
         _characterMonitor.LoadExistingRetainers(_configuration.GetSavedRetainers());
         _inventoryMonitor.LoadExistingData(_configurationManagerService.LoadInventory());
-        _inventoryHistory.LoadExistingHistory(_configurationManagerService.LoadHistoryFromCsv(out _));
+        _hostedInventoryHistory.LoadExistingHistory(_configurationManagerService.LoadHistoryFromCsv(out _));
         var entries = _mobTracker.LoadCsv(_configurationManagerService.MobSpawnFile, out var success);
         if(success)
         {
@@ -50,6 +50,15 @@ public class ServiceConfigurator : IHostedService
         _marketCache.CacheAutoRetrieve = _configuration.AutomaticallyDownloadMarketPrices;
         _marketCache.CacheTimeHours = _configuration.MarketRefreshTimeHours;
         _hostedUniversalisConfiguration.SaleHistoryLimit = _configuration.MarketSaleHistoryLimit;
+        if (_configuration.HistoryEnabled)
+        {
+            _hostedInventoryHistory.Enable();
+        }
+        else
+        {
+            _hostedInventoryHistory.Disable();
+        }
+        
     }
 
     public Task StartAsync(CancellationToken cancellationToken)

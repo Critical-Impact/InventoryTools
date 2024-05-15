@@ -35,7 +35,7 @@ namespace InventoryTools.Lists
         private readonly Func<Type, IColumn> _columnTypeFactory;
         private ConcurrentDictionary<string, FilterConfiguration> _lists;
 
-        public ListService(ILogger<ListService> logger, MediatorService mediatorService, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, InventoryHistory history, ConfigurationManagerService configurationManagerService, InventoryToolsConfiguration configuration, IChatUtilities chatUtilities, IFramework framework, Func<string, IColumn?> columnFactory, Func<Type,IColumn> columnTypeFactory) : base(logger, mediatorService)
+        public ListService(ILogger<ListService> logger, MediatorService mediatorService, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, HostedInventoryHistory history, ConfigurationManagerService configurationManagerService, InventoryToolsConfiguration configuration, IChatUtilities chatUtilities, IFramework framework, Func<string, IColumn?> columnFactory, Func<Type,IColumn> columnTypeFactory) : base(logger, mediatorService)
         {
             _history = history;
             _configurationManagerService = configurationManagerService;

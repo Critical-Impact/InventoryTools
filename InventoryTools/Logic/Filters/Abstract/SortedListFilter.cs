@@ -107,7 +107,7 @@ namespace InventoryTools.Logic.Filters.Abstract
                 if (table.Success)
                 {
                     ImGui.TableSetupColumn(Key + "ColumnEditTableName", ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthFixed, LabelSize);
-                    ImGui.TableSetupColumn(Key + "ColumnEditTableDelete", ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthFixed, InputSize);
+                    ImGui.TableSetupColumn(Key + "ColumnEditTableDelete", ImGuiTableColumnFlags.NoSort, InputSize);
                     var index = 0;
                     foreach (var item in value)
                     {

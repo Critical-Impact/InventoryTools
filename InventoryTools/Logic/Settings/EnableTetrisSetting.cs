@@ -23,8 +23,8 @@ public class EnableTetrisSetting : BooleanSetting
     public override string HelpText { get; set; } =
         "Should tetris be enabled? If enabled a new 'Tetris' option will show up in the hamburger menus in the plugin.";
 
-    public override SettingCategory SettingCategory { get; set; } = SettingCategory.General;
-    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Fun;
+    public override SettingCategory SettingCategory { get; set; } = SettingCategory.Misc;
+    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
     public override string Version => "1.6.2.5";
 
     public EnableTetrisSetting(ILogger<EnableTetrisSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)

@@ -38,6 +38,7 @@ public class MockPluginLoader : PluginLoader
             container.RegisterInstance(_logger).SingleInstance();
             container.RegisterInstance(_mockService).SingleInstance();
             container.RegisterType<MockWindow>().SingleInstance();
+            container.RegisterType<IconBrowserWindow>().SingleInstance();
             container.RegisterInstance(_mockProgram.Framework).As<IFramework>().SingleInstance();
             container.RegisterType<MockFont>().As<IFont>().SingleInstance();
             container.RegisterType<MockCharacterMonitor>().As<ICharacterMonitor>().SingleInstance();

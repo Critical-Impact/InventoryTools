@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -49,12 +50,12 @@ public class CraftSettingsColumn : IColumn
 
     public List<string>? FilterChoices { get; set; } = null;
     public bool HasFilter { get; set; } = false;
-    public bool CanBeRemoved { get; } = false;
     public ColumnFilterType FilterType { get; set; } = ColumnFilterType.None;
     public bool IsDebug { get; set; } = false;
     public FilterType AvailableIn { get; } = Logic.FilterType.CraftFilter;
     public virtual bool IsConfigurable => false;
     public bool IsDefault => true;
+    
     public bool AvailableInType(FilterType type)
     {
         return type == Logic.FilterType.CraftFilter;
@@ -119,32 +120,31 @@ public class CraftSettingsColumn : IColumn
 
     public List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
         InventoryItem item,
-        int rowIndex)
+        int rowIndex, int columnIndex)
     {
         return null;
     }
 
     public List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
         SortingResult item,
-        int rowIndex)
+        int rowIndex, int columnIndex)
     {
         return null;
     }
 
     public List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
         ItemEx item,
-        int rowIndex)
+        int rowIndex, int columnIndex)
     {
         return null;
     }
 
     public List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
         CraftItem item,
-        int rowIndex)
+        int rowIndex, int columnIndex)
     {
         ImGui.TableNextColumn();
-
-        using (var popup = ImRaii.Popup("ConfigureItemSettings" + item.ItemId + (item.IsOutputItem ? "o" : "")))
+        using (var popup = ImRaii.Popup("ConfigureItemSettings" + columnIndex + item.ItemId + (item.IsOutputItem ? "o" : "")))
         {
             if (popup.Success)
             {
@@ -156,6 +156,8 @@ public class CraftSettingsColumn : IColumn
                 DrawRetainerRetrievalSelector(configuration, item, rowIndex);
                 DrawSourceSelector(configuration, item, rowIndex);
                 DrawZoneSelector(configuration, item, rowIndex);
+                DrawMarketWorldSelector(configuration, item, rowIndex);
+                DrawMarketPriceSelector(configuration, item, rowIndex);
             }
         }
 
@@ -197,10 +199,30 @@ public class CraftSettingsColumn : IColumn
                 }
             }
         }
+
+        using (var popup = ImRaii.Popup("ConfigureMarketWorldPreference" + rowIndex))
+        {
+            if (popup.Success)
+            {
+                ImGui.Text("Prefer Market World:");
+                ImGui.Separator();
+            }
+        }
+
+        using (var popup = ImRaii.Popup("ConfigureItemPriceOverride" + rowIndex))
+        {
+            if (popup.Success)
+            {
+                ImGui.Text("Market Price:");
+                ImGui.Separator();
+            }
+        }
         var ingredientPreferenceDefault = configuration.CraftList.GetIngredientPreference(item.ItemId);
         var retainerRetrievalDefault = configuration.CraftList.GetCraftRetainerRetrieval(item.ItemId);
         var retainerRetrieval = retainerRetrievalDefault ?? (item.IsOutputItem ? configuration.CraftList.CraftRetainerRetrievalOutput : configuration.CraftList.CraftRetainerRetrieval);
         var zonePreference = configuration.CraftList.GetZonePreference(item.IngredientPreference.Type, item.ItemId);
+        var worldPreference = configuration.CraftList.GetMarketItemWorldPreference(item.ItemId);
+        var priceOverride = configuration.CraftList.GetMarketItemPriceOverride(item.ItemId);
         DrawRecipeIcon(configuration,rowIndex, item);
         DrawHqIcon(configuration, rowIndex, item);
         DrawRetainerIcon(configuration, rowIndex, item, retainerRetrievalDefault, retainerRetrieval);
@@ -209,7 +231,7 @@ public class CraftSettingsColumn : IColumn
 
         if (_settingsIcon.Draw("cnf_" + rowIndex))
         {
-            ImGui.OpenPopup("ConfigureItemSettings" + item.ItemId + (item.IsOutputItem ? "o" : ""));
+            ImGui.OpenPopup("ConfigureItemSettings" + columnIndex + item.ItemId + (item.IsOutputItem ? "o" : ""));
         }
 
         if (ImGui.IsItemHovered())
@@ -222,6 +244,11 @@ public class CraftSettingsColumn : IColumn
                     ImGui.TextUnformatted("Sourcing: " + (ingredientPreferenceDefault?.FormattedName ?? "Use Default"));
                     ImGui.TextUnformatted("Retainer: " + (retainerRetrievalDefault?.FormattedName() ?? "Use Default"));
                     ImGui.TextUnformatted("Zone: " + (zonePreference != null ? _excelCache.GetMapSheet().GetRow(zonePreference.Value)?.FormattedName ?? "Use Default" : "Use Default"));
+                    if (item.Item.CanBePlacedOnMarket)
+                    {
+                        ImGui.TextUnformatted("Market World Preference: " + (worldPreference != null ? _excelCache.GetWorldSheet().GetRow(worldPreference.Value)?.FormattedName ?? "Use Default" : "Use Default"));
+                        ImGui.TextUnformatted("Market Price Override: " + (priceOverride != null ? priceOverride.Value.ToString("N0") : "Use Default"));
+                    }
                 }
             }
         }
@@ -472,6 +499,8 @@ public class CraftSettingsColumn : IColumn
                 configuration.CraftList.GetIngredientPreference(item.ItemId);
             var previewValue = currentIngredientPreference?.FormattedName ?? "Use Default";
             ImGui.Text("Source Preference:");
+            ImGui.SameLine();
+            ImGuiService.HelpMarker("How should the item be sourced? As there are multiple ways to source an item, you can either rely on your list's ingredient sourcing (tab inside the craft list's settings) or you can override the source here.");
             using (var combo = ImRaii.Combo("##SetIngredients" + rowIndex, previewValue))
             {
                 if (combo.Success)
@@ -500,6 +529,72 @@ public class CraftSettingsColumn : IColumn
 
         return false;
     }
+
+    private bool DrawMarketPriceSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
+    {
+        if (item.IngredientPreference.Type is IngredientPreferenceType.Marketboard)
+        {
+            var priceOverride = configuration.CraftList.GetMarketItemPriceOverride(item.ItemId);
+            var priceString = priceOverride?.ToString() ?? "";
+            ImGui.Text("Market Price Override:");
+            ImGui.SameLine();
+            ImGuiService.HelpMarker("Override the price for this item. This is only used when no pricing is available. Use this to give you a rough estimate of the gil cost of your item.");
+            if (ImGui.InputText("##MarketPricePreference" + rowIndex, ref priceString, 50))
+            {
+                if (priceString == "")
+                {
+                    configuration.CraftList.UpdateMarketItemPriceOverride(item.ItemId, null);
+                    configuration.NeedsRefresh = true;
+                }
+                else if(UInt32.TryParse(priceString, out uint newValue))
+                {
+                    configuration.CraftList.UpdateMarketItemPriceOverride(item.ItemId, newValue);
+                    configuration.NeedsRefresh = true;
+                }
+            }
+        }
+
+        return false;
+    }
+    
+    private bool DrawMarketWorldSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
+    {
+        if (item.IngredientPreference.Type is IngredientPreferenceType.Marketboard)
+        {
+            var worldId = configuration.CraftList.GetMarketItemWorldPreference(item.ItemId);
+            var currentWorld = worldId != null ? _excelCache.GetWorldSheet().GetRow(worldId.Value) : null;
+            var previewValue = currentWorld?.FormattedName ?? "Use Default";
+            ImGui.Text("Market World Preference:");
+            ImGui.SameLine();
+            ImGuiService.HelpMarker("Override the market world preferences for this item. If you select a world here, the craft pricer will attempt to take prices from this world first then follow the normal rules for craft pricing.");
+            using (var combo = ImRaii.Combo("##MarketWorldPreference" + rowIndex, previewValue))
+            {
+                if (combo.Success)
+                {
+                    if (ImGui.Selectable("Use Default"))
+                    {
+                        configuration.CraftList.UpdateItemWorldPreference(item.ItemId, null);
+                        configuration.NeedsRefresh = true;
+                        configuration.NotifyConfigurationChange();
+                        return true;
+                    }
+                    var worlds = _excelCache.GetWorldSheet().Where(c => c.IsPublic).OrderBy(c => c.FormattedName).ToList();
+                    foreach (var world in worlds)
+                    {
+                        if (ImGui.Selectable(world.FormattedName))
+                        {
+                            configuration.CraftList.UpdateItemWorldPreference(item.ItemId, world.RowId);
+                            configuration.NeedsRefresh = true;
+                            configuration.NotifyConfigurationChange();
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
     
     private  bool DrawZoneSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
     {
@@ -512,6 +607,8 @@ public class CraftSettingsColumn : IColumn
                 var currentMap = mapId != null ? _excelCache.GetMapSheet().GetRow(mapId.Value) : null;
                 var previewValue = currentMap?.FormattedName ?? "Use Default";
                 ImGui.Text("Zone Preference:");
+                ImGui.SameLine();
+                ImGuiService.HelpMarker("Where should the item be sourced from? As there are sometimes multiple locations to source an item from, you can either rely on your list's zone preferences (tab inside the craft list's settings) or you can override the zone here.");
                 using (var combo = ImRaii.Combo("##ZonePreference" + rowIndex, previewValue))
                 {
                     if (combo.Success)
@@ -566,6 +663,8 @@ public class CraftSettingsColumn : IColumn
         }
 
         ImGui.Text("Retrieve from Retainer:");
+        ImGui.SameLine();
+        ImGuiService.HelpMarker("Should we source the item from your retainers? If there is a quantity available of the correct quality it will show up in the Items in Retainers/Bags section.");
         using (var combo = ImRaii.Combo("##SetRetrieveRetainer" + rowIndex, previewValue))
         {
             if (combo.Success)
@@ -619,6 +718,8 @@ public class CraftSettingsColumn : IColumn
             }
 
             ImGui.Text("HQ Required:");
+            ImGui.SameLine();
+            ImGuiService.HelpMarker("Should the item be HQ or NQ? For output items, the quantity needed will only reduce if you craft an item of the correct quality. For other materials this will dictate what is listed to retrieve and what counts towards the amount you need.");
             using (var combo = ImRaii.Combo("##SetHQRequired" + rowIndex, previewValue))
             {
                 if (combo.Success)
@@ -663,6 +764,9 @@ public class CraftSettingsColumn : IColumn
                         _excelCache.GetRecipeExSheet().GetRow(c)!)
                     .OrderBy(c => c.CraftType.Value?.Name ?? "").ToList();
                 var recipeName = item.Recipe?.CraftType.Value?.Name ?? "";
+                ImGui.Text("Recipe:");
+                ImGui.SameLine();
+                ImGuiService.HelpMarker("Select which recipe you wish to use for this item. Some items can be crafted by multiple classes.");
                 using (var combo = ImRaii.Combo("##SetRecipe" + rowIndex, recipeName))
                 {
                     if (combo.Success)
@@ -698,9 +802,9 @@ public class CraftSettingsColumn : IColumn
 
     public List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
         InventoryChange item,
-        int rowIndex)
+        int rowIndex, int columnIndex)
     {
-        return Draw(configuration, columnConfiguration, item.InventoryItem, rowIndex);
+        return Draw(configuration, columnConfiguration, item.InventoryItem, rowIndex, columnIndex);
     }
 
     public void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)

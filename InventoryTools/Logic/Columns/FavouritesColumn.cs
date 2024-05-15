@@ -40,37 +40,37 @@ public class FavouritesColumn : CheckboxColumn
 
     public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
         ItemEx item,
-        int rowIndex)
+        int rowIndex, int columnIndex)
     {
-        base.Draw(configuration, columnConfiguration, item, rowIndex);
+        base.Draw(configuration, columnConfiguration, item, rowIndex, columnIndex);
         return PostDraw(item.RowId);
     }
 
     public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
-        CraftItem item, int rowIndex)
+        CraftItem item, int rowIndex, int columnIndex)
     {
-        base.Draw(configuration, columnConfiguration, item, rowIndex);
+        base.Draw(configuration, columnConfiguration, item, rowIndex, columnIndex);
         return PostDraw(item.ItemId);
     }
 
     public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
-        InventoryChange item, int rowIndex)
+        InventoryChange item, int rowIndex, int columnIndex)
     {
-        base.Draw(configuration, columnConfiguration, item, rowIndex);
+        base.Draw(configuration, columnConfiguration, item, rowIndex, columnIndex);
         return PostDraw(item.InventoryItem.ItemId);
     }
 
     public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
-        InventoryItem item, int rowIndex)
+        InventoryItem item, int rowIndex, int columnIndex)
     {
-        base.Draw(configuration, columnConfiguration, item, rowIndex);
+        base.Draw(configuration, columnConfiguration, item, rowIndex, columnIndex);
         return PostDraw(item.ItemId);
     }
 
     public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
-        SortingResult item, int rowIndex)
+        SortingResult item, int rowIndex, int columnIndex)
     {
-        base.Draw(configuration, columnConfiguration, item, rowIndex);
+        base.Draw(configuration, columnConfiguration, item, rowIndex, columnIndex);
         return PostDraw(item.InventoryItem.ItemId);
     }
 

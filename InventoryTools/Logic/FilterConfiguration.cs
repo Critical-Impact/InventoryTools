@@ -1025,6 +1025,10 @@ namespace InventoryTools.Logic
                 {
                     return "Craft List";
                 }
+                else if (FilterType.HasFlag(FilterType.HistoryFilter))
+                {
+                    return "History List";
+                }
                 return "";
             }
         }

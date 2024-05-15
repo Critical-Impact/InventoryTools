@@ -42,20 +42,21 @@ namespace InventoryTools.Logic.Columns
             MarketboardWorldSetting.Draw(columnConfiguration);
         }
 
-        public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
-            InventoryItem item, int rowIndex)
+        public override List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            InventoryItem item, int rowIndex, int columnIndex)
         {
             return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
         }
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            SortingResult item, int rowIndex)
+            SortingResult item, int rowIndex, int columnIndex)
         {
             return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
         }
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            ItemEx item, int rowIndex)
+            ItemEx item, int rowIndex, int columnIndex)
         {
             return DoDraw(item, CurrentValue(columnConfiguration, (ItemEx)item), rowIndex, configuration, columnConfiguration);
         }

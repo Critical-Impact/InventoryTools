@@ -18,28 +18,31 @@ public abstract class MultipleChoiceSetting<T> : Setting<List<T>> where T:notnul
     }
     public override void Draw(InventoryToolsConfiguration configuration)
     {
-        DrawSearchBox(configuration);
-        DrawResults(configuration);
+        var currentX = ImGui.GetCursorPosX();
+        currentX += ImGui.GetFontSize() + ImGui.GetStyle().FramePadding.X * 2.0f + ImGui.GetStyle().ItemInnerSpacing.X;
+        DrawSearchBox(configuration, currentX);
+        DrawResults(configuration, currentX);
     }
     
-    public virtual void DrawSearchBox(InventoryToolsConfiguration configuration)
+    public virtual void DrawSearchBox(InventoryToolsConfiguration configuration, float currentX)
     {
+        ImGui.SetCursorPosX(currentX);
         ImGui.SetNextItemWidth(LabelSize);
         if (ColourModified && HasValueSet(configuration))
         {
             ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);
-            ImGui.LabelText("##" + Key + "Label", Name + ":");
+            ImGui.LabelText("##" + Key + "Label", Name);
             ImGui.PopStyleColor();
         }
         else
         {
-            ImGui.LabelText("##" + Key + "Label", Name + ":");
+            ImGui.LabelText("##" + Key + "Label", Name);
         }
 
         var choices = GetChoices(configuration);
         var selectedChoices = CurrentValue(configuration);
         var currentSearchCategory = "";
-        ImGui.SameLine();
+        ImGui.SetCursorPosX(currentX + ImGui.GetStyle().FramePadding.X);
         ImGui.SetNextItemWidth(InputSize);
         using (var combo = ImRaii.Combo("##"+Key+"Combo", currentSearchCategory, ImGuiComboFlags.HeightLarge))
         {
@@ -102,10 +105,14 @@ public abstract class MultipleChoiceSetting<T> : Setting<List<T>> where T:notnul
         }
     }
 
-    public virtual void DrawResults(InventoryToolsConfiguration configuration)
+    public virtual void DrawResults(InventoryToolsConfiguration configuration, float currentX)
     {
         var choices = GetChoices(configuration);
         var selectedChoices = CurrentValue(configuration);
+        if (selectedChoices.Count > 0)
+        {
+            ImGui.SetCursorPosX(currentX + ImGui.GetStyle().FramePadding.X);
+        }
 
         for (var index = 0; index < selectedChoices.Count; index++)
         {
@@ -130,6 +137,10 @@ public abstract class MultipleChoiceSetting<T> : Setting<List<T>> where T:notnul
                 (index % 4 != 0 || index == 0))
             {
                 ImGui.SameLine();
+            }
+            else
+            {
+                ImGui.SetCursorPosX(currentX + ImGui.GetStyle().FramePadding.X);
             }
         }
     }

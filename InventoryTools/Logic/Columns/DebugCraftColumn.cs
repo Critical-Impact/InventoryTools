@@ -33,7 +33,7 @@ namespace InventoryTools.Logic.Columns
 
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            CraftItem item, int rowIndex)
+            CraftItem item, int rowIndex, int columnIndex)
         {
             ImGui.TableNextColumn();
             ImGui.Text("Required: " +  item.QuantityRequired);

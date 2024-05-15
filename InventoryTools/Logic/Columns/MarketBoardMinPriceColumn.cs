@@ -56,9 +56,9 @@ namespace InventoryTools.Logic.Columns
             var activeCharacter = _characterMonitor.ActiveCharacter;
             if (activeCharacter != null)
             {
-                var selectedWorld = MarketboardWorldSetting.CurrentValue(columnConfiguration)?.Item1 ?? activeCharacter.WorldId;
+                var selectedWorldId = MarketboardWorldSetting.SelectedWorldId(columnConfiguration, activeCharacter);
 
-                var marketBoardData = _marketCache.GetPricing(item.RowId, selectedWorld, false);
+                var marketBoardData = _marketCache.GetPricing(item.RowId, selectedWorldId, false);
                 if (marketBoardData != null)
                 {
                     var nq = marketBoardData.MinPriceNq;
