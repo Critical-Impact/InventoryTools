@@ -46,7 +46,7 @@ public class TooltipLocationDisplayModeSetting : ChoiceSetting<TooltipLocationDi
             };
         }
     }
-    public override string Version => "1.6.2.5";
+    public override string Version => "1.7.0.0";
 
     public TooltipLocationDisplayModeSetting(ILogger<TooltipLocationDisplayModeSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
     {

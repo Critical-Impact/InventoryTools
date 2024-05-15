@@ -25,7 +25,7 @@ namespace InventoryTools.Logic.Settings
         public override string HelpText { get; set; } = "The color to set the highlighted tabs(that contain filtered items) to.";
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.Lists;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Highlighting;
-        public override string Version => "1.6.2.5";
+        public override string Version => "1.7.0.0";
 
         public TabHighlightColourSetting(ILogger<TabHighlightColourSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
         {

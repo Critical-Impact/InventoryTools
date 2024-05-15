@@ -24,7 +24,7 @@ namespace InventoryTools.Logic.Settings
             "Should the active craft list automatically change when moving between each craft list? The active craft list will only change if there is an active craft list already selected.";
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.Lists;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
-        public override string Version => "1.6.2.5";
+        public override string Version => "1.7.0.0";
 
         public SwitchCraftListsAutomaticallySetting(ILogger<SwitchCraftListsAutomaticallySetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
         {
