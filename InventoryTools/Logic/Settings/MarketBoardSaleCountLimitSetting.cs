@@ -38,6 +38,6 @@ namespace InventoryTools.Logic.Settings
 
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.MarketBoard;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Market;
-        public override string Version => "1.6.2.5";
+        public override string Version => "1.7.0.0";
     }
 }

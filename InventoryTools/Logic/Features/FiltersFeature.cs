@@ -68,7 +68,7 @@ public class SampleFilter1Setting : BooleanSetting, ISampleFilterSetting
     public override string HelpText { get; set; } = "Shows you any items that sell for under 100 gil at shops.";
     public override SettingCategory SettingCategory { get; set; } = SettingCategory.None;
     public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.None;
-    public override string Version => "1.6.2.5";
+    public override string Version => "1.7.0.0";
     public bool ShouldAdd => _shouldAdd;
     public void AddFilter()
     {
@@ -109,7 +109,7 @@ public class SampleFilter2Setting : BooleanSetting, ISampleFilterSetting
     public override string HelpText { get; set; } = "Finds any items where there are 2 seperate stacks in retainers & characters and attempts to sort them into a single stack. This is great for making sure your retainers are as compacted as possible.";
     public override SettingCategory SettingCategory { get; set; } = SettingCategory.None;
     public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.None;
-    public override string Version => "1.6.2.5";
+    public override string Version => "1.7.0.0";
     public bool ShouldAdd => _shouldAdd;
     public void AddFilter()
     {
@@ -152,7 +152,7 @@ public class SampleFilter3Setting : BooleanSetting, ISampleFilterSetting
     public override string HelpText { get; set; } = "Finds all gatherable items in your characters inventory and attempts to show you where to put them in your retainers.";
     public override SettingCategory SettingCategory { get; set; } = SettingCategory.None;
     public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.None;
-    public override string Version => "1.6.2.5";
+    public override string Version => "1.7.0.0";
     public bool ShouldAdd => _shouldAdd;
     public void AddFilter()
     {

@@ -23,7 +23,7 @@ namespace InventoryTools.Logic.Settings
         public override string HelpText { get; set; } = "This is the colour of the text within the tooltip";
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Visuals;
-        public override string Version => "1.6.2.5";
+        public override string Version => "1.7.0.0";
 
         public TooltipColorSetting(ILogger<TooltipColorSetting> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService, excelCache)
         {

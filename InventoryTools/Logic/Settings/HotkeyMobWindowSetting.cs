@@ -19,7 +19,7 @@ namespace InventoryTools.Logic.Settings
 
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.Hotkeys;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
-        public override string Version => "1.6.2.5";
+        public override string Version => "1.7.0.0";
 
         public HotkeyMobWindowSetting(ILogger<HotkeyMobWindowSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
         {

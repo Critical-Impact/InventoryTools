@@ -25,7 +25,7 @@ public class EnableTetrisSetting : BooleanSetting
 
     public override SettingCategory SettingCategory { get; set; } = SettingCategory.Misc;
     public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
-    public override string Version => "1.6.2.5";
+    public override string Version => "1.7.0.0";
 
     public EnableTetrisSetting(ILogger<EnableTetrisSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
     {
