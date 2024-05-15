@@ -168,25 +168,26 @@ namespace InventoryTools.Logic.Columns.Abstract
         public abstract IEnumerable<InventoryChange> Sort(ColumnConfiguration columnConfiguration,
             ImGuiSortDirection direction, IEnumerable<InventoryChange> items);
 
-        public abstract List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
-            InventoryItem item, int rowIndex);
+        public abstract List<MessageBase>? Draw(FilterConfiguration configuration,
+            ColumnConfiguration columnConfiguration,
+            InventoryItem item, int rowIndex, int columnIndex);
 
         public abstract List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            SortingResult item, int rowIndex);
+            SortingResult item, int rowIndex, int columnIndex);
         public abstract List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            ItemEx item, int rowIndex);
+            ItemEx item, int rowIndex, int columnIndex);
 
         public abstract List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            CraftItem item, int rowIndex);
+            CraftItem item, int rowIndex, int columnIndex);
 
         public virtual List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            InventoryChange item, int rowIndex)
+            InventoryChange item, int rowIndex, int columnIndex)
         {
-            return Draw(configuration, columnConfiguration, item.InventoryItem, rowIndex);
+            return Draw(configuration, columnConfiguration, item.InventoryItem, rowIndex, columnIndex);
         }
 
         public abstract List<MessageBase>? DoDraw(IItem item, T currentValue, int rowIndex,

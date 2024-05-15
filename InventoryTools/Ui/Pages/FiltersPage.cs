@@ -9,6 +9,7 @@ using InventoryTools.Logic;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
+using InventoryTools.Ui.Widgets;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Ui.Pages
@@ -26,8 +27,85 @@ namespace InventoryTools.Ui.Pages
             _importExportService = importExportService;
         }
         private bool _isSeparator = false;
+        private Dictionary<FilterConfiguration, PopupMenu> _popupMenus = new();
+
         public override void Initialize()
         {
+
+        }
+        
+        public Widgets.PopupMenu GetFilterMenu(FilterConfiguration configuration)
+        {
+            if (!_popupMenus.ContainsKey(configuration))
+            {
+                _popupMenus[configuration] = new Widgets.PopupMenu("fm" + configuration.Key, Widgets.PopupMenu.PopupMenuButtons.LeftRight,
+                    new List<Widgets.PopupMenu.IPopupMenuItem>()
+                    {
+                        new Widgets.PopupMenu.PopupMenuItemSelectableAskName("Duplicate", "df_" + configuration.Key, configuration.Name, DuplicateList, "Duplicate the list."),
+                        new Widgets.PopupMenu.PopupMenuItemSelectable("Export Configuration", "ef_" + configuration.Key,ExportList, "Exports the list."),
+                        new Widgets.PopupMenu.PopupMenuItemSelectable( "Move Up", "mu_" + configuration.Key, MoveListUp,  "Move the list up."),
+                        new Widgets.PopupMenu.PopupMenuItemSelectable( "Move Down", "md_" + configuration.Key, MoveListDown, "Move the list down."),
+                        new Widgets.PopupMenu.PopupMenuItemSelectableConfirm("Remove", "rf_" + configuration.Key, "Are you sure you want to remove this list?", RemoveList, "Remove the list."),
+                    }
+                );
+            }
+            return _popupMenus[configuration];
+        }
+
+        private void RemoveList(string id, bool confirmed)
+        {
+            if (confirmed)
+            {
+                id = id.Replace("rf_", "");
+                var existingFilter = _listService.GetListByKey(id);
+                if (existingFilter != null)
+                {
+                    _listService.RemoveList(existingFilter);
+
+                }
+            }
+        }
+
+        private void MoveListUp(string id)
+        {
+            id = id.Replace("mu_", "");
+            var existingFilter = _listService.GetListByKey(id);
+            if (existingFilter != null)
+            {
+                _listService.MoveListUp(existingFilter);
+            }
+        }
+
+        private void MoveListDown(string id)
+        {
+            id = id.Replace("md_", "");
+            var existingFilter = _listService.GetListByKey(id);
+            if (existingFilter != null)
+            {
+                _listService.MoveListDown(existingFilter);
+            }
+        }
+
+        private void ExportList(string id)
+        {
+            id = id.Replace("ef_", "");
+            var existingFilter = _listService.GetListByKey(id);
+            if (existingFilter != null)
+            {
+                var base64 = _importExportService.ToBase64(existingFilter);
+                ImGui.SetClipboardText(base64);
+                _chatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
+            }
+        }
+
+        private void DuplicateList(string filterName, string id)
+        {
+            id = id.Replace("df_", "");
+            var existingFilter = _listService.GetListByKey(id);
+            if (existingFilter != null)
+            {
+                _listService.DuplicateList(existingFilter, filterName);
+            }
         }
 
         public override string Name { get; } = "Item Lists";
@@ -86,44 +164,10 @@ namespace InventoryTools.Ui.Pages
                         }
                         
                         ImGui.TableNextColumn();
-                        if (ImGui.SmallButton("Export Configuration##" + index))
-                        {
-                            var base64 = _importExportService.ToBase64(filterConfiguration);
-                            ImGui.SetClipboardText(base64);
-                            _chatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
-                        }
 
-                        if (ImGui.SmallButton("Remove##" + index))
-                        {
-                            ImGui.OpenPopup("Delete?##" + index);
-                        }
+                        ImGui.Button("...");
+                        GetFilterMenu(filterConfiguration).Draw();
 
-                        if (ImGui.SmallButton("Open as Window##" + index))
-                        {
-                            messages.Add(new OpenStringWindowMessage(typeof(FilterWindow), filterConfiguration.Key));
-                        }
-
-                        if (ImGui.BeginPopupModal("Delete?##" + index))
-                        {
-                            ImGui.TextUnformatted(
-                                "Are you sure you want to delete this filter?.\nThis operation cannot be undone!\n\n");
-                            ImGui.Separator();
-
-                            if (ImGui.Button("OK", new Vector2(120, 0) * ImGui.GetIO().FontGlobalScale))
-                            {
-                                _listService.RemoveList(filterConfiguration);
-                                ImGui.CloseCurrentPopup();
-                            }
-
-                            ImGui.SetItemDefaultFocus();
-                            ImGui.SameLine();
-                            if (ImGui.Button("Cancel", new Vector2(120, 0) * ImGui.GetIO().FontGlobalScale))
-                            {
-                                ImGui.CloseCurrentPopup();
-                            }
-
-                            ImGui.EndPopup();
-                        }
                     }
 
                     ImGui.EndTable();

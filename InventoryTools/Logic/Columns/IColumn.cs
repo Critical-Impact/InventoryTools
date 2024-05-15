@@ -32,7 +32,6 @@ namespace InventoryTools.Logic.Columns
         
         public bool? CraftOnly { get; }
         
-        public bool CanBeRemoved { get; }
         public bool IsConfigurable { get; }
 
         public string? RenderName { get; }
@@ -62,19 +61,19 @@ namespace InventoryTools.Logic.Columns
         
         public List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
             InventoryItem item,
-            int rowIndex);
+            int rowIndex, int columnIndex);
         public List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
             SortingResult item,
-            int rowIndex);
+            int rowIndex, int columnIndex);
         public List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
             ItemEx item,
-            int rowIndex);
+            int rowIndex, int columnIndex);
         
         public List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
             CraftItem item,
-            int rowIndex);
+            int rowIndex, int columnIndex);
         public List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
-            InventoryChange item, int rowIndex);
+            InventoryChange item, int rowIndex, int columnIndex);
 
         public void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration);
 

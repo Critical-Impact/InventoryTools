@@ -24,7 +24,7 @@ namespace InventoryTools.Logic.Settings
         public override string HelpText { get; set; } =
             "Should characters not currently logged in and their associated retainers be available to view/search and filter against?";
 
-        public override SettingCategory SettingCategory { get; set; } = SettingCategory.General;
+        public override SettingCategory SettingCategory { get; set; } = SettingCategory.Lists;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
         public override string Version => "1.6.2.5";
 

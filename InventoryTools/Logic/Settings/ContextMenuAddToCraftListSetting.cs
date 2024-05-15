@@ -29,8 +29,8 @@ namespace InventoryTools.Logic.Settings
         public override string HelpText { get; set; } =
             "Add a submenu to add the item to a craft list?";
 
-        public override SettingCategory SettingCategory { get; set; } = SettingCategory.Visuals;
-        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.ContextMenus;
+        public override SettingCategory SettingCategory { get; set; } = SettingCategory.ContextMenu;
+        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
         public override string Version => "1.6.2.5";
     }
 }

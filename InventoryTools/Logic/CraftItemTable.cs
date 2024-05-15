@@ -129,7 +129,7 @@ namespace InventoryTools.Logic
                                     for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                                     {
                                         var column = Columns[columnIndex];
-                                        var columnMessages = column.Column.Draw(FilterConfiguration, column, item, index);
+                                        var columnMessages = column.Column.Draw(FilterConfiguration, column, item, index, columnIndex);
                                         if (columnMessages != null)
                                         {
                                             messages.AddRange(columnMessages);
@@ -234,7 +234,7 @@ namespace InventoryTools.Logic
                                             for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                                             {
                                                 var column = Columns[columnIndex];
-                                                var columnMessages = column.Column.Draw(FilterConfiguration, column, item, overallIndex);
+                                                var columnMessages = column.Column.Draw(FilterConfiguration, column, item, overallIndex, columnIndex);
                                                 if (columnMessages != null)
                                                 {
                                                     messages.AddRange(columnMessages);

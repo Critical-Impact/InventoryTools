@@ -22,6 +22,16 @@ namespace InventoryTools.Extensions
                     return "History";
                 case SettingCategory.Windows:
                     return "Windows";
+                case SettingCategory.Lists:
+                    return "Lists";
+                case SettingCategory.ContextMenu:
+                    return "Context Menu";
+                case SettingCategory.MobSpawnTracker:
+                    return "Mob Spawn Tracker";
+                case SettingCategory.TitleMenuButtons:
+                    return "Title Menu Button";
+                case SettingCategory.AutoSave:
+                    return "Auto Save";
             }
             return settingCategory.ToString();
         }

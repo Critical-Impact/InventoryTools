@@ -29,7 +29,7 @@ namespace InventoryTools
         private readonly IListService _listService;
         private readonly ILogger<PluginLogic> _logger;
         private readonly IFramework _framework;
-        private readonly InventoryHistory _history;
+        private readonly HostedInventoryHistory _hostedInventoryHistory;
         private readonly IInventoryMonitor _inventoryMonitor;
         private readonly IInventoryScanner _inventoryScanner;
         private readonly ICharacterMonitor _characterMonitor;
@@ -63,14 +63,14 @@ namespace InventoryTools
 
         private DateTime? _nextSaveTime = null;
         
-        public PluginLogic(ConfigurationManagerService configurationManagerService, IChatUtilities chatUtilities, IListService listService, ILogger<PluginLogic> logger, IFramework framework, MediatorService mediatorService, InventoryHistory history, IInventoryMonitor inventoryMonitor, IInventoryScanner inventoryScanner, ICharacterMonitor characterMonitor, InventoryToolsConfiguration configuration, IMobTracker mobTracker, IHotkeyService hotkeyService, ICraftMonitor craftMonitor, IGameInterface gameInterface, ITooltipService tooltipService, IEnumerable<BaseTooltip> tooltips, IEnumerable<IHotkey> hotkeys, Func<Type,IFilter> filterFactory, IMarketCache marketCache) : base(logger, mediatorService)
+        public PluginLogic(ConfigurationManagerService configurationManagerService, IChatUtilities chatUtilities, IListService listService, ILogger<PluginLogic> logger, IFramework framework, MediatorService mediatorService, HostedInventoryHistory hostedInventoryHistory, IInventoryMonitor inventoryMonitor, IInventoryScanner inventoryScanner, ICharacterMonitor characterMonitor, InventoryToolsConfiguration configuration, IMobTracker mobTracker, IHotkeyService hotkeyService, ICraftMonitor craftMonitor, IGameInterface gameInterface, ITooltipService tooltipService, IEnumerable<BaseTooltip> tooltips, IEnumerable<IHotkey> hotkeys, Func<Type,IFilter> filterFactory, IMarketCache marketCache) : base(logger, mediatorService)
         {
             _configurationManagerService = configurationManagerService;
             _chatUtilities = chatUtilities;
             _listService = listService;
             _logger = logger;
             _framework = framework;
-            _history = history;
+            _hostedInventoryHistory = hostedInventoryHistory;
             _inventoryMonitor = inventoryMonitor;
             _inventoryScanner = inventoryScanner;
             _characterMonitor = characterMonitor;
@@ -87,7 +87,7 @@ namespace InventoryTools
             _inventoryMonitor.OnInventoryChanged += InventoryMonitorOnOnInventoryChanged;
             _characterMonitor.OnCharacterUpdated += CharacterMonitorOnOnCharacterUpdated;
             _framework.Update += FrameworkOnUpdate;
-
+            _configurationManagerService.ConfigurationChanged += ConfigOnConfigurationChanged;
 
             _craftMonitor.CraftStarted += CraftMonitorOnCraftStarted;
             _craftMonitor.CraftFailed += CraftMonitorOnCraftFailed ;
@@ -203,24 +203,24 @@ namespace InventoryTools
                 }
             }
 
-            if (_history.Enabled != _configuration.HistoryEnabled)
+            if (_hostedInventoryHistory.Enabled != _configuration.HistoryEnabled)
             {
                 if (_configuration.HistoryEnabled)
                 {
-                    _history.Enable();
+                    _hostedInventoryHistory.Enable();
                 }
                 else
                 {
-                    _history.Disable();
+                    _hostedInventoryHistory.Disable();
                 }
             }
 
             if (_configuration.HistoryTrackReasons != null)
             {
-                if (_history.ReasonsToLog.ToList() !=
+                if (_hostedInventoryHistory.ReasonsToLog.ToList() !=
                     _configuration.HistoryTrackReasons)
                 {
-                    _history.SetChangeReasonsToLog(
+                    _hostedInventoryHistory.SetChangeReasonsToLog(
                         _configuration.HistoryTrackReasons.Distinct().ToHashSet());
                 }
             }
@@ -440,7 +440,7 @@ namespace InventoryTools
             _configurationManagerService.ConfigurationChanged -= ConfigOnConfigurationChanged;
             _configurationManagerService.Save();
             _configurationManagerService.SaveInventories(_inventoryMonitor.AllItems.ToList());
-            _configurationManagerService.SaveHistory(_history.GetHistory());
+            _configurationManagerService.SaveHistory(_hostedInventoryHistory.GetHistory());
             if (_configuration.TrackMobSpawns)
             {
                 _mobTracker.SaveCsv(_configurationManagerService.MobSpawnFile,

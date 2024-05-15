@@ -20,7 +20,6 @@ using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using OtterGui.Log;
-using QoLBar;
 
 namespace InventoryToolsMock;
 
@@ -36,7 +35,7 @@ public class MockWindow : GenericWindow
     private readonly InventoryHistory _inventoryHistory;
     private readonly ExcelCache _excelCache;
 
-    public MockWindow(ILogger<MockWindow> logger, MediatorService mediator,ImGuiService imGuiService, InventoryToolsConfiguration configuration, Logger otterLogger, ICraftMonitor craftMonitor, ICharacterMonitor characterMonitor, IMobTracker mobTracker, FileDialogManager fileDialogManager, IInventoryMonitor inventoryMonitor, IOverlayService overlayService, InventoryHistory inventoryHistory, ExcelCache excelCache, string name = "Mock Tools") : base(logger, mediator, imGuiService, configuration, name)
+    public MockWindow(ILogger<MockWindow> logger, MediatorService mediator,ImGuiService imGuiService, InventoryToolsConfiguration configuration, Logger otterLogger, ICraftMonitor craftMonitor, ICharacterMonitor characterMonitor, IMobTracker mobTracker, FileDialogManager fileDialogManager, IInventoryMonitor inventoryMonitor, IOverlayService overlayService, HostedInventoryHistory inventoryHistory, ExcelCache excelCache, string name = "Mock Tools") : base(logger, mediator, imGuiService, configuration, name)
     {
         _otterLogger = otterLogger;
         _craftMonitor = craftMonitor;

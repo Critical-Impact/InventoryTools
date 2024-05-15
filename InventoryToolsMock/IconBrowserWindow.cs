@@ -9,7 +9,7 @@ using InventoryTools.Ui;
 using Microsoft.Extensions.Logging;
 using OtterGui;
 
-namespace QoLBar;
+namespace InventoryToolsMock;
 
 public class IconBrowserWindow : GenericWindow
 {
@@ -263,8 +263,14 @@ public class IconBrowserWindow : GenericWindow
         {
             if (ImGuiService.IconService.IconExists(index))
             {
-                ImGui.Image(ImGuiService.IconService[index].ImGuiHandle, new Vector2(64, 64));
-                ImGuiUtil.HoverTooltip(index.ToString());
+                var dalamudTextureWrap = ImGuiService.IconService[index];
+                if (dalamudTextureWrap != null)
+                {
+                    ImGui.Image(dalamudTextureWrap.ImGuiHandle, new Vector2(64, 64));
+
+                    ImGuiUtil.HoverTooltip(index.ToString());
+                }
+
                 if (count % 10 != 0)
                 {
                     ImGui.SameLine();

@@ -16,25 +16,24 @@ namespace InventoryTools.Logic.Settings.Abstract
         public override void Draw(InventoryToolsConfiguration configuration)
         {
             var currentValue = CurrentValue(configuration);
-            
-            ImGui.SetNextItemWidth(LabelSize);
-            if (ColourModified && HasValueSet(configuration))
-            {
-                ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);
-                ImGui.LabelText("##" + Key + "Label", Name + ":");
-                ImGui.PopStyleColor();
-            }
-            else
-            {
-                ImGui.LabelText("##" + Key + "Label", Name + ":");
-            }
-            ImGui.SameLine();
             if (ImGui.Checkbox("##"+Key+"Boolean", ref currentValue))
             {
                 if (currentValue != CurrentValue(configuration))
                 {
                     UpdateFilterConfiguration(configuration, currentValue);
                 }
+            }
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(LabelSize);
+            if (ColourModified && HasValueSet(configuration))
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);
+                ImGui.LabelText("##" + Key + "Label", Name);
+                ImGui.PopStyleColor();
+            }
+            else
+            {
+                ImGui.LabelText("##" + Key + "Label", Name);
             }
             ImGui.SameLine();
             ImGuiService.HelpMarker(HelpText, Image, ImageSize);
@@ -46,6 +45,7 @@ namespace InventoryTools.Logic.Settings.Abstract
                     Reset(configuration);
                 }
             }
+
         }
     }
 }

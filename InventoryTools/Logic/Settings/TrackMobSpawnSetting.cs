@@ -35,8 +35,8 @@ public class TrackMobSpawnSetting : BooleanSetting
     public override string HelpText { get; set; } =
         "Should the plugin track where mobs spawn as you move around. This data is not used by the plugin yet but once you have collected enough you can hit the button next to the checkbox to export a file containing those positions. If you upload those CSVs and send a url to via feedback I can use that spawn data to provide accurate mob spawns for everyone.";
 
-    public override SettingCategory SettingCategory { get; set; } = SettingCategory.General;
-    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Experimental;
+    public override SettingCategory SettingCategory { get; set; } = SettingCategory.MobSpawnTracker;
+    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
 
     public override void Draw(InventoryToolsConfiguration configuration)
     {

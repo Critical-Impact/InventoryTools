@@ -29,7 +29,7 @@ namespace InventoryTools.Logic.Settings.Abstract
 
         public static readonly List<SettingCategory> SettingCategoryOrder = new() {SettingCategory.General, SettingCategory.Visuals, SettingCategory.ToolTips, SettingCategory.MarketBoard, SettingCategory.History};
         
-        public static readonly List<SettingSubCategory> SettingSubCategoryOrder = new() {SettingSubCategory.FilterSettings, SettingSubCategory.AutoSave, SettingSubCategory.Experimental, SettingSubCategory.Highlighting, SettingSubCategory.DestinationHighlighting, SettingSubCategory.General,SettingSubCategory.Subsetting,SettingSubCategory.Visuals, SettingSubCategory.WindowLayout, SettingSubCategory.Market, SettingSubCategory.ContextMenus, SettingSubCategory.Hotkeys, SettingSubCategory.Fun, SettingSubCategory.IgnoreEscape};
+        public static readonly List<SettingSubCategory> SettingSubCategoryOrder = new() {SettingSubCategory.ActiveLists, SettingSubCategory.General, SettingSubCategory.FilterSettings, SettingSubCategory.AutoSave, SettingSubCategory.Experimental, SettingSubCategory.Highlighting, SettingSubCategory.DestinationHighlighting,SettingSubCategory.Subsetting,SettingSubCategory.Visuals, SettingSubCategory.WindowLayout, SettingSubCategory.Market, SettingSubCategory.ContextMenus, SettingSubCategory.Hotkeys, SettingSubCategory.Fun, SettingSubCategory.IgnoreEscape};
 
     }
 }

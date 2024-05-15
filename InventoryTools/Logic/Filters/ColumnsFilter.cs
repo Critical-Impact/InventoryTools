@@ -72,14 +72,6 @@ namespace InventoryTools.Logic.Filters
 
         public override bool CanRemoveItem(FilterConfiguration configuration, ColumnConfiguration item)
         {
-            if (item.Column != null)
-            {
-                if (!item.Column.CanBeRemoved)
-                {
-                    return false;
-                }
-            }
-
             return true;
         }
 
@@ -240,14 +232,14 @@ namespace InventoryTools.Logic.Filters
                                     if (column.Value.DefaultIn.HasFlag(configuration.FilterType))
                                     {
                                         ImGui.SameLine();
-                                        ImGui.Image(ImGuiService.IconService[Icons.QuestionMarkIcon].ImGuiHandle, new Vector2(16,16));
+                                        ImGui.Image(ImGuiService.IconService[Icons.SproutIcon].ImGuiHandle, new Vector2(16,16));
                                         ImGuiUtil.HoverTooltip("Default Column");
                                     }
 
                                     if (column.Value.IsConfigurable)
                                     {
                                         ImGui.SameLine();
-                                        ImGui.Image(ImGuiService.IconService.LoadIcon(66319).ImGuiHandle, new Vector2(16,16));
+                                        ImGui.Image(ImGuiService.IconService[Icons.WrenchIcon].ImGuiHandle, new Vector2(16,16));
                                         ImGuiUtil.HoverTooltip("Configurable");
                                     }
 

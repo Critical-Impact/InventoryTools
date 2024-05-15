@@ -19,7 +19,8 @@ public class CraftButtonColumn : ButtonColumn
     public override float Width { get; set; } = 80;
     public override string HelpText { get; set; } = "A button that opens the crafting log for the item";
 
-    public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration, ItemEx item, int rowIndex)
+    public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
+        ItemEx item, int rowIndex, int columnIndex)
     {
         ImGui.TableNextColumn();
         if (item.CanBeCrafted && ImGui.Button("Craft"))

@@ -164,7 +164,7 @@ public class CraftWorldPricePreference : SortedListFilter<uint, uint>
             }
             if (_searchWorlds == null)
             {
-                _searchWorlds = Service.ExcelCache.GetWorldSheet().Where(c => c.FormattedName.ToParseable().PassesFilter(SearchString.ToParseable())).Take(100)
+                _searchWorlds = Service.ExcelCache.GetWorldSheet().Where(c => c.IsPublic && c.FormattedName.ToParseable().PassesFilter(SearchString.ToParseable())).Take(100)
                     .Select(c => Service.ExcelCache.GetWorldSheet().GetRow(c.RowId)!).ToList();
             }
 

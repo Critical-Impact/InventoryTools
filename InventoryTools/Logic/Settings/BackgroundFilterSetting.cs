@@ -39,8 +39,8 @@ namespace InventoryTools.Logic.Settings
         public override string HelpText { get; set; } =
             "This is the filter that is active when the allagan tools window is not visible. This filter can be toggled with the associated slash commands.";
 
-        public override SettingCategory SettingCategory { get; set; } = SettingCategory.General;
-        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.FilterSettings;
+        public override SettingCategory SettingCategory { get; set; } = SettingCategory.Lists;
+        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.ActiveLists;
 
         public override Dictionary<string, string> Choices
         {

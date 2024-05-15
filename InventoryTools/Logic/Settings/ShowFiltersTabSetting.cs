@@ -23,8 +23,8 @@ namespace InventoryTools.Logic.Settings
         public override string HelpText { get; set; } =
             "Should the main window show the tab called 'All Lists' containing all available lists in one tab?";
 
-        public override SettingCategory SettingCategory { get; set; } = SettingCategory.General;
-        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.FilterSettings;
+        public override SettingCategory SettingCategory { get; set; } = SettingCategory.Windows;
+        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
         public override string Version => "1.6.2.5";
 
         public ShowFiltersTabSetting(ILogger<ShowFiltersTabSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
