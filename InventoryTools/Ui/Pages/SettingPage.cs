@@ -52,9 +52,12 @@ namespace InventoryTools.Ui.Pages
             {
                 if (ImGui.CollapsingHeader(groupedSettings.Key.FormattedName(), ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
                 {
-                    foreach (var setting in groupedSettings.Value)
+                    for (var index = 0; index < groupedSettings.Value.Count; index++)
                     {
+                        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
+                        var setting = groupedSettings.Value[index];
                         setting.Draw(_configuration);
+                        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
                     }
                 }
             }

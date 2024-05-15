@@ -27,7 +27,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
 
     private readonly InventoryToolsConfiguration _configuration;
     private readonly ICharacterMonitor _characterMonitor;
-    private readonly InventoryHistory _inventoryHistory;
+    private readonly HostedInventoryHistory _inventoryHistory;
     private readonly IInventoryMonitor _inventoryMonitor;
     private readonly IMarketCache _marketCache;
     private readonly CraftPricer _craftPricer;
@@ -36,7 +36,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
 
     public IBackgroundTaskQueue FilterQueue { get; }
 
-    public ListFilterService(InventoryToolsConfiguration configuration, ICharacterMonitor characterMonitor, InventoryHistory inventoryHistory, IInventoryMonitor inventoryMonitor, IBackgroundTaskQueue filterQueue, ILogger<ListFilterService> logger, IMarketCache marketCache, CraftPricer craftPricer, IFilterService filterService, MediatorService mediatorService, ExcelCache excelCache) : base(logger, mediatorService)
+    public ListFilterService(InventoryToolsConfiguration configuration, ICharacterMonitor characterMonitor, HostedInventoryHistory inventoryHistory, IInventoryMonitor inventoryMonitor, IBackgroundTaskQueue filterQueue, ILogger<ListFilterService> logger, IMarketCache marketCache, CraftPricer craftPricer, IFilterService filterService, MediatorService mediatorService, ExcelCache excelCache) : base(logger, mediatorService)
     {
         _configuration = configuration;
         _characterMonitor = characterMonitor;
@@ -115,13 +115,12 @@ public class ListFilterService : DisposableMediatorBackgroundService
             filterConfiguration.CraftList.GenerateCraftChildren();
             var materials = filterConfiguration.CraftList.GetMaterialsList().ToList();
             var craftListConfiguration = new CraftListConfiguration(characterSources, externalSources, null, _craftPricer);
+            if (craftListConfiguration.WorldPreferences == null)
+            {
+                craftListConfiguration.WorldPreferences = new();
+            }
             if (filterConfiguration.GetBooleanFilter("CraftWorldPriceUseActiveWorld") == true && _characterMonitor.ActiveCharacter != null)
             {
-                if (craftListConfiguration.WorldPreferences == null)
-                {
-                    craftListConfiguration.WorldPreferences = new();
-                }
-
                 if (!craftListConfiguration.WorldPreferences.Contains(_characterMonitor.ActiveCharacter.ActiveWorldId))
                 {
                     craftListConfiguration.WorldPreferences.Add(_characterMonitor.ActiveCharacter.ActiveWorldId);
@@ -129,23 +128,14 @@ public class ListFilterService : DisposableMediatorBackgroundService
             }
             if (filterConfiguration.GetBooleanFilter("CraftWorldPriceUseHomeWorld") == true && _characterMonitor.ActiveCharacter != null)
             {
-                if (craftListConfiguration.WorldPreferences == null)
-                {
-                    craftListConfiguration.WorldPreferences = new();
-                }
-
                 if (!craftListConfiguration.WorldPreferences.Contains(_characterMonitor.ActiveCharacter.ActiveWorldId))
                 {
                     craftListConfiguration.WorldPreferences.Add(_characterMonitor.ActiveCharacter.ActiveWorldId);
                 }
             }
+            
             if (filterConfiguration.GetBooleanFilter("CraftWorldPriceUseDefaults") == true)
             {
-                if (craftListConfiguration.WorldPreferences == null)
-                {
-                    craftListConfiguration.WorldPreferences = new();
-                }
-
                 foreach (var worldId in _configuration.MarketBoardWorldIds)
                 {
                     if (!craftListConfiguration.WorldPreferences.Contains(worldId))
@@ -154,7 +144,14 @@ public class ListFilterService : DisposableMediatorBackgroundService
                     }
                 }
             }
-            var pricingData = _craftPricer.GetItemPricingDictionary(materials, craftListConfiguration.WorldPreferences ?? new());
+            foreach (var worldId in filterConfiguration.CraftList.WorldPricePreference)
+            {
+                if (!craftListConfiguration.WorldPreferences.Contains(worldId))
+                {
+                    craftListConfiguration.WorldPreferences.Add(worldId);
+                }
+            }
+            var pricingData = _craftPricer.GetItemPricingDictionary(materials, craftListConfiguration.WorldPreferences ?? new(), true);
             craftListConfiguration.PricingSource = pricingData;
             filterConfiguration.CraftList.Update(craftListConfiguration, _craftPricer);
             filterConfiguration.CraftList.ClearGroupCache();

@@ -10,5 +10,11 @@ namespace InventoryTools.Logic.Settings.Abstract
         Hotkeys = 5,
         History = 6,
         Windows = 7,
+        Lists = 8,
+        ContextMenu = 9,
+        MobSpawnTracker = 10,
+        TitleMenuButtons = 11,
+        AutoSave = 12,
+        Misc = 13,
     }
 }

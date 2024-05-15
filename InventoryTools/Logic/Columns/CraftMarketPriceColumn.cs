@@ -43,7 +43,8 @@ public class CraftMarketPriceColumn : GilColumn
     public override bool HasFilter { get; set; } = true;
     public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
 
-    public override List<MessageBase> Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration, CraftItem item, int rowIndex)
+    public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
+        CraftItem item, int rowIndex, int columnIndex)
     {
         ImGui.TableNextColumn();
         if (!item.Item.CanBeTraded) return new List<MessageBase>();

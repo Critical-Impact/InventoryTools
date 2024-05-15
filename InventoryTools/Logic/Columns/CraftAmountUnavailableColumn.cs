@@ -40,14 +40,14 @@ namespace InventoryTools.Logic.Columns
         
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            CraftItem item, int rowIndex)
+            CraftItem item, int rowIndex, int columnIndex)
         {
             if (CurrentValue(columnConfiguration, item) > 0)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudRed);
             }
 
-            base.Draw(configuration, columnConfiguration, item, rowIndex);
+            base.Draw(configuration, columnConfiguration, item, rowIndex, columnIndex);
             if (CurrentValue(columnConfiguration, item) > 0)
             {
                 ImGui.PopStyleColor();

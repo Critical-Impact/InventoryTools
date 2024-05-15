@@ -23,7 +23,7 @@ namespace InventoryTools.Logic.Settings
         public override string Key { get; set; } = "TabHighlightColour";
         public override string Name { get; set; } = "Tab Highlight Colour";
         public override string HelpText { get; set; } = "The color to set the highlighted tabs(that contain filtered items) to.";
-        public override SettingCategory SettingCategory { get; set; } = SettingCategory.Visuals;
+        public override SettingCategory SettingCategory { get; set; } = SettingCategory.Lists;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Highlighting;
         public override string Version => "1.6.2.5";
 

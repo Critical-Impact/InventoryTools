@@ -19,7 +19,8 @@ public class GatherButtonColumn : ButtonColumn
     public override float Width { get; set; } = 80;
     public override string HelpText { get; set; } = "Shows a button that calls gather buddy's /gather command";
 
-    public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration, ItemEx item, int rowIndex)
+    public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
+        ItemEx item, int rowIndex, int columnIndex)
     {
         ImGui.TableNextColumn();
         if (ImGui.Button("Gather"))

@@ -24,7 +24,7 @@ public class CraftWindowLayoutSetting : ChoiceSetting<WindowLayout>
 
     public override string WizardName { get; } = "Craft Window";
     public override string HelpText { get; set; } = "Set the layout of the craft window";
-    public override SettingCategory SettingCategory { get; set; } = SettingCategory.Visuals;
+    public override SettingCategory SettingCategory { get; set; } = SettingCategory.Windows;
     public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.WindowLayout;
 
     public override string? Image { get; } = "craft_display";

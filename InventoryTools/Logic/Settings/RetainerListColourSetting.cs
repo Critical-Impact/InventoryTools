@@ -25,7 +25,7 @@ namespace InventoryTools.Logic.Settings
         public override string HelpText { get; set; } =
             "The color to set the retainer(when the retainer contains filtered items) list to.";
 
-        public override SettingCategory SettingCategory { get; set; } = SettingCategory.Visuals;
+        public override SettingCategory SettingCategory { get; set; } = SettingCategory.Lists;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Highlighting;
         public override string Version => "1.6.2.5";
 

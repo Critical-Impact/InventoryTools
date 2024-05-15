@@ -58,9 +58,9 @@ public class NameIconColumn : TextIconColumn
     }
     
     public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
-        CraftItem item, int rowIndex)
+        CraftItem item, int rowIndex, int columnIndex)
     {
-        base.Draw(configuration, columnConfiguration, item, rowIndex);
+        base.Draw(configuration, columnConfiguration, item, rowIndex, columnIndex);
         if (item.IsOutputItem)
         {
             if (_excelCache.ItemRecipes.ContainsKey(item.ItemId))

@@ -863,29 +863,55 @@ namespace InventoryTools.Ui
                     if (_marketIcon.Draw("bb_market"))
                     {
                         var activeCharacter = _characterMonitor.ActiveCharacter;
-                        if (activeCharacter != null)
+                        foreach (var item in itemTable.RenderSortedItems)
                         {
-                            foreach (var item in itemTable.RenderSortedItems)
+                            if (activeCharacter != null)
                             {
                                 _universalis.QueuePriceCheck(item.InventoryItem.ItemId, activeCharacter.WorldId);
                             }
+                        }
 
-                            foreach (var item in itemTable.RenderItems)
+                        foreach (var item in itemTable.RenderItems)
+                        {
+                            if (activeCharacter != null)
                             {
                                 _universalis.QueuePriceCheck(item.RowId, activeCharacter.WorldId);
                             }
+                        }
 
-                            if (craftTable != null)
+                        foreach (var item in filterConfiguration.CraftList.GetFlattenedMergedMaterials())
+                        {
+                            var useActiveWorld = filterConfiguration.GetBooleanFilter("CraftWorldPriceUseActiveWorld");
+                            var useHomeWorld = filterConfiguration.GetBooleanFilter("CraftWorldPriceUseHomeWorld");
+                            var character = _characterMonitor.ActiveCharacter;
+                            HashSet<uint> worldIds = new HashSet<uint>();
+                            
+                            var marketItemWorldPreference = filterConfiguration.CraftList.GetMarketItemWorldPreference(item.ItemId);
+                            if (marketItemWorldPreference != null)
                             {
-                                foreach (var item in craftTable.CraftItems)
+                                worldIds.Add(marketItemWorldPreference.Value);
+                            }
+                            
+                            if (character != null)
+                            {
+                                if (useActiveWorld == true)
                                 {
-                                    _universalis.QueuePriceCheck(item.ItemId, activeCharacter.WorldId);
+                                    worldIds.Add(character.ActiveWorldId);
                                 }
+                                if (useHomeWorld == true)
+                                {
+                                    worldIds.Add(character.WorldId);
+                                }
+                            }
+                            
+                            foreach (var worldId in filterConfiguration.CraftList.WorldPricePreference)
+                            {
+                                worldIds.Add(worldId);
+                            }
 
-                                foreach (var item in craftTable.RenderItems)
-                                {
-                                    _universalis.QueuePriceCheck(item.RowId, activeCharacter.WorldId);
-                                }
+                            foreach (var worldId in worldIds)
+                            {
+                                _universalis.QueuePriceCheck(item.ItemId, worldId);
                             }
                         }
                     }

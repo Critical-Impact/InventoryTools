@@ -52,12 +52,12 @@ namespace InventoryTools.Logic.Settings.Abstract
             if (ColourModified && HasValueSet(configuration))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);
-                ImGui.LabelText("##" + Key + "Label", Name + ":");
+                ImGui.LabelText("##" + Key + "Label", Name);
                 ImGui.PopStyleColor();
             }
             else
             {
-                ImGui.LabelText("##" + Key + "Label", Name + ":");
+                ImGui.LabelText("##" + Key + "Label", Name);
             }
             ImGui.SameLine();
             var currentColour = new Vector4(255, 255, 255, 255);

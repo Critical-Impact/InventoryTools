@@ -23,7 +23,7 @@ namespace InventoryTools.Logic.Settings
         public override string HelpText { get; set; } =
             "Should the destination for items be highlighted? This can be overridden in the filter configuration.";
 
-        public override SettingCategory SettingCategory { get; set; } = SettingCategory.Visuals;
+        public override SettingCategory SettingCategory { get; set; } = SettingCategory.Lists;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.DestinationHighlighting;
         public override string Version => "1.6.2.5";
 

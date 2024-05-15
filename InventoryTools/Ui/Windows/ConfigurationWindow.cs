@@ -55,13 +55,16 @@ namespace InventoryTools.Ui
             Key = "configuration";
             _configPages = new List<IConfigPage>();
             _configPages.Add(new SeparatorPageItem("Settings"));
-            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.General));
-            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.Visuals));
-            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.ToolTips));
-            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.Hotkeys));
+            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.Lists));
+            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.AutoSave));
+            _configPages.Add(new SeparatorPageItem("Modules", true));
             _configPages.Add(_settingPageFactory.Invoke(SettingCategory.MarketBoard));
+            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.ToolTips));
+            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.ContextMenu));
+            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.Hotkeys));
+            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.MobSpawnTracker));
+            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.TitleMenuButtons));
             _configPages.Add(_settingPageFactory.Invoke(SettingCategory.History));
-            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.Windows));
             _configPages.Add(new SeparatorPageItem("Data", true));
             _configPages.Add(_configPageFactory.Invoke(typeof(FiltersPage)));
             _configPages.Add(_configPageFactory.Invoke(typeof(CraftFiltersPage)));
@@ -498,7 +501,7 @@ namespace InventoryTools.Ui
                             width -= 24 * ImGui.GetIO().FontGlobalScale;
                             
                             ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
-                            ImGui.SetCursorPosX(width * ImGui.GetIO().FontGlobalScale);
+                            ImGui.SetCursorPosX(width);
 
                             if (_menuIcon.Draw("openMenu"))
                             {
@@ -511,7 +514,7 @@ namespace InventoryTools.Ui
                             width -= 26 * ImGui.GetIO().FontGlobalScale;
                             
                             ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
-                            ImGui.SetCursorPosX(width * ImGui.GetIO().FontGlobalScale);
+                            ImGui.SetCursorPosX(width);
 
                             if (_wizardStart.Draw("openMenu"))
                             {

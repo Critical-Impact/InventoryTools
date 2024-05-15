@@ -42,7 +42,7 @@ namespace InventoryTools.Ui
         private readonly ListImportExportService _importExportService;
         private readonly InventoryToolsConfiguration _configuration;
 
-        public FiltersWindow(ILogger<FiltersWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IIconService iconService, IListService listService, IFilterService filterService, TableService tableService, IChatUtilities chatUtilities, ICharacterMonitor characterMonitor, IUniversalis universalis, FileDialogManager fileDialogManager, IGameUiManager gameUiManager, InventoryHistory inventoryHistory, ListImportExportService importExportService) : base(logger, mediator, imGuiService, configuration, "Filters Window")
+        public FiltersWindow(ILogger<FiltersWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IIconService iconService, IListService listService, IFilterService filterService, TableService tableService, IChatUtilities chatUtilities, ICharacterMonitor characterMonitor, IUniversalis universalis, FileDialogManager fileDialogManager, IGameUiManager gameUiManager, HostedInventoryHistory inventoryHistory, ListImportExportService importExportService) : base(logger, mediator, imGuiService, configuration, "Filters Window")
         {
             _iconService = iconService;
             _listService = listService;

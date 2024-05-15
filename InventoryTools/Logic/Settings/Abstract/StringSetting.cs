@@ -22,12 +22,12 @@ namespace InventoryTools.Logic.Settings.Abstract
             if (ColourModified && HasValueSet(configuration))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);
-                ImGui.LabelText("##" + Key + "Label", Name + ":");
+                ImGui.LabelText("##" + Key + "Label", Name);
                 ImGui.PopStyleColor();
             }
             else
             {
-                ImGui.LabelText("##" + Key + "Label", Name + ":");
+                ImGui.LabelText("##" + Key + "Label", Name);
             }
             ImGui.SameLine();
             if (ImGui.InputText("##"+Key+"Input", ref value, 500))

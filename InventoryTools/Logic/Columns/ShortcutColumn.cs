@@ -45,7 +45,7 @@ namespace InventoryTools.Logic.Columns
         
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            InventoryItem item, int rowIndex)
+            InventoryItem item, int rowIndex, int columnIndex)
         {
             ImGui.TableNextColumn();
             if (ImGui.SmallButton("GT##GT" + rowIndex))
@@ -73,14 +73,14 @@ namespace InventoryTools.Logic.Columns
 
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            SortingResult item, int rowIndex)
+            SortingResult item, int rowIndex, int columnIndex)
         {
-           return Draw(configuration, columnConfiguration, item.InventoryItem, rowIndex);
+           return Draw(configuration, columnConfiguration, item.InventoryItem, rowIndex, columnIndex);
         }
 
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            ItemEx item, int rowIndex)
+            ItemEx item, int rowIndex, int columnIndex)
         {
             ImGui.TableNextColumn();
             if (ImGui.SmallButton("G##G"+rowIndex))
