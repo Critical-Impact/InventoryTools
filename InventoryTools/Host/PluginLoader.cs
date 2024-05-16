@@ -49,8 +49,6 @@ public class PluginLoader : IDisposable
 {
     private readonly IPluginInterfaceService _pluginInterfaceService;
     private readonly Service _service;
-    private readonly CancellationTokenSource _pluginCts = new();
-    private Task _hostBuilderRunTask;
     public IHost? Host { get; private set; }
 
     public PluginLoader(IPluginInterfaceService pluginInterfaceService, Service service)
@@ -432,8 +430,7 @@ public class PluginLoader : IDisposable
             PreBuild(hostBuilder);
             var builtHost = hostBuilder
                 .Build();
-            _hostBuilderRunTask = builtHost
-            .RunAsync(_pluginCts.Token);
+            builtHost.RunAsync();
             Host = builtHost;
             return builtHost;
     }
@@ -450,7 +447,7 @@ public class PluginLoader : IDisposable
     public void Dispose()
     {
         Service.Log.Debug("Starting dispose of HostBuilder");
-        _pluginCts.Cancel();
-        _hostBuilderRunTask.Wait();
+        Host?.StopAsync().GetAwaiter().GetResult();
+        Host?.Dispose();
     }
 }
