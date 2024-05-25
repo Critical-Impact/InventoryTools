@@ -16,7 +16,6 @@ namespace InventoryTools.Logic.Columns
         
         public string HelpText { get; set; }
         
-        public string FilterText { get; set; }
         
         public List<string>? FilterChoices { get; set; }
         public ColumnCategory ColumnCategory { get; }
@@ -37,6 +36,7 @@ namespace InventoryTools.Logic.Columns
         public string? RenderName { get; }
         
         public FilterType DefaultIn { get; }
+        public uint MaxFilterLength { get; set; }
         
         public IEnumerable<InventoryItem> Filter(ColumnConfiguration columnConfiguration,
             IEnumerable<InventoryItem> items);
@@ -100,7 +100,5 @@ namespace InventoryTools.Logic.Columns
         
         public delegate void ButtonPressedDelegate(string buttonName, object eventData);
         public event ButtonPressedDelegate? ButtonPressed;
-
-        public bool DrawFilter(string tableKey, int columnIndex);
     }
 }

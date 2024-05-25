@@ -137,7 +137,7 @@ namespace InventoryTools.Services
         {
             var activeFilter = _listService.GetActiveUiList(false);
             var activeBackgroundFilter = _listService.GetActiveBackgroundList();
-            _logger.LogDebug("Overlays refreshing, active filter is " + (activeFilter?.Name ?? "no filter"));
+            _logger.LogDebug($"Overlays refreshing, active list: {activeFilter?.Name ?? "no list"}, background list: {activeBackgroundFilter?.Name ?? "no list"}");
             if (activeFilter != null && _tableService.HasListTable(activeFilter))
             {
                 var newState = _filterStateFactory.Invoke(activeFilter);
@@ -175,11 +175,11 @@ namespace InventoryTools.Services
 
         public void UpdateState(FilterState? filterState)
         {
+            _lastState = filterState;
             foreach (var overlay in _overlays)
             {
                 if (!overlay.Enabled) continue;
                 overlay.UpdateState(filterState);
-                _lastState = filterState;
             }
         }
 

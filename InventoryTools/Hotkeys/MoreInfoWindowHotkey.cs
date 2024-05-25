@@ -25,7 +25,7 @@ public class MoreInfoWindowHotkey : Hotkey
         id %= 500000;
         var item = _excelCache.GetItemExSheet().GetRow((uint) id);
         if (item == null) return false;
-        MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), item.RowId));
+        MediatorService.Publish(new ToggleUintWindowMessage(typeof(ItemWindow), item.RowId));
         return true;
     }
 }

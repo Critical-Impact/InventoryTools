@@ -390,10 +390,12 @@ public class MockWindow : GenericWindow
                 MediatorService.Publish(new OpenGenericWindowMessage(typeof(HelpWindow)));
             }
 
+            #if DEBUG
             if (ImGui.Button("Debug Window"))
             {
                 MediatorService.Publish(new OpenGenericWindowMessage(typeof(DebugWindow)));
             }
+            #endif
 
             if (ImGui.Button("Configuration Window"))
             {

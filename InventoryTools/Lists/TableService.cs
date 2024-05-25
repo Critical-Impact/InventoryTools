@@ -145,7 +145,7 @@ public class TableService : DisposableMediatorBackgroundService
                 for (var index = 0; index < columns.Count; index++)
                 {
                     var column = columns[index];
-                    if (column.Column.FilterText != "")
+                    if (column.FilterText != "")
                     {
                         filterTable.IsSearching = true;
                     }
@@ -170,7 +170,7 @@ public class TableService : DisposableMediatorBackgroundService
                 for (var index = 0; index < columns.Count; index++)
                 {
                     var column = columns[index];
-                    if (column.Column.FilterText != "")
+                    if (column.FilterText != "")
                     {
                         filterTable.IsSearching = true;
                     }
@@ -195,7 +195,7 @@ public class TableService : DisposableMediatorBackgroundService
                 for (var index = 0; index < columns.Count; index++)
                 {
                     var column = columns[index];
-                    if (column.Column.FilterText != "")
+                    if (column.FilterText != "")
                     {
                         filterTable.IsSearching = true;
                     }

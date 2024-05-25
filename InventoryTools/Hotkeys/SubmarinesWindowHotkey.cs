@@ -16,7 +16,7 @@ public class SubmarinesWindowHotkey : Hotkey
         Configuration.GetHotkey(HotkeySubmarinesWindowSetting.AsKey);
     public override bool OnHotKey()
     {
-        MediatorService.Publish(new OpenGenericWindowMessage(typeof(SubmarinesWindow)));
+        MediatorService.Publish(new ToggleGenericWindowMessage(typeof(SubmarinesWindow)));
         return true;
     }
 }

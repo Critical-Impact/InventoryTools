@@ -1,5 +1,10 @@
 using System;
 using System.Collections.Generic;
+using Dalamud.Game.Text;
+using Dalamud.Interface.Utility.Raii;
+using FFXIVClientStructs.FFXIV.Common.Math;
+using ImGuiNET;
+using InventoryTools.Extensions;
 using InventoryTools.Logic.Columns;
 using Newtonsoft.Json;
 
@@ -87,6 +92,161 @@ public class ColumnConfiguration
     public ColumnConfiguration()
     {
         
+    }
+    
+    private string _filterText = "";
+
+    [JsonIgnore]
+    public string FilterText
+    {
+        get => _filterText;
+        set
+        {
+            _filterText = value.Replace((char)SeIconChar.Collectible,  ' ').Replace((char)SeIconChar.HighQuality, ' ');
+            _filterComparisonText = new ComparisonExtensions.FilterComparisonText(_filterText);
+        }
+    }
+    
+    public virtual bool DrawFilter(string tableKey, int columnIndex)
+    {
+        if (Column.FilterType == ColumnFilterType.Text)
+        {
+            var filter = FilterText;
+            var hasChanged = false;
+
+            ImGui.TableSetColumnIndex(columnIndex);
+            ImGui.PushItemWidth(-20.000000f);
+            ImGui.PushID(Column.Name);
+            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(0, 0));
+            ImGui.InputText("##" + tableKey + "FilterI" + Column.Name, ref filter, Column.MaxFilterLength);
+            ImGui.PopStyleVar();
+            ImGui.SameLine(0.0f, ImGui.GetStyle().ItemInnerSpacing.X);
+            ImGui.TableHeader("");
+            ImGui.PopID();
+            ImGui.PopItemWidth();
+            if (filter != FilterText)
+            {
+                FilterText = filter;
+                hasChanged = true;
+            }
+
+            return hasChanged;
+        }
+        else if (Column.FilterType == ColumnFilterType.Choice)
+        {
+            var hasChanged = false;
+            ImGui.TableSetColumnIndex(columnIndex);
+            ImGui.PushItemWidth(-20.000000f);
+            using (ImRaii.PushId(Column.Name))
+            {
+                using (ImRaii.PushStyle(ImGuiStyleVar.FramePadding, new Vector2(0, 0)))
+                {
+
+                    var currentItem = FilterText;
+
+                    using (var combo = ImRaii.Combo("##Choice", currentItem))
+                    {
+                        if (combo.Success)
+                        {
+                            if (Column.FilterChoices != null)
+                            {
+                                if (ImGui.Selectable("", false))
+                                {
+                                    FilterText = "";
+                                    hasChanged = true;
+                                }
+
+                                foreach (var column in Column.FilterChoices)
+                                {
+                                    if (ImGui.Selectable(column, currentItem == column))
+                                    {
+                                        FilterText = column;
+                                        hasChanged = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                ImGui.SameLine(0.0f, ImGui.GetStyle().ItemInnerSpacing.X);
+                ImGui.TableHeader("");
+            }
+            ImGui.PopItemWidth();
+            return hasChanged;
+        }
+        else if (Column.FilterType == ColumnFilterType.Boolean)
+        {
+            var hasChanged = false;
+            ImGui.TableSetColumnIndex(columnIndex);
+            ImGui.PushItemWidth(-20.000000f);
+            using (ImRaii.PushId(Column.Name))
+            {
+                using (ImRaii.PushStyle(ImGuiStyleVar.FramePadding, new Vector2(0, 0)))
+                {
+
+                    var currentItem = FilterText;
+
+                    if (currentItem == "true")
+                    {
+                        currentItem = "Yes";
+                    }
+                    else if(currentItem == "false")
+                    {
+                        currentItem = "No";
+                    }
+
+                    using (var combo = ImRaii.Combo("##Choice", currentItem))
+                    {
+                        if (combo.Success)
+                        {
+                            if (ImGui.Selectable("", false))
+                            {
+                                FilterText = "";
+                                hasChanged = true;
+                            }
+
+
+
+                            if (ImGui.Selectable("Yes", currentItem == "Yes"))
+                            {
+                                FilterText = "true";
+                                hasChanged = true;
+                            }
+                            
+                            if (ImGui.Selectable("No", currentItem == "No"))
+                            {
+                                FilterText = "false";
+                                hasChanged = true;
+                            }
+                        }
+                    }
+                }
+
+                ImGui.SameLine(0.0f, ImGui.GetStyle().ItemInnerSpacing.X);
+                ImGui.TableHeader("");
+            }
+            ImGui.PopItemWidth();
+            return hasChanged;
+        }
+
+        return false;
+    }
+
+    private ComparisonExtensions.FilterComparisonText? _filterComparisonText;
+
+    [JsonIgnore]
+    public ComparisonExtensions.FilterComparisonText FilterComparisonText
+    {
+        get
+        {
+            if (_filterComparisonText == null)
+            {
+                _filterComparisonText = new ComparisonExtensions.FilterComparisonText(FilterText);
+            }
+
+            return _filterComparisonText;
+        }
     }
 
     [JsonIgnore]

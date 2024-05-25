@@ -353,6 +353,7 @@ namespace InventoryTools.Ui
                     filter.Active = false;
                 }
             }
+            base.OnClose();
         }
 
         public override unsafe void Draw()
@@ -361,7 +362,15 @@ namespace InventoryTools.Ui
             {
                 if (SelectedConfiguration == filter)
                 {
-                    filter.Active = true;
+                    if (filter.Active != true)
+                    {
+                        filter.NeedsRefresh = true;
+                        filter.Active = true;
+                    }
+                }
+                else
+                {
+                    filter.Active = false;
                 }
             }
             if (SelectedConfiguration != null && SelectedConfiguration.FilterType == FilterType.HistoryFilter && !_configuration.HasSeenNotification(NotificationPopup.HistoryNotice) && ImGui.IsWindowFocused())

@@ -209,4 +209,5 @@ public abstract class ButtonColumn : IColumn
     }
 
     public FilterType DefaultIn => Logic.FilterType.None;
+    public uint MaxFilterLength { get; set; } = 200;
 }

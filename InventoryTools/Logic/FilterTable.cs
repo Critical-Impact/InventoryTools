@@ -121,7 +121,7 @@ namespace InventoryTools.Logic
                             for (var index = 0; index < Columns.Count; index++)
                             {
                                 var column = Columns[index];
-                                if (column.Column.HasFilter && column.Column.DrawFilter(Key, index))
+                                if (column.Column.HasFilter && column.DrawFilter(Key, index))
                                 {
                                     refresh = true;
                                 }
@@ -195,24 +195,27 @@ namespace InventoryTools.Logic
                             {
                                 for (var index = clipper.DisplayStart; index < clipper.DisplayEnd; index++)
                                 {
-                                    var item = RenderItems[index];
-                                    ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
-                                    for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
+                                    if (index >= 0 && index < RenderItems.Count)
                                     {
-                                        var column = Columns[columnIndex];
-                                        var columnMessages = column.Column.Draw(FilterConfiguration, column, (ItemEx)item, index, columnIndex);
-                                        if (columnMessages != null)
+                                        var item = RenderItems[index];
+                                        ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
+                                        for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                                         {
-                                            messages.AddRange(columnMessages);
-                                        }
-                                        ImGui.SameLine();
-                                        if (columnIndex == Columns.Count - 1)
-                                        {
-                                            var menuMessages = DrawMenu(FilterConfiguration, column,
-                                                (ItemEx)item, index);
-                                            if (menuMessages != null)
+                                            var column = Columns[columnIndex];
+                                            var columnMessages = column.Column.Draw(FilterConfiguration, column, (ItemEx)item, index, columnIndex);
+                                            if (columnMessages != null)
                                             {
-                                                messages.AddRange(menuMessages);
+                                                messages.AddRange(columnMessages);
+                                            }
+                                            ImGui.SameLine();
+                                            if (columnIndex == Columns.Count - 1)
+                                            {
+                                                var menuMessages = DrawMenu(FilterConfiguration, column,
+                                                    (ItemEx)item, index);
+                                                if (menuMessages != null)
+                                                {
+                                                    messages.AddRange(menuMessages);
+                                                }
                                             }
                                         }
                                     }
@@ -402,7 +405,7 @@ namespace InventoryTools.Logic
 
         public void ClearFilters()
         {
-            Columns.ForEach(c => c.Column.FilterText = "");
+            Columns.ForEach(c => c.FilterText = "");
             NeedsRefresh = true;
         }
     }
