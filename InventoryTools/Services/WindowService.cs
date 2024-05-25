@@ -433,12 +433,14 @@ namespace InventoryTools.Services
             if(window.SaveState && !_configuration.OpenWindows.Contains(window.GetType().ToString()))
             {
                 _configuration.OpenWindows.Add(window.GetType().ToString());
+                _configuration.IsDirty = true;
             }
             if (window.SaveState && window.SavePosition)
             {
                 if (_configuration.SavedWindowPositions.ContainsKey(window.GetType().ToString()))
                 {
                     window.SetPosition(_configuration.SavedWindowPositions[window.GetType().ToString()], true);
+                    _configuration.IsDirty = true;
                 }
             }
             MediatorService.Publish(new OverlaysRequestRefreshMessage());
@@ -449,6 +451,7 @@ namespace InventoryTools.Services
             if(window.SaveState && _configuration.OpenWindows.Contains(window.GetType().ToString()))
             {
                 _configuration.OpenWindows.Remove(window.GetType().ToString());
+                _configuration.IsDirty = true;
             }
 
             if (window.SaveState && window.SavePosition)
@@ -467,6 +470,7 @@ namespace InventoryTools.Services
                 if (hasOtherWindowOpen == false)
                 {
                     _configuration.SavedWindowPositions[window.GetType().ToString()] = window.CurrentPosition;
+                    _configuration.IsDirty = true;
                 }
 
             }

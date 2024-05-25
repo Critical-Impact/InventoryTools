@@ -882,4 +882,5 @@ public class CraftSettingsColumn : IColumn
     {
     }
     public virtual FilterType DefaultIn => Logic.FilterType.CraftFilter;
+    public uint MaxFilterLength { get; set; } = 200;
 }

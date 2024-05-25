@@ -95,7 +95,7 @@ namespace InventoryTools.Logic.Columns.Abstract
 
         public override IEnumerable<ItemEx> Filter(ColumnConfiguration columnConfiguration, IEnumerable<ItemEx> items)
         {
-            return FilterText == "" ? items : items.Where(c =>
+            return columnConfiguration.FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(columnConfiguration, c);
                 if (currentValue == null)
@@ -105,17 +105,17 @@ namespace InventoryTools.Logic.Columns.Abstract
 
                 if (FilterType == ColumnFilterType.Choice)
                 {
-                    return currentValue == FilterText;
+                    return currentValue == columnConfiguration.FilterText;
                 }
-                return currentValue.ToLower().PassesFilter(FilterText.ToLower());
+                return currentValue.ToLower().PassesFilter(columnConfiguration.FilterText.ToLower());
             });
         }
 
         public override IEnumerable<InventoryItem> Filter(ColumnConfiguration columnConfiguration,
             IEnumerable<InventoryItem> items)
         {
-            var isChecked = FilterText != "";
-            return FilterText == "" ? items : items.Where(c =>
+            var isChecked = columnConfiguration.FilterText != "";
+            return columnConfiguration.FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(columnConfiguration, c);
                 if (currentValue == null)
@@ -124,17 +124,17 @@ namespace InventoryTools.Logic.Columns.Abstract
                 }
                 if (FilterType == ColumnFilterType.Choice)
                 {
-                    return currentValue == FilterText;
+                    return currentValue == columnConfiguration.FilterText;
                 }
-                return currentValue.ToLower().PassesFilter(FilterText.ToLower());
+                return currentValue.ToLower().PassesFilter(columnConfiguration.FilterText.ToLower());
             });
         }
 
         public override IEnumerable<SortingResult> Filter(ColumnConfiguration columnConfiguration,
             IEnumerable<SortingResult> items)
         {
-            var isChecked = FilterText != "";
-            return FilterText == "" ? items : items.Where(c =>
+            var isChecked = columnConfiguration.FilterText != "";
+            return columnConfiguration.FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(columnConfiguration, c);
                 if (currentValue == null)
@@ -143,17 +143,17 @@ namespace InventoryTools.Logic.Columns.Abstract
                 }
                 if (FilterType == ColumnFilterType.Choice)
                 {
-                    return currentValue == FilterText;
+                    return currentValue == columnConfiguration.FilterText;
                 }
-                return currentValue.ToLower().PassesFilter(FilterText.ToLower());
+                return currentValue.ToLower().PassesFilter(columnConfiguration.FilterText.ToLower());
             });
         }
         
         public override IEnumerable<InventoryChange> Filter(ColumnConfiguration columnConfiguration,
             IEnumerable<InventoryChange> items)
         {
-            var isChecked = FilterText != "";
-            return FilterText == "" ? items : items.Where(c =>
+            var isChecked = columnConfiguration.FilterText != "";
+            return columnConfiguration.FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(columnConfiguration, c);
                 if (currentValue == null)
@@ -162,9 +162,9 @@ namespace InventoryTools.Logic.Columns.Abstract
                 }
                 if (FilterType == ColumnFilterType.Choice)
                 {
-                    return currentValue == FilterText;
+                    return currentValue == columnConfiguration.FilterText;
                 }
-                return currentValue.ToLower().PassesFilter(FilterText.ToLower());
+                return currentValue.ToLower().PassesFilter(columnConfiguration.FilterText.ToLower());
             });
         }
 
