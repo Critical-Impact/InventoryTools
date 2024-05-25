@@ -53,6 +53,8 @@ namespace InventoryTools.Lists
             _characterMonitor.OnCharacterUpdated += CharacterMonitorOnOnCharacterUpdated;
             _characterMonitor.OnCharacterJobChanged += CharacterMonitorOnOnCharacterJobChanged;
             _characterMonitor.OnActiveRetainerChanged += CharacterMonitorOnOnActiveRetainerChanged;
+            _characterMonitor.OnCharacterLoggedIn += CharacterLoggedIn;
+            _characterMonitor.OnCharacterLoggedOut += CharacterLoggedOut;
             _inventoryMonitor = inventoryMonitor;
             _inventoryMonitor.OnInventoryChanged += InventoryMonitorOnOnInventoryChanged;
             _history.OnHistoryLogged += HistoryOnOnHistoryLogged;
@@ -60,6 +62,16 @@ namespace InventoryTools.Lists
             _mediatorService.Subscribe<AddToCraftListMessage>(this, AddToCraftListMessageRecv );
             _mediatorService.Subscribe<AddToNewCraftListMessage>(this, AddToNewCraftListMessageRecv );
             _framework.Update += OnUpdate;
+        }
+
+        private void CharacterLoggedIn(ulong characterid)
+        {
+            InvalidateLists();
+        }
+
+        private void CharacterLoggedOut(ulong characterid)
+        {
+            InvalidateLists();
         }
 
         private void AddToCraftListMessageRecv(AddToCraftListMessage obj)
@@ -188,6 +200,10 @@ namespace InventoryTools.Lists
 
                 if (filter.Value is { } configuration)
                 {
+                    if (_configuration.ActiveBackgroundFilter == configuration.Key && configuration.NeedsRefresh)
+                    {
+                        configuration.AllowRefresh = true;
+                    }
                     if ((configuration.NeedsRefresh || configuration.FilterType == FilterType.CraftFilter && configuration.CraftList.NeedsRefresh) && !configuration.Refreshing && configuration.AllowRefresh)
                     {
                         filter.Value.Refreshing = true;
@@ -564,6 +580,7 @@ namespace InventoryTools.Lists
                 if (_configuration.ActiveBackgroundFilter != configuration.Key)
                 {
                     _configuration.ActiveBackgroundFilter = configuration.Key;
+                    configuration.NeedsRefresh = true;
                     BackgroundListToggled?.Invoke(configuration, true);
                 }
 
@@ -578,6 +595,7 @@ namespace InventoryTools.Lists
             if (_configuration.ActiveBackgroundFilter != configuration.Key)
             {
                 _configuration.ActiveBackgroundFilter = configuration.Key;
+                configuration.NeedsRefresh = true;
                 BackgroundListToggled?.Invoke(configuration, true);
             }
 
@@ -899,6 +917,8 @@ namespace InventoryTools.Lists
             _characterMonitor.OnCharacterJobChanged -= CharacterMonitorOnOnCharacterJobChanged;
             _characterMonitor.OnActiveRetainerChanged -= CharacterMonitorOnOnActiveRetainerChanged;
             _inventoryMonitor.OnInventoryChanged -= InventoryMonitorOnOnInventoryChanged;
+            _characterMonitor.OnCharacterLoggedIn -= CharacterLoggedIn;
+            _characterMonitor.OnCharacterLoggedOut -= CharacterLoggedOut;
             _history.OnHistoryLogged -= HistoryOnOnHistoryLogged; 
         }
 

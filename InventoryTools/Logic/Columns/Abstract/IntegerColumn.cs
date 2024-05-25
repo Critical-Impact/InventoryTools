@@ -98,7 +98,7 @@ namespace InventoryTools.Logic.Columns.Abstract
         }
         public override IEnumerable<ItemEx> Filter(ColumnConfiguration columnConfiguration, IEnumerable<ItemEx> items)
         {
-            return FilterText == "" ? items : items.Where(c =>
+            return columnConfiguration.FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(columnConfiguration, c);
                 if (currentValue == null)
@@ -106,15 +106,15 @@ namespace InventoryTools.Logic.Columns.Abstract
                     return false;
                 }
 
-                return currentValue.Value.PassesFilter(FilterText);
+                return currentValue.Value.PassesFilter(columnConfiguration.FilterText);
             });
         }
 
         public override IEnumerable<InventoryItem> Filter(ColumnConfiguration columnConfiguration,
             IEnumerable<InventoryItem> items)
         {
-            var isChecked = FilterText != "";
-            return FilterText == "" ? items : items.Where(c =>
+            var isChecked = columnConfiguration.FilterText != "";
+            return columnConfiguration.FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(columnConfiguration, c);
                 if (currentValue == null)
@@ -122,14 +122,14 @@ namespace InventoryTools.Logic.Columns.Abstract
                     return false;
                 }
 
-                return currentValue.Value.PassesFilter(FilterText);
+                return currentValue.Value.PassesFilter(columnConfiguration.FilterText);
             });
         }
 
         public override IEnumerable<SortingResult> Filter(ColumnConfiguration columnConfiguration,
             IEnumerable<SortingResult> items)
         {
-            return FilterText == "" ? items : items.Where(c =>
+            return columnConfiguration.FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(columnConfiguration, c);
                 if (currentValue == null)
@@ -137,15 +137,15 @@ namespace InventoryTools.Logic.Columns.Abstract
                     return false;
                 }
 
-                return currentValue.Value.PassesFilter(FilterText);
+                return currentValue.Value.PassesFilter(columnConfiguration.FilterText);
             });
         }
         
         public override IEnumerable<InventoryChange> Filter(ColumnConfiguration columnConfiguration,
             IEnumerable<InventoryChange> items)
         {
-            var isChecked = FilterText != "";
-            return FilterText == "" ? items : items.Where(c =>
+            var isChecked = columnConfiguration.FilterText != "";
+            return columnConfiguration.FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(columnConfiguration, c.InventoryItem);
                 if (currentValue == null)
@@ -153,7 +153,7 @@ namespace InventoryTools.Logic.Columns.Abstract
                     return false;
                 }
 
-                return currentValue.Value.PassesFilter(FilterText);
+                return currentValue.Value.PassesFilter(columnConfiguration.FilterText);
             });
         }
 

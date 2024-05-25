@@ -70,7 +70,9 @@ public class MockCharacterMonitor : ICharacterMonitor
     public event CharacterMonitor.CharacterUpdatedDelegate? OnCharacterUpdated;
     public event CharacterMonitor.CharacterRemovedDelegate? OnCharacterRemoved;
     public event CharacterMonitor.CharacterJobChangedDelegate? OnCharacterJobChanged;
-    
+    public event ICharacterMonitor.CharacterLoginEventDelegate? OnCharacterLoggedIn;
+    public event ICharacterMonitor.CharacterLoginEventDelegate? OnCharacterLoggedOut;
+
     public KeyValuePair<ulong, Character>[] GetPlayerCharacters()
     {
         return Characters.Where(c => c.Value.OwnerId == 0 && c.Value.CharacterType == CharacterType.Character && c.Key != 0 && c.Value.Name != "").ToArray();

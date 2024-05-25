@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using CriticalCommonLib.Services.Ui;
 using InventoryTools.Logic;
@@ -5,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Overlays;
 
-public interface IGameOverlay : IAtkOverlayState
+public interface IGameOverlay : IAtkOverlayState, IDisposable
 {
     bool ShouldDraw { get; set; }
     public WindowName WindowName { get; }
@@ -26,6 +27,13 @@ public abstract class GameOverlay<T> : IGameOverlay where T : AtkOverlay
     {
         Logger = logger;
         AtkOverlay = overlay;
+        AtkOverlay.AtkUpdated += AtkOverlayOnAtkUpdated;
+    }
+
+    private void AtkOverlayOnAtkUpdated()
+    {
+        Logger.LogTrace("ATK overlay event received, requesting state refresh.");
+        NeedsStateRefresh = true;
     }
 
     public ILogger Logger { get; }
@@ -42,7 +50,7 @@ public abstract class GameOverlay<T> : IGameOverlay where T : AtkOverlay
         
     public virtual void Update()
     {
-            
+        AtkOverlay.Update();
     }
 
     public bool Enabled { get; set; } = true;
@@ -50,4 +58,9 @@ public abstract class GameOverlay<T> : IGameOverlay where T : AtkOverlay
     public abstract bool NeedsStateRefresh { get; set; }
     public abstract void UpdateState(FilterState? newState);
     public abstract void Clear();
+
+    public void Dispose()
+    {
+        AtkOverlay.AtkUpdated -= AtkOverlayOnAtkUpdated;
+    }
 }

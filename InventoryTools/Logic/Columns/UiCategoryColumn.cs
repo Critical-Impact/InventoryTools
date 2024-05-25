@@ -31,7 +31,7 @@ namespace InventoryTools.Logic.Columns
                 return null;
             }
 
-            return itemItemUiCategory.Value?.Name.ToDalamudString().ToString() ?? "";
+            return itemItemUiCategory.Value?.Name.AsReadOnly().ExtractText() ?? "";
         }
 
         public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)

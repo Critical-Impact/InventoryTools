@@ -129,8 +129,12 @@ namespace InventoryTools.Ui
             var filterConfiguration = SelectedConfiguration;
             if (filterConfiguration != null)
             {
-                
-                filterConfiguration.Active = true;
+                if (filterConfiguration.Active != true)
+                {
+                    filterConfiguration.Active = true;
+                    filterConfiguration.NeedsRefresh = true;
+                }
+
                 if (ImGui.IsWindowFocused())
                 {
                     if (_configuration.SwitchFiltersAutomatically &&

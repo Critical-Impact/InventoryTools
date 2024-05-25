@@ -16,7 +16,7 @@ public class RetainerTasksWindowHotkey : Hotkey
         Configuration.GetHotkey(HotkeyRetainerTasksWindowSetting.AsKey);
     public override bool OnHotKey()
     {
-        MediatorService.Publish(new OpenGenericWindowMessage(typeof(RetainerTasksWindow)));
+        MediatorService.Publish(new ToggleGenericWindowMessage(typeof(RetainerTasksWindow)));
         return true;
     }
 }

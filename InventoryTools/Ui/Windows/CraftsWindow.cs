@@ -549,11 +549,18 @@ namespace InventoryTools.Ui
 
                     for (var index = 0; index < filterConfigurations.Count; index++)
                     {
+                        var filterConfiguration = filterConfigurations[index];
+
                         if (_selectedFilterTab == index)
                         {
-                            var filterConfiguration = filterConfigurations[index];
+
                             if (isWindowFocused)
                             {
+                                if (filterConfiguration.Active != true)
+                                {
+                                    filterConfiguration.NeedsRefresh = true;
+                                    filterConfiguration.Active = true;
+                                }
                                 if (_configuration.SwitchFiltersAutomatically &&
                                     _configuration.ActiveUiFilter != filterConfiguration.Key &&
                                     _configuration.ActiveUiFilter != null)
@@ -581,6 +588,13 @@ namespace InventoryTools.Ui
                             else
                             {
                                 DrawCraftPanel(filterConfiguration);
+                            }
+                        }
+                        else
+                        {
+                            if (isWindowFocused)
+                            {
+                                filterConfiguration.Active = false;
                             }
                         }
                     }

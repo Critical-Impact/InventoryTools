@@ -86,7 +86,15 @@ namespace InventoryTools.Commands
             }
             else
             {
-                _mediatorService.Publish(new ToggleStringWindowMessage(typeof(FilterWindow), args));
+                var list = _listService.GetListByKeyOrName(args.Trim());
+                if (list != null)
+                {
+                    _mediatorService.Publish(new ToggleStringWindowMessage(typeof(FilterWindow), list.Key));
+                }
+                else
+                {
+                    Service.Chat.PrintError("Could not find a list with that name.");
+                }
             }
         }
 

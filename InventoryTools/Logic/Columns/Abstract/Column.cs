@@ -26,7 +26,6 @@ namespace InventoryTools.Logic.Columns.Abstract
 
         [JsonIgnore] protected ILogger Logger { get; }
         [JsonIgnore] protected ImGuiService ImGuiService { get; }
-        private string _filterText = "";
         public virtual uint MaxFilterLength { get; set; } = 200;
 
         public virtual FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter |
@@ -91,30 +90,7 @@ namespace InventoryTools.Logic.Columns.Abstract
         public abstract float Width { get; set; }
         public abstract string HelpText { get; set; }
 
-        public string FilterText
-        {
-            get => _filterText;
-            set
-            {
-                _filterText = value.Replace((char)SeIconChar.Collectible,  ' ').Replace((char)SeIconChar.HighQuality, ' ');
-                _filterComparisonText = new ComparisonExtensions.FilterComparisonText(_filterText);
-            }
-        }
 
-        private ComparisonExtensions.FilterComparisonText? _filterComparisonText;
-
-        public ComparisonExtensions.FilterComparisonText FilterComparisonText
-        {
-            get
-            {
-                if (_filterComparisonText == null)
-                {
-                    _filterComparisonText = new ComparisonExtensions.FilterComparisonText(FilterText);
-                }
-
-                return _filterComparisonText;
-            }
-        }
 
 
         public virtual List<string>? FilterChoices { get; set; } = null;
@@ -220,77 +196,7 @@ namespace InventoryTools.Logic.Columns.Abstract
             remove { }
         }
 
-        public virtual bool DrawFilter(string tableKey, int columnIndex)
-        {
-            if (FilterType == ColumnFilterType.Text)
-            {
-                var filter = FilterText;
-                var hasChanged = false;
-
-                ImGui.TableSetColumnIndex(columnIndex);
-                ImGui.PushItemWidth(-20.000000f);
-                ImGui.PushID(Name);
-                ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(0, 0));
-                ImGui.InputText("##" + tableKey + "FilterI" + Name, ref filter, MaxFilterLength);
-                ImGui.PopStyleVar();
-                ImGui.SameLine(0.0f, ImGui.GetStyle().ItemInnerSpacing.X);
-                ImGui.TableHeader("");
-                ImGui.PopID();
-                ImGui.PopItemWidth();
-                if (filter != FilterText)
-                {
-                    FilterText = filter;
-                    hasChanged = true;
-                }
-
-                return hasChanged;
-            }
-            else if (FilterType == ColumnFilterType.Choice)
-            {
-                var hasChanged = false;
-                ImGui.TableSetColumnIndex(columnIndex);
-                ImGui.PushItemWidth(-20.000000f);
-                using (ImRaii.PushId(Name))
-                {
-                    using (ImRaii.PushStyle(ImGuiStyleVar.FramePadding, new Vector2(0, 0)))
-                    {
-
-                        var currentItem = FilterText;
-
-                        using (var combo = ImRaii.Combo("##Choice", currentItem))
-                        {
-                            if (combo.Success)
-                            {
-                                if (FilterChoices != null)
-                                {
-                                    if (ImGui.Selectable("", false))
-                                    {
-                                        FilterText = "";
-                                        hasChanged = true;
-                                    }
-
-                                    foreach (var column in FilterChoices)
-                                    {
-                                        if (ImGui.Selectable(column, currentItem == column))
-                                        {
-                                            FilterText = column;
-                                            hasChanged = true;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    ImGui.SameLine(0.0f, ImGui.GetStyle().ItemInnerSpacing.X);
-                    ImGui.TableHeader("");
-                }
-                ImGui.PopItemWidth();
-                return hasChanged;
-            }
-
-            return false;
-        }
+        
 
         
         private bool _disposed;

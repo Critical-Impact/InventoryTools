@@ -14,7 +14,9 @@ using ImGuiNET;
 using InventoryTools.Logic;
 using LuminaSupplemental.Excel.Model;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Mediator;
 using InventoryTools.Services;
+using InventoryTools.Ui.DebugWindows;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Ui
@@ -26,7 +28,8 @@ namespace InventoryTools.Ui
         InventoryScanner = 2,
         InventoryMonitor = 3,
         Random = 4,
-        CraftAgents = 5
+        CraftAgents = 5,
+        DebugWindows = 6
     }
     public class DebugWindow : GenericWindow
     {
@@ -99,6 +102,11 @@ namespace InventoryTools.Ui
                         _configuration.SelectedDebugPage = (int)DebugMenu.CraftAgents;
                     }
 
+                    if (ImGui.Selectable("Debug Windows", _configuration.SelectedDebugPage == (int)DebugMenu.DebugWindows))
+                    {
+                        _configuration.SelectedDebugPage = (int)DebugMenu.DebugWindows;
+                    }
+
                 }
             }
             ImGui.SameLine();
@@ -122,6 +130,10 @@ namespace InventoryTools.Ui
                     else if (_configuration.SelectedDebugPage == (int)DebugMenu.CraftAgents)
                     {
                         DrawCraftAgentTab();
+                    }
+                    else if (_configuration.SelectedDebugPage == (int)DebugMenu.DebugWindows)
+                    {
+                        DrawDebugWindows();
                     }
 /*
                     else if (_configuration.SelectedDebugPage == 2)
@@ -1440,6 +1452,22 @@ namespace InventoryTools.Ui
             if (ImGui.Button("Clear notices"))
             {
                 _configuration.NotificationsSeen.Clear();
+            }
+        }
+
+        public void DrawDebugWindows()
+        {
+            if (ImGui.Button("Overlay Service"))
+            {
+                MediatorService.Publish(new OpenGenericWindowMessage(typeof(DebugOverlayServiceWindow)));
+            }
+            if (ImGui.Button("Window Service"))
+            {
+                MediatorService.Publish(new OpenGenericWindowMessage(typeof(DebugWindowServiceWindow)));
+            }
+            if (ImGui.Button("List Service"))
+            {
+                MediatorService.Publish(new OpenGenericWindowMessage(typeof(DebugListServiceWindow)));
             }
         }
 

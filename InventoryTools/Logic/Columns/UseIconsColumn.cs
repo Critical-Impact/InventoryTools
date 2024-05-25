@@ -63,7 +63,7 @@ namespace InventoryTools.Logic.Columns
             ImGui.TableNextColumn();
             if (currentValue != null)
             {
-                var uses = FilterText != "" ? currentValue.Where(c => c.FormattedName.ToLower().PassesFilter(FilterText)) : currentValue;
+                var uses = columnConfiguration.FilterText != "" ? currentValue.Where(c => c.FormattedName.ToLower().PassesFilter(columnConfiguration.FilterText)) : currentValue;
                 ImGuiService.WrapTableColumnElements("UseIconContainer" + rowIndex,uses, filterConfiguration.TableHeight * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X, item =>
                 {
                     var sourceIcon = ImGuiService.IconService[item.Icon];
@@ -196,7 +196,7 @@ namespace InventoryTools.Logic.Columns
         public override IEnumerable<InventoryItem> Filter(ColumnConfiguration columnConfiguration,
             IEnumerable<InventoryItem> items)
         {
-            return FilterText == "" ? items : items.Where(c =>
+            return columnConfiguration.FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(columnConfiguration, c);
                 if (currentValue == null)
@@ -204,14 +204,14 @@ namespace InventoryTools.Logic.Columns
                     return false;
                 }
 
-                return currentValue.Any(c => c.FormattedName.ToLower().PassesFilter(FilterComparisonText));
+                return currentValue.Any(c => c.FormattedName.ToLower().PassesFilter(columnConfiguration.FilterComparisonText));
             });
         }
 
         public override IEnumerable<SortingResult> Filter(ColumnConfiguration columnConfiguration,
             IEnumerable<SortingResult> items)
         {
-            return FilterText == "" ? items : items.Where(c =>
+            return columnConfiguration.FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(columnConfiguration, c);
                 if (currentValue == null)
@@ -219,13 +219,13 @@ namespace InventoryTools.Logic.Columns
                     return false;
                 }
 
-                return currentValue.Any(c => c.FormattedName.ToLower().PassesFilter(FilterComparisonText));
+                return currentValue.Any(c => c.FormattedName.ToLower().PassesFilter(columnConfiguration.FilterComparisonText));
             });
         }
 
         public override IEnumerable<ItemEx> Filter(ColumnConfiguration columnConfiguration, IEnumerable<ItemEx> items)
         {
-            return FilterText == "" ? items : items.Where(c =>
+            return columnConfiguration.FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(columnConfiguration, c);
                 if (currentValue == null)
@@ -233,14 +233,14 @@ namespace InventoryTools.Logic.Columns
                     return false;
                 }
 
-                return currentValue.Any(c => c.FormattedName.ToLower().PassesFilter(FilterComparisonText));
+                return currentValue.Any(c => c.FormattedName.ToLower().PassesFilter(columnConfiguration.FilterComparisonText));
             });
         }
 
         public override IEnumerable<CraftItem> Filter(ColumnConfiguration columnConfiguration,
             IEnumerable<CraftItem> items)
         {
-            return FilterText == "" ? items : items.Where(c =>
+            return columnConfiguration.FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(columnConfiguration, c);
                 if (currentValue == null)
@@ -248,14 +248,14 @@ namespace InventoryTools.Logic.Columns
                     return false;
                 }
 
-                return currentValue.Any(c => c.FormattedName.ToLower().PassesFilter(FilterComparisonText));
+                return currentValue.Any(c => c.FormattedName.ToLower().PassesFilter(columnConfiguration.FilterComparisonText));
             });
         }
         
         public override IEnumerable<InventoryChange> Filter(ColumnConfiguration columnConfiguration,
             IEnumerable<InventoryChange> items)
         {
-            return FilterText == "" ? items : items.Where(c =>
+            return columnConfiguration.FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(columnConfiguration, c.InventoryItem);
                 if (currentValue == null)
@@ -263,7 +263,7 @@ namespace InventoryTools.Logic.Columns
                     return false;
                 }
 
-                return currentValue.Any(c => c.FormattedName.ToLower().PassesFilter(FilterComparisonText));
+                return currentValue.Any(c => c.FormattedName.ToLower().PassesFilter(columnConfiguration.FilterComparisonText));
             });
         }
 

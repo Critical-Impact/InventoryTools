@@ -54,65 +54,6 @@ namespace InventoryTools.Logic.Columns.Abstract
             return items;
         }
 
-        public override bool DrawFilter(string tableKey, int columnIndex)
-        {
-            var filter = FilterText;
-            var hasChanged = false;
-            
-            ImGui.TableSetColumnIndex(columnIndex);
-            ImGui.PushID(Name);
-            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(0, 0));
-            bool? isChecked;
-            if (filter == "")
-            {
-                isChecked = null;
-            }
-            else if (filter == "true")
-            {
-                isChecked = true;
-            }
-            else
-            {
-                isChecked = false;
-            }
-            var checkboxUnChecked = isChecked.HasValue ? (isChecked.Value  ? ImGuiService.CheckboxChecked : ImGuiService.CheckboxUnChecked) : ImGuiService.CheckboxUnChecked;
-            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetContentRegionAvail().X / 2) - checkboxUnChecked.Size.X / 2);
-            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 2);
-            if (isChecked == null)
-            {
-                ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0, 0, 0, 0.1f));
-            }
-
-            if (ImGuiService.DrawUldIconButton(checkboxUnChecked))
-            {
-                if (!isChecked.HasValue)
-                {
-                    FilterText = "false";
-                }
-                else if (isChecked.Value == false)
-                {
-                    FilterText = "true";
-                }
-                else
-                {
-                    FilterText = "";
-                }
-                hasChanged = true;
-            }
-
-            if (isChecked == null)
-            {
-                ImGui.PopStyleColor();
-            }
-
-            ImGui.PopStyleVar();
-            ImGui.SameLine(0.0f, ImGui.GetStyle().ItemInnerSpacing.X);
-            ImGui.TableHeader("");
-            ImGui.PopID();
-
-            return hasChanged;
-        }
-
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
             InventoryItem item, int rowIndex, int columnIndex)
@@ -146,12 +87,12 @@ namespace InventoryTools.Logic.Columns.Abstract
         public override IEnumerable<ItemEx> Filter(ColumnConfiguration columnConfiguration, IEnumerable<ItemEx> items)
         {
             bool isChecked;
-            if (FilterText == "")
+            if (columnConfiguration.FilterText == "")
             {
                 return items;
             }
 
-            if (FilterText == "true")
+            if (columnConfiguration.FilterText == "true")
             {
                 isChecked = true;
             }
@@ -159,7 +100,7 @@ namespace InventoryTools.Logic.Columns.Abstract
             {
                 isChecked = false;
             }
-            return FilterText == "" ? items : items.Where(c =>
+            return columnConfiguration.FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(columnConfiguration, (ItemEx)c);
                 if (!currentValue.HasValue)
@@ -179,12 +120,12 @@ namespace InventoryTools.Logic.Columns.Abstract
             IEnumerable<InventoryItem> items)
         {
             bool isChecked;
-            if (FilterText == "")
+            if (columnConfiguration.FilterText == "")
             {
                 return items;
             }
 
-            if (FilterText == "true")
+            if (columnConfiguration.FilterText == "true")
             {
                 isChecked = true;
             }
@@ -192,7 +133,7 @@ namespace InventoryTools.Logic.Columns.Abstract
             {
                 isChecked = false;
             }
-            return FilterText == "" ? items : items.Where(c =>
+            return columnConfiguration.FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(columnConfiguration, c);
                 if (!currentValue.HasValue)
@@ -208,12 +149,12 @@ namespace InventoryTools.Logic.Columns.Abstract
             IEnumerable<SortingResult> items)
         {
             bool isChecked;
-            if (FilterText == "")
+            if (columnConfiguration.FilterText == "")
             {
                 return items;
             }
 
-            if (FilterText == "true")
+            if (columnConfiguration.FilterText == "true")
             {
                 isChecked = true;
             }
@@ -221,7 +162,7 @@ namespace InventoryTools.Logic.Columns.Abstract
             {
                 isChecked = false;
             }
-            return FilterText == "" ? items : items.Where(c =>
+            return columnConfiguration.FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(columnConfiguration, c);
                 if (!currentValue.HasValue)
@@ -237,12 +178,12 @@ namespace InventoryTools.Logic.Columns.Abstract
             IEnumerable<InventoryChange> items)
         {
             bool isChecked;
-            if (FilterText == "")
+            if (columnConfiguration.FilterText == "")
             {
                 return items;
             }
 
-            if (FilterText == "true")
+            if (columnConfiguration.FilterText == "true")
             {
                 isChecked = true;
             }
@@ -250,7 +191,7 @@ namespace InventoryTools.Logic.Columns.Abstract
             {
                 isChecked = false;
             }
-            return FilterText == "" ? items : items.Where(c =>
+            return columnConfiguration.FilterText == "" ? items : items.Where(c =>
             {
                 var currentValue = CurrentValue(columnConfiguration, c.InventoryItem);
                 if (!currentValue.HasValue)
