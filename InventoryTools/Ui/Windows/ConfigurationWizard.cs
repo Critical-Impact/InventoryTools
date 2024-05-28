@@ -213,7 +213,7 @@ public class ConfigurationWizard : GenericWindow
                                 }
 
                                 ImGui.SameLine();
-                                if (ImGui.Button("Close (and never show the wizard again"))
+                                if (ImGui.Button("Close (and never show the wizard again)"))
                                 {
                                     Close();
                                     _configuration.ShowWizardNewFeatures = false;
