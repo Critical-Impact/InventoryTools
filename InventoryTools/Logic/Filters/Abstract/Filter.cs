@@ -31,7 +31,8 @@ namespace InventoryTools.Logic.Filters.Abstract
         public abstract string Key { get; set; }
         public abstract string Name { get; set; }
         public abstract string HelpText { get; set; }
-        
+
+        public bool ShowOperatorTooltip { get; set; } = false;
         public abstract FilterCategory FilterCategory { get; set; }
 
         public virtual int Order { get; set; } = 0;

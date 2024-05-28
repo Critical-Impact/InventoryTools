@@ -157,6 +157,41 @@ public class ImGuiService
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public void HelpMarker(List<string> helpText, string? imagePath = null, System.Numerics.Vector2? imageSize = null)
+    {
+        ImGui.TextDisabled("(?)");
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.BeginTooltip();
+            ImGui.PushTextWrapPos(ImGui.GetFontSize() * 35.0f);
+            foreach (var line in helpText)
+            {
+                if (line == "")
+                {
+                    ImGui.Separator();
+                }
+                else
+                {
+                    ImGui.TextUnformatted(line);
+                }
+            }
+
+            ImGui.PopTextWrapPos();
+            if (imagePath != null)
+            {
+                var sourceIcon = LoadImage(imagePath);
+                if (sourceIcon != null)
+                {
+                    ImGui.Image(sourceIcon.ImGuiHandle, imageSize ??
+                                                        new Vector2(200, 200) * ImGui.GetIO().FontGlobalScale);
+                }
+            }
+
+            ImGui.EndTooltip();
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void VerticalCenter(string text)
     {
         var offset = (ImGui.GetWindowSize().Y - ImGui.CalcTextSize(text).Y) / 2.0f;

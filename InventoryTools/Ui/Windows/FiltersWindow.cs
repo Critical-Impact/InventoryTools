@@ -285,8 +285,8 @@ namespace InventoryTools.Ui
             _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
             Invalidate();
-            MediatorService.Publish(new ConfigurationWindowEditFilter(filterConfiguration));
             MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
+            MediatorService.Publish(new ConfigurationWindowEditFilter(filterConfiguration));
         }
         
         private void AddHistoryFilter(string newName, string id)
@@ -296,8 +296,8 @@ namespace InventoryTools.Ui
             _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
             Invalidate();
-            MediatorService.Publish(new ConfigurationWindowEditFilter(filterConfiguration));
             MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
+            MediatorService.Publish(new ConfigurationWindowEditFilter(filterConfiguration));
 
         }
 
@@ -307,8 +307,8 @@ namespace InventoryTools.Ui
             _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
             Invalidate();
-            MediatorService.Publish(new ConfigurationWindowEditFilter(filterConfiguration));
             MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
+            MediatorService.Publish(new ConfigurationWindowEditFilter(filterConfiguration));
         }
 
         private void AddSortFilter(string newName, string id)
@@ -317,8 +317,8 @@ namespace InventoryTools.Ui
             _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
             Invalidate();
-            MediatorService.Publish(new ConfigurationWindowEditFilter(filterConfiguration));
             MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
+            MediatorService.Publish(new ConfigurationWindowEditFilter(filterConfiguration));
 
         }
 
@@ -373,44 +373,7 @@ namespace InventoryTools.Ui
                     filter.Active = false;
                 }
             }
-            if (SelectedConfiguration != null && SelectedConfiguration.FilterType == FilterType.HistoryFilter && !_configuration.HasSeenNotification(NotificationPopup.HistoryNotice) && ImGui.IsWindowFocused())
-            {
-                ImGui.OpenPopup("historynotice");
-                _configuration.MarkNotificationSeen(NotificationPopup.HistoryNotice);
-            }
-            var choice = InventoryTools.Ui.Widgets.ImGuiUtil.ConfirmPopup("historynotice", new Vector2(800,340) * ImGui.GetIO().FontGlobalScale, () =>
-            {
-                ImGui.TextUnformatted("History Filter Notice");
-                ImGui.Separator();
-                ImGui.NewLine();
 
-                ImGui.PushTextWrapPos();
-                ImGui.Bullet();
-                ImGui.Text("This is a new module that helps you track changes to your inventory.");
-                ImGui.PopTextWrapPos();
-
-                ImGui.BulletText("By default it will track the following events:");
-
-                ImGui.Indent();
-                ImGui.BulletText("Items added");
-                ImGui.BulletText("Items removed");
-                ImGui.BulletText("Items moved");
-                ImGui.BulletText("Items quantities changing");
-                ImGui.BulletText("Retainer sale item price changes");
-                ImGui.Unindent();
-
-                ImGui.BulletText("It is not limited to tracking just these events and can track most changes to individual items.");
-
-                ImGui.BulletText("To change what is tracking, check out the History tab inside the main configuration section(gear icon).");
-                ImGui.BulletText("Please note that this module is experimental so it may sometimes track single events as 2 events.");
-                ImGui.NewLine();
-                ImGui.Text("By default the history module is turned off, would you like to turn it on?");
-            });
-            if (choice != null)
-            {
-                _configuration.HistoryEnabled = choice.Value;
-            }
-            
             if (_configuration.FiltersLayout == WindowLayout.Sidebar)
             {
                 DrawSidebar();
@@ -725,7 +688,7 @@ namespace InventoryTools.Ui
                                 var hasValuesSet = false;
                                 foreach (var filter in group.Value)
                                 {
-                                    if (filter.HasValueSet(filterConfiguration))
+                                    if (filter.HasValueSet(filterConfiguration) && filter.AvailableIn.HasFlag(filterConfiguration.FilterType))
                                     {
                                         hasValuesSet = true;
                                         break;

@@ -15,6 +15,8 @@ using Serilog;
 
 namespace InventoryToolsMock;
 
+using CriticalCommonLib.Crafting;
+
 public class MockPluginLoader : PluginLoader
 {
     private readonly MockProgram _mockProgram;
@@ -55,6 +57,7 @@ public class MockPluginLoader : PluginLoader
         hostBuilder.ConfigureContainer<ContainerBuilder>(container =>
         {
             container.RegisterType<MockWotsitIpc>().As<IWotsitIpc>().SingleInstance().ExternallyOwned();
+            container.RegisterType<MockHostedCraftMonitor>().As<ICraftMonitor>().SingleInstance().ExternallyOwned();
         });
     }
 }

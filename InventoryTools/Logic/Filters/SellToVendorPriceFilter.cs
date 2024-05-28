@@ -11,7 +11,7 @@ namespace InventoryTools.Logic.Filters
     {
         public override string Key { get; set; } = "GSSalePrice";
         public override string Name { get; set; } = "Sell to Shop Price";
-        public override string HelpText { get; set; } = "The price when bought from shops. !,>,<,>=,<= can be used for comparisons";
+        public override string HelpText { get; set; } = "The price when bought from shops.";
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Acquisition;
 
         public override FilterType AvailableIn { get; set; } =
@@ -47,6 +47,7 @@ namespace InventoryTools.Logic.Filters
 
         public SellToVendorPriceFilter(ILogger<SellToVendorPriceFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
         {
+            ShowOperatorTooltip = true;
         }
     }
 }

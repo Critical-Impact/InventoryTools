@@ -41,6 +41,7 @@ namespace InventoryTools.Logic.Filters
 
         public SpiritBondFilter(ILogger<SpiritBondFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
         {
+            ShowOperatorTooltip = true;
         }
     }
 }

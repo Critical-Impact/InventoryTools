@@ -37,6 +37,7 @@ namespace InventoryTools.Logic.Filters
 
         public RequiredLevelFilter(ILogger<RequiredLevelFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
         {
+            ShowOperatorTooltip = true;
         }
     }
 }

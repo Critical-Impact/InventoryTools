@@ -11,6 +11,7 @@ namespace InventoryTools.Logic.Filters
         public string Name { get; set; }
         public string HelpText { get; set; }
         public bool ShowReset { get; set; }
+        public bool ShowOperatorTooltip { get; set; }
         
         public FilterCategory FilterCategory { get; set; }
         
