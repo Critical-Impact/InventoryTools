@@ -23,6 +23,7 @@ namespace InventoryTools.Logic.Filters
             Name = "Marketboard " + configuration.MarketSaleHistoryLimit + " Sale Counter";
             HelpText = "Shows the number of sales that have been made within " + configuration.MarketSaleHistoryLimit +
                        " days.";
+            ShowOperatorTooltip = true;
         }
 
         public override string Key { get; set; } = "MBSaleCount";

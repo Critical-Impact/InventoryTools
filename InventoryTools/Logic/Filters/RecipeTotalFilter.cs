@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters;
 
-public class RecipeTotalFilter : IntegerFilter
+public class RecipeTotalFilter : StringFilter
 {
     private readonly ExcelCache _excelCache;
     public override string Key { get; set; } = "RecipeTotalFilter";
@@ -30,7 +30,7 @@ public class RecipeTotalFilter : IntegerFilter
         {
             return null;
         }
-        if (!_excelCache.ItemRecipeCount(item.RowId).PassesFilter(currentValue.Value.ToString()))
+        if (!_excelCache.ItemRecipeCount(item.RowId).PassesFilter(currentValue))
         {
             return false;
         }
@@ -41,5 +41,6 @@ public class RecipeTotalFilter : IntegerFilter
     public RecipeTotalFilter(ILogger<RecipeTotalFilter> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
     {
         _excelCache = excelCache;
+        ShowOperatorTooltip = true;
     }
 }
