@@ -430,7 +430,7 @@ public class PluginLoader : IDisposable
             PreBuild(hostBuilder);
             var builtHost = hostBuilder
                 .Build();
-            builtHost.RunAsync();
+            builtHost.StartAsync();
             Host = builtHost;
             return builtHost;
     }
