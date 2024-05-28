@@ -12,6 +12,7 @@ namespace InventoryTools.Logic.Filters
     {
         public MarketBoardMinTotalPriceFilter(ILogger<MarketBoardMinTotalPriceFilter> logger, ImGuiService imGuiService, ICharacterMonitor characterMonitor, IMarketCache marketCache) : base(logger, imGuiService, characterMonitor, marketCache)
         {
+            ShowOperatorTooltip = true;
         }
         public override string Key { get; set; } = "MBMinTotalPrice";
         public override string Name { get; set; } = "Market Board Total Minimum Price";

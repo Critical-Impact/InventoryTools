@@ -128,7 +128,11 @@ namespace InventoryTools.Ui
             MediatorService.Subscribe<ListRepositionedMessage>(this, _ => Invalidate());
             MediatorService.Subscribe<ListAddedMessage>(this, _ => Invalidate());
             MediatorService.Subscribe<ListRemovedMessage>(this, _ => Invalidate());
-            MediatorService.Subscribe<ConfigurationWindowEditFilter>(this, message => SetActiveFilter(message.filter));
+            MediatorService.Subscribe<ConfigurationWindowEditFilter>(this,  message =>
+            {
+                Invalidate();
+                SetActiveFilter(message.filter);
+            });
             MediatorService.Subscribe<ListInvalidatedMessage>(this, _ => Invalidate());
             MediatorService.Subscribe<ListRepositionedMessage>(this, _ => Invalidate());
             MediatorService.Subscribe<ListAddedMessage>(this, _ => Invalidate());
@@ -374,10 +378,10 @@ namespace InventoryTools.Ui
 
         public void SetActiveFilter(FilterConfiguration configuration)
         {
-            var filterIndex = _filterPages.ContainsKey(configuration.Key) ? _filterPages.Keys.IndexOf(configuration.Key) + 1 : -1;
+            var filterIndex = _filterPages.ContainsKey(configuration.Key) ? _filterPages.Where(c => !c.Value.IsMenuItem).Select(c => c.Key).IndexOf(configuration.Key) - 2 : -1;
             if (filterIndex != -1)
             {
-                ConfigSelectedConfigurationPage = _configPages.Count + filterIndex - 2;
+                ConfigSelectedConfigurationPage = _configPages.Count + filterIndex;
             }
         }
 

@@ -708,8 +708,8 @@ namespace InventoryTools
         private ModifiableHotkey? _moreInformationHotKey;
         private ConcurrentDictionary<string,ModifiableHotkey>? _hotkeys;
         private bool _trackMobSpawns = false;
-        private bool _marketBoardUseActiveWorld;
-        private bool _marketBoardUseHomeWorld;
+        private bool _marketBoardUseActiveWorld = true;
+        private bool _marketBoardUseHomeWorld = true;
         private List<uint>? _marketBoardWorldIds;
 
         public ModifiableHotkey? GetHotkey(string hotkey)

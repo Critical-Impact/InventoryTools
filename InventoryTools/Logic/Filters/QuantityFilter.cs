@@ -15,6 +15,7 @@ namespace InventoryTools.Logic.Filters
         public QuantityFilter(ILogger<QuantityFilter> logger, ImGuiService imGuiService, IInventoryMonitor inventoryMonitor) : base(logger, imGuiService)
         {
             _inventoryMonitor = inventoryMonitor;
+            ShowOperatorTooltip = true;
         }
         public override string Key { get; set; } = "Qty";
         public override string Name { get; set; } = "Quantity";

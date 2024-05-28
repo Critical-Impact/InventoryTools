@@ -5,6 +5,8 @@ using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters.Abstract
 {
+    using System.Collections.Generic;
+
     public abstract class StringFilter : Filter<string>
     {
 
@@ -44,7 +46,25 @@ namespace InventoryTools.Logic.Filters.Abstract
                 UpdateFilterConfiguration(configuration, value);
             }
             ImGui.SameLine();
-            ImGuiService.HelpMarker(HelpText);
+            if (this.ShowOperatorTooltip)
+            {
+                ImGuiService.HelpMarker(new List<string>()
+                {
+                    HelpText,
+                    "When searching the following operators can be used to compare: ",
+                    "",
+                    ">, >=, <, <=, =, for numerical comparisons" ,
+                    "=, for exact comparisons",
+                    "!, for inequality comparisons",
+                    "||, search multiple expressions using OR",
+                    "&&, search multiple expressions using AND"
+                });
+            }
+            else
+            {
+                ImGuiService.HelpMarker(HelpText);
+            }
+
             if (HasValueSet(configuration) && ShowReset)
             {
                 ImGui.SameLine();

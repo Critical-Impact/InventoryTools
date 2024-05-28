@@ -46,10 +46,12 @@ public interface ISampleFilterSetting
 public class SampleFilter1Setting : BooleanSetting, ISampleFilterSetting
 {
     private readonly IListService _listService;
+    private readonly BuyFromVendorPriceFilter buyFromVendorPriceFilter;
 
-    public SampleFilter1Setting(ILogger<SampleFilter1Setting> logger, ImGuiService imGuiService, IListService listService) : base(logger, imGuiService)
+    public SampleFilter1Setting(ILogger<SampleFilter1Setting> logger, ImGuiService imGuiService, IListService listService, BuyFromVendorPriceFilter buyFromVendorPriceFilter) : base(logger, imGuiService)
     {
         _listService = listService;
+        this.buyFromVendorPriceFilter = buyFromVendorPriceFilter;
     }
     private bool _shouldAdd;
     public override bool DefaultValue { get; set; }
@@ -78,7 +80,7 @@ public class SampleFilter1Setting : BooleanSetting, ISampleFilterSetting
         sampleFilter.SourceAllRetainers = true;
         sampleFilter.SourceAllFreeCompanies = true;
         sampleFilter.CanBeBought = true;
-        sampleFilter.ShopBuyingPrice = "<=100";
+        buyFromVendorPriceFilter.UpdateFilterConfiguration(sampleFilter, "<=100");
         _listService.AddDefaultColumns(sampleFilter);
         _listService.AddList(sampleFilter);
     }

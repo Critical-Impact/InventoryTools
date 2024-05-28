@@ -229,7 +229,7 @@ public class PluginLoader : IDisposable
                 builder.RegisterType<CharacterMonitor>().As<ICharacterMonitor>().SingleInstance();
                 builder.RegisterType<ChatUtilities>().As<IChatUtilities>().SingleInstance();
                 builder.RegisterType<ConfigurationWizardService>().As<IConfigurationWizardService>().SingleInstance();
-                builder.RegisterType<CraftMonitor>().As<ICraftMonitor>().SingleInstance();
+                builder.RegisterType<HostedCraftMonitor>().AsSelf().As<ICraftMonitor>().SingleInstance();
                 builder.RegisterType<FilterService>().As<IFilterService>().SingleInstance();
                 builder.RegisterType<Font>().As<IFont>().SingleInstance();
                 builder.RegisterType<GameInterface>().As<IGameInterface>().SingleInstance();
@@ -426,6 +426,7 @@ public class PluginLoader : IDisposable
                 collection.AddHostedService(p => p.GetRequiredService<LaunchButtonService>());
                 collection.AddHostedService(p => p.GetRequiredService<HostedInventoryHistory>());
                 collection.AddHostedService(p => p.GetRequiredService<IPCService>());
+                collection.AddHostedService(p => p.GetRequiredService<HostedCraftMonitor>());
             });
             PreBuild(hostBuilder);
             var builtHost = hostBuilder

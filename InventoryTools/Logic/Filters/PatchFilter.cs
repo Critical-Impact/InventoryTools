@@ -38,5 +38,6 @@ public class PatchFilter : StringFilter
 
     public PatchFilter(ILogger<PatchFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
     {
+        ShowOperatorTooltip = true;
     }
 }
