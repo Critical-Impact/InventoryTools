@@ -82,4 +82,6 @@ public class HeaderTextTooltip : BaseTooltip
             }
         }
     }
+
+    public override uint Order => 0;
 }

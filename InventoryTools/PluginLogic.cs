@@ -99,7 +99,7 @@ namespace InventoryTools
                 _hotkeyService.AddHotkey(hotkey);
             }
             
-            foreach (var tooltip in tooltips)
+            foreach (var tooltip in tooltips.OrderBy(c => c.Order))
             {
                 _tooltipService.AddTooltipTweak(tooltip);
             }

@@ -6,6 +6,8 @@ using Dalamud.Utility;
 
 namespace InventoryTools.Extensions
 {
+    using CriticalCommonLib.Time;
+
     public static class ComparisonExtensions
     {
         public class FilterComparisonText
@@ -215,6 +217,68 @@ namespace InventoryTools.Extensions
             return date.ToString(CultureInfo.CurrentCulture).Contains(filterString, StringComparison.Ordinal);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public static bool PassesFilter(this TimeInterval timeInterval, string filterString)
+        {
+            filterString = filterString.Trim();
+            if (filterString.Contains("||", StringComparison.Ordinal))
+            {
+                var ors = filterString.Split("||");
+                return ors.Select(c => PassesFilter(timeInterval, c)).Any(c => c);
+            }
+            if (filterString.Contains("&&", StringComparison.Ordinal))
+            {
+                var ands = filterString.Split("&&");
+                return ands.Select(c => PassesFilter(timeInterval, c)).All(c => c);
+            }
+            if (filterString.StartsWith("=", StringComparison.Ordinal) && filterString.Length >= 2)
+            {
+                var filter = filterString.Substring(1);
+                if (timeInterval.ToString() == filter)
+                {
+                    return true;
+                }
+
+                if (TimeInterval.DurationString(timeInterval.End, TimeStamp.UtcNow, true) == filter)
+                {
+                    return true;
+                }
+            }
+            else if (filterString.StartsWith("<=") && filterString.Length >= 3)
+            {
+
+                var filter = filterString.Substring(2);
+                if (int.TryParse(filter, CultureInfo.InvariantCulture, out var seconds))
+                {
+                    var timeStamp = timeInterval.Start - RealTime.MillisecondsPerSecond * seconds;
+                    if (TimeStamp.UtcNow >= timeStamp)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (filterString.StartsWith("!", StringComparison.Ordinal))
+            {
+                if (filterString.Length >= 2)
+                {
+                    var filter = filterString.Substring(1);
+                    return !TimeInterval.DurationString(timeInterval.End, TimeStamp.UtcNow, true).Contains(filter);
+                }
+                else if (filterString.Length == 1)
+                {
+                    return !TimeInterval.DurationString(timeInterval.End, TimeStamp.UtcNow, true).IsNullOrEmpty();
+                }
+            }
+            else if (filterString.StartsWith("~", StringComparison.Ordinal) && filterString.Length >= 2)
+            {
+                var filter = filterString.Substring(1).Split(" ");
+                var splitText = TimeInterval.DurationString(timeInterval.End, TimeStamp.UtcNow, true).Split(" ");
+                return filter.All(c => splitText.Any(d => d.Contains(c)));
+            }
+
+            return TimeInterval.DurationString(timeInterval.End, TimeStamp.UtcNow, true).Contains(filterString, StringComparison.Ordinal);
+        }
+
         public static bool PassesFilter(this uint number, string filterString)
         {
             return PassesFilter((int) number, filterString);
@@ -224,7 +288,7 @@ namespace InventoryTools.Extensions
         {
             return PassesFilter((int) number, filterString);
         }
-        
+
         public static bool PassesFilter(this double number, string filterString)
         {
             filterString = filterString.Trim();
@@ -298,7 +362,7 @@ namespace InventoryTools.Extensions
 
             return number.ToString().Contains(filterString);
         }
-        
+
         public static bool PassesFilter(this decimal number, string filterString)
         {
             filterString = filterString.Trim();

@@ -278,13 +278,14 @@ public class PluginLoader : IDisposable
 
                 builder.Register<Func<string, ColumnConfiguration?>>(c => {
                     var context = c.Resolve<IComponentContext>();
-                    return typeName => { 
-                        Type? type = Type.GetType($"InventoryTools.Logic.Columns." + typeName);
-                        if (type == null)
+                    return typeName => {
+                        var columns = context.Resolve<IEnumerable<IColumn>>();
+                        var column = columns.FirstOrDefault(column => column.GetType().Name == typeName);
+
+                        if (column == null)
                         {
                             return null;
                         }
-                        var column = (IColumn)context.Resolve(type);
 
                         var columnConfiguration = new ColumnConfiguration(typeName);
                         columnConfiguration.Column = column;
@@ -294,15 +295,12 @@ public class PluginLoader : IDisposable
                 
                 builder.Register<Func<string,IColumn?>>(c => {
                     var context = c.Resolve<IComponentContext>();
-                    return typeName => { 
-                        Type? type = Type.GetType($"InventoryTools.Logic.Columns." + typeName);
-                        if (type == null)
-                        {
-                            return null;
-                        }
+                    return typeName =>
+                    {
+                        var columns = context.Resolve<IEnumerable<IColumn>>();
+                        var column = columns.FirstOrDefault(column => column.GetType().Name == typeName);
 
-                        var uintWindow = (IColumn)context.Resolve(type);
-                        return uintWindow;
+                        return column;
                     };
                 });
                 

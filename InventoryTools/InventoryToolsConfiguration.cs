@@ -43,6 +43,7 @@ namespace InventoryTools
         private bool _highlightDestinationEmpty = false;
         private bool _addMoreInformationContextMenu = false;
         private bool _addToCraftListContextMenu = false;
+        private bool _addToActiveCraftListContextMenu = false;
 
         private bool _isVisible;
         private int _marketRefreshTimeHours = 24;
@@ -212,6 +213,16 @@ namespace InventoryTools
             set
             {
                 _addToCraftListContextMenu = value;
+                IsDirty = true;
+            }
+        }
+        [DefaultValue(false)]
+        public bool AddToActiveCraftListContextMenu
+        {
+            get => _addToActiveCraftListContextMenu;
+            set
+            {
+                _addToActiveCraftListContextMenu = value;
                 IsDirty = true;
             }
         }

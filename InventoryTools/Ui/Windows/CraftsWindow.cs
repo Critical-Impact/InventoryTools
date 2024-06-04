@@ -1469,5 +1469,21 @@ namespace InventoryTools.Ui
             base.Dispose(disposing);
             _throttleDispatcher.Dispose();
         }
+
+        public override void OnClose()
+        {
+            if (SelectedConfiguration != null)
+            {
+                SelectedConfiguration.Active = false;
+            }
+            foreach (var filter in Filters)
+            {
+                if (SelectedConfiguration == filter)
+                {
+                    filter.Active = false;
+                }
+            }
+            base.OnClose();
+        }
     }
 }

@@ -266,8 +266,13 @@ public class ConfigurationWizard : GenericWindow
         {
             feature.OnFinish();
         }
+
+        if (!_configurationWizardService.ConfiguredOnce)
+        {
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(FiltersWindow)));
+        }
         _configurationWizardService.MarkFeaturesSeen();
-        MediatorService.Publish(new OpenGenericWindowMessage(typeof(FiltersWindow)));
+
     }
 
     public override void Invalidate()

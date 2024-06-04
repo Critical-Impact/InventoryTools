@@ -122,6 +122,7 @@ namespace InventoryTools.Ui
             {
                 SelectedConfiguration.Active = false;
             }
+            base.OnClose();
         }
         
         public override void Draw()
