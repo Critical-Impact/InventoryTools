@@ -69,7 +69,20 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
                 args.AddMenuItem(menuItem);
             }
 
-            if (_configuration.AddMoreInformationContextMenu)
+            if (_configuration.AddToActiveCraftListContextMenu)
+            {
+                var activeList = _listService.GetActiveCraftList();
+                if (activeList != null)
+                {
+                    var menuItem = new MenuItem();
+                    menuItem.Name = "Add to Active Craft List";
+                    menuItem.PrefixChar = 'A';
+                    menuItem.OnClicked += clickedArgs => AddToCraftList(activeList, clickedArgs, itemId);
+                    args.AddMenuItem(menuItem);
+                }
+            }
+
+            if (_configuration.AddToCraftListContextMenu)
             {
                 var menuItem = new MenuItem();
                 menuItem.Name = "Add to Craft List";
@@ -78,6 +91,8 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
                 menuItem.OnClicked += clickedArgs => OpenAddCraftListSubmenu(clickedArgs, itemId);
                 args.AddMenuItem(menuItem);
             }
+
+
         }
     }
     
@@ -169,7 +184,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
             menuItem.Name = craftList.Name;
             menuItem.OnClicked += args =>
             {
-                AddToCraftList(craftList, args);
+                AddToCraftList(craftList, args, itemId);
             };
             menuItems.Add(menuItem);
         }

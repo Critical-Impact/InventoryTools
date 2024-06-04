@@ -10,6 +10,7 @@ public class ContextMenuFeature : Feature
         {
             typeof(ContextMenuMoreInformationSetting),
             typeof(ContextMenuAddToCraftListSetting),
+            typeof(ContextMenuAddToActiveCraftListSetting),
         },
         settings)
     {

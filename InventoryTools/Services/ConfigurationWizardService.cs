@@ -31,7 +31,7 @@ public class ConfigurationWizardService : IConfigurationWizardService
     public List<IFeature> GetNewFeatures()
     {
         var versionsSeen = _configuration.WizardVersionsSeen;
-        return _availableFeatures.Where(c => !versionsSeen.Overlaps(c.RelatedSettings.Select(d => d.Version))).ToList();
+        return _availableFeatures.Where(c => !c.RelatedSettings.Select(d => d.Version).Distinct().All(c => versionsSeen.Contains(c))).ToList();
     }
 
     public bool HasNewFeatures => GetNewFeatures().Count != 0;

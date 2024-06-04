@@ -125,4 +125,5 @@ public class DisplayMarketPriceTooltip : BaseTooltip
             }
         }
     }
+    public override uint Order => 3;
 }

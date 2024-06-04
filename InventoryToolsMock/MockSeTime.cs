@@ -5,7 +5,7 @@ namespace InventoryToolsMock;
 public class MockSeTime : ISeTime
 {
     public TimeStamp ServerTime { get; } = TimeStamp.UtcNow;
-    public TimeStamp EorzeaTime { get; } = TimeStamp.UtcNow;
+    public TimeStamp EorzeaTime => ServerTime.ConvertToEorzea();
     public long EorzeaTotalMinute { get; }
     public long EorzeaTotalHour { get; }
     public short EorzeaMinuteOfDay { get; }

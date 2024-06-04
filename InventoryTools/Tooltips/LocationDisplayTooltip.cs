@@ -128,4 +128,5 @@ public class LocationDisplayTooltip : BaseTooltip
             }
         }
     }
+    public override uint Order => 2;
 }

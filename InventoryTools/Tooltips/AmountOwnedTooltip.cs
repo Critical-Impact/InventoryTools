@@ -253,4 +253,6 @@ public class AmountOwnedTooltip : BaseTooltip
             }
         }
     }
+
+    public override uint Order => 1;
 }
