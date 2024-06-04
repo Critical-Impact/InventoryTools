@@ -77,4 +77,5 @@ public class FooterTextTooltip : BaseTooltip
         }
         
     }
+    public override uint Order => 99;
 }

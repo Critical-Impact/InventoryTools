@@ -11,6 +11,7 @@ public abstract class BaseTooltip : TooltipService.TooltipTweak
     public InventoryToolsConfiguration Configuration { get; }
     public IGameGui GameGui { get; }
     public ILogger Logger { get; }
+    public abstract uint Order { get; }
 
     public BaseTooltip(ILogger logger, ExcelCache excelCache, InventoryToolsConfiguration configuration, IGameGui gameGui)
     {
