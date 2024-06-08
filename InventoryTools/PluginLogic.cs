@@ -628,7 +628,7 @@ namespace InventoryTools
             PluginService.FilterService.AddFilter(filterConfiguration);
         }
 
-        public void AddSampleFilter100Gil(string newName = "100 gill or less")
+        public void AddSampleFilter100Gil(string newName = "100 gil or less")
         {
             var sampleFilter = new FilterConfiguration(newName, FilterType.SearchFilter);
             sampleFilter.DisplayInTabs = true;
