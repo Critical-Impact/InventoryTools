@@ -106,7 +106,7 @@ namespace InventoryTools.Logic.Filters
         public List<IGrouping<ColumnCategory, KeyValuePair<string, IColumn>>> GetGroupedItems(FilterConfiguration configuration)
         {
             var availableItems = GetAvailableItems(configuration).OrderBy(c => c.Value.Name);
-            _groupedItems = availableItems.GroupBy(c => c.Value.ColumnCategory).ToList();
+            _groupedItems = availableItems.OrderBy(c => c.Value.Name).GroupBy(c => c.Value.ColumnCategory).ToList();
 
             return _groupedItems;
         }
