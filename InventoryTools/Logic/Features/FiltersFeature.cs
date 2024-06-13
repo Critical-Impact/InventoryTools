@@ -66,7 +66,7 @@ public class SampleFilter1Setting : BooleanSetting, ISampleFilterSetting
     }
 
     public override string Key { get; set; } = "sample1";
-    public override string Name { get; set; } = "100 gill or less";
+    public override string Name { get; set; } = "100 gil or less";
     public override string HelpText { get; set; } = "Shows you any items that sell for under 100 gil at shops.";
     public override SettingCategory SettingCategory { get; set; } = SettingCategory.None;
     public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.None;
