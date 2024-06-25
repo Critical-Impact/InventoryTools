@@ -17,46 +17,34 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Crafting;
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return 0;
-        }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            return 0;
-        }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return 0;
-        }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, CraftItem currentValue)
-        {
-            if (currentValue.IsOutputItem)
+            if (searchResult.CraftItem == null) return 0;
+            if (searchResult.CraftItem.IsOutputItem)
             {
                 return 0;
             }
-            return (int?) currentValue.QuantityReady;
+            return (int?) searchResult.CraftItem.QuantityReady;
         }
         
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            CraftItem item, int rowIndex, int columnIndex)
+            SearchResult searchResult, int rowIndex, int columnIndex)
         {
-            if (item.IsOutputItem)
+            if (searchResult.CraftItem == null) return null;
+            
+            if (searchResult.CraftItem.IsOutputItem)
             {
                 ImGui.TableNextColumn();
                 return null;
             }
-            if(item.QuantityReady >= item.QuantityNeeded)
+            if(searchResult.CraftItem.QuantityReady >= searchResult.CraftItem.QuantityNeeded)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.HealerGreen);
             }
 
-            base.Draw(configuration, columnConfiguration, item, rowIndex, columnIndex);
-            if(item.QuantityReady >= item.QuantityNeeded)
+            base.Draw(configuration, columnConfiguration, searchResult, rowIndex, columnIndex);
+            if(searchResult.CraftItem.QuantityReady >= searchResult.CraftItem.QuantityNeeded)
             {
                 ImGui.PopStyleColor();
             }

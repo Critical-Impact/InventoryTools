@@ -25,17 +25,7 @@ public class CraftMarketPriceColumn : GilColumn
     }
 
     public override ColumnCategory ColumnCategory { get; } = ColumnCategory.Crafting;
-    public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
-    {
-        return null;
-    }
-
-    public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-    {
-        return null;
-    }
-
-    public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
+    public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
         return null;
     }
@@ -44,20 +34,22 @@ public class CraftMarketPriceColumn : GilColumn
     public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
 
     public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
-        CraftItem item, int rowIndex, int columnIndex)
+        SearchResult searchResult, int rowIndex, int columnIndex)
     {
+        if (searchResult.CraftItem == null) return null;
+        
         ImGui.TableNextColumn();
         if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;
-        if (!item.Item.CanBeTraded) return new List<MessageBase>();
-        if (item.MarketTotalPrice != null && item.MarketUnitPrice != null)
+        if (!searchResult.CraftItem.Item.CanBeTraded) return new List<MessageBase>();
+        if (searchResult.CraftItem.MarketTotalPrice != null && searchResult.CraftItem.MarketUnitPrice != null)
         {
-            ImGui.Text($"{item.MarketUnitPrice.Value:n0}" + SeIconChar.Gil.ToIconString() + " (" + $"{item.MarketTotalPrice.Value:n0}" + SeIconChar.Gil.ToIconString() + ")");
+            ImGui.Text($"{searchResult.CraftItem.MarketUnitPrice.Value:n0}" + SeIconChar.Gil.ToIconString() + " (" + $"{searchResult.CraftItem.MarketTotalPrice.Value:n0}" + SeIconChar.Gil.ToIconString() + ")");
 
-            if (item.Item.ObtainedGil)
+            if (searchResult.Item.ObtainedGil)
             {
                 var currentIndex = configuration.CraftList.IngredientPreferenceTypeOrder.IndexOf((
-                    item.IngredientPreference.Type,
-                    item.IngredientPreference.LinkedItemId));
+                    searchResult.CraftItem.IngredientPreference.Type,
+                    searchResult.CraftItem.IngredientPreference.LinkedItemId));
                 var buyIndex =
                     configuration.CraftList.IngredientPreferenceTypeOrder.IndexOf((IngredientPreferenceType.Buy, null));
                 var houseVendorIndex =
@@ -65,7 +57,7 @@ public class CraftMarketPriceColumn : GilColumn
                         null));
                 if (currentIndex < buyIndex || currentIndex < houseVendorIndex)
                 {
-                    if (item.MarketUnitPrice != 0 && item.MarketUnitPrice < item.Item.BuyFromVendorPrice)
+                    if (searchResult.CraftItem.MarketUnitPrice != 0 && searchResult.CraftItem.MarketUnitPrice < searchResult.Item.BuyFromVendorPrice)
                     {
                         ImGui.SameLine();
                         ImGui.Image(ImGuiService.GetIconTexture(Icons.QuestionMarkIcon).ImGuiHandle, new Vector2(16, 16));
@@ -80,7 +72,7 @@ public class CraftMarketPriceColumn : GilColumn
             ImGui.Text("N/A");
         }
 
-        var craftPrices = item.CraftPrices;
+        var craftPrices = searchResult.CraftItem.CraftPrices;
         if (craftPrices != null && craftPrices.Count != 0)
         {
             ImGui.SameLine();
@@ -106,9 +98,9 @@ public class CraftMarketPriceColumn : GilColumn
                         
                         ImGui.Text("Available: " + totalAvailable);
 
-                        if (item.MarketAvailable != item.QuantityNeeded)
+                        if (searchResult.CraftItem.MarketAvailable != searchResult.CraftItem.QuantityNeeded)
                         {
-                            ImGui.Text("Missing: " + (item.QuantityNeeded - item.MarketAvailable));
+                            ImGui.Text("Missing: " + (searchResult.CraftItem.QuantityNeeded - searchResult.CraftItem.MarketAvailable));
                         }
                     }
                 }

@@ -16,21 +16,10 @@ namespace InventoryTools.Logic.Columns
             _excelCache = excelCache;
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return _excelCache.CanCraftItem(item.ItemId);
+            return _excelCache.CanCraftItem(searchResult.Item.RowId);
         }
-
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            return _excelCache.CanCraftItem(item.RowId);
-        }
-
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return _excelCache.CanCraftItem(item.InventoryItem.ItemId);
-        }
-        
 
         public override string Name { get; set; } = "Is Craftable?";
         public override float Width { get; set; } = 125.0f;

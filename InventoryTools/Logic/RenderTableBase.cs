@@ -23,12 +23,8 @@ namespace InventoryTools.Logic
                                                 ImGuiTableFlags.Hideable | ImGuiTableFlags.ScrollX |
                                                 ImGuiTableFlags.ScrollY;
 
-        public List<SortingResult> SortedItems { get; set; } = new List<SortingResult>();
-        public List<SortingResult> RenderSortedItems { get; set; } = new List<SortingResult>();
-        public List<ItemEx> Items { get; set; } = new List<ItemEx>();
-        public List<ItemEx> RenderItems { get; set; } = new List<ItemEx>();
-        public List<InventoryChange> InventoryChanges { get; set; } = new List<InventoryChange>();
-        public List<InventoryChange> RenderInventoryChanges { get; set; } = new List<InventoryChange>();
+        public List<SearchResult> SearchResults { get; set; } = new List<SearchResult>();
+        public List<SearchResult> RenderSearchResults { get; set; } = new List<SearchResult>();
         public bool InitialColumnSetupDone { get; set; }
 
         public RenderTableBase(RightClickService rightClickService, InventoryToolsConfiguration configuration)
@@ -57,31 +53,10 @@ namespace InventoryTools.Logic
                 return FilterConfiguration.TableId;
             }
         }
-        
-        public virtual List<MessageBase>? DrawMenu(FilterConfiguration configuration,
-            ColumnConfiguration columnConfiguration,
-            InventoryItem item, int rowIndex)
-        {
-            return DrawMenu(configuration, columnConfiguration, item.Item, rowIndex);
-        }
 
         public virtual List<MessageBase>? DrawMenu(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            SortingResult item, int rowIndex)
-        {
-            return DrawMenu(configuration, columnConfiguration, item.InventoryItem.Item, rowIndex);
-        }
-
-        public virtual List<MessageBase>? DrawMenu(FilterConfiguration configuration,
-            ColumnConfiguration columnConfiguration,
-            InventoryChange item, int rowIndex)
-        {
-            return DrawMenu(configuration, columnConfiguration, item.InventoryItem, rowIndex);
-        }
-
-        public virtual List<MessageBase>? DrawMenu(FilterConfiguration configuration,
-            ColumnConfiguration columnConfiguration,
-            CraftItem item, int rowIndex)
+            SearchResult searchResult, int rowIndex)
         {
             var messages = new List<MessageBase>();
             var hoveredRow = -1;
@@ -93,41 +68,25 @@ namespace InventoryTools.Logic
             {
                 ImGui.OpenPopup("RightClick" + rowIndex);
             }
-
-            using (var popup = ImRaii.Popup("RightClick" + rowIndex))
+            if (searchResult.CraftItem != null)
             {
-                if (popup.Success)
+                using (var popup = ImRaii.Popup("RightClick" + rowIndex))
                 {
-                    _rightClickService.DrawRightClickPopup(item, configuration, messages);
+                    if (popup.Success)
+                    {
+                        _rightClickService.DrawRightClickPopup(searchResult, messages, configuration);
+                    }
                 }
             }
-
-            return messages;
-        }
-
-        
-
-        public virtual List<MessageBase>? DrawMenu(FilterConfiguration configuration,
-            ColumnConfiguration columnConfiguration,
-            ItemEx item, int rowIndex)
-        {
-            var messages = new List<MessageBase>();
-            var hoveredRow = -1;
-            ImGui.Selectable("", false, ImGuiSelectableFlags.SpanAllColumns | ImGuiSelectableFlags.AllowItemOverlap, new Vector2(0, configuration.TableHeight) * ImGui.GetIO().FontGlobalScale);
-            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow)) {
-                hoveredRow = rowIndex;
-            }
-            if (hoveredRow == rowIndex && ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+            else
             {
-                ImGui.OpenPopup("RightClick" + rowIndex);
-            }
-
-            using (var popup = ImRaii.Popup("RightClick" + rowIndex))
-            {
-                using var _ = ImRaii.PushId("RightClick" + rowIndex);
-                if (popup.Success)
+                using (var popup = ImRaii.Popup("RightClick" + rowIndex))
                 {
-                    _rightClickService.DrawRightClickPopup(item, messages);
+                    using var _ = ImRaii.PushId("RightClick" + rowIndex);
+                    if (popup.Success)
+                    {
+                        _rightClickService.DrawRightClickPopup(searchResult, messages, configuration);
+                    }
                 }
             }
 

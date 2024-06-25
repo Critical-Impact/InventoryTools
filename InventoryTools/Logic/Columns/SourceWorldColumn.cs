@@ -16,20 +16,15 @@ public class SourceWorldColumn : TextColumn
         _characterMonitor = characterMonitor;
     }
     public override ColumnCategory ColumnCategory => ColumnCategory.Inventory;
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+    public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        var character = _characterMonitor.GetCharacterById(item.RetainerId);
-        return character != null ? character.World?.FormattedName ?? "" : "";
-    }
+        if (searchResult.InventoryItem != null)
+        {
+            var character = _characterMonitor.GetCharacterById(searchResult.InventoryItem.RetainerId);
+            return character != null ? character.World?.FormattedName ?? "" : "";
+        }
 
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-    {
         return "";
-    }
-
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return CurrentValue(columnConfiguration, item.InventoryItem);
     }
 
     public override string Name { get; set; } = "Source World";

@@ -12,21 +12,10 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return CurrentValue(columnConfiguration, item.Item);
+            return searchResult.Item.CabinetCategory != 0;
         }
-
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            return item.CabinetCategory != 0;
-        }
-
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override string Name { get; set; } = "Is Armoire Item?";
         public override string RenderName => "Is Armoire?";
         public override float Width { get; set; } = 100;

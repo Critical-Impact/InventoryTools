@@ -84,18 +84,11 @@ public class IngredientSearchFilter : UintMultipleChoiceFilter
                     if (ImGui.Selectable("Add all from " + filter.Name))
                     {
                         var filterResult = _listFilterService.Value.RefreshList(filter);
-                        foreach (var item in filterResult.AllItems)
+                        foreach (var item in filterResult)
                         {
-                            if (item.CanBeCrafted && item.SearchString != "")
+                            if (item.Item.CanBeCrafted && item.Item.SearchString != "")
                             {
-                                currentValue.Add(item.RowId);
-                            }
-                        }
-                        foreach (var item in filterResult.SortedItems)
-                        {
-                            if (item.InventoryItem.Item.CanBeCrafted && item.InventoryItem.Item.SearchString != "")
-                            {
-                                currentValue.Add(item.InventoryItem.ItemId);
+                                currentValue.Add(item.Item.RowId);
                             }
                         }
                         UpdateFilterConfiguration(configuration,currentValue.ToList());

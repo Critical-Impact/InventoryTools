@@ -12,21 +12,10 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return item.CanBeTraded;
+            return searchResult.Item.CanBeTraded;
         }
-
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            return item.CanBeTraded;
-        }
-
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override string Name { get; set; } = "Is Tradable?";
         public override float Width { get; set; } = 90.0f;
         public override string HelpText { get; set; } = "Can the item be traded?";

@@ -144,7 +144,7 @@ namespace InventoryTools.Logic
                                 clipper.ItemsHeight = 32;
                             }
 
-                            var renderSortedItems = RenderSortedItems;
+                            var renderSortedItems = RenderSearchResults;
                             clipper.Begin(renderSortedItems.Count);
                             while (clipper.Step())
                             {
@@ -190,29 +190,28 @@ namespace InventoryTools.Logic
                                 clipper.ItemsHeight = 32;
                             }
 
-                            clipper.Begin(RenderItems.Count);
+                            clipper.Begin(RenderSearchResults.Count);
                             while (clipper.Step())
                             {
                                 for (var index = clipper.DisplayStart; index < clipper.DisplayEnd; index++)
                                 {
-                                    if (index >= 0 && index < RenderItems.Count)
+                                    if (index >= 0 && index < RenderSearchResults.Count)
                                     {
-                                        var item = RenderItems[index];
+                                        var item = RenderSearchResults[index];
                                         ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
                                         for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                                         {
                                             var column = Columns[columnIndex];
-                                            var columnMessages = column.Column.Draw(FilterConfiguration, column, (ItemEx)item, index, columnIndex);
+                                            var columnMessages = column.Column.Draw(FilterConfiguration, column, item, index, columnIndex);
                                             if (columnMessages != null)
                                             {
                                                 messages.AddRange(columnMessages);
                                             }
-
+                                            
                                             if (columnIndex == 0)
                                             {
                                                 ImGui.SameLine();
-                                                var menuMessages = DrawMenu(FilterConfiguration, column,
-                                                    (ItemEx)item, index);
+                                                var menuMessages = DrawMenu(FilterConfiguration, column,item, index);
                                                 if (menuMessages != null)
                                                 {
                                                     messages.AddRange(menuMessages);
@@ -235,12 +234,12 @@ namespace InventoryTools.Logic
                                 clipper.ItemsHeight = 32;
                             }
 
-                            clipper.Begin(InventoryChanges.Count);
+                            clipper.Begin(RenderSearchResults.Count);
                             while (clipper.Step())
                             {
                                 for (var index = clipper.DisplayStart; index < clipper.DisplayEnd; index++)
                                 {
-                                    var item = RenderInventoryChanges[index];
+                                    var item = RenderSearchResults[index];
                                     ImGui.TableNextRow(ImGuiTableRowFlags.None, FilterConfiguration.TableHeight);
                                     for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                                     {
@@ -306,40 +305,13 @@ namespace InventoryTools.Logic
                     csv.WriteField(column.ExportName ?? column.Column.Name);
                 }
                 csv.NextRecord();
-                if (FilterConfiguration.FilterType == FilterType.SearchFilter ||
-                    FilterConfiguration.FilterType == FilterType.SortingFilter ||
-                    FilterConfiguration.FilterType == FilterType.CraftFilter)
+                foreach (var item in RenderSearchResults)
                 {
-                    foreach (var item in RenderSortedItems)
+                    foreach (var column in Columns)
                     {
-                        foreach (var column in Columns)
-                        {
-                            csv.WriteField(column.Column.CsvExport(column, item));
-                        }
-                        csv.NextRecord();
+                        csv.WriteField(column.Column.CsvExport(column, item));
                     }
-                }
-                else if (FilterConfiguration.FilterType == FilterType.GameItemFilter)
-                {
-                    foreach (var item in RenderItems)
-                    {
-                        foreach (var column in Columns)
-                        {
-                            csv.WriteField(column.Column.CsvExport(column, item));
-                        }
-                        csv.NextRecord();
-                    }
-                }
-                else if (FilterConfiguration.FilterType == FilterType.HistoryFilter)
-                {
-                    foreach (var item in RenderInventoryChanges)
-                    {
-                        foreach (var column in Columns)
-                        {
-                            csv.WriteField(column.Column.CsvExport(column, item));
-                        }
-                        csv.NextRecord();
-                    }
+                    csv.NextRecord();
                 }
             }
         }
@@ -348,46 +320,15 @@ namespace InventoryTools.Logic
         {
             var lines = new List<dynamic>();
             var converter = new ExpandoObjectConverter();
-            if (FilterConfiguration.FilterType == FilterType.SearchFilter ||
-                FilterConfiguration.FilterType == FilterType.SortingFilter ||
-                FilterConfiguration.FilterType == FilterType.CraftFilter)
+            foreach (var item in RenderSearchResults)
             {
-                foreach (var item in RenderSortedItems)
+                var newLine = new ExpandoObject() as IDictionary<string, Object>;
+                newLine["id"] = item.Item.RowId;
+                foreach (var column in Columns)
                 {
-                    var newLine = new ExpandoObject() as IDictionary<string, Object>;
-                    newLine["id"] = item.InventoryItem.ItemId;
-                    foreach (var column in Columns)
-                    {
-                        newLine[column.Column.Name.ToLower()] = column.Column.JsonExport(column, item) ?? "";
-                    }
-                    lines.Add(newLine);
+                    newLine[column.Column.Name.ToLower()] = column.Column.JsonExport(column, item) ?? "";
                 }
-            }
-            else if (FilterConfiguration.FilterType == FilterType.GameItemFilter)
-            {
-                foreach (var item in RenderItems)
-                {
-                    var newLine = new ExpandoObject() as IDictionary<string, Object>;
-                    newLine["id"] = item.RowId;
-                    foreach (var column in Columns)
-                    {
-                        newLine[column.Column.Name.ToLower()] = column.Column.JsonExport(column, item) ?? "";
-                    }
-                    lines.Add(newLine);
-                }
-            }
-            else if (FilterConfiguration.FilterType == FilterType.HistoryFilter)
-            {
-                foreach (var item in RenderInventoryChanges)
-                {
-                    var newLine = new ExpandoObject() as IDictionary<string, Object>;
-                    newLine["id"] = item.InventoryItem.ItemId;
-                    foreach (var column in Columns)
-                    {
-                        newLine[column.Column.Name.ToLower()] = column.Column.JsonExport(column, item) ?? "";
-                    }
-                    lines.Add(newLine);
-                }
+                lines.Add(newLine);
             }
 
             return JsonConvert.SerializeObject(lines.ToArray(), Formatting.None,

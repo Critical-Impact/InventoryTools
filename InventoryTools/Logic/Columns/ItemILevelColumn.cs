@@ -12,26 +12,15 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return CurrentValue(columnConfiguration, item.Item);
-        }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            if ((int)item.LevelItem.Row == 0)
+            if ((int)searchResult.Item.LevelItem.Row == 0)
             {
                 return null;
             }
 
-            return (int)item.LevelItem.Row;
+            return (int)searchResult.Item.LevelItem.Row;
         }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override string Name { get; set; } = "iLevel";
         public override float Width { get; set; } = 50.0f;
         public override string HelpText { get; set; } = "Shows the iLevel of the item.";

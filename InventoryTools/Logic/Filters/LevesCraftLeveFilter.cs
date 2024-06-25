@@ -15,8 +15,7 @@ namespace InventoryTools.Logic.Filters
         public override string HelpText { get; set; } = "Is this item craftable and a hand-in for a leve?";
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Crafting;
 
-        public override FilterType AvailableIn { get; set; } =
-            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter;
+
         
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {

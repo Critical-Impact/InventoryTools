@@ -18,37 +18,26 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Crafting;
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
-        {
-            return 0;
-        }
 
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return 0;
-        }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return 0;
-        }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, CraftItem currentValue)
-        {
-            return Math.Max(0, (int)currentValue.QuantityMissingOverall);
+            if (searchResult.CraftItem == null) return 0;
+            return Math.Max(0, (int)searchResult.CraftItem.QuantityMissingOverall);
         }
         
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            CraftItem item, int rowIndex, int columnIndex)
+            SearchResult searchResult, int rowIndex, int columnIndex)
         {
-            if (CurrentValue(columnConfiguration, item) > 0)
+            if (searchResult.CraftItem == null) return null;
+            
+            if (CurrentValue(columnConfiguration, searchResult) > 0)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudRed);
             }
 
-            base.Draw(configuration, columnConfiguration, item, rowIndex, columnIndex);
-            if (CurrentValue(columnConfiguration, item) > 0)
+            base.Draw(configuration, columnConfiguration, searchResult, rowIndex, columnIndex);
+            if (CurrentValue(columnConfiguration, searchResult) > 0)
             {
                 ImGui.PopStyleColor();
             }

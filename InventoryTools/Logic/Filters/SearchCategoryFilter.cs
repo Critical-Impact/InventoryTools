@@ -25,8 +25,7 @@ namespace InventoryTools.Logic.Filters
 
         public override List<uint> DefaultValue { get; set; } = new();
 
-        public override FilterType AvailableIn { get; set; } =
-            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter;
+
         
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {

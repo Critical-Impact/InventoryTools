@@ -12,21 +12,10 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return item.Item.ObtainedGil;
+            return searchResult.Item.ObtainedGil;
         }
-
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            return item.ObtainedGil;
-        }
-
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override string Name { get; set; } = "Is Purchasable?";
         public override float Width { get; set; } = 70.0f;
         public override string HelpText { get; set; } = "Can the item be purchased with gil?";

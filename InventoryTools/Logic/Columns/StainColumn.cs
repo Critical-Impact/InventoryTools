@@ -12,21 +12,15 @@ public class StainColumn : TextColumn
     {
     }
     public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+    public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return item.StainEntry?.Name ?? "";
-    }
+        if (searchResult.InventoryItem != null)
+        {
+            return searchResult.InventoryItem.StainEntry?.Name ?? "";
+        }
 
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-    {
         return "";
     }
-
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return CurrentValue(columnConfiguration, item.InventoryItem);
-    }
-
     public override string Name { get; set; } = "Dye";
     public override float Width { get; set; } = 100;
     public override string HelpText { get; set; } = "The current dye of the item";

@@ -20,17 +20,7 @@ namespace InventoryTools.Logic.Columns
             _tryOn = tryOn;
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Tools;
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
-        {
-            return null;
-        }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            return null;
-        }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
             return null;
         }
@@ -45,67 +35,30 @@ namespace InventoryTools.Logic.Columns
         
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            InventoryItem item, int rowIndex, int columnIndex)
+            SearchResult searchResult, int rowIndex, int columnIndex)
         {
             ImGui.TableNextColumn();
             if (ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled))
             {
                 if (ImGui.SmallButton("GT##GT" + rowIndex))
                 {
-                    $"https://www.garlandtools.org/db/#item/{item.Item.GarlandToolsId}".OpenBrowser();
+                    $"https://www.garlandtools.org/db/#item/{searchResult.Item.GarlandToolsId}".OpenBrowser();
                 }
 
-                if (item.Item.CanTryOn)
+                if (searchResult.Item.CanTryOn)
                 {
                     ImGui.SameLine();
                     if (ImGui.SmallButton("Try On##TO" + rowIndex))
                     {
                         if (_tryOn.CanUseTryOn)
                         {
-                            _tryOn.TryOnItem(item.Item, 0, item.IsHQ);
+                            _tryOn.TryOnItem(searchResult.Item, searchResult.InventoryItem?.Stain ?? 0,
+                                searchResult.InventoryItem?.IsHQ ?? false);
                         }
                         else
                         {
-                            Logger.LogError("Something went wrong while attempting to try on " + item.Item.NameString);
-                        }
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        public override List<MessageBase>? Draw(FilterConfiguration configuration,
-            ColumnConfiguration columnConfiguration,
-            SortingResult item, int rowIndex, int columnIndex)
-        {
-           return Draw(configuration, columnConfiguration, item.InventoryItem, rowIndex, columnIndex);
-        }
-
-        public override List<MessageBase>? Draw(FilterConfiguration configuration,
-            ColumnConfiguration columnConfiguration,
-            ItemEx item, int rowIndex, int columnIndex)
-        {
-            ImGui.TableNextColumn();
-            if (ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled))
-            {
-                if (ImGui.SmallButton("G##G" + rowIndex))
-                {
-                    $"https://www.garlandtools.org/db/#item/{item.GarlandToolsId}".OpenBrowser();
-                }
-
-                if (item.CanTryOn)
-                {
-                    ImGui.SameLine();
-                    if (ImGui.SmallButton("Try On##TO" + rowIndex))
-                    {
-                        if (_tryOn.CanUseTryOn)
-                        {
-                            _tryOn.TryOnItem(item, 0, false);
-                        }
-                        else
-                        {
-                            Logger.LogError("Something went wrong while attempting to try on " + item.NameString);
+                            Logger.LogError("Something went wrong while attempting to try on " +
+                                            searchResult.Item.NameString);
                         }
                     }
                 }

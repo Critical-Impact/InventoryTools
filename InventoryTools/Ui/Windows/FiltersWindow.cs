@@ -77,10 +77,11 @@ namespace InventoryTools.Ui
             _addFilterMenu = new PopupMenu("addFilter", PopupMenu.PopupMenuButtons.LeftRight,
                 new List<PopupMenu.IPopupMenuItem>()
                 {
-                    new PopupMenu.PopupMenuItemSelectableAskName("Search Filter", "adf1", "New Search Filter", AddSearchFilter, "This will create a new filter that let's you search for specific items within your characters and retainers inventories."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Sort Filter", "af2", "New Sort Filter", AddSortFilter, "This will create a new filter that let's you search for specific items within your characters and retainers inventories then determine where they should be moved to."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Game Item Filter", "af3", "New Game Item Filter", AddGameItemFilter, "This will create a filter that lets you search for all items in the game."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("History Filter", "af4", "New History Item Filter", AddHistoryFilter, "This will create a filter that lets you view historical data of how your inventory has changed."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Search List", "adf1", "New Search List", AddSearchFilter, "This will create a new list that let's you search for specific items within your characters and retainers inventories."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Sort List", "af2", "New Sort List", AddSortFilter, "This will create a new list that let's you search for specific items within your characters and retainers inventories then determine where they should be moved to."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Game Item List", "af3", "New Game Item List", AddGameItemFilter, "This will create a list that lets you search for all items in the game."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("History List", "af4", "New History List", AddHistoryFilter, "This will create a list that lets you view historical data of how your inventory has changed."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Curated List", "af5", "New Curated List", AddCuratedFilter, "This will create a list that lets you add individual items to it manually."),
                 });
             MediatorService.Subscribe<ListInvalidatedMessage>(this, _ => Invalidate());
             MediatorService.Subscribe<ListRepositionedMessage>(this, _ => Invalidate());
@@ -286,7 +287,17 @@ namespace InventoryTools.Ui
             Invalidate();
             MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
             MediatorService.Publish(new ConfigurationWindowEditFilter(filterConfiguration));
-
+        }
+        
+        private void AddCuratedFilter(string newName, string id)
+        {
+            var filterConfiguration = new FilterConfiguration(newName,
+                Guid.NewGuid().ToString("N"), FilterType.CuratedList);
+            _listService.AddDefaultColumns(filterConfiguration);
+            _listService.AddList(filterConfiguration);
+            Invalidate();
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
+            MediatorService.Publish(new ConfigurationWindowEditFilter(filterConfiguration));
         }
 
         private void AddGameItemFilter(string newName, string id)
@@ -703,6 +714,10 @@ namespace InventoryTools.Ui
                                      filterConfiguration.FilterType.HasFlag(FilterType
                                          .HistoryFilter))
                                     ||
+                                    (filter.AvailableIn.HasFlag(FilterType.CuratedList) &&
+                                     filterConfiguration.FilterType.HasFlag(FilterType
+                                         .CuratedList))
+                                    ||
                                     (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
                                      filterConfiguration.FilterType.HasFlag(FilterType
                                          .GameItemFilter)));
@@ -751,6 +766,10 @@ namespace InventoryTools.Ui
                                                          (filter.AvailableIn.HasFlag(FilterType.HistoryFilter) &&
                                                           filterConfiguration.FilterType.HasFlag(FilterType
                                                               .HistoryFilter))
+                                                         ||
+                                                         (filter.AvailableIn.HasFlag(FilterType.CuratedList) &&
+                                                          filterConfiguration.FilterType.HasFlag(FilterType
+                                                              .CuratedList))
                                                          ||
                                                          (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
                                                           filterConfiguration.FilterType.HasFlag(FilterType
@@ -877,19 +896,9 @@ namespace InventoryTools.Ui
                         var activeCharacter = _characterMonitor.ActiveCharacter;
                         if (activeCharacter != null)
                         {
-                            foreach (var item in itemTable.RenderSortedItems)
+                            foreach (var item in itemTable.RenderSearchResults)
                             {
-                                _universalis.QueuePriceCheck(item.InventoryItem.ItemId, activeCharacter.WorldId);
-                            }
-
-                            foreach (var item in itemTable.RenderItems)
-                            {
-                                _universalis.QueuePriceCheck(item.RowId, activeCharacter.WorldId);
-                            }
-
-                            foreach (var item in itemTable.InventoryChanges)
-                            {
-                                _universalis.QueuePriceCheck(item.InventoryItem.ItemId, activeCharacter.WorldId);
+                                _universalis.QueuePriceCheck(item.Item.RowId, activeCharacter.WorldId);
                             }
                         }
                     }
@@ -1022,18 +1031,18 @@ namespace InventoryTools.Ui
                         ImGuiUtil.HoverTooltip("Clear your history.");
                     }
 
-                    var totalItems =  itemTable.RenderSortedItems.Count + " items";
+                    var totalItems =  itemTable.RenderSearchResults.Count + " items";
 
                     if (SelectedConfiguration != null && SelectedConfiguration.FilterType == FilterType.GameItemFilter)
                     {
-                        totalItems =  itemTable.RenderItems.Count + " items";
+                        totalItems =  itemTable.RenderSearchResults.Count + " items";
                     }
                     
                     if (SelectedConfiguration != null && SelectedConfiguration.FilterType == FilterType.HistoryFilter)
                     {
                         if (_configuration.HistoryEnabled)
                         {
-                            totalItems = itemTable.InventoryChanges.Count + " historical records";
+                            totalItems = itemTable.RenderSearchResults.Count + " historical records";
                         }
                         else
                         {

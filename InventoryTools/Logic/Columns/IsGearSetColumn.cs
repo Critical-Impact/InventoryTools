@@ -12,25 +12,21 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            if (item.GearSets == null)
+            if (searchResult.InventoryItem != null)
             {
-                return false;
+                if (searchResult.InventoryItem.GearSets == null)
+                {
+                    return false;
+                }
+
+                return searchResult.InventoryItem.GearSets.Length != 0;
             }
-            return item.GearSets.Length != 0;
-        }
 
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
             return false;
-        }
 
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
         }
-
         public override string Name { get; set; } = "In Gearset?";
         public override float Width { get; set; } = 80;
         public override string HelpText { get; set; } = "Is this item part of a gearset?";

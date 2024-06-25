@@ -16,19 +16,10 @@ public class HasBeenGatheredColumn : CheckboxColumn
         _gameInterface = gameInterface;
     }
     public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
-    {
-        return CurrentValue(columnConfiguration, item.Item);
-    }
 
-    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
+    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return _gameInterface.IsItemGathered(item.RowId);
-    }
-
-    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return CurrentValue(columnConfiguration, item.InventoryItem);
+        return _gameInterface.IsItemGathered(searchResult.Item.RowId);
     }
 
     public override string Name { get; set; } = "Logged in Gathering Log?";

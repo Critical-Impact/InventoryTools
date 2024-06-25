@@ -16,34 +16,23 @@ namespace InventoryTools.Logic.Columns
             _inventoryMonitor = inventoryMonitor;
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Inventory;
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
-        {
-            return CurrentValue(columnConfiguration, item.Item);
-        }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
             var qty = 0;
-            if (_inventoryMonitor.ItemCounts.ContainsKey((item.RowId,
+            if (_inventoryMonitor.ItemCounts.ContainsKey((searchResult.Item.RowId,
                     FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None)))
             {
-                qty += _inventoryMonitor.ItemCounts[(item.RowId,
+                qty += _inventoryMonitor.ItemCounts[(searchResult.Item.RowId,
                     FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None)];
             }
-            if (_inventoryMonitor.ItemCounts.ContainsKey((item.RowId,
+            if (_inventoryMonitor.ItemCounts.ContainsKey((searchResult.Item.RowId,
                     FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HighQuality)))
             {
-                qty += _inventoryMonitor.ItemCounts[(item.RowId,
+                qty += _inventoryMonitor.ItemCounts[(searchResult.Item.RowId,
                     FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HighQuality)];
             }
             return qty;
         }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override string Name { get; set; } = "Total Quantity Available";
         public override string RenderName => "Available";
         public override float Width { get; set; } = 100;

@@ -21,7 +21,7 @@ namespace InventoryTools.Logic.Columns
         public override ColumnCategory ColumnCategory => ColumnCategory.Market;
         public override FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter;
 
-        public override List<MessageBase>? DoDraw(IItem item, (int, int)? currentValue, int rowIndex,
+        public override List<MessageBase>? DoDraw(SearchResult searchResult, (int, int)? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
             if (currentValue.HasValue && currentValue.Value.Item1 == Loading)
@@ -42,32 +42,27 @@ namespace InventoryTools.Logic.Columns
             }
             else if(currentValue.HasValue)
             {
-                base.DoDraw(item, currentValue, rowIndex, filterConfiguration, columnConfiguration);
+                base.DoDraw(searchResult, currentValue, rowIndex, filterConfiguration, columnConfiguration);
 
             }
             else
             {
-                base.DoDraw(item, currentValue, rowIndex, filterConfiguration, columnConfiguration);
+                base.DoDraw(searchResult, currentValue, rowIndex, filterConfiguration, columnConfiguration);
             }
 
             return null;
         }
 
-        public override (int, int)? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override (int, int)? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            if (!item.CanBeTraded)
+            if (searchResult.InventoryItem is {CanBeTraded: false})
             {
                 return (Untradable, Untradable);
             }
-            var value = base.CurrentValue(columnConfiguration, item);
-            return value.HasValue ? ((int)(value.Value.Item1 * item.Quantity), (int)(value.Value.Item2 * item.Quantity)) : null;
+            var value = base.CurrentValue(columnConfiguration, searchResult);
+            var quantity = searchResult.InventoryItem?.Quantity ?? 1;
+            return value.HasValue ? ((int)(value.Value.Item1 * quantity), (int)(value.Value.Item2 * quantity)) : null;
         }
-
-        public override (int, int)? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override string Name { get; set; } = "Market Board Average Total Price(Qty * Price) NQ/HQ";
         public override string RenderName => "MB Avg. Total NQ/HQ";
         public override string HelpText { get; set; } =

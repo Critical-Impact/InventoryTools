@@ -19,21 +19,10 @@ public class RecipeTotalColumn : IntegerColumn
     public override ColumnCategory ColumnCategory { get; } = ColumnCategory.Crafting;
     public override bool HasFilter { get; set; } = true;
     public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
-
-    public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+    public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return CurrentValue(columnConfiguration, item.Item);
-    }
-
-    public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-    {
-        item.RecipesAsRequirement.Count();
-        return _excelCache.ItemRecipeCount(item.RowId);
-    }
-
-    public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return CurrentValue(columnConfiguration, item.InventoryItem);
+        searchResult.Item.RecipesAsRequirement.Count();
+        return _excelCache.ItemRecipeCount(searchResult.Item.RowId);
     }
 
     public override string Name { get; set; } = "Recipe Total Count";

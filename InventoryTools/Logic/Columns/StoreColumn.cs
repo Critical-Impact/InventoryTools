@@ -12,21 +12,10 @@ public class StoreColumn : CheckboxColumn
     {
     }
     public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return CurrentValue(columnConfiguration, item.Item);
+        return searchResult.Item.PurchasedSQStore;
     }
-
-    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-    {
-        return item.PurchasedSQStore;
-    }
-
-    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return CurrentValue(columnConfiguration, item.InventoryItem);
-    }
-
     public override string Name { get; set; } = "Is sold in Square Store?";
     public override string RenderName => "Is Square Store Item?";
     public override float Width { get; set; } = 80;

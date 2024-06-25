@@ -16,9 +16,6 @@ namespace InventoryTools.Logic.Filters
 
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Columns;
 
-        public override FilterType AvailableIn { get; set; } =
-            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.CraftFilter | FilterType.HistoryFilter;
-        
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
             return null;

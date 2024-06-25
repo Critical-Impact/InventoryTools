@@ -17,43 +17,33 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Crafting;
-        public override (int, int)? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
-        {
-            return null;
-        }
 
-        public override (int, int)? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
+        public override (int, int)? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return null;
-        }
-
-        public override (int, int)? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return null;
-        }
-
-        public override (int, int)? CurrentValue(ColumnConfiguration columnConfiguration, CraftItem currentValue)
-        {
-            if (currentValue.IsOutputItem)
+            if (searchResult.CraftItem == null) return null;
+            
+            if (searchResult.CraftItem.IsOutputItem)
             {
-                return ((int)currentValue.QuantityNeeded,(int)currentValue.QuantityRequired);
+                return ((int)searchResult.CraftItem.QuantityNeeded,(int)searchResult.CraftItem.QuantityRequired);
             }
-            return ((int)currentValue.QuantityNeeded,(int)currentValue.QuantityRequired);
+            return ((int)searchResult.CraftItem.QuantityNeeded,(int)searchResult.CraftItem.QuantityRequired);
         }
 
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            CraftItem item, int rowIndex, int columnIndex)
+            SearchResult searchResult, int rowIndex, int columnIndex)
         {
+            if (searchResult.CraftItem == null) return null;
+            
             ImGui.TableNextColumn();
             if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;
-            if (item.IsOutputItem)
+            if (searchResult.CraftItem.IsOutputItem)
             {
-                var value = CurrentValue(columnConfiguration, item)?.Item2.ToString() ?? "";
+                var value = CurrentValue(columnConfiguration, searchResult)?.Item2.ToString() ?? "";
                 ImGuiUtil.VerticalAlignButton(configuration.TableHeight);
-                if (ImGui.InputText("##"+item.ItemId+"RequiredInput" + columnIndex, ref value, 4, ImGuiInputTextFlags.CharsDecimal))
+                if (ImGui.InputText("##"+searchResult.CraftItem.ItemId+"RequiredInput" + columnIndex, ref value, 4, ImGuiInputTextFlags.CharsDecimal))
                 {
-                    if (value != (CurrentValue(columnConfiguration, item)?.Item2.ToString() ?? ""))
+                    if (value != (CurrentValue(columnConfiguration, searchResult)?.Item2.ToString() ?? ""))
                     {
                         int parsedNumber;
                         if (int.TryParse(value, out parsedNumber))
@@ -62,13 +52,13 @@ namespace InventoryTools.Logic.Columns
                             {
                                 parsedNumber = 0;
                             }
-                            var number = item.GetRoundedQuantity((uint)parsedNumber);
-                            if (number != item.QuantityRequired && configuration.CraftList.BeenGenerated && configuration.CraftList.BeenUpdated)
+                            var number = searchResult.CraftItem.GetRoundedQuantity((uint)parsedNumber);
+                            if (number != searchResult.CraftItem.QuantityRequired && configuration.CraftList.BeenGenerated && configuration.CraftList.BeenUpdated)
                             {
-                                configuration.CraftList.SetCraftRequiredQuantity(item.ItemId, number,
-                                    item.Flags,
-                                    item.Phase);
-                                item.QuantityRequired = number;
+                                configuration.CraftList.SetCraftRequiredQuantity(searchResult.CraftItem.ItemId, number,
+                                    searchResult.CraftItem.Flags,
+                                    searchResult.CraftItem.Phase);
+                                searchResult.CraftItem.QuantityRequired = number;
                                 configuration.NeedsRefresh = true;
                             }
                         }
@@ -77,7 +67,7 @@ namespace InventoryTools.Logic.Columns
             }
             else
             {
-                ImGuiUtil.VerticalAlignText(item.QuantityNeeded + "/" + item.QuantityNeededPreUpdate, configuration.TableHeight, false);
+                ImGuiUtil.VerticalAlignText(searchResult.CraftItem.QuantityNeeded + "/" + searchResult.CraftItem.QuantityNeededPreUpdate, configuration.TableHeight, false);
             }
             return null;
         }

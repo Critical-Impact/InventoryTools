@@ -13,21 +13,10 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return item.Item == null ? false : CurrentValue(columnConfiguration, item.Item);
+            return Helpers.HousingCategoryIds.Contains(searchResult.Item.ItemUICategory.Row);
         }
-
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            return Helpers.HousingCategoryIds.Contains(item.ItemUICategory.Row);
-        }
-
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override string Name { get; set; } = "Is Housing Item?";
         public override string RenderName => "Is Housing?";
         public override float Width { get; set; } = 100;

@@ -12,21 +12,11 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Debug;
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
-        {
-            return CurrentValue(columnConfiguration, item.Item);
-        }
 
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return "Item Search: " + item.ItemSearchCategory.Row + " - Ui Category: " + item.ItemUICategory.Row + " - Sort Category: " + item.ItemSortCategory.Row + " - Equip Slot Category: " + item.EquipSlotCategory.Row + " - Class Job Category: " + item.ClassJobCategory.Row + " - Buy: " + item.PriceMid + " - Unknown: " + item.Unknown19;
+            return "Item Search: " + searchResult.Item.ItemSearchCategory.Row + " - Ui Category: " + searchResult.Item.ItemUICategory.Row + " - Sort Category: " + searchResult.Item.ItemSortCategory.Row + " - Equip Slot Category: " + searchResult.Item.EquipSlotCategory.Row + " - Class Job Category: " + searchResult.Item.ClassJobCategory.Row + " - Buy: " + searchResult.Item.PriceMid + " - Unknown: " + searchResult.Item.Unknown19;
         }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override string Name { get; set; } = "Debug - General Information";
         public override float Width { get; set; } = 200;
         public override string HelpText { get; set; } = "Shows basic debug information";

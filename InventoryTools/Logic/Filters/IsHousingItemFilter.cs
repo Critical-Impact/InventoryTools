@@ -13,10 +13,6 @@ namespace InventoryTools.Logic.Filters
         public override string HelpText { get; set; } = "Only show items that relate to housing.";
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Searching;
 
-        public override FilterType AvailableIn { get; set; } =
-            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter;
-
-        
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
             var currentValue = this.CurrentValue(configuration);

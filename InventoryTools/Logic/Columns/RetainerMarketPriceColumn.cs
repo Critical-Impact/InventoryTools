@@ -12,21 +12,15 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Inventory;
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return (int)item.RetainerMarketPrice;
-        }
+            if (searchResult.InventoryItem != null)
+            {
+                return (int)searchResult.InventoryItem.RetainerMarketPrice;
+            }
 
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
             return null;
         }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override string Name { get; set; } = "Retainer Selling Unit Price";
         public override string RenderName => "Retainer Unit Price";
         public override float Width { get; set; } = 100;

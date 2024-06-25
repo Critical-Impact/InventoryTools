@@ -13,26 +13,15 @@ public class DesynthesisClassColumn : TextColumn
     {
     }
     public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+    public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return CurrentValue(columnConfiguration, item.Item);
-    }
-
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-    {
-        if (!item.CanBeDesynthed || item.ClassJobRepair.Row == 0)
+        if (!searchResult.Item.CanBeDesynthed || searchResult.Item.ClassJobRepair.Row == 0)
         {
             return null;
         }
 
-        return item.ClassJobRepair.Value?.Name.ToString().ToTitleCase() ?? "Unknown";
+        return searchResult.Item.ClassJobRepair.Value?.Name.ToString().ToTitleCase() ?? "Unknown";
     }
-
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return CurrentValue(columnConfiguration, item.InventoryItem);
-    }
-
     public override string Name { get; set; } = "Desynthesis Class";
     public override string RenderName  => "Desynth Class";
     public override float Width { get; set; } = 100;

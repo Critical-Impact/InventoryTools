@@ -119,7 +119,7 @@ public class MockGameItemsWindow : GenericWindow
                                                                     {
                                                                         if (popup.Success)
                                                                         {
-                                                                            MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(item.Item));
+                                                                            MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(item));
                                                                             ImGui.Separator();
                                                                             if (ImGui.Selectable("Copy item"))
                                                                             {

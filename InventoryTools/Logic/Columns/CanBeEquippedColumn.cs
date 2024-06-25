@@ -15,20 +15,10 @@ public class CanBeEquippedColumn : CheckboxColumn
     public override bool HasFilter { get; set; } = true;
     public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Boolean;
 
-    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return CurrentValue(columnConfiguration, item.Item);
+        return searchResult.Item.EquipSlotCategory.Row != 0;
     }
-
-    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-    {
-        return item.EquipSlotCategory.Row != 0;
-    }
-
-    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return CurrentValue(columnConfiguration, item.InventoryItem);    }
-
     public override string Name { get; set; } = "Can be Equipped?";
     public override float Width { get; set; } = 100;
     public override string HelpText { get; set; } = "Can this item be equipped?";
