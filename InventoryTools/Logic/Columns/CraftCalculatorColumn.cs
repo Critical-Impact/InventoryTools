@@ -23,20 +23,11 @@ public class CraftCalculatorColumn : IntegerColumn, IDisposable
     public override ColumnCategory ColumnCategory => ColumnCategory.Tools;
     public Dictionary<uint, uint>? _craftable;
     public CraftCalculator? _craftCalculator;
-    public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
-    {
-        return CurrentValue(columnConfiguration, item.Item);
-    }
 
-    public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
+    public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
         if (_craftable == null) return 0;
-        return (int?)(_craftable.ContainsKey(item.RowId) ? _craftable[item.RowId] : 0);
-    }
-
-    public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return CurrentValue(columnConfiguration, item.InventoryItem);
+        return (int?)(_craftable.ContainsKey(searchResult.Item.RowId) ? _craftable[searchResult.Item.RowId] : 0);
     }
 
     public override string Name { get; set; } = "Craft Calculator";
@@ -107,9 +98,9 @@ public class CraftCalculatorColumn : IntegerColumn, IDisposable
                     items.Add(item);
                 }
                 _craftCalculator.SetAvailableItems(items);                
-                foreach (var item in filterTable.RenderItems)
+                foreach (var item in filterTable.RenderSearchResults)
                 {
-                    _craftCalculator.AddItemId(item.RowId);
+                    _craftCalculator.AddItemId(item.Item.RowId);
                 }
                 _craftCalculator.StartProcessing();
             }

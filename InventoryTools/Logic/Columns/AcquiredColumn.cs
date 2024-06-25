@@ -17,23 +17,13 @@ namespace InventoryTools.Logic.Columns
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
 
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return CurrentValue(columnConfiguration, item.Item);
-        }
-
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            var action = item.ItemAction?.Value;
+            var action = searchResult.Item.ItemAction?.Value;
             if (!ActionTypeExt.IsValidAction(action)) {
                 return null;
             }
-            return _gameInterface.HasAcquired(item);
-        }
-
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem.Item);
+            return _gameInterface.HasAcquired(searchResult.Item);
         }
 
         public override string Name { get; set; } = "Has Been Acquired?";

@@ -113,11 +113,13 @@ public class TableService : DisposableMediatorBackgroundService
         
         RefreshCraftColumns(craftItemTable, cancellationToken);
         
-        if (filterConfiguration.FilterResult != null && filterConfiguration.CraftList.BeenGenerated && filterConfiguration.CraftList.BeenUpdated)
+        if (filterConfiguration.SearchResults != null && filterConfiguration.CraftList.BeenGenerated && filterConfiguration.CraftList.BeenUpdated)
         {
             Logger.LogTrace("CraftTable: Refreshing");
-            craftItemTable.CraftItems = filterConfiguration.CraftList.GetFlattenedMergedMaterials(true);
+            craftItemTable.CraftItems = filterConfiguration.CraftList.GetFlattenedMergedMaterials(true).Select(c => new SearchResult(c)).ToList();
             filterConfiguration.CraftList.ClearGroupCache();
+            var outputList = filterConfiguration.CraftList.GetOutputList();
+            craftItemTable.CraftGroups = outputList.Select(c => (c, c.CraftItems.Select(d => new SearchResult(d)).ToList())).ToList();
             craftItemTable.IsSearching = false;
             craftItemTable.NeedsRefresh = false;
             craftItemTable.Refreshing = false;
@@ -138,13 +140,13 @@ public class TableService : DisposableMediatorBackgroundService
         
         var filterConfiguration = filterTable.FilterConfiguration;
 
-        if (filterConfiguration.FilterResult != null)
+        if (filterConfiguration.SearchResults != null)
         {
             if (filterConfiguration.FilterType == FilterType.SearchFilter 
                 || filterConfiguration.FilterType == FilterType.SortingFilter 
                 || filterConfiguration.FilterType == FilterType.CraftFilter)
             {
-                var items = filterConfiguration.FilterResult.SortedItems.AsEnumerable();
+                var items = filterConfiguration.SearchResults.AsEnumerable();
                 filterTable.IsSearching = false;
                 var columns = filterTable.Columns;
                 for (var index = 0; index < columns.Count; index++)
@@ -162,14 +164,14 @@ public class TableService : DisposableMediatorBackgroundService
                     }
                 }
 
-                filterTable.SortedItems = items.ToList();
-                filterTable.RenderSortedItems = filterTable.SortedItems.Where(item => !item.InventoryItem.IsEmpty).ToList();
+                filterTable.SearchResults = items.ToList();
+                filterTable.RenderSearchResults = filterTable.SearchResults.Where(item => !item.InventoryItem?.IsEmpty ?? false).ToList();
                 filterTable.NeedsRefresh = false;
                 TableRefreshed?.Invoke(filterTable);
             }
             else if(filterConfiguration.FilterType == FilterType.GameItemFilter)
             {
-                var items = filterConfiguration.FilterResult.AllItems.AsEnumerable();
+                var items = filterConfiguration.SearchResults.AsEnumerable();
                 filterTable.IsSearching = false;
                 var columns = filterTable.Columns;
                 for (var index = 0; index < columns.Count; index++)
@@ -180,21 +182,45 @@ public class TableService : DisposableMediatorBackgroundService
                         filterTable.IsSearching = true;
                     }
                     column.Column.InvalidateSearchCache();
-                    items = column.Column.Filter(column, (IEnumerable<ItemEx>)items);
+                    items = column.Column.Filter(column, (IEnumerable<SearchResult>)items);
                     if (filterTable.SortColumn != null && index == filterTable.SortColumn)
                     {
-                        items = column.Column.Sort(column, filterTable.SortDirection ?? ImGuiSortDirection.None, (IEnumerable<ItemEx>)items);
+                        items = column.Column.Sort(column, filterTable.SortDirection ?? ImGuiSortDirection.None, (IEnumerable<SearchResult>)items);
                     }
                 }
 
-                filterTable.Items = items.Where(c => c.NameString.ToString() != "").ToList();
-                filterTable.RenderItems = filterTable.Items.ToList();
+                filterTable.SearchResults = items.Where(c => c.Item.NameString.ToString() != "").ToList();
+                filterTable.RenderSearchResults = filterTable.SearchResults.ToList();
+                filterTable.NeedsRefresh = false;
+                TableRefreshed?.Invoke(filterTable);
+            }
+            else if(filterConfiguration.FilterType == FilterType.CuratedList)
+            {
+                var items = filterConfiguration.SearchResults.AsEnumerable();
+                filterTable.IsSearching = false;
+                var columns = filterTable.Columns;
+                for (var index = 0; index < columns.Count; index++)
+                {
+                    var column = columns[index];
+                    if (column.FilterText != "")
+                    {
+                        filterTable.IsSearching = true;
+                    }
+
+                    items = column.Column.Filter(column, items);
+                    if (filterTable.SortColumn != null && index == filterTable.SortColumn)
+                    {
+                        items = column.Column.Sort(column, filterTable.SortDirection ?? ImGuiSortDirection.None, items);
+                    }
+                }
+                filterTable.SearchResults = items.ToList();
+                filterTable.RenderSearchResults = filterTable.SearchResults.ToList();
                 filterTable.NeedsRefresh = false;
                 TableRefreshed?.Invoke(filterTable);
             }
             else
             {
-                var items = filterConfiguration.FilterResult.InventoryHistory.AsEnumerable();
+                var items = filterConfiguration.SearchResults.AsEnumerable();
                 filterTable.IsSearching = false;
                 var columns = filterTable.Columns;
                 for (var index = 0; index < columns.Count; index++)
@@ -211,8 +237,8 @@ public class TableService : DisposableMediatorBackgroundService
                         items = column.Column.Sort(column, filterTable.SortDirection ?? ImGuiSortDirection.None, items);
                     }
                 }
-                filterTable.InventoryChanges = items.Where(c => c.InventoryItem.FormattedName != "").ToList();
-                filterTable.RenderInventoryChanges = filterTable.InventoryChanges.ToList();
+                filterTable.SearchResults = items.Where(c => (c.InventoryItem?.FormattedName ?? "") != "").ToList();
+                filterTable.RenderSearchResults = filterTable.SearchResults.ToList();
                 filterTable.NeedsRefresh = false;
                 TableRefreshed?.Invoke(filterTable);
             }

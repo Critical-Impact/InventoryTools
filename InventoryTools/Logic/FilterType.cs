@@ -11,6 +11,6 @@ namespace InventoryTools.Logic
         GameItemFilter = 4, //For displaying all the items
         CraftFilter = 8, //For crafting items
         HistoryFilter = 16, //For showing historical movement of items
-        FavouriteFilter = 32 //Manually curated lists
+        CuratedList = 32 //Manually curated lists
     }
 }

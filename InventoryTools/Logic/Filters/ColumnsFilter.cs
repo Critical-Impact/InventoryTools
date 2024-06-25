@@ -57,7 +57,7 @@ namespace InventoryTools.Logic.Filters
         }
 
         public override FilterType AvailableIn { get; set; } =
-            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.CraftFilter | FilterType.HistoryFilter;
+            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.CraftFilter | FilterType.HistoryFilter | FilterType.CuratedList;
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
             return null;

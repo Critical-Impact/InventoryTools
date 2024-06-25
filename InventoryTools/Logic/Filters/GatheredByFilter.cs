@@ -19,9 +19,6 @@ public class GatheredByFilter : UintMultipleChoiceFilter
 
     public override List<uint> DefaultValue { get; set; } = new();
 
-    public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter |
-                                                           FilterType.HistoryFilter | FilterType.GameItemFilter;
-
     public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
     {
         return FilterItem(configuration, item.Item);

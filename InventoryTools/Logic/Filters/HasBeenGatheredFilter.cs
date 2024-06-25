@@ -20,8 +20,6 @@ public class HasBeenGatheredFilter : BooleanFilter
     public override string HelpText { get; set; } = "Has this gathering item been gathered at least once by the currently logged in character? This only supports mining and botany at present.";
     public override FilterCategory FilterCategory { get; set; } = FilterCategory.Gathering;
 
-    public override FilterType AvailableIn { get; set; } =
-        FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter;
     public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
     {
         return FilterItem(configuration, item.Item);

@@ -12,21 +12,10 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return (int)item.ItemId;
+            return (int)searchResult.Item.RowId;
         }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            return (int)item.RowId;
-        }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override string Name { get; set; } = "Item ID";
         public override float Width { get; set; } = 100.0f;
         public override string HelpText { get; set; } = "Shows the item's internal ID.";

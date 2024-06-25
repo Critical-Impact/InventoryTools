@@ -16,34 +16,27 @@ namespace InventoryTools.Logic.Columns
             _inventoryMonitor = inventoryMonitor;
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Inventory;
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return (int)item.Quantity;
-        }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
+            if (searchResult.InventoryItem != null)
+            {
+                return (int)searchResult.InventoryItem.Quantity;
+            }
             var qty = 0;
-            if (_inventoryMonitor.ItemCounts.ContainsKey((item.RowId,
+            if (_inventoryMonitor.ItemCounts.ContainsKey((searchResult.Item.RowId,
                     FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None)))
             {
-                qty += _inventoryMonitor.ItemCounts[(item.RowId,
+                qty += _inventoryMonitor.ItemCounts[(searchResult.Item.RowId,
                     FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None)];
             }
-            if (_inventoryMonitor.ItemCounts.ContainsKey((item.RowId,
+            if (_inventoryMonitor.ItemCounts.ContainsKey((searchResult.Item.RowId,
                     FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HighQuality)))
             {
-                qty += _inventoryMonitor.ItemCounts[(item.RowId,
+                qty += _inventoryMonitor.ItemCounts[(searchResult.Item.RowId,
                     FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HighQuality)];
             }
             return qty;
         }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override string Name { get; set; } = "Total Quantity Available";
         public override string RenderName => "Quantity";
 
@@ -54,7 +47,7 @@ namespace InventoryTools.Logic.Columns
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
         
-        public override FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter | Logic.FilterType.GameItemFilter | Logic.FilterType.HistoryFilter;
-        public override FilterType DefaultIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter | Logic.FilterType.CraftFilter | Logic.FilterType.HistoryFilter;
+        public override FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter | Logic.FilterType.GameItemFilter | Logic.FilterType.HistoryFilter | Logic.FilterType.CuratedList;
+        public override FilterType DefaultIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter | Logic.FilterType.CraftFilter | Logic.FilterType.HistoryFilter | Logic.FilterType.CuratedList;
     }
 }

@@ -25,7 +25,7 @@ public abstract class ButtonColumn : IColumn
     public virtual bool IsDebug { get; set; } = false;
     public virtual FilterType AvailableIn { get; } = Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter |
                                                       Logic.FilterType.GameItemFilter | Logic.FilterType.HistoryFilter |
-                                                      Logic.FilterType.FavouriteFilter | Logic.FilterType.CraftFilter;
+                                                      Logic.FilterType.FavouriteFilter | Logic.FilterType.CraftFilter | Logic.FilterType.CuratedList;
 
     public bool AvailableInType(FilterType type) =>
         AvailableIn.HasFlag(InventoryTools.Logic.FilterType.SearchFilter) &&
@@ -46,137 +46,31 @@ public abstract class ButtonColumn : IColumn
     public virtual bool? CraftOnly { get; } = null;
     public bool IsConfigurable => false;
     public virtual string? RenderName { get; }
-    public virtual IEnumerable<InventoryItem> Filter(ColumnConfiguration columnConfiguration, IEnumerable<InventoryItem> items)
+
+    public virtual IEnumerable<SearchResult> Filter(ColumnConfiguration columnConfiguration, IEnumerable<SearchResult> items)
     {
         return items;
     }
 
-    public virtual IEnumerable<SortingResult> Filter(ColumnConfiguration columnConfiguration, IEnumerable<SortingResult> items)
+    public virtual IEnumerable<SearchResult> Sort(ColumnConfiguration columnConfiguration, ImGuiSortDirection direction, IEnumerable<SearchResult> items)
     {
         return items;
-    }
-
-    public virtual IEnumerable<ItemEx> Filter(ColumnConfiguration columnConfiguration, IEnumerable<ItemEx> items)
-    {
-        return items;
-    }
-
-    public virtual IEnumerable<CraftItem> Filter(ColumnConfiguration columnConfiguration, IEnumerable<CraftItem> items)
-    {
-        return items;
-    }
-
-    public virtual IEnumerable<InventoryChange> Filter(ColumnConfiguration columnConfiguration, IEnumerable<InventoryChange> items)
-    {
-        return items;
-    }
-
-    public virtual IEnumerable<InventoryItem> Sort(ColumnConfiguration columnConfiguration, ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
-    {
-        return items;
-    }
-
-    public virtual IEnumerable<SortingResult> Sort(ColumnConfiguration columnConfiguration, ImGuiSortDirection direction, IEnumerable<SortingResult> items)
-    {
-        return items;
-    }
-
-    public virtual IEnumerable<ItemEx> Sort(ColumnConfiguration columnConfiguration, ImGuiSortDirection direction, IEnumerable<ItemEx> items)
-    {
-        return items;
-    }
-
-    public virtual IEnumerable<CraftItem> Sort(ColumnConfiguration columnConfiguration, ImGuiSortDirection direction, IEnumerable<CraftItem> items)
-    {
-        return items;
-    }
-
-    public virtual IEnumerable<InventoryChange> Sort(ColumnConfiguration columnConfiguration, ImGuiSortDirection direction, IEnumerable<InventoryChange> items)
-    {
-        return items;
-    }
-
-    public virtual List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
-        InventoryItem item,
-        int rowIndex, int columnIndex)
-    {
-        return Draw(configuration, columnConfiguration, item.Item, rowIndex, columnIndex);
-    }
-
-    public virtual List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
-        SortingResult item,
-        int rowIndex, int columnIndex)
-    {
-        return Draw(configuration, columnConfiguration, item.Item, rowIndex, columnIndex);
     }
 
     public abstract List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
-        ItemEx item, int rowIndex, int columnIndex);
-
-    public virtual List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
-        CraftItem item, int rowIndex, int columnIndex)
-    {
-        return Draw(configuration, columnConfiguration, item.Item, rowIndex, columnIndex);
-    }
-
-    public virtual List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
-        InventoryChange item,
-        int rowIndex, int columnIndex)
-    {
-        return Draw(configuration, columnConfiguration, item.Item, rowIndex, columnIndex);
-    }
+        SearchResult searchResult, int rowIndex, int columnIndex);
 
     public virtual void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)
     {
         
     }
 
-    public virtual string CsvExport(ColumnConfiguration columnConfiguration, InventoryItem item)
+    public virtual string CsvExport(ColumnConfiguration columnConfiguration, SearchResult item)
     {
         return "";
     }
 
-    public virtual string CsvExport(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return "";
-    }
-
-    public virtual string CsvExport(ColumnConfiguration columnConfiguration, ItemEx item)
-    {
-        return "";
-    }
-
-    public virtual string CsvExport(ColumnConfiguration columnConfiguration, CraftItem item)
-    {
-        return "";
-    }
-
-    public virtual string CsvExport(ColumnConfiguration columnConfiguration, InventoryChange item)
-    {
-        return "";
-    }
-
-    public virtual dynamic? JsonExport(ColumnConfiguration columnConfiguration, InventoryItem item)
-    {
-        return "";
-    }
-
-    public virtual dynamic? JsonExport(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return "";
-    }
-
-    public virtual dynamic? JsonExport(ColumnConfiguration columnConfiguration, ItemEx item)
-    {
-        return "";
-    }
-
-    public virtual dynamic? JsonExport(ColumnConfiguration columnConfiguration, CraftItem item)
-    {
-        return "";
-    }
-
-    public virtual dynamic? JsonExport(ColumnConfiguration columnConfiguration, InventoryChange item)
+    public virtual dynamic? JsonExport(ColumnConfiguration columnConfiguration, SearchResult item)
     {
         return "";
     }

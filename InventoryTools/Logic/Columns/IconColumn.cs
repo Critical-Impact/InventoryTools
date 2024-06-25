@@ -12,6 +12,7 @@ using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Ui;
+using Lumina.Excel.GeneratedSheets;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
@@ -22,73 +23,26 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override (ushort, bool)? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override (ushort, bool)? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return (item.Icon, item.IsHQ);
+            if (searchResult.InventoryItem != null)
+            {
+                return (searchResult.InventoryItem.Icon, searchResult.InventoryItem.IsHQ);
+            }
+            return (searchResult.Item.Icon, false);
         }
 
-        public override (ushort, bool)? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
+        public override IEnumerable<SearchResult> Filter(ColumnConfiguration columnConfiguration, IEnumerable<SearchResult> searchResults)
         {
-            return (item.Icon, false);
+            return searchResults;
         }
 
-        public override (ushort, bool)? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
+        public override IEnumerable<SearchResult> Sort(ColumnConfiguration columnConfiguration, ImGuiSortDirection direction, IEnumerable<SearchResult> searchResults)
         {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-        
-        public override dynamic? JsonExport(ColumnConfiguration columnConfiguration, InventoryItem item)
-        {
-            return CurrentValue(columnConfiguration, item)?.Item1;
+            return searchResults;
         }
 
-        public override dynamic? JsonExport(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            return CurrentValue(columnConfiguration, item)?.Item1;
-        }
-
-        public override dynamic? JsonExport(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item)?.Item1;
-        }
-
-        public override dynamic? JsonExport(ColumnConfiguration columnConfiguration, CraftItem item)
-        {
-            return CurrentValue(columnConfiguration, item)?.Item1;
-        }
-
-        public override List<MessageBase>? Draw(FilterConfiguration configuration,
-            ColumnConfiguration columnConfiguration,
-            InventoryItem item, int rowIndex, int columnIndex)
-        {
-            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
-        }
-        public override List<MessageBase>? Draw(FilterConfiguration configuration,
-            ColumnConfiguration columnConfiguration,
-            SortingResult item, int rowIndex, int columnIndex)
-        {
-            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
-        }
-        public override List<MessageBase>? Draw(FilterConfiguration configuration,
-            ColumnConfiguration columnConfiguration,
-            ItemEx item, int rowIndex, int columnIndex)
-        {
-            return DoDraw(item, CurrentValue(columnConfiguration, (ItemEx)item), rowIndex, configuration, columnConfiguration);
-        }
-        public override List<MessageBase>? Draw(FilterConfiguration configuration,
-            ColumnConfiguration columnConfiguration,
-            CraftItem item, int rowIndex, int columnIndex)
-        {
-            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
-        }
-        public override List<MessageBase>? Draw(FilterConfiguration configuration,
-            ColumnConfiguration columnConfiguration,
-            InventoryChange item, int rowIndex, int columnIndex)
-        {
-            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
-        }
-
-        public override List<MessageBase>? DoDraw(IItem item, (ushort, bool)? currentValue, int rowIndex,
+        public override List<MessageBase>? DoDraw(SearchResult searchResult, (ushort, bool)? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
             ImGui.TableNextColumn();
@@ -100,7 +54,7 @@ namespace InventoryTools.Logic.Columns
                 if (ImGui.ImageButton(ImGuiService.GetIconTexture(currentValue.Value.Item1, currentValue.Value.Item2).ImGuiHandle, new Vector2(filterConfiguration.TableHeight - 1, filterConfiguration.TableHeight - 1) * ImGui.GetIO().FontGlobalScale,new Vector2(0,0), new Vector2(1,1), 2))
                 {
                     ImGui.PopID();
-                    messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), item.ItemId));
+                    messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), searchResult.Item.ItemId));
                 }
                 ImGui.PopID();
             }

@@ -64,7 +64,7 @@ namespace InventoryToolsTesting.Tests
             inventoryMonitor.AddInventory(inventory);
             
             var oneList = listFilterService.RefreshList(searchFilter);
-            Assert.AreEqual( 1, oneList.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+            Assert.AreEqual( 1, oneList.Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
 
         }
 
@@ -98,67 +98,66 @@ namespace InventoryToolsTesting.Tests
     
             //Nothing to sort
             var emptyList = listFilterService.RefreshList(searchFilter);
-            Assert.True(emptyList.SortedItems.All(c => c.InventoryItem.IsEmpty));
+            Assert.True(emptyList.All(c => c.InventoryItem != null && c.InventoryItem.IsEmpty));
     
             //1 item to retainer
             inventory.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
             var oneList = listFilterService.RefreshList( searchFilter);
-            Assert.AreEqual( 1, oneList.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+            Assert.AreEqual( 1, oneList.Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
     
             //Duplicates only, 0 items to retainer
             searchFilter.DuplicatesOnly = true;
-            Assert.True(listFilterService.RefreshList( searchFilter).SortedItems.All(c => c.InventoryItem.IsEmpty));
+            Assert.True(listFilterService.RefreshList(searchFilter).All(c => c.InventoryItem != null && c.InventoryItem.IsEmpty));
             
             //Duplicates only, 1 item to retainer
             retainerInventory.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1));
-            Assert.AreEqual(1, listFilterService.RefreshList( searchFilter).SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+            Assert.AreEqual(1, listFilterService.RefreshList(searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
             
             //Duplicates only, 1 item to retainer, add a unrelated item
             retainerInventory.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 1, wheatFlour.RowId, 1));
-            Assert.AreEqual(1,listFilterService.RefreshList( searchFilter).SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+            Assert.AreEqual(1,listFilterService.RefreshList( searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
             
             //Duplicates only, max out item in existing inventory
             retainerInventory.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.StackSize));
             var generateFilteredList = listFilterService.RefreshList( searchFilter);
-            Assert.AreEqual(1, generateFilteredList.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+            Assert.AreEqual(1, generateFilteredList.Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
             
             //Duplicates only, max out item in existing inventory then spill over
             retainerInventory.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.StackSize - 1));
             inventory.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 2));
-            Assert.AreEqual(2, listFilterService.RefreshList( searchFilter).SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+            Assert.AreEqual(2, listFilterService.RefreshList(searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
             
             //Duplicates only, max out retainer, should go nowhere, boy got some cinnamon, 2 items in inventory
             Fixtures.FillInventory(retainerInventory, InventoryCategory.RetainerBags, cinnamon.RowId, cinnamon.StackSize);
-            Assert.AreEqual(0,listFilterService.RefreshList( searchFilter).SortedItems.Count(c => !c.InventoryItem.IsEmpty));
-            Assert.AreEqual(0, listFilterService.RefreshList( searchFilter).UnsortableItems.Count(c => !c.IsEmpty));
+            Assert.AreEqual(0,listFilterService.RefreshList( searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
             
             //Allow item to spill over to retainer 2, but we are in retainer 1 so nothing shows up
             searchFilter.DuplicatesOnly = false;
             searchFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Only;
-            Assert.AreEqual(0, listFilterService.RefreshList( searchFilter).SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer2.CharacterId));
+            Assert.AreEqual(0, listFilterService.RefreshList( searchFilter).Count(c =>c.InventoryItem != null && c.SortingResult != null && !c.InventoryItem.IsEmpty && c.SortingResult.DestinationRetainerId == _retainer2.CharacterId));
             
             
             //Allow item to spill over to retainer 2 for real
             characterMonitor.OverrideActiveRetainer(0);
-            Assert.AreEqual(1, listFilterService.RefreshList( searchFilter).SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer2.CharacterId));
+            Assert.AreEqual(1, listFilterService.RefreshList( searchFilter).Count(c =>c.InventoryItem != null && c.SortingResult != null &&  !c.InventoryItem.IsEmpty && c.SortingResult.DestinationRetainerId == _retainer2.CharacterId));
             
             //Item should goto 2nd retainer first
             Fixtures.FillInventory(retainerInventory, InventoryCategory.RetainerBags, 0, 0);
             inventory.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
             retainerInventory2.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.StackSize - 1));
-            Assert.True(listFilterService.RefreshList( searchFilter).SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer2.CharacterId) == 1);
+            Assert.True(listFilterService.RefreshList( searchFilter).Count(c =>c.InventoryItem != null && c.SortingResult != null &&  !c.InventoryItem.IsEmpty && c.SortingResult.DestinationRetainerId == _retainer2.CharacterId) == 1);
             
             //Filter items when in specific retainer, should show 0 sorted items as we are in the first retainer and not the 2nd
             searchFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
             characterMonitor.OverrideActiveRetainer(_retainer.CharacterId);
-            Assert.True(listFilterService.RefreshList( searchFilter).SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer2.CharacterId) == 0);
-            Assert.True(listFilterService.RefreshList( searchFilter).SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer.CharacterId) == 0);
+            Assert.True(listFilterService.RefreshList( searchFilter).Count(c =>c.InventoryItem != null && c.SortingResult != null &&  !c.InventoryItem.IsEmpty && c.SortingResult.DestinationRetainerId == _retainer2.CharacterId) == 0);
+            Assert.True(listFilterService.RefreshList( searchFilter).Count(c =>c.InventoryItem != null && c.SortingResult != null &&  !c.InventoryItem.IsEmpty && c.SortingResult.DestinationRetainerId == _retainer.CharacterId) == 0);
             
             //Switch to retainer 2
             searchFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
             characterMonitor.OverrideActiveRetainer(_retainer2.CharacterId);
-            Assert.True(listFilterService.RefreshList( searchFilter).SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer2.CharacterId) == 1);
-            Assert.True(listFilterService.RefreshList( searchFilter).SortedItems.Count(c => !c.InventoryItem.IsEmpty && c.DestinationRetainerId == _retainer.CharacterId) == 0);
+            Assert.True(listFilterService.RefreshList( searchFilter).Count(c =>c.InventoryItem != null && c.SortingResult != null &&  !c.InventoryItem.IsEmpty && c.SortingResult.DestinationRetainerId == _retainer2.CharacterId) == 1);
+            Assert.True(listFilterService.RefreshList( searchFilter).Count(c =>c.InventoryItem != null && c.SortingResult != null &&  !c.InventoryItem.IsEmpty && c.SortingResult.DestinationRetainerId == _retainer.CharacterId) == 0);
         }
         //
         [Test]
@@ -188,12 +187,12 @@ namespace InventoryToolsTesting.Tests
             
             //Nothing to sort
             var emptyList = listFilterService.RefreshList(searchFilter);
-            Assert.True(emptyList.SortedItems.All(c => c.InventoryItem.IsEmpty));
+            Assert.True(emptyList.All(c => c.InventoryItem != null && c.InventoryItem.IsEmpty));
     
             //1 item to retainer
             inventory.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
             var oneList = listFilterService.RefreshList(searchFilter);
-            Assert.AreEqual( 1, oneList.SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+            Assert.AreEqual( 1, oneList.Count(c => c.InventoryItem != null &&  !c.InventoryItem.IsEmpty));
                 
         }
         
@@ -208,7 +207,7 @@ namespace InventoryToolsTesting.Tests
             searchFilter.IntegerFilters = new Dictionary<string, int>() {{"CraftItemFilter", 32224}};
             
             var emptyList = listFilterService.RefreshList( searchFilter);
-            Assert.AreEqual(16, emptyList.AllItems.Count);
+            Assert.AreEqual(16, emptyList.Count);
         }
         
         [Test]
@@ -247,21 +246,21 @@ namespace InventoryToolsTesting.Tests
             retainerInventory2.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1));
             
             //1 in player bag, 1 in retainer bag 1 as retainer 1 is active
-            Assert.AreEqual(2, listFilterService.RefreshList(searchFilter).SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+            Assert.AreEqual(2, listFilterService.RefreshList(searchFilter).Count(c => c.InventoryItem != null &&  !c.InventoryItem.IsEmpty));
             
             characterMonitor.OverrideActiveRetainer(0);
             //1 in player bag, 1 in retainer bag 1, 1 in retainer bag 2 as no retainer is active
-            Assert.AreEqual(3, listFilterService.RefreshList(searchFilter).SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+            Assert.AreEqual(3, listFilterService.RefreshList(searchFilter).Count(c => c.InventoryItem != null &&  !c.InventoryItem.IsEmpty));
             
             searchFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
             
             //1 from bag -> retainer 1
             //1 from retainer 1 -> retainer 2
             //1 from retainer 2 -> retainer 1
-            var actual = listFilterService.RefreshList(searchFilter).SortedItems.Where(c => !c.InventoryItem.IsEmpty).ToList();
-            Assert.AreEqual(_retainer.CharacterId, actual.ToList()[0].DestinationRetainerId);
-            Assert.AreEqual(_retainer2.CharacterId, actual.ToList()[1].DestinationRetainerId);
-            Assert.AreEqual(_retainer.CharacterId, actual.ToList()[2].DestinationRetainerId);
+            var actual = listFilterService.RefreshList(searchFilter).Where(c => c.InventoryItem != null && c.SortingResult != null && !c.InventoryItem.IsEmpty).ToList();
+            Assert.AreEqual(_retainer.CharacterId, actual.ToList()[0].SortingResult!.DestinationRetainerId);
+            Assert.AreEqual(_retainer2.CharacterId, actual.ToList()[1].SortingResult!.DestinationRetainerId);
+            Assert.AreEqual(_retainer.CharacterId, actual.ToList()[2].SortingResult!.DestinationRetainerId);
         }
         
         [Test]
@@ -303,16 +302,16 @@ namespace InventoryToolsTesting.Tests
             characterInventory2.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
             
             //Cross character off, should pick up 3
-            Assert.AreEqual(3, listFilterService.RefreshList(searchFilter).SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+            Assert.AreEqual(3, listFilterService.RefreshList(searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
             
             //Cross character on, should pick up 4
             configuration.DisplayCrossCharacter = true;
-            Assert.AreEqual(4, listFilterService.RefreshList(searchFilter).SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+            Assert.AreEqual(4, listFilterService.RefreshList(searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
             
             //Test cross character source filter setting
             configuration.DisplayCrossCharacter = false;
             searchFilter.SourceIncludeCrossCharacter = true;
-            Assert.AreEqual(4, listFilterService.RefreshList(searchFilter).SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+            Assert.AreEqual(4, listFilterService.RefreshList(searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
             
             //Test cross character destination filter setting
             searchFilter.DestinationIncludeCrossCharacter = true;
@@ -323,12 +322,12 @@ namespace InventoryToolsTesting.Tests
             };
             searchFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
             //With a active retainer and filter items in retainers set to yes, only 1 item shows up
-            var resultSortedItems = listFilterService.RefreshList(searchFilter).SortedItems;
-            Assert.AreEqual(1, resultSortedItems.Count(c => !c.InventoryItem.IsEmpty));
+            var resultSortedItems = listFilterService.RefreshList(searchFilter);
+            Assert.AreEqual(1, resultSortedItems.Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
             
             //Without a active retainer
             characterMonitor.OverrideActiveRetainer(0);
-            Assert.AreEqual(4, listFilterService.RefreshList(searchFilter).SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+            Assert.AreEqual(4, listFilterService.RefreshList(searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
     
     
             //Test cross character destination filter setting override
@@ -340,7 +339,7 @@ namespace InventoryToolsTesting.Tests
             searchFilter.DestinationIncludeCrossCharacter = false;
             searchFilter.SourceIncludeCrossCharacter = true;
     
-            Assert.AreEqual(1, listFilterService.RefreshList(searchFilter).SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+            Assert.AreEqual(1, listFilterService.RefreshList(searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
         }
         
         [Test]
@@ -385,14 +384,14 @@ namespace InventoryToolsTesting.Tests
             characterInventory2.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
             
             //Just character bags as source
-            Assert.AreEqual(1, listFilterService.RefreshList(searchFilter).SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+            Assert.AreEqual(1, listFilterService.RefreshList(searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
             
             //Add retainer bags as source
             searchFilter.SourceCategories.Add(InventoryCategory.RetainerBags);
-            Assert.AreEqual(3, listFilterService.RefreshList(searchFilter).SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+            Assert.AreEqual(3, listFilterService.RefreshList(searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
             
             //Sort filter, character to retainer bags
-            Assert.AreEqual(1, listFilterService.RefreshList(sortFilter).SortedItems.Count(c => !c.InventoryItem.IsEmpty));
+            Assert.AreEqual(1, listFilterService.RefreshList(sortFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
         }
         
         [Test]

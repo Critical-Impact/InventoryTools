@@ -12,21 +12,15 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return item.FormattedType;
-        }
+            if (searchResult.InventoryItem != null)
+            {
+                return searchResult.InventoryItem.FormattedType;
+            }
 
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
             return null;
         }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override string Name { get; set; } = "Type";
         public override float Width { get; set; } = 80.0f;
         public override string HelpText { get; set; } = "The type of the item.";

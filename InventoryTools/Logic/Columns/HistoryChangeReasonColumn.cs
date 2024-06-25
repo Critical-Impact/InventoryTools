@@ -12,32 +12,15 @@ public class HistoryChangeReasonColumn : TextColumn
     {
     }
     public override ColumnCategory ColumnCategory => ColumnCategory.History;
-
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+    public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return "";
-    }
+        if (searchResult.InventoryChange != null)
+        {
+            return searchResult.InventoryChange.GetFormattedChange();
+        }
 
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-    {
-        return "";
+        return null;
     }
-
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return "";
-    }
-
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryChange item)
-    {
-        return item.GetFormattedChange();
-    }
-    
-    public override string CsvExport(ColumnConfiguration columnConfiguration, InventoryChange item)
-    {
-        return CurrentValue(columnConfiguration, item) ?? "";
-    }
-
     public override string Name { get; set; } = "History Event Reason";
     public override string RenderName => "Event";
     public override float Width { get; set; } = 100;

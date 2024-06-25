@@ -16,13 +16,11 @@ public class ItemFilter : UintMultipleChoiceFilter
     public override string Name { get; set; } = "Name (Selector)";
 
     public override string HelpText { get; set; } =
-        "Select a list of items and the filter will only display these items.";
+        "Select a list of items and the filter will only display these items. You are better served using a Curated List but this filter will still work.";
 
     public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
     public override List<uint> DefaultValue { get; set; } = new();
 
-    public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.HistoryFilter |
-                                                           FilterType.SortingFilter | FilterType.GameItemFilter;
     public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
     {
         return FilterItem(configuration, item.Item);

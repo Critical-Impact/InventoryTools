@@ -15,8 +15,7 @@ namespace InventoryTools.Logic.Filters
         public override string HelpText { get; set; } = "Only show items that can be put into the armoire.";
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Searching;
 
-        public override FilterType AvailableIn { get; set; } =
-            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter;
+
 
         
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)

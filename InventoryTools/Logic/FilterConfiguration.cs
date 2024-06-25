@@ -35,6 +35,7 @@ namespace InventoryTools.Logic
         private Dictionary<string, List<ulong>>? _ulongChoiceFilters = new();
         private Dictionary<string, List<string>>? _stringChoiceFilters = new();
         private Dictionary<string, Vector4>? _colorFilters = new();
+        private List<CuratedItem>? _curatedItems;
         private string? _name = "";
         private string _key = "";
         private ulong _ownerId = 0;
@@ -116,7 +117,7 @@ namespace InventoryTools.Logic
         /// Is this list being viewed in a window?
         /// </summary>
         [JsonIgnore] public bool Active { get; set; }
-        
+
         //Crafting
         private CraftList? _craftList = null;
         private bool? _simpleCraftingMode = null;
@@ -164,17 +165,23 @@ namespace InventoryTools.Logic
         }
         
         [JsonIgnore]
-        private FilterResult? _filterResult = null;
+        private List<SearchResult>? _searchResults = null;
 
         private string? _tableId = null;
         private string? _craftTableId = null;
         public HighlightMode HighlightMode { get; set; } = HighlightMode.Never;
 
-        [JsonIgnore]
-        public FilterResult? FilterResult
+        public List<CuratedItem>? CuratedItems
         {
-            get => _filterResult;
-            set => _filterResult = value;
+            get => _curatedItems;
+            set => _curatedItems = value;
+        }
+
+        [JsonIgnore]
+        public List<SearchResult>? SearchResults
+        {
+            get => _searchResults;
+            set => _searchResults = value;
         }
 
         public FilterConfiguration(string name, string key, FilterType filterType)
@@ -1007,6 +1014,26 @@ namespace InventoryTools.Logic
             }
         }
 
+        public void AddCuratedItem(CuratedItem curatedItem)
+        {
+            if (_curatedItems == null)
+            {
+                _curatedItems = new();
+            }
+            _curatedItems.Add(curatedItem);
+            ConfigurationDirty = true;
+        }
+
+        public void RemoveCuratedItem(CuratedItem curatedItem)
+        {
+            if (_curatedItems == null)
+            {
+                _curatedItems = new();
+            }
+            _curatedItems.Remove(curatedItem);
+            ConfigurationDirty = true;
+        }
+
         [JsonIgnore]
         public string FormattedFilterType
         {
@@ -1031,6 +1058,10 @@ namespace InventoryTools.Logic
                 else if (FilterType.HasFlag(FilterType.HistoryFilter))
                 {
                     return "History List";
+                }
+                else if (FilterType.HasFlag(FilterType.CuratedList))
+                {
+                    return "Curated List";
                 }
                 return "";
             }
@@ -1453,9 +1484,9 @@ namespace InventoryTools.Logic
 
         public FilterConfiguration? Clone()
         {
-            FilterResult = null;
+            SearchResults = null;
             var clone = this.Copy();
-            FilterResult = null;
+            SearchResults = null;
             if (clone != null && this.FilterType == FilterType.CraftFilter)
             {
                 var clonedCraftList = CraftList.Clone();

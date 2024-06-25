@@ -16,8 +16,6 @@ public class RecipeTotalFilter : StringFilter
     public override string HelpText { get; set; } = "The number of recipes the item is a component of.";
     public override FilterCategory FilterCategory { get; set; } = FilterCategory.Crafting;
 
-    public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter |
-                                                           FilterType.HistoryFilter | FilterType.GameItemFilter;
     public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
     {
         return FilterItem(configuration, item.Item);

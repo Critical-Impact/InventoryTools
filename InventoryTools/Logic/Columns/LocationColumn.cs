@@ -15,21 +15,15 @@ namespace InventoryTools.Logic.Columns
 
         public override FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter | Logic.FilterType.CraftFilter;
 
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return item.FormattedBagLocation;
-        }
+            if (searchResult.InventoryItem != null)
+            {
+                return searchResult.InventoryItem.FormattedBagLocation;
+            }
 
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
             return null;
         }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override string Name { get; set; } = "Inventory Location";
         public override string RenderName => "Location";
         public override float Width { get; set; } = 100.0f;

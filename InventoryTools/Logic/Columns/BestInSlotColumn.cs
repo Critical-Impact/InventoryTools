@@ -49,17 +49,21 @@ namespace InventoryTools.Logic.Columns
             return null;
         }
 
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            if (item.SortedCategory == InventoryCategory.CharacterEquipped || item.SortedCategory == InventoryCategory.RetainerEquipped || item.SortedCategory == InventoryCategory.Armoire || item.SortedCategory == InventoryCategory.GlamourChest || item.InGearSet)
+            var inventoryItem = searchResult.InventoryItem;
+            if (inventoryItem != null)
             {
-                return null;
+                if (inventoryItem.SortedCategory == InventoryCategory.CharacterEquipped ||
+                    inventoryItem.SortedCategory == InventoryCategory.RetainerEquipped ||
+                    inventoryItem.SortedCategory == InventoryCategory.Armoire ||
+                    inventoryItem.SortedCategory == InventoryCategory.GlamourChest || inventoryItem.InGearSet)
+                {
+                    return null;
+                }
             }
-            return CurrentValue(columnConfiguration, item.Item);
-        }
 
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
+            var item = searchResult.Item;
             if (item.EquipSlotCategory.Row != 0 && CanCurrentJobEquip(item.ClassJobCategory.Row) && CanUse(item.LevelEquip))
             {
                 var equippedItem = GetEquippedItem(item);
@@ -73,14 +77,7 @@ namespace InventoryTools.Logic.Columns
 
                 return (int)item.LevelItem.Row;
             }
-
             return null;
-            
-        }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
         }
 
         public override string Name { get; set; } = "Relative Item Level";

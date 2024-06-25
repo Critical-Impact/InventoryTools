@@ -16,21 +16,10 @@ namespace InventoryTools.Logic.Columns
             _excelCache = excelCache;
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return _excelCache.IsItemCraftLeve(item.ItemId);
+            return _excelCache.IsItemCraftLeve(searchResult.Item.RowId);
         }
-
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            return _excelCache.IsItemCraftLeve(item.RowId);
-        }
-
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override string Name { get; set; } = "Is Leve(Craft) Item?";
         public override string RenderName => "Leve (Craft)";
         public override float Width { get; set; } = 100.0f;

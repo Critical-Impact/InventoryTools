@@ -16,21 +16,17 @@ namespace InventoryTools.Logic.Columns
             _characterMonitor = characterMonitor;
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Inventory;
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return _characterMonitor.Characters.ContainsKey(item.RetainerId) ?  _characterMonitor.Characters[item.RetainerId].FormattedName : "Unknown (" + item.RetainerId + ")";
-        }
+            if (searchResult.InventoryItem != null)
+            {
+                return _characterMonitor.Characters.TryGetValue(searchResult.InventoryItem.RetainerId, out var character)
+                    ? character.FormattedName
+                    : "Unknown (" + searchResult.InventoryItem.RetainerId + ")";
+            }
 
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
             return null;
         }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override string Name { get; set; } = "Source";
         public override float Width { get; set; } = 100.0f;
         public override string HelpText { get; set; } = "Shows the character/retainer an item is located in.";

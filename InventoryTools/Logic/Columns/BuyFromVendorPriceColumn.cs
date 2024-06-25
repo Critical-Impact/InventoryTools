@@ -13,31 +13,21 @@ namespace InventoryTools.Logic.Columns
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            if (item.Item.ObtainedGil)
+            if (searchResult.InventoryItem != null && searchResult.InventoryItem.Item.ObtainedGil)
             {
-                int buyPrice = (int)item.BuyFromVendorPrice;
+                int buyPrice = (int)searchResult.InventoryItem.BuyFromVendorPrice;
+                return buyPrice;
+            }
+            
+            if (searchResult.Item.ObtainedGil)
+            {
+                int buyPrice = (int)searchResult.Item.PriceMid;
                 return buyPrice;
             }
 
             return null;
-        }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            if (item.ObtainedGil)
-            {
-                int buyPrice = (int)item.PriceMid;
-                return buyPrice;
-            }
-
-            return null;
-        }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
         }
 
         public override string Name { get; set; } = "Buy from Vendor Price";

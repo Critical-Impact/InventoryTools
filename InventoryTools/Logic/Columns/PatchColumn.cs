@@ -16,21 +16,10 @@ public class PatchColumn : DecimalColumn
         _excelCache = excelCache;
     }
     public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-    public override decimal? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+    public override decimal? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return _excelCache.GetItemPatch(item.ItemId);
+        return _excelCache.GetItemPatch(searchResult.Item.RowId);
     }
-
-    public override decimal? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-    {
-        return _excelCache.GetItemPatch(item.RowId);
-    }
-
-    public override decimal? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return _excelCache.GetItemPatch(item.InventoryItem.ItemId);
-    }
-
     public override string Name { get; set; } = "Patch Added";
     public override string RenderName => "Patch";
     public override float Width { get; set; } = 100;

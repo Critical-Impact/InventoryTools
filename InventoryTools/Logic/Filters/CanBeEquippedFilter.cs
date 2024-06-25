@@ -11,7 +11,7 @@ namespace InventoryTools.Logic.Filters
         public override string Key { get; set; } = "CanBeEquipped";
         public override string Name { get; set; } = "Can be Equipped?";
         public override string HelpText { get; set; } = "Can the item be equipped?";
-        public override FilterType AvailableIn { get; set; }  = FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter;
+        
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
 
         public override bool? FilterItem(FilterConfiguration configuration,InventoryItem item)

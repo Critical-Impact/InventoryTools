@@ -42,27 +42,14 @@ namespace InventoryTools.Logic.Columns
             ImGui.Separator();
             MarketboardWorldSetting.Draw(columnConfiguration);
         }
-
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            InventoryItem item, int rowIndex, int columnIndex)
+            SearchResult searchResult, int rowIndex, int columnIndex)
         {
-            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
-        }
-        public override List<MessageBase>? Draw(FilterConfiguration configuration,
-            ColumnConfiguration columnConfiguration,
-            SortingResult item, int rowIndex, int columnIndex)
-        {
-            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
-        }
-        public override List<MessageBase>? Draw(FilterConfiguration configuration,
-            ColumnConfiguration columnConfiguration,
-            ItemEx item, int rowIndex, int columnIndex)
-        {
-            return DoDraw(item, CurrentValue(columnConfiguration, (ItemEx)item), rowIndex, configuration, columnConfiguration);
+            return DoDraw(searchResult, CurrentValue(columnConfiguration, searchResult), rowIndex, configuration, columnConfiguration);
         }
 
-        public override List<MessageBase>? DoDraw(IItem item, int? currentValue, int rowIndex,
+        public override List<MessageBase>? DoDraw(SearchResult searchResult, int? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
             if (currentValue.HasValue && currentValue.Value == Loading)
@@ -88,45 +75,31 @@ namespace InventoryTools.Logic.Columns
                 ImGui.TableNextColumn();
                 if (ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled))
                 {
-                    if (currentValue != null)
-                    {
-                        OtterGui.ImGuiUtil.RightAlign($"{currentValue.Value:n0}" + SeIconChar.Gil.ToIconString());
-                    }
-                    else
-                    {
-                        ImGui.Text(EmptyText);
-                    }
+                    OtterGui.ImGuiUtil.RightAlign($"{currentValue.Value:n0}" + SeIconChar.Gil.ToIconString());
                     ImGui.SameLine();
                     if (ImGui.SmallButton("R##" + rowIndex))
                     {
                         var activeCharacter = _characterMonitor.ActiveCharacter;
                         if (activeCharacter != null)
                         {
-                            return new List<MessageBase> { new MarketRequestItemUpdateMessage(item.ItemId) };
+                            return new List<MessageBase> { new MarketRequestItemUpdateMessage(searchResult.Item.ItemId) };
                         }
                     }
                 }
             }
             else
             {
-                base.DoDraw(item, currentValue, rowIndex, filterConfiguration, columnConfiguration);
+                base.DoDraw(searchResult, currentValue, rowIndex, filterConfiguration, columnConfiguration);
             }
             return null;
         }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            if (!item.CanBeTraded)
+            if (searchResult.InventoryItem != null && !searchResult.InventoryItem.CanBeTraded)
             {
                 return Untradable;
-            }
-
-            return CurrentValue(columnConfiguration, item.Item);
-        }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            if (!item.CanBeTraded)
+            }            
+            if (!searchResult.Item.CanBeTraded)
             {
                 return Untradable;
             }
@@ -135,7 +108,7 @@ namespace InventoryTools.Logic.Columns
             if (activeCharacter != null)
             {
                 var selectedWorldId = MarketboardWorldSetting.SelectedWorldId(columnConfiguration, activeCharacter);
-                var marketBoardData = _marketCache.GetPricing(item.ItemId, selectedWorldId, false);
+                var marketBoardData = _marketCache.GetPricing(searchResult.Item.ItemId, selectedWorldId, false);
                 if (marketBoardData != null)
                 {
                     var hq = marketBoardData.MinPriceHq;
@@ -145,12 +118,6 @@ namespace InventoryTools.Logic.Columns
 
             return Loading;
         }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override string Name { get; set; } = "Market Board Minimum Price HQ";
         public override string RenderName => "MB Min. Price HQ";
         public override float Width { get; set; } = 250.0f;

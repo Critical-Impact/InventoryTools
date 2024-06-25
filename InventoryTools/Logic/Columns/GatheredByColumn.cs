@@ -16,27 +16,17 @@ public class GatheredByColumn : TextColumn
     public override bool HasFilter { get; set; } = true;
     public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
 
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+    public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return CurrentValue(columnConfiguration, item.Item);
-    }
-
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-    {
-        var currentValue = item.GatheringTypes.Select(c => c.Value!.FormattedName).ToList();
-        if (item.ObtainedFishing)
+        var currentValue = searchResult.Item.GatheringTypes.Select(c => c.Value!.FormattedName).ToList();
+        if (searchResult.Item.ObtainedFishing)
         {
             currentValue.Add("Fishing");
         }
 
         return string.Join(",", currentValue);
     }
-
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return CurrentValue(columnConfiguration, item.InventoryItem);
-    }
-
+    
     public override string Name { get; set; } = "Gathered By?";
     public override float Width { get; set; } = 100;
     public override string HelpText { get; set; } = "How is this item gathered?";

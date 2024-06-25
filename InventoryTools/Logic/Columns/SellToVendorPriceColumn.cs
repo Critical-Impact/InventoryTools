@@ -13,21 +13,14 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return (int)item.SellToVendorPrice;
+            if (searchResult.InventoryItem != null)
+            {
+                return (int)searchResult.InventoryItem.SellToVendorPrice;
+            }
+            return (int)searchResult.Item.PriceLow;
         }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            return (int)item.PriceLow;
-        }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override string Name { get; set; } = "Sell to Vendor Price";
         public override float Width { get; set; } = 100.0f;
         public override string HelpText { get; set; } = "The amount this item can be sold to a vendor for(gil).";

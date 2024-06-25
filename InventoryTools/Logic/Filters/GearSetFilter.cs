@@ -15,9 +15,6 @@ namespace InventoryTools.Logic.Filters
         public override string HelpText { get; set; } = "Filter by the gear sets that a item is in.";
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
 
-        public override FilterType AvailableIn { get; set; } =
-            FilterType.SearchFilter | FilterType.SortingFilter;
-        
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
             var currentValue = CurrentValue(configuration);

@@ -16,8 +16,7 @@ namespace InventoryTools.Logic.Filters
 
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Advanced;
 
-        public override FilterType AvailableIn { get; set; } =
-            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter;
+
 
         public override bool? CurrentValue(FilterConfiguration configuration)
         {

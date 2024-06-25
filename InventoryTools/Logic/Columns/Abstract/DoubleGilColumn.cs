@@ -14,7 +14,7 @@ namespace InventoryTools.Logic.Columns.Abstract
         public DoubleGilColumn(ILogger logger, ImGuiService imGuiService) : base(logger, imGuiService)
         {
         }
-        public override List<MessageBase>? DoDraw(IItem item, (int, int)? currentValue, int rowIndex,
+        public override List<MessageBase>? DoDraw(SearchResult searchResult, (int, int)? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
             ImGui.TableNextColumn();
