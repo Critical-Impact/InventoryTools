@@ -44,24 +44,11 @@ namespace InventoryTools.Logic.Columns
 
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            InventoryItem item, int rowIndex, int columnIndex)
+            SearchResult searchResult, int rowIndex, int columnIndex)
         {
-            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
+            return DoDraw(searchResult, CurrentValue(columnConfiguration, searchResult), rowIndex, configuration, columnConfiguration);
         }
-        public override List<MessageBase>? Draw(FilterConfiguration configuration,
-            ColumnConfiguration columnConfiguration,
-            SortingResult item, int rowIndex, int columnIndex)
-        {
-            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
-        }
-        public override List<MessageBase>? Draw(FilterConfiguration configuration,
-            ColumnConfiguration columnConfiguration,
-            ItemEx item, int rowIndex, int columnIndex)
-        {
-            return DoDraw(item, CurrentValue(columnConfiguration, (ItemEx)item), rowIndex, configuration, columnConfiguration);
-        }
-
-        public override List<MessageBase>? DoDraw(IItem item, int? currentValue, int rowIndex,
+        public override List<MessageBase>? DoDraw(SearchResult searchResult, int? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
             if (currentValue.HasValue && currentValue.Value == Loading)
@@ -76,37 +63,31 @@ namespace InventoryTools.Logic.Columns
             }
             else if(currentValue.HasValue)
             {
-                base.DoDraw(item, currentValue, rowIndex, filterConfiguration, columnConfiguration);
+                base.DoDraw(searchResult, currentValue, rowIndex, filterConfiguration, columnConfiguration);
                 ImGui.SameLine();
                 if (ImGui.SmallButton("R##" + rowIndex))
                 {
                     var activeCharacter = _characterMonitor.ActiveCharacter;
                     if (activeCharacter != null)
                     {
-                        return new List<MessageBase> {new MarketRequestItemUpdateMessage(item.ItemId)};
+                        return new List<MessageBase> {new MarketRequestItemUpdateMessage(searchResult.Item.ItemId)};
                     }
                 }
             }
             else
             {
-                base.DoDraw(item, currentValue, rowIndex, filterConfiguration, columnConfiguration);
+                base.DoDraw(searchResult, currentValue, rowIndex, filterConfiguration, columnConfiguration);
             }
             return null;
         }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            if (!item.CanBeTraded)
+            if (searchResult.InventoryItem is {CanBeTraded: false})
             {
                 return Untradable;
             }
 
-            return CurrentValue(columnConfiguration, item.Item);
-        }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            if (!item.CanBeTraded)
+            if (!searchResult.Item.CanBeTraded)
             {
                 return Untradable;
             }
@@ -114,7 +95,7 @@ namespace InventoryTools.Logic.Columns
             if (activeCharacter != null)
             {
                 var selectedWorldId = MarketboardWorldSetting.SelectedWorldId(columnConfiguration, activeCharacter);
-                var marketBoardData = _marketCache.GetPricing(item.RowId, selectedWorldId, false);
+                var marketBoardData = _marketCache.GetPricing(searchResult.Item.RowId, selectedWorldId, false);
                 if (marketBoardData != null)
                 {
                     var nq = marketBoardData.AveragePriceNq;
@@ -124,12 +105,6 @@ namespace InventoryTools.Logic.Columns
 
             return Loading;
         }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override string Name { get; set; } = "Market Board Average Price NQ";
         public override string RenderName => "MB Avg. Price NQ";
         public override string HelpText { get; set; } =

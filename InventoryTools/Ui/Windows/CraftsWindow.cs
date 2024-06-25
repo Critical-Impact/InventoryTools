@@ -877,19 +877,11 @@ namespace InventoryTools.Ui
                     if (_marketIcon.Draw("bb_market"))
                     {
                         var activeCharacter = _characterMonitor.ActiveCharacter;
-                        foreach (var item in itemTable.RenderSortedItems)
+                        foreach (var item in itemTable.RenderSearchResults)
                         {
                             if (activeCharacter != null)
                             {
-                                _universalis.QueuePriceCheck(item.InventoryItem.ItemId, activeCharacter.WorldId);
-                            }
-                        }
-
-                        foreach (var item in itemTable.RenderItems)
-                        {
-                            if (activeCharacter != null)
-                            {
-                                _universalis.QueuePriceCheck(item.RowId, activeCharacter.WorldId);
+                                _universalis.QueuePriceCheck(item.Item.RowId, activeCharacter.WorldId);
                             }
                         }
 
@@ -1076,7 +1068,7 @@ namespace InventoryTools.Ui
 
                     if (craftTable != null)
                     {
-                        var totalItems =  itemTable.RenderSortedItems.Count + " items / " + craftTable.GetCraftListCount() + " craft items";
+                        var totalItems =  itemTable.RenderSearchResults.Count + " items / " + craftTable.GetCraftListCount() + " craft items";
                         var calcTextSize = ImGui.CalcTextSize(totalItems);
                         width -= calcTextSize.X + 15;
                         ImGui.SetCursorPosX(width);
@@ -1178,6 +1170,10 @@ namespace InventoryTools.Ui
                                      filterConfiguration.FilterType.HasFlag(FilterType
                                          .HistoryFilter))
                                     ||
+                                    (filter.AvailableIn.HasFlag(FilterType.CuratedList) &&
+                                     filterConfiguration.FilterType.HasFlag(FilterType
+                                         .CuratedList))
+                                    ||
                                     (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
                                      filterConfiguration.FilterType.HasFlag(FilterType
                                          .GameItemFilter)));
@@ -1226,6 +1222,10 @@ namespace InventoryTools.Ui
                                                          (filter.AvailableIn.HasFlag(FilterType.HistoryFilter) &&
                                                           filterConfiguration.FilterType.HasFlag(FilterType
                                                               .HistoryFilter))
+                                                         ||
+                                                         (filter.AvailableIn.HasFlag(FilterType.CuratedList) &&
+                                                          filterConfiguration.FilterType.HasFlag(FilterType
+                                                              .CuratedList))
                                                          ||
                                                          (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
                                                           filterConfiguration.FilterType.HasFlag(FilterType

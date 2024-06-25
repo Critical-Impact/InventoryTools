@@ -22,55 +22,34 @@ public class NameIconColumn : TextIconColumn
         _excelCache = excelCache;
     }
     public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-    public override (string, ushort, bool)? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+    public override (string, ushort, bool)? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return (item.Item.NameString, item.Icon, item.IsHQ);
+        return (
+            searchResult.CraftItem?.FormattedName ??
+            searchResult.InventoryItem?.FormattedName ?? searchResult.Item.NameString,
+            searchResult.InventoryItem?.Icon ?? searchResult.Item.Icon,
+            searchResult.InventoryItem?.IsHQ ?? false);
     }
 
-    public override (string, ushort, bool)? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
+    public override dynamic? JsonExport(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return (item.NameString, item.Icon, false);
-    }
-
-    public override (string, ushort, bool)? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return (item.InventoryItem.Item.NameString, item.InventoryItem.Item.Icon, item.InventoryItem.IsHQ);
-    }
-    
-    public override dynamic? JsonExport(ColumnConfiguration columnConfiguration, InventoryItem item)
-    {
-        return CurrentValue(columnConfiguration, item)?.Item1 ?? "";
-    }
-
-    public override dynamic? JsonExport(ColumnConfiguration columnConfiguration, ItemEx item)
-    {
-        return CurrentValue(columnConfiguration, item)?.Item1 ?? "";
-    }
-
-    public override dynamic? JsonExport(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return CurrentValue(columnConfiguration, item)?.Item1 ?? "";
-    }
-
-    public override dynamic? JsonExport(ColumnConfiguration columnConfiguration, CraftItem item)
-    {
-        return CurrentValue(columnConfiguration, item)?.Item1 ?? "";
+        return CurrentValue(columnConfiguration, searchResult)?.Item1 ?? "";
     }
     
     public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
-        CraftItem item, int rowIndex, int columnIndex)
+        SearchResult searchResult, int rowIndex, int columnIndex)
     {
-        base.Draw(configuration, columnConfiguration, item, rowIndex, columnIndex);
-        if (item.IsOutputItem)
+        base.Draw(configuration, columnConfiguration, searchResult, rowIndex, columnIndex);
+        if (searchResult.CraftItem != null && searchResult.CraftItem.IsOutputItem)
         {
-            if (_excelCache.ItemRecipes.ContainsKey(item.ItemId))
+            if (_excelCache.ItemRecipes.ContainsKey(searchResult.CraftItem.ItemId))
             {
-                var itemRecipes = _excelCache.ItemRecipes[item.ItemId];
+                var itemRecipes = _excelCache.ItemRecipes[searchResult.CraftItem.ItemId];
                 if (itemRecipes.Count != 1)
                 {
                     var actualRecipes = itemRecipes.Select(c => _excelCache.GetRecipeExSheet().GetRow(c)!)
                         .OrderBy(c => c.CraftType.Value?.Name ?? "").ToList();
-                    var value = item.Recipe?.CraftType.Value?.Name ?? "";
+                    var value = searchResult.CraftItem.Recipe?.CraftType.Value?.Name ?? "";
                     ImGui.SameLine();
                     using (var combo = ImRaii.Combo("##SetRecipe" + rowIndex, value))
                     {
@@ -81,7 +60,7 @@ public class NameIconColumn : TextIconColumn
                                 if (ImGui.Selectable(recipe.CraftType.Value?.Name ?? "",
                                         value == (recipe.CraftType.Value?.Name ?? "")))
                                 {
-                                    configuration.CraftList.SetCraftRecipe(item.ItemId, recipe.RowId);
+                                    configuration.CraftList.SetCraftRecipe(searchResult.CraftItem.ItemId, recipe.RowId);
                                     configuration.NeedsRefresh = true;
                                 }
                             }

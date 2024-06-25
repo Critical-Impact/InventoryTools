@@ -62,102 +62,38 @@ public class CraftSettingsColumn : IColumn
     }
 
     public bool? CraftOnly { get; } = true;
-    public IEnumerable<InventoryItem> Filter(ColumnConfiguration columnConfiguration, IEnumerable<InventoryItem> items)
+
+    public IEnumerable<SearchResult> Filter(ColumnConfiguration columnConfiguration, IEnumerable<SearchResult> items)
     {
         return items;
     }
 
-    public IEnumerable<SortingResult> Filter(ColumnConfiguration columnConfiguration, IEnumerable<SortingResult> items)
-    {
-        return items;
-    }
-
-    public IEnumerable<ItemEx> Filter(ColumnConfiguration columnConfiguration, IEnumerable<ItemEx> items)
-    {
-        return items;
-    }
-
-    public IEnumerable<CraftItem> Filter(ColumnConfiguration columnConfiguration, IEnumerable<CraftItem> items)
-    {
-        return items;
-    }
-
-    public IEnumerable<InventoryChange> Filter(ColumnConfiguration columnConfiguration,
-        IEnumerable<InventoryChange> items)
-    {
-        return items;
-    }
-
-    public IEnumerable<InventoryItem> Sort(ColumnConfiguration columnConfiguration, ImGuiSortDirection direction,
-        IEnumerable<InventoryItem> items)
-    {
-        return items;
-    }
-
-    public IEnumerable<SortingResult> Sort(ColumnConfiguration columnConfiguration, ImGuiSortDirection direction,
-        IEnumerable<SortingResult> items)
-    {
-        return items;
-    }
-
-    public IEnumerable<ItemEx> Sort(ColumnConfiguration columnConfiguration, ImGuiSortDirection direction,
-        IEnumerable<ItemEx> items)
-    {
-        return items;
-    }
-
-    public IEnumerable<CraftItem> Sort(ColumnConfiguration columnConfiguration, ImGuiSortDirection direction,
-        IEnumerable<CraftItem> items)
-    {
-        return items;
-    }
-
-    public IEnumerable<InventoryChange> Sort(ColumnConfiguration columnConfiguration, ImGuiSortDirection direction,
-        IEnumerable<InventoryChange> items)
+    public IEnumerable<SearchResult> Sort(ColumnConfiguration columnConfiguration, ImGuiSortDirection direction, IEnumerable<SearchResult> items)
     {
         return items;
     }
 
     public List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
-        InventoryItem item,
+        SearchResult searchResult,
         int rowIndex, int columnIndex)
     {
-        return null;
-    }
-
-    public List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
-        SortingResult item,
-        int rowIndex, int columnIndex)
-    {
-        return null;
-    }
-
-    public List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
-        ItemEx item,
-        int rowIndex, int columnIndex)
-    {
-        return null;
-    }
-
-    public List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
-        CraftItem item,
-        int rowIndex, int columnIndex)
-    {
+        if (searchResult.CraftItem == null) return null;
+        
         ImGui.TableNextColumn();
-        using (var popup = ImRaii.Popup("ConfigureItemSettings" + columnIndex + item.ItemId + (item.IsOutputItem ? "o" : "")))
+        using (var popup = ImRaii.Popup("ConfigureItemSettings" + columnIndex + searchResult.CraftItem.ItemId + (searchResult.CraftItem.IsOutputItem ? "o" : "")))
         {
             if (popup.Success)
             {
                 ImGui.Text("Configure Sourcing:");
                 ImGui.Separator();
 
-                DrawRecipeSelector(configuration, item, rowIndex);
-                DrawHqSelector(configuration, item, rowIndex);
-                DrawRetainerRetrievalSelector(configuration, item, rowIndex);
-                DrawSourceSelector(configuration, item, rowIndex);
-                DrawZoneSelector(configuration, item, rowIndex);
-                DrawMarketWorldSelector(configuration, item, rowIndex);
-                DrawMarketPriceSelector(configuration, item, rowIndex);
+                DrawRecipeSelector(configuration, searchResult.CraftItem, rowIndex);
+                DrawHqSelector(configuration, searchResult.CraftItem, rowIndex);
+                DrawRetainerRetrievalSelector(configuration, searchResult.CraftItem, rowIndex);
+                DrawSourceSelector(configuration, searchResult.CraftItem, rowIndex);
+                DrawZoneSelector(configuration, searchResult.CraftItem, rowIndex);
+                DrawMarketWorldSelector(configuration, searchResult.CraftItem, rowIndex);
+                DrawMarketPriceSelector(configuration, searchResult.CraftItem, rowIndex);
             }
         }
 
@@ -167,7 +103,7 @@ public class CraftSettingsColumn : IColumn
             {
                 ImGui.Text("Configure Recipe:");
                 ImGui.Separator();
-                if (DrawRecipeSelector(configuration, item, rowIndex))
+                if (DrawRecipeSelector(configuration, searchResult.CraftItem, rowIndex))
                 {
                     ImGui.CloseCurrentPopup();
                 }
@@ -180,7 +116,7 @@ public class CraftSettingsColumn : IColumn
             {
                 ImGui.Text("Configure HQ Required:");
                 ImGui.Separator();
-                if (DrawHqSelector(configuration, item, rowIndex))
+                if (DrawHqSelector(configuration, searchResult.CraftItem, rowIndex))
                 {
                     ImGui.CloseCurrentPopup();
                 }
@@ -193,7 +129,7 @@ public class CraftSettingsColumn : IColumn
             {
                 ImGui.Text("Retrieve from Retainer:");
                 ImGui.Separator();
-                if (DrawRetainerRetrievalSelector(configuration, item, rowIndex))
+                if (DrawRetainerRetrievalSelector(configuration, searchResult.CraftItem, rowIndex))
                 {
                     ImGui.CloseCurrentPopup();
                 }
@@ -217,21 +153,21 @@ public class CraftSettingsColumn : IColumn
                 ImGui.Separator();
             }
         }
-        var ingredientPreferenceDefault = configuration.CraftList.GetIngredientPreference(item.ItemId);
-        var retainerRetrievalDefault = configuration.CraftList.GetCraftRetainerRetrieval(item.ItemId);
-        var retainerRetrieval = retainerRetrievalDefault ?? (item.IsOutputItem ? configuration.CraftList.CraftRetainerRetrievalOutput : configuration.CraftList.CraftRetainerRetrieval);
-        var zonePreference = configuration.CraftList.GetZonePreference(item.IngredientPreference.Type, item.ItemId);
-        var worldPreference = configuration.CraftList.GetMarketItemWorldPreference(item.ItemId);
-        var priceOverride = configuration.CraftList.GetMarketItemPriceOverride(item.ItemId);
-        DrawRecipeIcon(configuration,rowIndex, item);
-        DrawHqIcon(configuration, rowIndex, item);
-        DrawRetainerIcon(configuration, rowIndex, item, retainerRetrievalDefault, retainerRetrieval);
+        var ingredientPreferenceDefault = configuration.CraftList.GetIngredientPreference(searchResult.CraftItem.ItemId);
+        var retainerRetrievalDefault = configuration.CraftList.GetCraftRetainerRetrieval(searchResult.CraftItem.ItemId);
+        var retainerRetrieval = retainerRetrievalDefault ?? (searchResult.CraftItem.IsOutputItem ? configuration.CraftList.CraftRetainerRetrievalOutput : configuration.CraftList.CraftRetainerRetrieval);
+        var zonePreference = configuration.CraftList.GetZonePreference(searchResult.CraftItem.IngredientPreference.Type, searchResult.CraftItem.ItemId);
+        var worldPreference = configuration.CraftList.GetMarketItemWorldPreference(searchResult.CraftItem.ItemId);
+        var priceOverride = configuration.CraftList.GetMarketItemPriceOverride(searchResult.CraftItem.ItemId);
+        DrawRecipeIcon(configuration,rowIndex, searchResult.CraftItem);
+        DrawHqIcon(configuration, rowIndex, searchResult.CraftItem);
+        DrawRetainerIcon(configuration, rowIndex, searchResult.CraftItem, retainerRetrievalDefault, retainerRetrieval);
 
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
 
         if (_settingsIcon.Draw("cnf_" + rowIndex))
         {
-            ImGui.OpenPopup("ConfigureItemSettings" + columnIndex + item.ItemId + (item.IsOutputItem ? "o" : ""));
+            ImGui.OpenPopup("ConfigureItemSettings" + columnIndex + searchResult.CraftItem.ItemId + (searchResult.CraftItem.IsOutputItem ? "o" : ""));
         }
 
         if (ImGui.IsItemHovered())
@@ -244,7 +180,7 @@ public class CraftSettingsColumn : IColumn
                     ImGui.TextUnformatted("Sourcing: " + (ingredientPreferenceDefault?.FormattedName ?? "Use Default"));
                     ImGui.TextUnformatted("Retainer: " + (retainerRetrievalDefault?.FormattedName() ?? "Use Default"));
                     ImGui.TextUnformatted("Zone: " + (zonePreference != null ? _excelCache.GetMapSheet().GetRow(zonePreference.Value)?.FormattedName ?? "Use Default" : "Use Default"));
-                    if (item.Item.CanBePlacedOnMarket)
+                    if (searchResult.Item.CanBePlacedOnMarket)
                     {
                         ImGui.TextUnformatted("Market World Preference: " + (worldPreference != null ? _excelCache.GetWorldSheet().GetRow(worldPreference.Value)?.FormattedName ?? "Use Default" : "Use Default"));
                         ImGui.TextUnformatted("Market Price Override: " + (priceOverride != null ? priceOverride.Value.ToString("N0") : "Use Default"));
@@ -800,66 +736,19 @@ public class CraftSettingsColumn : IColumn
         return false;
     }
 
-    public List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
-        InventoryChange item,
-        int rowIndex, int columnIndex)
-    {
-        return Draw(configuration, columnConfiguration, item.InventoryItem, rowIndex, columnIndex);
-    }
-
     public void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)
     {
         
     }
 
-    public string CsvExport(ColumnConfiguration columnConfiguration, InventoryItem item)
+    public string CsvExport(ColumnConfiguration columnConfiguration, SearchResult item)
     {
         return "";
     }
 
-    public string CsvExport(ColumnConfiguration columnConfiguration, SortingResult item)
+    public dynamic? JsonExport(ColumnConfiguration columnConfiguration, SearchResult item)
     {
         return "";
-    }
-
-    public string CsvExport(ColumnConfiguration columnConfiguration, ItemEx item)
-    {
-        return "";
-    }
-
-    public string CsvExport(ColumnConfiguration columnConfiguration, CraftItem item)
-    {
-        return "";
-    }
-
-    public string CsvExport(ColumnConfiguration columnConfiguration, InventoryChange item)
-    {
-        return "";
-    }
-
-    public dynamic? JsonExport(ColumnConfiguration columnConfiguration, InventoryItem item)
-    {
-        return null;
-    }
-
-    public dynamic? JsonExport(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return null;
-    }
-
-    public dynamic? JsonExport(ColumnConfiguration columnConfiguration, ItemEx item)
-    {
-        return null;
-    }
-
-    public dynamic? JsonExport(ColumnConfiguration columnConfiguration, CraftItem item)
-    {
-        return null;
-    }
-
-    public dynamic? JsonExport(ColumnConfiguration columnConfiguration, InventoryChange item)
-    {
-        return null;
     }
 
     public void Setup(FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration, int columnIndex)
@@ -873,10 +762,6 @@ public class CraftSettingsColumn : IColumn
     }
 
     public event IColumn.ButtonPressedDelegate? ButtonPressed;
-    public bool DrawFilter(string tableKey, int columnIndex)
-    {
-        return false;
-    }
 
     public void Dispose()
     {

@@ -20,8 +20,7 @@ namespace InventoryTools.Logic.Filters
         public override string HelpText { get; set; } = "The market board minimum price of the item. For this to work you need to have automatic pricing enabled and also note that any background price updates will not be evaluated until an event that refreshes the inventory occurs(this happens fairly often).";
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Market;
 
-        public override FilterType AvailableIn { get; set; } =
-            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter;
+
 
         public override bool? FilterItem(FilterConfiguration configuration,InventoryItem item)
         {

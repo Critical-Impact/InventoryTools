@@ -12,21 +12,10 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return item.Item == null ? false : CurrentValue(columnConfiguration, item.Item);
+            return searchResult.Item.IsIshgardCraft;
         }
-
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            return item.IsIshgardCraft;
-        }
-
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override string Name { get; set; } = "Is Ishgardian Craft?";
         public override float Width { get; set; } = 100;
         public override string HelpText { get; set; } = "Is this item a Ishgardian Restoration craft item?";

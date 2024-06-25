@@ -28,11 +28,11 @@ public class CraftBuyColumn : ButtonColumn
     public override float Width { get; set; } = 80;
     public override string HelpText { get; set; } = "A button/list to show you where you can buy an item";
     public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
-        ItemEx item, int rowIndex, int columnIndex)
+        SearchResult searchResult, int rowIndex, int columnIndex)
     {
         ImGui.TableNextColumn();
         var messages = new List<MessageBase>();
-        DrawVendorButton(item, rowIndex, messages);
+        DrawVendorButton(searchResult.Item, rowIndex, messages);
         return messages;
     }
     

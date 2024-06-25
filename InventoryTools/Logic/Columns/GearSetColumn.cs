@@ -14,25 +14,21 @@ namespace InventoryTools.Logic.Columns
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
 
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            if (item.GearSetNames == null)
+            if (searchResult.InventoryItem != null)
             {
-                return "";
-            }
-            return String.Join(", ", item.GearSetNames);
-        }
+                if (searchResult.InventoryItem.GearSetNames == null)
+                {
+                    return "";
+                }
 
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
+                return String.Join(", ", searchResult.InventoryItem.GearSetNames);
+            }
+
             return "";
         }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
+        
         public override string Name { get; set; } = "Gearset Number";
         public override string RenderName => "Gearsets";
         public override float Width { get; set; } = 100;

@@ -66,7 +66,7 @@ public class LocationDisplayTooltip : BaseTooltip
                             var craftItem = filterConfiguration.CraftList.GetItemById(hoverItemId, hoverItemIsHq, HoverItem?.CanBeHq ?? false);
                             if (craftItem != null)
                             {
-                                var filterResult = filterConfiguration.FilterResult;
+                                var filterResult = filterConfiguration.SearchResults;
                                 var missingOverall = craftItem.QuantityMissingOverall;
                                 var willRetrieve = craftItem.QuantityWillRetrieve;
                                 if (missingOverall != 0 || willRetrieve != 0)
@@ -74,14 +74,14 @@ public class LocationDisplayTooltip : BaseTooltip
                                     var needText = "Need: " + missingOverall;
                                     if (filterResult != null)
                                     {
-                                        var sortedItems = filterResult.SortedItems.Where(c =>
+                                        var sortedItems = filterResult.Where(c => c.InventoryItem != null &&
                                             c.InventoryItem.ItemId == hoverItemId && c.InventoryItem.IsHQ == hoverItemIsHq).ToList();
                                         if (sortedItems.Any())
                                         {
                                             var sortedItem = sortedItems.First();
-                                            if (sortedItem.Quantity != 0)
+                                            if (sortedItem.InventoryItem!.Quantity != 0)
                                             {
-                                                needText += " / (" + Math.Min(willRetrieve,sortedItem.Quantity) + " can be retrieved)";
+                                                needText += " / (" + Math.Min(willRetrieve,sortedItem.InventoryItem!.Quantity) + " can be retrieved)";
                                             }
                                         }
                                     }

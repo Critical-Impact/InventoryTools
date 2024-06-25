@@ -12,22 +12,10 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return CurrentValue(columnConfiguration, item.Item);
+            return searchResult.Item.FormattedRarity;
         }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            return item.FormattedRarity;
-        }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override string Name { get; set; } = "Rarity";
         public override float Width { get; set; } = 70.0f;
         public override string HelpText { get; set; } = "The item's rarity.";

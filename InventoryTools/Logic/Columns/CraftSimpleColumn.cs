@@ -27,19 +27,21 @@ namespace InventoryTools.Logic.Columns
             _font = font;
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Crafting;
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, CraftItem currentValue)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
             return "";
         }
 
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            CraftItem item, int rowIndex, int columnIndex)
+            SearchResult searchResult, int rowIndex, int columnIndex)
         {
+            if (searchResult.CraftItem == null) return null;
+            
             ImGui.TableNextColumn();
-            var nextStep = configuration.CraftList.GetNextStep(item);
+            var nextStep = configuration.CraftList.GetNextStep(searchResult.CraftItem);
             ImGuiUtil.VerticalAlignTextColored(nextStep.Item2, nextStep.Item1, configuration.TableHeight, true);
-            if (item.IsOutputItem && item.IsCompleted)
+            if (searchResult.CraftItem.IsOutputItem && searchResult.CraftItem.IsCompleted)
             {
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
@@ -52,22 +54,22 @@ namespace InventoryTools.Logic.Columns
 
                 if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
                 {
-                    configuration.CraftList.RemoveCraftItem(item.ItemId);
+                    configuration.CraftList.RemoveCraftItem(searchResult.CraftItem.ItemId);
                     configuration.NeedsRefresh = true;
                 }
                 OtterGui.ImGuiUtil.HoverTooltip("Delete item");
 
             }
 
-            if (item.IngredientPreference.Type == IngredientPreferenceType.Marketboard)
+            if (searchResult.CraftItem.IngredientPreference.Type == IngredientPreferenceType.Marketboard)
             {
-                if (item.MarketTotalPrice != null && item.MarketUnitPrice != null)
+                if (searchResult.CraftItem.MarketTotalPrice != null && searchResult.CraftItem.MarketUnitPrice != null)
                 {
-                    if (item.Item.ObtainedGil)
+                    if (searchResult.Item.ObtainedGil)
                     {
                         var currentIndex = configuration.CraftList.IngredientPreferenceTypeOrder.IndexOf((
-                            item.IngredientPreference.Type,
-                            item.IngredientPreference.LinkedItemId));
+                            searchResult.CraftItem.IngredientPreference.Type,
+                            searchResult.CraftItem.IngredientPreference.LinkedItemId));
                         var buyIndex =
                             configuration.CraftList.IngredientPreferenceTypeOrder.IndexOf((IngredientPreferenceType.Buy, null));
                         var houseVendorIndex =
@@ -75,7 +77,7 @@ namespace InventoryTools.Logic.Columns
                                 null));
                         if (currentIndex < buyIndex || currentIndex < houseVendorIndex)
                         {
-                            if (item.MarketUnitPrice != 0 && item.MarketUnitPrice < item.Item.BuyFromVendorPrice)
+                            if (searchResult.CraftItem.MarketUnitPrice != 0 && searchResult.CraftItem.MarketUnitPrice < searchResult.Item.BuyFromVendorPrice)
                             {
                                 ImGui.SameLine();
                                 ImGui.Image(ImGuiService.IconService[Icons.QuestionMarkIcon].ImGuiHandle, new Vector2(16, 16));
@@ -90,7 +92,7 @@ namespace InventoryTools.Logic.Columns
                     ImGui.Text("N/A");
                 }
 
-                var craftPrices = item.CraftPrices;
+                var craftPrices = searchResult.CraftItem.CraftPrices;
                 if (craftPrices != null && craftPrices.Count != 0)
                 {
                     ImGui.SameLine();
@@ -116,9 +118,9 @@ namespace InventoryTools.Logic.Columns
                                 
                                 ImGui.Text("Available: " + totalAvailable);
 
-                                if (item.MarketAvailable != item.QuantityNeeded)
+                                if (searchResult.CraftItem.MarketAvailable != searchResult.CraftItem.QuantityNeeded)
                                 {
-                                    ImGui.Text("Missing: " + (item.QuantityNeeded - item.MarketAvailable));
+                                    ImGui.Text("Missing: " + (searchResult.CraftItem.QuantityNeeded - searchResult.CraftItem.MarketAvailable));
                                 }
                             }
                         }
@@ -126,7 +128,7 @@ namespace InventoryTools.Logic.Columns
                 }                    
                     
             }
-            else if (item.MissingIngredients.Count != 0)
+            else if (searchResult.CraftItem.MissingIngredients.Count != 0)
             {
                 ImGui.SameLine();
                 ImGui.PushFont(_font.IconFont);
@@ -136,7 +138,7 @@ namespace InventoryTools.Logic.Columns
                 {
                     using var tt = ImRaii.Tooltip();
                     ImGui.Text("Missing Ingredients: ");
-                    foreach (var missingIngredient in item.MissingIngredients)
+                    foreach (var missingIngredient in searchResult.CraftItem.MissingIngredients)
                     {
                         var itemId = missingIngredient.Key.Item1;
                         var quantity = missingIngredient.Value;
@@ -151,21 +153,6 @@ namespace InventoryTools.Logic.Columns
             }
 
             return null;
-        }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
-        {
-            return "";
-        }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            return "";
-        }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return "";
         }
 
         public override string Name { get; set; } = "Next Step in Craft";

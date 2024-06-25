@@ -15,6 +15,7 @@ namespace InventoryTools.Services.Interfaces
         void AddDefaultColumns(FilterConfiguration configuration);
         FilterConfiguration DuplicateList(FilterConfiguration configuration, string newName);
         FilterConfiguration AddNewCraftList(string? name = null,bool? isEphemeral = false);
+        FilterConfiguration AddNewCuratedList(string? name = null);
         bool RemoveList(FilterConfiguration configuration);
         bool RemoveList(string name);
         bool RemoveFilterByKey(string key);

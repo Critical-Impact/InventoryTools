@@ -24,18 +24,41 @@ namespace InventoryTools.Logic.Columns
         public override string HelpText { get; set; } =
             "Shows the minimum price of both the NQ and HQ form of the item. If no world is selected, your home world is used. This data is sourced from universalis.";
         
-        public override (int, int)? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override (int, int)? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            if (!item.CanBeTraded)
+            var activeCharacter = _characterMonitor.ActiveCharacter;
+
+            if (searchResult.InventoryItem != null)
+            {
+                if (!searchResult.InventoryItem.CanBeTraded)
+                {
+                    return (Untradable, Untradable);
+                }
+
+                if (activeCharacter != null)
+                {
+                    var selectedWorldId = MarketboardWorldSetting.SelectedWorldId(columnConfiguration, activeCharacter);
+
+                    var marketBoardData = _marketCache.GetPricing(searchResult.InventoryItem.ItemId, selectedWorldId, false);
+                    if (marketBoardData != null)
+                    {
+                        var nq = marketBoardData.MinPriceNq;
+                        var hq = marketBoardData.MinPriceHq;
+                        return ((int) nq, (int) hq);
+                    }
+                }
+
+                return (Loading, Loading);
+            }
+            if (!searchResult.Item.CanBeTraded)
             {
                 return (Untradable, Untradable);
             }
-            var activeCharacter = _characterMonitor.ActiveCharacter;
             if (activeCharacter != null)
             {
                 var selectedWorldId = MarketboardWorldSetting.SelectedWorldId(columnConfiguration, activeCharacter);
 
-                var marketBoardData = _marketCache.GetPricing(item.ItemId, selectedWorldId, false);
+                var marketBoardData = _marketCache.GetPricing(searchResult.Item.RowId, selectedWorldId, false);
                 if (marketBoardData != null)
                 {
                     var nq = marketBoardData.MinPriceNq;
@@ -46,35 +69,6 @@ namespace InventoryTools.Logic.Columns
 
             return (Loading, Loading);
         }
-
-        public override (int, int)? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            if (!item.CanBeTraded)
-            {
-                return (Untradable, Untradable);
-            }
-            var activeCharacter = _characterMonitor.ActiveCharacter;
-            if (activeCharacter != null)
-            {
-                var selectedWorldId = MarketboardWorldSetting.SelectedWorldId(columnConfiguration, activeCharacter);
-
-                var marketBoardData = _marketCache.GetPricing(item.RowId, selectedWorldId, false);
-                if (marketBoardData != null)
-                {
-                    var nq = marketBoardData.MinPriceNq;
-                    var hq = marketBoardData.MinPriceHq;
-                    return ((int)nq, (int)hq);
-                }
-            }
-
-            return (Loading, Loading);
-        }
-
-        public override (int, int)? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override string Name { get; set; } = "Market Board Minimum Price NQ/HQ";
         public override string RenderName => "MB Min. Price NQ/HQ";
         

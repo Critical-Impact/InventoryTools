@@ -12,19 +12,10 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
-        {
-            return CurrentValue(columnConfiguration, item.Item);
-        }
 
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return item.IsDyeable;
-        }
-
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
+            return searchResult.Item.IsDyeable;
         }
 
         public override string Name { get; set; } = "Is Dyeable?";

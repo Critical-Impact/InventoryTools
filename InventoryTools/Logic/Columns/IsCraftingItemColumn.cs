@@ -16,21 +16,11 @@ namespace InventoryTools.Logic.Columns
             _excelCache = excelCache;
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
-        {
-            return CurrentValue(columnConfiguration, item.Item);
-        }
 
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return _excelCache.IsCraftItem(item.ItemUICategory.Row);
+            return _excelCache.IsCraftItem(searchResult.Item.ItemUICategory.Row);
         }
-
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override string Name { get; set; } = "Is Craft Component?";
         public override string RenderName => "Is Craft Item?";
         public override float Width { get; set; } = 100;

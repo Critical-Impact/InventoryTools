@@ -12,31 +12,15 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            if (item.ItemSearchCategory != null)
+            if (searchResult.Item.ItemSearchCategory != null)
             {
-                return item.FormattedSearchCategory;
+                return searchResult.Item.FormattedSearchCategory;
             }
 
             return "";
         }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            if (item.ItemSearchCategory != null)
-            {
-                return item.FormattedSearchCategory;
-            }
-
-            return "";
-        }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override string Name { get; set; } = "Category (Marketboard)";
         public override string RenderName => "MB Category";
         public override float Width { get; set; } = 200.0f;

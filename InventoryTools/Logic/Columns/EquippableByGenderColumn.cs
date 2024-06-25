@@ -15,19 +15,10 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
-        {
-            return item.Item.EquippableByGender.FormattedName();
-        }
 
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return item.EquippableByGender.FormattedName();
-        }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
+            return searchResult.Item.EquippableByGender.FormattedName();
         }
 
         public override string Name { get; set; } = "Equipped By (Gender)";

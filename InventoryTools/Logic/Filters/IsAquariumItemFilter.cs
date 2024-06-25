@@ -13,8 +13,7 @@ namespace InventoryTools.Logic.Filters
         public override string HelpText { get; set; } = "Can this item be put into a aquarium?";
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Searching;
 
-        public override FilterType AvailableIn { get; set; } =
-            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter;
+
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
             return FilterItem(configuration, item.Item);

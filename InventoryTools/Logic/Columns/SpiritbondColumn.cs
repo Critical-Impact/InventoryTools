@@ -12,24 +12,16 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return item.ActualSpiritbond + "%%";
+            if (searchResult.InventoryItem != null)
+            {
+                return searchResult.InventoryItem.ActualSpiritbond + "%%";
+            }
 
-        }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
             return null;
         }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter;
-
         public override string Name { get; set; } = "Spiritbond";
         public override float Width { get; set; } = 90.0f;
         public override string HelpText { get; set; } = "Shows the spiritbond % of the item.";

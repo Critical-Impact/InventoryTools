@@ -17,44 +17,11 @@ namespace InventoryTools.Logic.Columns.Abstract
         {
         }
         
-        public override string CsvExport(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override string CsvExport(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
             return "";
         }
-        
-
-        public override string CsvExport(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            return "";
-        }
-
-        public override string CsvExport(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return "";
-        }
-        public override (string, ushort, bool)? CurrentValue(ColumnConfiguration columnConfiguration,
-            CraftItem currentValue)
-        {
-            return CurrentValue(columnConfiguration, currentValue.Item);
-        }
-        
-        public override (string, ushort, bool)? CurrentValue(ColumnConfiguration columnConfiguration,
-            InventoryChange currentValue)
-        {
-            return CurrentValue(columnConfiguration, currentValue.InventoryItem);
-        }
-        
-        public override IEnumerable<CraftItem> Filter(ColumnConfiguration columnConfiguration,
-            IEnumerable<CraftItem> items)
-        {
-            return items;
-        }
-
-        public override IEnumerable<CraftItem> Sort(ColumnConfiguration columnConfiguration,
-            ImGuiSortDirection direction, IEnumerable<CraftItem> items)
-        {
-            return items;
-        }
+       
         public virtual string EmptyText
         {
             get
@@ -64,82 +31,23 @@ namespace InventoryTools.Logic.Columns.Abstract
         }
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            InventoryItem item, int rowIndex, int columnIndex)
+            SearchResult searchResult, int rowIndex, int columnIndex)
         {
-            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
+            return DoDraw(searchResult, CurrentValue(columnConfiguration, searchResult), rowIndex, configuration, columnConfiguration);
         }
-        public override List<MessageBase>? Draw(FilterConfiguration configuration,
-            ColumnConfiguration columnConfiguration,
-            SortingResult item, int rowIndex, int columnIndex)
+        
+        public override IEnumerable<SearchResult> Filter(ColumnConfiguration columnConfiguration, IEnumerable<SearchResult> searchResults)
         {
-            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
-        }
-        public override List<MessageBase>? Draw(FilterConfiguration configuration,
-            ColumnConfiguration columnConfiguration,
-            ItemEx item, int rowIndex, int columnIndex)
-        {
-            return DoDraw(item, CurrentValue(columnConfiguration, (ItemEx)item), rowIndex, configuration, columnConfiguration);
-        }
-        public override List<MessageBase>? Draw(FilterConfiguration configuration,
-            ColumnConfiguration columnConfiguration,
-            CraftItem item, int rowIndex, int columnIndex)
-        {
-            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
-        }
-        public override List<MessageBase>? Draw(FilterConfiguration configuration,
-            ColumnConfiguration columnConfiguration,
-            InventoryChange item, int rowIndex, int columnIndex)
-        {
-            return DoDraw(item, CurrentValue(columnConfiguration, item), rowIndex, configuration, columnConfiguration);
-        }
-        public override IEnumerable<ItemEx> Filter(ColumnConfiguration columnConfiguration, IEnumerable<ItemEx> items)
-        {
-            return items;
+            return searchResults;
         }
 
-        public override IEnumerable<InventoryItem> Filter(ColumnConfiguration columnConfiguration,
-            IEnumerable<InventoryItem> items)
+        public override IEnumerable<SearchResult> Sort(ColumnConfiguration columnConfiguration,
+            ImGuiSortDirection direction, IEnumerable<SearchResult> searchResults)
         {
-            return items;
+            return searchResults;
         }
 
-        public override IEnumerable<SortingResult> Filter(ColumnConfiguration columnConfiguration,
-            IEnumerable<SortingResult> items)
-        {
-            return items;
-        }
-
-        public override IEnumerable<InventoryChange> Filter(ColumnConfiguration columnConfiguration,
-            IEnumerable<InventoryChange> items)
-        {
-            return items;
-        }
-
-        public override IEnumerable<InventoryItem> Sort(ColumnConfiguration columnConfiguration,
-            ImGuiSortDirection direction, IEnumerable<InventoryItem> items)
-        {
-            return items;
-        }
-
-        public override IEnumerable<ItemEx> Sort(ColumnConfiguration columnConfiguration, ImGuiSortDirection direction,
-            IEnumerable<ItemEx> items)
-        {
-            return items;
-        }
-
-        public override IEnumerable<SortingResult> Sort(ColumnConfiguration columnConfiguration,
-            ImGuiSortDirection direction, IEnumerable<SortingResult> items)
-        {
-            return items;
-        }
-
-        public override IEnumerable<InventoryChange> Sort(ColumnConfiguration columnConfiguration,
-            ImGuiSortDirection direction, IEnumerable<InventoryChange> items)
-        {
-            return items;
-        }
-
-        public override List<MessageBase>? DoDraw(IItem item, (string, ushort, bool)? currentValue, int rowIndex,
+        public override List<MessageBase>? DoDraw(SearchResult searchResult, (string, ushort, bool)? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
             ImGui.TableNextColumn();

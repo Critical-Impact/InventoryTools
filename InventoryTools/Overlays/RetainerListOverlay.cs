@@ -85,9 +85,9 @@ namespace InventoryTools.Overlays
                 var currentCharacterId = _characterMonitor.LocalContentId;
                 if (filterResult != null)
                 {
-                    if (filterResult.AllItems.Count != 0)
+                    if (filterResult.Count != 0)
                     {
-                        var allItems = filterResult.AllItems;
+                        var allItems = filterResult;
                         Dictionary<ulong, HashSet<uint>> hasItems = new ();
                         Dictionary<ulong, int> characterTotals = new();
 
@@ -110,7 +110,7 @@ namespace InventoryTools.Overlays
                         {
                             foreach (var character in hasItems)
                             {
-                                if (character.Value.Contains(item.RowId))
+                                if (character.Value.Contains(item.Item.RowId))
                                 {
                                     characterTotals[character.Key]++;
                                 }
@@ -126,12 +126,12 @@ namespace InventoryTools.Overlays
                         return;
 
                     }
-                    var filteredList = filterResult.SortedItems;
+                    var filteredList = filterResult;
                     if (filterConfiguration.FilterType == FilterType.SortingFilter || filterConfiguration.FilterType == FilterType.CraftFilter)
                     {
-                        var grouping = filteredList.Where(c => !c.InventoryItem.IsEmpty && 
-                                (c.SourceRetainerId == currentCharacterId || c.DestinationRetainerId == currentCharacterId || _characterMonitor.BelongsToActiveCharacter(c.SourceRetainerId)) && c.DestinationRetainerId != null)
-                            .GroupBy(c => c.DestinationRetainerId == currentCharacterId || (_characterMonitor.BelongsToActiveCharacter(c.SourceRetainerId) && _characterMonitor.IsHousing(c.DestinationRetainerId!.Value)) ? c.SourceRetainerId : c.DestinationRetainerId!.Value).Where(c => c.Any()).ToList();
+                        var grouping = filteredList.Where(c => c.InventoryItem != null && c.SortingResult != null && !c.InventoryItem.IsEmpty && 
+                                (c.SortingResult.SourceRetainerId == currentCharacterId || c.SortingResult.DestinationRetainerId == currentCharacterId || _characterMonitor.BelongsToActiveCharacter(c.SortingResult.SourceRetainerId)) && c.SortingResult.DestinationRetainerId != null)
+                            .GroupBy(c => c.SortingResult!.DestinationRetainerId == currentCharacterId || (_characterMonitor.BelongsToActiveCharacter(c.SortingResult!.SourceRetainerId) && _characterMonitor.IsHousing(c.SortingResult!.DestinationRetainerId!.Value)) ? c.SortingResult!.SourceRetainerId : c.SortingResult!.DestinationRetainerId!.Value).Where(c => c.Any()).ToList();
                         RetainerColors = grouping.ToDictionary(c => c.Key,
                             c => filterConfiguration.RetainerListColor ??
                                  _configuration.RetainerListColor);
@@ -141,7 +141,7 @@ namespace InventoryTools.Overlays
                     }
                     else
                     {
-                        var grouping = filteredList.Where(c => !c.InventoryItem.IsEmpty).GroupBy(c => c.SourceRetainerId).Where(c => c.Any()).ToList();
+                        var grouping = filteredList.Where(c => c.InventoryItem != null && c.SortingResult != null && !c.InventoryItem.IsEmpty).GroupBy(c => c.SortingResult!.SourceRetainerId).Where(c => c.Any()).ToList();
                         RetainerNames = grouping.ToDictionary(c => c.Key, GenerateNewName);
                         RetainerColors = grouping.ToDictionary(c => c.Key,
                             c => filterConfiguration.RetainerListColor ??
@@ -161,7 +161,7 @@ namespace InventoryTools.Overlays
             HasState = false;
         }
         
-        private string GenerateNewName(IGrouping<ulong, SortingResult> c)
+        private string GenerateNewName(IGrouping<ulong, SearchResult> c)
         {
             if (_characterMonitor.Characters.ContainsKey(c.Key))
             {

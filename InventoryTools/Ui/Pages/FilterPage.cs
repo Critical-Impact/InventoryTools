@@ -127,7 +127,11 @@ namespace InventoryTools.Ui.Pages
                         ||
                         (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
                          filterConfiguration.FilterType.HasFlag(FilterType
-                             .GameItemFilter)));
+                             .GameItemFilter))
+                        ||
+                        (filter.AvailableIn.HasFlag(FilterType.CuratedList) &&
+                         filterConfiguration.FilterType.HasFlag(FilterType
+                             .CuratedList)));
                     if (hasValues && ImGui.BeginTabItem(group.Key.ToString()))
                     {
                         ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudWhite);
@@ -166,6 +170,9 @@ namespace InventoryTools.Ui.Pages
                                      ||
                                      (filter.AvailableIn.HasFlag(FilterType.HistoryFilter) &&
                                       filterConfiguration.FilterType.HasFlag(FilterType.HistoryFilter))
+                                     ||
+                                     (filter.AvailableIn.HasFlag(FilterType.CuratedList) &&
+                                      filterConfiguration.FilterType.HasFlag(FilterType.CuratedList))
                                      ||
                                      (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
                                       filterConfiguration.FilterType.HasFlag(FilterType.GameItemFilter))

@@ -42,7 +42,7 @@ namespace InventoryTools.Logic.Columns
             MarketboardWorldSetting.Draw(columnConfiguration);
         }
         
-        public override List<MessageBase>? DoDraw(IItem item, int? currentValue, int rowIndex,
+        public override List<MessageBase>? DoDraw(SearchResult searchResult, int? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
             if (currentValue.HasValue && currentValue.Value == Loading)
@@ -57,31 +57,24 @@ namespace InventoryTools.Logic.Columns
             }
             else if(currentValue.HasValue)
             {
-                base.DoDraw(item, currentValue, rowIndex, filterConfiguration, columnConfiguration);
+                base.DoDraw(searchResult, currentValue, rowIndex, filterConfiguration, columnConfiguration);
 
             }
             else
             {
-                base.DoDraw(item, currentValue, rowIndex, filterConfiguration, columnConfiguration);
+                base.DoDraw(searchResult, currentValue, rowIndex, filterConfiguration, columnConfiguration);
             }
 
             return null;
         }
-
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            if (!item.CanBeTraded)
+            if (searchResult.InventoryItem is {CanBeTraded: false})
             {
                 return Untradable;
             }
-
-            return CurrentValue(columnConfiguration, item.Item);
-        }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            if (!item.CanBeTraded)
+            
+            if (!searchResult.Item.CanBeTraded)
             {
                 return Untradable;
             }
@@ -89,7 +82,7 @@ namespace InventoryTools.Logic.Columns
             if (activeCharacter != null)
             {
                 var selectedWorldId = MarketboardWorldSetting.SelectedWorldId(columnConfiguration, activeCharacter);
-                var marketBoardData = _marketCache.GetPricing(item.ItemId, selectedWorldId, false);
+                var marketBoardData = _marketCache.GetPricing(searchResult.Item.ItemId, selectedWorldId, false);
                 if (marketBoardData != null)
                 {
                     var sevenDaySellCount = marketBoardData.SevenDaySellCount;
@@ -99,12 +92,6 @@ namespace InventoryTools.Logic.Columns
 
             return Loading;
         }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override string Name
         {
             get => "Market Board " + _configuration.MarketSaleHistoryLimit + " Day Sale Count";

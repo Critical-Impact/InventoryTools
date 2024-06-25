@@ -15,9 +15,6 @@ public class TableRowHeightFilter : IntegerFilter
     public override bool ShowReset { get; set; } = false;
     public override FilterCategory FilterCategory { get; set; } = FilterCategory.Display;
 
-    public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter |
-                                                           FilterType.GameItemFilter | FilterType.CraftFilter;
-
     public override int? CurrentValue(FilterConfiguration configuration)
     {
         return configuration.TableHeight;

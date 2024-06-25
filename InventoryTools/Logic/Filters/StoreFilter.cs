@@ -13,8 +13,6 @@ public class StoreFilter : BooleanFilter
     public override string HelpText { get; set; } = "Is this item sold in the square store?";
     public override FilterCategory FilterCategory { get; set; } = FilterCategory.Acquisition;
 
-    public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter |
-                                                           FilterType.GameItemFilter;
     public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
     {
         return FilterItem(configuration, item.Item);

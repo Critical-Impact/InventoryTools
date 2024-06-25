@@ -12,7 +12,6 @@ namespace InventoryTools.Logic.Filters
         public override string Name { get; set; } = "Is Ishgardian Craft?";
         public override string HelpText { get; set; } = "Is this item a Ishgardian Restoration craft item?";
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Crafting;
-        public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter;
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
             return FilterItem(configuration, item.Item);
