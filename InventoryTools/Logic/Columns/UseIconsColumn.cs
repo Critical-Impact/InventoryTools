@@ -66,78 +66,75 @@ namespace InventoryTools.Logic.Columns
                 var uses = columnConfiguration.FilterText != "" ? currentValue.Where(c => c.FormattedName.ToLower().PassesFilter(columnConfiguration.FilterText)) : currentValue;
                 ImGuiService.WrapTableColumnElements("UseIconContainer" + rowIndex,uses, filterConfiguration.TableHeight * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X, item =>
                 {
-                    var sourceIcon = ImGuiService.IconService[item.Icon];
-                    if (sourceIcon != null)
+                    var sourceIcon = ImGuiService.GetIconTexture(item.Icon);
+                    if (item is ItemSource source && source.ItemId != null && source.HasItem && source.Item != null)
                     {
-                        if (item is ItemSource source && source.ItemId != null && source.HasItem && source.Item != null)
+                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
+                                ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
                         {
-                            if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                    new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
-                                    ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
-                            {
-                                messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), source.ItemId.Value));
-                            }
-
-                            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
-                                                    ImGuiHoveredFlags.AllowWhenOverlapped &
-                                                    ImGuiHoveredFlags.AllowWhenBlockedByPopup &
-                                                    ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
-                                                    ImGuiHoveredFlags.AnyWindow) &&
-                                ImGui.IsMouseReleased(ImGuiMouseButton.Right))
-                            {
-                                ImGui.OpenPopup("RightClick" + source.ItemId);
-                            }
-
-                            using (var popup = ImRaii.Popup("RightClick" + source.ItemId))
-                            {
-                                if (popup.Success)
-                                {
-                                    _rightClickService.DrawRightClickPopup(source.Item, messages);
-                                }
-                            }
-                        }
-                        else if (item is DutySource dutySource)
-                        {
-                            if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                    new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
-                                    ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
-                            {
-                                messages.Add(new OpenUintWindowMessage(typeof(DutyWindow),
-                                    dutySource.ContentFinderConditionId));
-                            }
-                        }
-                        else if (item is AirshipSource airshipSource)
-                        {
-                            if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                    new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
-                                    ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
-                            {
-                                messages.Add(new OpenUintWindowMessage(typeof(AirshipWindow),
-                                    airshipSource.AirshipExplorationPointExId));
-                            }
-                        }
-                        else if (item is SubmarineSource submarineSource)
-                        {
-                            if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                    new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
-                                    ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
-                            {
-                                messages.Add(new OpenUintWindowMessage(typeof(SubmarineWindow),
-                                    submarineSource.SubmarineExplorationExId));
-                            }
-                        }
-                        else
-                        {
-                            if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                    new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
-                                    ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
-                            {
-
-                            }
+                            messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), source.ItemId.Value));
                         }
 
-                        ImGuiUtil.HoverTooltip(item.FormattedName);
+                        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
+                                                ImGuiHoveredFlags.AllowWhenOverlapped &
+                                                ImGuiHoveredFlags.AllowWhenBlockedByPopup &
+                                                ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
+                                                ImGuiHoveredFlags.AnyWindow) &&
+                            ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                        {
+                            ImGui.OpenPopup("RightClick" + source.ItemId);
+                        }
+
+                        using (var popup = ImRaii.Popup("RightClick" + source.ItemId))
+                        {
+                            if (popup.Success)
+                            {
+                                _rightClickService.DrawRightClickPopup(source.Item, messages);
+                            }
+                        }
                     }
+                    else if (item is DutySource dutySource)
+                    {
+                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
+                                ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
+                        {
+                            messages.Add(new OpenUintWindowMessage(typeof(DutyWindow),
+                                dutySource.ContentFinderConditionId));
+                        }
+                    }
+                    else if (item is AirshipSource airshipSource)
+                    {
+                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
+                                ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
+                        {
+                            messages.Add(new OpenUintWindowMessage(typeof(AirshipWindow),
+                                airshipSource.AirshipExplorationPointExId));
+                        }
+                    }
+                    else if (item is SubmarineSource submarineSource)
+                    {
+                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
+                                ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
+                        {
+                            messages.Add(new OpenUintWindowMessage(typeof(SubmarineWindow),
+                                submarineSource.SubmarineExplorationExId));
+                        }
+                    }
+                    else
+                    {
+                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
+                                ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
+                        {
+
+                        }
+                    }
+
+                    ImGuiUtil.HoverTooltip(item.FormattedName);
 
                     return true;
                 });

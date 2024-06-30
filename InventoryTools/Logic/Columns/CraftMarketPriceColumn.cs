@@ -67,7 +67,7 @@ public class CraftMarketPriceColumn : GilColumn
                     if (item.MarketUnitPrice != 0 && item.MarketUnitPrice < item.Item.BuyFromVendorPrice)
                     {
                         ImGui.SameLine();
-                        ImGui.Image(ImGuiService.IconService[Icons.QuestionMarkIcon].ImGuiHandle, new Vector2(16, 16));
+                        ImGui.Image(ImGuiService.GetIconTexture(Icons.QuestionMarkIcon).ImGuiHandle, new Vector2(16, 16));
                         ImGuiUtil.HoverTooltip(
                             "The market price of this item is cheaper than buying it from a vendor and you prefer vendors over the current ingredient preference.");
                     }
@@ -83,7 +83,7 @@ public class CraftMarketPriceColumn : GilColumn
         if (craftPrices != null && craftPrices.Count != 0)
         {
             ImGui.SameLine();
-            ImGui.Image(ImGuiService.IconService[Icons.MarketboardIcon].ImGuiHandle, new Vector2(16,16));
+            ImGui.Image(ImGuiService.GetIconTexture(Icons.MarketboardIcon).ImGuiHandle, new Vector2(16,16));
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
             {
                 using (var tooltip = ImRaii.Tooltip())

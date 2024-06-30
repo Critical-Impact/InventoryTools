@@ -20,12 +20,10 @@ namespace InventoryTools.Ui
     class ENpcWindow : UintWindow
     {
         private readonly ExcelCache _excelCache;
-        private readonly IIconService _iconService;
 
-        public ENpcWindow(ILogger<ENpcWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ExcelCache excelCache, IIconService iconService, string name = "NPC Window") : base(logger, mediator, imGuiService, configuration, name)
+        public ENpcWindow(ILogger<ENpcWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ExcelCache excelCache, string name = "NPC Window") : base(logger, mediator, imGuiService, configuration, name)
         {
             _excelCache = excelCache;
-            _iconService = iconService;
         }
         public override void Initialize(uint eNpcId)
         {
@@ -64,16 +62,14 @@ namespace InventoryTools.Ui
             }
             else
             {
-                var garlandIcon = _iconService.LoadImage("garlandtools");
-                if (ImGui.ImageButton(garlandIcon.ImGuiHandle,
+                if (ImGui.ImageButton(ImGuiService.GetImageTexture("garlandtools").ImGuiHandle,
                         new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                 {
                     $"https://www.garlandtools.org/db/#eNpc/{_eNpcId}".OpenBrowser();
                 }
                 ImGuiUtil.HoverTooltip("Open in Garland Tools");
                 ImGui.SameLine();
-                var tcIcon = _iconService.LoadImage("teamcraft");
-                if (ImGui.ImageButton(tcIcon.ImGuiHandle,
+                if (ImGui.ImageButton(ImGuiService.GetImageTexture("teamcraft").ImGuiHandle,
                         new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                 {
                     $"https://ffxivteamcraft.com/db/en/eNpc/{_eNpcId}".OpenBrowser();
@@ -103,41 +99,38 @@ namespace InventoryTools.Ui
                                 {
                                     if (item.ItemEx.Value != null)
                                     {
-                                        var useIcon = _iconService[item.ItemEx.Value.Icon];
-                                        if (useIcon != null)
+                                        var useIcon = ImGuiService.GetIconTexture(item.ItemEx.Value.Icon);
+                                        if (ImGui.ImageButton(useIcon.ImGuiHandle,
+                                                new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale,
+                                                new(0, 0), new(1, 1),
+                                                0))
                                         {
-                                            if (ImGui.ImageButton(useIcon.ImGuiHandle,
-                                                    new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale,
-                                                    new(0, 0), new(1, 1),
-                                                    0))
-                                            {
-                                                MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), item.ItemEx.Row));
-                                            }
+                                            MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), item.ItemEx.Row));
+                                        }
 
-                                            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
-                                                                    ImGuiHoveredFlags.AllowWhenOverlapped &
-                                                                    ImGuiHoveredFlags.AllowWhenBlockedByPopup &
-                                                                    ImGuiHoveredFlags
-                                                                        .AllowWhenBlockedByActiveItem &
-                                                                    ImGuiHoveredFlags.AnyWindow) &&
-                                                ImGui.IsMouseReleased(ImGuiMouseButton.Right))
-                                            {
-                                                ImGui.OpenPopup("RightClickUse" + item.ItemEx.Row);
-                                            }
+                                        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
+                                                                ImGuiHoveredFlags.AllowWhenOverlapped &
+                                                                ImGuiHoveredFlags.AllowWhenBlockedByPopup &
+                                                                ImGuiHoveredFlags
+                                                                    .AllowWhenBlockedByActiveItem &
+                                                                ImGuiHoveredFlags.AnyWindow) &&
+                                            ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                                        {
+                                            ImGui.OpenPopup("RightClickUse" + item.ItemEx.Row);
+                                        }
 
-                                            if (ImGui.BeginPopup("RightClickUse" + item.ItemEx.Row))
-                                            {
-                                                MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(item.ItemEx.Value));
-                                                ImGui.EndPopup();
-                                            }
+                                        if (ImGui.BeginPopup("RightClickUse" + item.ItemEx.Row))
+                                        {
+                                            MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(item.ItemEx.Value));
+                                            ImGui.EndPopup();
+                                        }
 
-                                            float lastButtonX2 = ImGui.GetItemRectMax().X;
-                                            float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
-                                            ImGuiUtil.HoverTooltip(item.ItemEx.Value.NameString);
-                                            if (listingCount < shop.ShopListings.Count() && nextButtonX2 < windowVisibleX2)
-                                            {
-                                                ImGui.SameLine();
-                                            }
+                                        float lastButtonX2 = ImGui.GetItemRectMax().X;
+                                        float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
+                                        ImGuiUtil.HoverTooltip(item.ItemEx.Value.NameString);
+                                        if (listingCount < shop.ShopListings.Count() && nextButtonX2 < windowVisibleX2)
+                                        {
+                                            ImGui.SameLine();
                                         }
                                     }
                                 }

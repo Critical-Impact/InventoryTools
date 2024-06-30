@@ -232,14 +232,14 @@ namespace InventoryTools.Logic.Filters
                                     if (column.Value.DefaultIn.HasFlag(configuration.FilterType))
                                     {
                                         ImGui.SameLine();
-                                        ImGui.Image(ImGuiService.IconService[Icons.SproutIcon].ImGuiHandle, new Vector2(16,16));
+                                        ImGui.Image(ImGuiService.GetIconTexture(Icons.SproutIcon).ImGuiHandle, new Vector2(16,16));
                                         ImGuiUtil.HoverTooltip("Default Column");
                                     }
 
                                     if (column.Value.IsConfigurable)
                                     {
                                         ImGui.SameLine();
-                                        ImGui.Image(ImGuiService.IconService[Icons.WrenchIcon].ImGuiHandle, new Vector2(16,16));
+                                        ImGui.Image(ImGuiService.GetIconTexture(Icons.WrenchIcon).ImGuiHandle, new Vector2(16,16));
                                         ImGuiUtil.HoverTooltip("Configurable");
                                     }
 

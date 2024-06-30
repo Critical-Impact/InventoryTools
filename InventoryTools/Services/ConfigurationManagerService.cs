@@ -20,6 +20,8 @@ using Task = System.Threading.Tasks.Task;
 
 namespace InventoryTools.Services
 {
+    using Dalamud.Plugin;
+
     public class ConfigurationManagerService : BackgroundService
     {
         public ILogger<ConfigurationManagerService> Logger { get; }
@@ -30,7 +32,7 @@ namespace InventoryTools.Services
 
         public event ConfigurationChangedDelegate? ConfigurationChanged;
         
-        public ConfigurationManagerService(IFramework framework, IPluginInterfaceService pluginInterfaceService, ILogger<ConfigurationManagerService> logger, IBackgroundTaskQueue saveQueue)
+        public ConfigurationManagerService(IFramework framework, IDalamudPluginInterface pluginInterfaceService, ILogger<ConfigurationManagerService> logger, IBackgroundTaskQueue saveQueue)
         {
             Logger = logger;
             _pluginInterfaceService = pluginInterfaceService;
@@ -280,7 +282,7 @@ namespace InventoryTools.Services
         
         public MinifyResolver MinifyResolver => _minifyResolver ??= new();
         private MinifyResolver? _minifyResolver;
-        private readonly IPluginInterfaceService _pluginInterfaceService;
+        private readonly IDalamudPluginInterface _pluginInterfaceService;
         private readonly IBackgroundTaskQueue _saveQueue;
 
         [Obsolete]

@@ -45,27 +45,29 @@ using OtterGui.Log;
 
 namespace InventoryTools.Host;
 
+using Dalamud.Plugin;
+
 public class PluginLoader : IDisposable
 {
-    private readonly IPluginInterfaceService _pluginInterfaceService;
+    private readonly IDalamudPluginInterface _pluginInterface;
     private readonly Service _service;
     public IHost? Host { get; private set; }
 
-    public PluginLoader(IPluginInterfaceService pluginInterfaceService, Service service)
+    public PluginLoader(IDalamudPluginInterface pluginInterfaceService, Service service)
     {
-        _pluginInterfaceService = pluginInterfaceService;
+        _pluginInterface = pluginInterfaceService;
         _service = service;
     }
 
     public IHost Build()
     {
-        if (!_pluginInterfaceService.ConfigDirectory.Exists)
+        if (!_pluginInterface.ConfigDirectory.Exists)
         {
-            _pluginInterfaceService.ConfigDirectory.Create();
+            _pluginInterface.ConfigDirectory.Create();
         }
         var hostBuilder = new HostBuilder();
         hostBuilder
-            .UseContentRoot(_pluginInterfaceService.ConfigDirectory.FullName)
+            .UseContentRoot(_pluginInterface.ConfigDirectory.FullName)
             .ConfigureLogging(lb =>
             {
                 lb.ClearProviders();
@@ -181,7 +183,7 @@ public class PluginLoader : IDisposable
                 builder.RegisterInstance(Service.Framework).ExternallyOwned();
                 builder.RegisterInstance(Service.GameGui).ExternallyOwned();
                 builder.RegisterInstance(Service.GameInteropProvider).ExternallyOwned();
-                builder.RegisterInstance(Service.Interface).ExternallyOwned();
+                builder.RegisterInstance(_pluginInterface).ExternallyOwned();
                 builder.RegisterInstance(Service.KeyState).ExternallyOwned();
                 builder.RegisterInstance(Service.Log).ExternallyOwned();
                 builder.RegisterInstance(Service.Network).ExternallyOwned();
@@ -235,7 +237,6 @@ public class PluginLoader : IDisposable
                 builder.RegisterType<GameInterface>().As<IGameInterface>().SingleInstance();
                 builder.RegisterType<GameUiManager>().As<IGameUiManager>().SingleInstance();
                 builder.RegisterType<HotkeyService>().As<IHotkeyService>().SingleInstance();
-                builder.RegisterType<IconService>().As<IIconService>().SingleInstance();
                 builder.RegisterType<InventoryMonitor>().As<IInventoryMonitor>().SingleInstance();
                 builder.RegisterType<InventoryScanner>().As<IInventoryScanner>().SingleInstance();
                 builder.RegisterType<MarketBoardService>().As<IMarketBoardService>().SingleInstance();

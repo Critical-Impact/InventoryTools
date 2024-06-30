@@ -31,14 +31,9 @@ public class CraftSettingsColumn : IColumn
         _logger = logger;
         _excelCache = excelCache;
         ImGuiService = imGuiService;
-         _settingsIcon = new(imGuiService.IconService.LoadIcon(66319),  new Vector2(22, 22));
-        _hqIcon = imGuiService.IconService.LoadImage("hq");
-        _retainerIcon = imGuiService.IconService.LoadIcon(60425);
     }
     public ColumnCategory ColumnCategory => ColumnCategory.Crafting;
-    private HoverButton _settingsIcon { get; }
-    private IDalamudTextureWrap _hqIcon { get; }
-    private IDalamudTextureWrap _retainerIcon { get; }
+    private HoverButton _settingsIcon = new();
 
 
     public string Name { get; set; } = "Settings";
@@ -229,7 +224,7 @@ public class CraftSettingsColumn : IColumn
 
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
 
-        if (_settingsIcon.Draw("cnf_" + rowIndex))
+        if (_settingsIcon.Draw(ImGuiService.GetIconTexture(66319).ImGuiHandle, "cnf_" + rowIndex))
         {
             ImGui.OpenPopup("ConfigureItemSettings" + columnIndex + item.ItemId + (item.IsOutputItem ? "o" : ""));
         }
@@ -260,7 +255,7 @@ public class CraftSettingsColumn : IColumn
         if (retainerRetrieval is CraftRetainerRetrieval.HQOnly or CraftRetainerRetrieval.Yes)
         {
             ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
-            ImGui.Image(_retainerIcon.ImGuiHandle, new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale,
+            ImGui.Image(ImGuiService.GetIconTexture(Icons.RetainerIcon).ImGuiHandle, new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale,
                 new System.Numerics.Vector2(0, 0), new System.Numerics.Vector2(1, 1),
                 retainerRetrieval == CraftRetainerRetrieval.HQOnly
                     ? new Vector4(0.9f, 0.75f, 0.14f, 1f)
@@ -271,7 +266,7 @@ public class CraftSettingsColumn : IColumn
         else
         {
             ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
-            ImGui.Image(_retainerIcon.ImGuiHandle, new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale,
+            ImGui.Image(ImGuiService.GetIconTexture(Icons.RetainerIcon).ImGuiHandle, new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale,
                 new System.Numerics.Vector2(0, 0), new System.Numerics.Vector2(1, 1), new Vector4(1f, 1f, 1f, 0.2f));
             ImGuiUtil.HoverTooltip("No" + (defaultRetainerRetrieval == null ? " (Default)" : ""));
             ImGui.SameLine();
@@ -312,7 +307,7 @@ public class CraftSettingsColumn : IColumn
         if (calculatedHqRequired == true && item.Item.CanBeHq)
         {
             ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
-            ImGui.Image(_hqIcon.ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale,
+            ImGui.Image(ImGuiService.GetImageTexture("hq").ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale,
                 new System.Numerics.Vector2(0, 0), new System.Numerics.Vector2(1, 1), new Vector4(0.9f, 0.75f, 0.14f, 1f));
             if (item.Item.CanBeHq && ImGui.IsItemClicked(ImGuiMouseButton.Left))
             {
@@ -338,7 +333,7 @@ public class CraftSettingsColumn : IColumn
         else
         {
             ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
-            ImGui.Image(_hqIcon.ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale,
+            ImGui.Image(ImGuiService.GetImageTexture("hq").ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale,
                 new System.Numerics.Vector2(0, 0), new System.Numerics.Vector2(1, 1),
                 new Vector4(0.9f, 0.75f, 0.14f, 0.2f));
             if (item.Item.CanBeHq && ImGui.IsItemClicked(ImGuiMouseButton.Left))
@@ -369,7 +364,7 @@ public class CraftSettingsColumn : IColumn
     {
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
         var icon = item.SourceIcon;
-        ImGui.Image(ImGuiService.IconService[icon].ImGuiHandle,
+        ImGui.Image(ImGuiService.GetIconTexture(icon).ImGuiHandle,
             new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
         var itemRecipe = item.Recipe;
         if (itemRecipe != null)
@@ -864,7 +859,7 @@ public class CraftSettingsColumn : IColumn
 
     public void Setup(FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration, int columnIndex)
     {
-        ImGui.TableSetupColumn(RenderName ?? Name, ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
+        ImGui.TableSetupColumn(columnConfiguration.Name ?? (RenderName ?? Name), ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
     }
 
     public IFilterEvent? DrawFooterFilter(FilterConfiguration configuration, FilterTable filterTable)

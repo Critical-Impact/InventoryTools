@@ -151,7 +151,7 @@ public class AmountOwnedTooltip : BaseTooltip
                             }
 
                             var typeIcon = "";
-                            if ((oGroup.Key.Flags & FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HQ) != 0)
+                            if ((oGroup.Key.Flags & FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HighQuality) != 0)
                             {
                                 typeIcon = "\uE03c";
                             }
@@ -188,7 +188,7 @@ public class AmountOwnedTooltip : BaseTooltip
                             }
 
                             var typeIcon = "";
-                            if ((oGroup.Key.Flags & FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HQ) != 0)
+                            if ((oGroup.Key.Flags & FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HighQuality) != 0)
                             {
                                 typeIcon = "\uE03c";
                             }

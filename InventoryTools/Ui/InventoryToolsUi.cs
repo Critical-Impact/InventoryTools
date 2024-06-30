@@ -11,16 +11,18 @@ using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Ui
 {
+    using Dalamud.Plugin;
+
     public partial class InventoryToolsUi : DisposableMediatorSubscriberBase, IHostedService
     {
-        private readonly IPluginInterfaceService _pluginInterfaceService;
+        private readonly IDalamudPluginInterface _pluginInterfaceService;
         private readonly ICharacterMonitor _characterMonitor;
         private readonly WindowService _windowService;
         private readonly FileDialogManager _fileDialogManager;
         private readonly InventoryToolsConfiguration _configuration;
         private bool _disposing = false;
         
-        public InventoryToolsUi(IPluginInterfaceService pluginInterfaceService, ILogger<InventoryToolsUi> logger, MediatorService mediatorService, ICharacterMonitor characterMonitor, WindowService windowService, FileDialogManager fileDialogManager, InventoryToolsConfiguration configuration) : base(logger, mediatorService)
+        public InventoryToolsUi(IDalamudPluginInterface pluginInterfaceService, ILogger<InventoryToolsUi> logger, MediatorService mediatorService, ICharacterMonitor characterMonitor, WindowService windowService, FileDialogManager fileDialogManager, InventoryToolsConfiguration configuration) : base(logger, mediatorService)
         {
             _pluginInterfaceService = pluginInterfaceService;
             _characterMonitor = characterMonitor;
@@ -71,18 +73,18 @@ namespace InventoryTools.Ui
         public Task StartAsync(CancellationToken cancellationToken)
         {
             Logger.LogTrace("Starting service {type} ({this})", GetType().Name, this);
-            _pluginInterfaceService.Draw += Draw;
-            _pluginInterfaceService.OpenConfigUi += UiBuilderOnOpenConfigUi;
-            _pluginInterfaceService.OpenMainUi += InterfaceOnOpenMainUi;
+            _pluginInterfaceService.UiBuilder.Draw += Draw;
+            _pluginInterfaceService.UiBuilder.OpenConfigUi += UiBuilderOnOpenConfigUi;
+            _pluginInterfaceService.UiBuilder.OpenMainUi += InterfaceOnOpenMainUi;
             return Task.CompletedTask;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
             Logger.LogTrace("Stopping service {type} ({this})", GetType().Name, this);
-            _pluginInterfaceService.Draw -= Draw;
-            _pluginInterfaceService.OpenConfigUi -= UiBuilderOnOpenConfigUi;
-            _pluginInterfaceService.OpenMainUi -= InterfaceOnOpenMainUi;
+            _pluginInterfaceService.UiBuilder.Draw -= Draw;
+            _pluginInterfaceService.UiBuilder.OpenConfigUi -= UiBuilderOnOpenConfigUi;
+            _pluginInterfaceService.UiBuilder.OpenMainUi -= InterfaceOnOpenMainUi;
             return Task.CompletedTask;
         }
     }

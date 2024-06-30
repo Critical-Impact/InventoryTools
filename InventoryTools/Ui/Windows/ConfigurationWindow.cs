@@ -21,9 +21,10 @@ using ImGuiUtil = OtterGui.ImGuiUtil;
 
 namespace InventoryTools.Ui
 {
+    using Dalamud.Interface.Textures;
+
     public class ConfigurationWindow : GenericWindow
     {
-        private readonly IIconService _iconService;
         private readonly ConfigurationWizardService _configurationWizardService;
         private readonly IChatUtilities _chatUtilities;
         private readonly PluginLogic _pluginLogic;
@@ -34,9 +35,8 @@ namespace InventoryTools.Ui
         private readonly Func<FilterConfiguration, FilterPage> _filterPageFactory;
         private readonly InventoryToolsConfiguration _configuration;
 
-        public ConfigurationWindow(ILogger<ConfigurationWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IIconService iconService, ConfigurationWizardService configurationWizardService, IChatUtilities chatUtilities, PluginLogic pluginLogic, IListService listService,IServiceScopeFactory serviceScopeFactory, Func<SettingCategory,SettingPage> settingPageFactory, Func<Type,IConfigPage> configPageFactory, Func<FilterConfiguration,FilterPage> filterPageFactory, string name = "Configuration Window") : base(logger, mediator, imGuiService, configuration, name)
+        public ConfigurationWindow(ILogger<ConfigurationWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ConfigurationWizardService configurationWizardService, IChatUtilities chatUtilities, PluginLogic pluginLogic, IListService listService,IServiceScopeFactory serviceScopeFactory, Func<SettingCategory,SettingPage> settingPageFactory, Func<Type,IConfigPage> configPageFactory, Func<FilterConfiguration,FilterPage> filterPageFactory, string name = "Configuration Window") : base(logger, mediator, imGuiService, configuration, name)
         {
-            _iconService = iconService;
             _configurationWizardService = configurationWizardService;
             _chatUtilities = chatUtilities;
             _pluginLogic = pluginLogic;
@@ -117,12 +117,7 @@ namespace InventoryTools.Ui
                     new PopupMenu.PopupMenuItemSelectable("Configure new settings", "configureNew", ConfigureNewSettings,"Configure new settings."),
                     new PopupMenu.PopupMenuItemSelectable("Configure all settings", "configureAll", ConfigureAllSettings,"Configure all settings."),
                 });
-            
-            _addIcon = new( _iconService.LoadIcon(66315),  new Vector2(22, 22));
-            _lightBulbIcon = new( _iconService.LoadIcon(66318),  new Vector2(22, 22));
-            _menuIcon = new( _iconService.LoadImage("menu"),  new Vector2(22, 22));
-            _wizardStart = new( _iconService.LoadImage("wizard"),  new Vector2(22, 22));
-            
+
             GenerateFilterPages();
             MediatorService.Subscribe<ListInvalidatedMessage>(this, _ => Invalidate());
             MediatorService.Subscribe<ListRepositionedMessage>(this, _ => Invalidate());
@@ -144,10 +139,10 @@ namespace InventoryTools.Ui
             Invalidate();
         }
 
-        private HoverButton _addIcon;
-        private HoverButton _lightBulbIcon;
-        private HoverButton _menuIcon;
-        private HoverButton _wizardStart;
+        private HoverButton _addIcon = new();
+        private HoverButton _lightBulbIcon= new();
+        private HoverButton _menuIcon = new ();
+        private HoverButton _wizardStart = new();
 
         private PopupMenu _wizardMenu = null!;
 
@@ -482,7 +477,7 @@ namespace InventoryTools.Ui
                             float height = ImGui.GetWindowSize().Y;
                             ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
 
-                            if(_addIcon.Draw("addFilter"))
+                            if(_addIcon.Draw(ImGuiService.GetIconTexture(66315).ImGuiHandle, "addFilter"))
                             {
 
                             }
@@ -493,7 +488,7 @@ namespace InventoryTools.Ui
                             ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
                             ImGui.SetCursorPosX(26 * ImGui.GetIO().FontGlobalScale);
 
-                            if (_lightBulbIcon.Draw("addSample"))
+                            if (_lightBulbIcon.Draw(ImGuiService.GetIconTexture(66318).ImGuiHandle,"addSample"))
                             {
 
                             }
@@ -507,7 +502,7 @@ namespace InventoryTools.Ui
                             ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
                             ImGui.SetCursorPosX(width);
 
-                            if (_menuIcon.Draw("openMenu"))
+                            if (_menuIcon.Draw(ImGuiService.GetImageTexture("menu").ImGuiHandle, "openMenu"))
                             {
 
                             }
@@ -520,7 +515,7 @@ namespace InventoryTools.Ui
                             ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
                             ImGui.SetCursorPosX(width);
 
-                            if (_wizardStart.Draw("openMenu"))
+                            if (_wizardStart.Draw(ImGuiService.GetImageTexture("wizard").ImGuiHandle, "openMenu"))
                             {
                                 _wizardMenu.Open();
                             }
