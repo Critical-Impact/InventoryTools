@@ -61,13 +61,13 @@ public class MockPlugin : IMockPlugin
 
     public bool IsStarted => _isStarted;
 
-    public void Start(MockProgram program, MockService mockService, MockPluginInterfaceService mockPluginInterfaceService)
+    public void Start(MockProgram program, MockService mockService, MockPluginInterface mockPluginInterface)
     {
         _service = new Service();
-        Service.Interface = mockPluginInterfaceService;
+        Service.Interface = mockPluginInterface;
         var clientLanguage = ClientLanguage.English;
 
-        _loader = new MockPluginLoader(program, this, mockService, mockPluginInterfaceService, _service, program.SeriLog);
+        _loader = new MockPluginLoader(program, this, mockService, mockPluginInterface, _service, program.SeriLog);
         var host = _loader.Build();
         
         _windowService = host.Services.GetRequiredService<WindowService>();
@@ -80,7 +80,7 @@ public class MockPlugin : IMockPlugin
         _isStarted = true;
     }
 
-    public void Stop(MockProgram program, MockService mockService, MockPluginInterfaceService mockPluginInterfaceService)
+    public void Stop(MockProgram program, MockService mockService, MockPluginInterface mockPluginInterface)
     {
         _isStarted = false;
         Dispose();

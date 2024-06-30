@@ -53,7 +53,7 @@ public class IPCService : IHostedService
     private ICallGateProvider<bool, bool>? _initialized;
     private bool _initalizedIpc;
 
-    private readonly IPluginInterfaceService _pluginInterface;
+    private readonly IDalamudPluginInterface _pluginInterface;
     private ILogger<IPCService> _logger;
     private ICharacterMonitor _characterMonitor;
     private IListService _listService;
@@ -61,7 +61,7 @@ public class IPCService : IHostedService
     private ListFilterService _listFilterService;
     private bool _disposed;
 
-    public IPCService(IPluginInterfaceService pluginInterface, ILogger<IPCService> logger, ICharacterMonitor characterMonitor, IListService listService, IInventoryMonitor inventoryMonitor, ListFilterService listFilterService)
+    public IPCService(IDalamudPluginInterface pluginInterface, ILogger<IPCService> logger, ICharacterMonitor characterMonitor, IListService listService, IInventoryMonitor inventoryMonitor, ListFilterService listFilterService)
     {
         _pluginInterface = pluginInterface;
         _logger = logger;
@@ -102,7 +102,7 @@ public class IPCService : IHostedService
 
     private uint ItemCountHQ(uint itemId, ulong characterId, int inventoryType)
     {
-        return (uint)_inventoryMonitor.AllItems.Where(c => c.ItemId == itemId && c.Flags == InventoryItem.ItemFlags.HQ && (inventoryType == -1 || (uint)c.SortedContainer == inventoryType) && (c.RetainerId == characterId)).Sum(c => c.Quantity);
+        return (uint)_inventoryMonitor.AllItems.Where(c => c.ItemId == itemId && c.Flags == InventoryItem.ItemFlags.HighQuality && (inventoryType == -1 || (uint)c.SortedContainer == inventoryType) && (c.RetainerId == characterId)).Sum(c => c.Quantity);
     }
 
     private uint ItemCountOwned(uint itemId, bool currentCharacterOnly, uint[] inventoryTypes)

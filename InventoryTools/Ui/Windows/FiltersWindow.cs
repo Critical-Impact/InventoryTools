@@ -29,7 +29,6 @@ namespace InventoryTools.Ui
 {
     public class FiltersWindow : GenericWindow
     {
-        private readonly IIconService _iconService;
         private readonly IListService _listService;
         private readonly IFilterService _filterService;
         private readonly TableService _tableService;
@@ -42,9 +41,8 @@ namespace InventoryTools.Ui
         private readonly ListImportExportService _importExportService;
         private readonly InventoryToolsConfiguration _configuration;
 
-        public FiltersWindow(ILogger<FiltersWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IIconService iconService, IListService listService, IFilterService filterService, TableService tableService, IChatUtilities chatUtilities, ICharacterMonitor characterMonitor, IUniversalis universalis, FileDialogManager fileDialogManager, IGameUiManager gameUiManager, HostedInventoryHistory inventoryHistory, ListImportExportService importExportService) : base(logger, mediator, imGuiService, configuration, "Filters Window")
+        public FiltersWindow(ILogger<FiltersWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IListService listService, IFilterService filterService, TableService tableService, IChatUtilities chatUtilities, ICharacterMonitor characterMonitor, IUniversalis universalis, FileDialogManager fileDialogManager, IGameUiManager gameUiManager, HostedInventoryHistory inventoryHistory, ListImportExportService importExportService) : base(logger, mediator, imGuiService, configuration, "Filters Window")
         {
-            _iconService = iconService;
             _listService = listService;
             _filterService = filterService;
             _tableService = tableService;
@@ -56,16 +54,6 @@ namespace InventoryTools.Ui
             _inventoryHistory = inventoryHistory;
             _importExportService = importExportService;
             _configuration = configuration;
-            _editIcon = new(_iconService.LoadImage("edit"),  new Vector2(22, 22));
-            _settingsIcon = new(_iconService.LoadIcon(66319),  new Vector2(22, 22));
-            _craftIcon = new(_iconService.LoadImage("craft"),  new Vector2(22, 22));
-            _csvIcon = new(_iconService.LoadImage("export2"),  new Vector2(22,22));
-            _clipboardIcon = new(_iconService.LoadImage("clipboard"),  new Vector2(22,22));
-            _clearIcon = new(_iconService.LoadIcon(66308),  new Vector2(22, 22));
-            _closeSettingsIcon = new(_iconService.LoadIcon(66311),  new Vector2(22, 22));
-            _marketIcon = new(_iconService.LoadImage("refresh-web"),  new Vector2(22, 22));
-            _addIcon = new(_iconService.LoadIcon(66315),  new Vector2(22, 22));
-            _menuIcon = new(_iconService.LoadImage("menu"),  new Vector2(22, 22));
         }
         public override void Initialize()
         {
@@ -112,16 +100,16 @@ namespace InventoryTools.Ui
         public override string GenericKey => "filters";
         public override string GenericName => "Filters";
         public override bool DestroyOnClose => false;
-        private HoverButton _editIcon { get; }
-        private HoverButton _settingsIcon { get; }
-        private HoverButton _craftIcon { get; }
-        private HoverButton _csvIcon { get; }
-        private HoverButton _clipboardIcon { get; }
-        private HoverButton _clearIcon { get; }
-        private HoverButton _closeSettingsIcon { get; }
-        private HoverButton _marketIcon { get; }
-        private HoverButton _addIcon { get; }
-        private HoverButton _menuIcon { get; }
+        private HoverButton _editIcon = new();
+        private HoverButton _settingsIcon = new();
+        private HoverButton _craftIcon = new();
+        private HoverButton _csvIcon = new();
+        private HoverButton _clipboardIcon = new();
+        private HoverButton _clearIcon = new();
+        private HoverButton _closeSettingsIcon = new();
+        private HoverButton _marketIcon = new();
+        private HoverButton _addIcon = new();
+        private HoverButton _menuIcon = new();
 
         
         private List<FilterConfiguration>? _filters;
@@ -492,7 +480,7 @@ namespace InventoryTools.Ui
                         {
                             float height = ImGui.GetWindowSize().Y;
                             ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
-                            if (_addIcon.Draw("cb_af"))
+                            if (_addIcon.Draw(ImGuiService.GetIconTexture(66315).ImGuiHandle, "cb_af"))
                             {
                             }
 
@@ -793,7 +781,7 @@ namespace InventoryTools.Ui
                     float width = ImGui.GetWindowSize().X;
                     ImGui.SetCursorPosX(width - 42 * ImGui.GetIO().FontGlobalScale);
                     ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                    if (_closeSettingsIcon.Draw("bb_settings"))
+                    if (_closeSettingsIcon.Draw(ImGuiService.GetIconTexture(66311).ImGuiHandle, "bb_settings"))
                     {
                         _settingsActive = false;
                     }
@@ -837,7 +825,7 @@ namespace InventoryTools.Ui
 
                     ImGui.SameLine();
                     ImGuiService.CenterElement(20 * ImGui.GetIO().FontGlobalScale);
-                    if(_clearIcon.Draw("clearSearch"))
+                    if(_clearIcon.Draw(ImGuiService.GetIconTexture(66308).ImGuiHandle, "clearSearch"))
                     {
                         itemTable.ClearFilters();
                     }
@@ -850,7 +838,7 @@ namespace InventoryTools.Ui
                     ImGui.SameLine();
                     width -= 28 * ImGui.GetIO().FontGlobalScale;
                     ImGui.SetCursorPosX(width);
-                    if (_editIcon.Draw("tb_edit"))
+                    if (_editIcon.Draw(ImGuiService.GetImageTexture("edit").ImGuiHandle, "tb_edit"))
                     {
                         _settingsActive = !_settingsActive;
                     }
@@ -884,7 +872,7 @@ namespace InventoryTools.Ui
                 if (bottomBarChild.Success)
                 {
                     ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                    if(_marketIcon.Draw("refreshMarket"))
+                    if(_marketIcon.Draw(ImGuiService.GetImageTexture("refresh-web").ImGuiHandle, "refreshMarket"))
                     {
                         var activeCharacter = _characterMonitor.ActiveCharacter;
                         if (activeCharacter != null)
@@ -909,7 +897,7 @@ namespace InventoryTools.Ui
                     ImGuiUtil.HoverTooltip("Refresh Market Prices");
                     ImGui.SameLine();
                     ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                    if (_csvIcon.Draw("exportCsv"))
+                    if (_csvIcon.Draw(ImGuiService.GetImageTexture("export2").ImGuiHandle, "exportCsv"))
                     {
                         _fileDialogManager.SaveFileDialog("Save to csv", "*.csv", "export.csv", ".csv",
                             (b, s) => { SaveCallback(itemTable, b, s); }, null, true);
@@ -918,7 +906,7 @@ namespace InventoryTools.Ui
                     ImGuiUtil.HoverTooltip("Export to CSV");
                     ImGui.SameLine();
                     ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                    if (_clipboardIcon.Draw("copyJson"))
+                    if (_clipboardIcon.Draw(ImGuiService.GetImageTexture("clipboard").ImGuiHandle, "copyJson"))
                     {
                         itemTable.ExportToJson().ToClipboard();
                     }
@@ -984,7 +972,7 @@ namespace InventoryTools.Ui
                     width -= 30 * ImGui.GetIO().FontGlobalScale;
                     ImGui.SetCursorPosX(width);
                     ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                    if (_menuIcon.Draw("openMenu"))
+                    if (_menuIcon.Draw(ImGuiService.GetImageTexture("menu").ImGuiHandle, "openMenu"))
                     {
                     }
                     _settingsMenu.Draw();
@@ -992,7 +980,7 @@ namespace InventoryTools.Ui
                     width -= 30 * ImGui.GetIO().FontGlobalScale;
                     ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                     ImGui.SetCursorPosX(width);
-                    if (_settingsIcon.Draw("openConfig"))
+                    if (_settingsIcon.Draw(ImGuiService.GetIconTexture(66319).ImGuiHandle, "openConfig"))
                     {
                         MediatorService.Publish(new ToggleGenericWindowMessage(typeof(ConfigurationWindow)));
                     }
@@ -1003,7 +991,7 @@ namespace InventoryTools.Ui
                     width -= 30 * ImGui.GetIO().FontGlobalScale;
                     ImGui.SetCursorPosX(width);
                     ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                    if (_craftIcon.Draw("openCraft"))
+                    if (_craftIcon.Draw(ImGuiService.GetImageTexture("craft").ImGuiHandle, "openCraft"))
                     {
                         MediatorService.Publish(new ToggleGenericWindowMessage(typeof(CraftsWindow)));
                     }
@@ -1016,7 +1004,7 @@ namespace InventoryTools.Ui
                         width -= 30 * ImGui.GetIO().FontGlobalScale;
                         ImGui.SetCursorPosX(width);
                         ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                        if (_clearIcon.Draw("clearHistory"))
+                        if (_clearIcon.Draw(ImGuiService.GetIconTexture(66308).ImGuiHandle, "clearHistory"))
                         {
                             ImGui.OpenPopup("confirmHistoryDelete");
                         }

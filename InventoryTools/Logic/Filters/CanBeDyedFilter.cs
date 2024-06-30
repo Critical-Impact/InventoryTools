@@ -24,7 +24,7 @@ namespace InventoryTools.Logic.Filters
         public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
         {
             var currentValue = CurrentValue(configuration);
-            var canByDyed = item.IsDyeable;
+            var canByDyed = item.DyeCount != 0;
             return currentValue == null || currentValue.Value && canByDyed || !currentValue.Value && !canByDyed;
         }
 

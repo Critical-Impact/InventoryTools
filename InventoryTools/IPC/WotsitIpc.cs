@@ -12,8 +12,11 @@ using Timer = System.Timers.Timer;
 
 namespace InventoryTools.IPC
 {
+    using Dalamud.Plugin;
+
     public class WotsitIpc: IWotsitIpc
     {
+        private readonly IDalamudPluginInterface _dalamudPluginInterface;
         private readonly IListService _listService;
         public ILogger<WotsitIpc> Logger { get; }
         private const string IpcDisplayName = "Allagan Tools";
@@ -29,8 +32,9 @@ namespace InventoryTools.IPC
         private Timer? _delayTimer = null;
 
 
-        public WotsitIpc(ILogger<WotsitIpc> logger, IListService listService)
+        public WotsitIpc(ILogger<WotsitIpc> logger, IDalamudPluginInterface dalamudPluginInterface, IListService listService)
         {
+            _dalamudPluginInterface = dalamudPluginInterface;
             _listService = listService;
             Logger = logger;
         }
@@ -80,18 +84,18 @@ namespace InventoryTools.IPC
         {
             if (_wotsitUnregister == null)
             {
-                _wotsitUnregister = Service.Interface.GetIpcSubscriber<string, bool>("FA.UnregisterAll");
+                _wotsitUnregister = _dalamudPluginInterface.GetIpcSubscriber<string, bool>("FA.UnregisterAll");
             }
             
             if (_wotsitRegister == null)
             {
                 _wotsitRegister =
-                    Service.Interface.GetIpcSubscriber<string, string, string, uint, string>("FA.RegisterWithSearch");
+                    _dalamudPluginInterface.GetIpcSubscriber<string, string, string, uint, string>("FA.RegisterWithSearch");
             }
 
             if (_callGateSubscriber == null)
             {
-                _callGateSubscriber = Service.Interface.GetIpcSubscriber<string, bool>("FA.Invoke");
+                _callGateSubscriber = _dalamudPluginInterface.GetIpcSubscriber<string, bool>("FA.Invoke");
                 _callGateSubscriber.Subscribe(WotsitInvoke);
             }
             
@@ -165,7 +169,7 @@ namespace InventoryTools.IPC
             Logger.LogTrace("Starting service {type} ({this})", GetType().Name, this);
 
             InitForWotsit();
-            _wotsitAvailable = Service.Interface.GetIpcSubscriber<bool>("FA.Available");
+            _wotsitAvailable = _dalamudPluginInterface.GetIpcSubscriber<bool>("FA.Available");
             _wotsitAvailable.Subscribe(FaAvailable);
             
             _listService.ListAdded += ListAddedRemoved;

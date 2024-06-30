@@ -1162,7 +1162,7 @@ namespace InventoryTools.Ui
                 var bagLoaded = _inventoryScanner.IsBagLoaded(bagType);
                 if (ImGui.TreeNode(bagType.ToString() + (bagLoaded ? " (Loaded)" : " (Not Loaded)")))
                 {
-                    var itemCount = bag.Count(c => c.ItemID != 0);
+                    var itemCount = bag.Count(c => c.ItemId != 0);
                     ImGui.Text(itemCount + "/" + bag.Length);
                     for (int i = 0; i < bag.Length; i++)
                     {
@@ -1431,7 +1431,7 @@ namespace InventoryTools.Ui
                     var bagLoaded = _inventoryScanner.IsBagLoaded(bagType);
                     if (ImGui.TreeNode(bagType.ToString() + (bagLoaded ? " (Loaded)" : " (Not Loaded)")))
                     {
-                        var itemCount = bag.Count(c => c.ItemID != 0);
+                        var itemCount = bag.Count(c => c.ItemId != 0);
                         ImGui.Text(itemCount + "/" + bag.Length);
                         for (int i = 0; i < bag.Length; i++)
                         {
@@ -1452,6 +1452,25 @@ namespace InventoryTools.Ui
             if (ImGui.Button("Clear notices"))
             {
                 _configuration.NotificationsSeen.Clear();
+            }
+
+            if (ImGui.Button("Print Inventory Types"))
+            {
+                unsafe
+                {
+                    var containers = InventoryManager.Instance()->Inventories;
+                    for (int i = 0; i < containers->Size; i++)
+                    {
+                        var items = containers[i].Items;
+                        for (int j = 0; j < containers[i].Size; j++)
+                        {
+                            if (items[j].ItemId == 8564)
+                            {
+                                Logger.LogDebug(((uint)containers[i].Type).ToString() + (containers[i].Type.ToString()));
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -1501,9 +1520,6 @@ namespace InventoryTools.Ui
                 ImGui.TextUnformatted(
                     "Recipe Durability: " + _craftMonitor.RecipeLevelTable?.Durability ??
                     "Unknown");
-                ImGui.TextUnformatted("Suggested Control: " +
-                           _craftMonitor.RecipeLevelTable?.SuggestedControl ??
-                           "Unknown");
                 ImGui.TextUnformatted("Suggested Craftsmanship: " +
                     _craftMonitor.RecipeLevelTable?.SuggestedCraftsmanship ?? "Unknown");
                 ImGui.TextUnformatted(

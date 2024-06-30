@@ -20,13 +20,11 @@ namespace InventoryTools.Ui;
 
 public class ENpcsWindow : GenericTabbedTable<ENpc>
 {
-    private readonly IIconService _iconService;
     private readonly ExcelCache _excelCache;
     private readonly IChatUtilities _chatUtilities;
 
-    public ENpcsWindow(ILogger<ENpcsWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IIconService iconService,ExcelCache excelCache, IChatUtilities chatUtilities, string name = "NPCs Window") : base(logger, mediator, imGuiService, configuration, name)
+    public ENpcsWindow(ILogger<ENpcsWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration,ExcelCache excelCache, IChatUtilities chatUtilities, string name = "NPCs Window") : base(logger, mediator, imGuiService, configuration, name)
     {
-        _iconService = iconService;
         _excelCache = excelCache;
         _chatUtilities = chatUtilities;
     }
@@ -43,7 +41,7 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
                 Draw = (ex, contentTypeId) =>
                 {
                     if (ImGui.ImageButton(
-                            _iconService[62043].ImGuiHandle,
+                            ImGuiService.GetIconTexture(62043).ImGuiHandle,
                             new Vector2(RowSize, RowSize)))
                     {
                         _columns[0].OnLeftClick?.Invoke(ex);
@@ -84,7 +82,7 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
                     var positions = ex.Locations;
                     ImGuiService.WrapTableColumnElements("Scroll" + ex.Key,positions, RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X, position =>
                     {
-                        if (ImGui.ImageButton(_iconService[60561].ImGuiHandle,
+                        if (ImGui.ImageButton(ImGuiService.GetIconTexture(60561).ImGuiHandle,
                                 new Vector2(RowSize * ImGui.GetIO().FontGlobalScale,
                                     RowSize * ImGui.GetIO().FontGlobalScale), new Vector2(0, 0),
                                 new Vector2(1, 1), 0))
@@ -165,7 +163,7 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
                             RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X,
                             drop =>
                             {
-                                var sourceIcon = _iconService[drop.Value!.Icon];
+                                var sourceIcon = ImGuiService.GetIconTexture(drop.Value!.Icon);
                                 ImGui.Image(sourceIcon.ImGuiHandle,
                                     new Vector2(RowSize, RowSize) * ImGui.GetIO().FontGlobalScale);
                                 if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &

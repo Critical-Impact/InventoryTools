@@ -22,12 +22,10 @@ namespace InventoryTools.Ui
 {
     class DutyWindow : UintWindow
     {
-        private readonly IIconService _iconService;
         private readonly ExcelCache _excelCache;
 
-        public DutyWindow(ILogger<DutyWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IIconService iconService, ExcelCache excelCache, string name = "Duty Window") : base(logger, mediator, imGuiService, configuration, name)
+        public DutyWindow(ILogger<DutyWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ExcelCache excelCache, string name = "Duty Window") : base(logger, mediator, imGuiService, configuration, name)
         {
-            _iconService = iconService;
             _excelCache = excelCache;
         }
         public override void Initialize(uint contentFinderConditionId)
@@ -104,10 +102,10 @@ namespace InventoryTools.Ui
                 ImGui.TextUnformatted("Level Required: " + ContentFinderCondition.ClassJobLevelRequired);
                 ImGui.TextUnformatted("Item Level Required: " + ContentFinderCondition.ItemLevelRequired);
                 ;
-                var itemIcon = _iconService[(int)(ContentFinderCondition.ContentType?.Value?.IconDutyFinder ?? Icons.DutyIcon)];
+                var itemIcon = ImGuiService.GetIconTexture((int)(ContentFinderCondition.ContentType?.Value?.IconDutyFinder ?? Icons.DutyIcon));
                 ImGui.Image(itemIcon.ImGuiHandle, new Vector2(100, 100) * ImGui.GetIO().FontGlobalScale);
                 
-                var garlandIcon = _iconService.LoadImage("garlandtools");
+                var garlandIcon = ImGuiService.GetImageTexture("garlandtools");
                 if (ImGui.ImageButton(garlandIcon.ImGuiHandle,
                         new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                 {
@@ -139,45 +137,41 @@ namespace InventoryTools.Ui
                                         var item = items[index];
                                         if (item.Item1 == null) continue;
                                         ImGui.PushID("dbc" + dungeonBoss.RowId + "_" + chest.Key + "_" + index);
-                                        IDalamudTextureWrap? useIcon = _iconService[item.Item1.Icon];
-                                        if (useIcon != null)
+                                        if (ImGui.ImageButton(ImGuiService.GetIconTexture(item.Item1.Icon).ImGuiHandle,
+                                                new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0),
+                                                new(1, 1), 0))
                                         {
-                                            if (ImGui.ImageButton(useIcon.ImGuiHandle,
-                                                    new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0),
-                                                    new(1, 1), 0))
+                                            MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), item.Item1.RowId));
+                                        }
+
+                                        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
+                                                                ImGuiHoveredFlags.AllowWhenOverlapped &
+                                                                ImGuiHoveredFlags.AllowWhenBlockedByPopup &
+                                                                ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
+                                                                ImGuiHoveredFlags.AnyWindow) &&
+                                            ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                                        {
+                                            ImGui.OpenPopup("RightClickUse" + item.Item1.RowId);
+                                        }
+
+                                        if (ImGui.BeginPopup("RightClickUse" + item.Item1.RowId))
+                                        {
+                                            var itemEx = _excelCache.GetItemExSheet()
+                                                .GetRow(item.Item1.RowId);
+                                            if (itemEx != null)
                                             {
-                                                MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), item.Item1.RowId));
+                                                MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(itemEx));
                                             }
 
-                                            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
-                                                                    ImGuiHoveredFlags.AllowWhenOverlapped &
-                                                                    ImGuiHoveredFlags.AllowWhenBlockedByPopup &
-                                                                    ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
-                                                                    ImGuiHoveredFlags.AnyWindow) &&
-                                                ImGui.IsMouseReleased(ImGuiMouseButton.Right))
-                                            {
-                                                ImGui.OpenPopup("RightClickUse" + item.Item1.RowId);
-                                            }
+                                            ImGui.EndPopup();
+                                        }
 
-                                            if (ImGui.BeginPopup("RightClickUse" + item.Item1.RowId))
-                                            {
-                                                var itemEx = _excelCache.GetItemExSheet()
-                                                    .GetRow(item.Item1.RowId);
-                                                if (itemEx != null)
-                                                {
-                                                    MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(itemEx));
-                                                }
-
-                                                ImGui.EndPopup();
-                                            }
-
-                                            float lastButtonX2 = ImGui.GetItemRectMax().X;
-                                            float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
-                                            ImGuiUtil.HoverTooltip(item.Item1.NameString);
-                                            if (index + 1 < items.Count && nextButtonX2 < windowVisibleX2)
-                                            {
-                                                ImGui.SameLine();
-                                            }
+                                        float lastButtonX2 = ImGui.GetItemRectMax().X;
+                                        float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
+                                        ImGuiUtil.HoverTooltip(item.Item1.NameString);
+                                        if (index + 1 < items.Count && nextButtonX2 < windowVisibleX2)
+                                        {
+                                            ImGui.SameLine();
                                         }
                                         ImGui.PopID();
                                     }
@@ -195,48 +189,44 @@ namespace InventoryTools.Ui
                                 for (var index = 0; index < drops.Count; index++)
                                 {
                                     var item = drops[index];
-                                    var useIcon = _iconService[item.Icon];
-                                    if (useIcon != null)
+                                    ImGui.PushID("dbd" + dungeonBoss.RowId + "_" + index);
+                                    if (ImGui.ImageButton(ImGuiService.GetIconTexture(item.Icon).ImGuiHandle,
+                                            new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0),
+                                            new(1, 1), 0))
                                     {
-                                        ImGui.PushID("dbd" + dungeonBoss.RowId + "_" + index);
-                                        if (ImGui.ImageButton(useIcon.ImGuiHandle,
-                                                new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0),
-                                                new(1, 1), 0))
-                                        {
-                                            MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), item.RowId));
-                                        }
-
-                                        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
-                                                                ImGuiHoveredFlags.AllowWhenOverlapped &
-                                                                ImGuiHoveredFlags.AllowWhenBlockedByPopup &
-                                                                ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
-                                                                ImGuiHoveredFlags.AnyWindow) &&
-                                            ImGui.IsMouseReleased(ImGuiMouseButton.Right))
-                                        {
-                                            ImGui.OpenPopup("RightClickUse" + item.RowId);
-                                        }
-
-                                        if (ImGui.BeginPopup("RightClickUse" + item.RowId))
-                                        {
-                                            var itemEx = _excelCache.GetItemExSheet()
-                                                .GetRow(item.RowId);
-                                            if (itemEx != null)
-                                            {
-                                                MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(itemEx));
-                                            }
-
-                                            ImGui.EndPopup();
-                                        }
-
-                                        float lastButtonX2 = ImGui.GetItemRectMax().X;
-                                        float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
-                                        ImGuiUtil.HoverTooltip(item.NameString);
-                                        if (index + 1 < drops.Count && nextButtonX2 < windowVisibleX2)
-                                        {
-                                            ImGui.SameLine();
-                                        }
-                                        ImGui.PopID();
+                                        MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), item.RowId));
                                     }
+
+                                    if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
+                                                            ImGuiHoveredFlags.AllowWhenOverlapped &
+                                                            ImGuiHoveredFlags.AllowWhenBlockedByPopup &
+                                                            ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
+                                                            ImGuiHoveredFlags.AnyWindow) &&
+                                        ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                                    {
+                                        ImGui.OpenPopup("RightClickUse" + item.RowId);
+                                    }
+
+                                    if (ImGui.BeginPopup("RightClickUse" + item.RowId))
+                                    {
+                                        var itemEx = _excelCache.GetItemExSheet()
+                                            .GetRow(item.RowId);
+                                        if (itemEx != null)
+                                        {
+                                            MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(itemEx));
+                                        }
+
+                                        ImGui.EndPopup();
+                                    }
+
+                                    float lastButtonX2 = ImGui.GetItemRectMax().X;
+                                    float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
+                                    ImGuiUtil.HoverTooltip(item.NameString);
+                                    if (index + 1 < drops.Count && nextButtonX2 < windowVisibleX2)
+                                    {
+                                        ImGui.SameLine();
+                                    }
+                                    ImGui.PopID();
                                 }
                             }
                         }                        
@@ -252,37 +242,33 @@ namespace InventoryTools.Ui
                     {
                         ImGui.PushID("Use"+index);
                         var use = uses[index];
-                        var useIcon = _iconService[use.Icon];
-                        if (useIcon != null)
+                        if (ImGui.ImageButton(ImGuiService.GetIconTexture(use.Icon).ImGuiHandle,
+                                new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1), 0))
                         {
-                            if (ImGui.ImageButton(useIcon.ImGuiHandle,
-                                    new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1), 0))
-                            {
-                                MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), use.RowId));
-                            }
-                            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right)) 
-                            {
-                                ImGui.OpenPopup("RightClickUse" + use.RowId);
-                            }
-                
-                            if (ImGui.BeginPopup("RightClickUse"+ use.RowId))
-                            {
-                                var itemEx = _excelCache.GetItemExSheet().GetRow(use.RowId);
-                                if (itemEx != null)
-                                {
-                                    MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(itemEx));
-                                }
+                            MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), use.RowId));
+                        }
+                        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                        {
+                            ImGui.OpenPopup("RightClickUse" + use.RowId);
+                        }
 
-                                ImGui.EndPopup();
+                        if (ImGui.BeginPopup("RightClickUse"+ use.RowId))
+                        {
+                            var itemEx = _excelCache.GetItemExSheet().GetRow(use.RowId);
+                            if (itemEx != null)
+                            {
+                                MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(itemEx));
                             }
 
-                            float lastButtonX2 = ImGui.GetItemRectMax().X;
-                            float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
-                            ImGuiUtil.HoverTooltip(use.NameString);
-                            if (index + 1 < uses.Count && nextButtonX2 < windowVisibleX2)
-                            {
-                                ImGui.SameLine();
-                            }
+                            ImGui.EndPopup();
+                        }
+
+                        float lastButtonX2 = ImGui.GetItemRectMax().X;
+                        float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
+                        ImGuiUtil.HoverTooltip(use.NameString);
+                        if (index + 1 < uses.Count && nextButtonX2 < windowVisibleX2)
+                        {
+                            ImGui.SameLine();
                         }
 
                         ImGui.PopID();
@@ -299,37 +285,33 @@ namespace InventoryTools.Ui
                         ImGui.PushID("Use"+index);
                         var use = uses[index];
                         
-                        var useIcon = _iconService[use.Icon];
-                        if (useIcon != null)
+                        if (ImGui.ImageButton(ImGuiService.GetIconTexture(use.Icon).ImGuiHandle,
+                                new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1), 0))
                         {
-                            if (ImGui.ImageButton(useIcon.ImGuiHandle,
-                                    new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1), 0))
-                            {
-                                MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), use.RowId));
-                            }
-                            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right)) 
-                            {
-                                ImGui.OpenPopup("RightClickUse" + use.RowId);
-                            }
-                
-                            if (ImGui.BeginPopup("RightClickUse"+ use.RowId))
-                            {
-                                var itemEx = _excelCache.GetItemExSheet().GetRow(use.RowId);
-                                if (itemEx != null)
-                                {
-                                    MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(itemEx));
-                                }
+                            MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), use.RowId));
+                        }
+                        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                        {
+                            ImGui.OpenPopup("RightClickUse" + use.RowId);
+                        }
 
-                                ImGui.EndPopup();
+                        if (ImGui.BeginPopup("RightClickUse"+ use.RowId))
+                        {
+                            var itemEx = _excelCache.GetItemExSheet().GetRow(use.RowId);
+                            if (itemEx != null)
+                            {
+                                MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(itemEx));
                             }
 
-                            float lastButtonX2 = ImGui.GetItemRectMax().X;
-                            float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
-                            ImGuiUtil.HoverTooltip(use.NameString);
-                            if (index + 1 < uses.Count && nextButtonX2 < windowVisibleX2)
-                            {
-                                ImGui.SameLine();
-                            }
+                            ImGui.EndPopup();
+                        }
+
+                        float lastButtonX2 = ImGui.GetItemRectMax().X;
+                        float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
+                        ImGuiUtil.HoverTooltip(use.NameString);
+                        if (index + 1 < uses.Count && nextButtonX2 < windowVisibleX2)
+                        {
+                            ImGui.SameLine();
                         }
 
                         ImGui.PopID();

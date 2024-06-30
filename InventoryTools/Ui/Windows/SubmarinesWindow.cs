@@ -37,7 +37,7 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>
                 OnLeftClick = OnLeftClick,
                 Draw = (ex, contentTypeId) =>
                 {
-                    if (ImGui.ImageButton(_imGuiService.IconService[Icons.AirshipIcon].ImGuiHandle,
+                    if (ImGui.ImageButton(_imGuiService.GetIconTexture(Icons.AirshipIcon).ImGuiHandle,
                             new Vector2(RowSize, RowSize)))
                     {
                         _columns[0].OnLeftClick?.Invoke(ex);
@@ -146,7 +146,7 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>
                     {
                         if (drop.Value != null)
                         {
-                            var sourceIcon = _imGuiService.IconService[drop.Value.Icon];
+                            var sourceIcon = _imGuiService.GetIconTexture(drop.Value.Icon);
                             ImGui.Image(sourceIcon.ImGuiHandle,
                                 new Vector2(RowSize, RowSize) * ImGui.GetIO().FontGlobalScale);
                             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &

@@ -17,13 +17,11 @@ namespace InventoryTools.Ui;
 
 public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
 {
-    private readonly IIconService _iconService;
     private readonly ImGuiService _imGuiService;
     private readonly ExcelCache _excelCache;
 
-    public DutiesWindow(ILogger<DutiesWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IIconService iconService, ExcelCache excelCache, string name = "Duties Window") : base(logger, mediator, imGuiService, configuration, name)
+    public DutiesWindow(ILogger<DutiesWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ExcelCache excelCache, string name = "Duties Window") : base(logger, mediator, imGuiService, configuration, name)
     {
-        _iconService = iconService;
         _imGuiService = imGuiService;
         _excelCache = excelCache;
     }
@@ -39,7 +37,7 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
                 OnLeftClick = OnLeftClick,
                 Draw = (ex, contentTypeId) =>
                 {
-                    if (ImGui.ImageButton(_iconService[(int)ex.ContentType.Value!.IconDutyFinder].ImGuiHandle,
+                    if (ImGui.ImageButton(ImGuiService.GetIconTexture((int)ex.ContentType.Value!.IconDutyFinder).ImGuiHandle,
                             new Vector2(RowSize, RowSize)))
                     {
                         _columns[0].OnLeftClick?.Invoke(ex);

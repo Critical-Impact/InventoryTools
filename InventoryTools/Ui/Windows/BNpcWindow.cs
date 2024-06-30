@@ -21,13 +21,11 @@ namespace InventoryTools.Ui
 {
     class BNpcWindow : UintWindow
     {
-        private readonly IIconService _iconService;
         private readonly IChatUtilities _chatUtilities;
         private readonly ExcelCache _excelCache;
 
-        public BNpcWindow(ILogger<BNpcWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IIconService iconService, IChatUtilities chatUtilities, ExcelCache excelCache,  string name = "Mob Window") : base(logger, mediator, imGuiService, configuration, name)
+        public BNpcWindow(ILogger<BNpcWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IChatUtilities chatUtilities, ExcelCache excelCache,  string name = "Mob Window") : base(logger, mediator, imGuiService, configuration, name)
         {
-            _iconService = iconService;
             _chatUtilities = chatUtilities;
             _excelCache = excelCache;
         }
@@ -80,8 +78,7 @@ namespace InventoryTools.Ui
                 var garlandId = bNpc.GarlandToolsId;
                 if (garlandId != null)
                 {
-                    var garlandIcon = _iconService.LoadImage("garlandtools");
-                    if (ImGui.ImageButton(garlandIcon.ImGuiHandle,
+                    if (ImGui.ImageButton(ImGuiService.GetImageTexture("garlandtools").ImGuiHandle,
                             new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                     {
                         $"https://www.garlandtools.org/db/#mob/{garlandId}".OpenBrowser();
@@ -91,8 +88,7 @@ namespace InventoryTools.Ui
                     ImGui.SameLine();
                 }
 
-                var tcIcon = _iconService.LoadImage("teamcraft");
-                if (ImGui.ImageButton(tcIcon.ImGuiHandle,
+                if (ImGui.ImageButton(ImGuiService.GetImageTexture("teamcraft").ImGuiHandle,
                         new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                 {
                     $"https://ffxivteamcraft.com/db/en/mob/{_bNpcId}".OpenBrowser();
@@ -114,41 +110,38 @@ namespace InventoryTools.Ui
 
                         if (drop.ItemEx.Value != null)
                         {
-                            var useIcon = _iconService[drop.ItemEx.Value.Icon];
-                            if (useIcon != null)
+                            var useIcon = ImGuiService.GetIconTexture(drop.ItemEx.Value.Icon);
+                            if (ImGui.ImageButton(useIcon.ImGuiHandle,
+                                    new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale,
+                                    new(0, 0), new(1, 1),
+                                    0))
                             {
-                                if (ImGui.ImageButton(useIcon.ImGuiHandle,
-                                        new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale,
-                                        new(0, 0), new(1, 1),
-                                        0))
-                                {
-                                    MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), drop.ItemEx.Row));
-                                }
+                                MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), drop.ItemEx.Row));
+                            }
 
-                                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
-                                                        ImGuiHoveredFlags.AllowWhenOverlapped &
-                                                        ImGuiHoveredFlags.AllowWhenBlockedByPopup &
-                                                        ImGuiHoveredFlags
-                                                            .AllowWhenBlockedByActiveItem &
-                                                        ImGuiHoveredFlags.AnyWindow) &&
-                                    ImGui.IsMouseReleased(ImGuiMouseButton.Right))
-                                {
-                                    ImGui.OpenPopup("RightClickUse" + drop.ItemEx.Row);
-                                }
+                            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
+                                                    ImGuiHoveredFlags.AllowWhenOverlapped &
+                                                    ImGuiHoveredFlags.AllowWhenBlockedByPopup &
+                                                    ImGuiHoveredFlags
+                                                        .AllowWhenBlockedByActiveItem &
+                                                    ImGuiHoveredFlags.AnyWindow) &&
+                                ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                            {
+                                ImGui.OpenPopup("RightClickUse" + drop.ItemEx.Row);
+                            }
 
-                                if (ImGui.BeginPopup("RightClickUse" + drop.ItemEx.Row))
-                                {
-                                    MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(drop.ItemEx.Value));
-                                    ImGui.EndPopup();
-                                }
+                            if (ImGui.BeginPopup("RightClickUse" + drop.ItemEx.Row))
+                            {
+                                MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(drop.ItemEx.Value));
+                                ImGui.EndPopup();
+                            }
 
-                                float lastButtonX2 = ImGui.GetItemRectMax().X;
-                                float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
-                                ImGuiUtil.HoverTooltip(drop.ItemEx.Value.NameString);
-                                if (listingCount < _mobDrops.Count && nextButtonX2 < windowVisibleX2)
-                                {
-                                    ImGui.SameLine();
-                                }
+                            float lastButtonX2 = ImGui.GetItemRectMax().X;
+                            float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
+                            ImGuiUtil.HoverTooltip(drop.ItemEx.Value.NameString);
+                            if (listingCount < _mobDrops.Count && nextButtonX2 < windowVisibleX2)
+                            {
+                                ImGui.SameLine();
                             }
                         }
                     }
@@ -170,7 +163,7 @@ namespace InventoryTools.Ui
                             .GetRow(spawn.TerritoryTypeId);
                         if (territory != null)
                         {
-                            if (ImGui.ImageButton(_iconService[60561].ImGuiHandle,
+                            if (ImGui.ImageButton(ImGuiService.GetIconTexture(60561).ImGuiHandle,
                                     new Vector2(32 * ImGui.GetIO().FontGlobalScale,32 * ImGui.GetIO().FontGlobalScale), new Vector2(0, 0),
                                     new Vector2(1, 1), 0))
                             {

@@ -18,12 +18,10 @@ namespace InventoryTools.Ui;
 
 public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
 {
-    private readonly IIconService _iconService;
     private readonly ExcelCache _excelCache;
 
-    public AirshipsWindow(ILogger<AirshipsWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IIconService iconService, ExcelCache excelCache, string name = "Airships Window") : base(logger, mediator, imGuiService, configuration, name)
+    public AirshipsWindow(ILogger<AirshipsWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ExcelCache excelCache, string name = "Airships Window") : base(logger, mediator, imGuiService, configuration, name)
     {
-        _iconService = iconService;
         _excelCache = excelCache;
     }
     public override void Initialize()
@@ -37,7 +35,7 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
                 OnLeftClick = OnLeftClick,
                 Draw = (ex, contentTypeId) =>
                 {
-                    if (ImGui.ImageButton(_iconService[Icons.AirshipIcon].ImGuiHandle,
+                    if (ImGui.ImageButton(ImGuiService.GetIconTexture(Icons.AirshipIcon).ImGuiHandle,
                             new Vector2(RowSize, RowSize)))
                     {
                         _columns[0].OnLeftClick?.Invoke(ex);
@@ -215,8 +213,7 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
                     {
                         if (drop.Value != null)
                         {
-                            var sourceIcon = _iconService[drop.Value.Icon];
-                            ImGui.Image(sourceIcon.ImGuiHandle,
+                            ImGui.Image(ImGuiService.GetIconTexture(drop.Value.Icon).ImGuiHandle,
                                 new Vector2(RowSize, RowSize) * ImGui.GetIO().FontGlobalScale);
                             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
                                                     ImGuiHoveredFlags.AllowWhenOverlapped &

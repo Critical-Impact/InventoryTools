@@ -9,15 +9,14 @@ namespace InventoryTools
     public class InventoryToolsPlugin : IDalamudPlugin
     {
         private Service? _service;
-        private DalamudPluginInterface? PluginInterface { get; set; }
+        private IDalamudPluginInterface? PluginInterface { get; set; }
         private PluginLoader? PluginLoader { get; set; }
         
-        public InventoryToolsPlugin(DalamudPluginInterface pluginInterface)
+        public InventoryToolsPlugin(IDalamudPluginInterface pluginInterface)
         {
             PluginInterface = pluginInterface;
             _service = PluginInterface.Create<Service>()!;
-            Service.Interface = new PluginInterfaceService(pluginInterface);
-            PluginLoader = new PluginLoader(new PluginInterfaceService(pluginInterface), _service);
+            PluginLoader = new PluginLoader(pluginInterface, _service);
             PluginLoader.Build();
         }
 

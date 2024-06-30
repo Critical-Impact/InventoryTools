@@ -20,14 +20,12 @@ namespace InventoryTools.Ui.Pages
 {
     public class CharacterRetainerPage : Page
     {
-        private readonly IIconService _iconService;
         private readonly ICharacterMonitor _characterMonitor;
         private readonly IInventoryMonitor _inventoryMonitor;
         private readonly ExcelCache _excelCache;
 
-        public CharacterRetainerPage(ILogger<CharacterRetainerPage> logger, ImGuiService imGuiService, IIconService iconService, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, ExcelCache excelCache) : base(logger, imGuiService)
+        public CharacterRetainerPage(ILogger<CharacterRetainerPage> logger, ImGuiService imGuiService, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, ExcelCache excelCache) : base(logger, imGuiService)
         {
-            _iconService = iconService;
             _characterMonitor = characterMonitor;
             _inventoryMonitor = inventoryMonitor;
             _excelCache = excelCache;
@@ -35,7 +33,6 @@ namespace InventoryTools.Ui.Pages
         private bool _isSeparator = false;
         public override void Initialize()
         {
-            _editIcon = new(_iconService.LoadImage("edit"), new Vector2(16, 16));
         }
 
         public override string Name { get; } = "Characters/Retainers";
@@ -46,7 +43,7 @@ namespace InventoryTools.Ui.Pages
         private bool _editMode = false;
         private string _newName = "";
 
-        private HoverButton _editIcon;
+        private HoverButton _editIcon = new(new Vector2(16,16));
         
         private Dictionary<Character, PopupMenu> _popupMenus = new();
         public PopupMenu GetCharacterMenu(Character character)
@@ -121,7 +118,7 @@ namespace InventoryTools.Ui.Pages
                         ImGui.SameLine();
                         if (character.Value.ActualClassJob != null)
                         {
-                            var icon = _iconService[character.Value.Icon];
+                            var icon = ImGuiService.GetIconTexture(character.Value.Icon);
                             ImGui.Image(icon.ImGuiHandle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale);
                         }
                     }
@@ -151,7 +148,7 @@ namespace InventoryTools.Ui.Pages
                         if (freeCompany.Value.ActualClassJob != null)
                         {
                             ImGui.SameLine();
-                            var icon = _iconService[freeCompany.Value.Icon];
+                            var icon = ImGuiService.GetIconTexture(freeCompany.Value.Icon);
                             ImGui.Image(icon.ImGuiHandle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale);
                         }
                     }
@@ -182,7 +179,7 @@ namespace InventoryTools.Ui.Pages
                         if (house.Value.ActualClassJob != null)
                         {
                             ImGui.SameLine();
-                            var icon = _iconService[house.Value.Icon];
+                            var icon = ImGuiService.GetIconTexture(house.Value.Icon);
                             ImGui.Image(icon.ImGuiHandle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale);
                         }
                     }
@@ -223,7 +220,7 @@ namespace InventoryTools.Ui.Pages
                             if (characterRetainer.Value.ActualClassJob != null)
                             {
                                 ImGui.SameLine();
-                                var icon = _iconService[characterRetainer.Value.Icon];
+                                var icon = ImGuiService.GetIconTexture(characterRetainer.Value.Icon);
                                 ImGui.Image(icon.ImGuiHandle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale);
                             }
                         }
@@ -259,7 +256,7 @@ namespace InventoryTools.Ui.Pages
                             if (characterRetainer.Value.ActualClassJob != null)
                             {
                                 ImGui.SameLine();
-                                var icon = _iconService[characterRetainer.Value.Icon];
+                                var icon = ImGuiService.GetIconTexture(characterRetainer.Value.Icon);
                                 ImGui.Image(icon.ImGuiHandle, new Vector2(16, 16) * ImGui.GetIO().FontGlobalScale);
                             }
                         }
@@ -309,12 +306,12 @@ namespace InventoryTools.Ui.Pages
                             if (character.ActualClassJob != null)
                             {
                                 ImGui.SameLine();
-                                var icon = _iconService[character.Icon];
+                                var icon = ImGuiService.GetIconTexture((uint)character.Icon);
                                 ImGui.Image(icon.ImGuiHandle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale);
                             }
                             
                             ImGui.SameLine();
-                            if(_editIcon.Draw("editName"))
+                            if(_editIcon.Draw(ImGuiService.LoadImage("edit"), "editName"))
                             {
                                 _editMode = true;
                                 _newName = character.AlternativeName ?? "";
@@ -436,10 +433,10 @@ namespace InventoryTools.Ui.Pages
                                                                                 {
                                                                                     if (ImGui.ImageButton(item.ItemId == 0
                                                                                                 ? ImGuiService
-                                                                                                    .IconService[62574]
+                                                                                                    .GetIconTexture(62574)
                                                                                                     .ImGuiHandle
                                                                                                 : ImGuiService
-                                                                                                    .IconService[item.Icon]
+                                                                                                    .GetIconTexture(item.Icon)
                                                                                                     .ImGuiHandle,
                                                                                             new Vector2(32, 32)))
                                                                                     {

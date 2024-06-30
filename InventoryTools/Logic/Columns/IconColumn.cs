@@ -95,21 +95,13 @@ namespace InventoryTools.Logic.Columns
             ImGui.TableNextColumn();
             if (currentValue != null)
             {
-                var textureWrap = Service.TextureProvider.GetIcon(currentValue.Value.Item1, currentValue.Value.Item2 ? ITextureProvider.IconFlags.ItemHighQuality : ITextureProvider.IconFlags.HiRes);
-                if (textureWrap != null)
+                ImGui.PushID("icon" + rowIndex);
+                if (ImGui.ImageButton(ImGuiService.GetIconTexture(currentValue.Value.Item1, currentValue.Value.Item2).ImGuiHandle, new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) * ImGui.GetIO().FontGlobalScale,new Vector2(0,0), new Vector2(1,1), 2))
                 {
-                    ImGui.PushID("icon" + rowIndex);
-                    if (ImGui.ImageButton(textureWrap.ImGuiHandle, new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) * ImGui.GetIO().FontGlobalScale,new Vector2(0,0), new Vector2(1,1), 2))
-                    {
-                        ImGui.PopID();
-                        messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), item.ItemId));
-                    }
                     ImGui.PopID();
+                    messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), item.ItemId));
                 }
-                else
-                {
-                    ImGui.Button("", new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) * ImGui.GetIO().FontGlobalScale);
-                }
+                ImGui.PopID();
             }
             return messages;
             
