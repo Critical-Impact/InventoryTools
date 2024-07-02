@@ -35,26 +35,31 @@ internal sealed class DalamudLogger : ILogger
 
 
         StringBuilder sb = new();
-        sb.AppendLine($"[{_name}]{{{(int)logLevel}}} {state}: {exception?.Message}");
-        sb.AppendLine(exception?.StackTrace);
-        var innerException = exception?.InnerException;
-        while (innerException != null)
+        sb.Append($"[{_name}]{{{(int)logLevel}}} {state}: {exception?.Message}");
+        if (exception != null)
         {
-            sb.AppendLine($"InnerException {innerException}: {innerException.Message}");
-            sb.AppendLine(innerException.StackTrace);
-            innerException = innerException.InnerException;
+            sb.AppendLine(exception.StackTrace);
+            var innerException = exception?.InnerException;
+            while (innerException != null)
+            {
+                sb.AppendLine($"InnerException {innerException}: {innerException.Message}");
+                sb.AppendLine(innerException.StackTrace);
+                innerException = innerException.InnerException;
+            }
         }
+
         if (logLevel == LogLevel.Trace)
-            _pluginLog.Verbose($"[{_name}]{{{(int)logLevel}}} {state}");
+            _pluginLog.Verbose(sb.ToString());
         else if (logLevel == LogLevel.Debug)
-            _pluginLog.Debug($"[{_name}]{{{(int)logLevel}}} {state}");
+            _pluginLog.Debug(sb.ToString());
         else if (logLevel == LogLevel.Information)
-            _pluginLog.Information($"[{_name}]{{{(int)logLevel}}} {state}");
+            _pluginLog.Information(sb.ToString());
         else if (logLevel == LogLevel.Warning)
-            _pluginLog.Warning($"[{_name}]{{{(int)logLevel}}} {state}");
+            _pluginLog.Warning(sb.ToString());
         else if (logLevel == LogLevel.Error)
-            _pluginLog.Error($"[{_name}]{{{(int)logLevel}}} {state}");
+            _pluginLog.Error(sb.ToString());
         else if (logLevel == LogLevel.Critical)
-            _pluginLog.Fatal($"[{_name}]{{{(int)logLevel}}} {state}");
+            _pluginLog.Fatal(sb.ToString());
+
     }
 }

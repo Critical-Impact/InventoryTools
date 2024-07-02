@@ -21,6 +21,9 @@ using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Ui
 {
+    using CriticalCommonLib.Addons;
+    using Dalamud.Plugin.Services;
+
     public enum DebugMenu
     {
         Characters = 0,
@@ -29,7 +32,8 @@ namespace InventoryTools.Ui
         InventoryMonitor = 3,
         Random = 4,
         CraftAgents = 5,
-        DebugWindows = 6
+        DebugWindows = 6,
+        Addons = 7
     }
     public class DebugWindow : GenericWindow
     {
@@ -37,15 +41,17 @@ namespace InventoryTools.Ui
         private readonly IInventoryScanner _inventoryScanner;
         private readonly ICraftMonitor _craftMonitor;
         private readonly ICharacterMonitor _characterMonitor;
+        private readonly IGameGui gameGui;
         private readonly ExcelCache _excelCache;
         private readonly InventoryToolsConfiguration _configuration;
 
-        public DebugWindow(ILogger<DebugWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IInventoryMonitor inventoryMonitor, IInventoryScanner inventoryScanner, ICraftMonitor craftMonitor, ICharacterMonitor characterMonitor, ExcelCache excelCache, string name = "Debug Window") : base(logger, mediator, imGuiService, configuration, name)
+        public DebugWindow(ILogger<DebugWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IInventoryMonitor inventoryMonitor, IInventoryScanner inventoryScanner, ICraftMonitor craftMonitor, ICharacterMonitor characterMonitor, IGameGui gameGui, ExcelCache excelCache, string name = "Debug Window") : base(logger, mediator, imGuiService, configuration, name)
         {
             _inventoryMonitor = inventoryMonitor;
             _inventoryScanner = inventoryScanner;
             _craftMonitor = craftMonitor;
             _characterMonitor = characterMonitor;
+            this.gameGui = gameGui;
             _excelCache = excelCache;
             _configuration = configuration;
         }
@@ -107,6 +113,11 @@ namespace InventoryTools.Ui
                         _configuration.SelectedDebugPage = (int)DebugMenu.DebugWindows;
                     }
 
+                    if (ImGui.Selectable("Addons", _configuration.SelectedDebugPage == (int)DebugMenu.Addons))
+                    {
+                        _configuration.SelectedDebugPage = (int)DebugMenu.Addons;
+                    }
+
                 }
             }
             ImGui.SameLine();
@@ -134,6 +145,10 @@ namespace InventoryTools.Ui
                     else if (_configuration.SelectedDebugPage == (int)DebugMenu.DebugWindows)
                     {
                         DrawDebugWindows();
+                    }
+                    else if (_configuration.SelectedDebugPage == (int)DebugMenu.Addons)
+                    {
+                        DrawAddons();
                     }
 /*
                     else if (_configuration.SelectedDebugPage == 2)
@@ -1487,6 +1502,55 @@ namespace InventoryTools.Ui
             if (ImGui.Button("List Service"))
             {
                 MediatorService.Publish(new OpenGenericWindowMessage(typeof(DebugListServiceWindow)));
+            }
+        }
+        public unsafe void DrawAddons()
+        {
+            if (ImGui.CollapsingHeader("Free Company Chest"))
+            {
+                var freeCompanyChest = this.gameGui.GetAddonByName("FreeCompanyChest");
+                if (freeCompanyChest != IntPtr.Zero)
+                {
+                    var freeCompanyChestAddon = (InventoryFreeCompanyChestAddon*)freeCompanyChest;
+                    if (freeCompanyChestAddon != null)
+                    {
+                        ImGui.Text($"Current Tab: { freeCompanyChestAddon->CurrentTab }");
+                    }
+                }
+            }
+            if (ImGui.CollapsingHeader("Glamour Chest(MiragePrismPrismBox)"))
+            {
+                var addon = this.gameGui.GetAddonByName("MiragePrismPrismBox");
+                if (addon != IntPtr.Zero)
+                {
+                    var mirageAddon = (InventoryMiragePrismBoxAddon*)addon;
+                    if (mirageAddon != null)
+                    {
+                        ImGui.Text($"Current Tab: { mirageAddon->SelectedTab }");
+                        ImGui.Text($"Class/Job Selected: { mirageAddon->ClassJobSelected }");
+                    }
+                }
+            }
+            if (ImGui.CollapsingHeader("Armoire(CabinetWithdraw)"))
+            {
+                var addon = this.gameGui.GetAddonByName("CabinetWithdraw");
+                if (addon != IntPtr.Zero)
+                {
+
+                    var cabinetWithdraw = (AddonCabinetWithdraw*)addon;
+                    if (cabinetWithdraw != null)
+                    {
+                        ImGui.Text($"Artifact Armor Selected: { (cabinetWithdraw->ArtifactArmorRadioButton->IsChecked ? "yes" : "no") }");
+                        ImGui.Text($"Seasonal Gear 1 Selected: { (cabinetWithdraw->SeasonalGear1RadioButton->IsChecked ? "yes" : "no") }");
+                        ImGui.Text($"Seasonal Gear 2 Selected: { (cabinetWithdraw->SeasonalGear2RadioButton->IsChecked ? "yes" : "no") }");
+                        ImGui.Text($"Seasonal Gear 3 Selected: { (cabinetWithdraw->SeasonalGear3RadioButton->IsChecked ? "yes" : "no") }");
+                        ImGui.Text($"Seasonal Gear 4 Selected: { (cabinetWithdraw->SeasonalGear4RadioButton->IsChecked ? "yes" : "no") }");
+                        ImGui.Text($"Seasonal Gear 5 Selected: { (cabinetWithdraw->SeasonalGear5RadioButton->IsChecked ? "yes" : "no") }");
+                        ImGui.Text($"Achievements Selected: { (cabinetWithdraw->AchievementsRadioButton->IsChecked ? "yes" : "no") }");
+                        ImGui.Text($"Exclusive Extras Selected: { (cabinetWithdraw->ExclusiveExtrasRadioButton->IsChecked ? "yes" : "no") }");
+                        ImGui.Text($"Search Selected: { (cabinetWithdraw->SearchRadioButton->IsChecked ? "yes" : "no") }");
+                    }
+                }
             }
         }
 
