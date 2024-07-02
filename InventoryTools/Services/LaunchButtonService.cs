@@ -54,7 +54,15 @@ public class LaunchButtonService : DisposableMediatorSubscriberBase, IHostedServ
         }
         try
         {
-            _entry = _titleScreenMenu.AddEntry("Allagan Tools", _textureProvider.GetFromFile(_fileName), OnTriggered);
+            _icon = _textureProvider.GetFromFile(_fileName).RentAsync().Result;
+            if (_icon != null)
+            {
+                _entry = _titleScreenMenu.AddEntry("Allagan Tools", _icon, OnTriggered);
+            }
+            else
+            {
+                _logger.LogError($"Could not load icon to add to title screen menu.");
+            }
 
             _pluginInterfaceService.UiBuilder.Draw -= CreateEntry;
         }
