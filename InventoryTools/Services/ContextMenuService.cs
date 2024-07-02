@@ -32,7 +32,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
     public const int AgentItemContextItemId          = 0x28;
     public const int GatheringNoteContextItemId      = 0xA0;
     public const int ItemSearchContextItemId         = 0x1740;
-    public const int ChatLogContextItemId            = 0x948;
+    public const int ChatLogContextItemId            = 0x950;
     
     public const int SubmarinePartsMenuContextItemId            = 0x54;
     public const int ShopExchangeItemContextItemId            = 0x54;
@@ -56,6 +56,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
         Logger.LogDebug($"{args.AddonName}");
         Logger.LogDebug($"{(ulong)args.AgentPtr:X}");
         itemId = GetGameObjectItemId(args);
+        itemId %= 500000;
         Logger.LogDebug($"{itemId}");
 
         if (itemId != null)
