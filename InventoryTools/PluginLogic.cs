@@ -38,7 +38,7 @@ namespace InventoryTools
         private readonly IHotkeyService _hotkeyService;
         private readonly ICraftMonitor _craftMonitor;
         private readonly IGameInterface _gameInterface;
-        //private readonly ITooltipService _tooltipService;
+        private readonly ITooltipService _tooltipService;
         private readonly Func<Type, IFilter> _filterFactory;
         private readonly IMarketCache _marketCache;
         private Dictionary<uint, InventoryMonitor.ItemChangesItem> _recentlyAddedSeen = new();
@@ -63,7 +63,7 @@ namespace InventoryTools
 
         private DateTime? _nextSaveTime = null;
         
-        public PluginLogic(ConfigurationManagerService configurationManagerService, IChatUtilities chatUtilities, IListService listService, ILogger<PluginLogic> logger, IFramework framework, MediatorService mediatorService, HostedInventoryHistory hostedInventoryHistory, IInventoryMonitor inventoryMonitor, IInventoryScanner inventoryScanner, ICharacterMonitor characterMonitor, InventoryToolsConfiguration configuration, IMobTracker mobTracker, IHotkeyService hotkeyService, ICraftMonitor craftMonitor, IGameInterface gameInterface,IEnumerable<BaseTooltip> tooltips, IEnumerable<IHotkey> hotkeys, Func<Type,IFilter> filterFactory, IMarketCache marketCache) : base(logger, mediatorService)
+        public PluginLogic(ConfigurationManagerService configurationManagerService, IChatUtilities chatUtilities, IListService listService, ILogger<PluginLogic> logger, IFramework framework, MediatorService mediatorService, HostedInventoryHistory hostedInventoryHistory, IInventoryMonitor inventoryMonitor, IInventoryScanner inventoryScanner, ICharacterMonitor characterMonitor, InventoryToolsConfiguration configuration, IMobTracker mobTracker, IHotkeyService hotkeyService, ICraftMonitor craftMonitor, IGameInterface gameInterface,IEnumerable<BaseTooltip> tooltips, IEnumerable<IHotkey> hotkeys, Func<Type,IFilter> filterFactory, IMarketCache marketCache, ITooltipService tooltipService) : base(logger, mediatorService)
         {
             _configurationManagerService = configurationManagerService;
             _chatUtilities = chatUtilities;
@@ -79,7 +79,7 @@ namespace InventoryTools
             _hotkeyService = hotkeyService;
             _craftMonitor = craftMonitor;
             _gameInterface = gameInterface;
-            //_tooltipService = tooltipService;
+            _tooltipService = tooltipService;
             _filterFactory = filterFactory;
             _marketCache = marketCache;
 
@@ -99,10 +99,10 @@ namespace InventoryTools
                 _hotkeyService.AddHotkey(hotkey);
             }
             
-            // foreach (var tooltip in tooltips.OrderBy(c => c.Order))
-            // {
-            //     _tooltipService.AddTooltipTweak(tooltip);
-            // }
+            foreach (var tooltip in tooltips.OrderBy(c => c.Order))
+            {
+                _tooltipService.AddTooltipTweak(tooltip);
+            }
             
             if (_configuration.FirstRun)
             {

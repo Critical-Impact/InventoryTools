@@ -244,7 +244,7 @@ public class PluginLoader : IDisposable
                 builder.RegisterType<MobTracker>().As<IMobTracker>().SingleInstance();
                 builder.RegisterType<IPCService>().SingleInstance();
                 builder.RegisterType<TeleporterIpc>().As<ITeleporterIpc>().SingleInstance();
-                //builder.RegisterType<TooltipService>().As<ITooltipService>().SingleInstance();
+                builder.RegisterType<TooltipService>().As<ITooltipService>().SingleInstance();
                 builder.RegisterType<MarketboardTaskQueue>().SingleInstance();
                 builder.RegisterType<ImGuiService>().SingleInstance();
                 builder.RegisterType<InventoryHistory>().SingleInstance();
