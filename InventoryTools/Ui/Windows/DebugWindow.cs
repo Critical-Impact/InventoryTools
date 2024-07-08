@@ -1554,12 +1554,14 @@ namespace InventoryTools.Ui
             }
         }
 
-        public void DrawCraftAgentTab()
+        public unsafe void DrawCraftAgentTab()
         {
             var craftMonitorAgent = _craftMonitor.Agent;
             var simpleCraftMonitorAgent = _craftMonitor.SimpleAgent;
             if (craftMonitorAgent != null)
             {
+                ImGui.Text($"Craft Monitor Pointer: {(ulong)craftMonitorAgent.Agent:X}");
+                ImGui.TextUnformatted("Is Trial Synthesis: " + craftMonitorAgent.IsTrialSynthesis);
                 ImGui.TextUnformatted("Progress: " + craftMonitorAgent.Progress);
                 ImGui.TextUnformatted("Total Progress Required: " +
                     _craftMonitor.RecipeLevelTable?.ProgressRequired(_craftMonitor
@@ -1591,6 +1593,7 @@ namespace InventoryTools.Ui
             }
             else if (simpleCraftMonitorAgent != null)
             {
+                ImGui.Text($"Simple Craft Monitor Pointer: {(ulong)simpleCraftMonitorAgent.Agent:X}");
                 ImGui.TextUnformatted("NQ Complete: " + simpleCraftMonitorAgent.NqCompleted);
                 ImGui.TextUnformatted("HQ Complete: " + simpleCraftMonitorAgent.HqCompleted);
                 ImGui.TextUnformatted("Failed: " + simpleCraftMonitorAgent.TotalFailed);

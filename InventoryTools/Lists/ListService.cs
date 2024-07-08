@@ -94,40 +94,46 @@ namespace InventoryTools.Lists
             var savedLists = _configuration.GetSavedFilters();
             foreach (var list in savedLists)
             {
-                if (list.Columns != null)
-                {
-                    List<ColumnConfiguration> invalidColumns = new();
-                    foreach (var columnConfiguration in list.Columns)
-                    {
-                        if (!SetupColumn(columnConfiguration))
-                        {
-                            invalidColumns.Add(columnConfiguration);
-                        }
-                    }
-
-                    foreach (var toRemove in invalidColumns)
-                    {
-                        list.Columns.Remove(toRemove);
-                    }
-                }
-                if (list.CraftColumns != null)
-                {
-                    List<ColumnConfiguration> invalidColumns = new();
-                    foreach (var columnConfiguration in list.CraftColumns)
-                    {
-                        if (!SetupColumn(columnConfiguration))
-                        {
-                            invalidColumns.Add(columnConfiguration);
-                        }
-                    }
-
-                    foreach (var toRemove in invalidColumns)
-                    {
-                        list.CraftColumns.Remove(toRemove);
-                    }
-                }
+                ValidateAndInjectListColumns(list);
             }
             return new ConcurrentDictionary<string, FilterConfiguration>(savedLists.ToDictionary(c => c.Key, c => c));
+        }
+
+        private void ValidateAndInjectListColumns(FilterConfiguration list)
+        {
+            if (list.Columns != null)
+            {
+                List<ColumnConfiguration> invalidColumns = new();
+                foreach (var columnConfiguration in list.Columns)
+                {
+                    if (!SetupColumn(columnConfiguration))
+                    {
+                        invalidColumns.Add(columnConfiguration);
+                    }
+                }
+
+                foreach (var toRemove in invalidColumns)
+                {
+                    list.Columns.Remove(toRemove);
+                }
+            }
+
+            if (list.CraftColumns != null)
+            {
+                List<ColumnConfiguration> invalidColumns = new();
+                foreach (var columnConfiguration in list.CraftColumns)
+                {
+                    if (!SetupColumn(columnConfiguration))
+                    {
+                        invalidColumns.Add(columnConfiguration);
+                    }
+                }
+
+                foreach (var toRemove in invalidColumns)
+                {
+                    list.CraftColumns.Remove(toRemove);
+                }
+            }
         }
 
         private bool SetupColumn(ColumnConfiguration columnConfiguration)
@@ -280,6 +286,7 @@ namespace InventoryTools.Lists
 
         public bool AddList(FilterConfiguration configuration)
         {
+            ValidateAndInjectListColumns(configuration);
             var result = _lists.TryAdd(configuration.Key, configuration);
             if (configuration.FilterType == FilterType.CraftFilter)
             {

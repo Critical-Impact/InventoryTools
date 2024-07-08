@@ -192,36 +192,6 @@ public class MigrationManagerService : IHostedService
         if (config.InternalVersion == 10)
         {
             _logger.LogInformation("Migrating to version 11");
-            foreach (var filterConfig in config.FilterConfigurations)
-            {
-                filterConfig.TableHeight = 32;
-                filterConfig.CraftTableHeight = 32;
-                if (filterConfig.FilterType == FilterType.CraftFilter)
-                {
-                    filterConfig.FreezeCraftColumns = 2;
-                    filterConfig.GenerateNewCraftTableId();
-                    _listService.AddCraftColumn(filterConfig, typeof(IconColumn), false);
-                    _listService.AddCraftColumn(filterConfig, typeof(NameColumn), false);
-                    if (filterConfig.SimpleCraftingMode == true)
-                    {
-                        _listService.AddCraftColumn(filterConfig, typeof(CraftAmountRequiredColumn), false);
-                        _listService.AddCraftColumn(filterConfig, typeof(CraftSimpleColumn), false);
-                    }
-                    else
-                    {
-                        _listService.AddCraftColumn(filterConfig, typeof(QuantityAvailableColumn), false);
-                        _listService.AddCraftColumn(filterConfig, typeof(CraftAmountRequiredColumn), false);
-                        _listService.AddCraftColumn(filterConfig, typeof(CraftAmountReadyColumn), false);
-                        _listService.AddCraftColumn(filterConfig, typeof(CraftAmountAvailableColumn), false);
-                        _listService.AddCraftColumn(filterConfig, typeof(CraftAmountUnavailableColumn), false);
-                        _listService.AddCraftColumn(filterConfig, typeof(CraftAmountCanCraftColumn), false);
-                    }
-                    _listService.AddCraftColumn(filterConfig, typeof(MarketBoardMinPriceColumn), false);
-                    _listService.AddCraftColumn(filterConfig, typeof(MarketBoardMinTotalPriceColumn), false);
-                    _listService.AddCraftColumn(filterConfig, typeof(AcquisitionSourceIconsColumn), false);
-                    _listService.AddCraftColumn(filterConfig, typeof(CraftGatherColumn), false);
-                }
-            }
             config.InternalVersion++;
         }
 
