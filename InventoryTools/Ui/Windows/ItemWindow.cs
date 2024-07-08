@@ -294,7 +294,7 @@ namespace InventoryTools.Ui
                 if (ImGui.ImageButton(ImGuiService.GetImageTexture("consolegameswiki").ImGuiHandle,
                         new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                 {
-                    var name = Item.NameString.Replace(' ', '_');
+                    var name = Item.NameString.Replace("#"," ").Replace("  ", " ").Replace(' ', '_');
                     name = name.Replace('–', '-');
 
                     if (name.StartsWith("_")) // "level sync" icon

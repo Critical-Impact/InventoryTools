@@ -268,7 +268,7 @@ public class RightClickService
         }
         if (ImGui.Selectable("Open in Console Games Wiki"))
         {
-            var name = item.NameString.Replace(' ', '_');
+            var name = item.NameString.Replace("#"," ").Replace("  ", " ").Replace(' ', '_');
             name = name.Replace('–', '-');
 
             if (name.StartsWith("_")) // "level sync" icon
