@@ -1,5 +1,6 @@
 using System.Numerics;
 using CriticalCommonLib.Services.Mediator;
+using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility;
 using ImGuiNET;
 using InventoryTools;
@@ -261,15 +262,11 @@ public class IconBrowserWindow : GenericWindow
         var count = 0;
         for (int index = start; index < end; index++)
         {
-            if (ImGuiService.IconService.IconExists(index))
+            if (ImGuiService.TextureProvider.TryGetFromGameIcon(new GameIconLookup((uint)index), out var icon))
             {
-                var dalamudTextureWrap = ImGuiService.IconService[index];
-                if (dalamudTextureWrap != null)
-                {
-                    ImGui.Image(dalamudTextureWrap.ImGuiHandle, new Vector2(64, 64));
+                ImGui.Image(icon.GetWrapOrEmpty().ImGuiHandle, new Vector2(64, 64));
 
-                    ImGuiUtil.HoverTooltip(index.ToString());
-                }
+                ImGuiUtil.HoverTooltip(index.ToString());
 
                 if (count % 10 != 0)
                 {
@@ -305,7 +302,14 @@ public class IconBrowserWindow : GenericWindow
                 for (int i = start; i < end; i++)
                 {
                     var icon = cache[i];
-                    ImGui.Image(ImGuiService.IconService[icon].ImGuiHandle, iconSize);
+                    if(ImGuiService.TextureProvider.TryGetFromGameIcon(new GameIconLookup((uint)icon), out var texture))
+                    {
+                        ImGui.Image(texture.GetWrapOrEmpty().ImGuiHandle, iconSize);
+                    }
+                    else
+                    {
+                        ImGui.Dummy(iconSize);
+                    }
                     if (ImGui.IsItemClicked())
                     {
                         doPasteIcon = true;

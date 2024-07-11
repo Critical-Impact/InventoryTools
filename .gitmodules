@@ -4,9 +4,3 @@
 [submodule "OtterGui"]
 	path = OtterGui
 	url = https://github.com/Ottermandias/OtterGui.git
-[submodule "LuminaSupplemental"]
-	path = LuminaSupplemental
-	url = https://github.com/Critical-Impact/LuminaSupplemental
-[submodule "DalaMock"]
-	path = DalaMock
-	url = https://github.com/Critical-Impact/DalaMock.git

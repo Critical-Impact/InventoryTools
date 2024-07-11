@@ -14,7 +14,7 @@ public class MockCraftMonitor : ICraftMonitor
 
     public void CompleteCraft(uint itemId, bool isHq, uint quantity)
     {
-        CraftCompleted?.Invoke(itemId, isHq ? InventoryItem.ItemFlags.HQ : InventoryItem.ItemFlags.None, quantity);
+        CraftCompleted?.Invoke(itemId, isHq ? InventoryItem.ItemFlags.HighQuality : InventoryItem.ItemFlags.None, quantity);
     }
 
     public event CraftMonitor.CraftStartedDelegate? CraftStarted;
