@@ -46,7 +46,7 @@ namespace InventoryTools.Misc
         private int _timerCounter = 0;
         private readonly int _timerStep = 10;
 
-        public Game Game;
+        public Game? Game;
         private Timer? _gameTimer;
 
 
@@ -75,43 +75,53 @@ namespace InventoryTools.Misc
         
         private void FrameworkOnOnUpdateEvent(IFramework framework) {
         try {
-            if (Game.Status != Game.GameStatus.InProgress) return;
+            if (Game != null && Game.Status != Game.GameStatus.InProgress) return;
 
             if (lastMoveTime != null && lastMoveTime.Value.AddMilliseconds(100) >= DateTime.Now)
             {
                 Service.KeyState.ClearAll();
                 return;
-            }                
-
-            if (isKeyPressed(new[]{VirtualKey.Z})) {
-                Game.RotateLeft();
-                lastMoveTime = DateTime.Now;
-            }                 
-
-            if (isKeyPressed(new[]{VirtualKey.X})) {
-                Game.RotateRight();
-                lastMoveTime = DateTime.Now;
-            }          
-
-            if (isKeyPressed(new[]{VirtualKey.UP})) {
-                Game.SmashDown();
-                lastMoveTime = DateTime.Now;
             }
 
-            if (isKeyPressed(new[]{VirtualKey.DOWN})) {
-                Game.MoveDown();
-                lastMoveTime = DateTime.Now;
+            if (Game != null)
+            {
+                if (isKeyPressed(new[] { VirtualKey.Z }))
+                {
+                    Game.RotateLeft();
+                    lastMoveTime = DateTime.Now;
+                }
+
+                if (isKeyPressed(new[] { VirtualKey.X }))
+                {
+                    Game.RotateRight();
+                    lastMoveTime = DateTime.Now;
+                }
+
+                if (isKeyPressed(new[] { VirtualKey.UP }))
+                {
+                    Game.SmashDown();
+                    lastMoveTime = DateTime.Now;
+                }
+
+                if (isKeyPressed(new[] { VirtualKey.DOWN }))
+                {
+                    Game.MoveDown();
+                    lastMoveTime = DateTime.Now;
+                }
+
+                if (isKeyPressed(new[] { VirtualKey.LEFT }))
+                {
+                    Game.MoveLeft();
+                    lastMoveTime = DateTime.Now;
+                }
+
+                if (isKeyPressed(new[] { VirtualKey.RIGHT }))
+                {
+                    Game.MoveRight();
+                    lastMoveTime = DateTime.Now;
+                }
             }
 
-            if (isKeyPressed(new[]{VirtualKey.LEFT})) {
-                Game.MoveLeft();
-                lastMoveTime = DateTime.Now;
-            }
-
-            if (isKeyPressed(new[]{VirtualKey.RIGHT})) {
-                Game.MoveRight();
-                lastMoveTime = DateTime.Now;
-            }
             MediatorService.Publish(new OverlaysRequestRefreshMessage());
             Service.KeyState.ClearAll();
             
@@ -153,6 +163,11 @@ namespace InventoryTools.Misc
         
         private void OnTimedEvent(object? source, ElapsedEventArgs e)
         {
+            if (Game == null)
+            {
+                return;
+            }
+
             if (Game.Status != Game.GameStatus.Finished)
             {
                 if (Game.Status != Game.GameStatus.Paused)

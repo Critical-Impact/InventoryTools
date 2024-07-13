@@ -25,7 +25,7 @@ namespace InventoryTools.Overlays
 
         public override bool Draw()
         {
-            if (!HasState || !AtkOverlay.HasAddon)
+            if (!HasState || !AtkOverlay.HasAddon || !Enabled || _tetrisGame.Game == null)
             {
                 return false;
             }

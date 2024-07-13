@@ -51,12 +51,22 @@ namespace InventoryTools.Ui
                 if (_tetrisGame.TetrisEnabled)
                 {
                     _tetrisOverlay.Enabled = false;
+                    _tetrisOverlay.Clear();
                 }
                 else
                 {
+                    if (_tetrisGame.Game == null)
+                    {
+                        _tetrisGame.Restart();
+                    }
                     _tetrisOverlay.Enabled = true;
                 }
                 _tetrisGame.ToggleTetris();
+            }
+
+            if (tetrisGame == null)
+            {
+                return;
             }
             
             ImGui.TextUnformatted("Overlay: " + (_tetrisGame.TetrisEnabled ? "Enabled" : "Disabled"));
