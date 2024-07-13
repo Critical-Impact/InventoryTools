@@ -15,13 +15,11 @@ namespace InventoryTools.Ui;
 
 public class ConfigurationWizard : GenericWindow
 {
-    private readonly IIconService _iconService;
     private readonly ConfigurationWizardService _configurationWizardService;
     private readonly InventoryToolsConfiguration _configuration;
 
-    public ConfigurationWizard(ILogger<ConfigurationWizard> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IIconService iconService, ConfigurationWizardService configurationWizardService, string name = "Configuration Wizard") : base(logger, mediator, imGuiService, configuration, name)
+    public ConfigurationWizard(ILogger<ConfigurationWizard> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ConfigurationWizardService configurationWizardService, string name = "Configuration Wizard") : base(logger, mediator, imGuiService, configuration, name)
     {
-        _iconService = iconService;
         _configurationWizardService = configurationWizardService;
         _configuration = configuration;
     }
@@ -103,7 +101,7 @@ public class ConfigurationWizard : GenericWindow
                     if (sideBarImage)
                     {
                         ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 12.5f);
-                        ImGui.Image(_iconService.LoadImage("icon").ImGuiHandle, new (100,100));
+                        ImGui.Image(ImGuiService.GetImageTexture("icon").ImGuiHandle, new (100,100));
                     }
                 }
             }
@@ -158,10 +156,10 @@ public class ConfigurationWizard : GenericWindow
                                     ImGui.Text(feature.Description);
                                     ImGui.PopTextWrapPos();
                                     ImGui.Separator();
-                                    foreach (var setting in feature.RelatedSettings)
+                                    foreach (var setting in _configurationWizardService.GetApplicableSettings(feature))
                                     {
                                         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
-                                        setting.LabelSize = 200;
+                                        setting.LabelSize = (int)(ImGui.GetWindowContentRegionMax().X - 20);
                                         setting.Draw(_configuration);
                                         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
                                     }

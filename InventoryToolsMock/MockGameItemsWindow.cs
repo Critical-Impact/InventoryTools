@@ -3,6 +3,7 @@ using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
+using Dalamud.Interface.Textures;
 using ImGuiNET;
 using InventoryTools;
 using InventoryTools.Logic;
@@ -95,9 +96,12 @@ public class MockGameItemsWindow : GenericWindow
                                                                 var item = itemChunk[index];
                                                                 using (ImRaii.PushId(item.Slot))
                                                                 {
-                                                                    if(ImGui.ImageButton(item.ItemId == 0 ? ImGuiService.IconService[62574].ImGuiHandle :
-                                                                               ImGuiService.IconService[item.Icon]
-                                                                            .ImGuiHandle,
+                                                                    var texture = item.ItemId == 0
+                                                                        ? ImGuiService.TextureProvider.GetFromGameIcon(
+                                                                            new GameIconLookup(62574))
+                                                                        : ImGuiService.TextureProvider.GetFromGameIcon(
+                                                                            new GameIconLookup(item.Icon));
+                                                                    if(ImGui.ImageButton(texture.GetWrapOrEmpty().ImGuiHandle,
                                                                         new Vector2(32, 32)))
                                                                     {
                                                                         item.ItemId = 0;

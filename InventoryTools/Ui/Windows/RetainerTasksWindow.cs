@@ -19,12 +19,10 @@ namespace InventoryTools.Ui;
 
 public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>
 {
-    private readonly IIconService _iconService;
     private readonly ExcelCache _excelCache;
 
-    public RetainerTasksWindow(ILogger<RetainerTasksWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IIconService iconService, ExcelCache excelCache, string name = "Retainer Ventures") : base(logger, mediator, imGuiService, configuration, name)
+    public RetainerTasksWindow(ILogger<RetainerTasksWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ExcelCache excelCache, string name = "Retainer Ventures") : base(logger, mediator, imGuiService, configuration, name)
     {
-        _iconService = iconService;
         _excelCache = excelCache;
     }
     public override void Initialize()
@@ -38,7 +36,7 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>
                 OnLeftClick = OnLeftClick,
                 Draw = (ex, contentTypeId) =>
                 {
-                    if (ImGui.ImageButton(_iconService[65049].ImGuiHandle,
+                    if (ImGui.ImageButton(ImGuiService.GetIconTexture(65049).ImGuiHandle,
                             new Vector2(RowSize, RowSize)))
                     {
                         _columns[0].OnLeftClick?.Invoke(ex);
@@ -236,8 +234,7 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>
                     RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X,
                     drop =>
                     {
-                        var sourceIcon = _iconService[drop.Icon];
-                        ImGui.Image(sourceIcon.ImGuiHandle,
+                        ImGui.Image(ImGuiService.GetIconTexture(drop.Icon).ImGuiHandle,
                             new Vector2(RowSize, RowSize) * ImGui.GetIO().FontGlobalScale);
                         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
                                                 ImGuiHoveredFlags.AllowWhenOverlapped &

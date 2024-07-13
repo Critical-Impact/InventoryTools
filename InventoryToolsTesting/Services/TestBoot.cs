@@ -18,7 +18,7 @@ namespace InventoryToolsTesting.Services
         {
             var service = new Service();
             var mockProgram = new MockProgram(service, false);
-            var pluginInterface = new MockPluginInterfaceService(mockProgram, new FileInfo(Path.Join(Environment.CurrentDirectory,"/","test.json")), new DirectoryInfo(Environment.CurrentDirectory));
+            var pluginInterface = new MockPluginInterface(mockProgram, new FileInfo(Path.Join(Environment.CurrentDirectory,"/","test.json")), new DirectoryInfo(Environment.CurrentDirectory));
             var mockFramework = new MockFramework();
             var logger = new LoggerConfiguration()
                 .WriteTo.Console(standardErrorFromLevel: LogEventLevel.Verbose)

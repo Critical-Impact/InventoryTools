@@ -19,7 +19,7 @@ namespace InventoryTools.Logic.Columns
 
         public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
         {
-            return item.IsDyeable;
+            return item.DyeCount != 0;
         }
 
         public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)

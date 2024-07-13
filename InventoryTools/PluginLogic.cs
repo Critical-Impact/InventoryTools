@@ -38,6 +38,8 @@ namespace InventoryTools
         private readonly IHotkeyService _hotkeyService;
         private readonly ICraftMonitor _craftMonitor;
         private readonly IGameInterface _gameInterface;
+        private readonly IEnumerable<BaseTooltip> tooltips;
+        private readonly IEnumerable<IHotkey> hotkeys;
         private readonly ITooltipService _tooltipService;
         private readonly Func<Type, IFilter> _filterFactory;
         private readonly IMarketCache _marketCache;
@@ -63,7 +65,7 @@ namespace InventoryTools
 
         private DateTime? _nextSaveTime = null;
         
-        public PluginLogic(ConfigurationManagerService configurationManagerService, IChatUtilities chatUtilities, IListService listService, ILogger<PluginLogic> logger, IFramework framework, MediatorService mediatorService, HostedInventoryHistory hostedInventoryHistory, IInventoryMonitor inventoryMonitor, IInventoryScanner inventoryScanner, ICharacterMonitor characterMonitor, InventoryToolsConfiguration configuration, IMobTracker mobTracker, IHotkeyService hotkeyService, ICraftMonitor craftMonitor, IGameInterface gameInterface, ITooltipService tooltipService, IEnumerable<BaseTooltip> tooltips, IEnumerable<IHotkey> hotkeys, Func<Type,IFilter> filterFactory, IMarketCache marketCache) : base(logger, mediatorService)
+        public PluginLogic(ConfigurationManagerService configurationManagerService, IChatUtilities chatUtilities, IListService listService, ILogger<PluginLogic> logger, IFramework framework, MediatorService mediatorService, HostedInventoryHistory hostedInventoryHistory, IInventoryMonitor inventoryMonitor, IInventoryScanner inventoryScanner, ICharacterMonitor characterMonitor, InventoryToolsConfiguration configuration, IMobTracker mobTracker, IHotkeyService hotkeyService, ICraftMonitor craftMonitor, IGameInterface gameInterface,IEnumerable<BaseTooltip> tooltips, IEnumerable<IHotkey> hotkeys, Func<Type,IFilter> filterFactory, IMarketCache marketCache, ITooltipService tooltipService) : base(logger, mediatorService)
         {
             _configurationManagerService = configurationManagerService;
             _chatUtilities = chatUtilities;
@@ -79,38 +81,12 @@ namespace InventoryTools
             _hotkeyService = hotkeyService;
             _craftMonitor = craftMonitor;
             _gameInterface = gameInterface;
+            this.tooltips = tooltips;
+            this.hotkeys = hotkeys;
             _tooltipService = tooltipService;
             _filterFactory = filterFactory;
             _marketCache = marketCache;
 
-            //Events we need to track, inventory updates, active retainer changes, player changes, 
-            _inventoryMonitor.OnInventoryChanged += InventoryMonitorOnOnInventoryChanged;
-            _characterMonitor.OnCharacterUpdated += CharacterMonitorOnOnCharacterUpdated;
-            _framework.Update += FrameworkOnUpdate;
-            _configurationManagerService.ConfigurationChanged += ConfigOnConfigurationChanged;
-
-            _craftMonitor.CraftStarted += CraftMonitorOnCraftStarted;
-            _craftMonitor.CraftFailed += CraftMonitorOnCraftFailed ;
-            _craftMonitor.CraftCompleted += CraftMonitorOnCraftCompleted ;
-            _gameInterface.AcquiredItemsUpdated += GameInterfaceOnAcquiredItemsUpdated;
-            
-            foreach (var hotkey in hotkeys)
-            {
-                _hotkeyService.AddHotkey(hotkey);
-            }
-            
-            foreach (var tooltip in tooltips.OrderBy(c => c.Order))
-            {
-                _tooltipService.AddTooltipTweak(tooltip);
-            }
-            
-            if (_configuration.FirstRun)
-            {
-                LoadDefaultData();
-                _configuration.FirstRun = false;
-            }
-            SyncConfigurationChanges(false);
-            ClearOrphans();
         }
 
         private void CraftMonitorOnCraftCompleted(uint itemid, FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags flags, uint quantity)
@@ -426,9 +402,45 @@ namespace InventoryTools
             }
         }
 
-        protected override void Dispose(bool disposing)
+
+        public Task StartAsync(CancellationToken cancellationToken)
         {
-            base.Dispose(disposing);
+            Logger.LogTrace("Starting service {type} ({this})", GetType().Name, this);
+            _inventoryMonitor.Start();
+            _inventoryScanner.Enable();
+            _inventoryMonitor.OnInventoryChanged += InventoryMonitorOnOnInventoryChanged;
+            _characterMonitor.OnCharacterUpdated += CharacterMonitorOnOnCharacterUpdated;
+            _framework.Update += FrameworkOnUpdate;
+            _configurationManagerService.ConfigurationChanged += ConfigOnConfigurationChanged;
+
+            _craftMonitor.CraftStarted += CraftMonitorOnCraftStarted;
+            _craftMonitor.CraftFailed += CraftMonitorOnCraftFailed ;
+            _craftMonitor.CraftCompleted += CraftMonitorOnCraftCompleted ;
+            _gameInterface.AcquiredItemsUpdated += GameInterfaceOnAcquiredItemsUpdated;
+
+            foreach (var hotkey in hotkeys)
+            {
+                _hotkeyService.AddHotkey(hotkey);
+            }
+
+            foreach (var tooltip in tooltips.OrderBy(c => c.Order))
+            {
+                _tooltipService.AddTooltipTweak(tooltip);
+            }
+
+            if (_configuration.FirstRun)
+            {
+                LoadDefaultData();
+                _configuration.FirstRun = false;
+            }
+            SyncConfigurationChanges(false);
+            ClearOrphans();
+            return Task.CompletedTask;
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            Logger.LogTrace("Stopping service {type} ({this})", GetType().Name, this);
             _gameInterface.AcquiredItemsUpdated -= GameInterfaceOnAcquiredItemsUpdated;
             _configuration.SavedCharacters = _characterMonitor.Characters;
             _framework.Update -= FrameworkOnUpdate;
@@ -445,20 +457,7 @@ namespace InventoryTools
             {
                 _mobTracker.SaveCsv(_configurationManagerService.MobSpawnFile,
                     _mobTracker.GetEntries());
-            }       
-        }
-
-        public Task StartAsync(CancellationToken cancellationToken)
-        {
-            Logger.LogTrace("Starting service {type} ({this})", GetType().Name, this);
-            _inventoryMonitor.Start();
-            _inventoryScanner.Enable();
-            return Task.CompletedTask;
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            Logger.LogTrace("Stopping service {type} ({this})", GetType().Name, this);
+            }
             return Task.CompletedTask;
         }
     }

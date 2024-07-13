@@ -43,7 +43,7 @@ namespace InventoryTools.Logic.Columns
             {
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
-                ImGui.Image(ImGuiService.IconService[Icons.RedXIcon].ImGuiHandle, new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale,
+                ImGui.Image(ImGuiService.GetIconTexture(Icons.RedXIcon).ImGuiHandle, new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale,
                     new System.Numerics.Vector2(0, 0), new System.Numerics.Vector2(1, 1));
                 if (ImGui.IsItemHovered())
                 {
@@ -78,7 +78,7 @@ namespace InventoryTools.Logic.Columns
                             if (item.MarketUnitPrice != 0 && item.MarketUnitPrice < item.Item.BuyFromVendorPrice)
                             {
                                 ImGui.SameLine();
-                                ImGui.Image(ImGuiService.IconService[Icons.QuestionMarkIcon].ImGuiHandle, new Vector2(16, 16));
+                                ImGui.Image(ImGuiService.GetIconTexture(Icons.QuestionMarkIcon).ImGuiHandle, new Vector2(16, 16));
                                 OtterGui.ImGuiUtil.HoverTooltip(
                                     "The market price of this item is cheaper than buying it from a vendor and you prefer vendors over the current ingredient preference.");
                             }
@@ -94,7 +94,7 @@ namespace InventoryTools.Logic.Columns
                 if (craftPrices != null && craftPrices.Count != 0)
                 {
                     ImGui.SameLine();
-                    ImGui.Image(ImGuiService.IconService[Icons.MarketboardIcon].ImGuiHandle, new Vector2(16,16));
+                    ImGui.Image(ImGuiService.GetIconTexture(Icons.MarketboardIcon).ImGuiHandle, new Vector2(16,16));
                     if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
                     {
                         using (var tooltip = ImRaii.Tooltip())

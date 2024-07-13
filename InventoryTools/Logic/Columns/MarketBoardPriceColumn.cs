@@ -97,7 +97,7 @@ namespace InventoryTools.Logic.Columns
             if (activeCharacter != null)
             {
                 ImGui.SameLine();
-                ImGui.Image(ImGuiService.IconService[Icons.MarketboardIcon].ImGuiHandle, new Vector2(16, 16));
+                ImGui.Image(ImGuiService.GetIconTexture(Icons.MarketboardIcon).ImGuiHandle, new Vector2(16, 16));
                 if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
                 {
                     using (var tooltip = ImRaii.Tooltip())

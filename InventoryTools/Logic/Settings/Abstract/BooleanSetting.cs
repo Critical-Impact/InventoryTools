@@ -16,14 +16,6 @@ namespace InventoryTools.Logic.Settings.Abstract
         public override void Draw(InventoryToolsConfiguration configuration)
         {
             var currentValue = CurrentValue(configuration);
-            if (ImGui.Checkbox("##"+Key+"Boolean", ref currentValue))
-            {
-                if (currentValue != CurrentValue(configuration))
-                {
-                    UpdateFilterConfiguration(configuration, currentValue);
-                }
-            }
-            ImGui.SameLine();
             ImGui.SetNextItemWidth(LabelSize);
             if (ColourModified && HasValueSet(configuration))
             {
@@ -34,6 +26,13 @@ namespace InventoryTools.Logic.Settings.Abstract
             else
             {
                 ImGui.LabelText("##" + Key + "Label", Name);
+            }
+            if (ImGui.Checkbox("##"+Key+"Boolean", ref currentValue))
+            {
+                if (currentValue != CurrentValue(configuration))
+                {
+                    UpdateFilterConfiguration(configuration, currentValue);
+                }
             }
             ImGui.SameLine();
             ImGuiService.HelpMarker(HelpText, Image, ImageSize);

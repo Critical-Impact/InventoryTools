@@ -3,11 +3,13 @@ using Dalamud.Plugin.Services;
 
 namespace InventoryTools.Extensions
 {
+    using Dalamud.Interface.Textures;
+
     public static class ITextureProviderExtensions
     {
-        public static IDalamudTextureWrap? GetUldIcon(this ITextureProvider textureProvider,  string iconName)
+        public static ISharedImmediateTexture? GetUldIcon(this ITextureProvider textureProvider,  string iconName)
         {
-            return textureProvider.GetTextureFromGame(string.Format("ui/uld/{0}.tex", iconName));
+            return textureProvider.GetFromGame(string.Format("ui/uld/{0}.tex", iconName));
         }
     }
 }

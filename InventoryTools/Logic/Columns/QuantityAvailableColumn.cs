@@ -31,10 +31,10 @@ namespace InventoryTools.Logic.Columns
                     FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None)];
             }
             if (_inventoryMonitor.ItemCounts.ContainsKey((item.RowId,
-                    FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HQ)))
+                    FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HighQuality)))
             {
                 qty += _inventoryMonitor.ItemCounts[(item.RowId,
-                    FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HQ)];
+                    FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HighQuality)];
             }
             return qty;
         }

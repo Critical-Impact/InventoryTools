@@ -14,6 +14,10 @@ using InventoryTools.Services.Interfaces;
 
 namespace InventoryTools.Services;
 
+using Dalamud.Interface.Textures;
+using Dalamud.Interface.Textures.TextureWraps;
+using Dalamud.Plugin;
+
 public struct GameIcon
 {
     public string Name;
@@ -24,18 +28,15 @@ public struct GameIcon
 
 public class ImGuiService
 {
+    private readonly IDalamudPluginInterface pluginInterface;
     public ITextureProvider TextureProvider { get; }
-    public IIconService IconService { get; }
     public RightClickService RightClickService { get; }
-    public IPluginInterfaceService PluginInterfaceService { get; }
 
-    public ImGuiService(ITextureProvider textureProvider, IIconService iconService, RightClickService rightClickService,
-        IPluginInterfaceService pluginInterfaceService)
+    public ImGuiService(ITextureProvider textureProvider, RightClickService rightClickService, IDalamudPluginInterface pluginInterface)
     {
+        this.pluginInterface = pluginInterface;
         TextureProvider = textureProvider;
-        IconService = iconService;
         RightClickService = rightClickService;
-        PluginInterfaceService = pluginInterfaceService;
     }
 
 
@@ -55,6 +56,25 @@ public class ImGuiService
         Name = "CheckBoxA_hr1", Size = new Vector2(16, 16), Uv0 = new Vector2(0f, 0f), Uv1 = new Vector2(0.5f, 1f)
     };
 
+    public IDalamudTextureWrap GetIconTexture(int iconId, bool isHq = false)
+    {
+        return TextureProvider.GetFromGameIcon(new GameIconLookup((uint)iconId, isHq)).GetWrapOrEmpty();
+    }
+
+    public IDalamudTextureWrap GetIconTexture(uint iconId)
+    {
+        return TextureProvider.GetFromGameIcon(new GameIconLookup(iconId)).GetWrapOrEmpty();
+    }
+
+    public IDalamudTextureWrap GetImageTexture(string filePath, bool pluginImage = true)
+    {
+        if (pluginImage)
+        {
+            return LoadImage(filePath).GetWrapOrEmpty();
+        }
+        return TextureProvider.GetFromFile(filePath).GetWrapOrEmpty();
+    }
+
     public void DrawUldIcon(GameIcon gameIcon, Vector2? size = null)
     {
         DrawUldIcon(gameIcon.Name, size ?? gameIcon.Size, gameIcon.Uv0, gameIcon.Uv1);
@@ -64,19 +84,19 @@ public class ImGuiService
     {
         var iconTex = TextureProvider.GetUldIcon(name);
         if (iconTex == null) return;
-        if (iconTex.ImGuiHandle == IntPtr.Zero) return;
+        var wrap = iconTex.GetWrapOrEmpty();
         if (uvStart.HasValue && uvEnd.HasValue)
         {
-            ImGui.Image(iconTex.ImGuiHandle, size, uvStart.Value,
+            ImGui.Image(wrap.ImGuiHandle, size, uvStart.Value,
                 uvEnd.Value);
         }
         else if (uvStart.HasValue)
         {
-            ImGui.Image(iconTex.ImGuiHandle, size, uvStart.Value);
+            ImGui.Image(wrap.ImGuiHandle, size, uvStart.Value);
         }
         else
         {
-            ImGui.Image(iconTex.ImGuiHandle, size);
+            ImGui.Image(wrap.ImGuiHandle, size);
         }
     }
 
@@ -84,16 +104,8 @@ public class ImGuiService
     {
         if (icon <= 65103)
         {
-            var iconTex = hqIcon
-                ? TextureProvider.GetIcon(icon, ITextureProvider.IconFlags.ItemHighQuality)
-                : TextureProvider.GetIcon(icon);
-            if (iconTex != null)
-            {
-                if (iconTex.ImGuiHandle != IntPtr.Zero)
-                {
-                    ImGui.Image(iconTex.ImGuiHandle, size);
-                }
-            }
+            var iconTex = TextureProvider.GetFromGameIcon(new GameIconLookup(icon, hqIcon));
+            ImGui.Image(iconTex.GetWrapOrEmpty().ImGuiHandle, size);
         }
         else
         {
@@ -111,21 +123,18 @@ public class ImGuiService
         var iconTex = TextureProvider.GetUldIcon(name);
         if (iconTex != null)
         {
-            if (iconTex.ImGuiHandle != IntPtr.Zero)
+            if (uvStart.HasValue && uvEnd.HasValue)
             {
-                if (uvStart.HasValue && uvEnd.HasValue)
-                {
-                    return ImGui.ImageButton(iconTex.ImGuiHandle, size, uvStart.Value,
-                        uvEnd.Value);
-                }
-                else if (uvStart.HasValue)
-                {
-                    return ImGui.ImageButton(iconTex.ImGuiHandle, size, uvStart.Value);
-                }
-                else
-                {
-                    return ImGui.ImageButton(iconTex.ImGuiHandle, size);
-                }
+                return ImGui.ImageButton(iconTex.GetWrapOrEmpty().ImGuiHandle, size, uvStart.Value,
+                    uvEnd.Value);
+            }
+            else if (uvStart.HasValue)
+            {
+                return ImGui.ImageButton(iconTex.GetWrapOrEmpty().ImGuiHandle, size, uvStart.Value);
+            }
+            else
+            {
+                return ImGui.ImageButton(iconTex.GetWrapOrEmpty().ImGuiHandle, size);
             }
         }
 
@@ -145,11 +154,8 @@ public class ImGuiService
             if (imagePath != null)
             {
                 var sourceIcon = LoadImage(imagePath);
-                if (sourceIcon != null)
-                {
-                    ImGui.Image(sourceIcon.ImGuiHandle, imageSize ??
-                                                        new Vector2(200, 200) * ImGui.GetIO().FontGlobalScale);
-                }
+                ImGui.Image(sourceIcon.GetWrapOrEmpty().ImGuiHandle, imageSize ??
+                                                    new Vector2(200, 200) * ImGui.GetIO().FontGlobalScale);
             }
 
             ImGui.EndTooltip();
@@ -180,11 +186,8 @@ public class ImGuiService
             if (imagePath != null)
             {
                 var sourceIcon = LoadImage(imagePath);
-                if (sourceIcon != null)
-                {
-                    ImGui.Image(sourceIcon.ImGuiHandle, imageSize ??
-                                                        new Vector2(200, 200) * ImGui.GetIO().FontGlobalScale);
-                }
+                ImGui.Image(sourceIcon.GetWrapOrEmpty().ImGuiHandle, imageSize ??
+                                                    new Vector2(200, 200) * ImGui.GetIO().FontGlobalScale);
             }
 
             ImGui.EndTooltip();
@@ -204,11 +207,11 @@ public class ImGuiService
         ImGui.SetCursorPosY((ImGui.GetWindowSize().Y - height) / 2.0f + (ImGui.GetStyle().FramePadding.Y / 2.0f));
     }
 
-    public IDalamudTextureWrap? LoadImage(string imageName)
+    public ISharedImmediateTexture LoadImage(string imageName)
     {
-        var assemblyLocation = PluginInterfaceService.AssemblyLocation.DirectoryName!;
-        var imagePath = Path.Combine(assemblyLocation, $@"Images\{imageName}.png");
-        return TextureProvider.GetTextureFromFile(new FileInfo(imagePath));
+        var assemblyLocation = pluginInterface.AssemblyLocation.DirectoryName!;
+        var imagePath = Path.Combine(assemblyLocation, Path.Combine("Images", $"{imageName}.png"));
+        return TextureProvider.GetFromFile(new FileInfo(imagePath));
     }
 
     public void WrapTableColumnElements<T>(string windowId, IEnumerable<T> items, float rowSize,

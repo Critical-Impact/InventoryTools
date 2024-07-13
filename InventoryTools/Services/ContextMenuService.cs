@@ -32,8 +32,8 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
     public const int AgentItemContextItemId          = 0x28;
     public const int GatheringNoteContextItemId      = 0xA0;
     public const int ItemSearchContextItemId         = 0x1740;
-    public const int ChatLogContextItemId            = 0x948;
     public const int ChatLogContextMenuType          = ChatLogContextItemId + 0x8;
+    public const int ChatLogContextItemId            = 0x950;
     
     public const int SubmarinePartsMenuContextItemId            = 0x54;
     public const int ShopExchangeItemContextItemId            = 0x54;
@@ -51,12 +51,13 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
         _configuration = configuration;
     }
 
-    private void MenuOpened(MenuOpenedArgs args)
+    private void MenuOpened(IMenuOpenedArgs args)
     {
         uint? itemId;
         Logger.LogDebug($"{args.AddonName}");
         Logger.LogDebug($"{(ulong)args.AgentPtr:X}");
         itemId = GetGameObjectItemId(args);
+        itemId %= 500000;
         Logger.LogDebug($"{itemId}");
 
         if (itemId != null)
@@ -97,7 +98,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
         }
     }
     
-    private uint? GetGameObjectItemId(MenuOpenedArgs args)
+    private uint? GetGameObjectItemId(IMenuOpenedArgs args)
     {
         var item = args.AddonName switch
         {
@@ -177,7 +178,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
         return itemId;
     }
 
-    private void OpenAddCraftListSubmenu(MenuItemClickedArgs obj, uint? itemId = null)
+    private void OpenAddCraftListSubmenu(IMenuItemClickedArgs obj, uint? itemId = null)
     {
         var craftLists = _listService.Lists.Where(c => !c.CraftListDefault && c.FilterType == FilterType.CraftFilter).ToList();
         var menuItems = new List<MenuItem>();
@@ -216,14 +217,14 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
         return (IntPtr)agent;
     }
     
-    private void AddToNewCraftList(MenuItemClickedArgs obj, uint? itemId = null)
+    private void AddToNewCraftList(IMenuItemClickedArgs obj, uint? itemId = null)
     {
         if (obj.Target is MenuTargetInventory inventory)
         {
             if (inventory.TargetItem != null)
             {
                 itemId ??= inventory.TargetItem.Value.ItemId;
-                MediatorService.Publish(new AddToNewCraftListMessage(itemId.Value, 1, inventory.TargetItem.Value.IsHq ? InventoryItem.ItemFlags.HQ : InventoryItem.ItemFlags.None, false));
+                MediatorService.Publish(new AddToNewCraftListMessage(itemId.Value, 1, inventory.TargetItem.Value.IsHq ? InventoryItem.ItemFlags.HighQuality : InventoryItem.ItemFlags.None, false));
             }
         }
         else if(itemId != null)
@@ -232,14 +233,14 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
         }
     }
     
-    private void AddToNewEphemeralCraftList(MenuItemClickedArgs obj, uint? itemId = null)
+    private void AddToNewEphemeralCraftList(IMenuItemClickedArgs obj, uint? itemId = null)
     {
         if (obj.Target is MenuTargetInventory inventory)
         {
             if (inventory.TargetItem != null)
             {
                 itemId ??= inventory.TargetItem.Value.ItemId;
-                MediatorService.Publish(new AddToNewCraftListMessage(itemId.Value, 1, inventory.TargetItem.Value.IsHq ? InventoryItem.ItemFlags.HQ : InventoryItem.ItemFlags.None, true));
+                MediatorService.Publish(new AddToNewCraftListMessage(itemId.Value, 1, inventory.TargetItem.Value.IsHq ? InventoryItem.ItemFlags.HighQuality : InventoryItem.ItemFlags.None, true));
             }
         }
         else if(itemId != null)
@@ -248,14 +249,14 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
         }
     }
 
-    private void AddToCraftList(FilterConfiguration craftList, MenuItemClickedArgs obj, uint? itemId = null)
+    private void AddToCraftList(FilterConfiguration craftList, IMenuItemClickedArgs obj, uint? itemId = null)
     {
         if (obj.Target is MenuTargetInventory inventory)
         {
             if (inventory.TargetItem != null)
             {
                 itemId ??= inventory.TargetItem.Value.ItemId;
-                MediatorService.Publish(new AddToCraftListMessage(craftList.Key, itemId.Value, 1, inventory.TargetItem.Value.IsHq ? InventoryItem.ItemFlags.HQ : InventoryItem.ItemFlags.None));
+                MediatorService.Publish(new AddToCraftListMessage(craftList.Key, itemId.Value, 1, inventory.TargetItem.Value.IsHq ? InventoryItem.ItemFlags.HighQuality : InventoryItem.ItemFlags.None));
             }
         }
         else if(itemId != null)
@@ -264,7 +265,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
         }
     }
 
-    private void MoreInformationClicked(MenuItemClickedArgs obj, uint? itemId = null)
+    private void MoreInformationClicked(IMenuItemClickedArgs obj, uint? itemId = null)
     {
         if (obj.Target is MenuTargetInventory inventory)
         {

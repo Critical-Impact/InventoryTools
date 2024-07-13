@@ -6,6 +6,8 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using CriticalCommonLib.Services.Mediator;
+using DalaMock.Host.Factories;
+using DalaMock.Shared.Interfaces;
 using Dalamud.Interface.Windowing;
 using InventoryTools.Mediator;
 using InventoryTools.Ui;
@@ -17,7 +19,7 @@ namespace InventoryTools.Services
 {
     public class WindowService : DisposableMediatorSubscriberBase, IHostedService
     {
-        private readonly WindowSystem windowSystem = new("AllaganTools");
+        private readonly IWindowSystem _windowSystem;
 
         private readonly Func<Type, uint, UintWindow> _uintWindowFactory;
         private readonly Func<Type, string, StringWindow> _stringWindowFactory;
@@ -25,8 +27,9 @@ namespace InventoryTools.Services
         private readonly InventoryToolsConfiguration _configuration;
         private readonly MediatorService _mediatorService;
 
-        public WindowService(ILogger<WindowService> logger, MediatorService mediatorService, IEnumerable<Window> windows, Func<Type, uint, UintWindow> uintWindowFactory, Func<Type, string, StringWindow> stringWindowFactory, Func<Type,GenericWindow> genericWindowFactory, InventoryToolsConfiguration configuration) : base(logger, mediatorService)
+        public WindowService(ILogger<WindowService> logger, MediatorService mediatorService, IEnumerable<Window> windows, Func<Type, uint, UintWindow> uintWindowFactory, Func<Type, string, StringWindow> stringWindowFactory, Func<Type,GenericWindow> genericWindowFactory, InventoryToolsConfiguration configuration, IWindowSystemFactory windowSystemFactory) : base(logger, mediatorService)
         {
+            _windowSystem = windowSystemFactory.Create("AllaganTools");
             _windows = windows.ToDictionary(c => c.GetType(), c => c);
             _uintWindowFactory = uintWindowFactory;
             _stringWindowFactory = stringWindowFactory;
@@ -102,7 +105,7 @@ namespace InventoryTools.Services
             }
         }
 
-        public WindowSystem WindowSystem => windowSystem;
+        public IWindowSystem WindowSystem => _windowSystem;
 
         public T GetWindow<T>() where T: GenericWindow 
         {
@@ -350,7 +353,7 @@ namespace InventoryTools.Services
             if (_genericWindows.TryAdd(windowType, window))
             {
                 _allWindows.Add(window);
-                windowSystem.AddWindow(window);
+                _windowSystem.AddWindow(window);
                 window.Closed += WindowOnClosed;
                 window.Opened += WindowOnOpened;
                 return true;
@@ -364,7 +367,7 @@ namespace InventoryTools.Services
             if (_uintWindows.TryAdd((windowType,windowId), window))
             {
                 _allWindows.Add(window);
-                windowSystem.AddWindow(window);
+                _windowSystem.AddWindow(window);
                 window.Closed += WindowOnClosed;
                 window.Opened += WindowOnOpened;
                 return true;
@@ -378,7 +381,7 @@ namespace InventoryTools.Services
             if (_stringWindows.TryAdd((windowType,windowId), window))
             {
                 _allWindows.Add(window);
-                windowSystem.AddWindow(window);
+                _windowSystem.AddWindow(window);
                 window.Closed += WindowOnClosed;
                 window.Opened += WindowOnOpened;
                 return true;
@@ -392,7 +395,7 @@ namespace InventoryTools.Services
             if (_genericWindows.TryAdd(window.GetType(), window))
             {
                 _allWindows.Add(window);
-                windowSystem.AddWindow(window);
+                _windowSystem.AddWindow(window);
                 window.Closed += WindowOnClosed;
                 window.Opened += WindowOnOpened;
                 return true;
@@ -406,7 +409,7 @@ namespace InventoryTools.Services
             if (_uintWindows.TryAdd((typeof(T),windowId), window))
             {
                 _allWindows.Add(window);
-                windowSystem.AddWindow(window);
+                _windowSystem.AddWindow(window);
                 window.Closed += WindowOnClosed;
                 window.Opened += WindowOnOpened;
                 return true;
@@ -420,7 +423,7 @@ namespace InventoryTools.Services
             if (_stringWindows.TryAdd((typeof(T),windowId), window))
             {
                 _allWindows.Add(window);
-                windowSystem.AddWindow(window);
+                _windowSystem.AddWindow(window);
                 window.Closed += WindowOnClosed;
                 window.Opened += WindowOnOpened;
                 return true;

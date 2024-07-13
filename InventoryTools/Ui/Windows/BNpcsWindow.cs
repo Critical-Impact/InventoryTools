@@ -20,13 +20,11 @@ namespace InventoryTools.Ui;
 
 public class BNpcsWindow : GenericTabbedTable<BNpcNameEx>
 {
-    private readonly IIconService _iconService;
     private readonly IChatUtilities _chatUtilities;
     private readonly ExcelCache _excelCache;
 
-    public BNpcsWindow(ILogger<BNpcsWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IIconService iconService, IChatUtilities chatUtilities, ExcelCache excelCache,  string name = "Mobs Window") : base(logger, mediator, imGuiService, configuration, name)
+    public BNpcsWindow(ILogger<BNpcsWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IChatUtilities chatUtilities, ExcelCache excelCache,  string name = "Mobs Window") : base(logger, mediator, imGuiService, configuration, name)
     {
-        _iconService = iconService;
         _chatUtilities = chatUtilities;
         _excelCache = excelCache;
     }
@@ -44,8 +42,7 @@ public class BNpcsWindow : GenericTabbedTable<BNpcNameEx>
                 OnLeftClick = OnLeftClick,
                 Draw = (ex, contentTypeId) =>
                 {
-                    if (ImGui.ImageButton(
-                            _iconService[Icons.MobIcon].ImGuiHandle,
+                    if (ImGui.ImageButton(ImGuiService.GetIconTexture(Icons.MobIcon).ImGuiHandle,
                             new Vector2(RowSize, RowSize)))
                     {
                         _columns[0].OnLeftClick?.Invoke(ex);
@@ -135,7 +132,7 @@ public class BNpcsWindow : GenericTabbedTable<BNpcNameEx>
                             .GetRow(position.TerritoryTypeId);
                         if (territory != null)
                         {
-                            if (ImGui.ImageButton(_iconService[60561].ImGuiHandle,
+                            if (ImGui.ImageButton(ImGuiService.GetIconTexture(60561).ImGuiHandle,
                                     new Vector2(RowSize * ImGui.GetIO().FontGlobalScale,
                                         RowSize * ImGui.GetIO().FontGlobalScale), new Vector2(0, 0),
                                     new Vector2(1, 1), 0))
@@ -184,8 +181,7 @@ public class BNpcsWindow : GenericTabbedTable<BNpcNameEx>
                         RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X,
                         drop =>
                     {
-                        var sourceIcon = _iconService[drop.Icon];
-                        ImGui.Image(sourceIcon.ImGuiHandle,
+                        ImGui.Image(ImGuiService.GetIconTexture(drop.Icon).ImGuiHandle,
                             new Vector2(RowSize, RowSize) * ImGui.GetIO().FontGlobalScale);
                         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
                                                 ImGuiHoveredFlags.AllowWhenOverlapped &

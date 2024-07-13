@@ -23,9 +23,6 @@ namespace InventoryTools.Logic.Settings.Abstract
         
         public override void Draw(InventoryToolsConfiguration configuration)
         {
-            var currentX = ImGui.GetCursorPosX();
-            currentX += ImGui.GetFontSize() + ImGui.GetStyle().FramePadding.X * 2.0f + ImGui.GetStyle().ItemInnerSpacing.X;
-            ImGui.SetCursorPosX(currentX);
             ImGui.SetNextItemWidth(LabelSize);
             if (ColourModified && HasValueSet(configuration))
             {
@@ -42,7 +39,6 @@ namespace InventoryTools.Logic.Settings.Abstract
             var activeChoice = CurrentValue(configuration);
 
             var currentSearchCategory = GetFormattedChoice(activeChoice);
-            ImGui.SetCursorPosX(currentX + ImGui.GetStyle().FramePadding.X);
             ImGui.SetNextItemWidth(InputSize);
             using (var combo = ImRaii.Combo("##" + Key + "Combo", currentSearchCategory))
             {

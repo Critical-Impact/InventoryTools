@@ -12,6 +12,7 @@ public class TooltipsFeature : Feature
             typeof(TooltipLocationDisplayModeSetting),
             typeof(TooltipDisplayRetrieveAmountSetting),
             typeof(TooltipMinimumMarketPriceSetting),
+            typeof(TooltipLocationScopeLimitSetting),
         },
         settings)
     {

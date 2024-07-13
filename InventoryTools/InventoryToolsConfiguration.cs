@@ -9,6 +9,7 @@ using Dalamud.Configuration;
 using Dalamud.Interface.Colors;
 using InventoryTools.Attributes;
 using InventoryTools.Logic;
+using InventoryTools.Logic.Editors;
 using InventoryTools.Logic.Settings;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -68,6 +69,7 @@ namespace InventoryTools
         private List<InventoryChangeReason> _historyTrackReasons = new();
         private List<uint>? _tooltipWhitelistCategories = new();
         private bool _tooltipWhitelistBlacklist = false;
+        private List<InventorySearchScope>? _tooltipSearchScope = null;
         private HashSet<string>? _windowsIgnoreEscape = new HashSet<string>();
         private HashSet<uint>? _favouriteItemsList = new HashSet<uint>();
 
@@ -443,6 +445,16 @@ namespace InventoryTools
             set
             {
                 _automaticallyDownloadMarketPrices = value;
+                IsDirty = true;
+            }
+        }
+
+        public List<InventorySearchScope>? TooltipSearchScope
+        {
+            get => _tooltipSearchScope;
+            set
+            {
+                _tooltipSearchScope = value;
                 IsDirty = true;
             }
         }

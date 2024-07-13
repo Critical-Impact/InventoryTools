@@ -13,22 +13,17 @@ namespace InventoryTools.Ui
 {
     public class IntroWindow : GenericWindow
     {
-        private readonly IIconService _iconService;
-
-        public IntroWindow(ILogger<IntroWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IIconService iconService, string name = "Intro Window") : base(logger, mediator, imGuiService, configuration, name)
+        public IntroWindow(ILogger<IntroWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, string name = "Intro Window") : base(logger, mediator, imGuiService, configuration, name)
         {
-            _iconService = iconService;
         }
         public override void Initialize()
         {
             WindowName = "Allagan Tools";
             Flags =
                 ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoScrollbar;
-            _allaganToolsIcon = _iconService.LoadImage("icon-hor");
             Key = "intro";
         }
         
-        private IDalamudTextureWrap _allaganToolsIcon = null!;
 
         public override void Invalidate()
         {
@@ -46,7 +41,7 @@ namespace InventoryTools.Ui
                 if (leftChild.Success)
                 {
                     ImGui.SetCursorPosY(40);
-                    ImGui.Image(_allaganToolsIcon.ImGuiHandle, new Vector2(200, 200) * ImGui.GetIO().FontGlobalScale);
+                    ImGui.Image(ImGuiService.GetImageTexture("icon-hor").ImGuiHandle, new Vector2(200, 200) * ImGui.GetIO().FontGlobalScale);
                 }
             }
             ImGui.SameLine();
