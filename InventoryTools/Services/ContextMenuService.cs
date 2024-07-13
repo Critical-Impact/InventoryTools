@@ -32,6 +32,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
     public const int AgentItemContextItemId          = 0x28;
     public const int GatheringNoteContextItemId      = 0xA0;
     public const int ItemSearchContextItemId         = 0x1740;
+    public const int ChatLogContextMenuType          = ChatLogContextItemId + 0x8;
     public const int ChatLogContextItemId            = 0x950;
     
     public const int SubmarinePartsMenuContextItemId            = 0x54;
@@ -118,6 +119,12 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
             "ChatLog"            => GetObjectItemId("ChatLog",               ChatLogContextItemId),
             _                    => null,
         };
+
+        if (args.AddonName == "ChatLog" &&
+            (item >= 1500000 || GetObjectItemId("ChatLog", ChatLogContextMenuType) != 3)) {
+            return null;
+        }
+
         if (item == null)
         {
             var guiHoveredItem = _gameGui.HoveredItem;
