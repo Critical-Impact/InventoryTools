@@ -4,15 +4,17 @@
     "net8.0-windows7.0": {
       "DalaMock.Core": {
         "type": "Direct",
-        "requested": "[2.0.8, )",
-        "resolved": "2.0.8",
-        "contentHash": "yM/AGboCY8/6qDWh5rbFge0ZreC51sQvRJKIMW6jP/FNuZubo+9bMLxdDCX/betzQKyi+20/pP6GoHQXrzq3qQ==",
+        "requested": "[2.0.11, )",
+        "resolved": "2.0.11",
+        "contentHash": "V9FFLmlxd5V3ZuAdO5eMIySVC+1e1mAsW1x6ivWCNtE0GlB5QMYmHE9yY0itiXDMdd71qCWAwj1sAWDhxrFbjw==",
         "dependencies": {
           "Autofac": "8.0.0",
-          "DalaMock.Shared": "2.0.8",
+          "DalaMock.Shared": "2.0.11",
+          "Microsoft.Extensions.Configuration": "8.0.0",
           "Microsoft.Extensions.Hosting": "8.0.0",
           "Microsoft.Extensions.Hosting.Abstractions": "8.0.0",
           "Microsoft.Extensions.ObjectPool": "9.0.0-preview.6.24328.4",
+          "NativeFileDialogSharp": "0.5.0",
           "Serilog": "2.11.0",
           "Serilog.Sinks.Async": "1.5.0",
           "Serilog.Sinks.Console": "4.0.1",
@@ -223,8 +225,8 @@
       },
       "DalaMock.Shared": {
         "type": "Transitive",
-        "resolved": "2.0.8",
-        "contentHash": "N9YJ8pTTl2HClTB9cRb+8SWN0HJXclsvnCEGa82iFIolI4VB7RyD6cxQnGvqGpmGwy2jSZkG5BICkFEBxL7A6A==",
+        "resolved": "2.0.11",
+        "contentHash": "Qe0EozbgdM5gCAcwjBBQqDIjcw9vgokyzC9r25SqtyZzqhkBtFTQCAQoIDJCrZLxvi0z4kJ8gw0fvCRIDxt/EQ==",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "9.0.0",
           "Microsoft.Extensions.Hosting": "8.0.0",
@@ -233,8 +235,8 @@
       },
       "DalamudPackager": {
         "type": "Transitive",
-        "resolved": "2.1.12",
-        "contentHash": "Sc0PVxvgg4NQjcI8n10/VfUQBAS4O+Fw2pZrAqBdRMbthYGeogzu5+xmIGCGmsEZ/ukMOBuAqiNiB5qA3MRalg=="
+        "resolved": "2.1.13",
+        "contentHash": "rMN1omGe8536f4xLMvx9NwfvpAc9YFFfeXJ1t4P4PE6Gu8WCIoFliR1sh07hM+bfODmesk/dvMbji7vNI+B/pQ=="
       },
       "JetBrains.Annotations": {
         "type": "Transitive",
@@ -606,6 +608,11 @@
         "resolved": "8.0.0",
         "contentHash": "bXJEZrW9ny8vjMF1JV253WeLhpEVzFo1lyaZu1vQ4ZxWUlVvknZ/+ftFgVheLubb4eZPSwwxBeqS1JkCOjxd8g=="
       },
+      "NativeFileDialogSharp": {
+        "type": "Transitive",
+        "resolved": "0.5.0",
+        "contentHash": "OvASDrHJhY1OzD3Cr9Pw7sgaj+WliK0CAD+0HL14jPJMxnkirC5vr3XhxbY24MKwkxANNgmN+ao7iiNOopOSqQ=="
+      },
       "NativeLibraryLoader": {
         "type": "Transitive",
         "resolved": "1.0.13",
@@ -805,7 +812,7 @@
           "CriticalCommonLib": "[1.0.0, )",
           "CsvHelper": "[30.0.1, )",
           "DalaMock.Host": "[2.0.8, )",
-          "DalamudPackager": "[2.1.12, )",
+          "DalamudPackager": "[2.1.13, )",
           "Humanizer.Core": "[2.14.1, )",
           "Microsoft.AspNetCore.SignalR.Client": "[7.0.11, )",
           "Microsoft.AspNetCore.SignalR.Protocols.MessagePack": "[7.0.11, )",

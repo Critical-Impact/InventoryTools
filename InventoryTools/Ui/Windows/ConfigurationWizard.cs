@@ -156,10 +156,10 @@ public class ConfigurationWizard : GenericWindow
                                     ImGui.Text(feature.Description);
                                     ImGui.PopTextWrapPos();
                                     ImGui.Separator();
-                                    foreach (var setting in feature.RelatedSettings)
+                                    foreach (var setting in _configurationWizardService.GetApplicableSettings(feature))
                                     {
                                         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
-                                        setting.LabelSize = 200;
+                                        setting.LabelSize = (int)(ImGui.GetWindowContentRegionMax().X - 20);
                                         setting.Draw(_configuration);
                                         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
                                     }

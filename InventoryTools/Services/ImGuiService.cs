@@ -210,7 +210,7 @@ public class ImGuiService
     public ISharedImmediateTexture LoadImage(string imageName)
     {
         var assemblyLocation = pluginInterface.AssemblyLocation.DirectoryName!;
-        var imagePath = Path.Combine(assemblyLocation, $@"Images\{imageName}.png");
+        var imagePath = Path.Combine(assemblyLocation, Path.Combine("Images", $"{imageName}.png"));
         return TextureProvider.GetFromFile(new FileInfo(imagePath));
     }
 

@@ -26,7 +26,6 @@ public abstract class MultipleChoiceSetting<T> : Setting<List<T>> where T:notnul
     
     public virtual void DrawSearchBox(InventoryToolsConfiguration configuration, float currentX)
     {
-        ImGui.SetCursorPosX(currentX);
         ImGui.SetNextItemWidth(LabelSize);
         if (ColourModified && HasValueSet(configuration))
         {
@@ -42,7 +41,6 @@ public abstract class MultipleChoiceSetting<T> : Setting<List<T>> where T:notnul
         var choices = GetChoices(configuration);
         var selectedChoices = CurrentValue(configuration);
         var currentSearchCategory = "";
-        ImGui.SetCursorPosX(currentX + ImGui.GetStyle().FramePadding.X);
         ImGui.SetNextItemWidth(InputSize);
         using (var combo = ImRaii.Combo("##"+Key+"Combo", currentSearchCategory, ImGuiComboFlags.HeightLarge))
         {
@@ -109,10 +107,6 @@ public abstract class MultipleChoiceSetting<T> : Setting<List<T>> where T:notnul
     {
         var choices = GetChoices(configuration);
         var selectedChoices = CurrentValue(configuration);
-        if (selectedChoices.Count > 0)
-        {
-            ImGui.SetCursorPosX(currentX + ImGui.GetStyle().FramePadding.X);
-        }
 
         for (var index = 0; index < selectedChoices.Count; index++)
         {
@@ -137,10 +131,6 @@ public abstract class MultipleChoiceSetting<T> : Setting<List<T>> where T:notnul
                 (index % 4 != 0 || index == 0))
             {
                 ImGui.SameLine();
-            }
-            else
-            {
-                ImGui.SetCursorPosX(currentX + ImGui.GetStyle().FramePadding.X);
             }
         }
     }

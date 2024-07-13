@@ -5,6 +5,8 @@ using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
 using CriticalCommonLib.Time;
 using DalaMock.Core.Mocks;
+using DalaMock.Core.Windows;
+using DalaMock.Host.Factories;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Plugin;
@@ -37,6 +39,7 @@ public class InventoryToolsPluginMock : InventoryToolsPlugin
             container.RegisterType<MockGameInterface>().As<IGameInterface>().SingleInstance();
             container.RegisterType<MockGameUiManager>().As<IGameUiManager>().SingleInstance();
             container.RegisterType<MockSeTime>().As<ISeTime>().SingleInstance();
+            container.RegisterType<MockWindowSystem>().As<IWindowSystem>().SingleInstance();
         });
         
         //Hosted service registrations

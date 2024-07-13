@@ -15,11 +15,13 @@ using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Services.Ui;
 using CriticalCommonLib.Time;
+using DalaMock.Host.Factories;
 using DalaMock.Host.Hosting;
 using DalaMock.Shared.Classes;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Interface.ImGuiFileDialog;
+using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using InventoryTools.Commands;
@@ -30,6 +32,7 @@ using InventoryTools.Lists;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Columns;
 using InventoryTools.Logic.Columns.Abstract.ColumnSettings;
+using InventoryTools.Logic.Editors;
 using InventoryTools.Logic.Features;
 using InventoryTools.Logic.Filters;
 using InventoryTools.Logic.Settings.Abstract;
@@ -44,6 +47,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OtterGui.Log;
+using Window = InventoryTools.Ui.Window;
 
 namespace InventoryTools
 {
@@ -251,6 +255,10 @@ namespace InventoryTools
                 builder.RegisterType<ListImportExportService>().SingleInstance();
                 builder.RegisterType<VersionInfo>().SingleInstance();
                 builder.RegisterType<CraftPricer>().SingleInstance();
+                builder.RegisterType<InventoryScopePicker>();
+                builder.RegisterType<InventoryScopeCalculator>().SingleInstance();
+                builder.RegisterType<WindowSystemFactory>().As<IWindowSystemFactory>().SingleInstance();
+                builder.RegisterType<DalamudWindowSystem>().As<IWindowSystem>();
                 builder.RegisterType<HostedUniversalisConfiguration>().AsSelf().As<IHostedUniversalisConfiguration>()
                     .SingleInstance();
 

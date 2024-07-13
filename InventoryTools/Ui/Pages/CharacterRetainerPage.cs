@@ -89,7 +89,7 @@ namespace InventoryTools.Ui.Pages
                 if (sidebar.Success)
                 {
                     var worldIds = _characterMonitor.GetWorldIds();
-                    var characters = _characterMonitor.GetPlayerCharacters().Where(c => _currentWorld == 0 || _currentWorld == c.Value.WorldId).ToList();
+                    var characters = _characterMonitor.GetPlayerCharacters().Where(c => _currentWorld == 0 || _currentWorld == c.Value.WorldId).OrderBy(c => c.Value.FormattedName).ToList();
                     ImGui.TextUnformatted("Characters (" + characters.Count + ")");
                     ImGui.Separator();
                     for (var index = 0; index < characters.Count; index++)
@@ -124,7 +124,7 @@ namespace InventoryTools.Ui.Pages
                     }
                     ImGui.NewLine();
                     
-                    var freeCompanies = _characterMonitor.GetFreeCompanies().Where(c => _currentWorld == 0 || _currentWorld == c.Value.WorldId).ToList();
+                    var freeCompanies = _characterMonitor.GetFreeCompanies().Where(c => _currentWorld == 0 || _currentWorld == c.Value.WorldId).OrderBy(c => c.Value.FormattedName).ToList();
                     ImGui.TextUnformatted("Free Companies (" + freeCompanies.Count + ")");
                     ImGui.Separator();
                     for (var index = 0; index < freeCompanies.Count; index++)
@@ -154,7 +154,7 @@ namespace InventoryTools.Ui.Pages
                     }
                     ImGui.NewLine();
                     
-                    var houses = _characterMonitor.GetHouses().Where(c => _currentWorld == 0 || _currentWorld == c.Value.WorldId).ToList();
+                    var houses = _characterMonitor.GetHouses().Where(c => _currentWorld == 0 || _currentWorld == c.Value.WorldId).OrderBy(c => c.Value.FormattedName).ToList();
                     ImGui.TextUnformatted("Residences (" + houses.Count + ")");
                     ImGui.Separator();
                     for (var index = 0; index < houses.Count; index++)
@@ -185,14 +185,14 @@ namespace InventoryTools.Ui.Pages
                     }
                     ImGui.NewLine();
                     
-                    var retainers = _characterMonitor.GetRetainerCharacters().Where(c => _currentWorld == 0 || _currentWorld == c.Value.WorldId).ToList();
+                    var retainers = _characterMonitor.GetRetainerCharacters().Where(c => _currentWorld == 0 || _currentWorld == c.Value.WorldId).OrderBy(c => c.Value.FormattedName).ToList();
                     ImGui.TextUnformatted("Retainers (" + retainers.Count + ")");
                     ImGui.Separator();
 
                     for (var index = 0; index < characters.Count; index++)
                     {
                         var character = characters[index];
-                        var characterRetainers = _characterMonitor.GetRetainerCharacters(character.Key).Where(c => _currentWorld == 0 || _currentWorld == c.Value.WorldId).ToList();
+                        var characterRetainers = _characterMonitor.GetRetainerCharacters(character.Key).Where(c => _currentWorld == 0 || _currentWorld == c.Value.WorldId).OrderBy(c => c.Value.FormattedName).ToList();
                         ImGui.TextUnformatted(character.Value.FormattedName + " (" + characterRetainers.Count + ")");
                         ImGui.Separator();
                         for (var index2 = 0; index2 < characterRetainers.Count; index2++)

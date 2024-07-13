@@ -1,4 +1,5 @@
 using Dalamud.Interface.Colors;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -12,9 +13,6 @@ namespace InventoryTools.Logic.Settings.Abstract
         }
         public override void Draw(InventoryToolsConfiguration configuration)
         {
-            var currentX = ImGui.GetCursorPosX();
-            currentX += ImGui.GetFontSize() + ImGui.GetStyle().FramePadding.X * 3.0f + ImGui.GetStyle().ItemInnerSpacing.X;
-            ImGui.SetCursorPosX(currentX);
             var value = CurrentValue(configuration).ToString();
             ImGui.SetNextItemWidth(LabelSize);
             if (ColourModified && HasValueSet(configuration))
@@ -27,7 +25,6 @@ namespace InventoryTools.Logic.Settings.Abstract
             {
                 ImGui.LabelText("##" + Key + "Label", Name);
             }
-            ImGui.SetCursorPosX(currentX + ImGui.GetStyle().FramePadding.X);
             ImGui.SetNextItemWidth(InputSize);
             if (ImGui.InputText("##"+Key+"Input", ref value, 100, ImGuiInputTextFlags.CharsDecimal))
             {
