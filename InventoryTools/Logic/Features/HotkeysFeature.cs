@@ -16,6 +16,7 @@ public class HotkeysFeature : Feature
             typeof(HotkeyMobWindowSetting),
             typeof(HotkeySubmarinesWindowSetting),
             typeof(HotkeyRetainerTasksWindowSetting),
+            typeof(HotKeyListsWindowSetting),
         },
         settings)
     {

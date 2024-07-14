@@ -35,27 +35,27 @@ namespace InventoryTools.Commands
         [HelpMessage("Shows the allagan tools items list window.")]
         public void ShowHideInventoryToolsCommand(string command, string args)
         {
-            _mediatorService.Publish(new OpenGenericWindowMessage(typeof(FiltersWindow)));
+            _mediatorService.Publish(new ToggleGenericWindowMessage(typeof(FiltersWindow)));
         }
         [Command("/duties")]
         [Aliases("/atduties")]
         [HelpMessage("Shows the allagan tools duties window.")]
         public void ShowHideDutiesWindow(string command, string args)
         {
-            _mediatorService.Publish(new OpenGenericWindowMessage(typeof(DutiesWindow)));
+            _mediatorService.Publish(new ToggleGenericWindowMessage(typeof(DutiesWindow)));
         }
         [Command("/mobs")]
         [Aliases("/atmobs")]
         [HelpMessage("Shows the allagan tools mobs window.")]
         public void ShowHideMobsWindow(string command, string args)
         {
-            _mediatorService.Publish(new OpenGenericWindowMessage(typeof(BNpcsWindow)));
+            _mediatorService.Publish(new ToggleGenericWindowMessage(typeof(BNpcsWindow)));
         }
         [Command("/atnpcs")]
         [HelpMessage("Shows the allagan tools npcs window.")]
         public void ShowHideNpcsWindow(string command, string args)
         {
-            _mediatorService.Publish(new OpenGenericWindowMessage(typeof(ENpcsWindow)));
+            _mediatorService.Publish(new ToggleGenericWindowMessage(typeof(ENpcsWindow)));
         }
  
 
@@ -102,7 +102,7 @@ namespace InventoryTools.Commands
         [HelpMessage("Opens the allagan tools crafts window")]
         public  void OpenCraftsWindow(string command, string args)
         {
-            _mediatorService.Publish(new OpenGenericWindowMessage(typeof(CraftsWindow)));
+            _mediatorService.Publish(new ToggleGenericWindowMessage(typeof(CraftsWindow)));
         }
 
         [Command("/airships")]

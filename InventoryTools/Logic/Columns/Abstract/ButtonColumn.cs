@@ -25,7 +25,7 @@ public abstract class ButtonColumn : IColumn
     public virtual bool IsDebug { get; set; } = false;
     public virtual FilterType AvailableIn { get; } = Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter |
                                                       Logic.FilterType.GameItemFilter | Logic.FilterType.HistoryFilter |
-                                                      Logic.FilterType.FavouriteFilter;
+                                                      Logic.FilterType.FavouriteFilter | Logic.FilterType.CraftFilter;
 
     public bool AvailableInType(FilterType type) =>
         AvailableIn.HasFlag(InventoryTools.Logic.FilterType.SearchFilter) &&
@@ -43,7 +43,7 @@ public abstract class ButtonColumn : IColumn
         (AvailableIn.HasFlag(InventoryTools.Logic.FilterType.HistoryFilter) &&
          type.HasFlag(InventoryTools.Logic.FilterType.HistoryFilter));
 
-    public virtual bool? CraftOnly { get; } = false;
+    public virtual bool? CraftOnly { get; } = null;
     public bool IsConfigurable => false;
     public virtual string? RenderName { get; }
     public virtual IEnumerable<InventoryItem> Filter(ColumnConfiguration columnConfiguration, IEnumerable<InventoryItem> items)

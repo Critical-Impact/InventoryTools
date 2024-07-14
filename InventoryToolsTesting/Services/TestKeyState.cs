@@ -1,10 +1,11 @@
 using System.Collections.Generic;
+using DalaMock.Core.Mocks;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Plugin.Services;
 
 namespace InventoryToolsTesting.Services
 {
-    public class TestKeyState : IKeyState
+    public class TestKeyState : IKeyState, IMockService
     {
         public int GetRawValue(int vkCode)
         {
@@ -59,5 +60,7 @@ namespace InventoryToolsTesting.Services
             {
             }
         }
+
+        public string ServiceName { get; set; } = "Key State";
     }
 }

@@ -42,7 +42,7 @@ public class LaunchButtonService : DisposableMediatorSubscriberBase, IHostedServ
         _inventoryToolsConfiguration = inventoryToolsConfiguration;
         _configurationManagerService = configurationManagerService;
         var assemblyLocation = pluginInterfaceService.AssemblyLocation.DirectoryName!;
-        _fileName = Path.Combine(assemblyLocation, $@"Images\menu-icon.png");
+        _fileName = Path.Combine(assemblyLocation, Path.Combine("Images", "menu-icon.png"));
     }
 
     private void CreateEntry()

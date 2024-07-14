@@ -90,6 +90,17 @@ namespace InventoryTools.Ui
                     new PopupMenu.PopupMenuItemSeparator(),
                     new PopupMenu.PopupMenuItemSelectable("Help", "help", OpenHelpWindow, "Open the help window."),
                 });
+            _listMenu = new PopupMenu("listMenu", PopupMenu.PopupMenuButtons.All,
+                new List<PopupMenu.IPopupMenuItem>()
+                {
+                    new PopupMenu.PopupMenuItemSelectableConfirm("Clear List", "clearList", "Are you sure you want to clear all the items in the list?", ClearListContents,
+                        "Clear the list of all items."),
+                    new PopupMenu.PopupMenuItemSelectable("Copy List Contents(To Clipboard)", "copyList", CopyListContents,
+                        "Copy the output items of the craft list to your clipboard."),
+                    new PopupMenu.PopupMenuItemSelectable("Paste List Contents(From Clipboard)", "pasteList",  PasteListContents,
+                        "Copy the output items of the craft list to your clipboard."),
+                });
+            
             MediatorService.Subscribe<ListInvalidatedMessage>(this, _ => Invalidate());
             MediatorService.Subscribe<ListRepositionedMessage>(this, _ => Invalidate());
             MediatorService.Subscribe<ListAddedMessage>(this, _ => Invalidate());
@@ -98,13 +109,57 @@ namespace InventoryTools.Ui
             MediatorService.Subscribe<TeamCraftDataImported>(this, ImportTeamcraftData);
         }
 
+        private void PasteListContents(string obj)
+        {
+            if (SelectedConfiguration != null)
+            {
+                var importedList = _importExportService.FromTCString(ImGui.GetClipboardText());
+                if (importedList == null)
+                {
+                    _chatUtilities.PrintError("The contents of your clipboard could not be parsed.");
+                }
+                else
+                {
+                    _chatUtilities.Print("The contents of your clipboard were imported.");
+                    MediatorService.Publish(new TeamCraftDataImported(importedList));
+                }
+            }
+        }
+
+
+        private void CopyListContents(string obj)
+        {
+            if (SelectedConfiguration != null)
+            {
+                var tcString = _importExportService.ToTCString(SelectedConfiguration.CraftList.CraftItems.Where(c => c.IsOutputItem).ToList());
+                ImGui.SetClipboardText(tcString);
+                _chatUtilities.Print("The craft list's contents were copied to your clipboard.");
+            }
+        }
+
+        private void ClearListContents(string arg1, bool arg2)
+        {
+            if (arg2)
+            {
+                if (this.SelectedConfiguration != null)
+                {
+                    this.SelectedConfiguration.CraftList.CraftItems.Clear();
+                    this.SelectedConfiguration.CraftList.NeedsRefresh = true;
+                }
+            }
+        }
+        
+
+
         private void ImportTeamcraftData(TeamCraftDataImported data)
         {
             if (SelectedConfiguration != null)
             {
                 foreach (var item in data.listData)
                 {
-                    SelectedConfiguration.CraftList.AddCraftItem(item.Item1, item.Item2);
+                    bool isHq = item.Item1 > 1000000;
+                    var itemId = item.Item1 % 500000;
+                    SelectedConfiguration.CraftList.AddCraftItem(itemId, item.Item2, isHq ? InventoryItem.ItemFlags.HighQuality : InventoryItem.ItemFlags.None);
                 }
                 SelectedConfiguration.NeedsRefresh = true;
             }
@@ -145,6 +200,7 @@ namespace InventoryTools.Ui
         private Dictionary<FilterConfiguration, Widgets.PopupMenu> _popupMenus = new();
         
         private PopupMenu _settingsMenu = null!;
+        private PopupMenu _listMenu = null!;
         
         private void OpenHelpWindow(string obj)
         {
@@ -851,6 +907,12 @@ namespace InventoryTools.Ui
                 if (bottomBarChild.Success)
                 {
                     ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                    if (_menuIcon.Draw(ImGuiService.GetImageTexture("menu").ImGuiHandle, "openListMenu"))
+                    {
+                    }
+                    _listMenu.Draw();
+                    ImGui.SameLine();
+                    
                     if (_marketIcon.Draw(ImGuiService.GetImageTexture("refresh-web").ImGuiHandle, "bb_market"))
                     {
                         var activeCharacter = _characterMonitor.ActiveCharacter;

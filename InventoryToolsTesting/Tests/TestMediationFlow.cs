@@ -15,9 +15,9 @@ public class TestMediationFlow : BaseTest
     [Test]
     public async Task TestMediation()
     {
-        var listService = TestHost.Services.GetRequiredService<IListService>()!;
-        var listFilterService = TestHost.Services.GetRequiredService<ListFilterService>()!;
-        var tableService = TestHost.Services.GetRequiredService<TableService>();
+        var listService = Host.Services.GetRequiredService<IListService>()!;
+        var listFilterService = Host.Services.GetRequiredService<ListFilterService>()!;
+        var tableService = Host.Services.GetRequiredService<TableService>();
 
 
         ListUpdatedMessage? listUpdatedMessage = null;

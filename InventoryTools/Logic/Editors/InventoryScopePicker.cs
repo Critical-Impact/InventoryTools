@@ -89,6 +89,30 @@ public class InventoryScopeCalculator
                 topLevelMatch = true;
             }
         }
+        else if (searchScope.ActiveCharacter is true)
+        {
+            if (inventoryItem.RetainerId == _characterMonitor.ActiveCharacterId)
+            {
+                topLevelMatch = true;
+            }
+        }
+        else if (searchScope.ActiveWorld is true)
+        {
+            if (!_characterWorldIds.ContainsKey(inventoryItem.RetainerId))
+            {
+                var character = _characterMonitor.GetCharacterById(inventoryItem.RetainerId);
+                if (character == null)
+                {
+                    return false;
+                }
+                _characterWorldIds[inventoryItem.RetainerId] = character.WorldId;
+            }
+            
+            if (_characterWorldIds[inventoryItem.RetainerId] == _characterMonitor.ActiveCharacter?.WorldId)
+            {
+                topLevelMatch = true;
+            }
+        }
         else
         {
             topLevelMatch = true;

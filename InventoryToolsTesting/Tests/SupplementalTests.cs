@@ -12,7 +12,7 @@ namespace InventoryToolsTesting.Tests
         [Test]
         public void TestDesynthesisSupplements()
         {
-            var excelCache = TestHost.Services.GetRequiredService<ExcelCache>();
+            var excelCache = Host.Services.GetRequiredService<ExcelCache>();
 
             //Aged Eye of Fire
             var agedEyeFire = excelCache.GetItemExSheet().GetRow(9522)!;

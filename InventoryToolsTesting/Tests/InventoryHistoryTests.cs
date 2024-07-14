@@ -19,14 +19,14 @@ public class InventoryHistoryTests : BaseTest
     [SetUp]
     public void SetupTests()
     {
-        var configuration = TestHost.Services.GetRequiredService<InventoryToolsConfiguration>();
+        var configuration = Host.Services.GetRequiredService<InventoryToolsConfiguration>();
         configuration.DisplayCrossCharacter = false;
     }
 
     [Test]
     public void TestMoveItem()
     {
-        var inventoryHistory = TestHost.Services.GetRequiredService<InventoryHistory>();
+        var inventoryHistory = Host.Services.GetRequiredService<InventoryHistory>();
         //We have a single ash cavalry bow in slot 0, we move it from there to slot 1, not on first load
         {
             var from1 = Fixtures.GenerateItem(100, InventoryType.Bag0, 0, 1915, 1);
@@ -91,7 +91,7 @@ public class InventoryHistoryTests : BaseTest
         {
             var from1 = Fixtures.GenerateItem(100, InventoryType.Bag0, 0, 36199, 1);
             var to1 = Fixtures.GenerateItem(100, InventoryType.Bag0, 0, 36199, 1);
-            from1.Flags = InventoryItem.ItemFlags.HQ;
+            from1.Flags = InventoryItem.ItemFlags.HighQuality;
 
             var inventoryChange = new InventoryChange(from1, to1, InventoryType.Bag0, false);
             var changes = new List<InventoryChange>();
@@ -100,7 +100,7 @@ public class InventoryHistoryTests : BaseTest
             var processedChange = processedChanges.First();
             Assert.AreEqual(0, processedChange.FromItem!.Slot);
             Assert.AreEqual(0, processedChange.ToItem!.Slot);
-            Assert.AreEqual(InventoryItem.ItemFlags.HQ, processedChange.FromItem!.Flags);
+            Assert.AreEqual(InventoryItem.ItemFlags.HighQuality, processedChange.FromItem!.Flags);
             Assert.AreEqual(InventoryItem.ItemFlags.None, processedChange.ToItem!.Flags);
             Assert.AreEqual(InventoryChangeReason.FlagsChanged, processedChange.InventoryChangeReason);
         }

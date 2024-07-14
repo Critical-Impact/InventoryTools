@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Dalamud.Game.ClientState.Keys;
+using Dalamud.Interface.Colors;
 using ImGuiNET;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -35,7 +36,7 @@ namespace InventoryTools.Logic.Settings.Abstract
         }
         public override void Draw(InventoryToolsConfiguration configuration)
         {
-            Widget.ModifiableKeySelector(Name, HelpText, LabelSize, CurrentValue(configuration),
+            Widget.ModifiableKeySelector(Name, HelpText, InputSize, CurrentValue(configuration),
                 delegate(ModifiableHotkey hotkey)
                 {
                     UpdateFilterConfiguration(configuration, hotkey);

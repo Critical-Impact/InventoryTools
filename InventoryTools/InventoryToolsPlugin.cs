@@ -55,7 +55,7 @@ namespace InventoryTools
     {
         private readonly IPluginLog _pluginLog;
         private Service? _service;
-        private IDalamudPluginInterface? PluginInterface { get; set; }
+        private IDalamudPluginInterface PluginInterface { get; set; }
         
         public InventoryToolsPlugin(IDalamudPluginInterface pluginInterface, IPluginLog pluginLog,
             IAddonLifecycle addonLifecycle, IChatGui chatGui, IClientState clientState, ICommandManager commandManager,

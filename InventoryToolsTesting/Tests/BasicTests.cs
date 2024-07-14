@@ -28,14 +28,14 @@ namespace InventoryToolsTesting.Tests
         [SetUp]
         public void SetupTests()
         {
-            var configuration = TestHost.Services.GetRequiredService<InventoryToolsConfiguration>()!;
+            var configuration = Host.Services.GetRequiredService<InventoryToolsConfiguration>()!;
             configuration.DisplayCrossCharacter = false;
         }
         
         [SetUp]
         public void Init()
         {
-            var characterMonitor = TestHost.Services.GetRequiredService<ICharacterMonitor>()!;
+            var characterMonitor = Host.Services.GetRequiredService<ICharacterMonitor>()!;
             _character = Fixtures.GenerateCharacter();
             _character2 = Fixtures.GenerateCharacter();
             _retainer = Fixtures.GenerateRetainer(_character);
@@ -50,9 +50,9 @@ namespace InventoryToolsTesting.Tests
         [Test]
         public void TestSearchFilter()
         {
-            var listFilterService = TestHost.Services.GetRequiredService<ListFilterService>()!;
-            var characterMonitor = TestHost.Services.GetRequiredService<ICharacterMonitor>()!;
-            var inventoryMonitor = TestHost.Services.GetRequiredService<TestInventoryMonitor>()!;
+            var listFilterService = Host.Services.GetRequiredService<ListFilterService>()!;
+            var characterMonitor = Host.Services.GetRequiredService<ICharacterMonitor>()!;
+            var inventoryMonitor = Host.Services.GetRequiredService<TestInventoryMonitor>()!;
             
             var searchFilter = new FilterConfiguration();
             searchFilter.SourceAllCharacters = true;
@@ -71,10 +71,10 @@ namespace InventoryToolsTesting.Tests
         [Test]
         public void TestSortFilter()
         {
-            var listFilterService = TestHost.Services.GetRequiredService<ListFilterService>()!;
-            var characterMonitor = TestHost.Services.GetRequiredService<ICharacterMonitor>()!;
-            var inventoryMonitor = TestHost.Services.GetRequiredService<TestInventoryMonitor>()!;
-            var excelCache = TestHost.Services.GetRequiredService<ExcelCache>()!;
+            var listFilterService = Host.Services.GetRequiredService<ListFilterService>()!;
+            var characterMonitor = Host.Services.GetRequiredService<ICharacterMonitor>()!;
+            var inventoryMonitor = Host.Services.GetRequiredService<TestInventoryMonitor>()!;
+            var excelCache = Host.Services.GetRequiredService<ExcelCache>()!;
             
             var searchFilter = new FilterConfiguration();
             searchFilter.SourceAllCharacters = true;
@@ -164,10 +164,10 @@ namespace InventoryToolsTesting.Tests
         [Test]
         public void TestDestinationInventory()
         {
-            var listFilterService = TestHost.Services.GetRequiredService<ListFilterService>()!;
-            var characterMonitor = TestHost.Services.GetRequiredService<ICharacterMonitor>()!;
-            var inventoryMonitor = TestHost.Services.GetRequiredService<TestInventoryMonitor>()!;
-            var excelCache = TestHost.Services.GetRequiredService<ExcelCache>()!;
+            var listFilterService = Host.Services.GetRequiredService<ListFilterService>()!;
+            var characterMonitor = Host.Services.GetRequiredService<ICharacterMonitor>()!;
+            var inventoryMonitor = Host.Services.GetRequiredService<TestInventoryMonitor>()!;
+            var excelCache = Host.Services.GetRequiredService<ExcelCache>()!;
             
             var searchFilter = new FilterConfiguration();
             searchFilter.SourceAllCharacters = true;
@@ -200,7 +200,7 @@ namespace InventoryToolsTesting.Tests
         [Test]
         public void TestCraftItemFilter()
         {
-            var listFilterService = TestHost.Services.GetRequiredService<ListFilterService>()!;
+            var listFilterService = Host.Services.GetRequiredService<ListFilterService>()!;
             
             var searchFilter = new FilterConfiguration();
             searchFilter.SourceAllCharacters = true;
@@ -214,10 +214,10 @@ namespace InventoryToolsTesting.Tests
         [Test]
         public void TestDuplicates()
         {
-            var listFilterService = TestHost.Services.GetRequiredService<ListFilterService>()!;
-            var characterMonitor = TestHost.Services.GetRequiredService<ICharacterMonitor>()!;
-            var inventoryMonitor = TestHost.Services.GetRequiredService<TestInventoryMonitor>()!;
-            var excelCache = TestHost.Services.GetRequiredService<ExcelCache>()!;
+            var listFilterService = Host.Services.GetRequiredService<ListFilterService>()!;
+            var characterMonitor = Host.Services.GetRequiredService<ICharacterMonitor>()!;
+            var inventoryMonitor = Host.Services.GetRequiredService<TestInventoryMonitor>()!;
+            var excelCache = Host.Services.GetRequiredService<ExcelCache>()!;
             
             var searchFilter = new FilterConfiguration();
             searchFilter.SourceAllCharacters = true;
@@ -267,11 +267,11 @@ namespace InventoryToolsTesting.Tests
         [Test]
         public void TestCrossCharacterSearching()
         {
-            var listFilterService = TestHost.Services.GetRequiredService<ListFilterService>()!;
-            var characterMonitor = TestHost.Services.GetRequiredService<ICharacterMonitor>()!;
-            var inventoryMonitor = TestHost.Services.GetRequiredService<TestInventoryMonitor>()!;
-            var excelCache = TestHost.Services.GetRequiredService<ExcelCache>()!;
-            var configuration = TestHost.Services.GetRequiredService < InventoryToolsConfiguration>();
+            var listFilterService = Host.Services.GetRequiredService<ListFilterService>()!;
+            var characterMonitor = Host.Services.GetRequiredService<ICharacterMonitor>()!;
+            var inventoryMonitor = Host.Services.GetRequiredService<TestInventoryMonitor>()!;
+            var excelCache = Host.Services.GetRequiredService<ExcelCache>()!;
+            var configuration = Host.Services.GetRequiredService < InventoryToolsConfiguration>();
             
             var searchFilter = new FilterConfiguration();
             searchFilter.SourceCategories = new HashSet<InventoryCategory>()
@@ -346,10 +346,10 @@ namespace InventoryToolsTesting.Tests
         [Test]
         public void TestInventoryCategoryFilters()
         {
-            var listFilterService = TestHost.Services.GetRequiredService<ListFilterService>()!;
-            var characterMonitor = TestHost.Services.GetRequiredService<ICharacterMonitor>()!;
-            var inventoryMonitor = TestHost.Services.GetRequiredService<TestInventoryMonitor>()!;
-            var excelCache = TestHost.Services.GetRequiredService<ExcelCache>()!;
+            var listFilterService = Host.Services.GetRequiredService<ListFilterService>()!;
+            var characterMonitor = Host.Services.GetRequiredService<ICharacterMonitor>()!;
+            var inventoryMonitor = Host.Services.GetRequiredService<TestInventoryMonitor>()!;
+            var excelCache = Host.Services.GetRequiredService<ExcelCache>()!;
             
             var searchFilter = new FilterConfiguration();
             searchFilter.FilterType = FilterType.SearchFilter;
@@ -477,7 +477,7 @@ namespace InventoryToolsTesting.Tests
         [Test]
         public void TestCompanyCraftRequirements()
         {
-            var excelCache = TestHost.Services.GetRequiredService<ExcelCache>()!;
+            var excelCache = Host.Services.GetRequiredService<ExcelCache>()!;
             Assert.IsTrue(excelCache.IsCompanyCraft(10157));
             var item = excelCache.GetItemExSheet().GetRow(10157);
             if (item != null)
@@ -494,10 +494,10 @@ namespace InventoryToolsTesting.Tests
             Match match = regex.Match("Bluespirit Alembic. Gather: 3 Stiperstone, 12 Bluespirit Ore, 4 Manasilver Sand, Silver Ore. Craft: 3 Bluespirit Tile, Manasilver Nugget.");
             if (match.Success)
             {
-                Service.Log.Info(match.Captures.Count.ToString());
+                PluginLog.Info(match.Captures.Count.ToString());
                 if (match.Groups.Count == 3)
                 {
-                    Service.Log.Info("matched with 3 groups");
+                    PluginLog.Info("matched with 3 groups");
                     var gather = match.Groups[1].Value;
                     var craft = match.Groups[2].Value;
                         
