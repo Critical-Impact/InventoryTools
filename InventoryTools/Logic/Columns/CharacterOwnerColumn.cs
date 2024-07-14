@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Sheets;
+using InventoryTools.Logic;
+using InventoryTools.Logic.Columns;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -36,8 +38,13 @@ public class CharacterOwnerColumn : TextColumn
     public override bool HasFilter { get; set; } = true;
     public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
 
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+    public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
+        var item = searchResult.InventoryItem;
+        if (item == null)
+        {
+            return null;
+        }
         var characterOwners = _characterOwners;
         
         if (characterOwners.TryGetValue(item.RetainerId, out var value))
@@ -96,16 +103,6 @@ public class CharacterOwnerColumn : TextColumn
         }
 
         return characterOwners[item.RetainerId];
-    }
-
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-    {
-        return null;
-    }
-
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return CurrentValue(columnConfiguration, item.InventoryItem);
     }
 
     public override void Dispose()

@@ -23,18 +23,8 @@ public class IsGCSupplyItemColumn : CheckboxColumn
     public override bool HasFilter { get; set; } = true;
     public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Boolean;
 
-    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return CurrentValue(columnConfiguration, item.Item);
-    }
-
-    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-    {
-        return item.HandInGrandCompanySupply;
-    }
-
-    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return CurrentValue(columnConfiguration, item.Item);
+        return searchResult.Item.HandInGrandCompanySupply;
     }
 }
