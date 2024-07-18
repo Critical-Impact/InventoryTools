@@ -31,7 +31,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
     public const int RecipeNoteContextItemId         = 0x398;
     public const int AgentItemContextItemId          = 0x28;
     public const int GatheringNoteContextItemId      = 0xA0;
-    public const int ItemSearchContextItemId         = 0x1740;
+    public const int ItemSearchContextItemId         = 0x17D0;
     public const int ChatLogContextMenuType          = ChatLogContextItemId + 0x8;
     public const int ChatLogContextItemId            = 0x950;
     
