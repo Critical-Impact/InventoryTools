@@ -71,6 +71,15 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
                 args.AddMenuItem(menuItem);
             }
 
+            if (_configuration.ItemSearchContextMenu)
+            {
+                var menuItem = new MenuItem();
+                menuItem.Name = "Search";
+                menuItem.PrefixChar = 'A';
+                menuItem.OnClicked += clickedArgs => ItemSearchClicked(clickedArgs, itemId);
+                args.AddMenuItem(menuItem);
+            }
+
             if (_configuration.AddToActiveCraftListContextMenu)
             {
                 var activeList = _listService.GetActiveCraftList();
@@ -278,6 +287,22 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
         if (itemId != null)
         {
             MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), itemId.Value));
+        }
+    }
+    
+    private void ItemSearchClicked(IMenuItemClickedArgs obj, uint? itemId = null)
+    {
+        if (obj.Target is MenuTargetInventory inventory)
+        {
+            if (inventory.TargetItem != null)
+            {
+                itemId ??= inventory.TargetItem.Value.ItemId;
+                MediatorService.Publish(new ItemSearchRequestedMessage(itemId.Value, inventory.TargetItem.Value.IsHq ? InventoryItem.ItemFlags.HighQuality : InventoryItem.ItemFlags.None));
+            }
+        }
+        else if(itemId != null)
+        {
+            MediatorService.Publish(new ItemSearchRequestedMessage(itemId.Value, InventoryItem.ItemFlags.None));
         }
     }
 

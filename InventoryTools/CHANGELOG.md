@@ -13,6 +13,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [1.7.0.13] - 2024-07-18
+
+### Added
+
+- Added a new "Seach" context menu, provides similar functionality to the game's search but will search across whatever scope you define
+- Bicolour Gem Vendors will now show NPCs and their respective locations
+- Added new mob spawn data (thanks to Emma <3)
+
+### Fixed
+
+- The context menu shortcuts will now work correctly in the market board
+- When using "Active Character" in any of the inventory scopes, this will now consider any "characters" owned by your logged in character as also active
+- Removed some old incorrect mob spawn data
+
 ## [1.7.0.12] - 2024-07-14
 
 ### Added

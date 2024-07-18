@@ -213,6 +213,7 @@ namespace InventoryTools
                 builder.RegisterType<TeleporterService>().SingleInstance().ExternallyOwned();
                 builder.RegisterType<LaunchButtonService>().SingleInstance().ExternallyOwned();
                 builder.RegisterType<HostedInventoryHistory>().SingleInstance().ExternallyOwned();
+                builder.RegisterType<ItemSearchService>().SingleInstance().ExternallyOwned();
             });
 
             hostBuilder.ConfigureContainer<ContainerBuilder>(builder =>
@@ -449,6 +450,7 @@ namespace InventoryTools
                     collection.AddHostedService(p => p.GetRequiredService<HostedInventoryHistory>());
                     collection.AddHostedService(p => p.GetRequiredService<IPCService>());
                     collection.AddHostedService(p => p.GetRequiredService<HostedCraftMonitor>());
+                    collection.AddHostedService(p => p.GetRequiredService<ItemSearchService>());
                 });
         }
 

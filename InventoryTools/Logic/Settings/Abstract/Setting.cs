@@ -43,6 +43,10 @@ namespace InventoryTools.Logic.Settings.Abstract
         public virtual bool HasValueSet(InventoryToolsConfiguration configuration)
         {
             var currentValue = CurrentValue(configuration);
+            if (currentValue == null && DefaultValue == null)
+            {
+                return false;
+            }
             return !currentValue?.Equals(DefaultValue) ?? true;
         }
 

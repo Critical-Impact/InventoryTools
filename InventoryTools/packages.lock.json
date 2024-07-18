@@ -29,12 +29,12 @@
       },
       "DalaMock.Host": {
         "type": "Direct",
-        "requested": "[2.0.14, )",
-        "resolved": "2.0.14",
-        "contentHash": "kiPLyeOAzbWnNtz19mnnoDPQSlp/KQ+bY2Y+IkYmzHoaVBhht0zPb9i/ohp94LPEmXUQjPi2SegTrexWbtuC4g==",
+        "requested": "[2.0.16, )",
+        "resolved": "2.0.16",
+        "contentHash": "XaI+B7uD/tiT5cZ6IprNRHGItwMFLcDsj02YD7PnG80j7sWZkbOXBGUL9S4f0W8ayj1bjQfmrugu3bLtOf+2JQ==",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "9.0.0",
-          "DalaMock.Shared": "2.0.14",
+          "DalaMock.Shared": "2.0.16",
           "Microsoft.Extensions.Hosting": "8.0.0",
           "Microsoft.Extensions.Hosting.Abstractions": "8.0.0",
           "Microsoft.Extensions.ObjectPool": "9.0.0-preview.6.24328.4",
@@ -125,8 +125,8 @@
       },
       "DalaMock.Shared": {
         "type": "Transitive",
-        "resolved": "2.0.14",
-        "contentHash": "AIVnax6qs+Jjb6+g2BX6WCEzhjCLtYqh4fBdonCjQWXT//1Pb05S/unK3ELorzWzBxdyh3+E47FF1HaVQuLSsg==",
+        "resolved": "2.0.16",
+        "contentHash": "LMngqUAGmqHqnMey04uUjHTMpwED95qT6TKZKiaQctFKvx3SwCKbxBQCYrwyx0b1lOLna5T7Rmm5ivmL9DTWRw==",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "9.0.0",
           "Microsoft.Extensions.Hosting": "8.0.0",
@@ -145,8 +145,8 @@
       },
       "LuminaSupplemental.Excel": {
         "type": "Transitive",
-        "resolved": "2.0.0",
-        "contentHash": "yNPOlaTEPQVtGJAWWo8touF9MTXGdIB4mzJPZCUWKsPsyHFo+pH2tKjubHfmyvHTSnym2PRZTNrt5MCGPlB90w==",
+        "resolved": "2.0.1",
+        "contentHash": "8e66vQqftCTkurXQOWKKYIecLYKhcKCHP8sth2IM6UhbfeviUhaZs4iOe4JqItn8z3TEoIEKupjJdg1mBuoOxQ==",
         "dependencies": {
           "CSVFile": "3.1.0",
           "CsvHelper": "30.0.1"
@@ -592,7 +592,7 @@
         "dependencies": {
           "Dalamud.ContextMenu": "[1.3.1, )",
           "Humanizer.Core": "[2.14.1, )",
-          "LuminaSupplemental.Excel": "[2.0.0, )",
+          "LuminaSupplemental.Excel": "[2.0.1, )",
           "Microsoft.Extensions.Hosting": "[7.0.1, )",
           "NaturalSort.Extension": "[3.2.0, )",
           "SerialQueue": "[2.1.0, )",

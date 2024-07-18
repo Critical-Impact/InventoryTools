@@ -33,3 +33,4 @@ public record AddToNewCraftListMessage(uint ItemId, uint Quantity, InventoryItem
 public record FocusListMessage(Type windowType, FilterConfiguration FilterConfiguration) : MessageBase;
 public record RequestTeleportMessage(uint aetheryteId) : MessageBase;
 public record OverlaysRequestRefreshMessage() : MessageBase;
+public record ItemSearchRequestedMessage(uint ItemId, InventoryItem.ItemFlags Flags) : MessageBase;

@@ -291,6 +291,10 @@ public class RightClickService
                 _tryOn.TryOnItem(item);
             }
         }
+        if (ImGui.Selectable("Search"))
+        {
+            messages.Add(new ItemSearchRequestedMessage(item.ItemId, InventoryItem.ItemFlags.None));
+        }
 
         if (item.CanOpenCraftLog && ImGui.Selectable("Open Crafting Log"))
         {

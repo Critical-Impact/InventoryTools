@@ -12,22 +12,22 @@ namespace InventoryTools.Logic.Settings;
 
 
 
-public class TooltipLocationScopeLimitSetting : Setting<List<InventorySearchScope>?>
+public class ContextMenuItemSearchScopeSetting : Setting<List<InventorySearchScope>?>
 {
     private readonly InventoryScopePicker _scopePicker;
 
-    public TooltipLocationScopeLimitSetting(ILogger<TooltipLocationScopeLimitSetting> logger, ImGuiService imGuiService, InventoryScopePicker scopePicker) : base(logger, imGuiService)
+    public ContextMenuItemSearchScopeSetting(ILogger<ContextMenuItemSearchScopeSetting> logger, ImGuiService imGuiService, InventoryScopePicker scopePicker) : base(logger, imGuiService)
     {
         _scopePicker = scopePicker;
     }
     public override List<InventorySearchScope>? DefaultValue { get; set; } = null;
     public override List<InventorySearchScope>? CurrentValue(InventoryToolsConfiguration configuration)
     {
-        if (configuration.TooltipSearchScope == null || configuration.TooltipSearchScope.Count == 0)
+        if (configuration.ItemSearchScope == null || configuration.ItemSearchScope.Count == 0)
         {
             return DefaultValue;
         }
-        return configuration.TooltipSearchScope;
+        return configuration.ItemSearchScope;
     }
 
     public override void Draw(InventoryToolsConfiguration configuration)
@@ -65,15 +65,15 @@ public class TooltipLocationScopeLimitSetting : Setting<List<InventorySearchScop
 
     public override void UpdateFilterConfiguration(InventoryToolsConfiguration configuration, List<InventorySearchScope>? newValue)
     {
-        configuration.TooltipSearchScope = newValue;
+        configuration.ItemSearchScope = newValue;
     }
 
-    public override string Key { get; set; } = "TooltipLocationScopeLimit";
-    public override string Name { get; set; } = "Amount Owned - Search Locations";
-    public override string HelpText { get; set; } = "When showing the locations of the items you own in the tooltip, which inventories should be included in the search?";
+    public override string Key { get; set; } = "ItemSearchScope";
+    public override string Name { get; set; } = "Context Menu - Search Scope";
+    public override string HelpText { get; set; } = "When searching for an item across the inventories AT knows about, which inventories should be searched?";
 
-    public override string WizardName { get; } = "Amount Owned - Search Locations";
-    public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
-    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Visuals;
-    public override string Version => "1.7.0.11";
+    public override string WizardName { get; } = "Search Scope";
+    public override SettingCategory SettingCategory { get; set; } = SettingCategory.ContextMenu;
+    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
+    public override string Version => "1.7.0.13";
 }

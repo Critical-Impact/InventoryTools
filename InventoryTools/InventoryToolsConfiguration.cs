@@ -45,6 +45,7 @@ namespace InventoryTools
         private bool _addMoreInformationContextMenu = false;
         private bool _addToCraftListContextMenu = false;
         private bool _addToActiveCraftListContextMenu = false;
+        private bool _itemSearchContextMenu = false;
 
         private bool _isVisible;
         private int _marketRefreshTimeHours = 24;
@@ -70,6 +71,7 @@ namespace InventoryTools
         private List<uint>? _tooltipWhitelistCategories = new();
         private bool _tooltipWhitelistBlacklist = false;
         private List<InventorySearchScope>? _tooltipSearchScope = null;
+        private List<InventorySearchScope>? _itemSearchScope = null;
         private HashSet<string>? _windowsIgnoreEscape = new HashSet<string>();
         private HashSet<uint>? _favouriteItemsList = new HashSet<uint>();
 
@@ -225,6 +227,26 @@ namespace InventoryTools
             set
             {
                 _addToActiveCraftListContextMenu = value;
+                IsDirty = true;
+            }
+        }
+        [DefaultValue(false)]
+        public bool ItemSearchContextMenu
+        {
+            get => _itemSearchContextMenu;
+            set
+            {
+                _itemSearchContextMenu = value;
+                IsDirty = true;
+            }
+        }
+        
+        public List<InventorySearchScope>? ItemSearchScope
+        {
+            get => _itemSearchScope;
+            set
+            {
+                _itemSearchScope = value;
                 IsDirty = true;
             }
         }

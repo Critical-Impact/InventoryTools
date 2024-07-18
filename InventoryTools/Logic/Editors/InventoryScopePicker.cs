@@ -91,7 +91,7 @@ public class InventoryScopeCalculator
         }
         else if (searchScope.ActiveCharacter is true)
         {
-            if (inventoryItem.RetainerId == _characterMonitor.ActiveCharacterId)
+            if(_characterMonitor.BelongsToActiveCharacter(inventoryItem.RetainerId))
             {
                 topLevelMatch = true;
             }
