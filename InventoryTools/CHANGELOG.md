@@ -13,6 +13,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [1.7.0.14] - 2024-07-19
+
+### Added
+
+- Added a calamity salvager filter and column, also items that can be purchased from a calamity salvager will be listed within the item window for applicable items
+
+### Fixed
+
+- Fixed a bug that would list missing ingredients for a craft even if they weren't missing
+- Fixed duplicate patch data that was breaking the patch column
+
 ## [1.7.0.13] - 2024-07-18
 
 ### Added

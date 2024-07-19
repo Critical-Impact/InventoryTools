@@ -145,8 +145,8 @@
       },
       "LuminaSupplemental.Excel": {
         "type": "Transitive",
-        "resolved": "2.0.1",
-        "contentHash": "8e66vQqftCTkurXQOWKKYIecLYKhcKCHP8sth2IM6UhbfeviUhaZs4iOe4JqItn8z3TEoIEKupjJdg1mBuoOxQ==",
+        "resolved": "2.0.2",
+        "contentHash": "y5reV6M3MIrUkULs7C2ApGUGPyPNVIPSSvhckImGjhgopUkcs9qOalkVue3U1QLf1Zec4Lr9ibzWkdiiPnEYnQ==",
         "dependencies": {
           "CSVFile": "3.1.0",
           "CsvHelper": "30.0.1"
@@ -592,7 +592,7 @@
         "dependencies": {
           "Dalamud.ContextMenu": "[1.3.1, )",
           "Humanizer.Core": "[2.14.1, )",
-          "LuminaSupplemental.Excel": "[2.0.1, )",
+          "LuminaSupplemental.Excel": "[2.0.2, )",
           "Microsoft.Extensions.Hosting": "[7.0.1, )",
           "NaturalSort.Extension": "[3.2.0, )",
           "SerialQueue": "[2.1.0, )",
