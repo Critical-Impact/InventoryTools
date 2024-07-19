@@ -13,6 +13,8 @@ using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using InventoryTools;
 using InventoryTools.Logic;
+using InventoryTools.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace InventoryToolsMock;
@@ -47,6 +49,13 @@ public class InventoryToolsPluginMock : InventoryToolsPlugin
         {
             container.RegisterType<MockWotsitIpc>().As<IWotsitIpc>().SingleInstance().ExternallyOwned();
             container.RegisterType<MockHostedCraftMonitor>().As<ICraftMonitor>().SingleInstance().ExternallyOwned();
+            container.RegisterType<MockStartup>().SingleInstance().ExternallyOwned();
         });
+
+        hostBuilder
+            .ConfigureServices(collection =>
+            {
+                collection.AddHostedService(p => p.GetRequiredService<MockStartup>());
+            });
     }
 }
