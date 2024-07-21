@@ -67,7 +67,7 @@ namespace InventoryTools.Logic.Columns
                 {
                     return (Untradable, Untradable);
                 }
-                var value = CurrentValue(columnConfiguration, searchResult);
+                var value = base.CurrentValue(columnConfiguration, searchResult);
                 return value.HasValue ? ((int)(value.Value.Item1 * searchResult.CraftItem.QuantityRequired), (int)(value.Value.Item2 * searchResult.CraftItem.QuantityRequired)) : null;
             }
             if (searchResult.InventoryItem != null)

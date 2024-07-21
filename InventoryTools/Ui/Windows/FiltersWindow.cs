@@ -8,6 +8,7 @@ using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Services.Ui;
+using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.ImGuiFileDialog;
 using ImGuiNET;
@@ -39,9 +40,10 @@ namespace InventoryTools.Ui
         private readonly IGameUiManager _gameUiManager;
         private readonly InventoryHistory _inventoryHistory;
         private readonly ListImportExportService _importExportService;
+        private readonly ExcelCache _excelCache;
         private readonly InventoryToolsConfiguration _configuration;
 
-        public FiltersWindow(ILogger<FiltersWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IListService listService, IFilterService filterService, TableService tableService, IChatUtilities chatUtilities, ICharacterMonitor characterMonitor, IUniversalis universalis, FileDialogManager fileDialogManager, IGameUiManager gameUiManager, HostedInventoryHistory inventoryHistory, ListImportExportService importExportService) : base(logger, mediator, imGuiService, configuration, "Filters Window")
+        public FiltersWindow(ILogger<FiltersWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IListService listService, IFilterService filterService, TableService tableService, IChatUtilities chatUtilities, ICharacterMonitor characterMonitor, IUniversalis universalis, FileDialogManager fileDialogManager, IGameUiManager gameUiManager, HostedInventoryHistory inventoryHistory, ListImportExportService importExportService, ExcelCache excelCache) : base(logger, mediator, imGuiService, configuration, "Filters Window")
         {
             _listService = listService;
             _filterService = filterService;
@@ -53,6 +55,7 @@ namespace InventoryTools.Ui
             _gameUiManager = gameUiManager;
             _inventoryHistory = inventoryHistory;
             _importExportService = importExportService;
+            _excelCache = excelCache;
             _configuration = configuration;
         }
         public override void Initialize()
@@ -111,8 +114,14 @@ namespace InventoryTools.Ui
         private HoverButton _marketIcon = new();
         private HoverButton _addIcon = new();
         private HoverButton _menuIcon = new();
+        private HoverButton _searchIcon = new();
+        private bool _addItemBarOpen;
 
-        
+        public bool ShowAddItemBar =>
+            SelectedConfiguration is { FilterType: FilterType.CuratedList } &&
+            _addItemBarOpen;
+
+
         private List<FilterConfiguration>? _filters;
         private PopupMenu _addFilterMenu = null!;
 
@@ -386,7 +395,7 @@ namespace InventoryTools.Ui
 
         private void DrawMainWindow()
         {
-            using (var mainChild = ImRaii.Child("Main",new Vector2(-1, -1) * ImGui.GetIO().FontGlobalScale, false,ImGuiWindowFlags.HorizontalScrollbar))
+            using (var mainChild = ImRaii.Child("Main",new Vector2(ShowAddItemBar ? -250 : -1, -1) * ImGui.GetIO().FontGlobalScale, false,ImGuiWindowFlags.HorizontalScrollbar))
             {
                 if (mainChild.Success)
                 {
@@ -444,6 +453,47 @@ namespace InventoryTools.Ui
                                         });
                                     }
                                 }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            ImGui.SameLine();
+            if (ShowAddItemBar)
+            {
+                using (var addItemChild = ImRaii.Child("AddItem", new Vector2(-1, -1) * ImGui.GetIO().FontGlobalScale, true))
+                {
+                    if (addItemChild.Success)
+                    {
+                        var filterConfiguration = SelectedConfiguration;
+                        if (filterConfiguration is { FilterType: FilterType.CuratedList })
+                        {
+                            ImGui.TextUnformatted("Add new Item");
+                            var searchString = SearchString;
+                            ImGui.InputText("##ItemSearch", ref searchString, 50);
+                            if (_searchString != searchString)
+                            {
+                                SearchString = searchString;
+                            }
+
+                            ImGui.Separator();
+                            if (_searchString == "")
+                            {
+                                ImGui.TextUnformatted("Start typing to search...");
+                            }
+
+                            using var table = ImRaii.Table("", 2, ImGuiTableFlags.None);
+                            if (!table || !table.Success)
+                                return;
+
+                            ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 200);
+                            ImGui.TableSetupColumn("", ImGuiTableColumnFlags.None, 16);
+
+                            foreach (var datum in SearchItems)
+                            {
+                                ImGui.TableNextRow();
+                                DrawSearchRow(filterConfiguration, datum);
                             }
                         }
                     }
@@ -863,6 +913,17 @@ namespace InventoryTools.Ui
                     }
 
                     ImGuiUtil.HoverTooltip("Edit the filter's configuration.");
+
+                    if (SelectedConfiguration is { FilterType: FilterType.CuratedList })
+                    {
+                        ImGui.SameLine();
+                        width -= 28 * ImGui.GetIO().FontGlobalScale;
+                        ImGui.SetCursorPosX(width);
+                        if (_searchIcon.Draw(ImGuiService.GetIconTexture(66320).ImGuiHandle, "tb_oib"))
+                        {
+                            _addItemBarOpen = !_addItemBarOpen;
+                        }
+                    }
                 }
             }
             using (var contentChild = ImRaii.Child("Content", new Vector2(0, -40) * ImGui.GetIO().FontGlobalScale, true,
@@ -1060,6 +1121,41 @@ namespace InventoryTools.Ui
             return filterConfiguration.Key;
         }
         
+        private void DrawSearchRow(FilterConfiguration filterConfiguration, ItemEx item)
+        {
+            ImGui.TableNextColumn();
+            ImGui.TextWrapped( item.NameString);
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right)) 
+            {
+                ImGui.OpenPopup("RightClick" + item.RowId);
+            }
+            
+            using (var popup = ImRaii.Popup("RightClick"+ item.RowId))
+            {
+                if (popup.Success)
+                {
+                    MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(item));
+                }
+            }
+            ImGui.TableNextColumn();
+            using (ImRaii.PushId("s_" + item.RowId))
+            {
+                if (_addIcon.Draw(ImGuiService.GetIconTexture(66315).ImGuiHandle, "bbadd_" + item.RowId, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale))
+                {
+                    Service.Framework.RunOnFrameworkThread(() =>
+                    {
+                        filterConfiguration.AddCuratedItem(new CuratedItem(item.RowId));
+                        filterConfiguration.NeedsRefresh = true;
+                    });
+                }
+
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+                }
+            }
+        }
+        
         public override FilterConfiguration? SelectedConfiguration
         {
             get
@@ -1085,6 +1181,37 @@ namespace InventoryTools.Ui
             if (selectedConfiguration != null)
             {
                 FocusFilter(selectedConfiguration);
+            }
+        }
+        
+        private string _searchString = "";
+        private List<ItemEx>? _searchItems;
+        public List<ItemEx> SearchItems
+        {
+            get
+            {
+                if (SearchString == "")
+                {
+                    _searchItems = new List<ItemEx>();
+                    return _searchItems;
+                }
+                if (_searchItems == null)
+                {
+                    _searchItems = _excelCache.ItemNamesById.Where(c => c.Value.ToLower().PassesFilter(SearchString.ToLower())).Take(100)
+                        .Select(c => _excelCache.GetItemExSheet().GetRow(c.Key)!).ToList();
+                }
+
+                return _searchItems;
+            }
+        }
+        
+        public string SearchString
+        {
+            get => _searchString;
+            set
+            {
+                _searchString = value;
+                _searchItems = null;
             }
         }
     }

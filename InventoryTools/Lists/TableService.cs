@@ -130,6 +130,11 @@ public class TableService : DisposableMediatorBackgroundService
             craftItemTable.NeedsRefresh = false;
             craftItemTable.Refreshing = false;
         }
+        else
+        {
+            craftItemTable.NeedsRefresh = false;
+            craftItemTable.Refreshing = false;
+        }
         
 
     }
