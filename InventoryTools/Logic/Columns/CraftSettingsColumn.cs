@@ -203,7 +203,18 @@ public class CraftSettingsColumn : IColumn
                 retainerRetrieval == CraftRetainerRetrieval.HQOnly
                     ? new Vector4(0.9f, 0.75f, 0.14f, 1f)
                     : new Vector4(1f, 1f, 1f, 1f));
-            ImGuiUtil.HoverTooltip((retainerRetrieval == CraftRetainerRetrieval.HQOnly ? "HQ Only" : "Yes") + (defaultRetainerRetrieval == null ? " (Default)" : ""));
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
+            {
+                using (var tt = ImRaii.Tooltip())
+                {
+                    if (tt)
+                    {
+                        ImGui.Text("Retainer Retrieval: ");
+                        ImGui.Separator();
+                        ImGui.Text((retainerRetrieval == CraftRetainerRetrieval.HQOnly ? "HQ Only" : "Yes") + (defaultRetainerRetrieval == null ? " (Default)" : ""));
+                    }
+                }
+            }
             ImGui.SameLine();
         }
         else
@@ -211,7 +222,18 @@ public class CraftSettingsColumn : IColumn
             ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
             ImGui.Image(ImGuiService.GetIconTexture(Icons.RetainerIcon).ImGuiHandle, new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale,
                 new System.Numerics.Vector2(0, 0), new System.Numerics.Vector2(1, 1), new Vector4(1f, 1f, 1f, 0.2f));
-            ImGuiUtil.HoverTooltip("No" + (defaultRetainerRetrieval == null ? " (Default)" : ""));
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
+            {
+                using (var tt = ImRaii.Tooltip())
+                {
+                    if (tt)
+                    {
+                        ImGui.Text("Retainer Retrieval: ");
+                        ImGui.Separator();
+                        ImGui.Text("No" + (defaultRetainerRetrieval == null ? " (Default)" : ""));
+                    }
+                }
+            }
             ImGui.SameLine();
         }
         if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
@@ -271,7 +293,20 @@ public class CraftSettingsColumn : IColumn
             {
                 ImGui.OpenPopup("ConfigureHQSettings" + rowIndex);
             }
-            ImGuiUtil.HoverTooltip("HQ" + (hqRequired == null ? " (Default)" : ""));
+
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
+            {
+                using (var tt = ImRaii.Tooltip())
+                {
+                    if (tt)
+                    {
+                        ImGui.Text("HQ Required: ");
+                        ImGui.Separator();
+                        ImGui.Text("HQ" + (hqRequired == null ? " (Default)" : ""));
+                    }
+                }
+            }
+
             ImGui.SameLine();
         }
         else
@@ -298,7 +333,21 @@ public class CraftSettingsColumn : IColumn
                 ImGui.OpenPopup("ConfigureHQSettings" + rowIndex);
             }
 
-            ImGuiUtil.HoverTooltip(item.Item.CanBeHq ? "No" + (hqRequired == null ? " (Default)" : "") : "Cannot be HQ");
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
+            {
+                using (var tt = ImRaii.Tooltip())
+                {
+                    if (tt)
+                    {
+                        ImGui.Text("HQ Required: ");
+                        ImGui.Separator();
+                        ImGui.Text(item.Item.CanBeHq
+                            ? "No" + (hqRequired == null ? " (Default)" : "")
+                            : "Cannot be HQ");
+                    }
+                }
+            }
+
             ImGui.SameLine();
         }
         
@@ -352,6 +401,7 @@ public class CraftSettingsColumn : IColumn
 
                 using var tt = ImRaii.Tooltip();
                 ImGui.Text($"Recipe ({itemRecipe.CraftTypeEx.Value?.FormattedName ?? "Unknown"}): ");
+                ImGui.Separator();
                 foreach (var ingredient in itemRecipe.Ingredients)
                 {
                     var actualItem = ingredient.Item.Value;
@@ -394,6 +444,7 @@ public class CraftSettingsColumn : IColumn
             {
                 using var tt = ImRaii.Tooltip();
                 ImGui.Text($"Items: ");
+                ImGui.Separator();
                 if (item.IngredientPreference.LinkedItemId != null && item.IngredientPreference.LinkedItemQuantity != null)
                 {
                     var itemName =
