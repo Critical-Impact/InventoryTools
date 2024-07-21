@@ -102,11 +102,16 @@ namespace InventoryTools.Logic.Filters
             return value.Where(c => c.CraftOnly != false && c.AvailableInType(configuration.FilterType)).ToDictionary(c => c.GetType().Name, c => c);
         }
 
+        private FilterType? _lastFilterType;
         private List<IGrouping<ColumnCategory, KeyValuePair<string, IColumn>>>? _groupedItems;
         public List<IGrouping<ColumnCategory, KeyValuePair<string, IColumn>>> GetGroupedItems(FilterConfiguration configuration)
         {
-            var availableItems = GetAvailableItems(configuration).OrderBy(c => c.Value.Name);
-            _groupedItems = availableItems.OrderBy(c => c.Value.Name).GroupBy(c => c.Value.ColumnCategory).ToList();
+            if (_groupedItems == null || _lastFilterType == null || _lastFilterType != configuration.FilterType)
+            {
+                var availableItems = GetAvailableItems(configuration).OrderBy(c => c.Value.Name);
+                _groupedItems = availableItems.OrderBy(c => c.Value.Name).GroupBy(c => c.Value.ColumnCategory).ToList();
+                _lastFilterType = configuration.FilterType;
+            }
 
             return _groupedItems;
         }

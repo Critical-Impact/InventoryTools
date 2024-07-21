@@ -13,6 +13,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [1.7.0.15] - 2024-07-21
+
+### Added
+
+- The craft window will warn you when a Universalis request failed, listing the date it happened, and to inform the user of a back off period. It will also warn the user if they make too many requests in a given time period(due to too many plugins making requests).
+
+### Fixed
+
+- Changing the "Retainer Retrieval" setting via the Retainer Bell icon in the craft settings column will refresh the craft list properly.
+- Fixed caching of the "Columns" tab that meant that some available columns would not show up.
+- The windows tab in the main configuration window had somehow been lost in the shuffle, it's back where it should be.
+- Some of the vendors were not parsing due to a bug in LuminaSupplemental, those vendors should now show again.
+
 ## [1.7.0.14] - 2024-07-19
 
 ### Added

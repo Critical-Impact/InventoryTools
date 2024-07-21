@@ -290,6 +290,7 @@ public class CraftSettingsColumn : IColumn
             {
                 newRetainerRetrieval = CraftRetainerRetrieval.No;
             }
+            configuration.NeedsRefresh = true;
             configuration.CraftList.UpdateCraftRetainerRetrieval(item.ItemId, newRetainerRetrieval);
         }
         else if (ImGui.IsItemClicked(ImGuiMouseButton.Right))

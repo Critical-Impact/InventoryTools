@@ -56,6 +56,7 @@ namespace InventoryTools.Ui
             _configPages = new List<IConfigPage>();
             _configPages.Add(new SeparatorPageItem("Settings"));
             _configPages.Add(_settingPageFactory.Invoke(SettingCategory.Lists));
+            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.Windows));
             _configPages.Add(_settingPageFactory.Invoke(SettingCategory.AutoSave));
             _configPages.Add(new SeparatorPageItem("Modules", true));
             _configPages.Add(_settingPageFactory.Invoke(SettingCategory.MarketBoard));
