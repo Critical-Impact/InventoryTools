@@ -13,6 +13,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [1.7.0.16] - 2024-07-23
+
+### Added
+
+- Added a "Is From Fate?" filter/column
+- More data is available for the following:
+  - Desynth results of items
+  - Loot
+  - Reduction
+  - Gardening
+  - Mob Drops
+  - Submarine/Airship Drops
+
+
+### Fixed
+
+- Items should now should the show the correct type of scrip for their requirements
+
 ## [1.7.0.15] - 2024-07-21
 
 ### Added

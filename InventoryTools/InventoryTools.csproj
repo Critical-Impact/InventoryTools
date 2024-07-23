@@ -3,7 +3,7 @@
     
     <PropertyGroup>
         <LangVersion>12</LangVersion>
-        <Version>1.7.0.14</Version>
+        <Version>1.7.0.16</Version>
         <AssemblyName>InventoryTools</AssemblyName>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
