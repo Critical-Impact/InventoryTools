@@ -77,13 +77,19 @@ namespace InventoryTools.Logic.Columns
         {
             if (currentValue.HasValue && currentValue.Value.Item1 == Loading)
             {
-                ImGui.TableNextColumn();
-                ImGuiUtil.VerticalAlignTextColored(LoadingString, ImGuiColors.DalamudYellow, filterConfiguration.TableHeight, false);
+                if (ImGui.TableNextColumn())
+                {
+                    ImGuiUtil.VerticalAlignTextColored(LoadingString, ImGuiColors.DalamudYellow,
+                        filterConfiguration.TableHeight, false);
+                }
             }
             else if (currentValue.HasValue && currentValue.Value.Item1 == Untradable)
             {
-                ImGui.TableNextColumn();
-                ImGuiUtil.VerticalAlignTextColored(UntradableString, ImGuiColors.DalamudRed, filterConfiguration.TableHeight, false);
+                if (ImGui.TableNextColumn())
+                {
+                    ImGuiUtil.VerticalAlignTextColored(UntradableString, ImGuiColors.DalamudRed,
+                        filterConfiguration.TableHeight, false);
+                }
             }
             else if(currentValue.HasValue)
             {

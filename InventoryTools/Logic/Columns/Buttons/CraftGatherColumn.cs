@@ -91,29 +91,40 @@ namespace InventoryTools.Logic.Columns.Buttons
         
         void DrawSupplierRow(ItemEx item,(IShop shop, ENpc? npc, ILocation? location) tuple, List<MessageBase> messages)
         {
-            ImGui.TableNextColumn();
-            ImGui.TextWrapped(tuple.shop.Name);
+            if (ImGui.TableNextColumn())
+            {
+                ImGui.TextWrapped(tuple.shop.Name);
+            }
+
             if (tuple.npc != null)
             {
-                ImGui.TableNextColumn();
-                ImGui.TextWrapped(tuple.npc?.Resident?.Singular ?? "");
+                if (ImGui.TableNextColumn())
+                {
+                    ImGui.TextWrapped(tuple.npc?.Resident?.Singular ?? "");
+                }
             }
             if (tuple.npc != null && tuple.location != null)
             {
-                ImGui.TableNextColumn();
-                ImGui.TextWrapped(tuple.location + " ( " + Math.Round(tuple.location.MapX, 2) + "/" +
-                                  Math.Round(tuple.location.MapY, 2) + ")");
-                ImGui.TableNextColumn();
-                if (ImGui.Button("Teleport##" + tuple.shop.RowId + "_" + tuple.npc.Key + "_" +
-                                 tuple.location.MapEx.Row))
+                if (ImGui.TableNextColumn())
                 {
-                    var nearestAetheryte = tuple.location.GetNearestAetheryte();
-                    if (nearestAetheryte != null)
+                    ImGui.TextWrapped(tuple.location + " ( " + Math.Round(tuple.location.MapX, 2) + "/" +
+                                      Math.Round(tuple.location.MapY, 2) + ")");
+                }
+
+                if (ImGui.TableNextColumn())
+                {
+                    if (ImGui.Button("Teleport##" + tuple.shop.RowId + "_" + tuple.npc.Key + "_" +
+                                     tuple.location.MapEx.Row))
                     {
-                        messages.Add(new RequestTeleportMessage(nearestAetheryte.RowId));
+                        var nearestAetheryte = tuple.location.GetNearestAetheryte();
+                        if (nearestAetheryte != null)
+                        {
+                            messages.Add(new RequestTeleportMessage(nearestAetheryte.RowId));
+                        }
+
+                        _chatUtilities.PrintFullMapLink(tuple.location, item.NameString);
+                        ImGui.CloseCurrentPopup();
                     }
-                    _chatUtilities.PrintFullMapLink(tuple.location, item.NameString);
-                    ImGui.CloseCurrentPopup();
                 }
             }
             else
@@ -127,8 +138,8 @@ namespace InventoryTools.Logic.Columns.Buttons
             ColumnConfiguration columnConfiguration,
             CraftItem item, int rowIndex, int columnIndex)
         {
+            if (!ImGui.TableNextColumn()) return null;
             var messages = new List<MessageBase>();
-            ImGui.TableNextColumn();
             if (CurrentValue(columnConfiguration, item) == true)
             {
                 bool hasVendors;
@@ -269,7 +280,7 @@ namespace InventoryTools.Logic.Columns.Buttons
             ColumnConfiguration columnConfiguration,
             InventoryItem item, int rowIndex, int columnIndex)
         {
-            ImGui.TableNextColumn();
+            if (!ImGui.TableNextColumn()) return null;
             if (CurrentValue(columnConfiguration, item) == true)
             {
                 if (item.Item.ObtainedGathering)
@@ -294,7 +305,7 @@ namespace InventoryTools.Logic.Columns.Buttons
             ColumnConfiguration columnConfiguration,
             ItemEx item, int rowIndex, int columnIndex)
         {
-            ImGui.TableNextColumn();
+            if (!ImGui.TableNextColumn()) return null;
             if (CurrentValue(columnConfiguration, item) == true)
             {
                 if (item.ObtainedGathering)

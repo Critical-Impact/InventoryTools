@@ -138,7 +138,8 @@ public class CraftSettingsColumn : IColumn
         CraftItem item,
         int rowIndex, int columnIndex)
     {
-        ImGui.TableNextColumn();
+        if (!ImGui.TableNextColumn()) return null;
+        
         using (var popup = ImRaii.Popup("ConfigureItemSettings" + columnIndex + item.ItemId + (item.IsOutputItem ? "o" : "")))
         {
             if (popup.Success)
@@ -872,6 +873,11 @@ public class CraftSettingsColumn : IColumn
     public bool DrawFilter(string tableKey, int columnIndex)
     {
         return false;
+    }
+    
+    public virtual void InvalidateSearchCache()
+    {
+        
     }
 
     public void Dispose()

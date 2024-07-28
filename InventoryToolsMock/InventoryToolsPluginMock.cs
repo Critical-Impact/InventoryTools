@@ -42,6 +42,7 @@ public class InventoryToolsPluginMock : InventoryToolsPlugin
             container.RegisterType<MockGameUiManager>().As<IGameUiManager>().SingleInstance();
             container.RegisterType<MockSeTime>().As<ISeTime>().SingleInstance();
             container.RegisterType<MockWindowSystem>().As<IWindowSystem>().SingleInstance();
+            container.RegisterType<MockGameInteropService>().As<IGameInteropService>().SingleInstance();
         });
         
         //Hosted service registrations

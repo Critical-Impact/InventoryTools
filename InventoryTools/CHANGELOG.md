@@ -13,6 +13,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [1.7.0.17] - 2024-07-28
+
+### Added
+
+- Added a amount owned tooltip sorting option(by retainer name or by inventory category name)
+- Added a outdated gear filter/column(will compare your current class/job levels to the gear in the specified inventories)
+
+### Fixed
+
+- Table columns can be hidden/shown using the built-in imgui menu without breaking the layout
+- Fixed a bug that would cause right clicking on a list/craft table item to fail
+
+
 ## [1.7.0.16] - 2024-07-23
 
 ### Added

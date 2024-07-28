@@ -203,6 +203,11 @@ public abstract class ButtonColumn : IColumn
     }
 
     public virtual event IColumn.ButtonPressedDelegate? ButtonPressed;
+    public virtual void InvalidateSearchCache()
+    {
+        
+    }
+
     public virtual bool DrawFilter(string tableKey, int columnIndex)
     {
         return false;

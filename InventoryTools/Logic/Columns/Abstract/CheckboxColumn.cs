@@ -242,12 +242,17 @@ namespace InventoryTools.Logic.Columns.Abstract
         public override List<MessageBase>? DoDraw(IItem item, bool? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
-            ImGui.TableNextColumn();
-            if (currentValue.HasValue)
+            if (ImGui.TableNextColumn())
             {
-                ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetContentRegionAvail().X / 2) - filterConfiguration.TableHeight / 2.0f);
-                ImGuiService.DrawUldIcon(currentValue.Value ? ImGuiService.TickIcon : ImGuiService.CrossIcon, new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight));
+                if (currentValue.HasValue)
+                {
+                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetContentRegionAvail().X / 2) -
+                                        filterConfiguration.TableHeight / 2.0f);
+                    ImGuiService.DrawUldIcon(currentValue.Value ? ImGuiService.TickIcon : ImGuiService.CrossIcon,
+                        new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight));
+                }
             }
+
             return null;
         }
 

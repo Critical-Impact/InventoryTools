@@ -184,15 +184,18 @@ namespace InventoryTools.Logic.Columns.Abstract
         public override List<MessageBase>? DoDraw(IItem item, decimal? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
-            ImGui.TableNextColumn();
-            if (currentValue != null)
+            if (ImGui.TableNextColumn())
             {
-                ImGui.Text($"{currentValue.Value:N2}");
+                if (currentValue != null)
+                {
+                    ImGui.Text($"{currentValue.Value:N2}");
+                }
+                else
+                {
+                    ImGui.Text(EmptyText);
+                }
             }
-            else
-            {
-                ImGui.Text(EmptyText);
-            }
+
             return null;
         }
 

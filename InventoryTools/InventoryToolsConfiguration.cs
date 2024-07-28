@@ -74,6 +74,7 @@ namespace InventoryTools
         private List<InventorySearchScope>? _itemSearchScope = null;
         private HashSet<string>? _windowsIgnoreEscape = new HashSet<string>();
         private HashSet<uint>? _favouriteItemsList = new HashSet<uint>();
+        private TooltipAmountOwnedSort _tooltipAmountOwnedSort = TooltipAmountOwnedSort.Alphabetically;
 
         [JsonProperty] [DefaultValue(300)] public int CraftWindowSplitterPosition { get; set; } = 300;
 
@@ -695,6 +696,16 @@ namespace InventoryTools
             }
         }
         
+        [DefaultValue(Logic.Settings.TooltipAmountOwnedSort.Alphabetically)]
+        public TooltipAmountOwnedSort TooltipAmountOwnedSort
+        {
+            get => _tooltipAmountOwnedSort;
+            set
+            {
+                _tooltipAmountOwnedSort = value;
+                IsDirty = true;
+            }
+        }
         
 
         public string? ActiveUiFilter { get; set; } = null;

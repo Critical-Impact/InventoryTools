@@ -66,25 +66,18 @@ namespace InventoryTools.Logic.Columns
         {
             if (currentValue.HasValue && currentValue.Value == Loading)
             {
-                ImGui.TableNextColumn();
-                ImGuiUtil.VerticalAlignTextColored(LoadingString, ImGuiColors.DalamudYellow, filterConfiguration.TableHeight, false);
+                if (ImGui.TableNextColumn())
+                {
+                    ImGuiUtil.VerticalAlignTextColored(LoadingString, ImGuiColors.DalamudYellow,
+                        filterConfiguration.TableHeight, false);
+                }
             }
             else if (currentValue.HasValue && currentValue.Value == Untradable)
             {
-                ImGui.TableNextColumn();
-                ImGuiUtil.VerticalAlignTextColored(UntradableString, ImGuiColors.DalamudRed, filterConfiguration.TableHeight, false);
-            }
-            else if(currentValue.HasValue)
-            {
-                base.DoDraw(item, currentValue, rowIndex, filterConfiguration, columnConfiguration);
-                ImGui.SameLine();
-                if (ImGui.SmallButton("R##" + rowIndex))
+                if (ImGui.TableNextColumn())
                 {
-                    var activeCharacter = _characterMonitor.ActiveCharacter;
-                    if (activeCharacter != null)
-                    {
-                        return new List<MessageBase> {new MarketRequestItemUpdateMessage(item.ItemId)};
-                    }
+                    ImGuiUtil.VerticalAlignTextColored(UntradableString, ImGuiColors.DalamudRed,
+                        filterConfiguration.TableHeight, false);
                 }
             }
             else

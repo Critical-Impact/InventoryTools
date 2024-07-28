@@ -89,6 +89,7 @@ namespace InventoryTools.Logic
                                 if (!tabItem.Success) continue;
 
                                 using var table = ImRaii.Table(Key + "CraftTable", Columns.Count, _tableFlags);
+                                var lastActiveColumn = Columns.FindLastIndex(c => !c.HiddenImGui);
                                 if (!table.Success || Columns.Count == 0) continue;
                                 var refresh = false;
                                 ImGui.TableSetupScrollFreeze(Math.Min(FreezeCols ?? 0, Columns.Count),
@@ -130,12 +131,14 @@ namespace InventoryTools.Logic
                                     {
                                         var column = Columns[columnIndex];
                                         var columnMessages = column.Column.Draw(FilterConfiguration, column, item, index, columnIndex);
+                                        var isVisible = ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsVisible);
+                                        column.HiddenImGui = !isVisible;
                                         if (columnMessages != null)
                                         {
                                             messages.AddRange(columnMessages);
                                         }
                                         ImGui.SameLine();
-                                        if (columnIndex == Columns.Count - 1)
+                                        if (columnIndex == lastActiveColumn)
                                         {
                                             var menuItems = DrawMenu(
                                                 FilterConfiguration, column,
@@ -163,6 +166,7 @@ namespace InventoryTools.Logic
                         {
                             if (!table || !table.Success) return messages;
                             var refresh = false;
+                            var lastActiveColumn = Columns.FindLastIndex(c => !c.HiddenImGui);
                             ImGui.TableSetupScrollFreeze(Math.Min(FreezeCols ?? 0, Columns.Count),
                                 FreezeRows ?? (ShowFilterRow ? 2 : 1));
                             for (var index = 0; index < Columns.Count; index++)
@@ -235,12 +239,14 @@ namespace InventoryTools.Logic
                                             {
                                                 var column = Columns[columnIndex];
                                                 var columnMessages = column.Column.Draw(FilterConfiguration, column, item, overallIndex, columnIndex);
+                                                var isVisible = ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsVisible);
+                                                column.HiddenImGui = !isVisible;
                                                 if (columnMessages != null)
                                                 {
                                                     messages.AddRange(columnMessages);
                                                 }
                                                 ImGui.SameLine();
-                                                if (columnIndex == Columns.Count - 1)
+                                                if (columnIndex == lastActiveColumn)
                                                 {
                                                     var menuMessages = DrawMenu(
                                                         FilterConfiguration, column,

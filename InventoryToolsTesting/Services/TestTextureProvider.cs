@@ -103,6 +103,11 @@ namespace InventoryToolsTesting.Services
             return null!;
         }
 
+        public ISharedImmediateTexture GetFromFileAbsolute(string fullPath)
+        {
+            return null!;
+        }
+
         public ISharedImmediateTexture GetFromManifestResource(Assembly assembly, string name)
         {
             return null!;

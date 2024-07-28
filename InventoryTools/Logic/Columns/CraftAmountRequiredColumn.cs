@@ -45,12 +45,12 @@ namespace InventoryTools.Logic.Columns
             ColumnConfiguration columnConfiguration,
             CraftItem item, int rowIndex, int columnIndex)
         {
-            ImGui.TableNextColumn();
+            if (!ImGui.TableNextColumn()) return null;
             if (item.IsOutputItem)
             {
                 var value = CurrentValue(columnConfiguration, item)?.Item2.ToString() ?? "";
                 ImGuiUtil.VerticalAlignButton(configuration.TableHeight);
-                if (ImGui.InputText("##"+item.ItemId+"RequiredInput", ref value, 4, ImGuiInputTextFlags.CharsDecimal))
+                if (ImGui.InputText("##"+item.ItemId+"RequiredInput" + columnIndex, ref value, 4, ImGuiInputTextFlags.CharsDecimal))
                 {
                     if (value != (CurrentValue(columnConfiguration, item)?.Item2.ToString() ?? ""))
                     {

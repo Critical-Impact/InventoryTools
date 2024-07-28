@@ -39,6 +39,11 @@ namespace InventoryTools.Logic.Filters.Abstract
             
         }
 
+        public virtual void InvalidateSearchCache()
+        {
+            
+        }
+
         public virtual bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
             return null;

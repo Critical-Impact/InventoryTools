@@ -28,5 +28,7 @@ namespace InventoryTools.Logic.Filters
         public void ResetFilter(FilterConfiguration configuration);
         public void ResetFilter(FilterConfiguration fromConfiguration, FilterConfiguration toConfiguration);
 
+        public void InvalidateSearchCache();
+
     }
 }

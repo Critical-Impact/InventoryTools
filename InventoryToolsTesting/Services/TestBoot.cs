@@ -25,8 +25,7 @@ namespace InventoryToolsTesting.Services
             },new Dictionary<Type, Type>()
             {
                 {typeof(MockKeyState), typeof(TestKeyState)},
-                {typeof(MockTextureProvider), typeof(TestTextureProvider)}, 
-                {typeof(MockTextureManager), typeof(TestTextureManager)} 
+                {typeof(MockTextureProvider), typeof(TestTextureProvider)}
             });
             var pluginLoader = mockContainer.GetPluginLoader();
             var mockPlugin = pluginLoader.AddPlugin(typeof(InventoryToolsTestingPlugin));

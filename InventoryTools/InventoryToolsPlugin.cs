@@ -257,7 +257,8 @@ namespace InventoryTools
                 builder.RegisterType<VersionInfo>().SingleInstance();
                 builder.RegisterType<CraftPricer>().SingleInstance();
                 builder.RegisterType<InventoryScopePicker>();
-                builder.RegisterType<InventoryScopeCalculator>().SingleInstance();
+                builder.RegisterType<InventoryScopeCalculator>().SingleInstance(); 
+                builder.RegisterType<GameInteropService>().As<IGameInteropService>().SingleInstance();
                 builder.RegisterType<WindowSystemFactory>().As<IWindowSystemFactory>().SingleInstance();
                 builder.RegisterType<DalamudWindowSystem>().As<IWindowSystem>();
                 builder.RegisterType<HostedUniversalisConfiguration>().AsSelf().As<IHostedUniversalisConfiguration>()

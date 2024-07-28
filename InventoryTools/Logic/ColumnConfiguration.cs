@@ -16,6 +16,7 @@ public class ColumnConfiguration
     private string _key;
     private string? _name;
     private string? _exportName;
+    private bool _hiddenImGui;
     
     public bool IsDirty { get; set; }
 
@@ -254,6 +255,13 @@ public class ColumnConfiguration
     {
         get => _column;
         set => _column = value;
+    }
+
+    [JsonIgnore]
+    public bool HiddenImGui
+    {
+        get => _hiddenImGui;
+        set => _hiddenImGui = value;
     }
 
     public Dictionary<string, string> StringSettings

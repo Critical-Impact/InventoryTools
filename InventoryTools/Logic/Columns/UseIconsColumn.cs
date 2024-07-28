@@ -59,8 +59,8 @@ namespace InventoryTools.Logic.Columns
         public override List<MessageBase>? DoDraw(IItem item, List<IItemSource>? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
+            if (!ImGui.TableNextColumn()) return null;
             var messages = new List<MessageBase>();
-            ImGui.TableNextColumn();
             if (currentValue != null)
             {
                 var uses = columnConfiguration.FilterText != "" ? currentValue.Where(c => c.FormattedName.ToLower().PassesFilter(columnConfiguration.FilterText)) : currentValue;

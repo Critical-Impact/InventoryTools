@@ -22,7 +22,8 @@ public class GatherButtonColumn : ButtonColumn
     public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
         ItemEx item, int rowIndex, int columnIndex)
     {
-        ImGui.TableNextColumn();
+        if (!ImGui.TableNextColumn()) return null;
+        
         if (ImGui.Button("Gather"))
         {
             if (item.ObtainedFishing)

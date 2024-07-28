@@ -154,7 +154,7 @@ public class TableService : DisposableMediatorBackgroundService
                     {
                         filterTable.IsSearching = true;
                     }
-
+                    column.Column.InvalidateSearchCache();
                     items = column.Column.Filter(column, items);
                     if (filterTable.SortColumn != null && index == filterTable.SortColumn)
                     {
@@ -179,7 +179,7 @@ public class TableService : DisposableMediatorBackgroundService
                     {
                         filterTable.IsSearching = true;
                     }
-
+                    column.Column.InvalidateSearchCache();
                     items = column.Column.Filter(column, (IEnumerable<ItemEx>)items);
                     if (filterTable.SortColumn != null && index == filterTable.SortColumn)
                     {
@@ -204,7 +204,7 @@ public class TableService : DisposableMediatorBackgroundService
                     {
                         filterTable.IsSearching = true;
                     }
-
+                    column.Column.InvalidateSearchCache();
                     items = column.Column.Filter(column, items);
                     if (filterTable.SortColumn != null && index == filterTable.SortColumn)
                     {

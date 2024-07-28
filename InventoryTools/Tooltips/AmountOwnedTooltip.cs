@@ -10,6 +10,7 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 using InventoryTools.Logic.Editors;
 using InventoryTools.Logic.Settings;
 using Microsoft.Extensions.Logging;
+using OtterGui;
 
 namespace InventoryTools.Tooltips;
 
@@ -61,6 +62,8 @@ public class AmountOwnedTooltip : BaseTooltip
             {
                 if (Configuration.TooltipDisplayAmountOwned)
                 {
+                    var sortMode = Configuration.TooltipAmountOwnedSort;
+                    
                     var enumerable = _inventoryMonitor.AllItems.Where(item =>
                         item.ItemId == HoverItemId &&
                         _characterMonitor.Characters.ContainsKey(item.RetainerId) &&
@@ -72,6 +75,18 @@ public class AmountOwnedTooltip : BaseTooltip
                     {
                         enumerable = enumerable.Where(c => _inventoryScopeCalculator.Filter(Configuration.TooltipSearchScope, c));
                     }
+
+                    if (sortMode == TooltipAmountOwnedSort.Alphabetically)
+                    {
+                        var characterNames = _characterMonitor.Characters.OrderBy(c => c.Value.FormattedName).ToList();
+                        enumerable = enumerable.OrderBy(c => characterNames.IndexOf(d => d.Key == c.RetainerId));
+                    }
+                    else if(sortMode == TooltipAmountOwnedSort.Categorically)
+                    {
+                        var characterNames = _characterMonitor.Characters.OrderBy(c => c.Value.FormattedName).ToList();
+                        enumerable = enumerable.OrderBy(c => c.SortedCategory.FormattedName()).ThenBy(c => characterNames.IndexOf(d => d.Key == c.RetainerId));
+                    }
+                    
                     var ownedItems = enumerable
                         .ToList();
                     

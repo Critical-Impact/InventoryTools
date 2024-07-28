@@ -91,12 +91,12 @@ namespace InventoryTools.Logic.Columns
         public override List<MessageBase>? DoDraw(IItem item, (ushort, bool)? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
+            if (!ImGui.TableNextColumn()) return null;
             var messages = new List<MessageBase>();
-            ImGui.TableNextColumn();
             if (currentValue != null)
             {
                 ImGui.PushID("icon" + rowIndex);
-                if (ImGui.ImageButton(ImGuiService.GetIconTexture(currentValue.Value.Item1, currentValue.Value.Item2).ImGuiHandle, new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) * ImGui.GetIO().FontGlobalScale,new Vector2(0,0), new Vector2(1,1), 2))
+                if (ImGui.ImageButton(ImGuiService.GetIconTexture(currentValue.Value.Item1, currentValue.Value.Item2).ImGuiHandle, new Vector2(filterConfiguration.TableHeight - 1, filterConfiguration.TableHeight - 1) * ImGui.GetIO().FontGlobalScale,new Vector2(0,0), new Vector2(1,1), 2))
                 {
                     ImGui.PopID();
                     messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), item.ItemId));

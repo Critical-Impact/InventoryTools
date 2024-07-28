@@ -100,5 +100,7 @@ namespace InventoryTools.Logic.Columns
         
         public delegate void ButtonPressedDelegate(string buttonName, object eventData);
         public event ButtonPressedDelegate? ButtonPressed;
+        
+        public void InvalidateSearchCache();
     }
 }

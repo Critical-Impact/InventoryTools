@@ -202,6 +202,12 @@ public class ListFilterService : DisposableMediatorBackgroundService
             {
                 filter.CraftList.GetFlattenedMergedMaterials(true);
             }
+
+            foreach (var availableFilter in _filterService.AvailableFilters)
+            {
+                availableFilter.InvalidateSearchCache();
+            }
+            
             foreach (var sourceInventory in sourceInventories)
             {
                 if (!filteredSources.ContainsKey(sourceInventory.Key))

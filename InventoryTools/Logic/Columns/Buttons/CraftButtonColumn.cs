@@ -22,10 +22,12 @@ public class CraftButtonColumn : ButtonColumn
     public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
         ItemEx item, int rowIndex, int columnIndex)
     {
-        ImGui.TableNextColumn();
-        if (item.CanBeCrafted && ImGui.Button("Craft"))
+        if (ImGui.TableNextColumn())
         {
-            _gameInterface.OpenCraftingLog(item.RowId);
+            if (item.CanBeCrafted && ImGui.Button("Craft"))
+            {
+                _gameInterface.OpenCraftingLog(item.RowId);
+            }
         }
 
         return null;

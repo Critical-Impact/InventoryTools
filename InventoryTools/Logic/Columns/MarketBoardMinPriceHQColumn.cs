@@ -5,6 +5,7 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Sheets;
+using Dalamud.Game.Text;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
@@ -66,24 +67,40 @@ namespace InventoryTools.Logic.Columns
         {
             if (currentValue.HasValue && currentValue.Value == Loading)
             {
-                ImGui.TableNextColumn();
-                ImGuiUtil.VerticalAlignTextColored(LoadingString, ImGuiColors.DalamudYellow, filterConfiguration.TableHeight, false);
+                if (ImGui.TableNextColumn())
+                {
+                    ImGuiUtil.VerticalAlignTextColored(LoadingString, ImGuiColors.DalamudYellow,
+                        filterConfiguration.TableHeight, false);
+                }
             }
             else if (currentValue.HasValue && currentValue.Value == Untradable)
             {
-                ImGui.TableNextColumn();
-                ImGuiUtil.VerticalAlignTextColored(UntradableString, ImGuiColors.DalamudRed, filterConfiguration.TableHeight, false);
+                if (ImGui.TableNextColumn())
+                {
+                    ImGuiUtil.VerticalAlignTextColored(UntradableString, ImGuiColors.DalamudRed,
+                        filterConfiguration.TableHeight, false);
+                }
             }
             else if(currentValue.HasValue)
             {
-                base.DoDraw(item, currentValue, rowIndex, filterConfiguration, columnConfiguration);
-                ImGui.SameLine();
-                if (ImGui.SmallButton("R##" + rowIndex))
+                if (ImGui.TableNextColumn())
                 {
-                    var activeCharacter = _characterMonitor.ActiveCharacter;
-                    if (activeCharacter != null)
+                    if (currentValue != null)
                     {
-                        return new List<MessageBase> {new MarketRequestItemUpdateMessage(item.ItemId)};
+                        OtterGui.ImGuiUtil.RightAlign($"{currentValue.Value:n0}" + SeIconChar.Gil.ToIconString());
+                    }
+                    else
+                    {
+                        ImGui.Text(EmptyText);
+                    }
+                    ImGui.SameLine();
+                    if (ImGui.SmallButton("R##" + rowIndex))
+                    {
+                        var activeCharacter = _characterMonitor.ActiveCharacter;
+                        if (activeCharacter != null)
+                        {
+                            return new List<MessageBase> { new MarketRequestItemUpdateMessage(item.ItemId) };
+                        }
                     }
                 }
             }

@@ -196,9 +196,11 @@ namespace InventoryTools.Logic.Columns.Abstract
             remove { }
         }
 
-        
+        public virtual void InvalidateSearchCache()
+        {
+        }
 
-        
+
         private bool _disposed;
         public virtual void Dispose()
         {

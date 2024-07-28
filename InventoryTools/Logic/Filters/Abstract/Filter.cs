@@ -26,6 +26,11 @@ namespace InventoryTools.Logic.Filters.Abstract
             UpdateFilterConfiguration(toConfiguration, currentValue);
         }
 
+        public virtual void InvalidateSearchCache()
+        {
+            
+        }
+
         public abstract void UpdateFilterConfiguration(FilterConfiguration configuration, T newValue);
 
         public abstract string Key { get; set; }

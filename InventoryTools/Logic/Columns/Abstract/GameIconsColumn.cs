@@ -127,19 +127,24 @@ namespace InventoryTools.Logic.Columns.Abstract
         public override List<MessageBase>? DoDraw(IItem item1, List<ushort>? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
-            ImGui.TableNextColumn();
-            if (currentValue != null)
+            if (ImGui.TableNextColumn())
             {
-                for (var index = 0; index < currentValue.Count; index++)
+                if (currentValue != null)
                 {
-                    var item = currentValue[index];
-                    ImGuiService.DrawIcon(item, new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) * ImGui.GetIO().FontGlobalScale);
-                    if (index != currentValue.Count)
+                    for (var index = 0; index < currentValue.Count; index++)
                     {
-                        ImGui.SameLine();
+                        var item = currentValue[index];
+                        ImGuiService.DrawIcon(item,
+                            new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
+                            ImGui.GetIO().FontGlobalScale);
+                        if (index != currentValue.Count)
+                        {
+                            ImGui.SameLine();
+                        }
                     }
                 }
             }
+
             return null;
         }
 

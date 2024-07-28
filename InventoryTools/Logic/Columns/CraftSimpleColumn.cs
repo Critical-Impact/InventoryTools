@@ -36,7 +36,7 @@ namespace InventoryTools.Logic.Columns
             ColumnConfiguration columnConfiguration,
             CraftItem item, int rowIndex, int columnIndex)
         {
-            ImGui.TableNextColumn();
+            if (!ImGui.TableNextColumn()) return null;
             var nextStep = configuration.CraftList.GetNextStep(item);
             ImGuiUtil.VerticalAlignTextColored(nextStep.Item2, nextStep.Item1, configuration.TableHeight, true);
             if (item.IsOutputItem && item.IsCompleted)

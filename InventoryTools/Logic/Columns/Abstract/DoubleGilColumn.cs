@@ -17,19 +17,23 @@ namespace InventoryTools.Logic.Columns.Abstract
         public override List<MessageBase>? DoDraw(IItem item, (int, int)? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
-            ImGui.TableNextColumn();
-            if (currentValue != null)
+            if (ImGui.TableNextColumn())
             {
-                var text = $"{currentValue.Value.Item1:n0}" + SeIconChar.Gil.ToIconString() + Divider + $"{currentValue.Value.Item2:n0}" + SeIconChar.Gil.ToIconString();
-                var xOffset = ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize(text).X - 22;
-                ImGuiUtil.VerticalAlignText(text, filterConfiguration.TableHeight, false, xOffset);
+                if (currentValue != null)
+                {
+                    var text = $"{currentValue.Value.Item1:n0}" + SeIconChar.Gil.ToIconString() + Divider +
+                               $"{currentValue.Value.Item2:n0}" + SeIconChar.Gil.ToIconString();
+                    var xOffset = ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize(text).X - 22;
+                    ImGuiUtil.VerticalAlignText(text, filterConfiguration.TableHeight, false, xOffset);
+                }
+                else
+                {
+                    var text = EmptyText;
+                    var xOffset = ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize(text).X - 22;
+                    ImGuiUtil.VerticalAlignText(text, filterConfiguration.TableHeight, false, xOffset);
+                }
             }
-            else
-            {
-                var text = EmptyText;
-                var xOffset = ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize(text).X - 22;
-                ImGuiUtil.VerticalAlignText(text, filterConfiguration.TableHeight, false, xOffset);
-            }
+
             return null;
         }
     }

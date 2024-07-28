@@ -236,22 +236,27 @@ namespace InventoryTools.Logic.Columns.Abstract
         public override List<MessageBase>? DoDraw(IItem item, (string, Vector4)? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
-            ImGui.TableNextColumn();
-            if (currentValue.HasValue)
+            if (ImGui.TableNextColumn())
             {
-                if (filterConfiguration.FilterType == Logic.FilterType.CraftFilter)
+                if (currentValue.HasValue)
                 {
-                    ImGuiUtil.VerticalAlignTextColored(currentValue.Value.Item1, currentValue.Value.Item2, filterConfiguration.TableHeight, true);
+                    if (filterConfiguration.FilterType == Logic.FilterType.CraftFilter)
+                    {
+                        ImGuiUtil.VerticalAlignTextColored(currentValue.Value.Item1, currentValue.Value.Item2,
+                            filterConfiguration.TableHeight, true);
+                    }
+                    else
+                    {
+                        ImGuiUtil.VerticalAlignTextColored(currentValue.Value.Item1, currentValue.Value.Item2,
+                            filterConfiguration.TableHeight, false);
+                    }
                 }
                 else
                 {
-                    ImGuiUtil.VerticalAlignTextColored(currentValue.Value.Item1, currentValue.Value.Item2, filterConfiguration.TableHeight, false);
+                    ImGui.Text(EmptyText);
                 }
             }
-            else
-            {
-                ImGui.Text(EmptyText);
-            }
+
             return null;
         }
 
