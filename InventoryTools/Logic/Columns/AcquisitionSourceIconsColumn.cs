@@ -56,7 +56,9 @@ namespace InventoryTools.Logic.Columns
         public override List<MessageBase>? DoDraw(IItem item1, List<IItemSource>? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
-            if (!ImGui.TableNextColumn()) return null;
+            ImGui.TableNextColumn();
+            if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;
+            
             var messages = new List<MessageBase>();
             if (currentValue != null)
             {

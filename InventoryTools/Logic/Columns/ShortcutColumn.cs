@@ -47,7 +47,8 @@ namespace InventoryTools.Logic.Columns
             ColumnConfiguration columnConfiguration,
             InventoryItem item, int rowIndex, int columnIndex)
         {
-            if (ImGui.TableNextColumn())
+            ImGui.TableNextColumn();
+            if (ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled))
             {
                 if (ImGui.SmallButton("GT##GT" + rowIndex))
                 {
@@ -85,7 +86,8 @@ namespace InventoryTools.Logic.Columns
             ColumnConfiguration columnConfiguration,
             ItemEx item, int rowIndex, int columnIndex)
         {
-            if (ImGui.TableNextColumn())
+            ImGui.TableNextColumn();
+            if (ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled))
             {
                 if (ImGui.SmallButton("G##G" + rowIndex))
                 {

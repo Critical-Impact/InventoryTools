@@ -45,6 +45,7 @@ public static class ImGuiUtil
         {
             ImGui.PushTextWrapPos();
         }
+        ImGui.AlignTextToFramePadding();    
         ImGui.TextUnformatted(text);
         if (autoWrap)
         {
@@ -67,6 +68,7 @@ public static class ImGuiUtil
         {
             ImGui.PushTextWrapPos();
         }
+        ImGui.AlignTextToFramePadding();    
         ImGui.TextDisabled(text);
         if (autoWrap)
         {
@@ -76,13 +78,14 @@ public static class ImGuiUtil
 
     public static void VerticalAlignTextColored(string text, Vector4 colour, int cellHeight,  bool autoWrap)
     {
+        var originalCursorPosY = ImGui.GetCursorPosY();
         var columnWidth = ImGui.GetColumnWidth();
         var frameHeight = cellHeight / 2.0f;
         var calcText = ImGui.CalcTextSize(text);
         if (calcText.X <= columnWidth || !autoWrap)
         {
             var textHeight = calcText.Y / 2.0f;
-            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + frameHeight - textHeight);
+            ImGui.SetCursorPosY(originalCursorPosY + frameHeight - textHeight);
         }
 
         if (autoWrap)
@@ -90,11 +93,13 @@ public static class ImGuiUtil
             ImGui.PushTextWrapPos();
         }
         using var _ = ImRaii.PushColor(ImGuiCol.Text,colour);
+        ImGui.AlignTextToFramePadding();    
         ImGui.TextUnformatted(text);
         if (autoWrap)
         {
             ImGui.PopTextWrapPos();
         }
+        ImGui.SetCursorPosY(originalCursorPosY);
     }
 
 
@@ -102,6 +107,7 @@ public static class ImGuiUtil
     {
         var frameHeight = cellHeight / 2.0f;
         var textHeight = (ImGui.GetFontSize() * 1 + ImGui.GetStyle().FramePadding.Y * 2) / 2.0f;
+        ImGui.AlignTextToFramePadding();    
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + frameHeight - textHeight);
     }
     

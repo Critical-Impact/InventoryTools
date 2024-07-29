@@ -133,8 +133,6 @@ namespace InventoryTools.Logic
                             NeedsRefresh = true;
                         }
                         
-                        var lastActiveColumn = Columns.FindLastIndex(c => !c.HiddenImGui);
-                        
                         if (FilterConfiguration.FilterType == FilterType.SearchFilter ||
                             FilterConfiguration.FilterType == FilterType.SortingFilter ||
                             FilterConfiguration.FilterType == FilterType.CraftFilter)
@@ -159,14 +157,12 @@ namespace InventoryTools.Logic
                                     {
                                         var column = Columns[columnIndex];
                                         var columnMessages = column.Column.Draw(FilterConfiguration, column, item, index, columnIndex);
-                                        var isVisible = ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsVisible);
-                                        column.HiddenImGui = !isVisible;
                                         if (columnMessages != null)
                                         {
                                             messages.AddRange(columnMessages);
                                         }
                                         ImGui.SameLine();
-                                        if (columnIndex == lastActiveColumn)
+                                        if (columnIndex == 0)
                                         {
                                             var menuMessages = DrawMenu(FilterConfiguration, column,
                                                 item,
@@ -207,20 +203,14 @@ namespace InventoryTools.Logic
                                         {
                                             var column = Columns[columnIndex];
                                             var columnMessages = column.Column.Draw(FilterConfiguration, column, (ItemEx)item, index, columnIndex);
-                                            var isVisible = ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsVisible);
-                                            column.HiddenImGui = !isVisible;
                                             if (columnMessages != null)
                                             {
                                                 messages.AddRange(columnMessages);
                                             }
 
-                                            if (isVisible)
+                                            if (columnIndex == 0)
                                             {
                                                 ImGui.SameLine();
-                                            }
-
-                                            if (columnIndex == lastActiveColumn)
-                                            {
                                                 var menuMessages = DrawMenu(FilterConfiguration, column,
                                                     (ItemEx)item, index);
                                                 if (menuMessages != null)

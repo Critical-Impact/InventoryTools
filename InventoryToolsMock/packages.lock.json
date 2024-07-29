@@ -4,12 +4,12 @@
     "net8.0-windows7.0": {
       "DalaMock.Core": {
         "type": "Direct",
-        "requested": "[2.0.18, )",
-        "resolved": "2.0.18",
-        "contentHash": "uSBwhVtUJUaWQUC1yVWXVQsNXTwV/JXzc4SNcCVNjtk4w2BWzmboeSqN3Zu/uv95lIBSQo52L3hxPPRfr6P3lQ==",
+        "requested": "[2.0.21, )",
+        "resolved": "2.0.21",
+        "contentHash": "gx8fUoGXWeambyhywVP2Z2rSzvh3ARWooZsgEh9XVmC7XyoO1Wa8/gmdN2vIl/wLxIHoJn1wQBsF8VZ2O3z+cA==",
         "dependencies": {
           "Autofac": "8.0.0",
-          "DalaMock.Shared": "2.0.18",
+          "DalaMock.Shared": "2.0.21",
           "Microsoft.Extensions.Configuration": "8.0.0",
           "Microsoft.Extensions.Hosting": "8.0.0",
           "Microsoft.Extensions.Hosting.Abstractions": "8.0.0",
@@ -209,11 +209,11 @@
       },
       "DalaMock.Host": {
         "type": "Transitive",
-        "resolved": "2.0.18",
-        "contentHash": "sK8RORbqZEB0cLBl8s9gYZ8vewHEeEN+/WVnRzGYDaY60KOKRc+xZ0ZLnaJB30o0Fecrgb1x0PLSOibHWCGxTQ==",
+        "resolved": "2.0.21",
+        "contentHash": "9uGfG0Gs9st3fEKmdMt19aGbrsGbewRjoC8OREAv8+YA7mzOJ8vgdqS+H5F3BdbHwsh8atbeJOBs2TnLXOrMdQ==",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "9.0.0",
-          "DalaMock.Shared": "2.0.18",
+          "DalaMock.Shared": "2.0.21",
           "Microsoft.Extensions.Hosting": "8.0.0",
           "Microsoft.Extensions.Hosting.Abstractions": "8.0.0",
           "Microsoft.Extensions.ObjectPool": "9.0.0-preview.6.24328.4",
@@ -225,8 +225,8 @@
       },
       "DalaMock.Shared": {
         "type": "Transitive",
-        "resolved": "2.0.18",
-        "contentHash": "vIl9ZRh2CIJhc4Xzn/koatGmZB+cGHhTgvbx3K3YMCgXtIn87z0B1bIGYvXbjtcx06c04JscxT7HBUes9/pCAA==",
+        "resolved": "2.0.21",
+        "contentHash": "nGniim1RWmkGP/9Rz3O6r0YEQFCU+htlTPlhBLW2ncl6Elfe/WxQnYbB2VaDNJoWOta9LSQEoX/l5tDDYdPXtA==",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "9.0.0",
           "Microsoft.Extensions.Hosting": "8.0.0",
@@ -811,7 +811,7 @@
           "Autofac.Extensions.DependencyInjection": "[9.0.0, )",
           "CriticalCommonLib": "[1.0.0, )",
           "CsvHelper": "[30.0.1, )",
-          "DalaMock.Host": "[2.0.18, )",
+          "DalaMock.Host": "[2.0.21, )",
           "DalamudPackager": "[2.1.13, )",
           "Humanizer.Core": "[2.14.1, )",
           "Microsoft.AspNetCore.SignalR.Client": "[7.0.11, )",

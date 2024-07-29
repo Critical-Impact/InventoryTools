@@ -36,7 +36,9 @@ namespace InventoryTools.Logic.Columns
             ColumnConfiguration columnConfiguration,
             CraftItem item, int rowIndex, int columnIndex)
         {
-            if (!ImGui.TableNextColumn()) return null;
+            ImGui.TableNextColumn();
+            if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;
+            var originalCursorPosY = ImGui.GetCursorPosY();
             var nextStep = configuration.CraftList.GetNextStep(item);
             ImGuiUtil.VerticalAlignTextColored(nextStep.Item2, nextStep.Item1, configuration.TableHeight, true);
             if (item.IsOutputItem && item.IsCompleted)
@@ -129,6 +131,7 @@ namespace InventoryTools.Logic.Columns
             else if (item.MissingIngredients.Count != 0)
             {
                 ImGui.SameLine();
+                ImGui.SetCursorPosY(originalCursorPosY);
                 ImGui.PushFont(_font.IconFont);
                 ImGuiUtil.VerticalAlignTextDisabled(FontAwesomeIcon.InfoCircle.ToIconString(), configuration.TableHeight, false);
                 ImGui.PopFont();

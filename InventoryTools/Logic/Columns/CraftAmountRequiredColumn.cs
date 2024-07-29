@@ -45,7 +45,8 @@ namespace InventoryTools.Logic.Columns
             ColumnConfiguration columnConfiguration,
             CraftItem item, int rowIndex, int columnIndex)
         {
-            if (!ImGui.TableNextColumn()) return null;
+            ImGui.TableNextColumn();
+            if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;
             if (item.IsOutputItem)
             {
                 var value = CurrentValue(columnConfiguration, item)?.Item2.ToString() ?? "";

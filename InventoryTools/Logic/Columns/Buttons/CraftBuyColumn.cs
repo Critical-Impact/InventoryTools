@@ -31,7 +31,8 @@ public class CraftBuyColumn : ButtonColumn
         ItemEx item, int rowIndex, int columnIndex)
     {
         var messages = new List<MessageBase>();
-        if (ImGui.TableNextColumn())
+        ImGui.TableNextColumn();
+        if (ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled))
         {
             DrawVendorButton(item, rowIndex, messages);
         }
@@ -77,27 +78,31 @@ public class CraftBuyColumn : ButtonColumn
     
     void DrawSupplierRow(ItemEx item,(IShop shop, ENpc? npc, ILocation? location) tuple, List<MessageBase> messages)
     {
-        if (ImGui.TableNextColumn())
+        ImGui.TableNextColumn();
+        if (ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled))
         {
             ImGui.TextWrapped(tuple.shop.Name);
         }
 
         if (tuple.npc != null)
         {
-            if (ImGui.TableNextColumn())
+            ImGui.TableNextColumn();
+            if (ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled))
             {
                 ImGui.TextWrapped(tuple.npc?.Resident?.Singular ?? "");
             }
         }
         if (tuple.npc != null && tuple.location != null)
         {
-            if (ImGui.TableNextColumn())
+            ImGui.TableNextColumn();
+            if (ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled))
             {
                 ImGui.TextWrapped(tuple.location + " ( " + Math.Round(tuple.location.MapX, 2) + "/" +
                                   Math.Round(tuple.location.MapY, 2) + ")");
             }
 
-            if (ImGui.TableNextColumn())
+            ImGui.TableNextColumn();
+            if (ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled))
             {
                 if (ImGui.Button("Teleport##" + tuple.shop.RowId + "_" + tuple.npc.Key + "_" +
                                  tuple.location.MapEx.Row))

@@ -257,13 +257,6 @@ public class ColumnConfiguration
         set => _column = value;
     }
 
-    [JsonIgnore]
-    public bool HiddenImGui
-    {
-        get => _hiddenImGui;
-        set => _hiddenImGui = value;
-    }
-
     public Dictionary<string, string> StringSettings
     {
         get => _stringSettings ??= new Dictionary<string, string>();

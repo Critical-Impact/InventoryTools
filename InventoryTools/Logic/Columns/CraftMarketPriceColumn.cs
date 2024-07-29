@@ -46,7 +46,8 @@ public class CraftMarketPriceColumn : GilColumn
     public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
         CraftItem item, int rowIndex, int columnIndex)
     {
-        if (!ImGui.TableNextColumn()) return null;
+        ImGui.TableNextColumn();
+        if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;
         if (!item.Item.CanBeTraded) return new List<MessageBase>();
         if (item.MarketTotalPrice != null && item.MarketUnitPrice != null)
         {

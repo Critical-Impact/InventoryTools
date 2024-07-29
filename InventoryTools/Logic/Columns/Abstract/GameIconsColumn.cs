@@ -127,7 +127,8 @@ namespace InventoryTools.Logic.Columns.Abstract
         public override List<MessageBase>? DoDraw(IItem item1, List<ushort>? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
-            if (ImGui.TableNextColumn())
+            ImGui.TableNextColumn();
+            if (ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled))
             {
                 if (currentValue != null)
                 {

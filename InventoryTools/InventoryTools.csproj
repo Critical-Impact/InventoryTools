@@ -3,7 +3,7 @@
     
     <PropertyGroup>
         <LangVersion>12</LangVersion>
-        <Version>1.7.0.16</Version>
+        <Version>1.7.0.18</Version>
         <AssemblyName>InventoryTools</AssemblyName>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
@@ -29,7 +29,7 @@
     <ItemGroup>
         <PackageReference Include="Autofac" Version="8.0.0" />
         <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="9.0.0" />
-        <PackageReference Include="DalaMock.Host" Version="2.0.18" />
+        <PackageReference Include="DalaMock.Host" Version="2.0.21" />
         <PackageReference Include="Humanizer.Core" Version="2.14.1" />
         <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.11" />
         <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="7.0.11" />

@@ -13,6 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [1.7.0.18] - 2024-07-29
+
+### Fixed
+
+- Hopefully fully fixed column hiding not breaking the layout
+- Craft/Gather button columns now work as intended
+- Having an empty tooltip amount owned scope would sometimes make the tooltip show no owned items
+
 ## [1.7.0.17] - 2024-07-28
 
 ### Added

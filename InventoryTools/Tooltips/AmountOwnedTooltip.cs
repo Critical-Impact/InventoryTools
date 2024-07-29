@@ -71,7 +71,7 @@ public class AmountOwnedTooltip : BaseTooltip
                           _characterMonitor.BelongsToActiveCharacter(item.RetainerId)) ||
                          !Configuration.TooltipCurrentCharacter)
                     );
-                    if (Configuration.TooltipSearchScope != null)
+                    if (Configuration.TooltipSearchScope != null && Configuration.TooltipSearchScope.Count != 0)
                     {
                         enumerable = enumerable.Where(c => _inventoryScopeCalculator.Filter(Configuration.TooltipSearchScope, c));
                     }

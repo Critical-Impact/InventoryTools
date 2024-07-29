@@ -42,7 +42,8 @@ namespace InventoryTools.Logic.Columns
             ColumnConfiguration columnConfiguration,
             CraftItem item, int rowIndex, int columnIndex)
         {
-            if (ImGui.TableNextColumn())
+            ImGui.TableNextColumn();
+            if (ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled))
             {
                 if (CurrentValue(columnConfiguration, item) > 0)
                 {

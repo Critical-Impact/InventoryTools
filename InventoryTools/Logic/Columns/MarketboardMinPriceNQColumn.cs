@@ -66,7 +66,8 @@ namespace InventoryTools.Logic.Columns
         {
             if (currentValue.HasValue && currentValue.Value == Loading)
             {
-                if (ImGui.TableNextColumn())
+                ImGui.TableNextColumn();
+                if (ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled))
                 {
                     ImGuiUtil.VerticalAlignTextColored(LoadingString, ImGuiColors.DalamudYellow,
                         filterConfiguration.TableHeight, false);
@@ -74,7 +75,8 @@ namespace InventoryTools.Logic.Columns
             }
             else if (currentValue.HasValue && currentValue.Value == Untradable)
             {
-                if (ImGui.TableNextColumn())
+                ImGui.TableNextColumn();
+                if (ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled))
                 {
                     ImGuiUtil.VerticalAlignTextColored(UntradableString, ImGuiColors.DalamudRed,
                         filterConfiguration.TableHeight, false);

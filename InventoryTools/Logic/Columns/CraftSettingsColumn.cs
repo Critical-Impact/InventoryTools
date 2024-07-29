@@ -13,6 +13,7 @@ using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Ui.Widgets;
 using Dalamud.Interface.Utility.Raii;
+using FFXIVClientStructs.FFXIV.Client.System.Input;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 using ImGuiUtil = OtterGui.ImGuiUtil;
@@ -138,7 +139,8 @@ public class CraftSettingsColumn : IColumn
         CraftItem item,
         int rowIndex, int columnIndex)
     {
-        if (!ImGui.TableNextColumn()) return null;
+        ImGui.TableNextColumn();
+        if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;
         
         using (var popup = ImRaii.Popup("ConfigureItemSettings" + columnIndex + item.ItemId + (item.IsOutputItem ? "o" : "")))
         {
@@ -219,9 +221,13 @@ public class CraftSettingsColumn : IColumn
         var zonePreference = configuration.CraftList.GetZonePreference(item.IngredientPreference.Type, item.ItemId);
         var worldPreference = configuration.CraftList.GetMarketItemWorldPreference(item.ItemId);
         var priceOverride = configuration.CraftList.GetMarketItemPriceOverride(item.ItemId);
+        var originalPos = ImGui.GetCursorPosY();
         DrawRecipeIcon(configuration,rowIndex, item);
+        ImGui.SetCursorPosY(originalPos);
         DrawHqIcon(configuration, rowIndex, item);
+        ImGui.SetCursorPosY(originalPos);
         DrawRetainerIcon(configuration, rowIndex, item, retainerRetrievalDefault, retainerRetrieval);
+        ImGui.SetCursorPosY(originalPos);
 
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
 
