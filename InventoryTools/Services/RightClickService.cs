@@ -300,11 +300,19 @@ public class RightClickService
         {
             if (recipeId != null)
             {
-                _gameInterface.OpenCraftingLog(item.RowId, recipeId.Value);
+                var result = _gameInterface.OpenCraftingLog(item.RowId, recipeId.Value);
+                if (!result)
+                {
+                    _chatUtilities.PrintError("Could not open the crafting log, you are currently crafting.");
+                }
             }
             else
             {
-                _gameInterface.OpenCraftingLog(item.RowId);
+                var result = _gameInterface.OpenCraftingLog(item.RowId);
+                if (!result)
+                {
+                    _chatUtilities.PrintError("Could not open the crafting log, you are currently crafting.");
+                }
             }
         }
 

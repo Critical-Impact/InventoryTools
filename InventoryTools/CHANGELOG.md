@@ -13,6 +13,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [1.7.0.19] - 2024-07-30
+
+### Added
+
+- Added a new section to the item window that displays the possible recipes for an item and the ingredients for each
+- Updated patch data for 7.05
+
+### Fixed
+
+- Attempting to open the craft log via AT will no longer be allowed while crafting
+- Fixed a bug that would cause the Gather/Purchase/Buy column to break how right clicking interacted with the tables
+
 ## [1.7.0.18] - 2024-07-29
 
 ### Fixed

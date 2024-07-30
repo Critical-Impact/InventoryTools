@@ -165,6 +165,8 @@ namespace InventoryTools.Ui
         private CraftItem? _craftItem;
         private List<MarketPricing> _marketPrices = new List<MarketPricing>();
         private WorldPicker _picker;
+        private Dictionary<uint, string>? _craftTypes;
+        private uint? _craftTypeId;
 
         private void GetMarketPrices()
         {
@@ -317,7 +319,11 @@ namespace InventoryTools.Ui
                     if (ImGui.ImageButton(ImGuiService.GetIconTexture(66456).ImGuiHandle,
                             new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                     {
-                        _gameInterface.OpenCraftingLog(_itemId);
+                        var result = _gameInterface.OpenCraftingLog(_itemId);
+                        if (!result)
+                        {
+                            _chatUtilities.PrintError("Could not open the crafting log, you are currently crafting.");
+                        }
                     }
 
                     ImGuiUtil.HoverTooltip("Craftable - Open in Craft Log");
@@ -423,7 +429,7 @@ namespace InventoryTools.Ui
 
                 DrawSharedModels();
 
-                DrawCompanyCrafts();
+                DrawCraftRecipe();
 
                 
 #if DEBUG
@@ -553,24 +559,105 @@ namespace InventoryTools.Ui
             }
         }
 
-        private bool DrawCompanyCrafts()
+        private bool DrawCraftRecipe()
         {
             bool hasInformation = false;
-            if (Item is { IsCompanyCraft: true })
+            
+            if (Item is { CanBeCrafted: true })
             {
-                hasInformation = true;
-                if (_craftItem == null)
+                var recipes = Item.RecipesAsResult;
+                if (_craftTypes == null)
                 {
-                    var craftList = new CraftList();
-                    craftList.AddCraftItem(Item.RowId, 1);
-                    _craftItem = craftList.CraftItems.First();
+                    var craftTypes = new Dictionary<uint, string>();
+                    if (Item.IsCompanyCraft)
+                    {
+                        craftTypes.Add(0, "All");
+                        var companyCraftIndex = 1u;
+                        if (Item.CompanyCraftSequenceEx != null)
+                        {
+                            var craftParts = Item.CompanyCraftSequenceEx.ActiveCompanyCraftParts;
+                            foreach (var craftPart in craftParts)
+                            {
+                                if (craftPart.Value?.CompanyCraftType.Value == null) continue;
+                                craftTypes.Add(companyCraftIndex,
+                                    craftPart.Value.CompanyCraftType.Value.Name.AsReadOnly().ToString());
+                                companyCraftIndex++;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (var recipe in recipes)
+                        {
+                            craftTypes[recipe.RowId] = recipe.CraftTypeEx.Value?.FormattedName ?? "Unknown Craft Type";
+                        }
+                    }
+
+                    _craftTypes = craftTypes;
                 }
-                if (ImGui.CollapsingHeader("Company Craft Recipe (" + _craftItem.ChildCrafts.Count + ")"))
+
+                if (_craftTypeId == null && _craftTypes.Count != 0)
                 {
+                    _craftTypeId = _craftTypes.First().Key;
+                }
+                else if(_craftTypeId == null)
+                {
+                    _craftTypeId = 0;
+                }
+
+                string headerName = "Recipes - for crafting this item";   
+                if (ImGui.CollapsingHeader(headerName))
+                {
+                    if (_craftTypes.Count > 1)
+                    {
+                        using (var combo = ImRaii.Combo("Craft Types",
+                                   _craftTypes.GetValueOrDefault(_craftTypeId.Value, "")))
+                        {
+                            if (combo)
+                            {
+                                foreach (var craftType in _craftTypes)
+                                {
+                                    if (ImGui.Selectable(craftType.Value))
+                                    {
+                                        _craftTypeId = craftType.Key;
+                                        _craftItem = null;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (Item.IsCompanyCraft)
+                    {
+                        if (_craftItem == null)
+                        {
+                            var craftList = new CraftList();
+                            craftList.AddCraftItem(Item.RowId, 1, InventoryItem.ItemFlags.None,
+                                _craftTypeId == 0 ? null : _craftTypeId - 1);
+                            craftList.GenerateCraftChildren();
+                            _craftItem = craftList.CraftItems.First();
+                        }
+                    }
+                    else
+                    {
+                        if (_craftItem == null)
+                        {
+                            var craftList = new CraftList();
+                            craftList.AddCraftItem(Item.RowId);
+                            if (_craftTypeId != null)
+                            {
+                                craftList.SetCraftRecipe(Item.RowId, _craftTypeId.Value);
+                            }
+
+                            craftList.GenerateCraftChildren();
+                            _craftItem = craftList.CraftItems.First();
+                        }
+                    }
+                    
                     ImGuiStylePtr style = ImGui.GetStyle();
                     float windowVisibleX2 = ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
                     var index = 0;
-                    foreach(var craftItem in _craftItem.ChildCrafts)
+                    foreach (var craftItem in _craftItem.ChildCrafts)
                     {
                         var item = _excelCache.GetItemExSheet().GetRow(craftItem.ItemId);
                         if (item != null)
@@ -610,10 +697,13 @@ namespace InventoryTools.Ui
                         }
                     }
                 }
+
+
             }
 
             return hasInformation;
         }
+
 
         private bool DrawSharedModels()
         {
@@ -666,7 +756,7 @@ namespace InventoryTools.Ui
             if (RecipesAsRequirement.Length != 0)
             {
                 hasInformation = true;
-                if (ImGui.CollapsingHeader("Recipes (" + RecipesAsRequirement.Length + ")"))
+                if (ImGui.CollapsingHeader("Recipes - Item is a requirement (" + RecipesAsRequirement.Length + ")"))
                 {
                     ImGuiStylePtr style = ImGui.GetStyle();
                     float windowVisibleX2 = ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;

@@ -66,13 +66,15 @@ public class MockGameInterface : IGameInterface
         return null;
     }
 
-    public unsafe void OpenCraftingLog(uint itemId)
+    public bool OpenCraftingLog(uint itemId)
     {
         _pluginLog.Info("Game Event: Crafting Log Opened for Item #" + itemId);
+        return true;
     }
 
-    public unsafe void OpenCraftingLog(uint itemId, uint recipeId)
+    public bool OpenCraftingLog(uint itemId, uint recipeId)
     {
         _pluginLog.Info("Game Event: Crafting Log Opened for Item #" + itemId + " and recipe " + recipeId);
+        return true;
     }
 }
