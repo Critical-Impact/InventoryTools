@@ -36,13 +36,9 @@ public class OutdatedGearColumn : CheckboxColumn
     }
 
 
-    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return CurrentValue(columnConfiguration, item.Item);
-    }
-
-    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-    {
+        var item = searchResult.Item;
         var isOutdated = false;
         var jobClassLevels = GetClassJobLevels();
         
@@ -72,11 +68,6 @@ public class OutdatedGearColumn : CheckboxColumn
         }
 
         return isOutdated;
-    }
-
-    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return CurrentValue(columnConfiguration, item.Item);
     }
 
     public override void InvalidateSearchCache()

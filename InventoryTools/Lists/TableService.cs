@@ -130,13 +130,6 @@ public class TableService : DisposableMediatorBackgroundService
             craftItemTable.NeedsRefresh = false;
             craftItemTable.Refreshing = false;
         }
-        else
-        {
-            craftItemTable.NeedsRefresh = false;
-            craftItemTable.Refreshing = false;
-        }
-        
-
     }
 
     public async Task RefreshTable(FilterTable filterTable, CancellationToken cancellationToken)
