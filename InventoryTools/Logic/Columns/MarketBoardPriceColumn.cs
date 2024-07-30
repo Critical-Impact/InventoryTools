@@ -101,45 +101,50 @@ namespace InventoryTools.Logic.Columns
             {
                 base.DoDraw(item, currentValue, rowIndex, filterConfiguration, columnConfiguration);
             }
-            var activeCharacter = _characterMonitor.ActiveCharacter;
-            if (activeCharacter != null)
+
+            if (ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled))
             {
-                ImGui.SameLine();
-                ImGui.Image(ImGuiService.GetIconTexture(Icons.MarketboardIcon).ImGuiHandle, new Vector2(16, 16));
-                if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
+                var activeCharacter = _characterMonitor.ActiveCharacter;
+                if (activeCharacter != null)
                 {
-                    using (var tooltip = ImRaii.Tooltip())
+                    ImGui.SameLine();
+                    ImGui.Image(ImGuiService.GetIconTexture(Icons.MarketboardIcon).ImGuiHandle, new Vector2(16, 16));
+                    if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
                     {
-                        if (tooltip.Success)
+                        using (var tooltip = ImRaii.Tooltip())
                         {
-                            var selectedWorldId =
-                                MarketboardWorldSetting.SelectedWorldId(columnConfiguration, activeCharacter);
-                            var pricing = _marketCache.GetPricing(item.ItemId, selectedWorldId, false);
-                            if (pricing is { recentHistory: null, listings: null })
+                            if (tooltip.Success)
                             {
-                                ImGui.Text("No data available");
-                            }
-
-                            if (pricing is { listings: not null })
-                            {
-                                ImGui.Text("Listings: ");
-                                ImGui.Separator();
-
-                                foreach (var price in pricing.listings)
+                                var selectedWorldId =
+                                    MarketboardWorldSetting.SelectedWorldId(columnConfiguration, activeCharacter);
+                                var pricing = _marketCache.GetPricing(item.ItemId, selectedWorldId, false);
+                                if (pricing is { recentHistory: null, listings: null })
                                 {
-                                    ImGui.Text(price.quantity + " available at " + price.pricePerUnit +
-                                               (price.hq ? " (HQ)" : ""));
+                                    ImGui.Text("No data available");
                                 }
-                            }
-                            if (pricing is { recentHistory: not null })
-                            {
-                                ImGui.Text("History: ");
-                                ImGui.Separator();
 
-                                foreach (var price in pricing.recentHistory)
+                                if (pricing is { listings: not null })
                                 {
-                                    ImGui.Text(price.quantity + " available at " + price.pricePerUnit +
-                                               (price.hq ? " (HQ)" : ""));
+                                    ImGui.Text("Listings: ");
+                                    ImGui.Separator();
+
+                                    foreach (var price in pricing.listings)
+                                    {
+                                        ImGui.Text(price.quantity + " available at " + price.pricePerUnit +
+                                                   (price.hq ? " (HQ)" : ""));
+                                    }
+                                }
+
+                                if (pricing is { recentHistory: not null })
+                                {
+                                    ImGui.Text("History: ");
+                                    ImGui.Separator();
+
+                                    foreach (var price in pricing.recentHistory)
+                                    {
+                                        ImGui.Text(price.quantity + " available at " + price.pricePerUnit +
+                                                   (price.hq ? " (HQ)" : ""));
+                                    }
                                 }
                             }
                         }
