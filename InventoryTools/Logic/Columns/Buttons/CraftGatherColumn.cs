@@ -133,6 +133,7 @@ namespace InventoryTools.Logic.Columns.Buttons
         {
             ImGui.TableNextColumn();
             if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;
+            
             var messages = new List<MessageBase>();
             if (CurrentValue(columnConfiguration, searchResult) == true)
             {

@@ -20,18 +20,8 @@ public class IsFromFateColumn : CheckboxColumn
     public override bool HasFilter { get; set; } = true;
     public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Boolean;
 
-    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return CurrentValue(columnConfiguration, item.Item);
-    }
-
-    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-    {
-        return item.FateItems.Count != 0;
-    }
-
-    public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return CurrentValue(columnConfiguration, item.Item);
+        return searchResult.Item.FateItems.Count != 0;
     }
 }
