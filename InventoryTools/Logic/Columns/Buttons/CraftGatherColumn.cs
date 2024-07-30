@@ -151,21 +151,13 @@ namespace InventoryTools.Logic.Columns.Buttons
                 bool hasGather;
                 if (item.IngredientPreference.Type is IngredientPreferenceType.Buy or IngredientPreferenceType.HouseVendor)
                 {
-                    hasVendors = DrawVendorButton(item, rowIndex, messages);
-                    if (hasVendors)
-                    {
-                        ImGui.SameLine();
-                    }
-                    hasGather = DrawGatherButtons(item, rowIndex);
+                    hasVendors = DrawVendorButton(item, rowIndex, messages, false);
+                    hasGather = DrawGatherButtons(item, rowIndex, hasVendors);
                 }
                 else
                 {
-                    hasGather = DrawGatherButtons(item, rowIndex);
-                    if (hasGather)
-                    {
-                        ImGui.SameLine();
-                    }
-                    hasVendors = DrawVendorButton(item, rowIndex, messages);
+                    hasGather = DrawGatherButtons(item, rowIndex, false);
+                    hasVendors = DrawVendorButton(item, rowIndex, messages, hasGather);
                 }
 
                 if (item.UpTime != null)
@@ -201,10 +193,14 @@ namespace InventoryTools.Logic.Columns.Buttons
             return messages;
         }
 
-        private bool DrawGatherButtons(CraftItem item, int rowIndex)
+        private bool DrawGatherButtons(CraftItem item, int rowIndex, bool needsSameLine)
         {
             if (item.Item.ObtainedGathering)
             {
+                if (needsSameLine)
+                {
+                    ImGui.SameLine();
+                }
                 if (ImGui.Button("Gather##Gather" + rowIndex))
                 {
                     Service.Commands.ProcessCommand("/gather " + item.Name);
@@ -214,6 +210,10 @@ namespace InventoryTools.Logic.Columns.Buttons
             }
             else if (item.Item.ObtainedFishing)
             {
+                if (needsSameLine)
+                {
+                    ImGui.SameLine();
+                }
                 if (ImGui.Button("Gather##Gather" + rowIndex))
                 {
                     Service.Commands.ProcessCommand("/gatherfish " + item.Name);
@@ -224,10 +224,14 @@ namespace InventoryTools.Logic.Columns.Buttons
             return false;
         }
 
-        private bool DrawVendorButton(CraftItem item, int rowIndex, List<MessageBase> messages)
+        private bool DrawVendorButton(CraftItem item, int rowIndex, List<MessageBase> messages, bool needsSameLine)
         {
             if (item.Item.Vendors.Any())
             {
+                if (needsSameLine)
+                {
+                    ImGui.SameLine();
+                }
                 ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 0.0f);
                 if (ImGui.Button("Buy##Buy" + rowIndex))
                 {
