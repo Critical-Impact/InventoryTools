@@ -131,4 +131,18 @@ public class ListImportExportService
         
         return string.Join(Environment.NewLine, lines);
     }
+    
+    public string ToTCString(List<CuratedItem> curatedItems)
+    {
+        List<string> lines = new();
+        lines.Add("Items :");
+        foreach (var curatedItem in curatedItems)
+        {
+            var item = _excelCache.GetItemExSheet().GetRow(curatedItem.ItemId);
+            if (item == null) continue;
+            lines.Add($"{curatedItem.Quantity}x {item.Name} {(curatedItem.ItemFlags == InventoryItem.ItemFlags.HighQuality ? " (HQ)" : "")}");
+        }
+        
+        return string.Join(Environment.NewLine, lines);
+    }
 }

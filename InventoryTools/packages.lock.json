@@ -29,12 +29,12 @@
       },
       "DalaMock.Host": {
         "type": "Direct",
-        "requested": "[2.0.21, )",
-        "resolved": "2.0.21",
-        "contentHash": "9uGfG0Gs9st3fEKmdMt19aGbrsGbewRjoC8OREAv8+YA7mzOJ8vgdqS+H5F3BdbHwsh8atbeJOBs2TnLXOrMdQ==",
+        "requested": "[2.0.22, )",
+        "resolved": "2.0.22",
+        "contentHash": "NRaRVAEthkyFHjcjD7z8YJVdZyMiFFTJby9PWWW24+9MpSBZpMT8HgTLhMF7DU67M8MNjS5kFe++h4IOfj7owQ==",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "9.0.0",
-          "DalaMock.Shared": "2.0.21",
+          "DalaMock.Shared": "2.0.22",
           "Microsoft.Extensions.Hosting": "8.0.0",
           "Microsoft.Extensions.Hosting.Abstractions": "8.0.0",
           "Microsoft.Extensions.ObjectPool": "9.0.0-preview.6.24328.4",
@@ -125,8 +125,8 @@
       },
       "DalaMock.Shared": {
         "type": "Transitive",
-        "resolved": "2.0.21",
-        "contentHash": "nGniim1RWmkGP/9Rz3O6r0YEQFCU+htlTPlhBLW2ncl6Elfe/WxQnYbB2VaDNJoWOta9LSQEoX/l5tDDYdPXtA==",
+        "resolved": "2.0.22",
+        "contentHash": "inThzXaa7oLBfcRwshboHWUbvWlIjBV6ju0LbyMjLtUPqOCSC2jCXgwluwIjbq08dR/ZO8Ecu7wb3TQC4vvIlg==",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "9.0.0",
           "Microsoft.Extensions.Hosting": "8.0.0",
