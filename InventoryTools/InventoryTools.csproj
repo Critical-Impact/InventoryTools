@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <Import Project="Dalamud.Plugin.Bootstrap.targets"/>
-    
+
     <PropertyGroup>
         <LangVersion>12</LangVersion>
         <Version>1.7.0.20</Version>
@@ -21,7 +21,7 @@
     <PropertyGroup>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     </PropertyGroup>
-    
+
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
       <PlatformTarget>x64</PlatformTarget>
     </PropertyGroup>
