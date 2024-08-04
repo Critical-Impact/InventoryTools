@@ -200,11 +200,7 @@ namespace InventoryTools.Logic.Columns.Abstract
             {
                 if (currentValue != null)
                 {
-                    var columnWidth = ImGui.GetColumnWidth();
-                    var frameHeight = filterConfiguration.TableHeight / 2.0f;
-                    var calcText = ImGui.CalcTextSize(currentValue);
-                    var textHeight = calcText.X >= columnWidth ? 0 : calcText.Y / 2.0f;
-                    ImGui.SetCursorPosY(ImGui.GetCursorPosY() + frameHeight - textHeight);
+                    ImGui.AlignTextToFramePadding();
                     ImGui.TextUnformatted(currentValue);
                 }
                 else

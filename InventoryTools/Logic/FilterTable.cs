@@ -161,9 +161,9 @@ namespace InventoryTools.Logic
                                         {
                                             messages.AddRange(columnMessages);
                                         }
-                                        ImGui.SameLine();
                                         if (columnIndex == 0)
                                         {
+                                            ImGui.SameLine();
                                             var menuMessages = DrawMenu(FilterConfiguration, column,
                                                 item,
                                                 index);

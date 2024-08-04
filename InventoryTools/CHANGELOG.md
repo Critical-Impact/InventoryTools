@@ -13,6 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [1.7.0.20] - 2024-08-04
+
+### Fixed
+
+- Expand the inventory scanner to cover missing currency types
+- Fix alignment issue with lists
+
 ## [1.7.0.19] - 2024-07-30
 
 ### Added
