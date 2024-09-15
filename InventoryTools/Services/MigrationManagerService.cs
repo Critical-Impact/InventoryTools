@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Threading;
@@ -6,6 +8,7 @@ using System.Threading.Tasks;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Colors;
+using Dalamud.Plugin;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Columns;
 using InventoryTools.Logic.Columns.Buttons;
@@ -26,8 +29,9 @@ public class MigrationManagerService : IHostedService
     private readonly IFilterService _filterService;
     private readonly IServiceProvider _serviceProvider;
     private readonly IListService _listService;
+    private readonly IDalamudPluginInterface _pluginInterfaceService;
 
-    public MigrationManagerService(ILogger<MigrationManagerService> logger, InventoryToolsConfiguration configuration, IMarketCache marketCache, IFilterService filterService, IServiceProvider serviceProvider, IListService listService)
+    public MigrationManagerService(ILogger<MigrationManagerService> logger, InventoryToolsConfiguration configuration, IMarketCache marketCache, IFilterService filterService, IServiceProvider serviceProvider, IListService listService, IDalamudPluginInterface pluginInterfaceService)
     {
         _logger = logger;
         _configuration = configuration;
@@ -35,6 +39,7 @@ public class MigrationManagerService : IHostedService
         _filterService = filterService;
         _serviceProvider = serviceProvider;
         _listService = listService;
+        _pluginInterfaceService = pluginInterfaceService;
     }
 
     public void RunMigrations()
@@ -287,8 +292,39 @@ public class MigrationManagerService : IHostedService
 
             config.InternalVersion++;
         }
-    }
+        if (config.InternalVersion == 17)
+        {
+            _logger.LogInformation("Migrating to version 18");
+            AddStain2ToInventories();
 
+            config.InternalVersion++;
+        }
+    }
+    private void AddStain2ToInventories()
+    {
+        string inputFile  = Path.Join(_pluginInterfaceService.ConfigDirectory.FullName, "inventories.csv");
+        string outputFile = Path.Join(_pluginInterfaceService.ConfigDirectory.FullName, "inventories_migration.csv");
+
+        using (var reader = new StreamReader(inputFile))
+        using (var writer = new StreamWriter(outputFile))
+        {
+            while (!reader.EndOfStream)
+            {
+                var line = reader.ReadLine();
+                if (string.IsNullOrWhiteSpace(line)) continue;
+
+                var values = new List<string>(line.Split(','));
+
+                // Insert a new column at position 18
+                values.Insert(18, "0");
+
+                var newLine = string.Join(",", values);
+                writer.WriteLine(newLine);
+            }
+        }
+        File.Move(inputFile, Path.Join(_pluginInterfaceService.ConfigDirectory.FullName, "inventories_BACKUP_VERSION_17.csv"));
+        File.Move(outputFile, inputFile);
+    }
     public Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogTrace("Starting service {type} ({this})", GetType().Name, this);
