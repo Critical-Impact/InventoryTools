@@ -16,7 +16,7 @@ public class IsGCSupplyItemFilter : BooleanFilter
     public override string Name { get; set; } = "Is GC Turn-in item?";
     public override string HelpText { get; set; } = "Is this item used for grand company supply missions?";
     public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
-    public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.CraftFilter | FilterType.HistoryFilter;
+    public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter;
     public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
     {
         return FilterItem(configuration, item.Item);

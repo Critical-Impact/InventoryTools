@@ -51,7 +51,7 @@ public class RightClickService
                 c.FilterType == Logic.FilterType.CraftFilter && !c.CraftListDefault).ToArray();
         foreach (var filter in craftFilters)
         {
-            if (item.CanBeCrafted && !_excelCache.IsCompanyCraft(item.RowId))
+            if (!_excelCache.IsCompanyCraft(item.RowId))
             {
                 if (firstItem)
                 {
@@ -66,7 +66,7 @@ public class RightClickService
                     filter.NeedsRefresh = true;
                 }
             }
-            if (item.CanBeCrafted && _excelCache.IsCompanyCraft(item.RowId))
+            if (_excelCache.IsCompanyCraft(item.RowId))
             {
                 if (item.CompanyCraftSequenceEx != null)
                 {
@@ -93,7 +93,7 @@ public class RightClickService
             }
         }
 
-        if (item.CanBeCrafted && !_excelCache.IsCompanyCraft(item.RowId))
+        if (!_excelCache.IsCompanyCraft(item.RowId))
         {
             if (ImGui.Selectable("Add to new craft list"))
             {
@@ -113,7 +113,7 @@ public class RightClickService
             }
         }
 
-        if (item.CanBeCrafted && _excelCache.IsCompanyCraft(item.RowId))
+        if ( _excelCache.IsCompanyCraft(item.RowId))
         {
             if (item.CompanyCraftSequenceEx != null)
             {
