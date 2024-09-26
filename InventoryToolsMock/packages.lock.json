@@ -4,20 +4,21 @@
     "net8.0-windows7.0": {
       "DalaMock.Core": {
         "type": "Direct",
-        "requested": "[2.0.23, )",
-        "resolved": "2.0.23",
-        "contentHash": "CBJ5OGNhV0sF+cD1BCGOGKzfWVlJdL56hJtScqzUEsqGyoAMk8NpoC4c4qTQM8wx14dcF5ky3NDbjFYxa372HQ==",
+        "requested": "[2.0.26, )",
+        "resolved": "2.0.26",
+        "contentHash": "/NAJYCVdP7obuDcOfZmNm3GylYgVrdEu8gqqBYgR6lpwUgUfRJmncz/i2E9fhVDR5MgGygrNr21NQUpPOwA5eQ==",
         "dependencies": {
           "Autofac": "8.0.0",
-          "DalaMock.Shared": "2.0.23",
+          "DalaMock.Shared": "2.0.26",
           "Microsoft.Extensions.Configuration": "8.0.0",
           "Microsoft.Extensions.Hosting": "8.0.0",
           "Microsoft.Extensions.Hosting.Abstractions": "8.0.0",
           "Microsoft.Extensions.ObjectPool": "9.0.0-preview.6.24328.4",
           "NativeFileDialogSharp": "0.5.0",
-          "Serilog": "2.11.0",
+          "Serilog": "4.0.1",
+          "Serilog.Extensions.Logging": "8.0.0",
           "Serilog.Sinks.Async": "1.5.0",
-          "Serilog.Sinks.Console": "4.0.1",
+          "Serilog.Sinks.Console": "6.0.0",
           "Serilog.Sinks.File": "5.0.0",
           "System.Collections.Immutable": "7.0.0",
           "Veldrid": "4.9.0",
@@ -108,35 +109,35 @@
       },
       "Serilog": {
         "type": "Direct",
-        "requested": "[2.11.0, )",
-        "resolved": "2.11.0",
-        "contentHash": "ysv+hBzTul6Dp+Hvm10FlhJO3yMQcFKSAleus+LpiIzvNstpeV4Z7gGuIZ1OPNfIMulSHOjmLuGAEDKzpnV8ZQ=="
+        "requested": "[4.0.1, )",
+        "resolved": "4.0.1",
+        "contentHash": "pzeDRXdpSLSsgBHpZcmpIDxqMy845Ab4s+dfnBg0sN9h8q/4Wo3vAoe0QCGPze1Q06EVtEPupS+UvLm8iXQmTQ=="
       },
       "Serilog.Sinks.Async": {
         "type": "Direct",
-        "requested": "[1.5.0, )",
-        "resolved": "1.5.0",
-        "contentHash": "csHYIqAwI4Gy9oAhXYRwxGrQEAtBg3Ep7WaCzsnA1cZuBZjVAU0n7hWaJhItjO7hbLHh/9gRVxALCUB4Dv+gZw==",
+        "requested": "[2.0.0, )",
+        "resolved": "2.0.0",
+        "contentHash": "a+kTyUUxPAOZWKJiNbDqCPMiP0BWBWzObyTpRmGLrgCecgc/YJ+HqYGjsQoS6Sj9cRVXB9hH5O1mTZ0DiewG2w==",
         "dependencies": {
-          "Serilog": "2.9.0"
+          "Serilog": "4.0.0"
         }
       },
       "Serilog.Sinks.Console": {
         "type": "Direct",
-        "requested": "[4.0.1, )",
-        "resolved": "4.0.1",
-        "contentHash": "apLOvSJQLlIbKlbx+Y2UDHSP05kJsV7mou+fvJoRGs/iR+jC22r8cuFVMjjfVxz/AD4B2UCltFhE1naRLXwKNw==",
+        "requested": "[6.0.0, )",
+        "resolved": "6.0.0",
+        "contentHash": "fQGWqVMClCP2yEyTXPIinSr5c+CBGUvBybPxjAGcf7ctDhadFhrQw03Mv8rJ07/wR5PDfFjewf2LimvXCDzpbA==",
         "dependencies": {
-          "Serilog": "2.10.0"
+          "Serilog": "4.0.0"
         }
       },
       "Serilog.Sinks.File": {
         "type": "Direct",
-        "requested": "[5.0.0, )",
-        "resolved": "5.0.0",
-        "contentHash": "uwV5hdhWPwUH1szhO8PJpFiahqXmzPzJT/sOijH/kFgUx+cyoDTMM8MHD0adw9+Iem6itoibbUXHYslzXsLEAg==",
+        "requested": "[6.0.0, )",
+        "resolved": "6.0.0",
+        "contentHash": "lxjg89Y8gJMmFxVkbZ+qDgjl+T4yC5F7WSLTvA+5q0R04tfKVLRL/EHpYoJ/MEQd2EeCKDuylBIVnAYMotmh2A==",
         "dependencies": {
-          "Serilog": "2.10.0"
+          "Serilog": "4.0.0"
         }
       },
       "StbiSharp": {
@@ -209,11 +210,11 @@
       },
       "DalaMock.Host": {
         "type": "Transitive",
-        "resolved": "2.0.23",
-        "contentHash": "4mjZJoyZDLhpgI1LA0YzT9k+iHfMj1LVS3/bNQpQxSrG5Fic3BE9bMag1tYTTEqoPZXBj5tDjLzg/jhQV7QBNg==",
+        "resolved": "2.0.26",
+        "contentHash": "cfR5TCVwbDTXuoAgZAnGSAaq4hqueTegS9WnKnjyEKxrJXETVxil+h1gQXhSv+TNDYuaGacv7z4rjCpE7u5Tpw==",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "9.0.0",
-          "DalaMock.Shared": "2.0.23",
+          "DalaMock.Shared": "2.0.26",
           "Microsoft.Extensions.Hosting": "8.0.0",
           "Microsoft.Extensions.Hosting.Abstractions": "8.0.0",
           "Microsoft.Extensions.ObjectPool": "9.0.0-preview.6.24328.4",
@@ -225,8 +226,8 @@
       },
       "DalaMock.Shared": {
         "type": "Transitive",
-        "resolved": "2.0.23",
-        "contentHash": "K86IyEfbgf8aQrgxC4mpml4WLW6LoDhha2Eb1cxigmkcFBgZN6QaCFAmWeH5GnpZgm82IyEkUsleqPkLeahDtQ==",
+        "resolved": "2.0.26",
+        "contentHash": "Vnh3UZNDW6a41AtW6H0RjyiVBdWKLGVVhWwPMQE19rzSMfl+jQite94vlZJ87cS+JbUoap2wX12S4tzjeT883A==",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "9.0.0",
           "Microsoft.Extensions.Hosting": "8.0.0",
@@ -636,6 +637,15 @@
         "resolved": "2.1.0",
         "contentHash": "rmQcrFXgcrqT9M6+xdxAK/JWx1vFuCRT8fTdce4ALdze2/8N5yMRW9Vmkresw+JpL+JC8zuC1HfDkrfVgBUIqA=="
       },
+      "Serilog.Extensions.Logging": {
+        "type": "Transitive",
+        "resolved": "8.0.0",
+        "contentHash": "YEAMWu1UnWgf1c1KP85l1SgXGfiVo0Rz6x08pCiPOIBt2Qe18tcZLvdBUuV5o1QHvrs8FAry9wTIhgBRtjIlEg==",
+        "dependencies": {
+          "Microsoft.Extensions.Logging": "8.0.0",
+          "Serilog": "3.1.1"
+        }
+      },
       "SharpGen.Runtime": {
         "type": "Transitive",
         "resolved": "2.0.0-beta.13",
@@ -811,7 +821,7 @@
           "Autofac.Extensions.DependencyInjection": "[9.0.0, )",
           "CriticalCommonLib": "[1.0.0, )",
           "CsvHelper": "[30.0.1, )",
-          "DalaMock.Host": "[2.0.23, )",
+          "DalaMock.Host": "[2.0.26, )",
           "DalamudPackager": "[2.1.13, )",
           "Humanizer.Core": "[2.14.1, )",
           "Microsoft.AspNetCore.SignalR.Client": "[7.0.11, )",

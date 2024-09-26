@@ -46,7 +46,7 @@ public class TableService : DisposableMediatorBackgroundService
 
     private void ListRefreshed(FilterConfiguration configuration)
     {
-        InvalidateTables(configuration);
+        RefreshTables(configuration);
     }
 
     private void OnUpdate(IFramework framework)
@@ -261,6 +261,20 @@ public class TableService : DisposableMediatorBackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await BackgroundProcessing(stoppingToken);
+    }
+
+    public void RefreshTables(FilterConfiguration filterConfiguration)
+    {
+        var filterTable = GetListTable(filterConfiguration);
+        if (filterTable is { FilterConfiguration.AllowRefresh: true })
+        {
+            filterTable.NeedsRefresh = true;
+            if (filterConfiguration.FilterType == FilterType.CraftFilter)
+            {
+                var craftItemTable = GetCraftTable(filterConfiguration);
+                craftItemTable.NeedsRefresh = true;
+            }
+        }
     }
 
     public void InvalidateTables(FilterConfiguration filterConfiguration)

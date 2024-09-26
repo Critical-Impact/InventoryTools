@@ -18,8 +18,7 @@ public class FromCalamitySalvagerFilter : BooleanFilter
     public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
 
     public override FilterType AvailableIn { get; set; } =
-        FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter |
-        FilterType.CraftFilter;
+        FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter;
     public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
     {
         return FilterItem(configuration, item.Item);
