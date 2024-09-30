@@ -961,19 +961,22 @@ namespace InventoryTools.Logic
             {
                 return null;
             }
-            
+
             return new FilteredItem(item, requiredAmount);
         }
 
         public ColumnConfiguration? GetColumn(string columnKey)
         {
             var columns = _columns;
-            if (columns == null)
-            {
-                return null;
-            }
 
-            return columns.FirstOrDefault(c => c?.Key == columnKey, null);
+            return columns?.FirstOrDefault(c => c?.Key == columnKey, null);
+        }
+
+        public ColumnConfiguration? GetCraftColumn(string columnKey)
+        {
+            var columns = _craftColumns;
+
+            return columns?.FirstOrDefault(c => c?.Key == columnKey, null);
         }
 
         public void AddColumn(ColumnConfiguration column, bool notify = true)

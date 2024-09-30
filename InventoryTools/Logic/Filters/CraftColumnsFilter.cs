@@ -309,7 +309,7 @@ namespace InventoryTools.Logic.Filters
                         {
                             if (_editMode)
                             {
-                                var columnConfiguration = configuration.GetColumn(_selectedColumnKey);
+                                var columnConfiguration = configuration.GetCraftColumn(_selectedColumnKey);
                                 if (columnConfiguration != null)
                                 {
                                     columnConfiguration.Name = _customName == "" ? null : _customName;

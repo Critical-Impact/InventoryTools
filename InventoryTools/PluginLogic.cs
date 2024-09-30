@@ -418,11 +418,6 @@ namespace InventoryTools
             _craftMonitor.CraftCompleted += CraftMonitorOnCraftCompleted ;
             _gameInterface.AcquiredItemsUpdated += GameInterfaceOnAcquiredItemsUpdated;
 
-            foreach (var hotkey in hotkeys)
-            {
-                _hotkeyService.AddHotkey(hotkey);
-            }
-
             foreach (var tooltip in tooltips.OrderBy(c => c.Order))
             {
                 _tooltipService.AddTooltipTweak(tooltip);
