@@ -33,24 +33,13 @@ namespace InventoryTools.Logic.Columns.Buttons
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Buttons;
 
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return CurrentValue(columnConfiguration, item.Item);
-        }
-
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            return item.CanBeGathered || item.ObtainedFishing;
-        }
-
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
-        public override bool? CurrentValue(ColumnConfiguration columnConfiguration, CraftItem currentValue)
-        {
-            return true;
+            if (searchResult.CraftItem != null)
+            {
+                return true;
+            }
+            return searchResult.Item.CanBeGathered || searchResult.Item.ObtainedFishing;
         }
 
         List<(IShop shop, ENpc? npc, ILocation? location)> GetLocations(ItemEx item)
@@ -140,33 +129,35 @@ namespace InventoryTools.Logic.Columns.Buttons
 
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            CraftItem item, int rowIndex, int columnIndex)
+            SearchResult searchResult, int rowIndex, int columnIndex)
         {
             ImGui.TableNextColumn();
             if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;
+            
             var messages = new List<MessageBase>();
-            if (CurrentValue(columnConfiguration, item) == true)
+            if (CurrentValue(columnConfiguration, searchResult) == true)
             {
                 bool hasVendors;
                 bool hasGather;
-                if (item.IngredientPreference.Type is IngredientPreferenceType.Buy or IngredientPreferenceType.HouseVendor)
+                if (searchResult.CraftItem != null && searchResult.CraftItem.IngredientPreference.Type is IngredientPreferenceType.Buy or IngredientPreferenceType.HouseVendor)
                 {
-                    hasVendors = DrawVendorButton(item, rowIndex, messages, false);
-                    hasGather = DrawGatherButtons(item, rowIndex, hasVendors);
+                    hasVendors = DrawVendorButton(searchResult, rowIndex, messages, false);
+                    hasGather = DrawGatherButtons(searchResult, rowIndex, hasVendors);
                 }
                 else
                 {
-                    hasGather = DrawGatherButtons(item, rowIndex, false);
-                    hasVendors = DrawVendorButton(item, rowIndex, messages, hasGather);
+                    hasGather = DrawGatherButtons(searchResult, rowIndex, false);
+                    hasVendors = DrawVendorButton(searchResult, rowIndex, messages, hasGather);
                 }
 
-                if (item.UpTime != null)
+                var gatheringUptime = searchResult.Item.GetGatheringUptime();
+                if (gatheringUptime != null)
                 {
                     if (hasGather || hasVendors)
                     {
                         ImGui.SameLine();
                     }
-                    var nextUptime = item.UpTime.Value.NextUptime(_seTime.ServerTime);
+                    var nextUptime = gatheringUptime.Value.NextUptime(_seTime.ServerTime);
                     if (nextUptime.Equals(TimeInterval.Always)
                         || nextUptime.Equals(TimeInterval.Invalid)
                         || nextUptime.Equals(TimeInterval.Never)) return null;
@@ -193,9 +184,9 @@ namespace InventoryTools.Logic.Columns.Buttons
             return messages;
         }
 
-        private bool DrawGatherButtons(CraftItem item, int rowIndex, bool needsSameLine)
+        private bool DrawGatherButtons(SearchResult searchResult, int rowIndex, bool needsSameLine)
         {
-            if (item.Item.ObtainedGathering)
+            if (searchResult.Item.ObtainedGathering)
             {
                 if (needsSameLine)
                 {
@@ -203,12 +194,12 @@ namespace InventoryTools.Logic.Columns.Buttons
                 }
                 if (ImGui.Button("Gather##Gather" + rowIndex))
                 {
-                    Service.Commands.ProcessCommand("/gather " + item.Name);
+                    Service.Commands.ProcessCommand("/gather " + searchResult.Item.Name);
                 }
 
                 return true;
             }
-            else if (item.Item.ObtainedFishing)
+            else if (searchResult.Item.ObtainedFishing)
             {
                 if (needsSameLine)
                 {
@@ -216,7 +207,7 @@ namespace InventoryTools.Logic.Columns.Buttons
                 }
                 if (ImGui.Button("Gather##Gather" + rowIndex))
                 {
-                    Service.Commands.ProcessCommand("/gatherfish " + item.Name);
+                    Service.Commands.ProcessCommand("/gatherfish " + searchResult.Item.Name);
                 }
                 return true;
             }
@@ -224,7 +215,7 @@ namespace InventoryTools.Logic.Columns.Buttons
             return false;
         }
 
-        private bool DrawVendorButton(CraftItem item, int rowIndex, List<MessageBase> messages, bool needsSameLine)
+        private bool DrawVendorButton(SearchResult item, int rowIndex, List<MessageBase> messages, bool needsSameLine)
         {
             if (item.Item.Vendors.Any())
             {
@@ -235,7 +226,8 @@ namespace InventoryTools.Logic.Columns.Buttons
                 ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 0.0f);
                 if (ImGui.Button("Buy##Buy" + rowIndex))
                 {
-                    int mapId = item.MapId == null ? -1 : (int) item.MapId;
+                    uint? umapId = item.CraftItem?.MapId ?? null;
+                    int mapId = umapId == null ? -1 : (int)umapId;
                     var vendor = GetLocations(item.Item).OrderBy(c => (c.location?.MapEx.Row ?? 0) == mapId ? 0 : 1).FirstOrDefault();
                     if (vendor.location != null)
                     {
@@ -245,7 +237,19 @@ namespace InventoryTools.Logic.Columns.Buttons
                             messages.Add(new RequestTeleportMessage(nearestAetheryte.RowId));
                         }
 
-                        _chatUtilities.PrintFullMapLink(vendor.location, vendor.location + " - Buy " + item.QuantityMissingOverall + " " + item.Item.NameString);
+                        var npcName = vendor.npc?.Resident?.Singular.AsReadOnly().ToString() ?? null;
+
+                        List<string?> stringParts = new()
+                        {
+                            vendor.location + " - Buy ",
+                            item.CraftItem?.QuantityMissingOverall.ToString() ?? null,
+                            item.Item.NameString,
+                            npcName != null ? $" from {npcName}" : null
+                        };
+
+                        var mapLinkText = String.Join("", stringParts.Where(c => c != null).Select(c => c!).ToList());
+                        
+                        _chatUtilities.PrintFullMapLink(vendor.location, mapLinkText);
                     }
                     else
                     {
@@ -283,60 +287,6 @@ namespace InventoryTools.Logic.Columns.Buttons
             }
 
             return false;
-        }
-
-        public override List<MessageBase>? Draw(FilterConfiguration configuration,
-            ColumnConfiguration columnConfiguration,
-            InventoryItem item, int rowIndex, int columnIndex)
-        {
-            ImGui.TableNextColumn();
-            if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;
-            
-            if (CurrentValue(columnConfiguration, item) == true)
-            {
-                if (item.Item.ObtainedGathering)
-                {
-                    if (ImGui.SmallButton("Gather##Gather" + rowIndex))
-                    {
-                        Service.Commands.ProcessCommand("/gather " + item.Item.NameString);
-                    }
-                }
-                else if (item.Item.ObtainedFishing)
-                {
-                    if (ImGui.SmallButton("Gather##Gather" + rowIndex))
-                    {
-                        Service.Commands.ProcessCommand("/gatherfish " + item.Item.NameString);
-                    }
-                }
-            }
-            return null;
-        }
-
-        public override List<MessageBase>? Draw(FilterConfiguration configuration,
-            ColumnConfiguration columnConfiguration,
-            ItemEx item, int rowIndex, int columnIndex)
-        {
-            ImGui.TableNextColumn();
-            if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;
-            
-            if (CurrentValue(columnConfiguration, item) == true)
-            {
-                if (item.ObtainedGathering)
-                {
-                    if (ImGui.SmallButton("Gather##Gather" + rowIndex))
-                    {
-                        Service.Commands.ProcessCommand("/gather " + item.NameString);
-                    }
-                }
-                else if (item.ObtainedFishing)
-                {
-                    if (ImGui.SmallButton("Gather##Gather" + rowIndex))
-                    {
-                        Service.Commands.ProcessCommand("/gatherfish " + item.NameString);
-                    }
-                }
-            }
-            return null;
         }
 
         public override string RenderName { get; } = "Gather/Purchase";

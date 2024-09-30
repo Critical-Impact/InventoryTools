@@ -22,8 +22,8 @@ namespace InventoryTools.Logic
         
         public Vector2? DestinationSlot => _destinationSlot;
         public bool? IsEmptyDestinationSlot => _isEmptyDestinationSlot;
-
         public int Quantity => _quantity;
+        public bool IsSortable => _isSortable;
 
         private ulong? _destinationRetainerId;
         private InventoryType _sourceBag;
@@ -32,6 +32,7 @@ namespace InventoryTools.Logic
         private Vector2? _destinationSlot;
         private bool? _isEmptyDestinationSlot;
         private int _quantity;
+        private bool _isSortable;
 
         public SortingResult(ulong sourceRetainerId, ulong destinationRetainerId, InventoryType sourceBag, InventoryType destinationBag, Vector2 destinationSlot, bool isEmptyDestinationSlot, InventoryItem inventoryItem, int quantity)
         {
@@ -43,9 +44,10 @@ namespace InventoryTools.Logic
             _inventoryItem = inventoryItem;
             _quantity = quantity;
             _isEmptyDestinationSlot = isEmptyDestinationSlot;
+            _isSortable = true;
         }
 
-        public SortingResult(ulong sourceRetainerId, InventoryType sourceBag, InventoryItem inventoryItem, int quantity)
+        public SortingResult(ulong sourceRetainerId, InventoryType sourceBag, InventoryItem inventoryItem, int quantity, bool isSortable = true)
         {
             _sourceRetainerId = sourceRetainerId;
             _sourceBag = sourceBag;
@@ -55,6 +57,7 @@ namespace InventoryTools.Logic
             _destinationRetainerId = null;
             _destinationSlot = null;
             _isEmptyDestinationSlot = null;
+            _isSortable = isSortable;
         }
         
         public Vector2 BagLocation => InventoryItem.BagLocation(_sourceBag);

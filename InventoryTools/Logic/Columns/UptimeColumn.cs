@@ -29,7 +29,7 @@ public class UptimeColumn : TimeIntervalColumn
     public override bool HasFilter { get; set; } = false;
     public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
 
-    public override List<MessageBase>? DoDraw(IItem item, TimeInterval? currentValue, int rowIndex, FilterConfiguration filterConfiguration,
+    public override List<MessageBase>? DoDraw(SearchResult searchResult, TimeInterval? currentValue, int rowIndex, FilterConfiguration filterConfiguration,
         ColumnConfiguration columnConfiguration)
     {
         ImGui.TableNextColumn();
@@ -62,14 +62,9 @@ public class UptimeColumn : TimeIntervalColumn
         return null;
     }
 
-    public override TimeInterval? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+    public override TimeInterval? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return CurrentValue(columnConfiguration, item.Item);
-    }
-
-    public override TimeInterval? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-    {
-        var gatheringUptime = item.GetGatheringUptime();
+        var gatheringUptime = searchResult.Item.GetGatheringUptime();
         if (gatheringUptime != null)
         {
             var nextUptime = gatheringUptime.Value.NextUptime(seTime.ServerTime);
@@ -80,10 +75,5 @@ public class UptimeColumn : TimeIntervalColumn
         }
 
         return null;
-    }
-
-    public override TimeInterval? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return CurrentValue(columnConfiguration, item.InventoryItem);
     }
 }

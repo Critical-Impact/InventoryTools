@@ -14,29 +14,19 @@ public class HistoryChangeDateColumn : DateTimeColumn
     {
     }
     public override ColumnCategory ColumnCategory => ColumnCategory.History;
-    public override DateTime? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+    public override DateTime? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return null;
-    }
+        if (searchResult.InventoryChange != null)
+        {
+            return searchResult.InventoryChange.ChangeDate;
+        }
 
-    public override DateTime? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-    {
         return null;
-    }
-
-    public override DateTime? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return null;
-    }
-
-    public override DateTime? CurrentValue(ColumnConfiguration columnConfiguration, InventoryChange currentValue)
-    {
-        return currentValue.ChangeDate;
     }
     
-    public override string CsvExport(ColumnConfiguration columnConfiguration, InventoryChange item)
+    public override string CsvExport(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return CurrentValue(columnConfiguration, item)?.ToString(CultureInfo.InvariantCulture) ?? "";
+        return CurrentValue(columnConfiguration, searchResult)?.ToString(CultureInfo.InvariantCulture) ?? "";
     }
 
     public override string Name { get; set; } = "History Event Date/Time";

@@ -12,21 +12,11 @@ public class VentureTypeColumn : TextColumn
     {
     }
     public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
-    {
-        return CurrentValue(columnConfiguration, item.Item);
-    }
 
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
+    public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return item.RetainerTaskNames;
+        return searchResult.Item.RetainerTaskNames;
     }
-
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return CurrentValue(columnConfiguration, item.InventoryItem);
-    }
-
     public override string Name { get; set; } = "Venture Type";
     public override float Width { get; set; } = 100;
     public override string HelpText { get; set; } = "The type of ventures that the item can be acquired from";

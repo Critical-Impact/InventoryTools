@@ -12,7 +12,6 @@ namespace InventoryTools.Logic.Filters
         public override string Name { get; set; } = "Is Part of Gearset?";
         public override string HelpText { get; set; } = "Is the item a part of a gearset?";
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
-        public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter;
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
             var currentValue = CurrentValue(configuration);

@@ -17,21 +17,10 @@ namespace InventoryTools.Logic.Columns
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Tools;
 
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return _pluginLogic.GetLastSeenTime(item.ItemId)?.ToHumanReadableString() ?? "";
+            return _pluginLogic.GetLastSeenTime(searchResult.Item.ItemId)?.ToHumanReadableString() ?? "";
         }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            return _pluginLogic.GetLastSeenTime(item.RowId)?.ToHumanReadableString() ?? "";
-        }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
         public override string Name { get; set; } = "Last Seen Date/Time";
         public override string RenderName => "Last Seen";
         public override float Width { get; set; } = 100;

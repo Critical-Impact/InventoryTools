@@ -51,7 +51,9 @@ namespace InventoryTools.Logic
             }
         }
 
-        public List<CraftItem> CraftItems = new();
+        public List<SearchResult> CraftItems = new();
+
+        public List<(CraftGrouping craftGrouping, List<SearchResult> searchResults)> CraftGroups = new();
 
         public override List<MessageBase> Draw(Vector2 size, bool shouldDraw = true)
         {
@@ -73,7 +75,7 @@ namespace InventoryTools.Logic
                         using var tabBar = ImRaii.TabBar("CraftTabs", ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.TabListPopupButton);
                         if (!tabBar.Success) return messages;
 
-                        var groupedCrafts = FilterConfiguration.CraftList.GetOutputList();
+                        var groupedCrafts = CraftGroups;
                         if (groupedCrafts.Count == 0)
                         {
                             using var tabItem = ImRaii.TabItem("No Items");
@@ -85,7 +87,7 @@ namespace InventoryTools.Logic
                         {
                             foreach (var groupedCraft in groupedCrafts)
                             {
-                                using var tabItem = ImRaii.TabItem( groupedCraft.FormattedName());
+                                using var tabItem = ImRaii.TabItem( groupedCraft.Item1.FormattedName());
                                 if (!tabItem.Success) continue;
 
                                 using var table = ImRaii.Table(Key + "CraftTable", Columns.Count, _tableFlags);
@@ -117,13 +119,13 @@ namespace InventoryTools.Logic
                                     NeedsRefresh = true;
                                 }
 
-                                if (!groupedCraft.CraftItems.Any()) continue;
+                                if (!groupedCraft.searchResults.Any()) continue;
                                 ImGui.TableNextRow(ImGuiTableRowFlags.Headers, FilterConfiguration.TableHeight);
                                 ImGui.TableNextColumn();
 
-                                for (var index = 0; index < groupedCraft.CraftItems.Count; index++)
+                                for (var index = 0; index < groupedCraft.searchResults.Count; index++)
                                 {
-                                    var item = groupedCraft.CraftItems[index];
+                                    var item = groupedCraft.searchResults[index];
                                     ImGui.TableNextRow(ImGuiTableRowFlags.None,
                                         FilterConfiguration.TableHeight);
                                     for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
@@ -193,7 +195,7 @@ namespace InventoryTools.Logic
 
 
                             var overallIndex = 0;
-                            var groupedCrafts = FilterConfiguration.CraftList.GetOutputList();
+                            var groupedCrafts = CraftGroups;
                             if (groupedCrafts.Count == 0)
                             {
                                 ImGui.TableNextRow(ImGuiTableRowFlags.None, 32);
@@ -210,11 +212,11 @@ namespace InventoryTools.Logic
 
                             foreach (var groupedCraft in groupedCrafts)
                             {
-                                if (!groupedCraft.CraftItems.Any()) continue;
+                                if (!groupedCraft.searchResults.Any()) continue;
                                 ImGui.TableNextRow(ImGuiTableRowFlags.Headers, FilterConfiguration.TableHeight);
                                 ImGui.TableNextColumn();
                                 var headerColor = ImRaii.PushColor(ImGuiCol.Header, new Vector4(0, 0, 0, 0));
-                                using (var treeNode = ImRaii.TreeNode("##" + groupedCraft.FormattedName(),
+                                using (var treeNode = ImRaii.TreeNode("##" + groupedCraft.craftGrouping.FormattedName(),
                                            ImGuiTreeNodeFlags.SpanFullWidth | ImGuiTreeNodeFlags.DefaultOpen |
                                            ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
@@ -223,14 +225,14 @@ namespace InventoryTools.Logic
                                     {
                                         ImGui.TableNextColumn();
                                         ImGui.TextColored(FilterConfiguration.CraftHeaderColour,
-                                            groupedCraft.FormattedName());
+                                            groupedCraft.craftGrouping.FormattedName());
                                     }
 
                                     if (treeNode.Success)
                                     {
-                                        for (var index = 0; index < groupedCraft.CraftItems.Count; index++)
+                                        for (var index = 0; index < groupedCraft.searchResults.Count; index++)
                                         {
-                                            var item = groupedCraft.CraftItems[index];
+                                            var item = groupedCraft.searchResults[index];
                                             ImGui.TableNextRow(ImGuiTableRowFlags.None,
                                                 FilterConfiguration.TableHeight);
                                             for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
@@ -269,14 +271,9 @@ namespace InventoryTools.Logic
             return messages;
         }
 
-        private List<CraftItem> GetOutputItemList()
-        {
-            return CraftItems.Where(c => c.IsOutputItem).ToList();
-        }
-
         public int GetCraftListCount()
         {
-            return CraftItems.Count(c => !FilterConfiguration.CraftList.HideComplete || !c.IsCompleted);
+            return CraftItems.Count(c => !FilterConfiguration.CraftList.HideComplete || !c.CraftItem!.IsCompleted);
         }
 
         public override void DrawFooterItems()
@@ -321,7 +318,7 @@ namespace InventoryTools.Logic
                 foreach (var item in CraftItems)
                 {
                     var newLine = new ExpandoObject() as IDictionary<string, Object>;
-                    newLine["Id"] = item.ItemId;
+                    newLine["Id"] = item.Item.ItemId;
                     foreach (var column in Columns)
                     {
                         newLine[column.Column.Name] = column.Column.JsonExport(column, item) ?? "";

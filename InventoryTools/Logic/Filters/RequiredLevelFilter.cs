@@ -12,7 +12,7 @@ namespace InventoryTools.Logic.Filters
         public override string Key { get; set; } = "ItemLvl";
         public override string Name { get; set; } = "Required Level";
         public override string HelpText { get; set; } = "The required level to equip the item.";
-        public override FilterType AvailableIn { get; set; }  = FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter;
+        
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
 
         public override bool? FilterItem(FilterConfiguration configuration,InventoryItem item)

@@ -14,8 +14,6 @@ public class FavouritesFilter : BooleanFilter
     public override string HelpText { get; set; } = "Is this item a favourite?";
     public override FilterCategory FilterCategory { get; set; } = FilterCategory.Searching;
 
-    public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter |
-                                                           FilterType.GameItemFilter | FilterType.HistoryFilter;
     public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
     {
         var currentValue = CurrentValue(configuration);

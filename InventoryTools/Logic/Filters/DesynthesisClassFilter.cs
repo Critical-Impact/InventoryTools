@@ -13,9 +13,6 @@ public class DesynthesisClassFilter : StringFilter
     public override string Name { get; set; } = "Desynth Class";
     public override string HelpText { get; set; } = "What class is related to de-synthesising this item?";
     public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
-
-    public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter |
-                                                           FilterType.GameItemFilter;
     
     public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
     {

@@ -236,14 +236,9 @@ namespace InventoryTools.Ui
                         var activeCharacter = _characterMonitor.ActiveCharacter;
                         if (activeCharacter != null)
                         {
-                            foreach (var item in itemTable.RenderSortedItems)
+                            foreach (var item in itemTable.SearchResults)
                             {
-                                _universalis.QueuePriceCheck(item.InventoryItem.ItemId, activeCharacter.WorldId);
-                            }
-
-                            foreach (var item in itemTable.RenderItems)
-                            {
-                                _universalis.QueuePriceCheck(item.RowId, activeCharacter.WorldId);
+                                _universalis.QueuePriceCheck(item.Item.RowId, activeCharacter.WorldId);
                             }
                         }
                     }
@@ -355,16 +350,16 @@ namespace InventoryTools.Ui
 
                     ImGuiUtil.HoverTooltip("Open the craft window.");
                     
-                    var totalItems =  itemTable.RenderSortedItems.Count + " items";
+                    var totalItems =  itemTable.RenderSearchResults.Count + " items";
 
                     if (SelectedConfiguration != null && SelectedConfiguration.FilterType == FilterType.GameItemFilter)
                     {
-                        totalItems =  itemTable.RenderItems.Count + " items";
+                        totalItems =  itemTable.RenderSearchResults.Count + " items";
                     }
 
                     if (SelectedConfiguration != null && SelectedConfiguration.FilterType == FilterType.HistoryFilter)
                     {
-                        totalItems =  itemTable.InventoryChanges.Count + " historical records";
+                        totalItems =  itemTable.RenderSearchResults.Count + " historical records";
                     }
 
                     var calcTextSize = ImGui.CalcTextSize(totalItems);

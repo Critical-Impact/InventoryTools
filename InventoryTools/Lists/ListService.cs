@@ -378,6 +378,27 @@ namespace InventoryTools.Lists
             return clonedFilter;
         }
 
+        public FilterConfiguration AddNewCuratedList(string? name = null)
+        {
+            name ??= "New Curated List";
+
+            var names = Lists.Where(c =>
+                c.FilterType == FilterType.CuratedList).Select(c => c.Name).Distinct().ToHashSet();
+            var count = 1;
+            var fixedName = name;
+            while (names.Contains(fixedName))
+            {
+                count++;
+                fixedName = name + " " + count;
+            }
+            
+            var filter = new FilterConfiguration(fixedName,
+                Guid.NewGuid().ToString("N"), FilterType.CuratedList);
+            AddDefaultColumns(filter);
+            AddList(filter);
+            return filter;
+        }
+
         public bool RemoveList(FilterConfiguration configuration)
         {
             var result = _lists.TryRemove(configuration.Key, out _);
@@ -1044,6 +1065,18 @@ namespace InventoryTools.Lists
                 AddColumn(configuration,typeof(LocationColumn), false);
                 configuration.DefaultSortColumn = changeDateColumn.Key;
                 configuration.DefaultSortOrder = ImGuiSortDirection.Descending;
+            }
+            else if (configuration.FilterType == FilterType.CuratedList)
+            {
+                AddColumn(configuration, typeof(FavouritesColumn));
+                AddColumn(configuration,typeof(IconColumn), false);
+                var nameColumn = AddColumn(configuration,typeof(NameColumn), false);
+                AddColumn(configuration,typeof(TypeColumn), false);
+                AddColumn(configuration,typeof(QuantityColumn), false);
+                AddColumn(configuration,typeof(SourceColumn), false);
+                AddColumn(configuration,typeof(LocationColumn),false);
+                configuration.DefaultSortColumn = nameColumn.Key;
+                configuration.DefaultSortOrder = ImGuiSortDirection.Ascending;
             }
         }
 

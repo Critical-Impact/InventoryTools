@@ -17,32 +17,33 @@ namespace InventoryTools.Logic.Columns
             _characterMonitor = characterMonitor;
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Inventory;
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
+            if (searchResult.InventoryChange != null)
+            {
+                var destination = searchResult.InventoryChange.ToItem != null
+                    ? _characterMonitor.Characters.ContainsKey(searchResult.InventoryChange.ToItem.RetainerId) ? _characterMonitor.Characters[searchResult.InventoryChange.ToItem.RetainerId].FormattedName : ""
+                    : "Unknown";
+                var destinationBag = searchResult.InventoryChange.ToItem?.FormattedBagLocation ?? "";
+                return destination + " - " + destinationBag;
+            }
+
+            if (searchResult.SortingResult != null)
+            {
+
+                var destination = searchResult.SortingResult.DestinationRetainerId.HasValue
+                    ? _characterMonitor.Characters.ContainsKey(searchResult.SortingResult.DestinationRetainerId
+                        .Value)
+                        ? _characterMonitor.Characters[searchResult.SortingResult.DestinationRetainerId.Value].FormattedName
+                        : ""
+                    : "Unknown";
+                var destinationBag = searchResult.SortingResult.DestinationBag?.ToInventoryCategory().FormattedName() ??
+                                     "";
+                return destination + " - " + destinationBag;
+            }
+
             return null;
-        }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            return null;
-        }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            var destination = item.DestinationRetainerId.HasValue
-                ? _characterMonitor.Characters.ContainsKey(item.DestinationRetainerId.Value) ? _characterMonitor.Characters[item.DestinationRetainerId.Value].FormattedName : ""
-                : "Unknown";
-            var destinationBag = item.DestinationBag?.ToInventoryCategory().FormattedName() ?? "";
-            return destination + " - " + destinationBag;
-        }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryChange item)
-        {
-            var destination = item.ToItem != null
-                ? _characterMonitor.Characters.ContainsKey(item.ToItem.RetainerId) ? _characterMonitor.Characters[item.ToItem.RetainerId].FormattedName : ""
-                : "Unknown";
-            var destinationBag = item.ToItem?.FormattedBagLocation ?? "";
-            return destination + " - " + destinationBag;
         }
 
         public override string Name { get; set; } = "Destination";

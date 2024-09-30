@@ -17,47 +17,48 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Crafting;
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
-        {
-            return 0;
-        }
 
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return 0;
-        }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return item.Quantity;
-        }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, CraftItem currentValue)
-        {
-            if (currentValue.IsOutputItem)
+            if (searchResult.CraftItem != null)
             {
-                return 0;
+                if (searchResult.CraftItem.IsOutputItem)
+                {
+                    return 0;
+                }
+
+                return (int) searchResult.CraftItem.QuantityWillRetrieve;
             }
-            return (int)currentValue.QuantityWillRetrieve;
+
+            if (searchResult.SortingResult != null)
+            {
+                return searchResult.SortingResult.Quantity;
+            }
+
+            return 0;
         }
 
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            CraftItem item, int rowIndex, int columnIndex)
+            SearchResult searchResult, int rowIndex, int columnIndex)
         {
-            if (item.IsOutputItem)
+            if (searchResult.CraftItem == null)
+            {
+                return null;
+            }
+            if (searchResult.CraftItem.IsOutputItem)
             {
                 ImGui.TableNextColumn();
                 return null;
             }
-            if (item.QuantityWillRetrieve != 0)
+            if (searchResult.CraftItem.QuantityWillRetrieve != 0)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.ParsedBlue);
             }
 
-            base.Draw(configuration, columnConfiguration, item, rowIndex, columnIndex);
+            base.Draw(configuration, columnConfiguration, searchResult, rowIndex, columnIndex);
 
-            if (item.QuantityWillRetrieve != 0)
+            if (searchResult.CraftItem.QuantityWillRetrieve != 0)
             {
                 ImGui.PopStyleColor();
             }

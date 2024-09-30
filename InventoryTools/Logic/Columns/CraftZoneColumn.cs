@@ -29,12 +29,24 @@ public class CraftZoneColumn : TextColumn
         "The zone in which this item should be gathered from. This is only relevant to craft lists.";
 
     public override ColumnCategory ColumnCategory { get; } = ColumnCategory.Crafting;
+    public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
+    {
+        return "";
+    }
+
     public override bool HasFilter { get; set; } = true;
     public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
 
-    public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration, CraftItem item, int rowIndex,
+    public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration, SearchResult searchResult, int rowIndex,
         int columnIndex)
     {
+        if (searchResult.CraftItem == null)
+        {
+            return null;
+        }
+
+        var item = searchResult.CraftItem;
+
         var mapIds = item.Item.GetSourceMaps(item.IngredientPreference.Type, item.IngredientPreference.LinkedItemId)
             .OrderBySequence(configuration.CraftList.ZonePreferenceOrder, location => location);
         MapEx? selectedLocation = null;
@@ -94,22 +106,6 @@ public class CraftZoneColumn : TextColumn
             currentValue = selectedLocation.FormattedName;
         }
 
-
-        return DoDraw(item, currentValue, rowIndex, configuration, columnConfiguration);
-    }
-
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
-    {
-        return null;
-    }
-
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-    {
-        return null;
-    }
-
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return null;
+        return DoDraw(searchResult, currentValue, rowIndex, configuration, columnConfiguration);
     }
 }

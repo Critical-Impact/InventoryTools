@@ -18,45 +18,33 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Crafting;
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return 0;
-        }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            return 0;
-        }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return 0;
-        }
-
-        public override int? CurrentValue(ColumnConfiguration columnConfiguration, CraftItem currentValue)
-        {
-            return (int?) (currentValue.CraftOperationsRequired);
+            if (searchResult.CraftItem == null) return 0;
+            return (int?) (searchResult.CraftItem.CraftOperationsRequired);
         }
         
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            CraftItem item, int rowIndex, int columnIndex)
+            SearchResult searchResult, int rowIndex, int columnIndex)
         {
+            if (searchResult.CraftItem == null) return null;
+            
             ImGui.TableNextColumn();
             if (ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled))
             {
-                if (CurrentValue(columnConfiguration, item) > 0)
+                if (CurrentValue(columnConfiguration, searchResult) > 0)
                 {
                     ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.ParsedBlue);
                 }
 
-                var currentValue = CurrentValue(columnConfiguration, item);
+                var currentValue = CurrentValue(columnConfiguration, searchResult);
                 if (currentValue != null)
                 {
                     var fmt = $"{currentValue.Value:n0}";
-                    if (item.Yield > 1)
+                    if (searchResult.CraftItem.Yield > 1)
                     {
-                        fmt += " (" + item.Yield + ")";
+                        fmt += " (" + searchResult.CraftItem.Yield + ")";
                     }
 
                     ImGuiUtil.VerticalAlignText(fmt, configuration.TableHeight, false);
@@ -66,7 +54,7 @@ namespace InventoryTools.Logic.Columns
                     ImGuiUtil.VerticalAlignText(EmptyText, configuration.TableHeight, false);
                 }
 
-                if (CurrentValue(columnConfiguration, item) > 0)
+                if (CurrentValue(columnConfiguration, searchResult) > 0)
                 {
                     ImGui.PopStyleColor();
                 }

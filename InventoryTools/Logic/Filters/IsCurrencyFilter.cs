@@ -13,8 +13,7 @@ namespace InventoryTools.Logic.Filters
         public override string HelpText { get; set; } = "Is this traded for items as specific shops?";
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Acquisition;
 
-        public override FilterType AvailableIn { get; set; } =
-            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter;
+
         
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {

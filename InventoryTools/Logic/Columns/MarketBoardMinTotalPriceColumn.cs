@@ -25,7 +25,7 @@ namespace InventoryTools.Logic.Columns
             "Shows the minimum price of both the NQ and HQ form of the item and multiplies it by the quantity available. If no world is selected, your home world is used. This data is sourced from universalis.";
         public override FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter;
 
-        public override List<MessageBase>? DoDraw(IItem item, (int, int)? currentValue, int rowIndex,
+        public override List<MessageBase>? DoDraw(SearchResult searchResult, (int, int)? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
             
@@ -49,39 +49,41 @@ namespace InventoryTools.Logic.Columns
             }
             else if(currentValue.HasValue)
             {
-                base.DoDraw(item, currentValue, rowIndex, filterConfiguration, columnConfiguration);
+                base.DoDraw(searchResult, currentValue, rowIndex, filterConfiguration, columnConfiguration);
             }
             else
             {
-                base.DoDraw(item, currentValue, rowIndex, filterConfiguration, columnConfiguration);
+                base.DoDraw(searchResult, currentValue, rowIndex, filterConfiguration, columnConfiguration);
             }
 
             return null;
         }
 
-        public override (int, int)? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override (int, int)? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            if (!item.CanBeTraded)
+            if (searchResult.CraftItem != null)
             {
-                return (Untradable, Untradable);
+                if (!searchResult.Item.CanBeTraded)
+                {
+                    return (Untradable, Untradable);
+                }
+                var value = base.CurrentValue(columnConfiguration, searchResult);
+                return value.HasValue ? ((int)(value.Value.Item1 * searchResult.CraftItem.QuantityRequired), (int)(value.Value.Item2 * searchResult.CraftItem.QuantityRequired)) : null;
             }
-            var value = base.CurrentValue(columnConfiguration, item);
-            return value.HasValue ? ((int)(value.Value.Item1 * item.Quantity), (int)(value.Value.Item2 * item.Quantity)) : null;
-        }
-
-        public override (int, int)? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-
-        public override (int, int)? CurrentValue(ColumnConfiguration columnConfiguration, CraftItem currentValue)
-        {
-            if (!currentValue.Item.CanBeTraded)
+            if (searchResult.InventoryItem != null)
             {
-                return (Untradable, Untradable);
+                if (!searchResult.InventoryItem.CanBeTraded)
+                {
+                    return (Untradable, Untradable);
+                }
+
+                var value = base.CurrentValue(columnConfiguration, searchResult);
+                return value.HasValue
+                    ? ((int) (value.Value.Item1 * searchResult.InventoryItem.Quantity), (int) (value.Value.Item2 * searchResult.InventoryItem.Quantity))
+                    : null;
             }
-            var value = CurrentValue(columnConfiguration, currentValue.Item);
-            return value.HasValue ? ((int)(value.Value.Item1 * currentValue.QuantityRequired), (int)(value.Value.Item2 * currentValue.QuantityRequired)) : null;
+
+            return base.CurrentValue(columnConfiguration, searchResult);
         }
         
         public override string Name { get; set; } = "Market Board Minimum Total Price(Qty * Price) NQ/HQ";

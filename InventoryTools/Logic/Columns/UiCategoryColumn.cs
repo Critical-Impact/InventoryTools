@@ -13,30 +13,16 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
-        {
-            if (item.ItemUICategory == null)
-            {
-                return null;
-            }
 
-            return item.FormattedUiCategory;
-        }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            var itemItemUiCategory = item.ItemUICategory;
+            var itemItemUiCategory = searchResult.Item.ItemUICategory;
             if (itemItemUiCategory == null)
             {
                 return null;
             }
 
             return itemItemUiCategory.Value?.Name.AsReadOnly().ExtractText() ?? "";
-        }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
         }
 
         public override string Name { get; set; } = "Category (Basic)";

@@ -29,70 +29,30 @@ namespace InventoryTools.Logic.Columns.Abstract
         public virtual uint MaxFilterLength { get; set; } = 200;
 
         public virtual FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter |
-                                                 Logic.FilterType.GameItemFilter | Logic.FilterType.CraftFilter | Logic.FilterType.HistoryFilter;
+                                                 Logic.FilterType.GameItemFilter | Logic.FilterType.CraftFilter | Logic.FilterType.HistoryFilter | Logic.FilterType.CuratedList;
 
         public virtual bool? CraftOnly => null;
         public bool CanBeRemoved => true;
         public virtual bool IsConfigurable => false;
 
         public abstract ColumnCategory ColumnCategory { get; }
-        public abstract T CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item);
-        public abstract T CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item);
-        public abstract T CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item);
-        public abstract T CurrentValue(ColumnConfiguration columnConfiguration, CraftItem item);
-        public abstract T CurrentValue(ColumnConfiguration columnConfiguration, InventoryChange change);
+        public abstract T CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult);
         public virtual void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)
         {
         }
 
-        public abstract string CsvExport(ColumnConfiguration columnConfiguration, InventoryItem item);
-        public abstract string CsvExport(ColumnConfiguration columnConfiguration, ItemEx item);
-        public abstract string CsvExport(ColumnConfiguration columnConfiguration, SortingResult item);
+        public abstract string CsvExport(ColumnConfiguration columnConfiguration, SearchResult searchResult);
 
-        public virtual string CsvExport(ColumnConfiguration columnConfiguration, CraftItem item)
+        public virtual dynamic? JsonExport(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return CsvExport(columnConfiguration, item.Item);
+            return CurrentValue(columnConfiguration, searchResult);
         }
-
-        public virtual string CsvExport(ColumnConfiguration columnConfiguration, InventoryChange item)
-        {
-            return CsvExport(columnConfiguration, item.InventoryItem);
-        }
-
-        public virtual dynamic? JsonExport(ColumnConfiguration columnConfiguration, InventoryItem item)
-        {
-            return CurrentValue(columnConfiguration, item);
-        }
-
-        public virtual dynamic? JsonExport(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            return CurrentValue(columnConfiguration, item);
-        }
-
-        public virtual dynamic? JsonExport(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item);
-        }
-
-        public virtual dynamic? JsonExport(ColumnConfiguration columnConfiguration, CraftItem item)
-        {
-            return CurrentValue(columnConfiguration, item);
-        }
-
-        public dynamic? JsonExport(ColumnConfiguration columnConfiguration, InventoryChange item)
-        {
-            return JsonExport(columnConfiguration, item.InventoryItem);
-        }
-
+        
         public abstract string Name { get; set; }
         public virtual string? RenderName { get; } = null;
         public virtual FilterType DefaultIn { get; } = Logic.FilterType.None;
         public abstract float Width { get; set; }
         public abstract string HelpText { get; set; }
-
-
-
-
         public virtual List<string>? FilterChoices { get; set; } = null;
         public abstract bool HasFilter { get; set; }
         public abstract ColumnFilterType FilterType { get; set; }
@@ -115,58 +75,22 @@ namespace InventoryTools.Logic.Columns.Abstract
              type.HasFlag(InventoryTools.Logic.FilterType.GameItemFilter))
             ||
             (AvailableIn.HasFlag(InventoryTools.Logic.FilterType.HistoryFilter) &&
-             type.HasFlag(InventoryTools.Logic.FilterType.HistoryFilter));
+             type.HasFlag(InventoryTools.Logic.FilterType.HistoryFilter))
+            ||
+            (AvailableIn.HasFlag(InventoryTools.Logic.FilterType.CuratedList) &&
+             type.HasFlag(InventoryTools.Logic.FilterType.CuratedList));
 
-        public abstract IEnumerable<InventoryItem> Filter(ColumnConfiguration columnConfiguration,
-            IEnumerable<InventoryItem> items);
+        public abstract IEnumerable<SearchResult> Filter(ColumnConfiguration columnConfiguration,
+            IEnumerable<SearchResult> searchResults);
 
-        public abstract IEnumerable<SortingResult> Filter(ColumnConfiguration columnConfiguration,
-            IEnumerable<SortingResult> items);
-
-        public abstract IEnumerable<ItemEx> Filter(ColumnConfiguration columnConfiguration, IEnumerable<ItemEx> items);
-
-        public abstract IEnumerable<CraftItem> Filter(ColumnConfiguration columnConfiguration,
-            IEnumerable<CraftItem> items);
-        public abstract IEnumerable<InventoryChange> Filter(ColumnConfiguration columnConfiguration,
-            IEnumerable<InventoryChange> items);
-
-        public abstract IEnumerable<InventoryItem> Sort(ColumnConfiguration columnConfiguration,
-            ImGuiSortDirection direction, IEnumerable<InventoryItem> items);
-
-        public abstract IEnumerable<SortingResult> Sort(ColumnConfiguration columnConfiguration,
-            ImGuiSortDirection direction, IEnumerable<SortingResult> items);
-
-        public abstract IEnumerable<ItemEx> Sort(ColumnConfiguration columnConfiguration, ImGuiSortDirection direction,
-            IEnumerable<ItemEx> items);
-        public abstract IEnumerable<CraftItem> Sort(ColumnConfiguration columnConfiguration,
-            ImGuiSortDirection direction, IEnumerable<CraftItem> items);
-
-        public abstract IEnumerable<InventoryChange> Sort(ColumnConfiguration columnConfiguration,
-            ImGuiSortDirection direction, IEnumerable<InventoryChange> items);
+        public abstract IEnumerable<SearchResult> Sort(ColumnConfiguration columnConfiguration,
+            ImGuiSortDirection direction, IEnumerable<SearchResult> searchResults);
 
         public abstract List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
-            InventoryItem item, int rowIndex, int columnIndex);
+            SearchResult searchResult, int rowIndex, int columnIndex);
 
-        public abstract List<MessageBase>? Draw(FilterConfiguration configuration,
-            ColumnConfiguration columnConfiguration,
-            SortingResult item, int rowIndex, int columnIndex);
-        public abstract List<MessageBase>? Draw(FilterConfiguration configuration,
-            ColumnConfiguration columnConfiguration,
-            ItemEx item, int rowIndex, int columnIndex);
-
-        public abstract List<MessageBase>? Draw(FilterConfiguration configuration,
-            ColumnConfiguration columnConfiguration,
-            CraftItem item, int rowIndex, int columnIndex);
-
-        public virtual List<MessageBase>? Draw(FilterConfiguration configuration,
-            ColumnConfiguration columnConfiguration,
-            InventoryChange item, int rowIndex, int columnIndex)
-        {
-            return Draw(configuration, columnConfiguration, item.InventoryItem, rowIndex, columnIndex);
-        }
-
-        public abstract List<MessageBase>? DoDraw(IItem item, T currentValue, int rowIndex,
+        public abstract List<MessageBase>? DoDraw(SearchResult searchResult, T currentValue, int rowIndex,
             FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration);
 
         public virtual void Setup(FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration,

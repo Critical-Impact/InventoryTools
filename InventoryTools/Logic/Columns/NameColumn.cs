@@ -15,27 +15,13 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        public override (string, Vector4)? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override (string, Vector4)? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return (item.FormattedName, item.ItemColour);
+            return (
+                searchResult.CraftItem?.FormattedName ??
+                searchResult.InventoryItem?.FormattedName ?? searchResult.Item.NameString,
+                searchResult.InventoryItem?.ItemColour ?? ImGuiColors.DalamudWhite);
         }
-
-        public override (string, Vector4)? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            return (item.NameString, ImGuiColors.DalamudWhite);
-        }
-
-        public override (string, Vector4)? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
-        }
-        
-
-        public override (string, Vector4)? CurrentValue(ColumnConfiguration columnConfiguration, CraftItem currentValue)
-        {
-            return (currentValue.FormattedName, ImGuiColors.DalamudWhite);
-        }
-
         public override string Name { get; set; } = "Name";
         public override float Width { get; set; } = 250.0f;
         public override string HelpText { get; set; } = "The name of the item.";

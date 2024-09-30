@@ -13,9 +13,6 @@ namespace InventoryTools.Logic.Filters
         public override string HelpText { get; set; } = "Can this item be desynthesised?";
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
 
-        public override FilterType AvailableIn { get; set; } =
-            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter;
-        
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
             return FilterItem(configuration, item.Item);

@@ -18,8 +18,15 @@ public class StainColumn : TextColumn
         _stainColumnSetting = stainColumnSetting;
     }
     public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+    public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
+        if (searchResult.InventoryItem == null)
+        {
+            return null;
+        }
+
+        var item = searchResult.InventoryItem;
+
         switch (_stainColumnSetting.CurrentValue(columnConfiguration))
         {
             case StainColumnSettingEnum.FirstStain:
@@ -33,16 +40,6 @@ public class StainColumn : TextColumn
         }
 
         return "";
-    }
-
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-    {
-        return "";
-    }
-
-    public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return CurrentValue(columnConfiguration, item.InventoryItem);
     }
 
     public override void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)

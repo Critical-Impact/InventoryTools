@@ -264,30 +264,33 @@ public class IPCService : IHostedService
             if (filter.FilterType == FilterType.SearchFilter || filter.FilterType == FilterType.SortingFilter)
             {
                 var filterResult = _listFilterService.RefreshList(filter);
-                foreach (var sortedItem in filterResult.SortedItems)
+                foreach (var sortedItem in filterResult)
                 {
-                    if (filterItems.ContainsKey(sortedItem.InventoryItem.ItemId))
+                    if (sortedItem.InventoryItem != null)
                     {
-                        filterItems[sortedItem.InventoryItem.ItemId] += sortedItem.InventoryItem.Quantity;
-                    }
-                    else
-                    {
-                        filterItems.Add(sortedItem.InventoryItem.ItemId, sortedItem.InventoryItem.Quantity);
+                        if (filterItems.ContainsKey(sortedItem.InventoryItem.ItemId))
+                        {
+                            filterItems[sortedItem.InventoryItem.ItemId] += sortedItem.InventoryItem.Quantity;
+                        }
+                        else
+                        {
+                            filterItems.Add(sortedItem.InventoryItem.ItemId, sortedItem.InventoryItem.Quantity);
+                        }
                     }
                 }
             }
             if (filter.FilterType == FilterType.GameItemFilter)
             {
                 var filterResult = _listFilterService.RefreshList(filter);
-                foreach (var sortedItem in filterResult.AllItems)
+                foreach (var sortedItem in filterResult)
                 {
-                    if (filterItems.ContainsKey(sortedItem.RowId))
+                    if (filterItems.ContainsKey(sortedItem.Item.RowId))
                     {
-                        filterItems[sortedItem.RowId] += 0;
+                        filterItems[sortedItem.Item.RowId] += 0;
                     }
                     else
                     {
-                        filterItems.Add(sortedItem.RowId, 0);
+                        filterItems.Add(sortedItem.Item.RowId, 0);
                     }
                 }
             }

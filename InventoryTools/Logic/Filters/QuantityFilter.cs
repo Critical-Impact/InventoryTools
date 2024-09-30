@@ -20,7 +20,7 @@ namespace InventoryTools.Logic.Filters
         public override string Key { get; set; } = "Qty";
         public override string Name { get; set; } = "Quantity";
         public override string HelpText { get; set; } = "The quantity of the item.";
-        public override FilterType AvailableIn { get; set; }  = FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter;
+        
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
 
         public override bool? FilterItem(FilterConfiguration configuration,InventoryItem item)

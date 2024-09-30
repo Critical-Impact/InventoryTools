@@ -18,9 +18,6 @@ namespace InventoryTools.Logic.Filters
             "When talking with a retainer should the filter adjust itself to only show items that should be put inside the retainer from your inventory? If set to only, highlighting will only occur when at the retainer bell and when within a retainer.";
 
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Display;
-        public override FilterType AvailableIn { get; set; } =
-            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter | FilterType.CraftFilter;
-        
         public override void ResetFilter(FilterConfiguration configuration)
         {
             UpdateFilterConfiguration(configuration, DefaultValue);

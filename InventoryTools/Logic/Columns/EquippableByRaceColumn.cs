@@ -16,19 +16,9 @@ namespace InventoryTools.Logic.Columns
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
 
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
+        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return CurrentValue(columnConfiguration, item.Item);
-        }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-        {
-            return item.EquipRace.FormattedName();
-        }
-
-        public override string? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-        {
-            return CurrentValue(columnConfiguration, item.InventoryItem);
+            return searchResult.Item.EquipRace.FormattedName();
         }
 
         public override string Name { get; set; } = "Equipped By (Race)";

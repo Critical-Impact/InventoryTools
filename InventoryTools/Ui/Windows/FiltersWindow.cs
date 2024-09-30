@@ -8,6 +8,7 @@ using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Services.Ui;
+using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.ImGuiFileDialog;
 using ImGuiNET;
@@ -39,9 +40,10 @@ namespace InventoryTools.Ui
         private readonly IGameUiManager _gameUiManager;
         private readonly InventoryHistory _inventoryHistory;
         private readonly ListImportExportService _importExportService;
+        private readonly ExcelCache _excelCache;
         private readonly InventoryToolsConfiguration _configuration;
 
-        public FiltersWindow(ILogger<FiltersWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IListService listService, IFilterService filterService, TableService tableService, IChatUtilities chatUtilities, ICharacterMonitor characterMonitor, IUniversalis universalis, FileDialogManager fileDialogManager, IGameUiManager gameUiManager, HostedInventoryHistory inventoryHistory, ListImportExportService importExportService) : base(logger, mediator, imGuiService, configuration, "Filters Window")
+        public FiltersWindow(ILogger<FiltersWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IListService listService, IFilterService filterService, TableService tableService, IChatUtilities chatUtilities, ICharacterMonitor characterMonitor, IUniversalis universalis, FileDialogManager fileDialogManager, IGameUiManager gameUiManager, HostedInventoryHistory inventoryHistory, ListImportExportService importExportService, ExcelCache excelCache) : base(logger, mediator, imGuiService, configuration, "Filters Window")
         {
             _listService = listService;
             _filterService = filterService;
@@ -53,6 +55,7 @@ namespace InventoryTools.Ui
             _gameUiManager = gameUiManager;
             _inventoryHistory = inventoryHistory;
             _importExportService = importExportService;
+            _excelCache = excelCache;
             _configuration = configuration;
         }
         public override void Initialize()
@@ -77,15 +80,27 @@ namespace InventoryTools.Ui
             _addFilterMenu = new PopupMenu("addFilter", PopupMenu.PopupMenuButtons.LeftRight,
                 new List<PopupMenu.IPopupMenuItem>()
                 {
-                    new PopupMenu.PopupMenuItemSelectableAskName("Search Filter", "adf1", "New Search Filter", AddSearchFilter, "This will create a new filter that let's you search for specific items within your characters and retainers inventories."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Sort Filter", "af2", "New Sort Filter", AddSortFilter, "This will create a new filter that let's you search for specific items within your characters and retainers inventories then determine where they should be moved to."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Game Item Filter", "af3", "New Game Item Filter", AddGameItemFilter, "This will create a filter that lets you search for all items in the game."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("History Filter", "af4", "New History Item Filter", AddHistoryFilter, "This will create a filter that lets you view historical data of how your inventory has changed."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Search List", "adf1", "New Search List", AddSearchFilter, "This will create a new list that let's you search for specific items within your characters and retainers inventories."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Sort List", "af2", "New Sort List", AddSortFilter, "This will create a new list that let's you search for specific items within your characters and retainers inventories then determine where they should be moved to."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Game Item List", "af3", "New Game Item List", AddGameItemFilter, "This will create a list that lets you search for all items in the game."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("History List", "af4", "New History List", AddHistoryFilter, "This will create a list that lets you view historical data of how your inventory has changed."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Curated List", "af5", "New Curated List", AddCuratedFilter, "This will create a list that lets you add individual items to it manually."),
+                });
+            _listMenu = new PopupMenu("listMenu", PopupMenu.PopupMenuButtons.All,
+                new List<PopupMenu.IPopupMenuItem>()
+                {
+                    new PopupMenu.PopupMenuItemSelectableConfirm("Clear List", "clearList", "Are you sure you want to clear all the items in the list?", ClearListContents,
+                        "Clear the list of all items."),
+                    new PopupMenu.PopupMenuItemSelectable("Copy List Contents(To Clipboard)", "copyList", CopyListContents,
+                        "Copy the output items of the craft list to your clipboard."),
+                    new PopupMenu.PopupMenuItemSelectable("Paste List Contents(From Clipboard)", "pasteList",  PasteListContents,
+                        "Copy the output items of the craft list to your clipboard."),
                 });
             MediatorService.Subscribe<ListInvalidatedMessage>(this, _ => Invalidate());
             MediatorService.Subscribe<ListRepositionedMessage>(this, _ => Invalidate());
             MediatorService.Subscribe<ListAddedMessage>(this, _ => Invalidate());
             MediatorService.Subscribe<ListRemovedMessage>(this, _ => Invalidate());
+            MediatorService.Subscribe<TeamCraftDataImported>(this, ImportTeamcraftData);
         }
 
         public override bool SaveState => true;
@@ -110,12 +125,73 @@ namespace InventoryTools.Ui
         private HoverButton _marketIcon = new();
         private HoverButton _addIcon = new();
         private HoverButton _menuIcon = new();
+        private HoverButton _searchIcon = new();
+        private PopupMenu _listMenu = null!;
+        private bool _addItemBarOpen;
 
-        
+        public bool ShowAddItemBar =>
+            SelectedConfiguration is { FilterType: FilterType.CuratedList } &&
+            _addItemBarOpen;
+
+
         private List<FilterConfiguration>? _filters;
         private PopupMenu _addFilterMenu = null!;
 
         private PopupMenu _settingsMenu;
+        
+        private void PasteListContents(string obj)
+        {
+            if (SelectedConfiguration != null)
+            {
+                var importedList = _importExportService.FromTCString(ImGui.GetClipboardText());
+                if (importedList == null)
+                {
+                    _chatUtilities.PrintError("The contents of your clipboard could not be parsed.");
+                }
+                else
+                {
+                    _chatUtilities.Print("The contents of your clipboard were imported.");
+                    MediatorService.Publish(new TeamCraftDataImported(importedList));
+                }
+            }
+        }
+
+
+        private void CopyListContents(string obj)
+        {
+            if (SelectedConfiguration != null)
+            {
+                var tcString = _importExportService.ToTCString(SelectedConfiguration.CuratedItems?.ToList() ?? []);
+                ImGui.SetClipboardText(tcString);
+                _chatUtilities.Print("The curated list's contents were copied to your clipboard.");
+            }
+        }
+
+        private void ClearListContents(string arg1, bool arg2)
+        {
+            if (arg2)
+            {
+                if (this.SelectedConfiguration != null && this.SelectedConfiguration.FilterType == FilterType.CuratedList)
+                {
+                    this.SelectedConfiguration.CuratedItems = new List<CuratedItem>();
+                    this.SelectedConfiguration.NeedsRefresh = true;
+                }
+            }
+        }
+        
+        private void ImportTeamcraftData(TeamCraftDataImported data)
+        {
+            if (SelectedConfiguration != null)
+            {
+                foreach (var item in data.listData)
+                {
+                    bool isHq = item.Item1 > 1000000;
+                    var itemId = item.Item1 % 500000;
+                    SelectedConfiguration.AddCuratedItem(new CuratedItem(itemId, item.Item2, isHq ? InventoryItem.ItemFlags.HighQuality : InventoryItem.ItemFlags.None));
+                }
+                SelectedConfiguration.NeedsRefresh = true;
+            }
+        }
 
         private void OpenHelpWindow(string obj)
         {
@@ -286,7 +362,17 @@ namespace InventoryTools.Ui
             Invalidate();
             MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
             MediatorService.Publish(new ConfigurationWindowEditFilter(filterConfiguration));
-
+        }
+        
+        private void AddCuratedFilter(string newName, string id)
+        {
+            var filterConfiguration = new FilterConfiguration(newName,
+                Guid.NewGuid().ToString("N"), FilterType.CuratedList);
+            _listService.AddDefaultColumns(filterConfiguration);
+            _listService.AddList(filterConfiguration);
+            Invalidate();
+            MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
+            MediatorService.Publish(new ConfigurationWindowEditFilter(filterConfiguration));
         }
 
         private void AddGameItemFilter(string newName, string id)
@@ -433,6 +519,50 @@ namespace InventoryTools.Ui
                                         });
                                     }
                                 }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void DrawAddItemBar()
+        {
+            if (ShowAddItemBar)
+            {
+                ImGui.SameLine();
+                using (var addItemChild = ImRaii.Child("AddItem", new Vector2(-1, -1) * ImGui.GetIO().FontGlobalScale, true))
+                {
+                    if (addItemChild.Success)
+                    {
+                        var filterConfiguration = SelectedConfiguration;
+                        if (filterConfiguration is { FilterType: FilterType.CuratedList })
+                        {
+                            ImGui.TextUnformatted("Add new Item");
+                            var searchString = SearchString;
+                            ImGui.InputText("##ItemSearch", ref searchString, 50);
+                            if (_searchString != searchString)
+                            {
+                                SearchString = searchString;
+                            }
+
+                            ImGui.Separator();
+                            if (_searchString == "")
+                            {
+                                ImGui.TextUnformatted("Start typing to search...");
+                            }
+
+                            using var table = ImRaii.Table("", 2, ImGuiTableFlags.None);
+                            if (!table || !table.Success)
+                                return;
+
+                            ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 200);
+                            ImGui.TableSetupColumn("", ImGuiTableColumnFlags.None, 16);
+
+                            foreach (var datum in SearchItems)
+                            {
+                                ImGui.TableNextRow();
+                                DrawSearchRow(filterConfiguration, datum);
                             }
                         }
                     }
@@ -703,6 +833,10 @@ namespace InventoryTools.Ui
                                      filterConfiguration.FilterType.HasFlag(FilterType
                                          .HistoryFilter))
                                     ||
+                                    (filter.AvailableIn.HasFlag(FilterType.CuratedList) &&
+                                     filterConfiguration.FilterType.HasFlag(FilterType
+                                         .CuratedList))
+                                    ||
                                     (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
                                      filterConfiguration.FilterType.HasFlag(FilterType
                                          .GameItemFilter)));
@@ -752,6 +886,10 @@ namespace InventoryTools.Ui
                                                           filterConfiguration.FilterType.HasFlag(FilterType
                                                               .HistoryFilter))
                                                          ||
+                                                         (filter.AvailableIn.HasFlag(FilterType.CuratedList) &&
+                                                          filterConfiguration.FilterType.HasFlag(FilterType
+                                                              .CuratedList))
+                                                         ||
                                                          (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
                                                           filterConfiguration.FilterType.HasFlag(FilterType
                                                               .GameItemFilter))
@@ -793,6 +931,10 @@ namespace InventoryTools.Ui
 
         public unsafe string DrawFilter(FilterTable itemTable, FilterConfiguration filterConfiguration)
         {
+            using var mainChild = ImRaii.Child("Main", new Vector2(filterConfiguration.FilterType == FilterType.CuratedList && _addItemBarOpen ? -250 : -1, -1) * ImGui.GetIO().FontGlobalScale, false,
+                ImGuiWindowFlags.HorizontalScrollbar);
+            if (!mainChild) return filterConfiguration.Key;
+            
             using (var topBarChild = ImRaii.Child("TopBar", new Vector2(0, 40) * ImGui.GetIO().FontGlobalScale, true,
                        ImGuiWindowFlags.NoScrollbar))
             {
@@ -844,6 +986,17 @@ namespace InventoryTools.Ui
                     }
 
                     ImGuiUtil.HoverTooltip("Edit the filter's configuration.");
+
+                    if (SelectedConfiguration is { FilterType: FilterType.CuratedList })
+                    {
+                        ImGui.SameLine();
+                        width -= 28 * ImGui.GetIO().FontGlobalScale;
+                        ImGui.SetCursorPosX(width);
+                        if (_searchIcon.Draw(ImGuiService.GetIconTexture(66320).ImGuiHandle, "tb_oib"))
+                        {
+                            _addItemBarOpen = !_addItemBarOpen;
+                        }
+                    }
                 }
             }
             using (var contentChild = ImRaii.Child("Content", new Vector2(0, -40) * ImGui.GetIO().FontGlobalScale, true,
@@ -871,25 +1024,26 @@ namespace InventoryTools.Ui
             {
                 if (bottomBarChild.Success)
                 {
+                    if (this.SelectedConfiguration.FilterType == FilterType.CuratedList)
+                    {
+                        ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
+                        if (_menuIcon.Draw(ImGuiService.GetImageTexture("menu").ImGuiHandle, "openListMenu"))
+                        {
+                        }
+
+                        _listMenu.Draw();
+                        ImGui.SameLine();
+                    }
+
                     ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                     if(_marketIcon.Draw(ImGuiService.GetImageTexture("refresh-web").ImGuiHandle, "refreshMarket"))
                     {
                         var activeCharacter = _characterMonitor.ActiveCharacter;
                         if (activeCharacter != null)
                         {
-                            foreach (var item in itemTable.RenderSortedItems)
+                            foreach (var item in itemTable.RenderSearchResults)
                             {
-                                _universalis.QueuePriceCheck(item.InventoryItem.ItemId, activeCharacter.WorldId);
-                            }
-
-                            foreach (var item in itemTable.RenderItems)
-                            {
-                                _universalis.QueuePriceCheck(item.RowId, activeCharacter.WorldId);
-                            }
-
-                            foreach (var item in itemTable.InventoryChanges)
-                            {
-                                _universalis.QueuePriceCheck(item.InventoryItem.ItemId, activeCharacter.WorldId);
+                                _universalis.QueuePriceCheck(item.Item.RowId, activeCharacter.WorldId);
                             }
                         }
                     }
@@ -1022,18 +1176,18 @@ namespace InventoryTools.Ui
                         ImGuiUtil.HoverTooltip("Clear your history.");
                     }
 
-                    var totalItems =  itemTable.RenderSortedItems.Count + " items";
+                    var totalItems =  itemTable.RenderSearchResults.Count + " items";
 
                     if (SelectedConfiguration != null && SelectedConfiguration.FilterType == FilterType.GameItemFilter)
                     {
-                        totalItems =  itemTable.RenderItems.Count + " items";
+                        totalItems =  itemTable.RenderSearchResults.Count + " items";
                     }
                     
                     if (SelectedConfiguration != null && SelectedConfiguration.FilterType == FilterType.HistoryFilter)
                     {
                         if (_configuration.HistoryEnabled)
                         {
-                            totalItems = itemTable.InventoryChanges.Count + " historical records";
+                            totalItems = itemTable.RenderSearchResults.Count + " historical records";
                         }
                         else
                         {
@@ -1047,8 +1201,49 @@ namespace InventoryTools.Ui
                     ImGuiService.VerticalCenter(totalItems);
                 }
             }
+            
+            mainChild.Dispose();
+            if (filterConfiguration.FilterType == FilterType.CuratedList && _addItemBarOpen)
+            {
+                DrawAddItemBar();
+            }
 
             return filterConfiguration.Key;
+        }
+        
+        private void DrawSearchRow(FilterConfiguration filterConfiguration, ItemEx item)
+        {
+            ImGui.TableNextColumn();
+            ImGui.TextWrapped( item.NameString);
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right)) 
+            {
+                ImGui.OpenPopup("RightClick" + item.RowId);
+            }
+            
+            using (var popup = ImRaii.Popup("RightClick"+ item.RowId))
+            {
+                if (popup.Success)
+                {
+                    MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(item));
+                }
+            }
+            ImGui.TableNextColumn();
+            using (ImRaii.PushId("s_" + item.RowId))
+            {
+                if (_addIcon.Draw(ImGuiService.GetIconTexture(66315).ImGuiHandle, "bbadd_" + item.RowId, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale))
+                {
+                    Service.Framework.RunOnFrameworkThread(() =>
+                    {
+                        filterConfiguration.AddCuratedItem(new CuratedItem(item.RowId));
+                        filterConfiguration.NeedsRefresh = true;
+                    });
+                }
+
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+                }
+            }
         }
         
         public override FilterConfiguration? SelectedConfiguration
@@ -1076,6 +1271,37 @@ namespace InventoryTools.Ui
             if (selectedConfiguration != null)
             {
                 FocusFilter(selectedConfiguration);
+            }
+        }
+        
+        private string _searchString = "";
+        private List<ItemEx>? _searchItems;
+        public List<ItemEx> SearchItems
+        {
+            get
+            {
+                if (SearchString == "")
+                {
+                    _searchItems = new List<ItemEx>();
+                    return _searchItems;
+                }
+                if (_searchItems == null)
+                {
+                    _searchItems = _excelCache.ItemNamesById.Where(c => c.Value.ToLower().PassesFilter(SearchString.ToLower())).Take(100)
+                        .Select(c => _excelCache.GetItemExSheet().GetRow(c.Key)!).ToList();
+                }
+
+                return _searchItems;
+            }
+        }
+        
+        public string SearchString
+        {
+            get => _searchString;
+            set
+            {
+                _searchString = value;
+                _searchItems = null;
             }
         }
     }

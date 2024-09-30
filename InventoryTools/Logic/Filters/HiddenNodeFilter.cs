@@ -11,7 +11,7 @@ namespace InventoryTools.Logic.Filters
         public override string Key { get; set; } = "HiddenNode";
         public override string Name { get; set; } = "Is Hidden Node?";
         public override string HelpText { get; set; } = "Is the item available in hidden nodes?";
-        public override FilterType AvailableIn { get; set; }  = FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter;
+        
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Gathering;
 
         public override bool? FilterItem(FilterConfiguration configuration,InventoryItem item)

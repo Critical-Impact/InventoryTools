@@ -16,21 +16,11 @@ public class DyeCountColumn : IntegerColumn
     public override float Width { get; set; } = 90;
     public override string HelpText { get; set; } = "The number of dyes the item has or supports.";
     public override ColumnCategory ColumnCategory { get; } = ColumnCategory.Basic;
+    public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
+    {
+        return searchResult.InventoryItem?.DyeCount ?? searchResult.Item.DyeCount;
+    }
+
     public override bool HasFilter { get; set; } = true;
     public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
-
-    public override int? CurrentValue(ColumnConfiguration columnConfiguration, InventoryItem item)
-    {
-        return item.DyeCount;
-    }
-
-    public override int? CurrentValue(ColumnConfiguration columnConfiguration, ItemEx item)
-    {
-        return item.DyeCount;
-    }
-
-    public override int? CurrentValue(ColumnConfiguration columnConfiguration, SortingResult item)
-    {
-        return CurrentValue(columnConfiguration, item.InventoryItem);
-    }
 }

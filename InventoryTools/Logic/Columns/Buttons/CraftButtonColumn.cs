@@ -22,14 +22,14 @@ public class CraftButtonColumn : ButtonColumn
     public override string HelpText { get; set; } = "A button that opens the crafting log for the item";
 
     public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
-        ItemEx item, int rowIndex, int columnIndex)
+        SearchResult searchResult, int rowIndex, int columnIndex)
     {
         ImGui.TableNextColumn();
         if (ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled))
         {
-            if (item.CanBeCrafted && ImGui.Button("Craft##" + rowIndex + "_" + columnIndex))
+            if (searchResult.Item.CanBeCrafted && ImGui.Button("Craft"))
             {
-                var result = _gameInterface.OpenCraftingLog(item.RowId);
+                var result = _gameInterface.OpenCraftingLog(searchResult.Item.RowId);
                 if (!result)
                 {
                     _chatUtilities.PrintError("Could not open the crafting log, you are currently crafting.");
