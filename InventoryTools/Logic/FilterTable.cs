@@ -23,7 +23,7 @@ namespace InventoryTools.Logic
     {
         public FilterTable(RightClickService rightClickService, InventoryToolsConfiguration configuration) : base(rightClickService, configuration)
         {
-            
+
         }
 
         public override void RefreshColumns()
@@ -47,7 +47,7 @@ namespace InventoryTools.Logic
             var highlightItems = HighlightItems;
 
             FilterConfiguration.AllowRefresh = true;
-            
+
             if (Columns.Count == 0 || !shouldDraw)
             {
                 return messages;
@@ -69,9 +69,9 @@ namespace InventoryTools.Logic
                             var column = Columns[index];
                             column.Column.Setup(FilterConfiguration, column, index);
                         }
-                        
+
                         ImGui.TableHeadersRow();
-                        
+
                         for (var index = 0; index < Columns.Count; index++)
                         {
                             var column = Columns[index];
@@ -132,7 +132,7 @@ namespace InventoryTools.Logic
                         {
                             NeedsRefresh = true;
                         }
-                        
+
                         if (FilterConfiguration.FilterType == FilterType.SearchFilter ||
                             FilterConfiguration.FilterType == FilterType.SortingFilter ||
                             FilterConfiguration.FilterType == FilterType.CraftFilter)
@@ -207,7 +207,7 @@ namespace InventoryTools.Logic
                                             {
                                                 messages.AddRange(columnMessages);
                                             }
-                                            
+
                                             if (columnIndex == 0)
                                             {
                                                 ImGui.SameLine();
@@ -318,9 +318,14 @@ namespace InventoryTools.Logic
 
         public string ExportToJson()
         {
+            return ExportToJson(RenderSearchResults);
+        }
+
+        public string ExportToJson(List<SearchResult> toExport)
+        {
             var lines = new List<dynamic>();
             var converter = new ExpandoObjectConverter();
-            foreach (var item in RenderSearchResults)
+            foreach (var item in toExport)
             {
                 var newLine = new ExpandoObject() as IDictionary<string, Object>;
                 newLine["id"] = item.Item.RowId;

@@ -13,6 +13,12 @@ using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 
 namespace InventoryTools.Lists;
 
+public enum TCExportMode
+{
+    Required,
+    Missing,
+}
+
 public class ListImportExportService
 {
     private readonly ExcelCache _excelCache;
@@ -66,13 +72,14 @@ public class ListImportExportService
             return false;
         }
     }
-    
+
     /// <summary>
     /// Parses a teamcraft/AT list of items and returns the item ID and quantity of the item as a list of tuples. HQ items have 500000 added to them.
     /// </summary>
     /// <param name="teamCraftList"></param>
+    /// <param name="onlyCraftables"></param>
     /// <returns></returns>
-    public List<(uint, uint)>? FromTCString(string teamCraftList)
+    public List<(uint, uint)>? FromTCString(string teamCraftList, bool onlyCraftables = true)
     {
         if (string.IsNullOrEmpty(teamCraftList)) return null;
         List<(uint, uint)> output = new List<(uint, uint)>();
@@ -106,7 +113,7 @@ public class ListImportExportService
 
                     var itemEx = _excelCache.GetItemExSheet().FirstOrDefault(c => c!.NameString == item, null);
 
-                    if (itemEx != null && _excelCache.CanCraftItem(itemEx.RowId))
+                    if (itemEx != null && (!onlyCraftables || _excelCache.CanCraftItem(itemEx.RowId)))
                     {
                         output.Add(((uint)(itemEx.RowId + (isHq ? 500000 : 0)), (uint)numberOfItem));
                     }
@@ -120,18 +127,30 @@ public class ListImportExportService
         return output;
     }
 
-    public string ToTCString(List<CraftItem> craftItems)
+    public string ToTCString(List<CraftItem> craftItems, TCExportMode exportMode = TCExportMode.Required)
     {
         List<string> lines = new();
         lines.Add("Items :");
         foreach (var craftItem in craftItems)
         {
-            lines.Add($"{craftItem.QuantityRequired}x {craftItem.Name} {(craftItem.Flags == InventoryItem.ItemFlags.HighQuality ? " (HQ)" : "")}");
+            var qty = craftItem.QuantityRequired;
+            switch (exportMode)
+            {
+                case TCExportMode.Missing:
+                    qty = craftItem.QuantityMissingOverall;
+                    break;
+            }
+
+            if (qty != 0)
+            {
+                lines.Add(
+                    $"{qty}x {craftItem.Name} {(craftItem.Flags == InventoryItem.ItemFlags.HighQuality ? " (HQ)" : "")}");
+            }
         }
-        
+
         return string.Join(Environment.NewLine, lines);
     }
-    
+
     public string ToTCString(List<CuratedItem> curatedItems)
     {
         List<string> lines = new();
@@ -142,7 +161,40 @@ public class ListImportExportService
             if (item == null) continue;
             lines.Add($"{curatedItem.Quantity}x {item.Name} {(curatedItem.ItemFlags == InventoryItem.ItemFlags.HighQuality ? " (HQ)" : "")}");
         }
-        
+
+        return string.Join(Environment.NewLine, lines);
+    }
+
+    public string ToTCString(List<SearchResult> searchResults)
+    {
+        List<string> lines = new();
+        lines.Add("Items :");
+        foreach (var searchResult in searchResults)
+        {
+            var item = _excelCache.GetItemExSheet().GetRow(searchResult.Item.RowId);
+            if (item == null) continue;
+            if (searchResult.SortingResult != null && searchResult.InventoryItem != null)
+            {
+                    lines.Add($"{searchResult.SortingResult.Quantity}x {item.Name} {(searchResult.SortingResult.InventoryItem.Flags == InventoryItem.ItemFlags.HighQuality ? " (HQ)" : "")}");
+            }
+            else if (searchResult.CraftItem != null)
+            {
+                lines.Add($"{searchResult.CraftItem.QuantityRequired}x {item.Name} {(searchResult.CraftItem.Flags == InventoryItem.ItemFlags.HighQuality ? " (HQ)" : "")}");
+            }
+            else if (searchResult.InventoryItem != null)
+            {
+                lines.Add($"{searchResult.InventoryItem.Quantity}x {item.Name} {(searchResult.InventoryItem.Flags == InventoryItem.ItemFlags.HighQuality ? " (HQ)" : "")}");
+            }
+            else if (searchResult.CuratedItem != null)
+            {
+                lines.Add($"{searchResult.CuratedItem.Quantity}x {item.Name} {(searchResult.CuratedItem.ItemFlags == InventoryItem.ItemFlags.HighQuality ? " (HQ)" : "")}");
+            }
+            else
+            {
+                lines.Add($"1x {item.Name}");
+            }
+        }
+
         return string.Join(Environment.NewLine, lines);
     }
 }

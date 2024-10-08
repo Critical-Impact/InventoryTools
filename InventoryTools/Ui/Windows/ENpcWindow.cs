@@ -20,10 +20,12 @@ namespace InventoryTools.Ui
     class ENpcWindow : UintWindow
     {
         private readonly ExcelCache _excelCache;
+        private readonly IClipboardService _clipboardService;
 
-        public ENpcWindow(ILogger<ENpcWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ExcelCache excelCache, string name = "NPC Window") : base(logger, mediator, imGuiService, configuration, name)
+        public ENpcWindow(ILogger<ENpcWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ExcelCache excelCache, IClipboardService clipboardService, string name = "NPC Window") : base(logger, mediator, imGuiService, configuration, name)
         {
             _excelCache = excelCache;
+            _clipboardService = clipboardService;
         }
         public override void Initialize(uint eNpcId)
         {
@@ -42,7 +44,7 @@ namespace InventoryTools.Ui
                 Key = "enpc_unknown";
             }
         }
-        
+
         public override bool SaveState => false;
         private uint _eNpcId;
         private ENpc? eNpc => _excelCache.ENpcCollection?.Get(_eNpcId);
@@ -58,7 +60,7 @@ namespace InventoryTools.Ui
 
             if (eNpc == null)
             {
-                ImGui.TextUnformatted("eNpc with the ID " + _eNpcId + " could not be found.");   
+                ImGui.TextUnformatted("eNpc with the ID " + _eNpcId + " could not be found.");
             }
             else
             {
@@ -75,9 +77,9 @@ namespace InventoryTools.Ui
                     $"https://ffxivteamcraft.com/db/en/eNpc/{_eNpcId}".OpenBrowser();
                 }
                 ImGuiUtil.HoverTooltip("Open in Teamcraft");
-                
+
                 ImGui.Separator();
-                
+
                 if (Shops != null && ImGui.CollapsingHeader("Shops (" + Shops.Count + ")", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
                 {
                     ImGuiStylePtr style = ImGui.GetStyle();
@@ -142,21 +144,21 @@ namespace InventoryTools.Ui
                         ImGui.NewLine();
                     }
                 }
-                
-                
+
+
                 var hasInformation = false;
                 if (!hasInformation)
                 {
                     ImGui.TextUnformatted("No information available.");
                 }
-                
+
                 #if DEBUG
                 if (ImGui.CollapsingHeader("Debug"))
                 {
                     ImGui.TextUnformatted("eNpc ID: " + _eNpcId);
                     if (ImGui.Button("Copy"))
                     {
-                        ImGui.SetClipboardText(_eNpcId.ToString());
+                        _clipboardService.CopyToClipboard(_eNpcId.ToString());
                     }
 
                     Utils.PrintOutObject(eNpc, 0, new List<string>());
@@ -168,9 +170,9 @@ namespace InventoryTools.Ui
 
         public override void Invalidate()
         {
-            
+
         }
-        
+
         public override FilterConfiguration? SelectedConfiguration => null;
         public override Vector2? DefaultSize { get; } = new Vector2(500, 800);
         public override Vector2? MaxSize => new (800, 1500);

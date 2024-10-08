@@ -42,23 +42,20 @@ namespace InventoryTools.Logic.Columns
             ColumnConfiguration columnConfiguration,
             SearchResult searchResult, int rowIndex, int columnIndex)
         {
-            if (searchResult.CraftItem == null)
-            {
-                return null;
-            }
-            if (searchResult.CraftItem.IsOutputItem)
+            var craftItem = searchResult.CraftItem;
+            if (craftItem?.IsOutputItem ?? false)
             {
                 ImGui.TableNextColumn();
                 return null;
             }
-            if (searchResult.CraftItem.QuantityWillRetrieve != 0)
+            if (craftItem != null && craftItem.QuantityWillRetrieve != 0)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.ParsedBlue);
             }
 
             base.Draw(configuration, columnConfiguration, searchResult, rowIndex, columnIndex);
 
-            if (searchResult.CraftItem.QuantityWillRetrieve != 0)
+            if (craftItem != null &&craftItem.QuantityWillRetrieve != 0)
             {
                 ImGui.PopStyleColor();
             }

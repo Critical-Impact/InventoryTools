@@ -9,6 +9,8 @@ namespace InventoryTools.Logic.Filters
 {
     public class HighlightColorFilter : ColorFilter
     {
+        public override FilterType AvailableIn { get; set; } =
+            FilterType.SearchFilter | FilterType.CraftFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter | FilterType.CuratedList;
         public override string Key { get; set; } = "HighlightColor";
         public override string Name { get; set; } = "Highlight Color";
 
@@ -26,8 +28,8 @@ namespace InventoryTools.Logic.Filters
         {
             return null;
         }
-        
-        
+
+
         public override Vector4? CurrentValue(FilterConfiguration configuration)
         {
             return configuration.HighlightColor;

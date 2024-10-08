@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,7 +36,11 @@ namespace InventoryTools.Lists
         private readonly Func<Type, IColumn> _columnTypeFactory;
         private ConcurrentDictionary<string, FilterConfiguration> _lists;
 
-        public ListService(ILogger<ListService> logger, MediatorService mediatorService, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, HostedInventoryHistory history, ConfigurationManagerService configurationManagerService, InventoryToolsConfiguration configuration, IChatUtilities chatUtilities, IFramework framework, Func<string, IColumn?> columnFactory, Func<Type,IColumn> columnTypeFactory) : base(logger, mediatorService)
+        public ListService(ILogger<ListService> logger, MediatorService mediatorService,
+            ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, HostedInventoryHistory history,
+            ConfigurationManagerService configurationManagerService, InventoryToolsConfiguration configuration,
+            IChatUtilities chatUtilities, IFramework framework, Func<string, IColumn?> columnFactory,
+            Func<Type, IColumn> columnTypeFactory) : base(logger, mediatorService)
         {
             _history = history;
             _configurationManagerService = configurationManagerService;
@@ -248,14 +253,14 @@ namespace InventoryTools.Lists
         {
             InvalidateLists();
         }
-        
+
         private void CraftListUpdated(FilterConfiguration filterconfiguration)
         {
             //_mediatorService.Publish(new ListModifiedMessage(filterconfiguration));
             InvalidateList(filterconfiguration);
             _configuration.IsDirty = true;
         }
-        
+
         private void FilterTableConfigurationChanged(FilterConfiguration filterConfiguration)
         {
             _mediatorService.Publish(new ListModifiedMessage(filterConfiguration));
@@ -271,7 +276,7 @@ namespace InventoryTools.Lists
             InvalidateList(filterConfiguration);
             _configuration.IsDirty = true;
         }
-        
+
 
         private void CharacterMonitorOnOnCharacterRemoved(ulong characterId)
         {
@@ -324,7 +329,7 @@ namespace InventoryTools.Lists
             _configuration.IsDirty = true;
             return result;
         }
-        
+
         public bool AddList(string name, FilterType filterType)
         {
             var sampleFilter = new FilterConfiguration(name, filterType);
@@ -356,7 +361,7 @@ namespace InventoryTools.Lists
                 count++;
                 fixedName = newNameNN + " " + count;
             }
-            
+
             var clonedFilter = GetDefaultCraftList().Clone();
             if (clonedFilter == null)
             {
@@ -391,7 +396,7 @@ namespace InventoryTools.Lists
                 count++;
                 fixedName = name + " " + count;
             }
-            
+
             var filter = new FilterConfiguration(fixedName,
                 Guid.NewGuid().ToString("N"), FilterType.CuratedList);
             AddDefaultColumns(filter);
@@ -451,7 +456,7 @@ namespace InventoryTools.Lists
             {
                 return null;
             }
-            
+
             if (_configuration.ActiveBackgroundFilter != null)
             {
                 if (_lists.Any(c => c.Key == _configuration.ActiveBackgroundFilter))
@@ -872,7 +877,7 @@ namespace InventoryTools.Lists
 
         public void RefreshList(FilterConfiguration configuration)
         {
-            
+
         }
 
         public void ResetFilter(IEnumerable<IFilter> toReset,FilterConfiguration configuration)
@@ -947,7 +952,7 @@ namespace InventoryTools.Lists
             _inventoryMonitor.OnInventoryChanged -= InventoryMonitorOnOnInventoryChanged;
             _characterMonitor.OnCharacterLoggedIn -= CharacterLoggedIn;
             _characterMonitor.OnCharacterLoggedOut -= CharacterLoggedOut;
-            _history.OnHistoryLogged -= HistoryOnOnHistoryLogged; 
+            _history.OnHistoryLogged -= HistoryOnOnHistoryLogged;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -974,7 +979,7 @@ namespace InventoryTools.Lists
             configuration.AddCraftColumn(newColumn, notify);
             return newColumn;
         }
-        
+
         public FilterConfiguration GenerateDefaultCraftList()
         {
             var defaultFilter = new FilterConfiguration("Default Craft List", FilterType.CraftFilter);
@@ -982,7 +987,18 @@ namespace InventoryTools.Lists
             defaultFilter.ApplyDefaultCraftFilterConfiguration();
             return defaultFilter;
         }
-        
+
+        public void AddRecommendedColumns(IEnumerable<IColumn> columns, FilterConfiguration configuration)
+        {
+            var existingColumnTypes = configuration.Columns?.Select(c => c.Column.GetType()).Distinct().ToHashSet() ?? [];
+            var toAdd = columns.Where(c =>
+                c.DefaultIn.HasFlag(configuration.FilterType) && !existingColumnTypes.Contains(c.GetType())).ToList();
+            foreach (var newColumn in toAdd)
+            {
+                AddColumn(configuration, newColumn.GetType(), false);
+            }
+        }
+
         public void AddDefaultColumns(FilterConfiguration configuration)
         {
             if (configuration.FilterType == FilterType.SearchFilter)
@@ -1049,6 +1065,7 @@ namespace InventoryTools.Lists
                 AddCraftColumn(configuration,typeof(CraftMarketPriceColumn), false);
                 AddCraftColumn(configuration,typeof(AcquisitionSourceIconsColumn), false);
                 AddCraftColumn(configuration,typeof(CraftGatherColumn), false);
+                AddCraftColumn(configuration,typeof(RemoveButtonColumn),false);
                 configuration.DefaultSortColumn = nameColumn.Key;
                 configuration.DefaultSortOrder = ImGuiSortDirection.Ascending;
             }
@@ -1075,6 +1092,7 @@ namespace InventoryTools.Lists
                 AddColumn(configuration,typeof(QuantityColumn), false);
                 AddColumn(configuration,typeof(SourceColumn), false);
                 AddColumn(configuration,typeof(LocationColumn),false);
+                AddColumn(configuration,typeof(RemoveButtonColumn),false);
                 configuration.DefaultSortColumn = nameColumn.Key;
                 configuration.DefaultSortOrder = ImGuiSortDirection.Ascending;
             }

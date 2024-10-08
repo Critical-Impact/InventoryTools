@@ -18,11 +18,11 @@ namespace InventoryTools.Ui
         private readonly IDalamudPluginInterface _pluginInterfaceService;
         private readonly ICharacterMonitor _characterMonitor;
         private readonly WindowService _windowService;
-        private readonly FileDialogManager _fileDialogManager;
+        private readonly IFileDialogManager _fileDialogManager;
         private readonly InventoryToolsConfiguration _configuration;
         private bool _disposing = false;
-        
-        public InventoryToolsUi(IDalamudPluginInterface pluginInterfaceService, ILogger<InventoryToolsUi> logger, MediatorService mediatorService, ICharacterMonitor characterMonitor, WindowService windowService, FileDialogManager fileDialogManager, InventoryToolsConfiguration configuration) : base(logger, mediatorService)
+
+        public InventoryToolsUi(IDalamudPluginInterface pluginInterfaceService, ILogger<InventoryToolsUi> logger, MediatorService mediatorService, ICharacterMonitor characterMonitor, WindowService windowService, IFileDialogManager fileDialogManager, InventoryToolsConfiguration configuration) : base(logger, mediatorService)
         {
             _pluginInterfaceService = pluginInterfaceService;
             _characterMonitor = characterMonitor;
@@ -42,7 +42,7 @@ namespace InventoryTools.Ui
             BypassLoginStatus = true;
             MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
         }
-        
+
         public bool BypassLoginStatus { get; set; }
 
         public bool IsVisible

@@ -23,11 +23,13 @@ namespace InventoryTools.Ui
     {
         private readonly IChatUtilities _chatUtilities;
         private readonly ExcelCache _excelCache;
+        private readonly IClipboardService _clipboardService;
 
-        public BNpcWindow(ILogger<BNpcWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IChatUtilities chatUtilities, ExcelCache excelCache,  string name = "Mob Window") : base(logger, mediator, imGuiService, configuration, name)
+        public BNpcWindow(ILogger<BNpcWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IChatUtilities chatUtilities, ExcelCache excelCache, IClipboardService clipboardService, string name = "Mob Window") : base(logger, mediator, imGuiService, configuration, name)
         {
             _chatUtilities = chatUtilities;
             _excelCache = excelCache;
+            _clipboardService = clipboardService;
         }
         public override void Initialize(uint bNpcId)
         {
@@ -46,7 +48,7 @@ namespace InventoryTools.Ui
                 WindowName = "Unknown Mob";
             }
         }
-        
+
         public override bool SaveState => false;
         private uint _bNpcId;
         private List<MobDropEx>? _mobDrops;
@@ -64,7 +66,7 @@ namespace InventoryTools.Ui
 
             if (bNpc == null)
             {
-                ImGui.TextUnformatted("bNpc with the ID " + _bNpcId + " could not be found.");   
+                ImGui.TextUnformatted("bNpc with the ID " + _bNpcId + " could not be found.");
             }
             else
             {
@@ -74,7 +76,7 @@ namespace InventoryTools.Ui
                 {
                     ImGui.Text("Rank: " + bNpc.NotoriousMonster.RankFormatted());
                 }
-                
+
                 var garlandId = bNpc.GarlandToolsId;
                 if (garlandId != null)
                 {
@@ -94,10 +96,10 @@ namespace InventoryTools.Ui
                     $"https://ffxivteamcraft.com/db/en/mob/{_bNpcId}".OpenBrowser();
                 }
                 ImGuiUtil.HoverTooltip("Open in Teamcraft");
-                
+
                 ImGui.Separator();
-                
-                
+
+
                 if (_mobDrops != null && ImGui.CollapsingHeader("Drops (" + _mobDrops.Count + ")", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
                 {
                     ImGuiStylePtr style = ImGui.GetStyle();
@@ -146,9 +148,9 @@ namespace InventoryTools.Ui
                         }
                     }
                 }
-                
+
                 ImGui.NewLine();
-                
+
                 if (_mobSpawns != null && ImGui.CollapsingHeader("Locations (" + _mobSpawns.Count + ")", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
                 {
                     ImGuiStylePtr style = ImGui.GetStyle();
@@ -158,7 +160,7 @@ namespace InventoryTools.Ui
                         ImGui.PushID("Location"+index);
                         var spawn = _mobSpawns[index];
                         var listingCount = 0;
-                        
+
                         var territory = _excelCache.GetTerritoryTypeExSheet()
                             .GetRow(spawn.TerritoryTypeId);
                         if (territory != null)
@@ -192,16 +194,16 @@ namespace InventoryTools.Ui
                         }
                     }
                 }
-                
+
                 ImGui.NewLine();
-                
+
                 #if DEBUG
                 if (ImGui.CollapsingHeader("Debug"))
                 {
                     ImGui.TextUnformatted("bNpc ID: " + _bNpcId);
                     if (ImGui.Button("Copy"))
                     {
-                        ImGui.SetClipboardText(_bNpcId.ToString());
+                        _clipboardService.CopyToClipboard(_bNpcId.ToString());
                     }
 
                     Utils.PrintOutObject(bNpc, 0, new List<string>());
@@ -213,9 +215,9 @@ namespace InventoryTools.Ui
 
         public override void Invalidate()
         {
-            
+
         }
-        
+
         public override FilterConfiguration? SelectedConfiguration => null;
         public override Vector2? DefaultSize { get; } = new Vector2(500, 800);
         public override Vector2? MaxSize => new (800, 1500);

@@ -26,8 +26,9 @@ public class RightClickService
     private readonly IGameInterface _gameInterface;
     private readonly ICommandManager _commandManager;
     private readonly InventoryToolsConfiguration _configuration;
+    private readonly IClipboardService _clipboardService;
 
-    public RightClickService(ExcelCache excelCache, IListService listService, IChatUtilities chatUtilities, TryOn tryOn, IGameInterface gameInterface, ICommandManager commandManager, InventoryToolsConfiguration configuration)
+    public RightClickService(ExcelCache excelCache, IListService listService, IChatUtilities chatUtilities, TryOn tryOn, IGameInterface gameInterface, ICommandManager commandManager, InventoryToolsConfiguration configuration, IClipboardService clipboardService)
     {
         _excelCache = excelCache;
         _listService = listService;
@@ -36,6 +37,7 @@ public class RightClickService
         _gameInterface = gameInterface;
         _commandManager = commandManager;
         _configuration = configuration;
+        _clipboardService = clipboardService;
     }
 
     public List<MessageBase> DrawRightClickPopup(SearchResult searchResult, FilterConfiguration? filterConfiguration = null)
@@ -365,7 +367,7 @@ public class RightClickService
         ImGui.Separator();
         if (ImGui.Selectable("Copy Name"))
         {
-            searchResult.Item.NameString.ToClipboard();
+            _clipboardService.CopyToClipboard(searchResult.Item.NameString);
         }
         if (ImGui.Selectable("Link"))
         {

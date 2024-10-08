@@ -7,6 +7,7 @@ using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Services.Ui;
+using DalaMock.Shared.Interfaces;
 using Dalamud.Interface.ImGuiFileDialog;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using ImGuiNET;
@@ -28,11 +29,11 @@ namespace InventoryTools.Ui
         private readonly IListService _listService;
         private readonly ICharacterMonitor _characterMonitor;
         private readonly IUniversalis _universalis;
-        private readonly FileDialogManager _fileDialogManager;
+        private readonly IFileDialogManager _fileDialogManager;
         private readonly IGameUiManager _gameUiManager;
         private readonly InventoryToolsConfiguration _configuration;
 
-        public FilterWindow(ILogger<FilterWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, TableService tableService, IListService listService, ICharacterMonitor characterMonitor, IUniversalis universalis, FileDialogManager fileDialogManager, IGameUiManager gameUiManager, string name = "Filter Window") : base(logger, mediator, imGuiService, configuration, name)
+        public FilterWindow(ILogger<FilterWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, TableService tableService, IListService listService, ICharacterMonitor characterMonitor, IUniversalis universalis, IFileDialogManager fileDialogManager, IGameUiManager gameUiManager, string name = "Filter Window") : base(logger, mediator, imGuiService, configuration, name)
         {
             _tableService = tableService;
             _listService = listService;
@@ -92,7 +93,7 @@ namespace InventoryTools.Ui
 
         public override void Invalidate()
         {
-            
+
         }
 
         private string _filterKey;
@@ -113,7 +114,7 @@ namespace InventoryTools.Ui
             }
             base.OnClose();
         }
-        
+
         public override void Draw()
         {
             var filterConfiguration = SelectedConfiguration;
@@ -174,7 +175,7 @@ namespace InventoryTools.Ui
                 }
             }
         }
-        
+
         public unsafe string DrawFilter(FilterTable itemTable, FilterConfiguration filterConfiguration)
         {
             using (var topBarChild = ImRaii.Child("TopBar", new Vector2(0, 40) * ImGui.GetIO().FontGlobalScale, true,
@@ -202,7 +203,7 @@ namespace InventoryTools.Ui
                     }
 
                     ImGuiUtil.HoverTooltip("Clear the current search.");
-                    
+
                 }
             }
             using (var contentChild = ImRaii.Child("Content", new Vector2(0, -40) * ImGui.GetIO().FontGlobalScale, true,
@@ -317,7 +318,7 @@ namespace InventoryTools.Ui
                     {
                     }
                     _settingsMenu.Draw();
-                    
+
                     width -= 30 * ImGui.GetIO().FontGlobalScale;
                     ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                     ImGui.SetCursorPosX(width);
@@ -327,7 +328,7 @@ namespace InventoryTools.Ui
                     }
 
                     ImGuiUtil.HoverTooltip("Open the configuration window.");
-                        
+
                     ImGui.SetCursorPosY(0);
                     width -= 30 * ImGui.GetIO().FontGlobalScale;
                     ImGui.SetCursorPosX(width);
@@ -338,7 +339,7 @@ namespace InventoryTools.Ui
                     }
 
                     ImGuiUtil.HoverTooltip("Open the items window.");
-                    
+
                     ImGui.SetCursorPosY(0);
                     width -= 30 * ImGui.GetIO().FontGlobalScale;
                     ImGui.SetCursorPosX(width);
@@ -349,7 +350,7 @@ namespace InventoryTools.Ui
                     }
 
                     ImGuiUtil.HoverTooltip("Open the craft window.");
-                    
+
                     var totalItems =  itemTable.RenderSearchResults.Count + " items";
 
                     if (SelectedConfiguration != null && SelectedConfiguration.FilterType == FilterType.GameItemFilter)
@@ -371,7 +372,7 @@ namespace InventoryTools.Ui
 
             return filterConfiguration.Key;
         }
-        
+
         private void SaveCallback(FilterTable filterTable, bool arg1, string arg2)
         {
             if (arg1)

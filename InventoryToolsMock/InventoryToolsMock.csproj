@@ -65,6 +65,7 @@
       <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="9.0.0-preview.6.24328.4" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3-beta1" />
       <PackageReference Include="StbiSharp" Version="1.2.1" />
+      <PackageReference Include="TextCopy" Version="6.2.1" />
       <PackageReference Include="Veldrid" Version="4.9.0" />
       <PackageReference Include="Veldrid.SDL2" Version="4.9.0" />
       <PackageReference Include="Veldrid.StartupUtilities" Version="4.9.0" />

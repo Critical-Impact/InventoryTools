@@ -12,16 +12,19 @@ using InventoryTools.Logic.Filters.Abstract;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
 using InventoryTools.Services;
+using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
     public class ColumnsFilter : SortedListFilter<ColumnConfiguration, IColumn>
     {
+        private readonly IListService _listService;
         private readonly IEnumerable<IColumn> _columns;
 
-        public ColumnsFilter(ILogger<ColumnsFilter> logger, ImGuiService imGuiService, IEnumerable<IColumn> columns) : base(logger, imGuiService)
+        public ColumnsFilter(ILogger<ColumnsFilter> logger, ImGuiService imGuiService, IListService listService, IEnumerable<IColumn> columns) : base(logger, imGuiService)
         {
+            _listService = listService;
             _columns = columns;
         }
         public override Dictionary<ColumnConfiguration, (string, string?)> CurrentValue(FilterConfiguration configuration)
@@ -33,7 +36,7 @@ namespace InventoryTools.Logic.Filters
 
             return (configuration.Columns ?? new List<ColumnConfiguration>()).ToDictionary(c => c, GetColumnDetails);
         }
-        
+
         public override void ResetFilter(FilterConfiguration configuration)
         {
             UpdateFilterConfiguration(configuration, new Dictionary<ColumnConfiguration, (string, string?)>());
@@ -115,13 +118,13 @@ namespace InventoryTools.Logic.Filters
         private bool _editMode = false;
         private ColumnConfiguration? _selectedColumnConfiguration;
         private IColumn? _selectedColumn;
-        
+
         public string SearchString
         {
             get => _searchString;
             set => _searchString = value;
         }
-        
+
         private string _searchString = "";
 
         public override void DrawItem(FilterConfiguration configuration, KeyValuePair<ColumnConfiguration, (string, string?)> item, int index)
@@ -361,18 +364,26 @@ namespace InventoryTools.Logic.Filters
             {
                 ImGui.SameLine();
             }
-            
+
             using (var table = ImRaii.Child("columnsTable", new Vector2(0, collapse ? 150 : 0), true))
             {
                 if (table.Success)
                 {
                     ImGui.Text("Current Columns:");
+                    var text = "Add Missing Default. Columns";
+                    var textSize = ImGui.CalcTextSize(text);
+                    ImGui.SameLine();
+                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X - textSize.X - 5);
+                    if (ImGui.SmallButton(text))
+                    {
+                        _listService.AddRecommendedColumns(_columns, configuration);
+                    }
                     ImGui.Separator();
                     DrawTable(configuration);
                 }
             }
 
-            
+
         }
     }
 }

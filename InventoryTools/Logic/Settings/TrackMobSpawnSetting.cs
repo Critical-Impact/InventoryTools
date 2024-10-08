@@ -1,4 +1,5 @@
 using CriticalCommonLib.Services;
+using DalaMock.Shared.Interfaces;
 using Dalamud.Interface.ImGuiFileDialog;
 using ImGuiNET;
 using InventoryTools.Logic.Settings.Abstract;
@@ -10,10 +11,10 @@ namespace InventoryTools.Logic.Settings;
 
 public class TrackMobSpawnSetting : BooleanSetting
 {
-    private readonly FileDialogManager _fileDialogManager;
+    private readonly IFileDialogManager _fileDialogManager;
     private readonly IMobTracker _mobTracker;
 
-    public TrackMobSpawnSetting(ILogger<TrackMobSpawnSetting> logger, ImGuiService imGuiService, FileDialogManager fileDialogManager, IMobTracker mobTracker) : base(logger, imGuiService)
+    public TrackMobSpawnSetting(ILogger<TrackMobSpawnSetting> logger, ImGuiService imGuiService, IFileDialogManager fileDialogManager, IMobTracker mobTracker) : base(logger, imGuiService)
     {
         _fileDialogManager = fileDialogManager;
         _mobTracker = mobTracker;

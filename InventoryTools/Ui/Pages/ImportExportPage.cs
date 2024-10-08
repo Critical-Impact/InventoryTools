@@ -18,18 +18,20 @@ namespace InventoryTools.Ui.Pages
         private readonly IChatUtilities _chatUtilities;
         private readonly PluginLogic _pluginLogic;
         private readonly ListImportExportService _importExportService;
+        private readonly IClipboardService _clipboardService;
 
-        public ImportExportPage(ILogger<ImportExportPage> logger, ImGuiService imGuiService, IListService listService, IChatUtilities chatUtilities, PluginLogic pluginLogic, ListImportExportService importExportService) : base(logger, imGuiService)
+        public ImportExportPage(ILogger<ImportExportPage> logger, ImGuiService imGuiService, IListService listService, IChatUtilities chatUtilities, PluginLogic pluginLogic, ListImportExportService importExportService, IClipboardService clipboardService) : base(logger, imGuiService)
         {
             _listService = listService;
             _chatUtilities = chatUtilities;
             _pluginLogic = pluginLogic;
             _importExportService = importExportService;
+            _clipboardService = clipboardService;
         }
         private bool _isSeparator = false;
         public override void Initialize()
         {
-            
+
         }
 
         public override string Name { get; } =  "Import/Export";
@@ -84,7 +86,7 @@ namespace InventoryTools.Ui.Pages
                         if (ImGui.SmallButton("Export Configuration##" + index))
                         {
                             var base64 = _importExportService.ToBase64(filterConfiguration);
-                            ImGui.SetClipboardText(base64);
+                            _clipboardService.CopyToClipboard(base64);
                             _chatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
                         }
                     }
@@ -98,7 +100,7 @@ namespace InventoryTools.Ui.Pages
             if (ImGui.CollapsingHeader("Import", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
             {
                 var importData = ImportData;
-                if (ImGui.InputTextMultiline("Paste filter here",ref importData, 10000, new Vector2(400, 200) * ImGui.GetIO().FontGlobalScale))
+                if (ImGui.InputTextMultiline("Paste list here",ref importData, 10000, new Vector2(400, 200) * ImGui.GetIO().FontGlobalScale))
                 {
                     ImportData = importData;
                     ImportFailed = false;
@@ -110,7 +112,7 @@ namespace InventoryTools.Ui.Pages
                     {
                         ImportFailed = true;
                         FailedReason =
-                            "You must paste a filter generated via the export function before pressing import.";
+                            "You must paste a list generated via the export function before pressing import.";
                     }
                     else
                     {
@@ -132,7 +134,7 @@ namespace InventoryTools.Ui.Pages
                     ImGui.TextColored(ImGuiColors.DalamudRed, FailedReason);
                 }
             }
-            ImGui.PopID();       
+            ImGui.PopID();
             return null;
         }
 

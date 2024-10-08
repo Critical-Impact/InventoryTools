@@ -15,7 +15,7 @@ using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Ui;
 
-public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
+public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>, IMenuWindow
 {
     private readonly ImGuiService _imGuiService;
     private readonly ExcelCache _excelCache;
@@ -29,7 +29,7 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>
     {
         WindowName = "Duties";
         Key = "duties";
-        
+
         _columns = new List<TableColumn<ContentFinderConditionEx>>()
         {
             new("Icon", 32, ImGuiTableColumnFlags.WidthFixed)

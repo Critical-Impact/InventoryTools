@@ -19,7 +19,8 @@ namespace InventoryTools.Logic
         public InventoryType? DestinationBag => _destinationBag;
 
         public InventoryItem InventoryItem => _inventoryItem;
-        
+        public InventoryItem DestinationItem => _destinationItem;
+
         public Vector2? DestinationSlot => _destinationSlot;
         public bool? IsEmptyDestinationSlot => _isEmptyDestinationSlot;
         public int Quantity => _quantity;
@@ -29,12 +30,13 @@ namespace InventoryTools.Logic
         private InventoryType _sourceBag;
         private InventoryType? _destinationBag;
         private InventoryItem _inventoryItem;
+        private InventoryItem _destinationItem;
         private Vector2? _destinationSlot;
         private bool? _isEmptyDestinationSlot;
         private int _quantity;
         private bool _isSortable;
 
-        public SortingResult(ulong sourceRetainerId, ulong destinationRetainerId, InventoryType sourceBag, InventoryType destinationBag, Vector2 destinationSlot, bool isEmptyDestinationSlot, InventoryItem inventoryItem, int quantity)
+        public SortingResult(ulong sourceRetainerId, ulong destinationRetainerId, InventoryType sourceBag, InventoryType destinationBag, Vector2 destinationSlot, bool isEmptyDestinationSlot, InventoryItem inventoryItem, InventoryItem destinationItem, int quantity)
         {
             _sourceRetainerId = sourceRetainerId;
             _destinationRetainerId = destinationRetainerId;
@@ -42,6 +44,7 @@ namespace InventoryTools.Logic
             _destinationSlot = destinationSlot;
             _destinationBag = destinationBag;
             _inventoryItem = inventoryItem;
+            _destinationItem = destinationItem;
             _quantity = quantity;
             _isEmptyDestinationSlot = isEmptyDestinationSlot;
             _isSortable = true;
@@ -59,7 +62,7 @@ namespace InventoryTools.Logic
             _isEmptyDestinationSlot = null;
             _isSortable = isSortable;
         }
-        
+
         public Vector2 BagLocation => InventoryItem.BagLocation(_sourceBag);
 
         public string GetExtraInformation()
@@ -73,7 +76,7 @@ namespace InventoryTools.Logic
             get => InventoryItem.ItemId;
             set
             {
-                
+
             }
         }
 

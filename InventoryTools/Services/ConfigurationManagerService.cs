@@ -31,7 +31,7 @@ namespace InventoryTools.Services
         private bool _configurationLoaded = false;
 
         public event ConfigurationChangedDelegate? ConfigurationChanged;
-        
+
         public ConfigurationManagerService(IFramework framework, IDalamudPluginInterface pluginInterfaceService, ILogger<ConfigurationManagerService> logger, IBackgroundTaskQueue saveQueue)
         {
             Logger = logger;
@@ -100,7 +100,7 @@ namespace InventoryTools.Services
         {
             return Config;
         }
-       
+
 
         /// <summary>
         /// Loads the primary configuration file
@@ -123,7 +123,7 @@ namespace InventoryTools.Services
             {
                 Converters = new List<JsonConverter>()
                 {
-                  new ColumnConverter()  
+                  new ColumnConverter()
                 },
                 TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
                 TypeNameHandling = TypeNameHandling.None,
@@ -164,7 +164,7 @@ namespace InventoryTools.Services
                         {
                             Converters = new List<JsonConverter>()
                             {
-                                new ColumnConverter()  
+                                new ColumnConverter()
                             },
                             DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
                             ContractResolver = MinifyResolver
@@ -223,7 +223,7 @@ namespace InventoryTools.Services
             loadConfigStopwatch.Restart();
             return inventories;
         }
-        
+
         public void Save()
         {
             Stopwatch loadConfigStopwatch = new Stopwatch();
@@ -247,7 +247,7 @@ namespace InventoryTools.Services
                 Logger.LogError($"Failed to save allagan tools configuration due to {e.Message}");
             }
         }
-        
+
         private void SaveAsync()
         {
             _saveQueue.QueueBackgroundWorkItemAsync(token => Task.Run(Save, token));
@@ -279,7 +279,7 @@ namespace InventoryTools.Services
                 return null;
             }
         }
-        
+
         public MinifyResolver MinifyResolver => _minifyResolver ??= new();
         private MinifyResolver? _minifyResolver;
         private readonly IDalamudPluginInterface _pluginInterfaceService;
@@ -291,7 +291,7 @@ namespace InventoryTools.Services
         {
             Logger.LogTrace("Saving inventory data");
             Stopwatch loadConfigStopwatch = new Stopwatch();
-            loadConfigStopwatch.Start();            
+            loadConfigStopwatch.Start();
             try
             {
                 var items = savedInventories.SelectMany(c => c.Value.SelectMany(d => d.Value)).ToList();
@@ -313,7 +313,7 @@ namespace InventoryTools.Services
         {
             return CsvLoader.ToCsvRaw<InventoryItem>(items, Path.Join(_pluginInterfaceService.ConfigDirectory.FullName, "inventories.csv"));
         }
-        
+
         public List<InventoryItem> LoadInventoriesFromCsv(out bool success, string? csvPath = null)
         {
             var inventoryCsv = csvPath ?? InventoryCsv;
@@ -341,7 +341,7 @@ namespace InventoryTools.Services
 
             return new List<InventoryItem>();
         }
-        
+
         public List<InventoryChange> LoadHistoryFromCsv(out bool success, string? csvPath = null)
         {
             var historyCsv = csvPath ?? HistoryCsv;
@@ -369,7 +369,7 @@ namespace InventoryTools.Services
 
             return new List<InventoryChange>();
         }
-        
+
         public bool SaveHistory(List<InventoryChange> changes)
         {
             return CsvLoader.ToCsvRaw<InventoryChange>(changes, Path.Join(_pluginInterfaceService.ConfigDirectory.FullName, "history.csv"));
@@ -380,12 +380,12 @@ namespace InventoryTools.Services
         {
             await BackgroundProcessing(stoppingToken);
         }
-        
+
         private async Task BackgroundProcessing(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                var workItem = 
+                var workItem =
                     await _saveQueue.DequeueAsync(stoppingToken);
 
                 try
@@ -394,12 +394,12 @@ namespace InventoryTools.Services
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError(ex, 
+                    Logger.LogError(ex,
                         "Error occurred executing {WorkItem}.", nameof(workItem));
                 }
             }
         }
-        
+
         public override async Task StopAsync(CancellationToken stoppingToken)
         {
             Logger.LogTrace("Configuration manager save queue is stopping.");
@@ -407,9 +407,11 @@ namespace InventoryTools.Services
             await base.StopAsync(stoppingToken);
         }
 
+        private bool disposed = false;
         public override void Dispose()
         {
             _framework.Update -= OnUpdate;
+            disposed = true;
         }
     }
 }

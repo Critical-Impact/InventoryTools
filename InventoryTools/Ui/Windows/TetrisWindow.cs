@@ -10,7 +10,7 @@ using Tetris.GameEngine;
 
 namespace InventoryTools.Ui
 {
-    public class TetrisWindow : GenericWindow
+    public class TetrisWindow : GenericWindow, IMenuWindow
     {
         private readonly TetrisGame _tetrisGame;
         private readonly TetrisOverlay _tetrisOverlay;
@@ -25,7 +25,7 @@ namespace InventoryTools.Ui
             WindowName = "Tetris";
             Key = "tetris";
         }
-        
+
         public override bool SaveState => false;
 
         public override void Draw()
@@ -68,7 +68,7 @@ namespace InventoryTools.Ui
             {
                 return;
             }
-            
+
             ImGui.TextUnformatted("Overlay: " + (_tetrisGame.TetrisEnabled ? "Enabled" : "Disabled"));
             ImGui.TextUnformatted("Current Status: " + tetrisGame.Status.ToString());
             if ((tetrisGame.Status == Game.GameStatus.ReadyToStart || tetrisGame.Status == Game.GameStatus.Finished) && ImGui.Button("Start"))
@@ -102,7 +102,7 @@ namespace InventoryTools.Ui
 
         public override void Invalidate()
         {
-            
+
         }
         public override FilterConfiguration? SelectedConfiguration => null;
         public override string GenericKey { get; } = "tetris";

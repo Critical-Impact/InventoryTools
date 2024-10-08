@@ -19,19 +19,21 @@ namespace InventoryTools.Ui.Pages
         private readonly IListService _listService;
         private readonly IChatUtilities _chatUtilities;
         private readonly ListImportExportService _importExportService;
+        private readonly IClipboardService _clipboardService;
 
-        public CraftFiltersPage(ILogger<CraftFiltersPage> logger, ImGuiService imGuiService, IListService listService, IChatUtilities chatUtilities, ListImportExportService importExportService) : base(logger, imGuiService)
+        public CraftFiltersPage(ILogger<CraftFiltersPage> logger, ImGuiService imGuiService, IListService listService, IChatUtilities chatUtilities, ListImportExportService importExportService, IClipboardService clipboardService) : base(logger, imGuiService)
         {
             _listService = listService;
             _chatUtilities = chatUtilities;
             _importExportService = importExportService;
+            _clipboardService = clipboardService;
         }
         private bool _isSeparator = false;
         public override void Initialize()
         {
-            
+
         }
-        
+
         private Dictionary<FilterConfiguration, PopupMenu> _popupMenus = new();
         public Widgets.PopupMenu GetFilterMenu(FilterConfiguration configuration)
         {
@@ -92,7 +94,7 @@ namespace InventoryTools.Ui.Pages
             if (existingFilter != null)
             {
                 var base64 = _importExportService.ToBase64(existingFilter);
-                ImGui.SetClipboardText(base64);
+                _clipboardService.CopyToClipboard(base64);
                 _chatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
             }
         }
@@ -156,9 +158,9 @@ namespace InventoryTools.Ui.Pages
                         {
                             _listService.MoveListDown(filterConfiguration);
                         }
-                        
+
                         ImGui.TableNextColumn();
-                        
+
                         ImGui.Button("...");
                         GetFilterMenu(filterConfiguration).Draw();
                     }

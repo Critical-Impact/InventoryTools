@@ -7,7 +7,7 @@ namespace InventoryTools.Logic.Settings
     public class InvertTabHighlightingSetting : BooleanSetting
     {
         public override bool DefaultValue { get; set; } = true;
-        
+
         public override bool CurrentValue(InventoryToolsConfiguration configuration)
         {
             return configuration.InvertTabHighlighting;
@@ -22,7 +22,7 @@ namespace InventoryTools.Logic.Settings
         public override string Name { get; set; } = "Invert Tab Highlighting?";
 
         public override string HelpText { get; set; } =
-            "Should all the tabs not matching a filter be highlighted instead? This can be overridden in the filter configuration.";
+            "Should all the tabs not matching a list be highlighted instead? This can be overridden in the list configuration.";
 
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.Lists;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Highlighting;

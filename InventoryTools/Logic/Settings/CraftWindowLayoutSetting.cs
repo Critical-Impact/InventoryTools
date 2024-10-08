@@ -34,7 +34,8 @@ public class CraftWindowLayoutSetting : ChoiceSetting<WindowLayout>
     public override Dictionary<WindowLayout, string> Choices { get; } = new Dictionary<WindowLayout, string>()
     {
         { WindowLayout.Sidebar, "Sidebar" },
-        { WindowLayout.Tabs , "Tabs" }
+        { WindowLayout.Tabs , "Tabs" },
+        { WindowLayout.Single , "Single" }
     };
     public override string Version => "1.7.0.0";
 

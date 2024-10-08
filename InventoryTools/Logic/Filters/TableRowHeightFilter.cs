@@ -9,6 +9,8 @@ namespace InventoryTools.Logic.Filters;
 
 public class TableRowHeightFilter : IntegerFilter
 {
+    public override FilterType AvailableIn { get; set; } =
+        FilterType.SearchFilter | FilterType.CraftFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter | FilterType.CuratedList;
     public override string Key { get; set; } = "TableRowHeight";
     public override string Name { get; set; } = "Table Row Height";
     public override string HelpText { get; set; } = "How many pixels high should each item row try to display at?";

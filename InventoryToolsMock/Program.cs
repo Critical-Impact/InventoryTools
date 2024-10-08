@@ -12,6 +12,7 @@ namespace InventoryToolsMock
             var pluginLoader = mockContainer.GetPluginLoader();
             var mockPlugin = pluginLoader.AddPlugin(typeof(InventoryToolsPluginMock));
             mockDalamudUi.Run();
+            pluginLoader.StartPlugin(mockPlugin);
         }
 
     }

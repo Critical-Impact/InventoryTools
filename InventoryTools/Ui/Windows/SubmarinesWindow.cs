@@ -16,7 +16,7 @@ using ImGuiUtil = OtterGui.ImGuiUtil;
 
 namespace InventoryTools.Ui;
 
-public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>
+public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>, IMenuWindow
 {
     private readonly ImGuiService _imGuiService;
     private readonly ExcelCache _excelCache;
@@ -185,9 +185,9 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>
         };
         _tabs = _excelCache.GetSubmarineMapSheet().Where(c => c.Name.ToDalamudString().ToString() != "").ToDictionary(c => c.RowId, c =>c.Name.ToString());
         _items = new Dictionary<uint, List<SubmarineExplorationEx>>();
-        _filteredItems = new Dictionary<uint, List<SubmarineExplorationEx>>();        
+        _filteredItems = new Dictionary<uint, List<SubmarineExplorationEx>>();
     }
-    
+
     private bool OnLeftClick(SubmarineExplorationEx arg)
     {
         MediatorService.Publish(new OpenGenericWindowMessage(typeof(SubmarineWindow)));
@@ -206,7 +206,7 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>
     {
         DrawTabs();
     }
-    
+
     public override void Invalidate()
     {
     }
@@ -223,14 +223,14 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>
     public override Dictionary<uint, List<SubmarineExplorationEx>> FilteredItems => _filteredItems;
 
     public override List<TableColumn<SubmarineExplorationEx>> Columns => _columns;
-    
+
     private List<TableColumn<SubmarineExplorationEx>> _columns = null!;
     private Dictionary<uint, List<SubmarineExplorationEx>> _items= null!;
     private Dictionary<uint, List<SubmarineExplorationEx>> _filteredItems= null!;
     private Dictionary<uint, string> _tabs= null!;
 
     public override ImGuiTableFlags TableFlags => _flags;
-    
+
     private ImGuiTableFlags _flags = ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersV |
                                      ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.BordersInnerV |
                                      ImGuiTableFlags.BordersH | ImGuiTableFlags.BordersOuterH |
@@ -284,8 +284,8 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>
     public override string TableName => _tableName;
 
     public override bool UseClipper => _useClipper;
-    
+
     private string _tableName = "submarines";
     private bool _useClipper = false;
-    
+
 }

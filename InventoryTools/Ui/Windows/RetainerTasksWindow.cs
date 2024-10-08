@@ -17,7 +17,7 @@ using ImGuiUtil = OtterGui.ImGuiUtil;
 
 namespace InventoryTools.Ui;
 
-public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>
+public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>, IMenuWindow
 {
     private readonly ExcelCache _excelCache;
 
@@ -271,9 +271,9 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>
         };
         _tabs = Enum.GetValues<RetainerTaskType>().Where(c => c != RetainerTaskType.Unknown).ToDictionary(c => (uint)c, c =>c.FormattedName());
         _items = new Dictionary<uint, List<RetainerTaskEx>>();
-        _filteredItems = new Dictionary<uint, List<RetainerTaskEx>>();        
+        _filteredItems = new Dictionary<uint, List<RetainerTaskEx>>();
     }
-    
+
     private bool OnLeftClick(RetainerTaskEx arg)
     {
         MediatorService.Publish(new OpenUintWindowMessage(typeof(RetainerTasksWindow), arg.RowId));
@@ -309,14 +309,14 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>
     public override Dictionary<uint, List<RetainerTaskEx>> FilteredItems => _filteredItems;
 
     public override List<TableColumn<RetainerTaskEx>> Columns => _columns;
-    
+
     private List<TableColumn<RetainerTaskEx>> _columns = null!;
     private Dictionary<uint, List<RetainerTaskEx>> _items= null!;
     private Dictionary<uint, List<RetainerTaskEx>> _filteredItems= null!;
     private Dictionary<uint, string> _tabs= null!;
 
     public override ImGuiTableFlags TableFlags => _flags;
-    
+
     private ImGuiTableFlags _flags = ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersV |
                                      ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.BordersInnerV |
                                      ImGuiTableFlags.BordersH | ImGuiTableFlags.BordersOuterH |
@@ -370,7 +370,7 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>
     public override string TableName => _tableName;
 
     public override bool UseClipper => _useClipper;
-    
+
     private string _tableName = "retainerTasks";
     private bool _useClipper = false;
 }

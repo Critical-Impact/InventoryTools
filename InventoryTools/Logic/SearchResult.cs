@@ -21,8 +21,59 @@ namespace InventoryTools.Logic
         public InventoryChange? InventoryChange => _inventoryChange;
 
         public CuratedItem? CuratedItem => _curatedItem;
-        
+
         public CraftItem? CraftItem => _craftItem;
+
+        public uint Quantity
+        {
+            get
+            {
+                if (CraftItem != null)
+                {
+                    return CraftItem.QuantityRequired;
+                }
+                if (CuratedItem != null)
+                {
+                    return CuratedItem.Quantity;
+                }
+                if (InventoryChange != null)
+                {
+                    return InventoryChange.InventoryItem.Quantity;
+                }
+                if (InventoryItem != null)
+                {
+                    return InventoryItem.Quantity;
+                }
+
+                return 1;
+            }
+        }
+        public FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags Flags
+        {
+            get
+            {
+                if (CraftItem != null)
+                {
+                    return CraftItem.Flags;
+                }
+                if (CuratedItem != null)
+                {
+                    return CuratedItem.ItemFlags;
+                }
+                if (InventoryChange != null)
+                {
+                    return InventoryChange.InventoryItem.Flags;
+                }
+                if (InventoryItem != null)
+                {
+                    return InventoryItem.Flags;
+                }
+
+                return FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None;
+            }
+        }
+
+        public uint ItemId => Item.RowId;
 
         public SearchResult(ItemEx item)
         {

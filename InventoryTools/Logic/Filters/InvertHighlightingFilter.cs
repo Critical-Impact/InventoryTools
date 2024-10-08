@@ -8,6 +8,8 @@ namespace InventoryTools.Logic.Filters
 {
     public class InvertHighlightingFilter : BooleanFilter
     {
+        public override FilterType AvailableIn { get; set; } =
+            FilterType.SearchFilter | FilterType.CraftFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter | FilterType.CuratedList;
         public override string Key { get; set; } = "InvertHighlighting";
         public override string Name { get; set; } = "Invert Highlighting?";
         public override string HelpText { get; set; } = "Should all the items not matching the filter be highlighted instead? If set to N/A will use the 'Invert Highlighting' setting inside the general configuration.";

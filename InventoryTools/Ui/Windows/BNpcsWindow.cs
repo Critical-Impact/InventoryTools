@@ -18,7 +18,7 @@ using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Ui;
 
-public class BNpcsWindow : GenericTabbedTable<BNpcNameEx>
+public class BNpcsWindow : GenericTabbedTable<BNpcNameEx>, IMenuWindow
 {
     private readonly IChatUtilities _chatUtilities;
     private readonly ExcelCache _excelCache;
@@ -156,7 +156,7 @@ public class BNpcsWindow : GenericTabbedTable<BNpcNameEx>
 
                         return true;
                     });
-                        
+
                 }
             },
             new("Drops", 200, ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoSort)
@@ -229,7 +229,7 @@ public class BNpcsWindow : GenericTabbedTable<BNpcNameEx>
 
         return null;
     }
-    
+
     private bool OnLeftClick(BNpcNameEx arg)
     {
         MediatorService.Publish(new OpenUintWindowMessage(typeof(BNpcWindow), arg.RowId));
@@ -262,7 +262,7 @@ public class BNpcsWindow : GenericTabbedTable<BNpcNameEx>
         _mobDrops[bNpcNameId] = mobDrops;
         return _mobDrops[bNpcNameId];
     }
-    
+
     public override List<BNpcNameEx> GetItems(uint placeNameId)
     {
         if (_excelCache.MobSpawns == null)
@@ -327,7 +327,7 @@ public class BNpcsWindow : GenericTabbedTable<BNpcNameEx>
     public override Vector2? MaxSize { get; } = new(2000, 2000);
     public override Vector2? MinSize { get; } = new(200, 200);
     public override Vector2? DefaultSize { get; } = new(600, 600);
-    
+
     public override void Draw()
     {
         DrawTabs();

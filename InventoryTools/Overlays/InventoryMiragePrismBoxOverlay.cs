@@ -15,7 +15,7 @@ namespace InventoryTools.Overlays
         {
             _characterMonitor = characterMonitor;
         }
-        
+
         public override bool HasState { get; set; }
         public override bool NeedsStateRefresh { get; set; }
 
@@ -28,7 +28,7 @@ namespace InventoryTools.Overlays
         public int? _currentPage = null;
         public uint? _classJobSelected = null;
         public bool? _onlyDisplay = null;
-        
+
         public override void Update()
         {
             if (!HasState || !AtkOverlay.HasAddon)
@@ -49,7 +49,7 @@ namespace InventoryTools.Overlays
                 _currentPage = currentPage;
                 NeedsStateRefresh = true;
             }
-            if (classJobSelected != 0 && classJobSelected != _classJobSelected)
+            if (classJobSelected != _classJobSelected)
             {
                 _classJobSelected = classJobSelected;
                 NeedsStateRefresh = true;
@@ -160,7 +160,7 @@ namespace InventoryTools.Overlays
                     return;
                 }
             }
-            
+
             if (HasState)
             {
                 ChestInventoryColours[AtkInventoryMiragePrismBox.DresserTab.Body] = EmptyDictionary;
@@ -179,7 +179,7 @@ namespace InventoryTools.Overlays
 
             HasState = false;
         }
-        
+
         public override void Setup()
         {
             for (int x = 0; x < 10; x++)

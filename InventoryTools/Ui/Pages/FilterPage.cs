@@ -18,16 +18,18 @@ namespace InventoryTools.Ui.Pages
         private readonly IFilterService _filterService;
         private readonly IChatUtilities _chatUtilities;
         private readonly ListImportExportService _importExportService;
+        private readonly IClipboardService _clipboardService;
 
-        public FilterPage(ILogger<FilterPage> logger, ImGuiService imGuiService, IFilterService filterService, IChatUtilities chatUtilities, ListImportExportService importExportService) : base(logger, imGuiService)
+        public FilterPage(ILogger<FilterPage> logger, ImGuiService imGuiService, IFilterService filterService, IChatUtilities chatUtilities, ListImportExportService importExportService, IClipboardService clipboardService) : base(logger, imGuiService)
         {
             _filterService = filterService;
             _chatUtilities = chatUtilities;
             _importExportService = importExportService;
+            _clipboardService = clipboardService;
         }
         public override void Initialize()
         {
-            
+
         }
 
         public void Initialize(FilterConfiguration filterConfiguration)
@@ -61,12 +63,12 @@ namespace InventoryTools.Ui.Pages
                 {
                     filterConfiguration.Name = filterName;
                 }
-                
+
                 ImGui.NewLine();
                 if (ImGui.Button("Export Configuration to Clipboard"))
                 {
                     var base64 = _importExportService.ToBase64(filterConfiguration);
-                    ImGui.SetClipboardText(base64);
+                    _clipboardService.CopyToClipboard(base64);
                     _chatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
                 }
 
@@ -137,7 +139,7 @@ namespace InventoryTools.Ui.Pages
                         ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudWhite);
                         if (group.Key == FilterCategory.CraftColumns)
                         {
-                            using (var craftColumns = ImRaii.Child("craftColumns", new (0, -200)))
+                            using (var craftColumns = ImRaii.Child("craftColumns", new (0, -100)))
                             {
                                 if (craftColumns.Success)
                                 {
@@ -148,7 +150,7 @@ namespace InventoryTools.Ui.Pages
                             {
                                 if (otherFilters.Success)
                                 {
-                                    foreach (var filter in group.Value.Where(c => c is not CraftColumnsFilter and ColumnsFilter))
+                                    foreach (var filter in group.Value.Where(c => c is not CraftColumnsFilter && c is not ColumnsFilter))
                                     {
                                         filter.Draw(filterConfiguration);
                                     }

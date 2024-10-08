@@ -40,7 +40,7 @@ namespace InventoryTools.Ui
         public HashSet<uint> SelectedWorldIds { get; set; } = new();
         public WorldPicker(IReadOnlyList<WorldEx> items, bool keepStorage, Logger log) : base(items, keepStorage, log)
         {
-            
+
         }
 
         protected override string ToString(WorldEx obj)
@@ -61,10 +61,16 @@ namespace InventoryTools.Ui
         private readonly Logger _otterLogger;
         private readonly IInventoryMonitor _inventoryMonitor;
         private readonly ICharacterMonitor _characterMonitor;
+        private readonly IClipboardService _clipboardService;
         private HashSet<uint> _marketRefreshing = new();
         private HoverButton _refreshPricesButton = new();
 
-        public ItemWindow(ILogger<ItemWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IMarketBoardService marketBoardService, IFramework framework, ICommandManager commandManager, IListService listService, ExcelCache excelCache, IGameInterface gameInterface, IMarketCache marketCache, IChatUtilities chatUtilities, Logger otterLogger, IInventoryMonitor inventoryMonitor, ICharacterMonitor characterMonitor, string name = "Item Window") : base(logger, mediator, imGuiService, configuration, name)
+        public ItemWindow(ILogger<ItemWindow> logger, MediatorService mediator, ImGuiService imGuiService,
+            InventoryToolsConfiguration configuration, IMarketBoardService marketBoardService, IFramework framework,
+            ICommandManager commandManager, IListService listService, ExcelCache excelCache,
+            IGameInterface gameInterface, IMarketCache marketCache, IChatUtilities chatUtilities, Logger otterLogger,
+            IInventoryMonitor inventoryMonitor, ICharacterMonitor characterMonitor, IClipboardService clipboardService, string name = "Item Window") : base(
+            logger, mediator, imGuiService, configuration, name)
         {
             _marketBoardService = marketBoardService;
             _framework = framework;
@@ -77,6 +83,7 @@ namespace InventoryTools.Ui
             _otterLogger = otterLogger;
             _inventoryMonitor = inventoryMonitor;
             _characterMonitor = characterMonitor;
+            _clipboardService = clipboardService;
         }
 
         private void MarketCacheUpdated(MarketCacheUpdatedMessage obj)
@@ -158,7 +165,7 @@ namespace InventoryTools.Ui
                 Key = "item_unknown";
             }
         }
-        
+
         public override bool SaveState => false;
         private uint _itemId;
         private ItemEx? Item => _excelCache.GetItemExSheet().GetRow(_itemId);
@@ -176,7 +183,7 @@ namespace InventoryTools.Ui
             {
                 worldIds.Add(world);
             }
-            
+
             _marketPrices = _marketCache.GetPricing(_itemId, worldIds.ToList(), true);
         }
 
@@ -211,9 +218,9 @@ namespace InventoryTools.Ui
         private RecipeEx[] RecipesResult { get;set; }
 
         private RetainerTaskEx[] RetainerTasks { get; set; }
-        
+
         private MobDropEx[] MobDrops { get;set; }
-        
+
         private List<CriticalCommonLib.Models.InventoryItem> OwnedItems { get; set; }
 
         public override string GenericName { get; } = "Item";
@@ -227,7 +234,7 @@ namespace InventoryTools.Ui
 
             if (Item == null)
             {
-                ImGui.TextUnformatted("Item with the ID " + _itemId + " could not be found.");   
+                ImGui.TextUnformatted("Item with the ID " + _itemId + " could not be found.");
             }
             else
             {
@@ -286,7 +293,7 @@ namespace InventoryTools.Ui
                     $"https://ffxivteamcraft.com/db/en/item/{_itemId}".OpenBrowser();
                 }
                 ImGuiUtil.HoverTooltip("Open in Teamcraft");
-                
+
                 ImGui.SameLine();
                 if (ImGui.ImageButton(ImGuiService.GetImageTexture("gamerescape").ImGuiHandle,
                         new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
@@ -299,7 +306,7 @@ namespace InventoryTools.Ui
                     $"https://ffxiv.gamerescape.com/wiki/{HttpUtility.UrlEncode(name)}?useskin=Vector".OpenBrowser();
                 }
                 ImGuiUtil.HoverTooltip("Open in Gamer Escape");
-                
+
                 ImGui.SameLine();
                 if (ImGui.ImageButton(ImGuiService.GetImageTexture("consolegameswiki").ImGuiHandle,
                         new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
@@ -312,7 +319,7 @@ namespace InventoryTools.Ui
                     $"https://ffxiv.consolegameswiki.com/wiki/{HttpUtility.UrlEncode(name)}".OpenBrowser();
                 }
                 ImGuiUtil.HoverTooltip("Open in Console Games Wiki");
-                
+
                 if (Item.CanOpenCraftLog)
                 {
                     ImGui.SameLine();
@@ -336,7 +343,7 @@ namespace InventoryTools.Ui
                     {
                         ImGui.OpenPopup("AddCraftList" + _itemId);
                     }
-                    
+
                     if (ImGui.BeginPopup("AddCraftList" + _itemId))
                     {
                         var craftFilters =
@@ -373,7 +380,7 @@ namespace InventoryTools.Ui
                     }
 
                     ImGuiUtil.HoverTooltip("Gatherable - Open in Gathering Log");
-                    
+
                     ImGui.SameLine();
                     if (ImGui.ImageButton(ImGuiService.GetIconTexture(63900).ImGuiHandle,
                             new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
@@ -394,7 +401,7 @@ namespace InventoryTools.Ui
                     }
 
                     ImGuiUtil.HoverTooltip("Gatherable - Open in Fishing Log");
-                    
+
                     ImGui.SameLine();
                     if (ImGui.ImageButton(ImGuiService.GetIconTexture(63900).ImGuiHandle,
                             new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
@@ -404,13 +411,13 @@ namespace InventoryTools.Ui
 
                     ImGuiUtil.HoverTooltip("Gatherable - Gather with Gatherbuddy");
                 }
-                
+
                 ImGui.Separator();
-    
+
                 DrawSources();
-                
+
                 DrawUses();
-                
+
                 DrawOwned();
 
                 DrawMobDrops();
@@ -431,14 +438,14 @@ namespace InventoryTools.Ui
 
                 DrawCraftRecipe();
 
-                
+
 #if DEBUG
                 if (ImGui.CollapsingHeader("Debug"))
                 {
                     ImGui.TextUnformatted("Item ID: " + _itemId);
                     if (ImGui.Button("Copy"))
                     {
-                        ImGui.SetClipboardText(_itemId.ToString());
+                        _clipboardService.CopyToClipboard(_itemId.ToString());
                     }
 
                     Utils.PrintOutObject(Item, 0, new List<string>());
@@ -562,7 +569,7 @@ namespace InventoryTools.Ui
         private bool DrawCraftRecipe()
         {
             bool hasInformation = false;
-            
+
             if (Item is { CanBeCrafted: true })
             {
                 var recipes = Item.RecipesAsResult;
@@ -605,7 +612,7 @@ namespace InventoryTools.Ui
                     _craftTypeId = 0;
                 }
 
-                string headerName = "Recipes - for crafting this item";   
+                string headerName = "Recipes - for crafting this item";
                 if (ImGui.CollapsingHeader(headerName))
                 {
                     if (_craftTypes.Count > 1)
@@ -653,7 +660,7 @@ namespace InventoryTools.Ui
                             _craftItem = craftList.CraftItems.First();
                         }
                     }
-                    
+
                     ImGuiStylePtr style = ImGui.GetStyle();
                     float windowVisibleX2 = ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
                     var index = 0;
@@ -723,11 +730,11 @@ namespace InventoryTools.Ui
                         {
                             MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), sharedModel.RowId));
                         }
-                        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right)) 
+                        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right))
                         {
                             ImGui.OpenPopup("RightClick" + sharedModel.RowId);
                         }
-                
+
                         if (ImGui.BeginPopup("RightClick"+ sharedModel.RowId))
                         {
                             MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(sharedModel));
@@ -772,11 +779,11 @@ namespace InventoryTools.Ui
                             {
                                 MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), recipe.ItemResultEx.Row));
                             }
-                            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right)) 
+                            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right))
                             {
                                 ImGui.OpenPopup("RightClick" + recipe.RowId);
                             }
-                    
+
                             if (ImGui.BeginPopup("RightClick"+ recipe.RowId))
                             {
                                 if (recipe.ItemResultEx.Value != null)
@@ -995,7 +1002,7 @@ namespace InventoryTools.Ui
                             }
                         }
                     }
-                        
+
                     ImGui.SameLine();
                     ImGui.SetCursorPosX(ImGui.GetWindowWidth() - 22 - ImGui.GetStyle().FramePadding.X);
                     if (_refreshPricesButton.Draw(ImGuiService.GetImageTexture("refresh-web").ImGuiHandle, "refreshPrices"))
@@ -1007,7 +1014,7 @@ namespace InventoryTools.Ui
                         new[] { "Server","Updated At", "Available", "Min. Price" });
                 }
             }
-                
+
             void DrawMarketRow(MarketPricing obj)
             {
                 ImGui.TableNextColumn();
@@ -1124,7 +1131,7 @@ namespace InventoryTools.Ui
             {
                 return;
             }
-            
+
             if (ImGui.CollapsingHeader("Uses/Rewards (" + Item.Uses.Count + ")", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
             {
                 ImGuiStylePtr style = ImGui.GetStyle();
@@ -1196,7 +1203,7 @@ namespace InventoryTools.Ui
         {
             ImGui.TableNextColumn();
             ImGui.TextUnformatted(spawnGroup.Key.PlaceName.Value?.Name ?? "Unknown");
-            
+
             ImGui.TableNextColumn();
 
             using (var locationScrollChild = ImRaii.Child(spawnGroup.Key.RowId + "LocationScroll",
@@ -1255,7 +1262,7 @@ namespace InventoryTools.Ui
             }
             ImGuiUtil.HoverTooltip(source.Name + " - Open in Gathering Log");
             ImGui.TableNextColumn();
-            ImGui.TextUnformatted(obj.Level.GatheringItemLevel.ToString());     
+            ImGui.TextUnformatted(obj.Level.GatheringItemLevel.ToString());
             ImGui.TableNextColumn();
             ImGui.TextWrapped(obj.PlaceName.Name + " - " + (obj.TerritoryType.PlaceName.Value?.Name ?? "Unknown"));
             ImGui.PopID();
@@ -1271,16 +1278,16 @@ namespace InventoryTools.Ui
             ImGui.TableNextColumn();
             ImGui.TextWrapped( obj.FormattedName);
             ImGui.TableNextColumn();
-            ImGui.TextUnformatted(obj.DurationString);     
+            ImGui.TextUnformatted(obj.DurationString);
             ImGui.TableNextColumn();
             ImGui.TextWrapped(obj.Quantities);
         }
 
         public override void Invalidate()
         {
-            
+
         }
-        
+
         public override FilterConfiguration? SelectedConfiguration => null;
         public override Vector2? DefaultSize { get; } = new Vector2(500, 800);
         public override Vector2? MaxSize => new (800, 1500);
@@ -1289,6 +1296,6 @@ namespace InventoryTools.Ui
         public override bool SavePosition => true;
 
         public override string GenericKey => "item";
-        
+
     }
 }

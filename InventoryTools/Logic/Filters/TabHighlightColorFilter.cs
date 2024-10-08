@@ -9,6 +9,8 @@ namespace InventoryTools.Logic.Filters
 {
     public class TabHighlightColorFilter : ColorFilter
     {
+        public override FilterType AvailableIn { get; set; } =
+            FilterType.SearchFilter | FilterType.CraftFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter | FilterType.CuratedList;
         public override string Key { get; set; } = "TabHighlightColor";
         public override string Name { get; set; } = "Tab Highlight Color";
 

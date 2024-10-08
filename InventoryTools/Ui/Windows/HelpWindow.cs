@@ -22,16 +22,16 @@ namespace InventoryTools.Ui
             WindowName = "Help";
             Key = "help";
         }
-        
+
         public override bool SaveState => false;
         public override Vector2? DefaultSize { get; } = new Vector2(700, 700);
         public override  Vector2? MaxSize { get; } = new Vector2(2000, 2000);
         public override  Vector2? MinSize { get; } = new Vector2(200, 200);
         public override string GenericKey { get; } = "help";
-        public override string GenericName { get; } = "Help;";
+        public override string GenericName { get; } = "Help";
         public override bool DestroyOnClose => true;
 
-        
+
         public override void Draw()
         {
             using (var sideBarChild =
@@ -79,23 +79,23 @@ namespace InventoryTools.Ui
                         ImGui.TextWrapped("The plugin will do it's best to keep track of your inventories. Some inventories are only cached when they are first accessed. If you aren't seeing your retainer/free company/glamour chest/etc then please be sure to view them first otherwise the plugin will not be able to cache them.");
                         ImGui.TextWrapped("Once the plugin knows about the items, you can create lists to narrow down searches for specific items, help you sort the items and a myriad of other things.");
                         ImGui.NewLine();
-                        
+
                         ImGui.TextUnformatted("Craft Planning:");
                         ImGui.Separator();
                         ImGui.TextWrapped("The plugin has a dedicated crafts window that lets you create lists of items you want to craft. It'll create a plan that breaks each item down into it's individual parts and will tell you what you're missing. It'll tell you where everything you need is and if you are missing anything, it'll direct you to the place to find/buy the missing items.");
                         ImGui.TextWrapped("If you've ever used Teamcraft, you should be right at home.");
                         ImGui.NewLine();
-                        
+
                         ImGui.TextUnformatted("Item Information:");
                         ImGui.Separator();
                         ImGui.TextWrapped("The plugin has a fairly comprehensive database of information about each item. If you've used garland tools, the information provided is very similar. Clicking on an item's icon within the plugin will always open the item's information window.");
                         ImGui.NewLine();
-                        
+
                         ImGui.TextUnformatted("Highlighting:");
                         ImGui.Separator();
                         ImGui.TextWrapped("When using either an item list or a craft list, you can toggle highlighting. This will highlight the items in game so that you can see exactly where the items are. When the plugins windows are active, you can hit the 'Highlight' checkbox to activate highlighting for that list. If you want to trigger this with a macro, please have a look at the commands section of help, you can toggle 'background' highlighting.");
                         ImGui.NewLine();
-                        
+
                         ImGui.TextUnformatted("This is a very basic guide, for more information please see the wiki.");
                         if (ImGui.Button("Open Wiki"))
                         {
@@ -151,7 +151,7 @@ namespace InventoryTools.Ui
                         ImGui.TextUnformatted("Advanced Search/Filter Syntax:");
                         ImGui.Separator();
                         ImGui.TextWrapped(
-                            "When creating a filter or when searching through the results of a list it is possible to use a series of operators to make your search more specific. The available operators are dependant on what you searching against but at present support for !, <, >, >=, <=, = is present.");
+                            "When creating a list or when searching through the results of a list it is possible to use a series of operators to make your search more specific. The available operators are dependant on what you searching against but at present support for !, <, >, >=, <=, = is present.");
                         ImGui.TextWrapped(
                             "! - Show any results that do not contain what is entered - available for text and numbers.");
                         ImGui.TextWrapped(
@@ -191,12 +191,12 @@ namespace InventoryTools.Ui
                 }
             }
         }
-        
+
         public override FilterConfiguration? SelectedConfiguration => null;
 
         public override void Invalidate()
         {
-            
+
         }
     }
 }

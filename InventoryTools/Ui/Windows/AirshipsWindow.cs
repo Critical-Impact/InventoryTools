@@ -16,7 +16,7 @@ using ImGuiUtil = OtterGui.ImGuiUtil;
 
 namespace InventoryTools.Ui;
 
-public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
+public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>, IMenuWindow
 {
     private readonly ExcelCache _excelCache;
 
@@ -254,7 +254,7 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
             {0, "All"}
         };
         _items = new Dictionary<uint, List<AirshipExplorationPointEx>>();
-        _filteredItems = new Dictionary<uint, List<AirshipExplorationPointEx>>();        
+        _filteredItems = new Dictionary<uint, List<AirshipExplorationPointEx>>();
     }
 
     private bool OnLeftClick(AirshipExplorationPointEx arg)
@@ -292,14 +292,14 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
     public override Dictionary<uint, List<AirshipExplorationPointEx>> FilteredItems => _filteredItems;
 
     public override List<TableColumn<AirshipExplorationPointEx>> Columns => _columns;
-    
+
     private List<TableColumn<AirshipExplorationPointEx>> _columns = null!;
     private Dictionary<uint, List<AirshipExplorationPointEx>> _items = null!;
     private Dictionary<uint, List<AirshipExplorationPointEx>> _filteredItems = null!;
     private Dictionary<uint, string> _tabs = null!;
 
     public override ImGuiTableFlags TableFlags => _flags;
-    
+
     private ImGuiTableFlags _flags = ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersV |
                                      ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.BordersInnerV |
                                      ImGuiTableFlags.BordersH | ImGuiTableFlags.BordersOuterH |
@@ -348,7 +348,7 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointEx>
     public override string TableName => _tableName;
 
     public override bool UseClipper => _useClipper;
-    
+
     private string _tableName = "airships";
     private bool _useClipper = false;
 }

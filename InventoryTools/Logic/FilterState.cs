@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib;
 using CriticalCommonLib.Enums;
+using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
@@ -30,7 +32,7 @@ namespace InventoryTools.Logic
         {
             FilterConfiguration = filterConfiguration;
         }
-        
+
         public FilterConfiguration FilterConfiguration;
         private readonly ILogger<FilterState> _logger;
         private readonly ICharacterMonitor _characterMonitor;
@@ -119,7 +121,7 @@ namespace InventoryTools.Logic
                             shouldHighlight = false;
                         }
                     }
-                    
+
                 }
 
                 return shouldHighlight;
@@ -206,7 +208,7 @@ namespace InventoryTools.Logic
                 {
                     return itemHighlights;
                 }
-                
+
 
                 var target = Service.Targets.Target;
                     if (target != null)
@@ -267,7 +269,7 @@ namespace InventoryTools.Logic
                         .ActiveCharacterId, InventoryCategory.Armoire);
 
                 var itemIds = fullInventory.Select(c => c.ItemId).Distinct().ToImmutableHashSet();
-                
+
                 var filteredItems = filterResult.Where(c =>
                 {
                     if (c.SortingResult == null)
@@ -286,7 +288,7 @@ namespace InventoryTools.Logic
                         }
                     }
                 }
-                
+
                 if (InvertHighlighting)
                 {
                     var invertedHighlights = new Dictionary<string, Vector4?>();
@@ -304,7 +306,7 @@ namespace InventoryTools.Logic
                     return invertedHighlights;
                 }
 
-                
+
                 return bagHighlights;
             }
 
@@ -326,7 +328,7 @@ namespace InventoryTools.Logic
                         .ActiveCharacterId, InventoryCategory.Armoire);
 
                 var itemIds = fullInventory.Select(c => c.ItemId).Distinct().ToImmutableHashSet();
-                
+
                 var filteredItems = filterResult.Where(c =>
                 {
                     if (c.SortingResult == null)
@@ -350,7 +352,7 @@ namespace InventoryTools.Logic
                 if (InvertTabHighlighting)
                 {
                     var invertedHighlights = new Dictionary<uint, Vector4?>();
-                    
+
                     foreach (var cab in cabinetDictionary)
                     {
                         if (!bagHighlights.ContainsKey(cab.Value))
@@ -372,7 +374,7 @@ namespace InventoryTools.Logic
                     return invertedHighlights;
 
                 }
-               
+
                 return bagHighlights;
             }
 
@@ -381,326 +383,268 @@ namespace InventoryTools.Logic
 
         public Dictionary<Vector2, Vector4?> GetGlamourHighlights(AtkInventoryMiragePrismBox.DresserTab dresserTab, int page, bool displayEquippableOnly,uint classJobSelected, List<SearchResult>? resultOverride = null)
         {
-            var bagHighlights = new Dictionary<Vector2, Vector4?>();
-            //Needs a rewrite
-            // if (_characterMonitor.ActiveCharacterId == 0)
-            // {
-            //     return bagHighlights;
-            // }
-            // var filterResult = resultOverride ?? FilterResult;
-            // if (filterResult != null)
-            // {
-            //     var fullInventory =
-            //         _inventoryMonitor.GetSpecificInventory(_characterMonitor
-            //             .ActiveCharacterId, InventoryCategory.GlamourChest);
-            //     
-            //     var filteredItems = fullInventory.Where(c =>
-            //         AtkInventoryMiragePrismBox.EquipSlotCategoryToDresserTab(c.EquipSlotCategory) ==
-            //         dresserTab);
-            //     
-            //     if (classJobSelected != 0)
-            //     {
-            //         filteredItems = filteredItems.Where(c => _excelCache.IsItemEquippableBy(c.Item.ClassJobCategory.Row, classJobSelected));
-            //     }
-            //
-            //     if (displayEquippableOnly && _characterMonitor.ActiveCharacter != null)
-            //     {
-            //         var race = _characterMonitor.ActiveCharacter.Race;
-            //         var gender = _characterMonitor.ActiveCharacter.Gender;
-            //         filteredItems = filteredItems.Where(c => c.Item.CanBeEquippedByRaceGender(race, gender));
-            //         
-            //     }
-            //
-            //     var inventoryItems =
-            //         filteredItems.Skip(page * 50).Take(50).OrderBy(c => c.SortedSlotIndex).ToList();
-            //     var glamourIndex = 0;
-            //     foreach (var item in inventoryItems)
-            //     {
-            //         item.GlamourIndex = glamourIndex;
-            //         glamourIndex++;
-            //     }
-            //     var correctResults = filterResult.OrderBy(c => c.InventoryItem?.Slot ?? 0).ToList();
-            //     var x = 0;
-            //     var y = 0;
-            //     foreach (var item in correctResults)
-            //     {
-            //         if(((item.InventoryItem != null && inventoryItems.Contains(item.InventoryItem)) || item.InventoryItem == null) && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting)))
-            //         {
-            //             var itemBagLocation = item.BagLocation;
-            //             if (!bagHighlights.ContainsKey(itemBagLocation))
-            //             {
-            //                 if (!InvertHighlighting && !item.InventoryItem.IsEmpty)
-            //                 {
-            //                     bagHighlights.Add(itemBagLocation, BagHighlightColor);
-            //                 }
-            //                 else if (InvertHighlighting && item.InventoryItem.IsEmpty)
-            //                 {
-            //                     bagHighlights.Add(itemBagLocation, BagHighlightColor);
-            //                 }
-            //                 else if(InvertHighlighting)
-            //                 {
-            //                     bagHighlights.Add(itemBagLocation, null);
-            //                 }
-            //                 else
-            //                 {
-            //                     bagHighlights.Add(itemBagLocation, null);
-            //                 }
-            //             }
-            //
-            //             x++;
-            //             if (x >= 10)
-            //             {
-            //                 x = 0;
-            //                 y++;
-            //             }
-            //         }
-            //     }
-            //     for (int x2 = 0; x2 < 10; x2++)
-            //     {
-            //         for (int y2 = 0; y2 < 5; y2++)
-            //         {
-            //             var position = new Vector2(x2,y2);
-            //             if(!bagHighlights.ContainsKey(position))
-            //             {
-            //                 if (InvertHighlighting)
-            //                 {
-            //                     bagHighlights.Add(position, BagHighlightColor);
-            //                 }
-            //                 else
-            //                 {
-            //                     bagHighlights.Add(position, null);
-            //                 }
-            //             }
-            //         }
-            //     }
-            //     return bagHighlights;
-            // }
+            var inventoryType = InventoryType.GlamourChest;
+            var characterId = GetCharacterId(inventoryType);
+            var filterResult = resultOverride ?? FilterResult;
+            if (characterId == null || filterResult == null)
+            {
+                return new Dictionary<Vector2, Vector4?>();
+            }
 
-            return new Dictionary<Vector2, Vector4?>();
+            var inventoryContents = _inventoryMonitor.GetSpecificInventory(characterId.Value, inventoryType);
+
+            var bagLayout = GenerateBagLayout(inventoryType);
+
+            var filteredItems = inventoryContents.Where(c =>
+                AtkInventoryMiragePrismBox.EquipSlotCategoryToDresserTab(c.EquipSlotCategory) ==
+                dresserTab);
+
+            if (classJobSelected != 0)
+            {
+                filteredItems = filteredItems.Where(c => _excelCache.IsItemEquippableBy(c.Item.ClassJobCategory.Row, classJobSelected));
+            }
+
+            if (displayEquippableOnly && _characterMonitor.ActiveCharacter != null)
+            {
+                var race = _characterMonitor.ActiveCharacter.Race;
+                var gender = _characterMonitor.ActiveCharacter.Gender;
+                filteredItems = filteredItems.Where(c => c.Item.CanBeEquippedByRaceGender(race, gender));
+
+            }
+
+            inventoryContents =
+                filteredItems.Skip(page * 50).Take(50).OrderBy(c => c.SortedSlotIndex).ToList();
+
+            var slotToPosition = new Dictionary<int, Vector2>();
+
+            for (var index = 0; index < inventoryContents.Count; index++)
+            {
+                var item = inventoryContents[index];
+                slotToPosition[item.SortedSlotIndex] = item.BagLocation(InventoryType.GlamourChest, index);
+            }
+
+            var contentsMap = inventoryContents.GroupBy(c => c.ItemId).ToDictionary(c => c.Key, c => c.ToList());
+
+            foreach (var searchResult in filterResult)
+            {
+                if (searchResult.SortingResult != null)
+                {
+                    var matchesSource = searchResult.SortingResult.SourceBag == inventoryType &&
+                                        (MatchesFilter(FilterConfiguration, searchResult, InvertHighlighting) ||
+                                         MatchesRetainerFilter(FilterConfiguration, searchResult, InvertHighlighting) ||
+                                         MatchesFreeCompanyFilter(FilterConfiguration, searchResult.SortingResult, InvertHighlighting) ||
+                                         MatchesHousingFilter(FilterConfiguration, searchResult.SortingResult, InvertHighlighting));
+
+                    if (!matchesSource)
+                    {
+                        continue;
+                    }
+                }
+
+                if (contentsMap.TryGetValue(searchResult.ItemId, out var value))
+                {
+                    foreach (var content in value)
+                    {
+                        Vector2? bagLocation = slotToPosition.TryGetValue(content.SortedSlotIndex, out var slotPosition) ? slotPosition : null;
+                        if (bagLocation != null && bagLayout.ContainsKey(bagLocation.Value))
+                        {
+                            bagLayout[bagLocation.Value] = content.IsEmpty ? null : content;
+                        }
+                    }
+                }
+            }
+
+            var bagHighlights = new Dictionary<Vector2, Vector4?>();
+            foreach (var item in bagLayout)
+            {
+                bagHighlights[item.Key] = InvertHighlighting ? item.Value == null ? BagHighlightColor : null : item.Value == null ? null : BagHighlightColor;
+            }
+
+            return bagHighlights;
         }
-        
-        public Dictionary<Vector2, Vector4?> GetBagHighlights(InventoryType bag, List<SearchResult>? resultOverride = null)
+
+        public ulong? GetCharacterId(InventoryType inventoryType)
         {
-            var bagHighlights = new Dictionary<Vector2, Vector4?>();
-            return bagHighlights;
-            
-            //Rewrite this to find the inventories that would be applicable(i.e. character/retainer)
+            var category = inventoryType.ToInventoryCategory();
+            switch (category)
+            {
+                case InventoryCategory.CharacterBags:
+                    return _characterMonitor.ActiveCharacterId;
+                    break;
+                case InventoryCategory.CharacterSaddleBags:
+                    return _characterMonitor.ActiveCharacterId;
+                    break;
+                case InventoryCategory.CharacterPremiumSaddleBags:
+                    return _characterMonitor.ActiveCharacterId;
+                    break;
+                case InventoryCategory.RetainerBags:
+                    return ActiveRetainerId;
+                    break;
+                case InventoryCategory.CharacterArmoryChest:
+                    return _characterMonitor.ActiveCharacterId;
+                    break;
+                case InventoryCategory.CharacterEquipped:
+                    return _characterMonitor.ActiveCharacterId;
+                    break;
+                case InventoryCategory.RetainerEquipped:
+                    return ActiveRetainerId;
+                    break;
+                case InventoryCategory.RetainerMarket:
+                    return ActiveRetainerId;
+                    break;
+                case InventoryCategory.GlamourChest:
+                    return _characterMonitor.ActiveCharacterId;
+                    break;
+                case InventoryCategory.Armoire:
+                    return _characterMonitor.ActiveCharacterId;
+                    break;
+                default:
+                    return null;
+            }
+        }
 
-            // var filterResult = resultOverride ?? FilterResult;
-            // if (filterResult != null)
-            // {
-            //     if (filterResult.AllItems.Count != 0)
-            //     {
-            //         var allItems = filterResult.AllItems;
-            //         var itemHashes = new HashSet<uint>();
-            //         Dictionary<uint, HashSet<Vector2>> availableItems = new ();
-            //         
-            //         //Hack until I work out somewhere else to push this
-            //
-            //         var characterId = _characterMonitor.ActiveCharacterId;
-            //
-            //         if (bag == InventoryType.FreeCompanyBag0 || bag == InventoryType.FreeCompanyBag1 ||
-            //             bag == InventoryType.FreeCompanyBag2 || bag == InventoryType.FreeCompanyBag3 ||
-            //             bag == InventoryType.FreeCompanyBag4 || bag == InventoryType.FreeCompanyBag5)
-            //         {
-            //             characterId = _characterMonitor.ActiveFreeCompanyId;
-            //         }
-            //         
-            //         
-            //         foreach (var item in _inventoryMonitor.GetSpecificInventory(characterId, bag))
-            //         {
-            //             if (!availableItems.ContainsKey(item.ItemId))
-            //             {
-            //                 availableItems[item.ItemId] = new HashSet<Vector2>();
-            //             }
-            //
-            //             var bagLocation = item.BagLocation(bag);
-            //             if (!availableItems[item.ItemId].Contains(bagLocation))
-            //             {
-            //                 availableItems[item.ItemId].Add(bagLocation);
-            //             }
-            //         }
-            //         
-            //         //Only hash the items we actually need
-            //         foreach (var item in allItems)
-            //         {
-            //             if (availableItems.ContainsKey(item.RowId))
-            //             {
-            //                 itemHashes.Add(item.RowId);
-            //             }
-            //         }
-            //
-            //         
-            //         foreach (var availableItem in availableItems.AsParallel())
-            //         {
-            //             if (itemHashes.Contains(availableItem.Key))
-            //             {
-            //                 foreach (var position in availableItem.Value)
-            //                 {
-            //                     if (!InvertHighlighting)
-            //                     {
-            //                         bagHighlights.TryAdd(position, BagHighlightColor);
-            //                     }
-            //                     else if (InvertHighlighting)
-            //                     {
-            //                         bagHighlights.TryAdd(position, null);
-            //                     }
-            //                 }
-            //             }
-            //         }
-            //
-            //         if (bag is InventoryType.Bag0 or InventoryType.Bag1 or InventoryType.Bag2 or InventoryType.Bag3 or InventoryType.RetainerBag0 or InventoryType.RetainerBag1 or InventoryType.RetainerBag2 or InventoryType.RetainerBag3 or InventoryType.RetainerBag4 or InventoryType.SaddleBag0 or InventoryType.SaddleBag1 or InventoryType.PremiumSaddleBag0 or InventoryType.PremiumSaddleBag1)
-            //         {
-            //             for (int x = 0; x < 5; x++)
-            //             {
-            //                 for (int y = 0; y < 7; y++)
-            //                 {
-            //                     var position = new Vector2(x,y);
-            //                     if(!bagHighlights.ContainsKey(position))
-            //                     {
-            //                         if (InvertHighlighting)
-            //                         {
-            //                             bagHighlights.Add(position, BagHighlightColor);
-            //                         }
-            //                         else
-            //                         {
-            //                             bagHighlights.Add(position, null);
-            //                         }
-            //                     }
-            //                 }
-            //             }
-            //         }
-            //
-            //         if (bag is InventoryType.ArmoryBody or InventoryType.ArmoryEar or InventoryType.ArmoryFeet or InventoryType.ArmoryHand or InventoryType.ArmoryHead or InventoryType.ArmoryLegs or InventoryType.ArmoryMain or InventoryType.ArmoryNeck or InventoryType.ArmoryOff or InventoryType.ArmoryRing  or InventoryType.ArmoryWrist or InventoryType.ArmorySoulCrystal  or InventoryType.FreeCompanyBag0 or InventoryType.FreeCompanyBag1 or InventoryType.FreeCompanyBag2 or InventoryType.FreeCompanyBag3 or InventoryType.FreeCompanyBag4)
-            //         {
-            //             for (int x = 0; x < 50; x++)
-            //             {
-            //                 var position = new Vector2(x,0);
-            //                 if(!bagHighlights.ContainsKey(position))
-            //                 {
-            //                     if (InvertHighlighting)
-            //                     {
-            //                         bagHighlights.Add(position, BagHighlightColor);
-            //                     }
-            //                     else
-            //                     {
-            //                         bagHighlights.Add(position, null);
-            //                     }
-            //                 }
-            //             }
-            //         }
-            //         return bagHighlights;
-            //     }
-            //
-            //     
-            //     foreach (var item in filterResult.SortedItems)
-            //     {
-            //         var matchesSource = item.SourceBag == bag && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting) || MatchesFreeCompanyFilter(FilterConfiguration, item, InvertHighlighting) || MatchesHousingFilter(FilterConfiguration, item, InvertHighlighting));
-            //         var matchesDestination = ShouldHighlightDestination && item.DestinationBag == bag && (MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting, true) || MatchesFreeCompanyFilter(FilterConfiguration, item, InvertHighlighting, true) || MatchesHousingFilter(FilterConfiguration, item, InvertHighlighting, true));
-            //         if(matchesSource)
-            //         {
-            //             var itemBagLocation = item.BagLocation;
-            //             if (!bagHighlights.ContainsKey(itemBagLocation))
-            //             {
-            //                 if (!InvertHighlighting && !item.InventoryItem.IsEmpty)
-            //                 {
-            //                     bagHighlights.Add(itemBagLocation, BagHighlightColor);
-            //                 }
-            //                 else if (InvertHighlighting && item.InventoryItem.IsEmpty)
-            //                 {
-            //                     bagHighlights.Add(itemBagLocation, BagHighlightColor);
-            //                 }
-            //                 else if(InvertHighlighting)
-            //                 {
-            //                     bagHighlights.Add(itemBagLocation, null);
-            //                 }
-            //                 else
-            //                 {
-            //                     bagHighlights.Add(itemBagLocation, null);
-            //                 }
-            //             }
-            //         }
-            //
-            //         if (matchesDestination && item.DestinationSlot != null)
-            //         {
-            //             if (!ShouldHighlightDestinationEmpty && item.IsEmptyDestinationSlot == true)
-            //             {
-            //                 continue;
-            //             }
-            //             var itemBagLocation = item.DestinationSlot.Value;
-            //             if (!bagHighlights.ContainsKey(itemBagLocation))
-            //             {
-            //                 if (!InvertDestinationHighlighting && !item.InventoryItem.IsEmpty)
-            //                 {
-            //                     bagHighlights.Add(itemBagLocation, BagDestinationHighlightColor);
-            //                 }
-            //                 else if (InvertDestinationHighlighting && item.InventoryItem.IsEmpty)
-            //                 {
-            //                     bagHighlights.Add(itemBagLocation, BagDestinationHighlightColor);
-            //                 }
-            //                 else if(InvertDestinationHighlighting)
-            //                 {
-            //                     bagHighlights.Add(itemBagLocation, null);
-            //                 }
-            //                 else
-            //                 {
-            //                     bagHighlights.Add(itemBagLocation, null);
-            //                 }
-            //             }
-            //         }
-            //     }
-            // }
-            //
-            // if (bag is InventoryType.Bag0 or InventoryType.Bag1 or InventoryType.Bag2 or InventoryType.Bag3 or InventoryType.RetainerBag0 or InventoryType.RetainerBag1 or InventoryType.RetainerBag2 or InventoryType.RetainerBag3 or InventoryType.RetainerBag4 or InventoryType.SaddleBag0 or InventoryType.SaddleBag1 or InventoryType.PremiumSaddleBag0 or InventoryType.PremiumSaddleBag1)
-            // {
-            //     for (int x = 0; x < 5; x++)
-            //     {
-            //         for (int y = 0; y < 7; y++)
-            //         {
-            //             var position = new Vector2(x,y);
-            //             if(!bagHighlights.ContainsKey(position))
-            //             {
-            //                 if (InvertHighlighting)
-            //                 {
-            //                     bagHighlights.Add(position, BagHighlightColor);
-            //                 }
-            //                 else
-            //                 {
-            //                     bagHighlights.Add(position, null);
-            //                 }
-            //             }
-            //         }
-            //     }
-            // }
-            //
-            // if (bag is InventoryType.ArmoryBody or InventoryType.ArmoryEar or InventoryType.ArmoryFeet or InventoryType.ArmoryHand or InventoryType.ArmoryHead or InventoryType.ArmoryLegs or InventoryType.ArmoryMain or InventoryType.ArmoryNeck or InventoryType.ArmoryOff or InventoryType.ArmoryRing  or InventoryType.ArmoryWrist or InventoryType.ArmorySoulCrystal or InventoryType.FreeCompanyBag0 or InventoryType.FreeCompanyBag1 or InventoryType.FreeCompanyBag2 or InventoryType.FreeCompanyBag3 or InventoryType.FreeCompanyBag4)
-            // {
-            //     for (int x = 0; x < 50; x++)
-            //     {
-            //         var position = new Vector2(x,0);
-            //         if(!bagHighlights.ContainsKey(position))
-            //         {
-            //             if (InvertHighlighting)
-            //             {
-            //                 bagHighlights.Add(position, BagHighlightColor);
-            //             }
-            //             else
-            //             {
-            //                 bagHighlights.Add(position, null);
-            //             }
-            //         }
-            //     }
-            // }
+        public Dictionary<Vector2, InventoryItem?> GenerateBagLayout(InventoryType inventoryType)
+        {
+            var layout = new Dictionary<Vector2, InventoryItem?>();
+            var category = inventoryType.ToInventoryCategory();
+            if (category is InventoryCategory.CharacterBags or InventoryCategory.RetainerBags or InventoryCategory.CharacterSaddleBags or InventoryCategory.CharacterPremiumSaddleBags)
+            {
+                for (var x = 0; x < 5; x++)
+                {
+                    for (var y = 0; y < 7; y++)
+                    {
+                        var position = new Vector2(x,y);
+                        layout.Add(position, null);
+                    }
+                }
+            }
+            if (category is InventoryCategory.FreeCompanyBags or InventoryCategory.CharacterArmoryChest)
+            {
+                for (int x = 0; x < 50; x++)
+                {
+                    var position = new Vector2(x,0);
+                    layout.Add(position, null);
+                }
+            }
+            if (category is InventoryCategory.GlamourChest)
+            {
+                for (int x = 0; x < 10; x++)
+                {
+                    for (int y = 0; y < 5; y++)
+                    {
+                        var position = new Vector2(x,y);
+                        layout.Add(position, null);
+                    }
+                }
+            }
+
+            return layout;
+        }
+
+        public Dictionary<Vector2, Vector4?> GetBagHighlights(InventoryType inventoryType, List<SearchResult>? resultOverride = null)
+        {
+            var characterId = GetCharacterId(inventoryType);
+            var filterResult = resultOverride ?? FilterResult;
+            if (characterId == null || filterResult == null)
+            {
+                return new Dictionary<Vector2, Vector4?>();
+            }
+
+            var inventoryContents = _inventoryMonitor.GetSpecificInventory(characterId.Value, inventoryType);
+
+            var contentsMap = inventoryContents.GroupBy(c => c.ItemId).ToDictionary(c => c.Key, c => c.ToList());
+            var bagLayout = GenerateBagLayout(inventoryType);
+            var bagDestinationLayout = GenerateBagLayout(inventoryType);
+
+            foreach (var searchResult in filterResult)
+            {
+                bool destination = false;
+                if (searchResult.SortingResult != null)
+                {
+                    var matchesSource = searchResult.SortingResult.SourceBag == inventoryType &&
+                                        (MatchesFilter(FilterConfiguration, searchResult, InvertHighlighting) ||
+                                         MatchesRetainerFilter(FilterConfiguration, searchResult, InvertHighlighting) ||
+                                         MatchesFreeCompanyFilter(FilterConfiguration, searchResult.SortingResult, InvertHighlighting) ||
+                                         MatchesHousingFilter(FilterConfiguration, searchResult.SortingResult, InvertHighlighting));
+
+                    var matchesDestination = ShouldHighlightDestination && searchResult.SortingResult.DestinationBag == inventoryType &&
+                                             (MatchesFilter(FilterConfiguration, searchResult, InvertHighlighting) ||
+                                              MatchesRetainerFilter(FilterConfiguration, searchResult, InvertHighlighting,
+                                                  true) || MatchesFreeCompanyFilter(FilterConfiguration, searchResult.SortingResult,
+                                                  InvertHighlighting, true) ||
+                                              MatchesHousingFilter(FilterConfiguration, searchResult.SortingResult, InvertHighlighting,
+                                                  true));
+                    if (!matchesSource && !matchesDestination)
+                    {
+                        continue;
+                    }
+
+                    if (matchesDestination)
+                    {
+                        destination = true;
+                    }
+                }
+
+                if (contentsMap.TryGetValue(searchResult.ItemId, out var value))
+                {
+                    foreach (var content in value)
+                    {
+                        var bagLocation = content.BagLocation(inventoryType);
+                        if (destination)
+                        {
+                            if (bagDestinationLayout.ContainsKey(bagLocation))
+                            {
+                                bagDestinationLayout[bagLocation] = content;
+                            }
+                        }
+                        else
+                        {
+                            if (bagLayout.ContainsKey(bagLocation))
+                            {
+                                bagLayout[bagLocation] = content.IsEmpty ? null : content;
+                            }
+                        }
+                    }
+                }
+                else if (destination && ShouldHighlightDestinationEmpty && (searchResult.SortingResult?.IsEmptyDestinationSlot ?? false))
+                {
+                    var bagLocation = searchResult.SortingResult.BagLocation;
+                    if (bagDestinationLayout.ContainsKey(bagLocation))
+                    {
+                        bagDestinationLayout[bagLocation] = searchResult.SortingResult.DestinationItem;
+                    }
+                }
+            }
+
+            var bagHighlights = new Dictionary<Vector2, Vector4?>();
+            foreach (var item in bagLayout)
+            {
+                bagHighlights[item.Key] = InvertHighlighting ? item.Value == null ? BagHighlightColor : null : item.Value == null ? null : BagHighlightColor;
+            }
+            foreach (var item in bagDestinationLayout)
+            {
+                if (item.Value != null)
+                {
+                    bagHighlights[item.Key] = InvertDestinationHighlighting
+                        ?
+                        item.Value == null ? BagDestinationHighlightColor : null
+                        : item.Value == null
+                            ? null
+                            : BagDestinationHighlightColor;
+                }
+            }
+
+
             return bagHighlights;
         }
-        
+
         private bool MatchesRetainerFilter(FilterConfiguration activeFilter, SearchResult searchResult, bool invertHighlighting = false, bool destinationFilter = false)
         {
             if (searchResult.InventoryItem == null)
             {
                 return false;
             }
-            
+
             bool matches = true;
 
             if (searchResult.SortingResult != null)
@@ -732,7 +676,7 @@ namespace InventoryTools.Logic
 
             return false;
         }
-        
+
         private bool MatchesFreeCompanyFilter(FilterConfiguration activeFilter, SortingResult item, bool invertHighlighting = false, bool destinationFilter = false)
         {
             bool matches = (activeFilter.FilterType.HasFlag(FilterType.SearchFilter) || activeFilter.FilterType.HasFlag(FilterType.SortingFilter) || activeFilter.FilterType.HasFlag(FilterType.CraftFilter));
@@ -760,7 +704,7 @@ namespace InventoryTools.Logic
 
             return false;
         }
-        
+
         private bool MatchesHousingFilter(FilterConfiguration activeFilter, SortingResult item, bool invertHighlighting = false, bool destinationFilter = false)
         {
             bool matches = (activeFilter.FilterType.HasFlag(FilterType.SearchFilter) || activeFilter.FilterType.HasFlag(FilterType.SortingFilter) || activeFilter.FilterType.HasFlag(FilterType.CraftFilter));
@@ -788,14 +732,14 @@ namespace InventoryTools.Logic
 
             return false;
         }
-        
+
         private bool MatchesFilter(FilterConfiguration activeFilter, SearchResult searchResult, bool invertHighlighting = false)
         {
             if (searchResult.InventoryItem == null)
             {
                 return false;
             }
-            
+
             bool matches = false;
 
             if (searchResult.SortingResult != null)
@@ -827,6 +771,7 @@ namespace InventoryTools.Logic
                 {
                     return true;
                 }
+
             }
 
             if (searchResult.InventoryItem.IsEmpty && invertHighlighting)
@@ -852,7 +797,7 @@ namespace InventoryTools.Logic
                 var activeFilter = FilterConfiguration;
                 RenderTableBase? activeTable = FilterTable;
                 var filteredList = activeFilter.SearchResults;
-                
+
                 if (activeTable != null)
                 {
                     filteredList = activeTable.SearchResults;

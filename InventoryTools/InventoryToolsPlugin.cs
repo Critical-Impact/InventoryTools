@@ -56,7 +56,7 @@ namespace InventoryTools
         private readonly IPluginLog _pluginLog;
         private Service? _service;
         private IDalamudPluginInterface PluginInterface { get; set; }
-        
+
         public InventoryToolsPlugin(IDalamudPluginInterface pluginInterface, IPluginLog pluginLog,
             IAddonLifecycle addonLifecycle, IChatGui chatGui, IClientState clientState, ICommandManager commandManager,
             ICondition condition, IDataManager dataManager, IFramework framework, IGameGui gameGui,
@@ -73,9 +73,53 @@ namespace InventoryTools
             PluginInterface = pluginInterface;
             _service = PluginInterface.Create<Service>()!;
             CreateHost();
-            
+
             Start();
-            
+
+        }
+
+        private List<Type> HostedServices { get; } = new()
+        {
+            typeof(ExcelCache),
+            typeof(ConfigurationManagerService),
+            typeof(ContextMenuService),
+            typeof(ListService),
+            typeof(OverlayService),
+            typeof(HostedUniversalis),
+            typeof(WotsitIpc),
+            typeof(ListFilterService),
+            typeof(MediatorService),
+            typeof(MigrationManagerService),
+            typeof(PluginCommandManager<PluginCommands>),
+            typeof(PluginLogic),
+            typeof(BootService),
+            typeof(ServiceConfigurator),
+            typeof(WindowService),
+            typeof(TableService),
+            typeof(InventoryToolsUi),
+            typeof(TeleporterService),
+            typeof(LaunchButtonService),
+            typeof(HostedInventoryHistory),
+            typeof(OdrScanner),
+        };
+
+        public List<Type> GetHostedServices()
+        {
+            var hostedServices = HostedServices.ToList();
+            Dictionary<Type, Type> replacements = new();
+            ReplaceHostedServices(replacements);
+            foreach (var replacement in replacements)
+            {
+                hostedServices.Remove(replacement.Key);
+                hostedServices.Add(replacement.Value);
+            }
+
+            return hostedServices;
+        }
+
+        public virtual void ReplaceHostedServices(Dictionary<Type,Type> replacements)
+        {
+
         }
 
         public override void PreBuild(IHostBuilder hostBuilder)
@@ -140,7 +184,7 @@ namespace InventoryTools
                         {
                             if (pair.Key.IsAssignableFrom(type))
                             {
-                                builder.RegisterType(type).As(pair.Value).As(pair.Key).As(type).ExternallyOwned();
+                                builder.RegisterType(type).As(pair.Value).AsImplementedInterfaces().As(pair.Key).As(type).ExternallyOwned();
                             }
                         }
 
@@ -191,29 +235,12 @@ namespace InventoryTools
             //Hosted service registrations
             hostBuilder.ConfigureContainer<ContainerBuilder>(builder =>
             {
-                //Needs to be externally owned as the hosted service causes a second registration in the container which causes it to dispose twice even though it's only constructed once
-                builder.RegisterType<ExcelCache>().SingleInstance().ExternallyOwned();
-                builder.RegisterType<ConfigurationManagerService>().SingleInstance().ExternallyOwned();
-                builder.RegisterType<ContextMenuService>().SingleInstance().ExternallyOwned();
-                builder.RegisterType<ListService>().As<IListService>().SingleInstance().ExternallyOwned();
-                builder.RegisterType<OverlayService>().As<IOverlayService>().SingleInstance().ExternallyOwned();
-                builder.RegisterType<HostedUniversalis>().AsSelf().As<IUniversalis>().SingleInstance()
-                    .ExternallyOwned();
-                builder.RegisterType<WotsitIpc>().As<IWotsitIpc>().SingleInstance().ExternallyOwned();
-                builder.RegisterType<ListFilterService>().SingleInstance().ExternallyOwned();
-                builder.RegisterType<MediatorService>().SingleInstance().ExternallyOwned();
-                builder.RegisterType<MigrationManagerService>().SingleInstance().ExternallyOwned();
-                builder.RegisterType<PluginCommandManager<PluginCommands>>().SingleInstance().ExternallyOwned();
-                builder.RegisterType<PluginLogic>().SingleInstance().ExternallyOwned();
-                builder.RegisterType<BootService>().SingleInstance().ExternallyOwned();
-                builder.RegisterType<ServiceConfigurator>().ExternallyOwned().SingleInstance();
-                builder.RegisterType<WindowService>().SingleInstance().ExternallyOwned();
-                builder.RegisterType<TableService>().SingleInstance().ExternallyOwned();
-                builder.RegisterType<InventoryToolsUi>().SingleInstance().ExternallyOwned();
-                builder.RegisterType<TeleporterService>().SingleInstance().ExternallyOwned();
-                builder.RegisterType<LaunchButtonService>().SingleInstance().ExternallyOwned();
-                builder.RegisterType<HostedInventoryHistory>().SingleInstance().ExternallyOwned();
-                builder.RegisterType<ItemSearchService>().SingleInstance().ExternallyOwned();
+                foreach (var hostedService in GetHostedServices())
+                {
+                    builder.RegisterType(hostedService).AsSelf().AsImplementedInterfaces().As<IHostedService>().SingleInstance();
+                }
+
+                builder.RegisterType<QuestManagerService>().AsImplementedInterfaces().AsSelf().SingleInstance();
             });
 
             hostBuilder.ConfigureContainer<ContainerBuilder>(builder =>
@@ -222,6 +249,7 @@ namespace InventoryTools
                 builder.RegisterType<SeTime>().As<ISeTime>().SingleInstance();
                 builder.RegisterType<ConfigurationWizardService>().SingleInstance();
                 builder.RegisterType<FileDialogManager>().SingleInstance();
+                builder.RegisterType<DalamudFileDialogManager>().As<IFileDialogManager>().SingleInstance();
                 builder.RegisterType<BackgroundTaskQueue>().As<IBackgroundTaskQueue>();
                 builder.RegisterType<CharacterMonitor>().As<ICharacterMonitor>().SingleInstance();
                 builder.RegisterType<ChatUtilities>().As<IChatUtilities>().SingleInstance();
@@ -237,6 +265,7 @@ namespace InventoryTools
                 builder.RegisterType<MarketBoardService>().As<IMarketBoardService>().SingleInstance();
                 builder.RegisterType<MarketCache>().As<IMarketCache>().SingleInstance();
                 builder.RegisterType<MobTracker>().As<IMobTracker>().SingleInstance();
+                builder.RegisterType<ClipboardService>().As<IClipboardService>().SingleInstance();
                 builder.RegisterType<IPCService>().SingleInstance();
                 builder.RegisterType<TeleporterIpc>().As<ITeleporterIpc>().SingleInstance();
                 builder.RegisterType<TooltipService>().As<ITooltipService>().SingleInstance();
@@ -245,7 +274,8 @@ namespace InventoryTools
                 builder.RegisterType<InventoryHistory>().SingleInstance();
                 builder.RegisterType<ListCategoryService>().SingleInstance();
                 builder.RegisterType<Logger>().SingleInstance();
-                builder.RegisterType<OdrScanner>().SingleInstance();
+                builder.RegisterType<PopupService>().SingleInstance();
+
                 builder.RegisterType<PluginCommands>().SingleInstance();
                 builder.RegisterType<RightClickService>().SingleInstance();
                 builder.RegisterType<TryOn>().SingleInstance();
@@ -257,7 +287,7 @@ namespace InventoryTools
                 builder.RegisterType<VersionInfo>().SingleInstance();
                 builder.RegisterType<CraftPricer>().SingleInstance();
                 builder.RegisterType<InventoryScopePicker>();
-                builder.RegisterType<InventoryScopeCalculator>().SingleInstance(); 
+                builder.RegisterType<InventoryScopeCalculator>().SingleInstance();
                 builder.RegisterType<GameInteropService>().As<IGameInteropService>().SingleInstance();
                 builder.RegisterType<WindowSystemFactory>().As<IWindowSystemFactory>().SingleInstance();
                 builder.RegisterType<DalamudWindowSystem>().As<IWindowSystem>();
@@ -426,43 +456,16 @@ namespace InventoryTools
                     };
                 });
             });
-            hostBuilder
-                .ConfigureServices(collection =>
-                {
-                    collection.AddHostedService(p => p.GetRequiredService<ExcelCache>());
-                    collection.AddHostedService(p => p.GetRequiredService<MigrationManagerService>());
-                    collection.AddHostedService(p => p.GetRequiredService<ServiceConfigurator>());
-                    collection.AddHostedService(p => p.GetRequiredService<IListService>());
-                    collection.AddHostedService(p => p.GetRequiredService<ListFilterService>());
-                    collection.AddHostedService(p => p.GetRequiredService<MediatorService>());
-                    collection.AddHostedService(p => p.GetRequiredService<PluginLogic>());
-                    collection.AddHostedService(p => p.GetRequiredService<WindowService>());
-                    collection.AddHostedService(p => p.GetRequiredService<TableService>());
-                    collection.AddHostedService(p => p.GetRequiredService<IOverlayService>());
-                    collection.AddHostedService(p => p.GetRequiredService<IWotsitIpc>());
-                    collection.AddHostedService(p => p.GetRequiredService<TeleporterService>());
-                    collection.AddHostedService(p => p.GetRequiredService<ContextMenuService>());
-                    collection.AddHostedService(p => p.GetRequiredService<PluginCommandManager<PluginCommands>>());
-                    collection.AddHostedService(p => p.GetRequiredService<BootService>());
-                    collection.AddHostedService(p => p.GetRequiredService<ConfigurationManagerService>());
-                    collection.AddHostedService(p => p.GetRequiredService<InventoryToolsUi>());
-                    collection.AddHostedService(p => p.GetRequiredService<HostedUniversalis>());
-                    collection.AddHostedService(p => p.GetRequiredService<LaunchButtonService>());
-                    collection.AddHostedService(p => p.GetRequiredService<HostedInventoryHistory>());
-                    collection.AddHostedService(p => p.GetRequiredService<IPCService>());
-                    collection.AddHostedService(p => p.GetRequiredService<HostedCraftMonitor>());
-                    collection.AddHostedService(p => p.GetRequiredService<ItemSearchService>());
-                });
         }
 
         public override void ConfigureContainer(ContainerBuilder containerBuilder)
         {
-            
+
         }
 
         public override void ConfigureServices(IServiceCollection serviceCollection)
         {
-            
+
         }
 
         protected virtual void Dispose(bool disposing)

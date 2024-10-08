@@ -25,7 +25,7 @@ public class FiltersWindowLayoutSetting : ChoiceSetting<WindowLayout>
     public override string HelpText { get; set; } = "Set the layout of the items window";
     public override SettingCategory SettingCategory { get; set; } = SettingCategory.Windows;
     public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.WindowLayout;
-    
+
     public override string? Image { get; } = "items_display";
 
     public override Vector2? ImageSize { get; } = new Vector2(878, 393);
@@ -33,7 +33,8 @@ public class FiltersWindowLayoutSetting : ChoiceSetting<WindowLayout>
     public override Dictionary<WindowLayout, string> Choices { get; } = new Dictionary<WindowLayout, string>()
     {
         { WindowLayout.Sidebar, "Sidebar" },
-        { WindowLayout.Tabs , "Tabs" }
+        { WindowLayout.Tabs , "Tabs" },
+        { WindowLayout.Single , "Single" }
     };
     public override string Version => "1.7.0.0";
 

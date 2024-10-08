@@ -11,7 +11,7 @@ public abstract class ButtonColumn : IColumn
 {
     public virtual void Dispose()
     {
-        
+
     }
 
     public abstract string Name { get; set; }
@@ -41,7 +41,10 @@ public abstract class ButtonColumn : IColumn
          type.HasFlag(InventoryTools.Logic.FilterType.GameItemFilter))
         ||
         (AvailableIn.HasFlag(InventoryTools.Logic.FilterType.HistoryFilter) &&
-         type.HasFlag(InventoryTools.Logic.FilterType.HistoryFilter));
+         type.HasFlag(InventoryTools.Logic.FilterType.HistoryFilter))
+        ||
+        (AvailableIn.HasFlag(InventoryTools.Logic.FilterType.CuratedList) &&
+         type.HasFlag(InventoryTools.Logic.FilterType.CuratedList));
 
     public virtual bool? CraftOnly { get; } = null;
     public bool IsConfigurable => false;
@@ -62,7 +65,7 @@ public abstract class ButtonColumn : IColumn
 
     public virtual void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)
     {
-        
+
     }
 
     public virtual string CsvExport(ColumnConfiguration columnConfiguration, SearchResult item)
@@ -99,7 +102,7 @@ public abstract class ButtonColumn : IColumn
     public virtual event IColumn.ButtonPressedDelegate? ButtonPressed;
     public virtual void InvalidateSearchCache()
     {
-        
+
     }
 
     public virtual bool DrawFilter(string tableKey, int columnIndex)

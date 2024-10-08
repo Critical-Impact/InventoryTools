@@ -10,6 +10,9 @@ namespace InventoryTools.Logic.Filters;
 
 public class DefaultSortColumnDirectionFilter : ChoiceFilter<ImGuiSortDirection?>
 {
+    public override FilterType AvailableIn { get; set; } =
+        FilterType.SearchFilter | FilterType.CraftFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter | FilterType.CuratedList;
+
     public override ImGuiSortDirection? CurrentValue(FilterConfiguration configuration)
     {
         return configuration.DefaultSortOrder;

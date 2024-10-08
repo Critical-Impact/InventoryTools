@@ -7,6 +7,7 @@ using CriticalCommonLib.Resolvers;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Services.Ui;
+using DalaMock.Shared.Interfaces;
 using Dalamud.Interface.ImGuiFileDialog;
 using ImGuiNET;
 using InventoryTools;
@@ -29,13 +30,13 @@ public class MockWindow : GenericWindow
     private readonly ICraftMonitor _craftMonitor;
     private readonly ICharacterMonitor _characterMonitor;
     private readonly IMobTracker _mobTracker;
-    private readonly FileDialogManager _fileDialogManager;
+    private readonly IFileDialogManager _fileDialogManager;
     private readonly IInventoryMonitor _inventoryMonitor;
     private readonly IOverlayService _overlayService;
     private readonly InventoryHistory _inventoryHistory;
     private readonly ExcelCache _excelCache;
 
-    public MockWindow(ILogger<MockWindow> logger, MediatorService mediator,ImGuiService imGuiService, InventoryToolsConfiguration configuration, Logger otterLogger, ICraftMonitor craftMonitor, ICharacterMonitor characterMonitor, IMobTracker mobTracker, FileDialogManager fileDialogManager, IInventoryMonitor inventoryMonitor, IOverlayService overlayService, HostedInventoryHistory inventoryHistory, ExcelCache excelCache, string name = "Mock Tools") : base(logger, mediator, imGuiService, configuration, name)
+    public MockWindow(ILogger<MockWindow> logger, MediatorService mediator,ImGuiService imGuiService, InventoryToolsConfiguration configuration, Logger otterLogger, ICraftMonitor craftMonitor, ICharacterMonitor characterMonitor, IMobTracker mobTracker, IFileDialogManager fileDialogManager, IInventoryMonitor inventoryMonitor, IOverlayService overlayService, HostedInventoryHistory inventoryHistory, ExcelCache excelCache, string name = "Mock Tools") : base(logger, mediator, imGuiService, configuration, name)
     {
         _otterLogger = otterLogger;
         _craftMonitor = craftMonitor;
@@ -48,7 +49,7 @@ public class MockWindow : GenericWindow
         _excelCache = excelCache;
     }
     private List<InventoryItem> _items;
-    
+
     public override void Initialize()
     {
         WindowName = "Mock Tools";
@@ -167,7 +168,7 @@ public class MockWindow : GenericWindow
         }
 
     }
-    
+
     private void DrawGameUiTab()
     {
         using (var gameUiTab = ImRaii.TabItem("Game UI"))
@@ -337,16 +338,16 @@ public class MockWindow : GenericWindow
                     toItem.SortedCategory = InventoryCategory.CharacterBags;
                     toItem.RetainerId = activeCharacter.CharacterId;
                     toItem.Quantity = 1;
-                    
+
                     currentHistory.Add(new InventoryChange(fromItem, toItem, InventoryChangeReason.Added, (uint)currentHistory.Count + 1));
                 }
                 _inventoryHistory.LoadExistingHistory(currentHistory);
             }
-            
+
             ImGui.EndTabItem();
         }
     }
-    
+
     private void ConvertFile(bool success, string fileName)
     {
         if (success)
@@ -472,5 +473,5 @@ public class MockWindow : GenericWindow
     }
 
     public override FilterConfiguration? SelectedConfiguration => null;
-    
+
 }

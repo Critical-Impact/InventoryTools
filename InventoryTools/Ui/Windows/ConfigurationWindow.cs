@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using Autofac;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using ImGuiNET;
@@ -11,6 +12,7 @@ using InventoryTools.Ui.MenuItems;
 using InventoryTools.Ui.Widgets;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Extensions;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
@@ -23,7 +25,7 @@ namespace InventoryTools.Ui
 {
     using Dalamud.Interface.Textures;
 
-    public class ConfigurationWindow : GenericWindow
+    public class ConfigurationWindow : GenericWindow, IMenuWindow
     {
         private readonly ConfigurationWizardService _configurationWizardService;
         private readonly IChatUtilities _chatUtilities;
@@ -33,9 +35,27 @@ namespace InventoryTools.Ui
         private readonly Func<SettingCategory,SettingPage> _settingPageFactory;
         private readonly Func<Type, IConfigPage> _configPageFactory;
         private readonly Func<FilterConfiguration, FilterPage> _filterPageFactory;
+        private readonly IComponentContext _context;
         private readonly InventoryToolsConfiguration _configuration;
+        private IEnumerable<IMenuWindow>? _menuWindows;
 
-        public ConfigurationWindow(ILogger<ConfigurationWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ConfigurationWizardService configurationWizardService, IChatUtilities chatUtilities, PluginLogic pluginLogic, IListService listService,IServiceScopeFactory serviceScopeFactory, Func<SettingCategory,SettingPage> settingPageFactory, Func<Type,IConfigPage> configPageFactory, Func<FilterConfiguration,FilterPage> filterPageFactory, string name = "Configuration Window") : base(logger, mediator, imGuiService, configuration, name)
+        public ConfigurationWindow(ILogger<ConfigurationWindow> logger,
+            MediatorService mediator,
+            ImGuiService imGuiService,
+            InventoryToolsConfiguration configuration,
+            ConfigurationWizardService configurationWizardService,
+            IChatUtilities chatUtilities,
+            PluginLogic pluginLogic,
+            IListService listService,
+            IServiceScopeFactory serviceScopeFactory,
+            Func<SettingCategory, SettingPage> settingPageFactory,
+            Func<Type, IConfigPage> configPageFactory,
+            Func<FilterConfiguration, FilterPage> filterPageFactory,
+            IComponentContext context) : base(logger,
+            mediator,
+            imGuiService,
+            configuration,
+            "Configuration Window")
         {
             _configurationWizardService = configurationWizardService;
             _chatUtilities = chatUtilities;
@@ -45,7 +65,9 @@ namespace InventoryTools.Ui
             _settingPageFactory = settingPageFactory;
             _configPageFactory = configPageFactory;
             _filterPageFactory = filterPageFactory;
+            _context = context;
             _configuration = configuration;
+            this.Flags = ImGuiWindowFlags.MenuBar;
         }
 
 
@@ -72,30 +94,30 @@ namespace InventoryTools.Ui
             _configPages.Add(_configPageFactory.Invoke(typeof(CraftFiltersPage)));
             _configPages.Add(_configPageFactory.Invoke(typeof(ImportExportPage)));
             _configPages.Add(_configPageFactory.Invoke(typeof(CharacterRetainerPage)));
-            
+
             _addFilterMenu = new PopupMenu("addFilter", PopupMenu.PopupMenuButtons.LeftRight,
                 new List<PopupMenu.IPopupMenuItem>()
                 {
-                    new PopupMenu.PopupMenuItemSelectableAskName("Search Filter", "adf1", "New Search Filter", AddSearchFilter, "This will create a new filter that let's you search for specific items within your characters and retainers inventories."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Sort Filter", "af2", "New Sort Filter", AddSortFilter, "This will create a new filter that let's you search for specific items within your characters and retainers inventories then determine where they should be moved to."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Game Item Filter", "af3", "New Game Item Filter", AddGameItemFilter, "This will create a filter that lets you search for all items in the game."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("History Filter", "af4", "New History Item Filter", AddHistoryFilter, "This will create a filter that lets you view historical data of how your inventory has changed."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Search List", "adf1", "New Search List", AddSearchFilter, "This will create a new list that let's you search for specific items within your characters and retainers inventories."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Sort List", "af2", "New Sort Filter", AddSortFilter, "This will create a new list that let's you search for specific items within your characters and retainers inventories then determine where they should be moved to."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Game Item List", "af3", "New Game Item List", AddGameItemFilter, "This will create a list that lets you search for all items in the game."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("History List", "af4", "New History Item List", AddHistoryFilter, "This will create a list that lets you view historical data of how your inventory has changed."),
                 });
-            
+
             _addSampleMenu = new PopupMenu("addSampleFilter", PopupMenu.PopupMenuButtons.LeftRight,
                 new List<PopupMenu.IPopupMenuItem>()
                 {
-                    new PopupMenu.PopupMenuItemSelectableAskName("All", "af4", "All", AddAllFilter, "This will add a filter that will be preconfigured to show items across all inventories."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Player", "af5", "Player", AddPlayerFilter, "This will add a filter that will be preconfigured to show items across all character inventories."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Retainers", "af6", "Retainers", AddRetainersFilter, "This will add a filter that will be preconfigured to show items across all retainer inventories."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Free Company", "af7", "Free Company", AddFreeCompanyFilter, "This will add a filter that will be preconfigured to show items across all free company inventories."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("All Game Items", "af8", "All Game Items", AddAllGameItemsFilter, "This will add a filter that will be preconfigured to show all of the game's items."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("All", "af4", "All", AddAllFilter, "This will add a list that will be preconfigured to show items across all inventories."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Player", "af5", "Player", AddPlayerFilter, "This will add a list that will be preconfigured to show items across all character inventories."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Retainers", "af6", "Retainers", AddRetainersFilter, "This will add a list that will be preconfigured to show items across all retainer inventories."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Free Company", "af7", "Free Company", AddFreeCompanyFilter, "This will add a list that will be preconfigured to show items across all free company inventories."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("All Game Items", "af8", "All Game Items", AddAllGameItemsFilter, "This will add a list that will be preconfigured to show all of the game's items."),
                     new PopupMenu.PopupMenuItemSeparator(),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Purchased for less than 100 gil", "af9", "Less than 100 gil", AddLessThan100GilFilter, "This will add a filter that will show all items that can be purchased from gil shops under 100 gil. It will look in both character and retainer inventories."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Put away materials +", "af10", "Put away materials", AddPutAwayMaterialsFilter, "This will add a filter that will be setup to quickly put away any excess materials. It will have all the material categories automatically added. When calculating where to put items it will try to prioritise existing stacks of items."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Duplicated items across characters/retainers +", "af11", "Duplicated items", AddDuplicatedItemsFilter, "This will add a filter that will provide a list of all the distinct stacks that appear in 2 sets of inventories. You can use this to make sure only one retainer has a specific type of item.")
+                    new PopupMenu.PopupMenuItemSelectableAskName("Purchased for less than 100 gil", "af9", "Less than 100 gil", AddLessThan100GilFilter, "This will add a list that will show all items that can be purchased from gil shops under 100 gil. It will look in both character and retainer inventories."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Put away materials +", "af10", "Put away materials", AddPutAwayMaterialsFilter, "This will add a list that will be setup to quickly put away any excess materials. It will have all the material categories automatically added. When calculating where to put items it will try to prioritise existing stacks of items."),
+                    new PopupMenu.PopupMenuItemSelectableAskName("Duplicated items across characters/retainers +", "af11", "Duplicated items", AddDuplicatedItemsFilter, "This will add a list that will provide a list of all the distinct stacks that appear in 2 sets of inventories. You can use this to make sure only one retainer has a specific type of item.")
                 });
-            
+
             _settingsMenu = new PopupMenu("configMenu", PopupMenu.PopupMenuButtons.All,
                 new List<PopupMenu.IPopupMenuItem>()
                 {
@@ -112,13 +134,14 @@ namespace InventoryTools.Ui
                     new PopupMenu.PopupMenuItemSeparator(),
                     new PopupMenu.PopupMenuItemSelectable("Help", "help", OpenHelpWindow,"Open the help window."),
                 });
-            
+
             _wizardMenu = new PopupMenu("wizardMenu", PopupMenu.PopupMenuButtons.All,
                 new List<PopupMenu.IPopupMenuItem>()
                 {
                     new PopupMenu.PopupMenuItemSelectable("Configure new settings", "configureNew", ConfigureNewSettings,"Configure new settings."),
                     new PopupMenu.PopupMenuItemSelectable("Configure all settings", "configureAll", ConfigureAllSettings,"Configure all settings."),
                 });
+            _menuWindows = _context.Resolve<IEnumerable<IMenuWindow>>().OrderBy(c => c.GenericName).Where(c => c.GetType() != this.GetType());
 
             GenerateFilterPages();
             MediatorService.Subscribe<ListInvalidatedMessage>(this, _ => Invalidate());
@@ -199,7 +222,7 @@ namespace InventoryTools.Ui
         {
             MediatorService.Publish(new OpenGenericWindowMessage(typeof(SubmarinesWindow)));
         }
-        
+
         private void OpenRetainerVenturesWindow(string obj)
         {
             MediatorService.Publish(new OpenGenericWindowMessage(typeof(RetainerTasksWindow)));
@@ -214,7 +237,7 @@ namespace InventoryTools.Ui
         {
             MediatorService.Publish(new OpenGenericWindowMessage(typeof(ENpcsWindow)));
         }
-        
+
         private void OpenTetrisWindow(string obj)
         {
             MediatorService.Publish(new OpenGenericWindowMessage(typeof(TetrisWindow)));
@@ -385,7 +408,7 @@ namespace InventoryTools.Ui
         public void GenerateFilterPages()
         {
             var filterConfigurations = _listService.Lists.Where(c => c.FilterType != FilterType.CraftFilter);
-            var filterPages = new Dictionary<string, IConfigPage>(); 
+            var filterPages = new Dictionary<string, IConfigPage>();
             foreach (var filter in filterConfigurations)
             {
                 if (!filterPages.ContainsKey(filter.Key))
@@ -396,7 +419,7 @@ namespace InventoryTools.Ui
 
             _filterPages = filterPages;
         }
-        
+
         public override bool SaveState => true;
         public override Vector2? DefaultSize { get; } = new(700, 700);
         public override Vector2? MaxSize { get; } = new(2000, 2000);
@@ -406,16 +429,85 @@ namespace InventoryTools.Ui
         public override bool DestroyOnClose => true;
         private List<IConfigPage> _configPages = null!;
         public Dictionary<string, IConfigPage> _filterPages = new Dictionary<string,IConfigPage>();
-        
+
 
         private void SetNewFilterActive()
         {
             ConfigSelectedConfigurationPage = _configPages.Count + _filterPages.Count - 2;
         }
 
+        private void DrawMenuBar()
+        {
+            if (ImGui.BeginMenuBar())
+            {
+                if (ImGui.BeginMenu("File"))
+                {
+                    if (ImGui.MenuItem("Report a Issue"))
+                    {
+                        "https://github.com/Critical-Impact/AllaganMarket".OpenBrowser();
+                    }
+
+                    if (ImGui.MenuItem("Help"))
+                    {
+                        this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(HelpWindow)));
+                    }
+
+                    if (ImGui.MenuItem("Ko-Fi"))
+                    {
+                        "https://ko-fi.com/critical_impact".OpenBrowser();
+                    }
+
+                    if (ImGui.MenuItem("Close"))
+                    {
+                        this.IsOpen = false;
+                    }
+
+                    ImGui.EndMenu();
+                }
+
+                if (ImGui.BeginMenu("Wizard"))
+                {
+                    var hasNewFeatures = this._configurationWizardService.HasNewFeatures;
+                    using var disabled = ImRaii.Disabled(!hasNewFeatures);
+                    if (ImGui.MenuItem("Configure New Features"))
+                    {
+                        this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWizard)));
+                    }
+
+                    disabled.Dispose();
+
+                    if (ImGui.MenuItem("Reconfigure All Features"))
+                    {
+                        this._configurationWizardService.ClearFeaturesSeen();
+                        this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWizard)));
+                    }
+
+                    ImGui.EndMenu();
+                }
+
+                if (ImGui.BeginMenu("Windows"))
+                {
+                    if (_menuWindows != null)
+                    {
+                        foreach (var window in _menuWindows)
+                        {
+                            if (ImGui.MenuItem(window.GenericName))
+                            {
+                                this.MediatorService.Publish(new OpenGenericWindowMessage(window.GetType()));
+                            }
+                        }
+                    }
+
+                    ImGui.EndMenu();
+                }
+
+                ImGui.EndMenuBar();
+            }
+        }
+
         public override void Draw()
         {
-
+            DrawMenuBar();
             using (var sideBarChild =
                    ImRaii.Child("SideBar", new Vector2(180, 0) * ImGui.GetIO().FontGlobalScale, true))
             {
@@ -500,7 +592,7 @@ namespace InventoryTools.Ui
 
                             var width = ImGui.GetWindowSize().X;
                             width -= 24 * ImGui.GetIO().FontGlobalScale;
-                            
+
                             ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
                             ImGui.SetCursorPosX(width);
 
@@ -510,10 +602,10 @@ namespace InventoryTools.Ui
                             }
 
                             _settingsMenu.Draw();
-                            
-                            
+
+
                             width -= 26 * ImGui.GetIO().FontGlobalScale;
-                            
+
                             ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
                             ImGui.SetCursorPosX(width);
 
@@ -523,14 +615,14 @@ namespace InventoryTools.Ui
                             }
                             _wizardMenu.Draw();
 
-                            
+
                             ImGuiUtil.HoverTooltip("Start configuration wizard.");
                         }
                     }
                 }
             }
-            
-            
+
+
 
             ImGui.SameLine();
 

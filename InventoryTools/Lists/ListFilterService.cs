@@ -65,7 +65,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
                InventoryCategory.Crystals);
             var currencyBags = _inventoryMonitor.GetSpecificInventory(_characterMonitor.ActiveCharacterId,
                InventoryCategory.Currency);
-            
+
             GenerateSources(filterConfiguration, inventories.ToList(), out var sourceInventories);
 
             var characterSources = new Dictionary<uint, List<CraftItemSource>>();
@@ -94,10 +94,10 @@ public class ListFilterService : DisposableMediatorBackgroundService
                 }
                 characterSources[item.ItemId].Add(new CraftItemSource(item.ItemId, item.Quantity, item.IsHQ));
             }
-            
+
             foreach (var inventory in sourceInventories)
             {
-                //Assume we have no retainer active because we want all the possible items 
+                //Assume we have no retainer active because we want all the possible items
                 if (filterConfiguration.InActiveInventories(_characterMonitor.ActiveCharacterId, 0, inventory.Key.Item1, _characterMonitor.ActiveCharacterId))
                 {
                     foreach (var item in inventory.Value)
@@ -133,7 +133,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
                     craftListConfiguration.WorldPreferences.Add(_characterMonitor.ActiveCharacter.ActiveWorldId);
                 }
             }
-            
+
             if (filterConfiguration.GetBooleanFilter("CraftWorldPriceUseDefaults") == true)
             {
                 foreach (var worldId in _configuration.MarketBoardWorldIds)
@@ -177,12 +177,12 @@ public class ListFilterService : DisposableMediatorBackgroundService
     private List<SearchResult> GenerateFilterResult(FilterConfiguration filter, List<Inventory> inventories)
     {
         var searchResults = new List<SearchResult>();
-        
+
         var activeCharacter = _characterMonitor.ActiveCharacterId;
         var activeRetainer = _characterMonitor.ActiveRetainerId;
         var displaySourceCrossCharacter = filter.SourceIncludeCrossCharacter ?? _configuration.DisplayCrossCharacter;
         var displayDestinationCrossCharacter = filter.DestinationIncludeCrossCharacter ?? _configuration.DisplayCrossCharacter;
-        
+
         Logger.LogTrace("Filter Information:");
         Logger.LogTrace("Filter Type: " + filter.FilterType);
 
@@ -205,7 +205,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
             {
                 availableFilter.InvalidateSearchCache();
             }
-            
+
             foreach (var sourceInventory in sourceInventories)
             {
                 if (!filteredSources.ContainsKey(sourceInventory.Key))
@@ -298,8 +298,8 @@ public class ListFilterService : DisposableMediatorBackgroundService
                                     {
                                         var sortingResult = new SortingResult(sourceInventory.Key.Item1,
                                             existingItem.RetainerId, sourceItem.SortedContainer,
-                                            existingItem.SortedContainer,existingItem.BagLocation(existingItem.SortedContainer),false, sourceItem, (int) canFit);
-                                        
+                                            existingItem.SortedContainer,existingItem.BagLocation(existingItem.SortedContainer),false, sourceItem, existingItem, (int) canFit);
+
                                         searchResults.Add(new SearchResult(sortingResult));
                                     }
 
@@ -365,7 +365,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
                                                         //    sourceItem.FormattedName);
                                                         var sortingResult = new SortingResult(sourceInventory.Key.Item1,
                                                             seenInventoryLocation.Item1, sourceItem.SortedContainer,
-                                                            seenInventoryLocation.Item2, nextEmptySlot.BagLocation(nextEmptySlot.SortedContainer),true, sourceItem,
+                                                            seenInventoryLocation.Item2, nextEmptySlot.BagLocation(nextEmptySlot.SortedContainer),true, sourceItem, nextEmptySlot,
                                                             (int) sourceItem.TempQuantity);
                                                         searchResults.Add(new SearchResult(sortingResult));
                                                     }
@@ -406,7 +406,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
                             slotsAvailable.Remove(slot.Key);
                         }
                     }
-                    
+
                     var nextSlots = slotsAvailable.Where(c =>
                         c.Value.Count != 0 &&
                         filter.InActiveInventories(activeCharacter, activeRetainer, sourceInventory.Key.Item1,
@@ -432,16 +432,16 @@ public class ListFilterService : DisposableMediatorBackgroundService
                                 sourceItem.SortedContainer != nextSlot.Key.Item2)
                             {
                                 var sortingResult = new SortingResult(sourceInventory.Key.Item1, nextSlot.Key.Item1,
-                                    sourceItem.SortedContainer, nextSlot.Key.Item2, nextEmptySlot.BagLocation(nextEmptySlot.SortedContainer),true, sourceItem,
+                                    sourceItem.SortedContainer, nextSlot.Key.Item2, nextEmptySlot.BagLocation(nextEmptySlot.SortedContainer),true, sourceItem, nextEmptySlot,
                                     (int) sourceItem.TempQuantity);
                                 searchResults.Add(new SearchResult(sortingResult));
-                                
+
                                 //We want to add the empty slot to the list of locations we know about, we need to create a copy and add that so any further items with the same ID can properly check how much room is left in the stack
                                 nextEmptySlot = new InventoryItem(nextEmptySlot);
                                 nextEmptySlot.ItemId = sourceItem.ItemId;
                                 nextEmptySlot.Flags = sourceItem.Flags;
                                 nextEmptySlot.Quantity = sourceItem.Quantity;
-                                
+
                                 //Add the destination item into the list of locations in case we have an empty slot for an item but multiple sources of the item.
                                 var newLocationHash = sourceItem.GenerateHashCode(filter.IgnoreHQWhenSorting ?? false);
                                 itemLocations.TryAdd(newLocationHash, new List<InventoryItem>());
@@ -535,7 +535,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
                             item, (int)item.Quantity);
                         searchResults.Add(new SearchResult(sortingResult));
                     }
-                    
+
                 }
             }
         }
@@ -568,7 +568,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
                     matchedItems.Add(item);
                 }
             }
-            
+
             bool MatchHistoryItem(InventoryChange item, ulong characterId, InventoryCategory inventoryCategory)
             {
                 if (filter.SourceAllRetainers.HasValue && filter.SourceAllRetainers.Value &&
@@ -626,7 +626,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
                     searchResults.Add(new SearchResult(change));
                 }
             }
-        }      
+        }
         else if (filter.FilterType == FilterType.CuratedList)
         {
             if (filter.CuratedItems != null)
@@ -646,7 +646,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
             searchResults = _excelCache.AllItems.Select(c => c.Value).Where(c => filter.FilterItem(_filterService.AvailableFilters, c)).Where(c => c.RowId != 0).Select(c => new SearchResult(c)).ToList();
         }
 
-        
+
         return searchResults;
     }
 
@@ -654,7 +654,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
     {
         var displaySourceCrossCharacter = filter.SourceIncludeCrossCharacter ?? _configuration.DisplayCrossCharacter;
         sourceInventories = new();
-        
+
         foreach (var character in inventories)
         {
             foreach (var inventory in character.GetAllInventoriesByType())
@@ -740,7 +740,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
     {
         var displaySourceCrossCharacter = filter.SourceIncludeCrossCharacter ?? _configuration.DisplayCrossCharacter;
         var displayDestinationCrossCharacter = filter.DestinationIncludeCrossCharacter ?? _configuration.DisplayCrossCharacter;
-        
+
         sourceInventories = new();
         destinationInventories = new();
         foreach (var character in inventories)
@@ -933,12 +933,12 @@ public class ListFilterService : DisposableMediatorBackgroundService
     {
         await BackgroundProcessing(stoppingToken);
     }
-    
+
     private async Task BackgroundProcessing(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var workItem = 
+            var workItem =
                 await FilterQueue.DequeueAsync(stoppingToken);
 
             try
@@ -947,12 +947,12 @@ public class ListFilterService : DisposableMediatorBackgroundService
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, 
+                Logger.LogError(ex,
                     "Error occurred executing {WorkItem}.", nameof(workItem));
             }
         }
     }
-    
+
     public override async Task StopAsync(CancellationToken stoppingToken)
     {
         Logger.LogTrace("Queued Hosted Service is stopping.");

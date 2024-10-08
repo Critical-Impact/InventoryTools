@@ -21,7 +21,7 @@ namespace InventoryTools.Logic.Settings
         public override string Name { get; set; } = "Invert Highlighting?";
 
         public override string HelpText { get; set; } =
-            "Should all the items not matching a filter be highlighted instead? This can be overridden in the filter configuration.";
+            "Should all the items not matching a list be highlighted instead? This can be overridden in the list configuration.";
 
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.Lists;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Highlighting;

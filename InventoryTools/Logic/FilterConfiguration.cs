@@ -163,7 +163,7 @@ namespace InventoryTools.Logic
             CraftTableId = Guid.NewGuid().ToString("N");
             return CraftTableId;
         }
-        
+
         [JsonIgnore]
         private List<SearchResult>? _searchResults = null;
 
@@ -197,7 +197,7 @@ namespace InventoryTools.Logic
             Name = name;
             Key = Guid.NewGuid().ToString("N");
         }
-        
+
         public void ApplyDefaultCraftFilterConfiguration()
         {
             CraftListDefault = true;
@@ -471,7 +471,7 @@ namespace InventoryTools.Logic
             set { _sourceAllRetainers = value;
                 NeedsRefresh = true;
                 ConfigurationDirty = true;
-            }            
+            }
         }
 
         public bool? SourceAllHouses
@@ -480,7 +480,7 @@ namespace InventoryTools.Logic
             set { _sourceAllHouses = value;
                 NeedsRefresh = true;
                 ConfigurationDirty = true;
-            }            
+            }
         }
 
         public bool? SourceAllFreeCompanies
@@ -489,9 +489,9 @@ namespace InventoryTools.Logic
             set { _sourceAllFreeCompanies = value;
                 NeedsRefresh = true;
                 ConfigurationDirty = true;
-            }            
+            }
         }
-        
+
         public string? HighlightWhen
         {
             get => _highlightWhen;
@@ -502,7 +502,7 @@ namespace InventoryTools.Logic
             }
         }
 
-        
+
         public bool? UseORFiltering
         {
             get => _useORFiltering;
@@ -519,7 +519,7 @@ namespace InventoryTools.Logic
             set { _sourceAllCharacters = value;
                 NeedsRefresh = true;
                 ConfigurationDirty = true;
-            }            
+            }
         }
 
         public bool? DestinationAllRetainers
@@ -528,7 +528,7 @@ namespace InventoryTools.Logic
             set { _destinationAllRetainers = value;
                 NeedsRefresh = true;
                 ConfigurationDirty = true;
-            }            
+            }
         }
 
         public bool? DestinationAllFreeCompanies
@@ -537,7 +537,7 @@ namespace InventoryTools.Logic
             set { _destinationAllFreeCompanies = value;
                 NeedsRefresh = true;
                 ConfigurationDirty = true;
-            }            
+            }
         }
 
         public bool? DestinationAllHouses
@@ -546,7 +546,7 @@ namespace InventoryTools.Logic
             set { _destinationAllHouses = value;
                 NeedsRefresh = true;
                 ConfigurationDirty = true;
-            }            
+            }
         }
 
         public bool? SourceIncludeCrossCharacter
@@ -555,7 +555,7 @@ namespace InventoryTools.Logic
             set { _sourceIncludeCrossCharacter = value;
                 NeedsRefresh = true;
                 ConfigurationDirty = true;
-            }            
+            }
         }
 
         public bool? DestinationIncludeCrossCharacter
@@ -564,7 +564,7 @@ namespace InventoryTools.Logic
             set { _destinationIncludeCrossCharacter = value;
                 NeedsRefresh = true;
                 ConfigurationDirty = true;
-            }            
+            }
         }
 
         public int? FreezeColumns
@@ -573,7 +573,7 @@ namespace InventoryTools.Logic
             set { _freezeColumns = value;
                 NeedsRefresh = true;
                 TableConfigurationDirty = true;
-            }            
+            }
         }
 
         public int? FreezeCraftColumns
@@ -582,7 +582,7 @@ namespace InventoryTools.Logic
             set { _freezeCraftColumns = value;
                 NeedsRefresh = true;
                 TableConfigurationDirty = true;
-            }            
+            }
         }
 
         public HashSet<InventoryCategory>? DestinationCategories
@@ -591,7 +591,7 @@ namespace InventoryTools.Logic
             set { _destinationCategories = value;
                 NeedsRefresh = true;
                 ConfigurationDirty = true;
-            }            
+            }
         }
 
         public HashSet<InventoryCategory>? SourceCategories
@@ -600,7 +600,7 @@ namespace InventoryTools.Logic
             set { _sourceCategories = value;
                 NeedsRefresh = true;
                 ConfigurationDirty = true;
-            }            
+            }
         }
 
         public bool? DestinationAllCharacters
@@ -609,9 +609,9 @@ namespace InventoryTools.Logic
             set { _destinationAllCharacters = value;
                 NeedsRefresh = true;
                 ConfigurationDirty = true;
-            }            
+            }
         }
-        
+
         public string ShopSellingPrice
         {
             get => _shopSellingPrice;
@@ -619,7 +619,7 @@ namespace InventoryTools.Logic
             {
                 _shopSellingPrice = value;
                 NeedsRefresh = true;
-                ConfigurationDirty = true;                
+                ConfigurationDirty = true;
             }
         }
 
@@ -666,7 +666,7 @@ namespace InventoryTools.Logic
                 ConfigurationDirty = true;
             }
         }
-        
+
         public bool? IsAvailableAtTimedNode
         {
             get => _isAvailableAtTimedNode;
@@ -675,7 +675,7 @@ namespace InventoryTools.Logic
                 _isAvailableAtTimedNode = value;
                 NeedsRefresh = true;
                 ConfigurationDirty = true;
-            }            
+            }
         }
 
         public ulong OwnerId
@@ -689,7 +689,7 @@ namespace InventoryTools.Logic
             get => _icon;
             set => _icon = value;
         }
-        
+
         public Vector4? HighlightColor
         {
             get => _highlightColor;
@@ -699,7 +699,7 @@ namespace InventoryTools.Logic
                 ConfigurationDirty = true;
             }
         }
-        
+
         public Vector4? DestinationHighlightColor
         {
             get => _destinationHighlightColor;
@@ -709,7 +709,7 @@ namespace InventoryTools.Logic
                 ConfigurationDirty = true;
             }
         }
-        
+
         public Vector4? RetainerListColor
         {
             get => _retainerListColor;
@@ -719,7 +719,7 @@ namespace InventoryTools.Logic
                 ConfigurationDirty = true;
             }
         }
-        
+
         public Vector4? TabHighlightColor
         {
             get => _tabHighlightColor;
@@ -809,16 +809,16 @@ namespace InventoryTools.Logic
                 TableConfigurationDirty = true;
             }
         }
-        
+
         public HashSet<uint>? SourceWorlds
         {
             get => _sourceWorlds;
             set { _sourceWorlds = value;
                 NeedsRefresh = true;
                 ConfigurationDirty = true;
-            }            
+            }
         }
-        
+
         public string? DefaultSortColumn
         {
             get => _defaultSortColumn;
@@ -826,9 +826,9 @@ namespace InventoryTools.Logic
                 NeedsRefresh = true;
                 TableConfigurationDirty = true;
                 ConfigurationDirty = true;
-            }            
+            }
         }
-        
+
         public ImGuiSortDirection? DefaultSortOrder
         {
             get => _defaultSortOrder;
@@ -836,16 +836,16 @@ namespace InventoryTools.Logic
                 NeedsRefresh = true;
                 TableConfigurationDirty = true;
                 ConfigurationDirty = true;
-            }            
+            }
         }
-        
+
         public CraftDisplayMode CraftDisplayMode
         {
             get => _craftDisplayMode;
             set { _craftDisplayMode = value;
                 NeedsRefresh = true;
                 ConfigurationDirty = true;
-            }            
+            }
         }
 
         public bool FilterItem(List<IFilter> filters, ItemEx item)
@@ -916,7 +916,7 @@ namespace InventoryTools.Logic
 
             return true;
         }
-        
+
         public FilteredItem? FilterItem(List<IFilter> filters, InventoryItem item)
         {
             if (item.ItemId == 0)
@@ -1031,6 +1031,16 @@ namespace InventoryTools.Logic
                 _curatedItems = new();
             }
             _curatedItems.Remove(curatedItem);
+            ConfigurationDirty = true;
+        }
+
+        public void ClearCuratedItems()
+        {
+            if (_curatedItems == null)
+            {
+                _curatedItems = new();
+            }
+            _curatedItems.Clear();
             ConfigurationDirty = true;
         }
 
@@ -1448,7 +1458,7 @@ namespace InventoryTools.Logic
             }
             return true;
         }
-        
+
         public CraftList CraftList
         {
             get
@@ -1479,8 +1489,32 @@ namespace InventoryTools.Logic
             ConfigurationDirty = true;
         }
 
+        public void AddItemsToList(List<(uint, uint)> items)
+        {
+            if (this.FilterType == FilterType.CraftFilter)
+            {
+                foreach (var item in items)
+                {
+                    bool isHq = item.Item1 > 1000000;
+                    var itemId = item.Item1 % 500000;
+                    CraftList.AddCraftItem(itemId, item.Item2, isHq ? FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HighQuality : FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None);
+                }
+                NeedsRefresh = true;
+            }
+            else if (this.FilterType == FilterType.CuratedList)
+            {
+                foreach (var item in items)
+                {
+                    bool isHq = item.Item1 > 1000000;
+                    var itemId = item.Item1 % 500000;
+                    AddCuratedItem(new CuratedItem(itemId, item.Item2,
+                        isHq ? FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HighQuality : FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None));
+                }
 
-        
+                NeedsRefresh = true;
+            }
+        }
+
 
         public FilterConfiguration? Clone()
         {

@@ -100,7 +100,7 @@ namespace InventoryTools.Logic
                                     var column = Columns[index];
                                     column.Column.Setup(FilterConfiguration, column, index);
                                 }
-                                
+
                                 ImGui.TableHeadersRow();
                                 for (var index = 0; index < Columns.Count; index++)
                                 {
@@ -174,7 +174,7 @@ namespace InventoryTools.Logic
                                 var column = Columns[index];
                                 column.Column.Setup(FilterConfiguration, column, index);
                             }
-                            
+
                             ImGui.TableHeadersRow();
                             for (var index = 0; index < Columns.Count; index++)
                             {
@@ -278,7 +278,7 @@ namespace InventoryTools.Logic
 
         public override void DrawFooterItems()
         {
-            
+
         }
 
         public void ExportToCsv(string fileName)
@@ -308,8 +308,13 @@ namespace InventoryTools.Logic
                 }
             }
         }
-        
+
         public string ExportToJson()
+        {
+            return ExportToJson(CraftItems);
+        }
+
+        public string ExportToJson(List<SearchResult> toExport)
         {
             var lines = new List<dynamic>();
             var converter = new ExpandoObjectConverter();

@@ -18,7 +18,7 @@ using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Ui;
 
-public class ENpcsWindow : GenericTabbedTable<ENpc>
+public class ENpcsWindow : GenericTabbedTable<ENpc>, IMenuWindow
 {
     private readonly ExcelCache _excelCache;
     private readonly IChatUtilities _chatUtilities;
@@ -28,7 +28,7 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
         _excelCache = excelCache;
         _chatUtilities = chatUtilities;
     }
-    
+
     public override void Initialize()
     {
         WindowName = "NPCs";
@@ -100,7 +100,7 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
 
                         return true;
                     });
-                        
+
                 }
             },
             new("Is Vendor", 200, ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoSort)
@@ -155,7 +155,7 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    
+
                     var drops = GetShopItems(ex);
                     if (drops != null)
                     {
@@ -210,7 +210,7 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
         _items = new Dictionary<uint, List<ENpc>>();
         _filteredItems = new Dictionary<uint, List<ENpc>>();
     }
-    
+
     private Dictionary<uint, List<LazyRow<ItemEx>>?> _shopItems = new();
 
     private List<LazyRow<ItemEx>>? GetShopItems(ENpc npc)
@@ -285,7 +285,7 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>
 
             _filteredItems.Add(placeNameId, unfilteredList);
         }
-        
+
         return _filteredItems[placeNameId];
     }
 

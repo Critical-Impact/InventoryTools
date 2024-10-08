@@ -18,7 +18,8 @@ namespace InventoryToolsTesting.Services
         {
             var mockContainer = new MockContainer(new MockDalamudConfiguration()
             {
-                GamePath = new DirectoryInfo("/home/blair/.xlcore/ffxiv/game/sqpack")
+                GamePath = new DirectoryInfo("/home/blair/.xlcore/ffxiv/game/sqpack"),
+                PluginSavePath = new DirectoryInfo("/home/blair/.xlcore/DalaMockConfigs/"),
             }, builder =>
             {
                 builder.RegisterType<MediatorService>();
