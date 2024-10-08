@@ -535,7 +535,7 @@ namespace InventoryTools.Ui
                     }
                     if (ImGui.MenuItem("Clear List"))
                     {
-                        _popupService.AddPopup(new ConfirmPopup("craftListDelete",
+                        _popupService.AddPopup(new ConfirmPopup(GetType(), "craftListDelete",
                             "Are you sure you want to clear your craft list?",
                             result =>
                             {
@@ -655,7 +655,7 @@ namespace InventoryTools.Ui
                     {
                         if (ImGui.MenuItem("Craft List"))
                         {
-                            _popupService.AddPopup(new NamePopup("addCraftList", "", result =>
+                            _popupService.AddPopup(new NamePopup(GetType(),"addCraftList", "", result =>
                             {
                                 if (result.Item1)
                                 {
@@ -665,7 +665,7 @@ namespace InventoryTools.Ui
                         }
                         if (ImGui.MenuItem("Craft List (Ephemeral)"))
                         {
-                            _popupService.AddPopup(new NamePopup("addCraftListEphemeral", "", result =>
+                            _popupService.AddPopup(new NamePopup(GetType(),"addCraftListEphemeral", "", result =>
                             {
                                 if (result.Item1)
                                 {
@@ -748,7 +748,7 @@ namespace InventoryTools.Ui
         public override unsafe void Draw()
         {
             DrawMenuBar();
-            _popupService.Draw();
+            _popupService.Draw(GetType());
             if (!_configuration.HasSeenNotification(NotificationPopup.CraftNotice) && ImGui.IsWindowFocused())
             {
                 ImGui.OpenPopup("notification");

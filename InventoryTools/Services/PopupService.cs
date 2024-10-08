@@ -17,7 +17,7 @@ public class PopupService : IDisposable
         _toOpen = new();
     }
 
-    public void Draw()
+    public void Draw(Type windowType)
     {
         if (_toOpen.TryDequeue(out IPopup toOpen))
         {
@@ -25,7 +25,10 @@ public class PopupService : IDisposable
         }
         foreach (var popup in _popups)
         {
-            popup.Draw();
+            if (popup.Window == windowType)
+            {
+                popup.Draw();
+            }
         }
     }
 
@@ -59,19 +62,22 @@ public class PopupService : IDisposable
 
 public class NamePopup : IPopup
 {
+    private readonly Type _window;
     private readonly string _id;
     private string _name;
     private bool _drawnOnce = false;
     private readonly Action<(bool, string)> _callback;
     public event IPopup.FinalizedDelegate? Finalized;
 
-    public NamePopup(string id, string defaultName, Action<(bool, string)> callback)
+    public NamePopup(Type window, string id, string defaultName, Action<(bool, string)> callback)
     {
+        _window = window;
         _id = id;
         _name = defaultName;
         _callback = callback;
     }
 
+    public Type Window => _window;
     public string Id => _id;
 
     public void Draw()
@@ -124,18 +130,21 @@ public class NamePopup : IPopup
 
 public class ConfirmPopup : IPopup
 {
+    private readonly Type _window;
     private readonly string _id;
     private readonly string _question;
     private readonly Action<bool> _callback;
     public event IPopup.FinalizedDelegate? Finalized;
 
-    public ConfirmPopup(string id, string question, Action<bool> callback)
+    public ConfirmPopup(Type window, string id, string question, Action<bool> callback)
     {
+        _window = window;
         _id = id;
         _question = question;
         _callback = callback;
     }
 
+    public Type Window => _window;
     public string Id => _id;
 
     public void Draw()
@@ -171,6 +180,7 @@ public class ConfirmPopup : IPopup
 
 public interface IPopup
 {
+    public Type Window { get; }
     string Id { get; }
     void Draw();
     void Finalize();

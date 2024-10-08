@@ -505,6 +505,7 @@ namespace InventoryTools.Ui
             }
 
             DrawMenuBar();
+            _popupService.Draw(GetType());
             if (_configuration.FiltersLayout == WindowLayout.Sidebar)
             {
                 DrawSidebar();
@@ -595,7 +596,7 @@ namespace InventoryTools.Ui
                     }
                     if (SelectedConfiguration.FilterType == FilterType.CuratedList && ImGui.MenuItem("Clear List"))
                     {
-                        _popupService.AddPopup(new ConfirmPopup("craftListDelete",
+                        _popupService.AddPopup(new ConfirmPopup(GetType(), "craftListDelete",
                             "Are you sure you want to clear this curated list?",
                             result =>
                             {
@@ -701,7 +702,7 @@ namespace InventoryTools.Ui
                     {
                         if (ImGui.MenuItem("Search List"))
                         {
-                            _popupService.AddPopup(new NamePopup("addSearchList", "", result =>
+                            _popupService.AddPopup(new NamePopup(GetType(), "addSearchList", "", result =>
                             {
                                 if (result.Item1)
                                 {
@@ -712,7 +713,7 @@ namespace InventoryTools.Ui
 
                         if (ImGui.MenuItem("Sort List"))
                         {
-                            _popupService.AddPopup(new NamePopup("addSortList", "", result =>
+                            _popupService.AddPopup(new NamePopup(GetType(), "addSortList", "", result =>
                             {
                                 if (result.Item1)
                                 {
@@ -723,7 +724,7 @@ namespace InventoryTools.Ui
 
                         if (ImGui.MenuItem("Game Item List"))
                         {
-                            _popupService.AddPopup(new NamePopup("addGameItemList", "", result =>
+                            _popupService.AddPopup(new NamePopup(GetType(), "addGameItemList", "", result =>
                             {
                                 if (result.Item1)
                                 {
@@ -734,7 +735,7 @@ namespace InventoryTools.Ui
 
                         if (ImGui.MenuItem("Curated List"))
                         {
-                            _popupService.AddPopup(new NamePopup("addCuratedList", "", result =>
+                            _popupService.AddPopup(new NamePopup(GetType(), "addCuratedList", "", result =>
                             {
                                 if (result.Item1)
                                 {
@@ -745,7 +746,7 @@ namespace InventoryTools.Ui
 
                         if (ImGui.MenuItem("History List"))
                         {
-                            _popupService.AddPopup(new NamePopup("addHistoryList", "", result =>
+                            _popupService.AddPopup(new NamePopup(GetType(), "addHistoryList", "", result =>
                             {
                                 if (result.Item1)
                                 {
