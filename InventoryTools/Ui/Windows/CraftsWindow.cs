@@ -404,7 +404,7 @@ namespace InventoryTools.Ui
                     ImGui.EndMenu();
                 }
 
-                if (ImGui.BeginMenu("Edit") && this.SelectedConfiguration != null)
+                if (this.SelectedConfiguration != null && ImGui.BeginMenu("Edit"))
                 {
                     if (ImGui.MenuItem("Clear Search"))
                     {
@@ -550,9 +550,12 @@ namespace InventoryTools.Ui
                     ImGui.Separator();
                     if (ImGui.BeginMenu("Add to Craft List"))
                     {
-                        foreach (var craft in _listService.Lists
-                                     .Where(c => c.FilterType == FilterType.CraftFilter && c.CraftListDefault == false)
-                                     .OrderBy(c => c.Order))
+                        var craftLists = _listService.Lists
+                            .Where(c => c.FilterType == FilterType.CraftFilter && c.CraftListDefault == false)
+                            .OrderBy(c => c.Order)
+                            .ToList();
+
+                        foreach (var craft in craftLists)
                         {
                             if (ImGui.MenuItem(craft.Name))
                             {
@@ -566,13 +569,56 @@ namespace InventoryTools.Ui
                                 MediatorService.Publish(new FocusListMessage(typeof(CraftsWindow), craft));
                             }
                         }
+                        if (craftLists.Count != 0)
+                        {
+                            ImGui.Separator();
+                        }
+
+                        if (ImGui.MenuItem("New Craft List"))
+                        {
+                            _popupService.AddPopup(new NamePopup(typeof(CraftsWindow), "newCraftList", "New Craft List",
+                                result =>
+                                {
+                                    if (result.Item1)
+                                    {
+                                        var craftList = _listService.AddNewCraftList(result.Item2);
+                                        var searchResults = _tableService.GetListTable(SelectedConfiguration).SearchResults;
+                                        foreach (var searchResult in searchResults)
+                                        {
+                                            craftList.CraftList.AddCraftItem(searchResult.ItemId, searchResult.Quantity,
+                                                searchResult.Flags);
+                                        }
+                                    }
+                                }));
+                        }
+
+                        if (ImGui.MenuItem("New Craft List (Ephemeral)"))
+                        {
+                            _popupService.AddPopup(new NamePopup(typeof(CraftsWindow), "newCraftList", "New Craft List",
+                                result =>
+                                {
+                                    if (result.Item1)
+                                    {
+                                        var craftList = _listService.AddNewCraftList(result.Item2, true);
+                                        var searchResults = _tableService.GetListTable(SelectedConfiguration).SearchResults;
+                                        foreach (var searchResult in searchResults)
+                                        {
+                                            craftList.CraftList.AddCraftItem(searchResult.ItemId, searchResult.Quantity,
+                                                searchResult.Flags);
+                                        }
+                                    }
+                                }));
+                        }
                         ImGui.EndMenu();
                     }
                     if (ImGui.BeginMenu("Add to Curated List"))
                     {
-                        foreach (var curatedList in _listService.Lists
-                                     .Where(c => c.FilterType == FilterType.CuratedList)
-                                     .OrderBy(c => c.Order))
+                        var curatedLists = _listService.Lists
+                            .Where(c => c.FilterType == FilterType.CuratedList)
+                            .OrderBy(c => c.Order)
+                            .ToList();
+
+                        foreach (var curatedList in curatedLists)
                         {
                             if (ImGui.MenuItem(curatedList.Name))
                             {
@@ -583,6 +629,31 @@ namespace InventoryTools.Ui
                                         searchResult.Flags));
                                 }
                             }
+                        }
+
+                        if (curatedLists.Count != 0)
+                        {
+                            ImGui.Separator();
+                        }
+
+                        if (ImGui.MenuItem("New Curated List"))
+                        {
+                            _popupService.AddPopup(new NamePopup(typeof(CraftsWindow), "newCuratedList", "New Curated List",
+                                result =>
+                                {
+                                    if (result.Item1)
+                                    {
+                                        var curatedList = _listService.AddNewCuratedList(result.Item2);
+                                        var searchResults = _tableService.GetListTable(SelectedConfiguration).SearchResults;
+                                        foreach (var searchResult in searchResults)
+                                        {
+                                            curatedList.AddCuratedItem(new CuratedItem(searchResult.ItemId, searchResult.Quantity,
+                                                searchResult.Flags));
+                                        }
+                                        this.MediatorService.Publish(new FocusListMessage(typeof(FiltersWindow), curatedList));
+                                        curatedList.NeedsRefresh = true;
+                                    }
+                                }));
                         }
                         ImGui.EndMenu();
                     }
@@ -611,12 +682,29 @@ namespace InventoryTools.Ui
 
                 if (ImGui.BeginMenu("Export"))
                 {
-                    if (ImGui.MenuItem("To CSV"))
+                    if (ImGui.MenuItem("Craft List (CSV)"))
                     {
+                        if (SelectedConfiguration != null)
+                        {
+                            _fileDialogManager.SaveFileDialog("Save to csv", "*.csv",
+                                "export-craft-list.csv", ".csv",
+                                (b, s) =>
+                                {
+                                    var craftTable = _tableService.GetCraftTable(SelectedConfiguration);
+                                    SaveCraftCallback(craftTable, b, s);
+                                }, null, true);
+                        }
                     }
-                    if (ImGui.MenuItem("To JSON"))
+                    if (ImGui.MenuItem("Retainer/Bag List (CSV)"))
                     {
+                        if (SelectedConfiguration != null)
+                        {
+                            var itemTable = _tableService.GetListTable(SelectedConfiguration);
+                            _fileDialogManager.SaveFileDialog("Save to csv", "*.csv", "export.csv", ".csv",
+                                (b, s) => { SaveCallback(itemTable, b, s); }, null, true);
+                        }
                     }
+
                     ImGui.EndMenu();
                 }
 
@@ -683,9 +771,9 @@ namespace InventoryTools.Ui
                         var windowGroup = windowGroups[index];
                         ImGui.Text(windowGroup.Key.FormattedName());
                         ImGui.Separator();
-                        foreach (var window in windowGroup)
+                        foreach (var window in windowGroup.OrderBy(c => c.CraftListDefault).ThenBy(c => c.Order))
                         {
-                            if (ImGui.MenuItem(window.Name, "", SelectedConfiguration == window))
+                            if (ImGui.MenuItem(window.Name, "", SelectedConfiguration == window || (SelectedConfiguration == null && window.CraftListDefault)))
                             {
                                 if (window.FilterType == FilterType.CraftFilter)
                                 {
@@ -695,8 +783,15 @@ namespace InventoryTools.Ui
                                     }
                                     else
                                     {
-                                        MediatorService.Publish(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                                        MediatorService.Publish(new FocusListMessage(typeof(CraftsWindow), window));
+                                        if (window.CraftListDefault)
+                                        {
+                                            _selectedFilterTab = Filters.Count + 1;
+                                        }
+                                        else
+                                        {
+                                            MediatorService.Publish(new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                                            MediatorService.Publish(new FocusListMessage(typeof(CraftsWindow), window));
+                                        }
                                     }
 
                                 }

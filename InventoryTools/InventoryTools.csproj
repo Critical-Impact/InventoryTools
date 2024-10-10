@@ -2,24 +2,12 @@
     <Import Project="Dalamud.Plugin.Bootstrap.targets"/>
 
     <PropertyGroup>
-        <LangVersion>12</LangVersion>
         <Version>1.7.0.20</Version>
         <AssemblyName>InventoryTools</AssemblyName>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-        <NoWarn>IDE0003</NoWarn>
+            <NoWarn>IDE0003</NoWarn>
         <OutputType>Library</OutputType>
         <OutputPath>bin\$(Configuration)\</OutputPath>
-        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
         <Configurations>Debug;Release;FullDebug</Configurations>
-        <Platforms>AnyCPU</Platforms>
-        <Nullable>enable</Nullable>
-        <TargetFramework>net8.0-windows</TargetFramework>
-    </PropertyGroup>
-
-    <PropertyGroup>
-        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -35,7 +23,6 @@
         <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="7.0.11" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
         <PackageReference Include="CsvHelper" Version="30.0.1" />
-        <PackageReference Include="DalamudPackager" Version="2.1.12" />
         <PackageReference Include="SerialQueue" Version="2.1.0" />
         <PackageReference Include="System.Reactive" Version="5.0.0" />
         <ProjectReference Include="..\CriticalCommonLib\CriticalCommonLib.csproj" />

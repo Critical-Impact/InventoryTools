@@ -100,9 +100,9 @@ public class MigrationManagerService : IHostedService
         if (config.InternalVersion == 3)
         {
             _logger.LogInformation("Migrating to version 4");
-            
-            
-            
+
+
+
             foreach (var filterConfig in config.FilterConfigurations)
             {
                 _serviceProvider.GetRequiredService<IsHqFilter>().UpdateFilterConfiguration(filterConfig, filterConfig.IsHq);
@@ -203,7 +203,7 @@ public class MigrationManagerService : IHostedService
         if (config.InternalVersion == 11)
         {
             _logger.LogInformation("Migrating to version 12");
-            config.TooltipLocationLimit = 10;                
+            config.TooltipLocationLimit = 10;
             config.TooltipLocationDisplayMode =
                 TooltipLocationDisplayMode.CharacterCategoryQuantityQuality;
             config.InternalVersion++;
@@ -304,6 +304,11 @@ public class MigrationManagerService : IHostedService
     {
         string inputFile  = Path.Join(_pluginInterfaceService.ConfigDirectory.FullName, "inventories.csv");
         string outputFile = Path.Join(_pluginInterfaceService.ConfigDirectory.FullName, "inventories_migration.csv");
+
+        if (!File.Exists(inputFile))
+        {
+            return;
+        }
 
         using (var reader = new StreamReader(inputFile))
         using (var writer = new StreamWriter(outputFile))
