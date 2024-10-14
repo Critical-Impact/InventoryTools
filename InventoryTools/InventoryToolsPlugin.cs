@@ -101,6 +101,10 @@ namespace InventoryTools
             typeof(LaunchButtonService),
             typeof(HostedInventoryHistory),
             typeof(OdrScanner),
+            typeof(IPCService),
+            typeof(HostedCraftMonitor),
+            typeof(ItemSearchService),
+
         };
 
         public List<Type> GetHostedServices()
@@ -254,7 +258,6 @@ namespace InventoryTools
                 builder.RegisterType<CharacterMonitor>().As<ICharacterMonitor>().SingleInstance();
                 builder.RegisterType<ChatUtilities>().As<IChatUtilities>().SingleInstance();
                 builder.RegisterType<ConfigurationWizardService>().As<IConfigurationWizardService>().SingleInstance();
-                builder.RegisterType<HostedCraftMonitor>().AsSelf().As<ICraftMonitor>().SingleInstance();
                 builder.RegisterType<FilterService>().As<IFilterService>().SingleInstance();
                 builder.RegisterType<Font>().As<IFont>().SingleInstance();
                 builder.RegisterType<GameInterface>().As<IGameInterface>().SingleInstance();
