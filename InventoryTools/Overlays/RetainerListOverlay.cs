@@ -87,80 +87,102 @@ namespace InventoryTools.Overlays
                 {
                     if (filterResult.Count != 0)
                     {
-                        var allItems = filterResult;
-                        Dictionary<ulong, HashSet<uint>> hasItems = new ();
-                        Dictionary<ulong, int> characterTotals = new();
+                        if (filterConfiguration.FilterType == FilterType.SearchFilter ||
+                            filterConfiguration.FilterType == FilterType.GameItemFilter)
+                        {
+                            var allItems = filterResult;
+                            Dictionary<ulong, HashSet<uint>> hasItems = new();
+                            Dictionary<ulong, int> characterTotals = new();
 
-                        foreach (var character in _characterMonitor.GetRetainerCharacters(_characterMonitor.ActiveCharacterId))
-                        {
-                            hasItems[character.Key] = new HashSet<uint>();
-                            characterTotals[character.Key] = 0;
-                        }
-                        foreach (var item in _inventoryMonitor.AllItems)
-                        {
-                            if (item.IsEmpty) continue;
-                            if (hasItems.ContainsKey(item.RetainerId))
+                            foreach (var character in _characterMonitor.GetRetainerCharacters(_characterMonitor
+                                         .ActiveCharacterId))
                             {
-                                hasItems[item.RetainerId].Add(item.ItemId);
+                                hasItems[character.Key] = new HashSet<uint>();
+                                characterTotals[character.Key] = 0;
                             }
-                        }
 
-                        
-                        foreach (var item in allItems)
-                        {
-                            foreach (var character in hasItems)
+                            foreach (var item in _inventoryMonitor.AllItems)
                             {
-                                if (character.Value.Contains(item.Item.RowId))
+                                if (item.IsEmpty) continue;
+                                if (hasItems.ContainsKey(item.RetainerId))
                                 {
-                                    characterTotals[character.Key]++;
+                                    hasItems[item.RetainerId].Add(item.ItemId);
                                 }
                             }
+
+
+                            foreach (var item in allItems)
+                            {
+                                foreach (var character in hasItems)
+                                {
+                                    if (character.Value.Contains(item.Item.RowId))
+                                    {
+                                        characterTotals[character.Key]++;
+                                    }
+                                }
+                            }
+
+                            var finalTotals = characterTotals.Where(c => c.Value != 0).ToList();
+                            RetainerNames = finalTotals.ToDictionary(c => c.Key, GenerateNewName);
+                            RetainerColors = finalTotals.ToDictionary(c => c.Key,
+                                c => filterConfiguration.RetainerListColor ??
+                                     _configuration.RetainerListColor);
+                            Draw();
+                            return;
+
                         }
 
-                        var finalTotals = characterTotals.Where(c => c.Value != 0).ToList();
-                        RetainerNames = finalTotals.ToDictionary(c => c.Key, GenerateNewName);
-                        RetainerColors = finalTotals.ToDictionary(c => c.Key,
-                            c => filterConfiguration.RetainerListColor ??
-                                 _configuration.RetainerListColor);
-                        Draw();
-                        return;
+                        if (filterConfiguration.FilterType == FilterType.SortingFilter ||
+                            filterConfiguration.FilterType == FilterType.CraftFilter)
+                        {
+                            var filteredList = filterResult;
+                            var grouping = filteredList.Where(c =>
+                                    c.InventoryItem != null && c.SortingResult != null && !c.InventoryItem.IsEmpty &&
+                                    (c.SortingResult.SourceRetainerId == currentCharacterId ||
+                                     c.SortingResult.DestinationRetainerId == currentCharacterId ||
+                                     _characterMonitor.BelongsToActiveCharacter(c.SortingResult.SourceRetainerId)) &&
+                                    c.SortingResult.DestinationRetainerId != null)
+                                .GroupBy(c =>
+                                    c.SortingResult!.DestinationRetainerId == currentCharacterId ||
+                                    (_characterMonitor.BelongsToActiveCharacter(c.SortingResult!.SourceRetainerId) &&
+                                     _characterMonitor.IsHousing(c.SortingResult!.DestinationRetainerId!.Value))
+                                        ? c.SortingResult!.SourceRetainerId
+                                        : c.SortingResult!.DestinationRetainerId!.Value).Where(c => c.Any()).ToList();
 
-                    }
-                    var filteredList = filterResult;
-                    if (filterConfiguration.FilterType == FilterType.SortingFilter || filterConfiguration.FilterType == FilterType.CraftFilter)
-                    {
-                        var grouping = filteredList.Where(c => c.InventoryItem != null && c.SortingResult != null && !c.InventoryItem.IsEmpty && 
-                                (c.SortingResult.SourceRetainerId == currentCharacterId || c.SortingResult.DestinationRetainerId == currentCharacterId || _characterMonitor.BelongsToActiveCharacter(c.SortingResult.SourceRetainerId)) && c.SortingResult.DestinationRetainerId != null)
-                            .GroupBy(c => c.SortingResult!.DestinationRetainerId == currentCharacterId || (_characterMonitor.BelongsToActiveCharacter(c.SortingResult!.SourceRetainerId) && _characterMonitor.IsHousing(c.SortingResult!.DestinationRetainerId!.Value)) ? c.SortingResult!.SourceRetainerId : c.SortingResult!.DestinationRetainerId!.Value).Where(c => c.Any()).ToList();
-                        RetainerColors = grouping.ToDictionary(c => c.Key,
-                            c => filterConfiguration.RetainerListColor ??
-                                 _configuration.RetainerListColor);
-                        RetainerNames = grouping.ToDictionary(c => c.Key, GenerateNewName);
-                        Draw();
-                        return;
-                    }
-                    else
-                    {
-                        var grouping = filteredList.Where(c => c.InventoryItem != null && c.SortingResult != null && !c.InventoryItem.IsEmpty).GroupBy(c => c.SortingResult!.SourceRetainerId).Where(c => c.Any()).ToList();
-                        RetainerNames = grouping.ToDictionary(c => c.Key, GenerateNewName);
-                        RetainerColors = grouping.ToDictionary(c => c.Key,
-                            c => filterConfiguration.RetainerListColor ??
-                                 _configuration.RetainerListColor);
+                            RetainerColors = grouping.ToDictionary(c => c.Key,
+                                c => filterConfiguration.RetainerListColor ??
+                                     _configuration.RetainerListColor);
+                            RetainerNames = grouping.ToDictionary(c => c.Key, GenerateNewName);
+                            Draw();
+                            return;
+                        }
+                        else
+                        {
+                            var filteredList = filterResult;
+                            var grouping = filteredList
+                                .Where(c => c.InventoryItem != null && c.SortingResult != null &&
+                                            !c.InventoryItem.IsEmpty).GroupBy(c => c.SortingResult!.SourceRetainerId)
+                                .Where(c => c.Any()).ToList();
+                            RetainerNames = grouping.ToDictionary(c => c.Key, GenerateNewName);
+                            RetainerColors = grouping.ToDictionary(c => c.Key,
+                                c => filterConfiguration.RetainerListColor ??
+                                     _configuration.RetainerListColor);
 
-                        Draw();
-                        return;
+                            Draw();
+                            return;
+                        }
                     }
                 }
             }
             if (HasState)
             {
-                RetainerNames = _characterMonitor.Characters.Where(c => c.Value.CharacterId == _characterMonitor.ActiveCharacterId).ToDictionary(c => c.Key, c => c.Value.Name);            
+                RetainerNames = _characterMonitor.Characters.Where(c => c.Value.CharacterId == _characterMonitor.ActiveCharacterId).ToDictionary(c => c.Key, c => c.Value.Name);
                 Clear();
             }
 
             HasState = false;
         }
-        
+
         private string GenerateNewName(IGrouping<ulong, SearchResult> c)
         {
             if (_characterMonitor.Characters.ContainsKey(c.Key))
@@ -169,7 +191,7 @@ namespace InventoryTools.Overlays
             }
             return "Unknown "  + "(" + c.Count() + ")";
         }
-        
+
         private string GenerateNewName(KeyValuePair<ulong, int> c)
         {
             if (_characterMonitor.Characters.ContainsKey(c.Key))

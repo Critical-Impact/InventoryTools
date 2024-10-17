@@ -300,6 +300,18 @@ public class MigrationManagerService : IHostedService
             config.InternalVersion++;
         }
     }
+
+    private string GetNewFileName(string fileName, string extension)
+    {
+        var path = Path.Join(_pluginInterfaceService.ConfigDirectory.FullName, fileName + "." + extension);
+        var fileIndex = 1;
+        while (File.Exists(path))
+        {
+            path = Path.Join(_pluginInterfaceService.ConfigDirectory.FullName, fileName + fileIndex + "." + extension);
+        }
+
+        return path;
+    }
     private void AddStain2ToInventories()
     {
         string inputFile  = Path.Join(_pluginInterfaceService.ConfigDirectory.FullName, "inventories.csv");
@@ -308,6 +320,11 @@ public class MigrationManagerService : IHostedService
         if (!File.Exists(inputFile))
         {
             return;
+        }
+
+        if (File.Exists(outputFile))
+        {
+            File.Delete(outputFile);
         }
 
         using (var reader = new StreamReader(inputFile))
@@ -327,7 +344,9 @@ public class MigrationManagerService : IHostedService
                 writer.WriteLine(newLine);
             }
         }
-        File.Move(inputFile, Path.Join(_pluginInterfaceService.ConfigDirectory.FullName, "inventories_BACKUP_VERSION_17.csv"));
+
+        var backupFile = GetNewFileName("inventories_backup_M17", "csv");
+        File.Move(inputFile, backupFile);
         File.Move(outputFile, inputFile);
     }
     public Task StartAsync(CancellationToken cancellationToken)

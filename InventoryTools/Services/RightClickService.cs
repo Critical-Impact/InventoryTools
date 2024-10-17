@@ -221,7 +221,7 @@ public class RightClickService
             }
         }
 
-        if (filterConfiguration != null && searchResult.InventoryItem != null && searchResult.CraftItem != null)
+        if (filterConfiguration != null && searchResult.CraftItem != null)
         {
             if (searchResult.CraftItem.IsOutputItem)
             {
@@ -233,7 +233,7 @@ public class RightClickService
 
                 if (ImGui.Selectable("Remove from craft list"))
                 {
-                    filterConfiguration.CraftList.RemoveCraftItem(searchResult.Item.ItemId, searchResult.InventoryItem.Flags);
+                    filterConfiguration.CraftList.RemoveCraftItem(searchResult.Item.ItemId, searchResult.CraftItem.Flags);
                     filterConfiguration.NeedsRefresh = true;
                 }
             }
