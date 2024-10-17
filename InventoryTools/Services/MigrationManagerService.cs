@@ -304,9 +304,10 @@ public class MigrationManagerService : IHostedService
     private string GetNewFileName(string fileName, string extension)
     {
         var path = Path.Join(_pluginInterfaceService.ConfigDirectory.FullName, fileName + "." + extension);
-        var fileIndex = 1;
+        var fileIndex = 0;
         while (File.Exists(path))
         {
+            fileIndex++;
             path = Path.Join(_pluginInterfaceService.ConfigDirectory.FullName, fileName + fileIndex + "." + extension);
         }
 
