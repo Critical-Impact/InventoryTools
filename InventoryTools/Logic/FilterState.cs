@@ -498,6 +498,9 @@ namespace InventoryTools.Logic
                 case InventoryCategory.Armoire:
                     return _characterMonitor.ActiveCharacterId;
                     break;
+                case InventoryCategory.FreeCompanyBags:
+                    return _characterMonitor.ActiveFreeCompanyId;
+                    break;
                 default:
                     return null;
             }

@@ -236,18 +236,18 @@ public class MockCharacterMonitor : ICharacterMonitor
             return _activeHouseId;
         }
     }
-    
+
     public HashSet<uint> GetWorldIds()
     {
         return Characters.Select(c => c.Value.WorldId).ToHashSet();
     }
-    
+
     public KeyValuePair<ulong, Character>[] GetFreeCompanyCharacters(ulong freeCompanyId)
     {
         return Characters.Where(c => c.Value.Name != "" && (c.Value.CharacterType == CharacterType.Character && c.Value.FreeCompanyId == freeCompanyId)).ToArray();
     }
 
-    public ulong ActiveFreeCompanyId { get; }
+    public ulong ActiveFreeCompanyId => _activeFreeCompanyId;
     public ulong InternalCharacterId { get; }
     public bool InternalHasHousePermission { get; }
     public short InternalRoomId { get; }

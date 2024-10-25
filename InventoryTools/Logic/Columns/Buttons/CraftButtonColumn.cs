@@ -27,7 +27,7 @@ public class CraftButtonColumn : ButtonColumn
         ImGui.TableNextColumn();
         if (ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled))
         {
-            if (searchResult.Item.CanBeCrafted && ImGui.Button("Craft"))
+            if (searchResult.Item.CanBeCrafted && ImGui.Button("Craft##" + rowIndex + "_" + columnIndex))
             {
                 var result = _gameInterface.OpenCraftingLog(searchResult.Item.RowId);
                 if (!result)
