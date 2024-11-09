@@ -1,7 +1,6 @@
 ﻿using CriticalCommonLib.MarketBoard;
-using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
-using CriticalCommonLib.Sheets;
+
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Logic.Columns.ColumnSettings;
 using InventoryTools.Services;
@@ -14,7 +13,7 @@ namespace InventoryTools.Logic.Columns
         private readonly ICharacterMonitor _characterMonitor;
         private readonly IMarketCache _marketCache;
 
-        public MarketBoardMinPriceColumn(ILogger<MarketBoardMinPriceColumn> logger, ImGuiService imGuiService, MarketboardWorldSetting marketboardWorldSetting, ICharacterMonitor characterMonitor, IMarketCache marketCache, ExcelCache excelCache) : base(logger, imGuiService, marketboardWorldSetting, characterMonitor, marketCache, excelCache)
+        public MarketBoardMinPriceColumn(ILogger<MarketBoardMinPriceColumn> logger, ImGuiService imGuiService, MarketboardWorldSetting marketboardWorldSetting, ICharacterMonitor characterMonitor, IMarketCache marketCache) : base(logger, imGuiService, marketboardWorldSetting, characterMonitor, marketCache)
         {
             _characterMonitor = characterMonitor;
             _marketCache = marketCache;
@@ -23,7 +22,7 @@ namespace InventoryTools.Logic.Columns
 
         public override string HelpText { get; set; } =
             "Shows the minimum price of both the NQ and HQ form of the item. If no world is selected, your home world is used. This data is sourced from universalis.";
-        
+
         public override (int, int)? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
             var activeCharacter = _characterMonitor.ActiveCharacter;
@@ -71,7 +70,7 @@ namespace InventoryTools.Logic.Columns
         }
         public override string Name { get; set; } = "Market Board Minimum Price NQ/HQ";
         public override string RenderName => "MB Min. Price NQ/HQ";
-        
+
         public override FilterType DefaultIn => Logic.FilterType.CraftFilter;
     }
 }

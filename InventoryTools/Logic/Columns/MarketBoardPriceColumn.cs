@@ -1,12 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
-using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
@@ -21,13 +19,11 @@ namespace InventoryTools.Logic.Columns
     public class MarketBoardPriceColumn : DoubleGilColumn
     {
         private readonly IMarketCache _marketCache;
-        private readonly ExcelCache _excelCache;
         private readonly ICharacterMonitor _characterMonitor;
 
-        public MarketBoardPriceColumn(ILogger<MarketBoardPriceColumn> logger, ImGuiService imGuiService, MarketboardWorldSetting marketboardWorldSetting, ICharacterMonitor characterMonitor, IMarketCache marketCache, ExcelCache excelCache) : base(logger, imGuiService)
+        public MarketBoardPriceColumn(ILogger<MarketBoardPriceColumn> logger, ImGuiService imGuiService, MarketboardWorldSetting marketboardWorldSetting, ICharacterMonitor characterMonitor, IMarketCache marketCache) : base(logger, imGuiService)
         {
             _marketCache = marketCache;
-            _excelCache = excelCache;
             _characterMonitor = characterMonitor;
             MarketboardWorldSetting = marketboardWorldSetting;
         }
@@ -37,7 +33,7 @@ namespace InventoryTools.Logic.Columns
         protected readonly int Loading = -1;
         protected readonly int Untradable = -2;
         public MarketboardWorldSetting MarketboardWorldSetting { get; }
-        
+
         public override bool IsConfigurable => true;
 
         public override void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)
@@ -98,7 +94,7 @@ namespace InventoryTools.Logic.Columns
                             {
                                 var selectedWorldId =
                                     MarketboardWorldSetting.SelectedWorldId(columnConfiguration, activeCharacter);
-                                var pricing = _marketCache.GetPricing(searchResult.Item.ItemId, selectedWorldId, false);
+                                var pricing = _marketCache.GetPricing(searchResult.Item.RowId, selectedWorldId, false);
                                 if (pricing is { recentHistory: null, listings: null })
                                 {
                                     ImGui.Text("No data available");

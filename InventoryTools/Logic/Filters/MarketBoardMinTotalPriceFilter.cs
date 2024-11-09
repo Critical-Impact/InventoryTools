@@ -1,7 +1,9 @@
+using AllaganLib.GameSheets.Sheets.Rows;
+using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
-using CriticalCommonLib.Sheets;
+
 using InventoryTools.Extensions;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -55,7 +57,7 @@ namespace InventoryTools.Logic.Filters
             return true;
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemRow item)
         {
             return true;
         }

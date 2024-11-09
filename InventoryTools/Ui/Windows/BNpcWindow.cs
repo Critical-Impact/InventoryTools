@@ -1,19 +1,20 @@
 using System.Collections.Generic;
 using System.Numerics;
+using AllaganLib.GameSheets.Sheets;
+using AllaganLib.GameSheets.Sheets.Rows;
+using AllaganLib.Shared.Extensions;
 using CriticalCommonLib;
-using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
-using InventoryTools.Services.Interfaces;
-using Lumina.Excel;
+using LuminaSupplemental.Excel.Model;
 using Microsoft.Extensions.Logging;
 using OtterGui;
 
@@ -22,14 +23,18 @@ namespace InventoryTools.Ui
     class BNpcWindow : UintWindow
     {
         private readonly IChatUtilities _chatUtilities;
-        private readonly ExcelCache _excelCache;
         private readonly IClipboardService _clipboardService;
+        private readonly BNpcNameSheet _bNpcNameSheet;
+        private readonly TerritoryTypeSheet _territoryTypeSheet;
+        private readonly ItemSheet _itemSheet;
 
-        public BNpcWindow(ILogger<BNpcWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IChatUtilities chatUtilities, ExcelCache excelCache, IClipboardService clipboardService, string name = "Mob Window") : base(logger, mediator, imGuiService, configuration, name)
+        public BNpcWindow(ILogger<BNpcWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IChatUtilities chatUtilities, IClipboardService clipboardService, BNpcNameSheet bNpcNameSheet, TerritoryTypeSheet territoryTypeSheet, ItemSheet itemSheet, string name = "Mob Window") : base(logger, mediator, imGuiService, configuration, name)
         {
             _chatUtilities = chatUtilities;
-            _excelCache = excelCache;
             _clipboardService = clipboardService;
+            _bNpcNameSheet = bNpcNameSheet;
+            _territoryTypeSheet = territoryTypeSheet;
+            _itemSheet = itemSheet;
         }
         public override void Initialize(uint bNpcId)
         {
@@ -38,10 +43,10 @@ namespace InventoryTools.Ui
             _bNpcId = bNpcId;
             if (bNpc != null)
             {
-                WindowName = bNpc.FormattedName + "##" + bNpcId;
+                WindowName = bNpc.Base.Singular.ExtractText() + "##" + bNpcId;
                 Key = "bNpc_" + bNpcId;
                 _mobDrops = bNpc.MobDrops;
-                _mobSpawns = bNpc.MobSpawns;
+                _mobSpawns = bNpc.MobSpawnPositions;
             }
             else
             {
@@ -51,10 +56,10 @@ namespace InventoryTools.Ui
 
         public override bool SaveState => false;
         private uint _bNpcId;
-        private List<MobDropEx>? _mobDrops;
-        private List<MobSpawnPositionEx>? _mobSpawns;
+        private List<MobDrop>? _mobDrops;
+        private List<MobSpawnPosition>? _mobSpawns;
 
-        private BNpcNameEx? bNpc => _excelCache.GetBNpcNameExSheet().GetRow(_bNpcId);
+        private BNpcNameRow? bNpc => _bNpcNameSheet.GetRowOrDefault(_bNpcId);
         public override string GenericName => "Mob";
         public override bool DestroyOnClose => true;
         public override void Draw()
@@ -74,7 +79,7 @@ namespace InventoryTools.Ui
 
                 if (bNpc.NotoriousMonster != null)
                 {
-                    ImGui.Text("Rank: " + bNpc.NotoriousMonster.RankFormatted());
+                    ImGui.Text("Rank: " + bNpc.NotoriousMonster?.RankFormatted());
                 }
 
                 var garlandId = bNpc.GarlandToolsId;
@@ -110,15 +115,15 @@ namespace InventoryTools.Ui
                         var drop = _mobDrops[index];
                         var listingCount = 0;
 
-                        if (drop.ItemEx.Value != null)
+                        if (drop.Item.IsValid)
                         {
-                            var useIcon = ImGuiService.GetIconTexture(drop.ItemEx.Value.Icon);
+                            var useIcon = ImGuiService.GetIconTexture(drop.Item.Value.Icon);
                             if (ImGui.ImageButton(useIcon.ImGuiHandle,
                                     new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale,
                                     new(0, 0), new(1, 1),
                                     0))
                             {
-                                MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), drop.ItemEx.Row));
+                                MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), drop.Item.RowId));
                             }
 
                             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
@@ -129,18 +134,18 @@ namespace InventoryTools.Ui
                                                     ImGuiHoveredFlags.AnyWindow) &&
                                 ImGui.IsMouseReleased(ImGuiMouseButton.Right))
                             {
-                                ImGui.OpenPopup("RightClickUse" + drop.ItemEx.Row);
+                                ImGui.OpenPopup("RightClickUse" + drop.Item.RowId);
                             }
 
-                            if (ImGui.BeginPopup("RightClickUse" + drop.ItemEx.Row))
+                            if (ImGui.BeginPopup("RightClickUse" + drop.Item.RowId))
                             {
-                                MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(drop.ItemEx.Value));
+                                MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(_itemSheet.GetRow(drop.Item.RowId)));
                                 ImGui.EndPopup();
                             }
 
                             float lastButtonX2 = ImGui.GetItemRectMax().X;
                             float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
-                            ImGuiUtil.HoverTooltip(drop.ItemEx.Value.NameString);
+                            ImGuiUtil.HoverTooltip(_itemSheet.GetRow(drop.Item.RowId).NameString);
                             if (listingCount < _mobDrops.Count && nextButtonX2 < windowVisibleX2)
                             {
                                 ImGui.SameLine();
@@ -161,8 +166,8 @@ namespace InventoryTools.Ui
                         var spawn = _mobSpawns[index];
                         var listingCount = 0;
 
-                        var territory = _excelCache.GetTerritoryTypeExSheet()
-                            .GetRow(spawn.TerritoryTypeId);
+                        var territory = _territoryTypeSheet
+                            .GetRowOrDefault(spawn.TerritoryTypeId);
                         if (territory != null)
                         {
                             if (ImGui.ImageButton(ImGuiService.GetIconTexture(60561).ImGuiHandle,
@@ -171,22 +176,21 @@ namespace InventoryTools.Ui
                             {
                                 _chatUtilities.PrintFullMapLink(
                                     new GenericMapLocation(spawn.Position.X, spawn.Position.Y,
-                                        territory.MapEx,
-                                        territory.PlaceNameEx,
-                                        new LazyRow<TerritoryTypeEx>(_excelCache.GameData, territory.RowId,
-                                            territory.SheetLanguage)), bNpc.FormattedName);
+                                        territory.Base.Map,
+                                        territory.Base.PlaceName,
+                                        territory.RowRef), bNpc.Base.Singular.ExtractText());
                             }
 
                             if (ImGui.IsItemHovered())
                             {
                                 using var tt = ImRaii.Tooltip();
-                                ImGui.TextUnformatted((territory.PlaceName.Value?.Name ?? "Unknown") + " - " +
+                                ImGui.TextUnformatted((territory.Base.PlaceName.ValueNullable?.Name.ExtractText() ?? "Unknown") + " - " +
                                                       spawn.Position.X +
                                                       " : " + spawn.Position.Y);
                             }
                             float lastButtonX2 = ImGui.GetItemRectMax().X;
                             float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
-                            ImGuiUtil.HoverTooltip(bNpc.FormattedName);
+                            ImGuiUtil.HoverTooltip(bNpc.Base.Singular.ExtractText());
                             if (listingCount < _mobSpawns.Count && nextButtonX2 < windowVisibleX2)
                             {
                                 ImGui.SameLine();

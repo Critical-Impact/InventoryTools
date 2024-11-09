@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
-using CriticalCommonLib.Services;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel;
+using Lumina.Excel.Sheets;
+
 
 namespace InventoryTools.Services;
 
@@ -15,14 +16,14 @@ public interface IGameInteropService
 public class GameInteropService : IGameInteropService
 {
     private readonly IClientState _clientState;
-    private readonly ExcelCache _excelCache;
+    private readonly ExcelSheet<ClassJob> _classJobSheet;
 
-    public GameInteropService(IClientState clientState, ExcelCache excelCache)
+    public GameInteropService(IClientState clientState, ExcelSheet<ClassJob> classJobSheet)
     {
         _clientState = clientState;
-        _excelCache = excelCache;
+        _classJobSheet = classJobSheet;
     }
-    
+
     public unsafe Dictionary<ClassJob, short>? GetClassJobLevels()
     {
         if (!_clientState.IsLoggedIn)
@@ -31,9 +32,8 @@ public class GameInteropService : IGameInteropService
         }
 
         var levels = new Dictionary<ClassJob, short>();
-        
-        var classJobSheet = _excelCache.GetClassJobSheet();
-        var byExpArray = classJobSheet.Where(c => c.RowId != 0).DistinctBy(c => c.ExpArrayIndex).ToDictionary(c => (short)c.ExpArrayIndex, c => c);
+
+        var byExpArray = _classJobSheet.Where(c => c.RowId != 0).DistinctBy(c => c.ExpArrayIndex).ToDictionary(c => (short)c.ExpArrayIndex, c => c);
         var span = UIState.Instance()->PlayerState.ClassJobLevels;
         for (short index = 0; index < span.Length; index++)
         {

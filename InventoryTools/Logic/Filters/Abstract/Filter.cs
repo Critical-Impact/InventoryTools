@@ -1,5 +1,6 @@
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
+
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 
@@ -48,7 +49,7 @@ namespace InventoryTools.Logic.Filters.Abstract
         public virtual FilterType AvailableIn { get; set; } =
             FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter | FilterType.CuratedList;
         public abstract bool? FilterItem(FilterConfiguration configuration,InventoryItem item);
-        public abstract bool? FilterItem(FilterConfiguration configuration, ItemEx item);
+        public abstract bool? FilterItem(FilterConfiguration configuration, ItemRow item);
 
         public virtual bool? FilterItem(FilterConfiguration configuration, InventoryChange item)
         {

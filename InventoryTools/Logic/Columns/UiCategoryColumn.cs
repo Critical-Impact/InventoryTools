@@ -1,7 +1,4 @@
-﻿using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
-using Dalamud.Utility;
-using InventoryTools.Logic.Columns.Abstract;
+﻿using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 
@@ -16,13 +13,13 @@ namespace InventoryTools.Logic.Columns
 
         public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            var itemItemUiCategory = searchResult.Item.ItemUICategory;
-            if (itemItemUiCategory == null)
+            var itemItemUiCategory = searchResult.Item.Base.ItemUICategory.ValueNullable;
+            if (itemItemUiCategory != null)
             {
                 return null;
             }
 
-            return itemItemUiCategory.Value?.Name.AsReadOnly().ExtractText() ?? "";
+            return itemItemUiCategory?.Name.ExtractText() ?? "";
         }
 
         public override string Name { get; set; } = "Category (Basic)";

@@ -1,5 +1,6 @@
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
+using System.Linq;
+using AllaganLib.GameSheets.Sheets.Caches;
+using AllaganLib.GameSheets.Sheets.ItemSources;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -15,7 +16,7 @@ public class VentureTypeColumn : TextColumn
 
     public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return searchResult.Item.RetainerTaskNames;
+        return string.Join(",", searchResult.Item.GetSourcesByCategory<ItemVentureSource>(ItemInfoCategory.AllVentures).Select(c => c.RetainerTaskRow.FormattedName));
     }
     public override string Name { get; set; } = "Venture Type";
     public override float Width { get; set; } = 100;

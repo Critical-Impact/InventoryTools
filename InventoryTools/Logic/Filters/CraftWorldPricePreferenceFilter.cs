@@ -1,13 +1,17 @@
 using System.Collections.Generic;
 using System.Linq;
+using AllaganLib.GameSheets.Sheets.Rows;
+using AllaganLib.Shared.Extensions;
 using CriticalCommonLib;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
+
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Services;
+using Lumina.Excel;
+using Lumina.Excel.Sheets;
 using Microsoft.Extensions.Logging;
 using OtterGui.Raii;
 
@@ -15,19 +19,22 @@ namespace InventoryTools.Logic.Filters;
 
 public class CraftWorldPricePreference : SortedListFilter<uint, uint>
 {
-    public CraftWorldPricePreference(ILogger<CraftWorldPricePreference> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+    private readonly ExcelSheet<World> _worldSheet;
+
+    public CraftWorldPricePreference(ILogger<CraftWorldPricePreference> logger, ImGuiService imGuiService, ExcelSheet<World> worldSheet) : base(logger, imGuiService)
     {
+        _worldSheet = worldSheet;
     }
-    
+
     public override Dictionary<uint, (string, string?)> CurrentValue(FilterConfiguration configuration)
     {
         (string, string?) GetWorldDetails(uint c)
         {
             string worldName;
-            var worldEx = Service.ExcelCache.GetWorldSheet().GetRow(c);
-            if (worldEx != null)
+            var world = _worldSheet.GetRowOrDefault(c);
+            if (world != null)
             {
-                worldName = worldEx.FormattedName;
+                worldName = world.Value.Name.ExtractText();
             }
             else
             {
@@ -71,7 +78,7 @@ public class CraftWorldPricePreference : SortedListFilter<uint, uint>
         return null;
     }
 
-    public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
+    public override bool? FilterItem(FilterConfiguration configuration, ItemRow item)
     {
         return null;
     }
@@ -86,7 +93,7 @@ public class CraftWorldPricePreference : SortedListFilter<uint, uint>
     {
         return item;
     }
-    
+
     public void AddItem(FilterConfiguration configuration, uint worldId)
     {
         var value = CurrentValue(configuration);
@@ -94,21 +101,6 @@ public class CraftWorldPricePreference : SortedListFilter<uint, uint>
         UpdateFilterConfiguration(configuration, value);
     }
 
-    public Dictionary<uint, string>? _worlds;
-
-    private Dictionary<uint, string> Worlds
-    {
-        get
-        {
-            if (_worlds == null)
-            {
-                _worlds = Service.ExcelCache.GetWorldSheet().ToDictionary(c => c.RowId, c => c.FormattedName);
-            }
-
-            return _worlds;
-        }
-    }
-    
     public override void Draw(FilterConfiguration configuration)
     {
         ImGui.TextUnformatted(Name);
@@ -117,7 +109,7 @@ public class CraftWorldPricePreference : SortedListFilter<uint, uint>
         DrawTable(configuration);
         ImGui.SameLine();
         ImGuiService.HelpMarker(HelpText);
-        
+
         var currentValue = CurrentValue(configuration);
         ImGui.SetNextItemWidth(LabelSize);
         ImGui.LabelText("##" + Key + "Label", "Add new world: ");
@@ -141,7 +133,7 @@ public class CraftWorldPricePreference : SortedListFilter<uint, uint>
                 }
                 foreach (var item in SearchWorlds.Where(c => !currentValue.ContainsKey(c.RowId)))
                 {
-                    var formattedName = item.FormattedName;
+                    var formattedName = item.Name.ExtractText();
                     if (ImGui.Selectable(formattedName, currentAddItem == formattedName))
                     {
                         AddItem(configuration,item.RowId);
@@ -150,28 +142,27 @@ public class CraftWorldPricePreference : SortedListFilter<uint, uint>
             }
         }
     }
-    
+
     private string _searchString = "";
-    private List<WorldEx>? _searchWorlds = null;
-    public List<WorldEx> SearchWorlds
+    private List<World>? _searchWorlds = null;
+    public List<World> SearchWorlds
     {
         get
         {
             if (SearchString == "")
             {
-                _searchWorlds = new List<WorldEx>();
+                _searchWorlds = new List<World>();
                 return _searchWorlds;
             }
             if (_searchWorlds == null)
             {
-                _searchWorlds = Service.ExcelCache.GetWorldSheet().Where(c => c.IsPublic && c.FormattedName.ToParseable().PassesFilter(SearchString.ToParseable())).Take(100)
-                    .Select(c => Service.ExcelCache.GetWorldSheet().GetRow(c.RowId)!).ToList();
+                _searchWorlds = _worldSheet.Where(c => c.IsPublic && c.Name.ExtractText().ToParseable().PassesFilter(SearchString.ToParseable())).Take(100).ToList();
             }
 
             return _searchWorlds;
         }
     }
-    
+
     public string SearchString
     {
         get => _searchString;

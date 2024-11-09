@@ -1,12 +1,10 @@
 using System.Numerics;
 using CriticalCommonLib.Services.Mediator;
-using Dalamud.Interface.Internal;
 using ImGuiNET;
 using InventoryTools.Logic;
 using Dalamud.Interface.Utility.Raii;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
-using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Ui

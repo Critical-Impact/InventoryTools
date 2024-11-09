@@ -1,8 +1,6 @@
 using System.Collections.Generic;
-using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
@@ -26,7 +24,7 @@ namespace InventoryTools.Logic.Columns
             SearchResult searchResult, int rowIndex, int columnIndex)
         {
             if (searchResult.CraftItem == null) return null;
-            
+
             ImGui.TableNextColumn();
             if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;
             ImGui.Text("Required: " +  searchResult.CraftItem.QuantityRequired);

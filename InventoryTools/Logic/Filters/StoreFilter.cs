@@ -1,5 +1,7 @@
+using AllaganLib.GameSheets.Sheets.Caches;
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
+
 using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -18,7 +20,7 @@ public class StoreFilter : BooleanFilter
         return FilterItem(configuration, item.Item);
     }
 
-    public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
+    public override bool? FilterItem(FilterConfiguration configuration, ItemRow item)
     {
         var currentValue = CurrentValue(configuration);
         if (currentValue == null)
@@ -26,7 +28,7 @@ public class StoreFilter : BooleanFilter
             return null;
         }
 
-        return currentValue.Value && item.PurchasedSQStore || !currentValue.Value && !item.PurchasedSQStore;
+        return currentValue.Value && item.HasSourcesByType(ItemInfoType.CashShop) || !currentValue.Value && !item.HasSourcesByType(ItemInfoType.CashShop);
     }
 
     public StoreFilter(ILogger<StoreFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)

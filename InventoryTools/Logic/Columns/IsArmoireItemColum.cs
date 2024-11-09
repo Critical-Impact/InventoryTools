@@ -1,5 +1,3 @@
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -14,7 +12,7 @@ namespace InventoryTools.Logic.Columns
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return searchResult.Item.CabinetCategory != 0;
+            return searchResult.Item.CabinetCategory != null;
         }
         public override string Name { get; set; } = "Is Armoire Item?";
         public override string RenderName => "Is Armoire?";

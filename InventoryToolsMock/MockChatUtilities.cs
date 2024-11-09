@@ -1,6 +1,8 @@
+using AllaganLib.GameSheets.Model;
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Services;
-using CriticalCommonLib.Sheets;
+
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Plugin.Services;
 
@@ -66,21 +68,21 @@ public class MockChatUtilities : IChatUtilities
 
     public void PrintFullMapLink(ILocation location, string? textOverride = null)
     {
-        if (location.MapEx.Value != null && location.MapEx.Value.TerritoryType.Value != null)
+        if (location.Map.IsValid && location.Map.Value.TerritoryType.IsValid)
         {
             var name = location.ToString();
             if (name != null)
             {
-                _pluginLog.Info(textOverride ?? name, location.MapEx.Value.TerritoryType.Value);
-                _pluginLog.Info("Map ID: " + location.MapEx.Row);
-                _pluginLog.Info("Territory Type ID: " + location.TerritoryTypeEx.Row);
-                _pluginLog.Info("Place Name ID: " + location.PlaceNameEx.Row);
+                _pluginLog.Info(textOverride ?? name, location.Map.Value.TerritoryType.Value);
+                _pluginLog.Info("Map ID: " + location.Map.RowId);
+                _pluginLog.Info("Territory Type ID: " + location.TerritoryType.RowId);
+                _pluginLog.Info("Place Name ID: " + location.PlaceName.RowId);
                 _pluginLog.Info("Map X & Y: " + (float)(location.MapX) + ":" + (float)(location.MapY));
             }
         }
     }
 
-    public void LinkItem(ItemEx item)
+    public void LinkItem(ItemRow item)
     {
         _pluginLog.Info("Item Link:");
         _pluginLog.Info(item.NameString);

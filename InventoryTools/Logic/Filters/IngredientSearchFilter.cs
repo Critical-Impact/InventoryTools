@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AllaganLib.GameSheets.Sheets;
+using AllaganLib.GameSheets.Sheets.Caches;
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
-using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Logic.Filters.Abstract;
 using Dalamud.Interface.Utility.Raii;
@@ -18,14 +19,16 @@ namespace InventoryTools.Logic.Filters;
 public class IngredientSearchFilter : UintMultipleChoiceFilter
 {
     private readonly IListService _listService;
-    private readonly ExcelCache _excelCache;
     private readonly Lazy<ListFilterService> _listFilterService;
+    private readonly ItemInfoCache _itemInfoCache;
+    private readonly ItemSheet _itemSheet;
 
-    public IngredientSearchFilter(ILogger<IngredientSearchFilter> logger, ImGuiService imGuiService,IListService listService, ExcelCache excelCache, Lazy<ListFilterService> listFilterService) : base(logger, imGuiService)
+    public IngredientSearchFilter(ILogger<IngredientSearchFilter> logger, ImGuiService imGuiService,IListService listService, Lazy<ListFilterService> listFilterService, ItemInfoCache itemInfoCache, ItemSheet itemSheet) : base(logger, imGuiService)
     {
         _listService = listService;
-        _excelCache = excelCache;
         _listFilterService = listFilterService;
+        _itemInfoCache = itemInfoCache;
+        _itemSheet = itemSheet;
     }
     public override string Key { get; set; } = "IngredientSearchFilter";
     public override string Name { get; set; } = "Ingredient Search Filter";
@@ -43,7 +46,7 @@ public class IngredientSearchFilter : UintMultipleChoiceFilter
         return FilterItem(configuration, item.Item);
     }
 
-    public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
+    public override bool? FilterItem(FilterConfiguration configuration, ItemRow item)
     {
         var searchItems = CurrentValue(configuration).ToList();
         if (searchItems.Count == 0)
@@ -70,7 +73,7 @@ public class IngredientSearchFilter : UintMultipleChoiceFilter
         {
             ImGui.OpenPopup("AddAllFilterSelect");
         }
-        
+
         var currentValue = CurrentValue(configuration).ToHashSet();
         using (var popup = ImRaii.Popup("AddAllFilterSelect"))
         {
@@ -129,7 +132,7 @@ public class IngredientSearchFilter : UintMultipleChoiceFilter
 
     public override bool FilterSearch(uint itemId, string itemName, string searchString)
     {
-        if (!_excelCache.CanCraftItem(itemId))
+        if (!_itemInfoCache.HasItemSources(itemId, ItemInfoType.CraftRecipe))
         {
             return false;
         }
@@ -138,7 +141,7 @@ public class IngredientSearchFilter : UintMultipleChoiceFilter
 
     public override Dictionary<uint, string> GetChoices(FilterConfiguration configuration)
     {
-        return _excelCache.ItemNamesById;
+        return _itemSheet.ToDictionary(c => c.RowId, c => c.NameString);
     }
 
     public override bool HideAlreadyPicked { get; set; } = true;

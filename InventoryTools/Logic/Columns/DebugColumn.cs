@@ -1,5 +1,3 @@
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -15,7 +13,7 @@ namespace InventoryTools.Logic.Columns
 
         public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return "Item Search: " + searchResult.Item.ItemSearchCategory.Row + " - Ui Category: " + searchResult.Item.ItemUICategory.Row + " - Sort Category: " + searchResult.Item.ItemSortCategory.Row + " - Equip Slot Category: " + searchResult.Item.EquipSlotCategory.Row + " - Class Job Category: " + searchResult.Item.ClassJobCategory.Row + " - Buy: " + searchResult.Item.PriceMid + " - Unknown: " + searchResult.Item.Unknown19;
+            return "Item Search: " + searchResult.Item.Base.ItemSearchCategory.RowId + " - Ui Category: " + searchResult.Item.Base.ItemUICategory.RowId + " - Sort Category: " + searchResult.Item.Base.ItemSortCategory.RowId + " - Equip Slot Category: " + searchResult.Item.Base.EquipSlotCategory.RowId + " - Class Job Category: " + searchResult.Item.Base.ClassJobCategory.RowId + " - Buy: " + searchResult.Item.Base.PriceMid;
         }
         public override string Name { get; set; } = "Debug - General Information";
         public override float Width { get; set; } = 200;

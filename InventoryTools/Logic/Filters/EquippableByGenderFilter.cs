@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using AllaganLib.GameSheets.Model;
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
+
 using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -20,7 +22,7 @@ namespace InventoryTools.Logic.Filters
         {
             configuration.UpdateUintFilter(Key,newValue);
         }
-        
+
         public override void ResetFilter(FilterConfiguration configuration)
         {
             UpdateFilterConfiguration(configuration, null);
@@ -33,13 +35,13 @@ namespace InventoryTools.Logic.Filters
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
 
 
-        
+
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
             return FilterItem(configuration, item.Item) == true;
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemRow item)
         {
             var currentValue = this.CurrentValue(configuration);
             if (currentValue == null)

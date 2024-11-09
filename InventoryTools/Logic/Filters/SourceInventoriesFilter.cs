@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
-using CriticalCommonLib.Sheets;
+
 using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -28,17 +29,17 @@ namespace InventoryTools.Logic.Filters
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Inventories;
         public override List<(ulong, InventoryCategory)> DefaultValue { get; set; } = new();
         public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter | FilterType.CraftFilter | FilterType.HistoryFilter;
-        
+
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
             return null;
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemRow item)
         {
             return null;
         }
-        
+
         public override void ResetFilter(FilterConfiguration configuration)
         {
             UpdateFilterConfiguration(configuration, new List<(ulong, InventoryCategory)>());
@@ -91,7 +92,7 @@ namespace InventoryTools.Logic.Filters
                     dict.Add((character.Key, InventoryCategory.Crystals), character.Value.FormattedName + " - " + InventoryCategory.Crystals.FormattedName());
                     dict.Add((character.Key, InventoryCategory.Currency), character.Value.FormattedName + " - " + InventoryCategory.Currency.FormattedName());
                     dict.Add((character.Key, InventoryCategory.CharacterEquipped), character.Value.FormattedName + " - " + InventoryCategory.CharacterEquipped.FormattedName());
-                   
+
                 }
             }
             return dict;

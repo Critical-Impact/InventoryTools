@@ -1,5 +1,4 @@
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
+using System.Linq;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -21,6 +20,6 @@ public class FromCalamitySalvagerColumn : CheckboxColumn
 
     public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult item)
     {
-        return item.Item.ObtainedCalamitySalvager;
+        return item.Item.CalamitySalvagerShops.Count != 0;
     }
 }

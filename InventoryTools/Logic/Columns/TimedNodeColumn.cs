@@ -1,6 +1,4 @@
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
-using CriticalCommonLib.Sheets;
+using AllaganLib.GameSheets.Sheets.Caches;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -9,16 +7,13 @@ namespace InventoryTools.Logic.Columns
 {
     public class TimedNodeColumn : CheckboxColumn
     {
-        private readonly ExcelCache _excelCache;
-
-        public TimedNodeColumn(ILogger<TimedNodeColumn> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
+        public TimedNodeColumn(ILogger<TimedNodeColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
         {
-            _excelCache = excelCache;
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return _excelCache.IsItemAvailableAtTimedNode(searchResult.Item.RowId);
+            return searchResult.Item.HasSourcesByCategory(ItemInfoCategory.TimedGathering);
         }
         public override string Name { get; set; } = "Is From Timed Node?";
         public override string RenderName => "Timed Node?";

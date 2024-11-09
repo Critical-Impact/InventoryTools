@@ -1,5 +1,6 @@
-﻿using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
+﻿using AllaganLib.GameSheets.Sheets.Rows;
+using CriticalCommonLib.Models;
+
 using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -21,7 +22,7 @@ public class CraftIsEphemeralFilter : BooleanFilter
         return null;
     }
 
-    public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
+    public override bool? FilterItem(FilterConfiguration configuration, ItemRow item)
     {
         return null;
     }
@@ -35,7 +36,7 @@ public class CraftIsEphemeralFilter : BooleanFilter
     {
         configuration.IsEphemeralCraftList = newValue ?? false;
     }
-    
+
     private readonly string[] _choices = new []{"Yes", "No"};
 
     public override string[] GetChoices()

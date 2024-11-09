@@ -1,6 +1,4 @@
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
-using CriticalCommonLib.Sheets;
+using AllaganLib.GameSheets.Sheets.Caches;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -16,7 +14,7 @@ namespace InventoryTools.Logic.Columns
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return searchResult.Item.IsItemAvailableAtHiddenNode;
+            return searchResult.Item.HasSourcesByCategory(ItemInfoCategory.HiddenGathering);
         }
         public override string Name { get; set; } = "Is From Hidden Node?";
         public override string RenderName => "Hidden Node?";

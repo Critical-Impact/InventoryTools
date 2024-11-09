@@ -25,7 +25,7 @@ public class IsRecipeCompletedColumn : CheckboxColumn
             return null;
         }
 
-        return searchResult.Item.RecipesAsResult.All(c => _questManagerService.IsRecipeComplete(c.RowId));
+        return searchResult.Item.Recipes.All(c => _questManagerService.IsRecipeComplete(c.RowId));
     }
 
     public override string Name { get; set; } = "Are Recipes Completed?";

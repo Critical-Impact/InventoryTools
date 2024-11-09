@@ -1,12 +1,8 @@
-using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Interfaces;
-using CriticalCommonLib.Models;
+using AllaganLib.Shared.Time;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Services;
@@ -14,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns.Abstract
 {
-    using CriticalCommonLib.Time;
+    
 
     public abstract class TimeIntervalColumn : Column<TimeInterval?>
     {

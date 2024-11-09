@@ -1,5 +1,4 @@
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
+using AllaganLib.GameSheets.Sheets.Caches;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -10,9 +9,9 @@ public class IsFromFateColumn : CheckboxColumn
 {
     public IsFromFateColumn(ILogger<IsFromFateColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
     {
-        
+
     }
-    
+
     public override string Name { get; set; } = "Is From Fate?";
     public override float Width { get; set; } = 80;
     public override string HelpText { get; set; } = "Is this item dropped/acquired in a fate?";
@@ -22,6 +21,6 @@ public class IsFromFateColumn : CheckboxColumn
 
     public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return searchResult.Item.FateItems.Count != 0;
+        return searchResult.Item.HasSourcesByType(ItemInfoType.Fate);
     }
 }

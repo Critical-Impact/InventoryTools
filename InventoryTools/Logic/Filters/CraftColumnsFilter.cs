@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using AllaganLib.GameSheets.Sheets.Rows;
+using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
+
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 using InventoryTools.Logic.Columns;
@@ -42,14 +44,14 @@ namespace InventoryTools.Logic.Filters
 
             return (configuration.CraftColumns ?? new List<ColumnConfiguration>()).ToDictionary(c => c, GetColumnDetails);
         }
-        
+
 
         public override void UpdateFilterConfiguration(FilterConfiguration configuration, Dictionary<ColumnConfiguration, (string, string?)> newValue)
         {
             configuration.CraftColumns = newValue.Select(c => c.Key).ToList();
             configuration.TableConfigurationDirty = true;
         }
-        
+
         public override void ResetFilter(FilterConfiguration configuration)
         {
             UpdateFilterConfiguration(configuration, new Dictionary<ColumnConfiguration, (string, string?)>());
@@ -73,7 +75,7 @@ namespace InventoryTools.Logic.Filters
             return null;
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemRow item)
         {
             return null;
         }
@@ -115,15 +117,15 @@ namespace InventoryTools.Logic.Filters
 
             return _groupedItems;
         }
-        
+
         public string SearchString
         {
             get => _searchString;
             set => _searchString = value;
         }
-        
+
         private string _searchString = "";
-        
+
         public override void DrawButtons(FilterConfiguration configuration, KeyValuePair<ColumnConfiguration, (string, string?)> item, int index)
         {
             base.DrawButtons(configuration, item, index);
@@ -133,7 +135,7 @@ namespace InventoryTools.Logic.Filters
                 EditItem(configuration, item.Key);
             }
         }
-        
+
         private void EditItem(FilterConfiguration configuration, ColumnConfiguration item)
         {
             _editMode = true;
@@ -221,14 +223,14 @@ namespace InventoryTools.Logic.Filters
                                             _selectedColumn = column.Value;
                                         }
                                     }
-                                    
+
                                     if (column.Value.DefaultIn.HasFlag(configuration.FilterType))
                                     {
                                         ImGui.SameLine();
                                         ImGui.Image(ImGuiService.GetIconTexture(Icons.SproutIcon).ImGuiHandle, new Vector2(16,16));
                                         ImGuiUtil.HoverTooltip("Default Column");
                                     }
-                                    
+
                                     if (column.Value.IsConfigurable)
                                     {
                                         ImGui.SameLine();
@@ -352,7 +354,7 @@ namespace InventoryTools.Logic.Filters
             {
                 ImGui.SameLine();
             }
-            
+
             using (var table = ImRaii.Child("columnsTable", new Vector2(0, collapse ? height : 0), true))
             {
                 if (table.Success)
@@ -363,7 +365,7 @@ namespace InventoryTools.Logic.Filters
                 }
             }
 
-            
+
         }
     }
 }

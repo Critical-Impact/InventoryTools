@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
-using CriticalCommonLib.Sheets;
+
 using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -34,7 +35,7 @@ namespace InventoryTools.Logic.Filters
             return null;
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemRow item)
         {
             return null;
         }

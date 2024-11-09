@@ -1,10 +1,6 @@
-using System;
 using System.Collections.Generic;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
-using CriticalCommonLib.Sheets;
-using InventoryTools.Logic;
-using InventoryTools.Logic.Columns;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -46,7 +42,7 @@ public class CharacterOwnerColumn : TextColumn
             return null;
         }
         var characterOwners = _characterOwners;
-        
+
         if (characterOwners.TryGetValue(item.RetainerId, out var value))
         {
             return value;

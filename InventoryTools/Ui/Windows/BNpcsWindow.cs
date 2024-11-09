@@ -1,41 +1,68 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using AllaganLib.GameSheets.Sheets;
+using AllaganLib.GameSheets.Sheets.Rows;
+using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
-using Lumina.Excel;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
-using InventoryTools.Services.Interfaces;
+using Lumina.Excel;
+using Lumina.Excel.Sheets;
+using LuminaSupplemental.Excel.Model;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Ui;
 
-public class BNpcsWindow : GenericTabbedTable<BNpcNameEx>, IMenuWindow
+public class BNpcsWindow : GenericTabbedTable<BNpcNameRow>, IMenuWindow
 {
     private readonly IChatUtilities _chatUtilities;
-    private readonly ExcelCache _excelCache;
+    private readonly List<MobSpawnPosition> _mobSpawnPositions;
+    private readonly List<MobDrop> _mobDrops;
+    private readonly TerritoryTypeSheet _territoryTypeSheet;
+    private readonly ItemSheet _itemSheet;
+    private readonly BNpcNameSheet _bnpcNameSheet;
 
-    public BNpcsWindow(ILogger<BNpcsWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IChatUtilities chatUtilities, ExcelCache excelCache,  string name = "Mobs Window") : base(logger, mediator, imGuiService, configuration, name)
+    public BNpcsWindow(ILogger<BNpcsWindow> logger,
+        MediatorService mediator,
+        ImGuiService imGuiService,
+        InventoryToolsConfiguration configuration,
+        IChatUtilities chatUtilities,
+        List<MobSpawnPosition> mobSpawnPositions,
+        List<MobDrop> mobDrops,
+        TerritoryTypeSheet territoryTypeSheet,
+        ItemSheet itemSheet,
+        BNpcNameSheet bnpcNameSheet,
+        string name = "Mobs Window") : base(logger,
+        mediator,
+        imGuiService,
+        configuration,
+        name)
     {
         _chatUtilities = chatUtilities;
-        _excelCache = excelCache;
+        _mobSpawnPositions = mobSpawnPositions;
+        _mobDrops = mobDrops;
+        _territoryTypeSheet = territoryTypeSheet;
+        _itemSheet = itemSheet;
+        _bnpcNameSheet = bnpcNameSheet;
     }
     public override void Initialize()
     {
         WindowName = "Mobs";
         Key = "mobs";
-        var mobSpawns = _excelCache.MobSpawns ?? new List<MobSpawnPositionEx>();
+        var mobSpawns = _mobSpawnPositions;
         var availableTerritories = mobSpawns.Select(c => c.TerritoryTypeId).ToHashSet();
         _mappedMobs = mobSpawns.Select(c => (c.BNpcNameId, c.TerritoryTypeId)).GroupBy(c => c.BNpcNameId).ToDictionary(c => c.Key, c => c.Select(c => c.TerritoryTypeId).ToHashSet());
-        _columns = new List<TableColumn<BNpcNameEx>>()
+        _columns = new List<TableColumn<BNpcNameRow>>()
         {
             new("Icon", 32, ImGuiTableColumnFlags.WidthFixed)
             {
@@ -82,7 +109,7 @@ public class BNpcsWindow : GenericTabbedTable<BNpcNameEx>, IMenuWindow
                         return exes;
                     }
 
-                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.FormattedName) : exes.OrderByDescending(c => c.FormattedName);
+                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.Base.Singular.ExtractText()) : exes.OrderByDescending(c => c.Base.Singular.ExtractText());
                 },
                 Filter = (s, exes) =>
                 {
@@ -90,11 +117,11 @@ public class BNpcsWindow : GenericTabbedTable<BNpcNameEx>, IMenuWindow
                     {
                         return exes;
                     }
-                    return s == "" ? exes : exes.Where(c => c.FormattedName.ToLower().PassesFilter(s.ToLower()));
+                    return s == "" ? exes : exes.Where(c => c.Base.Singular.ExtractText().ToLower().PassesFilter(s.ToLower()));
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    ImGui.TextUnformatted(ex.FormattedName);
+                    ImGui.TextUnformatted(ex.Base.Singular.ExtractText());
                 }
             },
             new("Type", 70, ImGuiTableColumnFlags.WidthFixed)
@@ -114,22 +141,22 @@ public class BNpcsWindow : GenericTabbedTable<BNpcNameEx>, IMenuWindow
                     {
                         return exes;
                     }
-                    return s == "" ? exes : exes.Where(c => c.MobTypes.ToLower().PassesFilter(s.ToLower()));
+                    return s == "" ? exes : exes.Where(c => String.Join(",", c.MobTypes.Select(d => d.ToString())).ToLower().PassesFilter(s.ToLower()));
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    ImGui.TextUnformatted(ex.MobTypes ?? "");
+                    ImGui.TextUnformatted(String.Join(",", ex.MobTypes.Select(d => d.ToString())));
                 }
             },
             new("Locations", 200, ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoSort)
             {
                 Draw = (ex, contentTypeId) =>
                 {
-                    var positions = GetPositions(ex.RowId).Where(c => c.TerritoryType.Value != null && c.TerritoryType.Value.PlaceName.Value != null && (c.TerritoryTypeId == contentTypeId || contentTypeId == 0));
+                    var positions = GetPositions(ex.RowId).Where(c => c.TerritoryType.IsValid && c.TerritoryType.Value.PlaceName.IsValid && (c.TerritoryTypeId == contentTypeId || contentTypeId == 0));
                     ImGuiService.WrapTableColumnElements("Scroll" + ex.RowId,positions, RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X, position =>
                     {
-                        var territory = _excelCache.GetTerritoryTypeExSheet()
-                            .GetRow(position.TerritoryTypeId);
+                        var territory = _territoryTypeSheet
+                            .GetRowOrDefault(position.TerritoryTypeId);
                         if (territory != null)
                         {
                             if (ImGui.ImageButton(ImGuiService.GetIconTexture(60561).ImGuiHandle,
@@ -139,16 +166,15 @@ public class BNpcsWindow : GenericTabbedTable<BNpcNameEx>, IMenuWindow
                             {
                                 _chatUtilities.PrintFullMapLink(
                                     new GenericMapLocation(position.Position.X, position.Position.Y,
-                                        territory.MapEx,
-                                        territory.PlaceNameEx,
-                                        new LazyRow<TerritoryTypeEx>(_excelCache.GameData, territory.RowId,
-                                            territory.SheetLanguage)), ex.FormattedName);
+                                        territory.Base.Map,
+                                        territory.Base.PlaceName,
+                                        territory.RowRef), ex.Base.Singular.ExtractText());
                             }
 
                             if (ImGui.IsItemHovered())
                             {
                                 using var tt = ImRaii.Tooltip();
-                                ImGui.TextUnformatted((territory.PlaceName.Value?.Name ?? "Unknown") + " - " +
+                                ImGui.TextUnformatted((territory.Base.PlaceName.ValueNullable?.Name.ExtractText() ?? "Unknown") + " - " +
                                                       position.Position.X +
                                                       " : " + position.Position.Y);
                             }
@@ -181,7 +207,7 @@ public class BNpcsWindow : GenericTabbedTable<BNpcNameEx>, IMenuWindow
                         RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X,
                         drop =>
                     {
-                        ImGui.Image(ImGuiService.GetIconTexture(drop.Icon).ImGuiHandle,
+                        ImGui.Image(ImGuiService.GetIconTexture(drop.Base.Icon).ImGuiHandle,
                             new Vector2(RowSize, RowSize) * ImGui.GetIO().FontGlobalScale);
                         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
                                                 ImGuiHoveredFlags.AllowWhenOverlapped &
@@ -216,9 +242,9 @@ public class BNpcsWindow : GenericTabbedTable<BNpcNameEx>, IMenuWindow
                 }
             },
         };
-        _tabs = _excelCache.GetTerritoryTypeExSheet().Where(c => availableTerritories.Contains(c.RowId)).OrderBy(c => c.PlaceNameEx.Value?.FormattedName ?? "Unknown").ToDictionary(c => c.RowId, c =>c.PlaceNameEx.Value?.FormattedName ?? "Unknown");
-        _items = new Dictionary<uint, List<BNpcNameEx>>();
-        _filteredItems = new Dictionary<uint, List<BNpcNameEx>>();
+        _tabs = _territoryTypeSheet.Where(c => availableTerritories.Contains(c.RowId)).OrderBy(c => c.Base.PlaceName.ValueNullable?.Name.ExtractText() ?? "Unknown").ToDictionary(c => c.RowId, c =>c.Base.PlaceName.ValueNullable?.Name.ExtractText() ?? "Unknown");
+        _items = new Dictionary<uint, List<BNpcNameRow>>();
+        _filteredItems = new Dictionary<uint, List<BNpcNameRow>>();
     }
     public HashSet<uint>? GetTerritory(uint bNpcNameId)
     {
@@ -230,62 +256,58 @@ public class BNpcsWindow : GenericTabbedTable<BNpcNameEx>, IMenuWindow
         return null;
     }
 
-    private bool OnLeftClick(BNpcNameEx arg)
+    private bool OnLeftClick(BNpcNameRow arg)
     {
         MediatorService.Publish(new OpenUintWindowMessage(typeof(BNpcWindow), arg.RowId));
         return true;
     }
 
-    private Dictionary<uint, List<MobSpawnPositionEx>> _spawnPositions = new Dictionary<uint, List<MobSpawnPositionEx>>();
-    private Dictionary<uint, List<ItemEx>> _mobDrops = new Dictionary<uint, List<ItemEx>>();
+    private Dictionary<uint, List<MobSpawnPosition>> _spawnPositions = new Dictionary<uint, List<MobSpawnPosition>>();
+    private Dictionary<uint, List<ItemRow>> mobDropLookup = new Dictionary<uint, List<ItemRow>>();
 
-    public List<MobSpawnPositionEx> GetPositions(uint bNpcNameId)
+    public List<MobSpawnPosition> GetPositions(uint bNpcNameId)
     {
         if (_spawnPositions.ContainsKey(bNpcNameId))
         {
             return _spawnPositions[bNpcNameId];
         }
 
-        var spawns = _excelCache.MobSpawns?.Where(c => c.BNpcNameId == bNpcNameId).ToList() ?? new List<MobSpawnPositionEx>();
+        var spawns = _mobSpawnPositions.Where(c => c.BNpcNameId == bNpcNameId).ToList() ?? new List<MobSpawnPosition>();
         _spawnPositions[bNpcNameId] = spawns;
         return _spawnPositions[bNpcNameId];
     }
 
-    public List<ItemEx> GetDrops(uint bNpcNameId)
+    public List<ItemRow> GetDrops(uint bNpcNameId)
     {
-        if (_mobDrops.ContainsKey(bNpcNameId))
+        if (mobDropLookup.ContainsKey(bNpcNameId))
         {
-            return _mobDrops[bNpcNameId];
+            return mobDropLookup[bNpcNameId];
         }
 
-        var mobDrops = _excelCache.MobDrops?.Where(c => c.BNpcNameId == bNpcNameId).Select(c => _excelCache.GetItemExSheet().GetRow(c.ItemId)).Where(c => c != null).Select(c => c!).ToList() ?? new List<ItemEx>();
-        _mobDrops[bNpcNameId] = mobDrops;
-        return _mobDrops[bNpcNameId];
+        var mobDrops = _mobDrops.Where(c => c.BNpcNameId == bNpcNameId).Select(c => _itemSheet.GetRowOrDefault(c.ItemId)).Where(c => c != null).Select(c => c!).ToList() ?? new List<ItemRow>();
+        mobDropLookup[bNpcNameId] = mobDrops;
+        return mobDropLookup[bNpcNameId];
     }
 
-    public override List<BNpcNameEx> GetItems(uint placeNameId)
+    public override List<BNpcNameRow> GetItems(uint placeNameId)
     {
-        if (_excelCache.MobSpawns == null)
-        {
-            return new();
-        }
         if (!_items.ContainsKey(placeNameId))
         {
             if (placeNameId == 0)
             {
-                var availableMobs = _excelCache.MobSpawns.Select(c => c.BNpcNameId).ToHashSet();
-                var actualMobs = availableMobs.Select(c => _excelCache.GetBNpcNameExSheet().GetRow(c)).ToList();
+                var availableMobs = _mobSpawnPositions.DistinctBy(c => c.BNpcNameId).ToHashSet();
+                var actualMobs = availableMobs.Select(c => _bnpcNameSheet.GetRowOrDefault(c.BNpcNameId)).ToList();
                 _items.Add(placeNameId, actualMobs!);
             }
             else
             {
-                bool FilterNpcs(BNpcNameEx c)
+                bool FilterNpcs(BNpcNameRow c)
                 {
                     var territory = GetTerritory(c.RowId);
-                    return c.FormattedName != "" && territory != null && territory.Contains(placeNameId);
+                    return c.Base.Singular.ExtractText() != "" && territory != null && territory.Contains(placeNameId);
                 }
-                var availableMobs = _excelCache.MobSpawns.Select(c => c.BNpcNameId).ToHashSet();
-                var actualMobs = availableMobs.Select(c => _excelCache.GetBNpcNameExSheet().GetRow(c)).Where(c => c != null && FilterNpcs(c) && c.FormattedName != "").ToList();
+                var availableMobs = _mobSpawnPositions.DistinctBy(c => c.BNpcNameId).ToHashSet();
+                var actualMobs = availableMobs.Select(c => _bnpcNameSheet.GetRowOrDefault(c.BNpcNameId)).Where(c => c != null && FilterNpcs(c) && c.Base.Singular.ExtractText() != "").ToList();
                 _items.Add(placeNameId, actualMobs!);
             }
         }
@@ -333,24 +355,24 @@ public class BNpcsWindow : GenericTabbedTable<BNpcNameEx>, IMenuWindow
         DrawTabs();
     }
 
-    public override int GetRowId(BNpcNameEx item)
+    public override int GetRowId(BNpcNameRow item)
     {
         return item.GetHashCode();
     }
 
-    public override Dictionary<uint, List<BNpcNameEx>> Items => _items;
+    public override Dictionary<uint, List<BNpcNameRow>> Items => _items;
 
-    public override Dictionary<uint, List<BNpcNameEx>> FilteredItems => _filteredItems;
+    public override Dictionary<uint, List<BNpcNameRow>> FilteredItems => _filteredItems;
 
-    public override List<TableColumn<BNpcNameEx>> Columns => _columns;
+    public override List<TableColumn<BNpcNameRow>> Columns => _columns;
 
     public override ImGuiTableFlags TableFlags => _flags;
 
     public override bool UseClipper => _useClipper;
 
-    private List<TableColumn<BNpcNameEx>> _columns = null!;
-    private Dictionary<uint, List<BNpcNameEx>> _items = null!;
-    private Dictionary<uint, List<BNpcNameEx>> _filteredItems = null!;
+    private List<TableColumn<BNpcNameRow>> _columns = null!;
+    private Dictionary<uint, List<BNpcNameRow>> _items = null!;
+    private Dictionary<uint, List<BNpcNameRow>> _filteredItems = null!;
     private ImGuiTableFlags _flags = ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersV |
                                                    ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.BordersInnerV |
                                                    ImGuiTableFlags.BordersH | ImGuiTableFlags.BordersOuterH |

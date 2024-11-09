@@ -1,39 +1,52 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using AllaganLib.GameSheets.Sheets;
+using AllaganLib.GameSheets.Sheets.Caches;
+using AllaganLib.GameSheets.Sheets.Rows;
+using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
-using Dalamud.Utility;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
-using Lumina.Excel;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
-using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Ui;
 
-public class ENpcsWindow : GenericTabbedTable<ENpc>, IMenuWindow
+public class ENpcsWindow : GenericTabbedTable<ENpcResidentRow>, IMenuWindow
 {
-    private readonly ExcelCache _excelCache;
     private readonly IChatUtilities _chatUtilities;
+    private readonly ItemInfoCache _itemInfoCache;
+    private readonly ENpcResidentSheet _eNpcResidentSheet;
 
-    public ENpcsWindow(ILogger<ENpcsWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration,ExcelCache excelCache, IChatUtilities chatUtilities, string name = "NPCs Window") : base(logger, mediator, imGuiService, configuration, name)
+    public ENpcsWindow(ILogger<ENpcsWindow> logger,
+        MediatorService mediator,
+        ImGuiService imGuiService,
+        InventoryToolsConfiguration configuration,
+        IChatUtilities chatUtilities,
+        ItemInfoCache itemInfoCache,
+        ENpcResidentSheet eNpcResidentSheet,
+        string name = "NPCs Window") : base(logger,
+        mediator,
+        imGuiService,
+        configuration,
+        name)
     {
-        _excelCache = excelCache;
         _chatUtilities = chatUtilities;
+        _itemInfoCache = itemInfoCache;
+        _eNpcResidentSheet = eNpcResidentSheet;
     }
 
     public override void Initialize()
     {
         WindowName = "NPCs";
         Key = "enpcs";
-         _columns = new List<TableColumn<ENpc>>()
+         _columns = new List<TableColumn<ENpcResidentRow>>()
         {
             new("Icon", 32, ImGuiTableColumnFlags.WidthFixed)
             {
@@ -58,8 +71,8 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>, IMenuWindow
                     }
 
                     return specs == ImGuiSortDirection.Ascending
-                        ? exes.OrderBy(c => c.Resident?.FormattedSingular ?? "")
-                        : exes.OrderByDescending(c => c.Resident?.FormattedSingular ?? "");
+                        ? exes.OrderBy(c => c.Base.Singular.ExtractText() ?? "")
+                        : exes.OrderByDescending(c => c.Base.Singular.ExtractText() ?? "");
                 },
                 Filter = (s, exes) =>
                 {
@@ -68,32 +81,32 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>, IMenuWindow
                         return exes;
                     }
 
-                    return s == "" ? exes : exes.Where(c => (c.Resident?.FormattedSingular ?? "").ToLower().PassesFilter(s.ToLower()));
+                    return s == "" ? exes : exes.Where(c => (c.Base.Singular.ExtractText() ?? "").ToLower().PassesFilter(s.ToLower()));
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    ImGui.TextUnformatted(ex.Resident?.FormattedSingular ?? "");
+                    ImGui.TextUnformatted(ex.Base.Singular.ExtractText() ?? "");
                 }
             },
             new("Locations", 200, ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoSort)
             {
                 Draw = (ex, contentTypeId) =>
                 {
-                    var positions = ex.Locations;
-                    ImGuiService.WrapTableColumnElements("Scroll" + ex.Key,positions, RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X, position =>
+                    var positions = ex.ENpcBase.Locations;
+                    ImGuiService.WrapTableColumnElements("Scroll" + ex.RowId,positions, RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X, position =>
                     {
                         if (ImGui.ImageButton(ImGuiService.GetIconTexture(60561).ImGuiHandle,
                                 new Vector2(RowSize * ImGui.GetIO().FontGlobalScale,
                                     RowSize * ImGui.GetIO().FontGlobalScale), new Vector2(0, 0),
                                 new Vector2(1, 1), 0))
                         {
-                            _chatUtilities.PrintFullMapLink(position, ex.Resident?.FormattedSingular ?? "");
+                            _chatUtilities.PrintFullMapLink(position, ex.Base.Singular.ExtractText() ?? "");
                         }
 
                         if (ImGui.IsItemHovered())
                         {
                             using var tt = ImRaii.Tooltip();
-                            ImGui.TextUnformatted((position.PlaceNameEx.Value?.FormattedName ?? "Unknown") + " - " +
+                            ImGui.TextUnformatted((position.PlaceName.ValueNullable?.Name.ExtractText() ?? "Unknown") + " - " +
                                                   position.MapX +
                                                   " : " + position.MapY);
                         }
@@ -112,12 +125,12 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>, IMenuWindow
                         return exes;
                     }
 
-                    return exes.Where(c => c.IsVendor && s == true || !c.IsVendor && s == false);
+                    return exes.Where(c => c.ENpcBase.IsVendor && s == true || !c.ENpcBase.IsVendor && s == false);
                 },
                 FilterBoolean = null,
                 Draw = (ex, contentTypeId) =>
                 {
-                    if (ex.IsVendor)
+                    if (ex.ENpcBase.IsVendor)
                     {
                         ImGui.Text("Yes");
                     }
@@ -150,7 +163,7 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>, IMenuWindow
                             return false;
                         }
 
-                        return currentValue.Any(c => c.Value!.NameString.ToLower().PassesFilter(s));
+                        return currentValue.Any(c => c.NameString.ToLower().PassesFilter(s));
                     });
                 },
                 Draw = (ex, contentTypeId) =>
@@ -159,11 +172,11 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>, IMenuWindow
                     var drops = GetShopItems(ex);
                     if (drops != null)
                     {
-                        ImGuiService.WrapTableColumnElements("ScrollDrops" + ex.Key, drops,
+                        ImGuiService.WrapTableColumnElements("ScrollDrops" + ex.RowId, drops,
                             RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X,
                             drop =>
                             {
-                                var sourceIcon = ImGuiService.GetIconTexture(drop.Value!.Icon);
+                                var sourceIcon = ImGuiService.GetIconTexture(drop.Base.Icon);
                                 ImGui.Image(sourceIcon.ImGuiHandle,
                                     new Vector2(RowSize, RowSize) * ImGui.GetIO().FontGlobalScale);
                                 if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
@@ -173,7 +186,7 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>, IMenuWindow
                                                         ImGuiHoveredFlags.AnyWindow) &&
                                     ImGui.IsMouseReleased(ImGuiMouseButton.Right))
                                 {
-                                    ImGui.OpenPopup("RightClick" + drop.Row);
+                                    ImGui.OpenPopup("RightClick" + drop.RowId);
                                 }
 
                                 if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
@@ -183,83 +196,75 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>, IMenuWindow
                                                         ImGuiHoveredFlags.AnyWindow) &&
                                     ImGui.IsMouseReleased(ImGuiMouseButton.Left))
                                 {
-                                    MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), drop.Row));
+                                    MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), drop.RowId));
                                 }
 
-                                if (ImGui.BeginPopup("RightClick" + drop.Row))
+                                if (ImGui.BeginPopup("RightClick" + drop.RowId))
                                 {
-                                    if (drop.Value != null)
-                                    {
-                                        MediatorService.Publish(
-                                            ImGuiService.RightClickService.DrawRightClickPopup(drop.Value));
-                                    }
+                                    MediatorService.Publish(
+                                        ImGuiService.RightClickService.DrawRightClickPopup(drop));
 
                                     ImGui.EndPopup();
                                 }
 
 
-                                ImGuiUtil.HoverTooltip(drop.Value!.NameString);
+                                ImGuiUtil.HoverTooltip(drop.NameString);
                                 return true;
                             });
                     }
                 }
             },
         };
-         var eNpcCollection = _excelCache.ENpcCollection;
-         _tabs = eNpcCollection == null ? new Dictionary<uint, string>() : eNpcCollection.Where(c => (c.Resident?.FormattedSingular ?? "") != "").SelectMany(c => c.Locations.Select(c => c.PlaceNameEx)).DistinctBy(c => c.Row).ToDictionary(c => c.Row, c => c.Value?.Name.ToDalamudString().ToString() ?? "");
-        _items = new Dictionary<uint, List<ENpc>>();
-        _filteredItems = new Dictionary<uint, List<ENpc>>();
+         _tabs = _eNpcResidentSheet.Where(c => (c.Base.Singular.ExtractText() ?? "") != "").SelectMany(c => c.ENpcBase.Locations.Select(c => c.PlaceName)).DistinctBy(c => c.RowId).ToDictionary(c => c.RowId, c => c.ValueNullable?.Name.ExtractText().ToString() ?? "");
+        _items = new Dictionary<uint, List<ENpcResidentRow>>();
+        _filteredItems = new Dictionary<uint, List<ENpcResidentRow>>();
     }
 
-    private Dictionary<uint, List<LazyRow<ItemEx>>?> _shopItems = new();
+    private Dictionary<uint, List<ItemRow>?> _shopItems = new();
 
-    private List<LazyRow<ItemEx>>? GetShopItems(ENpc npc)
+    private List<ItemRow>? GetShopItems(ENpcResidentRow npc)
     {
-        if (_shopItems.TryGetValue(npc.Key, out List<LazyRow<ItemEx>>? value))
+        if (_shopItems.TryGetValue(npc.RowId, out List<ItemRow>? value))
         {
             return value;
         }
-        if (npc.Shops != null)
+
+        var npcShops = _itemInfoCache.GetNpcShops(npc.RowId);
+        if (npcShops != null)
         {
-            IEnumerable<LazyRow<ItemEx>> items = new List<LazyRow<ItemEx>>();
-            foreach (var shop in npc.Shops)
+            IEnumerable<ItemRow> items = new List<ItemRow>();
+            foreach (var shop in npcShops)
             {
                 items = items.Concat(shop.Items);
             }
             var shopItems = items.ToList();
-            _shopItems[npc.Key] = shopItems;
+            _shopItems[npc.RowId] = shopItems;
             return shopItems;
         }
 
-        _shopItems[npc.Key] = null;
+        _shopItems[npc.RowId] = null;
         return null;
     }
 
-    private bool OnLeftClick(ENpc arg)
+    private bool OnLeftClick(ENpcResidentRow arg)
     {
-        MediatorService.Publish(new OpenUintWindowMessage(typeof(ENpcWindow), arg.Key));
+        MediatorService.Publish(new OpenUintWindowMessage(typeof(ENpcWindow), arg.RowId));
         return true;
     }
 
-    public override List<ENpc> GetItems(uint placeNameId)
+    public override List<ENpcResidentRow> GetItems(uint placeNameId)
     {
         if (!_items.ContainsKey(placeNameId))
         {
             if (placeNameId == 0)
             {
-                var enpcs = _excelCache.ENpcCollection?.Where(c => (c.Resident?.FormattedSingular ?? "") != "").ToList();
-                if (enpcs != null)
-                {
-                    _items.Add(placeNameId, enpcs);
-                }
+                var enpcs = _eNpcResidentSheet.Where(c => (c.Base.Singular.ExtractText() ?? "") != "").ToList();
+                _items.Add(placeNameId, enpcs);
             }
             else
             {
-                var enpcs = _excelCache.ENpcCollection?.Where(c => (c.Resident?.FormattedSingular ?? "") != "" && c.Locations.Any(c => c.PlaceNameEx.Row == placeNameId)).ToList();
-                if (enpcs != null)
-                {
-                    _items.Add(placeNameId, enpcs);
-                }
+                var enpcs = _eNpcResidentSheet.Where(c => (c.Base.Singular.ExtractText() ?? "") != "" && c.ENpcBase.Locations.Any(c => c.PlaceName.RowId == placeNameId)).ToList();
+                _items.Add(placeNameId, enpcs);
             }
         }
 
@@ -306,22 +311,22 @@ public class ENpcsWindow : GenericTabbedTable<ENpc>, IMenuWindow
         DrawTabs();
     }
 
-    public override int GetRowId(ENpc item)
+    public override int GetRowId(ENpcResidentRow item)
     {
-        return (int)item.Key;
+        return (int)item.RowId;
     }
 
-    public override Dictionary<uint, List<ENpc>> Items => _items;
+    public override Dictionary<uint, List<ENpcResidentRow>> Items => _items;
 
-    public override Dictionary<uint, List<ENpc>> FilteredItems => _filteredItems;
+    public override Dictionary<uint, List<ENpcResidentRow>> FilteredItems => _filteredItems;
 
-    public override List<TableColumn<ENpc>> Columns => _columns;
+    public override List<TableColumn<ENpcResidentRow>> Columns => _columns;
 
     public override ImGuiTableFlags TableFlags => _flags;
 
-    private List<TableColumn<ENpc>> _columns = null!;
-    private Dictionary<uint, List<ENpc>> _items = null!;
-    private Dictionary<uint, List<ENpc>> _filteredItems = null!;
+    private List<TableColumn<ENpcResidentRow>> _columns = null!;
+    private Dictionary<uint, List<ENpcResidentRow>> _items = null!;
+    private Dictionary<uint, List<ENpcResidentRow>> _filteredItems = null!;
     private ImGuiTableFlags _flags = ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersV |
                                                    ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.BordersInnerV |
                                                    ImGuiTableFlags.BordersH | ImGuiTableFlags.BordersOuterH |

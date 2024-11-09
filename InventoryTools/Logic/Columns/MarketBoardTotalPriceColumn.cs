@@ -1,7 +1,5 @@
 using System.Collections.Generic;
-using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.MarketBoard;
-using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using Dalamud.Interface.Colors;
@@ -15,7 +13,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class MarketBoardTotalPriceColumn : MarketBoardPriceColumn
     {
-        public MarketBoardTotalPriceColumn(ILogger<MarketBoardTotalPriceColumn> logger, ImGuiService imGuiService, MarketboardWorldSetting marketboardWorldSetting, ICharacterMonitor characterMonitor, IMarketCache marketCache, ExcelCache excelCache) : base(logger, imGuiService, marketboardWorldSetting, characterMonitor, marketCache, excelCache)
+        public MarketBoardTotalPriceColumn(ILogger<MarketBoardTotalPriceColumn> logger, ImGuiService imGuiService, MarketboardWorldSetting marketboardWorldSetting, ICharacterMonitor characterMonitor, IMarketCache marketCache) : base(logger, imGuiService, marketboardWorldSetting, characterMonitor, marketCache)
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Market;

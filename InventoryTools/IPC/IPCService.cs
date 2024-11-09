@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
-using DalaMock.Shared.Interfaces;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
 using InventoryTools.Lists;

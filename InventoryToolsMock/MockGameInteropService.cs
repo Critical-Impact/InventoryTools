@@ -1,28 +1,30 @@
 using CriticalCommonLib.Services;
 using InventoryTools.Services;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel;
+using Lumina.Excel.Sheets;
+
 
 namespace InventoryToolsMock;
 
 public class MockGameInteropService : IGameInteropService
 {
-    private readonly ExcelCache _excelCache;
+    private readonly ExcelSheet<ClassJob> _classJobSheet;
 
-    public MockGameInteropService(ExcelCache excelCache)
+    public MockGameInteropService(ExcelSheet<ClassJob> classJobSheet)
     {
-        _excelCache = excelCache;
+        _classJobSheet = classJobSheet;
     }
-    
+
     public unsafe Dictionary<ClassJob, short>? GetClassJobLevels()
     {
         return new Dictionary<ClassJob, short>()
         {
-            {_excelCache.GetClassJobSheet().GetRow(1)!,30},
-            {_excelCache.GetClassJobSheet().GetRow(2)!,60},
-            {_excelCache.GetClassJobSheet().GetRow(3)!,50},
-            {_excelCache.GetClassJobSheet().GetRow(4)!,80},
-            {_excelCache.GetClassJobSheet().GetRow(5)!,90},
-            {_excelCache.GetClassJobSheet().GetRow(6)!,10},
+            {_classJobSheet.GetRow(1),30},
+            {_classJobSheet.GetRow(2),60},
+            {_classJobSheet.GetRow(3),50},
+            {_classJobSheet.GetRow(4),80},
+            {_classJobSheet.GetRow(5),90},
+            {_classJobSheet.GetRow(6),10},
         };
     }
 }

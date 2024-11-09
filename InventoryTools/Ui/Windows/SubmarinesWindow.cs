@@ -1,36 +1,40 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using AllaganLib.GameSheets.Sheets;
+using AllaganLib.GameSheets.Sheets.Rows;
+using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
-using Dalamud.Utility;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
+using Lumina.Excel;
+using Lumina.Excel.Sheets;
 using Microsoft.Extensions.Logging;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 
 namespace InventoryTools.Ui;
 
-public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>, IMenuWindow
+public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationRow>, IMenuWindow
 {
     private readonly ImGuiService _imGuiService;
-    private readonly ExcelCache _excelCache;
+    private readonly SubmarineExplorationSheet _submarineExplorationSheet;
+    private readonly ExcelSheet<SubmarineMap> _submarineMapSheet;
 
-    public SubmarinesWindow(ILogger<SubmarinesWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ExcelCache excelCache, string name = "Submarines Window") : base(logger, mediator, imGuiService, configuration, name)
+    public SubmarinesWindow(ILogger<SubmarinesWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, SubmarineExplorationSheet submarineExplorationSheet, ExcelSheet<SubmarineMap> submarineMapSheet, string name = "Submarines Window") : base(logger, mediator, imGuiService, configuration, name)
     {
         _imGuiService = imGuiService;
-        _excelCache = excelCache;
+        _submarineExplorationSheet = submarineExplorationSheet;
+        _submarineMapSheet = submarineMapSheet;
     }
     public override void Initialize()
     {
         Key = "submarines";
         WindowName = "Submarines";
-        _columns = new List<TableColumn<SubmarineExplorationEx>>()
+        _columns = new List<TableColumn<SubmarineExplorationRow>>()
         {
             new("Icon", 32, ImGuiTableColumnFlags.WidthFixed)
             {
@@ -53,7 +57,7 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>, IMen
                         return exes;
                     }
 
-                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.FormattedNameShort) : exes.OrderByDescending(c => c.FormattedNameShort);
+                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.Base.Location.ExtractText()) : exes.OrderByDescending(c => c.Base.Location.ExtractText());
                 },
                 Filter = (s, exes) =>
                 {
@@ -61,11 +65,11 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>, IMen
                     {
                         return exes;
                     }
-                    return s == "" ? exes : exes.Where(c => c.FormattedNameShort.ToLower().PassesFilter(s.ToLower()));
+                    return s == "" ? exes : exes.Where(c => c.Base.Location.ExtractText().ToLower().PassesFilter(s.ToLower()));
                 },
                 Draw = (ex, tabId) =>
                 {
-                    ImGui.TextUnformatted(ex.FormattedNameShort.ToString());
+                    ImGui.TextUnformatted(ex.Base.Location.ExtractText());
                 }
             },
             new("Unlock Zone", 200, ImGuiTableColumnFlags.WidthFixed)
@@ -77,7 +81,7 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>, IMen
                         return exes;
                     }
 
-                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.UnlockPointEx.Value?.FormattedNameShort ?? "") : exes.OrderByDescending(c => c.UnlockPointEx.Value?.FormattedNameShort ?? "");
+                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.Unlock?.Base.Location.ExtractText() ?? "") : exes.OrderByDescending(c => c.Unlock?.Base.Location.ExtractText() ?? "");
                 },
                 Filter = (s, exes) =>
                 {
@@ -85,13 +89,13 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>, IMen
                     {
                         return exes;
                     }
-                    return s == "" ? exes : exes.Where(c => (c.UnlockPointEx.Value?.FormattedNameShort ?? "").ToLower().PassesFilter(s.ToLower()));
+                    return s == "" ? exes : exes.Where(c => (c.Unlock?.Base.Location.ExtractText() ?? "").ToLower().PassesFilter(s.ToLower()));
                 },
                 Draw = (ex, tabId) =>
                 {
-                    if (ex.UnlockPointEx.Row != 0)
+                    if (ex.Unlock != null)
                     {
-                        ImGui.TextUnformatted((ex.UnlockPointEx.Value?.FormattedNameShort ?? "").ToString());
+                        ImGui.TextUnformatted((ex.Unlock?.Base.Location.ExtractText() ?? "").ToString());
                     }
                 }
             },
@@ -104,7 +108,7 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>, IMen
                         return exes;
                     }
 
-                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.RankReq) : exes.OrderByDescending(c => c.RankReq);
+                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.Base.RankReq) : exes.OrderByDescending(c => c.Base.RankReq);
                 },
                 Filter = (s, exes) =>
                 {
@@ -112,13 +116,13 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>, IMen
                     {
                         return exes;
                     }
-                    return s == "" ? exes : exes.Where(c => (c.RankReq.ToString() ?? "").ToLower().PassesFilter(s.ToLower()));
+                    return s == "" ? exes : exes.Where(c => (c.Base.RankReq.ToString() ?? "").ToLower().PassesFilter(s.ToLower()));
                 },
                 Draw = (ex, tabId) =>
                 {
-                    if (ex.UnlockPointEx.Row != 0)
+                    if (ex.Unlock != null)
                     {
-                        ImGui.TextUnformatted((ex.RankReq.ToString() ?? "").ToString());
+                        ImGui.TextUnformatted((ex.Base.RankReq.ToString() ?? "").ToString());
                     }
                 }
             },
@@ -132,50 +136,48 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>, IMen
                 {
                     return s == null ? npcs : npcs.Where(c =>
                     {
-                        var currentValue = c.Drops.Where(c => c.Value != null);
+                        var currentValue = c.DropItems;
 
-                        return currentValue.Any(c => c.Value!.NameString.ToLower().PassesFilter(s));
+                        return currentValue.Any(c => c.NameString.ToLower().PassesFilter(s));
                     });
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    var drops = ex.Drops.Where(c => c.Value != null);
+                    var drops = ex.DropItems;
                     _imGuiService.WrapTableColumnElements("Drops" + ex.RowId, drops,
                     RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X,
                     drop =>
                     {
-                        if (drop.Value != null)
+
+                        var sourceIcon = _imGuiService.GetIconTexture(drop.Base.Icon);
+                        ImGui.Image(sourceIcon.ImGuiHandle,
+                            new Vector2(RowSize, RowSize) * ImGui.GetIO().FontGlobalScale);
+                        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
+                                                ImGuiHoveredFlags.AllowWhenOverlapped &
+                                                ImGuiHoveredFlags.AllowWhenBlockedByPopup &
+                                                ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
+                                                ImGuiHoveredFlags.AnyWindow) &&
+                            ImGui.IsMouseReleased(ImGuiMouseButton.Right))
                         {
-                            var sourceIcon = _imGuiService.GetIconTexture(drop.Value.Icon);
-                            ImGui.Image(sourceIcon.ImGuiHandle,
-                                new Vector2(RowSize, RowSize) * ImGui.GetIO().FontGlobalScale);
-                            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
-                                                    ImGuiHoveredFlags.AllowWhenOverlapped &
-                                                    ImGuiHoveredFlags.AllowWhenBlockedByPopup &
-                                                    ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
-                                                    ImGuiHoveredFlags.AnyWindow) &&
-                                ImGui.IsMouseReleased(ImGuiMouseButton.Right))
-                            {
-                                ImGui.OpenPopup("RightClick" + drop.Value.RowId);
-                            }
-
-                            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
-                                                    ImGuiHoveredFlags.AllowWhenOverlapped &
-                                                    ImGuiHoveredFlags.AllowWhenBlockedByPopup &
-                                                    ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
-                                                    ImGuiHoveredFlags.AnyWindow) &&
-                                ImGui.IsMouseReleased(ImGuiMouseButton.Left))
-                            {
-                                MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), drop.Value.RowId));
-                            }
-
-                            if (ImGui.BeginPopup("RightClick" + drop.Value.RowId))
-                            {
-                                MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(drop.Value));
-                                ImGui.EndPopup();
-                            }
-                            ImGuiUtil.HoverTooltip(drop.Value.NameString);
+                            ImGui.OpenPopup("RightClick" + drop);
                         }
+
+                        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
+                                                ImGuiHoveredFlags.AllowWhenOverlapped &
+                                                ImGuiHoveredFlags.AllowWhenBlockedByPopup &
+                                                ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
+                                                ImGuiHoveredFlags.AnyWindow) &&
+                            ImGui.IsMouseReleased(ImGuiMouseButton.Left))
+                        {
+                            MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), drop.Base.RowId));
+                        }
+
+                        if (ImGui.BeginPopup("RightClick" + drop))
+                        {
+                            MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(drop));
+                            ImGui.EndPopup();
+                        }
+                        ImGuiUtil.HoverTooltip(drop.NameString);
 
                         return true;
                     });
@@ -183,12 +185,12 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>, IMen
                 }
             },
         };
-        _tabs = _excelCache.GetSubmarineMapSheet().Where(c => c.Name.ToDalamudString().ToString() != "").ToDictionary(c => c.RowId, c =>c.Name.ToString());
-        _items = new Dictionary<uint, List<SubmarineExplorationEx>>();
-        _filteredItems = new Dictionary<uint, List<SubmarineExplorationEx>>();
+        _tabs = _submarineMapSheet.Where(c => c.Name.ExtractText().ToString() != "").ToDictionary(c => c.RowId, c =>c.Name.ToString());
+        _items = new Dictionary<uint, List<SubmarineExplorationRow>>();
+        _filteredItems = new Dictionary<uint, List<SubmarineExplorationRow>>();
     }
 
-    private bool OnLeftClick(SubmarineExplorationEx arg)
+    private bool OnLeftClick(SubmarineExplorationRow arg)
     {
         MediatorService.Publish(new OpenGenericWindowMessage(typeof(SubmarineWindow)));
         return true;
@@ -213,20 +215,20 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>, IMen
 
     public override FilterConfiguration? SelectedConfiguration => null;
 
-    public override int GetRowId(SubmarineExplorationEx item)
+    public override int GetRowId(SubmarineExplorationRow item)
     {
         return (int)item.RowId;
     }
 
-    public override Dictionary<uint, List<SubmarineExplorationEx>> Items => _items;
+    public override Dictionary<uint, List<SubmarineExplorationRow>> Items => _items;
 
-    public override Dictionary<uint, List<SubmarineExplorationEx>> FilteredItems => _filteredItems;
+    public override Dictionary<uint, List<SubmarineExplorationRow>> FilteredItems => _filteredItems;
 
-    public override List<TableColumn<SubmarineExplorationEx>> Columns => _columns;
+    public override List<TableColumn<SubmarineExplorationRow>> Columns => _columns;
 
-    private List<TableColumn<SubmarineExplorationEx>> _columns = null!;
-    private Dictionary<uint, List<SubmarineExplorationEx>> _items= null!;
-    private Dictionary<uint, List<SubmarineExplorationEx>> _filteredItems= null!;
+    private List<TableColumn<SubmarineExplorationRow>> _columns = null!;
+    private Dictionary<uint, List<SubmarineExplorationRow>> _items= null!;
+    private Dictionary<uint, List<SubmarineExplorationRow>> _filteredItems= null!;
     private Dictionary<uint, string> _tabs= null!;
 
     public override ImGuiTableFlags TableFlags => _flags;
@@ -238,18 +240,18 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationEx>, IMen
                                      ImGuiTableFlags.Resizable | ImGuiTableFlags.Sortable |
                                      ImGuiTableFlags.Hideable | ImGuiTableFlags.ScrollX |
                                      ImGuiTableFlags.ScrollY;
-    public override List<SubmarineExplorationEx> GetItems(uint tabId)
+    public override List<SubmarineExplorationRow> GetItems(uint tabId)
     {
         if (!_items.ContainsKey(tabId))
         {
             if (tabId == 0)
             {
-                var duties = _excelCache.GetSubmarineExplorationExSheet().Where(c => c.FormattedName.ToString() != "").ToList();
+                var duties = _submarineExplorationSheet.Where(c => c.Base.Location.ExtractText() != "").ToList();
                 _items.Add(tabId, duties);
             }
             else
             {
-                var duties = _excelCache.GetSubmarineExplorationExSheet().Where(c => c.FormattedName.ToString() != "" && c.Map.Row == tabId).ToList();
+                var duties = _submarineExplorationSheet.Where(c => c.Base.Location.ExtractText() != "" && c.Base.Map.RowId == tabId).ToList();
                 _items.Add(tabId, duties);
             }
         }

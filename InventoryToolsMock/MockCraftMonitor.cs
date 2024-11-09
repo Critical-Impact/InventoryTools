@@ -1,7 +1,10 @@
+using AllaganLib.GameSheets.Sheets;
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Agents;
 using CriticalCommonLib.Crafting;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
+
 
 namespace InventoryToolsMock;
 
@@ -9,7 +12,7 @@ public class MockCraftMonitor : ICraftMonitor
 {
     public void Dispose()
     {
-        
+
     }
 
     public void CompleteCraft(uint itemId, bool isHq, uint quantity)
@@ -37,7 +40,7 @@ public class MockCraftMonitor : ICraftMonitor
         }
     }
 
-    public Recipe? CurrentRecipe
+    public RecipeRow? CurrentRecipe
     {
         get
         {
@@ -45,7 +48,7 @@ public class MockCraftMonitor : ICraftMonitor
         }
     }
 
-    public RecipeLevelTable? RecipeLevelTable
+    public RecipeLevelTableRow? RecipeLevelTable
     {
         get
         {

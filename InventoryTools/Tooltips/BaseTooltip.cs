@@ -1,5 +1,7 @@
+using AllaganLib.GameSheets.Sheets;
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Services;
-using CriticalCommonLib.Sheets;
+
 using Dalamud.Plugin.Services;
 using Microsoft.Extensions.Logging;
 
@@ -7,18 +9,18 @@ namespace InventoryTools.Tooltips;
 
 public abstract class BaseTooltip : TooltipService.TooltipTweak
 {
-    public ExcelCache ExcelCache { get; }
     public InventoryToolsConfiguration Configuration { get; }
     public IGameGui GameGui { get; }
     public ILogger Logger { get; }
+    public ItemSheet ItemSheet { get; }
     public abstract uint Order { get; }
 
-    public BaseTooltip(ILogger logger, ExcelCache excelCache, InventoryToolsConfiguration configuration, IGameGui gameGui)
+    public BaseTooltip(ILogger logger, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui)
     {
-        ExcelCache = excelCache;
         Configuration = configuration;
         GameGui = gameGui;
         Logger = logger;
+        ItemSheet = itemSheet;
     }
     public bool HoverItemIsHq
     {
@@ -49,7 +51,7 @@ public abstract class BaseTooltip : TooltipService.TooltipTweak
         }
     }
 
-    public ItemEx? HoverItem => ExcelCache.GetItemExSheet().GetRow(HoverItemId);
+    public ItemRow? HoverItem => ItemSheet.GetRowOrDefault(HoverItemId);
 
     public bool ShouldShow()
     {
@@ -62,7 +64,7 @@ public abstract class BaseTooltip : TooltipService.TooltipTweak
         {
             itemId %= 500000;
 
-            var item = ExcelCache.GetItemExSheet().GetRow((uint) itemId);
+            var item = ItemSheet.GetRowOrDefault((uint) itemId);
             if (item != null)
             {
                 if (Configuration.TooltipWhitelistCategories.Count == 0)
@@ -71,7 +73,7 @@ public abstract class BaseTooltip : TooltipService.TooltipTweak
                 }
                 if (Configuration.TooltipWhitelistBlacklist)
                 {
-                    if (Configuration.TooltipWhitelistCategories.Contains(item.ItemUICategory.Row))
+                    if (Configuration.TooltipWhitelistCategories.Contains(item.Base.ItemUICategory.RowId))
                     {
                         return false;
                     }
@@ -79,7 +81,7 @@ public abstract class BaseTooltip : TooltipService.TooltipTweak
                     return true;
                 }
 
-                if (Configuration.TooltipWhitelistCategories.Contains(item.ItemUICategory.Row))
+                if (Configuration.TooltipWhitelistCategories.Contains(item.Base.ItemUICategory.RowId))
                 {
                     return true;
                 }

@@ -1,9 +1,10 @@
+using AllaganLib.Shared.Time;
 using Autofac;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
-using CriticalCommonLib.Time;
+
 using DalaMock.Core.Mocks;
 using DalaMock.Core.Windows;
 using DalaMock.Host.Factories;

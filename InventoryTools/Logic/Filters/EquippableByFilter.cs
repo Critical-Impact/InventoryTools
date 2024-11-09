@@ -1,18 +1,24 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using AllaganLib.GameSheets.Extensions;
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
-using CriticalCommonLib.Sheets;
-using InventoryTools.Extensions;
 using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Services;
+using Lumina.Excel;
+using Lumina.Excel.Sheets;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
     public class EquippableByFilter : UintMultipleChoiceFilter
     {
-        private readonly ExcelCache _excelCache;
+        private readonly ExcelSheet<ClassJob> _classJobSheet;
+
+        public EquippableByFilter(ILogger<EquippableByFilter> logger, ImGuiService imGuiService, ExcelSheet<ClassJob> classJobSheet) : base(logger, imGuiService)
+        {
+            _classJobSheet = classJobSheet;
+        }
         public override string Key { get; set; } = "EquippableBy";
         public override string Name { get; set; } = "Equippable By";
         public override string HelpText { get; set; } = "Which classes can this equipment be equipped by?";
@@ -26,17 +32,17 @@ namespace InventoryTools.Logic.Filters
             return FilterItem(configuration, item.Item) == true;
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemRow item)
         {
             var currentValue = this.CurrentValue(configuration);
             if (currentValue.Count == 0)
             {
                 return true;
             }
-            if (item.ClassJobCategoryEx.Value != null)
+            if (item.ClassJobCategory != null)
             {
-                
-                if (item.ClassJobCategoryEx.Value.ApplicableClasses.Any(c => currentValue.Contains(c.Key)))
+
+                if (item.ClassJobCategory.ClassJobIds.Any(c => currentValue.Contains(c)))
                 {
                     return true;
                 }
@@ -48,8 +54,7 @@ namespace InventoryTools.Logic.Filters
         public override Dictionary<uint, string> GetChoices(FilterConfiguration configuration)
         {
             var choices = new Dictionary<uint, string>();
-            var sheet = _excelCache.GetClassJobSheet();
-            foreach (var classJob in sheet)
+            foreach (var classJob in _classJobSheet)
             {
                 choices.Add(classJob.RowId, classJob.Name.ToString().ToTitleCase());
             }
@@ -58,10 +63,5 @@ namespace InventoryTools.Logic.Filters
         }
 
         public override bool HideAlreadyPicked { get; set; } = true;
-
-        public EquippableByFilter(ILogger<EquippableByFilter> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
-        {
-            _excelCache = excelCache;
-        }
     }
 }

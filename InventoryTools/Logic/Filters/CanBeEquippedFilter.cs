@@ -1,5 +1,6 @@
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
+
 using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -11,7 +12,7 @@ namespace InventoryTools.Logic.Filters
         public override string Key { get; set; } = "CanBeEquipped";
         public override string Name { get; set; } = "Can be Equipped?";
         public override string HelpText { get; set; } = "Can the item be equipped?";
-        
+
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
 
         public override bool? FilterItem(FilterConfiguration configuration,InventoryItem item)
@@ -19,7 +20,7 @@ namespace InventoryTools.Logic.Filters
             return FilterItem(configuration, item.Item);
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemRow item)
         {
             var currentValue = CurrentValue(configuration);
             if (currentValue == null)
@@ -27,7 +28,7 @@ namespace InventoryTools.Logic.Filters
                 return null;
             }
 
-            if (currentValue.Value && item.EquipSlotCategory.Row != 0)
+            if (currentValue.Value && item.Base.EquipSlotCategory.RowId != 0)
             {
                 return true;
             }

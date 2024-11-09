@@ -39,7 +39,7 @@ namespace InventoryTools.Misc
             {8, new Vector4(1,1,1,0.5f)}, //Shadow Piece
         };
         public Vector4 BackgroundColour = new Vector4(0,0,0,0.4f);
-        
+
 
         public int CursorX = 0;
         public int CursorY = 0;
@@ -72,7 +72,7 @@ namespace InventoryTools.Misc
         }
 
         private DateTime? lastMoveTime = null;
-        
+
         private void FrameworkOnOnUpdateEvent(IFramework framework) {
         try {
             if (Game != null && Game.Status != Game.GameStatus.InProgress) return;
@@ -124,10 +124,10 @@ namespace InventoryTools.Misc
 
             MediatorService.Publish(new OverlaysRequestRefreshMessage());
             Service.KeyState.ClearAll();
-            
+
 
         } catch (Exception) {
-            
+
         }
         }
 
@@ -160,7 +160,7 @@ namespace InventoryTools.Misc
             //PluginService.OverlayService.AddOverlay(new InventoryExpansionOverlay());
             MediatorService.Publish(new OverlaysRequestRefreshMessage());
         }
-        
+
         private void OnTimedEvent(object? source, ElapsedEventArgs e)
         {
             if (Game == null)
@@ -205,8 +205,7 @@ namespace InventoryTools.Misc
 
             //Draw PlayField
 
-
-            var gameBoard = Game.ActualBoard.ToArray();
+            var gameBoard = Game!.ActualBoard.ToArray();
 
             for (int x = 0; x < gameBoard.GetLength(0); x += 1) {
                 for (int y = 0; y < gameBoard.GetLength(1); y += 1)
@@ -226,7 +225,7 @@ namespace InventoryTools.Misc
                         else
                         {
                             var blockColor = BlockColors.ContainsKey(block) ? BlockColors[block] : BackgroundColour;
-                            positions.Add(position, blockColor);   
+                            positions.Add(position, blockColor);
                         }
                     }
                 }
@@ -278,7 +277,7 @@ namespace InventoryTools.Misc
                 {
                     finalPositions[correctBag].Add(actualPosition, color);
                 }
-                
+
             }
 
             foreach (var finalPosition in finalPositions)
@@ -297,14 +296,14 @@ namespace InventoryTools.Misc
 
             return finalPositions;
         }
-        
+
         private bool _disposed;
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-        
+
         protected virtual void Dispose(bool disposing)
         {
             if(!_disposed && disposing)
@@ -312,7 +311,7 @@ namespace InventoryTools.Misc
                 _gameTimer?.Dispose();
                 Service.Framework.Update -= FrameworkOnOnUpdateEvent;
             }
-            _disposed = true;         
+            _disposed = true;
         }
     }
 }

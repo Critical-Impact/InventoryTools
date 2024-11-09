@@ -1,6 +1,4 @@
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
-using CriticalCommonLib.Sheets;
+using AllaganLib.GameSheets.Sheets.Caches;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -9,11 +7,8 @@ namespace InventoryTools.Logic.Columns;
 
 public class IsCustomDeliveryItemColumn : CheckboxColumn
 {
-    private readonly ExcelCache _excelCache;
-
-    public IsCustomDeliveryItemColumn(ILogger<IsCustomDeliveryItemColumn> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
+    public IsCustomDeliveryItemColumn(ILogger<IsCustomDeliveryItemColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
     {
-        _excelCache = excelCache;
     }
 
     public override string Name { get; set; } = "Is custom delivery item?";
@@ -26,6 +21,6 @@ public class IsCustomDeliveryItemColumn : CheckboxColumn
 
     public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return searchResult.Item.HandInGrandCompanySupply;
+        return searchResult.Item.HasSourcesByType(ItemInfoType.CustomDelivery);
     }
 }

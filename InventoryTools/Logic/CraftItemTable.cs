@@ -323,7 +323,7 @@ namespace InventoryTools.Logic
                 foreach (var item in CraftItems)
                 {
                     var newLine = new ExpandoObject() as IDictionary<string, Object>;
-                    newLine["Id"] = item.Item.ItemId;
+                    newLine["Id"] = item.Item.RowId;
                     foreach (var column in Columns)
                     {
                         newLine[column.Column.Name] = column.Column.JsonExport(column, item) ?? "";

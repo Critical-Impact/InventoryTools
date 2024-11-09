@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Dalamud.Game.ClientState.Keys;
-using Dalamud.Interface.Colors;
 using ImGuiNET;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -41,7 +40,7 @@ namespace InventoryTools.Logic.Settings.Abstract
                 {
                     UpdateFilterConfiguration(configuration, hotkey);
                 }, _virtualKeys);
-            
+
             ImGui.SameLine();
             ImGuiService.HelpMarker(HelpText, Image, ImageSize);
             if (!HideReset && HasValueSet(configuration))
@@ -53,6 +52,6 @@ namespace InventoryTools.Logic.Settings.Abstract
                 }
             }
         }
-        
+
     }
 }

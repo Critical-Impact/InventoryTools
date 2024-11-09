@@ -1,43 +1,46 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using CriticalCommonLib.Services;
+using AllaganLib.GameSheets.Sheets;
+using AllaganLib.GameSheets.Sheets.Rows;
+using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
-using Dalamud.Utility;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
-using InventoryTools.Services.Interfaces;
+using Lumina.Excel;
+using Lumina.Excel.Sheets;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Ui;
 
-public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>, IMenuWindow
+public class DutiesWindow : GenericTabbedTable<ContentFinderConditionRow>, IMenuWindow
 {
     private readonly ImGuiService _imGuiService;
-    private readonly ExcelCache _excelCache;
+    private readonly ExcelSheet<ContentType> _contentTypeSheet;
+    private readonly ContentFinderConditionSheet _contentFinderConditionSheet;
 
-    public DutiesWindow(ILogger<DutiesWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ExcelCache excelCache, string name = "Duties Window") : base(logger, mediator, imGuiService, configuration, name)
+    public DutiesWindow(ILogger<DutiesWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ExcelSheet<ContentType> contentTypeSheet, ContentFinderConditionSheet contentFinderConditionSheet, string name = "Duties Window") : base(logger, mediator, imGuiService, configuration, name)
     {
         _imGuiService = imGuiService;
-        _excelCache = excelCache;
+        _contentTypeSheet = contentTypeSheet;
+        _contentFinderConditionSheet = contentFinderConditionSheet;
     }
     public override void Initialize()
     {
         WindowName = "Duties";
         Key = "duties";
 
-        _columns = new List<TableColumn<ContentFinderConditionEx>>()
+        _columns = new List<TableColumn<ContentFinderConditionRow>>()
         {
             new("Icon", 32, ImGuiTableColumnFlags.WidthFixed)
             {
                 OnLeftClick = OnLeftClick,
                 Draw = (ex, contentTypeId) =>
                 {
-                    if (ImGui.ImageButton(ImGuiService.GetIconTexture((int)ex.ContentType.Value!.IconDutyFinder).ImGuiHandle,
+                    if (ImGui.ImageButton(ImGuiService.GetIconTexture((int)ex.Base.ContentType.Value.IconDutyFinder).ImGuiHandle,
                             new Vector2(RowSize, RowSize)))
                     {
                         _columns[0].OnLeftClick?.Invoke(ex);
@@ -101,7 +104,7 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>, IMenuW
                         return exes;
                     }
 
-                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.ClassJobLevelRequired) : exes.OrderByDescending(c => c.ClassJobLevelRequired);
+                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.Base.ClassJobLevelRequired) : exes.OrderByDescending(c => c.Base.ClassJobLevelRequired);
                 },
                 Filter = (s, exes) =>
                 {
@@ -109,11 +112,11 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>, IMenuW
                     {
                         return exes;
                     }
-                    return s == "" ? exes : exes.Where(c => ((int)c.ClassJobLevelRequired).PassesFilter(s.ToLower()));
+                    return s == "" ? exes : exes.Where(c => ((int)c.Base.ClassJobLevelRequired).PassesFilter(s.ToLower()));
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    ImGui.TextUnformatted(ex.ClassJobLevelRequired.ToString());
+                    ImGui.TextUnformatted(ex.Base.ClassJobLevelRequired.ToString());
                 }
             },
             new("Sync Level", 100, ImGuiTableColumnFlags.WidthFixed)
@@ -125,7 +128,7 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>, IMenuW
                         return exes;
                     }
 
-                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.ClassJobLevelSync) : exes.OrderByDescending(c => c.ClassJobLevelSync);
+                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.Base.ClassJobLevelSync) : exes.OrderByDescending(c => c.Base.ClassJobLevelSync);
                 },
                 Filter = (s, exes) =>
                 {
@@ -133,11 +136,11 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>, IMenuW
                     {
                         return exes;
                     }
-                    return s == "" ? exes : exes.Where(c => ((int)c.ClassJobLevelSync).PassesFilter(s.ToLower()));
+                    return s == "" ? exes : exes.Where(c => ((int)c.Base.ClassJobLevelSync).PassesFilter(s.ToLower()));
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    ImGui.TextUnformatted(ex.ClassJobLevelSync.ToString());
+                    ImGui.TextUnformatted(ex.Base.ClassJobLevelSync.ToString());
                 }
             },
             new("Item Level", 100, ImGuiTableColumnFlags.WidthFixed)
@@ -149,7 +152,7 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>, IMenuW
                         return exes;
                     }
 
-                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.ItemLevelRequired) : exes.OrderByDescending(c => c.ItemLevelRequired);
+                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.Base.ItemLevelRequired) : exes.OrderByDescending(c => c.Base.ItemLevelRequired);
                 },
                 Filter = (s, exes) =>
                 {
@@ -157,11 +160,11 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>, IMenuW
                     {
                         return exes;
                     }
-                    return s == "" ? exes : exes.Where(c => ((int)c.ItemLevelRequired).PassesFilter(s.ToLower()));
+                    return s == "" ? exes : exes.Where(c => ((int)c.Base.ItemLevelRequired).PassesFilter(s.ToLower()));
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    ImGui.TextUnformatted(ex.ItemLevelRequired.ToString());
+                    ImGui.TextUnformatted(ex.Base.ItemLevelRequired.ToString());
                 }
             },
             new("Item Level Sync", 100, ImGuiTableColumnFlags.WidthFixed)
@@ -173,7 +176,7 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>, IMenuW
                         return exes;
                     }
 
-                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.ItemLevelSync) : exes.OrderByDescending(c => c.ItemLevelSync);
+                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.Base.ItemLevelSync) : exes.OrderByDescending(c => c.Base.ItemLevelSync);
                 },
                 Filter = (s, exes) =>
                 {
@@ -181,11 +184,11 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>, IMenuW
                     {
                         return exes;
                     }
-                    return s == "" ? exes : exes.Where(c => ((int)c.ItemLevelSync).PassesFilter(s.ToLower()));
+                    return s == "" ? exes : exes.Where(c => ((int)c.Base.ItemLevelSync).PassesFilter(s.ToLower()));
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    ImGui.TextUnformatted(ex.ItemLevelSync.ToString());
+                    ImGui.TextUnformatted(ex.Base.ItemLevelSync.ToString());
                 }
             },
             new("Allows Undersized", 80, ImGuiTableColumnFlags.WidthFixed)
@@ -197,7 +200,7 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>, IMenuW
                         return exes;
                     }
 
-                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.AllowUndersized) : exes.OrderByDescending(c => c.AllowUndersized);
+                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.Base.AllowUndersized) : exes.OrderByDescending(c => c.Base.AllowUndersized);
                 },
                 FilterBool = (s, exes) =>
                 {
@@ -205,12 +208,12 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>, IMenuW
                     {
                         return exes;
                     }
-                    return exes.Where(c => c.AllowUndersized == s);
+                    return exes.Where(c => c.Base.AllowUndersized == s);
                 },
                 Draw = (ex, contentTypeId) =>
                 {
                     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetContentRegionAvail().X / 2) - RowSize / 2.0f);
-                    _imGuiService.DrawUldIcon(ex.AllowUndersized ? _imGuiService.TickIcon : _imGuiService.CrossIcon, new Vector2(RowSize, RowSize));
+                    _imGuiService.DrawUldIcon(ex.Base.AllowUndersized ? _imGuiService.TickIcon : _imGuiService.CrossIcon, new Vector2(RowSize, RowSize));
                 }
             },
             new("Allows Explorer Mode", 80, ImGuiTableColumnFlags.WidthFixed)
@@ -222,7 +225,7 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>, IMenuW
                         return exes;
                     }
 
-                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.AllowExplorerMode) : exes.OrderByDescending(c => c.AllowExplorerMode);
+                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.Base.AllowExplorerMode) : exes.OrderByDescending(c => c.Base.AllowExplorerMode);
                 },
                 FilterBool = (s, exes) =>
                 {
@@ -230,12 +233,12 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>, IMenuW
                     {
                         return exes;
                     }
-                    return exes.Where(c => c.AllowExplorerMode == s);
+                    return exes.Where(c => c.Base.AllowExplorerMode == s);
                 },
                 Draw = (ex, contentTypeId) =>
                 {
                     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetContentRegionAvail().X / 2) - RowSize / 2.0f);
-                    _imGuiService.DrawUldIcon(ex.AllowExplorerMode ? _imGuiService.TickIcon : _imGuiService.CrossIcon, new Vector2(RowSize, RowSize));
+                    _imGuiService.DrawUldIcon(ex.Base.AllowExplorerMode ? _imGuiService.TickIcon : _imGuiService.CrossIcon, new Vector2(RowSize, RowSize));
                 }
             },
             new("PVP", 50, ImGuiTableColumnFlags.WidthFixed)
@@ -247,7 +250,7 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>, IMenuW
                         return exes;
                     }
 
-                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.PvP) : exes.OrderByDescending(c => c.PvP);
+                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.Base.PvP) : exes.OrderByDescending(c => c.Base.PvP);
                 },
                 FilterBool = (s, exes) =>
                 {
@@ -255,12 +258,12 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>, IMenuW
                     {
                         return exes;
                     }
-                    return exes.Where(c => c.PvP == s);
+                    return exes.Where(c => c.Base.PvP == s);
                 },
                 Draw = (ex, contentTypeId) =>
                 {
                     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetContentRegionAvail().X / 2) - RowSize / 2.0f);
-                    _imGuiService.DrawUldIcon(ex.PvP ? _imGuiService.TickIcon : _imGuiService.CrossIcon, new Vector2(RowSize, RowSize));
+                    _imGuiService.DrawUldIcon(ex.Base.PvP ? _imGuiService.TickIcon : _imGuiService.CrossIcon, new Vector2(RowSize, RowSize));
                 }
             },
             new("Accepted Classes", 100, ImGuiTableColumnFlags.WidthFixed)
@@ -272,7 +275,7 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>, IMenuW
                         return exes;
                     }
 
-                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.AcceptClassJobCategoryEx.Value?.FormattedName ?? "Unknown") : exes.OrderByDescending(c => c.AcceptClassJobCategoryEx.Value?.FormattedName ?? "Unknown");
+                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.AcceptClassJobCategory?.Base.Name.ExtractText() ?? "Unknown") : exes.OrderByDescending(c => c.AcceptClassJobCategory?.Base.Name.ExtractText() ?? "Unknown");
                 },
                 Filter = (s, exes) =>
                 {
@@ -280,37 +283,37 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>, IMenuW
                     {
                         return exes;
                     }
-                    return s == "" ? exes : exes.Where(c => (c.AcceptClassJobCategoryEx.Value?.FormattedName ?? "Unknown").ToLower().PassesFilter(s.ToLower()));
+                    return s == "" ? exes : exes.Where(c => (c.AcceptClassJobCategory?.Base.Name.ExtractText() ?? "Unknown").ToLower().PassesFilter(s.ToLower()));
                 },
                 Draw = (ex, contentTypeId) =>
                 {
-                    ImGui.TextUnformatted(ex.AcceptClassJobCategoryEx.Value?.FormattedName ?? "Unknown");
+                    ImGui.TextUnformatted(ex.AcceptClassJobCategory?.Base.Name.ExtractText() ?? "Unknown");
                 }
             },
         };
-        _tabs = _excelCache.GetContentTypeSheet().Where(c => c.Name.ToDalamudString().ToString() != "" && c.IconDutyFinder != 0).ToDictionary(c => c.RowId, c =>c.Name.ToString());
-        _items = new Dictionary<uint, List<ContentFinderConditionEx>>();
-        _filteredItems = new Dictionary<uint, List<ContentFinderConditionEx>>();
+        _tabs = _contentTypeSheet.Where(c => c.Name.ExtractText().ToString() != "" && c.IconDutyFinder != 0).ToDictionary(c => c.RowId, c =>c.Name.ToString());
+        _items = new Dictionary<uint, List<ContentFinderConditionRow>>();
+        _filteredItems = new Dictionary<uint, List<ContentFinderConditionRow>>();
     }
 
-    private bool OnLeftClick(ContentFinderConditionEx arg)
+    private bool OnLeftClick(ContentFinderConditionRow arg)
     {
         MediatorService.Publish(new OpenUintWindowMessage(typeof(DutyWindow), arg.RowId));
         return true;
     }
 
-    public override List<ContentFinderConditionEx> GetItems(uint contentTypeId)
+    public override List<ContentFinderConditionRow> GetItems(uint contentTypeId)
     {
         if (!_items.ContainsKey(contentTypeId))
         {
             if (contentTypeId == 0)
             {
-                var duties = _excelCache.GetContentFinderConditionExSheet().Where(c => c.Name.ToDalamudString().ToString() != "").ToList();
+                var duties = _contentFinderConditionSheet.Where(c => c.Base.Name.ExtractText() != "").ToList();
                 _items.Add(contentTypeId, duties);
             }
             else
             {
-                var duties = _excelCache.GetContentFinderConditionExSheet().Where(c => c.Name.ToDalamudString().ToString() != "" && c.ContentType.Row == contentTypeId).ToList();
+                var duties = _contentFinderConditionSheet.Where(c => c.Base.Name.ExtractText() != "" && c.Base.ContentType.RowId == contentTypeId).ToList();
                 _items.Add(contentTypeId, duties);
             }
         }
@@ -358,22 +361,22 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionEx>, IMenuW
         DrawTabs();
     }
 
-    public override int GetRowId(ContentFinderConditionEx item)
+    public override int GetRowId(ContentFinderConditionRow item)
     {
         return (int)item.RowId;
     }
 
-    public override Dictionary<uint, List<ContentFinderConditionEx>> Items => _items;
+    public override Dictionary<uint, List<ContentFinderConditionRow>> Items => _items;
 
-    public override Dictionary<uint, List<ContentFinderConditionEx>> FilteredItems => _filteredItems;
+    public override Dictionary<uint, List<ContentFinderConditionRow>> FilteredItems => _filteredItems;
 
-    public override List<TableColumn<ContentFinderConditionEx>> Columns => _columns;
+    public override List<TableColumn<ContentFinderConditionRow>> Columns => _columns;
 
     public override ImGuiTableFlags TableFlags => _flags;
 
-    private List<TableColumn<ContentFinderConditionEx>> _columns = null!;
-    private Dictionary<uint, List<ContentFinderConditionEx>> _items = null!;
-    private Dictionary<uint, List<ContentFinderConditionEx>> _filteredItems = null!;
+    private List<TableColumn<ContentFinderConditionRow>> _columns = null!;
+    private Dictionary<uint, List<ContentFinderConditionRow>> _items = null!;
+    private Dictionary<uint, List<ContentFinderConditionRow>> _filteredItems = null!;
     private ImGuiTableFlags _flags = ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersV |
                                                    ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.BordersInnerV |
                                                    ImGuiTableFlags.BordersH | ImGuiTableFlags.BordersOuterH |

@@ -1,5 +1,3 @@
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -17,7 +15,7 @@ public class CanBeEquippedColumn : CheckboxColumn
 
     public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return searchResult.Item.EquipSlotCategory.Row != 0;
+        return searchResult.Item.Base.EquipSlotCategory.RowId != 0;
     }
     public override string Name { get; set; } = "Can be Equipped?";
     public override float Width { get; set; } = 100;

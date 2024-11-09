@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using AllaganLib.Shared.Extensions;
 using Autofac;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
@@ -23,8 +24,6 @@ using ImGuiUtil = OtterGui.ImGuiUtil;
 
 namespace InventoryTools.Ui
 {
-    using Dalamud.Interface.Textures;
-
     public class ConfigurationWindow : GenericWindow, IMenuWindow
     {
         private readonly ConfigurationWizardService _configurationWizardService;

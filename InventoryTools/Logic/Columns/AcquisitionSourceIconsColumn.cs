@@ -2,12 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Interfaces;
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Models.ItemSources;
+using AllaganLib.GameSheets.Sheets.Caches;
+using AllaganLib.GameSheets.Sheets.ItemSources;
+using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Columns.Abstract;
@@ -17,42 +16,90 @@ using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Ui;
 using Microsoft.Extensions.Logging;
-using IItemSource = CriticalCommonLib.Models.ItemSources.IItemSource;
 
 namespace InventoryTools.Logic.Columns
 {
-    public class AcquisitionSourceIconsColumn : Column<List<IItemSource>?>
+    public class AcquisitionSourceIconsColumn : Column<List<ItemSource>?>
     {
         public AcquisitionSourceIconsColumn(ILogger<AcquisitionSourceIconsColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
 
-        public override List<IItemSource>? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
+        public override List<ItemSource>? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
             return searchResult.Item.Sources;
         }
 
-        public override List<MessageBase>? DoDraw(SearchResult searchResult, List<IItemSource>? currentValue, int rowIndex,
+        public override List<MessageBase>? DoDraw(SearchResult searchResult, List<ItemSource>? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
             ImGui.TableNextColumn();
             if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;
-            
+
             var messages = new List<MessageBase>();
             if (currentValue != null)
             {
-                var itemSources = columnConfiguration.FilterText != "" ? currentValue.Where(c => c.FormattedName.ToLower().PassesFilter(columnConfiguration.FilterText)) : currentValue;
+                var itemSources = columnConfiguration.FilterText != "" ? currentValue.Where(c => c.Name.ToLower().PassesFilter(columnConfiguration.FilterText)) : currentValue;
                 ImGuiService.WrapTableColumnElements("SourceIconContainer" + rowIndex,itemSources, filterConfiguration.TableHeight * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X, item =>
                 {
                     var sourceIcon = ImGuiService.GetIconTexture(item.Icon);
-                    if (item is ItemSource source && source.ItemId != null && source.HasItem && source.Item != null)
+                    if (item is ItemDungeonSource dungeonSource)
                     {
                         if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
                                 new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
                                 ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
                         {
-                            messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), source.ItemId.Value));
+                            messages.Add(new OpenUintWindowMessage(typeof(DutyWindow), dungeonSource.ContentFinderCondition.RowId));
+                        }
+                    }
+                    else if (item is ItemAirshipDropSource airshipSource)
+                    {
+                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
+                                ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
+                        {
+                            messages.Add(new OpenUintWindowMessage(typeof(AirshipWindow),
+                                airshipSource.AirshipExplorationPoint.RowId));
+                        }
+                    }
+                    else if (item is ItemSubmarineDropSource submarineSource)
+                    {
+                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
+                                ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
+                        {
+                            messages.Add(new OpenUintWindowMessage(typeof(SubmarineWindow),
+                                submarineSource.SubmarineExploration.RowId));
+                        }
+                    }
+                    else if (item is ItemVentureSource ventureSource)
+                    {
+                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
+                                ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
+                        {
+                            messages.Add(new OpenUintWindowMessage(typeof(RetainerTaskWindow),
+                                ventureSource.RetainerTaskRow.RowId));
+                        }
+                    }
+                    else if (item is ItemExplorationVentureSource explorationVentureSource)
+                    {
+                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
+                                ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
+                        {
+                            messages.Add(new OpenUintWindowMessage(typeof(RetainerTaskWindow),
+                                explorationVentureSource.RetainerTaskRow.RowId));
+                        }
+                    }
+                    if (item.CostItem != null)
+                    {
+                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
+                                ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
+                        {
+                            messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), item.CostItem.RowId));
                         }
 
                         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
@@ -62,58 +109,18 @@ namespace InventoryTools.Logic.Columns
                                                 ImGuiHoveredFlags.AnyWindow) &&
                             ImGui.IsMouseReleased(ImGuiMouseButton.Right))
                         {
-                            ImGui.OpenPopup("RightClick" + source.ItemId);
+                            ImGui.OpenPopup("RightClick" + item.CostItem.RowId);
                         }
 
-                        using (var popup = ImRaii.Popup("RightClick" + source.ItemId))
+                        using (var popup = ImRaii.Popup("RightClick" + item.CostItem.RowId))
                         {
                             if (popup.Success)
                             {
-                                if (source.Item != null)
+                                if (item.CostItem != null)
                                 {
-                                    ImGuiService.RightClickService.DrawRightClickPopup(source.Item, messages);
+                                    ImGuiService.RightClickService.DrawRightClickPopup(item.Item, messages);
                                 }
                             }
-                        }
-                    }
-                    else if (item is DutySource dutySource)
-                    {
-                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
-                                ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
-                        {
-                            messages.Add(new OpenUintWindowMessage(typeof(DutyWindow),
-                                dutySource.ContentFinderConditionId));
-                        }
-                    }
-                    else if (item is AirshipSource airshipSource)
-                    {
-                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
-                                ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
-                        {
-                            messages.Add(new OpenUintWindowMessage(typeof(AirshipWindow),
-                                airshipSource.AirshipExplorationPointExId));
-                        }
-                    }
-                    else if (item is SubmarineSource submarineSource)
-                    {
-                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
-                                ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
-                        {
-                            messages.Add(new OpenUintWindowMessage(typeof(SubmarineWindow),
-                                submarineSource.SubmarineExplorationExId));
-                        }
-                    }
-                    else if (item is VentureSource ventureSource)
-                    {
-                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
-                                ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
-                        {
-                            messages.Add(new OpenUintWindowMessage(typeof(RetainerTaskWindow),
-                                ventureSource.RetainerTask.RowId));
                         }
                     }
                     else
@@ -126,7 +133,7 @@ namespace InventoryTools.Logic.Columns
                         }
                     }
 
-                    ImGuiUtil.HoverTooltip(item.FormattedName);
+                    ImGuiUtil.HoverTooltip(item.Type.ToString() + item.Name);
 
                     return true;
                 });
@@ -144,7 +151,7 @@ namespace InventoryTools.Logic.Columns
         {
             return String.Join(", ", searchResult.Item.Sources.Select(c => c.Name));
         }
-        
+
         public override dynamic? JsonExport(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
             return String.Join(", ", searchResult.Item.Sources.Select(c => c.Name));
@@ -168,7 +175,7 @@ namespace InventoryTools.Logic.Columns
                     return false;
                 }
 
-                return currentValue.Any(c => c.FormattedName.ToLower().PassesFilter(columnConfiguration.FilterComparisonText));
+                return currentValue.Any(c => c.Name.ToLower().PassesFilterComparisonText(columnConfiguration.FilterComparisonText));
             });
         }
 
@@ -192,8 +199,8 @@ namespace InventoryTools.Logic.Columns
         {
             return DoDraw(searchResult, CurrentValue(columnConfiguration, searchResult), rowIndex, configuration, columnConfiguration);
         }
-        
+
         public override FilterType DefaultIn => Logic.FilterType.GameItemFilter | Logic.FilterType.CraftFilter;
-        
+
     }
 }

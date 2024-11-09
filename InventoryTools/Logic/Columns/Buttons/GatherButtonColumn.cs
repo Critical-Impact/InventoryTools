@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 
@@ -24,12 +24,12 @@ public class GatherButtonColumn : ButtonColumn
     {
         ImGui.TableNextColumn();
         if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;
-        
+
         if (ImGui.Button("Gather##" + rowIndex + "_" + columnIndex))
         {
             if (searchResult.Item.ObtainedFishing)
             {
-                _gameInterface.OpenFishingLog(searchResult.Item.RowId, searchResult.Item.IsSpearfishingItem());
+                _gameInterface.OpenFishingLog(searchResult.Item.RowId, searchResult.Item.ObtainedSpearFishing);
             }
             else
             {

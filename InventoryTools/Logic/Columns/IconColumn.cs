@@ -1,18 +1,12 @@
 using System.Collections.Generic;
 using System.Numerics;
-using CriticalCommonLib;
-using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Interfaces;
-using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
-using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Ui;
-using Lumina.Excel.GeneratedSheets;
+
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
@@ -29,7 +23,7 @@ namespace InventoryTools.Logic.Columns
             {
                 return (searchResult.InventoryItem.Icon, searchResult.InventoryItem.IsHQ);
             }
-            return (searchResult.Item.Icon, false);
+            return (searchResult.Item.Base.Icon, false);
         }
 
         public override IEnumerable<SearchResult> Filter(ColumnConfiguration columnConfiguration, IEnumerable<SearchResult> searchResults)
@@ -54,12 +48,12 @@ namespace InventoryTools.Logic.Columns
                 if (ImGui.ImageButton(ImGuiService.GetIconTexture(currentValue.Value.Item1, currentValue.Value.Item2).ImGuiHandle, new Vector2(filterConfiguration.TableHeight - 1, filterConfiguration.TableHeight - 1) * ImGui.GetIO().FontGlobalScale,new Vector2(0,0), new Vector2(1,1), 2))
                 {
                     ImGui.PopID();
-                    messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), searchResult.Item.ItemId));
+                    messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), searchResult.Item.RowId));
                 }
                 ImGui.PopID();
             }
             return messages;
-            
+
         }
 
 
@@ -69,7 +63,7 @@ namespace InventoryTools.Logic.Columns
         public override string HelpText { get; set; } = "Shows the icon of the item, pressing it will open the more information window for the item.";
         public override bool HasFilter { get; set; } = false;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
-        
+
         public override FilterType DefaultIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter | Logic.FilterType.GameItemFilter | Logic.FilterType.CraftFilter | Logic.FilterType.HistoryFilter;
     }
 }

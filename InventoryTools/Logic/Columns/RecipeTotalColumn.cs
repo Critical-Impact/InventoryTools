@@ -1,8 +1,4 @@
-﻿using System.Linq;
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
-using CriticalCommonLib.Sheets;
-using InventoryTools.Logic.Columns.Abstract;
+﻿using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 
@@ -10,19 +6,15 @@ namespace InventoryTools.Logic.Columns;
 
 public class RecipeTotalColumn : IntegerColumn
 {
-    private readonly ExcelCache _excelCache;
-
-    public RecipeTotalColumn(ILogger<RecipeTotalColumn> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
+    public RecipeTotalColumn(ILogger<RecipeTotalColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
     {
-        _excelCache = excelCache;
     }
     public override ColumnCategory ColumnCategory { get; } = ColumnCategory.Crafting;
     public override bool HasFilter { get; set; } = true;
     public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
     public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        searchResult.Item.RecipesAsRequirement.Count();
-        return _excelCache.ItemRecipeCount(searchResult.Item.RowId);
+        return searchResult.Item.RecipesAsRequirement.Count;
     }
 
     public override string Name { get; set; } = "Recipe Total Count";

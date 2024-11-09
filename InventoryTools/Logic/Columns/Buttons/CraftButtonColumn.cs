@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 

@@ -1,18 +1,25 @@
 using System.Collections.Generic;
 using System.Linq;
+using AllaganLib.GameSheets.Model;
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
-using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Services;
+using Lumina.Excel;
+using Lumina.Excel.Sheets;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
     public class EquippableByRaceFilter : UintMultipleChoiceFilter
     {
-        private readonly ExcelCache _excelCache;
+        private readonly ExcelSheet<Race> _raceSheet;
+
+        public EquippableByRaceFilter(ILogger<EquippableByRaceFilter> logger, ImGuiService imGuiService, ExcelSheet<Race> raceSheet) : base(logger, imGuiService)
+        {
+            _raceSheet = raceSheet;
+        }
         public override string Key { get; set; } = "EquippableByRace";
         public override string Name { get; set; } = "Equippable By Race";
         public override string HelpText { get; set; } = "Which races can this equipment be equipped by?";
@@ -26,7 +33,7 @@ namespace InventoryTools.Logic.Filters
             return FilterItem(configuration, item.Item) == true;
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemRow item)
         {
             var currentValue = this.CurrentValue(configuration);
             if (currentValue.Count == 0)
@@ -38,21 +45,9 @@ namespace InventoryTools.Logic.Filters
 
         public override Dictionary<uint, string> GetChoices(FilterConfiguration configuration)
         {
-            var choices = new Dictionary<uint, string>();
-            var sheet = _excelCache.GetRaceSheet();
-            foreach (var race in sheet)
-            {
-                choices.Add(race.RowId, race.Masculine);
-            }
-
-            return choices;
+            return _raceSheet.ToDictionary(race => race.RowId, race => race.Masculine.ExtractText());
         }
 
         public override bool HideAlreadyPicked { get; set; } = true;
-
-        public EquippableByRaceFilter(ILogger<EquippableByRaceFilter> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
-        {
-            _excelCache = excelCache;
-        }
     }
 }

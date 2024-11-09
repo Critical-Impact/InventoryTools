@@ -1,5 +1,7 @@
+using AllaganLib.GameSheets.Sheets.Rows;
+using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
+
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Services;
@@ -30,12 +32,12 @@ namespace InventoryTools.Logic.Filters
             return true;
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemRow item)
         {
             var currentValue = CurrentValue(configuration);
             if (!string.IsNullOrEmpty(currentValue))
             {
-                if (!item.PriceLow.PassesFilter(currentValue.ToLower()))
+                if (!item.Base.PriceLow.PassesFilter(currentValue.ToLower()))
                 {
                     return false;
                 }

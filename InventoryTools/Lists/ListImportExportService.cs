@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Services;
@@ -21,11 +21,11 @@ public enum TCExportMode
 
 public class ListImportExportService
 {
-    private readonly ExcelCache _excelCache;
+    private readonly ItemSheet _itemSheet;
 
-    public ListImportExportService(VersionInfo info ,ExcelCache excelCache)
+    public ListImportExportService(VersionInfo info , ItemSheet itemSheet)
     {
-        _excelCache = excelCache;
+        _itemSheet = itemSheet;
         CurrentVersion = (byte)info.ImportExportVersion;
     }
 
@@ -111,11 +111,11 @@ public class ListImportExportService
                         isHq = true;
                     }
 
-                    var itemEx = _excelCache.GetItemExSheet().FirstOrDefault(c => c!.NameString == item, null);
+                    var itemRow = _itemSheet.FirstOrDefault(c => c!.NameString == item, null);
 
-                    if (itemEx != null && (!onlyCraftables || _excelCache.CanCraftItem(itemEx.RowId)))
+                    if (itemRow != null && (!onlyCraftables || itemRow.CanBeCrafted))
                     {
-                        output.Add(((uint)(itemEx.RowId + (isHq ? 500000 : 0)), (uint)numberOfItem));
+                        output.Add(((uint)(itemRow.RowId + (isHq ? 500000 : 0)), (uint)numberOfItem));
                     }
                 }
 
@@ -157,9 +157,9 @@ public class ListImportExportService
         lines.Add("Items :");
         foreach (var curatedItem in curatedItems)
         {
-            var item = _excelCache.GetItemExSheet().GetRow(curatedItem.ItemId);
+            var item = _itemSheet.GetRowOrDefault(curatedItem.ItemId);
             if (item == null) continue;
-            lines.Add($"{curatedItem.Quantity}x {item.Name} {(curatedItem.ItemFlags == InventoryItem.ItemFlags.HighQuality ? " (HQ)" : "")}");
+            lines.Add($"{curatedItem.Quantity}x {item.Base.Name.ExtractText()} {(curatedItem.ItemFlags == InventoryItem.ItemFlags.HighQuality ? " (HQ)" : "")}");
         }
 
         return string.Join(Environment.NewLine, lines);
@@ -171,27 +171,27 @@ public class ListImportExportService
         lines.Add("Items :");
         foreach (var searchResult in searchResults)
         {
-            var item = _excelCache.GetItemExSheet().GetRow(searchResult.Item.RowId);
+            var item = _itemSheet.GetRowOrDefault(searchResult.Item.RowId);
             if (item == null) continue;
             if (searchResult.SortingResult != null && searchResult.InventoryItem != null)
             {
-                    lines.Add($"{searchResult.SortingResult.Quantity}x {item.Name} {(searchResult.SortingResult.InventoryItem.Flags == InventoryItem.ItemFlags.HighQuality ? " (HQ)" : "")}");
+                    lines.Add($"{searchResult.SortingResult.Quantity}x {item.Base.Name.ExtractText()} {(searchResult.SortingResult.InventoryItem.Flags == InventoryItem.ItemFlags.HighQuality ? " (HQ)" : "")}");
             }
             else if (searchResult.CraftItem != null)
             {
-                lines.Add($"{searchResult.CraftItem.QuantityRequired}x {item.Name} {(searchResult.CraftItem.Flags == InventoryItem.ItemFlags.HighQuality ? " (HQ)" : "")}");
+                lines.Add($"{searchResult.CraftItem.QuantityRequired}x {item.Base.Name.ExtractText()} {(searchResult.CraftItem.Flags == InventoryItem.ItemFlags.HighQuality ? " (HQ)" : "")}");
             }
             else if (searchResult.InventoryItem != null)
             {
-                lines.Add($"{searchResult.InventoryItem.Quantity}x {item.Name} {(searchResult.InventoryItem.Flags == InventoryItem.ItemFlags.HighQuality ? " (HQ)" : "")}");
+                lines.Add($"{searchResult.InventoryItem.Quantity}x {item.Base.Name.ExtractText()} {(searchResult.InventoryItem.Flags == InventoryItem.ItemFlags.HighQuality ? " (HQ)" : "")}");
             }
             else if (searchResult.CuratedItem != null)
             {
-                lines.Add($"{searchResult.CuratedItem.Quantity}x {item.Name} {(searchResult.CuratedItem.ItemFlags == InventoryItem.ItemFlags.HighQuality ? " (HQ)" : "")}");
+                lines.Add($"{searchResult.CuratedItem.Quantity}x {item.Base.Name.ExtractText()} {(searchResult.CuratedItem.ItemFlags == InventoryItem.ItemFlags.HighQuality ? " (HQ)" : "")}");
             }
             else
             {
-                lines.Add($"1x {item.Name}");
+                lines.Add($"1x {item.Base.Name.ExtractText()}");
             }
         }
 

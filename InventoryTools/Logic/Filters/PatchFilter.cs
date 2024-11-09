@@ -1,6 +1,6 @@
+using AllaganLib.GameSheets.Sheets.Rows;
+using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
-using InventoryTools.Extensions;
 using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -19,12 +19,12 @@ public class PatchFilter : StringFilter
         return FilterItem(configuration, item.Item);
     }
 
-    public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
+    public override bool? FilterItem(FilterConfiguration configuration, ItemRow item)
     {
         var currentValue = CurrentValue(configuration);
         if (!string.IsNullOrEmpty(currentValue))
         {
-            if (item.GetPatch().PassesFilter(currentValue.ToLower()))
+            if (item.Patch.PassesFilter(currentValue.ToLower()))
             {
                 return true;
             }

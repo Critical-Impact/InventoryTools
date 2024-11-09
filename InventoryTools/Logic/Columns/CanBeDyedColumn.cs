@@ -1,5 +1,3 @@
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -15,7 +13,7 @@ namespace InventoryTools.Logic.Columns
 
         public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return searchResult.Item.DyeCount != 0;
+            return searchResult.Item.Base.DyeCount != 0;
         }
 
 

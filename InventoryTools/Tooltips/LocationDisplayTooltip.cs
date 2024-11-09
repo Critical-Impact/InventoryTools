@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Services;
 using Dalamud.Game.Text.SeStringHandling;
@@ -17,7 +18,7 @@ public class LocationDisplayTooltip : BaseTooltip
 {
     private readonly IListService _listService;
 
-    public LocationDisplayTooltip(ILogger<LocationDisplayTooltip> logger,ExcelCache excelCache, InventoryToolsConfiguration configuration, IGameGui gameGui, IListService listService) : base(logger, excelCache, configuration, gameGui)
+    public LocationDisplayTooltip(ILogger<LocationDisplayTooltip> logger, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, IListService listService) : base(logger, itemSheet, configuration, gameGui)
     {
         _listService = listService;
     }
@@ -30,7 +31,7 @@ public class LocationDisplayTooltip : BaseTooltip
         var item = HoverItem;
         if (item != null) {
             var textLines = new List<string>();
-            
+
             TooltipService.ItemTooltipField itemTooltipField;
             var tooltipVisibility = GetTooltipVisibility((int**)numberArrayData);
             if (tooltipVisibility.HasFlag(ItemTooltipFieldVisibility.Description))
@@ -49,7 +50,7 @@ public class LocationDisplayTooltip : BaseTooltip
             {
                 return;
             }
-            
+
             var seStr = GetTooltipString(stringArrayData, itemTooltipField);
 
             if (seStr != null && seStr.Payloads.Count > 0)
@@ -63,7 +64,7 @@ public class LocationDisplayTooltip : BaseTooltip
                         {
                             var hoverItemIsHq = HoverItemIsHq;
                             var hoverItemId = HoverItemId;
-                            var craftItem = filterConfiguration.CraftList.GetItemById(hoverItemId, hoverItemIsHq, HoverItem?.CanBeHq ?? false);
+                            var craftItem = filterConfiguration.CraftList.GetItemById(hoverItemId, hoverItemIsHq, HoverItem?.Base.CanBeHq ?? false);
                             if (craftItem != null)
                             {
                                 var filterResult = filterConfiguration.SearchResults;

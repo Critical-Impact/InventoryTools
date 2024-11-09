@@ -1,13 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
-using Dalamud.Plugin.Services;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Services;
-using Lumina.Excel.GeneratedSheets;
+
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters;
@@ -40,24 +37,24 @@ public class OutdatedGearFilter : BooleanFilter
         return FilterItem(configuration, item.Item);
     }
 
-    public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
+    public override bool? FilterItem(FilterConfiguration configuration, ItemRow item)
     {
         var currentValue = this.CurrentValue(configuration);
         if (currentValue == null)
         {
             return null;
         }
-        
+
         var isOutdated = false;
         var jobClassLevels = GetClassJobLevels();
-        
-        if (item.ClassJobCategoryEx.Row != 0 && item.ClassJobCategoryEx.Value != null)
+
+        if (item.ClassJobCategory != null)
         {
             int? lowestJobLevel = null;
-            
-            foreach (var job in item.ClassJobCategoryEx.Value.ApplicableClasses)
+
+            foreach (var job in item.ClassJobCategory.ClassJobs)
             {
-                if (jobClassLevels.TryGetValue(job.Value.Row, out var jobLevel))
+                if (jobClassLevels.TryGetValue(job.RowId, out var jobLevel))
                 {
                     if (lowestJobLevel == null || lowestJobLevel > jobLevel)
                     {
@@ -66,7 +63,7 @@ public class OutdatedGearFilter : BooleanFilter
                 }
             }
 
-            if (lowestJobLevel != null && lowestJobLevel > item.LevelEquip)
+            if (lowestJobLevel != null && lowestJobLevel > item.Base.LevelEquip)
             {
                 isOutdated = true;
             }

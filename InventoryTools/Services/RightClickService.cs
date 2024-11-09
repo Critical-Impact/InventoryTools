@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using CriticalCommonLib.Crafting;
+using AllaganLib.GameSheets.Sheets.Caches;
+using AllaganLib.GameSheets.Sheets.Rows;
+using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Extensions;
@@ -12,14 +14,12 @@ using InventoryTools.Logic;
 using InventoryTools.Mediator;
 using InventoryTools.Services.Interfaces;
 using InventoryTools.Ui;
-using Lumina.Excel.GeneratedSheets2;
 using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 
 namespace InventoryTools.Services;
 
 public class RightClickService
 {
-    private readonly ExcelCache _excelCache;
     private readonly IListService _listService;
     private readonly IChatUtilities _chatUtilities;
     private readonly TryOn _tryOn;
@@ -28,9 +28,8 @@ public class RightClickService
     private readonly InventoryToolsConfiguration _configuration;
     private readonly IClipboardService _clipboardService;
 
-    public RightClickService(ExcelCache excelCache, IListService listService, IChatUtilities chatUtilities, TryOn tryOn, IGameInterface gameInterface, ICommandManager commandManager, InventoryToolsConfiguration configuration, IClipboardService clipboardService)
+    public RightClickService(IListService listService, IChatUtilities chatUtilities, TryOn tryOn, IGameInterface gameInterface, ICommandManager commandManager, InventoryToolsConfiguration configuration, IClipboardService clipboardService)
     {
-        _excelCache = excelCache;
         _listService = listService;
         _chatUtilities = chatUtilities;
         _tryOn = tryOn;
@@ -44,13 +43,13 @@ public class RightClickService
     {
         return DrawRightClickPopup(searchResult, new List<MessageBase>(), filterConfiguration);
     }
-    public List<MessageBase> DrawRightClickPopup(ItemEx itemEx, FilterConfiguration? filterConfiguration = null)
+    public List<MessageBase> DrawRightClickPopup(ItemRow itemRow, FilterConfiguration? filterConfiguration = null)
     {
-        return DrawRightClickPopup(new SearchResult(itemEx), new List<MessageBase>(), filterConfiguration);
+        return DrawRightClickPopup(new SearchResult(itemRow), new List<MessageBase>(), filterConfiguration);
     }
-    public List<MessageBase> DrawRightClickPopup(ItemEx itemEx, List<MessageBase> messages, FilterConfiguration? filterConfiguration = null)
+    public List<MessageBase> DrawRightClickPopup(ItemRow itemRow, List<MessageBase> messages, FilterConfiguration? filterConfiguration = null)
     {
-        return DrawRightClickPopup(new SearchResult(itemEx), messages, filterConfiguration);
+        return DrawRightClickPopup(new SearchResult(itemRow), messages, filterConfiguration);
     }
     public List<MessageBase> DrawRightClickPopup(CriticalCommonLib.Models.InventoryItem inventoryItem, FilterConfiguration? filterConfiguration = null)
     {
@@ -80,31 +79,32 @@ public class RightClickService
                 messages.Add(new FocusListMessage(typeof(FiltersWindow), filter));
                 filter.NeedsRefresh = true;
             }
-            if (searchResult.Item.CanBeCrafted && _excelCache.IsCompanyCraft(searchResult.Item.RowId))
-            {
-                if (searchResult.Item.CompanyCraftSequenceEx != null)
-                {
-                    for (var index = 0u; index < searchResult.Item.CompanyCraftSequenceEx.CompanyCraftPart.Length; index++)
-                    {
-                        var part = searchResult.Item.CompanyCraftSequenceEx.CompanyCraftPart[index];
-                        if (part.Row == 0) continue;
-                        if (firstItem)
-                        {
-                            ImGui.Separator();
-                            firstItem = false;
-                        }
-
-                        if (ImGui.Selectable("Add " + (part.Value?.CompanyCraftType.Value?.Name ?? "Unknown") + " to curated list - " + filter.Name))
-                        {
-                            filter.CraftList.AddCraftItem(searchResult.Item.RowId);
-                            messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                            messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
-                            filter.NeedsRefresh = true;
-                        }
-                    }
-                }
-                ImGui.Separator();
-            }
+            //TODO: Check this
+            // if (searchResult.Item.CanBeCrafted && searchResult.Item.HasSourcesByType(ItemInfoType.FreeCompanyCraftRecipe))
+            // {
+            //     if (searchResult.Item.CompanyCraftSequence != null)
+            //     {
+            //         for (var index = 0u; index < searchResult.Item.CompanyCraftSequence.CompanyCraftParts.Length; index++)
+            //         {
+            //             var part = searchResult.Item.CompanyCraftSequence.CompanyCraftParts[index];
+            //             if (part.RowId == 0) continue;
+            //             if (firstItem)
+            //             {
+            //                 ImGui.Separator();
+            //                 firstItem = false;
+            //             }
+            //
+            //             if (ImGui.Selectable("Add " + (part.CompanyCraftProcess..Name ?? "Unknown") + " to curated list - " + filter.Name))
+            //             {
+            //                 filter.CraftList.AddCraftItem(searchResult.Item.RowId);
+            //                 messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
+            //                 messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
+            //                 filter.NeedsRefresh = true;
+            //             }
+            //         }
+            //     }
+            //     ImGui.Separator();
+            // }
         }
 
         if (ImGui.Selectable("Add to new curated list"))
@@ -128,7 +128,7 @@ public class RightClickService
                 c.FilterType == Logic.FilterType.CraftFilter && !c.CraftListDefault).ToArray();
         foreach (var filter in craftFilters)
         {
-            if (!_excelCache.IsCompanyCraft(searchResult.Item.RowId))
+            if (!searchResult.Item.HasSourcesByType(ItemInfoType.FreeCompanyCraftRecipe))
             {
                 if (firstItem)
                 {
@@ -143,34 +143,35 @@ public class RightClickService
                     filter.NeedsRefresh = true;
                 }
             }
-            if (_excelCache.IsCompanyCraft(searchResult.Item.RowId))
-            {
-                if (searchResult.Item.CompanyCraftSequenceEx != null)
-                {
-                    for (var index = 0u; index < searchResult.Item.CompanyCraftSequenceEx.CompanyCraftPart.Length; index++)
-                    {
-                        var part = searchResult.Item.CompanyCraftSequenceEx.CompanyCraftPart[index];
-                        if (part.Row == 0) continue;
-                        if (firstItem)
-                        {
-                            ImGui.Separator();
-                            firstItem = false;
-                        }
-
-                        if (ImGui.Selectable("Add " + (part.Value?.CompanyCraftType.Value?.Name ?? "Unknown") + " to craft list - " + filter.Name))
-                        {
-                            filter.CraftList.AddCraftItem(searchResult.Item.RowId);
-                            messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                            messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
-                            filter.NeedsRefresh = true;
-                        }
-                    }
-                }
-                ImGui.Separator();
-            }
+            //TODO: Check me
+            // if (searchResult.Item.HasSourcesByType(ItemInfoType.FreeCompanyCraftRecipe))
+            // {
+            //     if (searchResult.Item.CompanyCraftSequence != null)
+            //     {
+            //         for (var index = 0u; index < searchResult.Item.CompanyCraftSequence.CompanyCraftPart.Length; index++)
+            //         {
+            //             var part = searchResult.Item.CompanyCraftSequence.CompanyCraftPart[index];
+            //             if (part.Row == 0) continue;
+            //             if (firstItem)
+            //             {
+            //                 ImGui.Separator();
+            //                 firstItem = false;
+            //             }
+            //
+            //             if (ImGui.Selectable("Add " + (part.Value?.CompanyCraftType.Value?.Name ?? "Unknown") + " to craft list - " + filter.Name))
+            //             {
+            //                 filter.CraftList.AddCraftItem(searchResult.Item.RowId);
+            //                 messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
+            //                 messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
+            //                 filter.NeedsRefresh = true;
+            //             }
+            //         }
+            //     }
+            //     ImGui.Separator();
+            // }
         }
 
-        if (!_excelCache.IsCompanyCraft(searchResult.Item.RowId))
+        if (!searchResult.Item.HasSourcesByType(ItemInfoType.FreeCompanyCraftRecipe))
         {
             if (ImGui.Selectable("Add to new craft list"))
             {
@@ -190,36 +191,37 @@ public class RightClickService
             }
         }
 
-        if (_excelCache.IsCompanyCraft(searchResult.Item.RowId))
-        {
-            if (searchResult.Item.CompanyCraftSequenceEx != null)
-            {
-                for (var index = 0u; index < searchResult.Item.CompanyCraftSequenceEx.CompanyCraftPart.Length; index++)
-                {
-                    var part = searchResult.Item.CompanyCraftSequenceEx.CompanyCraftPart[index];
-                    if (part.Row == 0) continue;
-                    if (ImGui.Selectable("Add " + (part.Value?.CompanyCraftType.Value?.Name ?? "Unknown") + " to new craft list"))
-                    {
-                        var newPhase = index;
-                         var filter = _listService.AddNewCraftList();
-                         filter.CraftList.AddCraftItem(searchResult.Item.RowId,1, InventoryItem.ItemFlags.None, newPhase);
-                         messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                         messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
-                         filter.NeedsRefresh = true;
-                    }
-                    if (ImGui.Selectable("Add " + (part.Value?.CompanyCraftType.Value?.Name ?? "Unknown") + " to new craft list (ephemeral)"))
-                    {
-                        var newPhase = index;
-                        var filter = _listService.AddNewCraftList(null,true);
-                        filter.IsEphemeralCraftList = true;
-                        filter.CraftList.AddCraftItem(searchResult.Item.RowId,1, InventoryItem.ItemFlags.None, newPhase);
-                        messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                        messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
-                        filter.NeedsRefresh = true;
-                    }
-                }
-            }
-        }
+        //TODO: Check this
+        // if (_excelCache.IsCompanyCraft(searchResult.Item.RowId))
+        // {
+        //     if (searchResult.Item.CompanyCraftSequence != null)
+        //     {
+        //         for (var index = 0u; index < searchResult.Item.CompanyCraftSequence.CompanyCraftPart.Length; index++)
+        //         {
+        //             var part = searchResult.Item.CompanyCraftSequence.CompanyCraftPart[index];
+        //             if (part.Row == 0) continue;
+        //             if (ImGui.Selectable("Add " + (part.Value?.CompanyCraftType.Value?.Name ?? "Unknown") + " to new craft list"))
+        //             {
+        //                 var newPhase = index;
+        //                  var filter = _listService.AddNewCraftList();
+        //                  filter.CraftList.AddCraftItem(searchResult.Item.RowId,1, InventoryItem.ItemFlags.None, newPhase);
+        //                  messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
+        //                  messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
+        //                  filter.NeedsRefresh = true;
+        //             }
+        //             if (ImGui.Selectable("Add " + (part.Value?.CompanyCraftType.Value?.Name ?? "Unknown") + " to new craft list (ephemeral)"))
+        //             {
+        //                 var newPhase = index;
+        //                 var filter = _listService.AddNewCraftList(null,true);
+        //                 filter.IsEphemeralCraftList = true;
+        //                 filter.CraftList.AddCraftItem(searchResult.Item.RowId,1, InventoryItem.ItemFlags.None, newPhase);
+        //                 messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
+        //                 messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
+        //                 filter.NeedsRefresh = true;
+        //             }
+        //         }
+        //     }
+        // }
 
         if (filterConfiguration != null && searchResult.CraftItem != null)
         {
@@ -233,30 +235,29 @@ public class RightClickService
 
                 if (ImGui.Selectable("Remove from craft list"))
                 {
-                    filterConfiguration.CraftList.RemoveCraftItem(searchResult.Item.ItemId, searchResult.CraftItem.Flags);
+                    filterConfiguration.CraftList.RemoveCraftItem(searchResult.Item.RowId, searchResult.CraftItem.Flags);
                     filterConfiguration.NeedsRefresh = true;
                 }
             }
 
-            if (searchResult.Item.CanBeCrafted && searchResult.CraftItem.IsOutputItem &&
-                _excelCache.IsCompanyCraft(searchResult.Item.ItemId))
+            if (searchResult.Item.CanBeCrafted && searchResult.CraftItem.IsOutputItem && searchResult.Item.HasSourcesByType(ItemInfoType.FreeCompanyCraftRecipe))
             {
-                if (searchResult.Item.CompanyCraftSequenceEx != null && searchResult.Item.CompanyCraftSequenceEx.ActiveCompanyCraftParts.Length > 1)
+                if (searchResult.Item.CompanyCraftSequence != null && searchResult.Item.CompanyCraftSequence.CompanyCraftParts.Length > 1)
                 {
                     if (searchResult.CraftItem.Phase != null && ImGui.Selectable("Switch to All Phases"))
                     {
-                        filterConfiguration.CraftList.SetCraftPhase(searchResult.Item.ItemId, null, searchResult.CraftItem.Phase);
+                        filterConfiguration.CraftList.SetCraftPhase(searchResult.Item.RowId, null, searchResult.CraftItem.Phase);
                         filterConfiguration.NeedsRefresh = true;
                     }
 
                     for (var index = 0u;
-                         index < searchResult.Item.CompanyCraftSequenceEx.ActiveCompanyCraftParts
+                         index < searchResult.Item.CompanyCraftSequence.CompanyCraftParts
                              .Length;
                          index++)
                     {
                         var part =
-                            searchResult.Item.CompanyCraftSequenceEx.ActiveCompanyCraftParts[index];
-                        if (part.Row == 0) continue;
+                            searchResult.Item.CompanyCraftSequence.CompanyCraftParts[index];
+                        if (part.RowId == 0) continue;
                         if (searchResult.CraftItem.Phase != index)
                         {
                             if (firstItem)
@@ -265,10 +266,9 @@ public class RightClickService
                                 firstItem = false;
                             }
 
-                            if (ImGui.Selectable("Switch to " + ((part.Value?.CompanyCraftType.Value?.Name ?? "") +
-                                                                 " (Phase " + (index + 1) + ")")))
+                            if (ImGui.Selectable("Switch to " + ((part.Base.CompanyCraftType.ValueNullable?.Name.ExtractText() ?? "") + " (Phase " + (index + 1) + ")")))
                             {
-                                filterConfiguration.CraftList.SetCraftPhase(searchResult.Item.ItemId, index,
+                                filterConfiguration.CraftList.SetCraftPhase(searchResult.Item.RowId, index,
                                     searchResult.CraftItem.Phase);
                                 filterConfiguration.NeedsRefresh = true;
                             }
@@ -279,8 +279,7 @@ public class RightClickService
 
             if (!searchResult.CraftItem.IsOutputItem)
             {
-                if (searchResult.Item.CanBeCrafted &&
-                    !_excelCache.IsCompanyCraft(searchResult.Item.RowId))
+                if (searchResult.Item.CanBeCrafted && !searchResult.Item.HasSourcesByType(ItemInfoType.FreeCompanyCraftRecipe))
                 {
                     foreach (var filter in craftFilters)
                     {
@@ -382,10 +381,10 @@ public class RightClickService
         }
         if (ImGui.Selectable("Search"))
         {
-            messages.Add(new ItemSearchRequestedMessage(searchResult.Item.ItemId, InventoryItem.ItemFlags.None));
+            messages.Add(new ItemSearchRequestedMessage(searchResult.Item.RowId, InventoryItem.ItemFlags.None));
         }
 
-        if (searchResult.Item.CanOpenCraftLog && ImGui.Selectable("Open Crafting Log"))
+        if (searchResult.Item.HasSourcesByType(ItemInfoType.CraftRecipe) && ImGui.Selectable("Open Crafting Log"))
         {
             if (recipeId != null)
             {
@@ -405,17 +404,17 @@ public class RightClickService
             }
         }
 
-        if (searchResult.Item.CanOpenGatheringLog && ImGui.Selectable("Open Gathering Log"))
+        if (searchResult.Item.HasSourcesByCategory(ItemInfoCategory.Gathering) && ImGui.Selectable("Open Gathering Log"))
         {
             _gameInterface.OpenGatheringLog(searchResult.Item.RowId);
         }
 
         if (searchResult.Item.ObtainedFishing && ImGui.Selectable("Open Fishing Log"))
         {
-            _gameInterface.OpenFishingLog(searchResult.Item.RowId, searchResult.Item.IsSpearfishingItem());
+            _gameInterface.OpenFishingLog(searchResult.Item.RowId, searchResult.Item.ObtainedSpearFishing);
         }
 
-        if (searchResult.Item.CanOpenGatheringLog && ImGui.Selectable("Gather with Gatherbuddy"))
+        if (searchResult.Item.HasSourcesByCategory(ItemInfoCategory.Gathering) && ImGui.Selectable("Gather with Gatherbuddy"))
         {
             _commandManager.ProcessCommand("/gather " + searchResult.Item.NameString);
         }

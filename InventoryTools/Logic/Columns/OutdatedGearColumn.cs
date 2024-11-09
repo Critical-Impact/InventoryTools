@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -24,7 +22,7 @@ public class OutdatedGearColumn : CheckboxColumn
     public override ColumnCategory ColumnCategory { get; } = ColumnCategory.Tools;
     public override bool HasFilter { get; set; } = true;
     public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Boolean;
-    
+
     private Dictionary<uint, short> GetClassJobLevels()
     {
         if (_jobClassLevels == null)
@@ -41,14 +39,14 @@ public class OutdatedGearColumn : CheckboxColumn
         var item = searchResult.Item;
         var isOutdated = false;
         var jobClassLevels = GetClassJobLevels();
-        
-        if (item.ClassJobCategoryEx.Row != 0 && item.ClassJobCategoryEx.Value != null)
+
+        if (item.ClassJobCategory != null)
         {
             int? lowestJobLevel = null;
-            
-            foreach (var job in item.ClassJobCategoryEx.Value.ApplicableClasses)
+
+            foreach (var job in item.ClassJobCategory.ClassJobIds)
             {
-                if (jobClassLevels.TryGetValue(job.Value.Row, out var jobLevel))
+                if (jobClassLevels.TryGetValue(job, out var jobLevel))
                 {
                     if (lowestJobLevel == null || lowestJobLevel > jobLevel)
                     {
@@ -57,7 +55,7 @@ public class OutdatedGearColumn : CheckboxColumn
                 }
             }
 
-            if (lowestJobLevel != null && lowestJobLevel > item.LevelEquip)
+            if (lowestJobLevel != null && lowestJobLevel > item.Base.LevelEquip)
             {
                 isOutdated = true;
             }

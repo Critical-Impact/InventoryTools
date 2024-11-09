@@ -1,5 +1,6 @@
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
+
 using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -20,10 +21,10 @@ namespace InventoryTools.Logic.Filters
             return FilterItem(configuration, item.Item);
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemRow item)
         {
             var currentValue = CurrentValue(configuration);
-            var canByDyed = item.DyeCount != 0;
+            var canByDyed = item.Base.DyeCount != 0;
             return currentValue == null || currentValue.Value && canByDyed || !currentValue.Value && !canByDyed;
         }
 

@@ -1,10 +1,10 @@
 using System.Collections.Generic;
+using AllaganLib.GameSheets.Sheets;
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -13,11 +13,11 @@ namespace InventoryTools.Logic.Columns;
 
 public class CraftZoneColumn : TextColumn
 {
-    private readonly ExcelCache _excelCache;
+    private readonly MapSheet _mapSheet;
 
-    public CraftZoneColumn(ILogger<CraftZoneColumn> logger, ExcelCache excelCache, ImGuiService imGuiService) : base(logger, imGuiService)
+    public CraftZoneColumn(ILogger<CraftZoneColumn> logger, ImGuiService imGuiService, MapSheet mapSheet) : base(logger, imGuiService)
     {
-        _excelCache = excelCache;
+        _mapSheet = mapSheet;
     }
 
     public override string Name { get; set; } = "Zone";
@@ -47,9 +47,9 @@ public class CraftZoneColumn : TextColumn
 
         var item = searchResult.CraftItem;
 
-        var mapIds = item.Item.GetSourceMaps(item.IngredientPreference.Type, item.IngredientPreference.LinkedItemId)
+        var mapIds = item.Item.GetSourceMaps(item.IngredientPreference.Type.ToItemInfoTypes(), item.IngredientPreference.LinkedItemId)
             .OrderBySequence(configuration.CraftList.ZonePreferenceOrder, location => location);
-        MapEx? selectedLocation = null;
+        MapRow? selectedLocation = null;
         uint? mapPreference;
         if (item.IngredientPreference.Type == IngredientPreferenceType.Buy)
         {
@@ -90,12 +90,12 @@ public class CraftZoneColumn : TextColumn
         {
             if (selectedLocation == null)
             {
-                selectedLocation = _excelCache.GetMapSheet().GetRow(mapId);
+                selectedLocation = _mapSheet.GetRowOrDefault(mapId);
             }
 
             if (mapPreference != null && mapPreference == mapId)
             {
-                selectedLocation = _excelCache.GetMapSheet().GetRow(mapId);
+                selectedLocation = _mapSheet.GetRow(mapId);
                 break;
             }
         }

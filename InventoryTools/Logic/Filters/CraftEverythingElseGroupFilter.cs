@@ -1,7 +1,8 @@
 using System.Collections.Generic;
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
+
 using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -21,7 +22,7 @@ public class CraftEverythingElseGroupFilter : ChoiceFilter<EverythingElseGroupSe
         return null;
     }
 
-    public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
+    public override bool? FilterItem(FilterConfiguration configuration, ItemRow item)
     {
         return null;
     }

@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AllaganLib.GameSheets.Model;
+using AllaganLib.GameSheets.Sheets.Caches;
+using AllaganLib.GameSheets.Sheets.ItemSources;
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Extensions;
-using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
@@ -39,11 +42,12 @@ public class CraftBuyColumn : ButtonColumn
 
         return messages;
     }
-    
-    List<(IShop shop, ENpc? npc, ILocation? location)> GetLocations(ItemEx item)
+
+    List<(IShop shop, ENpcBaseRow? npc, ILocation? location)> GetLocations(ItemRow item)
     {
-        var vendors = new List<(IShop shop, ENpc? npc, ILocation? location)>();
-        foreach (var vendor in item.Vendors)
+        var vendors = new List<(IShop shop, ENpcBaseRow? npc, ILocation? location)>();
+        var shops = item.GetSourcesByCategory<ItemShopSource>(ItemInfoCategory.Shop).Select(c => c.Shop);
+        foreach (var vendor in shops)
         {
             if (vendor.Name == "")
             {
@@ -75,8 +79,8 @@ public class CraftBuyColumn : ButtonColumn
         vendors = vendors.OrderByDescending(c => c.npc != null && c.location != null).ToList();
         return vendors;
     }
-    
-    void DrawSupplierRow(ItemEx item,(IShop shop, ENpc? npc, ILocation? location) tuple, List<MessageBase> messages)
+
+    void DrawSupplierRow(ItemRow item,(IShop shop, ENpcBaseRow? npc, ILocation? location) tuple, List<MessageBase> messages)
     {
         ImGui.TableNextColumn();
         if (ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled))
@@ -89,7 +93,7 @@ public class CraftBuyColumn : ButtonColumn
             ImGui.TableNextColumn();
             if (ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled))
             {
-                ImGui.TextWrapped(tuple.npc?.Resident?.Singular ?? "");
+                ImGui.TextWrapped(tuple.npc?.Resident.ValueNullable?.Singular.ExtractText() ?? "");
             }
         }
         if (tuple.npc != null && tuple.location != null)
@@ -104,13 +108,13 @@ public class CraftBuyColumn : ButtonColumn
             ImGui.TableNextColumn();
             if (ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled))
             {
-                if (ImGui.Button("Teleport##" + tuple.shop.RowId + "_" + tuple.npc.Key + "_" +
-                                 tuple.location.MapEx.Row))
+                if (ImGui.Button("Teleport##" + tuple.shop.RowId + "_" + tuple.npc.RowId + "_" +
+                                 tuple.location.Map.RowId))
                 {
                     var nearestAetheryte = tuple.location.GetNearestAetheryte();
                     if (nearestAetheryte != null)
                     {
-                        messages.Add(new RequestTeleportMessage(nearestAetheryte.RowId));
+                        messages.Add(new RequestTeleportMessage(nearestAetheryte.Value.RowId));
                     }
 
                     _chatUtilities.PrintFullMapLink(tuple.location, item.NameString);
@@ -124,21 +128,22 @@ public class CraftBuyColumn : ButtonColumn
             ImGui.TableNextColumn();
         }
     }
-    
-    private bool DrawVendorButton(ItemEx item, int rowIndex, List<MessageBase> messages)
+
+    private bool DrawVendorButton(ItemRow item, int rowIndex, List<MessageBase> messages)
     {
-        if (item.Item.Vendors.Any())
+        var shops = item.GetSourcesByCategory<ItemShopSource>(ItemInfoCategory.Shop).Select(c => c.Shop);
+        if (shops.Any())
         {
             ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 0.0f);
             if (ImGui.Button("Buy##Buy" + rowIndex))
             {
-                var vendor = GetLocations(item.Item).FirstOrDefault();
+                var vendor = GetLocations(item).FirstOrDefault();
                 if (vendor.location != null)
                 {
                     var nearestAetheryte = vendor.location.GetNearestAetheryte();
                     if (nearestAetheryte != null)
                     {
-                        messages.Add(new RequestTeleportMessage(nearestAetheryte.RowId));
+                        messages.Add(new RequestTeleportMessage(nearestAetheryte.Value.RowId));
                     }
 
                     _chatUtilities.PrintFullMapLink(vendor.location, vendor.location.ToString());
@@ -164,9 +169,9 @@ public class CraftBuyColumn : ButtonColumn
                     {
                         if (scroller.Success)
                         {
-                            ImGuiTable.DrawTable("VendorsText", GetLocations(item.Item), tuple =>
+                            ImGuiTable.DrawTable("VendorsText", GetLocations(item), tuple =>
                                 {
-                                    DrawSupplierRow(item.Item, tuple, messages);
+                                    DrawSupplierRow(item, tuple, messages);
                                 }, ImGuiTableFlags.None,
                                 new[] { "Shop Name", "NPC", "Location", "" });
                         }

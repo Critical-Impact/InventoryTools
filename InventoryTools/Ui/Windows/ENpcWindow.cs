@@ -1,17 +1,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using AllaganLib.GameSheets.Model;
+using AllaganLib.GameSheets.Sheets;
+using AllaganLib.GameSheets.Sheets.Caches;
+using AllaganLib.GameSheets.Sheets.Rows;
+using AllaganLib.Shared.Extensions;
 using CriticalCommonLib;
-using CriticalCommonLib.Interfaces;
-using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
-using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using OtterGui;
 
@@ -19,24 +21,37 @@ namespace InventoryTools.Ui
 {
     class ENpcWindow : UintWindow
     {
-        private readonly ExcelCache _excelCache;
         private readonly IClipboardService _clipboardService;
+        private readonly ItemInfoCache _itemInfoCache;
+        private readonly ENpcResidentSheet _eNpcResidentSheet;
 
-        public ENpcWindow(ILogger<ENpcWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ExcelCache excelCache, IClipboardService clipboardService, string name = "NPC Window") : base(logger, mediator, imGuiService, configuration, name)
+        public ENpcWindow(ILogger<ENpcWindow> logger,
+            MediatorService mediator,
+            ImGuiService imGuiService,
+            InventoryToolsConfiguration configuration,
+            IClipboardService clipboardService,
+            ItemInfoCache itemInfoCache,
+            ENpcResidentSheet eNpcResidentSheet,
+            string name = "NPC Window") : base(logger,
+            mediator,
+            imGuiService,
+            configuration,
+            name)
         {
-            _excelCache = excelCache;
             _clipboardService = clipboardService;
+            _itemInfoCache = itemInfoCache;
+            _eNpcResidentSheet = eNpcResidentSheet;
         }
         public override void Initialize(uint eNpcId)
         {
             base.Initialize(eNpcId);
             Flags = ImGuiWindowFlags.NoSavedSettings;
             _eNpcId = eNpcId;
-            if (eNpc != null)
+            if (ENpcResidentRow != null)
             {
                 Key = "enpc_" + eNpcId;
-                WindowName = "Allagan Tools - " + eNpc.Resident!.FormattedSingular + "##" + eNpcId;
-                Shops = _excelCache.ENpcCollection?.FindShops(eNpc)?.Select(c => _excelCache.ShopCollection?.Get(c)).Where(c => c != null).Select(c => c!).ToList();
+                WindowName = "Allagan Tools - " + ENpcResidentRow.Base.Singular.ExtractText() + "##" + eNpcId;
+                Shops = _itemInfoCache.GetNpcShops(eNpcId)?.ToList() ?? [];
             }
             else
             {
@@ -47,7 +62,7 @@ namespace InventoryTools.Ui
 
         public override bool SaveState => false;
         private uint _eNpcId;
-        private ENpc? eNpc => _excelCache.ENpcCollection?.Get(_eNpcId);
+        private ENpcResidentRow? ENpcResidentRow => _eNpcResidentSheet.GetRowOrDefault(_eNpcId);
         public List<IShop>? Shops;
         public override string GenericName => "Npcs";
         public override bool DestroyOnClose => true;
@@ -58,7 +73,7 @@ namespace InventoryTools.Ui
                 CurrentPosition = ImGui.GetWindowPos();
             }
 
-            if (eNpc == null)
+            if (ENpcResidentRow == null)
             {
                 ImGui.TextUnformatted("eNpc with the ID " + _eNpcId + " could not be found.");
             }
@@ -99,41 +114,38 @@ namespace InventoryTools.Ui
                             {
                                 foreach (var item in listing.Rewards)
                                 {
-                                    if (item.ItemEx.Value != null)
+                                    var useIcon = ImGuiService.GetIconTexture(item.Item.Base.Icon);
+                                    if (ImGui.ImageButton(useIcon.ImGuiHandle,
+                                            new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale,
+                                            new(0, 0), new(1, 1),
+                                            0))
                                     {
-                                        var useIcon = ImGuiService.GetIconTexture(item.ItemEx.Value.Icon);
-                                        if (ImGui.ImageButton(useIcon.ImGuiHandle,
-                                                new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale,
-                                                new(0, 0), new(1, 1),
-                                                0))
-                                        {
-                                            MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), item.ItemEx.Row));
-                                        }
+                                        MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), item.Item.RowId));
+                                    }
 
-                                        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
-                                                                ImGuiHoveredFlags.AllowWhenOverlapped &
-                                                                ImGuiHoveredFlags.AllowWhenBlockedByPopup &
-                                                                ImGuiHoveredFlags
-                                                                    .AllowWhenBlockedByActiveItem &
-                                                                ImGuiHoveredFlags.AnyWindow) &&
-                                            ImGui.IsMouseReleased(ImGuiMouseButton.Right))
-                                        {
-                                            ImGui.OpenPopup("RightClickUse" + item.ItemEx.Row);
-                                        }
+                                    if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
+                                                            ImGuiHoveredFlags.AllowWhenOverlapped &
+                                                            ImGuiHoveredFlags.AllowWhenBlockedByPopup &
+                                                            ImGuiHoveredFlags
+                                                                .AllowWhenBlockedByActiveItem &
+                                                            ImGuiHoveredFlags.AnyWindow) &&
+                                        ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                                    {
+                                        ImGui.OpenPopup("RightClickUse" + item.Item.RowId);
+                                    }
 
-                                        if (ImGui.BeginPopup("RightClickUse" + item.ItemEx.Row))
-                                        {
-                                            MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(item.ItemEx.Value));
-                                            ImGui.EndPopup();
-                                        }
+                                    if (ImGui.BeginPopup("RightClickUse" + item.Item.RowId))
+                                    {
+                                        MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(item.Item));
+                                        ImGui.EndPopup();
+                                    }
 
-                                        float lastButtonX2 = ImGui.GetItemRectMax().X;
-                                        float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
-                                        ImGuiUtil.HoverTooltip(item.ItemEx.Value.NameString);
-                                        if (listingCount < shop.ShopListings.Count() && nextButtonX2 < windowVisibleX2)
-                                        {
-                                            ImGui.SameLine();
-                                        }
+                                    float lastButtonX2 = ImGui.GetItemRectMax().X;
+                                    float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
+                                    ImGuiUtil.HoverTooltip(item.Item.NameString);
+                                    if (listingCount < shop.ShopListings.Count() && nextButtonX2 < windowVisibleX2)
+                                    {
+                                        ImGui.SameLine();
                                     }
                                 }
 
@@ -161,7 +173,7 @@ namespace InventoryTools.Ui
                         _clipboardService.CopyToClipboard(_eNpcId.ToString());
                     }
 
-                    Utils.PrintOutObject(eNpc, 0, new List<string>());
+                    Utils.PrintOutObject(ENpcResidentRow, 0, new List<string>());
                 }
                 #endif
 

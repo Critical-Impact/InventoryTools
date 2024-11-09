@@ -5,12 +5,12 @@ using System.Numerics;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
-using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
-using InventoryTools.Logic.Settings;
 using InventoryTools.Services;
 using InventoryTools.Ui.Widgets;
+using Lumina.Excel;
+using Lumina.Excel.Sheets;
 
 namespace InventoryTools.Logic.Editors;
 
@@ -20,16 +20,16 @@ public class InventorySearchScope
     public uint? WorldId { get; set; }
     public bool? ActiveCharacter { get; set; }
     public bool? ActiveWorld { get; set; }
-    
+
     public HashSet<InventoryCategory>? Categories { get; set; }
     public HashSet<CharacterType>? CharacterTypes { get; set; }
     public InventorySearchScopeMode Mode { get; set; }
     public bool Invert { get; set; }
-    
+
     public bool IncludeOwned { get; set; }
-    
+
     //Add Enum With Mode, turn into combo box
-    
+
 
     public void Reset()
     {
@@ -61,7 +61,7 @@ public class InventoryScopeCalculator
     {
         return searchScopes.Any(c => Filter(c, inventoryItem));
     }
-    
+
     public bool Filter(InventorySearchScope searchScope, InventoryItem inventoryItem)
     {
         bool topLevelMatch = false;
@@ -83,7 +83,7 @@ public class InventoryScopeCalculator
                 }
                 _characterWorldIds[inventoryItem.RetainerId] = character.WorldId;
             }
-            
+
             if (_characterWorldIds[inventoryItem.RetainerId] == searchScope.WorldId)
             {
                 topLevelMatch = true;
@@ -107,7 +107,7 @@ public class InventoryScopeCalculator
                 }
                 _characterWorldIds[inventoryItem.RetainerId] = character.WorldId;
             }
-            
+
             if (_characterWorldIds[inventoryItem.RetainerId] == _characterMonitor.ActiveCharacter?.WorldId)
             {
                 topLevelMatch = true;
@@ -158,18 +158,18 @@ public class InventoryScopeCalculator
 public class InventoryScopePicker
 {
     private readonly ICharacterMonitor _characterMonitor;
-    private readonly ExcelCache _excelCache;
     private readonly ImGuiService _imGuiService;
+    private readonly ExcelSheet<World> _worldSheet;
     private readonly HoverImageButton _editButton;
 
-    public InventoryScopePicker(ICharacterMonitor characterMonitor, ExcelCache excelCache, ImGuiService imGuiService)
+    public InventoryScopePicker(ICharacterMonitor characterMonitor, ImGuiService imGuiService, ExcelSheet<World> worldSheet)
     {
         _characterMonitor = characterMonitor;
-        _excelCache = excelCache;
         _imGuiService = imGuiService;
+        _worldSheet = worldSheet;
         _editButton = new("editButton");
     }
-    
+
     public string GetScopeName(InventorySearchScope scope)
     {
         var scopeName = "";
@@ -189,10 +189,10 @@ public class InventoryScopePicker
 
         if (scope.WorldId != null && scope.WorldId != 0)
         {
-            var world = _excelCache.GetWorldSheet().GetRow(scope.WorldId.Value);
-            scopeName += world?.FormattedName ?? "Unknown World";
+            var world = _worldSheet.GetRowOrDefault(scope.WorldId.Value);
+            scopeName += world?.Name.ExtractText() ?? "Unknown World";
         }
-        
+
         if (scopeName == "")
         {
             scopeName = "All";
@@ -210,7 +210,7 @@ public class InventoryScopePicker
 
     public bool Draw(string label, List<InventorySearchScope> searchScopes)
     {
-        
+
         var changed = false;
         var fakeRef = searchScopes.Count + " items selected.";
         using (var disabled = ImRaii.Disabled())
@@ -220,7 +220,7 @@ public class InventoryScopePicker
                 ImGui.InputText(label, ref fakeRef, 200);
             }
         }
-        
+
         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
         {
             using var tt = ImRaii.Tooltip();
@@ -359,7 +359,7 @@ public class InventoryScopePicker
                                     ImGui.SameLine();
                                     _imGuiService.HelpMarker("Match against all inventories");
                                     ImGui.NewLine();
-                                    
+
                                     if (ImGui.RadioButton("Character",isCharacter))
                                     {
                                         _selectedScope.Reset();
@@ -367,7 +367,7 @@ public class InventoryScopePicker
                                     }
                                     ImGui.SameLine();
                                     _imGuiService.HelpMarker("Match against a specific character(player character, retainer, free company, etc)");
-                                    
+
                                     if (_selectedScope.CharacterId != null)
                                     {
                                         var selectedCharacter = _characterMonitor.GetCharacterById(_selectedScope.CharacterId.Value);
@@ -413,15 +413,15 @@ public class InventoryScopePicker
                                     _imGuiService.HelpMarker("Match against a specific world");
                                     if (_selectedScope.WorldId != null)
                                     {
-                                        var selectedWorld = _selectedScope.WorldId == 0 ? null : _excelCache.GetWorldSheet().GetRow(_selectedScope.WorldId.Value);
+                                        var selectedWorld = _selectedScope.WorldId == 0 ? null : _worldSheet.GetRowOrDefault(_selectedScope.WorldId.Value);
                                         using (var worldSelector = ImRaii.Combo("##world",
-                                                   selectedWorld?.FormattedName ?? "Select World"))
+                                                   selectedWorld?.Name.ExtractText() ?? "Select World"))
                                         {
                                             if (worldSelector)
                                             {
-                                                foreach (var world in _excelCache.GetWorldSheet().Where(c => c.IsPublic))
+                                                foreach (var world in _worldSheet.Where(c => c.IsPublic))
                                                 {
-                                                    if (ImGui.Selectable(world.FormattedName))
+                                                    if (ImGui.Selectable(world.Name.ExtractText()))
                                                     {
                                                         _selectedScope.WorldId = world.RowId;
                                                     }
@@ -484,7 +484,7 @@ public class InventoryScopePicker
                                             }
                                         }
                                     }
-                                    
+
                                     ImGui.SameLine();
                                     _imGuiService.HelpMarker("When a category is selected, only items from this category will be shown. Select an item again to unselect it.");
 
@@ -549,7 +549,7 @@ public class InventoryScopePicker
                                         _selectedScope.Invert = invert;
                                         changed = true;
                                     }
-                                    
+
                                     ImGui.SameLine();
                                     _imGuiService.HelpMarker("When checked, match against the opposite of what is selected.");
                                 }
@@ -573,7 +573,7 @@ public class InventoryScopePicker
                                     }
                                 }
                             }
-                        }                        
+                        }
                     }
                 }
             }

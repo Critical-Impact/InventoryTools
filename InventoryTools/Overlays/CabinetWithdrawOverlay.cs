@@ -15,7 +15,7 @@ namespace InventoryTools.Overlays
         {
             _characterMonitor = characterMonitor;
         }
-        
+
         public override bool ShouldDraw { get; set; }
 
         public override bool Draw()
@@ -34,7 +34,7 @@ namespace InventoryTools.Overlays
 
             return false;
         }
-        
+
         public Dictionary<uint, Vector4?> TabColours = new();
         public Dictionary<string, Vector4?> Colours = new();
         public Dictionary<uint, Vector4?> EmptyTabs = new() { {0, null}, {1, null}, {2, null}, {3, null}, {4, null} , {5, null} , {6, null}  , {7, null}  , {8, null} };
@@ -60,7 +60,7 @@ namespace InventoryTools.Overlays
                 if (filterResult != null)
                 {
                     Colours = newState.GetArmoireHighlights();
-                    TabColours = newState.GetArmoireTabHighlights(AtkOverlay.CurrentTab);
+                    TabColours = newState.GetArmoireTabHighlights();
                     Draw();
                     return;
                 }

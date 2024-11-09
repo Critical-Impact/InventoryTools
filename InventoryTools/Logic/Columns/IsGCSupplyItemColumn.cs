@@ -1,6 +1,4 @@
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
-using CriticalCommonLib.Sheets;
+using AllaganLib.GameSheets.Sheets.Caches;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -9,11 +7,9 @@ namespace InventoryTools.Logic.Columns;
 
 public class IsGCSupplyItemColumn : CheckboxColumn
 {
-    private readonly ExcelCache _excelCache;
 
-    public IsGCSupplyItemColumn(ILogger<IsGCSupplyItemColumn> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
+    public IsGCSupplyItemColumn(ILogger<IsGCSupplyItemColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
     {
-        _excelCache = excelCache;
     }
 
     public override string Name { get; set; } = "Is GC Turn-in item?";
@@ -25,6 +21,6 @@ public class IsGCSupplyItemColumn : CheckboxColumn
 
     public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return searchResult.Item.HandInGrandCompanySupply;
+        return searchResult.Item.HasUsesByType(ItemInfoType.GCDailySupply);
     }
 }

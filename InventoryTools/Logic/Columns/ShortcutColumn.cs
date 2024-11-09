@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using CriticalCommonLib.Models;
+using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Columns.Abstract;

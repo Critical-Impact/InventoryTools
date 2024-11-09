@@ -1,16 +1,22 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using CriticalCommonLib.Services;
-using Dalamud.Utility;
 using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Services;
+using Lumina.Excel;
+using Lumina.Excel.Sheets;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Settings;
 
 public class TooltipCategoryWhitelistSetting : MultipleChoiceSetting<uint>
 {
-    private readonly ExcelCache _excelCache;
+    private readonly ExcelSheet<ItemUICategory> _itemUiCategorySheet;
+
+    public TooltipCategoryWhitelistSetting(ILogger<TooltipCategoryWhitelistSetting> logger, ImGuiService imGuiService, ExcelSheet<ItemUICategory> itemUiCategorySheet) : base(logger, imGuiService)
+    {
+        _itemUiCategorySheet = itemUiCategorySheet;
+    }
+
     public override List<uint> DefaultValue { get; set; } = new();
     public override List<uint> CurrentValue(InventoryToolsConfiguration configuration)
     {
@@ -29,15 +35,11 @@ public class TooltipCategoryWhitelistSetting : MultipleChoiceSetting<uint>
     public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
     public override Dictionary<uint, string> GetChoices(InventoryToolsConfiguration configuration)
     {
-        return _excelCache.GetItemUICategorySheet()
-            .ToDictionary(c => c.RowId, c => c.Name.ToDalamudString().ToString());
+        return _itemUiCategorySheet
+            .ToDictionary(c => c.RowId, c => c.Name.ExtractText());
     }
 
     public override bool HideAlreadyPicked { get; set; } = true;
     public override string Version => "1.7.0.0";
 
-    public TooltipCategoryWhitelistSetting(ILogger<TooltipCategoryWhitelistSetting> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
-    {
-        _excelCache = excelCache;
-    }
 }

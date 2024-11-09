@@ -1,19 +1,20 @@
-﻿using CriticalCommonLib.Crafting;
+﻿using AllaganLib.GameSheets.Sheets.Rows;
+using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
+
 
 namespace InventoryTools.Logic
 {
     public class SearchResult
     {
-        private ItemEx _item;
+        private ItemRow _item;
         private InventoryItem? _inventoryItem;
         private SortingResult? _sortingResult;
         private InventoryChange? _inventoryChange;
         private CuratedItem? _curatedItem;
         private CraftItem? _craftItem;
 
-        public ItemEx Item => _item;
+        public ItemRow Item => _item;
         public InventoryItem? InventoryItem => _inventoryItem;
 
         public SortingResult? SortingResult => _sortingResult;
@@ -75,7 +76,7 @@ namespace InventoryTools.Logic
 
         public uint ItemId => Item.RowId;
 
-        public SearchResult(ItemEx item)
+        public SearchResult(ItemRow item)
         {
             _item = item;
         }
@@ -106,7 +107,7 @@ namespace InventoryTools.Logic
             _craftItem = craftItem;
         }
 
-        public SearchResult(ItemEx item, CuratedItem curatedItem)
+        public SearchResult(ItemRow item, CuratedItem curatedItem)
         {
             _item = item;
             _curatedItem = curatedItem;

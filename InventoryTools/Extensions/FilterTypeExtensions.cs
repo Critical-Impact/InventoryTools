@@ -1,4 +1,3 @@
-using System;
 using InventoryTools.Logic;
 
 namespace InventoryTools.Extensions;

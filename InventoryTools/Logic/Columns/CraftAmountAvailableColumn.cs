@@ -1,8 +1,6 @@
 using System.Collections.Generic;
-using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;

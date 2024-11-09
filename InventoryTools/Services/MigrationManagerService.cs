@@ -10,8 +10,6 @@ using CriticalCommonLib.Models;
 using Dalamud.Interface.Colors;
 using Dalamud.Plugin;
 using InventoryTools.Logic;
-using InventoryTools.Logic.Columns;
-using InventoryTools.Logic.Columns.Buttons;
 using InventoryTools.Logic.Filters;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Services.Interfaces;

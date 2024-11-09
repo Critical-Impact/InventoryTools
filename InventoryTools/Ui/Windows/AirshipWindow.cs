@@ -1,74 +1,74 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using AllaganLib.GameSheets.Sheets;
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
-using Dalamud.Utility;
 using ImGuiNET;
 using InventoryTools.Logic;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
-using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Ui
 {
     class AirshipWindow : UintWindow
     {
-        private readonly ExcelCache _excelCache;
+        private readonly AirshipExplorationPointSheet _airshipExplorationPointSheet;
+        private readonly ItemSheet _itemSheet;
 
-        public AirshipWindow(ILogger<AirshipWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ExcelCache excelCache, string name = "Airship Window") : base(logger, mediator, imGuiService, configuration, name)
+        public AirshipWindow(ILogger<AirshipWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, AirshipExplorationPointSheet airshipExplorationPointSheet, ItemSheet itemSheet, string name = "Airship Window") : base(logger, mediator, imGuiService, configuration, name)
         {
-            _excelCache = excelCache;
+            _airshipExplorationPointSheet = airshipExplorationPointSheet;
+            _itemSheet = itemSheet;
         }
         public override void Initialize(uint airshipExplorationPointId)
         {
             base.Initialize(airshipExplorationPointId);
             _airshipExplorationPointId = airshipExplorationPointId;
-            if (AirshipExplorationPointEx != null)
+            if (AirshipExplorationPoint != null)
             {
-                WindowName = "" + AirshipExplorationPointEx.FormattedNameShort;
+                WindowName = "" + AirshipExplorationPoint.Base.NameShort.ExtractText();
                 Key = "aepid_" + airshipExplorationPointId;
-                _drops = AirshipExplorationPointEx.Drops.Where(c => c.Value != null).Select(c => c.Value!).ToList();
+                _drops = _airshipExplorationPointSheet.GetItemsByAirshipExplorationPoint(_airshipExplorationPointId).Select(c => _itemSheet.GetRow(c)).ToList();
             }
             else
             {
                 Key = "aepid_unknown";
                 WindowName = "Unknown Airship Point";
-                _drops = new List<ItemEx>();
+                _drops = new List<ItemRow>();
             }
         }
-        
+
         public override bool SaveState => false;
 
         private uint _airshipExplorationPointId;
-        private List<ItemEx> _drops;
-        private AirshipExplorationPointEx? AirshipExplorationPointEx => _excelCache.GetAirshipExplorationPointExSheet().GetRow(_airshipExplorationPointId);
+        private List<ItemRow> _drops;
+        private AirshipExplorationPointRow? AirshipExplorationPoint => _airshipExplorationPointSheet.GetRowOrDefault(_airshipExplorationPointId);
 
         public override string GenericKey => "airship";
         public override string GenericName => "Airship";
         public override bool DestroyOnClose => true;
         public override void Draw()
         {
-            if (AirshipExplorationPointEx == null)
+            if (AirshipExplorationPoint == null)
             {
-                ImGui.TextUnformatted("Airship Exploration Point with the ID " + _airshipExplorationPointId + " could not be found.");   
+                ImGui.TextUnformatted("Airship Exploration Point with the ID " + _airshipExplorationPointId + " could not be found.");
             }
             else
             {
-                ImGui.TextUnformatted(AirshipExplorationPointEx.NameShort.ToDalamudString().ToString());
-                ImGui.TextUnformatted("Unlocked Via: " + AirshipExplorationPointEx.AirshipUnlockEx?.AirshipExplorationPointUnlockEx.Value?.FormattedNameShort ?? "N/A");
-                ImGui.TextUnformatted("Rank Required: " + AirshipExplorationPointEx.RankReq);
+                ImGui.TextUnformatted(AirshipExplorationPoint.Base.NameShort.ExtractText());
+                ImGui.TextUnformatted("Unlocked Via: " + AirshipExplorationPoint.Unlock?.Base.NameShort.ExtractText() ?? "N/A");
+                ImGui.TextUnformatted("Rank Required: " + AirshipExplorationPoint.Base.RankReq);
                 ;
                 var itemIcon = ImGuiService.GetIconTexture(Icons.AirshipIcon);
                 ImGui.Image(itemIcon.ImGuiHandle, new Vector2(100, 100) * ImGui.GetIO().FontGlobalScale);
-                
-                
+
+
                 if (ImGui.CollapsingHeader("Rewards (" + _drops.Count + ")", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
                 {
                     ImGuiStylePtr style = ImGui.GetStyle();
@@ -78,8 +78,8 @@ namespace InventoryTools.Ui
                     {
                         ImGui.PushID("Reward"+index);
                         var drop = _drops[index];
-                        
-                        var useIcon = ImGuiService.GetIconTexture(drop.Icon);
+
+                        var useIcon = ImGuiService.GetIconTexture(drop.Base.Icon);
                         if (ImGui.ImageButton(useIcon.ImGuiHandle,
                                 new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1), 0))
                         {
@@ -94,11 +94,7 @@ namespace InventoryTools.Ui
                         {
                             if (popup.Success)
                             {
-                                var itemEx = _excelCache.GetItemExSheet().GetRow(drop.RowId);
-                                if (itemEx != null)
-                                {
-                                    MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(itemEx));
-                                }
+                                MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(drop));
                             }
                         }
 
@@ -113,12 +109,12 @@ namespace InventoryTools.Ui
                         ImGui.PopID();
                     }
                 }
-                
+
                 #if DEBUG
                 if (ImGui.CollapsingHeader("Debug"))
                 {
                     ImGui.TextUnformatted("Duty ID: " + _airshipExplorationPointId);
-                    Utils.PrintOutObject(AirshipExplorationPointEx, 0, new List<string>());
+                    Utils.PrintOutObject(AirshipExplorationPoint, 0, new List<string>());
                 }
                 #endif
 
@@ -127,7 +123,7 @@ namespace InventoryTools.Ui
 
         public override void Invalidate()
         {
-            
+
         }
         public override FilterConfiguration? SelectedConfiguration => null;
         public override Vector2? DefaultSize { get; } = new Vector2(500, 800);

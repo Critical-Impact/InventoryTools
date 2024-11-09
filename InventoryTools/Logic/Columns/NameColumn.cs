@@ -1,7 +1,4 @@
 ﻿using System.Numerics;
-using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
 using Dalamud.Interface.Colors;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
@@ -27,7 +24,7 @@ namespace InventoryTools.Logic.Columns
         public override string HelpText { get; set; } = "The name of the item.";
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
-        
+
         public override FilterType DefaultIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter | Logic.FilterType.GameItemFilter | Logic.FilterType.CraftFilter | Logic.FilterType.HistoryFilter;
     }
 }

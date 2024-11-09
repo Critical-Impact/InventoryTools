@@ -1,4 +1,6 @@
-using CriticalCommonLib.Time;
+
+
+using AllaganLib.Shared.Time;
 
 namespace InventoryToolsMock;
 
@@ -16,6 +18,6 @@ public class MockSeTime : ISeTime
     public event Action? WeatherChanged;
     public void Dispose()
     {
-        
+
     }
 }

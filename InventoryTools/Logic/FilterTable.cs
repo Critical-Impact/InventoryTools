@@ -7,7 +7,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using CsvHelper;
 using Dalamud.Interface.Colors;
 using ImGuiNET;

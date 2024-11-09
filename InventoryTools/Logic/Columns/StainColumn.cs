@@ -1,6 +1,3 @@
-using System;
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Logic.Columns.ColumnSettings;
@@ -30,12 +27,12 @@ public class StainColumn : TextColumn
         switch (_stainColumnSetting.CurrentValue(columnConfiguration))
         {
             case StainColumnSettingEnum.FirstStain:
-                return item.StainEntry?.Name ?? "";
+                return item.StainEntry?.Name.ExtractText() ?? "";
             case StainColumnSettingEnum.SecondStain:
-                return item.Stain2Entry?.Name ?? "";
+                return item.Stain2Entry?.Name.ExtractText() ?? "";
             case StainColumnSettingEnum.Both:
-                var firstStain = item.StainEntry?.Name ?? "No Dye";
-                var secondStain = item.Stain2Entry?.Name ?? "No Dye";
+                var firstStain = item.StainEntry?.Name.ExtractText() ?? "No Dye";
+                var secondStain = item.Stain2Entry?.Name.ExtractText() ?? "No Dye";
                 return firstStain + " / " + secondStain;
         }
 

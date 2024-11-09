@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using System.Numerics;
-using Dalamud.Interface.Internal;
 using ImGuiNET;
 using Dalamud.Interface.Utility.Raii;
 
@@ -10,7 +8,7 @@ public class HoverImageButton
 {
     private bool _isHovered;
     private string _id;
-    
+
     public HoverImageButton(string id)
     {
         _id = id;
@@ -20,10 +18,10 @@ public class HoverImageButton
     {
         bgColorHover ??= new Vector4(1, 1, 1, 0);
         bgColor ??= bgColorHover;
-        
+
         tintColor ??= new Vector4(1, 1, 1, 1);
         tintColorHover ??= ImGui.GetStyle().Colors[(int)ImGuiCol.ButtonHovered];
-        
+
         var success = false;
         using var pushId  = ImRaii.PushId(_id);
         if (ImGui.ImageButton(textureId,size * ImGui.GetIO().FontGlobalScale, uv0 ?? new Vector2(0,0), uv1 ?? new Vector2(1,1), framePadding,

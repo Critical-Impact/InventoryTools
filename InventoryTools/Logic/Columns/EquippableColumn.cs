@@ -1,6 +1,4 @@
-﻿using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
-using InventoryTools.Logic.Columns.Abstract;
+﻿using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 
@@ -12,10 +10,10 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        
+
         public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return searchResult.Item.ClassJobCategory.Value?.Name ?? "";
+            return searchResult.Item.ClassJobCategory?.Base.Name.ExtractText() ?? "";
         }
         public override string Name { get; set; } = "Equipped By (Class/Job)";
         public override float Width { get; set; } = 200;

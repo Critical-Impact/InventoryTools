@@ -1,6 +1,4 @@
-﻿using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
-using InventoryTools.Logic.Columns.Abstract;
+﻿using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 
@@ -14,7 +12,7 @@ namespace InventoryTools.Logic.Columns
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return searchResult.Item.LevelEquip;
+            return searchResult.Item.Base.LevelEquip;
         }
         public override string Name { get; set; } = "Item Level";
         public override float Width { get; set; } = 80.0f;

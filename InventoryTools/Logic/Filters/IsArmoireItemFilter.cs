@@ -1,6 +1,6 @@
+using AllaganLib.GameSheets.Sheets.Caches;
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
-using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -9,7 +9,10 @@ namespace InventoryTools.Logic.Filters
 {
     public class IsArmoireItemFilter : BooleanFilter
     {
-        private readonly ExcelCache _excelCache;
+        public IsArmoireItemFilter(ILogger<IsArmoireItemFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        {
+        }
+
         public override string Key { get; set; } = "IsArmoire";
         public override string Name { get; set; } = "Is Armoire Item?";
         public override string HelpText { get; set; } = "Only show items that can be put into the armoire.";
@@ -17,32 +20,27 @@ namespace InventoryTools.Logic.Filters
 
 
 
-        
+
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
             var currentValue = this.CurrentValue(configuration);
             return currentValue switch
             {
                 null => true,
-                true => _excelCache.IsArmoireItem(item.Item.RowId),
-                _ => !_excelCache.IsArmoireItem(item.Item.RowId)
+                true => item.Item.HasUsesByType(ItemInfoType.Armoire),
+                _ => !item.Item.HasUsesByType(ItemInfoType.Armoire)
             };
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemRow item)
         {
             var currentValue = this.CurrentValue(configuration);
             return currentValue switch
             {
                 null => true,
-                true => _excelCache.IsArmoireItem(item.RowId),
-                _ => !_excelCache.IsArmoireItem(item.RowId)
+                true => item.HasUsesByType(ItemInfoType.Armoire),
+                _ => !item.HasUsesByType(ItemInfoType.Armoire)
             };
-        }
-
-        public IsArmoireItemFilter(ILogger<IsArmoireItemFilter> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
-        {
-            _excelCache = excelCache;
         }
     }
 }

@@ -104,7 +104,7 @@ public class ColumnConfiguration
         set
         {
             _filterText = value.Replace((char)SeIconChar.Collectible,  ' ').Replace((char)SeIconChar.HighQuality, ' ');
-            _filterComparisonText = new ComparisonExtensions.FilterComparisonText(_filterText);
+            _filterComparisonText = new FilterComparisonExtensions.FilterComparisonText(_filterText);
         }
     }
     
@@ -234,16 +234,16 @@ public class ColumnConfiguration
         return false;
     }
 
-    private ComparisonExtensions.FilterComparisonText? _filterComparisonText;
+    private FilterComparisonExtensions.FilterComparisonText? _filterComparisonText;
 
     [JsonIgnore]
-    public ComparisonExtensions.FilterComparisonText FilterComparisonText
+    public FilterComparisonExtensions.FilterComparisonText FilterComparisonText
     {
         get
         {
             if (_filterComparisonText == null)
             {
-                _filterComparisonText = new ComparisonExtensions.FilterComparisonText(FilterText);
+                _filterComparisonText = new FilterComparisonExtensions.FilterComparisonText(FilterText);
             }
 
             return _filterComparisonText;

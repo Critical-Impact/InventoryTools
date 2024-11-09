@@ -1,8 +1,6 @@
 using System.Collections.Generic;
-using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
@@ -22,7 +20,7 @@ public class FavouritesColumn : CheckboxColumn
     public override ColumnCategory ColumnCategory { get; } = ColumnCategory.Basic;
     public override bool HasFilter { get; set; } = true;
     public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Boolean;
-    
+
     public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
         return _configuration.FavouriteItemsList.Contains(searchResult.Item.RowId);
