@@ -1,8 +1,5 @@
 using System.Collections.Generic;
-using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.MarketBoard;
-using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using Dalamud.Interface.Colors;
@@ -17,7 +14,7 @@ namespace InventoryTools.Logic.Columns
 {
     public class MarketBoardMinTotalPriceColumn : MarketBoardMinPriceColumn
     {
-        public MarketBoardMinTotalPriceColumn(ILogger<MarketBoardMinTotalPriceColumn> logger, ImGuiService imGuiService, MarketboardWorldSetting marketboardWorldSetting, ICharacterMonitor characterMonitor, IMarketCache marketCache, ExcelCache excelCache) : base(logger, imGuiService, marketboardWorldSetting, characterMonitor, marketCache, excelCache)
+        public MarketBoardMinTotalPriceColumn(ILogger<MarketBoardMinTotalPriceColumn> logger, ImGuiService imGuiService, MarketboardWorldSetting marketboardWorldSetting, ICharacterMonitor characterMonitor, IMarketCache marketCache) : base(logger, imGuiService, marketboardWorldSetting, characterMonitor, marketCache)
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Market;
@@ -28,7 +25,7 @@ namespace InventoryTools.Logic.Columns
         public override List<MessageBase>? DoDraw(SearchResult searchResult, (int, int)? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
-            
+
             if (currentValue.HasValue && currentValue.Value.Item1 == Loading)
             {
                 ImGui.TableNextColumn();
@@ -85,10 +82,10 @@ namespace InventoryTools.Logic.Columns
 
             return base.CurrentValue(columnConfiguration, searchResult);
         }
-        
+
         public override string Name { get; set; } = "Market Board Minimum Total Price(Qty * Price) NQ/HQ";
         public override string RenderName => "MB Min. Total NQ/HQ";
-        
+
         public override FilterType DefaultIn => Logic.FilterType.CraftFilter;
     }
 }

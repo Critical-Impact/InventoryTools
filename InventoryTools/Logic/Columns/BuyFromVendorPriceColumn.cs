@@ -1,5 +1,3 @@
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -12,18 +10,18 @@ namespace InventoryTools.Logic.Columns
         {
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
-        
+
         public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            if (searchResult.InventoryItem != null && searchResult.InventoryItem.Item.ObtainedGil)
+            if (searchResult.InventoryItem != null && searchResult.InventoryItem.Item.SpentGilShop)
             {
                 int buyPrice = (int)searchResult.InventoryItem.BuyFromVendorPrice;
                 return buyPrice;
             }
-            
-            if (searchResult.Item.ObtainedGil)
+
+            if (searchResult.Item.SpentGilShop)
             {
-                int buyPrice = (int)searchResult.Item.PriceMid;
+                int buyPrice = (int)searchResult.Item.Base.PriceMid;
                 return buyPrice;
             }
 

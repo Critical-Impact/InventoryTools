@@ -1,11 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Interfaces;
-using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Services;
@@ -53,7 +50,7 @@ namespace InventoryTools.Logic.Columns.Abstract
                     return false;
                 }
 
-                return currentValue.Value.Item1.ToLower().PassesFilter(columnConfiguration.FilterComparisonText);
+                return currentValue.Value.Item1.ToLower().PassesFilterComparisonText(columnConfiguration.FilterComparisonText);
             });
         }
 

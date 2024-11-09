@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Interfaces;
-using CriticalCommonLib.Models;
+using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Services;
@@ -18,7 +16,7 @@ namespace InventoryTools.Logic.Columns.Abstract
         public DecimalColumn(ILogger logger, ImGuiService imGuiService) : base(logger, imGuiService)
         {
         }
-     
+
         public override string CsvExport(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
             return CurrentValue(columnConfiguration, searchResult).ToString() ?? "";
@@ -37,7 +35,7 @@ namespace InventoryTools.Logic.Columns.Abstract
         {
             return DoDraw(searchResult, CurrentValue(columnConfiguration, searchResult), rowIndex, configuration, columnConfiguration);
         }
-        
+
         public override IEnumerable<SearchResult> Filter(ColumnConfiguration columnConfiguration, IEnumerable<SearchResult> searchResults)
         {
             return columnConfiguration.FilterText == "" ? searchResults : searchResults.Where(c =>

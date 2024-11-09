@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Services;
 using Dalamud.Game.Text.SeStringHandling;
@@ -11,7 +12,7 @@ namespace InventoryTools.Tooltips;
 
 public class FooterTextTooltip : BaseTooltip
 {
-    public FooterTextTooltip(ILogger<FooterTextTooltip> logger, ExcelCache excelCache, InventoryToolsConfiguration configuration, IGameGui gameGui) : base(logger, excelCache, configuration, gameGui)
+    public FooterTextTooltip(ILogger<FooterTextTooltip> logger, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui) : base(logger, itemSheet, configuration, gameGui)
     {
     }
     public override bool IsEnabled =>

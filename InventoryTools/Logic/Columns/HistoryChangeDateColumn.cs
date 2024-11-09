@@ -1,7 +1,5 @@
 using System;
 using System.Globalization;
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -23,7 +21,7 @@ public class HistoryChangeDateColumn : DateTimeColumn
 
         return null;
     }
-    
+
     public override string CsvExport(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
         return CurrentValue(columnConfiguration, searchResult)?.ToString(CultureInfo.InvariantCulture) ?? "";

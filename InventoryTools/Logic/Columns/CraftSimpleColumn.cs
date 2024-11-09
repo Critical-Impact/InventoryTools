@@ -2,9 +2,8 @@ using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using DalaMock.Shared.Interfaces;
 using Dalamud.Interface;
 using ImGuiNET;
@@ -12,19 +11,23 @@ using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Ui.Widgets;
 using Dalamud.Interface.Utility.Raii;
 using InventoryTools.Services;
+using Lumina.Excel;
+using Lumina.Excel.Sheets;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
 {
     public class CraftSimpleColumn : TextColumn
     {
-        private readonly ExcelCache _excelCache;
         private readonly IFont _font;
+        private readonly ExcelSheet<World> _worldSheet;
+        private readonly ExcelSheet<Item> _itemSheet;
 
-        public CraftSimpleColumn(ILogger<CraftSimpleColumn> logger, ImGuiService imGuiService,ExcelCache excelCache, IFont font) : base(logger, imGuiService)
+        public CraftSimpleColumn(ILogger<CraftSimpleColumn> logger, ImGuiService imGuiService, IFont font, ExcelSheet<World> worldSheet, ExcelSheet<Item> itemSheet) : base(logger, imGuiService)
         {
-            _excelCache = excelCache;
             _font = font;
+            _worldSheet = worldSheet;
+            _itemSheet = itemSheet;
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Crafting;
         public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
@@ -37,7 +40,7 @@ namespace InventoryTools.Logic.Columns
             SearchResult searchResult, int rowIndex, int columnIndex)
         {
             if (searchResult.CraftItem == null) return null;
-            
+
             ImGui.TableNextColumn();
             if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;
             var originalCursorPosY = ImGui.GetCursorPosY();
@@ -67,7 +70,7 @@ namespace InventoryTools.Logic.Columns
             {
                 if (searchResult.CraftItem.MarketTotalPrice != null && searchResult.CraftItem.MarketUnitPrice != null)
                 {
-                    if (searchResult.Item.ObtainedGil)
+                    if (searchResult.Item.SpentGilShop)
                     {
                         var currentIndex = configuration.CraftList.IngredientPreferenceTypeOrder.IndexOf((
                             searchResult.CraftItem.IngredientPreference.Type,
@@ -108,16 +111,16 @@ namespace InventoryTools.Logic.Columns
                                 var totalAvailable = 0;
                                 foreach (var price in craftPrices)
                                 {
-                                    var world = _excelCache.GetWorldSheet().GetRow(price.WorldId);
+                                    var world = _worldSheet.GetRowOrDefault(price.WorldId);
                                     if (world != null)
                                     {
                                         ImGui.Text(price.Left + " available at " + price.UnitPrice +
-                                                   (price.IsHq ? " (HQ)" : "") + " (" + world.FormattedName + ")");
+                                                   (price.IsHq ? " (HQ)" : "") + " (" + world.Value.Name.ExtractText() + ")");
                                     }
 
                                     totalAvailable += price.Left;
                                 }
-                                
+
                                 ImGui.Text("Available: " + totalAvailable);
 
                                 if (searchResult.CraftItem.MarketAvailable != searchResult.CraftItem.QuantityNeeded)
@@ -127,8 +130,8 @@ namespace InventoryTools.Logic.Columns
                             }
                         }
                     }
-                }                    
-                    
+                }
+
             }
             else if (searchResult.CraftItem.MissingIngredients.Count != 0)
             {
@@ -146,10 +149,10 @@ namespace InventoryTools.Logic.Columns
                         var itemId = missingIngredient.Key.Item1;
                         var quantity = missingIngredient.Value;
                         var isHq = missingIngredient.Key.Item2;
-                        var actualItem = _excelCache.GetItemExSheet().GetRow(itemId);
+                        var actualItem = _itemSheet.GetRowOrDefault(itemId);
                         if (actualItem != null)
                         {
-                            ImGui.Text(actualItem.NameString + " : " + quantity);
+                            ImGui.Text(actualItem.Value.Name.ExtractText() + " : " + quantity);
                         }
                     }
                 }

@@ -1,5 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
+using CriticalCommonLib;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using InventoryTools.Mediator;
 using InventoryTools.Ui;
@@ -12,9 +14,10 @@ public class BootService : DisposableMediatorSubscriberBase, IHostedService
 {
     private readonly IConfigurationWizardService _configurationWizardService;
 
-    public BootService(IConfigurationWizardService configurationWizardService, ILogger<BootService> logger, MediatorService mediatorService) : base(logger, mediatorService)
+    public BootService(IConfigurationWizardService configurationWizardService, ILogger<BootService> logger, MediatorService mediatorService, ExcelCache excelCache) : base(logger, mediatorService)
     {
         _configurationWizardService = configurationWizardService;
+        Service.ExcelCache = excelCache;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)

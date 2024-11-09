@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
@@ -42,17 +42,31 @@ namespace InventoryTools.Ui
         private readonly ICraftMonitor _craftMonitor;
         private readonly ICharacterMonitor _characterMonitor;
         private readonly IGameGui gameGui;
-        private readonly ExcelCache _excelCache;
+        private readonly ItemSheet _itemSheet;
         private readonly InventoryToolsConfiguration _configuration;
 
-        public DebugWindow(ILogger<DebugWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IInventoryMonitor inventoryMonitor, IInventoryScanner inventoryScanner, ICraftMonitor craftMonitor, ICharacterMonitor characterMonitor, IGameGui gameGui, ExcelCache excelCache, string name = "Debug Window") : base(logger, mediator, imGuiService, configuration, name)
+        public DebugWindow(ILogger<DebugWindow> logger,
+            MediatorService mediator,
+            ImGuiService imGuiService,
+            InventoryToolsConfiguration configuration,
+            IInventoryMonitor inventoryMonitor,
+            IInventoryScanner inventoryScanner,
+            ICraftMonitor craftMonitor,
+            ICharacterMonitor characterMonitor,
+            IGameGui gameGui,
+            ItemSheet itemSheet,
+            string name = "Debug Window") : base(logger,
+            mediator,
+            imGuiService,
+            configuration,
+            name)
         {
             _inventoryMonitor = inventoryMonitor;
             _inventoryScanner = inventoryScanner;
             _craftMonitor = craftMonitor;
             _characterMonitor = characterMonitor;
             this.gameGui = gameGui;
-            _excelCache = excelCache;
+            _itemSheet = itemSheet;
             _configuration = configuration;
         }
         public override void Initialize()
@@ -60,7 +74,7 @@ namespace InventoryTools.Ui
             Key = "debug";
             WindowName = "Debug";
         }
-        
+
         public override bool SaveState => true;
 
         public override Vector2? DefaultSize { get; } = new(700, 700);
@@ -225,7 +239,7 @@ namespace InventoryTools.Ui
 
                                             var uldManager = listItem->AtkComponentButton.AtkComponentBase.UldManager;
                                             if (uldManager.NodeListCount < 4) continue;
-                                            
+
                                             var textNode = (AtkTextNode*)uldManager.SearchNodeById(3);
                                             if (textNode != null)
                                             {
@@ -513,7 +527,7 @@ namespace InventoryTools.Ui
                             ImGui.TextUnformatted("Durability: " + craftMonitorAgent.Durability);
                             ImGui.TextUnformatted("HQ Chance: " + craftMonitorAgent.HqChance);
                             ImGui.TextUnformatted("Item: " +
-                                       (_excelCache.GetItemExSheet().GetRow(craftMonitorAgent.ResultItemId)
+                                       (_excelCache.GetItemSheet().GetRow(craftMonitorAgent.ResultItemId)
                                            ?.NameString ?? "Unknown"));
                             ImGui.TextUnformatted(
                                 "Current Recipe: " + _craftMonitor.CurrentRecipe?.RowId ?? "Unknown");
@@ -542,7 +556,7 @@ namespace InventoryTools.Ui
                             ImGui.TextUnformatted("Failed: " + simpleCraftMonitorAgent.TotalFailed);
                             ImGui.TextUnformatted("Total Completed: " + simpleCraftMonitorAgent.TotalCompleted);
                             ImGui.TextUnformatted("Total: " + simpleCraftMonitorAgent.Total);
-                            ImGui.TextUnformatted("Item: " + _excelCache.GetItemExSheet()
+                            ImGui.TextUnformatted("Item: " + _excelCache.GetItemSheet()
                                 .GetRow(simpleCraftMonitorAgent.ResultItemId)?.NameString.ToString() ?? "Unknown");
                             ImGui.TextUnformatted(
                                 "Current Recipe: " + _craftMonitor.CurrentRecipe?.RowId ?? "Unknown");
@@ -610,7 +624,7 @@ namespace InventoryTools.Ui
                                                            (ulong)sizeof(InventoryItem) * (ulong)i;
                                             Utils.ClickToCopyText($"{itemAddr:X}");
                                             ImGui.SameLine();
-                                            var actualItem = _excelCache.GetItemExSheet().GetRow(item.ItemID);
+                                            var actualItem = _excelCache.GetItemSheet().GetRow(item.ItemID);
                                             var actualItemName = actualItem?.Name ?? "<Not Found>";
                                             actualItemName += " - " + item.HashCode();
                                             Utils.PrintOutObject(item, (ulong)&item, new List<string> { $"Items[{i}]" },
@@ -856,7 +870,7 @@ namespace InventoryTools.Ui
                     {
 
                     }*/
-                    
+
                 }
             }
         }
@@ -1169,7 +1183,7 @@ namespace InventoryTools.Ui
 
                 ImGui.TreePop();
             }
-            
+
             if (ImGui.TreeNode("Free Company Currency##freeCompanyCurrency"))
             {
                 var bagType = (InventoryType)CriticalCommonLib.Enums.InventoryType.FreeCompanyCurrency;
@@ -1572,22 +1586,22 @@ namespace InventoryTools.Ui
                 ImGui.TextUnformatted("Durability: " + craftMonitorAgent.Durability);
                 ImGui.TextUnformatted("HQ Chance: " + craftMonitorAgent.HqChance);
                 ImGui.TextUnformatted("Item: " +
-                           (_excelCache.GetItemExSheet().GetRow(craftMonitorAgent.ResultItemId)
+                           (_itemSheet.GetRow(craftMonitorAgent.ResultItemId)
                                ?.NameString ?? "Unknown"));
                 ImGui.TextUnformatted(
                     "Current Recipe: " + _craftMonitor.CurrentRecipe?.RowId ?? "Unknown");
                 ImGui.TextUnformatted(
-                    "Recipe Difficulty: " + _craftMonitor.RecipeLevelTable?.Difficulty ??
+                    "Recipe Difficulty: " + _craftMonitor.RecipeLevelTable?.Base.Difficulty ??
                     "Unknown");
                 ImGui.TextUnformatted(
                     "Recipe Difficulty Factor: " +
-                    _craftMonitor.CurrentRecipe?.DifficultyFactor ??
+                    _craftMonitor.CurrentRecipe?.Base.DifficultyFactor ??
                     "Unknown");
                 ImGui.TextUnformatted(
-                    "Recipe Durability: " + _craftMonitor.RecipeLevelTable?.Durability ??
+                    "Recipe Durability: " + _craftMonitor.RecipeLevelTable?.Base.Durability ??
                     "Unknown");
                 ImGui.TextUnformatted("Suggested Craftsmanship: " +
-                    _craftMonitor.RecipeLevelTable?.SuggestedCraftsmanship ?? "Unknown");
+                    _craftMonitor.RecipeLevelTable?.Base.SuggestedCraftsmanship ?? "Unknown");
                 ImGui.TextUnformatted(
                     "Current Craft Type: " + _craftMonitor.Agent?.CraftType ?? "Unknown");
             }
@@ -1599,8 +1613,8 @@ namespace InventoryTools.Ui
                 ImGui.TextUnformatted("Failed: " + simpleCraftMonitorAgent.TotalFailed);
                 ImGui.TextUnformatted("Total Completed: " + simpleCraftMonitorAgent.TotalCompleted);
                 ImGui.TextUnformatted("Total: " + simpleCraftMonitorAgent.Total);
-                ImGui.TextUnformatted("Item: " + _excelCache.GetItemExSheet()
-                    .GetRow(simpleCraftMonitorAgent.ResultItemId)?.NameString.ToString() ?? "Unknown");
+                ImGui.TextUnformatted("Item: " + _itemSheet
+                    .GetRowOrDefault(simpleCraftMonitorAgent.ResultItemId)?.NameString.ToString() ?? "Unknown");
                 ImGui.TextUnformatted(
                     "Current Recipe: " + _craftMonitor.CurrentRecipe?.RowId ?? "Unknown");
                 ImGui.TextUnformatted(
@@ -1742,7 +1756,7 @@ namespace InventoryTools.Ui
 
         public override void Invalidate()
         {
-            
+
         }
     }
 }

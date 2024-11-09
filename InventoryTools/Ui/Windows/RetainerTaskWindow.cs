@@ -1,15 +1,14 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
+using AllaganLib.GameSheets.Sheets;
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib;
-using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using ImGuiNET;
 using InventoryTools.Logic;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
-using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using OtterGui;
 
@@ -17,33 +16,45 @@ namespace InventoryTools.Ui
 {
     class RetainerTaskWindow : UintWindow
     {
-        private readonly ExcelCache _excelCache;
+        private readonly RetainerTaskSheet _retainerTaskSheet;
+        private readonly ItemSheet _itemSheet;
 
-        public RetainerTaskWindow(ILogger<RetainerTaskWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ExcelCache excelCache, string name = "Retainer Venture") : base(logger, mediator, imGuiService, configuration, name)
+        public RetainerTaskWindow(ILogger<RetainerTaskWindow> logger,
+            MediatorService mediator,
+            ImGuiService imGuiService,
+            InventoryToolsConfiguration configuration,
+            RetainerTaskSheet retainerTaskSheet,
+            ItemSheet itemSheet,
+            string name = "Retainer Venture") : base(logger,
+            mediator,
+            imGuiService,
+            configuration,
+            name)
         {
-            _excelCache = excelCache;
+            _retainerTaskSheet = retainerTaskSheet;
+            _itemSheet = itemSheet;
         }
         public override void Initialize(uint retainerTaskId)
         {
             base.Initialize(retainerTaskId);
             _retainerTaskId = retainerTaskId;
-            if (RetainerTaskEx != null)
+            if (RetainerTask != null)
             {
                 Key = "rt_" + retainerTaskId;
-                WindowName = "Allagan Tools - " + RetainerTaskEx.NameString + " - Venture";
-                _drops = RetainerTaskEx.Drops.ToList();
+                WindowName = "Allagan Tools - " + RetainerTask.FormattedName + " - Venture";
+                _drops = RetainerTask.Drops;
             }
             else
             {
                 Key = "rt_invalid";
                 WindowName = "Allagan Tools - Invalid Retainer Task";
-                _drops = new List<ItemEx>();
+                _drops = new List<ItemRow>();
             }
         }
         public override bool SaveState => false;
         private uint _retainerTaskId;
-        private List<ItemEx> _drops;
-        private RetainerTaskEx? RetainerTaskEx => _excelCache.GetRetainerTaskExSheet().GetRow(_retainerTaskId);
+        private List<ItemRow> _drops;
+        private RetainerTaskRow? RetainerTask => _retainerTaskSheet.GetRowOrDefault(_retainerTaskId);
 
 
         public override string GenericKey { get; } = "retainertask";
@@ -51,22 +62,22 @@ namespace InventoryTools.Ui
         public override bool DestroyOnClose => true;
         public override void Draw()
         {
-            if (RetainerTaskEx == null)
+            if (RetainerTask == null)
             {
-                ImGui.TextUnformatted("Submarine Exploration Point with the ID " + _retainerTaskId + " could not be found.");   
+                ImGui.TextUnformatted("Submarine Exploration Point with the ID " + _retainerTaskId + " could not be found.");
             }
             else
             {
-                ImGui.TextUnformatted(RetainerTaskEx.NameString);
-                ImGui.TextUnformatted("Level: " + RetainerTaskEx.RetainerLevel);
-                ImGui.TextUnformatted("Duration: " + RetainerTaskEx.DurationString);
-                ImGui.TextUnformatted("Experience: " + RetainerTaskEx.ExperienceString);
-                ImGui.TextUnformatted("Venture Cost: " + RetainerTaskEx.VentureCost);
-                ImGui.TextUnformatted("Average iLvl: " + RetainerTaskEx.RequiredItemLevel);
+                ImGui.TextUnformatted(RetainerTask.FormattedName);
+                ImGui.TextUnformatted("Level: " + RetainerTask.Base.RetainerLevel);
+                ImGui.TextUnformatted("Duration: " + RetainerTask.DurationString);
+                ImGui.TextUnformatted("Experience: " + RetainerTask.ExperienceString);
+                ImGui.TextUnformatted("Venture Cost: " + RetainerTask.Base.VentureCost);
+                ImGui.TextUnformatted("Average iLvl: " + RetainerTask.Base.RequiredItemLevel);
                 ;
                 ImGui.Image(ImGuiService.GetIconTexture(65049).ImGuiHandle, new Vector2(100, 100) * ImGui.GetIO().FontGlobalScale);
-                
-                
+
+
                 if (ImGui.CollapsingHeader("Rewards (" + _drops.Count + ")", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
                 {
                     ImGuiStylePtr style = ImGui.GetStyle();
@@ -76,8 +87,8 @@ namespace InventoryTools.Ui
                     {
                         ImGui.PushID("Reward"+index);
                         var drop = _drops[index];
-                        
-                        if (ImGui.ImageButton(ImGuiService.GetIconTexture(drop.Icon).ImGuiHandle,
+
+                        if (ImGui.ImageButton(ImGuiService.GetIconTexture(drop.Base.Icon).ImGuiHandle,
                                 new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1), 0))
                         {
                             MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), drop.RowId));
@@ -89,10 +100,10 @@ namespace InventoryTools.Ui
 
                         if (ImGui.BeginPopup("RightClickUse"+ drop.RowId))
                         {
-                            var itemEx = _excelCache.GetItemExSheet().GetRow(drop.RowId);
-                            if (itemEx != null)
+                            var itemRow = _itemSheet.GetRowOrDefault(drop.RowId);
+                            if (itemRow != null)
                             {
-                                MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(itemEx));
+                                MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(itemRow));
                             }
 
                             ImGui.EndPopup();
@@ -109,12 +120,12 @@ namespace InventoryTools.Ui
                         ImGui.PopID();
                     }
                 }
-                
+
                 #if DEBUG
                 if (ImGui.CollapsingHeader("Debug"))
                 {
                     ImGui.TextUnformatted("Duty ID: " + _retainerTaskId);
-                    Utils.PrintOutObject(RetainerTaskEx, 0, new List<string>());
+                    Utils.PrintOutObject(RetainerTask, 0, new List<string>());
                 }
                 #endif
 
@@ -123,7 +134,7 @@ namespace InventoryTools.Ui
 
         public override void Invalidate()
         {
-            
+
         }
         public override FilterConfiguration? SelectedConfiguration => null;
         public override Vector2? DefaultSize { get; } = new Vector2(500, 800);

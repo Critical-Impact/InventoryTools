@@ -1,5 +1,4 @@
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
+using AllaganLib.GameSheets.Sheets.Caches;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -14,7 +13,7 @@ public class StoreColumn : CheckboxColumn
     public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
     public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return searchResult.Item.PurchasedSQStore;
+        return searchResult.Item.HasSourcesByType(ItemInfoType.CashShop);
     }
     public override string Name { get; set; } = "Is sold in Square Store?";
     public override string RenderName => "Is Square Store Item?";

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Services;
@@ -20,14 +21,14 @@ public class AmountOwnedTooltip : BaseTooltip
     private readonly IInventoryMonitor _inventoryMonitor;
     private readonly InventoryScopeCalculator _inventoryScopeCalculator;
 
-    public AmountOwnedTooltip(ILogger<AmountOwnedTooltip> logger,ExcelCache excelCache, InventoryToolsConfiguration configuration, IGameGui gameGui, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, InventoryScopeCalculator inventoryScopeCalculator) : base(logger, excelCache, configuration, gameGui)
+    public AmountOwnedTooltip(ILogger<AmountOwnedTooltip> logger, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, InventoryScopeCalculator inventoryScopeCalculator) : base(logger, itemSheet, configuration, gameGui)
     {
         _characterMonitor = characterMonitor;
         _inventoryMonitor = inventoryMonitor;
         _inventoryScopeCalculator = inventoryScopeCalculator;
     }
     private const string indentation = "      ";
-    
+
     public override bool IsEnabled => Configuration.DisplayTooltip && Configuration.TooltipDisplayAmountOwned;
     public override unsafe void OnGenerateItemTooltip(NumberArrayData* numberArrayData, StringArrayData* stringArrayData)
     {
@@ -35,7 +36,7 @@ public class AmountOwnedTooltip : BaseTooltip
         var item = HoverItem;
         if (item != null) {
             var textLines = new List<string>();
-                
+
             TooltipService.ItemTooltipField itemTooltipField;
             var tooltipVisibility = GetTooltipVisibility((int**)numberArrayData);
             if (tooltipVisibility.HasFlag(ItemTooltipFieldVisibility.Description))
@@ -55,15 +56,15 @@ public class AmountOwnedTooltip : BaseTooltip
                 Logger.LogTrace("No where to put the tooltip data.");
                 return;
             }
-                
+
             var seStr = GetTooltipString(stringArrayData, itemTooltipField);
-                
+
             if (seStr != null && seStr.Payloads.Count > 0)
             {
                 if (Configuration.TooltipDisplayAmountOwned)
                 {
                     var sortMode = Configuration.TooltipAmountOwnedSort;
-                    
+
                     var enumerable = _inventoryMonitor.AllItems.Where(item =>
                         item.ItemId == HoverItemId &&
                         _characterMonitor.Characters.ContainsKey(item.RetainerId) &&
@@ -86,22 +87,22 @@ public class AmountOwnedTooltip : BaseTooltip
                         var characterNames = _characterMonitor.Characters.OrderBy(c => c.Value.FormattedName).ToList();
                         enumerable = enumerable.OrderBy(c => c.SortedCategory.FormattedName()).ThenBy(c => characterNames.IndexOf(d => d.Key == c.RetainerId));
                     }
-                    
+
                     var ownedItems = enumerable
                         .ToList();
-                    
-                    
-                            
+
+
+
                     uint storageCount = 0;
                     List<string> locations = new List<string>();
-                        
+
                     if (Configuration.TooltipLocationDisplayMode ==
                         TooltipLocationDisplayMode.CharacterBagSlotQuality)
                     {
                         foreach (var oItem in ownedItems)
                         {
                             storageCount += oItem.Quantity;
-                                
+
                             if (locations.Count >= Configuration.TooltipLocationLimit)
                                 continue;
 
@@ -129,7 +130,7 @@ public class AmountOwnedTooltip : BaseTooltip
                         if (ownedItems.Count > Configuration.TooltipLocationLimit)
                         {
                             locations.Add(ownedItems.Count - Configuration.TooltipLocationLimit + " other locations.");
-                        }                        
+                        }
                     }
                     if (Configuration.TooltipLocationDisplayMode ==
                         TooltipLocationDisplayMode.CharacterBagSlotQuantity)
@@ -137,7 +138,7 @@ public class AmountOwnedTooltip : BaseTooltip
                         foreach (var oItem in ownedItems)
                         {
                             storageCount += oItem.Quantity;
-                                
+
                             if (locations.Count >= Configuration.TooltipLocationLimit)
                                 continue;
 
@@ -155,7 +156,7 @@ public class AmountOwnedTooltip : BaseTooltip
                         if (ownedItems.Count > Configuration.TooltipLocationLimit)
                         {
                             locations.Add(ownedItems.Count - Configuration.TooltipLocationLimit + " other locations.");
-                        }                        
+                        }
                     }
                     else if (Configuration.TooltipLocationDisplayMode == TooltipLocationDisplayMode.CharacterCategoryQuantityQuality)
                     {
@@ -164,7 +165,7 @@ public class AmountOwnedTooltip : BaseTooltip
                         {
                             var quantity = oGroup.Sum(c => c.Quantity);
                             storageCount += (uint)quantity;
-                                
+
                             if (locations.Count >= Configuration.TooltipLocationLimit)
                                 continue;
 
@@ -192,7 +193,7 @@ public class AmountOwnedTooltip : BaseTooltip
                         if (groupedItems.Count > Configuration.TooltipLocationLimit)
                         {
                             locations.Add(groupedItems.Count - Configuration.TooltipLocationLimit + " other locations.");
-                        }  
+                        }
                     }
                     else if (Configuration.TooltipLocationDisplayMode == TooltipLocationDisplayMode.CharacterQuantityQuality)
                     {
@@ -201,7 +202,7 @@ public class AmountOwnedTooltip : BaseTooltip
                         {
                             var quantity = oGroup.Sum(c => c.Quantity);
                             storageCount += (uint)quantity;
-                                
+
                             if (locations.Count >= Configuration.TooltipLocationLimit)
                                 continue;
 
@@ -229,7 +230,7 @@ public class AmountOwnedTooltip : BaseTooltip
                         if (groupedItems.Count > Configuration.TooltipLocationLimit)
                         {
                             locations.Add(groupedItems.Count - Configuration.TooltipLocationLimit + " other locations.");
-                        }  
+                        }
                     }
 
                     if (storageCount > 0)

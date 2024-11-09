@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using System.Numerics;
-using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using InventoryTools.Services;
@@ -101,7 +99,7 @@ namespace InventoryTools.Logic
         public bool ShowFilterRow { get; set; } = true;
         public bool NeedsRefresh { get; set; }
         public bool NeedsColumnRefresh { get; set; }
-        public bool Refreshing { get; set; } 
+        public bool Refreshing { get; set; }
         public bool IsSearching { get; set; }
         public FilterConfiguration FilterConfiguration { get; set; }
         public bool HighlightItems => _configuration.ActiveUiFilter == FilterConfiguration.Key;

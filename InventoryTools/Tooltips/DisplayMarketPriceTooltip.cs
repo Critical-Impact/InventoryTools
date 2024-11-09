@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Services;
@@ -16,7 +17,7 @@ public class DisplayMarketPriceTooltip : BaseTooltip
     private readonly ICharacterMonitor _characterMonitor;
     private readonly IMarketCache _marketCache;
 
-    public DisplayMarketPriceTooltip(ILogger<DisplayMarketPriceTooltip> logger, ExcelCache excelCache, InventoryToolsConfiguration configuration, IGameGui gameGui, ICharacterMonitor characterMonitor, IMarketCache marketCache) : base(logger, excelCache, configuration, gameGui)
+    public DisplayMarketPriceTooltip(ILogger<DisplayMarketPriceTooltip> logger, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, ICharacterMonitor characterMonitor, IMarketCache marketCache) : base(logger, itemSheet, configuration, gameGui)
     {
         _characterMonitor = characterMonitor;
         _marketCache = marketCache;
@@ -52,7 +53,7 @@ public class DisplayMarketPriceTooltip : BaseTooltip
             {
                 return;
             }
-            
+
             var seStr = GetTooltipString(stringArrayData, itemTooltipField);
 
             if (seStr != null && seStr.Payloads.Count > 0)
@@ -61,7 +62,7 @@ public class DisplayMarketPriceTooltip : BaseTooltip
                     Configuration.TooltipDisplayMarketLowestPrice)
                 {
                     var hoverItemId = HoverItemId;
-                    if (!(ExcelCache.GetItemExSheet().GetRow((uint)hoverItemId)?.IsUntradable ?? true))
+                    if (!(ItemSheet.GetRowOrDefault(hoverItemId)?.Base.IsUntradable ?? true))
                     {
                         var activeCharacter = _characterMonitor.ActiveCharacter;
                         if (activeCharacter != null)

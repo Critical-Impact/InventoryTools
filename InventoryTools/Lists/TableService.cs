@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic;

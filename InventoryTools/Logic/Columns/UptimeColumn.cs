@@ -1,12 +1,13 @@
+using System.Linq;
+using AllaganLib.Shared.Time;
+
 namespace InventoryTools.Logic.Columns;
 
 using System.Collections.Generic;
 using Abstract;
-using CriticalCommonLib.Interfaces;
-using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
-using CriticalCommonLib.Time;
+
+
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
@@ -64,7 +65,7 @@ public class UptimeColumn : TimeIntervalColumn
 
     public override TimeInterval? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        var gatheringUptime = searchResult.Item.GetGatheringUptime();
+        var gatheringUptime = searchResult.Item.GatheringUpTimes.Cast<BitfieldUptime?>().FirstOrDefault();
         if (gatheringUptime != null)
         {
             var nextUptime = gatheringUptime.Value.NextUptime(seTime.ServerTime);

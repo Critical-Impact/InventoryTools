@@ -1,5 +1,6 @@
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
+
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 
@@ -31,17 +32,17 @@ namespace InventoryTools.Logic.Filters.Abstract
 
         public void ResetFilter(FilterConfiguration configuration)
         {
-            
+
         }
 
         public void ResetFilter(FilterConfiguration fromConfiguration, FilterConfiguration toConfiguration)
         {
-            
+
         }
 
         public virtual void InvalidateSearchCache()
         {
-            
+
         }
 
         public virtual bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
@@ -49,7 +50,7 @@ namespace InventoryTools.Logic.Filters.Abstract
             return null;
         }
 
-        public virtual bool? FilterItem(FilterConfiguration configuration, ItemEx item)
+        public virtual bool? FilterItem(FilterConfiguration configuration, ItemRow item)
         {
             return null;
         }

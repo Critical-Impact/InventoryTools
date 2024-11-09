@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Extensions;
 using Dalamud.Interface.Colors;
 using FFXIVClientStructs.FFXIV.Common.Math;

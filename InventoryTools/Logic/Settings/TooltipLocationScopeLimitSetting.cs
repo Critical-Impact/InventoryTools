@@ -5,8 +5,6 @@ using InventoryTools.Logic.Editors;
 using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
-using OtterGui;
-using OtterGui.Raii;
 
 namespace InventoryTools.Logic.Settings;
 

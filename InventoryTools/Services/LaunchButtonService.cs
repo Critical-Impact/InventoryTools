@@ -2,12 +2,9 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using CriticalCommonLib.Services.Mediator;
-using DalaMock.Shared.Interfaces;
 using Dalamud.Interface;
-using Dalamud.Interface.Internal;
 using Dalamud.Plugin.Services;
 using InventoryTools.Mediator;
-using InventoryTools.Services.Interfaces;
 using InventoryTools.Ui;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -15,7 +12,6 @@ using Microsoft.Extensions.Logging;
 namespace InventoryTools.Services;
 
 using System.IO;
-using Dalamud.Interface.Textures;
 using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Plugin;
 
@@ -31,7 +27,7 @@ public class LaunchButtonService : DisposableMediatorSubscriberBase, IHostedServ
     private IDalamudTextureWrap?  _icon;
     private IReadOnlyTitleScreenMenuEntry? _entry;
     private readonly string           _fileName;
-    
+
     public LaunchButtonService(ILogger<LaunchButtonService> logger, ITextureProvider textureProvider, MediatorService mediatorService, ITitleScreenMenu titleScreenMenu, IDalamudPluginInterface pluginInterfaceService, InventoryToolsUi inventoryToolsUi, InventoryToolsConfiguration inventoryToolsConfiguration, ConfigurationManagerService configurationManagerService) : base(logger,mediatorService)
     {
         _titleScreenMenu = titleScreenMenu;

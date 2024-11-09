@@ -1,5 +1,3 @@
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -18,7 +16,7 @@ public class MateriaCountColumn : IntegerColumn
     public override ColumnCategory ColumnCategory { get; } = ColumnCategory.Basic;
     public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return searchResult.InventoryItem?.MateriaCount ?? searchResult.Item.MateriaSlotCount;
+        return searchResult.InventoryItem?.MateriaCount ?? searchResult.Item.Base.MateriaSlotCount;
     }
 
     public override bool HasFilter { get; set; } = true;

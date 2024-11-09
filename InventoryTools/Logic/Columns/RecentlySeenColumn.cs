@@ -1,5 +1,3 @@
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
@@ -19,7 +17,7 @@ namespace InventoryTools.Logic.Columns
 
         public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return _pluginLogic.GetLastSeenTime(searchResult.Item.ItemId)?.ToHumanReadableString() ?? "";
+            return _pluginLogic.GetLastSeenTime(searchResult.Item.RowId)?.ToHumanReadableString() ?? "";
         }
         public override string Name { get; set; } = "Last Seen Date/Time";
         public override string RenderName => "Last Seen";

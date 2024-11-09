@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
@@ -24,13 +22,13 @@ namespace InventoryTools.Logic.Columns
             if (searchResult.CraftItem == null) return 0;
             return Math.Max(0, (int)searchResult.CraftItem.QuantityMissingOverall);
         }
-        
+
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
             SearchResult searchResult, int rowIndex, int columnIndex)
         {
             if (searchResult.CraftItem == null) return null;
-            
+
             if (CurrentValue(columnConfiguration, searchResult) > 0)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudRed);

@@ -2,34 +2,34 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using AllaganLib.GameSheets.Model;
+using AllaganLib.GameSheets.Sheets;
+using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Extensions;
-using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using ImGuiNET;
-using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
-using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 
 namespace InventoryTools.Ui;
 
-public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>, IMenuWindow
+public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskRow>, IMenuWindow
 {
-    private readonly ExcelCache _excelCache;
+    private readonly RetainerTaskSheet _retainerTaskSheet;
 
-    public RetainerTasksWindow(ILogger<RetainerTasksWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ExcelCache excelCache, string name = "Retainer Ventures") : base(logger, mediator, imGuiService, configuration, name)
+    public RetainerTasksWindow(ILogger<RetainerTasksWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, RetainerTaskSheet retainerTaskSheet, string name = "Retainer Ventures") : base(logger, mediator, imGuiService, configuration, name)
     {
-        _excelCache = excelCache;
+        _retainerTaskSheet = retainerTaskSheet;
     }
     public override void Initialize()
     {
         WindowName = "Retainer Ventures";
         Key = "retainerTasks";
-        _columns = new List<TableColumn<RetainerTaskEx>>()
+        _columns = new List<TableColumn<RetainerTaskRow>>()
         {
             new("Icon", 32, ImGuiTableColumnFlags.WidthFixed)
             {
@@ -52,7 +52,7 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>, IMenuWind
                         return exes;
                     }
 
-                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.NameString) : exes.OrderByDescending(c => c.NameString);
+                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.FormattedName) : exes.OrderByDescending(c => c.FormattedName);
                 },
                 Filter = (s, exes) =>
                 {
@@ -60,11 +60,11 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>, IMenuWind
                     {
                         return exes;
                     }
-                    return s == "" ? exes : exes.Where(c => c.NameString.ToLower().PassesFilter(s.ToLower()));
+                    return s == "" ? exes : exes.Where(c => c.FormattedName.ToLower().PassesFilter(s.ToLower()));
                 },
                 Draw = (ex, tabId) =>
                 {
-                    ImGui.TextUnformatted(ex.NameString.ToString());
+                    ImGui.TextUnformatted(ex.FormattedName.ToString());
                 }
             },
             new("Task Type", 200, ImGuiTableColumnFlags.WidthFixed)
@@ -101,7 +101,7 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>, IMenuWind
                         return exes;
                     }
 
-                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.RetainerLevel) : exes.OrderByDescending(c => c.RetainerLevel);
+                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.Base.RetainerLevel) : exes.OrderByDescending(c => c.Base.RetainerLevel);
                 },
                 Filter = (s, exes) =>
                 {
@@ -109,11 +109,11 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>, IMenuWind
                     {
                         return exes;
                     }
-                    return s == "" ? exes : exes.Where(c => c.RetainerLevel.ToString().PassesFilter(s.ToLower()));
+                    return s == "" ? exes : exes.Where(c => c.Base.RetainerLevel.ToString().PassesFilter(s.ToLower()));
                 },
                 Draw = (ex, tabId) =>
                 {
-                    ImGui.TextUnformatted(ex.RetainerLevel.ToString());
+                    ImGui.TextUnformatted(ex.Base.RetainerLevel.ToString());
                 }
             },
             new("Duration", 200, ImGuiTableColumnFlags.WidthFixed)
@@ -149,7 +149,7 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>, IMenuWind
                         return exes;
                     }
 
-                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.Experience) : exes.OrderByDescending(c => c.Experience);
+                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.Base.Experience) : exes.OrderByDescending(c => c.Base.Experience);
                 },
                 Filter = (s, exes) =>
                 {
@@ -173,7 +173,7 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>, IMenuWind
                         return exes;
                     }
 
-                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.VentureCost) : exes.OrderByDescending(c => c.VentureCost);
+                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.Base.VentureCost) : exes.OrderByDescending(c => c.Base.VentureCost);
                 },
                 Filter = (s, exes) =>
                 {
@@ -181,11 +181,11 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>, IMenuWind
                     {
                         return exes;
                     }
-                    return s == "" ? exes : exes.Where(c => c.VentureCost.PassesFilter(s.ToLower()));
+                    return s == "" ? exes : exes.Where(c => c.Base.VentureCost.PassesFilter(s.ToLower()));
                 },
                 Draw = (ex, tabId) =>
                 {
-                    ImGui.TextUnformatted(ex.VentureCost.ToString());
+                    ImGui.TextUnformatted(ex.Base.VentureCost.ToString());
                 }
             },
             new("Average iLvl", 200, ImGuiTableColumnFlags.WidthFixed)
@@ -197,7 +197,7 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>, IMenuWind
                         return exes;
                     }
 
-                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.RequiredItemLevel) : exes.OrderByDescending(c => c.RequiredItemLevel);
+                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.Base.RequiredItemLevel) : exes.OrderByDescending(c => c.Base.RequiredItemLevel);
                 },
                 Filter = (s, exes) =>
                 {
@@ -205,11 +205,11 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>, IMenuWind
                     {
                         return exes;
                     }
-                    return s == "" ? exes : exes.Where(c => c.RequiredItemLevel.PassesFilter(s.ToLower()));
+                    return s == "" ? exes : exes.Where(c => c.Base.RequiredItemLevel.PassesFilter(s.ToLower()));
                 },
                 Draw = (ex, tabId) =>
                 {
-                    ImGui.TextUnformatted(ex.RequiredItemLevel.ToString());
+                    ImGui.TextUnformatted(ex.Base.RequiredItemLevel.ToString());
                 }
             },
             new("Drops", 200, ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoSort)
@@ -234,7 +234,7 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>, IMenuWind
                     RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X,
                     drop =>
                     {
-                        ImGui.Image(ImGuiService.GetIconTexture(drop.Icon).ImGuiHandle,
+                        ImGui.Image(ImGuiService.GetIconTexture(drop.Base.Icon).ImGuiHandle,
                             new Vector2(RowSize, RowSize) * ImGui.GetIO().FontGlobalScale);
                         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
                                                 ImGuiHoveredFlags.AllowWhenOverlapped &
@@ -270,11 +270,11 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>, IMenuWind
             },
         };
         _tabs = Enum.GetValues<RetainerTaskType>().Where(c => c != RetainerTaskType.Unknown).ToDictionary(c => (uint)c, c =>c.FormattedName());
-        _items = new Dictionary<uint, List<RetainerTaskEx>>();
-        _filteredItems = new Dictionary<uint, List<RetainerTaskEx>>();
+        _items = new Dictionary<uint, List<RetainerTaskRow>>();
+        _filteredItems = new Dictionary<uint, List<RetainerTaskRow>>();
     }
 
-    private bool OnLeftClick(RetainerTaskEx arg)
+    private bool OnLeftClick(RetainerTaskRow arg)
     {
         MediatorService.Publish(new OpenUintWindowMessage(typeof(RetainerTasksWindow), arg.RowId));
         return true;
@@ -299,20 +299,20 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>, IMenuWind
 
     public override FilterConfiguration? SelectedConfiguration => null;
 
-    public override int GetRowId(RetainerTaskEx item)
+    public override int GetRowId(RetainerTaskRow item)
     {
         return (int)item.RowId;
     }
 
-    public override Dictionary<uint, List<RetainerTaskEx>> Items => _items;
+    public override Dictionary<uint, List<RetainerTaskRow>> Items => _items;
 
-    public override Dictionary<uint, List<RetainerTaskEx>> FilteredItems => _filteredItems;
+    public override Dictionary<uint, List<RetainerTaskRow>> FilteredItems => _filteredItems;
 
-    public override List<TableColumn<RetainerTaskEx>> Columns => _columns;
+    public override List<TableColumn<RetainerTaskRow>> Columns => _columns;
 
-    private List<TableColumn<RetainerTaskEx>> _columns = null!;
-    private Dictionary<uint, List<RetainerTaskEx>> _items= null!;
-    private Dictionary<uint, List<RetainerTaskEx>> _filteredItems= null!;
+    private List<TableColumn<RetainerTaskRow>> _columns = null!;
+    private Dictionary<uint, List<RetainerTaskRow>> _items= null!;
+    private Dictionary<uint, List<RetainerTaskRow>> _filteredItems= null!;
     private Dictionary<uint, string> _tabs= null!;
 
     public override ImGuiTableFlags TableFlags => _flags;
@@ -324,18 +324,18 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskEx>, IMenuWind
                                      ImGuiTableFlags.Resizable | ImGuiTableFlags.Sortable |
                                      ImGuiTableFlags.Hideable | ImGuiTableFlags.ScrollX |
                                      ImGuiTableFlags.ScrollY;
-    public override List<RetainerTaskEx> GetItems(uint tabId)
+    public override List<RetainerTaskRow> GetItems(uint tabId)
     {
         if (!_items.ContainsKey(tabId))
         {
             if (tabId == 0)
             {
-                var duties = _excelCache.GetRetainerTaskExSheet().Where(c => c.Task != 0).ToList();
+                var duties = _retainerTaskSheet.Where(c => c.Base.Task.RowId != 0).ToList();
                 _items.Add(tabId, duties);
             }
             else
             {
-                var duties = _excelCache.GetRetainerTaskExSheet().Where(c => c.FormattedName.ToString() != "" && (uint)c.RetainerTaskType == tabId && c.Task != 0).ToList();
+                var duties = _retainerTaskSheet.Where(c => c.FormattedName.ToString() != "" && (uint)c.RetainerTaskType == tabId && c.Base.Task.RowId != 0).ToList();
                 _items.Add(tabId, duties);
             }
         }

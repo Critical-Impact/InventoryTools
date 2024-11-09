@@ -1,6 +1,7 @@
 using System.Linq;
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
+
 using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -25,7 +26,7 @@ public class IsRecipeCompletedFilter : BooleanFilter
         return FilterItem(configuration, item.Item);
     }
 
-    public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
+    public override bool? FilterItem(FilterConfiguration configuration, ItemRow item)
     {
         var currentValue = CurrentValue(configuration);
         if (currentValue == null)
@@ -41,9 +42,9 @@ public class IsRecipeCompletedFilter : BooleanFilter
         switch (currentValue.Value)
         {
             case false:
-                return !item.RecipesAsResult.All(c => _questManagerService.IsRecipeComplete(c.RowId));
+                return !item.Recipes.All(c => _questManagerService.IsRecipeComplete(c.RowId));
             case true:
-                return item.RecipesAsResult.All(c => _questManagerService.IsRecipeComplete(c.RowId));
+                return item.Recipes.All(c => _questManagerService.IsRecipeComplete(c.RowId));
         }
     }
 }

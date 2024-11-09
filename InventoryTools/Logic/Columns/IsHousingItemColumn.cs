@@ -1,5 +1,3 @@
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Misc;
 using InventoryTools.Services;
@@ -15,7 +13,7 @@ namespace InventoryTools.Logic.Columns
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return Helpers.HousingCategoryIds.Contains(searchResult.Item.ItemUICategory.Row);
+            return Helpers.HousingCategoryIds.Contains(searchResult.Item.Base.ItemUICategory.RowId);
         }
         public override string Name { get; set; } = "Is Housing Item?";
         public override string RenderName => "Is Housing?";

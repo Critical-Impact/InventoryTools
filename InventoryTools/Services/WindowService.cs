@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Factories;
 using DalaMock.Shared.Interfaces;
-using Dalamud.Interface.Windowing;
 using InventoryTools.Mediator;
 using InventoryTools.Ui;
 using Microsoft.Extensions.Hosting;

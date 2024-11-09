@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
+
 using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -20,35 +21,35 @@ namespace InventoryTools.Logic.Filters
         {
             configuration.SourceCategories = newValue.Count == 0 ? null : newValue.Distinct().ToHashSet();
         }
-        
+
         public override void ResetFilter(FilterConfiguration configuration)
         {
             UpdateFilterConfiguration(configuration, new List<InventoryCategory>());
         }
-        
+
         public override int LabelSize { get; set; } = 240;
         public override string Key { get; set; } = "SourceInventoryCategories";
         public override string Name { get; set; } = "Source - Inventory Categories";
         public override string HelpText { get; set; } =
             "This is a list of sources categories to search in. It will attempt to search for items in any bag of the given category.";
-        
+
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Inventories;
         public override List<InventoryCategory> DefaultValue { get; set; } = new();
         public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter | FilterType.CraftFilter | FilterType.HistoryFilter;
-        
+
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
             return null;
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemRow item)
         {
             return null;
         }
 
         public override Dictionary<InventoryCategory, string> GetChoices(FilterConfiguration configuration)
         {
-           
+
             var dict = new Dictionary<InventoryCategory, string>();
             dict.Add(InventoryCategory.RetainerBags, "Retainer " +InventoryCategory.RetainerBags.FormattedName());
             dict.Add(InventoryCategory.RetainerMarket, "Retainer " +InventoryCategory.RetainerMarket.FormattedName());

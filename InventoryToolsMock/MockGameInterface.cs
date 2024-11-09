@@ -1,5 +1,6 @@
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Services;
-using CriticalCommonLib.Sheets;
+
 using Dalamud.Plugin.Services;
 
 namespace InventoryToolsMock;
@@ -51,7 +52,7 @@ public class MockGameInterface : IGameInterface
         _pluginLog.Info("Game Event: Fishing Log Opened for Item #" + itemId);
     }
 
-    public unsafe bool HasAcquired(ItemEx item, bool debug = false)
+    public unsafe bool HasAcquired(ItemRow item, bool debug = false)
     {
         return false;
     }

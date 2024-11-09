@@ -4,6 +4,9 @@ using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
+using AllaganLib.GameSheets.Sheets;
+using AllaganLib.GameSheets.Sheets.Rows;
+using AllaganLib.Shared.Extensions;
 using Autofac;
 using CriticalCommonLib;
 using CriticalCommonLib.Addons;
@@ -15,7 +18,7 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Services.Ui;
-using CriticalCommonLib.Sheets;
+
 using DalaMock.Shared.Interfaces;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Colors;
@@ -35,6 +38,7 @@ using Microsoft.Extensions.Logging;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 using PopupMenu = InventoryTools.Ui.Widgets.PopupMenu;
+using StringExtensions = InventoryTools.Extensions.StringExtensions;
 
 namespace InventoryTools.Ui
 {
@@ -51,13 +55,13 @@ namespace InventoryTools.Ui
         private readonly IFileDialogManager _fileDialogManager;
         private readonly IGameUiManager _gameUiManager;
         private readonly IChatUtilities _chatUtilities;
-        private readonly ExcelCache _excelCache;
         private readonly ListImportExportService _importExportService;
         private readonly CraftWindowLayoutSetting _layoutSetting;
         private readonly IComponentContext _context;
         private readonly PopupService _popupService;
         private readonly IClipboardService _clipboardService;
         private readonly IKeyState _keyState;
+        private readonly ItemSheet _itemSheet;
         private IEnumerable<IMenuWindow> _menuWindows;
         private ThrottleDispatcher _throttleDispatcher;
 
@@ -66,9 +70,9 @@ namespace InventoryTools.Ui
             ConfigurationManagerService configurationManagerService, IListService listService,
             IFilterService filterService, PluginLogic pluginLogic, IUniversalis universalis,
             ICharacterMonitor characterMonitor, IFileDialogManager fileDialogManager, IGameUiManager gameUiManager,
-            IChatUtilities chatUtilities, ExcelCache excelCache, ListImportExportService importExportService,
+            IChatUtilities chatUtilities, ListImportExportService importExportService,
             CraftWindowLayoutSetting layoutSetting, IComponentContext context, PopupService popupService,
-            IClipboardService clipboardService, IKeyState keyState) : base(logger, mediator, imGuiService, configuration, "Crafts Window")
+            IClipboardService clipboardService, IKeyState keyState, ItemSheet itemSheet) : base(logger, mediator, imGuiService, configuration, "Crafts Window")
         {
             _tableService = tableService;
             _configuration = configuration;
@@ -81,13 +85,13 @@ namespace InventoryTools.Ui
             _fileDialogManager = fileDialogManager;
             _gameUiManager = gameUiManager;
             _chatUtilities = chatUtilities;
-            _excelCache = excelCache;
             _importExportService = importExportService;
             _layoutSetting = layoutSetting;
             _context = context;
             _popupService = popupService;
             _clipboardService = clipboardService;
             _keyState = keyState;
+            _itemSheet = itemSheet;
             Flags = ImGuiWindowFlags.MenuBar;
         }
         public override void Initialize()
@@ -446,7 +450,7 @@ namespace InventoryTools.Ui
                         if (ImGui.MenuItem("Craft List (Gatherables)"))
                         {
                             var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                .Where(c => c.Item.CanBeGathered && !c.IsOutputItem)
+                                .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
                                 .ToList();
 
                             var tcString = _importExportService.ToTCString(searchResults);
@@ -456,7 +460,7 @@ namespace InventoryTools.Ui
                         if (ImGui.MenuItem("Craft List (Missing Gatherables)"))
                         {
                             var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                .Where(c => c.Item.CanBeGathered && !c.IsOutputItem)
+                                .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
                                 .ToList();
 
                             var tcString = _importExportService.ToTCString(searchResults, TCExportMode.Missing);
@@ -506,7 +510,7 @@ namespace InventoryTools.Ui
                         {
                             var craftTable = _tableService.GetCraftTable(SelectedConfiguration);
                             var searchResults = craftTable.CraftItems
-                                .Where(c => c.Item.CanBeGathered && (c.CraftItem?.IsOutputItem ?? false))
+                                .Where(c => c.Item.ObtainedGathering && (c.CraftItem?.IsOutputItem ?? false))
                                 .ToList();
                             _clipboardService.CopyToClipboard(craftTable.ExportToJson(searchResults));
                             _chatUtilities.Print("The craft list's gatherables were copied to your clipboard.");
@@ -1818,7 +1822,7 @@ namespace InventoryTools.Ui
 
 
 
-        private void DrawSearchRow(FilterConfiguration filterConfiguration, ItemEx item)
+        private void DrawSearchRow(FilterConfiguration filterConfiguration, ItemRow item)
         {
             ImGui.TableNextColumn();
             ImGui.TextWrapped( item.NameString);
@@ -1854,20 +1858,20 @@ namespace InventoryTools.Ui
         }
 
         private string _searchString = "";
-        private List<ItemEx>? _searchItems;
-        public List<ItemEx> SearchItems
+        private List<ItemRow>? _searchItems;
+        public List<ItemRow> SearchItems
         {
             get
             {
                 if (SearchString == "")
                 {
-                    _searchItems = new List<ItemEx>();
+                    _searchItems = new List<ItemRow>();
                     return _searchItems;
                 }
                 if (_searchItems == null)
                 {
-                    _searchItems = _excelCache.ItemNamesById.Where(c => c.Value.ToLower().PassesFilter(SearchString.ToLower())).Take(100)
-                        .Select(c => _excelCache.GetItemExSheet().GetRow(c.Key)!).ToList();
+                    _searchItems = _itemSheet.ItemsBySearchString.Where(c => c.Key.ToLower().PassesFilter(SearchString.ToLower())).Take(100)
+                        .Select(c => _itemSheet.GetRow(c.Value)).ToList();
                 }
 
                 return _searchItems;

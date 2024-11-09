@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Shared.Interfaces;
-using Dalamud.Interface.ImGuiFileDialog;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using Microsoft.Extensions.Hosting;

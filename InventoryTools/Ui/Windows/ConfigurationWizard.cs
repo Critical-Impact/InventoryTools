@@ -7,7 +7,6 @@ using InventoryTools.Logic;
 using InventoryTools.Logic.Features;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
-using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using OtterGui.Raii;
 
@@ -51,7 +50,7 @@ public class ConfigurationWizard : GenericWindow
         }
         else if(_currentFeature == _availableFeatures.Count)
         {
-            
+
         }
         else
         {
@@ -66,7 +65,7 @@ public class ConfigurationWizard : GenericWindow
             _currentFeature--;
         }
     }
-    
+
     public override void Draw()
     {
         using (var sideBar = ImRaii.Child("sideBar", new Vector2(150, 0) * ImGui.GetIO().FontGlobalScale, true))

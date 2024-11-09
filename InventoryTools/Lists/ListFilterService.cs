@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Extensions;
@@ -11,7 +12,7 @@ using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using InventoryTools.Logic;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
@@ -32,11 +33,11 @@ public class ListFilterService : DisposableMediatorBackgroundService
     private readonly IMarketCache _marketCache;
     private readonly CraftPricer _craftPricer;
     private readonly IFilterService _filterService;
-    private readonly ExcelCache _excelCache;
+    private readonly ItemSheet _itemSheet;
 
     public IBackgroundTaskQueue FilterQueue { get; }
 
-    public ListFilterService(InventoryToolsConfiguration configuration, ICharacterMonitor characterMonitor, HostedInventoryHistory inventoryHistory, IInventoryMonitor inventoryMonitor, IBackgroundTaskQueue filterQueue, ILogger<ListFilterService> logger, IMarketCache marketCache, CraftPricer craftPricer, IFilterService filterService, MediatorService mediatorService, ExcelCache excelCache) : base(logger, mediatorService)
+    public ListFilterService(InventoryToolsConfiguration configuration, ICharacterMonitor characterMonitor, HostedInventoryHistory inventoryHistory, IInventoryMonitor inventoryMonitor, IBackgroundTaskQueue filterQueue, ILogger<ListFilterService> logger, IMarketCache marketCache, CraftPricer craftPricer, IFilterService filterService, MediatorService mediatorService, ItemSheet itemSheet) : base(logger, mediatorService)
     {
         _configuration = configuration;
         _characterMonitor = characterMonitor;
@@ -45,7 +46,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
         _marketCache = marketCache;
         _craftPricer = craftPricer;
         _filterService = filterService;
-        _excelCache = excelCache;
+        _itemSheet = itemSheet;
         FilterQueue = filterQueue;
         MediatorService.Subscribe<RequestListUpdateMessage>(this, message => RequestRefresh(message.FilterConfiguration));
     }
@@ -352,7 +353,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
                                         if (slotCount != 0)
                                         {
                                             var nextEmptySlot = slotsAvailable[seenInventoryLocation].Dequeue();
-                                            if (sourceItem.Item is {IsUnique: false})
+                                            if (sourceItem.Item.Base is {IsUnique: false})
                                             {
                                                 if (sourceInventory.Key.Item1 != seenInventoryLocation.Item1 ||
                                                     sourceItem.SortedContainer != seenInventoryLocation.Item2)
@@ -633,17 +634,17 @@ public class ListFilterService : DisposableMediatorBackgroundService
             {
                 foreach (var curatedItem in filter.CuratedItems)
                 {
-                    var itemEx = _excelCache.GetItemExSheet().GetRow(curatedItem.ItemId);
-                    if (itemEx != null)
+                    var itemRow = _itemSheet.GetRowOrDefault(curatedItem.ItemId);
+                    if (itemRow != null)
                     {
-                        searchResults.Add(new SearchResult(itemEx, curatedItem));
+                        searchResults.Add(new SearchResult(itemRow, curatedItem));
                     }
                 }
             }
         }
         else
         {
-            searchResults = _excelCache.AllItems.Select(c => c.Value).Where(c => filter.FilterItem(_filterService.AvailableFilters, c)).Where(c => c.RowId != 0).Select(c => new SearchResult(c)).ToList();
+            searchResults = _itemSheet.Where(c => filter.FilterItem(_filterService.AvailableFilters, c)).Where(c => c.RowId != 0).Select(c => new SearchResult(c)).ToList();
         }
 
 

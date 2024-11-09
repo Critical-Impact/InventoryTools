@@ -2,13 +2,14 @@ using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using Dalamud.Game.Text;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
+using Lumina.Excel;
+using Lumina.Excel.Sheets;
 using Microsoft.Extensions.Logging;
 using OtterGui;
 using OtterGui.Raii;
@@ -17,11 +18,11 @@ namespace InventoryTools.Logic.Columns;
 
 public class CraftMarketPriceColumn : GilColumn
 {
-    private readonly ExcelCache _excelCache;
+    private readonly ExcelSheet<World> _worldSheet;
 
-    public CraftMarketPriceColumn(ILogger<CraftMarketPriceColumn> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
+    public CraftMarketPriceColumn(ILogger<CraftMarketPriceColumn> logger, ImGuiService imGuiService, ExcelSheet<World> worldSheet) : base(logger, imGuiService)
     {
-        _excelCache = excelCache;
+        _worldSheet = worldSheet;
     }
 
     public override ColumnCategory ColumnCategory { get; } = ColumnCategory.Crafting;
@@ -37,7 +38,7 @@ public class CraftMarketPriceColumn : GilColumn
         SearchResult searchResult, int rowIndex, int columnIndex)
     {
         if (searchResult.CraftItem == null) return null;
-        
+
         ImGui.TableNextColumn();
         if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;
         if (!searchResult.CraftItem.Item.CanBeTraded) return new List<MessageBase>();
@@ -45,7 +46,7 @@ public class CraftMarketPriceColumn : GilColumn
         {
             ImGui.Text($"{searchResult.CraftItem.MarketUnitPrice.Value:n0}" + SeIconChar.Gil.ToIconString() + " (" + $"{searchResult.CraftItem.MarketTotalPrice.Value:n0}" + SeIconChar.Gil.ToIconString() + ")");
 
-            if (searchResult.Item.ObtainedGil)
+            if (searchResult.Item.SpentGilShop)
             {
                 var currentIndex = configuration.CraftList.IngredientPreferenceTypeOrder.IndexOf((
                     searchResult.CraftItem.IngredientPreference.Type,
@@ -86,16 +87,16 @@ public class CraftMarketPriceColumn : GilColumn
                         var totalAvailable = 0;
                         foreach (var price in craftPrices)
                         {
-                            var world = _excelCache.GetWorldSheet().GetRow(price.WorldId);
+                            var world = _worldSheet.GetRowOrDefault(price.WorldId);
                             if (world != null)
                             {
                                 ImGui.Text(price.Left + " available at " + price.UnitPrice +
-                                           (price.IsHq ? " (HQ)" : "") + " (" + world.FormattedName + ")");
+                                           (price.IsHq ? " (HQ)" : "") + " (" + world.Value.Name.ExtractText() + ")");
                             }
 
                             totalAvailable += price.Left;
                         }
-                        
+
                         ImGui.Text("Available: " + totalAvailable);
 
                         if (searchResult.CraftItem.MarketAvailable != searchResult.CraftItem.QuantityNeeded)
@@ -113,7 +114,7 @@ public class CraftMarketPriceColumn : GilColumn
     public override string Name { get; set; } = "Market Pricing";
     public override float Width { get; set; } = 150;
     public override string HelpText { get; set; } = "The current market pricing for the given item. ";
-    
+
     public override FilterType DefaultIn => Logic.FilterType.CraftFilter;
     public override FilterType AvailableIn => Logic.FilterType.CraftFilter;
 }

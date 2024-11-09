@@ -1,6 +1,4 @@
-﻿using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
-using InventoryTools.Logic.Columns.Abstract;
+﻿using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 

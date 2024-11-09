@@ -1,4 +1,3 @@
-using Dalamud.Interface.Internal;
 using Dalamud.Plugin.Services;
 
 namespace InventoryTools.Extensions

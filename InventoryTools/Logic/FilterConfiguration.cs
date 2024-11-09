@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
+
 using ImGuiNET;
 using InventoryTools.Attributes;
 using InventoryTools.Converters;
@@ -848,7 +849,7 @@ namespace InventoryTools.Logic
             }
         }
 
-        public bool FilterItem(List<IFilter> filters, ItemEx item)
+        public bool FilterItem(List<IFilter> filters, ItemRow item)
         {
             if (FilterType == FilterType.CraftFilter)
             {
@@ -865,14 +866,14 @@ namespace InventoryTools.Logic
                 var filter = filters[index];
                 if (UseORFiltering != null && UseORFiltering == true)
                 {
-                    if (filter.FilterItem(this, (ItemEx)item) == true)
+                    if (filter.FilterItem(this, (ItemRow)item) == true)
                     {
                         matchesAny = true;
                     }
                 }
                 else
                 {
-                    if (filter.FilterItem(this, (ItemEx)item) == false)
+                    if (filter.FilterItem(this, (ItemRow)item) == false)
                     {
                         return false;
                     }
@@ -926,7 +927,7 @@ namespace InventoryTools.Logic
             uint? requiredAmount = null;
             if (FilterType == FilterType.CraftFilter)
             {
-                var requiredMaterial = CraftList.GetItemById(item.ItemId, item.IsHQ, item.Item.CanBeHq);
+                var requiredMaterial = CraftList.GetItemById(item.ItemId, item.IsHQ, item.Item.Base.CanBeHq);
                 if (requiredMaterial == null)
                 {
                     return null;

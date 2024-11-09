@@ -1,22 +1,23 @@
 using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
+using Dalamud.Plugin.Services;
 using InventoryTools.Logic.Columns.Abstract.ColumnSettings;
 using InventoryTools.Services;
+using Lumina.Excel;
+using Lumina.Excel.Sheets;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns.ColumnSettings;
 
 public class MarketboardWorldSetting : ChoiceColumnSetting<(uint,string)?>
 {
-    private readonly ExcelCache _excelCache;
-
+    private readonly ExcelSheet<World> _worldSheet;
     public override string EmptyText => "Home World";
 
-    public MarketboardWorldSetting(ILogger<MarketboardWorldSetting> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
+    public MarketboardWorldSetting(ILogger<MarketboardWorldSetting> logger, ImGuiService imGuiService, ExcelSheet<World> worldSheet) : base(logger, imGuiService)
     {
-        _excelCache = excelCache;
+        _worldSheet = worldSheet;
     }
     public override (uint,string)? CurrentValue(ColumnConfiguration configuration)
     {
@@ -30,13 +31,13 @@ public class MarketboardWorldSetting : ChoiceColumnSetting<(uint,string)?>
         {
             return (0, "Active World");
         }
-        
-        var world = _excelCache.GetWorldSheet().GetRow(value.Value);
+
+        var world = _worldSheet.GetRowOrDefault(value.Value);
         if (world == null)
         {
             return null;
         }
-        return (world.RowId, world.FormattedName);
+        return (world.Value.RowId, world.Value.Name.ExtractText());
     }
 
     public uint SelectedWorldId(ColumnConfiguration configuration, Character character)
@@ -74,7 +75,7 @@ public class MarketboardWorldSetting : ChoiceColumnSetting<(uint,string)?>
     public override (uint,string)? DefaultValue { get; set; } = null;
     public override List<(uint,string)?> GetChoices(ColumnConfiguration configuration)
     {
-        List<(uint RowId, string FormattedName)?> worlds = _excelCache.GetWorldSheet().Where(c => c.IsPublic).Select(c =>((uint, string)?)(c.RowId, c.FormattedName)).ToList();
+        List<(uint RowId, string FormattedName)?> worlds = _worldSheet.Where(c => c.IsPublic).Select(c =>((uint, string)?)(c.RowId, c.Name.ExtractText())).ToList();
         worlds.Insert(0,(0,"Active World"));
         return worlds;
     }

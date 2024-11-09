@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using AllaganLib.GameSheets.Sheets;
+using AllaganLib.GameSheets.Sheets.Rows;
+using AllaganLib.Shared.Extensions;
 using Autofac;
 using CriticalCommonLib;
 using CriticalCommonLib.Addons;
@@ -10,13 +13,11 @@ using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Services.Ui;
-using CriticalCommonLib.Sheets;
+
 using DalaMock.Shared.Interfaces;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Colors;
-using Dalamud.Interface.ImGuiFileDialog;
 using ImGuiNET;
-using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Ui.Widgets;
@@ -27,6 +28,7 @@ using InventoryTools.Logic.Filters;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
+using InventoryTools.Extensions;
 using Microsoft.Extensions.Logging;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
@@ -45,9 +47,9 @@ namespace InventoryTools.Ui
         private readonly IGameUiManager _gameUiManager;
         private readonly InventoryHistory _inventoryHistory;
         private readonly ListImportExportService _importExportService;
-        private readonly ExcelCache _excelCache;
         private readonly IComponentContext _context;
         private readonly FiltersWindowLayoutSetting _layoutSetting;
+        private readonly ItemSheet _itemSheet;
         private readonly IClipboardService _clipboardService;
         private readonly PopupService _popupService;
         private readonly IKeyState _keyState;
@@ -59,7 +61,7 @@ namespace InventoryTools.Ui
             TableService tableService, IChatUtilities chatUtilities, ICharacterMonitor characterMonitor,
             IUniversalis universalis, IFileDialogManager fileDialogManager, IGameUiManager gameUiManager,
             HostedInventoryHistory inventoryHistory, ListImportExportService importExportService,
-            ExcelCache excelCache, IComponentContext context, FiltersWindowLayoutSetting layoutSetting,
+            IComponentContext context, FiltersWindowLayoutSetting layoutSetting, ItemSheet itemSheet,
             IClipboardService clipboardService, PopupService popupService, IKeyState keyState) : base(logger, mediator, imGuiService, configuration, "Filters Window")
         {
             _listService = listService;
@@ -72,9 +74,9 @@ namespace InventoryTools.Ui
             _gameUiManager = gameUiManager;
             _inventoryHistory = inventoryHistory;
             _importExportService = importExportService;
-            _excelCache = excelCache;
             _context = context;
             _layoutSetting = layoutSetting;
+            _itemSheet = itemSheet;
             _clipboardService = clipboardService;
             _popupService = popupService;
             _keyState = keyState;
@@ -1630,7 +1632,7 @@ namespace InventoryTools.Ui
             return filterConfiguration.Key;
         }
 
-        private void DrawSearchRow(FilterConfiguration filterConfiguration, ItemEx item)
+        private void DrawSearchRow(FilterConfiguration filterConfiguration, ItemRow item)
         {
             ImGui.TableNextColumn();
             ImGui.TextWrapped( item.NameString);
@@ -1694,20 +1696,20 @@ namespace InventoryTools.Ui
         }
 
         private string _searchString = "";
-        private List<ItemEx>? _searchItems;
-        public List<ItemEx> SearchItems
+        private List<ItemRow>? _searchItems;
+        public List<ItemRow> SearchItems
         {
             get
             {
                 if (SearchString == "")
                 {
-                    _searchItems = new List<ItemEx>();
+                    _searchItems = new List<ItemRow>();
                     return _searchItems;
                 }
                 if (_searchItems == null)
                 {
-                    _searchItems = _excelCache.ItemNamesById.Where(c => c.Value.ToLower().PassesFilter(SearchString.ToLower())).Take(100)
-                        .Select(c => _excelCache.GetItemExSheet().GetRow(c.Key)!).ToList();
+                    _searchItems = _itemSheet.ItemsByName.Where(c => c.Key.ToLower().PassesFilter(SearchString.ToLower())).Take(100)
+                        .Select(c => _itemSheet.GetRow(c.Value)).ToList();
                 }
 
                 return _searchItems;

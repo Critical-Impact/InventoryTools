@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
+using AllaganLib.GameSheets.Sheets;
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
-using CriticalCommonLib.Sheets;
+
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
@@ -15,16 +17,16 @@ namespace InventoryTools.Logic.Columns
     {
         private readonly ICharacterMonitor _characterMonitor;
         private readonly IInventoryMonitor _inventoryMonitor;
-        private readonly ExcelCache _excelCache;
+        private readonly ClassJobCategorySheet _classJobCategorySheet;
 
-        public BestInSlotColumn(ILogger<BestInSlotColumn> logger, ImGuiService imGuiService, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, ExcelCache excelCache) : base(logger, imGuiService)
+        public BestInSlotColumn(ILogger<BestInSlotColumn> logger, ImGuiService imGuiService, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, ClassJobCategorySheet classJobCategorySheet) : base(logger, imGuiService)
         {
             _characterMonitor = characterMonitor;
             _inventoryMonitor = inventoryMonitor;
-            _excelCache = excelCache;
+            _classJobCategorySheet = classJobCategorySheet;
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Tools;
-        
+
         private ClippedSelectableCombo<KeyValuePair<ulong, Character>>? _characters;
         private ulong? _selectedCharacter;
 
@@ -64,18 +66,18 @@ namespace InventoryTools.Logic.Columns
             }
 
             var item = searchResult.Item;
-            if (item.EquipSlotCategory.Row != 0 && CanCurrentJobEquip(item.ClassJobCategory.Row) && CanUse(item.LevelEquip))
+            if (item.EquipSlotCategory != null && CanCurrentJobEquip(item.Base.ClassJobCategory.RowId) && CanUse(item.Base.LevelEquip))
             {
                 var equippedItem = GetEquippedItem(item);
                 if (equippedItem != null)
                 {
-                    if (item.EquipSlotCategoryEx?.SimilarSlots(equippedItem.Item) ?? false)
+                    if (item.EquipSlotCategory?.SimilarSlots(equippedItem.Item) ?? false)
                     {
-                        return (int)item.LevelItem.Row - (int)equippedItem.Item.LevelItem.Row;
+                        return (int)item.Base.LevelItem.RowId - (int)equippedItem.Item.Base.LevelItem.RowId;
                     }
                 }
 
-                return (int)item.LevelItem.Row;
+                return (int)item.Base.LevelItem.RowId;
             }
             return null;
         }
@@ -123,7 +125,7 @@ namespace InventoryTools.Logic.Columns
                     var character = _characterMonitor.Characters[_selectedCharacter.Value];
                     if (character.OwnerId != 0)
                     {
-                        if(_excelCache.IsItemEquippableBy(classJobCategory, character.ClassJob))
+                        if(_classJobCategorySheet.IsItemEquippableBy(classJobCategory, character.ClassJob))
                         {
                             return true;
                         }
@@ -137,7 +139,7 @@ namespace InventoryTools.Logic.Columns
                 var activeCharacter = _characterMonitor.ActiveCharacter;
                 if (activeCharacter != null)
                 {
-                    if(_excelCache.IsItemEquippableBy(classJobCategory, activeCharacter.ClassJob))
+                    if(_classJobCategorySheet.IsItemEquippableBy(classJobCategory, activeCharacter.ClassJob))
                     {
                         return true;
                     }
@@ -147,7 +149,7 @@ namespace InventoryTools.Logic.Columns
             return false;
         }
 
-        public InventoryItem? GetEquippedItem(ItemEx comparingItem)
+        public InventoryItem? GetEquippedItem(ItemRow comparingItem)
         {
             if (_selectedCharacter != null)
             {
@@ -157,7 +159,7 @@ namespace InventoryTools.Logic.Columns
                     if (character.OwnerId != 0)
                     {
                         var equipped = _inventoryMonitor.GetSpecificInventory(character.CharacterId,InventoryCategory.RetainerEquipped);
-                        return equipped.FirstOrDefault(c => c.Item.EquipSlotCategoryEx?.SimilarSlots(comparingItem) ?? false);
+                        return equipped.FirstOrDefault(c => c.Item.EquipSlotCategory?.SimilarSlots(comparingItem) ?? false);
                     }
                 }
             }
@@ -165,7 +167,7 @@ namespace InventoryTools.Logic.Columns
             {
                 var equipped = _inventoryMonitor.GetSpecificInventory(_characterMonitor.ActiveCharacterId,
                     InventoryCategory.CharacterEquipped);
-                return equipped.FirstOrDefault(c => c.Item.EquipSlotCategoryEx?.SimilarSlots(comparingItem) ?? false);
+                return equipped.FirstOrDefault(c => c.Item.EquipSlotCategory?.SimilarSlots(comparingItem) ?? false);
             }
 
             return null;

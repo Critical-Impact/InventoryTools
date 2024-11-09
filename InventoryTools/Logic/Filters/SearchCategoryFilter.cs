@@ -1,22 +1,28 @@
 using System.Collections.Generic;
 using System.Linq;
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
-using CriticalCommonLib.Sheets;
-using Dalamud.Utility;
 using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Services;
+using Lumina.Excel;
+using Lumina.Excel.Sheets;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
     public class SearchCategoryFilter : UintMultipleChoiceFilter
     {
-        private readonly ExcelCache _excelCache;
+        private readonly ExcelSheet<ItemSearchCategory> _itemSearchCategorySheet;
+
+        public SearchCategoryFilter(ILogger<SearchCategoryFilter> logger, ImGuiService imGuiService, ExcelSheet<ItemSearchCategory> itemSearchCategorySheet) : base(logger, imGuiService)
+        {
+            _itemSearchCategorySheet = itemSearchCategorySheet;
+        }
+
         public override string Key { get; set; } = "SchCategory";
-        
+
         public override string Name { get; set; } = "Market Board Categories";
-        
+
         public override string HelpText { get; set; } = "Filter by the categories available on the market board.";
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Searching;
 
@@ -26,16 +32,16 @@ namespace InventoryTools.Logic.Filters
         public override List<uint> DefaultValue { get; set; } = new();
 
 
-        
+
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
             return FilterItem(configuration, item.Item);
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemRow item)
         {
             var currentValue = CurrentValue(configuration);
-            if (currentValue.Count != 0 && !currentValue.Contains(item.ItemSearchCategory.Row))
+            if (currentValue.Count != 0 && !currentValue.Contains(item.Base.ItemSearchCategory.RowId))
             {
                 return false;
             }
@@ -47,8 +53,7 @@ namespace InventoryTools.Logic.Filters
         {
             if (!_choicesLoaded)
             {
-                _choices = _excelCache.GetAllItemSearchCategories()
-                    .ToDictionary(c => c.Key, c => c.Value.Name.ToDalamudString().ToString());
+                _choices = _itemSearchCategorySheet.ToDictionary(c => c.RowId, c => c.Name.ExtractText());
                 _choicesLoaded = true;
             }
 
@@ -68,10 +73,5 @@ namespace InventoryTools.Logic.Filters
         }
 
         public override bool HideAlreadyPicked { get; set; } = true;
-
-        public SearchCategoryFilter(ILogger<SearchCategoryFilter> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
-        {
-            _excelCache = excelCache;
-        }
     }
 }

@@ -1,15 +1,22 @@
 using System.Collections.Generic;
 using System.Linq;
-using CriticalCommonLib.Services;
 using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Services;
+using Lumina.Excel;
+using Lumina.Excel.Sheets;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Settings;
 
 public class MarketBoardExtraWorldsSetting : MultipleChoiceSetting<uint>
 {
-    private readonly ExcelCache _excelCache;
+    private readonly ExcelSheet<World> _worldSheet;
+
+    public MarketBoardExtraWorldsSetting(ILogger<MarketBoardExtraWorldsSetting> logger, ImGuiService imGuiService, ExcelSheet<World> worldSheet) : base(logger, imGuiService)
+    {
+        _worldSheet = worldSheet;
+    }
+
     public override List<uint> DefaultValue { get; set; } = new List<uint>();
     public override List<uint> CurrentValue(InventoryToolsConfiguration configuration)
     {
@@ -32,17 +39,12 @@ public class MarketBoardExtraWorldsSetting : MultipleChoiceSetting<uint>
     {
         if (_worldNames == null)
         {
-            _worldNames = _excelCache.GetWorldSheet().Where(c => c.IsPublic).OrderBy(c => c.FormattedName)
-                .ToDictionary(c => c.RowId, c => c.FormattedName);
+            _worldNames = _worldSheet.Where(c => c.IsPublic).OrderBy(c => c.Name.ExtractText())
+                .ToDictionary(c => c.RowId, c => c.Name.ExtractText());
         }
 
         return _worldNames;
     }
 
     public override bool HideAlreadyPicked { get; set; } = true;
-
-    public MarketBoardExtraWorldsSetting(ILogger<MarketBoardExtraWorldsSetting> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
-    {
-        _excelCache = excelCache;
-    }
 }

@@ -1,5 +1,4 @@
 using Dalamud.Interface.Colors;
-using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;

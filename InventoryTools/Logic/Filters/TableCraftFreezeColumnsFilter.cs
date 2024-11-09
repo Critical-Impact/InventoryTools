@@ -1,5 +1,6 @@
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
+
 using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -18,13 +19,13 @@ namespace InventoryTools.Logic.Filters
 
         public override FilterType AvailableIn { get; set; } =
             FilterType.CraftFilter;
-        
+
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {
             return null;
         }
 
-        public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
+        public override bool? FilterItem(FilterConfiguration configuration, ItemRow item)
         {
             return null;
         }

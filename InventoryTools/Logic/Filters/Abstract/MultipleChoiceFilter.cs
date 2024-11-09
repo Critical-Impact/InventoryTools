@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Extensions;
 using Dalamud.Interface.Colors;
 using ImGuiNET;

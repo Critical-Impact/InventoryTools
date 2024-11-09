@@ -9,7 +9,6 @@ using Dalamud.Plugin.Services;
 using InventoryTools.Attributes;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using static Dalamud.Game.Command.CommandInfo;
 
 // ReSharper disable ForCanBeConvertedToForeach
 

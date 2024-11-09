@@ -1,10 +1,7 @@
 using System.Collections.Generic;
 using System.Numerics;
-using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Interfaces;
-using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using ImGuiNET;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -16,12 +13,12 @@ namespace InventoryTools.Logic.Columns.Abstract
         public TextIconColumn(ILogger logger, ImGuiService imGuiService) : base(logger, imGuiService)
         {
         }
-        
+
         public override string CsvExport(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
             return "";
         }
-       
+
         public virtual string EmptyText
         {
             get
@@ -35,7 +32,7 @@ namespace InventoryTools.Logic.Columns.Abstract
         {
             return DoDraw(searchResult, CurrentValue(columnConfiguration, searchResult), rowIndex, configuration, columnConfiguration);
         }
-        
+
         public override IEnumerable<SearchResult> Filter(ColumnConfiguration columnConfiguration, IEnumerable<SearchResult> searchResults)
         {
             return searchResults;

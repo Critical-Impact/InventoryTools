@@ -1,4 +1,5 @@
 using System.Numerics;
+using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Services.Mediator;
 using ImGuiNET;
 using InventoryTools.Extensions;

@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using AllaganLib.GameSheets.Extensions;
+using AllaganLib.GameSheets.Model;
+using AllaganLib.GameSheets.Service;
+using AllaganLib.GameSheets.Sheets.Caches;
+using AllaganLib.Shared.Time;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Autofac.Util;
@@ -14,14 +19,13 @@ using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Services.Ui;
-using CriticalCommonLib.Time;
+
 using DalaMock.Host.Factories;
 using DalaMock.Host.Hosting;
 using DalaMock.Shared.Classes;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Interface.ImGuiFileDialog;
-using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using InventoryTools.Commands;
@@ -43,6 +47,9 @@ using InventoryTools.Services.Interfaces;
 using InventoryTools.Tooltips;
 using InventoryTools.Ui;
 using InventoryTools.Ui.Pages;
+using Lumina;
+using Lumina.Excel;
+using LuminaSupplemental.Excel.Model;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -55,7 +62,7 @@ namespace InventoryTools
     {
         private readonly IPluginLog _pluginLog;
         private Service? _service;
-        private IDalamudPluginInterface PluginInterface { get; set; }
+        private IDalamudPluginInterface? PluginInterface { get; set; }
 
         public InventoryToolsPlugin(IDalamudPluginInterface pluginInterface, IPluginLog pluginLog,
             IAddonLifecycle addonLifecycle, IChatGui chatGui, IClientState clientState, ICommandManager commandManager,
@@ -80,7 +87,6 @@ namespace InventoryTools
 
         private List<Type> HostedServices { get; } = new()
         {
-            typeof(ExcelCache),
             typeof(ConfigurationManagerService),
             typeof(ContextMenuService),
             typeof(ListService),
@@ -129,7 +135,7 @@ namespace InventoryTools
         public override void PreBuild(IHostBuilder hostBuilder)
         {
             hostBuilder
-                .UseContentRoot(PluginInterface.ConfigDirectory.FullName)
+                .UseContentRoot(PluginInterface!.ConfigDirectory.FullName)
                 .ConfigureLogging(lb =>
                 {
                     lb.ClearProviders();
@@ -278,6 +284,52 @@ namespace InventoryTools
                 builder.RegisterType<ListCategoryService>().SingleInstance();
                 builder.RegisterType<Logger>().SingleInstance();
                 builder.RegisterType<PopupService>().SingleInstance();
+                builder.RegisterType<ExcelCache>().SingleInstance();
+                builder.RegisterType<CraftingCache>().SingleInstance();
+
+                builder.Register<GameData>(c => c.Resolve<IDataManager>().GameData).SingleInstance().ExternallyOwned();
+                builder.RegisterType<SheetManager>().SingleInstance();
+                builder.Register<SheetManagerStartupOptions>(c => new SheetManagerStartupOptions()).SingleInstance();
+                builder.Register<SheetIndexer>(c => c.Resolve<SheetManager>().SheetIndexer).SingleInstance().ExternallyOwned();
+                builder.Register<ItemInfoCache>(c => c.Resolve<SheetManager>().ItemInfoCache).SingleInstance().ExternallyOwned();
+                builder.Register<NpcLevelCache>(c => c.Resolve<SheetManager>().NpcLevelCache).SingleInstance().ExternallyOwned();
+                builder.Register<NpcShopCache>(c => c.Resolve<SheetManager>().NpcShopCache).SingleInstance().ExternallyOwned();
+                builder.RegisterGeneric((context, parameters) =>
+                {
+                    var gameData = context.Resolve<IDataManager>();
+                    var method = typeof(IDataManager).GetMethod(nameof(IDataManager.GetExcelSheet))
+                        ?.MakeGenericMethod(parameters);
+                    var sheet = method!.Invoke(gameData, [null, null])!;
+                    return sheet;
+                })
+                .As(typeof(ExcelSheet<>));
+
+                Assembly assembly = typeof(SheetManager).Assembly;
+
+                var extendedSheetTypes = assembly.GetTypes()
+                    .Where(t => !t.IsAbstract && !t.IsInterface && (t.IsExtendedSheet() || t.IsExtendedSubrowSheet()));
+
+                foreach (var extendedSheetType in extendedSheetTypes)
+                {
+                    builder.Register(context =>
+                    {
+                        return context.Resolve<SheetManager>().SheetContainer.Resolve(extendedSheetType);
+                    }).As(extendedSheetType).SingleInstance().ExternallyOwned();
+                }
+
+                Assembly luminaSupplemental = typeof(ICsv).Assembly;
+
+                var csvs = luminaSupplemental.GetTypes()
+                    .Where(t => !t.IsAbstract && !t.IsInterface && t.GetInterface("ICsv") != null);
+
+                foreach (var csvType in csvs)
+                {
+                    var listType = typeof(List<>).MakeGenericType(csvType);
+                    builder.Register(context =>
+                    {
+                        return context.Resolve<SheetManager>().SheetContainer.Resolve(listType);
+                    }).As(listType).SingleInstance().ExternallyOwned();
+                }
 
                 builder.RegisterType<PluginCommands>().SingleInstance();
                 builder.RegisterType<RightClickService>().SingleInstance();

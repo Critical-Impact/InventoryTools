@@ -1,5 +1,6 @@
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
+
 
 namespace InventoryTools.Logic.Filters
 {
@@ -12,16 +13,16 @@ namespace InventoryTools.Logic.Filters
         public string HelpText { get; set; }
         public bool ShowReset { get; set; }
         public bool ShowOperatorTooltip { get; set; }
-        
+
         public FilterCategory FilterCategory { get; set; }
-        
+
         public int Order { get; set; }
 
         public bool HasValueSet(FilterConfiguration configuration);
-        
+
         public FilterType AvailableIn { get; set; }
         public bool? FilterItem(FilterConfiguration configuration, InventoryItem item);
-        public bool? FilterItem(FilterConfiguration configuration, ItemEx item);
+        public bool? FilterItem(FilterConfiguration configuration, ItemRow item);
         public bool? FilterItem(FilterConfiguration configuration, InventoryChange item);
         public void Draw(FilterConfiguration configuration);
 

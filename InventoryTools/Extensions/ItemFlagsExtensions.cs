@@ -1,4 +1,3 @@
-using System;
 using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace InventoryTools.Extensions;

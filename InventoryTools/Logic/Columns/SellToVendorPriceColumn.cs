@@ -1,6 +1,4 @@
 using System;
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -19,7 +17,7 @@ namespace InventoryTools.Logic.Columns
             {
                 return (int)searchResult.InventoryItem.SellToVendorPrice;
             }
-            return (int)searchResult.Item.PriceLow;
+            return (int)searchResult.Item.Base.PriceLow;
         }
         public override string Name { get; set; } = "Sell to Vendor Price";
         public override float Width { get; set; } = 100.0f;

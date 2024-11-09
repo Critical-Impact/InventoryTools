@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using CriticalCommonLib.Models;
+﻿using System.Collections.Generic;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using InventoryTools.Extensions;
@@ -24,7 +22,7 @@ namespace InventoryTools.Logic.Columns
         public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration, SearchResult searchResult,
             int rowIndex, int columnIndex)
         {
-            if (searchResult.CuratedItem != null && (searchResult.Item.IsCollectable || searchResult.Item.CanBeHq))
+            if (searchResult.CuratedItem != null && (searchResult.Item.Base.IsCollectable || searchResult.Item.Base.CanBeHq))
             {
                 ImGui.TableNextColumn();
                 if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;

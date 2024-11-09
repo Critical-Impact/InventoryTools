@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using AllaganLib.GameSheets.Sheets;
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
-using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -11,7 +11,13 @@ namespace InventoryTools.Logic.Filters;
 
 public class ItemFilter : UintMultipleChoiceFilter
 {
-    private readonly ExcelCache _excelCache;
+    private readonly ItemSheet _itemSheet;
+
+    public ItemFilter(ILogger<ItemFilter> logger, ImGuiService imGuiService, ItemSheet itemSheet) : base(logger, imGuiService)
+    {
+        _itemSheet = itemSheet;
+    }
+
     public override string Key { get; set; } = "ItemFilter";
     public override string Name { get; set; } = "Name (Selector)";
 
@@ -26,7 +32,7 @@ public class ItemFilter : UintMultipleChoiceFilter
         return FilterItem(configuration, item.Item);
     }
 
-    public override bool? FilterItem(FilterConfiguration configuration, ItemEx item)
+    public override bool? FilterItem(FilterConfiguration configuration, ItemRow item)
     {
         var searchItems = CurrentValue(configuration).ToList();
         if (searchItems.Count == 0)
@@ -44,13 +50,8 @@ public class ItemFilter : UintMultipleChoiceFilter
 
     public override Dictionary<uint, string> GetChoices(FilterConfiguration configuration)
     {
-        return _excelCache.ItemNamesById;
+        return _itemSheet.ToDictionary(c => c.RowId, c => c.NameString);
     }
 
     public override bool HideAlreadyPicked { get; set; }
-
-    public ItemFilter(ILogger<ItemFilter> logger, ImGuiService imGuiService, ExcelCache excelCache) : base(logger, imGuiService)
-    {
-        _excelCache = excelCache;
-    }
 }

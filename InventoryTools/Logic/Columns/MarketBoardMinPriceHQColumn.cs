@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
-using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.MarketBoard;
-using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using Dalamud.Game.Text;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
@@ -33,9 +31,9 @@ namespace InventoryTools.Logic.Columns
         protected readonly string UntradableString = "untradable";
         protected readonly int Loading = -1;
         protected readonly int Untradable = -2;
-        
+
         public override bool IsConfigurable => true;
-        
+
         public override void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)
         {
             ImGui.NewLine();
@@ -82,7 +80,7 @@ namespace InventoryTools.Logic.Columns
                         var activeCharacter = _characterMonitor.ActiveCharacter;
                         if (activeCharacter != null)
                         {
-                            return new List<MessageBase> { new MarketRequestItemUpdateMessage(searchResult.Item.ItemId) };
+                            return new List<MessageBase> { new MarketRequestItemUpdateMessage(searchResult.Item.RowId) };
                         }
                     }
                 }
@@ -98,7 +96,7 @@ namespace InventoryTools.Logic.Columns
             if (searchResult.InventoryItem != null && !searchResult.InventoryItem.CanBeTraded)
             {
                 return Untradable;
-            }            
+            }
             if (!searchResult.Item.CanBeTraded)
             {
                 return Untradable;
@@ -108,7 +106,7 @@ namespace InventoryTools.Logic.Columns
             if (activeCharacter != null)
             {
                 var selectedWorldId = MarketboardWorldSetting.SelectedWorldId(columnConfiguration, activeCharacter);
-                var marketBoardData = _marketCache.GetPricing(searchResult.Item.ItemId, selectedWorldId, false);
+                var marketBoardData = _marketCache.GetPricing(searchResult.Item.RowId, selectedWorldId, false);
                 if (marketBoardData != null)
                 {
                     var hq = marketBoardData.MinPriceHq;

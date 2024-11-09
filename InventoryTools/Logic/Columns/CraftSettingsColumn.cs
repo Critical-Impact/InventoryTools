@@ -2,19 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
-using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
-using Dalamud.Interface.Internal;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Ui.Widgets;
 using Dalamud.Interface.Utility.Raii;
-using FFXIVClientStructs.FFXIV.Client.System.Input;
 using InventoryTools.Services;
+using Lumina.Excel;
+using Lumina.Excel.Sheets;
 using Microsoft.Extensions.Logging;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 using Vector2 = FFXIVClientStructs.FFXIV.Common.Math.Vector2;
@@ -24,13 +23,21 @@ namespace InventoryTools.Logic.Columns;
 public class CraftSettingsColumn : IColumn
 {
     private readonly ILogger<CraftSettingsColumn> _logger;
-    private readonly ExcelCache _excelCache;
+    private readonly CraftingCache _craftingCache;
+    private readonly RecipeSheet _recipeSheet;
+    private readonly MapSheet _mapSheet;
+    private readonly ItemSheet _itemSheet;
+    private readonly ExcelSheet<World> _worldSheet;
     public ImGuiService ImGuiService { get; }
 
-    public CraftSettingsColumn(ILogger<CraftSettingsColumn> logger, ImGuiService imGuiService, ExcelCache excelCache)
+    public CraftSettingsColumn(ILogger<CraftSettingsColumn> logger, ImGuiService imGuiService, CraftingCache craftingCache, RecipeSheet recipeSheet, MapSheet mapSheet, ItemSheet itemSheet, ExcelSheet<World> worldSheet)
     {
         _logger = logger;
-        _excelCache = excelCache;
+        _craftingCache = craftingCache;
+        _recipeSheet = recipeSheet;
+        _mapSheet = mapSheet;
+        _itemSheet = itemSheet;
+        _worldSheet = worldSheet;
         ImGuiService = imGuiService;
     }
     public ColumnCategory ColumnCategory => ColumnCategory.Crafting;
@@ -51,7 +58,7 @@ public class CraftSettingsColumn : IColumn
     public FilterType AvailableIn { get; } = Logic.FilterType.CraftFilter;
     public virtual bool IsConfigurable => false;
     public bool IsDefault => true;
-    
+
     public bool AvailableInType(FilterType type)
     {
         return type == Logic.FilterType.CraftFilter;
@@ -74,10 +81,10 @@ public class CraftSettingsColumn : IColumn
         int rowIndex, int columnIndex)
     {
         if (searchResult.CraftItem == null) return null;
-        
+
         ImGui.TableNextColumn();
         if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;
-        
+
         using (var popup = ImRaii.Popup("ConfigureItemSettings" + columnIndex + searchResult.CraftItem.ItemId + (searchResult.CraftItem.IsOutputItem ? "o" : "")))
         {
             if (popup.Success)
@@ -164,7 +171,7 @@ public class CraftSettingsColumn : IColumn
         ImGui.SetCursorPosY(originalPos);
         DrawRetainerIcon(configuration, rowIndex, searchResult.CraftItem, retainerRetrievalDefault, retainerRetrieval);
         ImGui.SetCursorPosY(originalPos);
-        
+
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
 
         if (_settingsIcon.Draw(ImGuiService.GetIconTexture(66319).ImGuiHandle, "cnf_" + rowIndex))
@@ -181,10 +188,10 @@ public class CraftSettingsColumn : IColumn
 
                     ImGui.TextUnformatted("Sourcing: " + (ingredientPreferenceDefault?.FormattedName ?? "Use Default"));
                     ImGui.TextUnformatted("Retainer: " + (retainerRetrievalDefault?.FormattedName() ?? "Use Default"));
-                    ImGui.TextUnformatted("Zone: " + (zonePreference != null ? _excelCache.GetMapSheet().GetRow(zonePreference.Value)?.FormattedName ?? "Use Default" : "Use Default"));
+                    ImGui.TextUnformatted("Zone: " + (zonePreference != null ? _mapSheet.GetRowOrDefault(zonePreference.Value)?.FormattedName ?? "Use Default" : "Use Default"));
                     if (searchResult.Item.CanBePlacedOnMarket)
                     {
-                        ImGui.TextUnformatted("Market World Preference: " + (worldPreference != null ? _excelCache.GetWorldSheet().GetRow(worldPreference.Value)?.FormattedName ?? "Use Default" : "Use Default"));
+                        ImGui.TextUnformatted("Market World Preference: " + (worldPreference != null ? _worldSheet.GetRowOrDefault(worldPreference.Value)?.Name.ExtractText() ?? "Use Default" : "Use Default"));
                         ImGui.TextUnformatted("Market Price Override: " + (priceOverride != null ? priceOverride.Value.ToString("N0") : "Use Default"));
                     }
                 }
@@ -270,12 +277,12 @@ public class CraftSettingsColumn : IColumn
 
         var calculatedHqRequired = hqRequired ?? configuration.CraftList.HQRequired;
 
-        if (calculatedHqRequired == true && item.Item.CanBeHq)
+        if (calculatedHqRequired == true && item.Item.Base.CanBeHq)
         {
             ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
             ImGui.Image(ImGuiService.GetImageTexture("hq").ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale,
                 new System.Numerics.Vector2(0, 0), new System.Numerics.Vector2(1, 1), new Vector4(0.9f, 0.75f, 0.14f, 1f));
-            if (item.Item.CanBeHq && ImGui.IsItemClicked(ImGuiMouseButton.Left))
+            if (item.Item.Base.CanBeHq && ImGui.IsItemClicked(ImGuiMouseButton.Left))
             {
                 if (hqRequired != null)
                 {
@@ -289,7 +296,7 @@ public class CraftSettingsColumn : IColumn
                 }
 
             }
-            else if (item.Item.CanBeHq && ImGui.IsItemClicked(ImGuiMouseButton.Right))
+            else if (item.Item.Base.CanBeHq && ImGui.IsItemClicked(ImGuiMouseButton.Right))
             {
                 ImGui.OpenPopup("ConfigureHQSettings" + rowIndex);
             }
@@ -315,7 +322,7 @@ public class CraftSettingsColumn : IColumn
             ImGui.Image(ImGuiService.GetImageTexture("hq").ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale,
                 new System.Numerics.Vector2(0, 0), new System.Numerics.Vector2(1, 1),
                 new Vector4(0.9f, 0.75f, 0.14f, 0.2f));
-            if (item.Item.CanBeHq && ImGui.IsItemClicked(ImGuiMouseButton.Left))
+            if (item.Item.Base.CanBeHq && ImGui.IsItemClicked(ImGuiMouseButton.Left))
             {
                 if (hqRequired != null)
                 {
@@ -328,7 +335,7 @@ public class CraftSettingsColumn : IColumn
                     configuration.NeedsRefresh = true;
                 }
             }
-            else if (item.Item.CanBeHq && ImGui.IsItemClicked(ImGuiMouseButton.Right))
+            else if (item.Item.Base.CanBeHq && ImGui.IsItemClicked(ImGuiMouseButton.Right))
             {
                 ImGui.OpenPopup("ConfigureHQSettings" + rowIndex);
             }
@@ -341,7 +348,7 @@ public class CraftSettingsColumn : IColumn
                     {
                         ImGui.Text("HQ Required: ");
                         ImGui.Separator();
-                        ImGui.Text(item.Item.CanBeHq
+                        ImGui.Text(item.Item.Base.CanBeHq
                             ? "No" + (hqRequired == null ? " (Default)" : "")
                             : "Cannot be HQ");
                     }
@@ -350,7 +357,7 @@ public class CraftSettingsColumn : IColumn
 
             ImGui.SameLine();
         }
-        
+
     }
 
     private void DrawRecipeIcon(FilterConfiguration configuration, int rowIndex, CraftItem item)
@@ -364,22 +371,19 @@ public class CraftSettingsColumn : IColumn
         {
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
             {
-                var itemRecipes = _excelCache.ItemRecipes[item.ItemId];
+                var itemRecipes = item.Item.Recipes.OrderBy(c => c.CraftType?.FormattedName ?? "").ToList();
                 if (itemRecipes.Count != 1)
                 {
-                    var actualRecipes = itemRecipes.Select(c =>
-                            _excelCache.GetRecipeExSheet().GetRow(c)!)
-                        .OrderBy(c => c.CraftType.Value?.Name ?? "").ToList();
                     if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
                     {
-                        var currentRecipeIndex = actualRecipes.IndexOf(itemRecipe);
+                        var currentRecipeIndex = itemRecipes.IndexOf(itemRecipe);
                         currentRecipeIndex++;
-                        if (actualRecipes.Count <= currentRecipeIndex)
+                        if (itemRecipes.Count <= currentRecipeIndex)
                         {
                             currentRecipeIndex = 0;
                         }
 
-                        var newRecipe = actualRecipes[currentRecipeIndex];
+                        var newRecipe = itemRecipes[currentRecipeIndex];
                         if (item.IsOutputItem)
                         {
                             configuration.CraftList.SetCraftRecipe(item.ItemId,
@@ -400,19 +404,20 @@ public class CraftSettingsColumn : IColumn
                 }
 
                 using var tt = ImRaii.Tooltip();
-                ImGui.Text($"Recipe ({itemRecipe.CraftTypeEx.Value?.FormattedName ?? "Unknown"}): ");
+                ImGui.Text($"Recipe ({itemRecipe.CraftType?.FormattedName ?? "Unknown"}): ");
                 ImGui.Separator();
-                foreach (var ingredient in itemRecipe.Ingredients)
+                foreach (var ingredient in itemRecipe.IngredientCounts)
                 {
-                    var actualItem = ingredient.Item.Value;
-                    var quantity = ingredient.Count;
+                    var actualItem = _itemSheet.GetRowOrDefault(ingredient.Key);
+                    var quantity = ingredient.Value;
+
                     if (actualItem != null)
                     {
                         ImGui.Text(actualItem.NameString + " : " + quantity);
                     }
                 }
 
-                if (_excelCache.GetItemRecipes(item.ItemId).Count > 1)
+                if (itemRecipes.Count > 1)
                 {
                     ImGui.NewLine();
                     ImGui.Text("Left Click: Next Recipe");
@@ -420,16 +425,16 @@ public class CraftSettingsColumn : IColumn
                 }
             }
         }
-        else if (item.Item.CompanyCraftSequenceEx != null)
+        else if (item.Item.CompanyCraftSequence != null)
         {
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
             {
                 using var tt = ImRaii.Tooltip();
                 ImGui.Text($"Recipe (Company Craft): ");
-                foreach (var ingredient in item.Item.CompanyCraftSequenceEx.MaterialsRequired(item.Phase))
+                foreach (var ingredient in item.Item.CompanyCraftSequence.MaterialsRequired(item.Phase))
                 {
                     var itemId = ingredient.ItemId;
-                    var actualItem = _excelCache.GetItemExSheet().GetRow(itemId);
+                    var actualItem = _itemSheet.GetRowOrDefault(itemId);
                     var quantity = ingredient.Quantity;
                     if (actualItem != null)
                     {
@@ -448,14 +453,14 @@ public class CraftSettingsColumn : IColumn
                 if (item.IngredientPreference.LinkedItemId != null && item.IngredientPreference.LinkedItemQuantity != null)
                 {
                     var itemName =
-                        _excelCache.GetItemExSheet().GetRow(item.IngredientPreference.LinkedItemId.Value)
+                        _itemSheet.GetRowOrDefault(item.IngredientPreference.LinkedItemId.Value)
                             ?.NameString ?? "Unknown Item" + " : " + item.IngredientPreference.LinkedItemQuantity.Value;
                     ImGui.Text(itemName);
                     if (item.IngredientPreference.LinkedItem2Id != null &&
                         item.IngredientPreference.LinkedItem2Quantity != null)
                     {
                         var itemName2 =
-                            (_excelCache.GetItemExSheet().GetRow(item.IngredientPreference.LinkedItem2Id.Value)
+                            (_itemSheet.GetRowOrDefault(item.IngredientPreference.LinkedItem2Id.Value)
                                 ?.NameString ?? "Unknown Item") + " : " +
                             item.IngredientPreference.LinkedItem2Quantity.Value;
                         ImGui.Text(itemName2);
@@ -465,7 +470,7 @@ public class CraftSettingsColumn : IColumn
                         item.IngredientPreference.LinkedItem3Quantity != null)
                     {
                         var itemName3 =
-                            (_excelCache.GetItemExSheet().GetRow(item.IngredientPreference.LinkedItem3Id.Value)
+                            (_itemSheet.GetRowOrDefault(item.IngredientPreference.LinkedItem3Id.Value)
                                 ?.NameString ?? "Unknown Item") + " : " +
                             item.IngredientPreference.LinkedItem3Quantity.Value;
                         ImGui.Text(itemName3);
@@ -483,7 +488,8 @@ public class CraftSettingsColumn : IColumn
 
     private bool DrawSourceSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
     {
-        if (item.Item.IngredientPreferences.Count != 0)
+        var ingredientPreferences = _craftingCache.GetIngredientPreferences(item.ItemId);
+        if (ingredientPreferences.Count != 0)
         {
             var currentIngredientPreference =
                 configuration.CraftList.GetIngredientPreference(item.ItemId);
@@ -503,7 +509,7 @@ public class CraftSettingsColumn : IColumn
                         return true;
                     }
 
-                    foreach (var ingredientPreference in item.Item.IngredientPreferences)
+                    foreach (var ingredientPreference in ingredientPreferences)
                     {
                         if (ImGui.Selectable(ingredientPreference.FormattedName))
                         {
@@ -546,14 +552,14 @@ public class CraftSettingsColumn : IColumn
 
         return false;
     }
-    
+
     private bool DrawMarketWorldSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
     {
         if (item.IngredientPreference.Type is IngredientPreferenceType.Marketboard)
         {
             var worldId = configuration.CraftList.GetMarketItemWorldPreference(item.ItemId);
-            var currentWorld = worldId != null ? _excelCache.GetWorldSheet().GetRow(worldId.Value) : null;
-            var previewValue = currentWorld?.FormattedName ?? "Use Default";
+            var currentWorld = worldId != null ? _worldSheet.GetRowOrDefault(worldId.Value) : null;
+            var previewValue = currentWorld?.Name.ExtractText() ?? "Use Default";
             ImGui.Text("Market World Preference:");
             ImGui.SameLine();
             ImGuiService.HelpMarker("Override the market world preferences for this item. If you select a world here, the craft pricer will attempt to take prices from this world first then follow the normal rules for craft pricing.");
@@ -568,10 +574,10 @@ public class CraftSettingsColumn : IColumn
                         configuration.NotifyConfigurationChange();
                         return true;
                     }
-                    var worlds = _excelCache.GetWorldSheet().Where(c => c.IsPublic).OrderBy(c => c.FormattedName).ToList();
+                    var worlds = _worldSheet.Where(c => c.IsPublic).OrderBy(c => c.Name.ExtractText()).ToList();
                     foreach (var world in worlds)
                     {
-                        if (ImGui.Selectable(world.FormattedName))
+                        if (ImGui.Selectable(world.Name.ExtractText()))
                         {
                             configuration.CraftList.UpdateItemWorldPreference(item.ItemId, world.RowId);
                             configuration.NeedsRefresh = true;
@@ -585,16 +591,16 @@ public class CraftSettingsColumn : IColumn
 
         return false;
     }
-    
+
     private  bool DrawZoneSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
     {
         if (item.IngredientPreference.Type is IngredientPreferenceType.Buy or IngredientPreferenceType.Item or IngredientPreferenceType.Mobs or IngredientPreferenceType.Mining or IngredientPreferenceType.Botany or IngredientPreferenceType.HouseVendor )
         {
-            var mapIds = item.Item.GetSourceMaps(item.IngredientPreference.Type, item.IngredientPreference.LinkedItemId);
+            var mapIds = item.Item.GetSourceMaps(item.IngredientPreference.Type.ToItemInfoTypes(), item.IngredientPreference.LinkedItemId);
             if (mapIds.Count != 0)
             {
                 var mapId = configuration.CraftList.GetZonePreference(item.IngredientPreference.Type,item.ItemId);
-                var currentMap = mapId != null ? _excelCache.GetMapSheet().GetRow(mapId.Value) : null;
+                var currentMap = mapId != null ? _mapSheet.GetRow(mapId.Value) : null;
                 var previewValue = currentMap?.FormattedName ?? "Use Default";
                 ImGui.Text("Zone Preference:");
                 ImGui.SameLine();
@@ -611,7 +617,7 @@ public class CraftSettingsColumn : IColumn
                             return true;
                         }
 
-                        var maps = mapIds.Select(c => _excelCache.GetMapSheet().GetRow(c)).Where(c => c != null);
+                        var maps = mapIds.Select(c => _mapSheet.GetRow(c)).Where(c => c != null);
                         foreach (var map in maps)
                         {
                             if (map == null) continue;
@@ -698,7 +704,7 @@ public class CraftSettingsColumn : IColumn
 
     private bool DrawHqSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
     {
-        if (item.Item.CanBeHq)
+        if (item.Item.Base.CanBeHq)
         {
             var currentHQRequired = configuration.CraftList.GetHQRequired(item.ItemId);
             var previewValue = "Use Default";
@@ -745,41 +751,35 @@ public class CraftSettingsColumn : IColumn
 
     private bool DrawRecipeSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
     {
-        if (_excelCache.ItemRecipes.ContainsKey(item.ItemId))
+        var itemRecipes = item.Item.Recipes.OrderBy(c => c.CraftType?.FormattedName ?? "").ToList();
+        if (itemRecipes.Count != 1)
         {
-            var itemRecipes = _excelCache.ItemRecipes[item.ItemId];
-            if (itemRecipes.Count != 1)
+            var recipeName = item.Recipe?.CraftType?.FormattedName ?? "";
+            ImGui.Text("Recipe:");
+            ImGui.SameLine();
+            ImGuiService.HelpMarker("Select which recipe you wish to use for this item. Some items can be crafted by multiple classes.");
+            using (var combo = ImRaii.Combo("##SetRecipe" + rowIndex, recipeName))
             {
-                var actualRecipes = itemRecipes.Select(c =>
-                        _excelCache.GetRecipeExSheet().GetRow(c)!)
-                    .OrderBy(c => c.CraftType.Value?.Name ?? "").ToList();
-                var recipeName = item.Recipe?.CraftType.Value?.Name ?? "";
-                ImGui.Text("Recipe:");
-                ImGui.SameLine();
-                ImGuiService.HelpMarker("Select which recipe you wish to use for this item. Some items can be crafted by multiple classes.");
-                using (var combo = ImRaii.Combo("##SetRecipe" + rowIndex, recipeName))
+                if (combo.Success)
                 {
-                    if (combo.Success)
+                    foreach (var recipe in itemRecipes)
                     {
-                        foreach (var recipe in actualRecipes)
+                        if (ImGui.Selectable(recipe.CraftType?.FormattedName ?? "",
+                                recipeName == (recipe.CraftType?.FormattedName ?? "")))
                         {
-                            if (ImGui.Selectable(recipe.CraftType.Value?.Name ?? "",
-                                    recipeName == (recipe.CraftType.Value?.Name ?? "")))
+                            if (item.IsOutputItem)
                             {
-                                if (item.IsOutputItem)
-                                {
-                                    configuration.CraftList.SetCraftRecipe(item.ItemId,
-                                        recipe.RowId);
-                                    configuration.NeedsRefresh = true;
-                                    return true;
-                                }
-                                else
-                                {
-                                    configuration.CraftList.UpdateCraftRecipePreference(item.ItemId,
-                                        recipe.RowId);
-                                    configuration.NeedsRefresh = true;
-                                    return true;
-                                }
+                                configuration.CraftList.SetCraftRecipe(item.ItemId,
+                                    recipe.RowId);
+                                configuration.NeedsRefresh = true;
+                                return true;
+                            }
+                            else
+                            {
+                                configuration.CraftList.UpdateCraftRecipePreference(item.ItemId,
+                                    recipe.RowId);
+                                configuration.NeedsRefresh = true;
+                                return true;
                             }
                         }
                     }
@@ -792,7 +792,7 @@ public class CraftSettingsColumn : IColumn
 
     public void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)
     {
-        
+
     }
 
     public string CsvExport(ColumnConfiguration columnConfiguration, SearchResult item)
@@ -816,10 +816,10 @@ public class CraftSettingsColumn : IColumn
     }
 
     public event IColumn.ButtonPressedDelegate? ButtonPressed;
-    
+
     public virtual void InvalidateSearchCache()
     {
-        
+
     }
 
     public void Dispose()

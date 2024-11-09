@@ -1,6 +1,4 @@
 using System.Linq;
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -18,7 +16,7 @@ public class GatheredByColumn : TextColumn
 
     public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        var currentValue = searchResult.Item.GatheringTypes.Select(c => c.Value!.FormattedName).ToList();
+        var currentValue = searchResult.Item.GatheringTypes.Select(c => c.Base.Name.ExtractText()).ToList();
         if (searchResult.Item.ObtainedFishing)
         {
             currentValue.Add("Fishing");
@@ -26,7 +24,7 @@ public class GatheredByColumn : TextColumn
 
         return string.Join(",", currentValue);
     }
-    
+
     public override string Name { get; set; } = "Gathered By?";
     public override float Width { get; set; } = 100;
     public override string HelpText { get; set; } = "How is this item gathered?";

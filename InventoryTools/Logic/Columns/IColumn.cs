@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using CriticalCommonLib.Crafting;
-using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Sheets;
+
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 
@@ -13,24 +11,24 @@ namespace InventoryTools.Logic.Columns
     {
         public string Name { get; set; }
         public float Width { get; set; }
-        
+
         public string HelpText { get; set; }
-        
-        
+
+
         public List<string>? FilterChoices { get; set; }
         public ColumnCategory ColumnCategory { get; }
-        
+
         public bool HasFilter { get; set; }
-        
+
         public ColumnFilterType FilterType { get; set; }
-        
+
         public bool IsDebug { get; set; }
 
         public FilterType AvailableIn { get; }
         public bool AvailableInType(FilterType type);
-        
+
         public bool? CraftOnly { get; }
-        
+
         public bool IsConfigurable { get; }
 
         public string? RenderName { get; }
@@ -48,17 +46,17 @@ namespace InventoryTools.Logic.Columns
         public dynamic? JsonExport(ColumnConfiguration columnConfiguration, SearchResult item);
 
         public void Setup(FilterConfiguration filterConfiguration, ColumnConfiguration configuration, int columnIndex);
-        
+
         public void SetupFilter(string tableKey)
         {
             ImGui.TableSetupColumn(tableKey + "Filter" + Name, ImGuiTableColumnFlags.NoSort);
         }
 
         public IFilterEvent? DrawFooterFilter(FilterConfiguration configuration, FilterTable filterTable);
-        
+
         public delegate void ButtonPressedDelegate(string buttonName, object eventData);
         public event ButtonPressedDelegate? ButtonPressed;
-        
+
         public void InvalidateSearchCache();
     }
 }

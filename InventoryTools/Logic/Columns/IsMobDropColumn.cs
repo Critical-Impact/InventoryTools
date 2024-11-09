@@ -1,5 +1,4 @@
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
+using AllaganLib.GameSheets.Sheets.Caches;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -16,7 +15,7 @@ public class IsMobDropColumn : CheckboxColumn
     public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Boolean;
     public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        return searchResult.Item.HasMobDrops();
+        return searchResult.Item.HasSourcesByType(ItemInfoType.Monster);
     }
     public override string Name { get; set; } = "Is Dropped by Mobs?";
     public override float Width { get; set; } = 100;

@@ -1,6 +1,4 @@
-﻿using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
-using InventoryTools.Logic.Columns.Abstract;
+﻿using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 
@@ -14,12 +12,12 @@ namespace InventoryTools.Logic.Columns
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            if ((int)searchResult.Item.LevelItem.Row == 0)
+            if ((int)searchResult.Item.Base.LevelItem.RowId == 0)
             {
                 return null;
             }
 
-            return (int)searchResult.Item.LevelItem.Row;
+            return (int)searchResult.Item.Base.LevelItem.RowId;
         }
         public override string Name { get; set; } = "iLevel";
         public override float Width { get; set; } = 50.0f;

@@ -1,6 +1,4 @@
-using CriticalCommonLib.Models;
-using CriticalCommonLib.Sheets;
-using InventoryTools.Extensions;
+using AllaganLib.GameSheets.Extensions;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -15,12 +13,12 @@ public class DesynthesisClassColumn : TextColumn
     public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
     public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        if (!searchResult.Item.CanBeDesynthed || searchResult.Item.ClassJobRepair.Row == 0)
+        if (!searchResult.Item.CanBeDesynthed || searchResult.Item.Base.ClassJobRepair.RowId == 0)
         {
             return null;
         }
 
-        return searchResult.Item.ClassJobRepair.Value?.Name.ToString().ToTitleCase() ?? "Unknown";
+        return searchResult.Item.Base.ClassJobRepair.ValueNullable?.Name.ToString().ToTitleCase() ?? "Unknown";
     }
     public override string Name { get; set; } = "Desynthesis Class";
     public override string RenderName  => "Desynth Class";
