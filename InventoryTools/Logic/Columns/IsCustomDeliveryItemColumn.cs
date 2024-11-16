@@ -1,4 +1,4 @@
-using AllaganLib.GameSheets.Sheets.Caches;
+using AllaganLib.GameSheets.Caches;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;

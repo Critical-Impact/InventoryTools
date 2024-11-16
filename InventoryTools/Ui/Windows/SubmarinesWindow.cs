@@ -149,7 +149,7 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationRow>, IMe
                     drop =>
                     {
 
-                        var sourceIcon = _imGuiService.GetIconTexture(drop.Base.Icon);
+                        var sourceIcon = _imGuiService.GetIconTexture(drop.Icon);
                         ImGui.Image(sourceIcon.ImGuiHandle,
                             new Vector2(RowSize, RowSize) * ImGui.GetIO().FontGlobalScale);
                         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &

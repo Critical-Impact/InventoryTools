@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using AllaganLib.GameSheets.Model;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Extensions;
 using InventoryTools.Logic.Columns.Abstract;

@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using AllaganLib.GameSheets.Sheets.Caches;
+using AllaganLib.GameSheets.Caches;
+using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Sheets.Rows;
 using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Services;
@@ -79,32 +80,36 @@ public class RightClickService
                 messages.Add(new FocusListMessage(typeof(FiltersWindow), filter));
                 filter.NeedsRefresh = true;
             }
-            //TODO: Check this
-            // if (searchResult.Item.CanBeCrafted && searchResult.Item.HasSourcesByType(ItemInfoType.FreeCompanyCraftRecipe))
-            // {
-            //     if (searchResult.Item.CompanyCraftSequence != null)
-            //     {
-            //         for (var index = 0u; index < searchResult.Item.CompanyCraftSequence.CompanyCraftParts.Length; index++)
-            //         {
-            //             var part = searchResult.Item.CompanyCraftSequence.CompanyCraftParts[index];
-            //             if (part.RowId == 0) continue;
-            //             if (firstItem)
-            //             {
-            //                 ImGui.Separator();
-            //                 firstItem = false;
-            //             }
-            //
-            //             if (ImGui.Selectable("Add " + (part.CompanyCraftProcess..Name ?? "Unknown") + " to curated list - " + filter.Name))
-            //             {
-            //                 filter.CraftList.AddCraftItem(searchResult.Item.RowId);
-            //                 messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-            //                 messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
-            //                 filter.NeedsRefresh = true;
-            //             }
-            //         }
-            //     }
-            //     ImGui.Separator();
-            // }
+
+            if (searchResult.Item.CanBeCrafted && searchResult.Item.HasSourcesByType(ItemInfoType.FreeCompanyCraftRecipe))
+            {
+                if (searchResult.Item.CompanyCraftSequence != null)
+                {
+                    for (var index = 0u;
+                         index < searchResult.Item.CompanyCraftSequence.CompanyCraftParts.Length;
+                         index++)
+                    {
+                        var part = searchResult.Item.CompanyCraftSequence.CompanyCraftParts[index];
+                        if (part.RowId == 0) continue;
+                        if (firstItem)
+                        {
+                            ImGui.Separator();
+                            firstItem = false;
+                        }
+
+                        if (ImGui.Selectable("Add " + (part.Base.CompanyCraftType.ValueNullable?.Name.ExtractText() ?? "Unknown") +
+                                             " to curated list - " + filter.Name))
+                        {
+                            filter.CraftList.AddCraftItem(searchResult.Item.RowId);
+                            messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                            messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
+                            filter.NeedsRefresh = true;
+                        }
+                    }
+                }
+
+                ImGui.Separator();
+            }
         }
 
         if (ImGui.Selectable("Add to new curated list"))
@@ -143,32 +148,36 @@ public class RightClickService
                     filter.NeedsRefresh = true;
                 }
             }
-            //TODO: Check me
-            // if (searchResult.Item.HasSourcesByType(ItemInfoType.FreeCompanyCraftRecipe))
-            // {
-            //     if (searchResult.Item.CompanyCraftSequence != null)
-            //     {
-            //         for (var index = 0u; index < searchResult.Item.CompanyCraftSequence.CompanyCraftPart.Length; index++)
-            //         {
-            //             var part = searchResult.Item.CompanyCraftSequence.CompanyCraftPart[index];
-            //             if (part.Row == 0) continue;
-            //             if (firstItem)
-            //             {
-            //                 ImGui.Separator();
-            //                 firstItem = false;
-            //             }
-            //
-            //             if (ImGui.Selectable("Add " + (part.Value?.CompanyCraftType.Value?.Name ?? "Unknown") + " to craft list - " + filter.Name))
-            //             {
-            //                 filter.CraftList.AddCraftItem(searchResult.Item.RowId);
-            //                 messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-            //                 messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
-            //                 filter.NeedsRefresh = true;
-            //             }
-            //         }
-            //     }
-            //     ImGui.Separator();
-            // }
+
+            if (searchResult.Item.HasSourcesByType(ItemInfoType.FreeCompanyCraftRecipe))
+            {
+                if (searchResult.Item.CompanyCraftSequence != null)
+                {
+                    for (var index = 0u;
+                         index < searchResult.Item.CompanyCraftSequence.CompanyCraftParts.Length;
+                         index++)
+                    {
+                        var part = searchResult.Item.CompanyCraftSequence.CompanyCraftParts[index];
+                        if (part.RowId == 0) continue;
+                        if (firstItem)
+                        {
+                            ImGui.Separator();
+                            firstItem = false;
+                        }
+
+                        if (ImGui.Selectable("Add " + (part.Base.CompanyCraftType.ValueNullable?.Name.ExtractText() ?? "Unknown") +
+                                             " to craft list - " + filter.Name))
+                        {
+                            filter.CraftList.AddCraftItem(searchResult.Item.RowId);
+                            messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                            messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
+                            filter.NeedsRefresh = true;
+                        }
+                    }
+                }
+
+                ImGui.Separator();
+            }
         }
 
         if (!searchResult.Item.HasSourcesByType(ItemInfoType.FreeCompanyCraftRecipe))
@@ -191,37 +200,47 @@ public class RightClickService
             }
         }
 
-        //TODO: Check this
-        // if (_excelCache.IsCompanyCraft(searchResult.Item.RowId))
-        // {
-        //     if (searchResult.Item.CompanyCraftSequence != null)
-        //     {
-        //         for (var index = 0u; index < searchResult.Item.CompanyCraftSequence.CompanyCraftPart.Length; index++)
-        //         {
-        //             var part = searchResult.Item.CompanyCraftSequence.CompanyCraftPart[index];
-        //             if (part.Row == 0) continue;
-        //             if (ImGui.Selectable("Add " + (part.Value?.CompanyCraftType.Value?.Name ?? "Unknown") + " to new craft list"))
-        //             {
-        //                 var newPhase = index;
-        //                  var filter = _listService.AddNewCraftList();
-        //                  filter.CraftList.AddCraftItem(searchResult.Item.RowId,1, InventoryItem.ItemFlags.None, newPhase);
-        //                  messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-        //                  messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
-        //                  filter.NeedsRefresh = true;
-        //             }
-        //             if (ImGui.Selectable("Add " + (part.Value?.CompanyCraftType.Value?.Name ?? "Unknown") + " to new craft list (ephemeral)"))
-        //             {
-        //                 var newPhase = index;
-        //                 var filter = _listService.AddNewCraftList(null,true);
-        //                 filter.IsEphemeralCraftList = true;
-        //                 filter.CraftList.AddCraftItem(searchResult.Item.RowId,1, InventoryItem.ItemFlags.None, newPhase);
-        //                 messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-        //                 messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
-        //                 filter.NeedsRefresh = true;
-        //             }
-        //         }
-        //     }
-        // }
+        if (searchResult.Item.HasSourcesByType(ItemInfoType.FreeCompanyCraftRecipe))
+        {
+            if (searchResult.Item.CompanyCraftSequence != null)
+            {
+                for (var index = 0u;
+                     index < searchResult.Item.CompanyCraftSequence.CompanyCraftParts.Length;
+                     index++)
+                {
+                    var part = searchResult.Item.CompanyCraftSequence.CompanyCraftParts[index];
+                    if (part.RowId == 0) continue;
+                    if (firstItem)
+                    {
+                        ImGui.Separator();
+                        firstItem = false;
+                    }
+
+                    if (ImGui.Selectable("Add " + (part.Base.CompanyCraftType.ValueNullable?.Name.ExtractText() ?? "Unknown") + " to new craft list"))
+                    {
+                        var newPhase = index;
+                         var filter = _listService.AddNewCraftList();
+                         filter.CraftList.AddCraftItem(searchResult.Item.RowId,1, InventoryItem.ItemFlags.None, newPhase);
+                         messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                         messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
+                         filter.NeedsRefresh = true;
+                    }
+
+                    if (ImGui.Selectable("Add " + (part.Base.CompanyCraftType.ValueNullable?.Name.ExtractText() ?? "Unknown") + " to new craft list (ephemeral)"))
+                    {
+                        var newPhase = index;
+                        var filter = _listService.AddNewCraftList(null,true);
+                        filter.IsEphemeralCraftList = true;
+                        filter.CraftList.AddCraftItem(searchResult.Item.RowId,1, InventoryItem.ItemFlags.None, newPhase);
+                        messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                        messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
+                        filter.NeedsRefresh = true;
+                    }
+                }
+            }
+
+            ImGui.Separator();
+        }
 
         if (filterConfiguration != null && searchResult.CraftItem != null)
         {

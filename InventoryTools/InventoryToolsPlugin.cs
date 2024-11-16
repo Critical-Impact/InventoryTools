@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.Extensions;
 using AllaganLib.GameSheets.Model;
 using AllaganLib.GameSheets.Service;
-using AllaganLib.GameSheets.Sheets.Caches;
 using AllaganLib.Shared.Time;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -61,6 +62,7 @@ namespace InventoryTools
     public class InventoryToolsPlugin : HostedPlugin
     {
         private readonly IPluginLog _pluginLog;
+        private readonly IFramework _framework;
         private Service? _service;
         private IDalamudPluginInterface? PluginInterface { get; set; }
 
@@ -76,13 +78,21 @@ namespace InventoryTools
             objectTable, targetManager, textureProvider,
             toastGui, contextMenu, titleScreenMenu)
         {
+            JetBrains.Profiler.Api.MeasureProfiler.StartCollectingData();
+            Stopwatch loadConfigStopwatch = new Stopwatch();
+            loadConfigStopwatch.Start();
+            pluginLog.Verbose("Starting Allagan Tools.");
+
             _pluginLog = pluginLog;
+            _framework = framework;
             PluginInterface = pluginInterface;
             _service = PluginInterface.Create<Service>()!;
             CreateHost();
 
             Start();
-
+            loadConfigStopwatch.Stop();
+            JetBrains.Profiler.Api.MeasureProfiler.StopCollectingData();
+            pluginLog.Verbose("Took " + loadConfigStopwatch.Elapsed.TotalSeconds + " to start Allagan Tools.");
         }
 
         private List<Type> HostedServices { get; } = new()
@@ -286,50 +296,9 @@ namespace InventoryTools
                 builder.RegisterType<PopupService>().SingleInstance();
                 builder.RegisterType<ExcelCache>().SingleInstance();
                 builder.RegisterType<CraftingCache>().SingleInstance();
-
+                builder.RegisterType<ItemInfoRenderer>().SingleInstance();
                 builder.Register<GameData>(c => c.Resolve<IDataManager>().GameData).SingleInstance().ExternallyOwned();
-                builder.RegisterType<SheetManager>().SingleInstance();
-                builder.Register<SheetManagerStartupOptions>(c => new SheetManagerStartupOptions()).SingleInstance();
-                builder.Register<SheetIndexer>(c => c.Resolve<SheetManager>().SheetIndexer).SingleInstance().ExternallyOwned();
-                builder.Register<ItemInfoCache>(c => c.Resolve<SheetManager>().ItemInfoCache).SingleInstance().ExternallyOwned();
-                builder.Register<NpcLevelCache>(c => c.Resolve<SheetManager>().NpcLevelCache).SingleInstance().ExternallyOwned();
-                builder.Register<NpcShopCache>(c => c.Resolve<SheetManager>().NpcShopCache).SingleInstance().ExternallyOwned();
-                builder.RegisterGeneric((context, parameters) =>
-                {
-                    var gameData = context.Resolve<IDataManager>();
-                    var method = typeof(IDataManager).GetMethod(nameof(IDataManager.GetExcelSheet))
-                        ?.MakeGenericMethod(parameters);
-                    var sheet = method!.Invoke(gameData, [null, null])!;
-                    return sheet;
-                })
-                .As(typeof(ExcelSheet<>));
-
-                Assembly assembly = typeof(SheetManager).Assembly;
-
-                var extendedSheetTypes = assembly.GetTypes()
-                    .Where(t => !t.IsAbstract && !t.IsInterface && (t.IsExtendedSheet() || t.IsExtendedSubrowSheet()));
-
-                foreach (var extendedSheetType in extendedSheetTypes)
-                {
-                    builder.Register(context =>
-                    {
-                        return context.Resolve<SheetManager>().SheetContainer.Resolve(extendedSheetType);
-                    }).As(extendedSheetType).SingleInstance().ExternallyOwned();
-                }
-
-                Assembly luminaSupplemental = typeof(ICsv).Assembly;
-
-                var csvs = luminaSupplemental.GetTypes()
-                    .Where(t => !t.IsAbstract && !t.IsInterface && t.GetInterface("ICsv") != null);
-
-                foreach (var csvType in csvs)
-                {
-                    var listType = typeof(List<>).MakeGenericType(csvType);
-                    builder.Register(context =>
-                    {
-                        return context.Resolve<SheetManager>().SheetContainer.Resolve(listType);
-                    }).As(listType).SingleInstance().ExternallyOwned();
-                }
+                builder.RegisterGameSheetManager();
 
                 builder.RegisterType<PluginCommands>().SingleInstance();
                 builder.RegisterType<RightClickService>().SingleInstance();
@@ -520,6 +489,7 @@ namespace InventoryTools
 
         public override void ConfigureServices(IServiceCollection serviceCollection)
         {
+
 
         }
 

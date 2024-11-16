@@ -18,11 +18,11 @@ using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
 {
-    public class AcquisitionSourceIconsColumn : Column<List<List<ItemSource>>?>
+    public class UseIconsColumn : Column<List<List<ItemSource>>?>
     {
         private readonly ItemInfoRenderer _itemInfoRenderer;
 
-        public AcquisitionSourceIconsColumn(ILogger<AcquisitionSourceIconsColumn> logger, ImGuiService imGuiService, ItemInfoRenderer itemInfoRenderer) : base(logger, imGuiService)
+        public UseIconsColumn(ILogger<UseIconsColumn> logger, ImGuiService imGuiService, ItemInfoRenderer itemInfoRenderer) : base(logger, imGuiService)
         {
             _itemInfoRenderer = itemInfoRenderer;
         }
@@ -30,19 +30,19 @@ namespace InventoryTools.Logic.Columns
 
         public override List<List<ItemSource>>? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            List<List<ItemSource>> groupedItemSources = new List<List<ItemSource>>();
-            foreach (var itemSourceGroup in searchResult.Item.Sources.GroupBy(c => c.Type))
+            List<List<ItemSource>> groupedItemUses = new List<List<ItemSource>>();
+            foreach (var itemUseGroup in searchResult.Item.Uses.GroupBy(c => c.Type))
             {
-                if (_itemInfoRenderer.ShouldGroupSource(itemSourceGroup.Key))
+                if (_itemInfoRenderer.ShouldGroupUse(itemUseGroup.Key))
                 {
-                    groupedItemSources.Add(itemSourceGroup.ToList());
+                    groupedItemUses.Add(itemUseGroup.ToList());
                 }
                 else
                 {
-                    groupedItemSources.AddRange(itemSourceGroup.Select(c => new List<ItemSource>(){c}));
+                    groupedItemUses.AddRange(itemUseGroup.Select(c => new List<ItemSource>(){c}));
                 }
             }
-            return groupedItemSources;
+            return groupedItemUses;
         }
 
         public override List<MessageBase>? DoDraw(SearchResult searchResult, List<List<ItemSource>>? currentValue, int rowIndex,
@@ -55,68 +55,68 @@ namespace InventoryTools.Logic.Columns
             var messages = new List<MessageBase>();
             if (currentValue != null)
             {
-                var itemSources = columnConfiguration.FilterText != "" ? currentValue.Where(c => c.Any(d => _itemInfoRenderer.GetSourceTypeName(d.Type).Singular.ToLower().PassesFilterComparisonText(columnConfiguration.FilterComparisonText) ||  _itemInfoRenderer.RenderSourceName(d).ToLower().PassesFilterComparisonText(columnConfiguration.FilterComparisonText))) : currentValue;
+                var itemUses = columnConfiguration.FilterText != "" ? currentValue.Where(c => c.Any(d => _itemInfoRenderer.GetSourceTypeName(d.Type).Singular.ToLower().PassesFilterComparisonText(columnConfiguration.FilterComparisonText) ||  _itemInfoRenderer.RenderUseName(d).ToLower().PassesFilterComparisonText(columnConfiguration.FilterComparisonText))) : currentValue;
 
-                ImGuiService.WrapTableColumnElements("SourceIconContainer" + rowIndex,itemSources, filterConfiguration.TableHeight * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X, itemList =>
+                ImGuiService.WrapTableColumnElements("UseIconContainer" + rowIndex,itemUses, filterConfiguration.TableHeight * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X, itemList =>
                 {
                     var item = itemList.First();
-                    var sourceIcon = ImGuiService.GetIconTexture(_itemInfoRenderer.RenderSourceIcon(item));
-                    if (item is ItemDungeonSource dungeonSource)
+                    var useIcon = ImGuiService.GetIconTexture(_itemInfoRenderer.RenderSourceIcon(item));
+                    if (item is ItemDungeonSource dungeonUse)
                     {
-                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                        if (ImGui.ImageButton(useIcon.ImGuiHandle,
                                 new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
                                 ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
                         {
-                            messages.Add(new OpenUintWindowMessage(typeof(DutyWindow), dungeonSource.ContentFinderCondition.RowId));
+                            messages.Add(new OpenUintWindowMessage(typeof(DutyWindow), dungeonUse.ContentFinderCondition.RowId));
                         }
                     }
-                    else if (item is ItemAirshipDropSource airshipSource)
+                    else if (item is ItemAirshipDropSource airshipUse)
                     {
-                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                        if (ImGui.ImageButton(useIcon.ImGuiHandle,
                                 new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
                                 ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
                         {
                             messages.Add(new OpenUintWindowMessage(typeof(AirshipWindow),
-                                airshipSource.AirshipExplorationPoint.RowId));
+                                airshipUse.AirshipExplorationPoint.RowId));
                         }
                     }
-                    else if (item is ItemSubmarineDropSource submarineSource)
+                    else if (item is ItemSubmarineDropSource submarineUse)
                     {
-                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                        if (ImGui.ImageButton(useIcon.ImGuiHandle,
                                 new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
                                 ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
                         {
                             messages.Add(new OpenUintWindowMessage(typeof(SubmarineWindow),
-                                submarineSource.SubmarineExploration.RowId));
+                                submarineUse.SubmarineExploration.RowId));
                         }
                     }
-                    else if (item is ItemVentureSource ventureSource)
+                    else if (item is ItemVentureSource ventureUse)
                     {
-                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                        if (ImGui.ImageButton(useIcon.ImGuiHandle,
                                 new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
                                 ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
                         {
                             messages.Add(new OpenUintWindowMessage(typeof(RetainerTaskWindow),
-                                ventureSource.RetainerTaskRow.RowId));
+                                ventureUse.RetainerTaskRow.RowId));
                         }
                     }
-                    else if (item is ItemExplorationVentureSource explorationVentureSource)
+                    else if (item is ItemExplorationVentureSource explorationVentureUse)
                     {
-                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                        if (ImGui.ImageButton(useIcon.ImGuiHandle,
                                 new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
                                 ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
                         {
                             messages.Add(new OpenUintWindowMessage(typeof(RetainerTaskWindow),
-                                explorationVentureSource.RetainerTaskRow.RowId));
+                                explorationVentureUse.RetainerTaskRow.RowId));
                         }
                     }
-                    else if (item.CostItem != null)
+                    else
                     {
-                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                        if (ImGui.ImageButton(useIcon.ImGuiHandle,
                                 new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
                                 ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
                         {
-                            messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), item.CostItem.RowId));
+                            messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), item.Item.RowId));
                         }
 
                         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
@@ -126,10 +126,10 @@ namespace InventoryTools.Logic.Columns
                                                 ImGuiHoveredFlags.AnyWindow) &&
                             ImGui.IsMouseReleased(ImGuiMouseButton.Right))
                         {
-                            ImGui.OpenPopup("RightClick" + item.CostItem.RowId);
+                            ImGui.OpenPopup("RightClick" + item.Item.RowId);
                         }
 
-                        using (var popup = ImRaii.Popup("RightClick" + item.CostItem.RowId))
+                        using (var popup = ImRaii.Popup("RightClick" + item.Item.RowId))
                         {
                             if (popup.Success)
                             {
@@ -140,15 +140,15 @@ namespace InventoryTools.Logic.Columns
                             }
                         }
                     }
-                    else
-                    {
-                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
-                                ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
-                        {
-
-                        }
-                    }
+                    // else
+                    // {
+                    //     if (ImGui.ImageButton(useIcon.ImGuiHandle,
+                    //             new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
+                    //             ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
+                    //     {
+                    //
+                    //     }
+                    // }
 
                     if (ImGui.IsItemHovered())
                     {
@@ -170,19 +170,19 @@ namespace InventoryTools.Logic.Columns
 
         public override string CsvExport(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return String.Join(", ", searchResult.Item.Sources.Select(c => _itemInfoRenderer.RenderSourceName(c)));
+            return String.Join(", ", searchResult.Item.Uses.Select(c => _itemInfoRenderer.RenderUseName(c)));
         }
 
         public override dynamic? JsonExport(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return String.Join(", ", searchResult.Item.Sources.Select(c => _itemInfoRenderer.RenderSourceName(c)));
+            return String.Join(", ", searchResult.Item.Uses.Select(c => _itemInfoRenderer.RenderUseName(c)));
         }
 
-        public override string Name { get; set; } = "Acquisition";
         public override float Width { get; set; } = 250;
+        public override string Name { get; set; } = "Uses";
 
         public override string HelpText { get; set; } =
-            "Shows icons indicating what items can be obtained with(gathering, crafting, currency, etc)";
+            "Shows icons indicating what the items drop/can be used for";
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
         public override IEnumerable<SearchResult> Filter(ColumnConfiguration columnConfiguration,
@@ -196,7 +196,7 @@ namespace InventoryTools.Logic.Columns
                     return false;
                 }
 
-                return currentValue.SelectMany(d => d).Any(e => _itemInfoRenderer.GetSourceTypeName(e.Type).Singular.ToLower().PassesFilterComparisonText(columnConfiguration.FilterComparisonText) || _itemInfoRenderer.RenderSourceName(e).ToLower().PassesFilterComparisonText(columnConfiguration.FilterComparisonText));
+                return currentValue.SelectMany(d => d).Any(e => _itemInfoRenderer.GetSourceTypeName(e.Type).Singular.ToLower().PassesFilterComparisonText(columnConfiguration.FilterComparisonText) || _itemInfoRenderer.RenderUseName(e).ToLower().PassesFilterComparisonText(columnConfiguration.FilterComparisonText));
             });
         }
 

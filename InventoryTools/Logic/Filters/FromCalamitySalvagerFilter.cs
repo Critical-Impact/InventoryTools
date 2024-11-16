@@ -1,4 +1,4 @@
-using AllaganLib.GameSheets.Sheets.Caches;
+using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Models;
 

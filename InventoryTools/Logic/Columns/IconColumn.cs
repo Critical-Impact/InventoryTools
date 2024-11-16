@@ -23,7 +23,7 @@ namespace InventoryTools.Logic.Columns
             {
                 return (searchResult.InventoryItem.Icon, searchResult.InventoryItem.IsHQ);
             }
-            return (searchResult.Item.Base.Icon, false);
+            return (searchResult.Item.Icon, false);
         }
 
         public override IEnumerable<SearchResult> Filter(ColumnConfiguration columnConfiguration, IEnumerable<SearchResult> searchResults)

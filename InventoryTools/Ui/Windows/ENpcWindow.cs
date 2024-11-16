@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.Model;
 using AllaganLib.GameSheets.Sheets;
-using AllaganLib.GameSheets.Sheets.Caches;
 using AllaganLib.GameSheets.Sheets.Rows;
 using AllaganLib.Shared.Extensions;
 using CriticalCommonLib;
@@ -114,7 +114,7 @@ namespace InventoryTools.Ui
                             {
                                 foreach (var item in listing.Rewards)
                                 {
-                                    var useIcon = ImGuiService.GetIconTexture(item.Item.Base.Icon);
+                                    var useIcon = ImGuiService.GetIconTexture(item.Item.Icon);
                                     if (ImGui.ImageButton(useIcon.ImGuiHandle,
                                             new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale,
                                             new(0, 0), new(1, 1),

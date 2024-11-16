@@ -369,7 +369,7 @@ public class CraftSettingsColumn : IColumn
         var itemRecipe = item.Recipe;
         if (itemRecipe != null)
         {
-            if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
+            if (item.IngredientPreference.Type == IngredientPreferenceType.Crafting && ImGui.IsItemHovered(ImGuiHoveredFlags.None))
             {
                 var itemRecipes = item.Item.Recipes.OrderBy(c => c.CraftType?.FormattedName ?? "").ToList();
                 if (itemRecipes.Count != 1)
@@ -752,7 +752,7 @@ public class CraftSettingsColumn : IColumn
     private bool DrawRecipeSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
     {
         var itemRecipes = item.Item.Recipes.OrderBy(c => c.CraftType?.FormattedName ?? "").ToList();
-        if (itemRecipes.Count != 1)
+        if (itemRecipes.Count > 1)
         {
             var recipeName = item.Recipe?.CraftType?.FormattedName ?? "";
             ImGui.Text("Recipe:");

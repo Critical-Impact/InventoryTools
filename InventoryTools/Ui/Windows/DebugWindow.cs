@@ -14,6 +14,7 @@ using ImGuiNET;
 using InventoryTools.Logic;
 using LuminaSupplemental.Excel.Model;
 using Dalamud.Interface.Utility.Raii;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Ui.DebugWindows;
@@ -33,7 +34,8 @@ namespace InventoryTools.Ui
         Random = 4,
         CraftAgents = 5,
         DebugWindows = 6,
-        Addons = 7
+        Addons = 7,
+        GameInventory = 8,
     }
     public class DebugWindow : GenericWindow
     {
@@ -44,6 +46,7 @@ namespace InventoryTools.Ui
         private readonly IGameGui gameGui;
         private readonly ItemSheet _itemSheet;
         private readonly InventoryToolsConfiguration _configuration;
+        private InventoryType? _inventoryType;
 
         public DebugWindow(ILogger<DebugWindow> logger,
             MediatorService mediator,
@@ -110,6 +113,11 @@ namespace InventoryTools.Ui
                     if (ImGui.Selectable("Inventory Monitor", _configuration.SelectedDebugPage == (int)DebugMenu.InventoryMonitor))
                     {
                         _configuration.SelectedDebugPage = (int)DebugMenu.InventoryMonitor;
+                    }
+
+                    if (ImGui.Selectable("Game Inventory", _configuration.SelectedDebugPage == (int)DebugMenu.GameInventory))
+                    {
+                        _configuration.SelectedDebugPage = (int)DebugMenu.GameInventory;
                     }
 
                     if (ImGui.Selectable("Random", _configuration.SelectedDebugPage == (int)DebugMenu.Random))
@@ -729,6 +737,31 @@ namespace InventoryTools.Ui
                     {
                         DrawInventoryScannerDebugTab();
                     }
+                    else if (_configuration.SelectedDebugPage == (int)DebugMenu.GameInventory)
+                    {
+                        var inventoryTypes = Enum.GetValues<InventoryType>();
+                        using (var combo = ImRaii.Combo("Inventory Type", _inventoryType?.ToString() ?? "None"))
+                        {
+                            if (combo)
+                            {
+                                foreach (var inventoryType in inventoryTypes)
+                                {
+                                    if (ImGui.Selectable(inventoryType.ToString()))
+                                    {
+                                        _inventoryType = inventoryType;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (_inventoryType != null)
+                        {
+                            var container = InventoryManager.Instance()->GetInventoryContainer(_inventoryType.Value);
+                            ImGui.Text(container->Loaded != 0 ? "Container Loaded" : "Container Unloaded");
+                            ImGui.Text(container->Loaded.ToString());
+
+                        }
+                    }
                     else if (_configuration.SelectedDebugPage == (int)DebugMenu.InventoryMonitor)
                     {
                         foreach (var character in _inventoryMonitor.Inventories)
@@ -876,6 +909,22 @@ namespace InventoryTools.Ui
         }
         private void DrawInventoryScannerDebugTab()
         {
+
+            ImGui.TextUnformatted("Inventories Seen via Network Traffic");
+            foreach (var inventory in _inventoryScanner.LoadedInventories)
+            {
+                ImGui.TextUnformatted(inventory.ToString());
+            }
+
+            ImGui.TextUnformatted("Retainer Inventories Seen via Network Traffic");
+            foreach (var inventory in _inventoryScanner.InMemoryRetainers)
+            {
+                ImGui.TextUnformatted(inventory.Key.ToString());
+                foreach (var hashSet in inventory.Value)
+                {
+                    ImGui.TextUnformatted(hashSet.ToString());
+                }
+            }
             if (ImGui.TreeNode("Character Bags 1##characterBags1"))
             {
                 for (int i = 0; i < _inventoryScanner.CharacterBag1.Length; i++)
@@ -1547,10 +1596,19 @@ namespace InventoryTools.Ui
             }
             if (ImGui.CollapsingHeader("Armoire(CabinetWithdraw)"))
             {
+                var uiState = UIState.Instance();
+                if (uiState == null)
+                {
+                    ImGui.Text("UIState not found.");
+                }
+                else
+                {
+                    ImGui.Text(uiState->Cabinet.IsCabinetLoaded() ? "Cabinet Loaded" : "Cabinet Not Loaded");
+                }
+
                 var addon = this.gameGui.GetAddonByName("CabinetWithdraw");
                 if (addon != IntPtr.Zero)
                 {
-
                     var cabinetWithdraw = (AddonCabinetWithdraw*)addon;
                     if (cabinetWithdraw != null)
                     {

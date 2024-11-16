@@ -88,7 +88,7 @@ namespace InventoryTools.Ui
                         ImGui.PushID("Reward"+index);
                         var drop = _drops[index];
 
-                        if (ImGui.ImageButton(ImGuiService.GetIconTexture(drop.Base.Icon).ImGuiHandle,
+                        if (ImGui.ImageButton(ImGuiService.GetIconTexture(drop.Icon).ImGuiHandle,
                                 new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1), 0))
                         {
                             MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), drop.RowId));

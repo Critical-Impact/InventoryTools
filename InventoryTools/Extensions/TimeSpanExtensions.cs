@@ -7,16 +7,16 @@ namespace InventoryTools.Extensions
         public static string ToHumanReadableString (this TimeSpan t)
         {
             if (t.TotalMinutes <= 1) {
-                return $@"{t:%s} seconds";
+                return $@"{t.TotalSeconds} seconds";
             }
             if (t.TotalHours <= 1) {
-                return $@"{t:%m} minutes";
+                return $@"{t.TotalMinutes} minutes";
             }
             if (t.TotalDays <= 1) {
-                return $@"{t:%h} hours";
+                return $@"{t.TotalHours} hours";
             }
 
-            return $@"{t:%d} days";
+            return $@"{t.TotalDays} days";
         }
     }
 }

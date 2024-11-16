@@ -4,12 +4,12 @@
     "net8.0-windows7.0": {
       "DalaMock.Core": {
         "type": "Direct",
-        "requested": "[2.1.0-alpha, )",
-        "resolved": "2.1.0-alpha",
-        "contentHash": "FSrubQ+KLDIBlcaH9BrsLCt6/TErgjhldELERHKA2XSPSv+DrTjSlaDwlyRDygPTDvRs2gvnln7DWj0LxYLs/Q==",
+        "requested": "[2.1.2, )",
+        "resolved": "2.1.2",
+        "contentHash": "D3GZI6BaLfL+q/NtkLinazIrXNkNYmXJ8Y2sAutSucT19gHE3zFZd3zFkLjulKRHrb8dJiAf5d9ljenxz1eSww==",
         "dependencies": {
           "Autofac": "8.0.0",
-          "DalaMock.Shared": "2.1.0-alpha",
+          "DalaMock.Shared": "2.1.2",
           "Microsoft.Extensions.Configuration": "8.0.0",
           "Microsoft.Extensions.Hosting": "8.0.0",
           "Microsoft.Extensions.Hosting.Abstractions": "8.0.0",
@@ -40,6 +40,16 @@
         "dependencies": {
           "System.Memory": "4.5.5",
           "System.ValueTuple": "4.5.0"
+        }
+      },
+      "LuminaSupplemental.Excel": {
+        "type": "Direct",
+        "requested": "[2.1.1, )",
+        "resolved": "2.1.1",
+        "contentHash": "MRh6wWrPkpAARUD0CH8HbLriJdT6NvyBT9P0rhMDLm1N+c+RxjcILakgtAWgFDTELtIZRioDPA1QxW7mBtrNyA==",
+        "dependencies": {
+          "CSVFile": "3.1.0",
+          "CsvHelper": "30.0.1"
         }
       },
       "Microsoft.AspNetCore.TestHost": {
@@ -258,11 +268,11 @@
       },
       "DalaMock.Host": {
         "type": "Transitive",
-        "resolved": "2.0.28",
-        "contentHash": "IJt/+njWY3aIDLvcmB4g3ja89eBAQaf3/sLXxManwivlVxFJxnYTIYBSyp2EaL7yjSxuYUzw6+myeRMhkSpPJA==",
+        "resolved": "2.1.1",
+        "contentHash": "qgdiiJ/vKRMna3GOzgwJ/GhaMlNI0xfCHND9lEob5u2xfJVSUHpI/g6KbY6Jp9xB4YOt6FGPPJ/qjbmJSrce8w==",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "9.0.0",
-          "DalaMock.Shared": "2.0.28",
+          "DalaMock.Shared": "2.1.1",
           "Microsoft.Extensions.Hosting": "8.0.0",
           "Microsoft.Extensions.Hosting.Abstractions": "8.0.0",
           "Microsoft.Extensions.ObjectPool": "9.0.0-preview.6.24328.4",
@@ -274,8 +284,8 @@
       },
       "DalaMock.Shared": {
         "type": "Transitive",
-        "resolved": "2.1.0-alpha",
-        "contentHash": "9yzAf667cllJKmcZRnkXJ0wS0AOTIz8X8chtZpGKNN0cP+wL7TQoYUJyoAckxHxFpzqgAveZFLGSHAGmmyBG/g==",
+        "resolved": "2.1.2",
+        "contentHash": "qKpMKKbdd8jeCio5aDpsV7ekuujyYjLmd697rIHeT4U8ugp92fObWcToSrH7wXCWE+top269T0dIDw0QwDNQxw==",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "9.0.0",
           "Microsoft.Extensions.Hosting": "8.0.0",
@@ -284,8 +294,8 @@
       },
       "DalamudPackager": {
         "type": "Transitive",
-        "resolved": "2.1.13",
-        "contentHash": "rMN1omGe8536f4xLMvx9NwfvpAc9YFFfeXJ1t4P4PE6Gu8WCIoFliR1sh07hM+bfODmesk/dvMbji7vNI+B/pQ=="
+        "resolved": "11.0.0",
+        "contentHash": "bjT7XUlhIJSmsE/O76b7weUX+evvGQctbQB8aKXt94o+oPWxHpCepxAGMs7Thow3AzCyqWs7cOpp9/2wcgRRQA=="
       },
       "Gee.External.Capstone": {
         "type": "Transitive",
@@ -333,22 +343,6 @@
         "dependencies": {
           "JetBrains.HabitatDetector": "1.4.1",
           "JetBrains.Profiler.Api": "1.4.6"
-        }
-      },
-      "Lumina": {
-        "type": "Transitive",
-        "resolved": "5.2.1",
-        "contentHash": "WQld2p7eWfcItfxjFwvySpiuUCT+fmJWh9GdCHgKS7vOjYGhPH6SWq6gh0ie+vHp0eaSIB2Tigv6i4qKT+HRSA==",
-        "dependencies": {
-          "Microsoft.Extensions.ObjectPool": "8.0.7"
-        }
-      },
-      "Lumina.Excel": {
-        "type": "Transitive",
-        "resolved": "7.0.3",
-        "contentHash": "UrEE6/8/MFI3qOt56ly5W8yaQVuox/cNP3xy77lshLtnW2SX3dHQXfVOOT51ziUr4L7QL35vZkqMihuiL+op7g==",
-        "dependencies": {
-          "Lumina": "0.0.0-preview.0"
         }
       },
       "MessagePack": {
@@ -1870,13 +1864,12 @@
       "allaganlib.gamesheets": {
         "type": "Project",
         "dependencies": {
-          "AllaganLib.Shared": "[1.0.5, )",
+          "AllaganLib.Shared": "[1.1.0, )",
           "Autofac.Extensions.DependencyInjection": "[9.0.0, )",
           "BenchmarkDotNet": "[0.14.0, )",
           "BenchmarkDotNet.Diagnostics.dotTrace": "[0.14.0, )",
           "CSVFile": "[3.2.0, )",
-          "Lumina": "[5.2.1, )",
-          "Lumina.Excel": "[7.0.3, )"
+          "LuminaSupplemental.Excel": "[2.1.1, )"
         }
       },
       "allaganlib.shared": {
@@ -1892,6 +1885,7 @@
           "AllaganLib.GameSheets": "[1.0.5, )",
           "Dalamud.ContextMenu": "[1.3.1, )",
           "Humanizer.Core": "[3.0.0-beta.54, )",
+          "LuminaSupplemental.Excel": "[2.1.1, )",
           "Microsoft.Extensions.Hosting": "[8.0.1, )",
           "NaturalSort.Extension": "[3.2.0, )",
           "SerialQueue": "[2.1.0, )",
@@ -1905,9 +1899,10 @@
           "Autofac.Extensions.DependencyInjection": "[9.0.0, )",
           "CriticalCommonLib": "[1.0.0, )",
           "CsvHelper": "[30.0.1, )",
-          "DalaMock.Host": "[2.0.28, )",
-          "DalamudPackager": "[2.1.13, )",
+          "DalaMock.Host": "[2.1.1, )",
+          "DalamudPackager": "[11.0.0, )",
           "Humanizer.Core": "[3.0.0-beta.54, )",
+          "LuminaSupplemental.Excel": "[2.1.1, )",
           "Microsoft.AspNetCore.SignalR.Client": "[7.0.11, )",
           "Microsoft.AspNetCore.SignalR.Protocols.MessagePack": "[7.0.11, )",
           "Microsoft.Extensions.Hosting": "[8.0.1, )",

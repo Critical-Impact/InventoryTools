@@ -133,5 +133,10 @@ namespace InventoryToolsTesting.Services
         {
             return false;
         }
+
+        public IntPtr ConvertToKernelTexture(IDalamudTextureWrap wrap, bool leaveWrapOpen = false)
+        {
+            return IntPtr.Zero;
+        }
     }
 }

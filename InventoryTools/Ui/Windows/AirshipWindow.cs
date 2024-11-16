@@ -79,7 +79,7 @@ namespace InventoryTools.Ui
                         ImGui.PushID("Reward"+index);
                         var drop = _drops[index];
 
-                        var useIcon = ImGuiService.GetIconTexture(drop.Base.Icon);
+                        var useIcon = ImGuiService.GetIconTexture(drop.Icon);
                         if (ImGui.ImageButton(useIcon.ImGuiHandle,
                                 new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1), 0))
                         {

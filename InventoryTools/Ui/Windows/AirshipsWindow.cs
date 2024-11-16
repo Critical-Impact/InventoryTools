@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.Sheets;
-using AllaganLib.GameSheets.Sheets.Caches;
-using AllaganLib.GameSheets.Sheets.ItemSources;
 using AllaganLib.GameSheets.Sheets.Rows;
 using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Models;
@@ -217,7 +216,7 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointRow>, IM
                     itemId =>
                     {
                         var drop = _itemSheet.GetRow(itemId);
-                        ImGui.Image(ImGuiService.GetIconTexture(drop.Base.Icon).ImGuiHandle,
+                        ImGui.Image(ImGuiService.GetIconTexture(drop.Icon).ImGuiHandle,
                             new Vector2(RowSize, RowSize) * ImGui.GetIO().FontGlobalScale);
                         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
                                                 ImGuiHoveredFlags.AllowWhenOverlapped &
