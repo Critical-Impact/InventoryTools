@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.Sheets;
-using AllaganLib.GameSheets.Sheets.Caches;
 using AllaganLib.GameSheets.Sheets.Rows;
 using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Services;
@@ -176,7 +176,7 @@ public class ENpcsWindow : GenericTabbedTable<ENpcResidentRow>, IMenuWindow
                             RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X,
                             drop =>
                             {
-                                var sourceIcon = ImGuiService.GetIconTexture(drop.Base.Icon);
+                                var sourceIcon = ImGuiService.GetIconTexture(drop.Icon);
                                 ImGui.Image(sourceIcon.ImGuiHandle,
                                     new Vector2(RowSize, RowSize) * ImGui.GetIO().FontGlobalScale);
                                 if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &

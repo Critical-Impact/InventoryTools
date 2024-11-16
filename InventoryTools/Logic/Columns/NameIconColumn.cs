@@ -22,7 +22,7 @@ public class NameIconColumn : TextIconColumn
         return (
             searchResult.CraftItem?.FormattedName ??
             searchResult.InventoryItem?.FormattedName ?? searchResult.Item.NameString,
-            searchResult.InventoryItem?.Icon ?? searchResult.Item.Base.Icon,
+            searchResult.InventoryItem?.Icon ?? searchResult.Item.Icon,
             searchResult.InventoryItem?.IsHQ ?? false);
     }
 

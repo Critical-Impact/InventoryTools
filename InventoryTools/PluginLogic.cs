@@ -64,7 +64,7 @@ namespace InventoryTools
         }
 
         private DateTime? _nextSaveTime = null;
-        
+
         public PluginLogic(ConfigurationManagerService configurationManagerService, IChatUtilities chatUtilities, IListService listService, ILogger<PluginLogic> logger, IFramework framework, MediatorService mediatorService, HostedInventoryHistory hostedInventoryHistory, IInventoryMonitor inventoryMonitor, IInventoryScanner inventoryScanner, ICharacterMonitor characterMonitor, InventoryToolsConfiguration configuration, IMobTracker mobTracker, IHotkeyService hotkeyService, ICraftMonitor craftMonitor, IGameInterface gameInterface,IEnumerable<BaseTooltip> tooltips, IEnumerable<IHotkey> hotkeys, Func<Type,IFilter> filterFactory, IMarketCache marketCache, ITooltipService tooltipService) : base(logger, mediatorService)
         {
             _configurationManagerService = configurationManagerService;
@@ -91,6 +91,8 @@ namespace InventoryTools
 
         private void CraftMonitorOnCraftCompleted(uint itemid, FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags flags, uint quantity)
         {
+            _logger.LogTrace("Craft completed for item " + itemid);
+
             var activeCraftList = _listService.GetActiveCraftList();
             if (activeCraftList != null && activeCraftList.FilterType == FilterType.CraftFilter)
             {
@@ -109,10 +111,12 @@ namespace InventoryTools
 
         private void CraftMonitorOnCraftFailed(uint itemid)
         {
+            _logger.LogTrace("Craft failed for item " + itemid);
         }
 
         private void CraftMonitorOnCraftStarted(uint itemid)
         {
+            _logger.LogTrace("Craft started for item " + itemid);
         }
 
 
@@ -221,21 +225,21 @@ namespace InventoryTools
         public void LoadDefaultData()
         {
             _listService.GetDefaultCraftList();
-            
+
             AddAllFilter();
 
             AddRetainerFilter();
 
             AddPlayerFilter();
-            
+
             AddFreeCompanyFilter();
 
             AddAllGameItemsFilter();
-            
+
             AddFavouritesFilter();
-            
+
             AddCraftFilter();
-            
+
             AddHistoryFilter();
         }
 
@@ -292,7 +296,7 @@ namespace InventoryTools
         public void AddAllGameItemsFilter(string newName = "All Game Items")
         {
             var allGameItemsFilter = new FilterConfiguration(newName, FilterType.GameItemFilter);
-            allGameItemsFilter.DisplayInTabs = true;      
+            allGameItemsFilter.DisplayInTabs = true;
             _listService.AddDefaultColumns(allGameItemsFilter);
             _listService.AddList(allGameItemsFilter);
         }
@@ -302,7 +306,7 @@ namespace InventoryTools
             var newFilter = new FilterConfiguration(newName, FilterType.GameItemFilter);
             var favouritesFilter = (FavouritesFilter)_filterFactory.Invoke(typeof(FavouritesFilter));
             favouritesFilter.UpdateFilterConfiguration(newFilter, true);
-            newFilter.DisplayInTabs = true;   
+            newFilter.DisplayInTabs = true;
             _listService.AddDefaultColumns(newFilter);
             _listService.AddList(newFilter);
         }
@@ -310,7 +314,7 @@ namespace InventoryTools
         public void AddCraftFilter(string newName = "Craft List")
         {
             var newFilter = _listService.AddNewCraftList(newName);
-            newFilter.DisplayInTabs = true;            
+            newFilter.DisplayInTabs = true;
         }
 
         public void AddNewCraftFilter()

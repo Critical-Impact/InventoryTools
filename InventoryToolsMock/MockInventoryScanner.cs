@@ -9,7 +9,7 @@ public class MockInventoryScanner : IInventoryScanner
 {
     public void Dispose()
     {
-        
+
     }
 
     public void Enable()
@@ -43,12 +43,14 @@ public class MockInventoryScanner : IInventoryScanner
 
     public void ClearRetainerCache(ulong retainerId)
     {
-        
+
     }
 
     public void ClearCache()
     {
     }
+
+    public HashSet<InventoryType> LoadedInventories { get; set; }
 
     public HashSet<InventoryType> InMemory => new();
     public Dictionary<ulong, HashSet<InventoryType>> InMemoryRetainers => new();
@@ -130,19 +132,20 @@ public class MockInventoryScanner : IInventoryScanner
     {
     }
 
-    public unsafe void ParseCharacterEquipped(InventorySortOrder currentSortOrder, BagChangeContainer changeSet)
+    public unsafe void ParseCharacterEquipped(BagChangeContainer changeSet)
+    {
+
+    }
+
+    public unsafe void ParseFreeCompanyBags(BagChangeContainer changeSet)
     {
     }
 
-    public unsafe void ParseFreeCompanyBags(InventorySortOrder currentSortOrder, BagChangeContainer changeSet)
+    public unsafe void ParseArmoire(BagChangeContainer changeSet)
     {
     }
 
-    public unsafe void ParseArmoire(InventorySortOrder currentSortOrder, BagChangeContainer changeSet)
-    {
-    }
-
-    public unsafe void ParseGlamourChest(InventorySortOrder currentSortOrder, BagChangeContainer changeSet)
+    public unsafe void ParseGlamourChest(BagChangeContainer changeSet)
     {
     }
 
@@ -150,7 +153,8 @@ public class MockInventoryScanner : IInventoryScanner
     {
     }
 
-    public unsafe void ParseGearSets(InventorySortOrder currentSortOrder, BagChangeContainer changeSet)
+    public unsafe bool ParseGearSets(BagChangeContainer changeSet)
     {
+        return false;
     }
 }

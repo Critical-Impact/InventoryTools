@@ -1,6 +1,6 @@
 using System.Linq;
-using AllaganLib.GameSheets.Sheets.Caches;
-using AllaganLib.GameSheets.Sheets.ItemSources;
+using AllaganLib.GameSheets.Caches;
+using AllaganLib.GameSheets.ItemSources;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;

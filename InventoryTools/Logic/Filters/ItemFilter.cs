@@ -50,7 +50,7 @@ public class ItemFilter : UintMultipleChoiceFilter
 
     public override Dictionary<uint, string> GetChoices(FilterConfiguration configuration)
     {
-        return _itemSheet.ToDictionary(c => c.RowId, c => c.NameString);
+        return _itemSheet.ItemsSearchStringsById;
     }
 
     public override bool HideAlreadyPicked { get; set; }

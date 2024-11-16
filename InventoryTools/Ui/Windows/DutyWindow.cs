@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using AllaganLib.GameSheets.Caches;
+using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Sheets;
-using AllaganLib.GameSheets.Sheets.Caches;
-using AllaganLib.GameSheets.Sheets.ItemSources;
 using AllaganLib.GameSheets.Sheets.Rows;
 using AllaganLib.Shared.Extensions;
 using CriticalCommonLib;
@@ -149,7 +149,7 @@ namespace InventoryTools.Ui
                                         var item = items[index];
                                         if (item.Item1 == null) continue;
                                         ImGui.PushID("dbc" + dungeonBoss.RowId + "_" + chest.Key + "_" + index);
-                                        if (ImGui.ImageButton(ImGuiService.GetIconTexture(item.Item1.Base.Icon).ImGuiHandle,
+                                        if (ImGui.ImageButton(ImGuiService.GetIconTexture(item.Item1.Icon).ImGuiHandle,
                                                 new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0),
                                                 new(1, 1), 0))
                                         {
@@ -202,7 +202,7 @@ namespace InventoryTools.Ui
                                 {
                                     var item = drops[index];
                                     ImGui.PushID("dbd" + dungeonBoss.RowId + "_" + index);
-                                    if (ImGui.ImageButton(ImGuiService.GetIconTexture(item.Base.Icon).ImGuiHandle,
+                                    if (ImGui.ImageButton(ImGuiService.GetIconTexture(item.Icon).ImGuiHandle,
                                             new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0),
                                             new(1, 1), 0))
                                     {
@@ -254,7 +254,7 @@ namespace InventoryTools.Ui
                     {
                         ImGui.PushID("Use"+index);
                         var use = uses[index];
-                        if (ImGui.ImageButton(ImGuiService.GetIconTexture(use.Base.Icon).ImGuiHandle,
+                        if (ImGui.ImageButton(ImGuiService.GetIconTexture(use.Icon).ImGuiHandle,
                                 new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1), 0))
                         {
                             MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), use.RowId));
@@ -297,7 +297,7 @@ namespace InventoryTools.Ui
                         ImGui.PushID("Use"+index);
                         var use = uses[index];
 
-                        if (ImGui.ImageButton(ImGuiService.GetIconTexture(use.Base.Icon).ImGuiHandle,
+                        if (ImGui.ImageButton(ImGuiService.GetIconTexture(use.Icon).ImGuiHandle,
                                 new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1), 0))
                         {
                             MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), use.RowId));
