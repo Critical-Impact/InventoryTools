@@ -12,8 +12,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OtterGui", "OtterGui\OtterG
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryToolsMock", "InventoryToolsMock\InventoryToolsMock.csproj", "{71F3D03A-C28B-4A92-830D-1591AABBCCD6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AllaganLib.GameSheets", "..\..\RiderProjects\AllaganLib\AllaganLib.GameSheets\AllaganLib.GameSheets.csproj", "{0BAA5ADA-A69C-4293-A56F-CEFF18840988}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,11 +56,5 @@ Global
 		{71F3D03A-C28B-4A92-830D-1591AABBCCD6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{71F3D03A-C28B-4A92-830D-1591AABBCCD6}.FullDebug|Any CPU.ActiveCfg = Debug|Any CPU
 		{71F3D03A-C28B-4A92-830D-1591AABBCCD6}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
-		{0BAA5ADA-A69C-4293-A56F-CEFF18840988}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0BAA5ADA-A69C-4293-A56F-CEFF18840988}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0BAA5ADA-A69C-4293-A56F-CEFF18840988}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0BAA5ADA-A69C-4293-A56F-CEFF18840988}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0BAA5ADA-A69C-4293-A56F-CEFF18840988}.FullDebug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0BAA5ADA-A69C-4293-A56F-CEFF18840988}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 EndGlobal
