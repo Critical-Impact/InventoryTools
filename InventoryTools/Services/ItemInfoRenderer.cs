@@ -166,15 +166,197 @@ public class ItemInfoRenderer
                 return false;
             case ItemInfoType.SpecialShop:
                 return false;
-            case ItemInfoType.Desynthesis:
-                break;
-            case ItemInfoType.Loot:
-                break;
-            case ItemInfoType.Reduction:
-                break;
         }
 
         return true;
+    }
+
+    public void DrawUse<T>(List<T> items) where T : ItemSource
+    {
+        var firstItem = items.First();
+        var sourceTypeNames = this.GetSourceTypeName(firstItem.Type);
+        var sourceTypeName = sourceTypeNames.Singular;
+        if (items.Count > 1 && sourceTypeNames.Plural != null)
+        {
+            sourceTypeName = sourceTypeNames.Plural;
+        }
+
+        if (firstItem is ItemSpecialShopSource specialShopSource)
+        {
+            ImGui.Text(sourceTypeName + ":");
+            var maps = specialShopSource.MapIds == null || specialShopSource.MapIds.Count == 0
+                ? null
+                : specialShopSource.MapIds.Select(c => _mapSheet.GetRow(c).FormattedName);
+
+            ImGui.Text( "Rewards:");
+            using (ImRaii.PushIndent())
+            {
+                foreach (var reward in specialShopSource.ShopListing.Rewards)
+                {
+                    var itemName = reward.Item.NameString;
+                    var count = reward.Count;
+                    var costString = $"{itemName} x {count}";
+                    ImGui.Text(costString);
+                    if (reward.IsHq == true)
+                    {
+                        ImGui.Image(_imGuiService.GetImageTexture("hq").ImGuiHandle,
+                            new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
+                    }
+                }
+            }
+
+            ImGui.Text("Costs:");
+            using (ImRaii.PushIndent())
+            {
+                foreach (var cost in specialShopSource.ShopListing.Costs)
+                {
+                    var itemName = cost.Item.NameString;
+                    var count = cost.Count;
+                    var costString = $"{itemName} x {count}";
+                    ImGui.Text(costString);
+                    if (cost.IsHq == true)
+                    {
+                        ImGui.Image(_imGuiService.GetImageTexture("hq").ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
+                    }
+                }
+            }
+
+            if (maps != null)
+            {
+                ImGui.Text("Maps:");
+                using (ImRaii.PushIndent())
+                {
+                    foreach (var map in maps)
+                    {
+                        ImGui.Text(map);
+                    }
+                }
+            }
+        }
+        else if (firstItem is ItemCraftRequirementSource)
+        {
+            ImGui.Text(sourceTypeName + ":");
+            var results = items.Cast<ItemCraftRequirementSource>().Select(c => c.Item.NameString + "(" + c.Recipe.Base.CraftType.Value.Name.ExtractText() + ")");
+            using var push = ImRaii.PushIndent();
+            foreach (var craftItem in results)
+            {
+                ImGui.Text("Result: " + craftItem);
+            }
+        }
+        else if (firstItem is ItemGilShopSource)
+        {
+            ImGui.Text(sourceTypeName + ":");
+            ImGui.Text($"Can purchase {items.Count} items.");
+        }
+        else if (firstItem is ItemFccShopSource)
+        {
+            ImGui.Text(sourceTypeName + ":");
+            ImGui.Text($"Can purchase {items.Count} items.");
+        }
+        else if (firstItem is ItemGCShopSource)
+        {
+            ImGui.Text(sourceTypeName + ":");
+            ImGui.Text($"Can purchase {items.Count} items.");
+        }
+        else if (firstItem is ItemSkybuilderInspectionSource skybuilderInspectionSource)
+        {
+            ImGui.Text(sourceTypeName + ":");
+            using (ImRaii.PushIndent())
+            {
+                ImGui.Text($"Reward: {skybuilderInspectionSource.Item!.NameString}");
+                ImGui.Text($"Required: {skybuilderInspectionSource.InspectionData.AmountRequired}");
+            }
+        }
+        else if (firstItem is ItemDesynthSource or ItemReductionSource or ItemLootSource or ItemGardeningSource)
+        {
+            ImGui.Text(sourceTypeName + ":");
+            using var push = ImRaii.PushIndent();
+            foreach (var desynthItem in items)
+            {
+                ImGui.Text(desynthItem.Item.NameString);
+            }
+        }
+        else if (firstItem is ItemCompanyCraftRequirementSource)
+        {
+            ImGui.Text(sourceTypeName + ":");
+            var results = items.Cast<ItemCompanyCraftRequirementSource>().Select(c => c.Item.NameString + "(" + c.CompanyCraftSequence.Base.CompanyCraftType.Value.Name.ExtractText() + ")");
+            using var push = ImRaii.PushIndent();
+            foreach (var craftItem in results)
+            {
+                ImGui.Text("Result: " + craftItem);
+            }
+        }
+        else if (firstItem is ItemAquariumSource aquariumSource)
+        {
+            ImGui.Text("Size: " + aquariumSource.AquariumFish.Size.ToString());
+            ImGui.Text("Water Type: " + aquariumSource.AquariumFish.Base.AquariumWater.Value.Name.ExtractText());
+        }
+        else if (firstItem is ItemSkybuilderHandInSource skybuilderHandInSource)
+        {
+            var baseReward = skybuilderHandInSource.HWDCrafterSupplyParams.BaseCollectableReward.Value;
+            var midReward = skybuilderHandInSource.HWDCrafterSupplyParams.MidCollectableReward.Value;
+            var highReward = skybuilderHandInSource.HWDCrafterSupplyParams.HighCollectableReward.Value;
+            ImGui.Text("Level: " + skybuilderHandInSource.Level);
+            ImGui.Text("Max Level: " + skybuilderHandInSource.LevelMax);
+
+            ImGui.Text("Rewards:");
+            using (ImRaii.PushIndent())
+            {
+                ImGui.Text("Exp: " + baseReward.ExpReward + "/" + midReward.ExpReward + "/" + highReward.ExpReward);
+                ImGui.Text("Script: " + baseReward.ScriptRewardAmount + "/" + midReward.ScriptRewardAmount + "/" + highReward.ScriptRewardAmount);
+                ImGui.Text("Points: " + baseReward.Points + "/" + midReward.Points + "/" + highReward.Points);
+            }
+        }
+        else if (firstItem is ItemDailySupplyItemSource dailySupplyItemSource)
+        {
+            var rewardRow = dailySupplyItemSource.DailySupplyRewardRow;
+            if (rewardRow != null)
+            {
+                var baseReward = rewardRow.Base.ExperienceSupply;
+                var sealsSupply = rewardRow.Base.SealsSupply;
+                ImGui.Text("Exp: " + rewardRow.Base.ExperienceSupply);
+                ImGui.Text("Seals: " + sealsSupply);
+            }
+            else
+            {
+                ImGui.Text("Unknown rewards");
+            }
+        }
+        else if (firstItem is ItemCustomDeliverySource customDeliverySource)
+        {
+            var eNpcResident = customDeliverySource.SupplyRow.Npc?.Base.Npc.Value;
+            if (eNpcResident != null)
+            {
+                var collectabilityLow = customDeliverySource.SupplyRow.Base.CollectabilityLow;
+                var collectabilityMid = customDeliverySource.SupplyRow.Base.CollectabilityMid;
+                var collectabilityHigh = customDeliverySource.SupplyRow.Base.CollectabilityHigh;
+                ImGui.Text("NPC: " + eNpcResident.Value.Singular.ExtractText());
+                ImGui.Text("Collectability (Low): " + collectabilityLow);
+                ImGui.Text("Collectability (Mid): " + collectabilityMid);
+                ImGui.Text("Collectability (High): " + collectabilityHigh);
+            }
+            else
+            {
+                ImGui.Text("Unknown Npc");
+            }
+        }
+        else if (firstItem is ItemCraftLeveSource craftLeveSource)
+        {
+            var leveRow = craftLeveSource.CraftLeveRow.Base.Leve.Value;
+            ImGui.Text("Leve: " + leveRow.Name.ExtractText());
+            ImGui.Text("Class: " + leveRow.ClassJobCategory.Value.Name.ExtractText());
+            ImGui.Text("EXP Reward: " + leveRow.ExpReward);
+            ImGui.Text("Allowance Cost: " + leveRow.AllowanceCost);
+        }
+        else
+        {
+            ImGui.Text(sourceTypeName + ":");
+            using var push = ImRaii.PushIndent();
+            foreach (var item in items.Select(RenderUseName).Distinct())
+            {
+                ImGui.Text(item);
+            }
+        }
     }
 
     public void DrawSource<T>(List<T> items) where T : ItemSource
@@ -902,6 +1084,19 @@ public class ItemInfoRenderer
 
     public string RenderUseName<T>(T item) where T : ItemSource
     {
+        switch (item.Type)
+        {
+            case ItemInfoType.SpecialShop:
+                if (item is ItemSpecialShopSource specialShopSource)
+                {
+                    var costs = String.Join(", ",
+                        specialShopSource.ShopListing.Costs.Select(c => c.Item.NameString + " (" + c.Count + ")"));
+                    var rewards = String.Join(", ",
+                        specialShopSource.ShopListing.Rewards.Select(c => c.Item.NameString + " (" + c.Count + ")"));
+                    return $"Costs {costs} - Rewards {rewards}";
+                }
+                break;
+        }
         if (item is ItemCraftRequirementSource craftRequirementSource)
         {
             //craftRequirementSource.;
@@ -916,6 +1111,40 @@ public class ItemInfoRenderer
         }
 
         return item.Type.ToString();
+    }
+
+    public ushort RenderUseIcon<T>(T item) where T : ItemSource
+    {
+        switch (item.Type)
+        {
+            case ItemInfoType.SpecialShop:
+                if (item is ItemSpecialShopSource specialShopSource)
+                {
+                    return specialShopSource.Item.Icon;
+                }
+                break;
+            case ItemInfoType.CustomDelivery:
+                return Icons.CustomDeliveryIcon;
+            case ItemInfoType.Aquarium:
+                return Icons.AquariumIcon;
+            case ItemInfoType.GCDailySupply:
+                return Icons.FlameSealIcon;
+            case ItemInfoType.CraftLeve:
+                return Icons.LeveIcon;
+            case ItemInfoType.Armoire:
+                return Icons.ArmoireIcon;
+            case ItemInfoType.CraftRecipe:
+                if (item is ItemCraftRequirementSource craftRequirementSource)
+                {
+                    if (craftRequirementSource.Recipe.CraftType != null)
+                    {
+                        return craftRequirementSource.Recipe.CraftType.Icon;
+                    }
+                }
+                break;
+        }
+
+        return RenderSourceIcon(item);
     }
 
     public ushort RenderSourceIcon<T>(T item) where T : ItemSource
@@ -937,7 +1166,16 @@ public class ItemInfoRenderer
             case ItemInfoType.SpecialShop:
                 if (item is ItemSpecialShopSource specialShopSource)
                 {
-                    return specialShopSource.CostItem?.Icon ?? specialShopSource.Item.Icon;
+                    if (specialShopSource.CostItem != null)
+                    {
+                        return specialShopSource.CostItem.Icon;
+                    }
+
+                    if (specialShopSource.CostItems.Count != 0)
+                    {
+                        return specialShopSource.CostItems[0].Icon;
+                    }
+                    return specialShopSource.Item.Icon;
                 }
                 break;
             case ItemInfoType.GilShop:
@@ -1078,9 +1316,8 @@ public class ItemInfoRenderer
     {
         switch (itemInfoType)
         {
-            case ItemInfoType.Desynthesis:
-            case ItemInfoType.Reduction:
-            case ItemInfoType.Gardening:
+            case ItemInfoType.CraftRecipe:
+            case ItemInfoType.SpecialShop:
             case ItemInfoType.CustomDelivery:
             case ItemInfoType.SkybuilderHandIn:
                 return false;

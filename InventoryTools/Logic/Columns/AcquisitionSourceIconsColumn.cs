@@ -110,6 +110,19 @@ namespace InventoryTools.Logic.Columns
                                 explorationVentureSource.RetainerTaskRow.RowId));
                         }
                     }
+                    else if (item is ItemSpecialShopSource specialShopSource)
+                    {
+                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
+                                ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
+                        {
+                            if (specialShopSource.CostItems.Count != 0)
+                            {
+                                messages.Add(new OpenUintWindowMessage(typeof(ItemWindow),
+                                    specialShopSource.CostItems.First().RowId));
+                            }
+                        }
+                    }
                     else if (item.CostItem != null)
                     {
                         if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
@@ -146,7 +159,10 @@ namespace InventoryTools.Logic.Columns
                                 new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
                                 ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
                         {
-
+                            if (item.CostItem != null)
+                            {
+                                messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), item.CostItem.RowId));
+                            }
                         }
                     }
 
@@ -159,7 +175,7 @@ namespace InventoryTools.Logic.Columns
                     return true;
                 });
             }
-            return null;
+            return messages;
         }
 
         public override void Setup(FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration,

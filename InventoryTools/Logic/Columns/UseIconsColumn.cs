@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Services.Mediator;
@@ -39,7 +40,18 @@ namespace InventoryTools.Logic.Columns
                 }
                 else
                 {
-                    groupedItemUses.AddRange(itemUseGroup.Select(c => new List<ItemSource>(){c}));
+                    if (itemUseGroup.Key == ItemInfoType.CraftRecipe)
+                    {
+                        var groupedCrafts = itemUseGroup.Cast<ItemCraftRequirementSource>().GroupBy(c => c.Recipe.CraftType!.RowId);
+                        foreach (var groupedCraft in groupedCrafts)
+                        {
+                            groupedItemUses.Add(groupedCraft.Cast<ItemSource>().ToList());
+                        }
+                    }
+                    else
+                    {
+                        groupedItemUses.AddRange(itemUseGroup.Select(c => new List<ItemSource>(){c}));
+                    }
                 }
             }
             return groupedItemUses;
@@ -60,7 +72,7 @@ namespace InventoryTools.Logic.Columns
                 ImGuiService.WrapTableColumnElements("UseIconContainer" + rowIndex,itemUses, filterConfiguration.TableHeight * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X, itemList =>
                 {
                     var item = itemList.First();
-                    var useIcon = ImGuiService.GetIconTexture(_itemInfoRenderer.RenderSourceIcon(item));
+                    var useIcon = ImGuiService.GetIconTexture(_itemInfoRenderer.RenderUseIcon(item));
                     if (item is ItemDungeonSource dungeonUse)
                     {
                         if (ImGui.ImageButton(useIcon.ImGuiHandle,
@@ -153,7 +165,7 @@ namespace InventoryTools.Logic.Columns
                     if (ImGui.IsItemHovered())
                     {
                         using var tt = ImRaii.Tooltip();
-                        _itemInfoRenderer.DrawSource(itemList);
+                        _itemInfoRenderer.DrawUse(itemList);
                     }
 
                     return true;

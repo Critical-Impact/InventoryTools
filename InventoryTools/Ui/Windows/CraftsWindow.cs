@@ -1870,8 +1870,8 @@ namespace InventoryTools.Ui
                 }
                 if (_searchItems == null)
                 {
-                    _searchItems = _itemSheet.ItemsBySearchString.Where(c => c.Key.ToLower().PassesFilter(SearchString.ToLower())).Take(100)
-                        .Select(c => _itemSheet.GetRow(c.Value)).ToList();
+                    _searchItems = _itemSheet.ItemsSearchStringsById.Where(c => c.Value.ToLower().PassesFilter(SearchString.ToLower())).Take(100)
+                        .Select(c => _itemSheet.GetRowOrDefault(c.Key)!).ToList();
                 }
 
                 return _searchItems;
