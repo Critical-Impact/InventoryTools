@@ -5,6 +5,7 @@ using CriticalCommonLib.Services;
 
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Plugin.Services;
+using LuminaSupplemental.Excel.Model;
 
 namespace InventoryToolsMock;
 
@@ -79,6 +80,18 @@ public class MockChatUtilities : IChatUtilities
                 _pluginLog.Info("Place Name ID: " + location.PlaceName.RowId);
                 _pluginLog.Info("Map X & Y: " + (float)(location.MapX) + ":" + (float)(location.MapY));
             }
+        }
+    }
+
+    public void PrintFullMapLink(MobSpawnPosition mobSpawnPosition, string text)
+    {
+        if (mobSpawnPosition.TerritoryType.IsValid && mobSpawnPosition.TerritoryType.Value.Map.IsValid)
+        {
+            _pluginLog.Info(text);
+            _pluginLog.Info("Map ID: " + mobSpawnPosition.TerritoryType.Value.Map.RowId);
+            _pluginLog.Info("Territory Type ID: " + mobSpawnPosition.TerritoryType.RowId);
+            _pluginLog.Info("Place Name ID: " + mobSpawnPosition.TerritoryType.Value.PlaceName.RowId);
+            _pluginLog.Info("Map X & Y: " + (float)(mobSpawnPosition.Position.X) + ":" + (float)(mobSpawnPosition.Position.Y));
         }
     }
 
