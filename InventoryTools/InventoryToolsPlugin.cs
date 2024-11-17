@@ -78,7 +78,6 @@ namespace InventoryTools
             objectTable, targetManager, textureProvider,
             toastGui, contextMenu, titleScreenMenu)
         {
-            JetBrains.Profiler.Api.MeasureProfiler.StartCollectingData();
             Stopwatch loadConfigStopwatch = new Stopwatch();
             loadConfigStopwatch.Start();
             pluginLog.Verbose("Starting Allagan Tools.");
@@ -91,7 +90,6 @@ namespace InventoryTools
 
             Start();
             loadConfigStopwatch.Stop();
-            JetBrains.Profiler.Api.MeasureProfiler.StopCollectingData();
             pluginLog.Verbose("Took " + loadConfigStopwatch.Elapsed.TotalSeconds + " to start Allagan Tools.");
         }
 
