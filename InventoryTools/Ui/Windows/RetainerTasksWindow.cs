@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using AllaganLib.GameSheets.Model;
 using AllaganLib.GameSheets.Sheets;
+using AllaganLib.GameSheets.Sheets.Rows;
 using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Services.Mediator;

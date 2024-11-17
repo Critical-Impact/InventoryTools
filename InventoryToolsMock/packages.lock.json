@@ -203,6 +203,28 @@
           "Veldrid.SDL2": "4.9.0"
         }
       },
+      "AllaganLib.GameSheets": {
+        "type": "Transitive",
+        "resolved": "1.1.2",
+        "contentHash": "7WbMQFv/c0k9KNGOujo7ZV38rqkAIqnkPRKHyA6ktlsiS/kgtMELbKFi8lakpRsoVwL0omLRosCbBcOju52f8w==",
+        "dependencies": {
+          "AllaganLib.Shared": "1.1.2",
+          "Autofac.Extensions.DependencyInjection": "9.0.0",
+          "BenchmarkDotNet": "0.14.0",
+          "BenchmarkDotNet.Diagnostics.dotTrace": "0.14.0",
+          "CSVFile": "3.2.0",
+          "LuminaSupplemental.Excel": "2.1.1"
+        }
+      },
+      "AllaganLib.Shared": {
+        "type": "Transitive",
+        "resolved": "1.1.2",
+        "contentHash": "98r773gKXye/H5VbVL1vmPsZ2ejh9M0pK7ymMERcxYTaPPPqGQQELo2nQCoxBVWDiLWuCLiXQmA6WTqU7VF/JQ==",
+        "dependencies": {
+          "Microsoft.Extensions.Hosting": "8.0.0",
+          "Microsoft.Extensions.Hosting.Abstractions": "8.0.0"
+        }
+      },
       "Autofac": {
         "type": "Transitive",
         "resolved": "8.0.0",
@@ -1861,28 +1883,10 @@
         "resolved": "1.4.25",
         "contentHash": "V2yJMl/QKceXEjYEnf2EWcNkUJI5/zE04cNUnawHbdR0wjMHv1dVTLf0IUJk0D0w29FrCWdQQK/n4L4vx0HeQA=="
       },
-      "allaganlib.gamesheets": {
-        "type": "Project",
-        "dependencies": {
-          "AllaganLib.Shared": "[1.1.0, )",
-          "Autofac.Extensions.DependencyInjection": "[9.0.0, )",
-          "BenchmarkDotNet": "[0.14.0, )",
-          "BenchmarkDotNet.Diagnostics.dotTrace": "[0.14.0, )",
-          "CSVFile": "[3.2.0, )",
-          "LuminaSupplemental.Excel": "[2.1.1, )"
-        }
-      },
-      "allaganlib.shared": {
-        "type": "Project",
-        "dependencies": {
-          "Microsoft.Extensions.Hosting": "[8.0.0, )",
-          "Microsoft.Extensions.Hosting.Abstractions": "[8.0.0, )"
-        }
-      },
       "criticalcommonlib": {
         "type": "Project",
         "dependencies": {
-          "AllaganLib.GameSheets": "[1.1.1, )",
+          "AllaganLib.GameSheets": "[1.1.2, )",
           "Dalamud.ContextMenu": "[1.3.1, )",
           "Humanizer.Core": "[3.0.0-beta.54, )",
           "LuminaSupplemental.Excel": "[2.1.1, )",
