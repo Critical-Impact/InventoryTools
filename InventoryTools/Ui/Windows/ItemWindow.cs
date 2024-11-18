@@ -200,8 +200,7 @@ namespace InventoryTools.Ui
                 }
                 Vendors = Vendors.OrderByDescending(c => c.npc != null && c.location != null).ToList();
                 GatheringSources = Item.GetSourcesByCategory<ItemGatheringSource>(ItemInfoCategory.Gathering).ToList();
-                //SharedModels = Item.GetSharedModels(); //TODO: Fix me
-                SharedModels = new List<ItemRow>();
+                SharedModels = Item.GetSharedModels();
                 MobDrops = Item.GetSourcesByType<ItemMonsterDropSource>(ItemInfoType.Monster).Select(c => c.MobDrop).ToArray();
                 OwnedItems = _inventoryMonitor.AllItems.Where(c => c.ItemId == itemId).ToList();
                 if (Configuration.AutomaticallyDownloadMarketPrices)

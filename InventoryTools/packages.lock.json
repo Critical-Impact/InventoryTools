@@ -134,10 +134,10 @@
       },
       "AllaganLib.GameSheets": {
         "type": "Transitive",
-        "resolved": "1.1.3",
-        "contentHash": "uHkCtqdQWSKGlinqM61VHwKOBgVn7lNYLnU3Zdv8HmFjjjCvW/pgcfRKkHICo50CvNK+WQuePrNTLpg2sgJCCQ==",
+        "resolved": "1.1.5",
+        "contentHash": "QxSQRtWK1N9p2NWSxvcTWueSfUeajPXkPdpfMLoEDyiUSZX/AesbYocUVgV68gicrqssmzCer1WIyzjFuwt/FA==",
         "dependencies": {
-          "AllaganLib.Shared": "1.1.3",
+          "AllaganLib.Shared": "1.1.5",
           "Autofac.Extensions.DependencyInjection": "9.0.0",
           "CSVFile": "3.2.0",
           "LuminaSupplemental.Excel": "2.1.1"
@@ -145,8 +145,8 @@
       },
       "AllaganLib.Shared": {
         "type": "Transitive",
-        "resolved": "1.1.3",
-        "contentHash": "Mko0tymMkUlvrB0NKCUWqYUADDwazSWlgvhDrKzUX5+d1VUFM/OsL7Nj4VrY/p43hZAGYHJ5b4nBhgSVa2ni5w==",
+        "resolved": "1.1.5",
+        "contentHash": "yGH0BU/Wes99TwjpM5BiLyhov7kQsIfgwH9IRduWDT+OfBkfp1aXdRGWZrNCfSUameGYgA3+tWGghaEYOcNKtw==",
         "dependencies": {
           "Microsoft.Extensions.Hosting": "8.0.0",
           "Microsoft.Extensions.Hosting.Abstractions": "8.0.0"
@@ -603,7 +603,7 @@
       "criticalcommonlib": {
         "type": "Project",
         "dependencies": {
-          "AllaganLib.GameSheets": "[1.1.3, )",
+          "AllaganLib.GameSheets": "[1.1.5, )",
           "Dalamud.ContextMenu": "[1.3.1, )",
           "Humanizer.Core": "[3.0.0-beta.54, )",
           "LuminaSupplemental.Excel": "[2.1.1, )",
