@@ -6,6 +6,7 @@ using CriticalCommonLib.Enums;
 using CriticalCommonLib.Services;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
+using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using InventoryTools.Logic;
@@ -18,7 +19,7 @@ public class LocationDisplayTooltip : BaseTooltip
 {
     private readonly IListService _listService;
 
-    public LocationDisplayTooltip(ILogger<LocationDisplayTooltip> logger, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, IListService listService) : base(logger, itemSheet, configuration, gameGui)
+    public LocationDisplayTooltip(ILogger<LocationDisplayTooltip> logger, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, IListService listService, IDalamudPluginInterface pluginInterface) : base(6904, logger, itemSheet, configuration, gameGui, pluginInterface)
     {
         _listService = listService;
     }
@@ -32,28 +33,40 @@ public class LocationDisplayTooltip : BaseTooltip
         if (item != null) {
             var textLines = new List<string>();
 
-            TooltipService.ItemTooltipField itemTooltipField;
-            var tooltipVisibility = GetTooltipVisibility((int**)numberArrayData);
-            if (tooltipVisibility.HasFlag(ItemTooltipFieldVisibility.Description))
+            TooltipService.ItemTooltipField itemTooltipField = TooltipService.ItemTooltipField.ItemDescription;
+            SeString? seStr = null;
+            if (GetTooltipVisibility(ItemTooltipFieldVisibility.Description))
             {
                 itemTooltipField = TooltipService.ItemTooltipField.ItemDescription;
+                seStr = GetTooltipString(stringArrayData, itemTooltipField);
             }
-            else if (tooltipVisibility.HasFlag(ItemTooltipFieldVisibility.Effects))
+
+            if (seStr == null && GetTooltipVisibility(ItemTooltipFieldVisibility.Effects))
             {
                 itemTooltipField = TooltipService.ItemTooltipField.Effects;
+                seStr = GetTooltipString(stringArrayData, itemTooltipField);
             }
-            else if (tooltipVisibility.HasFlag(ItemTooltipFieldVisibility.Levels))
+
+            if (seStr == null && GetTooltipVisibility(ItemTooltipFieldVisibility.Levels))
             {
                 itemTooltipField = TooltipService.ItemTooltipField.Levels;
+                seStr = GetTooltipString(stringArrayData, itemTooltipField);
             }
-            else
+
+            if(seStr == null)
             {
                 return;
             }
 
-            var seStr = GetTooltipString(stringArrayData, itemTooltipField);
+            if (seStr.Payloads.Any(payload =>
+                    payload is DalamudLinkPayload linkPayload && linkPayload.CommandId == TooltipIdentifier))
+            {
+                return;
+            }
+            seStr.Payloads.Add(GetLinkPayload());
+            seStr.Payloads.Add(RawPayload.LinkTerminator);
 
-            if (seStr != null && seStr.Payloads.Count > 0)
+            if (seStr.Payloads.Count > 0)
             {
                 if (Configuration.TooltipDisplayRetrieveAmount)
                 {

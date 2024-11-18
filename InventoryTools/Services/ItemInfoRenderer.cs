@@ -16,6 +16,7 @@ using ImGuiNET;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
 using InventoryTools.Extensions;
+using Lumina.Data;
 
 namespace InventoryTools.Services;
 
@@ -93,6 +94,12 @@ public class ItemInfoRenderer
                 return ("Harvesting (Ephemeral)", null);
             case ItemInfoType.Fishing:
                 return ("Fishing", null);
+            case ItemInfoType.Achievement:
+                return ("Achievement", "Achievements");
+            case ItemInfoType.BuddyItem:
+                return ("Chocobo Item", "Chocobo Items");
+            case ItemInfoType.FurnitureItem:
+                return ("Interior Furnishing", null);
             case ItemInfoType.Spearfishing:
                 return ("Spearfishing", null);
             case ItemInfoType.Monster:
@@ -347,6 +354,16 @@ public class ItemInfoRenderer
             ImGui.Text("Class: " + leveRow.ClassJobCategory.Value.Name.ExtractText());
             ImGui.Text("EXP Reward: " + leveRow.ExpReward);
             ImGui.Text("Allowance Cost: " + leveRow.AllowanceCost);
+        }
+        else if (firstItem is ItemFurnitureSource itemFurnitureSource)
+        {
+            ImGui.Text(sourceTypeName + ":");
+            using (ImRaii.PushIndent())
+            {
+
+                ImGui.Text($"Category: {itemFurnitureSource.FurnitureCatalogItem.Value.Category.Value.Category.ExtractText()}");
+                ImGui.Text($"Patch Added: {itemFurnitureSource.FurnitureCatalogItem.Value.Patch}");
+            }
         }
         else
         {
@@ -849,6 +866,18 @@ public class ItemInfoRenderer
                 }
             }
         }
+        else if (firstItem is ItemAchievementSource)
+        {
+            var achievementSources = items.Cast<ItemAchievementSource>().ToList();
+            ImGui.Text(sourceTypeName + ":");
+            using (ImRaii.PushIndent())
+            {
+                foreach (var achievementSource in achievementSources)
+                {
+                    ImGui.Text($"{achievementSource.Achievement.Value.Name.ExtractText()} ({achievementSource.Achievement.Value.AchievementCategory.Value.Name.ExtractText()})");
+                }
+            }
+        }
         else
         {
             ImGui.Text(sourceTypeName + ":");
@@ -974,6 +1003,12 @@ public class ItemInfoRenderer
                     return fishingSource.Item.NameString;
                 }
                 break;
+            case ItemInfoType.Achievement:
+                if (item is ItemAchievementSource achievementSource)
+                {
+                    return achievementSource.Achievement.Value.Name.ExtractText();
+                }
+                break;
             case ItemInfoType.Spearfishing:
                 if (item is ItemSpearfishingSource spearfishingSource)
                 {
@@ -1097,14 +1132,16 @@ public class ItemInfoRenderer
                 }
                 break;
         }
-        if (item is ItemCraftRequirementSource craftRequirementSource)
+        if (item is ItemBuddySource buddySource)
         {
-            //craftRequirementSource.;
+            return buddySource.Item.NameString;
         }
+
         if (item is ItemAquariumSource aquariumSource)
         {
             return "Aquarium: " + aquariumSource.AquariumFish.Base.AquariumWater.Value.Name.ExtractText() + " (" + aquariumSource.AquariumFish.Size + " )";
         }
+
         if (item is ItemArmoireSource armoireSource)
         {
             return "Armoire: " + (armoireSource.Cabinet.CabinetCategory?.Base.Category.Value.Text.ExtractText() ?? "Unknown");
@@ -1133,6 +1170,10 @@ public class ItemInfoRenderer
                 return Icons.LeveIcon;
             case ItemInfoType.Armoire:
                 return Icons.ArmoireIcon;
+            case ItemInfoType.BuddyItem:
+                return Icons.ChocoboIcon;
+            case ItemInfoType.FurnitureItem:
+                return Icons.TableIcon;
             case ItemInfoType.CraftRecipe:
                 if (item is ItemCraftRequirementSource craftRequirementSource)
                 {
@@ -1252,6 +1293,8 @@ public class ItemInfoRenderer
                 return Icons.FishingIcon;
             case ItemInfoType.Spearfishing:
                 return Icons.Spearfishing;
+            case ItemInfoType.Achievement:
+                return Icons.AchievementCertIcon;
             case ItemInfoType.Monster:
                 return Icons.MobIcon;
             case ItemInfoType.Fate:

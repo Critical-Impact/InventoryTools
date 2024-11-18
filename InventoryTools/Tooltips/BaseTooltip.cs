@@ -1,27 +1,49 @@
+using System;
 using AllaganLib.GameSheets.Sheets;
 using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Services;
-
+using Dalamud.Game.Text.SeStringHandling.Payloads;
+using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Tooltips;
 
-public abstract class BaseTooltip : TooltipService.TooltipTweak
+public abstract class BaseTooltip : TooltipService.TooltipTweak, IDisposable
 {
     public InventoryToolsConfiguration Configuration { get; }
     public IGameGui GameGui { get; }
+
+    public IDalamudPluginInterface PluginInterface { get; }
     public ILogger Logger { get; }
     public ItemSheet ItemSheet { get; }
     public abstract uint Order { get; }
 
-    public BaseTooltip(ILogger logger, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui)
+    public BaseTooltip(uint tooltipIdentifier, ILogger logger, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, IDalamudPluginInterface pluginInterface)
     {
+        TooltipIdentifier = tooltipIdentifier;
         Configuration = configuration;
         GameGui = gameGui;
+        PluginInterface = pluginInterface;
         Logger = logger;
         ItemSheet = itemSheet;
     }
+
+    public DalamudLinkPayload GetLinkPayload()
+    {
+        return this.IdentifierPayload ??= PluginInterface.AddChatLinkHandler(TooltipIdentifier, (_, _) => { });
+    }
+
+    public void ClearLinkPayload()
+    {
+        if (this.IdentifierPayload != null)
+        {
+            PluginInterface.RemoveChatLinkHandler(TooltipIdentifier);
+        }
+    }
+
+    public virtual uint TooltipIdentifier { get; set; }
+
     public bool HoverItemIsHq
     {
         get
@@ -89,5 +111,10 @@ public abstract class BaseTooltip : TooltipService.TooltipTweak
         }
 
         return false;
+    }
+
+    public void Dispose()
+    {
+        ClearLinkPayload();
     }
 }
