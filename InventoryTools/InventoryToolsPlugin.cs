@@ -81,7 +81,6 @@ namespace InventoryTools
             Stopwatch loadConfigStopwatch = new Stopwatch();
             loadConfigStopwatch.Start();
             pluginLog.Verbose("Starting Allagan Tools.");
-
             _pluginLog = pluginLog;
             _framework = framework;
             PluginInterface = pluginInterface;
@@ -296,7 +295,10 @@ namespace InventoryTools
                 builder.RegisterType<CraftingCache>().SingleInstance();
                 builder.RegisterType<ItemInfoRenderer>().SingleInstance();
                 builder.Register<GameData>(c => c.Resolve<IDataManager>().GameData).SingleInstance().ExternallyOwned();
-                builder.RegisterGameSheetManager();
+                builder.RegisterGameSheetManager(new SheetManagerStartupOptions()
+                {
+                    Logger = _pluginLog.Logger
+                });
 
                 builder.RegisterType<PluginCommands>().SingleInstance();
                 builder.RegisterType<RightClickService>().SingleInstance();

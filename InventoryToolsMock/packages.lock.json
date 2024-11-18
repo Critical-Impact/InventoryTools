@@ -4,22 +4,21 @@
     "net8.0-windows7.0": {
       "DalaMock.Core": {
         "type": "Direct",
-        "requested": "[2.1.2, )",
-        "resolved": "2.1.2",
-        "contentHash": "D3GZI6BaLfL+q/NtkLinazIrXNkNYmXJ8Y2sAutSucT19gHE3zFZd3zFkLjulKRHrb8dJiAf5d9ljenxz1eSww==",
+        "requested": "[2.1.4, )",
+        "resolved": "2.1.4",
+        "contentHash": "p3Yl+A3fKi2dt5JIpU3qwIvvH7aBBfK0nmizvVE+Kbuz6mPsVazOpJl2eGgunKJpKuBi44kWyYT4c0gkJTGLzg==",
         "dependencies": {
           "Autofac": "8.0.0",
-          "DalaMock.Shared": "2.1.2",
+          "DalaMock.Shared": "2.1.4",
           "Microsoft.Extensions.Configuration": "8.0.0",
+          "Microsoft.Extensions.DependencyModel": "9.0.0",
           "Microsoft.Extensions.Hosting": "8.0.0",
           "Microsoft.Extensions.Hosting.Abstractions": "8.0.0",
           "Microsoft.Extensions.ObjectPool": "9.0.0-preview.6.24328.4",
           "NativeFileDialogSharp": "0.5.0",
-          "Serilog": "4.0.1",
+          "Newtonsoft.Json": "13.0.3",
+          "Serilog": "4.0.0",
           "Serilog.Extensions.Logging": "8.0.0",
-          "Serilog.Sinks.Async": "1.5.0",
-          "Serilog.Sinks.Console": "6.0.0",
-          "Serilog.Sinks.File": "5.0.0",
           "System.Collections.Immutable": "7.0.0",
           "Veldrid": "4.9.0",
           "Veldrid.SDL2": "4.9.0",
@@ -40,16 +39,6 @@
         "dependencies": {
           "System.Memory": "4.5.5",
           "System.ValueTuple": "4.5.0"
-        }
-      },
-      "LuminaSupplemental.Excel": {
-        "type": "Direct",
-        "requested": "[2.1.1, )",
-        "resolved": "2.1.1",
-        "contentHash": "MRh6wWrPkpAARUD0CH8HbLriJdT6NvyBT9P0rhMDLm1N+c+RxjcILakgtAWgFDTELtIZRioDPA1QxW7mBtrNyA==",
-        "dependencies": {
-          "CSVFile": "3.1.0",
-          "CsvHelper": "30.0.1"
         }
       },
       "Microsoft.AspNetCore.TestHost": {
@@ -100,12 +89,12 @@
       },
       "Microsoft.Extensions.DependencyModel": {
         "type": "Direct",
-        "requested": "[8.0.0-preview.5.23280.8, )",
-        "resolved": "8.0.0-preview.5.23280.8",
-        "contentHash": "A9c3yKnzuVQLGvRbAYyfx4oTGrOITUl7oaUxynGQ/8fHyWQjtoqR64o7NtIxYD2TOSqU7IWgteDFAcGLxvuNGg==",
+        "requested": "[9.0.0, )",
+        "resolved": "9.0.0",
+        "contentHash": "saxr2XzwgDU77LaQfYFXmddEDRUKHF4DaGMZkNB3qjdVSZlax3//dGJagJkKrGMIPNZs2jVFXITyCCR6UHJNdA==",
         "dependencies": {
-          "System.Text.Encodings.Web": "8.0.0-preview.5.23280.8",
-          "System.Text.Json": "8.0.0-preview.5.23280.8"
+          "System.Text.Encodings.Web": "9.0.0",
+          "System.Text.Json": "9.0.0"
         }
       },
       "Microsoft.Extensions.ObjectPool": {
@@ -113,18 +102,6 @@
         "requested": "[9.0.0-preview.6.24328.4, )",
         "resolved": "9.0.0-preview.6.24328.4",
         "contentHash": "gtSoyW2B38YGz5TWzlZbi8AoPUryq00xvVBCGkN288lHU7e9oap/GSOwoi7bXGNOWnLJGske1yUZFDDj+3QGkw=="
-      },
-      "Newtonsoft.Json": {
-        "type": "Direct",
-        "requested": "[13.0.3-beta1, )",
-        "resolved": "13.0.3-beta1",
-        "contentHash": "P5VfOceZ1ZuVnrz6xiEssjigMv6VLoA4BWXpFk6KJpixf0pM9Y1Nc9zJJYPyfuCmUtw/3seUa/orRNjSh9/NBg=="
-      },
-      "Serilog": {
-        "type": "Direct",
-        "requested": "[4.0.1, )",
-        "resolved": "4.0.1",
-        "contentHash": "pzeDRXdpSLSsgBHpZcmpIDxqMy845Ab4s+dfnBg0sN9h8q/4Wo3vAoe0QCGPze1Q06EVtEPupS+UvLm8iXQmTQ=="
       },
       "Serilog.Sinks.Async": {
         "type": "Direct",
@@ -205,19 +182,19 @@
       },
       "AllaganLib.GameSheets": {
         "type": "Transitive",
-        "resolved": "1.1.5",
-        "contentHash": "QxSQRtWK1N9p2NWSxvcTWueSfUeajPXkPdpfMLoEDyiUSZX/AesbYocUVgV68gicrqssmzCer1WIyzjFuwt/FA==",
+        "resolved": "1.1.6",
+        "contentHash": "d4cWvVycJSY+d3E/bsYfwzcoRo2Sdvpu5kDJZEVZwWOBMBiOV0sShggbgf66AeU0q+qBAV5vfxN+QAiqLtsAjg==",
         "dependencies": {
-          "AllaganLib.Shared": "1.1.5",
+          "AllaganLib.Shared": "1.1.6",
           "Autofac.Extensions.DependencyInjection": "9.0.0",
           "CSVFile": "3.2.0",
-          "LuminaSupplemental.Excel": "2.1.1"
+          "LuminaSupplemental.Excel": "2.1.3"
         }
       },
       "AllaganLib.Shared": {
         "type": "Transitive",
-        "resolved": "1.1.5",
-        "contentHash": "yGH0BU/Wes99TwjpM5BiLyhov7kQsIfgwH9IRduWDT+OfBkfp1aXdRGWZrNCfSUameGYgA3+tWGghaEYOcNKtw==",
+        "resolved": "1.1.6",
+        "contentHash": "+tmD5Qd/F6UiXWYHdB760ezXVbxYIx4mcRf650Vw3bbVhNuNzxaUiVyrp0MMrSAWBzHLwxgYhGHGJwGxUIhoRg==",
         "dependencies": {
           "Microsoft.Extensions.Hosting": "8.0.0",
           "Microsoft.Extensions.Hosting.Abstractions": "8.0.0"
@@ -252,24 +229,20 @@
       },
       "DalaMock.Host": {
         "type": "Transitive",
-        "resolved": "2.1.1",
-        "contentHash": "qgdiiJ/vKRMna3GOzgwJ/GhaMlNI0xfCHND9lEob5u2xfJVSUHpI/g6KbY6Jp9xB4YOt6FGPPJ/qjbmJSrce8w==",
+        "resolved": "2.1.4",
+        "contentHash": "MSbUFeY4YWS/f+HZwN2l24pNNh60shC9YO92akrIIyFS1czuXq2jQo4c//lBz7sD8miOv5OFvLnpTQftDjKfPw==",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "9.0.0",
-          "DalaMock.Shared": "2.1.1",
+          "DalaMock.Shared": "2.1.4",
           "Microsoft.Extensions.Hosting": "8.0.0",
           "Microsoft.Extensions.Hosting.Abstractions": "8.0.0",
-          "Microsoft.Extensions.ObjectPool": "9.0.0-preview.6.24328.4",
-          "Serilog": "2.11.0",
-          "Serilog.Sinks.Async": "1.5.0",
-          "Serilog.Sinks.Console": "4.0.1",
-          "Serilog.Sinks.File": "5.0.0"
+          "Microsoft.Extensions.ObjectPool": "9.0.0-preview.6.24328.4"
         }
       },
       "DalaMock.Shared": {
         "type": "Transitive",
-        "resolved": "2.1.2",
-        "contentHash": "qKpMKKbdd8jeCio5aDpsV7ekuujyYjLmd697rIHeT4U8ugp92fObWcToSrH7wXCWE+top269T0dIDw0QwDNQxw==",
+        "resolved": "2.1.4",
+        "contentHash": "7ux+g6DVMRinCaNClNJ+fjhtI1YvsEOCr+LcFi6Hs3C5Xvszq6mXaYbbLJLxuQfBNif4oJO3rJ8Z5ORFgKQzJw==",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "9.0.0",
           "Microsoft.Extensions.Hosting": "8.0.0",
@@ -285,6 +258,15 @@
         "type": "Transitive",
         "resolved": "2024.2.0",
         "contentHash": "GNnqCFW/163p1fOehKx0CnAqjmpPrUSqrgfHM6qca+P+RN39C9rhlfZHQpJhxmQG/dkOYe/b3Z0P8b6Kv5m1qw=="
+      },
+      "LuminaSupplemental.Excel": {
+        "type": "Transitive",
+        "resolved": "2.1.3",
+        "contentHash": "Pvvv1svauHCCaVZgsgIBPzfXusureUhtg+3oJFZQ0d2R9O6OowA3fKDCdeWeC1iDGWe96QTX/Oo1n5MueCLh2Q==",
+        "dependencies": {
+          "CSVFile": "3.1.0",
+          "CsvHelper": "30.0.1"
+        }
       },
       "MessagePack": {
         "type": "Transitive",
@@ -657,6 +639,11 @@
         "resolved": "3.2.0",
         "contentHash": "E6DE1xnwGYIwvxMeqW/TwJ882q+NL+TBJtW1x+u5u77HMCupL9qBQUkQikFcZYH0oSBr47qLpC/UYx4atTLdQA=="
       },
+      "Newtonsoft.Json": {
+        "type": "Transitive",
+        "resolved": "13.0.3",
+        "contentHash": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ=="
+      },
       "PolySharp": {
         "type": "Transitive",
         "resolved": "1.10.0",
@@ -666,6 +653,11 @@
         "type": "Transitive",
         "resolved": "2.1.0",
         "contentHash": "rmQcrFXgcrqT9M6+xdxAK/JWx1vFuCRT8fTdce4ALdze2/8N5yMRW9Vmkresw+JpL+JC8zuC1HfDkrfVgBUIqA=="
+      },
+      "Serilog": {
+        "type": "Transitive",
+        "resolved": "4.0.0",
+        "contentHash": "2jDkUrSh5EofOp7Lx5Zgy0EB+7hXjjxE2ktTb1WVQmU00lDACR2TdROGKU0K1pDTBSJBN1PqgYpgOZF8mL7NJw=="
       },
       "Serilog.Extensions.Logging": {
         "type": "Transitive",
@@ -710,8 +702,8 @@
       },
       "System.IO.Pipelines": {
         "type": "Transitive",
-        "resolved": "8.0.0",
-        "contentHash": "FHNOatmUq0sqJOkTx+UF/9YK1f180cnW5FVqnQMvYUN0elp6wFzbtPSiqbo1/ru8ICp43JM1i7kKkk6GsNGHlA=="
+        "resolved": "9.0.0",
+        "contentHash": "eA3cinogwaNB4jdjQHOP3Z3EuyiDII7MT35jgtnsA4vkn0LUrrSHsU0nzHTzFzmaFYeKV7MYyMxOocFzsBHpTw=="
       },
       "System.Memory": {
         "type": "Transitive",
@@ -745,15 +737,16 @@
       },
       "System.Text.Encodings.Web": {
         "type": "Transitive",
-        "resolved": "8.0.0-preview.5.23280.8",
-        "contentHash": "g4I3rXyyQj4AmsooE1z1nCYjXY712foWowYdCep13QajdgNiVOXSBTij2CbqR6+gryMj/x/cInk2TGcBS79ubw=="
+        "resolved": "9.0.0",
+        "contentHash": "e2hMgAErLbKyUUwt18qSBf9T5Y+SFAL3ZedM8fLupkVj8Rj2PZ9oxQ37XX2LF8fTO1wNIxvKpihD7Of7D/NxZw=="
       },
       "System.Text.Json": {
         "type": "Transitive",
-        "resolved": "8.0.0-preview.5.23280.8",
-        "contentHash": "pIbWMzNEuUrO0DAe2T17rloNfrYsHg8MHhmxLOlyPHZgrAXEr3smeZvHaxNGkrJHYPoO7hgmWI9tuTI/kiJT8Q==",
+        "resolved": "9.0.0",
+        "contentHash": "js7+qAu/9mQvnhA4EfGMZNEzXtJCDxgkgj8ohuxq/Qxv+R56G+ljefhiJHOxTNiw54q8vmABCWUwkMulNdlZ4A==",
         "dependencies": {
-          "System.Text.Encodings.Web": "8.0.0-preview.5.23280.8"
+          "System.IO.Pipelines": "9.0.0",
+          "System.Text.Encodings.Web": "9.0.0"
         }
       },
       "System.Threading.Channels": {
@@ -840,10 +833,9 @@
       "criticalcommonlib": {
         "type": "Project",
         "dependencies": {
-          "AllaganLib.GameSheets": "[1.1.5, )",
+          "AllaganLib.GameSheets": "[1.1.6, )",
           "Dalamud.ContextMenu": "[1.3.1, )",
           "Humanizer.Core": "[3.0.0-beta.54, )",
-          "LuminaSupplemental.Excel": "[2.1.1, )",
           "Microsoft.Extensions.Hosting": "[8.0.1, )",
           "NaturalSort.Extension": "[3.2.0, )",
           "SerialQueue": "[2.1.0, )",
@@ -857,10 +849,9 @@
           "Autofac.Extensions.DependencyInjection": "[9.0.0, )",
           "CriticalCommonLib": "[1.0.0, )",
           "CsvHelper": "[30.0.1, )",
-          "DalaMock.Host": "[2.1.1, )",
+          "DalaMock.Host": "[2.1.4, )",
           "DalamudPackager": "[11.0.0, )",
           "Humanizer.Core": "[3.0.0-beta.54, )",
-          "LuminaSupplemental.Excel": "[2.1.1, )",
           "Microsoft.AspNetCore.SignalR.Client": "[7.0.11, )",
           "Microsoft.AspNetCore.SignalR.Protocols.MessagePack": "[7.0.11, )",
           "Microsoft.Extensions.Hosting": "[8.0.1, )",
