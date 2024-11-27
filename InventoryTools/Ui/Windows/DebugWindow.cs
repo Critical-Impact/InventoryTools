@@ -9,6 +9,7 @@ using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
+
 using FFXIVClientStructs.FFXIV.Client.Game;
 using ImGuiNET;
 using InventoryTools.Logic;

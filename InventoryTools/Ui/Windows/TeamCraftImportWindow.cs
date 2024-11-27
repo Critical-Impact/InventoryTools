@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib.Services.Mediator;
+
 using ImGuiNET;
 using InventoryTools.Lists;
 using InventoryTools.Logic;

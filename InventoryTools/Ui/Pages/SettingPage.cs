@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib.Services.Mediator;
+
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Settings.Abstract;
@@ -30,7 +31,7 @@ namespace InventoryTools.Ui.Pages
 
         public override void Initialize()
         {
-            
+
         }
 
         public override string Name

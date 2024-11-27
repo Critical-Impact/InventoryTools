@@ -19,7 +19,7 @@ namespace InventoryTools.Logic.Columns
         public override (int, int)? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
             if (searchResult.CraftItem == null) return null;
-            
+
             if (searchResult.CraftItem.IsOutputItem)
             {
                 return ((int)searchResult.CraftItem.QuantityNeeded,(int)searchResult.CraftItem.QuantityRequired);
@@ -32,7 +32,7 @@ namespace InventoryTools.Logic.Columns
             SearchResult searchResult, int rowIndex, int columnIndex)
         {
             if (searchResult.CraftItem == null) return null;
-            
+
             ImGui.TableNextColumn();
             if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;
             if (searchResult.CraftItem.IsOutputItem)
@@ -77,7 +77,7 @@ namespace InventoryTools.Logic.Columns
         public override string HelpText { get; set; } = "The amount required with inventory and external sources factored in/The amount required without inventory and external sources factored in.";
         public override bool HasFilter { get; set; } = false;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
-        
+
         public override FilterType DefaultIn => Logic.FilterType.CraftFilter;
     }
 }

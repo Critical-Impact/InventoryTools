@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using CriticalCommonLib.Services.Mediator;
 
+
 namespace InventoryTools.Logic
 {
     public interface IConfigPage

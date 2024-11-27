@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AllaganLib.GameSheets.Sheets;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
+
 using Dalamud.Game.Gui.ContextMenu;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -24,6 +27,8 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
     private readonly IListService _listService;
     private readonly IGameGui _gameGui;
     private readonly InventoryToolsConfiguration _configuration;
+    private readonly ItemSheet _itemSheet;
+    private readonly IGameInterface _gameInterface;
     public const int SatisfactionSupplyItemIdx       = 84;
     public const int SatisfactionSupplyItem1Id       = 128 + 1 * 60;
     public const int SatisfactionSupplyItem2Id       = 128 + 2 * 60;
@@ -43,12 +48,14 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
     public const int GrandCompanySupplyListContextItemId            = 84;
     public const int GrandCompanyExchangeContextItemId            = 84;
 
-    public ContextMenuService(ILogger<ContextMenuService> logger, IListService listService, IContextMenu contextMenu, IGameGui gameGui, MediatorService mediatorService, InventoryToolsConfiguration configuration) : base(logger, mediatorService)
+    public ContextMenuService(ILogger<ContextMenuService> logger, IListService listService, IContextMenu contextMenu, IGameGui gameGui, MediatorService mediatorService, InventoryToolsConfiguration configuration, ItemSheet itemSheet, IGameInterface gameInterface) : base(logger, mediatorService)
     {
         ContextMenu = contextMenu;
         _listService = listService;
         _gameGui = gameGui;
         _configuration = configuration;
+        _itemSheet = itemSheet;
+        _gameInterface = gameInterface;
     }
 
     private void MenuOpened(IMenuOpenedArgs args)
@@ -101,6 +108,44 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
                 menuItem.IsSubmenu = true;
                 menuItem.OnClicked += clickedArgs => OpenAddCraftListSubmenu(clickedArgs, itemId);
                 args.AddMenuItem(menuItem);
+            }
+
+            if (_configuration.OpenCraftingLogContextMenu)
+            {
+                var item = _itemSheet.GetRowOrDefault(itemId.Value);
+                if (item != null && item.CanOpenCraftingLog)
+                {
+                    var menuItem = new MenuItem();
+                    menuItem.Name = "Open Crafting Log";
+                    menuItem.PrefixChar = 'A';
+                    menuItem.OnClicked += _ => _gameInterface.OpenCraftingLog(itemId.Value);
+                    args.AddMenuItem(menuItem);
+                }
+            }
+
+            if (_configuration.OpenGatheringLogContextMenu)
+            {
+                var item = _itemSheet.GetRowOrDefault(itemId.Value);
+                if (item != null && item.CanOpenGatheringLog)
+                {
+                    var menuItem = new MenuItem();
+                    menuItem.Name = "Open Gathering Log";
+                    menuItem.PrefixChar = 'A';
+                    menuItem.OnClicked += _ => _gameInterface.OpenGatheringLog(itemId.Value);
+                    args.AddMenuItem(menuItem);
+                }
+            }
+            if (_configuration.OpenFishingLogContextMenu)
+            {
+                var item = _itemSheet.GetRowOrDefault(itemId.Value);
+                if (item != null && item.CanOpenFishingLog)
+                {
+                    var menuItem = new MenuItem();
+                    menuItem.Name = "Open Fishing Log";
+                    menuItem.PrefixChar = 'A';
+                    menuItem.OnClicked += _ => _gameInterface.OpenFishingLog(itemId.Value, item.ObtainedSpearFishing);
+                    args.AddMenuItem(menuItem);
+                }
             }
 
 

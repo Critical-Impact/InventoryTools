@@ -326,27 +326,36 @@ public class MigrationManagerService : IHostedService
             File.Delete(outputFile);
         }
 
-        using (var reader = new StreamReader(inputFile))
-        using (var writer = new StreamWriter(outputFile))
+        try
         {
-            while (!reader.EndOfStream)
+            using (var reader = new StreamReader(inputFile))
+            using (var writer = new StreamWriter(outputFile))
             {
-                var line = reader.ReadLine();
-                if (string.IsNullOrWhiteSpace(line)) continue;
+                while (!reader.EndOfStream)
+                {
+                    var line = reader.ReadLine();
+                    if (string.IsNullOrWhiteSpace(line)) continue;
 
-                var values = new List<string>(line.Split(','));
+                    var values = new List<string>(line.Split(','));
 
-                // Insert a new column at position 18
-                values.Insert(18, "0");
+                    // Insert a new column at position 18
+                    values.Insert(18, "0");
 
-                var newLine = string.Join(",", values);
-                writer.WriteLine(newLine);
+                    var newLine = string.Join(",", values);
+                    writer.WriteLine(newLine);
+                }
             }
-        }
 
-        var backupFile = GetNewFileName("inventories_backup_M17", "csv");
-        File.Move(inputFile, backupFile);
-        File.Move(outputFile, inputFile);
+            var backupFile = GetNewFileName("inventories_backup_M17", "csv");
+            File.Move(inputFile, backupFile);
+            File.Move(outputFile, inputFile);
+        }
+        catch (Exception e)
+        {
+            var backupFile = GetNewFileName("inventories_backup_M17", "csv");
+            _logger.LogError($"Failed to migrate inventories, has been saved to {backupFile}");
+            File.Copy(inputFile, backupFile);
+        }
     }
     public Task StartAsync(CancellationToken cancellationToken)
     {

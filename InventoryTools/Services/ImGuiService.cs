@@ -55,7 +55,7 @@ public class ImGuiService
 
     public IDalamudTextureWrap GetIconTexture(int iconId, bool isHq = false)
     {
-        return TextureProvider.GetFromGameIcon(new GameIconLookup((uint)iconId, isHq)).GetWrapOrEmpty();
+        return TextureProvider.TryGetFromGameIcon(new GameIconLookup((uint)iconId, isHq), out var texture) ? texture.GetWrapOrEmpty() : TextureProvider.GetFromGameIcon(new GameIconLookup(60074, isHq)).GetWrapOrEmpty();
     }
 
     public IDalamudTextureWrap GetIconTexture(uint iconId)
@@ -214,7 +214,8 @@ public class ImGuiService
     public void WrapTableColumnElements<T>(string windowId, IEnumerable<T> items, float rowSize,
         Func<T, bool> drawElement)
     {
-        using (var wrapTableChild = ImRaii.Child(windowId,
+        using var pushId = ImRaii.PushId(windowId);
+        using (var wrapTableChild = ImRaii.Child("ScrollBox",
                    new Vector2(ImGui.GetContentRegionAvail().X,
                        rowSize + ImGui.GetStyle().CellPadding.Y + ImGui.GetStyle().ItemSpacing.Y), false))
         {

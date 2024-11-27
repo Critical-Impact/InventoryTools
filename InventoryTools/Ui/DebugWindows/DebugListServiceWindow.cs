@@ -2,6 +2,7 @@
 using System.Numerics;
 using Autofac;
 using CriticalCommonLib.Services.Mediator;
+
 using ImGuiNET;
 using InventoryTools.Logic;
 using InventoryTools.Services;

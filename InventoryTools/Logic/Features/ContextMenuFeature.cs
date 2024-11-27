@@ -11,6 +11,9 @@ public class ContextMenuFeature : Feature
             typeof(ContextMenuMoreInformationSetting),
             typeof(ContextMenuAddToCraftListSetting),
             typeof(ContextMenuAddToActiveCraftListSetting),
+            typeof(ContextMenuOpenCraftingLogSetting),
+            typeof(ContextMenuOpenGatheringLogSetting),
+            typeof(ContextMenuOpenFishingLogSetting),
         },
         settings)
     {

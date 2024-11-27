@@ -11,6 +11,8 @@ using InventoryTools.Extensions;
 using InventoryTools.Logic.Columns.Abstract;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Logic.Columns.ColumnSettings;
+using InventoryTools.Logic.ItemRenderers;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Ui;
@@ -18,162 +20,50 @@ using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns
 {
-    public class AcquisitionSourceIconsColumn : Column<List<List<ItemSource>>?>
+    public class AcquisitionSourceIconsColumn : Column<List<ItemSource>?>
     {
-        private readonly ItemInfoRenderer _itemInfoRenderer;
+        public SourceTypeSelectorSetting SourceTypeSelectorSetting { get; }
 
-        public AcquisitionSourceIconsColumn(ILogger<AcquisitionSourceIconsColumn> logger, ImGuiService imGuiService, ItemInfoRenderer itemInfoRenderer) : base(logger, imGuiService)
+        private readonly ItemInfoRenderService _itemInfoRenderService;
+
+        public AcquisitionSourceIconsColumn(ILogger<AcquisitionSourceIconsColumn> logger, ImGuiService imGuiService, ItemInfoRenderService itemInfoRenderService, SourceTypeSelectorSetting sourceTypeSelectorSetting) : base(logger, imGuiService)
         {
-            _itemInfoRenderer = itemInfoRenderer;
+            SourceTypeSelectorSetting = sourceTypeSelectorSetting;
+            _itemInfoRenderService = itemInfoRenderService;
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
 
-        public override List<List<ItemSource>>? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
+        public override List<ItemSource>? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            List<List<ItemSource>> groupedItemSources = new List<List<ItemSource>>();
-            foreach (var itemSourceGroup in searchResult.Item.Sources.GroupBy(c => c.Type))
-            {
-                if (_itemInfoRenderer.ShouldGroupSource(itemSourceGroup.Key))
-                {
-                    groupedItemSources.Add(itemSourceGroup.ToList());
-                }
-                else
-                {
-                    groupedItemSources.AddRange(itemSourceGroup.Select(c => new List<ItemSource>(){c}));
-                }
-            }
-            return groupedItemSources;
+            return searchResult.Item.Sources;
         }
 
-        public override List<MessageBase>? DoDraw(SearchResult searchResult, List<List<ItemSource>>? currentValue, int rowIndex,
+        public override void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)
+        {
+            ImGui.NewLine();
+            ImGui.Separator();
+            SourceTypeSelectorSetting.Draw(columnConfiguration);
+        }
+
+        public override List<MessageBase>? DoDraw(SearchResult searchResult, List<ItemSource>? currentValue, int rowIndex,
             FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration)
         {
             ImGui.TableNextColumn();
             if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;
 
-            using var foo = ImRaii.PushId(rowIndex);
+            using var foo = ImRaii.PushId(columnConfiguration.Key + rowIndex);
             var messages = new List<MessageBase>();
             if (currentValue != null)
             {
-                var itemSources = columnConfiguration.FilterText != "" ? currentValue.Where(c => c.Any(d => _itemInfoRenderer.GetSourceTypeName(d.Type).Singular.ToLower().PassesFilterComparisonText(columnConfiguration.FilterComparisonText) ||  _itemInfoRenderer.RenderSourceName(d).ToLower().PassesFilterComparisonText(columnConfiguration.FilterComparisonText))) : currentValue;
-
-                ImGuiService.WrapTableColumnElements("SourceIconContainer" + rowIndex,itemSources, filterConfiguration.TableHeight * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X, itemList =>
+                var search = currentValue.AsEnumerable();
+                var sourceTypeSelectorSetting = SourceTypeSelectorSetting.CurrentValue(columnConfiguration)?.Select(d => d.Item1).ToList() ?? null;
+                if (sourceTypeSelectorSetting != null)
                 {
-                    var item = itemList.First();
-                    var sourceIcon = ImGuiService.GetIconTexture(_itemInfoRenderer.RenderSourceIcon(item));
-                    if (item is ItemDungeonSource dungeonSource)
-                    {
-                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
-                                ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
-                        {
-                            messages.Add(new OpenUintWindowMessage(typeof(DutyWindow), dungeonSource.ContentFinderCondition.RowId));
-                        }
-                    }
-                    else if (item is ItemAirshipDropSource airshipSource)
-                    {
-                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
-                                ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
-                        {
-                            messages.Add(new OpenUintWindowMessage(typeof(AirshipWindow),
-                                airshipSource.AirshipExplorationPoint.RowId));
-                        }
-                    }
-                    else if (item is ItemSubmarineDropSource submarineSource)
-                    {
-                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
-                                ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
-                        {
-                            messages.Add(new OpenUintWindowMessage(typeof(SubmarineWindow),
-                                submarineSource.SubmarineExploration.RowId));
-                        }
-                    }
-                    else if (item is ItemVentureSource ventureSource)
-                    {
-                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
-                                ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
-                        {
-                            messages.Add(new OpenUintWindowMessage(typeof(RetainerTaskWindow),
-                                ventureSource.RetainerTaskRow.RowId));
-                        }
-                    }
-                    else if (item is ItemExplorationVentureSource explorationVentureSource)
-                    {
-                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
-                                ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
-                        {
-                            messages.Add(new OpenUintWindowMessage(typeof(RetainerTaskWindow),
-                                explorationVentureSource.RetainerTaskRow.RowId));
-                        }
-                    }
-                    else if (item is ItemSpecialShopSource specialShopSource)
-                    {
-                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
-                                ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
-                        {
-                            if (specialShopSource.CostItems.Count != 0)
-                            {
-                                messages.Add(new OpenUintWindowMessage(typeof(ItemWindow),
-                                    specialShopSource.CostItems.First().RowId));
-                            }
-                        }
-                    }
-                    else if (item.CostItem != null)
-                    {
-                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
-                                ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
-                        {
-                            messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), item.CostItem.RowId));
-                        }
+                    search = currentValue.Where(c => sourceTypeSelectorSetting.Contains(c.Type));
+                }
 
-                        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
-                                                ImGuiHoveredFlags.AllowWhenOverlapped &
-                                                ImGuiHoveredFlags.AllowWhenBlockedByPopup &
-                                                ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
-                                                ImGuiHoveredFlags.AnyWindow) &&
-                            ImGui.IsMouseReleased(ImGuiMouseButton.Right))
-                        {
-                            ImGui.OpenPopup("RightClick" + item.CostItem.RowId);
-                        }
-
-                        using (var popup = ImRaii.Popup("RightClick" + item.CostItem.RowId))
-                        {
-                            if (popup.Success)
-                            {
-                                if (item.CostItem != null)
-                                {
-                                    ImGuiService.RightClickService.DrawRightClickPopup(item.Item, messages);
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight) *
-                                ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 0))
-                        {
-                            if (item.CostItem != null)
-                            {
-                                messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), item.CostItem.RowId));
-                            }
-                        }
-                    }
-
-                    if (ImGui.IsItemHovered())
-                    {
-                        using var tt = ImRaii.Tooltip();
-                        _itemInfoRenderer.DrawSource(itemList);
-                    }
-
-                    return true;
-                });
+                var itemSources = columnConfiguration.FilterText != "" ? search.Where(c => (_itemInfoRenderService.GetSourceName(c).ToLower() + " " + _itemInfoRenderService.GetSourceTypeName(c.GetType()).Singular.ToLower()).PassesFilterComparisonText(columnConfiguration.FilterComparisonText)) : search;
+                messages.AddRange(_itemInfoRenderService.DrawItemSourceIconsContainer("ItemUses" + rowIndex, filterConfiguration.TableHeight * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X, new Vector2(filterConfiguration.TableHeight, filterConfiguration.TableHeight), itemSources.ToList()));
             }
             return messages;
         }
@@ -186,12 +76,12 @@ namespace InventoryTools.Logic.Columns
 
         public override string CsvExport(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return String.Join(", ", searchResult.Item.Sources.Select(c => _itemInfoRenderer.RenderSourceName(c)));
+            return String.Join(", ", searchResult.Item.Sources.Select(c => _itemInfoRenderService.GetSourceName(c)));
         }
 
         public override dynamic? JsonExport(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return String.Join(", ", searchResult.Item.Sources.Select(c => _itemInfoRenderer.RenderSourceName(c)));
+            return String.Join(", ", searchResult.Item.Sources.Select(c => _itemInfoRenderService.GetSourceName(c)));
         }
 
         public override string Name { get; set; } = "Acquisition";
@@ -212,7 +102,15 @@ namespace InventoryTools.Logic.Columns
                     return false;
                 }
 
-                return currentValue.SelectMany(d => d).Any(e => _itemInfoRenderer.GetSourceTypeName(e.Type).Singular.ToLower().PassesFilterComparisonText(columnConfiguration.FilterComparisonText) || _itemInfoRenderer.RenderSourceName(e).ToLower().PassesFilterComparisonText(columnConfiguration.FilterComparisonText));
+                var search = currentValue.AsEnumerable();
+                var sourceTypeSelectorSetting = SourceTypeSelectorSetting.CurrentValue(columnConfiguration)?.Select(d => d.Item1).ToList() ?? null;
+                if (sourceTypeSelectorSetting != null)
+                {
+                    search = currentValue.Where(c => sourceTypeSelectorSetting.Contains(c.Type));
+                }
+
+
+                return search.Any(e => (_itemInfoRenderService.GetSourceName(e).ToLower() + " " + _itemInfoRenderService.GetSourceTypeName(e.GetType()).Singular.ToLower()).PassesFilterComparisonText(columnConfiguration.FilterComparisonText));
             });
         }
 
@@ -222,11 +120,33 @@ namespace InventoryTools.Logic.Columns
             return direction == ImGuiSortDirection.Ascending ? items.OrderBy(item =>
             {
                 var currentValue = CurrentValue(columnConfiguration, item);
-                return currentValue?.Count ?? 0;
+                if (currentValue == null)
+                {
+                    return 0;
+                }
+                var search = currentValue.AsEnumerable();
+                var sourceTypeSelectorSetting = SourceTypeSelectorSetting.CurrentValue(columnConfiguration)?.Select(d => d.Item1).ToList() ?? null;
+                if (sourceTypeSelectorSetting != null)
+                {
+                    search = currentValue.Where(c => sourceTypeSelectorSetting.Contains(c.Type));
+                }
+
+                return search.Count();
             }) : items.OrderByDescending(item =>
             {
                 var currentValue = CurrentValue(columnConfiguration, item);
-                return currentValue?.Count ?? 0;
+                if (currentValue == null)
+                {
+                    return 0;
+                }
+                var search = currentValue.AsEnumerable();
+                var sourceTypeSelectorSetting = SourceTypeSelectorSetting.CurrentValue(columnConfiguration)?.Select(d => d.Item1).ToList() ?? null;
+                if (sourceTypeSelectorSetting != null)
+                {
+                    search = currentValue.Where(c => sourceTypeSelectorSetting.Contains(c.Type));
+                }
+
+                return search.Count();
             });
         }
 

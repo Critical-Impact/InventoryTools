@@ -9,6 +9,7 @@ using System.Text;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Services.Mediator;
 using CsvHelper;
+
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 using Newtonsoft.Json;

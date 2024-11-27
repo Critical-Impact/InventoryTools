@@ -7,8 +7,10 @@ using AllaganLib.GameSheets.Sheets;
 using AllaganLib.Shared.Extensions;
 using AllaganLib.Shared.Time;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services.Mediator;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using Humanizer;
@@ -16,1356 +18,427 @@ using ImGuiNET;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
 using InventoryTools.Extensions;
+using InventoryTools.Logic.ItemRenderers;
 using Lumina.Data;
 
 namespace InventoryTools.Services;
 
-
-public class ItemInfoRenderer
+public class ItemInfoRenderService
 {
-    private readonly MapSheet _mapSheet;
-    private readonly ItemSheet _itemSheet;
-    private readonly ExcelSheet<GCRankGridaniaMaleText> _gcRankSheet;
-    private readonly ISeTime _seTime;
     private readonly ImGuiService _imGuiService;
+    private readonly IPluginLog _pluginLog;
+    private readonly Dictionary<Type,IItemInfoRenderer> _sourceRenderers;
+    private readonly Dictionary<Type,IItemInfoRenderer> _useRenderers;
+    private readonly Dictionary<ItemInfoType,IItemInfoRenderer> _sourceRenderersByItemInfoType;
+    private readonly Dictionary<ItemInfoType,IItemInfoRenderer> _useRenderersByItemInfoType;
 
-    public ItemInfoRenderer(MapSheet mapSheet, ItemSheet itemSheet, ExcelSheet<GCRankGridaniaMaleText> gcRankSheet, ISeTime seTime, ImGuiService imGuiService)
+    public ItemInfoRenderService(IEnumerable<IItemInfoRenderer> itemRenderers, ImGuiService imGuiService, IPluginLog pluginLog)
     {
-        _mapSheet = mapSheet;
-        _itemSheet = itemSheet;
-        _gcRankSheet = gcRankSheet;
-        _seTime = seTime;
         _imGuiService = imGuiService;
+        _pluginLog = pluginLog;
+        var itemInfoRenderers = itemRenderers.ToList();
+        _sourceRenderers = itemInfoRenderers.Where(c => c.RendererType == RendererType.Source).ToDictionary(c => c.ItemSourceType, c => c);
+        _useRenderers = itemInfoRenderers.Where(c => c.RendererType == RendererType.Use).ToDictionary(c => c.ItemSourceType, c => c);
+        _sourceRenderersByItemInfoType = itemInfoRenderers.Where(c => c.RendererType == RendererType.Source).ToDictionary(c => c.Type, c => c);
+        _useRenderersByItemInfoType = itemInfoRenderers.Where(c => c.RendererType == RendererType.Use).ToDictionary(c => c.Type, c => c);
+
+        #if DEBUG
+        foreach (var itemType in Enum.GetValues<ItemInfoType>())
+        {
+            if (!_sourceRenderersByItemInfoType.ContainsKey(itemType) && !_useRenderersByItemInfoType.ContainsKey(itemType))
+            {
+                _pluginLog.Verbose($"Missing type {itemType}");
+            }
+        }
+        #endif
     }
 
     public (string Singular, string? Plural) GetSourceTypeName(ItemInfoType type)
     {
-        switch (type)
+        if (_sourceRenderersByItemInfoType.TryGetValue(type, out var renderer))
         {
-            case ItemInfoType.CraftRecipe:
-                return ("Craft Recipe", "Craft Recipes");
-            case ItemInfoType.FreeCompanyCraftRecipe:
-                return ("Free Company Craft Recipe", null);
-            case ItemInfoType.SpecialShop:
-                return ("Special Shop", "Special Shops");
-            case ItemInfoType.GilShop:
-                return ("Gil Shop", "Gil Shops");
-            case ItemInfoType.FCShop:
-                return ("Free Company Shop", "Free Company Shops");
-            case ItemInfoType.GCShop:
-                return ("Grand Company Shop", "Grand Company Shops");
-            case ItemInfoType.CashShop:
-                return ("SQ Cash Shop", "SQ Cash Shops");
-            case ItemInfoType.FateShop:
-                return ("Fate Shop", "Fate Shops");
-            case ItemInfoType.CalamitySalvagerShop:
-                return ("Calamity Salvager", "Calamity Salvager Shops");
-            case ItemInfoType.Mining:
-                return ("Mining", null);
-            case ItemInfoType.Quarrying:
-                return ("Quarrying", null);
-            case ItemInfoType.Logging:
-                return ("Logging", null);
-            case ItemInfoType.Harvesting:
-                return ("Harvesting", null);
-            case ItemInfoType.HiddenMining:
-                return ("Mining (Hidden)", null);
-            case ItemInfoType.HiddenQuarrying:
-                return ("Quarrying (Hidden)", null);
-            case ItemInfoType.HiddenLogging:
-                return ("Logging (Hidden)", null);
-            case ItemInfoType.HiddenHarvesting:
-                return ("Harvesting (Hidden)", null);
-            case ItemInfoType.TimedMining:
-                return ("Mining (Timed)", null);
-            case ItemInfoType.TimedQuarrying:
-                return ("Quarrying (Timed)", null);
-            case ItemInfoType.TimedLogging:
-                return ("Logging (Timed)", null);
-            case ItemInfoType.TimedHarvesting:
-                return ("Harvesting (Timed)", null);
-            case ItemInfoType.EphemeralQuarrying:
-                return ("Quarrying (Ephemeral)", null);
-            case ItemInfoType.EphemeralMining:
-                return ("Mining (Ephemeral)", null);
-            case ItemInfoType.EphemeralLogging:
-                return ("Logging (Ephemeral)", null);
-            case ItemInfoType.EphemeralHarvesting:
-                return ("Harvesting (Ephemeral)", null);
-            case ItemInfoType.Fishing:
-                return ("Fishing", null);
-            case ItemInfoType.Achievement:
-                return ("Achievement", "Achievements");
-            case ItemInfoType.BuddyItem:
-                return ("Chocobo Item", "Chocobo Items");
-            case ItemInfoType.FurnitureItem:
-                return ("Interior Furnishing", null);
-            case ItemInfoType.Spearfishing:
-                return ("Spearfishing", null);
-            case ItemInfoType.Monster:
-                return ("Monster", "Monsters");
-            case ItemInfoType.Fate:
-                return ("Fate", null);
-            case ItemInfoType.Desynthesis:
-                return ("Desynthesis", null);
-            case ItemInfoType.Gardening:
-                return ("Gardening", null);
-            case ItemInfoType.Loot:
-                return ("Loot", null);
-            case ItemInfoType.SkybuilderInspection:
-                return ("Sky Builder Inspection", null);
-            case ItemInfoType.SkybuilderHandIn:
-                return ("Sky Builder Hand In", null);
-            case ItemInfoType.QuickVenture:
-                return ("Quick Venture", null);
-            case ItemInfoType.MiningVenture:
-                return ("Mining Venture", null);
-            case ItemInfoType.MiningExplorationVenture:
-                return ("Mining Exploration Venture", "Mining Exploration Ventures");
-            case ItemInfoType.BotanyVenture:
-                return ("Botany Venture", null);
-            case ItemInfoType.BotanyExplorationVenture:
-                return ("Botany Exploration Venture", "Botany Exploration Ventures");
-            case ItemInfoType.CombatVenture:
-                return ("Combat Venture", null);
-            case ItemInfoType.CombatExplorationVenture:
-                return ("Combat Exploration Venture", "Combat Exploration Ventures");
-            case ItemInfoType.FishingVenture:
-                return ("Fishing Venture", null);
-            case ItemInfoType.FishingExplorationVenture:
-                return ("Fishing Exploration Venture", "Fishing Exploration Ventures");
-            case ItemInfoType.Reduction:
-                return ("Reduction", null);
-            case ItemInfoType.Airship:
-                return ("Airship Exploration", null);
-            case ItemInfoType.Submarine:
-                return ("Submarine Exploration", null);
-            case ItemInfoType.DungeonChest:
-                return ("Dungeon Chest", "Dungeon Chests");
-            case ItemInfoType.DungeonBossDrop:
-                return ("Dungeon Boss Drop", "Dungeon Boss Drops");
-            case ItemInfoType.DungeonBossChest:
-                return ("Dungeon Boss Chest", "Dungeon Boss Chests");
-            case ItemInfoType.DungeonDrop:
-                return ("Dungeon Drop", "Dungeon Drops");
-            case ItemInfoType.CustomDelivery:
-                return ("Custom Delivery", "Custom Deliveries");
-            case ItemInfoType.Aquarium:
-                return ("Aquarium", null);
-            case ItemInfoType.GCDailySupply:
-                return ("Grand Company Daily Supplly", null);
-            case ItemInfoType.CraftLeve:
-                return ("Craft Leve", "Craft Leves");
-            case ItemInfoType.Armoire:
-                return ("Armoire", null);
+            return (renderer.SingularName, renderer.PluralName);
         }
 
-        return (type.ToString(),  null);
+        return (type.ToString(), null);
     }
 
-    public bool ShouldGroupSource(ItemInfoType itemInfoType)
+    public (string Singular, string? Plural) GetSourceTypeName(Type type)
     {
-        switch (itemInfoType)
+        if (_sourceRenderers.TryGetValue(type, out var renderer))
         {
-            case ItemInfoType.CraftRecipe:
-                return false;
-            case ItemInfoType.FreeCompanyCraftRecipe:
-                return false;
-            case ItemInfoType.SpecialShop:
-                return false;
+            return (renderer.SingularName, renderer.PluralName);
         }
 
-        return true;
+        return (type.ToString(), null);
     }
 
-    public void DrawUse<T>(List<T> items) where T : ItemSource
+    public (string Singular, string? Plural) GetUseTypeName(ItemInfoType type)
     {
-        var firstItem = items.First();
-        var sourceTypeNames = this.GetSourceTypeName(firstItem.Type);
-        var sourceTypeName = sourceTypeNames.Singular;
-        if (items.Count > 1 && sourceTypeNames.Plural != null)
+        if (_useRenderersByItemInfoType.TryGetValue(type, out var renderer))
         {
-            sourceTypeName = sourceTypeNames.Plural;
+            return (renderer.SingularName, renderer.PluralName);
         }
 
-        if (firstItem is ItemSpecialShopSource specialShopSource)
-        {
-            ImGui.Text(sourceTypeName + ":");
-            var maps = specialShopSource.MapIds == null || specialShopSource.MapIds.Count == 0
-                ? null
-                : specialShopSource.MapIds.Select(c => _mapSheet.GetRow(c).FormattedName);
-
-            ImGui.Text( "Rewards:");
-            using (ImRaii.PushIndent())
-            {
-                foreach (var reward in specialShopSource.ShopListing.Rewards)
-                {
-                    var itemName = reward.Item.NameString;
-                    var count = reward.Count;
-                    var costString = $"{itemName} x {count}";
-                    ImGui.Text(costString);
-                    if (reward.IsHq == true)
-                    {
-                        ImGui.Image(_imGuiService.GetImageTexture("hq").ImGuiHandle,
-                            new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
-                    }
-                }
-            }
-
-            ImGui.Text("Costs:");
-            using (ImRaii.PushIndent())
-            {
-                foreach (var cost in specialShopSource.ShopListing.Costs)
-                {
-                    var itemName = cost.Item.NameString;
-                    var count = cost.Count;
-                    var costString = $"{itemName} x {count}";
-                    ImGui.Text(costString);
-                    if (cost.IsHq == true)
-                    {
-                        ImGui.Image(_imGuiService.GetImageTexture("hq").ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
-                    }
-                }
-            }
-
-            if (maps != null)
-            {
-                ImGui.Text("Maps:");
-                using (ImRaii.PushIndent())
-                {
-                    foreach (var map in maps)
-                    {
-                        ImGui.Text(map);
-                    }
-                }
-            }
-        }
-        else if (firstItem is ItemCraftRequirementSource)
-        {
-            ImGui.Text(sourceTypeName + ":");
-            var results = items.Cast<ItemCraftRequirementSource>().Select(c => c.Item.NameString + "(" + c.Recipe.Base.CraftType.Value.Name.ExtractText() + ")");
-            using var push = ImRaii.PushIndent();
-            foreach (var craftItem in results)
-            {
-                ImGui.Text("Result: " + craftItem);
-            }
-        }
-        else if (firstItem is ItemGilShopSource)
-        {
-            ImGui.Text(sourceTypeName + ":");
-            ImGui.Text($"Can purchase {items.Count} items.");
-        }
-        else if (firstItem is ItemFccShopSource)
-        {
-            ImGui.Text(sourceTypeName + ":");
-            ImGui.Text($"Can purchase {items.Count} items.");
-        }
-        else if (firstItem is ItemGCShopSource)
-        {
-            ImGui.Text(sourceTypeName + ":");
-            ImGui.Text($"Can purchase {items.Count} items.");
-        }
-        else if (firstItem is ItemSkybuilderInspectionSource skybuilderInspectionSource)
-        {
-            ImGui.Text(sourceTypeName + ":");
-            using (ImRaii.PushIndent())
-            {
-                ImGui.Text($"Reward: {skybuilderInspectionSource.Item!.NameString}");
-                ImGui.Text($"Required: {skybuilderInspectionSource.InspectionData.AmountRequired}");
-            }
-        }
-        else if (firstItem is ItemDesynthSource or ItemReductionSource or ItemLootSource or ItemGardeningSource)
-        {
-            ImGui.Text(sourceTypeName + ":");
-            using var push = ImRaii.PushIndent();
-            foreach (var desynthItem in items)
-            {
-                ImGui.Text(desynthItem.Item.NameString);
-            }
-        }
-        else if (firstItem is ItemCompanyCraftRequirementSource)
-        {
-            ImGui.Text(sourceTypeName + ":");
-            var results = items.Cast<ItemCompanyCraftRequirementSource>().Select(c => c.Item.NameString + "(" + c.CompanyCraftSequence.Base.CompanyCraftType.Value.Name.ExtractText() + ")");
-            using var push = ImRaii.PushIndent();
-            foreach (var craftItem in results)
-            {
-                ImGui.Text("Result: " + craftItem);
-            }
-        }
-        else if (firstItem is ItemAquariumSource aquariumSource)
-        {
-            ImGui.Text("Size: " + aquariumSource.AquariumFish.Size.ToString());
-            ImGui.Text("Water Type: " + aquariumSource.AquariumFish.Base.AquariumWater.Value.Name.ExtractText());
-        }
-        else if (firstItem is ItemSkybuilderHandInSource skybuilderHandInSource)
-        {
-            var baseReward = skybuilderHandInSource.HWDCrafterSupplyParams.BaseCollectableReward.Value;
-            var midReward = skybuilderHandInSource.HWDCrafterSupplyParams.MidCollectableReward.Value;
-            var highReward = skybuilderHandInSource.HWDCrafterSupplyParams.HighCollectableReward.Value;
-            ImGui.Text("Level: " + skybuilderHandInSource.Level);
-            ImGui.Text("Max Level: " + skybuilderHandInSource.LevelMax);
-
-            ImGui.Text("Rewards:");
-            using (ImRaii.PushIndent())
-            {
-                ImGui.Text("Exp: " + baseReward.ExpReward + "/" + midReward.ExpReward + "/" + highReward.ExpReward);
-                ImGui.Text("Script: " + baseReward.ScriptRewardAmount + "/" + midReward.ScriptRewardAmount + "/" + highReward.ScriptRewardAmount);
-                ImGui.Text("Points: " + baseReward.Points + "/" + midReward.Points + "/" + highReward.Points);
-            }
-        }
-        else if (firstItem is ItemDailySupplyItemSource dailySupplyItemSource)
-        {
-            var rewardRow = dailySupplyItemSource.DailySupplyRewardRow;
-            if (rewardRow != null)
-            {
-                var baseReward = rewardRow.Base.ExperienceSupply;
-                var sealsSupply = rewardRow.Base.SealsSupply;
-                ImGui.Text("Exp: " + rewardRow.Base.ExperienceSupply);
-                ImGui.Text("Seals: " + sealsSupply);
-            }
-            else
-            {
-                ImGui.Text("Unknown rewards");
-            }
-        }
-        else if (firstItem is ItemCustomDeliverySource customDeliverySource)
-        {
-            var eNpcResident = customDeliverySource.SupplyRow.Npc?.Base.Npc.Value;
-            if (eNpcResident != null)
-            {
-                var collectabilityLow = customDeliverySource.SupplyRow.Base.CollectabilityLow;
-                var collectabilityMid = customDeliverySource.SupplyRow.Base.CollectabilityMid;
-                var collectabilityHigh = customDeliverySource.SupplyRow.Base.CollectabilityHigh;
-                ImGui.Text("NPC: " + eNpcResident.Value.Singular.ExtractText());
-                ImGui.Text("Collectability (Low): " + collectabilityLow);
-                ImGui.Text("Collectability (Mid): " + collectabilityMid);
-                ImGui.Text("Collectability (High): " + collectabilityHigh);
-            }
-            else
-            {
-                ImGui.Text("Unknown Npc");
-            }
-        }
-        else if (firstItem is ItemCraftLeveSource craftLeveSource)
-        {
-            var leveRow = craftLeveSource.CraftLeveRow.Base.Leve.Value;
-            ImGui.Text("Leve: " + leveRow.Name.ExtractText());
-            ImGui.Text("Class: " + leveRow.ClassJobCategory.Value.Name.ExtractText());
-            ImGui.Text("EXP Reward: " + leveRow.ExpReward);
-            ImGui.Text("Allowance Cost: " + leveRow.AllowanceCost);
-        }
-        else if (firstItem is ItemFurnitureSource itemFurnitureSource)
-        {
-            ImGui.Text(sourceTypeName + ":");
-            using (ImRaii.PushIndent())
-            {
-
-                ImGui.Text($"Category: {itemFurnitureSource.FurnitureCatalogItem.Value.Category.Value.Category.ExtractText()}");
-                ImGui.Text($"Patch Added: {itemFurnitureSource.FurnitureCatalogItem.Value.Patch}");
-            }
-        }
-        else
-        {
-            ImGui.Text(sourceTypeName + ":");
-            using var push = ImRaii.PushIndent();
-            foreach (var item in items.Select(RenderUseName).Distinct())
-            {
-                ImGui.Text(item);
-            }
-        }
+        return (type.ToString(), null);
     }
 
-    public void DrawSource<T>(List<T> items) where T : ItemSource
+    public (string Singular, string? Plural) GetUseTypeName(Type type)
     {
-        var firstItem = items.First();
-        var sourceTypeNames = this.GetSourceTypeName(firstItem.Type);
-        var sourceTypeName = sourceTypeNames.Singular;
-        if (items.Count > 1 && sourceTypeNames.Plural != null)
+        if (_useRenderers.TryGetValue(type, out var renderer))
         {
-            sourceTypeName = sourceTypeNames.Plural;
+            return (renderer.SingularName, renderer.PluralName);
         }
 
-        if (firstItem is ItemCraftResultSource craftResultSource)
+        return (type.ToString(), null);
+    }
+
+    public List<List<ItemSource>> GetGroupedSources(List<ItemSource> allItemSources)
+    {
+        return GroupItemSources(_sourceRenderers, allItemSources);
+    }
+
+    public List<MessageBase> DrawSource(string id, List<ItemSource> itemSources, Vector2 iconSize)
+    {
+        return DrawItemSource(RendererType.Source, id, itemSources, iconSize);
+    }
+
+    public string GetSourceName(ItemSource itemSource)
+    {
+        var sourceRenderer = this._sourceRenderers.ContainsKey(itemSource.GetType()) ? this._sourceRenderers[itemSource.GetType()] : null;
+        return sourceRenderer?.GetName(itemSource) ?? itemSource.Item.NameString;
+    }
+
+    public int GetSourceIcon(ItemSource itemSource)
+    {
+        var sourceRenderer = this._sourceRenderers.ContainsKey(itemSource.GetType()) ? this._sourceRenderers[itemSource.GetType()] : null;
+        return sourceRenderer?.GetIcon(itemSource) ?? itemSource.Item.Icon;
+    }
+
+    public List<List<ItemSource>> GetGroupedUses(List<ItemSource> allItemSources)
+    {
+        return GroupItemSources(_useRenderers, allItemSources);
+    }
+
+    public List<MessageBase> DrawUse(string id, List<ItemSource> itemSources, Vector2 iconSize)
+    {
+        return DrawItemSource(RendererType.Use, id, itemSources, iconSize);
+    }
+
+    public string GetUseName(ItemSource itemSource)
+    {
+        var useRenderer = this._useRenderers.ContainsKey(itemSource.GetType()) ? this._useRenderers[itemSource.GetType()] : null;
+        return useRenderer?.GetName(itemSource) ?? itemSource.Item.NameString;
+    }
+
+    public int GetUseIcon(ItemSource itemSource)
+    {
+        var useRenderer = this._useRenderers.ContainsKey(itemSource.GetType()) ? this._useRenderers[itemSource.GetType()] : null;
+        return useRenderer?.GetIcon(itemSource) ?? itemSource.Item.Icon;
+    }
+
+    private List<List<ItemSource>> GroupItemSources(Dictionary<Type,IItemInfoRenderer> renderers, List<ItemSource> allItemSources)
+    {
+        List<List<ItemSource>> groupedItems = new List<List<ItemSource>>();
+        var groupedByType = allItemSources.GroupBy(c => c.GetType());
+        foreach (var group in groupedByType)
         {
-            ImGui.Text(sourceTypeName + ":");
-            using (ImRaii.PushIndent())
+            if (renderers.TryGetValue(group.Key, out var renderer))
             {
-                ImGui.Text($"Craft Type: {craftResultSource.Recipe.Base.CraftType.Value.Name}");
-                ImGui.Text($"Yield: {craftResultSource.Recipe.Base.AmountResult}");
-                ImGui.Text($"Difficulty: {craftResultSource.Recipe.Base.DifficultyFactor}");
-                ImGui.Text($"Required Craftsmanship: {craftResultSource.Recipe.Base.RequiredCraftsmanship}");
-            }
-
-            ImGui.Text("Ingredients:");
-            using (ImRaii.PushIndent())
-            {
-                foreach (var ingredient in craftResultSource.Recipe.IngredientCounts)
+                if (renderer.CustomGroup != null)
                 {
-                    var item = _itemSheet.GetRow(ingredient.Key);
-                    ImGui.Text($"{item.NameString} x {ingredient.Value}");
+                    var customGrouping = renderer.CustomGroup.Invoke(group.ToList());
+                    groupedItems.AddRange(customGrouping);
                 }
-            }
-        }
-        else if (firstItem is ItemGCShopSource gcShopSource)
-        {
-            var allGcShopSources = items.Cast<ItemGCShopSource>().ToList();
-            ImGui.Text(sourceTypeName + ":");
-            var maps = allGcShopSources.SelectMany(shopSource => shopSource.MapIds == null || shopSource.MapIds.Count == 0
-                ? new List<string>()
-                : shopSource.MapIds.Select(c => _mapSheet.GetRow(c).FormattedName)).ToList();
-
-            using (ImRaii.PushIndent())
-            {
-                ImGui.Text($"Cost: Company Seal x {gcShopSource.GCScripShopItem.Base.CostGCSeals}");
-                if (gcShopSource.GCScripShopItem.Base.RequiredGrandCompanyRank.IsValid)
+                else
                 {
-                    var genericRank = _gcRankSheet
-                        .GetRow(gcShopSource.GCScripShopItem.Base.RequiredGrandCompanyRank.RowId).NameRank.ExtractText()
-                        .ToTitleCase();
-                    ImGui.Text($"Rank Required: " + genericRank);
-                }
-            }
-
-            if (maps.Count != 0)
-            {
-                ImGui.Text("Maps:");
-                using (ImRaii.PushIndent())
-                {
-                    foreach (var map in maps)
+                    if (renderer.ShouldGroup)
                     {
-                        ImGui.Text(map);
+                        groupedItems.Add(group.ToList());
                     }
-                }
-            }
-        }
-        else if (firstItem is ItemFccShopSource fccShopSource)
-        {
-            var allShopSources = items.Cast<ItemFccShopSource>().ToList();
-            ImGui.Text(sourceTypeName + ":");
-            var maps = allShopSources.SelectMany(shopSource => shopSource.MapIds == null || shopSource.MapIds.Count == 0
-                ? new List<string>()
-                : shopSource.MapIds.Select(c => _mapSheet.GetRow(c).FormattedName)).ToList();
-
-            using (ImRaii.PushIndent())
-            {
-                ImGui.Text($"Cost: Company Credit x {fccShopSource.FccShopListing.Cost.Count}");
-            }
-
-            if (maps.Count != 0)
-            {
-                ImGui.Text("Maps:");
-                using (ImRaii.PushIndent())
-                {
-                    foreach (var map in maps)
+                    else
                     {
-                        ImGui.Text(map);
-                    }
-                }
-            }
-        }
-        else if (firstItem is ItemCompanyCraftResultSource companyCraftResultSource)
-        {
-            ImGui.Text(sourceTypeName + ":");
-            using (ImRaii.PushIndent())
-            {
-                ImGui.Text($"Craft Type: {companyCraftResultSource.CompanyCraftSequence.Base.CompanyCraftType.Value.Name}");
-            }
-            ImGui.Text("Ingredients:");
-            using (ImRaii.PushIndent())
-            {
-                foreach (var ingredient in companyCraftResultSource.CompanyCraftSequence.MaterialsRequired(null))
-                {
-                    var item = _itemSheet.GetRow(ingredient.ItemId);
-                    ImGui.Text($"{item.NameString} x {ingredient.Quantity}");
-                }
-            }
-        }
-        else if (firstItem is ItemGatheringSource itemGatheringSource)
-        {
-            ImGui.Text(sourceTypeName + ":");
-            var maps = itemGatheringSource.MapIds == null || itemGatheringSource.MapIds.Count == 0
-                ? null
-                : itemGatheringSource.MapIds.Select(c => _mapSheet.GetRow(c).FormattedName);
-
-            using (ImRaii.PushIndent())
-            {
-                var level = itemGatheringSource.GatheringItem.Base.GatheringItemLevel.Value.GatheringItemLevel;
-                ImGui.Text("Level:" + (level == 0 ? "N/A" : level));
-                var stars = itemGatheringSource.GatheringItem.Base.GatheringItemLevel.Value.Stars;
-                ImGui.Text("Stars:" + (stars == 0 ? "N/A" : stars));
-                var perceptionRequired = itemGatheringSource.GatheringItem.Base.PerceptionReq;
-                ImGui.Text("Perception Required:" + (perceptionRequired == 0 ? "N/A" : stars));
-            }
-
-            if (itemGatheringSource.GatheringItem.AvailableAtTimedNode)
-            {
-                ImGui.Text("Maps:");
-                using (ImRaii.PushIndent())
-                {
-                    foreach (var gatheringPoint in itemGatheringSource.GatheringItem.GatheringPoints)
-                    {
-                        var mapName = _mapSheet.GetRow(gatheringPoint.Base.TerritoryType.Value.Map.RowId).FormattedName;
-                        var nextUptime = gatheringPoint.GatheringPointTransient.GetGatheringUptime()
-                            ?.NextUptime(_seTime.ServerTime) ?? null;
-                        if (nextUptime == null
-                            || nextUptime.Equals(TimeInterval.Always)
-                            || nextUptime.Equals(TimeInterval.Invalid)
-                            || nextUptime.Equals(TimeInterval.Never))
+                        foreach (var ungroupedItem in group)
                         {
-                            continue;
+                            groupedItems.Add([ungroupedItem]);
                         }
-                        if (nextUptime.Value.Start > TimeStamp.UtcNow)
+                    }
+                }
+            }
+            else
+            {
+                //If no renderer assume we'll leave them ungrouped
+                foreach (var ungroupedItem in group)
+                {
+                    groupedItems.Add([ungroupedItem]);
+                }
+            }
+        }
+
+        return groupedItems;
+    }
+
+    private List<MessageBase> DrawItemSource(RendererType rendererType, string id, List<ItemSource> itemSources, Vector2 iconSize)
+    {
+        using var pushId = ImRaii.PushId(id);
+        var messages = new List<MessageBase>();
+        var firstItem = itemSources.First();
+        var renderers = rendererType == RendererType.Source ? _sourceRenderers : _useRenderers;
+        var icon = rendererType == RendererType.Source ? GetSourceIcon(firstItem) : GetUseIcon(firstItem);
+        var sourceRenderer = renderers.ContainsKey(firstItem.GetType()) ? renderers[firstItem.GetType()] : null;
+
+        var sourceIcon = _imGuiService.GetIconTexture(icon);
+
+        var isButton = sourceRenderer?.OnClick != null;
+        var hasTooltip = sourceRenderer?.DrawTooltip != null;
+        var hasGroupedTooltip = sourceRenderer?.DrawTooltipGrouped != null;
+
+
+        if (isButton && ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                new Vector2(iconSize.X, iconSize.Y) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
+                new Vector2(1, 1), 0))
+        {
+            if (itemSources.Count > 1)
+            {
+                ImGui.OpenPopup("PickItemSource");
+            }
+            else
+            {
+                var newMessages = sourceRenderer?.OnClick?.Invoke(firstItem);
+                if (newMessages != null)
+                {
+                    messages.AddRange(newMessages);
+                }
+            }
+        }
+        else if(!isButton)
+        {
+            ImGui.Image(sourceIcon.ImGuiHandle,
+                new Vector2(iconSize.X, iconSize.Y) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
+                new Vector2(1, 1));
+        }
+
+        if (isButton && itemSources.Count > 1)
+        {
+            using (var popup = ImRaii.Popup("PickItemSource"))
+            {
+                if (popup.Success)
+                {
+                    var typeName = (rendererType == RendererType.Source ? this.GetSourceTypeName(firstItem.GetType()) : this.GetUseTypeName(firstItem.GetType()));
+                    ImGui.Text("Pick a " + (typeName.Plural ?? typeName.Singular));
+                    ImGui.Separator();
+                    for (var index = 0; index < itemSources.Count; index++)
+                    {
+                        var source = itemSources[index];
+                        using (ImRaii.PushId(index))
                         {
-                            using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudRed))
+                            if (ImGui.Selectable(sourceRenderer?.GetName(source) ?? "No Name"))
                             {
-                                ImGui.Text(mapName + ": up in " +
-                                                  TimeInterval.DurationString(nextUptime.Value.Start, TimeStamp.UtcNow,
-                                                      true));
+                                var newMessages = sourceRenderer?.OnClick?.Invoke(source);
+                                if (newMessages != null)
+                                {
+                                    messages.AddRange(newMessages);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if ((hasTooltip || hasGroupedTooltip) && ImGui.IsItemHovered())
+        {
+            using var tt = ImRaii.Tooltip();
+            if (tt.Success)
+            {
+                if (itemSources.Count > 1)
+                {
+                    var typeName = (rendererType == RendererType.Source ? this.GetSourceTypeName(firstItem.GetType()) : this.GetUseTypeName(firstItem.GetType()));
+                    ImGui.Text(typeName.Plural ?? typeName.Singular);
+                    ImGui.Separator();
+                    if (hasGroupedTooltip)
+                    {
+                        sourceRenderer?.DrawTooltipGrouped?.Invoke(itemSources);
+                    }
+                    else
+                    {
+
+                        byte itemsPerRow = sourceRenderer?.MaxColumns ?? 3;
+                        float childWidth = sourceRenderer?.TooltipChildWidth ?? 250;
+                        float childHeight = sourceRenderer?.TooltipChildHeight ?? 150;
+
+                        if (itemsPerRow == 1)
+                        {
+                            for (var index = 0; index < itemSources.Count; index++)
+                            {
+                                var source = itemSources[index];
+
+                                sourceRenderer?.DrawTooltip.Invoke(source);
+                                if (index != itemSources.Count - 1)
+                                {
+                                    ImGui.Separator();
+                                }
                             }
                         }
                         else
                         {
-                            using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.HealerGreen))
+
+                            for (var index = 0; index < itemSources.Count; index++)
                             {
-                                ImGui.Text(mapName + " up for " +
-                                                  TimeInterval.DurationString(nextUptime.Value.End, TimeStamp.UtcNow,
-                                                      true));
+                                var source = itemSources[index];
+
+                                using (var child = ImRaii.Child($"Tooltip_{index}", new(childWidth, childHeight), false,
+                                           ImGuiWindowFlags.NoScrollbar))
+                                {
+                                    if (child.Success)
+                                    {
+                                        sourceRenderer?.DrawTooltip.Invoke(source);
+                                    }
+                                }
+
+                                if ((index + 1) % itemsPerRow != 0)
+                                {
+                                    ImGui.SameLine();
+                                }
                             }
                         }
+
                     }
                 }
-            }
-            else
-            {
-                if (maps != null)
+                else
                 {
-                    ImGui.Text("Maps:");
-                    using (ImRaii.PushIndent())
-                    {
-                        foreach (var map in maps)
-                        {
-                            ImGui.Text(map);
-                        }
-                    }
+                    ImGui.Text((rendererType == RendererType.Source
+                        ? this.GetSourceTypeName(firstItem.GetType())
+                        : this.GetUseTypeName(firstItem.GetType())).Singular);
+                    ImGui.Separator();
+                    sourceRenderer?.DrawTooltip.Invoke(firstItem);
                 }
             }
         }
-        else if (firstItem is ItemFishingSource fishingSource)
+        else if(ImGui.IsItemHovered())
         {
-            ImGui.Text(sourceTypeName + ":");
-
-            var allFishingShops = items.Cast<ItemFishingSource>().ToList();
-            ImGui.Text(sourceTypeName + ":");
-            var maps = allFishingShops.SelectMany(shopSource => shopSource.MapIds == null || shopSource.MapIds.Count == 0
-                ? new List<string>()
-                : shopSource.MapIds.Select(c => _mapSheet.GetRow(c).FormattedName)).ToList();
-
-            using (ImRaii.PushIndent())
+            using var tt = ImRaii.Tooltip();
+            if (tt.Success)
             {
-                var level = fishingSource.FishingSpotRow.Base.GatheringLevel;
-                ImGui.Text("Level:" + (level == 0 ? "N/A" : level));
-            }
-
-            if (maps.Count != 0)
-            {
-                ImGui.Text("Maps:");
-                using (ImRaii.PushIndent())
-                {
-                    foreach (var map in maps)
-                    {
-                        ImGui.Text(map);
-                    }
-                }
+                ImGui.Text("No tooltip configured for " + (rendererType == RendererType.Source
+                    ? this.GetSourceTypeName(firstItem.GetType())
+                    : this.GetUseTypeName(firstItem.GetType())).Singular + ", please report this!");
             }
         }
-        else if (firstItem is ItemSpecialShopSource specialShopSource)
+
+        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
+                                ImGuiHoveredFlags.AllowWhenOverlapped &
+                                ImGuiHoveredFlags.AllowWhenBlockedByPopup &
+                                ImGuiHoveredFlags.AllowWhenBlockedByActiveItem &
+                                ImGuiHoveredFlags.AnyWindow) &&
+            ImGui.IsMouseReleased(ImGuiMouseButton.Right))
         {
-            ImGui.Text(sourceTypeName + ":");
-            var maps = specialShopSource.MapIds == null || specialShopSource.MapIds.Count == 0
-                ? null
-                : specialShopSource.MapIds.Select(c => _mapSheet.GetRow(c).FormattedName);
-
-            ImGui.Text("Costs:");
-            using (ImRaii.PushIndent())
-            {
-                foreach (var cost in specialShopSource.ShopListing.Costs)
-                {
-                    var itemName = cost.Item.NameString;
-                    var count = cost.Count;
-                    var costString = $"{itemName} x {count}";
-                    ImGui.Text(costString);
-                    if (cost.IsHq == true)
-                    {
-                        ImGui.Image(_imGuiService.GetImageTexture("hq").ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
-                    }
-                }
-            }
-
-            if (specialShopSource.ShopListing.Rewards.Count() > 1)
-            {
-                ImGui.Text("Rewards:");
-                using (ImRaii.PushIndent())
-                {
-                    foreach (var reward in specialShopSource.ShopListing.Rewards)
-                    {
-                        var itemName = reward.Item.NameString;
-                        var count = reward.Count;
-                        var costString = $"{itemName} x {count}";
-                        ImGui.Text(costString);
-                        if (reward.IsHq == true)
-                        {
-                            ImGui.Image(_imGuiService.GetImageTexture("hq").ImGuiHandle,
-                                new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
-                        }
-                    }
-                }
-            }
-
-            if (maps != null)
-            {
-                ImGui.Text("Maps:");
-                using (ImRaii.PushIndent())
-                {
-                    foreach (var map in maps)
-                    {
-                        ImGui.Text(map);
-                    }
-                }
-            }
+            ImGui.OpenPopup("RightClick");
         }
-        else if (firstItem is ItemGilShopSource gilShopSource)
+
+        using (var popup = ImRaii.Popup("RightClick"))
         {
-            var allGilShops = items.Cast<ItemGilShopSource>().ToList();
-            ImGui.Text(sourceTypeName + ":");
-            var maps = allGilShops.SelectMany(shopSource => shopSource.MapIds == null || shopSource.MapIds.Count == 0
-                ? new List<string>()
-                : shopSource.MapIds.Select(c => _mapSheet.GetRow(c).FormattedName)).ToList();
-
-            ImGui.Text("Costs:");
-
-            using (ImRaii.PushIndent())
+            if (popup.Success)
             {
-                var itemName = gilShopSource.CostItem!.NameString;
-                var count = gilShopSource.Cost;
-                var costString = $"{itemName} x {count}";
-                ImGui.Text(costString);
-
-                if (gilShopSource.GilShopItem.Base.AchievementRequired.RowId != 0)
+                if (sourceRenderer?.OnRightClick != null)
                 {
-                    ImGui.Text($"Achievement Required: {gilShopSource.GilShopItem.Base.AchievementRequired.Value.Name.ExtractText()}");
+                    sourceRenderer?.OnRightClick.Invoke(firstItem);
                 }
-
-                foreach (var quest in gilShopSource.GilShopItem.Base.QuestRequired)
+                else
                 {
-                    if (quest.RowId != 0)
-                    {
-                        ImGui.Text(
-                            $"Quest Required: {quest.Value.Name.ExtractText()}");
-                    }
-                }
-            }
-
-            if (maps.Count != 0)
-            {
-                ImGui.Text("Maps:");
-                using (ImRaii.PushIndent())
-                {
-                    foreach (var map in maps)
-                    {
-                        ImGui.Text(map);
-                    }
+                    _imGuiService.RightClickService.DrawRightClickPopup(rendererType == RendererType.Source ? firstItem.Item : (firstItem.CostItem ?? firstItem.Item), messages);
                 }
             }
         }
-        else if (firstItem is ItemFateShopSource fateShopSource)
-        {
-            var allShops = items.Cast<ItemFateShopSource>().ToList();
-            ImGui.Text(sourceTypeName + ":");
-            var maps = allShops.SelectMany(shopSource => shopSource.MapIds == null || shopSource.MapIds.Count == 0
-                ? new List<string>()
-                : shopSource.MapIds.Select(c => _mapSheet.GetRow(c).FormattedName)).ToList();
 
-            ImGui.Text("Costs:");
-
-            using (ImRaii.PushIndent())
-            {
-                foreach (var cost in fateShopSource.ShopListing.Costs)
-                {
-                    var itemName = cost.Item.NameString;
-                    var count = cost.Count;
-                    var costString = $"{itemName} x {count}";
-                    ImGui.Text(costString);
-                    if (cost.IsHq == true)
-                    {
-                        ImGui.Image(_imGuiService.GetImageTexture("hq").ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
-                    }
-                }
-            }
-
-            if (maps.Count != 0)
-            {
-                ImGui.Text("Maps:");
-                using (ImRaii.PushIndent())
-                {
-                    foreach (var map in maps)
-                    {
-                        ImGui.Text(map);
-                    }
-                }
-            }
-        }
-        else if (firstItem is ItemSpearfishingSource spearfishingSource)
-        {
-            ImGui.Text(sourceTypeName + ":");
-
-            var allSpearfishing = items.Cast<ItemSpearfishingSource>().ToList();
-            ImGui.Text(sourceTypeName + ":");
-            var maps = allSpearfishing.SelectMany(source => source.MapIds == null || source.MapIds.Count == 0
-                ? new List<string>()
-                : source.MapIds.Select(c => _mapSheet.GetRow(c).FormattedName)).ToList();
-
-            using (ImRaii.PushIndent())
-            {
-                var level = spearfishingSource.SpearfishingItemRow.Base.GatheringItemLevel.Value.GatheringItemLevel;
-                ImGui.Text("Level:" + (level == 0 ? "N/A" : level));
-                var stars = spearfishingSource.SpearfishingItemRow.Base.GatheringItemLevel.Value.Stars;
-                ImGui.Text("Stars:" + (stars == 0 ? "N/A" : stars));
-            }
-
-            if (maps.Count != 0)
-            {
-                ImGui.Text("Maps:");
-                using (ImRaii.PushIndent())
-                {
-                    foreach (var map in maps)
-                    {
-                        ImGui.Text(map);
-                    }
-                }
-            }
-        }
-        else if (firstItem is ItemFateSource fateSource)
-        {
-            var allFates = items.Cast<ItemFateSource>().ToList();
-            ImGui.Text(sourceTypeName + ":");
-            using (ImRaii.PushIndent())
-            {
-                foreach (var fate in allFates)
-                {
-                    ImGui.Text(fate.Fate.Base.Name.ExtractText());
-                }
-            }
-        }
-        else if (firstItem is ItemQuickVentureSource quickVentureSource)
-        {
-            ImGui.Text(sourceTypeName + ":");
-            using (ImRaii.PushIndent())
-            {
-                ImGui.Text($"Venture Cost: {quickVentureSource.RetainerTaskRow.Base.VentureCost}");
-                ImGui.Text(
-                    $"Time: {quickVentureSource.RetainerTaskRow.Base.MaxTimemin.Minutes().ToHumanReadableString()}");
-            }
-        }
-        else if (firstItem is ItemExplorationVentureSource)
-        {
-            var allVentures = items.Cast<ItemExplorationVentureSource>().ToList();
-            foreach (var explorationVentureSource in allVentures)
-            {
-                ImGui.Text($"{explorationVentureSource.RetainerTaskRow.FormattedName}");
-                using (ImRaii.PushIndent())
-                {
-                    ImGui.Text($"Venture Cost: {explorationVentureSource.RetainerTaskRow.Base.VentureCost}");
-                    ImGui.Text($"Required Level: {explorationVentureSource.RetainerTaskRow.Base.RetainerLevel}");
-                    if (explorationVentureSource.RetainerTaskRow.Base.RequiredGathering != 0)
-                    {
-                        ImGui.Text(
-                            $"Required Gathering: {explorationVentureSource.RetainerTaskRow.Base.RequiredGathering}");
-                    }
-
-                    if (explorationVentureSource.RetainerTaskRow.Base.RequiredItemLevel != 0)
-                    {
-                        ImGui.Text(
-                            $"Required Item Level: {explorationVentureSource.RetainerTaskRow.Base.RequiredItemLevel}");
-                    }
-
-                    ImGui.Text($"Experience: {explorationVentureSource.RetainerTaskRow.Base.Experience}");
-                    ImGui.Text(
-                        $"Time: {explorationVentureSource.RetainerTaskRow.Base.MaxTimemin.Minutes().ToHumanReadableString()}");
-                }
-            }
-        }
-        else if (firstItem is ItemVentureSource)
-        {
-            var allVentures = items.Cast<ItemVentureSource>().ToList();
-            foreach (var ventureSource in allVentures)
-            {
-                ImGui.Text($"{ventureSource.RetainerTaskRow.FormattedName}");
-                using (ImRaii.PushIndent())
-                {
-                    ImGui.Text($"Venture Cost: {ventureSource.RetainerTaskRow.Base.VentureCost}");
-                    ImGui.Text($"Required Level: {ventureSource.RetainerTaskRow.Base.RetainerLevel}");
-                    if (ventureSource.RetainerTaskRow.Base.RequiredGathering != 0)
-                    {
-                        ImGui.Text(
-                            $"Required Gathering: {ventureSource.RetainerTaskRow.Base.RequiredGathering}");
-                    }
-
-                    if (ventureSource.RetainerTaskRow.Base.RequiredItemLevel != 0)
-                    {
-                        ImGui.Text(
-                            $"Required Item Level: {ventureSource.RetainerTaskRow.Base.RequiredItemLevel}");
-                    }
-
-                    ImGui.Text($"Experience: {ventureSource.RetainerTaskRow.Base.Experience}");
-                    ImGui.Text(
-                        $"Time: {ventureSource.RetainerTaskRow.Base.MaxTimemin.Minutes().ToHumanReadableString()}");
-                }
-            }
-        }
-        else if (firstItem is ItemMonsterDropSource)
-        {
-            ImGui.Text(sourceTypeName + ":");
-            foreach (var monsterDropSource in items.Cast<ItemMonsterDropSource>().ToList())
-            {
-                var allSources = items.Cast<ItemMonsterDropSource>().ToList();
-                ImGui.Text(monsterDropSource.BNpcName.Base.Singular.ExtractText().ToTitleCase() + ":");
-
-                var maps = allSources.SelectMany(source => source.MapIds == null || source.MapIds.Count == 0
-                    ? new List<string>()
-                    : source.MapIds.Select(c => _mapSheet.GetRow(c).FormattedName)).Distinct().ToList();
-
-                using (ImRaii.PushIndent())
-                {
-                    if (maps.Count != 0)
-                    {
-                        using (ImRaii.PushIndent())
-                        {
-                            foreach (var map in maps)
-                            {
-                                ImGui.Text(map);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        ImGui.Text("No known locations.");
-                    }
-                }
-            }
-        }
-        else if (firstItem is ItemSkybuilderInspectionSource skybuilderInspectionSource)
-        {
-            var inspectionSources = items.Cast<ItemSkybuilderInspectionSource>().ToList();
-            ImGui.Text(sourceTypeName + ":");
-            using (ImRaii.PushIndent())
-            {
-                foreach (var inspectionSource in inspectionSources)
-                {
-                    ImGui.Text($"{inspectionSource.CostItem!.NameString} x {inspectionSource.InspectionData.AmountRequired}");
-                }
-            }
-        }
-        else if (firstItem is ItemAchievementSource)
-        {
-            var achievementSources = items.Cast<ItemAchievementSource>().ToList();
-            ImGui.Text(sourceTypeName + ":");
-            using (ImRaii.PushIndent())
-            {
-                foreach (var achievementSource in achievementSources)
-                {
-                    ImGui.Text($"{achievementSource.Achievement.Value.Name.ExtractText()} ({achievementSource.Achievement.Value.AchievementCategory.Value.Name.ExtractText()})");
-                }
-            }
-        }
-        else
-        {
-            ImGui.Text(sourceTypeName + ":");
-            using var push = ImRaii.PushIndent();
-            foreach (var item in items.Select(c => RenderSourceName(c)).Distinct())
-            {
-                ImGui.Text(item);
-            }
-        }
+        return messages;
     }
 
-    public string RenderSourceName<T>(T item) where T : ItemSource
+    public List<MessageBase> DrawItemSourceIconsContainer(string id, float rowSize, Vector2 iconSize, List<ItemSource> itemSources)
     {
-        switch (item.Type)
-        {
-            case ItemInfoType.CraftRecipe:
-                if (item is ItemCraftResultSource craftResultSource)
-                {
-                    return craftResultSource.Recipe.Base.ItemResult.Value.Name.ExtractText() + "(" + (craftResultSource.Recipe.CraftType?.FormattedName ?? "Unknown") + ")";
-                }
-                break;
-            case ItemInfoType.FreeCompanyCraftRecipe:
-                if (item is ItemCompanyCraftResultSource itemCompanyCraftResult)
-                {
-                    return itemCompanyCraftResult.Item.Base.Name.ExtractText() + "(" + (itemCompanyCraftResult.CompanyCraftSequence.Base.CompanyCraftType.ValueNullable?.Name.ExtractText() ?? "Unknown") + ")";
-                }
-                break;
-            case ItemInfoType.SpecialShop:
-                if (item is ItemSpecialShopSource specialShopSource)
-                {
-                    var costs = String.Join(", ",
-                        specialShopSource.ShopListing.Costs.Select(c => c.Item.NameString + " (" + c.Count + ")"));
-                    if (specialShopSource.ShopListing.Rewards.Count() > 1)
-                    {
-                        var rewards = String.Join(", ",
-                            specialShopSource.ShopListing.Rewards.Select(c => c.Item.NameString + " (" + c.Count + ")"));
-                        return $"Costs {costs} - Rewards {rewards}";
-                    }
-                    return $"Costs {costs}";
-                }
-                break;
-            case ItemInfoType.GilShop:
-                if (item is ItemGilShopSource gilShopSource)
-                {
-                    if (gilShopSource.MapIds == null || gilShopSource.MapIds.Count == 0)
-                    {
-                        return gilShopSource.GilShop.Name;
-                    }
+        var messages = new List<MessageBase>();
+        using var pushId = ImRaii.PushId(id);
+        var count = 0;
+        var groupedSources = GetGroupedSources(itemSources);
+        _imGuiService.WrapTableColumnElements(id, groupedSources,
+            rowSize,
+            itemList =>
+            {
+                messages.AddRange(this.DrawSource(count.ToString(), itemList, iconSize));
+                count++;
+                return true;
+            });
 
-                    var maps = gilShopSource.MapIds.Select(c => _mapSheet.GetRow(c).FormattedName);
-                    return gilShopSource.GilShop.Name + "(" + maps + ")";
-                }
-                break;
-            case ItemInfoType.FCShop:
-                if (item is ItemFccShopSource fccShopSource)
-                {
-                    return fccShopSource.FccShop.Name;
-                }
-                break;
-            case ItemInfoType.GCShop:
-                if (item is ItemGCShopSource gcShopSource)
-                {
-                    return gcShopSource.GcShop.Name;
-                }
-                break;
-            case ItemInfoType.CashShop:
-                if (item is ItemCashShopSource cashShopSource)
-                {
-                    return (cashShopSource.FittingShopItemSetRow?.Base.Unknown6.ExtractText() ?? "Not in a set");
-                }
-                break;
-            case ItemInfoType.FateShop:
-                if (item is ItemFateShopSource fateShopSource)
-                {
-                    var costs = String.Join(", ",
-                        fateShopSource.ShopListing.Costs.Select(c => c.Item.NameString + " (" + c.Count + ")"));
-                    if (fateShopSource.ShopListing.Rewards.Count() > 1)
-                    {
-                        var rewards = String.Join(", ",
-                            fateShopSource.ShopListing.Rewards.Select(c => c.Item.NameString + " (" + c.Count + ")").Distinct());
-                        return $"Costs {costs} - Rewards {rewards}";
-                    }
-                    return $"Costs {costs}";
-                }
-                break;
-            case ItemInfoType.CalamitySalvagerShop:
-                if (item is ItemGilShopSource calamitySalvagerShopSource)
-                {
-                    if (calamitySalvagerShopSource.MapIds == null || calamitySalvagerShopSource.MapIds.Count == 0)
-                    {
-                        return calamitySalvagerShopSource.GilShop.Name;
-                    }
-
-                    var maps = calamitySalvagerShopSource.MapIds.Select(c => _mapSheet.GetRow(c).FormattedName);
-                    return calamitySalvagerShopSource.GilShop.Name + "(" + maps + ")";
-                }
-                break;
-            case ItemInfoType.Mining:
-            case ItemInfoType.Quarrying:
-            case ItemInfoType.Logging:
-            case ItemInfoType.Harvesting:
-            case ItemInfoType.HiddenMining:
-            case ItemInfoType.HiddenQuarrying:
-            case ItemInfoType.HiddenLogging:
-            case ItemInfoType.HiddenHarvesting:
-            case ItemInfoType.TimedMining:
-            case ItemInfoType.TimedQuarrying:
-            case ItemInfoType.TimedLogging:
-            case ItemInfoType.TimedHarvesting:
-            case ItemInfoType.EphemeralQuarrying:
-            case ItemInfoType.EphemeralMining:
-            case ItemInfoType.EphemeralLogging:
-            case ItemInfoType.EphemeralHarvesting:
-                //Handled with custom draw method
-                if (item is ItemGatheringSource gatheringSource)
-                {
-                    return gatheringSource.Item.NameString;
-                }
-                break;
-            case ItemInfoType.Fishing:
-                if (item is ItemFishingSource fishingSource)
-                {
-                    return fishingSource.Item.NameString;
-                }
-                break;
-            case ItemInfoType.Achievement:
-                if (item is ItemAchievementSource achievementSource)
-                {
-                    return achievementSource.Achievement.Value.Name.ExtractText();
-                }
-                break;
-            case ItemInfoType.Spearfishing:
-                if (item is ItemSpearfishingSource spearfishingSource)
-                {
-                    return spearfishingSource.Item.NameString;
-                }
-                break;
-                break;
-            case ItemInfoType.Monster:
-                if (item is ItemMonsterDropSource monsterDropSource)
-                {
-                    return monsterDropSource.BNpcName.Base.Singular.ExtractText().ToTitleCase();
-                }
-                break;
-            case ItemInfoType.Fate:
-                break;
-            case ItemInfoType.Desynthesis:
-                break;
-            case ItemInfoType.Gardening:
-                break;
-            case ItemInfoType.Loot:
-                if (item is ItemLootSource lootSource)
-                {
-                    return (lootSource.CostItem?.NameString ?? "Unknown");
-                }
-                break;
-            case ItemInfoType.SkybuilderInspection:
-                break;
-            case ItemInfoType.SkybuilderHandIn:
-                break;
-            case ItemInfoType.QuickVenture:
-                break;
-            case ItemInfoType.MiningVenture:
-                break;
-            case ItemInfoType.MiningExplorationVenture:
-                break;
-            case ItemInfoType.BotanyVenture:
-                break;
-            case ItemInfoType.BotanyExplorationVenture:
-                break;
-            case ItemInfoType.CombatVenture:
-                break;
-            case ItemInfoType.CombatExplorationVenture:
-                break;
-            case ItemInfoType.FishingVenture:
-                break;
-            case ItemInfoType.FishingExplorationVenture:
-                break;
-            case ItemInfoType.Reduction:
-                break;
-            case ItemInfoType.Airship:
-                if (item is ItemAirshipDropSource airshipDropSource)
-                {
-                    return airshipDropSource.AirshipExplorationPoint.Base.NameShort.ToString();
-                }
-                break;
-            case ItemInfoType.Submarine:
-                if (item is ItemSubmarineDropSource submarineDropSource)
-                {
-                    return submarineDropSource.SubmarineExploration.Base.Location.ToString();
-                }
-                break;
-            case ItemInfoType.DungeonChest:
-                if (item is ItemDungeonChestSource dungeonChestSource)
-                {
-                    return dungeonChestSource.ContentFinderCondition.Base.Name.ExtractText();
-                }
-                break;
-            case ItemInfoType.DungeonBossDrop:
-                if (item is ItemDungeonBossDropSource dungeonBossDropSource)
-                {
-                    return dungeonBossDropSource.ContentFinderCondition.Base.Name.ExtractText() + " - " + dungeonBossDropSource.BNpcName.Base.Singular.ExtractText().ToTitleCase();
-                }
-                break;
-            case ItemInfoType.DungeonBossChest:
-                if (item is ItemDungeonBossChestSource dungeonBossChestSource)
-                {
-                    return dungeonBossChestSource.ContentFinderCondition.Base.Name.ExtractText() + " - " + dungeonBossChestSource.BNpcName.Base.Singular.ExtractText().ToTitleCase();
-                }
-                break;
-            case ItemInfoType.DungeonDrop:
-                if (item is ItemDungeonDropSource dungeonDropSource)
-                {
-                    return dungeonDropSource.ContentFinderCondition.Base.Name.ExtractText();
-                }
-                break;
-            case ItemInfoType.CustomDelivery:
-                //Is a use
-                break;
-            case ItemInfoType.Aquarium:
-                //Is a use
-                break;
-            case ItemInfoType.GCDailySupply:
-                //Is a use
-                break;
-            case ItemInfoType.CraftLeve:
-                //Is a use
-                break;
-            case ItemInfoType.Armoire:
-                //Is a use
-                break;
-        }
-
-
-
-
-        return item.CostItem?.NameString ?? item.Type.ToString();
+        return messages;
     }
 
-    public string RenderUseName<T>(T item) where T : ItemSource
+    public List<MessageBase> DrawItemSourceIcons(string id, Vector2 iconSize, List<ItemSource> itemSources)
     {
-        switch (item.Type)
+        ImGuiStylePtr style = ImGui.GetStyle();
+        float windowVisibleX2 = ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
+
+        var messages = new List<MessageBase>();
+        using var pushId = ImRaii.PushId(id);
+        var groupedSources = GetGroupedSources(itemSources);
+
+        for (var index = 0; index < groupedSources.Count; index++)
         {
-            case ItemInfoType.SpecialShop:
-                if (item is ItemSpecialShopSource specialShopSource)
-                {
-                    var costs = String.Join(", ",
-                        specialShopSource.ShopListing.Costs.Select(c => c.Item.NameString + " (" + c.Count + ")"));
-                    var rewards = String.Join(", ",
-                        specialShopSource.ShopListing.Rewards.Select(c => c.Item.NameString + " (" + c.Count + ")"));
-                    return $"Costs {costs} - Rewards {rewards}";
-                }
-                break;
-        }
-        if (item is ItemBuddySource buddySource)
-        {
-            return buddySource.Item.NameString;
+            var groupedSource = groupedSources[index];
+            messages.AddRange(DrawSource(index.ToString(), groupedSource, iconSize));
+
+            float lastButtonX2 = ImGui.GetItemRectMax().X;
+            float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
+
+            if (index + 1 < groupedSources.Count && nextButtonX2 < windowVisibleX2)
+            {
+                ImGui.SameLine();
+            }
         }
 
-        if (item is ItemAquariumSource aquariumSource)
-        {
-            return "Aquarium: " + aquariumSource.AquariumFish.Base.AquariumWater.Value.Name.ExtractText() + " (" + aquariumSource.AquariumFish.Size + " )";
-        }
-
-        if (item is ItemArmoireSource armoireSource)
-        {
-            return "Armoire: " + (armoireSource.Cabinet.CabinetCategory?.Base.Category.Value.Text.ExtractText() ?? "Unknown");
-        }
-
-        return item.Type.ToString();
+        return messages;
     }
 
-    public ushort RenderUseIcon<T>(T item) where T : ItemSource
+    public List<MessageBase> DrawItemUseIcons(string id, Vector2 iconSize, List<ItemSource> itemSources)
     {
-        switch (item.Type)
+        ImGuiStylePtr style = ImGui.GetStyle();
+        float windowVisibleX2 = ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
+
+        var messages = new List<MessageBase>();
+        using var pushId = ImRaii.PushId(id);
+        var groupedSources = GetGroupedUses(itemSources);
+
+        for (var index = 0; index < groupedSources.Count; index++)
         {
-            case ItemInfoType.SpecialShop:
-                if (item is ItemSpecialShopSource specialShopSource)
-                {
-                    return specialShopSource.Item.Icon;
-                }
-                break;
-            case ItemInfoType.CustomDelivery:
-                return Icons.CustomDeliveryIcon;
-            case ItemInfoType.Aquarium:
-                return Icons.AquariumIcon;
-            case ItemInfoType.GCDailySupply:
-                return Icons.FlameSealIcon;
-            case ItemInfoType.CraftLeve:
-                return Icons.LeveIcon;
-            case ItemInfoType.Armoire:
-                return Icons.ArmoireIcon;
-            case ItemInfoType.BuddyItem:
-                return Icons.ChocoboIcon;
-            case ItemInfoType.FurnitureItem:
-                return Icons.TableIcon;
-            case ItemInfoType.CraftRecipe:
-                if (item is ItemCraftRequirementSource craftRequirementSource)
-                {
-                    if (craftRequirementSource.Recipe.CraftType != null)
-                    {
-                        return craftRequirementSource.Recipe.CraftType.Icon;
-                    }
-                }
-                break;
+            var groupedSource = groupedSources[index];
+            messages.AddRange(DrawUse(index.ToString(), groupedSource, iconSize));
+
+            float lastButtonX2 = ImGui.GetItemRectMax().X;
+            float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
+
+            if (index + 1 < groupedSources.Count && nextButtonX2 < windowVisibleX2)
+            {
+                ImGui.SameLine();
+            }
         }
 
-        return RenderSourceIcon(item);
+        return messages;
     }
 
-    public ushort RenderSourceIcon<T>(T item) where T : ItemSource
+    public List<MessageBase> DrawItemUseIconsContainer(string id, float rowSize, Vector2 iconSize, List<ItemSource> itemSources)
     {
-        switch (item.Type)
-        {
-            case ItemInfoType.CraftRecipe:
-                if (item is ItemCraftResultSource craftResultSource)
-                {
-                    if (craftResultSource.Recipe.CraftType != null)
-                    {
-                        return craftResultSource.Recipe.CraftType.Icon;
-                    }
-                }
-                break;
-            case ItemInfoType.FreeCompanyCraftRecipe:
-                return Icons.CraftIcon;
-                break;
-            case ItemInfoType.SpecialShop:
-                if (item is ItemSpecialShopSource specialShopSource)
-                {
-                    if (specialShopSource.CostItem != null)
-                    {
-                        return specialShopSource.CostItem.Icon;
-                    }
+        var messages = new List<MessageBase>();
+        using var pushId = ImRaii.PushId(id);
+        var count = 0;
+        var groupedSources = GetGroupedUses(itemSources);
+        _imGuiService.WrapTableColumnElements(id, groupedSources,
+            rowSize,
+            itemList =>
+            {
+                messages.AddRange(this.DrawUse(count.ToString(), itemList, iconSize));
+                count++;
+                return true;
+            });
 
-                    if (specialShopSource.CostItems.Count != 0)
-                    {
-                        return specialShopSource.CostItems[0].Icon;
-                    }
-                    return specialShopSource.Item.Icon;
-                }
-                break;
-            case ItemInfoType.GilShop:
-                return _itemSheet.GetRow(1).Icon;
-            case ItemInfoType.FCShop:
-                return Icons.FreeCompanyCreditIcon;
-            case ItemInfoType.GCShop:
-                return Icons.GrandCompany3;
-            case ItemInfoType.CashShop:
-                return Icons.BagStar;
-            case ItemInfoType.FateShop:
-                return Icons.BicolorGemstone;
-            case ItemInfoType.CalamitySalvagerShop:
-                return Icons.CalamitySalvagerBag;
-            case ItemInfoType.Mining:
-            case ItemInfoType.Quarrying:
-            case ItemInfoType.Logging:
-            case ItemInfoType.Harvesting:
-            case ItemInfoType.HiddenMining:
-            case ItemInfoType.HiddenQuarrying:
-            case ItemInfoType.HiddenLogging:
-            case ItemInfoType.HiddenHarvesting:
-            case ItemInfoType.TimedMining:
-            case ItemInfoType.TimedQuarrying:
-            case ItemInfoType.TimedLogging:
-            case ItemInfoType.TimedHarvesting:
-            case ItemInfoType.EphemeralQuarrying:
-            case ItemInfoType.EphemeralMining:
-            case ItemInfoType.EphemeralLogging:
-            case ItemInfoType.EphemeralHarvesting:
-                if (item is ItemGatheringSource gatheringSource)
-                {
-                    if (gatheringSource.Type == ItemInfoType.Mining)
-                    {
-                        return Icons.MiningIcon;
-                    }
-
-                    if (gatheringSource.Type == ItemInfoType.Quarrying)
-                    {
-                        return Icons.QuarryingIcon;
-                    }
-
-                    if (gatheringSource.Type == ItemInfoType.Harvesting)
-                    {
-                        return Icons.HarvestingIcon;
-                    }
-
-                    if (gatheringSource.Type == ItemInfoType.Logging)
-                    {
-                        return Icons.LoggingIcon;
-                    }
-
-                    if (gatheringSource.Type is ItemInfoType.TimedMining or ItemInfoType.HiddenMining or ItemInfoType.EphemeralMining)
-                    {
-                        return Icons.TimedMiningIcon;
-                    }
-                    if (gatheringSource.Type is ItemInfoType.TimedQuarrying or ItemInfoType.HiddenQuarrying or ItemInfoType.EphemeralQuarrying)
-                    {
-                        return Icons.TimedQuarryingIcon;
-                    }
-
-                    if (gatheringSource.Type is ItemInfoType.TimedHarvesting or ItemInfoType.HiddenHarvesting or ItemInfoType.EphemeralHarvesting)
-                    {
-                        return Icons.TimedHarvestingIcon;
-                    }
-
-                    if (gatheringSource.Type is ItemInfoType.TimedLogging or ItemInfoType.HiddenLogging or ItemInfoType.EphemeralLogging)
-                    {
-                        return Icons.TimedLoggingIcon;
-                    }
-                }
-                break;
-            case ItemInfoType.Fishing:
-                return Icons.FishingIcon;
-            case ItemInfoType.Spearfishing:
-                return Icons.Spearfishing;
-            case ItemInfoType.Achievement:
-                return Icons.AchievementCertIcon;
-            case ItemInfoType.Monster:
-                return Icons.MobIcon;
-            case ItemInfoType.Fate:
-                return Icons.Fate;
-            case ItemInfoType.Desynthesis:
-                return Icons.DesynthesisIcon;
-            case ItemInfoType.Gardening:
-                return Icons.SproutIcon;
-            case ItemInfoType.Loot:
-                if (item is ItemLootSource lootSource)
-                {
-                    return lootSource.CostItem?.Icon ?? Icons.LootIcon;
-                }
-
-                break;
-            case ItemInfoType.SkybuilderInspection:
-                return Icons.SkybuildersScripIcon;
-            case ItemInfoType.SkybuilderHandIn:
-                return Icons.SkybuildersScripIcon;
-            case ItemInfoType.QuickVenture:
-            case ItemInfoType.MiningVenture:
-            case ItemInfoType.MiningExplorationVenture:
-            case ItemInfoType.BotanyVenture:
-            case ItemInfoType.BotanyExplorationVenture:
-            case ItemInfoType.CombatVenture:
-            case ItemInfoType.CombatExplorationVenture:
-            case ItemInfoType.FishingVenture:
-            case ItemInfoType.FishingExplorationVenture:
-                return Icons.VentureIcon;
-            case ItemInfoType.Reduction:
-                return Icons.ReductionIcon;
-            case ItemInfoType.Airship:
-                return Icons.AirshipIcon;
-            case ItemInfoType.Submarine:
-                return Icons.SubmarineIcon;
-            case ItemInfoType.DungeonChest:
-                return Icons.Chest;
-            case ItemInfoType.DungeonBossDrop:
-                return Icons.DutyIcon;
-            case ItemInfoType.DungeonBossChest:
-                return Icons.GoldChest;
-            case ItemInfoType.DungeonDrop:
-                return Icons.DutyIcon;
-            case ItemInfoType.CustomDelivery:
-                break;
-            case ItemInfoType.Aquarium:
-                break;
-            case ItemInfoType.GCDailySupply:
-                break;
-            case ItemInfoType.CraftLeve:
-                break;
-            case ItemInfoType.Armoire:
-                break;
-        }
-
-
-
-        return item.Item.Icon;
-    }
-
-    public bool ShouldGroupUse(ItemInfoType itemInfoType)
-    {
-        switch (itemInfoType)
-        {
-            case ItemInfoType.CraftRecipe:
-            case ItemInfoType.SpecialShop:
-            case ItemInfoType.CustomDelivery:
-            case ItemInfoType.SkybuilderHandIn:
-                return false;
-        }
-
-        return true;
+        return messages;
     }
 }

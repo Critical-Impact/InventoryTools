@@ -3,6 +3,7 @@ using Dalamud.Game.ClientState.Keys;
 using InventoryTools.Hotkeys;
 using System.Linq;
 using CriticalCommonLib.Services.Mediator;
+
 using Dalamud.Plugin.Services;
 using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Logging;

@@ -1,5 +1,6 @@
 using System;
 using CriticalCommonLib.Services.Mediator;
+
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Mediator;

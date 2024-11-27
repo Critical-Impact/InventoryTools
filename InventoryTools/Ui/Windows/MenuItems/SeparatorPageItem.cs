@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using CriticalCommonLib.Services.Mediator;
+
 using ImGuiNET;
 using InventoryTools.Logic;
 
@@ -18,7 +19,7 @@ public class SeparatorPageItem : IConfigPage
 
     public void Initialize()
     {
-        
+
     }
 
     public string Name => "Separator";

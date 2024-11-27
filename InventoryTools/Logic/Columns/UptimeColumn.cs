@@ -1,5 +1,9 @@
 using System.Linq;
+using AllaganLib.GameSheets.Sheets;
 using AllaganLib.Shared.Time;
+using Dalamud.Interface.Textures;
+using Lumina.Extensions;
+
 
 namespace InventoryTools.Logic.Columns;
 
@@ -16,11 +20,13 @@ using Services;
 
 public class UptimeColumn : TimeIntervalColumn
 {
-    private readonly ISeTime seTime;
+    private readonly ISeTime _seTime;
+    private readonly MapSheet _mapSheet;
 
-    public UptimeColumn(ILogger<UptimeColumn> logger, ImGuiService imGuiService, ISeTime seTime) : base(logger, imGuiService)
+    public UptimeColumn(ILogger<UptimeColumn> logger, ImGuiService imGuiService, ISeTime seTime, MapSheet mapSheet) : base(logger, imGuiService)
     {
-        this.seTime = seTime;
+        this._seTime = seTime;
+        _mapSheet = mapSheet;
     }
 
     public override string Name { get; set; } = "Next Gather Uptime";
@@ -56,6 +62,46 @@ public class UptimeColumn : TimeIntervalColumn
                                        true));
                     }
                 }
+
+
+                ImGui.SameLine();
+                var wrap = ImGuiService.TextureProvider.GetFromGameIcon(new GameIconLookup(66317)).GetWrapOrEmpty();
+                ImGui.Image(wrap.ImGuiHandle, new(16, 16));
+
+                if (ImGui.IsItemHovered())
+                {
+                    using (var tooltip = ImRaii.Tooltip())
+                    {
+                        if (tooltip.Success)
+                        {
+                            var pointsWithUpTimes = searchResult.Item.GatheringPoints.Where(c => c.GatheringPointTransient.GetGatheringUptime() != null).DistinctBy(c => c.GatheringPointTransient.GetGatheringUptime());
+                            foreach (var nextUptime in pointsWithUpTimes.Select(row => (row, row.GatheringPointTransient.GetGatheringUptime()!.Value.NextUptime(_seTime.ServerTime))).Where(c => !c.Item2.Equals(TimeInterval.Always) && !c.Item2.Equals(TimeInterval.Invalid) && !c.Item2.Equals(TimeInterval.Never)).OrderBy(c => c.Item2))
+                            {
+                                var map = _mapSheet.GetRow(nextUptime.row.Base.TerritoryType.Value.Map.RowId);
+                                ImGui.Text(map.FormattedName + ": ");
+                                ImGui.SameLine();
+                                if (nextUptime.Item2.Start > TimeStamp.UtcNow)
+                                {
+                                    using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudRed))
+                                    {
+                                        ImGui.Text( " (Up in " +
+                                                   TimeInterval.DurationString(nextUptime.Item2.Start, TimeStamp.UtcNow,
+                                                       true) + ")");
+                                    }
+                                }
+                                else
+                                {
+                                    using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.HealerGreen))
+                                    {
+                                        ImGui.Text(" (Up for " +
+                                                   TimeInterval.DurationString(nextUptime.Item2.End, TimeStamp.UtcNow,
+                                                       true) + ")");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -65,16 +111,7 @@ public class UptimeColumn : TimeIntervalColumn
 
     public override TimeInterval? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
-        var gatheringUptime = searchResult.Item.GatheringUpTimes.Cast<BitfieldUptime?>().FirstOrDefault();
-        if (gatheringUptime != null)
-        {
-            var nextUptime = gatheringUptime.Value.NextUptime(seTime.ServerTime);
-            if (nextUptime.Equals(TimeInterval.Always)
-                || nextUptime.Equals(TimeInterval.Invalid)
-                || nextUptime.Equals(TimeInterval.Never)) return null;
-            return nextUptime;
-        }
-
-        return null;
+        var gatheringUptime = searchResult.Item.GatheringUpTimes.Select(c => c.NextUptime(_seTime.ServerTime)).Where(c => !c.Equals(TimeInterval.Always) && !c.Equals(TimeInterval.Invalid) && !c.Equals(TimeInterval.Never)).OrderBy(c => c).FirstOrNull();
+        return gatheringUptime;
     }
 }

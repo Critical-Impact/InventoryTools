@@ -45,6 +45,9 @@ namespace InventoryTools
         private bool _addMoreInformationContextMenu = false;
         private bool _addToCraftListContextMenu = false;
         private bool _addToActiveCraftListContextMenu = false;
+        private bool _openCraftingLogContextMenu = false;
+        private bool _openGatheringLogContextMenu = false;
+        private bool _openFishingLogContextMenu = false;
         private bool _itemSearchContextMenu = false;
 
         private bool _isVisible;
@@ -137,9 +140,9 @@ namespace InventoryTools
             }
             IsDirty = true;
         }
-        
-        
-        
+
+
+
 
         public bool HistoryEnabled
         {
@@ -232,6 +235,36 @@ namespace InventoryTools
             }
         }
         [DefaultValue(false)]
+        public bool OpenCraftingLogContextMenu
+        {
+            get => _openCraftingLogContextMenu;
+            set
+            {
+                _openCraftingLogContextMenu = value;
+                IsDirty = true;
+            }
+        }
+        [DefaultValue(false)]
+        public bool OpenGatheringLogContextMenu
+        {
+            get => _openGatheringLogContextMenu;
+            set
+            {
+                _openGatheringLogContextMenu = value;
+                IsDirty = true;
+            }
+        }
+        [DefaultValue(false)]
+        public bool OpenFishingLogContextMenu
+        {
+            get => _openFishingLogContextMenu;
+            set
+            {
+                _openFishingLogContextMenu = value;
+                IsDirty = true;
+            }
+        }
+        [DefaultValue(false)]
         public bool ItemSearchContextMenu
         {
             get => _itemSearchContextMenu;
@@ -241,7 +274,7 @@ namespace InventoryTools
                 IsDirty = true;
             }
         }
-        
+
         public List<InventorySearchScope>? ItemSearchScope
         {
             get => _itemSearchScope;
@@ -300,7 +333,7 @@ namespace InventoryTools
         private WindowLayout _filtersLayout = WindowLayout.Tabs;
         private uint? _tooltipColor = null;
         private HashSet<NotificationPopup>? _notificationsSeen = new ();
-        
+
         [Vector4Default("0.007, 0.008,0.007, 0.212")]
         public Vector4 HighlightColor
         {
@@ -311,7 +344,7 @@ namespace InventoryTools
                 IsDirty = true;
             }
         }
-        
+
         [Vector4Default("0.321, 0.239, 0.03, 1")]
         public Vector4 DestinationHighlightColor
         {
@@ -373,7 +406,7 @@ namespace InventoryTools
                 IsDirty = true;
             }
         }
-        
+
         public bool TooltipDisplayAmountOwned
         {
             get => _tooltipDisplayAmountOwned;
@@ -383,7 +416,7 @@ namespace InventoryTools
                 IsDirty = true;
             }
         }
-        
+
         public bool TooltipAddCharacterNameOwned
         {
             get => _tooltipAddCharacterNameOwned;
@@ -593,7 +626,7 @@ namespace InventoryTools
                 IsDirty = true;
             }
         }
-        
+
         public bool TooltipDisplayHeader
         {
             get => _tooltipDisplayHeader;
@@ -603,7 +636,7 @@ namespace InventoryTools
                 IsDirty = true;
             }
         }
-        
+
         public HashSet<NotificationPopup> NotificationsSeen
         {
             get => _notificationsSeen ??= new HashSet<NotificationPopup>();
@@ -624,13 +657,13 @@ namespace InventoryTools
             NotificationsSeen.Add(popup);
             IsDirty = true;
         }
-        
+
         public Dictionary<ulong, HashSet<uint>> AcquiredItems
         {
             get => _acquiredItems ??= new Dictionary<ulong, HashSet<uint>>();
             set => _acquiredItems = value;
         }
-        
+
         public HashSet<string> WizardVersionsSeen
         {
             get => _wizardVersionsSeen ??= new();
@@ -640,7 +673,7 @@ namespace InventoryTools
                 IsDirty = true;
             }
         }
-        
+
         [DefaultValue(true)]
         public bool MarketBoardUseActiveWorld
         {
@@ -651,7 +684,7 @@ namespace InventoryTools
                 IsDirty = true;
             }
         }
-        
+
         [DefaultValue(true)]
         public bool MarketBoardUseHomeWorld
         {
@@ -662,7 +695,7 @@ namespace InventoryTools
                 IsDirty = true;
             }
         }
-        
+
         public List<uint> MarketBoardWorldIds
         {
             get => _marketBoardWorldIds ??= new List<uint>();
@@ -684,7 +717,7 @@ namespace InventoryTools
             WizardVersionsSeen.Add(versionNumber);
             IsDirty = true;
         }
-        
+
         [DefaultValue(true)]
         public bool ShowWizardNewFeatures
         {
@@ -695,7 +728,7 @@ namespace InventoryTools
                 IsDirty = true;
             }
         }
-        
+
         [DefaultValue(Logic.Settings.TooltipAmountOwnedSort.Alphabetically)]
         public TooltipAmountOwnedSort TooltipAmountOwnedSort
         {
@@ -706,14 +739,14 @@ namespace InventoryTools
                 IsDirty = true;
             }
         }
-        
+
 
         public string? ActiveUiFilter { get; set; } = null;
 
         public bool TetrisEnabled { get; set; } = false;
 
         public string? ActiveBackgroundFilter { get; set; } = null;
-        
+
         public string? ActiveCraftList { get; set; } = null;
 
         public bool SaveBackgroundFilter { get; set; } = false;
@@ -744,7 +777,31 @@ namespace InventoryTools
             get => _moreInformationHotKey;
             set => _moreInformationHotKey = value;
         }
-        
+
+        public ModifiableHotkey? OpenCraftingLogHotKey
+        {
+            get => _openCraftingLogHotKey;
+            set => _openCraftingLogHotKey = value;
+        }
+
+        public ModifiableHotkey? OpenGatheringLogHotKey
+        {
+            get => _openGatheringLogHotKey;
+            set => _openGatheringLogHotKey = value;
+        }
+
+        public ModifiableHotkey? OpenFishingLogHotKey
+        {
+            get => _openFishingLogHotKey;
+            set => _openFishingLogHotKey = value;
+        }
+
+        public ModifiableHotkey? OpenItemLogHotKey
+        {
+            get => _openItemLogHotKey;
+            set => _openItemLogHotKey = value;
+        }
+
         public ConcurrentDictionary<string,ModifiableHotkey> Hotkeys
         {
             get
@@ -762,6 +819,10 @@ namespace InventoryTools
         }
 
         private ModifiableHotkey? _moreInformationHotKey;
+        private ModifiableHotkey? _openCraftingLogHotKey;
+        private ModifiableHotkey? _openGatheringLogHotKey;
+        private ModifiableHotkey? _openFishingLogHotKey;
+        private ModifiableHotkey? _openItemLogHotKey;
         private ConcurrentDictionary<string,ModifiableHotkey>? _hotkeys;
         private bool _trackMobSpawns = false;
         private bool _marketBoardUseActiveWorld = true;
@@ -845,7 +906,7 @@ namespace InventoryTools
                 ActiveBackgroundFilter = null;
             }
         }
-        
+
         public bool HasDefaultCraftList()
         {
             if (FilterConfigurations.Any(c => c.FilterType == FilterType.CraftFilter && c.CraftListDefault))

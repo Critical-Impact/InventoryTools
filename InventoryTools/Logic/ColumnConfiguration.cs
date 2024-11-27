@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AllaganLib.GameSheets.Caches;
 using Dalamud.Game.Text;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Common.Math;
@@ -17,7 +18,7 @@ public class ColumnConfiguration
     private string? _name;
     private string? _exportName;
     private bool _hiddenImGui;
-    
+
     public bool IsDirty { get; set; }
 
     public string ColumnName
@@ -46,6 +47,7 @@ public class ColumnConfiguration
 
     private Dictionary<string, string>? _stringSettings;
     private Dictionary<string, uint>? _uintSettings;
+    private Dictionary<string, List<ItemInfoType>>? _itemInfoTypes;
     [JsonIgnore]
     private IColumn _column;
 
@@ -84,6 +86,23 @@ public class ColumnConfiguration
         value = UintSettings.ContainsKey(key) ? UintSettings[key] : null;
     }
 
+    public void GetSetting(string key, out List<ItemInfoType>? value)
+    {
+        value = ItemInfoTypes.ContainsKey(key) ? ItemInfoTypes[key] : null;
+    }
+
+    public void SetSetting(string key, List<ItemInfoType>? value)
+    {
+        if (value == null)
+        {
+            ItemInfoTypes.Remove(key);
+        }
+        else
+        {
+            ItemInfoTypes[key] = value;
+        }
+    }
+
     public ColumnConfiguration(string columnName)
     {
         _columnName = columnName;
@@ -92,9 +111,9 @@ public class ColumnConfiguration
 
     public ColumnConfiguration()
     {
-        
+
     }
-    
+
     private string _filterText = "";
 
     [JsonIgnore]
@@ -107,7 +126,7 @@ public class ColumnConfiguration
             _filterComparisonText = new FilterComparisonExtensions.FilterComparisonText(_filterText);
         }
     }
-    
+
     public virtual bool DrawFilter(string tableKey, int columnIndex)
     {
         if (Column.FilterType == ColumnFilterType.Text)
@@ -214,7 +233,7 @@ public class ColumnConfiguration
                                 FilterText = "true";
                                 hasChanged = true;
                             }
-                            
+
                             if (ImGui.Selectable("No", currentItem == "No"))
                             {
                                 FilterText = "false";
@@ -267,6 +286,12 @@ public class ColumnConfiguration
     {
         get => _uintSettings ??= new Dictionary<string, uint>();
         set => _uintSettings = value;
+    }
+
+    public Dictionary<string, List<ItemInfoType>> ItemInfoTypes
+    {
+        get => _itemInfoTypes ??= new Dictionary<string, List<ItemInfoType>>();
+        set => _itemInfoTypes = value;
     }
 
 }

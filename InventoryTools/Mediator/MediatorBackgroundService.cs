@@ -1,4 +1,5 @@
 using CriticalCommonLib.Services.Mediator;
+
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 

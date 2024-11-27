@@ -4,6 +4,7 @@ using System.Linq;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Model;
+using AllaganLib.GameSheets.Sheets;
 using AllaganLib.GameSheets.Sheets.Rows;
 using AllaganLib.Shared.Time;
 using CriticalCommonLib;
@@ -11,12 +12,15 @@ using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
+
 using Dalamud.Interface.Colors;
+using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
+using Lumina.Extensions;
 using Microsoft.Extensions.Logging;
 using OtterGui;
 
@@ -26,11 +30,13 @@ namespace InventoryTools.Logic.Columns.Buttons
     {
         private readonly IChatUtilities _chatUtilities;
         private readonly ISeTime _seTime;
+        private readonly MapSheet _mapSheet;
 
-        public CraftGatherColumn(ILogger<CraftGatherColumn> logger, ImGuiService imGuiService, IChatUtilities chatUtilities, ISeTime seTime) : base(logger, imGuiService)
+        public CraftGatherColumn(ILogger<CraftGatherColumn> logger, ImGuiService imGuiService, IChatUtilities chatUtilities, ISeTime seTime, MapSheet mapSheet) : base(logger, imGuiService)
         {
             _chatUtilities = chatUtilities;
             _seTime = seTime;
+            _mapSheet = mapSheet;
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Buttons;
 
@@ -155,33 +161,72 @@ namespace InventoryTools.Logic.Columns.Buttons
                 var gatheringUptimes = searchResult.Item.GatheringUpTimes;
                 if (gatheringUptimes.Count != 0)
                 {
+                    var firstUptime = gatheringUptimes.Select(c => c.NextUptime(_seTime.ServerTime)).Where(c => !c.Equals(TimeInterval.Always) && !c.Equals(TimeInterval.Invalid) && !c.Equals(TimeInterval.Never)).OrderBy(c => c).FirstOrNull();
+
+                    if (firstUptime == null)
+                    {
+                        return messages;
+                    }
+
                     if (hasGather || hasVendors)
                     {
                         ImGui.SameLine();
                     }
 
-                    foreach (var gatheringUptime in gatheringUptimes)
+                    if (firstUptime.Value.Start > TimeStamp.UtcNow)
                     {
-                        var nextUptime = gatheringUptime.NextUptime(_seTime.ServerTime);
-                        if (nextUptime.Equals(TimeInterval.Always)
-                            || nextUptime.Equals(TimeInterval.Invalid)
-                            || nextUptime.Equals(TimeInterval.Never)) return null;
-                        if (nextUptime.Start > TimeStamp.UtcNow)
+                        using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudRed))
                         {
-                            using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudRed))
-                            {
-                                ImGui.Text(" (Up in " +
-                                           TimeInterval.DurationString(nextUptime.Start, TimeStamp.UtcNow,
-                                               true) + ")");
-                            }
+                            ImGui.Text(" (Up in " +
+                                       TimeInterval.DurationString(firstUptime.Value.Start, TimeStamp.UtcNow,
+                                           true) + ")");
                         }
-                        else
+                    }
+                    else
+                    {
+                        using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.HealerGreen))
                         {
-                            using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.HealerGreen))
+                            ImGui.Text(" (Up for " +
+                                       TimeInterval.DurationString(firstUptime.Value.End, TimeStamp.UtcNow,
+                                           true) + ")");
+                        }
+                    }
+
+                    ImGui.SameLine();
+                    var wrap = ImGuiService.TextureProvider.GetFromGameIcon(new GameIconLookup(66317)).GetWrapOrEmpty();
+                    ImGui.Image(wrap.ImGuiHandle, new(16, 16));
+
+                    if (ImGui.IsItemHovered())
+                    {
+                        using (var tooltip = ImRaii.Tooltip())
+                        {
+                            if (tooltip.Success)
                             {
-                                ImGui.Text(" (Up for " +
-                                           TimeInterval.DurationString(nextUptime.End, TimeStamp.UtcNow,
-                                               true) + ")");
+                                var pointsWithUpTimes = searchResult.Item.GatheringPoints.Where(c => c.GatheringPointTransient.GetGatheringUptime() != null).DistinctBy(c => c.GatheringPointTransient.GetGatheringUptime());
+                                foreach (var nextUptime in pointsWithUpTimes.Select(row => (row, row.GatheringPointTransient.GetGatheringUptime()!.Value.NextUptime(_seTime.ServerTime))).Where(c => !c.Item2.Equals(TimeInterval.Always) && !c.Item2.Equals(TimeInterval.Invalid) && !c.Item2.Equals(TimeInterval.Never)).OrderBy(c => c.Item2))
+                                {
+                                    var map = _mapSheet.GetRow(nextUptime.row.Base.TerritoryType.Value.Map.RowId);
+                                    ImGui.Text(map.FormattedName + ": ");
+                                    ImGui.SameLine();
+                                    if (nextUptime.Item2.Start > TimeStamp.UtcNow)
+                                    {
+                                        using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudRed))
+                                        {
+                                            ImGui.Text( " (Up in " +
+                                                       TimeInterval.DurationString(nextUptime.Item2.Start, TimeStamp.UtcNow,
+                                                           true) + ")");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.HealerGreen))
+                                        {
+                                            ImGui.Text(" (Up for " +
+                                                       TimeInterval.DurationString(nextUptime.Item2.End, TimeStamp.UtcNow,
+                                                           true) + ")");
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

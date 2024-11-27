@@ -23,6 +23,7 @@ using CriticalCommonLib.Services.Ui;
 
 using DalaMock.Host.Factories;
 using DalaMock.Host.Hosting;
+
 using DalaMock.Shared.Classes;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Game.ClientState.Objects;
@@ -40,6 +41,7 @@ using InventoryTools.Logic.Columns.Abstract.ColumnSettings;
 using InventoryTools.Logic.Editors;
 using InventoryTools.Logic.Features;
 using InventoryTools.Logic.Filters;
+using InventoryTools.Logic.ItemRenderers;
 using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Misc;
 using InventoryTools.Overlays;
@@ -230,6 +232,14 @@ namespace InventoryTools
                             }
                         }
                     }
+
+                    var dataAccess = Assembly.GetExecutingAssembly();
+
+                    builder.RegisterAssemblyTypes(dataAccess)
+                        .Where(t => t.Name.EndsWith("Renderer"))
+                        .AsSelf()
+                        .As<IItemInfoRenderer>()
+                        .SingleInstance();
                 });
 
             hostBuilder.ConfigureContainer<ContainerBuilder>(builder =>
@@ -293,7 +303,7 @@ namespace InventoryTools
                 builder.RegisterType<PopupService>().SingleInstance();
                 builder.RegisterType<ExcelCache>().SingleInstance();
                 builder.RegisterType<CraftingCache>().SingleInstance();
-                builder.RegisterType<ItemInfoRenderer>().SingleInstance();
+                builder.RegisterType<ItemInfoRenderService>().SingleInstance();
                 builder.Register<GameData>(c => c.Resolve<IDataManager>().GameData).SingleInstance().ExternallyOwned();
                 builder.RegisterGameSheetManager(new SheetManagerStartupOptions()
                 {

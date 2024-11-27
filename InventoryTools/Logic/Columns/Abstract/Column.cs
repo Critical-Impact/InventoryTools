@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using CriticalCommonLib.Services.Mediator;
+
 using ImGuiNET;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;

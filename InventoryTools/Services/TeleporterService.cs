@@ -2,6 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Services.Mediator;
+
 using InventoryTools.Mediator;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;

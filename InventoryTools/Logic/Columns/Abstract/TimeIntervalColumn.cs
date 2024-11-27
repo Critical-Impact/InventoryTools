@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns.Abstract
 {
-    
+
 
     public abstract class TimeIntervalColumn : Column<TimeInterval?>
     {

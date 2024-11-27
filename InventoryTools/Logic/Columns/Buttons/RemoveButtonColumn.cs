@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using CriticalCommonLib.Services.Mediator;
+
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;

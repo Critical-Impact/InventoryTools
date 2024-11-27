@@ -30,7 +30,7 @@ namespace InventoryTools.Logic.Columns
         protected readonly int Loading = -1;
         protected readonly int Untradable = -2;
         public override bool IsConfigurable => true;
-        
+
         public override void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)
         {
             ImGui.NewLine();

@@ -26,6 +26,7 @@ using OtterGui;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
 using Humanizer;
+using InventoryTools.Logic.ItemRenderers;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
@@ -69,7 +70,7 @@ namespace InventoryTools.Ui
         private readonly IInventoryMonitor _inventoryMonitor;
         private readonly ICharacterMonitor _characterMonitor;
         private readonly IClipboardService _clipboardService;
-        private readonly ItemInfoRenderer _itemInfoRenderer;
+        private readonly ItemInfoRenderService _itemInfoRenderService;
         private readonly BNpcNameSheet _bNpcNameSheet;
         private readonly MapSheet _mapSheet;
         private HashSet<uint> _marketRefreshing = new();
@@ -80,7 +81,7 @@ namespace InventoryTools.Ui
             ICommandManager commandManager, IListService listService, ItemSheet itemSheet, ExcelSheet<World> worldSheet,
             IGameInterface gameInterface, IMarketCache marketCache, IChatUtilities chatUtilities, Logger otterLogger,
             IInventoryMonitor inventoryMonitor, ICharacterMonitor characterMonitor, IClipboardService clipboardService,
-            ItemInfoRenderer itemInfoRenderer, BNpcNameSheet bNpcNameSheet, MapSheet mapSheet, string name = "Item Window") : base(
+            ItemInfoRenderService itemInfoRenderService, BNpcNameSheet bNpcNameSheet, MapSheet mapSheet, string name = "Item Window") : base(
             logger, mediator, imGuiService, configuration, name)
         {
             _marketBoardService = marketBoardService;
@@ -96,7 +97,7 @@ namespace InventoryTools.Ui
             _inventoryMonitor = inventoryMonitor;
             _characterMonitor = characterMonitor;
             _clipboardService = clipboardService;
-            _itemInfoRenderer = itemInfoRenderer;
+            _itemInfoRenderService = itemInfoRenderService;
             _bNpcNameSheet = bNpcNameSheet;
             _mapSheet = mapSheet;
         }
@@ -125,47 +126,7 @@ namespace InventoryTools.Ui
                 RetainerTasks = Item.GetSourcesByCategory<ItemVentureSource>(ItemInfoCategory.AllVentures).Select(c => c.RetainerTaskRow).ToArray();
                 RecipesResult = Item.GetSourcesByType<ItemCraftResultSource>(ItemInfoType.CraftRecipe).Select(c => c.Recipe).ToArray();
                 RecipesAsRequirement = Item.RecipesAsRequirement.ToArray();
-
-                List<List<ItemSource>> groupedItemSources = new List<List<ItemSource>>();
-                foreach (var itemSourceGroup in Item.Sources.GroupBy(c => c.Type))
-                {
-                    if (_itemInfoRenderer.ShouldGroupSource(itemSourceGroup.Key))
-                    {
-                        groupedItemSources.Add(itemSourceGroup.ToList());
-                    }
-                    else
-                    {
-                        groupedItemSources.AddRange(itemSourceGroup.Select(c => new List<ItemSource>(){c}));
-                    }
-                }
-                GroupedSources = groupedItemSources;
-
-                List<List<ItemSource>> groupedItemUses = new List<List<ItemSource>>();
-                foreach (var itemUseGroup in Item.Uses.GroupBy(c => c.Type))
-                {
-                    if (_itemInfoRenderer.ShouldGroupUse(itemUseGroup.Key))
-                    {
-                        groupedItemUses.Add(itemUseGroup.ToList());
-                    }
-                    else
-                    {
-                        if (itemUseGroup.Key == ItemInfoType.CraftRecipe)
-                        {
-                            var groupedCrafts = itemUseGroup.Cast<ItemCraftRequirementSource>().GroupBy(c => c.Recipe.CraftType!.RowId);
-                            foreach (var groupedCraft in groupedCrafts)
-                            {
-                                groupedItemUses.Add(groupedCraft.Cast<ItemSource>().ToList());
-                            }
-                        }
-                        else
-                        {
-                            groupedItemUses.AddRange(itemUseGroup.Select(c => new List<ItemSource>(){c}));
-                        }
-                    }
-                }
-                GroupedUses = groupedItemUses;
-
-
+                Uses = Item.Uses;
                 Vendors = new List<(IShop shop, ENpcResidentRow? npc, ILocation? location)>();
 
                 foreach (var shopSource in Item.GetSourcesByCategory<ItemShopSource>(ItemInfoCategory.Shop))
@@ -218,8 +179,8 @@ namespace InventoryTools.Ui
                 Vendors = new();
                 SharedModels = new();
                 MobDrops = [];
-                GroupedSources = [];
-                GroupedUses = [];
+                Sources = [];
+                Uses = [];
                 OwnedItems = new List<CriticalCommonLib.Models.InventoryItem>();
                 WindowName = "Invalid Item";
                 Key = "item_unknown";
@@ -281,8 +242,8 @@ namespace InventoryTools.Ui
 
         private MobDrop[] MobDrops { get;set; }
 
-        private List<List<ItemSource>> GroupedSources { get; set; }
-        private List<List<ItemSource>> GroupedUses { get; set; }
+        private List<ItemSource> Sources { get; set; }
+        private List<ItemSource> Uses { get; set; }
 
         private List<CriticalCommonLib.Models.InventoryItem> OwnedItems { get; set; }
 
@@ -384,7 +345,7 @@ namespace InventoryTools.Ui
                 }
                 ImGuiUtil.HoverTooltip("Open in Console Games Wiki");
 
-                if (Item.CanOpenCraftLog)
+                if (Item.CanOpenCraftingLog)
                 {
                     ImGui.SameLine();
                     if (ImGui.ImageButton(ImGuiService.GetIconTexture(66456).ImGuiHandle,
@@ -527,77 +488,8 @@ namespace InventoryTools.Ui
             }
             if (ImGui.CollapsingHeader("Sources (" + Item.Sources.Count + ")", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
             {
-                ImGuiStylePtr style = ImGui.GetStyle();
-                float windowVisibleX2 = ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
-                var sources = GroupedSources;
-                for (var index = 0; index < sources.Count; index++)
-                {
-                    ImGui.PushID("Source"+index);
-                    var source = sources[index];
-                    var item = source.First();
-                    var sourceIcon = ImGuiService.GetIconTexture(_itemInfoRenderer.RenderSourceIcon(item));
-
-
-                    if (item is ItemDungeonSource dungeonSource)
-                    {
-                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1),
-                                0))
-                        {
-                            MediatorService.Publish(new OpenUintWindowMessage(typeof(DutyWindow), dungeonSource.ContentFinderCondition.RowId));
-                        }
-                    }
-                    else if (item is ItemAirshipDropSource airshipSource)
-                    {
-                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1),
-                                0))
-                        {
-                            MediatorService.Publish(new OpenUintWindowMessage(typeof(AirshipWindow), airshipSource.AirshipExplorationPoint.RowId));
-                        }
-                    }
-                    else if (item is ItemSubmarineDropSource submarineSource)
-                    {
-                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1),
-                                0))
-                        {
-                            MediatorService.Publish(new OpenUintWindowMessage(typeof(SubmarineWindow), submarineSource.SubmarineExploration.RowId));
-                        }
-                    }
-                    else if (item is ItemVentureSource ventureSource)
-                    {
-                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1),
-                                0))
-                        {
-                            MediatorService.Publish(new OpenUintWindowMessage(typeof(RetainerTaskWindow), ventureSource.RetainerTaskRow.RowId));
-                        }
-                    }
-                    else if (item is ItemSource itemSource )
-                    {
-                        if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
-                                new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1),
-                                0))
-                        {
-                            MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), itemSource.Item.RowId));
-                        }
-                    }
-
-                    float lastButtonX2 = ImGui.GetItemRectMax().X;
-                    float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
-                    if (ImGui.IsItemHovered())
-                    {
-                        using var tt = ImRaii.Tooltip();
-                        _itemInfoRenderer.DrawSource(source);
-                    }
-                    if (index + 1 < sources.Count && nextButtonX2 < windowVisibleX2)
-                    {
-                        ImGui.SameLine();
-                    }
-
-                    ImGui.PopID();
-                }
+                var messages = _itemInfoRenderService.DrawItemSourceIcons("Sources", new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, Item.Sources.ToList());
+                MediatorService.Publish(messages);
             }
         }
 
@@ -1164,77 +1056,8 @@ namespace InventoryTools.Ui
 
             if (ImGui.CollapsingHeader("Uses (" + Item.Uses.Count + ")", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
             {
-                ImGuiStylePtr style = ImGui.GetStyle();
-                float windowVisibleX2 = ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
-                var uses = GroupedUses;
-                for (var index = 0; index < uses.Count; index++)
-                {
-                    ImGui.PushID("Use"+index);
-                    var use = uses[index];
-                    var item = use.First();
-                    var useIcon = ImGuiService.GetIconTexture(_itemInfoRenderer.RenderUseIcon(item));
-
-
-                    if (item is ItemDungeonSource dungeonUse)
-                    {
-                        if (ImGui.ImageButton(useIcon.ImGuiHandle,
-                                new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1),
-                                0))
-                        {
-                            MediatorService.Publish(new OpenUintWindowMessage(typeof(DutyWindow), dungeonUse.ContentFinderCondition.RowId));
-                        }
-                    }
-                    else if (item is ItemAirshipDropSource airshipUse)
-                    {
-                        if (ImGui.ImageButton(useIcon.ImGuiHandle,
-                                new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1),
-                                0))
-                        {
-                            MediatorService.Publish(new OpenUintWindowMessage(typeof(AirshipWindow), airshipUse.AirshipExplorationPoint.RowId));
-                        }
-                    }
-                    else if (item is ItemSubmarineDropSource submarineUse)
-                    {
-                        if (ImGui.ImageButton(useIcon.ImGuiHandle,
-                                new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1),
-                                0))
-                        {
-                            MediatorService.Publish(new OpenUintWindowMessage(typeof(SubmarineWindow), submarineUse.SubmarineExploration.RowId));
-                        }
-                    }
-                    else if (item is ItemVentureSource ventureUse)
-                    {
-                        if (ImGui.ImageButton(useIcon.ImGuiHandle,
-                                new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1),
-                                0))
-                        {
-                            MediatorService.Publish(new OpenUintWindowMessage(typeof(RetainerTaskWindow), ventureUse.RetainerTaskRow.RowId));
-                        }
-                    }
-                    else if (item is ItemSource itemUse )
-                    {
-                        if (ImGui.ImageButton(useIcon.ImGuiHandle,
-                                new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1),
-                                0))
-                        {
-                            MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), itemUse.Item.RowId));
-                        }
-                    }
-
-                    float lastButtonX2 = ImGui.GetItemRectMax().X;
-                    float nextButtonX2 = lastButtonX2 + style.ItemSpacing.X + 32;
-                    if (ImGui.IsItemHovered())
-                    {
-                        using var tt = ImRaii.Tooltip();
-                        _itemInfoRenderer.DrawUse(use);
-                    }
-                    if (index + 1 < uses.Count && nextButtonX2 < windowVisibleX2)
-                    {
-                        ImGui.SameLine();
-                    }
-
-                    ImGui.PopID();
-                }
+                var messages = _itemInfoRenderService.DrawItemUseIcons("Uses", new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, Item.Uses.ToList());
+                MediatorService.Publish(messages);
             }
         }
 

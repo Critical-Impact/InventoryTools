@@ -1,5 +1,6 @@
 using System.Numerics;
 using CriticalCommonLib.Services.Mediator;
+
 using ImGuiNET;
 using InventoryTools.Logic;
 using Dalamud.Interface.Utility.Raii;
@@ -21,7 +22,7 @@ namespace InventoryTools.Ui
                 ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoScrollbar;
             Key = "intro";
         }
-        
+
 
         public override void Invalidate()
         {
@@ -63,7 +64,7 @@ namespace InventoryTools.Ui
                                 ImGui.Bullet();
                                 ImGui.Text("Provide information about items, monsters, duties and much more");
                             }
-                            
+
                             ImGui.TextWrapped(
                                 "You can open various new windows using command shortcuts(the main filter  or from the main window.");
                             ImGui.TextWrapped(

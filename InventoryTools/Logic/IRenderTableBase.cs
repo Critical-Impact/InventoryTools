@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib.Services.Mediator;
 
+
 namespace InventoryTools.Logic
 {
     public interface IRenderTableBase

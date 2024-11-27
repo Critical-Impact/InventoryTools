@@ -7,6 +7,7 @@ using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Services.Ui;
+
 using DalaMock.Shared.Interfaces;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using ImGuiNET;

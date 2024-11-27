@@ -1,4 +1,5 @@
 using CriticalCommonLib.Services.Mediator;
+
 using InventoryTools.Logic.Settings;
 using InventoryTools.Mediator;
 using InventoryTools.Ui;

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib.Services.Mediator;
+
 using ImGuiNET;
 using Dalamud.Interface.Utility.Raii;
 using InventoryTools.Services;

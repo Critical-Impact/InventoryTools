@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using CriticalCommonLib.Services.Mediator;
+
 using FFXIVClientStructs.FFXIV.Client.Game;
 using InventoryTools.Logic;
 

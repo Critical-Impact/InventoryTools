@@ -2,6 +2,7 @@
 using System.Numerics;
 using Autofac;
 using CriticalCommonLib.Services.Mediator;
+
 using ImGuiNET;
 using InventoryTools.Logic;
 using InventoryTools.Services;
@@ -13,7 +14,7 @@ public class DebugWindowServiceWindow : GenericWindow
 {
     private readonly IComponentContext _componentContext;
     private WindowService? _windowService;
-    
+
     public DebugWindowServiceWindow(ILogger<DebugWindowServiceWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IComponentContext componentContext, string name = "Window Service - Debug") : base(logger, mediator, imGuiService, configuration, name)
     {
         _componentContext = componentContext;
@@ -23,7 +24,7 @@ public class DebugWindowServiceWindow : GenericWindow
     public override void Draw()
     {
         ImGui.Text($"Filter Window Open: {WindowService.HasFilterWindowOpen}");
-        
+
     }
 
     public override void Invalidate()

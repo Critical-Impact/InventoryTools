@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using CriticalCommonLib.Services.Mediator;
+
 using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Mediator;
 using InventoryTools.Services;

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using AllaganLib.GameSheets.Sheets;
 using AllaganLib.GameSheets.Sheets.Rows;
@@ -43,7 +44,7 @@ namespace InventoryTools.Ui
             _bNpcId = bNpcId;
             if (bNpc != null)
             {
-                WindowName = bNpc.Base.Singular.ExtractText() + "##" + bNpcId;
+                WindowName = bNpc.Base.Singular.ExtractText().ToTitleCase() + "##" + bNpcId;
                 Key = "bNpc_" + bNpcId;
                 _mobDrops = bNpc.MobDrops;
                 _mobSpawns = bNpc.MobSpawnPositions;
@@ -75,7 +76,7 @@ namespace InventoryTools.Ui
             }
             else
             {
-                ImGui.Text("Type: " + bNpc.MobTypes);
+                ImGui.Text("Type: " + string.Join(", ", bNpc.MobTypes.Select(c => c.ToString())));
 
                 if (bNpc.NotoriousMonster != null)
                 {

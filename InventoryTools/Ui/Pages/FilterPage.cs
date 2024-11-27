@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
+
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;

@@ -17,6 +17,10 @@ public class HotkeysFeature : Feature
             typeof(HotkeySubmarinesWindowSetting),
             typeof(HotkeyRetainerTasksWindowSetting),
             typeof(HotKeyListsWindowSetting),
+            typeof(HotkeyOpenGatheringLogSetting),
+            typeof(HotkeyOpenCraftingLogSetting),
+            typeof(HotkeyOpenFishingLogSetting),
+            typeof(HotkeyOpenItemLogSetting),
         },
         settings)
     {

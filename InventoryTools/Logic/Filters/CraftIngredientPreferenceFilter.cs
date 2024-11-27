@@ -197,8 +197,8 @@ public class CraftIngredientPreferenceFilter : SortedListFilter<(IngredientPrefe
             }
             if (_searchItems == null)
             {
-                _searchItems = _itemSheet.ItemsSearchStringsById.Where(c => c.Value.ToParseable().PassesFilter(SearchString.ToParseable())).Take(100)
-                    .Select(c => _itemSheet.GetRow(c.Key)!).ToList();
+                _searchItems = _itemSheet.Where(c => c.NameString.ToLower().PassesFilter(SearchString.ToLower())).Take(100)
+                    .Select(c => _itemSheet.GetRow(c.RowId)).ToList();
             }
 
             return _searchItems;

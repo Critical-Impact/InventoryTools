@@ -6,6 +6,7 @@ using AllaganLib.Shared.Extensions;
 using Autofac;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
+
 using ImGuiNET;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings.Abstract;

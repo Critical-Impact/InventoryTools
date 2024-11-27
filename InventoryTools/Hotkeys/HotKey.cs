@@ -1,5 +1,6 @@
 using System;
 using CriticalCommonLib.Services.Mediator;
+
 using Dalamud.Game.ClientState.Keys;
 using InventoryTools.Extensions;
 using Microsoft.Extensions.Logging;
