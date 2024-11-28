@@ -44,7 +44,7 @@ namespace InventoryTools.Services
                 AddOverlay(overlay);
             }
         }
-        
+
         public FilterState? LastState => _lastState;
 
         public List<IGameOverlay> Overlays
@@ -113,7 +113,7 @@ namespace InventoryTools.Services
                     }
                     if (_windowVisible.ContainsKey(overlay.WindowName.ToString()) && _windowVisible[overlay.WindowName.ToString()] && overlay.Draw())
                     {
-                        
+
                     }
                 }
             }
@@ -136,6 +136,11 @@ namespace InventoryTools.Services
 
         public void RefreshOverlayStates()
         {
+            if (!_frameworkService.IsInFrameworkUpdateThread)
+            {
+                _frameworkService.RunOnFrameworkThread(RefreshOverlayStates);
+                return;
+            }
             var activeFilter = _listService.GetActiveUiList(false);
             var activeBackgroundFilter = _listService.GetActiveBackgroundList();
             _logger.LogDebug($"Overlays refreshing, active list: {activeFilter?.Name ?? "no list"}, background list: {activeBackgroundFilter?.Name ?? "no list"}");
@@ -207,7 +212,7 @@ namespace InventoryTools.Services
                     _windowsToTrack.Add(extraWindow.ToString());
                 }
             }
-            
+
             if (!Overlays.Contains(overlay))
             {
                 Overlays.Add(overlay);
@@ -227,7 +232,7 @@ namespace InventoryTools.Services
                 overlay.Clear();
             }
         }
-        
+
         public Task StartAsync(CancellationToken cancellationToken)
         {
             MediatorService.Subscribe<OverlaysRequestRefreshMessage>(this, RefreshRequested);
