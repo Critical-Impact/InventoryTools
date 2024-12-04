@@ -1,3 +1,4 @@
+using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.Sheets.Rows;
 using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Models;
@@ -21,7 +22,7 @@ namespace InventoryTools.Logic.Filters
             var currentValue = CurrentValue(configuration);
             if (!string.IsNullOrEmpty(currentValue))
             {
-                if (!item.Item.SpentGilShop)
+                if (!item.Item.HasSourcesByType(ItemInfoType.GilShop, ItemInfoType.CalamitySalvagerShop))
                 {
                     return false;
                 }
@@ -39,7 +40,7 @@ namespace InventoryTools.Logic.Filters
             var currentValue = CurrentValue(configuration);
             if (!string.IsNullOrEmpty(currentValue))
             {
-                if (!item.SpentGilShop)
+                if (!item.HasSourcesByType(ItemInfoType.GilShop, ItemInfoType.CalamitySalvagerShop))
                 {
                     return false;
                 }

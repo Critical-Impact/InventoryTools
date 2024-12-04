@@ -44,6 +44,7 @@ namespace InventoryTools
         private readonly IEnumerable<IHotkey> hotkeys;
         private readonly ITooltipService _tooltipService;
         private readonly Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter> _sourceCategoryFilterFactory;
+        private readonly BuyFromVendorPriceFilter _buyFromVendorPriceFilter;
         private readonly Func<Type, IFilter> _filterFactory;
         private readonly IMarketCache _marketCache;
         private Dictionary<uint, InventoryMonitor.ItemChangesItem> _recentlyAddedSeen = new();
@@ -68,7 +69,7 @@ namespace InventoryTools
 
         private DateTime? _nextSaveTime = null;
 
-        public PluginLogic(ConfigurationManagerService configurationManagerService, IChatUtilities chatUtilities, IListService listService, ILogger<PluginLogic> logger, IFramework framework, MediatorService mediatorService, HostedInventoryHistory hostedInventoryHistory, IInventoryMonitor inventoryMonitor, IInventoryScanner inventoryScanner, ICharacterMonitor characterMonitor, InventoryToolsConfiguration configuration, IMobTracker mobTracker, IHotkeyService hotkeyService, ICraftMonitor craftMonitor, IUnlockTrackerService unlockTrackerService,IEnumerable<BaseTooltip> tooltips, IEnumerable<IHotkey> hotkeys, Func<Type,IFilter> filterFactory, IMarketCache marketCache, ITooltipService tooltipService, Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter> sourceCategoryFilterFactory) : base(logger, mediatorService)
+        public PluginLogic(ConfigurationManagerService configurationManagerService, IChatUtilities chatUtilities, IListService listService, ILogger<PluginLogic> logger, IFramework framework, MediatorService mediatorService, HostedInventoryHistory hostedInventoryHistory, IInventoryMonitor inventoryMonitor, IInventoryScanner inventoryScanner, ICharacterMonitor characterMonitor, InventoryToolsConfiguration configuration, IMobTracker mobTracker, IHotkeyService hotkeyService, ICraftMonitor craftMonitor, IUnlockTrackerService unlockTrackerService,IEnumerable<BaseTooltip> tooltips, IEnumerable<IHotkey> hotkeys, Func<Type,IFilter> filterFactory, IMarketCache marketCache, ITooltipService tooltipService, Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter> sourceCategoryFilterFactory, BuyFromVendorPriceFilter buyFromVendorPriceFilter) : base(logger, mediatorService)
         {
             _configurationManagerService = configurationManagerService;
             _chatUtilities = chatUtilities;
@@ -88,6 +89,7 @@ namespace InventoryTools
             this.hotkeys = hotkeys;
             _tooltipService = tooltipService;
             _sourceCategoryFilterFactory = sourceCategoryFilterFactory;
+            _buyFromVendorPriceFilter = buyFromVendorPriceFilter;
             _filterFactory = filterFactory;
             _marketCache = marketCache;
 
@@ -322,9 +324,10 @@ namespace InventoryTools
             sampleFilter.SourceAllCharacters = true;
             sampleFilter.SourceAllRetainers = true;
             sampleFilter.SourceAllFreeCompanies = true;
-            sampleFilter.CanBeBought = true;
-            sampleFilter.ShopBuyingPrice = "<=100";
+            _sourceCategoryFilterFactory.Invoke(ItemInfoRenderCategory.Shop).UpdateFilterConfiguration(sampleFilter, true);
+            _buyFromVendorPriceFilter.UpdateFilterConfiguration(sampleFilter, "<=100");
             _listService.AddList(sampleFilter);
+            _listService.AddDefaultColumns(sampleFilter);
         }
 
         public void AddSampleFilterMaterials(string newName = "Put away materials")
@@ -338,6 +341,7 @@ namespace InventoryTools
             var gatherFilter = _sourceCategoryFilterFactory.Invoke(ItemInfoRenderCategory.Gathering);
             gatherFilter.UpdateFilterConfiguration(sampleFilter, true);
             _listService.AddList(sampleFilter);
+            _listService.AddDefaultColumns(sampleFilter);
         }
 
         public void AddSampleFilterDuplicatedItems(string newName = "Duplicated SortItems")
@@ -350,6 +354,7 @@ namespace InventoryTools
             sampleFilter.DuplicatesOnly = true;
             sampleFilter.HighlightWhen = "Always";
             _listService.AddList(sampleFilter);
+            _listService.AddDefaultColumns(sampleFilter);
         }
 
 

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Numerics;
+using AllaganLib.GameSheets.Caches;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
@@ -70,7 +71,7 @@ namespace InventoryTools.Logic.Columns
             {
                 if (searchResult.CraftItem.MarketTotalPrice != null && searchResult.CraftItem.MarketUnitPrice != null)
                 {
-                    if (searchResult.Item.SpentGilShop)
+                    if (searchResult.Item.HasSourcesByType(ItemInfoType.GilShop, ItemInfoType.CalamitySalvagerShop))
                     {
                         var currentIndex = configuration.CraftList.IngredientPreferenceTypeOrder.IndexOf((
                             searchResult.CraftItem.IngredientPreference.Type,

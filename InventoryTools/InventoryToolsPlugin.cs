@@ -509,22 +509,26 @@ namespace InventoryTools
 
                 builder.Register<Func<ItemInfoType, GenericHasSourceFilter>>(c =>
                 {
-                    return type => c.Resolve<GenericHasSourceFilter>(new NamedParameter("itemType", type));
+                    var context = c.Resolve<IComponentContext>();
+                    return type => context.Resolve<GenericHasSourceFilter>(new NamedParameter("itemType", type));
                 });
 
                 builder.Register<Func<ItemInfoType, GenericHasUseFilter>>(c =>
                 {
-                    return type => c.Resolve<GenericHasUseFilter>(new NamedParameter("itemType", type));
+                    var context = c.Resolve<IComponentContext>();
+                    return type => context.Resolve<GenericHasUseFilter>(new NamedParameter("itemType", type));
                 });
 
                 builder.Register<Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter>>(c =>
                 {
-                    return renderCategory => c.Resolve<GenericHasSourceCategoryFilter>(new NamedParameter("renderCategory", renderCategory));
+                    var context = c.Resolve<IComponentContext>();
+                    return renderCategory => context.Resolve<GenericHasSourceCategoryFilter>(new NamedParameter("renderCategory", renderCategory));
                 });
 
                 builder.Register<Func<ItemInfoRenderCategory, GenericHasUseCategoryFilter>>(c =>
                 {
-                    return renderCategory => c.Resolve<GenericHasUseCategoryFilter>(new NamedParameter("renderCategory", renderCategory));
+                    var context = c.Resolve<IComponentContext>();
+                    return renderCategory => context.Resolve<GenericHasUseCategoryFilter>(new NamedParameter("renderCategory", renderCategory));
                 });
 
                 builder.Register<Func<int, IBackgroundTaskQueue>>(c =>

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Numerics;
+using AllaganLib.GameSheets.Caches;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
@@ -46,7 +47,7 @@ public class CraftMarketPriceColumn : GilColumn
         {
             ImGui.Text($"{searchResult.CraftItem.MarketUnitPrice.Value:n0}" + SeIconChar.Gil.ToIconString() + " (" + $"{searchResult.CraftItem.MarketTotalPrice.Value:n0}" + SeIconChar.Gil.ToIconString() + ")");
 
-            if (searchResult.Item.SpentGilShop)
+            if (searchResult.Item.HasSourcesByType(ItemInfoType.GilShop, ItemInfoType.CalamitySalvagerShop))
             {
                 var currentIndex = configuration.CraftList.IngredientPreferenceTypeOrder.IndexOf((
                     searchResult.CraftItem.IngredientPreference.Type,

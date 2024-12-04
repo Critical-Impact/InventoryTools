@@ -284,9 +284,14 @@ namespace InventoryTools.Ui
                     ImGui.TextUnformatted("Sell to Vendor: " + Item.SellToVendorPrice + SeIconChar.Gil.ToIconString());
                 }
 
-                if (Item.BuyFromVendorPrice != 0 && Item.SpentGilShop)
+                if (Item.BuyFromVendorPrice != 0 && Item.HasSourcesByType(ItemInfoType.GilShop))
                 {
                     ImGui.TextUnformatted("Buy from Vendor: " + Item.BuyFromVendorPrice + SeIconChar.Gil.ToIconString());
+                }
+
+                if (Item.BuyFromVendorPrice != 0 && Item.HasSourcesByType(ItemInfoType.CalamitySalvagerShop))
+                {
+                    ImGui.TextUnformatted("Buy from Calamity Salvager: " + Item.BuyFromVendorPrice + SeIconChar.Gil.ToIconString());
                 }
                 ImGui.Image(ImGuiService.GetIconTexture(Item.Icon).ImGuiHandle, new Vector2(100, 100) * ImGui.GetIO().FontGlobalScale);
                 if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &

@@ -66,13 +66,6 @@ namespace InventoryTools.Logic
 
         public Vector2 BagLocation => InventoryItem.BagLocation(_sourceBag);
 
-        public string GetExtraInformation()
-        {
-            string info = "";
-            info += (InventoryItem.Item.SpentGilShop ? "Can be bought" : "Can't be bought") + '\n';
-            return info;
-        }
-
         public uint ItemId {
             get => InventoryItem.ItemId;
             set

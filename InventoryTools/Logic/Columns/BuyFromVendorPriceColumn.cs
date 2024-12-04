@@ -1,3 +1,4 @@
+using AllaganLib.GameSheets.Caches;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -13,13 +14,13 @@ namespace InventoryTools.Logic.Columns
 
         public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            if (searchResult.InventoryItem != null && searchResult.InventoryItem.Item.SpentGilShop)
+            if (searchResult.InventoryItem != null && searchResult.InventoryItem.Item.HasSourcesByType(ItemInfoType.GilShop, ItemInfoType.CalamitySalvagerShop))
             {
                 int buyPrice = (int)searchResult.InventoryItem.BuyFromVendorPrice;
                 return buyPrice;
             }
 
-            if (searchResult.Item.SpentGilShop)
+            if (searchResult.Item.HasSourcesByType(ItemInfoType.GilShop, ItemInfoType.CalamitySalvagerShop))
             {
                 int buyPrice = (int)searchResult.Item.Base.PriceMid;
                 return buyPrice;
