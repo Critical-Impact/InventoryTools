@@ -178,7 +178,7 @@ namespace InventoryTools
                     HashSet<Type> singletons = new HashSet<Type>()
                     {
                         typeof(IHotkey), typeof(BaseTooltip), typeof(IAtkOverlay), typeof(IColumn),
-                        typeof(IGameOverlay), typeof(IFilter), typeof(ISetting), typeof(IColumnSetting),
+                        typeof(IGameOverlay), typeof(ISetting), typeof(IColumnSetting),
                         typeof(IFeature)
                     };
 
@@ -240,6 +240,30 @@ namespace InventoryTools
                         .AsSelf()
                         .As<IItemInfoRenderer>()
                         .SingleInstance();
+
+                    //Filters
+                    builder.RegisterAssemblyTypes(dataAccess)
+                        .Where(t => t.Name.EndsWith("Filter"))
+                        .AsSelf()
+                        .As<IFilter>()
+                        .Where(c => c.GetInterface("IGenericFilter") == null)
+                        .SingleInstance();
+
+                    builder
+                        .RegisterType(typeof(GenericHasSourceFilter))
+                        .AsSelf();
+
+                    builder
+                        .RegisterType(typeof(GenericHasSourceCategoryFilter))
+                        .AsSelf();
+
+                    builder
+                        .RegisterType(typeof(GenericHasUseFilter))
+                        .AsSelf();
+
+                    builder
+                        .RegisterType(typeof(GenericHasUseCategoryFilter))
+                        .AsSelf();
                 });
 
             hostBuilder.ConfigureContainer<ContainerBuilder>(builder =>
@@ -284,6 +308,7 @@ namespace InventoryTools
                 builder.RegisterType<FilterService>().As<IFilterService>().SingleInstance();
                 builder.RegisterType<Font>().As<IFont>().SingleInstance();
                 builder.RegisterType<GameInterface>().As<IGameInterface>().SingleInstance();
+                builder.RegisterType<UnlockTrackerService>().As<IUnlockTrackerService>().SingleInstance();
                 builder.RegisterType<GameUiManager>().As<IGameUiManager>().SingleInstance();
                 builder.RegisterType<HotkeyService>().As<IHotkeyService>().SingleInstance();
                 builder.RegisterType<InventoryMonitor>().As<IInventoryMonitor>().SingleInstance();
@@ -481,6 +506,27 @@ namespace InventoryTools
                         return filter;
                     };
                 });
+
+                builder.Register<Func<ItemInfoType, GenericHasSourceFilter>>(c =>
+                {
+                    return type => c.Resolve<GenericHasSourceFilter>(new NamedParameter("itemType", type));
+                });
+
+                builder.Register<Func<ItemInfoType, GenericHasUseFilter>>(c =>
+                {
+                    return type => c.Resolve<GenericHasUseFilter>(new NamedParameter("itemType", type));
+                });
+
+                builder.Register<Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter>>(c =>
+                {
+                    return renderCategory => c.Resolve<GenericHasSourceCategoryFilter>(new NamedParameter("renderCategory", renderCategory));
+                });
+
+                builder.Register<Func<ItemInfoRenderCategory, GenericHasUseCategoryFilter>>(c =>
+                {
+                    return renderCategory => c.Resolve<GenericHasUseCategoryFilter>(new NamedParameter("renderCategory", renderCategory));
+                });
+
                 builder.Register<Func<int, IBackgroundTaskQueue>>(c =>
                 {
                     return capacity =>

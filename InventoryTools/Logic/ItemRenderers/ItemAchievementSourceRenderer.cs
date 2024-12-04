@@ -13,6 +13,7 @@ public class ItemAchievementSourceRenderer : ItemInfoRenderer<ItemAchievementSou
     public override string SingularName => "Achievement";
 
     public override string? PluralName => "Achievements";
+    public override string HelpText => "Can the item be earned via an achievement?";
     public override bool ShouldGroup => true;
 
     public override Action<ItemSource> DrawTooltip => source =>

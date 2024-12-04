@@ -27,7 +27,7 @@ namespace InventoryTools.Logic.Filters.Abstract
             {
                 return "N/A";
             }
-            
+
             if (currentValue == true)
             {
                 return "Yes";
@@ -61,8 +61,7 @@ namespace InventoryTools.Logic.Filters.Abstract
         public override void Draw(FilterConfiguration configuration)
         {
             var currentValue = CurrentSelection(configuration);
-            
-            ImGui.SetNextItemWidth(LabelSize);
+
             if (HasValueSet(configuration))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);
@@ -73,7 +72,13 @@ namespace InventoryTools.Logic.Filters.Abstract
             {
                 ImGui.LabelText("##" + Key + "Label", Name + ":");
             }
-            ImGui.SameLine();
+            ImGui.Indent();
+            using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudGrey))
+            {
+                    ImGui.PushTextWrapPos();
+                    ImGui.TextUnformatted(HelpText);
+                    ImGui.PopTextWrapPos();
+            }
             ImGui.SetNextItemWidth(InputSize);
             using (var combo = ImRaii.Combo("##"+Key+"Combo", currentValue))
             {
@@ -88,8 +93,6 @@ namespace InventoryTools.Logic.Filters.Abstract
                     }
                 }
             }
-            ImGui.SameLine();
-            ImGuiService.HelpMarker(HelpText);            
             if (HasValueSet(configuration) && ShowReset)
             {
                 ImGui.SameLine();
@@ -98,6 +101,7 @@ namespace InventoryTools.Logic.Filters.Abstract
                     ResetFilter(configuration);
                 }
             }
+            ImGui.Unindent();
         }
 
         public override void UpdateFilterConfiguration(FilterConfiguration configuration, bool? newValue)

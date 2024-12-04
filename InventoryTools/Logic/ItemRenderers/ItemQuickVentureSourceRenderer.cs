@@ -15,6 +15,7 @@ public class ItemQuickVentureSourceRenderer : ItemInfoRenderer<ItemQuickVentureS
     public override ItemInfoType Type => ItemInfoType.QuickVenture;
     public override string SingularName => "Quick Venture";
     public override bool ShouldGroup => true;
+    public override string HelpText => "Can the item be returned by retainers from quick ventures?";
     public override Action<ItemSource> DrawTooltip => source =>
     {
         var asSource = AsSource(source);

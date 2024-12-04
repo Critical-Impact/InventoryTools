@@ -19,6 +19,8 @@ public class ItemFateShopUseRenderer : ItemFateShopSourceRenderer
     {
     }
 
+    public override string HelpText => "Can the item be spent at a bicolor gemstone shop?";
+
     public override RendererType RendererType => RendererType.Use;
 
     public override Func<ItemSource, int> GetIcon => source =>
@@ -41,9 +43,11 @@ public class ItemFateShopSourceRenderer : ItemInfoRenderer<ItemFateShopSource>
 
     public override RendererType RendererType => RendererType.Source;
     public override ItemInfoType Type => ItemInfoType.FateShop;
-    public override string SingularName => "Fate Shop";
-    public override string PluralName => "Fate Shops";
+    public override string SingularName => "Bicolor Gemstone Shop";
+    public override string PluralName => "Bicolor Gemstone Shops";
+    public override string HelpText => "Can the item be purchased from a bicolour gem shop?";
     public override bool ShouldGroup => true;
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Shop];
 
     public override byte MaxColumns => 4;
 

@@ -29,7 +29,7 @@ public abstract class ChoiceColumnSetting<T> : ColumnSetting<T?>
 
     public abstract string GetFormattedChoice(ColumnConfiguration filterConfiguration, T choice);
     
-    public override void Draw(ColumnConfiguration configuration)
+    public override void Draw(ColumnConfiguration configuration, string? helpText)
     {
         ImGui.SetNextItemWidth(LabelSize);
         if (HasValueSet(configuration))

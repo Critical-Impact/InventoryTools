@@ -16,7 +16,7 @@ namespace InventoryTools.Logic.ItemRenderers;
 public class ItemFccShopUseRenderer : ItemFccShopSourceRenderer
 {
     private readonly ItemSheet _itemSheet;
-
+    public override string HelpText => "Can the item be spent at a free company shop?";
     public ItemFccShopUseRenderer(ImGuiService imGuiService, MapSheet mapSheet, ItemSheet itemSheet) : base(imGuiService, mapSheet, itemSheet)
     {
         _itemSheet = itemSheet;
@@ -73,9 +73,11 @@ public class ItemFccShopSourceRenderer : ItemInfoRenderer<ItemFccShopSource>
     public override ItemInfoType Type => ItemInfoType.FCShop;
     public override string SingularName => "Free Company Shop";
     public override string PluralName => "Free Company Shops";
+    public override string HelpText => "Can the item be purchased from a free company shop?";
     public override bool ShouldGroup => true;
 
     public override byte MaxColumns => 1;
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Shop];
 
     public override Action<List<ItemSource>>? DrawTooltipGrouped => sources =>
     {

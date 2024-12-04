@@ -277,9 +277,11 @@ public class InventoryScopePicker
                                 {
                                     ImGui.TextWrapped("No scopes defined yet. Press add to start.");
                                 }
-                                foreach (var searchScope in searchScopes)
+
+                                for (var index = 0; index < searchScopes.Count; index++)
                                 {
-                                    if(ImGui.Selectable(GetScopeName(searchScope), _selectedScope == searchScope))
+                                    var searchScope = searchScopes[index];
+                                    if (ImGui.Selectable(GetScopeName(searchScope) + "##" + index, _selectedScope == searchScope))
                                     {
                                         _selectedScope = searchScope;
                                     }
@@ -305,6 +307,7 @@ public class InventoryScopePicker
                                             }
                                         }
                                     }
+
                                     ImGui.Separator();
                                 }
                             }

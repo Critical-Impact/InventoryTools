@@ -23,7 +23,7 @@ public class TooltipAmountOwnedSortSetting : ChoiceSetting<TooltipAmountOwnedSor
     }
 
     public override string Key { get; set; } = "TooltipAmountOwnedSort";
-    public override string Name { get; set; } = "Amount Owned (Order)";
+    public override string Name { get; set; } = "Add Item Locations (Order)";
 
     public override string HelpText { get; set; } =
         "How should the items displayed in the tooltip that you own be ordered? None is included if you find the sorting to be non-performant.";

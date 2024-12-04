@@ -10,11 +10,12 @@ namespace InventoryTools.Logic.ItemRenderers;
 public interface IItemInfoRenderer
 {
     Type ItemSourceType { get; }
-
+    IReadOnlyList<ItemInfoRenderCategory>? Categories { get; }
     RendererType RendererType { get; }
     ItemInfoType Type { get; }
     string SingularName { get; }
     string? PluralName { get; }
+    string HelpText { get; }
     bool ShouldGroup { get; }
     Func<List<ItemSource>, List<List<ItemSource>>>? CustomGroup { get; }
     Action<ItemSource> DrawTooltip { get; }

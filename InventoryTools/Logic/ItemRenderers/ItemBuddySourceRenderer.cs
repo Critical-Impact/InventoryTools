@@ -13,6 +13,7 @@ public class ItemBuddySourceRenderer : ItemInfoRenderer<ItemBuddySource>
     public override ItemInfoType Type => ItemInfoType.BuddyItem;
     public override string SingularName => "Used on Chocobo Companion";
     public override bool ShouldGroup => false;
+    public override string HelpText => "Can the item be used on your chocobo companion?";
 
     public override Action<ItemSource> DrawTooltip => source =>
     {

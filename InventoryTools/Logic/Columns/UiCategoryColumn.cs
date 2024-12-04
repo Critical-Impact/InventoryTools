@@ -14,7 +14,7 @@ namespace InventoryTools.Logic.Columns
         public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
             var itemItemUiCategory = searchResult.Item.Base.ItemUICategory.ValueNullable;
-            if (itemItemUiCategory != null)
+            if (itemItemUiCategory == null)
             {
                 return null;
             }

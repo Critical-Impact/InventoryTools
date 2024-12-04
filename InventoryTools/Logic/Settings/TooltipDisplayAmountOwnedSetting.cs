@@ -19,9 +19,9 @@ namespace InventoryTools.Logic.Settings
         }
 
         public override string Key { get; set; } = "TooltipDisplayOwned";
-        public override string Name { get; set; } = "Add Amount Owned";
+        public override string Name { get; set; } = "Add Item Locations";
 
-        public override string WizardName { get; } = "Amount Owned";
+        public override string WizardName { get; } = "Add Item Locations";
 
         public override string HelpText { get; set; } =
             "When hovering an item, should the tooltip contain information about where the items are located.";

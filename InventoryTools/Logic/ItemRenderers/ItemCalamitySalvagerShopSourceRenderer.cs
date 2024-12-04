@@ -17,6 +17,8 @@ public class ItemCalamitySalvagerShopUseRenderer : ItemCalamitySalvagerShopSourc
 {
     private readonly ItemSheet _itemSheet;
 
+    public override string HelpText => "Can the item be spent at the calamity salvager?";
+
     public ItemCalamitySalvagerShopUseRenderer(ImGuiService imGuiService, MapSheet mapSheet, ItemSheet itemSheet) : base(imGuiService, mapSheet, itemSheet)
     {
         _itemSheet = itemSheet;
@@ -38,11 +40,13 @@ public class ItemCalamitySalvagerShopSourceRenderer : ItemInfoRenderer<ItemCalam
         _itemSheet = itemSheet;
     }
 
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Shop];
     public override RendererType RendererType => RendererType.Source;
     public override ItemInfoType Type => ItemInfoType.CalamitySalvagerShop;
     public override string SingularName => "Calamity Salvager";
     public override string PluralName => "Calamity Salvagers";
     public override bool ShouldGroup => true;
+    public override string HelpText => "Can the item be purchased from the Calamity Salvager?";
 
     public override byte MaxColumns => 1;
 

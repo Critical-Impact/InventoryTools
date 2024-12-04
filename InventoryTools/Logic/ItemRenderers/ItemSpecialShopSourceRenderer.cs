@@ -21,6 +21,8 @@ public class ItemSpecialShopUseRenderer : ItemSpecialShopSourceRenderer
 
     public override RendererType RendererType => RendererType.Use;
 
+    public override string HelpText => "Can the item be spent at a special currency shop?";
+
     public override Func<ItemSource, int> GetIcon => source =>
     {
         var asSource = AsSource(source);
@@ -43,9 +45,11 @@ public class ItemSpecialShopSourceRenderer : ItemInfoRenderer<ItemSpecialShopSou
     public override ItemInfoType Type => ItemInfoType.SpecialShop;
     public override string SingularName => "Special Shop";
     public override string PluralName => "Special Shops";
+    public override string HelpText => "Can the item be purchased from a special currency shop?";
     public override bool ShouldGroup => true;
 
     public override byte MaxColumns => 1;
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Shop];
 
     public override Func<List<ItemSource>, List<List<ItemSource>>>? CustomGroup => sources =>
     {

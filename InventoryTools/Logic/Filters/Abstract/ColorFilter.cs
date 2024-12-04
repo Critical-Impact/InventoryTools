@@ -3,6 +3,7 @@ using Dalamud.Interface.Colors;
 using ImGuiNET;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
+using OtterGui.Raii;
 
 namespace InventoryTools.Logic.Filters.Abstract
 {
@@ -14,7 +15,7 @@ namespace InventoryTools.Logic.Filters.Abstract
         {
             return CurrentValue(configuration) != null;
         }
-        
+
         public override Vector4? CurrentValue(FilterConfiguration configuration)
         {
             return configuration.GetColorFilter(Key);
@@ -23,7 +24,6 @@ namespace InventoryTools.Logic.Filters.Abstract
         public override void Draw(FilterConfiguration configuration)
         {
             var value = CurrentValue(configuration) ?? Vector4.Zero;
-            ImGui.SetNextItemWidth(LabelSize);
             if (HasValueSet(configuration))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);
@@ -34,24 +34,31 @@ namespace InventoryTools.Logic.Filters.Abstract
             {
                 ImGui.LabelText("##" + Key + "Label", Name + ":");
             }
-            ImGui.SameLine();
+            ImGui.Indent();
+            using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudGrey))
+            {
+                ImGui.PushTextWrapPos();
+                ImGui.TextUnformatted(HelpText);
+                ImGui.PopTextWrapPos();
+            }
             ImGui.SetNextItemWidth(InputSize);
             if (ImGui.ColorEdit4("##" + Key + "Color", ref value, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel))
             {
                 UpdateFilterConfiguration(configuration, value);
             }
-            ImGui.SameLine();
-            if (HasValueSet(configuration) && ImGui.Button("Clear Color"))
+            if (HasValueSet(configuration))
             {
-                UpdateFilterConfiguration(configuration, null);
+                ImGui.SameLine();
+                if (ImGui.Button("Clear Color"))
+                {
+                    UpdateFilterConfiguration(configuration, null);
+                }
             }
             if (HasValueSet(configuration) && value.W == 0)
             {
                 ImGui.SameLine();
                 ImGui.TextColored(ImGuiColors.DalamudRed, "The alpha is currently set to 0, this will be invisible.");
             }
-            ImGui.SameLine();
-            ImGuiService.HelpMarker(HelpText);
             if (HasValueSet(configuration) && ShowReset)
             {
                 ImGui.SameLine();
@@ -60,6 +67,7 @@ namespace InventoryTools.Logic.Filters.Abstract
                     ResetFilter(configuration);
                 }
             }
+            ImGui.Unindent();
         }
 
         public override void UpdateFilterConfiguration(FilterConfiguration configuration, Vector4? newValue)
@@ -73,7 +81,7 @@ namespace InventoryTools.Logic.Filters.Abstract
                 configuration.RemoveColorFilter(Key);
             }
         }
-        
+
         public override void ResetFilter(FilterConfiguration configuration)
         {
             UpdateFilterConfiguration(configuration, DefaultValue);

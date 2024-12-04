@@ -2,6 +2,7 @@ using Dalamud.Interface.Colors;
 using ImGuiNET;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
+using OtterGui.Raii;
 
 namespace InventoryTools.Logic.Filters.Abstract
 {
@@ -19,7 +20,7 @@ namespace InventoryTools.Logic.Filters.Abstract
         {
             return CurrentValue(configuration) != "";
         }
-        
+
         public override string CurrentValue(FilterConfiguration configuration)
         {
             return (configuration.GetStringFilter(Key) ?? "").Trim();
@@ -28,7 +29,6 @@ namespace InventoryTools.Logic.Filters.Abstract
         public override void Draw(FilterConfiguration configuration)
         {
             var value = CurrentValue(configuration) ?? "";
-            ImGui.SetNextItemWidth(LabelSize);
             if (HasValueSet(configuration))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);
@@ -39,18 +39,25 @@ namespace InventoryTools.Logic.Filters.Abstract
             {
                 ImGui.LabelText("##" + Key + "Label", Name + ":");
             }
-            ImGui.SameLine();
+
+            ImGui.Indent();
+            using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudGrey))
+            {
+                ImGui.PushTextWrapPos();
+                ImGui.TextUnformatted(HelpText);
+                ImGui.PopTextWrapPos();
+            }
+
             ImGui.SetNextItemWidth(InputSize);
             if (ImGui.InputText("##"+Key+"Input", ref value, 500))
             {
                 UpdateFilterConfiguration(configuration, value);
             }
-            ImGui.SameLine();
             if (this.ShowOperatorTooltip)
             {
+                ImGui.SameLine();
                 ImGuiService.HelpMarker(new List<string>()
                 {
-                    HelpText,
                     "When searching the following operators can be used to compare: ",
                     "",
                     ">, >=, <, <=, =, for numerical comparisons" ,
@@ -59,10 +66,6 @@ namespace InventoryTools.Logic.Filters.Abstract
                     "||, search multiple expressions using OR",
                     "&&, search multiple expressions using AND"
                 });
-            }
-            else
-            {
-                ImGuiService.HelpMarker(HelpText);
             }
 
             if (HasValueSet(configuration) && ShowReset)
@@ -73,13 +76,14 @@ namespace InventoryTools.Logic.Filters.Abstract
                     ResetFilter(configuration);
                 }
             }
+            ImGui.Unindent();
         }
 
         public override void UpdateFilterConfiguration(FilterConfiguration configuration, string newValue)
         {
             configuration.UpdateStringFilter(Key, newValue);
         }
-        
+
         public override void ResetFilter(FilterConfiguration configuration)
         {
             UpdateFilterConfiguration(configuration, DefaultValue);

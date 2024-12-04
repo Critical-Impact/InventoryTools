@@ -13,6 +13,8 @@ public class TooltipsFeature : Feature
             typeof(TooltipDisplayRetrieveAmountSetting),
             typeof(TooltipMinimumMarketPriceSetting),
             typeof(TooltipLocationScopeLimitSetting),
+            typeof(TooltipDisplayUnlockSetting),
+            typeof(TooltipDisplayUnlockCharacterSetting),
         },
         settings)
     {

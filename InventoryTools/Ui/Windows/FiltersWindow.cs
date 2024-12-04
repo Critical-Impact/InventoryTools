@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using AllaganLib.GameSheets.Caches;
+using AllaganLib.GameSheets.Extensions;
 using AllaganLib.GameSheets.Sheets;
 using AllaganLib.GameSheets.Sheets.Rows;
 using AllaganLib.Shared.Extensions;
@@ -1188,6 +1190,7 @@ namespace InventoryTools.Ui
             }
         }
         private string? _newName;
+        private string _filterSearch = "";
         private void DrawSettingsPanel(FilterConfiguration filterConfiguration)
         {
             using (var contentChild = ImRaii.Child("Content", new Vector2(0, -44) * ImGui.GetIO().FontGlobalScale, true))
@@ -1235,12 +1238,28 @@ namespace InventoryTools.Ui
 
                     }
 
+                    var filterSearch = _filterSearch;
+                    ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
+                    if (ImGui.InputTextWithHint("##SearchFilter", "Search...", ref filterSearch, 100))
+                    {
+                        _filterSearch = filterSearch;
+                    }
+                    ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
+
                     using (var tabBar = ImRaii.TabBar("ConfigTabs", ImGuiTabBarFlags.FittingPolicyScroll))
                     {
                         if (tabBar.Success)
                         {
-                            foreach (var group in _filterService.GroupedFilters)
+                            var groupedFilters = _filterService.GroupedFilters;
+                            groupedFilters = groupedFilters.ToDictionary(c => c.Key, c => c.Value.Where(f => f.Name.ToLower().Contains(_filterSearch.ToLower()) || f.HelpText.ToLower().Contains(_filterSearch.ToLower())).ToList());
+                            var hasResults = false;
+                            foreach (var group in groupedFilters)
                             {
+                                if (group.Value.Count == 0)
+                                {
+                                    continue;
+                                }
+                                hasResults = true;
                                 var hasValuesSet = false;
                                 foreach (var filter in group.Value)
                                 {
@@ -1280,7 +1299,7 @@ namespace InventoryTools.Ui
                                          .GameItemFilter)));
                                 if (hasValues)
                                 {
-                                    using (var tabItem = ImRaii.TabItem(group.Key.ToString().ToSentence()))
+                                    using (var tabItem = ImRaii.TabItem(group.Key.FormattedName()))
                                     {
                                         if (!tabItem.Success) continue;
                                         using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudWhite))
@@ -1291,7 +1310,10 @@ namespace InventoryTools.Ui
                                                 {
                                                     if (craftColumns.Success)
                                                     {
+                                                        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
                                                         group.Value.Single(c => c is CraftColumnsFilter or ColumnsFilter).Draw(filterConfiguration);
+                                                        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
+                                                        ImGui.Separator();
                                                     }
                                                 }
                                                 using (var otherFilters = ImRaii.Child("otherFilters", new (0, 0)))
@@ -1300,7 +1322,10 @@ namespace InventoryTools.Ui
                                                     {
                                                         foreach (var filter in group.Value.Where(c => c is not CraftColumnsFilter && c is not ColumnsFilter))
                                                         {
+                                                            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
                                                             filter.Draw(filterConfiguration);
+                                                            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
+                                                            ImGui.Separator();
                                                         }
                                                     }
                                                 }
@@ -1333,11 +1358,25 @@ namespace InventoryTools.Ui
                                                               .GameItemFilter))
                                                         ))
                                                     {
+                                                        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
                                                         filter.Draw(filterConfiguration);
+                                                        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
+                                                        ImGui.Separator();
                                                     }
                                                 }
                                             }
                                         }
+                                    }
+                                }
+                            }
+
+                            if (!hasResults)
+                            {
+                                using (var tabItem = ImRaii.TabItem("No results found"))
+                                {
+                                    if (tabItem.Success)
+                                    {
+
                                     }
                                 }
                             }

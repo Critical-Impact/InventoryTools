@@ -23,7 +23,7 @@ namespace InventoryTools
         [JsonIgnore]
         public bool IsDirty { get; set; }
 
-        private bool _automaticallyDownloadMarketPrices = false;
+        private bool _automaticallyDownloadMarketPrices;
         private bool _colorRetainerList = true;
 
         private bool _displayCrossCharacter = true;
@@ -38,24 +38,24 @@ namespace InventoryTools
 
         private string _highlightWhen = "When Searching";
         private bool _invertHighlighting = true;
-        private bool _invertDestinationHighlighting = false;
-        private bool _invertTabHighlighting = false;
-        private bool _highlightDestination = false;
-        private bool _highlightDestinationEmpty = false;
-        private bool _addMoreInformationContextMenu = false;
-        private bool _addToCraftListContextMenu = false;
-        private bool _addToActiveCraftListContextMenu = false;
-        private bool _openCraftingLogContextMenu = false;
-        private bool _openGatheringLogContextMenu = false;
-        private bool _openFishingLogContextMenu = false;
-        private bool _itemSearchContextMenu = false;
+        private bool _invertDestinationHighlighting;
+        private bool _invertTabHighlighting;
+        private bool _highlightDestination;
+        private bool _highlightDestinationEmpty;
+        private bool _addMoreInformationContextMenu;
+        private bool _addToCraftListContextMenu;
+        private bool _addToActiveCraftListContextMenu;
+        private bool _openCraftingLogContextMenu;
+        private bool _openGatheringLogContextMenu;
+        private bool _openFishingLogContextMenu;
+        private bool _itemSearchContextMenu;
 
         private bool _isVisible;
         private int _marketRefreshTimeHours = 24;
         private int _marketSaleHistoryLimit = 7;
         private bool _showItemNumberRetainerList = true;
-        private bool _historyEnabled = false;
-        private bool _addTitleMenuButton = false;
+        private bool _historyEnabled;
+        private bool _addTitleMenuButton;
 
         private Vector4 _tabHighlightColor = new (0.007f, 0.008f,
             0.007f, 0.2f);
@@ -72,9 +72,9 @@ namespace InventoryTools
         private Dictionary<string, Vector2>? _savedWindowPositions = new();
         private List<InventoryChangeReason> _historyTrackReasons = new();
         private List<uint>? _tooltipWhitelistCategories = new();
-        private bool _tooltipWhitelistBlacklist = false;
-        private List<InventorySearchScope>? _tooltipSearchScope = null;
-        private List<InventorySearchScope>? _itemSearchScope = null;
+        private bool _tooltipWhitelistBlacklist;
+        private List<InventorySearchScope>? _tooltipSearchScope;
+        private List<InventorySearchScope>? _itemSearchScope;
         private HashSet<string>? _windowsIgnoreEscape = new HashSet<string>();
         private HashSet<uint>? _favouriteItemsList = new HashSet<uint>();
         private TooltipAmountOwnedSort _tooltipAmountOwnedSort = TooltipAmountOwnedSort.Alphabetically;
@@ -318,20 +318,22 @@ namespace InventoryTools
         public bool ShowFilterTab { get; set; } = true;
         public bool SwitchFiltersAutomatically { get; set; } = true;
         public bool SwitchCraftListsAutomatically { get; set; } = true;
-        private bool _tooltipCurrentCharacter = false;
+        private bool _tooltipCurrentCharacter;
         private bool _tooltipDisplayAmountOwned = true;
-        private bool _tooltipDisplayMarketAveragePrice = false;
+        private bool _tooltipDisplayUnlock;
+        private List<ulong>? _tooltipDisplayUnlockCharacters = new();
+        private bool _tooltipDisplayMarketAveragePrice;
         private bool _tooltipDisplayMarketLowestPrice = true;
-        private bool _tooltipAddCharacterNameOwned = false;
-        private bool _tooltipDisplayRetrieveAmount = false;
+        private bool _tooltipAddCharacterNameOwned;
+        private bool _tooltipDisplayRetrieveAmount;
         private int _tooltipLocationLimit = 10;
-        private bool _tooltipDisplayHeader = false;
-        private int _tooltipHeaderLines = 0;
-        private int _tooltipFooterLines = 0;
+        private bool _tooltipDisplayHeader;
+        private int _tooltipHeaderLines;
+        private int _tooltipFooterLines;
         private TooltipLocationDisplayMode _tooltipLocationDisplayMode = TooltipLocationDisplayMode.CharacterCategoryQuantityQuality;
         private WindowLayout _craftWindowLayout =  WindowLayout.Tabs;
         private WindowLayout _filtersLayout = WindowLayout.Tabs;
-        private uint? _tooltipColor = null;
+        private uint? _tooltipColor;
         private HashSet<NotificationPopup>? _notificationsSeen = new ();
 
         [Vector4Default("0.007, 0.008,0.007, 0.212")]
@@ -413,6 +415,24 @@ namespace InventoryTools
             set
             {
                 _tooltipDisplayAmountOwned = value;
+                IsDirty = true;
+            }
+        }
+        public bool TooltipDisplayUnlock
+        {
+            get => _tooltipDisplayUnlock;
+            set
+            {
+                _tooltipDisplayUnlock = value;
+                IsDirty = true;
+            }
+        }
+        public List<ulong>? TooltipDisplayUnlockCharacters
+        {
+            get => _tooltipDisplayUnlockCharacters;
+            set
+            {
+                _tooltipDisplayUnlockCharacters = value;
                 IsDirty = true;
             }
         }
@@ -745,7 +765,7 @@ namespace InventoryTools
 
         public bool TetrisEnabled { get; set; } = false;
 
-        public string? ActiveBackgroundFilter { get; set; } = null;
+        public string? ActiveBackgroundFilter { get; set; }
 
         public string? ActiveCraftList { get; set; } = null;
 
@@ -756,7 +776,7 @@ namespace InventoryTools
         [DefaultValue(true)]
         private bool _showWizardNewFeatures { get; set; } = true;
 
-        private HashSet<string>? _wizardVersionsSeen { get; set; } = null;
+        private HashSet<string>? _wizardVersionsSeen { get; set; }
         public int SelectedHelpPage { get; set; }
         #if DEBUG
         public int SelectedDebugPage { get; set; }
@@ -824,7 +844,7 @@ namespace InventoryTools
         private ModifiableHotkey? _openFishingLogHotKey;
         private ModifiableHotkey? _openItemLogHotKey;
         private ConcurrentDictionary<string,ModifiableHotkey>? _hotkeys;
-        private bool _trackMobSpawns = false;
+        private bool _trackMobSpawns;
         private bool _marketBoardUseActiveWorld = true;
         private bool _marketBoardUseHomeWorld = true;
         private List<uint>? _marketBoardWorldIds;

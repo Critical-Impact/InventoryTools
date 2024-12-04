@@ -28,11 +28,11 @@ public class ContextMenuItemSearchScopeSetting : Setting<List<InventorySearchSco
         return configuration.ItemSearchScope;
     }
 
-    public override void Draw(InventoryToolsConfiguration configuration)
+    public override void Draw(InventoryToolsConfiguration configuration, string? customName, bool? disableReset,
+        bool? disableColouring)
     {
         var currentScopes = CurrentValue(configuration) ?? new List<InventorySearchScope>();
-        ImGui.SetNextItemWidth(LabelSize);
-        if (ColourModified && HasValueSet(configuration))
+        if (disableColouring != true && HasValueSet(configuration))
         {
             ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.HealerGreen);
             ImGui.LabelText("##" + Key + "Label", Name);
@@ -51,7 +51,7 @@ public class ContextMenuItemSearchScopeSetting : Setting<List<InventorySearchSco
 
         ImGui.SameLine();
         ImGuiService.HelpMarker(HelpText, Image, ImageSize);
-        if (!HideReset && HasValueSet(configuration))
+        if (disableReset != true && HasValueSet(configuration))
         {
             ImGui.SameLine();
             if (ImGui.Button("Reset##" + Key + "Reset"))

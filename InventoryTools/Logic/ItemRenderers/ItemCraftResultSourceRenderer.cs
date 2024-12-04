@@ -27,7 +27,8 @@ public class ItemCraftResultSourceRenderer : ItemInfoRenderer<ItemCraftResultSou
     public override ItemInfoType Type => ItemInfoType.CraftRecipe;
     public override string SingularName => "Craft Recipe";
     public override bool ShouldGroup => true;
-
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Crafting];
+    public override string HelpText => "Can the item be crafted via a craft recipe?";
     public override Func<ItemSource, List<MessageBase>?>? OnClick => source =>
     {
         var asSource = AsSource(source);

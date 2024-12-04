@@ -33,6 +33,7 @@ public class ItemMonsterDropSourceRenderer : ItemInfoRenderer<ItemMonsterDropSou
     public override ItemInfoType Type => ItemInfoType.Monster;
     public override string SingularName => "Monster Drop";
     public override string PluralName => "Monster Drops";
+    public override string HelpText => "Is the item dropped from monsters?";
     public override bool ShouldGroup => true;
 
     public override Action<ItemSource> DrawTooltip => source =>

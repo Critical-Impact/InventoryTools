@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using CriticalCommonLib.Models;
@@ -12,7 +13,9 @@ public class ItemCraftLeveSourceRenderer : ItemInfoRenderer<ItemCraftLeveSource>
     public override ItemInfoType Type => ItemInfoType.CraftLeve;
     public override string SingularName => "Craft Leve";
     public override string PluralName => "Craft Leves";
+    public override string HelpText => "Can the item be used in a craft leve?";
     public override bool ShouldGroup => true;
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Leve];
     public override Action<ItemSource> DrawTooltip => source =>
     {
         var asSource = AsSource(source);

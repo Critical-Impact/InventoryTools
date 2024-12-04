@@ -14,15 +14,6 @@ public class ConfigurationWizardService : IConfigurationWizardService
     {
         _configuration = configuration;
         _availableFeatures = features.ToList();
-        foreach (var feature in _availableFeatures)
-        {
-            foreach (var setting in feature.RelatedSettings)
-            {
-                setting.Name = setting.WizardName;
-                setting.HideReset = true;
-                setting.ColourModified = false;
-            }
-        }
     }
 
     /// <summary>
@@ -41,7 +32,7 @@ public class ConfigurationWizardService : IConfigurationWizardService
 
         return value;
     }
-    
+
     public List<IFeature> GetFeatures()
     {
         return _availableFeatures.ToList();
@@ -63,7 +54,7 @@ public class ConfigurationWizardService : IConfigurationWizardService
             _configuration.MarkWizardVersionSeen(version);
         }
     }
-    
+
     public bool ShouldShowWizard => HasNewFeatures && _configuration.ShowWizardNewFeatures;
     public bool ConfiguredOnce => _configuration.WizardVersionsSeen.Count != 0;
     public void ClearFeaturesSeen()

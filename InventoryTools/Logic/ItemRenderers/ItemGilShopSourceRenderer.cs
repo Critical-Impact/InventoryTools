@@ -16,6 +16,7 @@ namespace InventoryTools.Logic.ItemRenderers;
 public class ItemGilShopUseRenderer : ItemGilShopSourceRenderer
 {
     private readonly ItemSheet _itemSheet;
+    public override string HelpText => "Can the item be spent at a gil shop?";
 
     public ItemGilShopUseRenderer(ImGuiService imGuiService, MapSheet mapSheet, ItemSheet itemSheet) : base(imGuiService, mapSheet, itemSheet)
     {
@@ -42,7 +43,9 @@ public class ItemGilShopSourceRenderer : ItemInfoRenderer<ItemGilShopSource>
     public override ItemInfoType Type => ItemInfoType.GilShop;
     public override string SingularName => "Gil Shop";
     public override string PluralName => "Gil Shops";
+    public override string HelpText => "Can the item be purchased at a gil shop?";
     public override bool ShouldGroup => true;
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Shop];
 
     public override byte MaxColumns => 1;
 

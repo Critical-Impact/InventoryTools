@@ -159,8 +159,7 @@ public class ConfigurationWizard : GenericWindow
                                     foreach (var setting in _configurationWizardService.GetApplicableSettings(feature))
                                     {
                                         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
-                                        setting.LabelSize = (int)(ImGui.GetWindowContentRegionMax().X - 20);
-                                        setting.Draw(_configuration);
+                                        setting.Draw(_configuration, setting.WizardName, true, true);
                                         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
                                     }
                                 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using CriticalCommonLib.Models;
@@ -10,8 +11,10 @@ public class ItemFurnitureSourceRenderer : ItemInfoRenderer<ItemFurnitureSource>
 {
     public override RendererType RendererType => RendererType.Use;
     public override ItemInfoType Type => ItemInfoType.FurnitureItem;
-    public override string SingularName => "Interior Furnishing";
+    public override string SingularName => "Interior Furniture";
+    public override string HelpText => "Can the item be placed inside houses?";
     public override bool ShouldGroup => true;
+    public override IReadOnlyList<ItemInfoRenderCategory>? Categories => [ItemInfoRenderCategory.House];
 
     public override Action<ItemSource> DrawTooltip => source =>
     {

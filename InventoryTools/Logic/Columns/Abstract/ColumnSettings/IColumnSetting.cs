@@ -10,6 +10,6 @@ public interface IColumnSetting
     public bool ShowReset { get; set; }
         
     public bool HasValueSet(ColumnConfiguration configuration);
-    public void Draw(ColumnConfiguration configuration);
+    public void Draw(ColumnConfiguration configuration, string? helpText);
     public void ResetFilter(ColumnConfiguration configuration);
 }

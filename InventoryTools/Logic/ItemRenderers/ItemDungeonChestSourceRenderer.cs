@@ -19,7 +19,9 @@ public class ItemDungeonChestSourceRenderer : ItemInfoRenderer<ItemDungeonChestS
     public override ItemInfoType Type => ItemInfoType.DungeonChest;
     public override string SingularName => "Dungeon Chest";
     public override string PluralName => "Dungeon Chests";
+    public override string HelpText => "Can the item appear in a dungeon chest?";
     public override bool ShouldGroup => true;
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Duty];
 
     public override Action<ItemSource> DrawTooltip => source =>
     {

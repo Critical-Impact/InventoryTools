@@ -276,7 +276,7 @@ namespace InventoryTools.Logic
         {
             foreach (var column in Columns)
             {
-                var result = column.Column.DrawFooterFilter(FilterConfiguration, this);
+                var result = column.Column.DrawFooterFilter(column, this);
                 if (result != null)
                 {
                     result.HandleEvent(FilterConfiguration);

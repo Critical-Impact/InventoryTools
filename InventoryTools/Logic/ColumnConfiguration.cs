@@ -7,6 +7,7 @@ using FFXIVClientStructs.FFXIV.Common.Math;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Columns;
+using InventoryTools.Logic.Editors;
 using Newtonsoft.Json;
 
 namespace InventoryTools.Logic;
@@ -48,6 +49,8 @@ public class ColumnConfiguration
     private Dictionary<string, string>? _stringSettings;
     private Dictionary<string, uint>? _uintSettings;
     private Dictionary<string, List<ItemInfoType>>? _itemInfoTypes;
+    private Dictionary<string, List<InventorySearchScope>>? _inventorySearchScopes;
+
     [JsonIgnore]
     private IColumn _column;
 
@@ -76,6 +79,18 @@ public class ColumnConfiguration
         }
     }
 
+    public void SetSetting(string key, List<InventorySearchScope>? value)
+    {
+        if (value == null)
+        {
+            InventorySearchScopes.Remove(key);
+        }
+        else
+        {
+            InventorySearchScopes[key] = value;
+        }
+    }
+
     public void GetSetting(string key, out string? value)
     {
         value = StringSettings.ContainsKey(key) ? StringSettings[key] : null;
@@ -89,6 +104,11 @@ public class ColumnConfiguration
     public void GetSetting(string key, out List<ItemInfoType>? value)
     {
         value = ItemInfoTypes.ContainsKey(key) ? ItemInfoTypes[key] : null;
+    }
+
+    public void GetSetting(string key, out List<InventorySearchScope>? value)
+    {
+        value = InventorySearchScopes.ContainsKey(key) ? InventorySearchScopes[key] : null;
     }
 
     public void SetSetting(string key, List<ItemInfoType>? value)
@@ -292,6 +312,12 @@ public class ColumnConfiguration
     {
         get => _itemInfoTypes ??= new Dictionary<string, List<ItemInfoType>>();
         set => _itemInfoTypes = value;
+    }
+
+    public Dictionary<string, List<InventorySearchScope>> InventorySearchScopes
+    {
+        get => _inventorySearchScopes ??= new Dictionary<string, List<InventorySearchScope>>();
+        set => _inventorySearchScopes = value;
     }
 
 }

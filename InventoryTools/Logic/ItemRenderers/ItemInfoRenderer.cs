@@ -11,10 +11,12 @@ namespace InventoryTools.Logic.ItemRenderers;
 public abstract class ItemInfoRenderer<T> : IItemInfoRenderer where T : ItemSource
 {
     public Type ItemSourceType => typeof(T);
+    public virtual IReadOnlyList<ItemInfoRenderCategory>? Categories => null;
     public abstract RendererType RendererType { get; }
     public abstract ItemInfoType Type { get; }
     public abstract string SingularName { get; }
     public virtual string? PluralName => null;
+    public abstract string HelpText { get; }
     public abstract bool ShouldGroup { get; }
     public virtual Func<List<ItemSource>, List<List<ItemSource>>>? CustomGroup => null;
     public abstract Action<ItemSource> DrawTooltip { get; }

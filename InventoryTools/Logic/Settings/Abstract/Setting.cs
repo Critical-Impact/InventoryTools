@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -13,18 +14,15 @@ namespace InventoryTools.Logic.Settings.Abstract
             ImGuiService = imGuiService;
         }
         public abstract T DefaultValue { get; set; }
-        public virtual int LabelSize { get; set; } = 300;
         public virtual int InputSize { get; set; } = 300;
         public abstract T CurrentValue(InventoryToolsConfiguration configuration);
-        public abstract void Draw(InventoryToolsConfiguration configuration);
+        public abstract void Draw(InventoryToolsConfiguration configuration, string? customName, bool? disableReset,
+            bool? disableColouring);
         public abstract void UpdateFilterConfiguration(InventoryToolsConfiguration configuration, T newValue);
 
         public abstract string Key { get; set; }
         public abstract string Name { get; set; }
         public abstract string HelpText { get; set; }
-
-        public bool HideReset { get; set; } = false;
-        public bool ColourModified { get; set; } = true;
         public abstract SettingCategory SettingCategory { get; set; }
         public abstract SettingSubCategory SettingSubCategory { get; }
         public abstract string Version { get; }

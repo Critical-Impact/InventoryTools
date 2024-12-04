@@ -16,6 +16,7 @@ public class ItemDesynthSourceRenderer : ItemSupplementSourceRenderer<ItemDesynt
     }
 
     public override string SingularName => "Desynthesis";
+    public override string HelpText => "Can the item be obtained via desynthesis?";
 }
 
 public class ItemReductionSourceRenderer : ItemSupplementSourceRenderer<ItemReductionSource>
@@ -25,6 +26,7 @@ public class ItemReductionSourceRenderer : ItemSupplementSourceRenderer<ItemRedu
     }
 
     public override string SingularName => "Reduction";
+    public override string HelpText => "Can the item be obtained via reduction?";
 }
 
 public class ItemLootSourceRenderer : ItemSupplementSourceRenderer<ItemLootSource>
@@ -34,6 +36,7 @@ public class ItemLootSourceRenderer : ItemSupplementSourceRenderer<ItemLootSourc
     }
 
     public override string SingularName => "Loot";
+    public override string HelpText => "Can the item be obtained from another item(normally a chest/material container/coffer)?";
 }
 
 public class ItemGardeningSourceRenderer : ItemSupplementSourceRenderer<ItemGardeningSource>
@@ -43,6 +46,7 @@ public class ItemGardeningSourceRenderer : ItemSupplementSourceRenderer<ItemGard
     }
 
     public override string SingularName => "Gardening";
+    public override string HelpText => "Can the item be grown via gardening?";
 }
 public class ItemDesynthUseRenderer : ItemSupplementUseRenderer<ItemDesynthSource>
 {
@@ -51,6 +55,7 @@ public class ItemDesynthUseRenderer : ItemSupplementUseRenderer<ItemDesynthSourc
     }
 
     public override string SingularName => "Desynthesis";
+    public override string HelpText => "Can the item be desynthesized?";
 }
 
 public class ItemReductionUseRenderer : ItemSupplementUseRenderer<ItemReductionSource>
@@ -60,6 +65,7 @@ public class ItemReductionUseRenderer : ItemSupplementUseRenderer<ItemReductionS
     }
 
     public override string SingularName => "Reduction";
+    public override string HelpText => "Can the item be reduced?";
 }
 
 public class ItemLootUseRenderer : ItemSupplementUseRenderer<ItemLootSource>
@@ -69,6 +75,7 @@ public class ItemLootUseRenderer : ItemSupplementUseRenderer<ItemLootSource>
     }
 
     public override string SingularName => "Loot";
+    public override string HelpText => "Does this item contain other items?";
 }
 
 public class ItemGardeningUseRenderer : ItemSupplementUseRenderer<ItemGardeningSource>
@@ -78,6 +85,7 @@ public class ItemGardeningUseRenderer : ItemSupplementUseRenderer<ItemGardeningS
     }
 
     public override string SingularName => "Gardening";
+    public override string HelpText => "Can the item be used for gardening?";
 }
 
 public abstract class ItemSupplementUseRenderer<T> : ItemSupplementSourceRenderer<T> where T : ItemSupplementSource

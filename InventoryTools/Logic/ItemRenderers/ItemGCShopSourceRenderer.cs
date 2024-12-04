@@ -24,6 +24,8 @@ public class ItemGCShopUseRenderer : ItemGCShopSourceRenderer
         _itemSheet = itemSheet;
     }
 
+    public override string HelpText => "Can the item be spent at a grand company shop?";
+
     public override Action<List<ItemSource>>? DrawTooltipGrouped => sources =>
     {
         var asSources = AsSource(sources);
@@ -77,7 +79,9 @@ public class ItemGCShopSourceRenderer : ItemInfoRenderer<ItemGCShopSource>
     public override ItemInfoType Type => ItemInfoType.GCShop;
     public override string SingularName => "Grand Company Shop";
     public override string PluralName => "Grand Company Shops";
+    public override string HelpText => "Can the item be purchased at your grand company shop?";
     public override bool ShouldGroup => true;
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Shop];
 
     public override byte MaxColumns => 1;
 

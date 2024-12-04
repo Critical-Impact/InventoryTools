@@ -19,7 +19,9 @@ public class ItemDungeonBossDropSourceRenderer : ItemInfoRenderer<ItemDungeonBos
     public override ItemInfoType Type => ItemInfoType.DungeonBossDrop;
     public override string SingularName => "Dungeon Boss Drop";
     public override string PluralName => "Dungeon Boss Drops";
+    public override string HelpText => "Can the item be drop from a dungeon boss?";
     public override bool ShouldGroup => true;
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Duty];
 
     public override Action<ItemSource> DrawTooltip => source =>
     {

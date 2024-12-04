@@ -14,6 +14,7 @@ public class ItemCashShopSourceRenderer : ItemInfoRenderer<ItemCashShopSource>
     public override ItemInfoType Type => ItemInfoType.CashShop;
     public override string SingularName => "Bought on SQ Store(real money)";
     public override bool ShouldGroup => true;
+    public override string HelpText => "Can the item be purchased through the mogstation?";
 
     public override Action<ItemSource> DrawTooltip => source =>
     {

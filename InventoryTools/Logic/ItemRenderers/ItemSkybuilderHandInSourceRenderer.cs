@@ -19,6 +19,7 @@ public class ItemSkybuilderHandInSourceRenderer : ItemInfoRenderer<ItemSkybuilde
     public override RendererType RendererType => RendererType.Use;
     public override ItemInfoType Type => ItemInfoType.SkybuilderHandIn;
     public override string SingularName => "Sky Builder Hand In";
+    public override string HelpText => "Can the item be handed in at the firmament for skybuilders' scrip?";
     public override bool ShouldGroup => false;
 
     public override Action<ItemSource> DrawTooltip => source =>

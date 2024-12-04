@@ -12,6 +12,8 @@ public class ItemGlamourReadySourceRenderer : ItemInfoRenderer<ItemGlamourReadyS
     public override RendererType RendererType => RendererType.Use;
     public override ItemInfoType Type => ItemInfoType.GlamourReady;
     public override string SingularName => "Glamour Ready";
+    public override string HelpText => "Is the item part of a 'Glamour Ready' outfit?";
+
     public override bool ShouldGroup => true;
 
     public override Action<ItemSource> DrawTooltip => source =>

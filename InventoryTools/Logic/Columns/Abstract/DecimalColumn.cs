@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Services.Mediator;
@@ -64,7 +65,7 @@ namespace InventoryTools.Logic.Columns.Abstract
             {
                 if (currentValue != null)
                 {
-                    ImGui.Text($"{currentValue.Value:N2}");
+                    ImGui.Text($"{currentValue.Value.ToString("N2", CultureInfo.InvariantCulture)}");
                 }
                 else
                 {

@@ -18,6 +18,8 @@ public class ItemCompanyCraftRequirementSourceRenderer : ItemInfoRenderer<ItemCo
     public override ItemInfoType Type => ItemInfoType.FreeCompanyCraftRecipe;
     public override string SingularName => "Company Craft Ingredient";
     public override bool ShouldGroup => true;
+    public override string HelpText => "Is the item a material in a company craft recipe?";
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Crafting];
 
     public override Action<ItemSource> DrawTooltip => source =>
     {

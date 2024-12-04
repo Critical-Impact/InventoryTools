@@ -811,7 +811,7 @@ public class CraftSettingsColumn : IColumn
         ImGui.TableSetupColumn(columnConfiguration.Name ?? (RenderName ?? Name), ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
     }
 
-    public IFilterEvent? DrawFooterFilter(FilterConfiguration configuration, FilterTable filterTable)
+    public IFilterEvent? DrawFooterFilter(ColumnConfiguration columnConfiguration, FilterTable filterTable)
     {
         return null;
     }

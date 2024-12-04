@@ -35,7 +35,7 @@ namespace InventoryTools.Logic.Filters.Abstract
             {
                 var currentChoices = CurrentValue(configuration);
                 filteredChoices = choices.Where(c => FilterSearch(c.Key, c.Value, searchString) && !currentChoices.Contains(c.Key));
-                
+
             }
             else
             {
@@ -50,12 +50,12 @@ namespace InventoryTools.Logic.Filters.Abstract
             _cachedChoices = filteredChoices.ToDictionary(c => c.Key, c => c.Value);;
             return _cachedChoices;
         }
-        
+
         public abstract bool HideAlreadyPicked { get; set; }
 
         public virtual int? ResultLimit { get; } = null;
 
-        
+
         private string _searchString = "";
 
         public virtual bool FilterSearch(T itemId, string itemName, string searchString)
@@ -67,7 +67,7 @@ namespace InventoryTools.Logic.Filters.Abstract
 
             return itemName.ToParseable().PassesFilter(searchString);
         }
-    
+
         public string SearchString
         {
             get => _searchString;
@@ -80,7 +80,6 @@ namespace InventoryTools.Logic.Filters.Abstract
 
         public virtual void DrawSearchBox(FilterConfiguration configuration)
         {
-            ImGui.SetNextItemWidth(LabelSize);
             if (HasValueSet(configuration))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);
@@ -92,10 +91,17 @@ namespace InventoryTools.Logic.Filters.Abstract
                 ImGui.LabelText("##" + Key + "Label", Name + ":");
             }
 
+            ImGui.Indent();
+            using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudGrey))
+            {
+                ImGui.PushTextWrapPos();
+                ImGui.TextUnformatted(HelpText);
+                ImGui.PopTextWrapPos();
+            }
+
             var choices = GetChoices(configuration);
             var selectedChoices = CurrentValue(configuration);
             var currentSearchCategory = "";
-            ImGui.SameLine();
             ImGui.SetNextItemWidth(InputSize);
             using (var combo = ImRaii.Combo("##"+Key+"Combo", currentSearchCategory, ImGuiComboFlags.HeightLarge))
             {
@@ -145,8 +151,6 @@ namespace InventoryTools.Logic.Filters.Abstract
                     }
                 }
             }
-            ImGui.SameLine();
-            ImGuiService.HelpMarker(HelpText);
             if (HasValueSet(configuration) && ShowReset)
             {
                 ImGui.SameLine();
@@ -156,6 +160,8 @@ namespace InventoryTools.Logic.Filters.Abstract
                     _cachedChoices = null;
                 }
             }
+
+            ImGui.Unindent();
         }
 
         public virtual void DrawResults(FilterConfiguration configuration)

@@ -257,8 +257,8 @@ namespace InventoryTools.Services
         {
             _addonLifecycle.UnregisterListener(AddonEvent.PostRefresh, PostRefresh);
             _addonLifecycle.UnregisterListener(AddonEvent.PostSetup, PostSetup);
-            _addonLifecycle.UnregisterListener(AddonEvent.PreFinalize, PreFinalize);                
-            _addonLifecycle.UnregisterListener(AddonEvent.PostRequestedUpdate, PostRequestedUpdate);                
+            _addonLifecycle.UnregisterListener(AddonEvent.PreFinalize, PreFinalize);
+            _addonLifecycle.UnregisterListener(AddonEvent.PostRequestedUpdate, PostRequestedUpdate);
             _frameworkService.Update -= FrameworkOnUpdate;
             _tableService.TableRefreshed -= TableRefreshed;
             ClearOverlays();

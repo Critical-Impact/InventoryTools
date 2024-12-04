@@ -19,7 +19,7 @@ namespace InventoryTools.Logic.Settings
         }
 
         public override string Key { get; set; } = "TooltipCharacterName";
-        public override string Name { get; set; } = "Add Character Name to Owned";
+        public override string Name { get; set; } = "Affix with Character Name";
 
         public override string HelpText { get; set; } =
             "When hovering an item and you have an amount owned by a retainer, should the owner of that retainer be affixed to that item?";

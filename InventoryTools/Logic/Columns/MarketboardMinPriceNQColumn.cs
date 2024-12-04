@@ -37,7 +37,7 @@ namespace InventoryTools.Logic.Columns
         {
             ImGui.NewLine();
             ImGui.Separator();
-            MarketboardWorldSetting.Draw(columnConfiguration);
+            MarketboardWorldSetting.Draw(columnConfiguration, null);
         }
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,

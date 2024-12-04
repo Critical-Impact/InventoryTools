@@ -21,7 +21,6 @@ namespace InventoryTools.Logic.Filters.Abstract
 
         public override void Draw(FilterConfiguration configuration)
         {
-            ImGui.SetNextItemWidth(LabelSize);
             if (HasValueSet(configuration))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.HealerGreen);
@@ -33,11 +32,18 @@ namespace InventoryTools.Logic.Filters.Abstract
                 ImGui.LabelText("##" + Key + "Label", Name + ":");
             }
 
+            ImGui.Indent();
+            using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudGrey))
+            {
+                ImGui.PushTextWrapPos();
+                ImGui.TextUnformatted(HelpText);
+                ImGui.PopTextWrapPos();
+            }
+
             var choices = GetChoices(configuration);
             var activeChoice = CurrentValue(configuration);
 
             var currentSearchCategory = activeChoice != null ? GetFormattedChoice(configuration, activeChoice) : "";
-            ImGui.SameLine();
             ImGui.SetNextItemWidth(InputSize);
             using (var combo = ImRaii.Combo("##" + Key + "Combo", currentSearchCategory))
             {
@@ -67,8 +73,6 @@ namespace InventoryTools.Logic.Filters.Abstract
                 }
             }
 
-            ImGui.SameLine();
-            ImGuiService.HelpMarker(HelpText);
             if (HasValueSet(configuration) && ShowReset)
             {
                 ImGui.SameLine();
@@ -77,6 +81,7 @@ namespace InventoryTools.Logic.Filters.Abstract
                     ResetFilter(configuration);
                 }
             }
+            ImGui.Unindent();
         }
 
         protected ChoiceFilter(ILogger logger, ImGuiService imGuiService) : base(logger, imGuiService)

@@ -9,11 +9,11 @@ namespace InventoryTools.Logic.Columns
 {
     public class AcquiredColumn : CheckboxColumn
     {
-        private readonly IGameInterface _gameInterface;
+        private readonly IUnlockTrackerService _unlockTrackerService;
 
-        public AcquiredColumn(ILogger<AcquiredColumn> logger, ImGuiService imGuiService, IGameInterface gameInterface) : base(logger, imGuiService)
+        public AcquiredColumn(ILogger<AcquiredColumn> logger, ImGuiService imGuiService, IUnlockTrackerService unlockTrackerService) : base(logger, imGuiService)
         {
-            _gameInterface = gameInterface;
+            _unlockTrackerService = unlockTrackerService;
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
 
@@ -23,7 +23,7 @@ namespace InventoryTools.Logic.Columns
             if (!ActionTypeExt.IsValidAction(action)) {
                 return null;
             }
-            return _gameInterface.HasAcquired(searchResult.Item);
+            return _unlockTrackerService.IsUnlocked(searchResult.Item);
         }
 
         public override string Name { get; set; } = "Has Been Acquired?";

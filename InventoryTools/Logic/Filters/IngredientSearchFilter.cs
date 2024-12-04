@@ -141,7 +141,7 @@ public class IngredientSearchFilter : UintMultipleChoiceFilter
 
     public override Dictionary<uint, string> GetChoices(FilterConfiguration configuration)
     {
-        return _itemSheet.ToDictionary(c => c.RowId, c => c.NameString);
+        return _itemSheet.ItemsNamesById;
     }
 
     public override bool HideAlreadyPicked { get; set; } = true;

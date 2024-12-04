@@ -15,6 +15,7 @@
      {
          private readonly ItemSheet _itemSheet;
          private readonly ItemInfoCache _itemInfoCache;
+         private Dictionary<uint,string>? cachedCurrencies;
 
          public PurchasedWithCurrencyFilter(ILogger<PurchasedWithCurrencyFilter> logger, ItemSheet itemSheet, ItemInfoCache itemInfoCache, ImGuiService imGuiService) : base(logger, imGuiService)
          {
@@ -57,7 +58,8 @@
              currencies.Add(21);
              currencies.Add(22);
 
-             return currencies.ToDictionary(c => c, c => _itemSheet.GetRowOrDefault(c)?.NameString ?? "Unknown").OrderBy(c => c.Value).ToDictionary(c => c.Key, c => c.Value);
+             cachedCurrencies ??= currencies.ToDictionary(c => c, c => _itemSheet.GetRowOrDefault(c)?.NameString ?? "Unknown").OrderBy(c => c.Value).ToDictionary(c => c.Key, c => c.Value);
+             return cachedCurrencies;
          }
 
          public override bool HideAlreadyPicked { get; set; } = true;

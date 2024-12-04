@@ -48,21 +48,21 @@ namespace InventoryTools.Logic.Settings.Abstract
         private readonly Dictionary<uint, UIColor> uiColors;
 
 
-        public override void Draw(InventoryToolsConfiguration configuration)
+        public override void Draw(InventoryToolsConfiguration configuration, string? customName, bool? disableReset,
+            bool? disableColouring)
         {
             var value = CurrentValue(configuration);
-            ImGui.SetNextItemWidth(LabelSize);
-            if (ColourModified && HasValueSet(configuration))
+            if (disableColouring != true && HasValueSet(configuration))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);
-                ImGui.LabelText("##" + Key + "Label", Name);
+                ImGui.LabelText("##" + Key + "Label", customName ?? Name);
                 ImGui.PopStyleColor();
             }
             else
             {
-                ImGui.LabelText("##" + Key + "Label", Name);
+                ImGui.LabelText("##" + Key + "Label", customName ?? Name);
             }
-            ImGui.SameLine();
+            ImGui.LabelText("##" + Key + "Label", "Current Colour: ");
             var currentColour = new Vector4(255, 255, 255, 255);
             if (value != null && uiColors.ContainsKey(value.Value))
             {
@@ -71,6 +71,7 @@ namespace InventoryTools.Logic.Settings.Abstract
             if (ImGui.ColorButton("##" + Key + "CurrentVal", currentColour))
             {
             }
+            ImGui.NewLine();
 
             var index = 0;
             foreach(var uiColor in uiColors)
@@ -103,7 +104,7 @@ namespace InventoryTools.Logic.Settings.Abstract
             }
 
             ImGuiService.HelpMarker(HelpText, Image, ImageSize);
-            if (!HideReset && HasValueSet(configuration))
+            if (disableReset != true && HasValueSet(configuration))
             {
                 ImGui.SameLine();
                 if (ImGui.Button("Reset##" + Key + "Reset"))

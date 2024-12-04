@@ -15,70 +15,86 @@ namespace InventoryTools.Logic.ItemRenderers;
 
 public class ItemWoodlandExplorationVentureSourceRenderer : ItemVentureSourceRenderer<ItemWoodlandExplorationVentureSource>
 {
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.ExplorationVenture];
     public ItemWoodlandExplorationVentureSourceRenderer() : base(ItemInfoType.BotanyExplorationVenture)
     {
     }
 
     public override string SingularName => "Woodland Exploration Venture (Botany)";
+    public override string HelpText => "Can the item be returned by retainers from botany exploration ventures?";
 }
 public class ItemWatersideExplorationVentureSourceRenderer : ItemVentureSourceRenderer<ItemWatersideExplorationVentureSource>
 {
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.ExplorationVenture];
     public ItemWatersideExplorationVentureSourceRenderer() : base(ItemInfoType.FishingExplorationVenture)
     {
     }
 
     public override string SingularName => "Waterside Exploration Venture (Fishing)";
+    public override string HelpText => "Can the item be returned by retainers from fishing exploration ventures?";
 }
 public class ItemHighlandExplorationVentureSourceRenderer : ItemVentureSourceRenderer<ItemHighlandExplorationVentureSource>
 {
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.ExplorationVenture];
     public ItemHighlandExplorationVentureSourceRenderer() : base(ItemInfoType.MiningExplorationVenture)
     {
     }
 
     public override string SingularName => "Highland Exploration Venture (Mining)";
+    public override string HelpText => "Can the item be returned by retainers from mining exploration ventures?";
 }
 
 public class ItemFieldExplorationVentureSourceRenderer : ItemVentureSourceRenderer<ItemFieldExplorationVentureSource>
 {
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.ExplorationVenture];
     public ItemFieldExplorationVentureSourceRenderer() : base(ItemInfoType.CombatExplorationVenture)
     {
     }
 
     public override string SingularName => "Field Exploration Venture (Combat)";
+    public override string HelpText => "Can the item be returned by retainers from combat exploration ventures?";
 }
 
 public class ItemBotanistVentureSourceRenderer : ItemVentureSourceRenderer<ItemBotanistVentureSource>
 {
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Venture];
     public ItemBotanistVentureSourceRenderer() : base(ItemInfoType.BotanyVenture)
     {
     }
 
     public override string SingularName => "Venture (Botany)";
+    public override string HelpText => "Can the item be returned by retainers from botany ventures?";
 }
 public class ItemFishingVentureSourceRenderer : ItemVentureSourceRenderer<ItemFishingVentureSource>
 {
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Venture];
     public ItemFishingVentureSourceRenderer() : base(ItemInfoType.FishingVenture)
     {
     }
 
     public override string SingularName => "Venture (Fishing)";
+    public override string HelpText => "Can the item be returned by retainers from fishing ventures?";
 }
 public class ItemMiningVentureSourceRenderer : ItemVentureSourceRenderer<ItemMiningVentureSource>
 {
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Venture];
     public ItemMiningVentureSourceRenderer() : base(ItemInfoType.MiningVenture)
     {
     }
 
     public override string SingularName => "Venture (Mining)";
+    public override string HelpText => "Can the item be returned by retainers from mining ventures?";
 }
 
 public class ItemHuntingVentureSourceRenderer : ItemVentureSourceRenderer<ItemHuntingVentureSource>
 {
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Venture];
     public ItemHuntingVentureSourceRenderer() : base(ItemInfoType.CombatVenture)
     {
     }
 
     public override string SingularName => "Venture (Combat)";
+    public override string HelpText => "Can the item be returned by retainers from combat ventures?";
 }
 
 public abstract class ItemVentureSourceRenderer<T> : ItemInfoRenderer<T> where T : ItemVentureSource
@@ -92,6 +108,7 @@ public abstract class ItemVentureSourceRenderer<T> : ItemInfoRenderer<T> where T
     public override RendererType RendererType => RendererType.Source;
     public override ItemInfoType Type => _itemInfoType;
     public override bool ShouldGroup => true;
+
     public override Action<ItemSource> DrawTooltip => source =>
     {
         var asSource = AsSource(source);

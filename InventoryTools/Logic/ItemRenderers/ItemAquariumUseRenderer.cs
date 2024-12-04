@@ -14,6 +14,7 @@ public class ItemAquariumUseRenderer : ItemInfoRenderer<ItemAquariumSource>
     public override ItemInfoType Type => ItemInfoType.Aquarium;
     public override string SingularName => "Aquarium";
     public override string PluralName => "Aquariums";
+    public override string HelpText => "Can the item be placed in aquariums?";
     public override bool ShouldGroup => false;
 
     public override Action<ItemSource> DrawTooltip => source =>

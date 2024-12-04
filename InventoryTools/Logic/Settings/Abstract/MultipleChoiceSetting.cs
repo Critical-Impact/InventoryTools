@@ -17,33 +17,33 @@ public abstract class MultipleChoiceSetting<T> : Setting<List<T>> where T:notnul
     public MultipleChoiceSetting(ILogger logger, ImGuiService imGuiService) : base(logger, imGuiService)
     {
     }
-    public override void Draw(InventoryToolsConfiguration configuration)
+    public override void Draw(InventoryToolsConfiguration configuration, string? customName, bool? disableReset,
+        bool? disableColouring)
     {
         var currentX = ImGui.GetCursorPosX();
         currentX += ImGui.GetFontSize() + ImGui.GetStyle().FramePadding.X * 2.0f + ImGui.GetStyle().ItemInnerSpacing.X;
-        DrawSearchBox(configuration, currentX);
-        DrawResults(configuration, currentX);
+        DrawSearchBox(configuration, customName, disableReset, disableColouring, currentX);
+        DrawResults(configuration, customName, disableReset, disableColouring, currentX);
     }
-    
-    public virtual void DrawSearchBox(InventoryToolsConfiguration configuration, float currentX)
+
+    public virtual void DrawSearchBox(InventoryToolsConfiguration configuration, string? customName, bool? disableReset,
+        bool? disableColouring, float currentX)
     {
-        ImGui.SetNextItemWidth(LabelSize);
-        if (ColourModified && HasValueSet(configuration))
+        if (disableColouring != true && HasValueSet(configuration))
         {
             ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);
-            ImGui.LabelText("##" + Key + "Label", Name);
+            ImGui.LabelText("##" + Key + "Label", customName ?? Name);
             ImGui.PopStyleColor();
         }
         else
         {
-            ImGui.LabelText("##" + Key + "Label", Name);
+            ImGui.LabelText("##" + Key + "Label", customName ?? Name);
         }
 
         var choices = GetChoices(configuration);
         var selectedChoices = CurrentValue(configuration);
-        var currentSearchCategory = "";
         ImGui.SetNextItemWidth(InputSize);
-        using (var combo = ImRaii.Combo("##"+Key+"Combo", currentSearchCategory, ImGuiComboFlags.HeightLarge))
+        using (var combo = ImRaii.Combo("##"+Key+"Combo", GetPreviewValue(selectedChoices), ImGuiComboFlags.HeightLarge))
         {
             if (combo.Success)
             {
@@ -79,9 +79,15 @@ public abstract class MultipleChoiceSetting<T> : Setting<List<T>> where T:notnul
                         }
 
                         if (ImGui.Selectable(item.Value.Replace("\u0002\u001F\u0001\u0003", "-"),
-                                currentSearchCategory == item.Value))
+                                selectedChoices.Contains(item.Key)))
                         {
-                            if (!selectedChoices.Contains(item.Key))
+                            if (selectedChoices.Contains(item.Key))
+                            {
+                                selectedChoices.Remove(item.Key);
+                                UpdateFilterConfiguration(configuration, selectedChoices);
+                                _cachedChoices = null;
+                            }
+                            else
                             {
                                 selectedChoices.Add(item.Key);
                                 UpdateFilterConfiguration(configuration, selectedChoices);
@@ -94,7 +100,7 @@ public abstract class MultipleChoiceSetting<T> : Setting<List<T>> where T:notnul
         }
         ImGui.SameLine();
         ImGuiService.HelpMarker(HelpText, Image, ImageSize);
-        if (!HideReset && HasValueSet(configuration))
+        if (disableReset != true && HasValueSet(configuration))
         {
             ImGui.SameLine();
             if (ImGui.Button("Reset##" + Key + "Reset"))
@@ -104,7 +110,8 @@ public abstract class MultipleChoiceSetting<T> : Setting<List<T>> where T:notnul
         }
     }
 
-    public virtual void DrawResults(InventoryToolsConfiguration configuration, float currentX)
+    public virtual void DrawResults(InventoryToolsConfiguration configuration, string? customName, bool? disableReset,
+        bool? disableColouring, float currentX)
     {
         var choices = GetChoices(configuration);
         var selectedChoices = CurrentValue(configuration);
@@ -135,7 +142,7 @@ public abstract class MultipleChoiceSetting<T> : Setting<List<T>> where T:notnul
             }
         }
     }
-    
+
     public abstract Dictionary<T, string> GetChoices(InventoryToolsConfiguration configuration);
 
     private Dictionary<T, string>? _cachedChoices;
@@ -152,7 +159,7 @@ public abstract class MultipleChoiceSetting<T> : Setting<List<T>> where T:notnul
         {
             var currentChoices = CurrentValue(configuration);
             filteredChoices = choices.Where(c => FilterSearch(c.Key, c.Value, searchString) && !currentChoices.Contains(c.Key));
-                
+
         }
         else
         {
@@ -167,12 +174,17 @@ public abstract class MultipleChoiceSetting<T> : Setting<List<T>> where T:notnul
         _cachedChoices = filteredChoices.ToDictionary(c => c.Key, c => c.Value);;
         return _cachedChoices;
     }
-    
+
     public abstract bool HideAlreadyPicked { get; set; }
+
+    public virtual string GetPreviewValue(List<T> items)
+    {
+        return items.Count == 0 ? "No items selected" : $"{items.Count} items selected";
+    }
 
     public virtual int? ResultLimit { get; } = null;
 
-        
+
     private string _searchString = "";
 
     public virtual bool FilterSearch(T itemId, string itemName, string searchString)
@@ -184,7 +196,7 @@ public abstract class MultipleChoiceSetting<T> : Setting<List<T>> where T:notnul
 
         return itemName.ToParseable().PassesFilter(searchString);
     }
-    
+
     public string SearchString
     {
         get => _searchString;
@@ -194,7 +206,7 @@ public abstract class MultipleChoiceSetting<T> : Setting<List<T>> where T:notnul
             _cachedChoices = null;
         }
     }
-    
+
     public override bool HasValueSet(InventoryToolsConfiguration configuration)
     {
         var currentValue = CurrentValue(configuration).Distinct().ToHashSet();

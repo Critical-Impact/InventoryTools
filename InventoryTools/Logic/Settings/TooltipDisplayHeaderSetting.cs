@@ -18,7 +18,7 @@ public class TooltipDisplayHeaderSetting : BooleanSetting
     }
 
     public override string Key { get; set; } = "TooltipDisplayHeader";
-    public override string Name { get; set; } = "Display Plugin Name";
+    public override string Name { get; set; } = "Add Plugin Name";
 
     public override string HelpText { get; set; } =
         "Should [Allagan Tools] be displayed in the tooltip above any tooltip modifications?";

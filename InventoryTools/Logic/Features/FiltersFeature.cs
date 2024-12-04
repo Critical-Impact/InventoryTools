@@ -1,7 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using Autofac;
 using CriticalCommonLib.Models;
 using InventoryTools.Logic.Filters;
+using InventoryTools.Logic.ItemRenderers;
 using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
@@ -130,13 +133,13 @@ public class SampleFilter2Setting : BooleanSetting, ISampleFilterSetting
 public class SampleFilter3Setting : BooleanSetting, ISampleFilterSetting
 {
     private readonly IListService _listService;
+    private readonly Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter> _hasSourceCategoryFactory;
 
-    public SampleFilter3Setting(ILogger<SampleFilter3Setting> logger, ImGuiService imGuiService, IListService listService, CanBeGatheredFilter canBeGatheredFilter) : base(logger, imGuiService)
+    public SampleFilter3Setting(ILogger<SampleFilter3Setting> logger, ImGuiService imGuiService, IListService listService, Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter> hasSourceCategoryFactory) : base(logger, imGuiService)
     {
         _listService = listService;
-        _canBeGatheredFilter = canBeGatheredFilter;
+        _hasSourceCategoryFactory = hasSourceCategoryFactory;
     }
-    private readonly CanBeGatheredFilter _canBeGatheredFilter;
     private bool _shouldAdd;
     public override bool DefaultValue { get; set; }
     public override bool CurrentValue(InventoryToolsConfiguration configuration)
@@ -164,7 +167,7 @@ public class SampleFilter3Setting : BooleanSetting, ISampleFilterSetting
         sampleFilter.DestinationCategories =  new HashSet<InventoryCategory>() {InventoryCategory.RetainerBags};
         sampleFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
         sampleFilter.HighlightWhen = "Always";
-        var gatherFilter = _canBeGatheredFilter;
+        var gatherFilter = _hasSourceCategoryFactory.Invoke(ItemInfoRenderCategory.Gathering);
         gatherFilter.UpdateFilterConfiguration(sampleFilter, true);
         _listService.AddDefaultColumns(sampleFilter);
         _listService.AddList(sampleFilter);

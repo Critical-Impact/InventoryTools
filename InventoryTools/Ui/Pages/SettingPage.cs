@@ -7,6 +7,7 @@ using InventoryTools.Extensions;
 using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
+using OtterGui.Raii;
 
 namespace InventoryTools.Ui.Pages
 {
@@ -57,7 +58,7 @@ namespace InventoryTools.Ui.Pages
                     {
                         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
                         var setting = groupedSettings.Value[index];
-                        setting.Draw(_configuration);
+                        setting.Draw(_configuration, null, null, null);
                         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
                     }
                 }

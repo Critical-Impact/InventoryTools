@@ -24,7 +24,9 @@ public class ItemSpearfishingSourceRenderer : ItemInfoRenderer<ItemSpearfishingS
     public override RendererType RendererType => RendererType.Source;
     public override ItemInfoType Type => ItemInfoType.Spearfishing;
     public override string SingularName => "Spearfishing";
+    public override string HelpText => "Can the item be gathered via spearfishing?";
     public override bool ShouldGroup => true;
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Fishing];
 
     public override Action<List<ItemSource>>? DrawTooltipGrouped => sources =>
     {

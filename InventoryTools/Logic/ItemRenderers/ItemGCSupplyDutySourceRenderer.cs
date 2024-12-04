@@ -11,6 +11,7 @@ public class ItemGcSupplyDutySourceRenderer : ItemInfoRenderer<ItemGCSupplyDutyS
     public override RendererType RendererType => RendererType.Use;
     public override ItemInfoType Type => ItemInfoType.GCDailySupply;
     public override string SingularName => "Grand Company Supply & Provisioning";
+    public override string HelpText => "Can the item be handed in for 'Supply & Provisioning' at your grand company?";
     public override bool ShouldGroup => true;
 
     public override Action<ItemSource> DrawTooltip => source =>

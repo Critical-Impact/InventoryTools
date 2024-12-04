@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
@@ -13,6 +14,8 @@ namespace InventoryTools.Logic.ItemRenderers;
 
 public class ItemMiningSourceRenderer : ItemGatheringSourceRenderer<ItemMiningSource>
 {
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Mining];
+    public override string HelpText => "Can the item be gathered from a regular mining node?";
     public ItemMiningSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.Mining)
     {
     }
@@ -22,6 +25,8 @@ public class ItemMiningSourceRenderer : ItemGatheringSourceRenderer<ItemMiningSo
 
 public class ItemQuarryingSourceRenderer : ItemGatheringSourceRenderer<ItemQuarryingSource>
 {
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Mining];
+    public override string HelpText => "Can the item be gathered from a regular quarrying node?";
     public ItemQuarryingSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.Quarrying)
     {
     }
@@ -31,6 +36,8 @@ public class ItemQuarryingSourceRenderer : ItemGatheringSourceRenderer<ItemQuarr
 
 public class ItemLoggingSourceRenderer : ItemGatheringSourceRenderer<ItemLoggingSource>
 {
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Botany];
+    public override string HelpText => "Can the item be gathered from a regular logging node?";
     public ItemLoggingSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.Logging)
     {
     }
@@ -40,6 +47,9 @@ public class ItemLoggingSourceRenderer : ItemGatheringSourceRenderer<ItemLogging
 
 public class ItemHarvestingSourceRenderer : ItemGatheringSourceRenderer<ItemHarvestingSource>
 {
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Botany];
+    public override string HelpText => "Can the item be gathered from a regular harvesting node?";
+
     public ItemHarvestingSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.Harvesting)
     {
     }
@@ -49,6 +59,9 @@ public class ItemHarvestingSourceRenderer : ItemGatheringSourceRenderer<ItemHarv
 
 public class ItemHiddenMiningSourceRenderer : ItemGatheringSourceRenderer<ItemHiddenMiningSource>
 {
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Mining, ItemInfoRenderCategory.HiddenGathering];
+    public override string HelpText => "Can the item be gathered from a hidden mining node?";
+
     public ItemHiddenMiningSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.HiddenMining)
     {
     }
@@ -58,6 +71,9 @@ public class ItemHiddenMiningSourceRenderer : ItemGatheringSourceRenderer<ItemHi
 
 public class ItemHiddenQuarryingSourceRenderer : ItemGatheringSourceRenderer<ItemHiddenQuarryingSource>
 {
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Mining, ItemInfoRenderCategory.HiddenGathering];
+    public override string HelpText => "Can the item be gathered from a hidden quarrying node?";
+
     public ItemHiddenQuarryingSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.HiddenQuarrying)
     {
     }
@@ -67,6 +83,9 @@ public class ItemHiddenQuarryingSourceRenderer : ItemGatheringSourceRenderer<Ite
 
 public class ItemHiddenLoggingSourceRenderer : ItemGatheringSourceRenderer<ItemHiddenLoggingSource>
 {
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Botany, ItemInfoRenderCategory.HiddenGathering];
+    public override string HelpText => "Can the item be gathered from a hidden logging node?";
+
     public ItemHiddenLoggingSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.HiddenLogging)
     {
     }
@@ -76,6 +95,9 @@ public class ItemHiddenLoggingSourceRenderer : ItemGatheringSourceRenderer<ItemH
 
 public class ItemHiddenHarvestingSourceRenderer : ItemGatheringSourceRenderer<ItemHiddenHarvestingSource>
 {
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Botany, ItemInfoRenderCategory.HiddenGathering];
+    public override string HelpText => "Can the item be gathered from a hidden harvesting node?";
+
     public ItemHiddenHarvestingSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.HiddenHarvesting)
     {
     }
@@ -85,6 +107,9 @@ public class ItemHiddenHarvestingSourceRenderer : ItemGatheringSourceRenderer<It
 
 public class ItemTimedMiningSourceRenderer : ItemGatheringSourceRenderer<ItemTimedMiningSource>
 {
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Mining, ItemInfoRenderCategory.TimedGathering];
+    public override string HelpText => "Can the item be gathered from a timed mining node?";
+
     public ItemTimedMiningSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.TimedMining)
     {
     }
@@ -94,6 +119,9 @@ public class ItemTimedMiningSourceRenderer : ItemGatheringSourceRenderer<ItemTim
 
 public class ItemTimedQuarryingSourceRenderer : ItemGatheringSourceRenderer<ItemTimedQuarryingSource>
 {
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Mining, ItemInfoRenderCategory.TimedGathering];
+    public override string HelpText => "Can the item be gathered from a timed quarrying node?";
+
     public ItemTimedQuarryingSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.TimedQuarrying)
     {
     }
@@ -103,6 +131,9 @@ public class ItemTimedQuarryingSourceRenderer : ItemGatheringSourceRenderer<Item
 
 public class ItemTimedLoggingSourceRenderer : ItemGatheringSourceRenderer<ItemTimedLoggingSource>
 {
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Botany, ItemInfoRenderCategory.TimedGathering];
+    public override string HelpText => "Can the item be gathered from a timed logging node?";
+
     public ItemTimedLoggingSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.TimedLogging)
     {
     }
@@ -112,6 +143,9 @@ public class ItemTimedLoggingSourceRenderer : ItemGatheringSourceRenderer<ItemTi
 
 public class ItemTimedHarvestingSourceRenderer : ItemGatheringSourceRenderer<ItemTimedHarvestingSource>
 {
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Botany, ItemInfoRenderCategory.TimedGathering];
+    public override string HelpText => "Can the item be gathered from a timed harvesting node?";
+
     public ItemTimedHarvestingSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.TimedHarvesting)
     {
     }
@@ -121,6 +155,9 @@ public class ItemTimedHarvestingSourceRenderer : ItemGatheringSourceRenderer<Ite
 
 public class ItemEphemeralMiningSourceRenderer : ItemGatheringSourceRenderer<ItemEphemeralMiningSource>
 {
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Mining, ItemInfoRenderCategory.EphemeralGathering];
+    public override string HelpText => "Can the item be gathered from a ephemeral mining node?";
+
     public ItemEphemeralMiningSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.EphemeralMining)
     {
     }
@@ -130,6 +167,8 @@ public class ItemEphemeralMiningSourceRenderer : ItemGatheringSourceRenderer<Ite
 
 public class ItemEphemeralQuarryingSourceRenderer : ItemGatheringSourceRenderer<ItemEphemeralQuarryingSource>
 {
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Mining, ItemInfoRenderCategory.EphemeralGathering];
+    public override string HelpText => "Can the item be gathered from a ephemeral quarrying node?";
     public ItemEphemeralQuarryingSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.EphemeralQuarrying)
     {
     }
@@ -139,6 +178,8 @@ public class ItemEphemeralQuarryingSourceRenderer : ItemGatheringSourceRenderer<
 
 public class ItemEphemeralLoggingSourceRenderer : ItemGatheringSourceRenderer<ItemEphemeralLoggingSource>
 {
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Botany, ItemInfoRenderCategory.EphemeralGathering];
+    public override string HelpText => "Can the item be gathered from a ephemeral logging node?";
     public ItemEphemeralLoggingSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.EphemeralLogging)
     {
     }
@@ -148,6 +189,9 @@ public class ItemEphemeralLoggingSourceRenderer : ItemGatheringSourceRenderer<It
 
 public class ItemEphemeralHarvestingSourceRenderer : ItemGatheringSourceRenderer<ItemEphemeralHarvestingSource>
 {
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.EphemeralGathering];
+    public override string HelpText => "Can the item be gathered from a ephemeral harvesting node?";
+
     public ItemEphemeralHarvestingSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.EphemeralHarvesting)
     {
     }
@@ -171,6 +215,7 @@ public abstract class ItemGatheringSourceRenderer<T> : ItemInfoRenderer<T> where
     public override RendererType RendererType => RendererType.Source;
     public override ItemInfoType Type => _type;
     public override bool ShouldGroup => true;
+
     public override Action<ItemSource> DrawTooltip => source =>
     {
         var asSource = (ItemGatheringSource)source;

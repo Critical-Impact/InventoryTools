@@ -43,7 +43,7 @@ public class StainColumn : TextColumn
     {
         ImGui.NewLine();
         ImGui.Separator();
-        _stainColumnSetting.Draw(columnConfiguration);
+        _stainColumnSetting.Draw(columnConfiguration, null);
         base.DrawEditor(columnConfiguration, configuration);
     }
 

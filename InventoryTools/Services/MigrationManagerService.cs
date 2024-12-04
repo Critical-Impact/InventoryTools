@@ -5,12 +5,15 @@ using System.Linq;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
+using AllaganLib.GameSheets.Caches;
+using Autofac;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Colors;
 using Dalamud.Plugin;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Filters;
+using InventoryTools.Logic.ItemRenderers;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,16 +29,18 @@ public class MigrationManagerService : IHostedService
     private readonly IMarketCache _marketCache;
     private readonly IFilterService _filterService;
     private readonly IServiceProvider _serviceProvider;
+    private readonly IComponentContext _componentContext;
     private readonly IListService _listService;
     private readonly IDalamudPluginInterface _pluginInterfaceService;
 
-    public MigrationManagerService(ILogger<MigrationManagerService> logger, InventoryToolsConfiguration configuration, IMarketCache marketCache, IFilterService filterService, IServiceProvider serviceProvider, IListService listService, IDalamudPluginInterface pluginInterfaceService)
+    public MigrationManagerService(ILogger<MigrationManagerService> logger, InventoryToolsConfiguration configuration, IMarketCache marketCache, IFilterService filterService, IServiceProvider serviceProvider, IComponentContext componentContext, IListService listService, IDalamudPluginInterface pluginInterfaceService)
     {
         _logger = logger;
         _configuration = configuration;
         _marketCache = marketCache;
         _filterService = filterService;
         _serviceProvider = serviceProvider;
+        _componentContext = componentContext;
         _listService = listService;
         _pluginInterfaceService = pluginInterfaceService;
     }
@@ -111,10 +116,8 @@ public class MigrationManagerService : IHostedService
                 _serviceProvider.GetRequiredService<SpiritBondFilter>().UpdateFilterConfiguration(filterConfig, filterConfig.Spiritbond);
                 _serviceProvider.GetRequiredService<SellToVendorPriceFilter>().UpdateFilterConfiguration(filterConfig, filterConfig.ShopSellingPrice);
                 _serviceProvider.GetRequiredService<BuyFromVendorPriceFilter>().UpdateFilterConfiguration(filterConfig, filterConfig.ShopBuyingPrice);
-                _serviceProvider.GetRequiredService<CanBePurchasedFilter>().UpdateFilterConfiguration(filterConfig, filterConfig.CanBeBought);
                 _serviceProvider.GetRequiredService<MarketBoardPriceFilter>().UpdateFilterConfiguration(filterConfig, filterConfig.MarketAveragePrice);
                 _serviceProvider.GetRequiredService<MarketBoardTotalPriceFilter>().UpdateFilterConfiguration(filterConfig, filterConfig.MarketTotalAveragePrice);
-                _serviceProvider.GetRequiredService<IsTimedNodeFilter>().UpdateFilterConfiguration(filterConfig, filterConfig.IsAvailableAtTimedNode);
                 _serviceProvider.GetRequiredService<ItemUiCategoryFilter>().UpdateFilterConfiguration(filterConfig, filterConfig.ItemUiCategoryId);
                 _serviceProvider.GetRequiredService<SearchCategoryFilter>().UpdateFilterConfiguration(filterConfig, filterConfig.ItemSearchCategoryId);
             }
@@ -296,6 +299,38 @@ public class MigrationManagerService : IHostedService
             AddStain2ToInventories();
 
             config.InternalVersion++;
+        }
+
+        if (config.InternalVersion == 18)
+        {
+            _logger.LogInformation("Migrating to version 19");
+
+            foreach (var filterConfig in config.FilterConfigurations)
+            {
+                _componentContext.Resolve<GenericHasUseFilter>(new NamedParameter("itemType", ItemInfoType.Desynthesis)).UpdateFilterConfiguration(filterConfig, filterConfig.GetBooleanFilter("desynth"));
+                _componentContext.Resolve<GenericHasUseFilter>(new NamedParameter("itemType", ItemInfoType.Stain)).UpdateFilterConfiguration(filterConfig, filterConfig.GetBooleanFilter("CanBeDyed"));
+                _componentContext.Resolve<GenericHasUseFilter>(new NamedParameter("itemType", ItemInfoType.Aquarium)).UpdateFilterConfiguration(filterConfig, filterConfig.GetBooleanFilter("IsAquarium"));
+                _componentContext.Resolve<GenericHasUseFilter>(new NamedParameter("itemType", ItemInfoType.Armoire)).UpdateFilterConfiguration(filterConfig, filterConfig.GetBooleanFilter("IsArmoire"));
+                _componentContext.Resolve<GenericHasUseFilter>(new NamedParameter("itemType", ItemInfoType.SpecialShop)).UpdateFilterConfiguration(filterConfig, filterConfig.GetBooleanFilter("IsCurrency"));
+                _componentContext.Resolve<GenericHasUseFilter>(new NamedParameter("itemType", ItemInfoType.CustomDelivery)).UpdateFilterConfiguration(filterConfig, filterConfig.GetBooleanFilter("IsCustomDeliveryItem"));
+                _componentContext.Resolve<GenericHasUseFilter>(new NamedParameter("itemType", ItemInfoType.GCDailySupply)).UpdateFilterConfiguration(filterConfig, filterConfig.GetBooleanFilter("IsGCSupplyItem"));
+                _componentContext.Resolve<GenericHasUseFilter>(new NamedParameter("itemType", ItemInfoType.SkybuilderHandIn)).UpdateFilterConfiguration(filterConfig, filterConfig.GetBooleanFilter("IsIshgardCraft"));
+                _componentContext.Resolve<GenericHasSourceFilter>(new NamedParameter("itemType", ItemInfoType.GilShop)).UpdateFilterConfiguration(filterConfig, filterConfig.GetBooleanFilter("Purchasable"));
+                _componentContext.Resolve<GenericHasSourceFilter>(new NamedParameter("itemType", ItemInfoType.CraftRecipe)).UpdateFilterConfiguration(filterConfig, filterConfig.GetBooleanFilter("CanCraft"));
+                _componentContext.Resolve<GenericHasSourceFilter>(new NamedParameter("itemType", ItemInfoType.CalamitySalvagerShop)).UpdateFilterConfiguration(filterConfig, filterConfig.GetBooleanFilter("FromCalamitySalvager"));
+                _componentContext.Resolve<GenericHasSourceFilter>(new NamedParameter("itemType", ItemInfoType.Fate)).UpdateFilterConfiguration(filterConfig, filterConfig.GetBooleanFilter("IsFromFate"));
+                _componentContext.Resolve<GenericHasSourceFilter>(new NamedParameter("itemType", ItemInfoType.Monster)).UpdateFilterConfiguration(filterConfig, filterConfig.GetBooleanFilter("IsMobDrop"));
+                _componentContext.Resolve<GenericHasSourceFilter>(new NamedParameter("itemType", ItemInfoType.CraftLeve)).UpdateFilterConfiguration(filterConfig, filterConfig.GetBooleanFilter("LeveIsCraftLeve"));
+                _componentContext.Resolve<GenericHasSourceFilter>(new NamedParameter("itemType", ItemInfoType.CashShop)).UpdateFilterConfiguration(filterConfig, filterConfig.GetBooleanFilter("StoreFilter"));
+                _componentContext.Resolve<GenericHasSourceCategoryFilter>(new NamedParameter("renderCategory", ItemInfoRenderCategory.Gathering)).UpdateFilterConfiguration(filterConfig, filterConfig.GetBooleanFilter("Gatherable"));
+                _componentContext.Resolve<GenericHasSourceCategoryFilter>(new NamedParameter("renderCategory", ItemInfoRenderCategory.EphemeralGathering)).UpdateFilterConfiguration(filterConfig, filterConfig.GetBooleanFilter("EphemeralNode"));
+                _componentContext.Resolve<GenericHasSourceCategoryFilter>(new NamedParameter("renderCategory", ItemInfoRenderCategory.HiddenGathering)).UpdateFilterConfiguration(filterConfig, filterConfig.GetBooleanFilter("HiddenNode"));
+                _componentContext.Resolve<GenericHasSourceCategoryFilter>(new NamedParameter("renderCategory", ItemInfoRenderCategory.TimedGathering)).UpdateFilterConfiguration(filterConfig, filterConfig.GetBooleanFilter("TimedNode"));
+                _componentContext.Resolve<GenericHasUseCategoryFilter>(new NamedParameter("renderCategory", ItemInfoRenderCategory.Crafting)).UpdateFilterConfiguration(filterConfig, filterConfig.GetBooleanFilter("IsCrafting"));
+                _componentContext.Resolve<GenericHasUseCategoryFilter>(new NamedParameter("renderCategory", ItemInfoRenderCategory.House)).UpdateFilterConfiguration(filterConfig, filterConfig.GetBooleanFilter("IsHousing"));
+            }
+            config.InternalVersion++;
+
         }
     }
 

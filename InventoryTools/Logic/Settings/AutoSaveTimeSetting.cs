@@ -25,13 +25,13 @@ namespace InventoryTools.Logic.Settings
             _pluginLogic.ClearAutoSave();
         }
 
-        public override void Draw(InventoryToolsConfiguration configuration)
+        public override void Draw(InventoryToolsConfiguration configuration, string? customName, bool? disableReset,
+            bool? disableColouring)
         {
-            base.Draw(configuration);
+            base.Draw(configuration, null, null, null);
             var currentX = ImGui.GetCursorPosX();
             currentX += ImGui.GetFontSize() + ImGui.GetStyle().FramePadding.X * 3.0f + ImGui.GetStyle().ItemInnerSpacing.X;
             ImGui.SetCursorPosX(currentX);
-            ImGui.SetNextItemWidth(LabelSize);
             ImGui.LabelText("##NextAutoSave","Next Autosave: " + (_pluginLogic.NextSaveTime?.ToString() ?? "N/A"));
         }
 

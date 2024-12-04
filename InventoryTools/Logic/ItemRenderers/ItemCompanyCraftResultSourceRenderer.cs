@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Sheets;
@@ -21,7 +22,8 @@ public class ItemCompanyCraftResultSourceRenderer : ItemInfoRenderer<ItemCompany
     public override ItemInfoType Type => ItemInfoType.FreeCompanyCraftRecipe;
     public override string SingularName => "Company Craft";
     public override bool ShouldGroup => true;
-
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Crafting];
+    public override string HelpText => "Is the item crafted at the company workshop as a company craft recipe?";
     public override Action<ItemSource> DrawTooltip => source =>
     {
         var asSource = AsSource(source);

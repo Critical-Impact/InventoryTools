@@ -53,6 +53,62 @@ public class ItemInfoRenderService
         #endif
     }
 
+    public string GetCategoryName(ItemInfoRenderCategory renderCategory)
+    {
+        switch (renderCategory)
+        {
+            case ItemInfoRenderCategory.Gathering:
+                return "Gathering";
+            case ItemInfoRenderCategory.Mining:
+                return "Mining";
+            case ItemInfoRenderCategory.Botany:
+                return "Botany";
+            case ItemInfoRenderCategory.EphemeralGathering:
+                return "Gathering (Ephemeral)";
+            case ItemInfoRenderCategory.TimedGathering:
+                return "Gathering (Timed)";
+            case ItemInfoRenderCategory.HiddenGathering:
+                return "Gathering (Hidden)";
+            case ItemInfoRenderCategory.Fishing:
+                return "Fishing";
+            case ItemInfoRenderCategory.Venture:
+                return "Venture";
+            case ItemInfoRenderCategory.ExplorationVenture:
+                return "Venture (Exploration)";
+            case ItemInfoRenderCategory.Crafting:
+                return "Crafting";
+            case ItemInfoRenderCategory.Leve:
+                return "Leves";
+            case ItemInfoRenderCategory.Duty:
+                return "Duties";
+            case ItemInfoRenderCategory.Shop:
+                return "Shops";
+            case ItemInfoRenderCategory.House:
+                return "Housing";
+        }
+
+        return renderCategory.ToString().Titleize();
+    }
+
+    public bool HasSourceRenderer(ItemInfoType itemInfoType)
+    {
+        return _sourceRenderersByItemInfoType.ContainsKey(itemInfoType);
+    }
+    public bool HasUseRenderer(ItemInfoType itemInfoType)
+    {
+        return _useRenderersByItemInfoType.ContainsKey(itemInfoType);
+    }
+
+    public List<IItemInfoRenderer> GetSourcesByCategory(ItemInfoRenderCategory renderCategory)
+    {
+        return _sourceRenderers.Where(c => c.Value.Categories?.Contains(renderCategory) ?? false).Select(c => c.Value).ToList();
+    }
+
+    public List<IItemInfoRenderer> GetUsesByCategory(ItemInfoRenderCategory renderCategory)
+    {
+        return _useRenderers.Where(c => c.Value.Categories?.Contains(renderCategory) ?? false).Select(c => c.Value).ToList();
+    }
+
     public (string Singular, string? Plural) GetSourceTypeName(ItemInfoType type)
     {
         if (_sourceRenderersByItemInfoType.TryGetValue(type, out var renderer))
@@ -61,6 +117,16 @@ public class ItemInfoRenderService
         }
 
         return (type.ToString(), null);
+    }
+
+    public string GetSourceHelpText(ItemInfoType type)
+    {
+        if (_sourceRenderersByItemInfoType.TryGetValue(type, out var renderer))
+        {
+            return renderer.HelpText;
+        }
+
+        return "Can this item be sourced via " + type.ToString();
     }
 
     public (string Singular, string? Plural) GetSourceTypeName(Type type)
@@ -82,6 +148,17 @@ public class ItemInfoRenderService
 
         return (type.ToString(), null);
     }
+
+    public string GetUseHelpText(ItemInfoType type)
+    {
+        if (_useRenderersByItemInfoType.TryGetValue(type, out var renderer))
+        {
+            return renderer.HelpText;
+        }
+
+        return "Can this item be used for " + type.ToString();
+    }
+
 
     public (string Singular, string? Plural) GetUseTypeName(Type type)
     {

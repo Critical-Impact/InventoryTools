@@ -26,6 +26,8 @@ public class ItemCraftRequirementSourceRenderer : ItemInfoRenderer<ItemCraftRequ
     public override ItemInfoType Type => ItemInfoType.CraftRecipe;
     public override string SingularName => "Craft Ingredient";
     public override bool ShouldGroup => true;
+    public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Crafting];
+    public override string HelpText => "Can the item be used as a material in a craft recipe?";
 
     public override Func<List<ItemSource>, List<List<ItemSource>>>? CustomGroup => sources =>
     {

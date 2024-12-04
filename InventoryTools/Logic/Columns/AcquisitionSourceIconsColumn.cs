@@ -42,7 +42,7 @@ namespace InventoryTools.Logic.Columns
         {
             ImGui.NewLine();
             ImGui.Separator();
-            SourceTypeSelectorSetting.Draw(columnConfiguration);
+            SourceTypeSelectorSetting.Draw(columnConfiguration, null);
         }
 
         public override List<MessageBase>? DoDraw(SearchResult searchResult, List<ItemSource>? currentValue, int rowIndex,

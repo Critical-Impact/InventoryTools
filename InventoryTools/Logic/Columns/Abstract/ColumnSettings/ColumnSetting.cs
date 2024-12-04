@@ -6,7 +6,7 @@ public abstract class ColumnSetting<T> : IColumnSetting
     public virtual int InputSize { get; set; } = 250;
     
     public abstract T CurrentValue(ColumnConfiguration configuration);
-    public abstract void Draw(ColumnConfiguration configuration);
+    public abstract void Draw(ColumnConfiguration configuration, string? helpText);
     public abstract void ResetFilter(ColumnConfiguration configuration);
     public abstract bool HasValueSet(ColumnConfiguration configuration);
     public abstract void UpdateColumnConfiguration(ColumnConfiguration configuration, T newValue);

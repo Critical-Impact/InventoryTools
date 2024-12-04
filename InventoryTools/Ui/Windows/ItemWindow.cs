@@ -73,6 +73,7 @@ namespace InventoryTools.Ui
         private readonly ItemInfoRenderService _itemInfoRenderService;
         private readonly BNpcNameSheet _bNpcNameSheet;
         private readonly MapSheet _mapSheet;
+        private readonly IUnlockTrackerService _unlockTrackerService;
         private HashSet<uint> _marketRefreshing = new();
         private HoverButton _refreshPricesButton = new();
 
@@ -81,7 +82,7 @@ namespace InventoryTools.Ui
             ICommandManager commandManager, IListService listService, ItemSheet itemSheet, ExcelSheet<World> worldSheet,
             IGameInterface gameInterface, IMarketCache marketCache, IChatUtilities chatUtilities, Logger otterLogger,
             IInventoryMonitor inventoryMonitor, ICharacterMonitor characterMonitor, IClipboardService clipboardService,
-            ItemInfoRenderService itemInfoRenderService, BNpcNameSheet bNpcNameSheet, MapSheet mapSheet, string name = "Item Window") : base(
+            ItemInfoRenderService itemInfoRenderService, BNpcNameSheet bNpcNameSheet, MapSheet mapSheet, IUnlockTrackerService unlockTrackerService, string name = "Item Window") : base(
             logger, mediator, imGuiService, configuration, name)
         {
             _marketBoardService = marketBoardService;
@@ -100,6 +101,7 @@ namespace InventoryTools.Ui
             _itemInfoRenderService = itemInfoRenderService;
             _bNpcNameSheet = bNpcNameSheet;
             _mapSheet = mapSheet;
+            _unlockTrackerService = unlockTrackerService;
         }
 
         private void MarketCacheUpdated(MarketCacheUpdatedMessage obj)
@@ -273,7 +275,8 @@ namespace InventoryTools.Ui
 
                 if (Item.CanBeAcquired)
                 {
-                    ImGui.TextUnformatted("Acquired:" + (_gameInterface.HasAcquired(Item) ? "Yes" : "No"));
+                    var hasAcquired = _unlockTrackerService.IsUnlocked(Item);
+                    ImGui.TextUnformatted("Acquired:" + (hasAcquired == null ? "Checking" : hasAcquired == true ? "Yes" : "No"));
                 }
 
                 if (Item.SellToVendorPrice != 0)

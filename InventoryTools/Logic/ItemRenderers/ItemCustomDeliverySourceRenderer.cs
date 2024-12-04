@@ -12,6 +12,7 @@ public class ItemCustomDeliverySourceRenderer : ItemInfoRenderer<ItemCustomDeliv
     public override ItemInfoType Type => ItemInfoType.CustomDelivery;
     public override string SingularName => "Custom Delivery";
     public override string PluralName => "Custom Deliveries";
+    public override string HelpText => "Can the item be delivered in a custom delivery quest?";
     public override bool ShouldGroup => false;
 
     public override Action<ItemSource> DrawTooltip => source =>
