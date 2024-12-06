@@ -76,7 +76,7 @@ public class DisplayUnlockTooltip : BaseTooltip
             var textLines = Configuration.AcquiredItems.
                 Where(c => characterSetting.Count == 0 || characterSetting.Contains(c.Key)).
                 Where(c => _characterMonitor.Characters.ContainsKey(c.Key)).
-                Select(c => _characterMonitor.GetCharacterById(c.Key)!.FormattedName + " - " + (c.Value.Contains(item.RowId) ? "Acquired" : "Not Acquired") + "\n").ToList();
+                Select(c => _characterMonitor.GetCharacterById(c.Key)!.FormattedName + " - " + (c.Value.Contains(item.RowId) ? "Acquired" : "Not Acquired") + "\n").OrderBy(c => c).ToList();
 
             var newText = "";
             if (textLines.Count != 0)
