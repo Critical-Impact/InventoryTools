@@ -15,7 +15,7 @@ public class CraftIsEphemeralFilter : BooleanFilter
     public override string HelpText { get; set; } =
         "Is this craft list ephemeral? If checked, once all the items in the craft list are deleted, the list will delete itself. This is only checked as each craft is completed.";
 
-    public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
+    public override FilterCategory FilterCategory { get; set; } = FilterCategory.Settings;
     public override FilterType AvailableIn { get; set; } = FilterType.CraftFilter;
     public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
     {

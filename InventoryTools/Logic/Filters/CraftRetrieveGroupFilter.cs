@@ -45,7 +45,7 @@ public class CraftRetrieveGroupFilter : ChoiceFilter<RetrieveGroupSetting>
     public override string HelpText { get; set; } =
         "Should the items you need to retrieve be grouped?";
 
-    public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
+    public override FilterCategory FilterCategory { get; set; } = FilterCategory.Settings;
     public override RetrieveGroupSetting DefaultValue { get; set; } = RetrieveGroupSetting.None;
     public override List<RetrieveGroupSetting> GetChoices(FilterConfiguration configuration)
     {

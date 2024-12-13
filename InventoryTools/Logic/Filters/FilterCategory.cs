@@ -20,5 +20,6 @@ namespace InventoryTools.Logic.Filters
         Uses = 15,
         SourceCategories = 16,
         UseCategories = 17,
+        Settings = 18,
     }
 }

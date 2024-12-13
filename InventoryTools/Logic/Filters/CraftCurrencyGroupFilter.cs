@@ -45,7 +45,7 @@ public class CraftCurrencyGroupFilter : ChoiceFilter<CurrencyGroupSetting>
     public override string HelpText { get; set; } =
         "Should the currency be grouped together or show up in the Gather/Buy list?";
 
-    public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
+    public override FilterCategory FilterCategory { get; set; } = FilterCategory.Settings;
     public override CurrencyGroupSetting DefaultValue { get; set; } = CurrencyGroupSetting.Separate;
     public override List<CurrencyGroupSetting> GetChoices(FilterConfiguration configuration)
     {

@@ -1,10 +1,13 @@
+using System;
 using System.Collections.Generic;
+using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Services.Mediator;
 
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
+using OtterGui.Raii;
 using ImGuiUtil = InventoryTools.Ui.Widgets.ImGuiUtil;
 
 namespace InventoryTools.Logic.Columns
@@ -37,27 +40,96 @@ namespace InventoryTools.Logic.Columns
             if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;
             if (searchResult.CraftItem.IsOutputItem)
             {
-                var value = CurrentValue(columnConfiguration, searchResult)?.Item2.ToString() ?? "";
-                ImGuiUtil.VerticalAlignButton(configuration.TableHeight);
-                if (ImGui.InputText("##"+searchResult.CraftItem.ItemId+"RequiredInput" + columnIndex, ref value, 4, ImGuiInputTextFlags.CharsDecimal))
+                if (configuration.CraftList.CraftListMode == CraftListMode.Normal)
                 {
-                    if (value != (CurrentValue(columnConfiguration, searchResult)?.Item2.ToString() ?? ""))
+                    var value = CurrentValue(columnConfiguration, searchResult)?.Item2.ToString() ?? "";
+                    ImGuiUtil.VerticalAlignButton(configuration.TableHeight);
+                    if (ImGui.InputText("##" + searchResult.CraftItem.ItemId + "RequiredInput" + columnIndex, ref value,
+                            4, ImGuiInputTextFlags.CharsDecimal))
                     {
-                        int parsedNumber;
-                        if (int.TryParse(value, out parsedNumber))
+                        if (value != (CurrentValue(columnConfiguration, searchResult)?.Item2.ToString() ?? ""))
                         {
-                            if (parsedNumber < 0)
+                            int parsedNumber;
+                            if (int.TryParse(value, out parsedNumber))
                             {
-                                parsedNumber = 0;
+                                if (parsedNumber < 0)
+                                {
+                                    parsedNumber = 0;
+                                }
+
+                                var number = searchResult.CraftItem.GetRoundedQuantity((uint)parsedNumber);
+                                if (number != searchResult.CraftItem.QuantityRequired &&
+                                    configuration.CraftList.BeenGenerated && configuration.CraftList.BeenUpdated)
+                                {
+                                    configuration.CraftList.SetCraftRequiredQuantity(searchResult.CraftItem.ItemId,
+                                        number,
+                                        searchResult.CraftItem.Flags,
+                                        searchResult.CraftItem.Phase);
+                                    searchResult.CraftItem.QuantityRequired = number;
+                                    configuration.NeedsRefresh = true;
+                                }
                             }
-                            var number = searchResult.CraftItem.GetRoundedQuantity((uint)parsedNumber);
-                            if (number != searchResult.CraftItem.QuantityRequired && configuration.CraftList.BeenGenerated && configuration.CraftList.BeenUpdated)
+                        }
+                    }
+                }
+                else
+                {
+                    var widthAvailable = ImGui.GetContentRegionAvail().X / 2;
+
+                    var value = searchResult.CraftItem.QuantityReady.ToString();
+                    ImGuiUtil.VerticalAlignButton(configuration.TableHeight);
+                    ImGui.SetNextItemWidth(widthAvailable - ImGui.GetStyle().ItemSpacing.X);
+                    using (var disabled = ImRaii.Disabled())
+                    {
+                        if (disabled)
+                        {
+                            if (ImGui.InputText("##" + searchResult.CraftItem.ItemId + "RequiredInput" + columnIndex,
+                                    ref value,
+                                    4, ImGuiInputTextFlags.CharsDecimal))
                             {
-                                configuration.CraftList.SetCraftRequiredQuantity(searchResult.CraftItem.ItemId, number,
-                                    searchResult.CraftItem.Flags,
-                                    searchResult.CraftItem.Phase);
-                                searchResult.CraftItem.QuantityRequired = number;
-                                configuration.NeedsRefresh = true;
+
+                            }
+                        }
+                    }
+
+                    if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                    {
+                        using (var tooltip = ImRaii.Tooltip())
+                        {
+                            if (tooltip)
+                            {
+                                ImGui.Text("The amount you currently have in your inventory.");
+                            }
+                        }
+                    }
+
+                    var toStock = searchResult.CraftItem.QuantityToStock.ToString();
+                    ImGui.SameLine();
+                    ImGui.SetNextItemWidth(widthAvailable);
+                    if (ImGui.InputText("##" + searchResult.CraftItem.ItemId + "StockInput" + columnIndex, ref toStock,
+                            4, ImGuiInputTextFlags.CharsDecimal))
+                    {
+                        if (toStock != (searchResult.CraftItem.QuantityToStock.ToString() ?? ""))
+                        {
+                            int parsedNumber;
+                            if (int.TryParse(toStock, out parsedNumber))
+                            {
+                                if (parsedNumber < 0)
+                                {
+                                    parsedNumber = 0;
+                                }
+
+                                var number = searchResult.CraftItem.GetRoundedQuantity((uint)parsedNumber);
+                                if (number != searchResult.CraftItem.QuantityToStock &&
+                                    configuration.CraftList.BeenGenerated && configuration.CraftList.BeenUpdated)
+                                {
+                                    configuration.CraftList.SetCraftToStockQuantity(searchResult.CraftItem.ItemId,
+                                        number,
+                                        searchResult.CraftItem.Flags,
+                                        searchResult.CraftItem.Phase);
+                                    searchResult.CraftItem.QuantityToStock = number;
+                                    configuration.NeedsRefresh = true;
+                                }
                             }
                         }
                     }

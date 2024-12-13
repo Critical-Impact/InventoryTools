@@ -112,10 +112,11 @@ public class ListFilterService : DisposableMediatorBackgroundService
                     }
                 }
             }
+            var craftListConfiguration = new CraftListConfiguration(characterSources, externalSources, null, _craftPricer);
 
+            filterConfiguration.CraftList.UpdateStockItems(craftListConfiguration);
             filterConfiguration.CraftList.GenerateCraftChildren();
             var materials = filterConfiguration.CraftList.GetMaterialsList().ToList();
-            var craftListConfiguration = new CraftListConfiguration(characterSources, externalSources, null, _craftPricer);
             if (craftListConfiguration.WorldPreferences == null)
             {
                 craftListConfiguration.WorldPreferences = new();

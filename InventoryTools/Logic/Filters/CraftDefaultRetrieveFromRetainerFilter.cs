@@ -34,7 +34,7 @@ public class CraftDefaultRetrieveFromRetainerFilter : ChoiceFilter<CraftRetainer
     public override string HelpText { get; set; } =
         "What should the default 'Retrieve from Retainer' setting be for 'Non-output' items?";
 
-    public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
+    public override FilterCategory FilterCategory { get; set; } = FilterCategory.Settings;
     public override CraftRetainerRetrieval DefaultValue { get; set; } = CraftRetainerRetrieval.Yes;
     public override FilterType AvailableIn { get; set; } = FilterType.CraftFilter;
     public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)

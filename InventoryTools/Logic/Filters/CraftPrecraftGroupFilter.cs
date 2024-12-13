@@ -46,7 +46,7 @@ public class CraftPrecraftGroupFilter : ChoiceFilter<PrecraftGroupSetting>
     public override string HelpText { get; set; } =
         "How should precrafts be grouped together?";
 
-    public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
+    public override FilterCategory FilterCategory { get; set; } = FilterCategory.Settings;
     public override PrecraftGroupSetting DefaultValue { get; set; } = PrecraftGroupSetting.ByClass;
     public override List<PrecraftGroupSetting> GetChoices(FilterConfiguration configuration)
     {

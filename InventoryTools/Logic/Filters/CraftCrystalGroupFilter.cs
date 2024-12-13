@@ -45,7 +45,7 @@ public class CraftCrystalGroupFilter : ChoiceFilter<CrystalGroupSetting>
     public override string HelpText { get; set; } =
         "Should the crystals be grouped together or show up in the Gather/Buy list?";
 
-    public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
+    public override FilterCategory FilterCategory { get; set; } = FilterCategory.Settings;
     public override CrystalGroupSetting DefaultValue { get; set; } = CrystalGroupSetting.Separate;
     public override List<CrystalGroupSetting> GetChoices(FilterConfiguration configuration)
     {

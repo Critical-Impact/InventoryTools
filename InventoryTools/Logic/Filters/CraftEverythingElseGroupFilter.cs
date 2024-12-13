@@ -44,7 +44,7 @@ public class CraftEverythingElseGroupFilter : ChoiceFilter<EverythingElseGroupSe
     public override string HelpText { get; set; } =
         "How should everything else not in it's own group be grouped?";
 
-    public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
+    public override FilterCategory FilterCategory { get; set; } = FilterCategory.Settings;
     public override EverythingElseGroupSetting DefaultValue { get; set; } = EverythingElseGroupSetting.ByClosestZone;
     public override List<EverythingElseGroupSetting> GetChoices(FilterConfiguration configuration)
     {

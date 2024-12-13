@@ -100,7 +100,7 @@ namespace InventoryTools
             _logger.LogTrace("Craft completed for item " + itemid);
 
             var activeCraftList = _listService.GetActiveCraftList();
-            if (activeCraftList != null && activeCraftList.FilterType == FilterType.CraftFilter)
+            if (activeCraftList != null && activeCraftList.FilterType == FilterType.CraftFilter && activeCraftList.CraftList.CraftListMode == CraftListMode.Normal)
             {
                 activeCraftList.CraftList.MarkCrafted(itemid, flags, quantity);
                 if (activeCraftList is { IsEphemeralCraftList: true, CraftList.IsCompleted: true })
