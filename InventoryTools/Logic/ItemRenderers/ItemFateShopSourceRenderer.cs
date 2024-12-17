@@ -7,15 +7,19 @@ using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Models;
+using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
+using InventoryTools.Extensions;
 using InventoryTools.Services;
 
 namespace InventoryTools.Logic.ItemRenderers;
 
 public class ItemFateShopUseRenderer : ItemFateShopSourceRenderer
 {
-    public ItemFateShopUseRenderer(ImGuiService imGuiService, MapSheet mapSheet) : base(imGuiService, mapSheet)
+    public ItemFateShopUseRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface, MapSheet mapSheet) : base(textureProvider, pluginInterface, mapSheet)
     {
     }
 
@@ -32,13 +36,15 @@ public class ItemFateShopUseRenderer : ItemFateShopSourceRenderer
 
 public class ItemFateShopSourceRenderer : ItemInfoRenderer<ItemFateShopSource>
 {
+    private readonly ITextureProvider _textureProvider;
+    private readonly IDalamudPluginInterface _pluginInterface;
     public MapSheet MapSheet { get; }
-    private readonly ImGuiService _imGuiService;
 
-    public ItemFateShopSourceRenderer(ImGuiService imGuiService, MapSheet mapSheet)
+    public ItemFateShopSourceRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface, MapSheet mapSheet)
     {
+        _textureProvider = textureProvider;
+        _pluginInterface = pluginInterface;
         MapSheet = mapSheet;
-        _imGuiService = imGuiService;
     }
 
     public override RendererType RendererType => RendererType.Source;
@@ -69,7 +75,7 @@ public class ItemFateShopSourceRenderer : ItemInfoRenderer<ItemFateShopSource>
         {
             foreach (var reward in asSource.ShopListing.Rewards)
             {
-                ImGui.Image(_imGuiService.GetIconTexture(reward.Item.Icon).ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
+                ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(reward.Item.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
                 ImGui.SameLine();
                 var itemName = reward.Item.NameString;
                 var count = reward.Count;
@@ -77,7 +83,7 @@ public class ItemFateShopSourceRenderer : ItemInfoRenderer<ItemFateShopSource>
                 ImGui.Text(costString);
                 if (reward.IsHq == true)
                 {
-                    ImGui.Image(_imGuiService.GetImageTexture("hq").ImGuiHandle,
+                    ImGui.Image(_textureProvider.GetPluginImageTexture(_pluginInterface, "hq").GetWrapOrEmpty().ImGuiHandle,
                         new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
                 }
             }
@@ -87,7 +93,7 @@ public class ItemFateShopSourceRenderer : ItemInfoRenderer<ItemFateShopSource>
         {
             foreach (var cost in asSource.ShopListing.Costs)
             {
-                ImGui.Image(_imGuiService.GetIconTexture(cost.Item.Icon).ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
+                ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(cost.Item.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
                 ImGui.SameLine();
                 var itemName = cost.Item.NameString;
                 var count = cost.Count;
@@ -95,7 +101,7 @@ public class ItemFateShopSourceRenderer : ItemInfoRenderer<ItemFateShopSource>
                 ImGui.Text(costString);
                 if (cost.IsHq == true)
                 {
-                    ImGui.Image(_imGuiService.GetImageTexture("hq").ImGuiHandle,
+                    ImGui.Image(_textureProvider.GetPluginImageTexture(_pluginInterface, "hq").GetWrapOrEmpty().ImGuiHandle,
                         new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
                 }
             }

@@ -136,7 +136,7 @@ namespace InventoryTools.Ui
 
                                     if (ImGui.BeginPopup("RightClickUse" + item.Item.RowId))
                                     {
-                                        MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(item.Item));
+                                        MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(item.Item));
                                         ImGui.EndPopup();
                                     }
 

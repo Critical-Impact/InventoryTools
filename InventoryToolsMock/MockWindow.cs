@@ -263,6 +263,10 @@ public class MockWindow : GenericWindow
                 {
                     if (combo.Success)
                     {
+                        if(ImGui.Selectable("None", _characterMonitor.ActiveRetainerId == 0))
+                        {
+                            _characterMonitor.OverrideActiveRetainer(0);
+                        }
                         foreach (var character in _characterMonitor.GetRetainerCharacters())
                         {
                             if (ImGui.Selectable(character.Value.FormattedName + "##" + character.Key, _characterMonitor.ActiveRetainerId == character.Key))

@@ -16,6 +16,8 @@ using InventoryTools.Logic;
 using LuminaSupplemental.Excel.Model;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
+using FFXIVClientStructs.FFXIV.Client.LayoutEngine.Layer;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Ui.DebugWindows;
@@ -37,8 +39,10 @@ namespace InventoryTools.Ui
         DebugWindows = 6,
         Addons = 7,
         GameInventory = 8,
+        Unlocks = 9,
+        LayerDebugger = 10,
     }
-    public class DebugWindow : GenericWindow
+    public class DebugWindow : GenericWindow, IMenuWindow
     {
         private readonly IInventoryMonitor _inventoryMonitor;
         private readonly IInventoryScanner _inventoryScanner;
@@ -141,6 +145,16 @@ namespace InventoryTools.Ui
                         _configuration.SelectedDebugPage = (int)DebugMenu.Addons;
                     }
 
+                    if (ImGui.Selectable("Unlocks", _configuration.SelectedDebugPage == (int)DebugMenu.Unlocks))
+                    {
+                        _configuration.SelectedDebugPage = (int)DebugMenu.Unlocks;
+                    }
+
+                    if (ImGui.Selectable("Layer Debugger", _configuration.SelectedDebugPage == (int)DebugMenu.LayerDebugger))
+                    {
+                        _configuration.SelectedDebugPage = (int)DebugMenu.LayerDebugger;
+                    }
+
                 }
             }
             ImGui.SameLine();
@@ -172,6 +186,14 @@ namespace InventoryTools.Ui
                     else if (_configuration.SelectedDebugPage == (int)DebugMenu.Addons)
                     {
                         DrawAddons();
+                    }
+                    else if (_configuration.SelectedDebugPage == (int)DebugMenu.LayerDebugger)
+                    {
+                        DrawLayerDebugger();
+                    }
+                    else if (_configuration.SelectedDebugPage == (int)DebugMenu.Unlocks)
+                    {
+                        DrawUnlocks();
                     }
 /*
                     else if (_configuration.SelectedDebugPage == 2)
@@ -908,6 +930,38 @@ namespace InventoryTools.Ui
                 }
             }
         }
+
+        private unsafe void DrawLayerDebugger()
+        {
+            var activeLayout = LayoutWorld.Instance()->ActiveLayout;
+            if (activeLayout != null)
+            {
+                ImGui.TextUnformatted($"Level ID: {activeLayout->LevelId}");
+                ImGui.TextUnformatted($"ID: {activeLayout->Id}");
+                ImGui.TextUnformatted($"Type: {activeLayout->Type}");
+                ImGui.TextUnformatted($"Resource Strings: {activeLayout->Type}");
+                foreach (var resourcePath in activeLayout->ResourcePaths.Strings)
+                {
+                    if (resourcePath.Value != null)
+                    {
+                        ImGui.TextUnformatted($"{resourcePath.Value->DataString}");
+                    }
+                }
+                ImGui.TextUnformatted($"Layers:");
+                foreach (var layer in activeLayout->Layers)
+                {
+                    ImGui.TextUnformatted($"{layer.Item1}");
+                    var pointer = layer.Item2.Value;
+                    if (pointer != null)
+                    {
+                        ImGui.TextUnformatted($"Layer ID: " + pointer->Id);
+                        ImGui.TextUnformatted($"Layer Group ID: " + pointer->LayerGroupId);
+                        ImGui.TextUnformatted($"Festival ID: " + pointer->FestivalId);
+                    }
+                }
+            }
+        }
+
         private void DrawInventoryScannerDebugTab()
         {
 
@@ -1566,6 +1620,17 @@ namespace InventoryTools.Ui
             if (ImGui.Button("List Service"))
             {
                 MediatorService.Publish(new OpenGenericWindowMessage(typeof(DebugListServiceWindow)));
+            }
+        }
+
+        public void DrawUnlocks()
+        {
+            var acquiredItems = _configuration.AcquiredItems;
+            foreach (var characterPair in acquiredItems)
+            {
+                var character = _characterMonitor.GetCharacterById(characterPair.Key);
+                ImGui.TextUnformatted(character?.FormattedName ?? "Unknown Character");
+                ImGui.Text($"{characterPair.Value.Count} unlocked items");
             }
         }
         public unsafe void DrawAddons()

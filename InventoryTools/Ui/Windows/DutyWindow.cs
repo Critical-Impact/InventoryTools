@@ -173,7 +173,7 @@ namespace InventoryTools.Ui
                                                 .GetRowOrDefault(item.Item1.RowId);
                                             if (itemRow != null)
                                             {
-                                                MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(itemRow));
+                                                MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(itemRow));
                                             }
 
                                             ImGui.EndPopup();
@@ -226,7 +226,7 @@ namespace InventoryTools.Ui
                                             .GetRowOrDefault(item.RowId);
                                         if (itemRow != null)
                                         {
-                                            MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(itemRow));
+                                            MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(itemRow));
                                         }
 
                                         ImGui.EndPopup();
@@ -270,7 +270,7 @@ namespace InventoryTools.Ui
                             var itemRow = _itemSheet.GetRowOrDefault(use.RowId);
                             if (itemRow != null)
                             {
-                                MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(itemRow));
+                                MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(itemRow));
                             }
 
                             ImGui.EndPopup();
@@ -313,7 +313,7 @@ namespace InventoryTools.Ui
                             var itemRow = _itemSheet.GetRowOrDefault(use.RowId);
                             if (itemRow != null)
                             {
-                                MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(itemRow));
+                                MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(itemRow));
                             }
 
                             ImGui.EndPopup();

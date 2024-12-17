@@ -423,7 +423,7 @@ public class ItemInfoRenderService
                 }
                 else
                 {
-                    _imGuiService.RightClickService.DrawRightClickPopup(rendererType == RendererType.Source ? firstItem.Item : (firstItem.CostItem ?? firstItem.Item), messages);
+                    _imGuiService.ImGuiMenuService.DrawRightClickPopup(rendererType == RendererType.Source ? firstItem.Item : (firstItem.CostItem ?? firstItem.Item), messages);
                 }
             }
         }

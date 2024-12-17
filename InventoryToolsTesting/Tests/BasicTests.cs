@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using AllaganLib.GameSheets.Caches;
+using AllaganLib.GameSheets.ItemSources;
 using CriticalCommonLib;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Extensions;
@@ -118,17 +120,17 @@ namespace InventoryToolsTesting.Tests
             Assert.AreEqual(1,listFilterService.RefreshList( searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
 
             //Duplicates only, max out item in existing inventory
-            retainerInventory.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.StackSize));
+            retainerInventory.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.Base.StackSize));
             var generateFilteredList = listFilterService.RefreshList( searchFilter);
             Assert.AreEqual(1, generateFilteredList.Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
 
             //Duplicates only, max out item in existing inventory then spill over
-            retainerInventory.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.StackSize - 1));
+            retainerInventory.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.Base.StackSize - 1));
             inventory.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 2));
             Assert.AreEqual(2, listFilterService.RefreshList(searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
 
             //Duplicates only, max out retainer, should go nowhere, boy got some cinnamon, 2 items in inventory
-            Fixtures.FillInventory(retainerInventory, InventoryCategory.RetainerBags, cinnamon.RowId, cinnamon.StackSize);
+            Fixtures.FillInventory(retainerInventory, InventoryCategory.RetainerBags, cinnamon.RowId, cinnamon.Base.StackSize);
             Assert.AreEqual(0,listFilterService.RefreshList( searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
 
             //Allow item to spill over to retainer 2, but we are in retainer 1 so nothing shows up
@@ -144,7 +146,7 @@ namespace InventoryToolsTesting.Tests
             //Item should goto 2nd retainer first
             Fixtures.FillInventory(retainerInventory, InventoryCategory.RetainerBags, 0, 0);
             inventory.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
-            retainerInventory2.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.StackSize - 1));
+            retainerInventory2.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.Base.StackSize - 1));
             Assert.True(listFilterService.RefreshList( searchFilter).Count(c =>c.InventoryItem != null && c.SortingResult != null &&  !c.InventoryItem.IsEmpty && c.SortingResult.DestinationRetainerId == _retainer2.CharacterId) == 1);
 
             //Filter items when in specific retainer, should show 0 sorted items as we are in the first retainer and not the 2nd
@@ -477,13 +479,11 @@ namespace InventoryToolsTesting.Tests
         public void TestCompanyCraftRequirements()
         {
             var excelCache = Host.Services.GetRequiredService<ExcelCache>()!;
-            Assert.IsTrue(excelCache.IsCompanyCraft(10157));
-            var item = excelCache.GetItemSheet().GetRow(10157);
-            if (item != null)
-            {
-                var craftItems = item.GetFlattenedCraftItems(true, 1);
-                Assert.AreEqual(craftItems.Count, 42);
-            }
+            var itemRow = excelCache.GetItemSheet().GetRow(10157);
+            var itemCompanyCraftResultSources = itemRow.GetSourcesByType<ItemCompanyCraftResultSource>(ItemInfoType.FreeCompanyCraftRecipe);
+            Assert.IsTrue(itemCompanyCraftResultSources.Count != 0);
+            var craftItems = itemRow.CompanyCraftSequence!.MaterialsRequired(null);
+            Assert.AreEqual(craftItems.Count, 42);
         }
 
         [Test]

@@ -8,6 +8,7 @@ using CriticalCommonLib.Models;
 using Dalamud.Configuration;
 using Dalamud.Interface.Colors;
 using InventoryTools.Attributes;
+using InventoryTools.Converters;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Editors;
 using InventoryTools.Logic.Settings;
@@ -18,7 +19,7 @@ using OtterGui.Classes;
 namespace InventoryTools
 {
     [Serializable]
-    public class InventoryToolsConfiguration : IPluginConfiguration
+    public class InventoryToolsConfiguration : IPluginConfiguration, IConfigurable<bool?>, IConfigurable<int?>, IConfigurable<Enum?>
     {
         [JsonIgnore]
         public bool IsDirty { get; set; }
@@ -78,6 +79,9 @@ namespace InventoryTools
         private HashSet<string>? _windowsIgnoreEscape = new HashSet<string>();
         private HashSet<uint>? _favouriteItemsList = new HashSet<uint>();
         private TooltipAmountOwnedSort _tooltipAmountOwnedSort = TooltipAmountOwnedSort.Alphabetically;
+        private Dictionary<string, bool>? _booleanSettings = new();
+        private Dictionary<string, int>? _integerSettings = new();
+        private Dictionary<string, Enum>? _enumSettings = new();
 
         [JsonProperty] [DefaultValue(300)] public int CraftWindowSplitterPosition { get; set; } = 300;
 
@@ -906,6 +910,25 @@ namespace InventoryTools
 
         public LogLevel LogLevel { get; set; } = LogLevel.Information;
 
+        public Dictionary<string, bool> BooleanSettings
+        {
+            get => _booleanSettings ??= new Dictionary<string, bool>();
+            set => _booleanSettings = value;
+        }
+
+        public Dictionary<string, int> IntegerSettings
+        {
+            get => _integerSettings ??= new Dictionary<string, int>();
+            set => _integerSettings = value;
+        }
+
+        [JsonConverter(typeof(EnumDictionaryConverter))]
+        public Dictionary<string, Enum> EnumSettings
+        {
+            get => _enumSettings ??= new Dictionary<string, Enum>();
+            set => _enumSettings = value;
+        }
+
 
         //Configuration Helpers
 
@@ -948,5 +971,61 @@ namespace InventoryTools
         }
 
 
+        public bool? Get(string key, bool? defaultValue)
+        {
+            return this.BooleanSettings.TryGetValue(key, out var value) ? value : defaultValue;
+        }
+
+        public void Set(string key, int? newValue)
+        {
+            if (newValue == null)
+            {
+                this.IntegerSettings.Remove(key);
+            }
+            else
+            {
+                this.IntegerSettings[key] = newValue.Value;
+            }
+
+            this.IsDirty = true;
+        }
+
+        public void Set(string key, bool? newValue)
+        {
+            if (newValue == null)
+            {
+                this.BooleanSettings.Remove(key);
+            }
+            else
+            {
+                this.BooleanSettings[key] = newValue.Value;
+            }
+
+            this.IsDirty = true;
+        }
+
+        public int? Get(string key, int? defaultValue)
+        {
+            return this.IntegerSettings.TryGetValue(key, out var value) ? value : defaultValue;
+        }
+
+        public Enum? Get(string key, Enum? defaultValue)
+        {
+            return this.EnumSettings.GetValueOrDefault(key);
+        }
+
+        public void Set(string key, Enum? newValue)
+        {
+            if (newValue == null)
+            {
+                this.EnumSettings.Remove(key);
+            }
+            else
+            {
+                this.EnumSettings[key] = newValue;
+            }
+
+            this.IsDirty = true;
+        }
     }
 }

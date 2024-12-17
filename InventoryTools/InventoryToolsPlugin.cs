@@ -41,6 +41,7 @@ using InventoryTools.Logic.Columns.Abstract.ColumnSettings;
 using InventoryTools.Logic.Editors;
 using InventoryTools.Logic.Features;
 using InventoryTools.Logic.Filters;
+using InventoryTools.Logic.GenericFilters;
 using InventoryTools.Logic.ItemRenderers;
 using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Misc;
@@ -87,12 +88,14 @@ namespace InventoryTools
             _framework = framework;
             PluginInterface = pluginInterface;
             _service = PluginInterface.Create<Service>()!;
-            CreateHost();
+            this.Host = CreateHost();
 
             Start();
             loadConfigStopwatch.Stop();
             pluginLog.Verbose("Took " + loadConfigStopwatch.Elapsed.TotalSeconds + " to start Allagan Tools.");
         }
+
+        public IHost Host { get; set; }
 
         private List<Type> HostedServices { get; } = new()
         {
@@ -264,6 +267,10 @@ namespace InventoryTools
                     builder
                         .RegisterType(typeof(GenericHasUseCategoryFilter))
                         .AsSelf();
+
+                    builder
+                        .RegisterType(typeof(GenericBooleanFilter))
+                        .AsSelf();
                 });
 
             hostBuilder.ConfigureContainer<ContainerBuilder>(builder =>
@@ -336,7 +343,8 @@ namespace InventoryTools
                 });
 
                 builder.RegisterType<PluginCommands>().SingleInstance();
-                builder.RegisterType<RightClickService>().SingleInstance();
+                builder.RegisterType<ImGuiMenuService>().SingleInstance();
+                builder.RegisterType<ImGuiTooltipService>().SingleInstance();
                 builder.RegisterType<TryOn>().SingleInstance();
                 builder.RegisterType<TetrisGame>().SingleInstance();
                 builder.RegisterType<WotsitIpc>().As<IWotsitIpc>().SingleInstance();

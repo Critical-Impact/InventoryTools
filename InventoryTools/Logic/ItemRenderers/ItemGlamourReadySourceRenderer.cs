@@ -7,18 +7,19 @@ using ImGuiNET;
 
 namespace InventoryTools.Logic.ItemRenderers;
 
-public class ItemGlamourReadySourceRenderer : ItemInfoRenderer<ItemGlamourReadySource>
+public class ItemGlamourReadySetItemSourceRenderer : ItemInfoRenderer<ItemGlamourReadySetItemSource>
 {
     public override RendererType RendererType => RendererType.Use;
-    public override ItemInfoType Type => ItemInfoType.GlamourReady;
-    public override string SingularName => "Glamour Ready";
-    public override string HelpText => "Is the item part of a 'Glamour Ready' outfit?";
+    public override ItemInfoType Type => ItemInfoType.GlamourReadySetItem;
+    public override string SingularName => "Glamour Ready Set Item";
+    public override string HelpText => "Is the item part of a 'Glamour Ready' outfit set?";
 
     public override bool ShouldGroup => true;
 
     public override Action<ItemSource> DrawTooltip => source =>
     {
         var asSource = AsSource(source);
+        ImGui.Text("Transforms into: " + asSource.ConvertedItem.NameString);
         if (asSource.SetItems.Count > 1)
         {
             ImGui.Text("Set Items:");

@@ -7,6 +7,7 @@ using DalaMock.Core.DI;
 using DalaMock.Core.Mocks;
 using DalaMock.Core.Plugin;
 using Dalamud.Plugin.Services;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.Extensions.Hosting;
 using Veldrid.Sdl2;
 
@@ -25,8 +26,8 @@ namespace InventoryToolsTesting.Services
                 builder.RegisterType<MediatorService>();
             },new Dictionary<Type, Type>()
             {
-                {typeof(MockKeyState), typeof(TestKeyState)},
-                {typeof(MockTextureProvider), typeof(TestTextureProvider)}
+                {typeof(IKeyState), typeof(TestKeyState)},
+                {typeof(ITextureProvider), typeof(TestTextureProvider)}
             });
             var pluginLoader = mockContainer.GetPluginLoader();
             var mockPlugin = pluginLoader.AddPlugin(typeof(InventoryToolsTestingPlugin));
@@ -41,7 +42,7 @@ namespace InventoryToolsTesting.Services
             {
                 throw new Exception("Plugin was not built.");
             }
-            return inventoryToolsTestingPlugin.BuiltHost;
+            return inventoryToolsTestingPlugin.Host;
         }
     }
 }

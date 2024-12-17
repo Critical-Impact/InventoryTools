@@ -1,4 +1,5 @@
 using AllaganLib.GameSheets.Model;
+using AllaganLib.GameSheets.Sheets;
 using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Services;
@@ -93,6 +94,32 @@ public class MockChatUtilities : IChatUtilities
             _pluginLog.Info("Place Name ID: " + mobSpawnPosition.TerritoryType.Value.PlaceName.RowId);
             _pluginLog.Info("Map X & Y: " + (float)(mobSpawnPosition.Position.X) + ":" + (float)(mobSpawnPosition.Position.Y));
         }
+    }
+
+    public void PrintGatheringMapLink(GatheringPointRow gatheringPoint)
+    {
+        _pluginLog.Info("Map ID: " + gatheringPoint.TerritoryType.Value.Map.RowId);
+        _pluginLog.Info("Territory Type ID: " + gatheringPoint.TerritoryType.RowId);
+        _pluginLog.Info("Place Name ID: " + gatheringPoint.TerritoryType.Value.PlaceName.RowId);
+        _pluginLog.Info("Map X & Y: " + (float)(gatheringPoint.MapX) + ":" + (float)(gatheringPoint.MapY));
+    }
+
+    public void PrintGatheringMapLink(FishingSpotRow fishingSpotRow, FishParameterRow fishParameterRow)
+    {
+        _pluginLog.Info("Record type: " + fishParameterRow.Base.FishingRecordType.Value.Addon.Value.Text.ExtractText());
+        _pluginLog.Info("Map ID: " + fishingSpotRow.TerritoryType.Value.Map.RowId);
+        _pluginLog.Info("Territory Type ID: " + fishingSpotRow.TerritoryType.RowId);
+        _pluginLog.Info("Place Name ID: " + fishingSpotRow.TerritoryType.Value.PlaceName.RowId);
+        _pluginLog.Info("Map X & Y: " + (float)(fishingSpotRow.MapX) + ":" + (float)(fishingSpotRow.MapY));
+    }
+
+    public void PrintGatheringMapLink(SpearfishingNotebookRow spearfishingNotebookRow, SpearfishingItemRow spearfishingItemRow)
+    {
+        _pluginLog.Info("Record type: " + spearfishingItemRow.FishRecordType);
+        _pluginLog.Info("Map ID: " + spearfishingNotebookRow.TerritoryType.Value.Map.RowId);
+        _pluginLog.Info("Territory Type ID: " + spearfishingNotebookRow.TerritoryType.RowId);
+        _pluginLog.Info("Place Name ID: " + spearfishingNotebookRow.TerritoryType.Value.PlaceName.RowId);
+        _pluginLog.Info("Map X & Y: " + (float)(spearfishingNotebookRow.MapX) + ":" + (float)(spearfishingNotebookRow.MapY));
     }
 
     public void LinkItem(ItemRow item)

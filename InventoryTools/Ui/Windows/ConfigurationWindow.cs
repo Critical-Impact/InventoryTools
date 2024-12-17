@@ -87,6 +87,7 @@ namespace InventoryTools.Ui
             _configPages.Add(_settingPageFactory.Invoke(SettingCategory.Hotkeys));
             _configPages.Add(_settingPageFactory.Invoke(SettingCategory.MobSpawnTracker));
             _configPages.Add(_settingPageFactory.Invoke(SettingCategory.TitleMenuButtons));
+            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.CraftOverlay));
             _configPages.Add(_settingPageFactory.Invoke(SettingCategory.History));
             _configPages.Add(_settingPageFactory.Invoke(SettingCategory.Misc));
             _configPages.Add(new SeparatorPageItem("Data", true));

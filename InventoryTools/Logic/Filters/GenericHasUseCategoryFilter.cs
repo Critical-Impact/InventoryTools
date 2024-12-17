@@ -17,6 +17,7 @@ public class GenericHasUseCategoryFilter : BooleanFilter, IGenericFilter
 
     public override int LabelSize { get; set; } = 250;
 
+    public delegate GenericHasUseCategoryFilter Factory(ItemInfoRenderCategory renderCategory);
     public GenericHasUseCategoryFilter(ItemInfoRenderCategory renderCategory, ItemInfoRenderService infoRenderService, ILogger<GenericHasUseCategoryFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
     {
         _renderCategory = renderCategory;

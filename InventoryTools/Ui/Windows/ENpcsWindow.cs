@@ -203,7 +203,7 @@ public class ENpcsWindow : GenericTabbedTable<ENpcResidentRow>, IMenuWindow
                                 if (ImGui.BeginPopup("RightClick" + drop.RowId))
                                 {
                                     MediatorService.Publish(
-                                        ImGuiService.RightClickService.DrawRightClickPopup(drop));
+                                        ImGuiService.ImGuiMenuService.DrawRightClickPopup(drop));
 
                                     ImGui.EndPopup();
                                 }

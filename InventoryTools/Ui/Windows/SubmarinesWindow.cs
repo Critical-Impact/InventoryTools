@@ -175,7 +175,7 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationRow>, IMe
 
                         if (ImGui.BeginPopup("RightClick" + drop))
                         {
-                            MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(drop));
+                            MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(drop));
                             ImGui.EndPopup();
                         }
                         ImGuiUtil.HoverTooltip(drop.NameString);

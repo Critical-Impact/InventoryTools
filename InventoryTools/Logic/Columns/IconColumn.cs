@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib.Services.Mediator;
-
+using Dalamud.Game.ClientState.Keys;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Logic.Settings;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Ui;
@@ -14,8 +16,17 @@ namespace InventoryTools.Logic.Columns
 {
     public class IconColumn : GameIconColumn
     {
-        public IconColumn(ILogger<IconColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        private readonly ImGuiTooltipService _tooltipService;
+        private readonly ImGuiTooltipModeSetting _tooltipModeSetting;
+        private readonly InventoryToolsConfiguration _configuration;
+        private readonly IKeyState _keyState;
+
+        public IconColumn(ILogger<IconColumn> logger, ImGuiTooltipService tooltipService, ImGuiService imGuiService, ImGuiTooltipModeSetting tooltipModeSetting, InventoryToolsConfiguration configuration, IKeyState keyState) : base(logger, imGuiService)
         {
+            _tooltipService = tooltipService;
+            _tooltipModeSetting = tooltipModeSetting;
+            _configuration = configuration;
+            _keyState = keyState;
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
         public override (ushort, bool)? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
@@ -49,7 +60,17 @@ namespace InventoryTools.Logic.Columns
                 if (ImGui.ImageButton(ImGuiService.GetIconTexture(currentValue.Value.Item1, currentValue.Value.Item2).ImGuiHandle, new Vector2(filterConfiguration.TableHeight - 1, filterConfiguration.TableHeight - 1) * ImGui.GetIO().FontGlobalScale,new Vector2(0,0), new Vector2(1,1), 2))
                 {
                     ImGui.PopID();
-                    messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), searchResult.Item.RowId));
+                    if (!this._keyState[VirtualKey.CONTROL] && !this._keyState[VirtualKey.SHIFT] && !this._keyState[VirtualKey.MENU])
+                    {
+                        messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), searchResult.Item.RowId));
+                    }
+                }
+                if (_tooltipModeSetting.CurrentValue(_configuration) == ImGuiTooltipMode.Icons)
+                {
+                    if (ImGui.IsItemHovered())
+                    {
+                        _tooltipService.DrawItemTooltip(searchResult);
+                    }
                 }
                 ImGui.PopID();
             }

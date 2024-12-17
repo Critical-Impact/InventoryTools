@@ -17,11 +17,8 @@ namespace InventoryTools.Logic.ItemRenderers;
 
 public class ItemGCShopUseRenderer : ItemGCShopSourceRenderer
 {
-    private readonly ItemSheet _itemSheet;
-
-    public ItemGCShopUseRenderer(ImGuiService imGuiService, MapSheet mapSheet, ItemSheet itemSheet, ExcelSheet<GCRankGridaniaMaleText> rankSheet) : base(imGuiService, mapSheet, itemSheet, rankSheet)
+    public ItemGCShopUseRenderer(MapSheet mapSheet, ExcelSheet<GCRankGridaniaMaleText> rankSheet) : base(mapSheet, rankSheet)
     {
-        _itemSheet = itemSheet;
     }
 
     public override string HelpText => "Can the item be spent at a grand company shop?";
@@ -63,15 +60,11 @@ public class ItemGCShopUseRenderer : ItemGCShopSourceRenderer
 public class ItemGCShopSourceRenderer : ItemInfoRenderer<ItemGCShopSource>
 {
     public MapSheet MapSheet { get; }
-    private readonly ImGuiService _imGuiService;
-    private readonly ItemSheet _itemSheet;
     private readonly ExcelSheet<GCRankGridaniaMaleText> _rankSheet;
 
-    public ItemGCShopSourceRenderer(ImGuiService imGuiService, MapSheet mapSheet, ItemSheet itemSheet, ExcelSheet<GCRankGridaniaMaleText> rankSheet)
+    public ItemGCShopSourceRenderer(MapSheet mapSheet, ExcelSheet<GCRankGridaniaMaleText> rankSheet)
     {
         MapSheet = mapSheet;
-        _imGuiService = imGuiService;
-        _itemSheet = itemSheet;
         _rankSheet = rankSheet;
     }
 

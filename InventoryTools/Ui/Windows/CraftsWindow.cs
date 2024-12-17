@@ -840,6 +840,11 @@ namespace InventoryTools.Ui
                     ImGui.EndMenu();
                 }
 
+                if (ImGui.MenuItem("Toggle Crafting Overlay"))
+                {
+                    this.MediatorService.Publish(new ToggleGenericWindowMessage(typeof(CraftOverlayWindow)));
+                }
+
                 ImGui.EndMenuBar();
             }
         }
@@ -1835,7 +1840,7 @@ namespace InventoryTools.Ui
             {
                 if (popup.Success)
                 {
-                    MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(item));
+                    MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(item));
                 }
             }
             ImGui.TableNextColumn();

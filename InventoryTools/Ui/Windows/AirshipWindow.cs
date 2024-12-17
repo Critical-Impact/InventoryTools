@@ -95,7 +95,7 @@ namespace InventoryTools.Ui
                         {
                             if (popup.Success)
                             {
-                                MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(drop));
+                                MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(drop));
                             }
                         }
 

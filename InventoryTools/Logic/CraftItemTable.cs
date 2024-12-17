@@ -16,13 +16,14 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Logic.Settings;
 using InventoryTools.Services;
 
 namespace InventoryTools.Logic
 {
     public class CraftItemTable : RenderTableBase
     {
-        public CraftItemTable(RightClickService rightClickService, InventoryToolsConfiguration configuration) : base(rightClickService, configuration)
+        public CraftItemTable(ImGuiMenuService imGuiMenuService, ImGuiTooltipService imGuiTooltipService, InventoryToolsConfiguration configuration, ImGuiTooltipModeSetting tooltipModeSetting) : base(imGuiMenuService, imGuiTooltipService, tooltipModeSetting, configuration)
         {
             _tableFlags = ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersV |
                           ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.BordersInnerV |

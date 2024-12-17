@@ -4,6 +4,9 @@ using System.Numerics;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using CriticalCommonLib.Models;
+using Dalamud.Interface.Textures;
+using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Services;
 
@@ -11,7 +14,7 @@ namespace InventoryTools.Logic.ItemRenderers;
 
 public class ItemDesynthSourceRenderer : ItemSupplementSourceRenderer<ItemDesynthSource>
 {
-    public ItemDesynthSourceRenderer(ImGuiService imGuiService) : base(imGuiService, ItemInfoType.Desynthesis, Icons.DesynthesisIcon)
+    public ItemDesynthSourceRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(textureProvider, pluginInterface,  ItemInfoType.Desynthesis, Icons.DesynthesisIcon)
     {
     }
 
@@ -21,7 +24,7 @@ public class ItemDesynthSourceRenderer : ItemSupplementSourceRenderer<ItemDesynt
 
 public class ItemReductionSourceRenderer : ItemSupplementSourceRenderer<ItemReductionSource>
 {
-    public ItemReductionSourceRenderer(ImGuiService imGuiService) : base(imGuiService, ItemInfoType.Reduction, Icons.ReductionIcon)
+    public ItemReductionSourceRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(textureProvider, pluginInterface,  ItemInfoType.Reduction, Icons.ReductionIcon)
     {
     }
 
@@ -31,7 +34,7 @@ public class ItemReductionSourceRenderer : ItemSupplementSourceRenderer<ItemRedu
 
 public class ItemLootSourceRenderer : ItemSupplementSourceRenderer<ItemLootSource>
 {
-    public ItemLootSourceRenderer(ImGuiService imGuiService) : base(imGuiService, ItemInfoType.Loot, Icons.LootIcon)
+    public ItemLootSourceRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(textureProvider, pluginInterface,  ItemInfoType.Loot, Icons.LootIcon)
     {
     }
 
@@ -41,7 +44,7 @@ public class ItemLootSourceRenderer : ItemSupplementSourceRenderer<ItemLootSourc
 
 public class ItemGardeningSourceRenderer : ItemSupplementSourceRenderer<ItemGardeningSource>
 {
-    public ItemGardeningSourceRenderer(ImGuiService imGuiService) : base(imGuiService, ItemInfoType.Gardening, Icons.SproutIcon)
+    public ItemGardeningSourceRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(textureProvider, pluginInterface,  ItemInfoType.Gardening, Icons.SproutIcon)
     {
     }
 
@@ -50,7 +53,7 @@ public class ItemGardeningSourceRenderer : ItemSupplementSourceRenderer<ItemGard
 }
 public class ItemDesynthUseRenderer : ItemSupplementUseRenderer<ItemDesynthSource>
 {
-    public ItemDesynthUseRenderer(ImGuiService imGuiService) : base(imGuiService, ItemInfoType.Desynthesis, Icons.DesynthesisIcon)
+    public ItemDesynthUseRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(textureProvider, pluginInterface,  ItemInfoType.Desynthesis, Icons.DesynthesisIcon)
     {
     }
 
@@ -60,7 +63,7 @@ public class ItemDesynthUseRenderer : ItemSupplementUseRenderer<ItemDesynthSourc
 
 public class ItemReductionUseRenderer : ItemSupplementUseRenderer<ItemReductionSource>
 {
-    public ItemReductionUseRenderer(ImGuiService imGuiService) : base(imGuiService, ItemInfoType.Reduction, Icons.ReductionIcon)
+    public ItemReductionUseRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(textureProvider, pluginInterface,  ItemInfoType.Reduction, Icons.ReductionIcon)
     {
     }
 
@@ -70,7 +73,7 @@ public class ItemReductionUseRenderer : ItemSupplementUseRenderer<ItemReductionS
 
 public class ItemLootUseRenderer : ItemSupplementUseRenderer<ItemLootSource>
 {
-    public ItemLootUseRenderer(ImGuiService imGuiService) : base(imGuiService, ItemInfoType.Loot, Icons.LootIcon)
+    public ItemLootUseRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(textureProvider, pluginInterface,  ItemInfoType.Loot, Icons.LootIcon)
     {
     }
 
@@ -80,7 +83,7 @@ public class ItemLootUseRenderer : ItemSupplementUseRenderer<ItemLootSource>
 
 public class ItemGardeningUseRenderer : ItemSupplementUseRenderer<ItemGardeningSource>
 {
-    public ItemGardeningUseRenderer(ImGuiService imGuiService) : base(imGuiService, ItemInfoType.Gardening, Icons.SproutIcon)
+    public ItemGardeningUseRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(textureProvider, pluginInterface, ItemInfoType.Gardening, Icons.SproutIcon)
     {
     }
 
@@ -92,7 +95,7 @@ public abstract class ItemSupplementUseRenderer<T> : ItemSupplementSourceRendere
 {
     public override RendererType RendererType => RendererType.Use;
 
-    protected ItemSupplementUseRenderer(ImGuiService imGuiService, ItemInfoType itemInfoType, ushort icon) : base(imGuiService, itemInfoType, icon)
+    protected ItemSupplementUseRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface, ItemInfoType itemInfoType, ushort icon) : base(textureProvider, pluginInterface, itemInfoType, icon)
     {
     }
 
@@ -100,7 +103,7 @@ public abstract class ItemSupplementUseRenderer<T> : ItemSupplementSourceRendere
     {
         foreach (var source in sources)
         {
-            ImGui.Image(ImGuiService.GetIconTexture(source.Item.Icon).ImGuiHandle, new Vector2(18,18) * ImGui.GetIO().FontGlobalScale);
+            ImGui.Image(TextureProvider.GetFromGameIcon(new GameIconLookup(source.Item.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18,18) * ImGui.GetIO().FontGlobalScale);
             ImGui.SameLine();
             ImGui.Text(source.Item.NameString);
         }
@@ -108,7 +111,7 @@ public abstract class ItemSupplementUseRenderer<T> : ItemSupplementSourceRendere
 
     public override Action<ItemSource> DrawTooltip => source =>
     {
-        ImGui.Image(ImGuiService.GetIconTexture(source.Item.Icon).ImGuiHandle, new Vector2(18,18) * ImGui.GetIO().FontGlobalScale);
+        ImGui.Image(TextureProvider.GetFromGameIcon(new GameIconLookup(source.Item.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18,18) * ImGui.GetIO().FontGlobalScale);
         ImGui.SameLine();
         ImGui.Text(source.Item.NameString);
     };
@@ -116,13 +119,15 @@ public abstract class ItemSupplementUseRenderer<T> : ItemSupplementSourceRendere
 
 public abstract class ItemSupplementSourceRenderer<T> : ItemInfoRenderer<T> where T : ItemSupplementSource
 {
-    public ImGuiService ImGuiService { get; }
+    public ITextureProvider TextureProvider { get; }
+    private readonly IDalamudPluginInterface _pluginInterface;
     private readonly ItemInfoType _itemInfoType;
     private readonly ushort _icon;
 
-    public ItemSupplementSourceRenderer(ImGuiService imGuiService, ItemInfoType itemInfoType, ushort icon)
+    public ItemSupplementSourceRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface, ItemInfoType itemInfoType, ushort icon)
     {
-        ImGuiService = imGuiService;
+        TextureProvider = textureProvider;
+        _pluginInterface = pluginInterface;
         _itemInfoType = itemInfoType;
         _icon = icon;
     }
@@ -135,7 +140,7 @@ public abstract class ItemSupplementSourceRenderer<T> : ItemInfoRenderer<T> wher
     {
         foreach (var source in sources)
         {
-            ImGui.Image(ImGuiService.GetIconTexture(source.CostItem!.Icon).ImGuiHandle, new Vector2(18,18) * ImGui.GetIO().FontGlobalScale);
+            ImGui.Image(TextureProvider.GetFromGameIcon(new GameIconLookup(source.CostItem!.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18,18) * ImGui.GetIO().FontGlobalScale);
             ImGui.SameLine();
             ImGui.Text(source.CostItem!.NameString);
         }
@@ -143,7 +148,7 @@ public abstract class ItemSupplementSourceRenderer<T> : ItemInfoRenderer<T> wher
 
     public override Action<ItemSource> DrawTooltip => source =>
     {
-        ImGui.Image(ImGuiService.GetIconTexture(source.CostItem!.Icon).ImGuiHandle, new Vector2(18,18) * ImGui.GetIO().FontGlobalScale);
+        ImGui.Image(TextureProvider.GetFromGameIcon(new GameIconLookup(source.CostItem!.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18,18) * ImGui.GetIO().FontGlobalScale);
         ImGui.SameLine();
         ImGui.Text(source.CostItem!.NameString);
     };

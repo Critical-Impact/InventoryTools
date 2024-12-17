@@ -117,7 +117,7 @@ public class CraftBuyColumn : ButtonColumn
                         messages.Add(new RequestTeleportMessage(nearestAetheryte.Value.RowId));
                     }
 
-                    _chatUtilities.PrintFullMapLink(tuple.location, item.NameString);
+                    _chatUtilities.PrintFullMapLink(tuple.location, tuple.npc.ENpcResidentRow.Base.Singular.ExtractText());
                     ImGui.CloseCurrentPopup();
                 }
             }
@@ -146,7 +146,7 @@ public class CraftBuyColumn : ButtonColumn
                         messages.Add(new RequestTeleportMessage(nearestAetheryte.Value.RowId));
                     }
 
-                    _chatUtilities.PrintFullMapLink(vendor.location, vendor.location.ToString());
+                    _chatUtilities.PrintFullMapLink(vendor.location, vendor.npc?.ENpcResidentRow.Base.Singular.ExtractText() ?? vendor.location.ToString());
                 }
                 else
                 {

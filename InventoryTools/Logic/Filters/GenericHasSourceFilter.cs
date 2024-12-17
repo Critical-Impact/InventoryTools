@@ -19,6 +19,8 @@ public class GenericHasSourceFilter : BooleanFilter, IGenericFilter, IItemTypeFi
 
     public override int LabelSize { get; set; } = 250;
 
+    public delegate GenericHasSourceFilter Factory(ItemInfoType itemType);
+
     public GenericHasSourceFilter(ItemInfoType itemType, ItemInfoRenderService infoRenderService, ILogger<GenericHasSourceFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
     {
         _infoRenderService = infoRenderService;

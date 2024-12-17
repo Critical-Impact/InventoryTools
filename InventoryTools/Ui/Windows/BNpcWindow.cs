@@ -140,7 +140,7 @@ namespace InventoryTools.Ui
 
                             if (ImGui.BeginPopup("RightClickUse" + drop.Item.RowId))
                             {
-                                MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(_itemSheet.GetRow(drop.Item.RowId)));
+                                MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(_itemSheet.GetRow(drop.Item.RowId)));
                                 ImGui.EndPopup();
                             }
 

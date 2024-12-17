@@ -17,7 +17,7 @@ public class ItemFccShopUseRenderer : ItemFccShopSourceRenderer
 {
     private readonly ItemSheet _itemSheet;
     public override string HelpText => "Can the item be spent at a free company shop?";
-    public ItemFccShopUseRenderer(ImGuiService imGuiService, MapSheet mapSheet, ItemSheet itemSheet) : base(imGuiService, mapSheet, itemSheet)
+    public ItemFccShopUseRenderer(MapSheet mapSheet, ItemSheet itemSheet) : base(mapSheet, itemSheet)
     {
         _itemSheet = itemSheet;
     }
@@ -59,13 +59,11 @@ public class ItemFccShopUseRenderer : ItemFccShopSourceRenderer
 public class ItemFccShopSourceRenderer : ItemInfoRenderer<ItemFccShopSource>
 {
     public MapSheet MapSheet { get; }
-    private readonly ImGuiService _imGuiService;
     private readonly ItemSheet _itemSheet;
 
-    public ItemFccShopSourceRenderer(ImGuiService imGuiService, MapSheet mapSheet, ItemSheet itemSheet)
+    public ItemFccShopSourceRenderer(MapSheet mapSheet, ItemSheet itemSheet)
     {
         MapSheet = mapSheet;
-        _imGuiService = imGuiService;
         _itemSheet = itemSheet;
     }
 

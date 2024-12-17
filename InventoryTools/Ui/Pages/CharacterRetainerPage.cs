@@ -470,7 +470,7 @@ namespace InventoryTools.Ui.Pages
                                                                                         using var _ = ImRaii.PushId("RightClick" + realSlot);
                                                                                         if (popup.Success)
                                                                                         {
-                                                                                            ImGuiService.RightClickService.DrawRightClickPopup(item, messages);
+                                                                                            ImGuiService.ImGuiMenuService.DrawRightClickPopup(item, messages);
                                                                                         }
                                                                                     }
                                                                                 }

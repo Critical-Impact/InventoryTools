@@ -231,7 +231,7 @@ public class BNpcsWindow : GenericTabbedTable<BNpcNameRow>, IMenuWindow
 
                         if (ImGui.BeginPopup("RightClick" + drop.RowId))
                         {
-                            MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(drop));
+                            MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(drop));
                             ImGui.EndPopup();
                         }
 

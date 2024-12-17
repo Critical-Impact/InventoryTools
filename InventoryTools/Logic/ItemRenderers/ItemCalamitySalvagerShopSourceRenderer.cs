@@ -15,27 +15,39 @@ namespace InventoryTools.Logic.ItemRenderers;
 
 public class ItemCalamitySalvagerShopUseRenderer : ItemCalamitySalvagerShopSourceRenderer
 {
+    private readonly MapSheet _mapSheet;
     private readonly ItemSheet _itemSheet;
 
     public override string HelpText => "Can the item be spent at the calamity salvager?";
 
-    public ItemCalamitySalvagerShopUseRenderer(ImGuiService imGuiService, MapSheet mapSheet, ItemSheet itemSheet) : base(imGuiService, mapSheet, itemSheet)
+    public ItemCalamitySalvagerShopUseRenderer(MapSheet mapSheet, ItemSheet itemSheet) : base(mapSheet, itemSheet)
     {
+        _mapSheet = mapSheet;
         _itemSheet = itemSheet;
     }
+
+    public override Action<List<ItemSource>>? DrawTooltipGrouped => sources =>
+    {
+        var asSources = AsSource(sources);
+        var allGilShops = asSources.ToList();
+        var maps = allGilShops.SelectMany(shopSource => shopSource.MapIds == null || shopSource.MapIds.Count == 0
+            ? new List<string>()
+            : shopSource.MapIds.Select(c => _mapSheet.GetRow(c).FormattedName)).Distinct().ToList();
+
+        ImGui.Text($"{allGilShops.Count} items available for purchase with gil in {maps.Count} zones");
+    };
+
 
     public override RendererType RendererType => RendererType.Use;
 }
 
 public class ItemCalamitySalvagerShopSourceRenderer : ItemInfoRenderer<ItemCalamitySalvagerShopSource>
 {
-    private readonly ImGuiService _imGuiService;
     private readonly MapSheet _mapSheet;
     private readonly ItemSheet _itemSheet;
 
-    public ItemCalamitySalvagerShopSourceRenderer(ImGuiService imGuiService, MapSheet mapSheet, ItemSheet itemSheet)
+    public ItemCalamitySalvagerShopSourceRenderer(MapSheet mapSheet, ItemSheet itemSheet)
     {
-        _imGuiService = imGuiService;
         _mapSheet = mapSheet;
         _itemSheet = itemSheet;
     }

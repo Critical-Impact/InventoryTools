@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using AllaganLib.GameSheets.Caches;
 using Autofac;
+using CriticalCommonLib.Models;
 using InventoryTools.Logic.Filters;
+using InventoryTools.Logic.GenericFilters;
 using InventoryTools.Logic.ItemRenderers;
 
 namespace InventoryTools.Services;
@@ -16,22 +18,42 @@ public interface IFilterService
 
 public class FilterService : IFilterService
 {
+    private readonly GenericBooleanFilter.Factory _booleanFilterFactory;
+    private readonly GenericHasSourceFilter.Factory _hasSourceFactory;
+    private readonly GenericHasUseFilter.Factory _hasUseFactory;
+    private readonly GenericHasSourceCategoryFilter.Factory _hasSourceCategoryFactory;
+    private readonly GenericHasUseCategoryFilter.Factory _hasUseCategoryFactory;
     public readonly List<FilterCategory> FilterCategoryOrder = new() { FilterCategory.Settings, FilterCategory.Display, FilterCategory.Inventories, FilterCategory.Columns,FilterCategory.CraftColumns,  FilterCategory.Basic, FilterCategory.Sources, FilterCategory.SourceCategories, FilterCategory.Uses, FilterCategory.UseCategories, FilterCategory.IngredientSourcing,FilterCategory.ZonePreference,FilterCategory.WorldPricePreference, FilterCategory.Acquisition, FilterCategory.Searching, FilterCategory.Market, FilterCategory.Searching, FilterCategory.Crafting, FilterCategory.Gathering, FilterCategory.Advanced};
-    public FilterService(IEnumerable<IFilter> filters, IComponentContext componentContext, ItemInfoRenderService itemInfoRenderService)
+    public FilterService(IEnumerable<IFilter> filters,
+        GenericBooleanFilter.Factory booleanFilterFactory,
+        GenericHasSourceFilter.Factory hasSourceFactory,
+        GenericHasUseFilter.Factory hasUseFactory,
+        GenericHasSourceCategoryFilter.Factory hasSourceCategoryFactory,
+        GenericHasUseCategoryFilter.Factory hasUseCategoryFactory,
+        ItemInfoRenderService itemInfoRenderService)
     {
+        _booleanFilterFactory = booleanFilterFactory;
+        _hasSourceFactory = hasSourceFactory;
+        _hasUseFactory = hasUseFactory;
+        _hasSourceCategoryFactory = hasSourceCategoryFactory;
+        _hasUseCategoryFactory = hasUseCategoryFactory;
+
         _availableFilters = filters.ToList();
+
+        _availableFilters.Add(_booleanFilterFactory.Invoke("grCombined", "Glamour Ready Combined",
+            "Is the item combined in the glamour chest?", FilterCategory.Basic,
+            item => item.SortedCategory == InventoryCategory.GlamourChest && item.GlamourId != 0, null));
+
         foreach (var itemInfoType in Enum.GetValues<ItemInfoType>())
         {
             if (itemInfoRenderService.HasSourceRenderer(itemInfoType))
             {
-                var genericFilter =
-                    componentContext.Resolve<GenericHasSourceFilter>(new NamedParameter("itemType", itemInfoType));
+                var genericFilter = _hasSourceFactory.Invoke(itemInfoType);
                 _availableFilters.Add(genericFilter);
             }
             if (itemInfoRenderService.HasUseRenderer(itemInfoType))
             {
-                var genericFilter =
-                    componentContext.Resolve<GenericHasUseFilter>(new NamedParameter("itemType", itemInfoType));
+                var genericFilter = _hasUseFactory.Invoke(itemInfoType);
                 _availableFilters.Add(genericFilter);
             }
         }
@@ -39,17 +61,13 @@ public class FilterService : IFilterService
         {
             if (itemInfoRenderService.GetSourcesByCategory(category).Count != 0)
             {
-                var genericFilter =
-                    componentContext.Resolve<GenericHasSourceCategoryFilter>(new NamedParameter("renderCategory",
-                        category));
+                var genericFilter = hasSourceCategoryFactory.Invoke(category);
                 _availableFilters.Add(genericFilter);
             }
 
             if (itemInfoRenderService.GetUsesByCategory(category).Count != 0)
             {
-                var genericFilter =
-                    componentContext.Resolve<GenericHasUseCategoryFilter>(
-                        new NamedParameter("renderCategory", category));
+                var genericFilter = hasUseCategoryFactory.Invoke(category);
                 _availableFilters.Add(genericFilter);
             }
         }

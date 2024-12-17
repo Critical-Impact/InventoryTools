@@ -14,6 +14,7 @@ using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.MarketBoard;
+using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 
@@ -27,6 +28,7 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
 using Humanizer;
 using InventoryTools.Logic.ItemRenderers;
+using InventoryTools.Logic.Settings;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
@@ -74,6 +76,8 @@ namespace InventoryTools.Ui
         private readonly BNpcNameSheet _bNpcNameSheet;
         private readonly MapSheet _mapSheet;
         private readonly IUnlockTrackerService _unlockTrackerService;
+        private readonly ImGuiTooltipService _tooltipService;
+        private readonly ImGuiTooltipModeSetting _tooltipModeSetting;
         private HashSet<uint> _marketRefreshing = new();
         private HoverButton _refreshPricesButton = new();
 
@@ -82,7 +86,9 @@ namespace InventoryTools.Ui
             ICommandManager commandManager, IListService listService, ItemSheet itemSheet, ExcelSheet<World> worldSheet,
             IGameInterface gameInterface, IMarketCache marketCache, IChatUtilities chatUtilities, Logger otterLogger,
             IInventoryMonitor inventoryMonitor, ICharacterMonitor characterMonitor, IClipboardService clipboardService,
-            ItemInfoRenderService itemInfoRenderService, BNpcNameSheet bNpcNameSheet, MapSheet mapSheet, IUnlockTrackerService unlockTrackerService, string name = "Item Window") : base(
+            ItemInfoRenderService itemInfoRenderService, BNpcNameSheet bNpcNameSheet, MapSheet mapSheet, IUnlockTrackerService unlockTrackerService,
+            ImGuiTooltipService tooltipService, ImGuiTooltipModeSetting tooltipModeSetting,
+            string name = "Item Window") : base(
             logger, mediator, imGuiService, configuration, name)
         {
             _marketBoardService = marketBoardService;
@@ -102,6 +108,8 @@ namespace InventoryTools.Ui
             _bNpcNameSheet = bNpcNameSheet;
             _mapSheet = mapSheet;
             _unlockTrackerService = unlockTrackerService;
+            _tooltipService = tooltipService;
+            _tooltipModeSetting = tooltipModeSetting;
         }
 
         private void MarketCacheUpdated(MarketCacheUpdatedMessage obj)
@@ -146,7 +154,7 @@ namespace InventoryTools.Ui
                     {
                         foreach (var npc in vendor.ENpcs)
                         {
-                            //if ((_excelCache.GetHouseVendor(npc.Key)?.ParentId ?? 0) != 0) continue; TODO: work out what this actually does
+                            if (npc.IsHouseVendorChild) continue;
                             if (!npc.Locations.Any())
                             {
                                 Vendors.Add(new (vendor, npc.ENpcResidentRow, null));
@@ -294,6 +302,10 @@ namespace InventoryTools.Ui
                     ImGui.TextUnformatted("Buy from Calamity Salvager: " + Item.BuyFromVendorPrice + SeIconChar.Gil.ToIconString());
                 }
                 ImGui.Image(ImGuiService.GetIconTexture(Item.Icon).ImGuiHandle, new Vector2(100, 100) * ImGui.GetIO().FontGlobalScale);
+                if (_tooltipModeSetting.CurrentValue(Configuration) != ImGuiTooltipMode.Never)
+                {
+                    _tooltipService.DrawItemTooltip(new SearchResult(Item));
+                }
                 if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
                                         ImGuiHoveredFlags.AllowWhenOverlapped &
                                         ImGuiHoveredFlags.AllowWhenBlockedByPopup &
@@ -309,7 +321,7 @@ namespace InventoryTools.Ui
 
                 if (ImGui.BeginPopup("RightClick" + _itemId))
                 {
-                    this.MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(Item));
+                    this.MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(Item));
                     ImGui.EndPopup();
                 }
 
@@ -622,7 +634,7 @@ namespace InventoryTools.Ui
 
                             if (ImGui.BeginPopup("RightClick" + item.RowId))
                             {
-                                MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(item));
+                                MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(item));
                                 ImGui.EndPopup();
                             }
 
@@ -672,7 +684,7 @@ namespace InventoryTools.Ui
 
                         if (ImGui.BeginPopup("RightClick"+ sharedModel.RowId))
                         {
-                            MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(sharedModel));
+                            MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(sharedModel));
                             ImGui.EndPopup();
                         }
 
@@ -723,7 +735,7 @@ namespace InventoryTools.Ui
                             {
                                 if (recipe.ItemResult != null)
                                 {
-                                    MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(recipe.ItemResult));
+                                    MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(recipe.ItemResult));
                                 }
 
                                 ImGui.EndPopup();
@@ -811,6 +823,21 @@ namespace InventoryTools.Ui
             ImGui.TextWrapped(_characterMonitor.GetCharacterNameById(obj.RetainerId));
             ImGui.TableNextColumn();
             ImGui.TextWrapped(obj.FormattedBagLocation);
+            if (obj.SortedCategory == InventoryCategory.GlamourChest && obj.GlamourId != 0)
+            {
+                ImGui.SameLine();
+                ImGui.Image(this.ImGuiService.GetIconTexture(Icons.MannequinIcon).ImGuiHandle, new Vector2(16,16));
+                if (ImGui.IsItemHovered())
+                {
+                    using (var tooltip = ImRaii.Tooltip())
+                    {
+                        if (tooltip)
+                        {
+                            ImGui.TextUnformatted("This item has been combined into a single glamour ready item.");
+                        }
+                    }
+                }
+            }
             ImGui.TableNextColumn();
             ImGui.TextWrapped(obj.Quantity.ToString());
             ImGui.TableNextColumn();
@@ -853,7 +880,7 @@ namespace InventoryTools.Ui
             {
                 ImGui.TableNextColumn();
                 ImGui.TextWrapped("Housing Vendor");
-                ImGuiUtil.LabeledHelpMarker("", "This is a vendor that can be placed inside your house/apartment.");
+                ImGuiService.HelpMarker("This is a vendor that can be placed inside your house/apartment.");
                 ImGui.TableNextColumn();
             }
             else

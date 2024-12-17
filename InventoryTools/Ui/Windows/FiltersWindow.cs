@@ -1684,7 +1684,7 @@ namespace InventoryTools.Ui
             {
                 if (popup.Success)
                 {
-                    MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(item));
+                    MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(item));
                 }
             }
             ImGui.TableNextColumn();

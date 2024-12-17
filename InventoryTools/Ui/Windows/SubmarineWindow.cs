@@ -100,7 +100,7 @@ namespace InventoryTools.Ui
                             var itemRow = _itemSheet.GetRowOrDefault(drop.RowId);
                             if (itemRow != null)
                             {
-                                MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(itemRow));
+                                MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(itemRow));
                             }
 
                             ImGui.EndPopup();

@@ -259,7 +259,7 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskRow>, IMenuWin
 
                         if (ImGui.BeginPopup("RightClick" + drop.RowId))
                         {
-                            MediatorService.Publish(ImGuiService.RightClickService.DrawRightClickPopup(drop));
+                            MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(drop));
                             ImGui.EndPopup();
                         }
                         ImGuiUtil.HoverTooltip(drop.NameString);

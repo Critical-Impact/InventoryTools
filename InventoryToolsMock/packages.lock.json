@@ -176,19 +176,19 @@
       },
       "AllaganLib.GameSheets": {
         "type": "Transitive",
-        "resolved": "1.1.11",
-        "contentHash": "LxetkKl/CiU6JYFrdmVhr00y/OKYTushWFm+D3Gh+mOCIZENNS0trrhwem9VqP8OXnS1MZ1yJr8BZHgmzOn3zg==",
+        "resolved": "1.1.14",
+        "contentHash": "v94Vp6KZvhmj2Dh0F6nhidJQnl+mwKi0VqQYsImJQJIvAGfBKnI+czXvfXiFpW7nHHdw1+YUund/Ln5fq6Vp1w==",
         "dependencies": {
-          "AllaganLib.Shared": "1.1.11",
+          "AllaganLib.Shared": "1.1.12",
           "Autofac.Extensions.DependencyInjection": "9.0.0",
           "CSVFile": "3.2.0",
-          "LuminaSupplemental.Excel": "2.1.5"
+          "LuminaSupplemental.Excel": "2.1.6"
         }
       },
       "AllaganLib.Shared": {
         "type": "Transitive",
-        "resolved": "1.1.11",
-        "contentHash": "D+aBFYcG2/8J55+cCLqC9AUI9c3FD7r1xFyTzAjDfW0hq3ST0CYapD1TpZy60zA4lH9dOOlSqeJAi5BgNqmQsQ==",
+        "resolved": "1.1.12",
+        "contentHash": "j48q3r3lk5S+AAbX2MmOI9+9xjA1GbNMqN7PZ6HKXk7toREDKPQVv2bgTLOeMtQVEmQPFsoBCSbdHOpGMmBreA==",
         "dependencies": {
           "Microsoft.Extensions.Hosting": "8.0.0",
           "Microsoft.Extensions.Hosting.Abstractions": "8.0.0"
@@ -255,8 +255,8 @@
       },
       "LuminaSupplemental.Excel": {
         "type": "Transitive",
-        "resolved": "2.1.5",
-        "contentHash": "+ctOGZUWDL6xdIGymD4buURhK4ceePJsZq+4pK0rgNYEN4ts/ggMNY219NxqLlZ3LN136pV9DoJ5O1XAs2iInQ==",
+        "resolved": "2.1.6",
+        "contentHash": "h/rGvwCbQJ3xBDApu77xpZWgmr98EGjcXbsOyfIaCnzi5MUh3IQRIPyD+qQTEE9Tcw8unw3gEiJNxd/s0syhuw==",
         "dependencies": {
           "CSVFile": "3.1.0",
           "CsvHelper": "30.0.1"
@@ -827,7 +827,7 @@
       "criticalcommonlib": {
         "type": "Project",
         "dependencies": {
-          "AllaganLib.GameSheets": "[1.1.11, )",
+          "AllaganLib.GameSheets": "[1.1.14, )",
           "Humanizer.Core": "[3.0.0-beta.54, )",
           "Microsoft.Extensions.Hosting": "[8.0.1, )",
           "NaturalSort.Extension": "[3.2.0, )",

@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Settings.Abstract
 {
-    public abstract class ChoiceSetting<T> : Setting<T> where T : IComparable
+    public abstract class ChoiceSetting<T> : Setting<T> where T : IComparable?
     {
         public ChoiceSetting(ILogger logger, ImGuiService imGuiService) : base(logger, imGuiService)
         {
@@ -18,7 +18,7 @@ namespace InventoryTools.Logic.Settings.Abstract
 
         public virtual string GetFormattedChoice(T choice)
         {
-            return Choices.SingleOrDefault(c => c.Key.Equals(choice)).Value;
+            return Choices.SingleOrDefault(c => c.Key!.Equals(choice)).Value;
         }
 
         public override void Draw(InventoryToolsConfiguration configuration, string? customName, bool? disableReset,

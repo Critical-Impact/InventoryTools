@@ -18,6 +18,8 @@ public class GenericHasSourceCategoryFilter : BooleanFilter, IGenericFilter
 
     public override int LabelSize { get; set; } = 250;
 
+    public delegate GenericHasSourceCategoryFilter Factory(ItemInfoRenderCategory renderCategory);
+
     public GenericHasSourceCategoryFilter(ItemInfoRenderCategory renderCategory, ItemInfoRenderService infoRenderService, ILogger<GenericHasSourceCategoryFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
     {
         _renderCategory = renderCategory;

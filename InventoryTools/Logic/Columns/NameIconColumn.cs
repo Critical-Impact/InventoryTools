@@ -5,6 +5,7 @@ using CriticalCommonLib.Services.Mediator;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Logic.Settings;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 
@@ -12,9 +13,15 @@ namespace InventoryTools.Logic.Columns;
 
 public class NameIconColumn : TextIconColumn
 {
+    private readonly ImGuiTooltipService _tooltipService;
+    private readonly ImGuiTooltipModeSetting _tooltipModeSetting;
+    private readonly InventoryToolsConfiguration _configuration;
 
-    public NameIconColumn(ILogger<NameIconColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+    public NameIconColumn(ILogger<NameIconColumn> logger, ImGuiTooltipService tooltipService, ImGuiTooltipModeSetting tooltipModeSetting, ImGuiService imGuiService, InventoryToolsConfiguration configuration) : base(logger, imGuiService)
     {
+        _tooltipService = tooltipService;
+        _tooltipModeSetting = tooltipModeSetting;
+        _configuration = configuration;
     }
     public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
     public override (string, ushort, bool)? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
@@ -35,6 +42,14 @@ public class NameIconColumn : TextIconColumn
         SearchResult searchResult, int rowIndex, int columnIndex)
     {
         base.Draw(configuration, columnConfiguration, searchResult, rowIndex, columnIndex);
+        _tooltipService.DrawItemTooltip(searchResult);
+        if (_tooltipModeSetting.CurrentValue(_configuration) == ImGuiTooltipMode.Icons)
+        {
+            if (ImGui.IsItemHovered())
+            {
+                _tooltipService.DrawItemTooltip(searchResult);
+            }
+        }
         if (searchResult.CraftItem != null && searchResult.CraftItem.IsOutputItem)
         {
             var itemRecipes = searchResult.Item.Recipes

@@ -6,6 +6,8 @@ using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
+using Dalamud.Interface.Textures;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
@@ -16,11 +18,11 @@ namespace InventoryTools.Logic.ItemRenderers;
 
 public class ItemCraftRequirementSourceRenderer : ItemInfoRenderer<ItemCraftRequirementSource>
 {
-    private readonly ImGuiService _imGuiService;
+    private readonly ITextureProvider _textureProvider;
 
-    public ItemCraftRequirementSourceRenderer(ImGuiService imGuiService)
+    public ItemCraftRequirementSourceRenderer(ITextureProvider textureProvider)
     {
-        _imGuiService = imGuiService;
+        _textureProvider = textureProvider;
     }
     public override RendererType RendererType => RendererType.Use;
     public override ItemInfoType Type => ItemInfoType.CraftRecipe;
@@ -40,7 +42,7 @@ public class ItemCraftRequirementSourceRenderer : ItemInfoRenderer<ItemCraftRequ
         ImGui.TextUnformatted($"Ingredient of Craft Recipe:");
         using (ImRaii.PushIndent())
         {
-            ImGui.Image(_imGuiService.GetIconTexture(asSource.Item.Icon).ImGuiHandle, new Vector2(16,16));
+            ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(asSource.Item.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(16,16));
             ImGui.SameLine();
             ImGui.TextUnformatted(GetName(source));
         }

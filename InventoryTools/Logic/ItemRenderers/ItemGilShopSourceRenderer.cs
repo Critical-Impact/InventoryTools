@@ -15,26 +15,37 @@ namespace InventoryTools.Logic.ItemRenderers;
 
 public class ItemGilShopUseRenderer : ItemGilShopSourceRenderer
 {
+    private readonly MapSheet _mapSheet;
     private readonly ItemSheet _itemSheet;
     public override string HelpText => "Can the item be spent at a gil shop?";
 
-    public ItemGilShopUseRenderer(ImGuiService imGuiService, MapSheet mapSheet, ItemSheet itemSheet) : base(imGuiService, mapSheet, itemSheet)
+    public ItemGilShopUseRenderer(MapSheet mapSheet, ItemSheet itemSheet) : base(mapSheet, itemSheet)
     {
+        _mapSheet = mapSheet;
         _itemSheet = itemSheet;
     }
+
+    public override Action<List<ItemSource>>? DrawTooltipGrouped => sources =>
+    {
+        var asSources = AsSource(sources);
+        var allGilShops = asSources.ToList();
+        var maps = allGilShops.SelectMany(shopSource => shopSource.MapIds == null || shopSource.MapIds.Count == 0
+            ? new List<string>()
+            : shopSource.MapIds.Select(c => _mapSheet.GetRow(c).FormattedName)).Distinct().ToList();
+
+        ImGui.Text($"{allGilShops.Count} items available for purchase with gil in {maps.Count} zones");
+    };
 
     public override RendererType RendererType => RendererType.Use;
 }
 
 public class ItemGilShopSourceRenderer : ItemInfoRenderer<ItemGilShopSource>
 {
-    private readonly ImGuiService _imGuiService;
     private readonly MapSheet _mapSheet;
     private readonly ItemSheet _itemSheet;
 
-    public ItemGilShopSourceRenderer(ImGuiService imGuiService, MapSheet mapSheet, ItemSheet itemSheet)
+    public ItemGilShopSourceRenderer(MapSheet mapSheet, ItemSheet itemSheet)
     {
-        _imGuiService = imGuiService;
         _mapSheet = mapSheet;
         _itemSheet = itemSheet;
     }
@@ -56,7 +67,7 @@ public class ItemGilShopSourceRenderer : ItemInfoRenderer<ItemGilShopSource>
         var allGilShops = asSources.Cast<ItemGilShopSource>().ToList();
         var maps = allGilShops.SelectMany(shopSource => shopSource.MapIds == null || shopSource.MapIds.Count == 0
             ? new List<string>()
-            : shopSource.MapIds.Select(c => _mapSheet.GetRow(c).FormattedName)).ToList();
+            : shopSource.MapIds.Select(c => _mapSheet.GetRow(c).FormattedName)).Distinct().ToList();
 
         ImGui.Text("Costs:");
 
