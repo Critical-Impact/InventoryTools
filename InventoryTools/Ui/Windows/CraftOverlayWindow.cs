@@ -43,6 +43,7 @@ public class CraftOverlayWindow : OverlayWindow
     private readonly CraftOverlayMaxExpandedItemsSetting _maxExpandedItemsSetting;
     private readonly CraftOverlayRememberStateSetting _rememberStateSetting;
     private readonly CraftOverlayWindowStateSetting _windowStateSetting;
+    private readonly CraftOverlayHideSetting _overlayHideSetting;
     private readonly MapSheet _mapSheet;
 
     public CraftOverlayWindow(ILogger<CraftOverlayWindow> logger,
@@ -62,7 +63,8 @@ public class CraftOverlayWindow : OverlayWindow
         ImGuiService imGuiService,
         CraftOverlayMaxExpandedItemsSetting maxExpandedItemsSetting,
         CraftOverlayRememberStateSetting rememberStateSetting,
-        CraftOverlayWindowStateSetting windowStateSetting) : base(logger,
+        CraftOverlayWindowStateSetting windowStateSetting,
+        CraftOverlayHideSetting overlayHideSetting) : base(logger,
         configuration,
         addonLifecycle,
         gameGui,
@@ -82,6 +84,7 @@ public class CraftOverlayWindow : OverlayWindow
         _maxExpandedItemsSetting = maxExpandedItemsSetting;
         _rememberStateSetting = rememberStateSetting;
         _windowStateSetting = windowStateSetting;
+        _overlayHideSetting = overlayHideSetting;
     }
 
     public override void Initialize()
@@ -93,6 +96,16 @@ public class CraftOverlayWindow : OverlayWindow
     {
         get => _windowStateSetting.CurrentValue(Configuration);
         set => _windowStateSetting.UpdateFilterConfiguration(Configuration, value);
+    }
+
+    public override bool DrawConditions()
+    {
+        if (this._overlayHideSetting.CurrentValue(Configuration) == CraftOverlayHide.AlwaysShow)
+        {
+            return true;
+        }
+
+        return this._overlayHideSetting.ShouldShow();
     }
 
     public override void Draw()

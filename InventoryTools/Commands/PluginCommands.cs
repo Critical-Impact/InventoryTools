@@ -187,6 +187,13 @@ namespace InventoryTools.Commands
             CloseFilterWindows(command,args);
         }
 
+        [Command("/craftoverlay")]
+        [HelpMessage("Toggles the crafting overlay window.")]
+        public void CraftOverlay(string command, string args)
+        {
+            _mediatorService.Publish(new ToggleGenericWindowMessage(typeof(CraftOverlayWindow)));
+        }
+
         [Command("/moreinfo")]
         [Aliases("/itemwindow")]
         [HelpMessage("Opens the more information window for a specific item. Provide the name of the item or the ID of the item.")]
