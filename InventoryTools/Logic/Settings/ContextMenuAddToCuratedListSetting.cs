@@ -19,4 +19,7 @@ public class ContextMenuAddToCuratedListSetting : GenericBooleanSetting
         imGuiService)
     {
     }
+
+    public override string WizardName { get; } = "Add to Curated List";
+
 }
