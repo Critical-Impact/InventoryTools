@@ -107,7 +107,7 @@ namespace InventoryTools.Services
 
         public IWindowSystem WindowSystem => _windowSystem;
 
-        public T GetWindow<T>() where T: GenericWindow 
+        public T GetWindow<T>() where T: GenericWindow
         {
             if (_genericWindows.ContainsKey(typeof(T)))
             {
@@ -130,7 +130,7 @@ namespace InventoryTools.Services
             AddWindow(type, newWindow);
             return newWindow;
         }
-        
+
         public UintWindow GetWindow(Type type, uint windowId)
         {
             if (_uintWindows.ContainsKey((type,windowId)))
@@ -142,7 +142,7 @@ namespace InventoryTools.Services
             AddWindow(type, newWindow, windowId);
             return newWindow;
         }
-        
+
         public StringWindow GetWindow(Type type, string windowId)
         {
             if (_stringWindows.ContainsKey((type,windowId)))
@@ -182,7 +182,7 @@ namespace InventoryTools.Services
             GetWindow<T>().Toggle();
             return true;
         }
-        
+
         public bool ToggleWindow<T>(uint windowId) where T: UintWindow
         {
             GetWindow<T>(windowId).Toggle();
@@ -293,7 +293,7 @@ namespace InventoryTools.Services
 
             return true;
         }
-        
+
         private bool CloseWindow(Type windowType)
         {
             if (_genericWindows.ContainsKey(windowType))
@@ -303,7 +303,7 @@ namespace InventoryTools.Services
             }
             return false;
         }
-        
+
         private bool CloseWindow(Type windowType, uint windowId)
         {
             if (_uintWindows.ContainsKey((windowType,windowId)))
@@ -313,7 +313,7 @@ namespace InventoryTools.Services
             }
             return false;
         }
-        
+
         private bool CloseWindow(Type windowType, string windowId)
         {
             if (_stringWindows.ContainsKey((windowType,windowId)))
@@ -323,7 +323,7 @@ namespace InventoryTools.Services
             }
             return false;
         }
-        
+
         private bool CloseWindows()
         {
             foreach (var window in _allWindows)
@@ -333,7 +333,7 @@ namespace InventoryTools.Services
 
             return true;
         }
-        
+
         private bool CloseWindows(Type type)
         {
             foreach (var window in _allWindows)
@@ -346,7 +346,7 @@ namespace InventoryTools.Services
 
             return true;
         }
-        
+
         private bool AddWindow(Type windowType, GenericWindow window)
         {
             window.Logger = Logger;
@@ -360,7 +360,7 @@ namespace InventoryTools.Services
             }
             return false;
         }
-        
+
         private bool AddWindow(Type windowType, UintWindow window, uint windowId)
         {
             window.Logger = Logger;
@@ -374,7 +374,7 @@ namespace InventoryTools.Services
             }
             return false;
         }
-        
+
         private bool AddWindow(Type windowType, StringWindow window, string windowId)
         {
             window.Logger = Logger;
@@ -469,7 +469,7 @@ namespace InventoryTools.Services
                         hasOtherWindowOpen = true;
                     }
                 }
-                
+
                 if (hasOtherWindowOpen == false)
                 {
                     _configuration.SavedWindowPositions[window.GetType().ToString()] = window.CurrentPosition;
@@ -483,6 +483,18 @@ namespace InventoryTools.Services
                 RemoveWindow(window);
             }
             MediatorService.Publish(new OverlaysRequestRefreshMessage());
+        }
+
+        private void SaveWindowStates()
+        {
+            foreach (var window in _allWindows)
+            {
+                if (window.SaveState && window.SavePosition && window.IsOpen)
+                {
+                    _configuration.SavedWindowPositions[window.GetType().ToString()] = window.CurrentPosition;
+                }
+            }
+            _configuration.IsDirty = true;
         }
 
         public void RemoveWindow(IWindow window)
@@ -507,8 +519,8 @@ namespace InventoryTools.Services
             }
             window.Dispose();
         }
-                
-        
+
+
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
@@ -536,7 +548,7 @@ namespace InventoryTools.Services
             _mediatorService.Subscribe(this, new Action<CloseWindowsMessage>(CloseWindows) );
             _mediatorService.Subscribe(this, new Action<OpenSavedWindowsMessage>(OpenSavedWindows) );
             _mediatorService.Subscribe(this, new Action<UpdateWindowRespectClose>(close => UpdateRespectCloseHotkey(close.windowType, close.newSetting)) );
-            
+
             return Task.CompletedTask;
         }
 
@@ -592,6 +604,7 @@ namespace InventoryTools.Services
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
+            SaveWindowStates();
             Logger.LogTrace("Stopping service {type} ({this})", GetType().Name, this);
             return Task.CompletedTask;
         }

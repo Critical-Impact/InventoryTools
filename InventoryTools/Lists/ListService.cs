@@ -66,6 +66,8 @@ namespace InventoryTools.Lists
             _mediatorService.Subscribe<ListUpdatedMessage>(this, message => ListUpdated(message.FilterConfiguration) );
             _mediatorService.Subscribe<AddToCraftListMessage>(this, AddToCraftListMessageRecv );
             _mediatorService.Subscribe<AddToNewCraftListMessage>(this, AddToNewCraftListMessageRecv );
+            _mediatorService.Subscribe<AddToNewCuratedListMessage>(this, AddToNewCuratedListMessageRecv );
+            _mediatorService.Subscribe<AddToCuratedListMessage>(this, AddToCuratedListMessageRecv );
             _framework.Update += OnUpdate;
         }
 
@@ -88,10 +90,22 @@ namespace InventoryTools.Lists
             }
         }
 
+        private void AddToCuratedListMessageRecv(AddToCuratedListMessage obj)
+        {
+            var filter = GetListByKey(obj.FilterKey);
+            filter?.AddCuratedItem(new CuratedItem(obj.ItemId, obj.Quantity, obj.Flags));
+        }
+
         private void AddToNewCraftListMessageRecv(AddToNewCraftListMessage obj)
         {
             var craftList = AddNewCraftList(null, obj.IsEphemeral);
             craftList.CraftList.AddCraftItem(obj.ItemId, obj.Quantity, obj.Flags);
+        }
+
+        private void AddToNewCuratedListMessageRecv(AddToNewCuratedListMessage obj)
+        {
+            var craftList = AddNewCuratedList();
+            craftList.AddCuratedItem(new CuratedItem(obj.ItemId, obj.Quantity, obj.Flags));
         }
 
         private ConcurrentDictionary<string, FilterConfiguration> LoadListsFromConfiguration()

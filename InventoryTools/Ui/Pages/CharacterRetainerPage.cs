@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
@@ -111,7 +112,7 @@ namespace InventoryTools.Ui.Pages
                         var tooltip = character.Value.FormattedName;
                         if (character.Value.ActualClassJob != null)
                         {
-                            tooltip += "\n" + character.Value.ActualClassJob?.Base.Name.ExtractText();
+                            tooltip += "\n" + character.Value.ActualClassJob?.Base.Name.ExtractText().ToTitleCase();
                         }
 
                         tooltip += "\n\nRight Click: Options";
@@ -213,7 +214,7 @@ namespace InventoryTools.Ui.Pages
                             var tooltip = characterRetainer.Value.FormattedName;
                             if (characterRetainer.Value.ActualClassJob != null)
                             {
-                                tooltip += "\n" + characterRetainer.Value.ActualClassJob?.Base.NameEnglish.ExtractText();
+                                tooltip += "\n" + characterRetainer.Value.ActualClassJob?.Base.Name.ExtractText().ToTitleCase();
                             }
 
                             tooltip += "\n\nRight Click: Options";
@@ -249,7 +250,7 @@ namespace InventoryTools.Ui.Pages
                             var tooltip = characterRetainer.Value.FormattedName;
                             if (characterRetainer.Value.ActualClassJob != null)
                             {
-                                tooltip += "\n" + characterRetainer.Value.ActualClassJob?.Base.NameEnglish.ExtractText();
+                                tooltip += "\n" + characterRetainer.Value.ActualClassJob?.Base.Name.ExtractText().ToTitleCase();
                             }
 
                             tooltip += "\n\nRight Click: Options";
@@ -362,7 +363,7 @@ namespace InventoryTools.Ui.Pages
                                 ImGui.Text("Free Company: " + character.FreeCompanyName);
                                 ImGui.Text("World: " + (character.World?.Name.ExtractText() ?? "Unknown"));
                                 ImGui.Text("Class/Job: " +
-                                           (character.ActualClassJob?.Base.NameEnglish.ExtractText() ?? "Unknown"));
+                                           (character.ActualClassJob?.Base.Name.ExtractText().ToTitleCase() ?? "Unknown"));
                             }
                             else if (character.CharacterType is CharacterType.Housing)
                             {

@@ -57,7 +57,7 @@ public class MockCharacterMonitor : ICharacterMonitor
             Service.Framework.RunOnFrameworkThread(() => { OnCharacterUpdated?.Invoke(null); });
         }
     }
-    
+
     private Dictionary<ulong, Character> _characters;
     private bool _isLoggedIn;
     public Dictionary<ulong, Character> Characters => _characters;
@@ -117,6 +117,11 @@ public class MockCharacterMonitor : ICharacterMonitor
         return false;
     }
 
+    public unsafe List<ulong> GetOwnedHouseIds()
+    {
+        return new();
+    }
+
     public KeyValuePair<ulong, Character>[] GetRetainerCharacters(ulong retainerId)
     {
         return Characters.Where(c => c.Value.OwnerId == retainerId && c.Value.CharacterType == CharacterType.Retainer && c.Key != 0 && c.Value.Name != "").ToArray();
@@ -131,8 +136,8 @@ public class MockCharacterMonitor : ICharacterMonitor
     {
         return Characters.Where(c => c.Value.Owners.Contains(characterId) && c.Value.CharacterType == CharacterType.Housing && c.Key != 0 && c.Value.Name != "").ToArray();
     }
-        
-        
+
+
     public KeyValuePair<ulong, Character>[] GetCharacterHouses()
     {
         return Characters.Where(c => c.Value.Owners.Count != 0 && c.Value.CharacterType == CharacterType.Housing && c.Key != 0 && c.Value.HousingName != "").ToArray();
@@ -182,7 +187,7 @@ public class MockCharacterMonitor : ICharacterMonitor
         }
         return null;
     }
-    
+
     public Character? GetParentCharacterById(ulong characterId)
     {
         var character = GetCharacterById(characterId);
@@ -195,7 +200,7 @@ public class MockCharacterMonitor : ICharacterMonitor
 
         return null;
     }
-    
+
     public string GetCharacterNameById(ulong characterId, bool owner = false)
     {
         if (!owner) return GetCharacterById(characterId)?.FormattedName ?? "Unknown";
@@ -261,9 +266,9 @@ public class MockCharacterMonitor : ICharacterMonitor
 
     public Character? ActiveFreeCompany =>
         _characters.ContainsKey(_activeFreeCompanyId) ? _characters[_activeFreeCompanyId] : null;
-    
+
     public Character? ActiveRetainer =>
-        _characters.ContainsKey(_activeRetainerId) ? _characters[_activeRetainerId] : null;    
+        _characters.ContainsKey(_activeRetainerId) ? _characters[_activeRetainerId] : null;
 
     public bool IsLoggedIn
     {

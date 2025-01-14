@@ -1690,6 +1690,20 @@ namespace InventoryTools.Ui
                     }
                 }
             }
+
+            if (ImGui.CollapsingHeader("Housing Goods"))
+            {
+                var addon = this.gameGui.GetAddonByName("HousingGoods");
+                if (addon != IntPtr.Zero)
+                {
+                    var housingGoods = (AddonHousingGoods*)addon;
+                    if (housingGoods != null)
+                    {
+                        ImGui.Text($"Current Tab: { (housingGoods->CurrentTab) }");
+                    }
+                }
+
+            }
         }
 
         public unsafe void DrawCraftAgentTab()
@@ -1810,7 +1824,7 @@ namespace InventoryTools.Ui
             // ImGui.EndTable();
         }
 
-        private void DrawCharacterDebugTab()
+        private unsafe void DrawCharacterDebugTab()
         {
             ImGui.TextUnformatted("Character Information:");
             ImGui.TextUnformatted(_characterMonitor.ActiveCharacter?.Name.ToString() ??
@@ -1826,8 +1840,29 @@ namespace InventoryTools.Ui
             ImGui.TextUnformatted("Cached Division Id:" + _characterMonitor.InternalDivisionId.ToString());
             ImGui.TextUnformatted("Cached Room Id:" + _characterMonitor.InternalRoomId.ToString());
             ImGui.TextUnformatted("Cached House Id:" + _characterMonitor.InternalHouseId.ToString());
+
+            var ot = HousingManager.Instance()->OutdoorTerritory;
+            if(ot != null)
+            {
+                ImGui.TextUnformatted(ot->HouseId.ToString());
+            }
+            var it = HousingManager.Instance()->IndoorTerritory;
+            if(it != null)
+            {
+                ImGui.TextUnformatted(it->HouseId.ToString());
+            }
+            var ct = HousingManager.Instance()->CurrentTerritory;
+            if(ct != null)
+            {
+                ImGui.TextUnformatted($"{(ulong)ct:X}");
+            }
+            ImGui.TextUnformatted("Owned House IDS:");
+            foreach (var id in _characterMonitor.GetOwnedHouseIds())
+            {
+                ImGui.TextUnformatted(id.ToString());
+            }
             ImGui.TextUnformatted("Has Housing Permission:" +
-                                  (_characterMonitor.InternalHasHousePermission ? "Yes" : "No"));
+                                  (_characterMonitor.InternalHasHousePermission || _characterMonitor.GetOwnedHouseIds().Contains(_characterMonitor.InternalHouseId) ? "Yes" : "No"));
             ImGui.NewLine();
             ImGui.TextUnformatted("Retainers:");
             ImGui.BeginTable("retainerTable", 6);

@@ -20,7 +20,7 @@ public class FavouritesFilter : BooleanFilter
         var currentValue = CurrentValue(configuration);
         if (currentValue != null)
         {
-            return currentValue.Value && _configuration.IsFavouriteItem(item.ItemId);
+            return currentValue.Value && _configuration.IsFavouriteItem(item.ItemId) || !currentValue.Value && !_configuration.IsFavouriteItem(item.ItemId);
         }
 
         return null;
@@ -31,7 +31,7 @@ public class FavouritesFilter : BooleanFilter
         var currentValue = CurrentValue(configuration);
         if (currentValue != null)
         {
-            return currentValue.Value && _configuration.IsFavouriteItem(item.RowId);
+            return currentValue.Value && _configuration.IsFavouriteItem(item.RowId) || !currentValue.Value && !_configuration.IsFavouriteItem(item.RowId);
         }
 
         return null;

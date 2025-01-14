@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AllaganLib.GameSheets.Sheets;
+using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Services;
 using Dalamud.Game.Text.SeStringHandling;
@@ -85,7 +86,13 @@ public class LocationDisplayTooltip : BaseTooltip
                                 var willRetrieve = craftItem.QuantityWillRetrieve;
                                 if (missingOverall != 0 || willRetrieve != 0)
                                 {
-                                    var needText = "Need: " + missingOverall;
+                                    var missingText = "Missing: ";
+                                    if (craftItem.IngredientPreference.Type is IngredientPreferenceType.Buy
+                                        or IngredientPreferenceType.Item or IngredientPreferenceType.HouseVendor)
+                                    {
+                                        missingText = "Buy: ";
+                                    }
+                                    var needText = missingText + missingOverall;
                                     if (filterResult != null)
                                     {
                                         var sortedItems = filterResult.Where(c => c.InventoryItem != null &&
@@ -95,7 +102,7 @@ public class LocationDisplayTooltip : BaseTooltip
                                             var sortedItem = sortedItems.First();
                                             if (sortedItem.InventoryItem!.Quantity != 0)
                                             {
-                                                needText += " / (" + Math.Min(willRetrieve,sortedItem.InventoryItem!.Quantity) + " can be retrieved)";
+                                                needText += " / (" + Math.Min(willRetrieve,sortedItem.InventoryItem!.Quantity) + " should be retrieved)";
                                             }
                                         }
                                     }

@@ -2,7 +2,9 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
+using AllaganLib.GameSheets.Model;
 using CriticalCommonLib;
+using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
@@ -183,78 +185,63 @@ namespace InventoryTools.Logic
             }
         }
 
-        public List<Vector4?> GetSelectIconStringItems(List<SearchResult>? resultOverride = null)
+        public List<Vector4?> GetSelectIconStringItems(List<IShop> shops, List<SearchResult>? resultOverride = null)
         {
             var itemHighlights = new List<Vector4?>();
-            return itemHighlights;
-            //TODO: Rework
+            if (_characterMonitor.ActiveCharacterId == 0)
+            {
+                return itemHighlights;
+            }
+            var filterResult = resultOverride ?? FilterResult;
+            if (filterResult != null)
+            {
+                HashSet<uint> requiredItems;
+                if (FilterConfiguration.FilterType == FilterType.CraftFilter)
+                {
+                    requiredItems = FilterConfiguration.CraftList.GetFlattenedMergedMaterials().Where(c => c.IngredientPreference.Type is IngredientPreferenceType.Buy or IngredientPreferenceType.Item or IngredientPreferenceType.HouseVendor ).Select(c => c.Item.RowId).Distinct()
+                        .ToHashSet();
+                }
+                else if (filterResult.Count != 0)
+                {
+                    requiredItems = filterResult.Select(c => c.Item.RowId).Distinct().ToHashSet();
+                }
+                else
+                {
+                    requiredItems = new HashSet<uint>();
+                }
 
-            // if (_characterMonitor.ActiveCharacterId == 0)
-            // {
-            //     return itemHighlights;
-            // }
-            // var filterResult = resultOverride ?? FilterResult;
-            // if (filterResult != null)
-            // {
-            //     HashSet<uint> requiredItems;
-            //     if (FilterConfiguration.FilterType == FilterType.CraftFilter)
-            //     {
-            //         _logger.LogTrace("Craft filter, getting flattened materials");
-            //         requiredItems = FilterConfiguration.CraftList.GetFlattenedMaterials().Select(c => c.Item.RowId).Distinct()
-            //             .ToHashSet();
-            //     }
-            //     else if (filterResult.Count != 0)
-            //     {
-            //         requiredItems = filterResult.Select(c => c.Item.RowId).Distinct().ToHashSet();
-            //     }
-            //     else
-            //     {
-            //         return itemHighlights;
-            //     }
-            //
-            //
-            //     var target = Service.Targets.Target;
-            //         if (target != null)
-            //         {
-            //             _logger.LogTrace("Target found for SelectIconString");
-            //
-            //             var npcId = target.DataId;
-            //             var npc = _excelCache.ENpcCollection?.Get(npcId);
-            //             if (npc != null && npc.Base != null)
-            //             {
-            //                 _logger.LogTrace("NPC found for SelectIconString");
-            //                 //TODO: Probably need to deal with custom talk and shit
-            //                 for (var index = 0; index < npc.Base.ENpcData.Length; index++)
-            //                 {
-            //                     var talkItem = npc.Base.ENpcData[index];
-            //                     var preHandler = _excelCache.GetPreHandlerSheet().GetRow(talkItem);
-            //                     if (preHandler != null)
-            //                     {
-            //                         talkItem = preHandler.Target;
-            //                     }
-            //                     var shop = _excelCache.ShopCollection?.GetShop(talkItem);
-            //                     if (shop != null)
-            //                     {
-            //                         _logger.LogTrace("Shop found for SelectIconString");
-            //                         var shouldHighlight = shop.Items.Any(c => requiredItems.Contains(c.Row));
-            //                         if (shouldHighlight)
-            //                         {
-            //                             _logger.LogTrace("Found item for shop" + shop.RowId);
-            //                             itemHighlights.Add(FilterConfiguration.RetainerListColor ?? _configuration.RetainerListColor);
-            //                         }
-            //                         else
-            //                         {
-            //                             _logger.LogTrace("Did not find item for shop" + shop.RowId);
-            //                             itemHighlights.Add(null);
-            //                         }
-            //                     }
-            //                 }
-            //             }
-            //         }
-            //         return itemHighlights;
-            // }
+                foreach (var shop in shops)
+                {
+                    var shouldHighlight = shop.Items.Any(c => requiredItems.Contains(c.RowId));
+                    itemHighlights.Add(shouldHighlight ? FilterConfiguration.RetainerListColor ?? _configuration.RetainerListColor : null);
+                }
+            }
 
             return itemHighlights;
+        }
+
+        public HashSet<uint> GetItemIds(List<SearchResult>? resultOverride = null)
+        {
+            var itemIds = new HashSet<uint>();
+            if (_characterMonitor.ActiveCharacterId == 0)
+            {
+                return itemIds;
+            }
+            var filterResult = resultOverride ?? FilterResult;
+            if (filterResult != null)
+            {
+                if (FilterConfiguration.FilterType == FilterType.CraftFilter)
+                {
+                    itemIds = FilterConfiguration.CraftList.GetFlattenedMergedMaterials().Where(c => c.IngredientPreference.Type is IngredientPreferenceType.Buy or IngredientPreferenceType.Item or IngredientPreferenceType.HouseVendor).Select(c => c.Item.RowId).Distinct()
+                        .ToHashSet();
+                }
+                else if (filterResult.Count != 0)
+                {
+                    itemIds = filterResult.Select(c => c.Item.RowId).Distinct().ToHashSet();
+                }
+            }
+
+            return itemIds;
         }
 
         public Dictionary<string, Vector4?> GetArmoireHighlights(List<SearchResult>? resultOverride = null)

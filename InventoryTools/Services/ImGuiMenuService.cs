@@ -534,7 +534,7 @@ public class ImGuiMenuService
                         {
                             if (ImGui.MenuItem(shopSource.Shop.Name + " - Teleport"))
                             {
-                                var eNpcBaseRow = shopSource.Shop.ENpcs.FirstOrDefault();
+                                var eNpcBaseRow = shopSource.Shop.ENpcs.FirstOrDefault(c => c.Locations.Any(d => d.Map.RowId == groupedShop.Key));
                                 var firstLocation = eNpcBaseRow?.Locations.FirstOrDefault();
                                 if (firstLocation != null && eNpcBaseRow != null)
                                 {

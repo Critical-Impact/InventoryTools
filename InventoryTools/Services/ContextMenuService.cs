@@ -13,6 +13,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using InventoryTools.Logic;
+using InventoryTools.Logic.Settings;
 using InventoryTools.Mediator;
 using InventoryTools.Services.Interfaces;
 using InventoryTools.Ui;
@@ -29,6 +30,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
     private readonly InventoryToolsConfiguration _configuration;
     private readonly ItemSheet _itemSheet;
     private readonly IGameInterface _gameInterface;
+    private readonly ContextMenuAddToCuratedListSetting _curatedListSetting;
     public const int SatisfactionSupplyItemIdx       = 84;
     public const int SatisfactionSupplyItem1Id       = 128 + 1 * 60;
     public const int SatisfactionSupplyItem2Id       = 128 + 2 * 60;
@@ -48,7 +50,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
     public const int GrandCompanySupplyListContextItemId            = 84;
     public const int GrandCompanyExchangeContextItemId            = 84;
 
-    public ContextMenuService(ILogger<ContextMenuService> logger, IListService listService, IContextMenu contextMenu, IGameGui gameGui, MediatorService mediatorService, InventoryToolsConfiguration configuration, ItemSheet itemSheet, IGameInterface gameInterface) : base(logger, mediatorService)
+    public ContextMenuService(ILogger<ContextMenuService> logger, IListService listService, IContextMenu contextMenu, IGameGui gameGui, MediatorService mediatorService, InventoryToolsConfiguration configuration, ItemSheet itemSheet, IGameInterface gameInterface, ContextMenuAddToCuratedListSetting curatedListSetting) : base(logger, mediatorService)
     {
         ContextMenu = contextMenu;
         _listService = listService;
@@ -56,6 +58,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
         _configuration = configuration;
         _itemSheet = itemSheet;
         _gameInterface = gameInterface;
+        _curatedListSetting = curatedListSetting;
     }
 
     private void MenuOpened(IMenuOpenedArgs args)
@@ -109,6 +112,17 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
                 menuItem.OnClicked += clickedArgs => OpenAddCraftListSubmenu(clickedArgs, itemId);
                 args.AddMenuItem(menuItem);
             }
+
+            if (_curatedListSetting.CurrentValue(_configuration))
+            {
+                var menuItem = new MenuItem();
+                menuItem.Name = "Add to Curated List";
+                menuItem.PrefixChar = 'A';
+                menuItem.IsSubmenu = true;
+                menuItem.OnClicked += clickedArgs => OpenAddCuratedListSubmenu(clickedArgs, itemId);
+                args.AddMenuItem(menuItem);
+            }
+
 
             if (_configuration.OpenCraftingLogContextMenu)
             {
@@ -263,6 +277,29 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
         obj.OpenSubmenu(menuItems);
     }
 
+    private void OpenAddCuratedListSubmenu(IMenuItemClickedArgs obj, uint? itemId = null)
+    {
+        var curatedLists = _listService.Lists.Where(c => c.FilterType == FilterType.CuratedList).ToList();
+        var menuItems = new List<MenuItem>();
+        foreach (var curatedList in curatedLists)
+        {
+            var menuItem = new MenuItem();
+            menuItem.Name = curatedList.Name;
+            menuItem.OnClicked += args =>
+            {
+                AddToCuratedList(curatedList, args, itemId);
+            };
+            menuItems.Add(menuItem);
+        }
+
+        var newButton = new MenuItem();
+        newButton.Name = "Add to New Curated List";
+        newButton.OnClicked += args => AddToNewCuratedList(args, itemId);
+        menuItems.Add(newButton);
+
+        obj.OpenSubmenu(menuItems);
+    }
+
     private unsafe IntPtr AgentById(AgentId id)
     {
         var uiModule = (UIModule*)_gameGui.GetUIModule();
@@ -284,6 +321,22 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
         else if(itemId != null)
         {
             MediatorService.Publish(new AddToNewCraftListMessage(itemId.Value, 1, InventoryItem.ItemFlags.None, false));
+        }
+    }
+
+    private void AddToNewCuratedList(IMenuItemClickedArgs obj, uint? itemId = null)
+    {
+        if (obj.Target is MenuTargetInventory inventory)
+        {
+            if (inventory.TargetItem != null)
+            {
+                itemId ??= inventory.TargetItem.Value.ItemId;
+                MediatorService.Publish(new AddToNewCuratedListMessage(itemId.Value, 1, inventory.TargetItem.Value.IsHq ? InventoryItem.ItemFlags.HighQuality : InventoryItem.ItemFlags.None));
+            }
+        }
+        else if(itemId != null)
+        {
+            MediatorService.Publish(new AddToNewCuratedListMessage(itemId.Value, 1, InventoryItem.ItemFlags.None));
         }
     }
 
@@ -316,6 +369,22 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
         else if(itemId != null)
         {
             MediatorService.Publish(new AddToCraftListMessage(craftList.Key, itemId.Value, 1, InventoryItem.ItemFlags.None));
+        }
+    }
+
+    private void AddToCuratedList(FilterConfiguration craftList, IMenuItemClickedArgs obj, uint? itemId = null)
+    {
+        if (obj.Target is MenuTargetInventory inventory)
+        {
+            if (inventory.TargetItem != null)
+            {
+                itemId ??= inventory.TargetItem.Value.ItemId;
+                MediatorService.Publish(new AddToCuratedListMessage(craftList.Key, itemId.Value, 1, inventory.TargetItem.Value.IsHq ? InventoryItem.ItemFlags.HighQuality : InventoryItem.ItemFlags.None));
+            }
+        }
+        else if(itemId != null)
+        {
+            MediatorService.Publish(new AddToCuratedListMessage(craftList.Key, itemId.Value, 1, InventoryItem.ItemFlags.None));
         }
     }
 

@@ -31,6 +31,7 @@ using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using InventoryTools.Commands;
+using InventoryTools.Highlighting;
 using InventoryTools.Host;
 using InventoryTools.Hotkeys;
 using InventoryTools.IPC;
@@ -122,7 +123,6 @@ namespace InventoryTools
             typeof(IPCService),
             typeof(HostedCraftMonitor),
             typeof(ItemSearchService),
-
         };
 
         public List<Type> GetHostedServices()
@@ -288,6 +288,7 @@ namespace InventoryTools
                 builder.RegisterType<AtkRetainerLarge>().As<IAtkOverlay>().As<AtkRetainerLarge>();
                 builder.RegisterType<AtkRetainerList>().As<IAtkOverlay>().As<AtkRetainerList>();
                 builder.RegisterType<AtkSelectIconString>().As<IAtkOverlay>().As<AtkSelectIconString>();
+                builder.RegisterType<AtkShop>().As<IAtkOverlay>().As<AtkShop>();
             });
 
             //Hosted service registrations
@@ -336,6 +337,8 @@ namespace InventoryTools
                 builder.RegisterType<ExcelCache>().SingleInstance();
                 builder.RegisterType<CraftingCache>().SingleInstance();
                 builder.RegisterType<ItemInfoRenderService>().SingleInstance();
+                builder.RegisterType<ShopHighlighting>().SingleInstance();
+                builder.RegisterType<ShopTrackerService>().SingleInstance();
                 builder.Register<GameData>(c => c.Resolve<IDataManager>().GameData).SingleInstance().ExternallyOwned();
                 builder.RegisterGameSheetManager(new SheetManagerStartupOptions()
                 {

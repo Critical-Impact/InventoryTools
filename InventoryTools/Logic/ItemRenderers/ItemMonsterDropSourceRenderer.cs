@@ -81,7 +81,7 @@ public class ItemMonsterDropSourceRenderer : ItemInfoRenderer<ItemMonsterDropSou
 
         foreach (var npcGroup in positionsGroupedByNpcId)
         {
-            ImGui.Text("Monster: " + _bnpcNameSheet.GetRow(npcGroup.Key).Base.Singular.ExtractText().ToTitleCase());
+            ImGui.Text("Map: " + _mapSheet.GetRow(npcGroup.Key).FormattedName);
             ImGui.Text("Locations:");
             using (ImRaii.PushIndent())
             {

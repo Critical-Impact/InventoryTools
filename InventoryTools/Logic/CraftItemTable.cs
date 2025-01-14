@@ -92,8 +92,9 @@ namespace InventoryTools.Logic
                                 using var tabItem = ImRaii.TabItem( groupedCraft.Item1.FormattedName());
                                 if (!tabItem.Success) continue;
 
+                                if (Columns.Count == 0) continue;
                                 using var table = ImRaii.Table(Key + "CraftTable", Columns.Count, _tableFlags);
-                                if (!table.Success || Columns.Count == 0) continue;
+                                if (!table.Success) continue;
                                 var refresh = false;
                                 ImGui.TableSetupScrollFreeze(Math.Min(FreezeCols ?? 0, Columns.Count),
                                     FreezeRows ?? (ShowFilterRow ? 2 : 1));

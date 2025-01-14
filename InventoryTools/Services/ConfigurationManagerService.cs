@@ -29,6 +29,7 @@ namespace InventoryTools.Services
         public delegate void ConfigurationChangedDelegate();
         private readonly IFramework _framework;
         private bool _configurationLoaded = false;
+        private Task? _currentInventorySaveTask = null;
 
         public event ConfigurationChangedDelegate? ConfigurationChanged;
 
@@ -307,6 +308,15 @@ namespace InventoryTools.Services
             loadConfigStopwatch.Stop();
             Logger.LogTrace("Took " + loadConfigStopwatch.Elapsed.TotalSeconds + " to save inventories.");
 
+        }
+
+        public Task SaveInventoriesAsync(List<InventoryItem> items)
+        {
+            if (_currentInventorySaveTask == null || _currentInventorySaveTask.IsCompleted || _currentInventorySaveTask.IsFaulted)
+            {
+                _currentInventorySaveTask = Task.Run(() => SaveInventories(items));
+            }
+            return _currentInventorySaveTask;
         }
 
         public bool SaveInventories(List<InventoryItem> items)

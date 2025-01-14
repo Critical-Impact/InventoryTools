@@ -39,8 +39,7 @@ public abstract class OverlayWindow : GenericWindow, IDisposable
         this.pluginLog = pluginLog;
         this.AttachedAddons = [];
         this.MediatorService.Subscribe<PluginLoadedMessage>(this, this.PluginLoaded);
-        this.Flags = ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoResize |
-                     ImGuiWindowFlags.NoSavedSettings;
+        this.Flags = ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoResize;
         this.Size = null;
         this.RespectCloseHotkey = false;
     }

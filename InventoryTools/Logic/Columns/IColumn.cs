@@ -49,7 +49,6 @@ namespace InventoryTools.Logic.Columns
 
         public void SetupFilter(string tableKey)
         {
-            ImGui.TableSetupColumn(tableKey + "Filter" + Name, ImGuiTableColumnFlags.NoSort);
         }
 
         public IFilterEvent? DrawFooterFilter(ColumnConfiguration columnConfiguration, FilterTable filterTable);

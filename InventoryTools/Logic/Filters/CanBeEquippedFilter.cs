@@ -33,6 +33,11 @@ namespace InventoryTools.Logic.Filters
                 return true;
             }
 
+            if (!currentValue.Value && item.Base.EquipSlotCategory.RowId == 0)
+            {
+                return true;
+            }
+
             return false;
         }
 

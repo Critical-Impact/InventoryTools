@@ -44,6 +44,7 @@ public class CraftOverlayWindow : OverlayWindow
     private readonly CraftOverlayRememberStateSetting _rememberStateSetting;
     private readonly CraftOverlayWindowStateSetting _windowStateSetting;
     private readonly CraftOverlayHideSetting _overlayHideSetting;
+    private readonly ShopTrackerService _shopTrackerService;
     private readonly MapSheet _mapSheet;
 
     public CraftOverlayWindow(ILogger<CraftOverlayWindow> logger,
@@ -64,7 +65,8 @@ public class CraftOverlayWindow : OverlayWindow
         CraftOverlayMaxExpandedItemsSetting maxExpandedItemsSetting,
         CraftOverlayRememberStateSetting rememberStateSetting,
         CraftOverlayWindowStateSetting windowStateSetting,
-        CraftOverlayHideSetting overlayHideSetting) : base(logger,
+        CraftOverlayHideSetting overlayHideSetting,
+        ShopTrackerService shopTrackerService) : base(logger,
         configuration,
         addonLifecycle,
         gameGui,
@@ -85,6 +87,7 @@ public class CraftOverlayWindow : OverlayWindow
         _rememberStateSetting = rememberStateSetting;
         _windowStateSetting = windowStateSetting;
         _overlayHideSetting = overlayHideSetting;
+        _shopTrackerService = shopTrackerService;
     }
 
     public override void Initialize()
@@ -110,6 +113,10 @@ public class CraftOverlayWindow : OverlayWindow
 
     public override void Draw()
     {
+        if (ImGui.GetWindowPos() != CurrentPosition)
+        {
+            CurrentPosition = ImGui.GetWindowPos();
+        }
         var collapsed = this.WindowState;
 
         var currentCursorPosX = ImGui.GetCursorPosX();
@@ -452,6 +459,8 @@ public class CraftOverlayWindow : OverlayWindow
     public override bool DestroyOnClose { get; } = false;
 
     public override bool SaveState => this._rememberStateSetting.CurrentValue(Configuration);
+
+    public override bool SavePosition => true;
     public override Vector2? DefaultSize { get; } = null;
     public override Vector2? MaxSize { get; } = null;
     public override Vector2? MinSize { get; } = null;

@@ -221,6 +221,8 @@ namespace InventoryTools
 
             AddFreeCompanyFilter();
 
+            AddHousingFilter();
+
             AddAllGameItemsFilter();
 
             AddFavouritesFilter();
@@ -276,6 +278,15 @@ namespace InventoryTools
             var newFilter = new FilterConfiguration(newName,  FilterType.SearchFilter);
             newFilter.DisplayInTabs = true;
             newFilter.SourceAllFreeCompanies = true;
+            _listService.AddDefaultColumns(newFilter);
+            _listService.AddList(newFilter);
+        }
+
+        public void AddHousingFilter(string newName = "Housing")
+        {
+            var newFilter = new FilterConfiguration(newName,  FilterType.SearchFilter);
+            newFilter.DisplayInTabs = true;
+            newFilter.SourceAllHouses = true;
             _listService.AddDefaultColumns(newFilter);
             _listService.AddList(newFilter);
         }
@@ -369,7 +380,7 @@ namespace InventoryTools
         {
             _logger.LogTrace("PluginLogic: Inventory changed, saving to config.");
             var allItems = _inventoryMonitor.AllItems.ToList();
-            _configurationManagerService.SaveInventories(allItems);
+            _configurationManagerService.SaveInventoriesAsync(allItems);
             if (_configuration.AutomaticallyDownloadMarketPrices)
             {
                 var activeCharacter = _characterMonitor.ActiveCharacter;
@@ -438,7 +449,7 @@ namespace InventoryTools
             _craftMonitor.CraftCompleted -= CraftMonitorOnCraftCompleted ;
             _configurationManagerService.ConfigurationChanged -= ConfigOnConfigurationChanged;
             _configurationManagerService.Save();
-            _configurationManagerService.SaveInventories(_inventoryMonitor.AllItems.ToList());
+            _configurationManagerService.SaveInventoriesAsync(_inventoryMonitor.AllItems.ToList()).Wait(TimeSpan.FromSeconds(2));
             _configurationManagerService.SaveHistory(_hostedInventoryHistory.GetHistory());
             if (_configuration.TrackMobSpawns)
             {

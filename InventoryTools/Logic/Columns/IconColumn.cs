@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib.Services.Mediator;
 using Dalamud.Game.ClientState.Keys;
+using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
@@ -56,23 +57,28 @@ namespace InventoryTools.Logic.Columns
             var messages = new List<MessageBase>();
             if (currentValue != null)
             {
-                ImGui.PushID("icon" + rowIndex);
-                if (ImGui.ImageButton(ImGuiService.GetIconTexture(currentValue.Value.Item1, currentValue.Value.Item2).ImGuiHandle, new Vector2(filterConfiguration.TableHeight - 1, filterConfiguration.TableHeight - 1) * ImGui.GetIO().FontGlobalScale,new Vector2(0,0), new Vector2(1,1), 2))
+                using (ImRaii.PushId("icon" + rowIndex))
                 {
-                    ImGui.PopID();
-                    if (!this._keyState[VirtualKey.CONTROL] && !this._keyState[VirtualKey.SHIFT] && !this._keyState[VirtualKey.MENU])
+                    if (ImGui.ImageButton(
+                            ImGuiService.GetIconTexture(currentValue.Value.Item1, currentValue.Value.Item2).ImGuiHandle,
+                            new Vector2(filterConfiguration.TableHeight - 1, filterConfiguration.TableHeight - 1) *
+                            ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 2))
                     {
-                        messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), searchResult.Item.RowId));
+                        if (!this._keyState[VirtualKey.CONTROL] && !this._keyState[VirtualKey.SHIFT] &&
+                            !this._keyState[VirtualKey.MENU])
+                        {
+                            messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), searchResult.Item.RowId));
+                        }
+                    }
+
+                    if (_tooltipModeSetting.CurrentValue(_configuration) == ImGuiTooltipMode.Icons)
+                    {
+                        if (ImGui.IsItemHovered())
+                        {
+                            _tooltipService.DrawItemTooltip(searchResult);
+                        }
                     }
                 }
-                if (_tooltipModeSetting.CurrentValue(_configuration) == ImGuiTooltipMode.Icons)
-                {
-                    if (ImGui.IsItemHovered())
-                    {
-                        _tooltipService.DrawItemTooltip(searchResult);
-                    }
-                }
-                ImGui.PopID();
             }
             return messages;
 

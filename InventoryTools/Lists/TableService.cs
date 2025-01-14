@@ -28,7 +28,7 @@ public class TableService : DisposableMediatorBackgroundService
     public delegate void TableRefreshedDelegate(RenderTableBase table);
     public event TableRefreshedDelegate TableRefreshed;
     public IBackgroundTaskQueue TableQueue { get; }
-    
+
     public TableService(ILogger<TableService> logger, MediatorService mediatorService, IListService listService, IBackgroundTaskQueue filterQueue, IFramework framework, Func<FilterConfiguration, CraftItemTable> craftItemTableFactory, Func<FilterConfiguration, FilterTable> filterTableFactory) : base(logger, mediatorService)
     {
         _listService = listService;
@@ -110,13 +110,13 @@ public class TableService : DisposableMediatorBackgroundService
     public async Task RefreshTable(CraftItemTable craftItemTable, CancellationToken cancellationToken)
     {
         var filterConfiguration = craftItemTable.FilterConfiguration;
-        
+
         RefreshCraftColumns(craftItemTable, cancellationToken);
-        
+
         if (filterConfiguration.SearchResults != null && filterConfiguration.CraftList.BeenGenerated && filterConfiguration.CraftList.BeenUpdated)
         {
             Logger.LogTrace("CraftTable: Refreshing");
-            craftItemTable.CraftItems = filterConfiguration.CraftList.GetFlattenedMergedMaterials(true).Select(c => new SearchResult(c)).ToList();
+            craftItemTable.CraftItems = filterConfiguration.CraftList.GetFlattenedMergedMaterials().Select(c => new SearchResult(c)).ToList();
             filterConfiguration.CraftList.ClearGroupCache();
             var outputList = filterConfiguration.CraftList.GetOutputList();
             craftItemTable.CraftGroups = outputList.Select(c => (c, c.CraftItems.Select(d => new SearchResult(d)).ToList())).ToList();
@@ -124,7 +124,7 @@ public class TableService : DisposableMediatorBackgroundService
             craftItemTable.NeedsRefresh = false;
             craftItemTable.Refreshing = false;
             TableRefreshed?.Invoke(craftItemTable);
-        }   
+        }
         else
         {
             craftItemTable.NeedsRefresh = false;
@@ -135,13 +135,13 @@ public class TableService : DisposableMediatorBackgroundService
     public async Task RefreshTable(FilterTable filterTable, CancellationToken cancellationToken)
     {
         RefreshColumns(filterTable, cancellationToken);
-        
+
         var filterConfiguration = filterTable.FilterConfiguration;
 
         if (filterConfiguration.SearchResults != null)
         {
-            if (filterConfiguration.FilterType == FilterType.SearchFilter 
-                || filterConfiguration.FilterType == FilterType.SortingFilter 
+            if (filterConfiguration.FilterType == FilterType.SearchFilter
+                || filterConfiguration.FilterType == FilterType.SortingFilter
                 || filterConfiguration.FilterType == FilterType.CraftFilter)
             {
                 var items = filterConfiguration.SearchResults.AsEnumerable();
@@ -246,10 +246,10 @@ public class TableService : DisposableMediatorBackgroundService
     }
 
 
-    
+
     public CraftItemTable GetCraftTable(FilterConfiguration configuration)
     {
-        
+
         var filterKey = configuration.Key;
         if (!_craftItemTables.ContainsKey(filterKey))
         {
@@ -316,7 +316,7 @@ public class TableService : DisposableMediatorBackgroundService
             }
         }
     }
-    
+
     public Task RequestRefresh(FilterTable filterTable)
     {
         if (filterTable is { NeedsRefresh: true, Refreshing: false, FilterConfiguration.AllowRefresh: true })
@@ -327,7 +327,7 @@ public class TableService : DisposableMediatorBackgroundService
 
         return Task.CompletedTask;
     }
-    
+
     public Task RequestRefresh(CraftItemTable craftItemTable)
     {
         if (craftItemTable is { NeedsRefresh: true, Refreshing: false, FilterConfiguration.AllowRefresh: true })
@@ -338,12 +338,12 @@ public class TableService : DisposableMediatorBackgroundService
 
         return Task.CompletedTask;
     }
-    
+
     private async Task BackgroundProcessing(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var workItem = 
+            var workItem =
                 await TableQueue.DequeueAsync(stoppingToken);
 
             try
@@ -352,7 +352,7 @@ public class TableService : DisposableMediatorBackgroundService
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, 
+                Logger.LogError(ex,
                     "Error occurred executing {WorkItem}.", nameof(workItem));
             }
         }

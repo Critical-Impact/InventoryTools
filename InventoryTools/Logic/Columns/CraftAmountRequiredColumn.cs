@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Services.Mediator;
-
+using DalaMock.Shared.Interfaces;
+using Dalamud.Interface;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
@@ -14,8 +16,13 @@ namespace InventoryTools.Logic.Columns
 {
     public class CraftAmountRequiredColumn : DoubleIntegerColumn
     {
-        public CraftAmountRequiredColumn(ILogger<CraftAmountRequiredColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        private readonly IFont _font;
+        private readonly ItemSheet _itemSheet;
+
+        public CraftAmountRequiredColumn(ILogger<CraftAmountRequiredColumn> logger, ImGuiService imGuiService, IFont font, ItemSheet itemSheet) : base(logger, imGuiService)
         {
+            _font = font;
+            _itemSheet = itemSheet;
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Crafting;
 
@@ -38,6 +45,9 @@ namespace InventoryTools.Logic.Columns
 
             ImGui.TableNextColumn();
             if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;
+            var originalCursorPosY = ImGui.GetCursorPosY();
+            var itemHovered = false;
+
             if (searchResult.CraftItem.IsOutputItem)
             {
                 if (configuration.CraftList.CraftListMode == CraftListMode.Normal)
@@ -94,13 +104,7 @@ namespace InventoryTools.Logic.Columns
 
                     if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
                     {
-                        using (var tooltip = ImRaii.Tooltip())
-                        {
-                            if (tooltip)
-                            {
-                                ImGui.Text("The amount you currently have in your inventory.");
-                            }
-                        }
+                        itemHovered = true;
                     }
 
                     var toStock = searchResult.CraftItem.QuantityToStock.ToString();
@@ -138,6 +142,50 @@ namespace InventoryTools.Logic.Columns
             else
             {
                 ImGuiUtil.VerticalAlignText(searchResult.CraftItem.QuantityNeeded + "/" + searchResult.CraftItem.QuantityNeededPreUpdate, configuration.TableHeight, false);
+            }
+            ImGui.SameLine();
+            ImGui.SetCursorPosY(originalCursorPosY);
+            ImGui.PushFont(_font.IconFont);
+            ImGuiUtil.VerticalAlignTextDisabled(FontAwesomeIcon.InfoCircle.ToIconString(), configuration.TableHeight, false);
+            ImGui.PopFont();
+            if (itemHovered || ImGui.IsItemHovered(ImGuiHoveredFlags.None))
+            {
+                using var tt = ImRaii.Tooltip();
+                ImGui.Text("Ingredient Breakdown:");
+                ImGui.TextUnformatted("Amount Originally Required: " + searchResult.CraftItem.QuantityRequired);
+                ImGui.TextUnformatted("Amount Required: " + searchResult.CraftItem.QuantityNeededPreUpdate);
+                ImGui.TextUnformatted("Amount in Inventory: " + searchResult.CraftItem.QuantityReady);
+                ImGui.TextUnformatted("Amount to Retrieve: " + searchResult.CraftItem.QuantityAvailable);
+                ImGui.Separator();
+                ImGui.TextUnformatted("Amount Missing: " + searchResult.CraftItem.QuantityMissingOverall);
+                if (searchResult.Item.CanBeCrafted)
+                {
+                    ImGui.TextUnformatted("Amount Craftable: " + searchResult.CraftItem.QuantityCanCraft);
+                    if (searchResult.CraftItem.Yield != 1)
+                    {
+                        ImGui.Separator();
+                        ImGui.TextUnformatted("Craft Operations Required: " +
+                                              searchResult.CraftItem.QuantityNeeded / searchResult.CraftItem.Yield);
+                        ImGui.TextUnformatted("Recipe Yield: " + searchResult.CraftItem.Yield);
+                    }
+                }
+
+
+                if (searchResult.CraftItem.Recipe != null)
+                {
+                    ImGui.Separator();
+                    ImGui.TextUnformatted("Ingredients: ");
+                    using (ImRaii.PushIndent())
+                    {
+                        foreach (var ingredient in searchResult.CraftItem.Ingredients)
+                        {
+                            var item = _itemSheet.GetRow(ingredient.Key.Item1);
+                            var quantityRequired = ingredient.Value;
+                            ImGui.TextUnformatted(item.NameString + ": " + quantityRequired);
+                        }
+                    }
+                }
+
             }
             return null;
         }

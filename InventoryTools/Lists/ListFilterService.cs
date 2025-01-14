@@ -186,6 +186,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
         var displayDestinationCrossCharacter = filter.DestinationIncludeCrossCharacter ?? _configuration.DisplayCrossCharacter;
 
         Logger.LogTrace("Filter Information:");
+        Logger.LogTrace("Filter Name:" + filter.NameFilter);
         Logger.LogTrace("Filter Type: " + filter.FilterType);
 
         if (filter.FilterType == FilterType.SortingFilter || filter.FilterType == FilterType.CraftFilter)
