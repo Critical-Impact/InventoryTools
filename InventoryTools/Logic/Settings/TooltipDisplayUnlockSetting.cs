@@ -23,7 +23,7 @@ public class TooltipDisplayUnlockSetting : BooleanSetting
 
     public override string Key { get; set; } = "TooltipDisplayUnlockSetting";
     public override string Name { get; set; } = "Add Item Unlock Status";
-    public override string HelpText { get; set; } = "If an item can be unlocked/acquired, shows if your characters have unlocked/acquired said item. Can be configured below to show specific characters.";
+    public override string HelpText { get; set; } = "If an item can be unlocked/acquired, shows if your characters have unlocked/acquired said item. Can be configured to show specific characters inside the configuration window.";
     public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
     public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.ItemUnlockStatus;
     public override string Version { get; } = "1.11.0.4";

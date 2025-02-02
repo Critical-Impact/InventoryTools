@@ -24,7 +24,7 @@ namespace InventoryTools.Logic.Settings
         public override string WizardName { get; } = "Add Item Locations";
 
         public override string HelpText { get; set; } =
-            "When hovering an item, should the tooltip contain information about where the items are located.";
+            "When hovering an item, should the tooltip show the locations of any copies of the item you currently own?";
 
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.AddItemLocations;

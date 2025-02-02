@@ -33,9 +33,11 @@ public enum TooltipSourceModifier
 
 public class TooltipSourceInformationEnabledSetting : GenericBooleanSetting
 {
-    public TooltipSourceInformationEnabledSetting(ILogger<TooltipSourceInformationEnabledSetting> logger, ImGuiService imGuiService) : base("TooltipSourceInformationEnabled", "Source Information Enabled", "Should source information be shown in the tooltip?", false, SettingCategory.ToolTips, SettingSubCategory.SourceInformation, "1.11.0.11", logger, imGuiService)
+    public TooltipSourceInformationEnabledSetting(ILogger<TooltipSourceInformationEnabledSetting> logger, ImGuiService imGuiService) : base("TooltipSourceInformationEnabled", "Source Information Enabled", "Should source information be shown in the tooltip? For example that an item can be sourced via crafting, shops, monsters etc", false, SettingCategory.ToolTips, SettingSubCategory.SourceInformation, "1.11.0.11", logger, imGuiService)
     {
     }
+
+    public override string WizardName { get; } = "Show Source Information";
     public override uint? Order { get; } = 0;
 }
 

@@ -9,12 +9,10 @@ public class TooltipsFeature : Feature
     public TooltipsFeature(IEnumerable<ISetting> settings) : base(new[]
         {
             typeof(TooltipDisplayAmountOwnedSetting),
-            typeof(TooltipLocationDisplayModeSetting),
-            typeof(TooltipDisplayRetrieveAmountSetting),
             typeof(TooltipMinimumMarketPriceSetting),
-            typeof(TooltipLocationScopeLimitSetting),
             typeof(TooltipDisplayUnlockSetting),
-            typeof(TooltipDisplayUnlockCharacterSetting),
+            typeof(TooltipSourceInformationEnabledSetting),
+            typeof(TooltipUseInformationEnabledSetting),
         },
         settings)
     {
@@ -22,5 +20,5 @@ public class TooltipsFeature : Feature
 
     public override string Name { get; } = "Tooltips";
     public override string Description { get; } =
-        "Allagan Tools can add extra information to the tooltips for items. It can add the amount you own of an item(including retainers), the amount you should retrieve(when using craft lists) and also pricing from the market.";
+        "Allagan Tools can add extra information to the tooltips for items. Select which you would like to show in the tooltip. For further configuration including the ability to change each tooltips colour and settings specific to each tooltip please open the configuration window.";
 }
