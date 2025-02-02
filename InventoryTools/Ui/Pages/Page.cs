@@ -16,6 +16,8 @@ public abstract class Page : IConfigPage
     public abstract bool IsMenuItem { get; }
     public abstract bool DrawBorder { get; }
 
+    public IEnumerable<Page>? ChildPages { get; set; }
+
     public ImGuiService ImGuiService => _imGuiService;
 
     public Page(ILogger logger, ImGuiService imGuiService)

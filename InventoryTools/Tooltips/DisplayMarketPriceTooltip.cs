@@ -10,17 +10,20 @@ using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using InventoryTools.Logic.Settings;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Tooltips;
 
 public class DisplayMarketPriceTooltip : BaseTooltip
 {
+    private readonly TooltipMarketPricingColorSetting _colorSetting;
     private readonly ICharacterMonitor _characterMonitor;
     private readonly IMarketCache _marketCache;
 
-    public DisplayMarketPriceTooltip(ILogger<DisplayMarketPriceTooltip> logger, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, ICharacterMonitor characterMonitor, IMarketCache marketCache, IDalamudPluginInterface pluginInterface) : base(6901, logger, itemSheet, configuration, gameGui, pluginInterface)
+    public DisplayMarketPriceTooltip(ILogger<DisplayMarketPriceTooltip> logger, TooltipMarketPricingColorSetting colorSetting, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, ICharacterMonitor characterMonitor, IMarketCache marketCache, IDalamudPluginInterface pluginInterface) : base(6901, logger, itemSheet, configuration, gameGui, pluginInterface)
     {
+        _colorSetting = colorSetting;
         _characterMonitor = characterMonitor;
         _marketCache = marketCache;
     }
@@ -126,7 +129,7 @@ public class DisplayMarketPriceTooltip : BaseTooltip
                 {
                     var lines = new List<Payload>()
                     {
-                        new UIForegroundPayload((ushort)(Configuration.TooltipColor ?? 1)),
+                        new UIForegroundPayload((ushort)(_colorSetting.CurrentValue(Configuration) ?? Configuration.TooltipColor ?? 1)),
                         new UIGlowPayload(0),
                         new TextPayload(newText),
                         new UIGlowPayload(0),

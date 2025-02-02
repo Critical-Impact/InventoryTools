@@ -18,12 +18,14 @@ namespace InventoryTools.Tooltips;
 
 public class AmountOwnedTooltip : BaseTooltip
 {
+    private readonly TooltipAmountOwnedColorSetting _colorSetting;
     private readonly ICharacterMonitor _characterMonitor;
     private readonly IInventoryMonitor _inventoryMonitor;
     private readonly InventoryScopeCalculator _inventoryScopeCalculator;
 
-    public AmountOwnedTooltip(ILogger<AmountOwnedTooltip> logger, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, InventoryScopeCalculator inventoryScopeCalculator, IDalamudPluginInterface pluginInterface) : base(6900, logger, itemSheet, configuration, gameGui, pluginInterface)
+    public AmountOwnedTooltip(ILogger<AmountOwnedTooltip> logger, TooltipAmountOwnedColorSetting colorSetting, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, InventoryScopeCalculator inventoryScopeCalculator, IDalamudPluginInterface pluginInterface) : base(6900, logger, itemSheet, configuration, gameGui, pluginInterface)
     {
+        _colorSetting = colorSetting;
         _characterMonitor = characterMonitor;
         _inventoryMonitor = inventoryMonitor;
         _inventoryScopeCalculator = inventoryScopeCalculator;
@@ -94,6 +96,10 @@ public class AmountOwnedTooltip : BaseTooltip
             {
                 var characterNames = _characterMonitor.Characters.OrderBy(c => c.Value.FormattedName).ToList();
                 enumerable = enumerable.OrderBy(c => c.SortedCategory.FormattedName()).ThenBy(c => characterNames.IndexOf(d => d.Key == c.RetainerId));
+            }
+            else if(sortMode == TooltipAmountOwnedSort.Quantity)
+            {
+                enumerable = enumerable.OrderByDescending(c => c.Quantity);
             }
 
             var ownedItems = enumerable
@@ -271,7 +277,7 @@ public class AmountOwnedTooltip : BaseTooltip
             {
                 var lines = new List<Payload>()
                 {
-                    new UIForegroundPayload((ushort)(Configuration.TooltipColor ?? 1)),
+                    new UIForegroundPayload((ushort)(_colorSetting.CurrentValue(Configuration) ?? Configuration.TooltipColor ?? 1)),
                     new UIGlowPayload(0),
                     new TextPayload(newText),
                     new UIGlowPayload(0),

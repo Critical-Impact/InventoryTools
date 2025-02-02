@@ -7,7 +7,7 @@ namespace InventoryTools.Logic.Settings
     public class TooltipAverageMarketPriceSetting : BooleanSetting
     {
         public override bool DefaultValue { get; set; } = true;
-        
+
         public override bool CurrentValue(InventoryToolsConfiguration configuration)
         {
             return configuration.TooltipDisplayMarketAveragePrice;
@@ -25,7 +25,7 @@ namespace InventoryTools.Logic.Settings
             "When hovering an item, should the tooltip contain the average market price for both NQ and HQ. Please make sure 'Automatically download prices' is enabled.";
 
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
-        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Subsetting;
+        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.MarketPricing;
         public override string Version => "1.7.0.0";
 
         public TooltipAverageMarketPriceSetting(ILogger<TooltipAverageMarketPriceSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)

@@ -19,23 +19,30 @@ using Lumina.Excel;
 using Lumina.Excel.Sheets;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.ItemRenderers;
+using InventoryTools.Logic.Settings;
 using Lumina.Data;
 
 namespace InventoryTools.Services;
 
 public class ItemInfoRenderService
 {
+    private readonly SourceIconGroupingSetting _sourceIconGroupingSetting;
+    private readonly UseIconGroupingSetting _useIconGroupingSetting;
     private readonly ImGuiService _imGuiService;
     private readonly IPluginLog _pluginLog;
+    private readonly InventoryToolsConfiguration _configuration;
     private readonly Dictionary<Type,IItemInfoRenderer> _sourceRenderers;
     private readonly Dictionary<Type,IItemInfoRenderer> _useRenderers;
     private readonly Dictionary<ItemInfoType,IItemInfoRenderer> _sourceRenderersByItemInfoType;
     private readonly Dictionary<ItemInfoType,IItemInfoRenderer> _useRenderersByItemInfoType;
 
-    public ItemInfoRenderService(IEnumerable<IItemInfoRenderer> itemRenderers, ImGuiService imGuiService, IPluginLog pluginLog)
+    public ItemInfoRenderService(IEnumerable<IItemInfoRenderer> itemRenderers, SourceIconGroupingSetting sourceIconGroupingSetting, UseIconGroupingSetting useIconGroupingSetting, ImGuiService imGuiService, IPluginLog pluginLog, InventoryToolsConfiguration configuration)
     {
+        _sourceIconGroupingSetting = sourceIconGroupingSetting;
+        _useIconGroupingSetting = useIconGroupingSetting;
         _imGuiService = imGuiService;
         _pluginLog = pluginLog;
+        _configuration = configuration;
         var itemInfoRenderers = itemRenderers.ToList();
         _sourceRenderers = itemInfoRenderers.Where(c => c.RendererType == RendererType.Source).ToDictionary(c => c.ItemSourceType, c => c);
         _useRenderers = itemInfoRenderers.Where(c => c.RendererType == RendererType.Use).ToDictionary(c => c.ItemSourceType, c => c);
@@ -52,6 +59,9 @@ public class ItemInfoRenderService
         }
         #endif
     }
+
+    public Dictionary<Type,IItemInfoRenderer> SourceRenderers => _sourceRenderers;
+    public Dictionary<Type,IItemInfoRenderer> UseRenderers => _useRenderers;
 
     public string GetCategoryName(ItemInfoRenderCategory renderCategory)
     {
@@ -222,7 +232,37 @@ public class ItemInfoRenderService
         {
             if (renderers.TryGetValue(group.Key, out var renderer))
             {
-                if (renderer.CustomGroup != null)
+                var sourceGroupings = _sourceIconGroupingSetting.CurrentValue(_configuration);
+                var useGroupings = _useIconGroupingSetting.CurrentValue(_configuration);
+                if (renderer.RendererType == RendererType.Source && (sourceGroupings?.ContainsKey(group.Key) ?? false))
+                {
+                    if (sourceGroupings[group.Key])
+                    {
+                        groupedItems.Add(group.ToList());
+                    }
+                    else
+                    {
+                        foreach (var ungroupedItem in group)
+                        {
+                            groupedItems.Add([ungroupedItem]);
+                        }
+                    }
+                }
+                else if (renderer.RendererType == RendererType.Use && (useGroupings?.ContainsKey(group.Key) ?? false))
+                {
+                    if (useGroupings[group.Key])
+                    {
+                        groupedItems.Add(group.ToList());
+                    }
+                    else
+                    {
+                        foreach (var ungroupedItem in group)
+                        {
+                            groupedItems.Add([ungroupedItem]);
+                        }
+                    }
+                }
+                else if (renderer.CustomGroup != null)
                 {
                     var customGrouping = renderer.CustomGroup.Invoke(group.ToList());
                     groupedItems.AddRange(customGrouping);

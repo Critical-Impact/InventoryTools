@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
+using AllaganLib.GameSheets.Caches;
 using CriticalCommonLib.Models;
 using Dalamud.Configuration;
 using Dalamud.Interface.Colors;
@@ -19,7 +20,7 @@ using OtterGui.Classes;
 namespace InventoryTools
 {
     [Serializable]
-    public class InventoryToolsConfiguration : IPluginConfiguration, IConfigurable<bool?>, IConfigurable<int?>, IConfigurable<Enum?>
+    public class InventoryToolsConfiguration : IPluginConfiguration, IConfigurable<bool?>, IConfigurable<int?>, IConfigurable<Enum?>, IConfigurable<Dictionary<Type, bool>>, IConfigurable<Vector4?>, IConfigurable<uint?>
     {
         [JsonIgnore]
         public bool IsDirty { get; set; }
@@ -81,7 +82,12 @@ namespace InventoryTools
         private TooltipAmountOwnedSort _tooltipAmountOwnedSort = TooltipAmountOwnedSort.Alphabetically;
         private Dictionary<string, bool>? _booleanSettings = new();
         private Dictionary<string, int>? _integerSettings = new();
+        private Dictionary<string, uint>? _uintegerSettings = new();
+        private Dictionary<string, Vector4>? _vector4Settings = new();
         private Dictionary<string, Enum>? _enumSettings = new();
+        private Dictionary<string, Dictionary<Type, bool>>? _typeDictionarySettings = new();
+        private Dictionary<ItemInfoType, TooltipSourceSetting>? _tooltipInfoSourceSetting = new();
+        private Dictionary<ItemInfoType, TooltipSourceSetting>? _tooltipInfoUseSetting = new();
 
         [JsonProperty] [DefaultValue(300)] public int CraftWindowSplitterPosition { get; set; } = 300;
 
@@ -111,6 +117,26 @@ namespace InventoryTools
             set
             {
                 _favouriteItemsList = value;
+                IsDirty = true;
+            }
+        }
+
+        public Dictionary<ItemInfoType, TooltipSourceSetting> TooltipInfoSourceSetting
+        {
+            get => _tooltipInfoSourceSetting ??= new();
+            set
+            {
+                _tooltipInfoSourceSetting = value;
+                IsDirty = true;
+            }
+        }
+
+        public Dictionary<ItemInfoType, TooltipSourceSetting> TooltipInfoUseSetting
+        {
+            get => _tooltipInfoUseSetting ??= new();
+            set
+            {
+                _tooltipInfoUseSetting = value;
                 IsDirty = true;
             }
         }
@@ -922,11 +948,30 @@ namespace InventoryTools
             set => _integerSettings = value;
         }
 
+        public Dictionary<string, uint> UIntegerSettings
+        {
+            get => _uintegerSettings ??= new Dictionary<string, uint>();
+            set => _uintegerSettings = value;
+        }
+
         [JsonConverter(typeof(EnumDictionaryConverter))]
         public Dictionary<string, Enum> EnumSettings
         {
             get => _enumSettings ??= new Dictionary<string, Enum>();
             set => _enumSettings = value;
+        }
+
+        [JsonConverter(typeof(TypeDictionaryConverter))]
+        public Dictionary<string, Dictionary<Type, bool>> TypeDictionarySettings
+        {
+            get => _typeDictionarySettings ??= new Dictionary<string, Dictionary<Type, bool>>();
+            set => _typeDictionarySettings = value;
+        }
+
+        public Dictionary<string, Vector4> Vector4Settings
+        {
+            get => _vector4Settings ??= new Dictionary<string, Vector4>();
+            set => _vector4Settings = value;
         }
 
 
@@ -1023,6 +1068,63 @@ namespace InventoryTools
             else
             {
                 this.EnumSettings[key] = newValue;
+            }
+
+            this.IsDirty = true;
+        }
+
+        public Dictionary<Type, bool>? Get(string key, Dictionary<Type, bool>? defaultValue)
+        {
+            return this.TypeDictionarySettings.GetValueOrDefault(key);
+        }
+
+        public void Set(string key, Dictionary<Type, bool>? newValue)
+        {
+            if (newValue == null)
+            {
+                this.TypeDictionarySettings.Remove(key);
+            }
+            else
+            {
+                this.TypeDictionarySettings[key] = newValue;
+            }
+
+            this.IsDirty = true;
+        }
+
+        public Vector4? Get(string key, Vector4? defaultValue)
+        {
+            return this.Vector4Settings.TryGetValue(key, out var value) ? value : defaultValue;
+        }
+
+        public void Set(string key, Vector4? newValue)
+        {
+            if (newValue == null)
+            {
+                this.Vector4Settings.Remove(key);
+            }
+            else
+            {
+                this.Vector4Settings[key] = newValue.Value;
+            }
+
+            this.IsDirty = true;
+        }
+
+        public uint? Get(string key, uint? defaultValue)
+        {
+            return this.UIntegerSettings.TryGetValue(key, out var value) ? value : defaultValue;
+        }
+
+        public void Set(string key, uint? newValue)
+        {
+            if (newValue == null)
+            {
+                this.UIntegerSettings.Remove(key);
+            }
+            else
+            {
+                this.UIntegerSettings[key] = newValue.Value;
             }
 
             this.IsDirty = true;

@@ -11,6 +11,7 @@ using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using InventoryTools.Logic;
+using InventoryTools.Logic.Settings;
 using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
@@ -18,10 +19,12 @@ namespace InventoryTools.Tooltips;
 
 public class LocationDisplayTooltip : BaseTooltip
 {
+    private readonly TooltipAmountToRetrieveColorSetting _colorSetting;
     private readonly IListService _listService;
 
-    public LocationDisplayTooltip(ILogger<LocationDisplayTooltip> logger, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, IListService listService, IDalamudPluginInterface pluginInterface) : base(6904, logger, itemSheet, configuration, gameGui, pluginInterface)
+    public LocationDisplayTooltip(ILogger<LocationDisplayTooltip> logger, TooltipAmountToRetrieveColorSetting colorSetting, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, IListService listService, IDalamudPluginInterface pluginInterface) : base(6904, logger, itemSheet, configuration, gameGui, pluginInterface)
     {
+        _colorSetting = colorSetting;
         _listService = listService;
     }
     public override bool IsEnabled =>
@@ -133,7 +136,7 @@ public class LocationDisplayTooltip : BaseTooltip
                 {
                     var lines = new List<Payload>()
                     {
-                        new UIForegroundPayload((ushort)(Configuration.TooltipColor ?? 1)),
+                        new UIForegroundPayload((ushort)(_colorSetting.CurrentValue(Configuration) ?? Configuration.TooltipColor ?? 1)),
                         new UIGlowPayload(0),
                         new TextPayload(newText),
                         new UIGlowPayload(0),

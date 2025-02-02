@@ -159,7 +159,7 @@ public class ItemGilShopSourceRenderer : ItemInfoRenderer<ItemGilShopSource>
         }
 
         var maps = asSource.MapIds.Select(c => _mapSheet.GetRow(c).FormattedName);
-        return asSource.GilShop.Name + "(" + maps + ")";
+        return asSource.GilShop.Name + "(" + string.Join(",", maps) + ")";
     };
 
     public override Func<ItemSource, int> GetIcon => source =>

@@ -21,7 +21,7 @@ namespace InventoryTools.Logic.Settings
         public override string Name { get; set; } = "Enable Tooltip Tweaks?";
 
         public override string HelpText { get; set; } =
-            "When hovering an item in game, show additional information about the item including it's location in inventories and market price(if available).";
+            "Disable/enable the entire tooltip modification system for the plugin. If this is off, no changes will be made to your item's tooltips.";
 
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;

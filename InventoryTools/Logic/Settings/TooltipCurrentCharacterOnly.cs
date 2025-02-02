@@ -7,7 +7,7 @@ namespace InventoryTools.Logic.Settings
     public class TooltipCurrentCharacterSetting : BooleanSetting
     {
         public override bool DefaultValue { get; set; } = false;
-        
+
         public override bool CurrentValue(InventoryToolsConfiguration configuration)
         {
             return configuration.TooltipCurrentCharacter;
@@ -25,7 +25,7 @@ namespace InventoryTools.Logic.Settings
             "Limits the information displayed on the tooltip to inventories belonging to the currently logged in character.";
 
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
-        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Subsetting;
+        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.AddItemLocations;
         public override string Version => "1.7.0.0";
 
         public TooltipCurrentCharacterSetting(ILogger<TooltipCurrentCharacterSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)

@@ -34,6 +34,10 @@ namespace InventoryTools.Extensions
                     return "Title Menu Button";
                 case SettingCategory.AutoSave:
                     return "Auto Save";
+                case SettingCategory.Items:
+                    return "Items";
+                case SettingCategory.Highlighting:
+                    return "Highlighting";
             }
             return settingCategory.ToString();
         }

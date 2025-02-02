@@ -25,7 +25,7 @@ namespace InventoryTools.Logic.Settings
             "When hovering an item and you have an amount owned by a retainer, should the owner of that retainer be affixed to that item?";
 
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
-        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Subsetting;
+        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.AddItemLocations;
         public override string Version => "1.7.0.0";
 
         public TooltipAddCharacterNameSetting(ILogger<TooltipAddCharacterNameSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)

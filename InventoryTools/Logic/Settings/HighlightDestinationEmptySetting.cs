@@ -23,8 +23,8 @@ namespace InventoryTools.Logic.Settings
         public override string HelpText { get; set; } =
             "When highlighting destinations should empty spots be highlighted or only items that already exist in the destination?";
 
-        public override SettingCategory SettingCategory { get; set; } = SettingCategory.Lists;
-        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.DestinationHighlighting;
+        public override SettingCategory SettingCategory { get; set; } = SettingCategory.Highlighting;
+        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
         public override string Version => "1.7.0.0";
 
         public HighlightDestinationEmptySetting(ILogger<HighlightDestinationEmptySetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)

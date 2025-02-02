@@ -30,6 +30,9 @@ namespace InventoryTools.Logic.Settings.Abstract
         public virtual string? Image { get; } = null;
         public virtual Vector2? ImageSize { get; } = null;
 
+        public virtual uint? Order { get; } = null;
+
+
         public virtual string WizardName
         {
             get

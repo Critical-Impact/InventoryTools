@@ -34,10 +34,10 @@ namespace InventoryTools.Logic.Settings
         }
 
         public override string Key { get; set; } = "WindowFilter";
-        public override string Name { get; set; } = "Active Window Filter";
+        public override string Name { get; set; } = "Window List Highlighting";
 
         public override string HelpText { get; set; } =
-            "This is the filter that is active when the allagan tools window is visible.";
+            "This is the list that will be highlighted when any of the allagan tools windows are visible.";
 
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.Lists;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.ActiveLists;

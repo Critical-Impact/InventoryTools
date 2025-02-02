@@ -34,10 +34,10 @@ namespace InventoryTools.Logic.Settings
         }
 
         public override string Key { get; set; } = "BackgroundFilter";
-        public override string Name { get; set; } = "Active Background Filter";
+        public override string Name { get; set; } = "Background List Highlighting";
 
         public override string HelpText { get; set; } =
-            "This is the filter that is active when the allagan tools window is not visible. This filter can be toggled with the associated slash commands.";
+            "This is the list that is currently being highlighted when the allagan tools window is not visible. This list can be toggled with the associated slash commands.";
 
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.Lists;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.ActiveLists;

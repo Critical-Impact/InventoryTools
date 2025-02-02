@@ -18,12 +18,21 @@ namespace InventoryTools.Logic.Settings.Abstract
 
         public string Version { get; }
 
+        public uint? Order { get; }
+
         public bool HasValueSet(InventoryToolsConfiguration configuration);
 
         public void Draw(InventoryToolsConfiguration configuration, string? customName, bool? disableReset,
             bool? disableColouring);
 
-        public static readonly List<SettingSubCategory> SettingSubCategoryOrder = new() {SettingSubCategory.ActiveLists, SettingSubCategory.General, SettingSubCategory.FilterSettings, SettingSubCategory.AutoSave, SettingSubCategory.Experimental, SettingSubCategory.Highlighting, SettingSubCategory.DestinationHighlighting,SettingSubCategory.Subsetting,SettingSubCategory.Visuals, SettingSubCategory.WindowLayout, SettingSubCategory.Market, SettingSubCategory.ContextMenus, SettingSubCategory.Hotkeys, SettingSubCategory.Fun, SettingSubCategory.IgnoreEscape};
+        public static readonly List<SettingSubCategory> SettingSubCategoryOrder =
+        [
+            SettingSubCategory.General,SettingSubCategory.ActiveLists, SettingSubCategory.FilterSettings,
+            SettingSubCategory.AutoSave, SettingSubCategory.Experimental, SettingSubCategory.Highlighting,
+            SettingSubCategory.DestinationHighlighting, SettingSubCategory.Subsetting, SettingSubCategory.Visuals,
+            SettingSubCategory.WindowLayout, SettingSubCategory.Market, SettingSubCategory.ContextMenus,
+            SettingSubCategory.Hotkeys, SettingSubCategory.Fun, SettingSubCategory.IgnoreEscape,
+        ];
 
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using InventoryTools.Logic.Settings.Abstract;
 
 namespace InventoryTools.Extensions
@@ -40,6 +41,24 @@ namespace InventoryTools.Extensions
                     return "Hotkeys";
                 case SettingSubCategory.IgnoreEscape:
                     return "Ignore Escape Key";
+                case SettingSubCategory.SourceGrouping:
+                    return "Source Grouping";
+                case SettingSubCategory.UseGrouping:
+                    return "Use Grouping";
+                case SettingSubCategory.Colours:
+                    return "Colours";
+                case SettingSubCategory.AddItemLocations:
+                    return "Add Item Locations";
+                case SettingSubCategory.MarketPricing:
+                    return "Market Pricing";
+                case SettingSubCategory.AmountToRetrieve:
+                    return "Amount To Retrieve";
+                case SettingSubCategory.ItemUnlockStatus:
+                    return "Item Unlock Status";
+                case SettingSubCategory.SourceInformation:
+                    return "Source Information";
+                case SettingSubCategory.UseInformation:
+                    return "Use Information";
             }
             return settingSubCategory.ToString();
         }

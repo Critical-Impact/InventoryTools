@@ -29,7 +29,7 @@ public class TooltipAmountOwnedSortSetting : ChoiceSetting<TooltipAmountOwnedSor
         "How should the items displayed in the tooltip that you own be ordered? None is included if you find the sorting to be non-performant.";
 
     public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
-    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Visuals;
+    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.AddItemLocations;
     public override string Version { get; } = "1.7.0.17";
 
     public override Dictionary<TooltipAmountOwnedSort, string> Choices { get; } =
@@ -37,6 +37,7 @@ public class TooltipAmountOwnedSortSetting : ChoiceSetting<TooltipAmountOwnedSor
         {
             { TooltipAmountOwnedSort.Alphabetically, "Alphabetical Order(Character/Retainer/etc)" },
             { TooltipAmountOwnedSort.Categorically, "Alphabetical Order(Category)" },
+            { TooltipAmountOwnedSort.Quantity, "Item Quantity" },
             { TooltipAmountOwnedSort.None, "No Order" },
         };
 }
@@ -45,5 +46,6 @@ public enum TooltipAmountOwnedSort
 {
     Alphabetically,
     Categorically,
+    Quantity,
     None
 }

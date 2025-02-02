@@ -3,6 +3,7 @@ using CriticalCommonLib.Services.Mediator;
 
 using ImGuiNET;
 using InventoryTools.Logic;
+using InventoryTools.Ui.Pages;
 
 namespace InventoryTools.Ui.MenuItems;
 
@@ -40,5 +41,6 @@ public class SeparatorPageItem : IConfigPage
     }
 
     public bool IsMenuItem => true;
+    public IEnumerable<Page>? ChildPages { get; set; } = null;
     public bool DrawBorder { get; }
 }

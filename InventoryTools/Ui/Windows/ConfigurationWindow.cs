@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using AllaganLib.Interface.Widgets;
 using AllaganLib.Shared.Extensions;
 using Autofac;
 using CriticalCommonLib.Services;
@@ -32,11 +33,12 @@ namespace InventoryTools.Ui
         private readonly PluginLogic _pluginLogic;
         private readonly IListService _listService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
-        private readonly Func<SettingCategory,SettingPage> _settingPageFactory;
+        private readonly SettingPage.Factory _settingPageFactory;
         private readonly Func<Type, IConfigPage> _configPageFactory;
         private readonly Func<FilterConfiguration, FilterPage> _filterPageFactory;
         private readonly IComponentContext _context;
         private readonly InventoryToolsConfiguration _configuration;
+        private readonly VerticalSplitter _verticalSplitter;
         private IEnumerable<IMenuWindow>? _menuWindows;
 
         public ConfigurationWindow(ILogger<ConfigurationWindow> logger,
@@ -48,9 +50,9 @@ namespace InventoryTools.Ui
             PluginLogic pluginLogic,
             IListService listService,
             IServiceScopeFactory serviceScopeFactory,
-            Func<SettingCategory, SettingPage> settingPageFactory,
             Func<Type, IConfigPage> configPageFactory,
             Func<FilterConfiguration, FilterPage> filterPageFactory,
+            SettingPage.Factory settingPageFactory,
             IComponentContext context) : base(logger,
             mediator,
             imGuiService,
@@ -67,6 +69,7 @@ namespace InventoryTools.Ui
             _filterPageFactory = filterPageFactory;
             _context = context;
             _configuration = configuration;
+            _verticalSplitter = new VerticalSplitter(250, new Vector2(200, 400));
             this.Flags = ImGuiWindowFlags.MenuBar;
         }
 
@@ -77,7 +80,10 @@ namespace InventoryTools.Ui
             Key = "configuration";
             _configPages = new List<IConfigPage>();
             _configPages.Add(new SeparatorPageItem("Settings"));
+            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.General));
             _configPages.Add(_settingPageFactory.Invoke(SettingCategory.Lists));
+            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.Highlighting));
+            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.Items));
             _configPages.Add(_settingPageFactory.Invoke(SettingCategory.Windows));
             _configPages.Add(_settingPageFactory.Invoke(SettingCategory.AutoSave));
             _configPages.Add(new SeparatorPageItem("Modules", true));
@@ -509,162 +515,214 @@ namespace InventoryTools.Ui
         public override void Draw()
         {
             DrawMenuBar();
-            using (var sideBarChild =
-                   ImRaii.Child("SideBar", new Vector2(180, 0) * ImGui.GetIO().FontGlobalScale, true))
-            {
-                if (sideBarChild.Success)
-                {
-                    using (var menuChild = ImRaii.Child("Menu", new Vector2(0, -28) * ImGui.GetIO().FontGlobalScale,
-                               false, ImGuiWindowFlags.NoSavedSettings))
-                    {
-                        if (menuChild.Success)
-                        {
+            _verticalSplitter.Draw(DrawSideBar, DrawMainWindow);
+        }
 
-                            var count = 0;
-                            for (var index = 0; index < _configPages.Count; index++)
-                            {
-                                var configPage = _configPages[index];
-                                if (configPage.IsMenuItem)
-                                {
-                                    MediatorService.Publish(configPage.Draw());
-                                }
-                                else
-                                {
-                                    if (ImGui.Selectable(configPage.Name, ConfigSelectedConfigurationPage == count))
-                                    {
-                                        ConfigSelectedConfigurationPage = count;
-                                    }
-
-                                    count++;
-                                }
-                            }
-
-                            ImGui.NewLine();
-                            ImGui.TextUnformatted("Item Lists");
-                            ImGui.Separator();
-
-                            var filterIndex = count;
-                            foreach (var item in _filterPages)
-                            {
-                                filterIndex++;
-                                if (ImGui.Selectable(item.Value.Name + "##" + item.Key,
-                                        ConfigSelectedConfigurationPage == filterIndex))
-                                {
-                                    ConfigSelectedConfigurationPage = filterIndex;
-                                }
-
-                                var filter = _listService.GetListByKey(item.Key);
-                                if (filter != null)
-                                {
-                                    GetFilterMenu(filter).Draw();
-                                }
-
-                            }
-                        }
-                    }
-
-                    using (var commandBarChild = ImRaii.Child("CommandBar",
-                               new Vector2(0, 0) * ImGui.GetIO().FontGlobalScale, false))
-                    {
-                        if (commandBarChild.Success)
-                        {
-
-                            float height = ImGui.GetWindowSize().Y;
-                            ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
-
-                            if(_addIcon.Draw(ImGuiService.GetIconTexture(66315).ImGuiHandle, "addFilter"))
-                            {
-
-                            }
-
-                            _addFilterMenu.Draw();
-                            ImGuiUtil.HoverTooltip("Add a new filter");
-
-                            ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
-                            ImGui.SetCursorPosX(26 * ImGui.GetIO().FontGlobalScale);
-
-                            if (_lightBulbIcon.Draw(ImGuiService.GetIconTexture(66318).ImGuiHandle,"addSample"))
-                            {
-
-                            }
-
-                            _addSampleMenu.Draw();
-                            ImGuiUtil.HoverTooltip("Add a sample filter");
-
-                            var width = ImGui.GetWindowSize().X;
-                            width -= 24 * ImGui.GetIO().FontGlobalScale;
-
-                            ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
-                            ImGui.SetCursorPosX(width);
-
-                            if (_menuIcon.Draw(ImGuiService.GetImageTexture("menu").ImGuiHandle, "openMenu"))
-                            {
-
-                            }
-
-                            _settingsMenu.Draw();
-
-
-                            width -= 26 * ImGui.GetIO().FontGlobalScale;
-
-                            ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
-                            ImGui.SetCursorPosX(width);
-
-                            if (_wizardStart.Draw(ImGuiService.GetImageTexture("wizard").ImGuiHandle, "openMenu"))
-                            {
-                                _wizardMenu.Open();
-                            }
-                            _wizardMenu.Draw();
-
-
-                            ImGuiUtil.HoverTooltip("Start configuration wizard.");
-                        }
-                    }
-                }
-            }
-
-
-
-            ImGui.SameLine();
-
+        private void DrawMainWindow()
+        {
             IConfigPage? currentConfigPage = null;
 
             {
                 var count = 0;
                 for (var index = 0; index < _configPages.Count; index++)
                 {
-                    if (_configPages[index].IsMenuItem)
+                    var configPage = _configPages[index];
+                    if (configPage.IsMenuItem)
                     {
-                        count++;
                         continue;
                     }
 
-                    if (ConfigSelectedConfigurationPage == index - count)
+                    if (ConfigSelectedConfigurationPage == count)
                     {
-                        currentConfigPage = _configPages[index];
+                        currentConfigPage = configPage;
+                    }
+
+
+                    if (configPage.ChildPages != null)
+                    {
+                        foreach (var childPage in configPage.ChildPages)
+                        {
+                            if (ConfigSelectedConfigurationPage == count)
+                            {
+                                currentConfigPage = childPage;
+                            }
+                            count++;
+                        }
+                    }
+                    else
+                    {
+                        count++;
                     }
                 }
 
-                var filterIndex2 = _configPages.Count - count;
                 foreach (var filter in _filterPages)
                 {
-                    filterIndex2++;
-                    if (ConfigSelectedConfigurationPage == filterIndex2)
+                    count++;
+                    if (ConfigSelectedConfigurationPage == count)
                     {
                         currentConfigPage = filter.Value;
                     }
                 }
             }
-
-            using (var mainChild =
-                   ImRaii.Child("Main", new Vector2(-1, -1), currentConfigPage?.DrawBorder ?? false, ImGuiWindowFlags.HorizontalScrollbar))
+            if (currentConfigPage != null)
             {
-                if (mainChild.Success)
+                MediatorService.Publish(currentConfigPage.Draw());
+            }
+        }
+
+        private void DrawSideBar()
+        {
+            using (var menuChild = ImRaii.Child("Menu", new Vector2(0, -28) * ImGui.GetIO().FontGlobalScale,
+                       false, ImGuiWindowFlags.NoSavedSettings))
+            {
+                if (menuChild.Success)
                 {
-                    if (currentConfigPage != null)
+
+                    var count = 0;
+                    for (var index = 0; index < _configPages.Count; index++)
                     {
-                        MediatorService.Publish(currentConfigPage.Draw());
+                        var configPage = _configPages[index];
+                        if (configPage.IsMenuItem)
+                        {
+                            MediatorService.Publish(configPage.Draw());
+                        }
+                        else
+                        {
+                            var hasChildren = configPage.ChildPages != null;
+                            var isSelected = ConfigSelectedConfigurationPage == count;
+                            using (var node = ImRaii.TreeNode(configPage.Name, hasChildren ?  ImGuiTreeNodeFlags.DefaultOpen : isSelected ? ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.Selected : ImGuiTreeNodeFlags.Leaf))
+                            {
+                                if (node)
+                                {
+                                    if (configPage.ChildPages != null)
+                                    {
+                                        foreach (var childPage in configPage.ChildPages)
+                                        {
+                                            isSelected = ConfigSelectedConfigurationPage == count;
+
+                                            using (var subNode = ImRaii.TreeNode(childPage.Name,
+                                                       isSelected
+                                                           ? ImGuiTreeNodeFlags.Selected |
+                                                             ImGuiTreeNodeFlags.Bullet
+                                                           : ImGuiTreeNodeFlags.Bullet))
+                                            {
+                                                if (subNode)
+                                                {
+                                                }
+                                            }
+
+                                            if (ImGui.IsItemClicked() && !ImGui.IsItemToggledOpen())
+                                            {
+                                                ConfigSelectedConfigurationPage = count;
+                                            }
+
+                                            count++;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    if (configPage.ChildPages != null)
+                                    {
+                                        foreach (var childPage in configPage.ChildPages)
+                                        {
+                                            count++;
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (!hasChildren)
+                            {
+                                if (ImGui.IsItemClicked() && !ImGui.IsItemToggledOpen())
+                                {
+                                    ConfigSelectedConfigurationPage = count;
+                                }
+                                count++;
+
+                            }
+                        }
                     }
+
+                    ImGui.NewLine();
+                    ImGui.TextUnformatted("Item Lists");
+                    ImGui.Separator();
+
+                    var filterIndex = count;
+                    foreach (var item in _filterPages)
+                    {
+                        filterIndex++;
+                        if (ImGui.Selectable(item.Value.Name + "##" + item.Key,
+                                ConfigSelectedConfigurationPage == filterIndex))
+                        {
+                            ConfigSelectedConfigurationPage = filterIndex;
+                        }
+
+                        var filter = _listService.GetListByKey(item.Key);
+                        if (filter != null)
+                        {
+                            GetFilterMenu(filter).Draw();
+                        }
+
+                    }
+                }
+            }
+
+            using (var commandBarChild = ImRaii.Child("CommandBar",
+                       new Vector2(0, 0) * ImGui.GetIO().FontGlobalScale, false))
+            {
+                if (commandBarChild.Success)
+                {
+
+                    float height = ImGui.GetWindowSize().Y;
+                    ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
+
+                    if(_addIcon.Draw(ImGuiService.GetIconTexture(66315).ImGuiHandle, "addFilter"))
+                    {
+
+                    }
+
+                    _addFilterMenu.Draw();
+                    ImGuiUtil.HoverTooltip("Add a new filter");
+
+                    ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
+                    ImGui.SetCursorPosX(26 * ImGui.GetIO().FontGlobalScale);
+
+                    if (_lightBulbIcon.Draw(ImGuiService.GetIconTexture(66318).ImGuiHandle,"addSample"))
+                    {
+
+                    }
+
+                    _addSampleMenu.Draw();
+                    ImGuiUtil.HoverTooltip("Add a sample filter");
+
+                    var width = ImGui.GetWindowSize().X;
+                    width -= 24 * ImGui.GetIO().FontGlobalScale;
+
+                    ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
+                    ImGui.SetCursorPosX(width);
+
+                    if (_menuIcon.Draw(ImGuiService.GetImageTexture("menu").ImGuiHandle, "openMenu"))
+                    {
+
+                    }
+
+                    _settingsMenu.Draw();
+
+
+                    width -= 26 * ImGui.GetIO().FontGlobalScale;
+
+                    ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
+                    ImGui.SetCursorPosX(width);
+
+                    if (_wizardStart.Draw(ImGuiService.GetImageTexture("wizard").ImGuiHandle, "openMenu"))
+                    {
+                        _wizardMenu.Open();
+                    }
+                    _wizardMenu.Draw();
+
+
+                    ImGuiUtil.HoverTooltip("Start configuration wizard.");
                 }
             }
         }

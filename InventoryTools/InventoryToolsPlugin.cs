@@ -92,6 +92,7 @@ namespace InventoryTools
             this.Host = CreateHost();
 
             Start();
+            this.Host.Services.GetRequiredService<MediatorService>().Publish(new PluginLoadedMessage());
             loadConfigStopwatch.Stop();
             pluginLog.Verbose("Took " + loadConfigStopwatch.Elapsed.TotalSeconds + " to start Allagan Tools.");
         }
@@ -448,16 +449,7 @@ namespace InventoryTools
                         return genericWindow;
                     };
                 });
-                builder.Register<Func<SettingCategory, SettingPage>>(c =>
-                {
-                    var context = c.Resolve<IComponentContext>();
-                    return settingCategory =>
-                    {
-                        var settingPage = (SettingPage)context.Resolve(typeof(SettingPage));
-                        settingPage.Initialize(settingCategory);
-                        return settingPage;
-                    };
-                });
+
                 builder.Register<Func<Type, uint, UintWindow>>(c =>
                 {
                     var context = c.Resolve<IComponentContext>();

@@ -92,7 +92,14 @@ namespace InventoryTools
             _buyFromVendorPriceFilter = buyFromVendorPriceFilter;
             _filterFactory = filterFactory;
             _marketCache = marketCache;
+            this.MediatorService.Subscribe<PluginLoadedMessage>(this, PluginLoaded);
 
+        }
+
+        private void PluginLoaded(PluginLoadedMessage obj)
+        {
+            _inventoryMonitor.Start();
+            _inventoryScanner.Enable();
         }
 
         private void CraftMonitorOnCraftCompleted(uint itemid, FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags flags, uint quantity)
@@ -411,8 +418,6 @@ namespace InventoryTools
         public Task StartAsync(CancellationToken cancellationToken)
         {
             Logger.LogTrace("Starting service {type} ({this})", GetType().Name, this);
-            _inventoryMonitor.Start();
-            _inventoryScanner.Enable();
             _inventoryMonitor.OnInventoryChanged += InventoryMonitorOnOnInventoryChanged;
             _framework.Update += FrameworkOnUpdate;
             _configurationManagerService.ConfigurationChanged += ConfigOnConfigurationChanged;

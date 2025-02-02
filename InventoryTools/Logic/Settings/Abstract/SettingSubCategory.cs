@@ -19,5 +19,14 @@ namespace InventoryTools.Logic.Settings.Abstract
         General,
         Subsetting,
         IgnoreEscape,
+        SourceGrouping,
+        UseGrouping,
+        Colours,
+        AddItemLocations,
+        MarketPricing,
+        AmountToRetrieve,
+        ItemUnlockStatus,
+        SourceInformation,
+        UseInformation,
     }
 }

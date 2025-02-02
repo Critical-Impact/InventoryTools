@@ -3,43 +3,57 @@ using System.Linq;
 using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Services;
+using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using InventoryTools.Logic.Settings;
+using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Tooltips;
 
-public class DisplayUnlockTooltip : BaseTooltip
+public class SourceInformationTooltip : BaseTooltip
 {
-    private readonly TooltipItemUnlockStatusColorSetting _colorSetting;
-    private readonly TooltipDisplayUnlockSetting _tooltipDisplayUnlockSetting;
+    private readonly TooltipSourceInformationColorSetting _colorSetting;
+    private readonly ItemInfoRenderService _itemInfoRenderService;
     private readonly ShowTooltipsSetting _showTooltipsSetting;
-    private readonly TooltipDisplayUnlockCharacterSetting _tooltipDisplayUnlockCharacterSetting;
-    private readonly ICharacterMonitor _characterMonitor;
+    private readonly TooltipSourceInformationSetting _sourceInformationSetting;
+    private readonly TooltipSourceInformationEnabledSetting _enabledSetting;
+    private readonly TooltipSourceInformationModifierSetting _modifierSetting;
+    private readonly IKeyState _keyState;
     private readonly IUnlockTrackerService _unlockTrackerService;
 
-    public DisplayUnlockTooltip(ILogger<DisplayUnlockTooltip> logger, TooltipItemUnlockStatusColorSetting colorSetting, TooltipDisplayUnlockSetting tooltipDisplayUnlockSetting, ShowTooltipsSetting showTooltipsSetting, TooltipDisplayUnlockCharacterSetting tooltipDisplayUnlockCharacterSetting, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, ICharacterMonitor characterMonitor, IDalamudPluginInterface pluginInterface, IUnlockTrackerService unlockTrackerService) : base(6905, logger, itemSheet, configuration, gameGui, pluginInterface)
+    public SourceInformationTooltip(ILogger<SourceInformationTooltip> logger, TooltipSourceInformationColorSetting colorSetting, ItemInfoRenderService itemInfoRenderService, ShowTooltipsSetting showTooltipsSetting, TooltipSourceInformationSetting sourceInformationSetting, TooltipSourceInformationEnabledSetting enabledSetting, TooltipSourceInformationModifierSetting modifierSetting, IKeyState keyState, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, IDalamudPluginInterface pluginInterface, IUnlockTrackerService unlockTrackerService) : base(6906, logger, itemSheet, configuration, gameGui, pluginInterface)
     {
         _colorSetting = colorSetting;
-        _tooltipDisplayUnlockSetting = tooltipDisplayUnlockSetting;
+        _itemInfoRenderService = itemInfoRenderService;
         _showTooltipsSetting = showTooltipsSetting;
-        _tooltipDisplayUnlockCharacterSetting = tooltipDisplayUnlockCharacterSetting;
-        _characterMonitor = characterMonitor;
+        _sourceInformationSetting = sourceInformationSetting;
+        _enabledSetting = enabledSetting;
+        _modifierSetting = modifierSetting;
+        _keyState = keyState;
         _unlockTrackerService = unlockTrackerService;
     }
 
-    public override bool IsEnabled => _showTooltipsSetting.CurrentValue(Configuration) && _tooltipDisplayUnlockSetting.CurrentValue(Configuration);
+    public override bool IsEnabled => _showTooltipsSetting.CurrentValue(Configuration) && _enabledSetting.CurrentValue(Configuration);
     public override unsafe void OnGenerateItemTooltip(NumberArrayData* numberArrayData, StringArrayData* stringArrayData)
     {
         if (!ShouldShow()) return;
-        var item = HoverItem;
-        if (item != null && item.CanBeAcquired)
+        var modifier = _modifierSetting.CurrentValue(Configuration);
+        if (modifier == TooltipSourceModifier.Shift && !_keyState[VirtualKey.SHIFT])
         {
-            _unlockTrackerService.IsUnlocked(item);
+            return;
+        }
+        if (modifier == TooltipSourceModifier.Control && !_keyState[VirtualKey.CONTROL])
+        {
+            return;
+        }
+        var item = HoverItem;
+        if (item != null)
+        {
             TooltipService.ItemTooltipField itemTooltipField = TooltipService.ItemTooltipField.ItemDescription;
             SeString? seStr = null;
             if (GetTooltipVisibility(ItemTooltipFieldVisibility.Description))
@@ -73,30 +87,39 @@ public class DisplayUnlockTooltip : BaseTooltip
             seStr.Payloads.Add(GetLinkPayload());
             seStr.Payloads.Add(RawPayload.LinkTerminator);
 
-            var characterSetting = _tooltipDisplayUnlockCharacterSetting.CurrentValue(Configuration);
+            var currentValue = _sourceInformationSetting.CurrentValue(Configuration);
 
-            var textLines = Configuration.AcquiredItems.
-                Where(c => characterSetting.Count == 0 || characterSetting.Contains(c.Key)).
-                Where(c => _characterMonitor.Characters.ContainsKey(c.Key)).
-                Select(c => _characterMonitor.GetCharacterById(c.Key)!.FormattedName + " - " + (c.Value.Contains(item.RowId) ? "Acquired" : "Not Acquired") + "\n").OrderBy(c => c).ToList();
+            var groupedLines = item.Sources
+                .Where(c => !currentValue.ContainsKey(c.Type) || currentValue[c.Type].Show)
+                .OrderBy(c => currentValue.TryGetValue(c.Type, out var value) ? value.Order : 999)
+                .GroupBy(c => c.Type);
+
+            var textLines = new List<string>();
+
+            foreach (var groupedLine in groupedLines)
+            {
+                if (currentValue[groupedLine.Key].Group == false)
+                {
+                    foreach (var line in groupedLine)
+                    {
+                        textLines.Add(_itemInfoRenderService.GetSourceName(line));
+                    }
+                }
+                else
+                {
+                    textLines.Add(_itemInfoRenderService.GetSourceTypeName(groupedLine.Key).Singular);
+                }
+            }
 
             var newText = "";
             if (textLines.Count != 0)
             {
-                newText += "\n";
-                for (var index = 0; index < textLines.Count; index++)
-                {
-                    var line = textLines[index];
-                    if (index == textLines.Count)
-                    {
-                        line = line.TrimEnd('\n');
-                    }
-                    newText += line;
-                }
+                newText = "Sources: " + string.Join(", ", textLines.Distinct());
             }
 
             if (newText != "")
             {
+                newText += "\n";
                 var lines = new List<Payload>()
                 {
                     new UIForegroundPayload((ushort)(_colorSetting.CurrentValue(Configuration) ?? Configuration.TooltipColor ?? 1)),

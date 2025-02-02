@@ -123,16 +123,7 @@ public class ItemSpecialShopSourceRenderer : ItemInfoRenderer<ItemSpecialShopSou
     public override Func<ItemSource, string> GetName => source =>
     {
         var asSource = AsSource(source);
-        var costs = String.Join(", ",
-            asSource.ShopListing.Costs.Select(c => c.Item.NameString + " (" + c.Count + ")"));
-        if (asSource.ShopListing.Rewards.Count() > 1)
-        {
-            var rewards = String.Join(", ",
-                asSource.ShopListing.Rewards.Select(c => c.Item.NameString + " (" + c.Count + ")"));
-            return $"Costs {costs} - Rewards {rewards}";
-        }
-
-        return $"Costs {costs}";
+        return asSource.Shop.Name;
     };
 
     public override Func<ItemSource, int> GetIcon => source =>

@@ -25,10 +25,10 @@ public class TooltipLocationDisplayModeSetting : ChoiceSetting<TooltipLocationDi
     public override string WizardName { get; } = "Display Mode";
 
     public override string HelpText { get; set; } =
-        "How the locations of items should be presented in the tooltip. This requires 'Display Amount Owned?' to be on.";
+        "How the locations of items should be presented in the tooltip. This requires 'Add Item Locations?' to be on.";
 
     public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
-    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Visuals;
+    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.AddItemLocations;
 
     public override Dictionary<TooltipLocationDisplayMode, string> Choices
     {
