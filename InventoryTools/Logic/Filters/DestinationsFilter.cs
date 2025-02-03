@@ -100,15 +100,14 @@ namespace InventoryTools.Logic.Filters
             }
             ImGui.SameLine();
             ImGui.TextWrapped(String.Join(", ", destinations));
-            
+
             //Free Companies
             destinations = new();
             foreach (var characterCategories in _listCategoryService.DestinationFreeCompanyCategories(configuration))
             {
                 foreach (var characterCategory in characterCategories.Value)
                 {
-                    if (allCharacters.ContainsKey(characterCategories.Key) &&
-                        characterCategories.Key.ToString().StartsWith("9"))
+                    if (allCharacters.ContainsKey(characterCategories.Key))
                     {
                         var formattedName = allCharacters[characterCategories.Key].FormattedName + " - " +
                                             characterCategory.FormattedName();

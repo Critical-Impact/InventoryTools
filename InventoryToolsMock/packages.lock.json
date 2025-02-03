@@ -185,13 +185,13 @@
       },
       "AllaganLib.GameSheets": {
         "type": "Transitive",
-        "resolved": "1.1.18",
-        "contentHash": "ihew3Mc2zy0qM5kdWP9hPrgpxfbqIlbn+a5tdS/lM/IS15cpwi6m0LODZHNWgEb8C+KGRh+C5E9Jmd2MknmzYw==",
+        "resolved": "1.1.19",
+        "contentHash": "cKbT26a27CDW4mR0YaT8cMUmsv8IKmgSsU1T9z8pZrm+psAo0tDLUFBJs4CwgtQIn+kX9QXbvHU7ALyuzU6FYw==",
         "dependencies": {
           "AllaganLib.Shared": "1.1.12",
           "Autofac.Extensions.DependencyInjection": "9.0.0",
           "CSVFile": "3.2.0",
-          "LuminaSupplemental.Excel": "2.1.9"
+          "LuminaSupplemental.Excel": "2.2.0"
         }
       },
       "AllaganLib.Interface": {
@@ -274,11 +274,12 @@
       },
       "LuminaSupplemental.Excel": {
         "type": "Transitive",
-        "resolved": "2.1.9",
-        "contentHash": "9BpzaWYccugdEQ0tzoI7ZIeAnSKTO8TRSdsBNqwsVzlco/UMbXEzc2e4VL54YvJgcqEF9YxT5lq7vr93CTZ+Hw==",
+        "resolved": "2.2.0",
+        "contentHash": "pRhyOy5oGEi1c6yb7nKPadVkUac+H8/SsHVobb8LWLib1HP4RkwBfeCuoy7M/WAFQj84rFSnC7/RHwCsv4WdgQ==",
         "dependencies": {
           "CSVFile": "3.2.0",
-          "CsvHelper": "30.0.1"
+          "CsvHelper": "30.0.1",
+          "Sylvan.Data.Csv": "1.3.9"
         }
       },
       "MessagePack": {
@@ -698,6 +699,11 @@
           "SharpGen.Runtime": "2.0.0-beta.13"
         }
       },
+      "Sylvan.Data.Csv": {
+        "type": "Transitive",
+        "resolved": "1.3.9",
+        "contentHash": "ej6VghLaUn5/GK6jGFvd5aHn3Wue+Yp2tpmyI507PBRb/lFA6WAPS+3yKGr5wtFzh0zaE53CnCxhjc0ZW8xu3g=="
+      },
       "System.Collections.Immutable": {
         "type": "Transitive",
         "resolved": "7.0.0",
@@ -846,7 +852,7 @@
       "criticalcommonlib": {
         "type": "Project",
         "dependencies": {
-          "AllaganLib.GameSheets": "[1.1.18, )",
+          "AllaganLib.GameSheets": "[1.1.19, )",
           "Humanizer.Core": "[3.0.0-beta.54, )",
           "Microsoft.Extensions.Hosting": "[8.0.1, )",
           "NaturalSort.Extension": "[3.2.0, )",

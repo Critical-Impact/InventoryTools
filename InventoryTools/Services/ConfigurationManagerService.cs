@@ -331,7 +331,7 @@ namespace InventoryTools.Services
             {
                 try
                 {
-                    var items = CsvLoader.LoadCsv<InventoryItem>(inventoryCsv, out _, out _);
+                    var items = CsvLoader.LoadCsv<InventoryItem>(inventoryCsv, false, out _, out _);
                     success = true;
                     return items;
                 }
@@ -359,7 +359,7 @@ namespace InventoryTools.Services
             {
                 try
                 {
-                    var items = CsvLoader.LoadCsv<InventoryChange>(historyCsv, out _, out _);
+                    var items = CsvLoader.LoadCsv<InventoryChange>(historyCsv, false, out _, out _);
                     success = true;
                     return items;
                 }

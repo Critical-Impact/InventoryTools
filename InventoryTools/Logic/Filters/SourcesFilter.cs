@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using CriticalCommonLib.Extensions;
+using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
@@ -103,15 +104,14 @@ namespace InventoryTools.Logic.Filters
             }
             ImGui.SameLine();
             ImGui.TextWrapped(String.Join(", ", sources));
-            
+
             //Free Company Sources
             sources = new();
             foreach (var characterCategories in _listCategoryService.SourceFreeCompanyCategories(configuration))
             {
                 foreach (var characterCategory in characterCategories.Value)
                 {
-                    if (allCharacters.ContainsKey(characterCategories.Key) &&
-                        characterCategories.Key.ToString().StartsWith("9"))
+                    if (allCharacters.ContainsKey(characterCategories.Key))
                     {
                         var formattedName = allCharacters[characterCategories.Key].FormattedName + " - " +
                                             characterCategory.FormattedName();
@@ -131,17 +131,16 @@ namespace InventoryTools.Logic.Filters
             }
             ImGui.SameLine();
             ImGui.TextWrapped(String.Join(", ", sources));
-            
+
             //House Sources
             sources = new();
             foreach (var characterCategories in _listCategoryService.SourceHouseCategories(configuration))
             {
                 foreach (var characterCategory in characterCategories.Value)
                 {
-                    if (allCharacters.ContainsKey(characterCategories.Key) &&
-                        characterCategories.Key.ToString().StartsWith("9"))
+                    if (allCharacters.TryGetValue(characterCategories.Key, out var character))
                     {
-                        var formattedName = allCharacters[characterCategories.Key].FormattedName + " - " +
+                        var formattedName = character.FormattedName + " - " +
                                             characterCategory.FormattedName();
                         sources.Add(formattedName);
                     }
