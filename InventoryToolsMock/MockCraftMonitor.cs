@@ -55,4 +55,6 @@ public class MockCraftMonitor : ICraftMonitor
             return null;
         }
     }
+
+    public uint CraftType { get; set; }
 }

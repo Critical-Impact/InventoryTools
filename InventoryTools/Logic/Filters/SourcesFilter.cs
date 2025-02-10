@@ -30,7 +30,7 @@ namespace InventoryTools.Logic.Filters
             "This lists all the sources that are applicable given the sources picked above.";
 
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Inventories;
-        
+
         public override bool HasValueSet(FilterConfiguration configuration)
         {
             return false;
@@ -47,7 +47,7 @@ namespace InventoryTools.Logic.Filters
             ImGui.SameLine();
             ImGuiService.HelpMarker(HelpText);
             var allCharacters = _characterMonitor.Characters;
-            
+
             //Retainer Sources
             List<string> sources = new();
             foreach (var retainerCategories in _listCategoryService.SourceRetainerCategories(configuration))
@@ -63,7 +63,7 @@ namespace InventoryTools.Logic.Filters
                     }
                 }
             }
-            
+
             ImGui.SetNextItemWidth(LabelSize);
             if (sources.Count != 0)
             {
@@ -76,7 +76,7 @@ namespace InventoryTools.Logic.Filters
             }
             ImGui.SameLine();
             ImGui.TextWrapped(String.Join(", ", sources));
-            
+
             //Character Sources
             sources = new();
             foreach (var characterCategories in _listCategoryService.SourceCharacterCategories(configuration))

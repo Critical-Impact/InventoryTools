@@ -25,6 +25,10 @@
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
         <PackageReference Include="CsvHelper" Version="30.0.1" />
         <PackageReference Include="SerialQueue" Version="2.1.0" />
+        <PackageReference Include="SonarAnalyzer.CSharp" Version="10.6.0.109712">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="System.Reactive" Version="5.0.0" />
         <ProjectReference Include="..\CriticalCommonLib\CriticalCommonLib.csproj" />
         <ProjectReference Include="..\OtterGui\OtterGui.csproj" />

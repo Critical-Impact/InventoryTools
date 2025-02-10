@@ -43,6 +43,7 @@ namespace InventoryTools
         private readonly IEnumerable<BaseTooltip> tooltips;
         private readonly IEnumerable<IHotkey> hotkeys;
         private readonly ITooltipService _tooltipService;
+        private readonly FilterConfiguration.Factory _filterConfigFactory;
         private readonly Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter> _sourceCategoryFilterFactory;
         private readonly BuyFromVendorPriceFilter _buyFromVendorPriceFilter;
         private readonly Func<Type, IFilter> _filterFactory;
@@ -69,7 +70,16 @@ namespace InventoryTools
 
         private DateTime? _nextSaveTime = null;
 
-        public PluginLogic(ConfigurationManagerService configurationManagerService, IChatUtilities chatUtilities, IListService listService, ILogger<PluginLogic> logger, IFramework framework, MediatorService mediatorService, HostedInventoryHistory hostedInventoryHistory, IInventoryMonitor inventoryMonitor, IInventoryScanner inventoryScanner, ICharacterMonitor characterMonitor, InventoryToolsConfiguration configuration, IMobTracker mobTracker, IHotkeyService hotkeyService, ICraftMonitor craftMonitor, IUnlockTrackerService unlockTrackerService,IEnumerable<BaseTooltip> tooltips, IEnumerable<IHotkey> hotkeys, Func<Type,IFilter> filterFactory, IMarketCache marketCache, ITooltipService tooltipService, Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter> sourceCategoryFilterFactory, BuyFromVendorPriceFilter buyFromVendorPriceFilter) : base(logger, mediatorService)
+        public PluginLogic(ConfigurationManagerService configurationManagerService, IChatUtilities chatUtilities,
+            IListService listService, ILogger<PluginLogic> logger, IFramework framework,
+            MediatorService mediatorService, HostedInventoryHistory hostedInventoryHistory,
+            IInventoryMonitor inventoryMonitor, IInventoryScanner inventoryScanner, ICharacterMonitor characterMonitor,
+            InventoryToolsConfiguration configuration, IMobTracker mobTracker, IHotkeyService hotkeyService,
+            ICraftMonitor craftMonitor, IUnlockTrackerService unlockTrackerService, IEnumerable<BaseTooltip> tooltips,
+            IEnumerable<IHotkey> hotkeys, Func<Type, IFilter> filterFactory, IMarketCache marketCache,
+            ITooltipService tooltipService, FilterConfiguration.Factory filterConfigFactory,
+            Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter> sourceCategoryFilterFactory,
+            BuyFromVendorPriceFilter buyFromVendorPriceFilter) : base(logger, mediatorService)
         {
             _configurationManagerService = configurationManagerService;
             _chatUtilities = chatUtilities;
@@ -88,12 +98,12 @@ namespace InventoryTools
             this.tooltips = tooltips;
             this.hotkeys = hotkeys;
             _tooltipService = tooltipService;
+            _filterConfigFactory = filterConfigFactory;
             _sourceCategoryFilterFactory = sourceCategoryFilterFactory;
             _buyFromVendorPriceFilter = buyFromVendorPriceFilter;
             _filterFactory = filterFactory;
             _marketCache = marketCache;
             this.MediatorService.Subscribe<PluginLoadedMessage>(this, PluginLoaded);
-
         }
 
         private void PluginLoaded(PluginLoadedMessage obj)
@@ -241,7 +251,7 @@ namespace InventoryTools
 
         public void AddAllFilter(string newName = "All")
         {
-            var allItemsFilter = new FilterConfiguration(newName, FilterType.SearchFilter);
+            var allItemsFilter = _filterConfigFactory.Invoke(newName, FilterType.SearchFilter);
             allItemsFilter.DisplayInTabs = true;
             allItemsFilter.SourceAllCharacters = true;
             allItemsFilter.SourceAllRetainers = true;
@@ -252,7 +262,7 @@ namespace InventoryTools
 
         public void AddRetainerFilter(string newName = "Retainers")
         {
-            var retainerItemsFilter = new FilterConfiguration(newName, FilterType.SearchFilter);
+            var retainerItemsFilter = _filterConfigFactory.Invoke(newName, FilterType.SearchFilter);
             retainerItemsFilter.DisplayInTabs = true;
             retainerItemsFilter.SourceAllRetainers = true;
             _listService.AddDefaultColumns(retainerItemsFilter);
@@ -261,7 +271,7 @@ namespace InventoryTools
 
         public void AddPlayerFilter(string newName = "Player")
         {
-            var playerItemsFilter = new FilterConfiguration(newName,  FilterType.SearchFilter);
+            var playerItemsFilter = _filterConfigFactory.Invoke(newName,  FilterType.SearchFilter);
             playerItemsFilter.DisplayInTabs = true;
             playerItemsFilter.SourceAllCharacters = true;
             _listService.AddDefaultColumns(playerItemsFilter);
@@ -270,7 +280,7 @@ namespace InventoryTools
 
         public void AddHistoryFilter(string newName = "History")
         {
-            var historyFilter = new FilterConfiguration(newName,  FilterType.HistoryFilter);
+            var historyFilter = _filterConfigFactory.Invoke(newName,  FilterType.HistoryFilter);
             historyFilter.DisplayInTabs = true;
             historyFilter.SourceAllCharacters = true;
             historyFilter.SourceAllRetainers = true;
@@ -282,7 +292,7 @@ namespace InventoryTools
 
         public void AddFreeCompanyFilter(string newName = "Free Company")
         {
-            var newFilter = new FilterConfiguration(newName,  FilterType.SearchFilter);
+            var newFilter = _filterConfigFactory.Invoke(newName,  FilterType.SearchFilter);
             newFilter.DisplayInTabs = true;
             newFilter.SourceAllFreeCompanies = true;
             _listService.AddDefaultColumns(newFilter);
@@ -291,7 +301,7 @@ namespace InventoryTools
 
         public void AddHousingFilter(string newName = "Housing")
         {
-            var newFilter = new FilterConfiguration(newName,  FilterType.SearchFilter);
+            var newFilter = _filterConfigFactory.Invoke(newName,  FilterType.SearchFilter);
             newFilter.DisplayInTabs = true;
             newFilter.SourceAllHouses = true;
             _listService.AddDefaultColumns(newFilter);
@@ -300,7 +310,7 @@ namespace InventoryTools
 
         public void AddAllGameItemsFilter(string newName = "All Game Items")
         {
-            var allGameItemsFilter = new FilterConfiguration(newName, FilterType.GameItemFilter);
+            var allGameItemsFilter = _filterConfigFactory.Invoke(newName, FilterType.GameItemFilter);
             allGameItemsFilter.DisplayInTabs = true;
             _listService.AddDefaultColumns(allGameItemsFilter);
             _listService.AddList(allGameItemsFilter);
@@ -308,7 +318,7 @@ namespace InventoryTools
 
         public void AddFavouritesFilter(string newName = "Favourites")
         {
-            var newFilter = new FilterConfiguration(newName, FilterType.GameItemFilter);
+            var newFilter = _filterConfigFactory.Invoke(newName, FilterType.GameItemFilter);
             var favouritesFilter = (FavouritesFilter)_filterFactory.Invoke(typeof(FavouritesFilter));
             favouritesFilter.UpdateFilterConfiguration(newFilter, true);
             newFilter.DisplayInTabs = true;
@@ -337,7 +347,7 @@ namespace InventoryTools
 
         public void AddSampleFilter100Gil(string newName = "100 gil or less")
         {
-            var sampleFilter = new FilterConfiguration(newName, FilterType.SearchFilter);
+            var sampleFilter = _filterConfigFactory.Invoke(newName, FilterType.SearchFilter);
             sampleFilter.DisplayInTabs = true;
             sampleFilter.SourceAllCharacters = true;
             sampleFilter.SourceAllRetainers = true;
@@ -350,7 +360,7 @@ namespace InventoryTools
 
         public void AddSampleFilterMaterials(string newName = "Put away materials")
         {
-            var sampleFilter = new FilterConfiguration(newName, FilterType.SortingFilter);
+            var sampleFilter = _filterConfigFactory.Invoke(newName, FilterType.SortingFilter);
             sampleFilter.DisplayInTabs = true;
             sampleFilter.SourceCategories = new HashSet<InventoryCategory>() {InventoryCategory.CharacterBags};
             sampleFilter.DestinationCategories =  new HashSet<InventoryCategory>() {InventoryCategory.RetainerBags};
@@ -364,7 +374,7 @@ namespace InventoryTools
 
         public void AddSampleFilterDuplicatedItems(string newName = "Duplicated SortItems")
         {
-            var sampleFilter = new FilterConfiguration(newName, FilterType.SortingFilter);
+            var sampleFilter = _filterConfigFactory.Invoke(newName, FilterType.SortingFilter);
             sampleFilter.DisplayInTabs = true;
             sampleFilter.SourceCategories = new HashSet<InventoryCategory>() {InventoryCategory.CharacterBags,InventoryCategory.RetainerBags};
             sampleFilter.DestinationCategories =  new HashSet<InventoryCategory>() {InventoryCategory.RetainerBags};

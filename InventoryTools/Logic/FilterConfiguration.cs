@@ -18,6 +18,7 @@ namespace InventoryTools.Logic
 {
     public class FilterConfiguration
     {
+        private readonly CraftList.Factory _craftListFactory;
         private List<(ulong, InventoryCategory)> _destinationInventories = new();
         private bool _displayInTabs = true;
         private bool? _duplicatesOnly;
@@ -185,15 +186,16 @@ namespace InventoryTools.Logic
             set => _searchResults = value;
         }
 
-        public FilterConfiguration(string name, string key, FilterType filterType)
+        public delegate FilterConfiguration Factory(string name, FilterType filterType);
+
+        public FilterConfiguration(CraftList.Factory craftListFactory)
         {
-            FilterType = filterType;
-            Name = name;
-            Key = key;
+            _craftListFactory = craftListFactory;
         }
 
-        public FilterConfiguration(string name, FilterType filterType)
+        public FilterConfiguration(string name, FilterType filterType, CraftList.Factory craftListFactory)
         {
+            _craftListFactory = craftListFactory;
             FilterType = filterType;
             Name = name;
             Key = Guid.NewGuid().ToString("N");
@@ -1466,7 +1468,7 @@ namespace InventoryTools.Logic
             {
                 if (_craftList == null)
                 {
-                    _craftList = new CraftList();
+                    _craftList = _craftListFactory.Invoke();
                 }
                 return _craftList;
             }

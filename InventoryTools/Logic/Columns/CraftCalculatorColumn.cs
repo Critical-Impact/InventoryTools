@@ -21,13 +21,15 @@ public class CraftCalculatorColumn : IntegerColumn, IDisposable
     private readonly ICharacterMonitor _characterMonitor;
     private readonly ScopePickerColumnSetting _scopePickerColumnSetting;
     private readonly InventoryScopeCalculator _scopeCalculator;
+    private readonly CraftCalculator.Factory _craftCalculatorFactory;
 
-    public CraftCalculatorColumn(ILogger<CraftCalculatorColumn> logger, ImGuiService imGuiService, IInventoryMonitor inventoryMonitor, ICharacterMonitor characterMonitor, ScopePickerColumnSetting scopePickerColumnSetting, InventoryScopeCalculator scopeCalculator) : base(logger, imGuiService)
+    public CraftCalculatorColumn(ILogger<CraftCalculatorColumn> logger, ImGuiService imGuiService, IInventoryMonitor inventoryMonitor, ICharacterMonitor characterMonitor, ScopePickerColumnSetting scopePickerColumnSetting, InventoryScopeCalculator scopeCalculator, CraftCalculator.Factory craftCalculatorFactory) : base(logger, imGuiService)
     {
         _inventoryMonitor = inventoryMonitor;
         _characterMonitor = characterMonitor;
         _scopePickerColumnSetting = scopePickerColumnSetting;
         _scopeCalculator = scopeCalculator;
+        _craftCalculatorFactory = craftCalculatorFactory;
     }
     public override ColumnCategory ColumnCategory => ColumnCategory.Tools;
     public Dictionary<uint, uint>? _craftable;
@@ -72,7 +74,7 @@ public class CraftCalculatorColumn : IntegerColumn, IDisposable
             {
                 if (_craftCalculator == null)
                 {
-                    _craftCalculator = new CraftCalculator();
+                    _craftCalculator = _craftCalculatorFactory.Invoke();
                     _craftCalculator.CraftingResult += CraftCalculatorOnCraftingResult;
                 }
 

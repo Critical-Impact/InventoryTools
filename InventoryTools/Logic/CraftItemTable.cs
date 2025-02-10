@@ -16,6 +16,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Localizers;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Services;
 
@@ -23,8 +24,14 @@ namespace InventoryTools.Logic
 {
     public class CraftItemTable : RenderTableBase
     {
-        public CraftItemTable(ImGuiMenuService imGuiMenuService, ImGuiTooltipService imGuiTooltipService, InventoryToolsConfiguration configuration, ImGuiTooltipModeSetting tooltipModeSetting) : base(imGuiMenuService, imGuiTooltipService, tooltipModeSetting, configuration)
+        private readonly CraftGroupingLocalizer _craftGroupingLocalizer;
+
+        public CraftItemTable(ImGuiMenuService imGuiMenuService, ImGuiTooltipService imGuiTooltipService,
+            InventoryToolsConfiguration configuration, ImGuiTooltipModeSetting tooltipModeSetting,
+            CraftGroupingLocalizer craftGroupingLocalizer) : base(
+            imGuiMenuService, imGuiTooltipService, tooltipModeSetting, configuration)
         {
+            _craftGroupingLocalizer = craftGroupingLocalizer;
             _tableFlags = ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersV |
                           ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.BordersInnerV |
                           ImGuiTableFlags.BordersH | ImGuiTableFlags.BordersOuterH |
@@ -89,7 +96,7 @@ namespace InventoryTools.Logic
                         {
                             foreach (var groupedCraft in groupedCrafts)
                             {
-                                using var tabItem = ImRaii.TabItem( groupedCraft.Item1.FormattedName());
+                                using var tabItem = ImRaii.TabItem( _craftGroupingLocalizer.FormattedName(groupedCraft.Item1));
                                 if (!tabItem.Success) continue;
 
                                 if (Columns.Count == 0) continue;
@@ -219,7 +226,7 @@ namespace InventoryTools.Logic
                                 ImGui.TableNextRow(ImGuiTableRowFlags.Headers, FilterConfiguration.TableHeight);
                                 ImGui.TableNextColumn();
                                 var headerColor = ImRaii.PushColor(ImGuiCol.Header, new Vector4(0, 0, 0, 0));
-                                using (var treeNode = ImRaii.TreeNode("##" + groupedCraft.craftGrouping.FormattedName(),
+                                using (var treeNode = ImRaii.TreeNode("##" + _craftGroupingLocalizer.FormattedName(groupedCraft.craftGrouping),
                                            ImGuiTreeNodeFlags.SpanFullWidth | ImGuiTreeNodeFlags.DefaultOpen |
                                            ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
@@ -228,7 +235,7 @@ namespace InventoryTools.Logic
                                     {
                                         ImGui.TableNextColumn();
                                         ImGui.TextColored(FilterConfiguration.CraftHeaderColour,
-                                            groupedCraft.craftGrouping.FormattedName());
+                                            _craftGroupingLocalizer.FormattedName(groupedCraft.craftGrouping));
                                     }
 
                                     if (treeNode.Success)

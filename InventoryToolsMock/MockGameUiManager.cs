@@ -60,4 +60,9 @@ public class MockGameUiManager : IGameUiManager
         AddonPtr = null;
         return false;
     }
+
+    public unsafe T* GetNodeByID<T>(AtkUldManager uldManager, uint nodeId, NodeType? type = null) where T : unmanaged
+    {
+        return null;
+    }
 }

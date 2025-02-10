@@ -33,6 +33,7 @@ namespace InventoryTools.Lists
         private readonly IChatUtilities _chatUtilities;
         private readonly IFramework _framework;
         private readonly Func<string, IColumn?> _columnFactory;
+        private readonly FilterConfiguration.Factory _filterConfigFactory;
         private readonly Func<Type, IColumn> _columnTypeFactory;
         private ConcurrentDictionary<string, FilterConfiguration> _lists;
 
@@ -40,6 +41,7 @@ namespace InventoryTools.Lists
             ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, HostedInventoryHistory history,
             ConfigurationManagerService configurationManagerService, InventoryToolsConfiguration configuration,
             IChatUtilities chatUtilities, IFramework framework, Func<string, IColumn?> columnFactory,
+            FilterConfiguration.Factory filterConfigFactory,
             Func<Type, IColumn> columnTypeFactory) : base(logger, mediatorService)
         {
             _history = history;
@@ -48,6 +50,7 @@ namespace InventoryTools.Lists
             _chatUtilities = chatUtilities;
             _framework = framework;
             _columnFactory = columnFactory;
+            _filterConfigFactory = filterConfigFactory;
             _columnTypeFactory = columnTypeFactory;
             _lists = new ConcurrentDictionary<string, FilterConfiguration>();
 
@@ -346,7 +349,7 @@ namespace InventoryTools.Lists
 
         public bool AddList(string name, FilterType filterType)
         {
-            var sampleFilter = new FilterConfiguration(name, filterType);
+            var sampleFilter = _filterConfigFactory.Invoke(name, filterType);
             AddDefaultColumns(sampleFilter);
             return AddList(sampleFilter);
         }
@@ -379,8 +382,7 @@ namespace InventoryTools.Lists
             var clonedFilter = GetDefaultCraftList().Clone();
             if (clonedFilter == null)
             {
-                var filter = new FilterConfiguration(fixedName,
-                    Guid.NewGuid().ToString("N"), FilterType.CraftFilter);
+                var filter = _filterConfigFactory.Invoke(fixedName, FilterType.CraftFilter);
                 AddDefaultColumns(filter);
                 filter.IsEphemeralCraftList = isEphemeralNN;
                 AddList(filter);
@@ -411,8 +413,7 @@ namespace InventoryTools.Lists
                 fixedName = name + " " + count;
             }
 
-            var filter = new FilterConfiguration(fixedName,
-                Guid.NewGuid().ToString("N"), FilterType.CuratedList);
+            var filter = _filterConfigFactory.Invoke(fixedName, FilterType.CuratedList);
             AddDefaultColumns(filter);
             AddList(filter);
             return filter;
@@ -996,7 +997,7 @@ namespace InventoryTools.Lists
 
         public FilterConfiguration GenerateDefaultCraftList()
         {
-            var defaultFilter = new FilterConfiguration("Default Craft List", FilterType.CraftFilter);
+            var defaultFilter = _filterConfigFactory.Invoke("Default Craft List", FilterType.CraftFilter);
             AddDefaultColumns(defaultFilter);
             defaultFilter.ApplyDefaultCraftFilterConfiguration();
             return defaultFilter;

@@ -123,6 +123,12 @@
         "resolved": "2.1.0",
         "contentHash": "rmQcrFXgcrqT9M6+xdxAK/JWx1vFuCRT8fTdce4ALdze2/8N5yMRW9Vmkresw+JpL+JC8zuC1HfDkrfVgBUIqA=="
       },
+      "SonarAnalyzer.CSharp": {
+        "type": "Direct",
+        "requested": "[10.6.0.109712, )",
+        "resolved": "10.6.0.109712",
+        "contentHash": "fMwoXhlmFrcIYLpmCZOPXQkKwQD6WoFsmkZp8FZ7RJ9Db+ELUg56qh1X4Vy2nU7ZOWmuAMDOMosYxiQKNLBWtw=="
+      },
       "System.Reactive": {
         "type": "Direct",
         "requested": "[5.0.0, )",

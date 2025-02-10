@@ -34,6 +34,7 @@ namespace InventoryTools.Ui
         private readonly IListService _listService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly SettingPage.Factory _settingPageFactory;
+        private readonly FilterConfiguration.Factory _filterConfigurationFactory;
         private readonly Func<Type, IConfigPage> _configPageFactory;
         private readonly Func<FilterConfiguration, FilterPage> _filterPageFactory;
         private readonly IComponentContext _context;
@@ -53,6 +54,7 @@ namespace InventoryTools.Ui
             Func<Type, IConfigPage> configPageFactory,
             Func<FilterConfiguration, FilterPage> filterPageFactory,
             SettingPage.Factory settingPageFactory,
+            FilterConfiguration.Factory filterConfigurationFactory,
             IComponentContext context) : base(logger,
             mediator,
             imGuiService,
@@ -65,6 +67,7 @@ namespace InventoryTools.Ui
             _listService = listService;
             _serviceScopeFactory = serviceScopeFactory;
             _settingPageFactory = settingPageFactory;
+            _filterConfigurationFactory = filterConfigurationFactory;
             _configPageFactory = configPageFactory;
             _filterPageFactory = filterPageFactory;
             _context = context;
@@ -364,8 +367,7 @@ namespace InventoryTools.Ui
 
         private void AddSearchFilter(string newName, string id)
         {
-            var filterConfiguration = new FilterConfiguration(newName,
-                Guid.NewGuid().ToString("N"), FilterType.SearchFilter);
+            var filterConfiguration = _filterConfigurationFactory.Invoke(newName, FilterType.SearchFilter);
             _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
             SetNewFilterActive();
@@ -373,8 +375,7 @@ namespace InventoryTools.Ui
 
         private void AddHistoryFilter(string newName, string id)
         {
-            var filterConfiguration = new FilterConfiguration(newName,
-                Guid.NewGuid().ToString("N"), FilterType.HistoryFilter);
+            var filterConfiguration = _filterConfigurationFactory.Invoke(newName, FilterType.HistoryFilter);
             _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
             SetNewFilterActive();
@@ -382,7 +383,7 @@ namespace InventoryTools.Ui
 
         private void AddGameItemFilter(string newName, string id)
         {
-            var filterConfiguration = new FilterConfiguration(newName,Guid.NewGuid().ToString("N"), FilterType.GameItemFilter);
+            var filterConfiguration = _filterConfigurationFactory.Invoke(newName, FilterType.GameItemFilter);
             _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
             SetNewFilterActive();
@@ -390,7 +391,7 @@ namespace InventoryTools.Ui
 
         private void AddSortFilter(string newName, string id)
         {
-            var filterConfiguration = new FilterConfiguration(newName,Guid.NewGuid().ToString("N"), FilterType.SortingFilter);
+            var filterConfiguration = _filterConfigurationFactory.Invoke(newName, FilterType.SortingFilter);
             _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
             SetNewFilterActive();

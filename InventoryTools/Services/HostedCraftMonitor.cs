@@ -1,4 +1,5 @@
 using AllaganLib.GameSheets.Sheets;
+using Dalamud.Plugin.Services;
 
 namespace InventoryTools.Services;
 
@@ -10,7 +11,7 @@ using Microsoft.Extensions.Hosting;
 
 public class HostedCraftMonitor : CraftMonitor, IHostedService
 {
-    public HostedCraftMonitor(IGameUiManager gameUiManager, RecipeSheet recipeSheet) : base(gameUiManager, recipeSheet)
+    public HostedCraftMonitor(IGameUiManager gameUiManager, RecipeSheet recipeSheet, IClientState clientState, IFramework framework, IPluginLog pluginLog) : base(gameUiManager, recipeSheet, clientState, framework, pluginLog)
     {
     }
 

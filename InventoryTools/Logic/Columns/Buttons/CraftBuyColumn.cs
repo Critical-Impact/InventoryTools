@@ -14,6 +14,7 @@ using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Mediator;
+using InventoryTools.Services;
 
 namespace InventoryTools.Logic.Columns.Buttons;
 
@@ -21,11 +22,13 @@ public class CraftBuyColumn : ButtonColumn
 {
     private readonly IGameInterface _gameInterface;
     private readonly IChatUtilities _chatUtilities;
+    private readonly TeleporterService _teleporterService;
 
-    public CraftBuyColumn(IGameInterface gameInterface, IChatUtilities chatUtilities)
+    public CraftBuyColumn(IGameInterface gameInterface, IChatUtilities chatUtilities, TeleporterService teleporterService)
     {
         _gameInterface = gameInterface;
         _chatUtilities = chatUtilities;
+        _teleporterService = teleporterService;
     }
     public override string Name { get; set; } = "Buy Button";
     public override float Width { get; set; } = 80;
@@ -111,7 +114,7 @@ public class CraftBuyColumn : ButtonColumn
                 if (ImGui.Button("Teleport##" + tuple.shop.RowId + "_" + tuple.npc.RowId + "_" +
                                  tuple.location.Map.RowId))
                 {
-                    var nearestAetheryte = tuple.location.GetNearestAetheryte();
+                    var nearestAetheryte = _teleporterService.GetNearestAetheryte(tuple.location);
                     if (nearestAetheryte != null)
                     {
                         messages.Add(new RequestTeleportMessage(nearestAetheryte.Value.RowId));
@@ -140,7 +143,7 @@ public class CraftBuyColumn : ButtonColumn
                 var vendor = GetLocations(item).FirstOrDefault();
                 if (vendor.location != null)
                 {
-                    var nearestAetheryte = vendor.location.GetNearestAetheryte();
+                    var nearestAetheryte = _teleporterService.GetNearestAetheryte(vendor.location);
                     if (nearestAetheryte != null)
                     {
                         messages.Add(new RequestTeleportMessage(nearestAetheryte.Value.RowId));

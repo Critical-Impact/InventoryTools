@@ -70,7 +70,7 @@ namespace InventoryTools.Commands
             Logger.LogTrace(args);
             if (args.Trim() == "")
             {
-                Service.Chat.PrintError("You must enter the name of an list.");
+                _chatUtilities.PrintError("You must enter the name of an list.");
             }
             else
             {
@@ -84,7 +84,7 @@ namespace InventoryTools.Commands
         {
             if (args.Trim() == "")
             {
-                Service.Chat.PrintError("You must enter the name of a list.");
+                _chatUtilities.PrintError("You must enter the name of a list.");
             }
             else
             {
@@ -95,7 +95,7 @@ namespace InventoryTools.Commands
                 }
                 else
                 {
-                    Service.Chat.PrintError("Could not find a list with that name.");
+                    _chatUtilities.PrintError("Could not find a list with that name.");
                 }
             }
         }

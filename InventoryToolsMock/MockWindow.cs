@@ -39,6 +39,7 @@ public class MockWindow : GenericWindow
     private readonly InventoryHistory _inventoryHistory;
     private readonly ExcelCache _excelCache;
     private readonly ExcelSheet<World> _worldSheet;
+    private readonly MinifyResolver _minifyResolver;
 
     public MockWindow(ILogger<MockWindow> logger,
         MediatorService mediator,
@@ -54,6 +55,7 @@ public class MockWindow : GenericWindow
         HostedInventoryHistory inventoryHistory,
         ExcelCache excelCache,
         ExcelSheet<World> worldSheet,
+        MinifyResolver minifyResolver,
         string name = "Mock Tools") : base(logger,
         mediator,
         imGuiService,
@@ -70,6 +72,7 @@ public class MockWindow : GenericWindow
         _inventoryHistory = inventoryHistory;
         _excelCache = excelCache;
         _worldSheet = worldSheet;
+        _minifyResolver = minifyResolver;
     }
     private List<InventoryItem> _items;
 
@@ -384,11 +387,10 @@ public class MockWindow : GenericWindow
                 Logger.LogDebug("Loading inventories from " + fileName);
                 var cacheFile = new FileInfo(fileName);
                 string json = File.ReadAllText(cacheFile.FullName, Encoding.UTF8);
-                MinifyResolver minifyResolver = new();
                 var parsedInventories = JsonConvert.DeserializeObject<Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>>(json, new JsonSerializerSettings()
                 {
                     DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
-                    ContractResolver = minifyResolver
+                    ContractResolver = _minifyResolver
                 });
                 _items = parsedInventories.SelectMany(c => c.Value.SelectMany(d => d.Value)).ToList();
             }

@@ -33,11 +33,12 @@ namespace InventoryTools.Services
 
         public event ConfigurationChangedDelegate? ConfigurationChanged;
 
-        public ConfigurationManagerService(IFramework framework, IDalamudPluginInterface pluginInterfaceService, ILogger<ConfigurationManagerService> logger, IBackgroundTaskQueue saveQueue)
+        public ConfigurationManagerService(IFramework framework, IDalamudPluginInterface pluginInterfaceService, ILogger<ConfigurationManagerService> logger, IBackgroundTaskQueue saveQueue, MinifyResolver minifyResolver)
         {
             Logger = logger;
             _pluginInterfaceService = pluginInterfaceService;
             _saveQueue = saveQueue;
+            _minifyResolver = minifyResolver;
             _framework = framework;
             _framework.Update += OnUpdate;
         }
@@ -130,7 +131,7 @@ namespace InventoryTools.Services
                 TypeNameHandling = TypeNameHandling.None,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                 DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
-                ContractResolver = MinifyResolver
+                ContractResolver = _minifyResolver
             });
             if (inventoryToolsConfiguration == null)
             {
@@ -168,7 +169,7 @@ namespace InventoryTools.Services
                                 new ColumnConverter()
                             },
                             DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
-                            ContractResolver = MinifyResolver
+                            ContractResolver = _minifyResolver
                         });
                     if (inventoryToolsConfiguration != null)
                     {
@@ -238,7 +239,7 @@ namespace InventoryTools.Services
                     TypeNameHandling = TypeNameHandling.None,
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                     DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
-                    ContractResolver = MinifyResolver
+                    ContractResolver = _minifyResolver
                 }));
                 loadConfigStopwatch.Stop();
                 Logger.LogTrace("Took " + loadConfigStopwatch.Elapsed.TotalSeconds + " to save configuration.");
@@ -271,7 +272,7 @@ namespace InventoryTools.Services
                 return JsonConvert.DeserializeObject<Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>>(json, new JsonSerializerSettings()
                 {
                     DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
-                    ContractResolver = MinifyResolver
+                    ContractResolver = _minifyResolver
                 });
             }
             catch (Exception e)
@@ -281,8 +282,7 @@ namespace InventoryTools.Services
             }
         }
 
-        public MinifyResolver MinifyResolver => _minifyResolver ??= new();
-        private MinifyResolver? _minifyResolver;
+        private MinifyResolver _minifyResolver;
         private readonly IDalamudPluginInterface _pluginInterfaceService;
         private readonly IBackgroundTaskQueue _saveQueue;
 

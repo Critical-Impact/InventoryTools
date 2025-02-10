@@ -12,6 +12,7 @@ using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Ui.Widgets;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Localizers;
 using InventoryTools.Services;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
@@ -29,9 +30,13 @@ public class CraftSettingsColumn : IColumn
     private readonly MapSheet _mapSheet;
     private readonly ItemSheet _itemSheet;
     private readonly ExcelSheet<World> _worldSheet;
+    private readonly CraftItemLocalizer _craftItemLocalizer;
+    private readonly IngredientPreferenceLocalizer _ingredientPreferenceLocalizer;
     public ImGuiService ImGuiService { get; }
 
-    public CraftSettingsColumn(ILogger<CraftSettingsColumn> logger, ImGuiService imGuiService, CraftingCache craftingCache, RecipeSheet recipeSheet, MapSheet mapSheet, ItemSheet itemSheet, ExcelSheet<World> worldSheet)
+    public CraftSettingsColumn(ILogger<CraftSettingsColumn> logger, ImGuiService imGuiService,
+        CraftingCache craftingCache, RecipeSheet recipeSheet, MapSheet mapSheet, ItemSheet itemSheet,
+        ExcelSheet<World> worldSheet, CraftItemLocalizer craftItemLocalizer, IngredientPreferenceLocalizer ingredientPreferenceLocalizer)
     {
         _logger = logger;
         _craftingCache = craftingCache;
@@ -39,6 +44,8 @@ public class CraftSettingsColumn : IColumn
         _mapSheet = mapSheet;
         _itemSheet = itemSheet;
         _worldSheet = worldSheet;
+        _craftItemLocalizer = craftItemLocalizer;
+        _ingredientPreferenceLocalizer = ingredientPreferenceLocalizer;
         ImGuiService = imGuiService;
     }
     public ColumnCategory ColumnCategory => ColumnCategory.Crafting;
@@ -187,7 +194,7 @@ public class CraftSettingsColumn : IColumn
                 if (tooltip.Success)
                 {
 
-                    ImGui.TextUnformatted("Sourcing: " + (ingredientPreferenceDefault?.FormattedName ?? "Use Default"));
+                    ImGui.TextUnformatted("Sourcing: " + (ingredientPreferenceDefault != null ? _ingredientPreferenceLocalizer.FormattedName(ingredientPreferenceDefault) : "Use Default"));
                     ImGui.TextUnformatted("Retainer: " + (retainerRetrievalDefault?.FormattedName() ?? "Use Default"));
                     ImGui.TextUnformatted("Zone: " + (zonePreference != null ? _mapSheet.GetRowOrDefault(zonePreference.Value)?.FormattedName ?? "Use Default" : "Use Default"));
                     if (searchResult.Item.CanBePlacedOnMarket)
@@ -364,7 +371,7 @@ public class CraftSettingsColumn : IColumn
     private void DrawRecipeIcon(FilterConfiguration configuration, int rowIndex, CraftItem item)
     {
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
-        var icon = item.SourceIcon;
+        var icon = _craftItemLocalizer.SourceIcon(item);
         ImGui.Image(ImGuiService.GetIconTexture(icon).ImGuiHandle,
             new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
         var itemRecipe = item.Recipe;
@@ -481,7 +488,7 @@ public class CraftSettingsColumn : IColumn
         }
         else
         {
-            ImGuiUtil.HoverTooltip(item.SourceName);
+            ImGuiUtil.HoverTooltip(_craftItemLocalizer.SourceName(item));
         }
 
         ImGui.SameLine();
@@ -494,7 +501,7 @@ public class CraftSettingsColumn : IColumn
         {
             var currentIngredientPreference =
                 configuration.CraftList.GetIngredientPreference(item.ItemId);
-            var previewValue = currentIngredientPreference?.FormattedName ?? "Use Default";
+            var previewValue = currentIngredientPreference != null ? _ingredientPreferenceLocalizer.FormattedName(currentIngredientPreference) : "Use Default";
             ImGui.Text("Source Preference:");
             ImGui.SameLine();
             ImGuiService.HelpMarker("How should the item be sourced? As there are multiple ways to source an item, you can either rely on your list's ingredient sourcing (tab inside the craft list's settings) or you can override the source here.");
@@ -512,7 +519,7 @@ public class CraftSettingsColumn : IColumn
 
                     foreach (var ingredientPreference in ingredientPreferences)
                     {
-                        if (ImGui.Selectable(ingredientPreference.FormattedName))
+                        if (ImGui.Selectable(_ingredientPreferenceLocalizer.FormattedName(ingredientPreference)))
                         {
                             configuration.CraftList.UpdateIngredientPreference(item.ItemId, ingredientPreference);
                             configuration.NeedsRefresh = true;

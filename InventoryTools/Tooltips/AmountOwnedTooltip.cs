@@ -9,6 +9,7 @@ using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using InventoryTools.Localizers;
 using InventoryTools.Logic.Editors;
 using InventoryTools.Logic.Settings;
 using Microsoft.Extensions.Logging;
@@ -22,13 +23,15 @@ public class AmountOwnedTooltip : BaseTooltip
     private readonly ICharacterMonitor _characterMonitor;
     private readonly IInventoryMonitor _inventoryMonitor;
     private readonly InventoryScopeCalculator _inventoryScopeCalculator;
+    private readonly ItemLocalizer _itemLocalizer;
 
-    public AmountOwnedTooltip(ILogger<AmountOwnedTooltip> logger, TooltipAmountOwnedColorSetting colorSetting, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, InventoryScopeCalculator inventoryScopeCalculator, IDalamudPluginInterface pluginInterface) : base(6900, logger, itemSheet, configuration, gameGui, pluginInterface)
+    public AmountOwnedTooltip(ILogger<AmountOwnedTooltip> logger, TooltipAmountOwnedColorSetting colorSetting, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, InventoryScopeCalculator inventoryScopeCalculator, IDalamudPluginInterface pluginInterface, ItemLocalizer itemLocalizer) : base(6900, logger, itemSheet, configuration, gameGui, pluginInterface)
     {
         _colorSetting = colorSetting;
         _characterMonitor = characterMonitor;
         _inventoryMonitor = inventoryMonitor;
         _inventoryScopeCalculator = inventoryScopeCalculator;
+        _itemLocalizer = itemLocalizer;
     }
     private const string indentation = "      ";
 
@@ -139,7 +142,7 @@ public class AmountOwnedTooltip : BaseTooltip
                         typeIcon = "\uE03d";
                     }
 
-                    locations.Add($"{name} - {oItem.FormattedBagLocation} " + typeIcon);
+                    locations.Add($"{name} - {_itemLocalizer.FormattedBagLocation(oItem)} " + typeIcon);
                 }
                 if (ownedItems.Count > Configuration.TooltipLocationLimit)
                 {
@@ -165,7 +168,7 @@ public class AmountOwnedTooltip : BaseTooltip
                             name += " (" + owner + ")";
                     }
 
-                    locations.Add($"{name} - {oItem.FormattedBagLocation} - {+ oItem.Quantity} ");
+                    locations.Add($"{name} - {_itemLocalizer.FormattedBagLocation(oItem)} - {+ oItem.Quantity} ");
                 }
                 if (ownedItems.Count > Configuration.TooltipLocationLimit)
                 {

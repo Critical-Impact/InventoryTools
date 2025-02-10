@@ -17,6 +17,8 @@ using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Ipc;
 using CriticalCommonLib.MarketBoard;
+using CriticalCommonLib.Models;
+using CriticalCommonLib.Resolvers;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Services.Ui;
@@ -36,6 +38,7 @@ using InventoryTools.Host;
 using InventoryTools.Hotkeys;
 using InventoryTools.IPC;
 using InventoryTools.Lists;
+using InventoryTools.Localizers;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Columns;
 using InventoryTools.Logic.Columns.Abstract.ColumnSettings;
@@ -364,9 +367,20 @@ namespace InventoryTools
                 builder.RegisterType<DalamudWindowSystem>().As<IWindowSystem>();
                 builder.RegisterType<HostedUniversalisConfiguration>().AsSelf().As<IHostedUniversalisConfiguration>()
                     .SingleInstance();
+                builder.RegisterType<MinifyResolver>().SingleInstance();
+                builder.RegisterType<ItemLocalizer>().SingleInstance();
+                builder.RegisterType<IngredientPreferenceLocalizer>().SingleInstance();
+                builder.RegisterType<CraftGroupingLocalizer>().SingleInstance();
+                builder.RegisterType<CraftItemLocalizer>().SingleInstance();
+                builder.RegisterType<MarketOrderService>().AsImplementedInterfaces().SingleInstance();
 
                 //Transient
                 builder.RegisterType<FilterState>();
+                builder.RegisterType<Character>();
+                builder.RegisterType<CraftList>();
+                builder.RegisterType<CraftCalculator>();
+                builder.RegisterType<FilterConfiguration>();
+                builder.RegisterType<Inventory>();
 
                 builder.Register(provider =>
                 {
@@ -560,7 +574,7 @@ namespace InventoryTools
         {
             if (disposing)
             {
-                Service.Log.Debug("Starting dispose of InventoryToolsPlugin");
+                _pluginLog.Debug("Starting dispose of InventoryToolsPlugin");
                 _service?.Dispose();
                 _service = null;
                 PluginInterface = null;

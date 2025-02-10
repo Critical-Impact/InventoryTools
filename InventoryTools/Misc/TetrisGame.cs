@@ -17,8 +17,13 @@ namespace InventoryTools.Misc
 {
     public class TetrisGame : MediatorSubscriberBase
     {
-        public TetrisGame(ILogger<TetrisGame> logger, MediatorService mediatorService) : base(logger, mediatorService)
+        private readonly IKeyState _keyState;
+        private readonly IFramework _framework;
+
+        public TetrisGame(ILogger<TetrisGame> logger, MediatorService mediatorService, IKeyState keyState, IFramework framework) : base(logger, mediatorService)
         {
+            _keyState = keyState;
+            _framework = framework;
         }
 
         private readonly int[,] clearBlock = {
@@ -57,16 +62,16 @@ namespace InventoryTools.Misc
             Game = new Game();
             _gameTimer = new System.Timers.Timer(800);
             _gameTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
-            Service.Framework.Update += FrameworkOnOnUpdateEvent;
+            _framework.Update += FrameworkOnOnUpdateEvent;
             _gameTimer.Start();
         }
 
         private bool isKeyPressed(VirtualKey[] keys) {
-            foreach (var vk in Service.KeyState.GetValidVirtualKeys()) {
+            foreach (var vk in _keyState.GetValidVirtualKeys()) {
                 if (keys.Contains(vk)) {
-                    if (!Service.KeyState[vk]) return false;
+                    if (!_keyState[vk]) return false;
                 } else {
-                    if (Service.KeyState[vk]) return false;
+                    if (_keyState[vk]) return false;
                 }
             }
             return true;
@@ -80,7 +85,7 @@ namespace InventoryTools.Misc
 
             if (lastMoveTime != null && lastMoveTime.Value.AddMilliseconds(100) >= DateTime.Now)
             {
-                Service.KeyState.ClearAll();
+                _keyState.ClearAll();
                 return;
             }
 
@@ -124,7 +129,7 @@ namespace InventoryTools.Misc
             }
 
             MediatorService.Publish(new OverlaysRequestRefreshMessage());
-            Service.KeyState.ClearAll();
+            _keyState.ClearAll();
 
 
         } catch (Exception) {
@@ -310,7 +315,7 @@ namespace InventoryTools.Misc
             if(!_disposed && disposing)
             {
                 _gameTimer?.Dispose();
-                Service.Framework.Update -= FrameworkOnOnUpdateEvent;
+                _framework.Update -= FrameworkOnOnUpdateEvent;
             }
             _disposed = true;
         }

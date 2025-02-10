@@ -22,13 +22,15 @@ public class IngredientSearchFilter : UintMultipleChoiceFilter
     private readonly Lazy<ListFilterService> _listFilterService;
     private readonly ItemInfoCache _itemInfoCache;
     private readonly ItemSheet _itemSheet;
+    private readonly CraftList.Factory _craftListFactory;
 
-    public IngredientSearchFilter(ILogger<IngredientSearchFilter> logger, ImGuiService imGuiService,IListService listService, Lazy<ListFilterService> listFilterService, ItemInfoCache itemInfoCache, ItemSheet itemSheet) : base(logger, imGuiService)
+    public IngredientSearchFilter(ILogger<IngredientSearchFilter> logger, ImGuiService imGuiService,IListService listService, Lazy<ListFilterService> listFilterService, ItemInfoCache itemInfoCache, ItemSheet itemSheet, CraftList.Factory craftListFactory) : base(logger, imGuiService)
     {
         _listService = listService;
         _listFilterService = listFilterService;
         _itemInfoCache = itemInfoCache;
         _itemSheet = itemSheet;
+        _craftListFactory = craftListFactory;
     }
     public override string Key { get; set; } = "IngredientSearchFilter";
     public override string Name { get; set; } = "Ingredient Search Filter";
@@ -113,7 +115,7 @@ public class IngredientSearchFilter : UintMultipleChoiceFilter
         if (!_relatedCrafts.ContainsKey(itemId))
         {
             var ingredients = new HashSet<uint>();
-            var craftList = new CraftList();
+            var craftList = _craftListFactory.Invoke();
             craftList.AddCraftItem(itemId);
             craftList.GenerateCraftChildren();
             foreach (var material in craftList.GetFlattenedMaterials())

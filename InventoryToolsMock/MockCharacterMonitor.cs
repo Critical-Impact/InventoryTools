@@ -1,11 +1,15 @@
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
+using Dalamud.Plugin.Services;
 
 namespace InventoryToolsMock;
 
 public class MockCharacterMonitor : ICharacterMonitor
 {
+    private readonly IFramework _framework;
+    private readonly IPluginLog _pluginLog;
+    private readonly Character.Factory _characterFactory;
     private ulong _activeRetainerId;
     private ulong _activeCharacterId;
     private ulong _activeFreeCompanyId;
@@ -14,14 +18,17 @@ public class MockCharacterMonitor : ICharacterMonitor
     {
     }
 
-    public MockCharacterMonitor()
+    public MockCharacterMonitor(IFramework framework, IPluginLog pluginLog, Character.Factory characterFactory)
     {
+        _framework = framework;
+        _pluginLog = pluginLog;
+        _characterFactory = characterFactory;
         _characters = new Dictionary<ulong, Character>();
     }
 
     public void UpdateCharacter(Character character)
     {
-        Service.Framework.RunOnFrameworkThread(() => { OnCharacterUpdated?.Invoke(character); });
+        _framework.RunOnFrameworkThread(() => { OnCharacterUpdated?.Invoke(character); });
     }
 
     public void RemoveCharacter(ulong characterId)
@@ -29,7 +36,7 @@ public class MockCharacterMonitor : ICharacterMonitor
         if (_characters.ContainsKey(characterId))
         {
             _characters.Remove(characterId);
-            Service.Framework.RunOnFrameworkThread(() => { OnCharacterRemoved?.Invoke(characterId); });
+            _framework.RunOnFrameworkThread(() => { OnCharacterRemoved?.Invoke(characterId); });
         }
     }
 
@@ -37,7 +44,7 @@ public class MockCharacterMonitor : ICharacterMonitor
     {
         if (IsLoggedIn && LocalContentId != 0)
         {
-            Service.Log.Verbose("CharacterMonitor: Character has changed to " + LocalContentId);
+            _pluginLog.Verbose("CharacterMonitor: Character has changed to " + LocalContentId);
             Character character;
             if (_characters.ContainsKey(LocalContentId))
             {
@@ -45,16 +52,16 @@ public class MockCharacterMonitor : ICharacterMonitor
             }
             else
             {
-                character = new Character();
+                character = _characterFactory.Invoke();
                 character.CharacterId = LocalContentId;
                 _characters[character.CharacterId] = character;
             }
             //character.UpdateFromCurrentPlayer(Service.ClientState.LocalPlayer);
-            Service.Framework.RunOnFrameworkThread(() => { OnCharacterUpdated?.Invoke(character); });
+            _framework.RunOnFrameworkThread(() => { OnCharacterUpdated?.Invoke(character); });
         }
         else
         {
-            Service.Framework.RunOnFrameworkThread(() => { OnCharacterUpdated?.Invoke(null); });
+            _framework.RunOnFrameworkThread(() => { OnCharacterUpdated?.Invoke(null); });
         }
     }
 
