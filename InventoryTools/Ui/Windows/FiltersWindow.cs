@@ -400,7 +400,9 @@ namespace InventoryTools.Ui
 
         private void AddSearchFilter(string newName, string id)
         {
-            var filterConfiguration = _filterConfigFactory.Invoke(newName, FilterType.SearchFilter);
+            var filterConfiguration = _filterConfigFactory.Invoke();
+            filterConfiguration.Name = newName;
+            filterConfiguration.FilterType = FilterType.SearchFilter;
             _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
             Invalidate();
@@ -411,7 +413,9 @@ namespace InventoryTools.Ui
 
         private void AddHistoryFilter(string newName, string id)
         {
-            var filterConfiguration = _filterConfigFactory.Invoke(newName, FilterType.HistoryFilter);
+            var filterConfiguration = _filterConfigFactory.Invoke();
+            filterConfiguration.Name = newName;
+            filterConfiguration.FilterType = FilterType.HistoryFilter;
             _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
             Invalidate();
@@ -422,7 +426,9 @@ namespace InventoryTools.Ui
 
         private void AddCuratedFilter(string newName, string id)
         {
-            var filterConfiguration = _filterConfigFactory.Invoke(newName, FilterType.CuratedList);
+            var filterConfiguration = _filterConfigFactory.Invoke();
+            filterConfiguration.Name = newName;
+            filterConfiguration.FilterType = FilterType.CuratedList;
             _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
             Invalidate();
@@ -433,7 +439,9 @@ namespace InventoryTools.Ui
 
         private void AddGameItemFilter(string newName, string id)
         {
-            var filterConfiguration = _filterConfigFactory.Invoke(newName, FilterType.GameItemFilter);
+            var filterConfiguration = _filterConfigFactory.Invoke();
+            filterConfiguration.Name = newName;
+            filterConfiguration.FilterType = FilterType.GameItemFilter;
             _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
             Invalidate();
@@ -444,7 +452,9 @@ namespace InventoryTools.Ui
 
         private void AddSortFilter(string newName, string id)
         {
-            var filterConfiguration = _filterConfigFactory.Invoke(newName, FilterType.SortingFilter);
+            var filterConfiguration = _filterConfigFactory.Invoke();
+            filterConfiguration.Name = newName;
+            filterConfiguration.FilterType = FilterType.SortingFilter;
             _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
             Invalidate();

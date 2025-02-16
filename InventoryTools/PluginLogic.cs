@@ -251,7 +251,9 @@ namespace InventoryTools
 
         public void AddAllFilter(string newName = "All")
         {
-            var allItemsFilter = _filterConfigFactory.Invoke(newName, FilterType.SearchFilter);
+            var allItemsFilter = _filterConfigFactory.Invoke();
+            allItemsFilter.Name = newName;
+            allItemsFilter.FilterType = FilterType.SearchFilter;
             allItemsFilter.DisplayInTabs = true;
             allItemsFilter.SourceAllCharacters = true;
             allItemsFilter.SourceAllRetainers = true;
@@ -262,7 +264,9 @@ namespace InventoryTools
 
         public void AddRetainerFilter(string newName = "Retainers")
         {
-            var retainerItemsFilter = _filterConfigFactory.Invoke(newName, FilterType.SearchFilter);
+            var retainerItemsFilter = _filterConfigFactory.Invoke();
+            retainerItemsFilter.Name = newName;
+            retainerItemsFilter.FilterType = FilterType.SearchFilter;
             retainerItemsFilter.DisplayInTabs = true;
             retainerItemsFilter.SourceAllRetainers = true;
             _listService.AddDefaultColumns(retainerItemsFilter);
@@ -271,7 +275,9 @@ namespace InventoryTools
 
         public void AddPlayerFilter(string newName = "Player")
         {
-            var playerItemsFilter = _filterConfigFactory.Invoke(newName,  FilterType.SearchFilter);
+            var playerItemsFilter = _filterConfigFactory.Invoke();
+            playerItemsFilter.Name = newName;
+            playerItemsFilter.FilterType = FilterType.SearchFilter;
             playerItemsFilter.DisplayInTabs = true;
             playerItemsFilter.SourceAllCharacters = true;
             _listService.AddDefaultColumns(playerItemsFilter);
@@ -280,7 +286,9 @@ namespace InventoryTools
 
         public void AddHistoryFilter(string newName = "History")
         {
-            var historyFilter = _filterConfigFactory.Invoke(newName,  FilterType.HistoryFilter);
+            var historyFilter = _filterConfigFactory.Invoke();
+            historyFilter.Name = newName;
+            historyFilter.FilterType = FilterType.HistoryFilter;
             historyFilter.DisplayInTabs = true;
             historyFilter.SourceAllCharacters = true;
             historyFilter.SourceAllRetainers = true;
@@ -292,7 +300,9 @@ namespace InventoryTools
 
         public void AddFreeCompanyFilter(string newName = "Free Company")
         {
-            var newFilter = _filterConfigFactory.Invoke(newName,  FilterType.SearchFilter);
+            var newFilter = _filterConfigFactory.Invoke();
+            newFilter.Name = newName;
+            newFilter.FilterType = FilterType.SearchFilter;
             newFilter.DisplayInTabs = true;
             newFilter.SourceAllFreeCompanies = true;
             _listService.AddDefaultColumns(newFilter);
@@ -301,7 +311,9 @@ namespace InventoryTools
 
         public void AddHousingFilter(string newName = "Housing")
         {
-            var newFilter = _filterConfigFactory.Invoke(newName,  FilterType.SearchFilter);
+            var newFilter = _filterConfigFactory.Invoke();
+            newFilter.Name = newName;
+            newFilter.FilterType = FilterType.SearchFilter;
             newFilter.DisplayInTabs = true;
             newFilter.SourceAllHouses = true;
             _listService.AddDefaultColumns(newFilter);
@@ -310,7 +322,9 @@ namespace InventoryTools
 
         public void AddAllGameItemsFilter(string newName = "All Game Items")
         {
-            var allGameItemsFilter = _filterConfigFactory.Invoke(newName, FilterType.GameItemFilter);
+            var allGameItemsFilter = _filterConfigFactory.Invoke();
+            allGameItemsFilter.Name = newName;
+            allGameItemsFilter.FilterType = FilterType.GameItemFilter;
             allGameItemsFilter.DisplayInTabs = true;
             _listService.AddDefaultColumns(allGameItemsFilter);
             _listService.AddList(allGameItemsFilter);
@@ -318,7 +332,9 @@ namespace InventoryTools
 
         public void AddFavouritesFilter(string newName = "Favourites")
         {
-            var newFilter = _filterConfigFactory.Invoke(newName, FilterType.GameItemFilter);
+            var newFilter = _filterConfigFactory.Invoke();
+            newFilter.Name = newName;
+            newFilter.FilterType = FilterType.GameItemFilter;
             var favouritesFilter = (FavouritesFilter)_filterFactory.Invoke(typeof(FavouritesFilter));
             favouritesFilter.UpdateFilterConfiguration(newFilter, true);
             newFilter.DisplayInTabs = true;
@@ -347,7 +363,9 @@ namespace InventoryTools
 
         public void AddSampleFilter100Gil(string newName = "100 gil or less")
         {
-            var sampleFilter = _filterConfigFactory.Invoke(newName, FilterType.SearchFilter);
+            var sampleFilter = _filterConfigFactory.Invoke();
+            sampleFilter.Name = newName;
+            sampleFilter.FilterType = FilterType.SearchFilter;
             sampleFilter.DisplayInTabs = true;
             sampleFilter.SourceAllCharacters = true;
             sampleFilter.SourceAllRetainers = true;
@@ -360,7 +378,9 @@ namespace InventoryTools
 
         public void AddSampleFilterMaterials(string newName = "Put away materials")
         {
-            var sampleFilter = _filterConfigFactory.Invoke(newName, FilterType.SortingFilter);
+            var sampleFilter = _filterConfigFactory.Invoke();
+            sampleFilter.Name = newName;
+            sampleFilter.FilterType = FilterType.SortingFilter;
             sampleFilter.DisplayInTabs = true;
             sampleFilter.SourceCategories = new HashSet<InventoryCategory>() {InventoryCategory.CharacterBags};
             sampleFilter.DestinationCategories =  new HashSet<InventoryCategory>() {InventoryCategory.RetainerBags};
@@ -374,7 +394,9 @@ namespace InventoryTools
 
         public void AddSampleFilterDuplicatedItems(string newName = "Duplicated SortItems")
         {
-            var sampleFilter = _filterConfigFactory.Invoke(newName, FilterType.SortingFilter);
+            var sampleFilter = _filterConfigFactory.Invoke();
+            sampleFilter.Name = newName;
+            sampleFilter.FilterType = FilterType.SortingFilter;
             sampleFilter.DisplayInTabs = true;
             sampleFilter.SourceCategories = new HashSet<InventoryCategory>() {InventoryCategory.CharacterBags,InventoryCategory.RetainerBags};
             sampleFilter.DestinationCategories =  new HashSet<InventoryCategory>() {InventoryCategory.RetainerBags};

@@ -186,18 +186,11 @@ namespace InventoryTools.Logic
             set => _searchResults = value;
         }
 
-        public delegate FilterConfiguration Factory(string name, FilterType filterType);
+        public delegate FilterConfiguration Factory();
 
         public FilterConfiguration(CraftList.Factory craftListFactory)
         {
             _craftListFactory = craftListFactory;
-        }
-
-        public FilterConfiguration(string name, FilterType filterType, CraftList.Factory craftListFactory)
-        {
-            _craftListFactory = craftListFactory;
-            FilterType = filterType;
-            Name = name;
             Key = Guid.NewGuid().ToString("N");
         }
 
@@ -218,11 +211,6 @@ namespace InventoryTools.Logic
                 InventoryCategory.CharacterPremiumSaddleBags,
             };
         }
-
-        public FilterConfiguration()
-        {
-        }
-
 
         public List<(ulong, InventoryCategory)> SourceInventories
         {
@@ -1526,7 +1514,8 @@ namespace InventoryTools.Logic
             SearchResults = null;
             if (clone != null && this.FilterType == FilterType.CraftFilter)
             {
-                var clonedCraftList = CraftList.Clone();
+                var newCraftList = _craftListFactory.Invoke();
+                var clonedCraftList = CraftList.Clone(newCraftList);
                 clone._craftList = clonedCraftList;
             }
             return clone;

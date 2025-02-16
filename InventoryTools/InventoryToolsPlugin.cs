@@ -8,8 +8,10 @@ using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.Extensions;
 using AllaganLib.GameSheets.Model;
 using AllaganLib.GameSheets.Service;
+using AllaganLib.GameSheets.Sheets;
 using AllaganLib.Shared.Time;
 using Autofac;
+using Autofac.Core.Activators.Reflection;
 using Autofac.Extensions.DependencyInjection;
 using Autofac.Util;
 using CriticalCommonLib;
@@ -57,6 +59,7 @@ using InventoryTools.Ui;
 using InventoryTools.Ui.Pages;
 using Lumina;
 using Lumina.Excel;
+using Lumina.Excel.Sheets;
 using LuminaSupplemental.Excel.Model;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -70,7 +73,6 @@ namespace InventoryTools
     {
         private readonly IPluginLog _pluginLog;
         private readonly IFramework _framework;
-        private Service? _service;
         private IDalamudPluginInterface? PluginInterface { get; set; }
 
         public InventoryToolsPlugin(IDalamudPluginInterface pluginInterface, IPluginLog pluginLog,
@@ -91,7 +93,6 @@ namespace InventoryTools
             _pluginLog = pluginLog;
             _framework = framework;
             PluginInterface = pluginInterface;
-            _service = PluginInterface.Create<Service>()!;
             this.Host = CreateHost();
 
             Start();
@@ -338,7 +339,6 @@ namespace InventoryTools
                 builder.RegisterType<ListCategoryService>().SingleInstance();
                 builder.RegisterType<Logger>().SingleInstance();
                 builder.RegisterType<PopupService>().SingleInstance();
-                builder.RegisterType<ExcelCache>().SingleInstance();
                 builder.RegisterType<CraftingCache>().SingleInstance();
                 builder.RegisterType<ItemInfoRenderService>().SingleInstance();
                 builder.RegisterType<ShopHighlighting>().SingleInstance();
@@ -373,6 +373,7 @@ namespace InventoryTools
                 builder.RegisterType<CraftGroupingLocalizer>().SingleInstance();
                 builder.RegisterType<CraftItemLocalizer>().SingleInstance();
                 builder.RegisterType<MarketOrderService>().AsImplementedInterfaces().SingleInstance();
+                builder.RegisterType<ContainerAwareCsvLoader>().SingleInstance();
 
                 //Transient
                 builder.RegisterType<FilterState>();
@@ -381,6 +382,9 @@ namespace InventoryTools
                 builder.RegisterType<CraftCalculator>();
                 builder.RegisterType<FilterConfiguration>();
                 builder.RegisterType<Inventory>();
+                builder.RegisterType<InventoryChange>();
+                builder.RegisterType<CraftItem>();
+                builder.RegisterType<InventoryItem>();
 
                 builder.Register(provider =>
                 {
@@ -568,24 +572,6 @@ namespace InventoryTools
         {
 
 
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _pluginLog.Debug("Starting dispose of InventoryToolsPlugin");
-                _service?.Dispose();
-                _service = null;
-                PluginInterface = null;
-            }
-        }
-
-        public new void Dispose()
-        {
-            Dispose(true);
-            base.Dispose();
-            GC.SuppressFinalize(this);
         }
     }
 }

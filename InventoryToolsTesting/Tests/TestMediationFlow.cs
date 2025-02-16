@@ -18,6 +18,7 @@ public class TestMediationFlow : BaseTest
         var listService = Host.Services.GetRequiredService<IListService>()!;
         var listFilterService = Host.Services.GetRequiredService<ListFilterService>()!;
         var tableService = Host.Services.GetRequiredService<TableService>();
+        var filterConfigurationFactory = Host.Services.GetRequiredService<FilterConfiguration.Factory>();
 
 
         ListUpdatedMessage? listUpdatedMessage = null;
@@ -28,18 +29,20 @@ public class TestMediationFlow : BaseTest
             listUpdatedMessage = msg;
             tcs.SetResult(msg);
         });
-        
-        var gameItemsList = new FilterConfiguration("test", FilterType.GameItemFilter);
+
+        var gameItemsList = filterConfigurationFactory.Invoke();
+        gameItemsList.Name = "test";
+        gameItemsList.FilterType = FilterType.GameItemFilter;
         gameItemsList.AllowRefresh = true;
-        
+
         listService.AddList(gameItemsList);
-        
+
         MediatorService.Publish(new RequestListUpdateMessage(gameItemsList));
 
         await Task.WhenAny(tcs.Task, Task.Delay(10000));
         Assert.IsNotNull(listUpdatedMessage);
-        
-        
-        
+
+
+
     }
 }

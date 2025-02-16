@@ -79,7 +79,9 @@ public class SampleFilter1Setting : BooleanSetting, ISampleFilterSetting
     public bool ShouldAdd => _shouldAdd;
     public void AddFilter()
     {
-        var sampleFilter = _filterConfigFactory.Invoke(Name, FilterType.SearchFilter);
+        var sampleFilter = _filterConfigFactory.Invoke();
+        sampleFilter.Name = Name;
+        sampleFilter.FilterType = FilterType.SearchFilter;
         sampleFilter.DisplayInTabs = true;
         sampleFilter.SourceAllCharacters = true;
         sampleFilter.SourceAllRetainers = true;
@@ -122,7 +124,9 @@ public class SampleFilter2Setting : BooleanSetting, ISampleFilterSetting
     public bool ShouldAdd => _shouldAdd;
     public void AddFilter()
     {
-        var sampleFilter = _filterConfigFactory.Invoke(Name, FilterType.SortingFilter);
+        var sampleFilter = _filterConfigFactory.Invoke();
+        sampleFilter.Name = Name;
+        sampleFilter.FilterType = FilterType.SortingFilter;
         sampleFilter.DisplayInTabs = true;
         sampleFilter.SourceCategories = new HashSet<InventoryCategory>() {InventoryCategory.CharacterBags,InventoryCategory.RetainerBags};
         sampleFilter.DestinationCategories =  new HashSet<InventoryCategory>() {InventoryCategory.RetainerBags};
@@ -167,7 +171,9 @@ public class SampleFilter3Setting : BooleanSetting, ISampleFilterSetting
     public bool ShouldAdd => _shouldAdd;
     public void AddFilter()
     {
-        var sampleFilter = _filterConfigFactory.Invoke(Name, FilterType.SortingFilter);
+        var sampleFilter = _filterConfigFactory.Invoke();
+        sampleFilter.Name = Name;
+        sampleFilter.FilterType = FilterType.SortingFilter;
         sampleFilter.DisplayInTabs = true;
         sampleFilter.SourceCategories = new HashSet<InventoryCategory>() {InventoryCategory.CharacterBags};
         sampleFilter.DestinationCategories =  new HashSet<InventoryCategory>() {InventoryCategory.RetainerBags};

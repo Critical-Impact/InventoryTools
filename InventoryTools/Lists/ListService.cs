@@ -349,14 +349,16 @@ namespace InventoryTools.Lists
 
         public bool AddList(string name, FilterType filterType)
         {
-            var sampleFilter = _filterConfigFactory.Invoke(name, filterType);
+            var sampleFilter = _filterConfigFactory.Invoke();
+            sampleFilter.Name = name;
+            sampleFilter.FilterType = filterType;
             AddDefaultColumns(sampleFilter);
             return AddList(sampleFilter);
         }
 
         public FilterConfiguration DuplicateList(FilterConfiguration configuration, string newName)
         {
-            var newConfiguration = configuration.Clone() ?? new FilterConfiguration();
+            var newConfiguration = configuration.Clone() ?? _filterConfigFactory.Invoke();
             newConfiguration.Key = Guid.NewGuid().ToString("N");
             newConfiguration.Name = newName;
             AddList(newConfiguration);
@@ -382,7 +384,9 @@ namespace InventoryTools.Lists
             var clonedFilter = GetDefaultCraftList().Clone();
             if (clonedFilter == null)
             {
-                var filter = _filterConfigFactory.Invoke(fixedName, FilterType.CraftFilter);
+                var filter = _filterConfigFactory.Invoke();
+                filter.Name = fixedName;
+                filter.FilterType = FilterType.CraftFilter;
                 AddDefaultColumns(filter);
                 filter.IsEphemeralCraftList = isEphemeralNN;
                 AddList(filter);
@@ -413,7 +417,9 @@ namespace InventoryTools.Lists
                 fixedName = name + " " + count;
             }
 
-            var filter = _filterConfigFactory.Invoke(fixedName, FilterType.CuratedList);
+            var filter = _filterConfigFactory.Invoke();
+            filter.Name = fixedName;
+            filter.FilterType = FilterType.CuratedList;
             AddDefaultColumns(filter);
             AddList(filter);
             return filter;
@@ -997,7 +1003,9 @@ namespace InventoryTools.Lists
 
         public FilterConfiguration GenerateDefaultCraftList()
         {
-            var defaultFilter = _filterConfigFactory.Invoke("Default Craft List", FilterType.CraftFilter);
+            var defaultFilter = _filterConfigFactory.Invoke();
+            defaultFilter.Name = "Default Craft List";
+            defaultFilter.FilterType = FilterType.CraftFilter;
             AddDefaultColumns(defaultFilter);
             defaultFilter.ApplyDefaultCraftFilterConfiguration();
             return defaultFilter;

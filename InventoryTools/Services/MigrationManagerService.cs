@@ -269,7 +269,9 @@ public class MigrationManagerService : IHostedService
             var hasExistingHistoryList = config.HasList("History");
             if (!hasExistingHistoryList && !config.FirstRun)
             {
-                var historyFilter = _filterConfigFactory.Invoke("History",  FilterType.HistoryFilter);
+                var historyFilter = _filterConfigFactory.Invoke();
+                historyFilter.Name = "History";
+                historyFilter.FilterType = FilterType.HistoryFilter;
                 historyFilter.DisplayInTabs = true;
                 historyFilter.SourceAllCharacters = true;
                 historyFilter.SourceAllRetainers = true;
