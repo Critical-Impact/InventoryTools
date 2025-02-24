@@ -661,8 +661,18 @@ namespace InventoryTools.Ui
                     foreach (var item in _filterPages)
                     {
                         filterIndex++;
-                        if (ImGui.Selectable(item.Value.Name + "##" + item.Key,
-                                ConfigSelectedConfigurationPage == filterIndex))
+                        using (var subNode = ImRaii.TreeNode(item.Value.Name,
+                                   ConfigSelectedConfigurationPage == filterIndex
+                                       ? ImGuiTreeNodeFlags.Selected |
+                                         ImGuiTreeNodeFlags.Leaf
+                                       : ImGuiTreeNodeFlags.Leaf))
+                        {
+                            if (subNode)
+                            {
+                            }
+                        }
+
+                        if (ImGui.IsItemClicked() && !ImGui.IsItemToggledOpen())
                         {
                             ConfigSelectedConfigurationPage = filterIndex;
                         }

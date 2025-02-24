@@ -97,31 +97,34 @@ namespace InventoryTools.Ui.Pages
                     for (var index = 0; index < characters.Count; index++)
                     {
                         var character = characters[index];
-                        if (ImGui.Selectable(character.Value.FormattedName))
+                        using (ImRaii.PushId(index))
                         {
-                            _selectedCharacter = character.Key;
-                        }
+                            if (ImGui.Selectable(character.Value.FormattedName))
+                            {
+                                _selectedCharacter = character.Key;
+                            }
 
-                        if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
-                        {
-                            ImGui.OpenPopup("cm_" + character.Key);
-                        }
+                            if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
+                            {
+                                ImGui.OpenPopup("cm_" + character.Key);
+                            }
 
-                        GetCharacterMenu(character.Value).Draw();
+                            GetCharacterMenu(character.Value).Draw();
 
-                        var tooltip = character.Value.FormattedName;
-                        if (character.Value.ActualClassJob != null)
-                        {
-                            tooltip += "\n" + character.Value.ActualClassJob?.Base.Name.ExtractText().ToTitleCase();
-                        }
+                            var tooltip = character.Value.FormattedName;
+                            if (character.Value.ActualClassJob != null)
+                            {
+                                tooltip += "\n" + character.Value.ActualClassJob?.Base.Name.ExtractText().ToTitleCase();
+                            }
 
-                        tooltip += "\n\nRight Click: Options";
-                        ImGuiUtil.HoverTooltip(tooltip);
-                        ImGui.SameLine();
-                        if (character.Value.ActualClassJob != null)
-                        {
-                            var icon = ImGuiService.GetIconTexture(character.Value.Icon);
-                            ImGui.Image(icon.ImGuiHandle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale);
+                            tooltip += "\n\nRight Click: Options";
+                            ImGuiUtil.HoverTooltip(tooltip);
+                            ImGui.SameLine();
+                            if (character.Value.ActualClassJob != null)
+                            {
+                                var icon = ImGuiService.GetIconTexture(character.Value.Icon);
+                                ImGui.Image(icon.ImGuiHandle, new Vector2(16, 16) * ImGui.GetIO().FontGlobalScale);
+                            }
                         }
                     }
                     ImGui.NewLine();

@@ -6,7 +6,7 @@ namespace InventoryTools.Logic.Settings
 {
     public class TooltipAverageMarketPriceSetting : BooleanSetting
     {
-        public override bool DefaultValue { get; set; } = true;
+        public override bool DefaultValue { get; set; } = false;
 
         public override bool CurrentValue(InventoryToolsConfiguration configuration)
         {
