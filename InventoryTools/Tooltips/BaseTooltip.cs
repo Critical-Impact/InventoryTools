@@ -19,7 +19,8 @@ public abstract class BaseTooltip : TooltipService.TooltipTweak, IDisposable
     public ItemSheet ItemSheet { get; }
     public abstract uint Order { get; }
 
-    public BaseTooltip(uint tooltipIdentifier, ILogger logger, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, IDalamudPluginInterface pluginInterface)
+    public BaseTooltip(uint tooltipIdentifier, ILogger logger, ItemSheet itemSheet,
+        InventoryToolsConfiguration configuration, IGameGui gameGui, IDalamudPluginInterface pluginInterface) : base(logger)
     {
         TooltipIdentifier = tooltipIdentifier;
         Configuration = configuration;

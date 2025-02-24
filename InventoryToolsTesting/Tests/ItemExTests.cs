@@ -1,6 +1,7 @@
 using System.Linq;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
+using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Services;
 using InventoryToolsTesting.Tests.Abstract;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,66 +16,65 @@ namespace InventoryToolsTesting.Tests
         [Test]
         public void TestGatheringSources()
         {
-            var excelCache = Host.Services.GetRequiredService<ExcelCache>();
+            var itemSheet = Host.Services.GetRequiredService<ItemSheet>();
             //Earth Shard
-            var earthShard = excelCache.GetItemSheet().GetRow(5)!;
+            var earthShard = itemSheet.GetRow(5)!;
             var gatheringSources = earthShard.GetSourcesByCategory<ItemGatheringSource>(ItemInfoCategory.Gathering);
-            //Not the same as garland tools because we don't deal with individual nodes
-            Assert.AreEqual(16, gatheringSources.Count);
+            Assert.AreEqual(4, gatheringSources.Count);
         }
 
 
         [Test]
         public void TestUplandWheatFlour()
         {
-            var excelCache = Host.Services.GetRequiredService<ExcelCache>();
-            var uplandWheatFlour = excelCache.GetItemSheet().GetRow(27841)!;
+            var itemSheet = Host.Services.GetRequiredService<ItemSheet>();
+            var uplandWheatFlour = itemSheet.GetRow(27841)!;
             var gatheringSources = uplandWheatFlour.GetSourcesByCategory<ItemGatheringSource>(ItemInfoCategory.Gathering);
             Assert.AreEqual(0, gatheringSources.Count);
             var sources = uplandWheatFlour.Sources;
-            Assert.AreEqual(0, sources.Count);
+            Assert.AreEqual(1, sources.Count);
             Assert.AreEqual(false, uplandWheatFlour.ObtainedGathering);
         }
 
         [Test]
         public void TestScrip()
         {
-            var excelCache = Host.Services.GetRequiredService<ExcelCache>();
+            var itemSheet = Host.Services.GetRequiredService<ItemSheet>();
             //Handsaint Jacket
-            var handsaintJacket = excelCache.GetItemSheet().GetRow(31794)!;
-            Assert.AreEqual(2, handsaintJacket.Sources.Count);
+            var handsaintJacket = itemSheet.GetRow(31794)!;
+            Assert.AreEqual(3, handsaintJacket.Sources.Count);
             var shops = handsaintJacket.GetSourcesByCategory<ItemShopSource>(ItemInfoCategory.Shop);
-            Assert.AreEqual(4, shops.Count);
+            Assert.AreEqual(3, shops.Count);
             var actualVendors = shops.SelectMany(shop => shop.Shop.ENpcs.SelectMany(npc => npc.Locations.Select(location => (shop, npc, location)))).ToList();
 
-            Assert.AreEqual(10, actualVendors.Count);
+            Assert.AreEqual(18, actualVendors.Count);
 
             //Wool Top 16906
-            var woolTop = excelCache.GetItemSheet().GetRow(16906)!;
-            Assert.AreEqual(4, woolTop.Sources.Count);
+            var woolTop = itemSheet.GetRow(16906)!;
+            Assert.AreEqual(7, woolTop.Sources.Count);
             shops = woolTop.GetSourcesByCategory<ItemShopSource>(ItemInfoCategory.Shop);
-            Assert.AreEqual(4, shops);
+            Assert.AreEqual(4, shops.Count);
             actualVendors = shops.SelectMany(shop => shop.Shop.ENpcs.SelectMany(npc => npc.Locations.Select(location => (shop, npc, location)))).ToList();
 
-            Assert.AreEqual(28, actualVendors.Count);
+            Assert.AreEqual(36, actualVendors.Count);
         }
 
         [Test]
         public void TestTomestones()
         {
-            var excelCache = Host.Services.GetRequiredService<ExcelCache>();
+            var itemSheet = Host.Services.GetRequiredService<ItemSheet>();
             //Palebloom Kudzu Cloth
-            var item = excelCache.GetItemSheet().GetRow(37829)!;
-            Assert.AreEqual(1, item.Sources.Count);
+            var item = itemSheet.GetRow(37829)!;
+            Assert.AreEqual(2, item.Sources.Count);
 
         }
 
         [Test]
         public void TestMoonwardGear()
         {
-            var excelCache = Host.Services.GetRequiredService<ExcelCache>();
+            var itemSheet = Host.Services.GetRequiredService<ItemSheet>();
             //Moonward Longsword
-            var item = excelCache.GetItemSheet().GetRow(34850)!;
+            var item = itemSheet.GetRow(34850)!;
             Assert.AreEqual(2, item.Sources.Count);
 
         }

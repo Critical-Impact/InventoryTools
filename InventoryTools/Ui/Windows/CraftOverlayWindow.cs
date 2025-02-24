@@ -15,6 +15,7 @@ using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
+using InventoryTools.Localizers;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Mediator;
@@ -45,6 +46,7 @@ public class CraftOverlayWindow : OverlayWindow
     private readonly CraftOverlayWindowStateSetting _windowStateSetting;
     private readonly CraftOverlayHideSetting _overlayHideSetting;
     private readonly ShopTrackerService _shopTrackerService;
+    private readonly CraftGroupingLocalizer _craftGroupingLocalizer;
     private readonly MapSheet _mapSheet;
 
     public CraftOverlayWindow(ILogger<CraftOverlayWindow> logger,
@@ -66,7 +68,8 @@ public class CraftOverlayWindow : OverlayWindow
         CraftOverlayRememberStateSetting rememberStateSetting,
         CraftOverlayWindowStateSetting windowStateSetting,
         CraftOverlayHideSetting overlayHideSetting,
-        ShopTrackerService shopTrackerService) : base(logger,
+        ShopTrackerService shopTrackerService,
+        CraftGroupingLocalizer craftGroupingLocalizer) : base(logger,
         configuration,
         addonLifecycle,
         gameGui,
@@ -88,6 +91,7 @@ public class CraftOverlayWindow : OverlayWindow
         _windowStateSetting = windowStateSetting;
         _overlayHideSetting = overlayHideSetting;
         _shopTrackerService = shopTrackerService;
+        _craftGroupingLocalizer = craftGroupingLocalizer;
     }
 
     public override void Initialize()
@@ -259,7 +263,7 @@ public class CraftOverlayWindow : OverlayWindow
         ImGui.SameLine();
         if (currentGroup != null)
         {
-            ImGui.Text(currentGroup.FormattedName() + $" ({completedSteps}/{totalSteps})");
+            ImGui.Text(_craftGroupingLocalizer.FormattedName(currentGroup) + $" ({completedSteps}/{totalSteps})");
         }
         else
         {

@@ -29,7 +29,7 @@ namespace InventoryTools.Logic.Filters
             "This lists all the destinations that are applicable given the destinations picked above.";
 
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Inventories;
-        
+
         public override bool HasValueSet(FilterConfiguration configuration)
         {
             return false;
@@ -44,7 +44,7 @@ namespace InventoryTools.Logic.Filters
             ImGui.SameLine();
             ImGuiService.HelpMarker(HelpText);
             var allCharacters = _characterMonitor.Characters;
-            
+
             //Retainers
             List<string> destinations = new();
             foreach (var retainerCategories in _listCategoryService.DestinationRetainerCategories(configuration))
@@ -72,7 +72,7 @@ namespace InventoryTools.Logic.Filters
             }
             ImGui.SameLine();
             ImGui.TextWrapped(String.Join(", ", destinations));
-            
+
             //Characters
             destinations = new();
             foreach (var characterCategories in _listCategoryService.DestinationCharacterCategories(configuration))
@@ -127,7 +127,7 @@ namespace InventoryTools.Logic.Filters
             }
             ImGui.SameLine();
             ImGui.TextWrapped(String.Join(", ", destinations));
-            
+
             //Houses
             destinations = new();
             foreach (var characterCategories in _listCategoryService.DestinationHouseCategories(configuration))

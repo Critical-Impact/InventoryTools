@@ -8,7 +8,7 @@ namespace InventoryToolsTesting.Services;
 
 public class TestInventoryMonitor : InventoryMonitor
 {
-    public TestInventoryMonitor(ICharacterMonitor monitor, ICraftMonitor craftMonitor, IInventoryScanner scanner, IFramework frameworkService, ExcelCache excelCache) : base(monitor, craftMonitor, scanner, frameworkService, excelCache)
+    public TestInventoryMonitor(ICharacterMonitor monitor, ICraftMonitor craftMonitor, IInventoryScanner scanner, IFramework frameworkService,IPluginLog pluginLog, Inventory.Factory inventoryFactory) : base(monitor, craftMonitor, scanner, frameworkService, pluginLog, inventoryFactory)
     {
     }
 

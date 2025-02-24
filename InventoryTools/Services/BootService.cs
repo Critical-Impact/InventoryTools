@@ -15,10 +15,9 @@ public class BootService : DisposableMediatorSubscriberBase, IHostedService
 {
     private readonly IConfigurationWizardService _configurationWizardService;
 
-    public BootService(IConfigurationWizardService configurationWizardService, ILogger<BootService> logger, MediatorService mediatorService, ExcelCache excelCache) : base(logger, mediatorService)
+    public BootService(IConfigurationWizardService configurationWizardService, ILogger<BootService> logger, MediatorService mediatorService) : base(logger, mediatorService)
     {
         _configurationWizardService = configurationWizardService;
-        Service.ExcelCache = excelCache;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)

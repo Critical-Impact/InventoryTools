@@ -32,8 +32,9 @@ public class MigrationManagerService : IHostedService
     private readonly IComponentContext _componentContext;
     private readonly IListService _listService;
     private readonly IDalamudPluginInterface _pluginInterfaceService;
+    private readonly FilterConfiguration.Factory _filterConfigFactory;
 
-    public MigrationManagerService(ILogger<MigrationManagerService> logger, InventoryToolsConfiguration configuration, IMarketCache marketCache, IFilterService filterService, IServiceProvider serviceProvider, IComponentContext componentContext, IListService listService, IDalamudPluginInterface pluginInterfaceService)
+    public MigrationManagerService(ILogger<MigrationManagerService> logger, InventoryToolsConfiguration configuration, IMarketCache marketCache, IFilterService filterService, IServiceProvider serviceProvider, IComponentContext componentContext, IListService listService, IDalamudPluginInterface pluginInterfaceService, FilterConfiguration.Factory filterConfigFactory)
     {
         _logger = logger;
         _configuration = configuration;
@@ -43,6 +44,7 @@ public class MigrationManagerService : IHostedService
         _componentContext = componentContext;
         _listService = listService;
         _pluginInterfaceService = pluginInterfaceService;
+        _filterConfigFactory = filterConfigFactory;
     }
 
     public void RunMigrations()
@@ -267,7 +269,9 @@ public class MigrationManagerService : IHostedService
             var hasExistingHistoryList = config.HasList("History");
             if (!hasExistingHistoryList && !config.FirstRun)
             {
-                var historyFilter = new FilterConfiguration("History",  FilterType.HistoryFilter);
+                var historyFilter = _filterConfigFactory.Invoke();
+                historyFilter.Name = "History";
+                historyFilter.FilterType = FilterType.HistoryFilter;
                 historyFilter.DisplayInTabs = true;
                 historyFilter.SourceAllCharacters = true;
                 historyFilter.SourceAllRetainers = true;

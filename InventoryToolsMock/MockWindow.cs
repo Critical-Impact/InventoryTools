@@ -36,9 +36,8 @@ public class MockWindow : GenericWindow
     private readonly IFileDialogManager _fileDialogManager;
     private readonly IInventoryMonitor _inventoryMonitor;
     private readonly IOverlayService _overlayService;
-    private readonly InventoryHistory _inventoryHistory;
-    private readonly ExcelCache _excelCache;
     private readonly ExcelSheet<World> _worldSheet;
+    private readonly MinifyResolver _minifyResolver;
 
     public MockWindow(ILogger<MockWindow> logger,
         MediatorService mediator,
@@ -51,9 +50,8 @@ public class MockWindow : GenericWindow
         IFileDialogManager fileDialogManager,
         IInventoryMonitor inventoryMonitor,
         IOverlayService overlayService,
-        HostedInventoryHistory inventoryHistory,
-        ExcelCache excelCache,
         ExcelSheet<World> worldSheet,
+        MinifyResolver minifyResolver,
         string name = "Mock Tools") : base(logger,
         mediator,
         imGuiService,
@@ -67,9 +65,8 @@ public class MockWindow : GenericWindow
         _fileDialogManager = fileDialogManager;
         _inventoryMonitor = inventoryMonitor;
         _overlayService = overlayService;
-        _inventoryHistory = inventoryHistory;
-        _excelCache = excelCache;
         _worldSheet = worldSheet;
+        _minifyResolver = minifyResolver;
     }
     private List<InventoryItem> _items;
 
@@ -322,17 +319,6 @@ public class MockWindow : GenericWindow
             {
                 _fileDialogManager.OpenFileDialog("Pick a file", "*.*", ConvertFile);
             }
-            if (ImGui.Button("Save loaded json to csv"))
-            {
-                _fileDialogManager.SaveFileDialog("Pick a file", "*.csv", "inventories", ".csv",
-                    (b, s) =>
-                    {
-                        if (b)
-                        {
-                            CsvLoader.ToCsvRaw<InventoryItem>(_items, s);
-                        }
-                    });
-            }
             if (ImGui.Button("Refresh overlay states"))
             {
                 _characterMonitor.OverrideActiveCharacter(_characterMonitor.GetPlayerCharacters().First().Key);
@@ -341,34 +327,6 @@ public class MockWindow : GenericWindow
             if (ImGui.Button("Refresh item counts for inventory"))
             {
                 _inventoryMonitor.GenerateItemCounts();
-            }
-            if (ImGui.Button("Push random item to player bag"))
-            {
-                var currentHistory = _inventoryHistory.GetHistory();
-                var activeCharacter = _characterMonitor.ActiveCharacter;
-                if (activeCharacter != null)
-                {
-                    var fromItem = new InventoryItem();
-                    var slot = (short)_rng.Next(0,35);
-                    fromItem.Slot = slot;
-                    fromItem.ItemId = 0;
-                    fromItem.SortedSlotIndex = slot;
-                    fromItem.SortedContainer = InventoryType.Bag0;
-                    fromItem.SortedCategory = InventoryCategory.CharacterBags;
-                    fromItem.RetainerId = activeCharacter.CharacterId;
-                    fromItem.Quantity = 0;
-                    var toItem = new InventoryItem();
-                    toItem.Slot = slot;
-                    toItem.ItemId = (uint)_rng.Next(1000,10000);
-                    toItem.SortedSlotIndex = slot;
-                    toItem.SortedContainer = InventoryType.Bag0;
-                    toItem.SortedCategory = InventoryCategory.CharacterBags;
-                    toItem.RetainerId = activeCharacter.CharacterId;
-                    toItem.Quantity = 1;
-
-                    currentHistory.Add(new InventoryChange(fromItem, toItem, InventoryChangeReason.Added, (uint)currentHistory.Count + 1));
-                }
-                _inventoryHistory.LoadExistingHistory(currentHistory);
             }
 
             ImGui.EndTabItem();
@@ -384,11 +342,10 @@ public class MockWindow : GenericWindow
                 Logger.LogDebug("Loading inventories from " + fileName);
                 var cacheFile = new FileInfo(fileName);
                 string json = File.ReadAllText(cacheFile.FullName, Encoding.UTF8);
-                MinifyResolver minifyResolver = new();
                 var parsedInventories = JsonConvert.DeserializeObject<Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>>(json, new JsonSerializerSettings()
                 {
                     DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
-                    ContractResolver = minifyResolver
+                    ContractResolver = _minifyResolver
                 });
                 _items = parsedInventories.SelectMany(c => c.Value.SelectMany(d => d.Value)).ToList();
             }

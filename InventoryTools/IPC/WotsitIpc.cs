@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using CriticalCommonLib;
 using Dalamud.Plugin.Ipc;
+using Dalamud.Plugin.Services;
 using InventoryTools.Logic;
 using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -18,6 +19,7 @@ namespace InventoryTools.IPC
     {
         private readonly IDalamudPluginInterface _dalamudPluginInterface;
         private readonly IListService _listService;
+        private readonly IFramework _framework;
         public ILogger<WotsitIpc> Logger { get; }
         private const string IpcDisplayName = "Allagan Tools";
         private const uint WotsitIconId = 32;
@@ -32,16 +34,17 @@ namespace InventoryTools.IPC
         private Timer? _delayTimer = null;
 
 
-        public WotsitIpc(ILogger<WotsitIpc> logger, IDalamudPluginInterface dalamudPluginInterface, IListService listService)
+        public WotsitIpc(ILogger<WotsitIpc> logger, IDalamudPluginInterface dalamudPluginInterface, IListService listService, IFramework framework)
         {
             _dalamudPluginInterface = dalamudPluginInterface;
             _listService = listService;
+            _framework = framework;
             Logger = logger;
         }
 
         private void FaAvailable()
         {
-            Service.Framework.RunOnTick(InitForWotsit);
+            _framework.RunOnTick(InitForWotsit);
         }
 
         private void DelayTimerOnElapsed(object? sender, ElapsedEventArgs e)
@@ -86,7 +89,7 @@ namespace InventoryTools.IPC
             {
                 _wotsitUnregister = _dalamudPluginInterface.GetIpcSubscriber<string, bool>("FA.UnregisterAll");
             }
-            
+
             if (_wotsitRegister == null)
             {
                 _wotsitRegister =
@@ -98,7 +101,7 @@ namespace InventoryTools.IPC
                 _callGateSubscriber = _dalamudPluginInterface.GetIpcSubscriber<string, bool>("FA.Invoke");
                 _callGateSubscriber.Subscribe(WotsitInvoke);
             }
-            
+
             if (_wotsitUnregister != null)
             {
                 try
@@ -114,7 +117,7 @@ namespace InventoryTools.IPC
                     return;
                 }
             }
-            
+
             _wotsItRegistered = true;
             RegisterFilters();
         }
@@ -146,7 +149,7 @@ namespace InventoryTools.IPC
 
         public void WotsitInvoke(string guid)
         {
-            Service.Framework.RunOnFrameworkThread(() =>
+            _framework.RunOnFrameworkThread(() =>
             {
                 if (_wotsitToggleFilterGuids.TryGetValue(guid, out var filterKey))
                 {
@@ -161,7 +164,7 @@ namespace InventoryTools.IPC
 
         public void Dispose()
         {
-            
+
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -171,7 +174,7 @@ namespace InventoryTools.IPC
             InitForWotsit();
             _wotsitAvailable = _dalamudPluginInterface.GetIpcSubscriber<bool>("FA.Available");
             _wotsitAvailable.Subscribe(FaAvailable);
-            
+
             _listService.ListAdded += ListAddedRemoved;
             _listService.ListRemoved += ListAddedRemoved;
             _listService.ListConfigurationChanged += ListChanged;
@@ -207,6 +210,6 @@ namespace InventoryTools.IPC
             return Task.CompletedTask;
         }
     }
-    
-    
+
+
 }

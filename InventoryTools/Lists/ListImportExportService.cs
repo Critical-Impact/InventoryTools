@@ -22,10 +22,12 @@ public enum TCExportMode
 public class ListImportExportService
 {
     private readonly ItemSheet _itemSheet;
+    private readonly FilterConfiguration.Factory _filterConfigurationFactory;
 
-    public ListImportExportService(VersionInfo info , ItemSheet itemSheet)
+    public ListImportExportService(VersionInfo info , ItemSheet itemSheet, FilterConfiguration.Factory filterConfigurationFactory)
     {
         _itemSheet = itemSheet;
+        _filterConfigurationFactory = filterConfigurationFactory;
         CurrentVersion = (byte)info.ImportExportVersion;
     }
 
@@ -46,7 +48,8 @@ public class ListImportExportService
     }
     public bool FromBase64(string data, out FilterConfiguration filterConfiguration)
     {
-        filterConfiguration = new FilterConfiguration();
+        filterConfiguration = _filterConfigurationFactory.Invoke();
+        filterConfiguration.FilterType = FilterType.SearchFilter;
         try
         {
             var bytes = data.FromCompressedBase64();

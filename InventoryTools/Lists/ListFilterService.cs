@@ -34,10 +34,16 @@ public class ListFilterService : DisposableMediatorBackgroundService
     private readonly CraftPricer _craftPricer;
     private readonly IFilterService _filterService;
     private readonly ItemSheet _itemSheet;
+    private readonly InventoryItem.Factory _inventoryItemFactory;
 
     public IBackgroundTaskQueue FilterQueue { get; }
 
-    public ListFilterService(InventoryToolsConfiguration configuration, ICharacterMonitor characterMonitor, HostedInventoryHistory inventoryHistory, IInventoryMonitor inventoryMonitor, IBackgroundTaskQueue filterQueue, ILogger<ListFilterService> logger, IMarketCache marketCache, CraftPricer craftPricer, IFilterService filterService, MediatorService mediatorService, ItemSheet itemSheet) : base(logger, mediatorService)
+    public ListFilterService(InventoryToolsConfiguration configuration, ICharacterMonitor characterMonitor,
+        HostedInventoryHistory inventoryHistory, IInventoryMonitor inventoryMonitor, IBackgroundTaskQueue filterQueue,
+        ILogger<ListFilterService> logger, IMarketCache marketCache, CraftPricer craftPricer,
+        IFilterService filterService, MediatorService mediatorService, ItemSheet itemSheet,
+        InventoryItem.Factory inventoryItemFactory) : base(logger,
+        mediatorService)
     {
         _configuration = configuration;
         _characterMonitor = characterMonitor;
@@ -47,6 +53,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
         _craftPricer = craftPricer;
         _filterService = filterService;
         _itemSheet = itemSheet;
+        _inventoryItemFactory = inventoryItemFactory;
         FilterQueue = filterQueue;
         MediatorService.Subscribe<RequestListUpdateMessage>(this, message => RequestRefresh(message.FilterConfiguration));
     }
@@ -440,7 +447,8 @@ public class ListFilterService : DisposableMediatorBackgroundService
                                 searchResults.Add(new SearchResult(sortingResult));
 
                                 //We want to add the empty slot to the list of locations we know about, we need to create a copy and add that so any further items with the same ID can properly check how much room is left in the stack
-                                nextEmptySlot = new InventoryItem(nextEmptySlot);
+                                nextEmptySlot = _inventoryItemFactory.Invoke();
+                                nextEmptySlot.FromInventoryItem(nextEmptySlot);
                                 nextEmptySlot.ItemId = sourceItem.ItemId;
                                 nextEmptySlot.Flags = sourceItem.Flags;
                                 nextEmptySlot.Quantity = sourceItem.Quantity;

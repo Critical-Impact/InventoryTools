@@ -33,11 +33,13 @@ namespace InventoryTools.Services
 
         public event ConfigurationChangedDelegate? ConfigurationChanged;
 
-        public ConfigurationManagerService(IFramework framework, IDalamudPluginInterface pluginInterfaceService, ILogger<ConfigurationManagerService> logger, IBackgroundTaskQueue saveQueue)
+        public ConfigurationManagerService(IFramework framework, IDalamudPluginInterface pluginInterfaceService, ILogger<ConfigurationManagerService> logger, IBackgroundTaskQueue saveQueue, MinifyResolver minifyResolver, ContainerAwareCsvLoader containerAwareCsvLoader)
         {
             Logger = logger;
             _pluginInterfaceService = pluginInterfaceService;
             _saveQueue = saveQueue;
+            _minifyResolver = minifyResolver;
+            _containerAwareCsvLoader = containerAwareCsvLoader;
             _framework = framework;
             _framework.Update += OnUpdate;
         }
@@ -130,7 +132,7 @@ namespace InventoryTools.Services
                 TypeNameHandling = TypeNameHandling.None,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                 DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
-                ContractResolver = MinifyResolver
+                ContractResolver = _minifyResolver
             });
             if (inventoryToolsConfiguration == null)
             {
@@ -168,7 +170,7 @@ namespace InventoryTools.Services
                                 new ColumnConverter()
                             },
                             DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
-                            ContractResolver = MinifyResolver
+                            ContractResolver = _minifyResolver
                         });
                     if (inventoryToolsConfiguration != null)
                     {
@@ -238,7 +240,7 @@ namespace InventoryTools.Services
                     TypeNameHandling = TypeNameHandling.None,
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                     DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
-                    ContractResolver = MinifyResolver
+                    ContractResolver = _minifyResolver
                 }));
                 loadConfigStopwatch.Stop();
                 Logger.LogTrace("Took " + loadConfigStopwatch.Elapsed.TotalSeconds + " to save configuration.");
@@ -271,7 +273,7 @@ namespace InventoryTools.Services
                 return JsonConvert.DeserializeObject<Dictionary<ulong, Dictionary<InventoryCategory, List<InventoryItem>>>>(json, new JsonSerializerSettings()
                 {
                     DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
-                    ContractResolver = MinifyResolver
+                    ContractResolver = _minifyResolver
                 });
             }
             catch (Exception e)
@@ -281,8 +283,8 @@ namespace InventoryTools.Services
             }
         }
 
-        public MinifyResolver MinifyResolver => _minifyResolver ??= new();
-        private MinifyResolver? _minifyResolver;
+        private MinifyResolver _minifyResolver;
+        private readonly ContainerAwareCsvLoader _containerAwareCsvLoader;
         private readonly IDalamudPluginInterface _pluginInterfaceService;
         private readonly IBackgroundTaskQueue _saveQueue;
 
@@ -321,7 +323,7 @@ namespace InventoryTools.Services
 
         public bool SaveInventories(List<InventoryItem> items)
         {
-            return CsvLoader.ToCsvRaw<InventoryItem>(items, Path.Join(_pluginInterfaceService.ConfigDirectory.FullName, "inventories.csv"));
+            return _containerAwareCsvLoader.ToCsvRaw(items, Path.Join(_pluginInterfaceService.ConfigDirectory.FullName, "inventories.csv"));
         }
 
         public List<InventoryItem> LoadInventoriesFromCsv(out bool success, string? csvPath = null)
@@ -331,7 +333,7 @@ namespace InventoryTools.Services
             {
                 try
                 {
-                    var items = CsvLoader.LoadCsv<InventoryItem>(inventoryCsv, false, out _, out _);
+                    var items = _containerAwareCsvLoader.LoadCsv<InventoryItem>(inventoryCsv,  out _, out _);
                     success = true;
                     return items;
                 }
@@ -359,7 +361,7 @@ namespace InventoryTools.Services
             {
                 try
                 {
-                    var items = CsvLoader.LoadCsv<InventoryChange>(historyCsv, false, out _, out _);
+                    var items = _containerAwareCsvLoader.LoadCsv<InventoryChange>(historyCsv, out _, out _);
                     success = true;
                     return items;
                 }
@@ -382,7 +384,7 @@ namespace InventoryTools.Services
 
         public bool SaveHistory(List<InventoryChange> changes)
         {
-            return CsvLoader.ToCsvRaw<InventoryChange>(changes, Path.Join(_pluginInterfaceService.ConfigDirectory.FullName, "history.csv"));
+            return _containerAwareCsvLoader.ToCsvRaw(changes, Path.Join(_pluginInterfaceService.ConfigDirectory.FullName, "history.csv"));
         }
 
 

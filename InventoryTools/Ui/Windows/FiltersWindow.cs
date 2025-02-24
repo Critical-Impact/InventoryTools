@@ -52,9 +52,11 @@ namespace InventoryTools.Ui
         private readonly IComponentContext _context;
         private readonly FiltersWindowLayoutSetting _layoutSetting;
         private readonly ItemSheet _itemSheet;
+        private readonly FilterConfiguration.Factory _filterConfigFactory;
         private readonly IClipboardService _clipboardService;
         private readonly PopupService _popupService;
         private readonly IKeyState _keyState;
+        private readonly IFramework _framework;
         private IEnumerable<IMenuWindow>? _menuWindows;
         private readonly InventoryToolsConfiguration _configuration;
 
@@ -64,7 +66,8 @@ namespace InventoryTools.Ui
             IUniversalis universalis, IFileDialogManager fileDialogManager, IGameUiManager gameUiManager,
             HostedInventoryHistory inventoryHistory, ListImportExportService importExportService,
             IComponentContext context, FiltersWindowLayoutSetting layoutSetting, ItemSheet itemSheet,
-            IClipboardService clipboardService, PopupService popupService, IKeyState keyState) : base(logger, mediator, imGuiService, configuration, "Filters Window")
+            FilterConfiguration.Factory filterConfigFactory,
+            IClipboardService clipboardService, PopupService popupService, IKeyState keyState, IFramework framework) : base(logger, mediator, imGuiService, configuration, "Filters Window")
         {
             _listService = listService;
             _filterService = filterService;
@@ -79,9 +82,11 @@ namespace InventoryTools.Ui
             _context = context;
             _layoutSetting = layoutSetting;
             _itemSheet = itemSheet;
+            _filterConfigFactory = filterConfigFactory;
             _clipboardService = clipboardService;
             _popupService = popupService;
             _keyState = keyState;
+            _framework = framework;
             _configuration = configuration;
             this.Flags = ImGuiWindowFlags.MenuBar;
         }
@@ -395,8 +400,9 @@ namespace InventoryTools.Ui
 
         private void AddSearchFilter(string newName, string id)
         {
-            var filterConfiguration = new FilterConfiguration(newName,
-                Guid.NewGuid().ToString("N"), FilterType.SearchFilter);
+            var filterConfiguration = _filterConfigFactory.Invoke();
+            filterConfiguration.Name = newName;
+            filterConfiguration.FilterType = FilterType.SearchFilter;
             _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
             Invalidate();
@@ -407,8 +413,9 @@ namespace InventoryTools.Ui
 
         private void AddHistoryFilter(string newName, string id)
         {
-            var filterConfiguration = new FilterConfiguration(newName,
-                Guid.NewGuid().ToString("N"), FilterType.HistoryFilter);
+            var filterConfiguration = _filterConfigFactory.Invoke();
+            filterConfiguration.Name = newName;
+            filterConfiguration.FilterType = FilterType.HistoryFilter;
             _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
             Invalidate();
@@ -419,8 +426,9 @@ namespace InventoryTools.Ui
 
         private void AddCuratedFilter(string newName, string id)
         {
-            var filterConfiguration = new FilterConfiguration(newName,
-                Guid.NewGuid().ToString("N"), FilterType.CuratedList);
+            var filterConfiguration = _filterConfigFactory.Invoke();
+            filterConfiguration.Name = newName;
+            filterConfiguration.FilterType = FilterType.CuratedList;
             _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
             Invalidate();
@@ -431,8 +439,9 @@ namespace InventoryTools.Ui
 
         private void AddGameItemFilter(string newName, string id)
         {
-            var filterConfiguration =
-                new FilterConfiguration(newName, Guid.NewGuid().ToString("N"), FilterType.GameItemFilter);
+            var filterConfiguration = _filterConfigFactory.Invoke();
+            filterConfiguration.Name = newName;
+            filterConfiguration.FilterType = FilterType.GameItemFilter;
             _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
             Invalidate();
@@ -443,8 +452,9 @@ namespace InventoryTools.Ui
 
         private void AddSortFilter(string newName, string id)
         {
-            var filterConfiguration =
-                new FilterConfiguration(newName, Guid.NewGuid().ToString("N"), FilterType.SortingFilter);
+            var filterConfiguration = _filterConfigFactory.Invoke();
+            filterConfiguration.Name = newName;
+            filterConfiguration.FilterType = FilterType.SortingFilter;
             _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
             Invalidate();
@@ -931,7 +941,7 @@ namespace InventoryTools.Ui
                                     _configuration.ActiveUiFilter != filterConfiguration.Key &&
                                     _configuration.ActiveUiFilter != null)
                                 {
-                                    Service.Framework.RunOnFrameworkThread(() =>
+                                    _framework.RunOnFrameworkThread(() =>
                                     {
                                         _listService.ToggleActiveUiList(filterConfiguration);
                                     });
@@ -953,7 +963,7 @@ namespace InventoryTools.Ui
                                         _configuration.ActiveUiFilter != filterConfiguration.Key &&
                                         _configuration.ActiveUiFilter != null)
                                     {
-                                        Service.Framework.RunOnFrameworkThread(() =>
+                                        _framework.RunOnFrameworkThread(() =>
                                         {
                                             _listService.ToggleActiveUiList(filterConfiguration);
                                         });
@@ -1032,7 +1042,7 @@ namespace InventoryTools.Ui
                                         _configuration.ActiveUiFilter != filterConfiguration.Key &&
                                         _configuration.ActiveUiFilter != null)
                                     {
-                                        Service.Framework.RunOnFrameworkThread(() =>
+                                        _framework.RunOnFrameworkThread(() =>
                                         {
                                             _listService.ToggleActiveUiList(filterConfiguration);
                                         });
@@ -1107,7 +1117,7 @@ namespace InventoryTools.Ui
                                             _configuration.ActiveUiFilter != filterConfiguration.Key &&
                                             _configuration.ActiveUiFilter != null)
                                         {
-                                            Service.Framework.RunOnFrameworkThread(() =>
+                                            _framework.RunOnFrameworkThread(() =>
                                             {
                                                 _listService.ToggleActiveUiList(filterConfiguration);
                                             });
@@ -1135,7 +1145,7 @@ namespace InventoryTools.Ui
                                     if (_configuration.SwitchFiltersAutomatically &&
                                         _configuration.ActiveUiFilter != filterConfiguration.Key)
                                     {
-                                        Service.Framework.RunOnFrameworkThread(() =>
+                                        _framework.RunOnFrameworkThread(() =>
                                         {
                                             _listService.ToggleActiveUiList(filterConfiguration);
                                         });
@@ -1165,7 +1175,7 @@ namespace InventoryTools.Ui
                                             _configuration.ActiveUiFilter != filterConfiguration.Key &&
                                             _configuration.ActiveUiFilter != null)
                                         {
-                                            Service.Framework.RunOnFrameworkThread(() =>
+                                            _framework.RunOnFrameworkThread(() =>
                                             {
                                                 _listService.ToggleActiveUiList(
                                                     filterConfiguration);
@@ -1423,7 +1433,7 @@ namespace InventoryTools.Ui
                         ref highlightItems);
                     if (highlightItems != itemTable.HighlightItems)
                     {
-                        Service.Framework.RunOnFrameworkThread(() =>
+                        _framework.RunOnFrameworkThread(() =>
                         {
                             _listService.ToggleActiveUiList(itemTable.FilterConfiguration);
                         });
@@ -1528,21 +1538,17 @@ namespace InventoryTools.Ui
                             if (ImGui.Button("Add Company Craft to List"))
                             {
                                 var subAddon = (SubmarinePartsMenuAddon*)subMarinePartsMenu;
-                                for (int i = 0; i < 6; i++)
+                                for (byte i = 0; i < 6; i++)
                                 {
-                                    var itemRequired = subAddon->RequiredItemId(i);
-                                    if (itemRequired != 0)
+                                    var itemRequired = subAddon->GetItem(i);
+                                    if (itemRequired != null)
                                     {
-                                        var amountHandedIn = subAddon->AmountHandedIn(i);
-                                        var amountNeeded = subAddon->AmountNeeded(i);
-                                        var amountLeft = Math.Max((int)amountNeeded - (int)amountHandedIn,
-                                            0);
+                                        var amountLeft = itemRequired.Value.QtyRemaining;
                                         if (amountLeft > 0)
                                         {
-                                            Service.Framework.RunOnFrameworkThread(() =>
+                                            _framework.RunOnFrameworkThread(() =>
                                             {
-                                                filterConfiguration.CraftList.AddCraftItem(itemRequired,
-                                                    (uint)amountLeft, InventoryItem.ItemFlags.None);
+                                                filterConfiguration.CraftList.AddCraftItem(itemRequired.Value.ItemId,amountLeft);
                                                 filterConfiguration.NeedsRefresh = true;
                                             });
                                         }
@@ -1692,7 +1698,7 @@ namespace InventoryTools.Ui
             {
                 if (_addIcon.Draw(ImGuiService.GetIconTexture(66315).ImGuiHandle, "bbadd_" + item.RowId, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale))
                 {
-                    Service.Framework.RunOnFrameworkThread(() =>
+                    _framework.RunOnFrameworkThread(() =>
                     {
                         filterConfiguration.AddCuratedItem(new CuratedItem(item.RowId));
                         filterConfiguration.NeedsRefresh = true;

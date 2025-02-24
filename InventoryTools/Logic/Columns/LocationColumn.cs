@@ -1,4 +1,5 @@
-﻿using InventoryTools.Logic.Columns.Abstract;
+﻿using InventoryTools.Localizers;
+using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 
@@ -6,8 +7,11 @@ namespace InventoryTools.Logic.Columns
 {
     public class LocationColumn : TextColumn
     {
-        public LocationColumn(ILogger<LocationColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        private readonly ItemLocalizer _itemLocalizer;
+
+        public LocationColumn(ILogger<LocationColumn> logger, ImGuiService imGuiService, ItemLocalizer itemLocalizer) : base(logger, imGuiService)
         {
+            _itemLocalizer = itemLocalizer;
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Inventory;
 
@@ -17,7 +21,7 @@ namespace InventoryTools.Logic.Columns
         {
             if (searchResult.InventoryItem != null)
             {
-                return searchResult.InventoryItem.FormattedBagLocation;
+                return _itemLocalizer.FormattedBagLocation(searchResult.InventoryItem);
             }
 
             return null;

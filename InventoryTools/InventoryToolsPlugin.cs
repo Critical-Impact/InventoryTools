@@ -8,8 +8,10 @@ using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.Extensions;
 using AllaganLib.GameSheets.Model;
 using AllaganLib.GameSheets.Service;
+using AllaganLib.GameSheets.Sheets;
 using AllaganLib.Shared.Time;
 using Autofac;
+using Autofac.Core.Activators.Reflection;
 using Autofac.Extensions.DependencyInjection;
 using Autofac.Util;
 using CriticalCommonLib;
@@ -17,6 +19,8 @@ using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Ipc;
 using CriticalCommonLib.MarketBoard;
+using CriticalCommonLib.Models;
+using CriticalCommonLib.Resolvers;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Services.Ui;
@@ -36,6 +40,7 @@ using InventoryTools.Host;
 using InventoryTools.Hotkeys;
 using InventoryTools.IPC;
 using InventoryTools.Lists;
+using InventoryTools.Localizers;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Columns;
 using InventoryTools.Logic.Columns.Abstract.ColumnSettings;
@@ -54,6 +59,7 @@ using InventoryTools.Ui;
 using InventoryTools.Ui.Pages;
 using Lumina;
 using Lumina.Excel;
+using Lumina.Excel.Sheets;
 using LuminaSupplemental.Excel.Model;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -67,7 +73,6 @@ namespace InventoryTools
     {
         private readonly IPluginLog _pluginLog;
         private readonly IFramework _framework;
-        private Service? _service;
         private IDalamudPluginInterface? PluginInterface { get; set; }
 
         public InventoryToolsPlugin(IDalamudPluginInterface pluginInterface, IPluginLog pluginLog,
@@ -88,7 +93,6 @@ namespace InventoryTools
             _pluginLog = pluginLog;
             _framework = framework;
             PluginInterface = pluginInterface;
-            _service = PluginInterface.Create<Service>()!;
             this.Host = CreateHost();
 
             Start();
@@ -335,7 +339,6 @@ namespace InventoryTools
                 builder.RegisterType<ListCategoryService>().SingleInstance();
                 builder.RegisterType<Logger>().SingleInstance();
                 builder.RegisterType<PopupService>().SingleInstance();
-                builder.RegisterType<ExcelCache>().SingleInstance();
                 builder.RegisterType<CraftingCache>().SingleInstance();
                 builder.RegisterType<ItemInfoRenderService>().SingleInstance();
                 builder.RegisterType<ShopHighlighting>().SingleInstance();
@@ -364,9 +367,24 @@ namespace InventoryTools
                 builder.RegisterType<DalamudWindowSystem>().As<IWindowSystem>();
                 builder.RegisterType<HostedUniversalisConfiguration>().AsSelf().As<IHostedUniversalisConfiguration>()
                     .SingleInstance();
+                builder.RegisterType<MinifyResolver>().SingleInstance();
+                builder.RegisterType<ItemLocalizer>().SingleInstance();
+                builder.RegisterType<IngredientPreferenceLocalizer>().SingleInstance();
+                builder.RegisterType<CraftGroupingLocalizer>().SingleInstance();
+                builder.RegisterType<CraftItemLocalizer>().SingleInstance();
+                builder.RegisterType<MarketOrderService>().AsImplementedInterfaces().SingleInstance();
+                builder.RegisterType<ContainerAwareCsvLoader>().SingleInstance();
 
                 //Transient
                 builder.RegisterType<FilterState>();
+                builder.RegisterType<Character>();
+                builder.RegisterType<CraftList>();
+                builder.RegisterType<CraftCalculator>();
+                builder.RegisterType<FilterConfiguration>();
+                builder.RegisterType<Inventory>();
+                builder.RegisterType<InventoryChange>();
+                builder.RegisterType<CraftItem>();
+                builder.RegisterType<InventoryItem>();
 
                 builder.Register(provider =>
                 {
@@ -554,24 +572,6 @@ namespace InventoryTools
         {
 
 
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Service.Log.Debug("Starting dispose of InventoryToolsPlugin");
-                _service?.Dispose();
-                _service = null;
-                PluginInterface = null;
-            }
-        }
-
-        public new void Dispose()
-        {
-            Dispose(true);
-            base.Dispose();
-            GC.SuppressFinalize(this);
         }
     }
 }

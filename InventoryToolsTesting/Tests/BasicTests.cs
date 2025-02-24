@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
+using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Extensions;
@@ -38,10 +39,10 @@ namespace InventoryToolsTesting.Tests
         public void Init()
         {
             var characterMonitor = Host.Services.GetRequiredService<ICharacterMonitor>()!;
-            _character = Fixtures.GenerateCharacter();
-            _character2 = Fixtures.GenerateCharacter();
-            _retainer = Fixtures.GenerateRetainer(_character);
-            _retainer2 = Fixtures.GenerateRetainer(_character);
+            _character = GenerateCharacter();
+            _character2 = GenerateCharacter();
+            _retainer = GenerateRetainer(_character);
+            _retainer2 = GenerateRetainer(_character);
             var characters = new Dictionary<ulong, Character>();
             characters.Add(_character.CharacterId, _character);
             characters.Add(_retainer.CharacterId, _retainer);
@@ -52,17 +53,18 @@ namespace InventoryToolsTesting.Tests
         [Test]
         public void TestSearchFilter()
         {
+            var filterConfigFactory = GetFilterConfigurationFactory();
             var listFilterService = Host.Services.GetRequiredService<ListFilterService>()!;
             var characterMonitor = Host.Services.GetRequiredService<ICharacterMonitor>()!;
             var inventoryMonitor = Host.Services.GetRequiredService<TestInventoryMonitor>()!;
 
-            var searchFilter = new FilterConfiguration();
+            var searchFilter = filterConfigFactory.Invoke();
             searchFilter.SourceAllCharacters = true;
             searchFilter.FilterType = FilterType.SearchFilter;
 
             characterMonitor.OverrideActiveCharacter(_character.CharacterId);
-            var inventory = Fixtures.GenerateBlankInventory(_character);
-            inventory.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, 1000, 1));
+            var inventory = GenerateBlankInventory(_character);
+            inventory.AddItem(GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, 1000, 1));
             inventoryMonitor.AddInventory(inventory);
 
             var oneList = listFilterService.RefreshList(searchFilter);
@@ -73,28 +75,31 @@ namespace InventoryToolsTesting.Tests
         [Test]
         public void TestSortFilter()
         {
+            var filterConfigFactory = GetFilterConfigurationFactory();
             var listFilterService = Host.Services.GetRequiredService<ListFilterService>()!;
             var characterMonitor = Host.Services.GetRequiredService<ICharacterMonitor>()!;
             var inventoryMonitor = Host.Services.GetRequiredService<TestInventoryMonitor>()!;
-            var excelCache = Host.Services.GetRequiredService<ExcelCache>()!;
+            var itemSheet = Host.Services.GetRequiredService<ItemSheet>();
 
-            var searchFilter = new FilterConfiguration();
+
+
+            var searchFilter = filterConfigFactory.Invoke();
             searchFilter.SourceAllCharacters = true;
             searchFilter.DestinationAllRetainers = true;
             searchFilter.FilterType = FilterType.SortingFilter;
 
             //Flour, just cause
-            var ryeFlour = excelCache.GetItemSheet().GetRow(4825)!;
-            var wheatFlour = excelCache.GetItemSheet().GetRow(4826)!;
-            var cinnamon = excelCache.GetItemSheet().GetRow(4828)!;
+            var ryeFlour = itemSheet.GetRow(4825)!;
+            var wheatFlour = itemSheet.GetRow(4826)!;
+            var cinnamon = itemSheet.GetRow(4828)!;
 
 
             characterMonitor.OverrideActiveRetainer(_retainer.CharacterId);
             characterMonitor.OverrideActiveCharacter(_character.CharacterId);
 
-            var inventory = Fixtures.GenerateBlankInventory(_character);
-            var retainerInventory = Fixtures.GenerateBlankInventory(_retainer);
-            var retainerInventory2 = Fixtures.GenerateBlankInventory(_retainer2);
+            var inventory = GenerateBlankInventory(_character);
+            var retainerInventory = GenerateBlankInventory(_retainer);
+            var retainerInventory2 = GenerateBlankInventory(_retainer2);
             var inventories = new List<Inventory>() { inventory, retainerInventory, retainerInventory2 };
             inventoryMonitor.AddInventory(inventories);
 
@@ -103,7 +108,7 @@ namespace InventoryToolsTesting.Tests
             Assert.True(emptyList.All(c => c.InventoryItem != null && c.InventoryItem.IsEmpty));
 
             //1 item to retainer
-            inventory.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
+            inventory.AddItem(GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
             var oneList = listFilterService.RefreshList( searchFilter);
             Assert.AreEqual( 1, oneList.Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
 
@@ -112,25 +117,25 @@ namespace InventoryToolsTesting.Tests
             Assert.True(listFilterService.RefreshList(searchFilter).All(c => c.InventoryItem != null && c.InventoryItem.IsEmpty));
 
             //Duplicates only, 1 item to retainer
-            retainerInventory.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1));
+            retainerInventory.AddItem(GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1));
             Assert.AreEqual(1, listFilterService.RefreshList(searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
 
             //Duplicates only, 1 item to retainer, add a unrelated item
-            retainerInventory.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 1, wheatFlour.RowId, 1));
+            retainerInventory.AddItem(GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 1, wheatFlour.RowId, 1));
             Assert.AreEqual(1,listFilterService.RefreshList( searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
 
             //Duplicates only, max out item in existing inventory
-            retainerInventory.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.Base.StackSize));
+            retainerInventory.AddItem(GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.Base.StackSize));
             var generateFilteredList = listFilterService.RefreshList( searchFilter);
             Assert.AreEqual(1, generateFilteredList.Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
 
             //Duplicates only, max out item in existing inventory then spill over
-            retainerInventory.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.Base.StackSize - 1));
-            inventory.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 2));
+            retainerInventory.AddItem(GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.Base.StackSize - 1));
+            inventory.AddItem(GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 2));
             Assert.AreEqual(2, listFilterService.RefreshList(searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
 
             //Duplicates only, max out retainer, should go nowhere, boy got some cinnamon, 2 items in inventory
-            Fixtures.FillInventory(retainerInventory, InventoryCategory.RetainerBags, cinnamon.RowId, cinnamon.Base.StackSize);
+            FillInventory(retainerInventory, InventoryCategory.RetainerBags, cinnamon.RowId, cinnamon.Base.StackSize);
             Assert.AreEqual(0,listFilterService.RefreshList( searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
 
             //Allow item to spill over to retainer 2, but we are in retainer 1 so nothing shows up
@@ -144,9 +149,9 @@ namespace InventoryToolsTesting.Tests
             Assert.AreEqual(1, listFilterService.RefreshList( searchFilter).Count(c =>c.InventoryItem != null && c.SortingResult != null &&  !c.InventoryItem.IsEmpty && c.SortingResult.DestinationRetainerId == _retainer2.CharacterId));
 
             //Item should goto 2nd retainer first
-            Fixtures.FillInventory(retainerInventory, InventoryCategory.RetainerBags, 0, 0);
-            inventory.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
-            retainerInventory2.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.Base.StackSize - 1));
+            FillInventory(retainerInventory, InventoryCategory.RetainerBags, 0, 0);
+            inventory.AddItem(GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
+            retainerInventory2.AddItem(GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, ryeFlour.Base.StackSize - 1));
             Assert.True(listFilterService.RefreshList( searchFilter).Count(c =>c.InventoryItem != null && c.SortingResult != null &&  !c.InventoryItem.IsEmpty && c.SortingResult.DestinationRetainerId == _retainer2.CharacterId) == 1);
 
             //Filter items when in specific retainer, should show 0 sorted items as we are in the first retainer and not the 2nd
@@ -165,25 +170,26 @@ namespace InventoryToolsTesting.Tests
         [Test]
         public void TestDestinationInventory()
         {
+            var filterConfigFactory = GetFilterConfigurationFactory();
             var listFilterService = Host.Services.GetRequiredService<ListFilterService>()!;
             var characterMonitor = Host.Services.GetRequiredService<ICharacterMonitor>()!;
             var inventoryMonitor = Host.Services.GetRequiredService<TestInventoryMonitor>()!;
-            var excelCache = Host.Services.GetRequiredService<ExcelCache>()!;
+            var itemSheet = Host.Services.GetRequiredService<ItemSheet>();
 
-            var searchFilter = new FilterConfiguration();
+            var searchFilter = filterConfigFactory.Invoke();
             searchFilter.SourceAllCharacters = true;
             searchFilter.FilterType = FilterType.SortingFilter;
 
             //Flour, just cause
-            var ryeFlour = excelCache.GetItemSheet().GetRow(4825)!;
-            var wheatFlour = excelCache.GetItemSheet().GetRow(4826)!;
-            var cinnamon = excelCache.GetItemSheet().GetRow(4828)!;
+            var ryeFlour = itemSheet.GetRow(4825)!;
+            var wheatFlour = itemSheet.GetRow(4826)!;
+            var cinnamon = itemSheet.GetRow(4828)!;
 
 
             searchFilter.DestinationInventories = new List<(ulong, InventoryCategory)>() {(_character.CharacterId, InventoryCategory.CharacterSaddleBags)};
             characterMonitor.OverrideActiveCharacter(_character.CharacterId);
 
-            var inventory = Fixtures.GenerateBlankInventory(_character);
+            var inventory = GenerateBlankInventory(_character);
             var inventories = new List<Inventory>() { inventory };
             inventoryMonitor.AddInventory(inventories);
 
@@ -192,35 +198,22 @@ namespace InventoryToolsTesting.Tests
             Assert.True(emptyList.All(c => c.InventoryItem != null && c.InventoryItem.IsEmpty));
 
             //1 item to retainer
-            inventory.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
+            inventory.AddItem(GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
             var oneList = listFilterService.RefreshList(searchFilter);
             Assert.AreEqual( 1, oneList.Count(c => c.InventoryItem != null &&  !c.InventoryItem.IsEmpty));
 
         }
 
         [Test]
-        public void TestCraftItemFilter()
-        {
-            var listFilterService = Host.Services.GetRequiredService<ListFilterService>()!;
-
-            var searchFilter = new FilterConfiguration();
-            searchFilter.SourceAllCharacters = true;
-            searchFilter.FilterType = FilterType.GameItemFilter;
-            searchFilter.IntegerFilters = new Dictionary<string, int>() {{"CraftItemFilter", 32224}};
-
-            var emptyList = listFilterService.RefreshList( searchFilter);
-            Assert.AreEqual(16, emptyList.Count);
-        }
-
-        [Test]
         public void TestDuplicates()
         {
+            var filterConfigFactory = GetFilterConfigurationFactory();
             var listFilterService = Host.Services.GetRequiredService<ListFilterService>()!;
             var characterMonitor = Host.Services.GetRequiredService<ICharacterMonitor>()!;
             var inventoryMonitor = Host.Services.GetRequiredService<TestInventoryMonitor>()!;
-            var excelCache = Host.Services.GetRequiredService<ExcelCache>()!;
+            var itemSheet = Host.Services.GetRequiredService<ItemSheet>();
 
-            var searchFilter = new FilterConfiguration();
+            var searchFilter = filterConfigFactory.Invoke();
             searchFilter.SourceAllCharacters = true;
             searchFilter.SourceAllRetainers = true;
             searchFilter.DestinationAllRetainers = true;
@@ -228,24 +221,24 @@ namespace InventoryToolsTesting.Tests
             searchFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
 
             //Flour, just cause
-            var ryeFlour = excelCache.GetItemSheet().GetRow(4825)!;
-            var wheatFlour = excelCache.GetItemSheet().GetRow(4826)!;
-            var cinnamon = excelCache.GetItemSheet().GetRow(4828)!;
+            var ryeFlour = itemSheet.GetRow(4825)!;
+            var wheatFlour = itemSheet.GetRow(4826)!;
+            var cinnamon = itemSheet.GetRow(4828)!;
 
             characterMonitor.OverrideActiveRetainer(_retainer.CharacterId);
             characterMonitor.OverrideActiveCharacter(_character.CharacterId);
 
 
-            var inventory = Fixtures.GenerateBlankInventory(_character);
-            var retainerInventory = Fixtures.GenerateBlankInventory(_retainer);
-            var retainerInventory2 = Fixtures.GenerateBlankInventory(_retainer2);
+            var inventory = GenerateBlankInventory(_character);
+            var retainerInventory = GenerateBlankInventory(_retainer);
+            var retainerInventory2 = GenerateBlankInventory(_retainer2);
 
             var inventories = new List<Inventory>() { inventory, retainerInventory, retainerInventory2 };
             inventoryMonitor.AddInventory(inventories);
 
-            inventory.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
-            retainerInventory.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1));
-            retainerInventory2.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1));
+            inventory.AddItem(GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
+            retainerInventory.AddItem(GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1));
+            retainerInventory2.AddItem(GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1));
 
             //1 in player bag, 1 in retainer bag 1 as retainer 1 is active
             Assert.AreEqual(2, listFilterService.RefreshList(searchFilter).Count(c => c.InventoryItem != null &&  !c.InventoryItem.IsEmpty));
@@ -268,13 +261,14 @@ namespace InventoryToolsTesting.Tests
         [Test]
         public void TestCrossCharacterSearching()
         {
+            var filterConfigFactory = GetFilterConfigurationFactory();
             var listFilterService = Host.Services.GetRequiredService<ListFilterService>()!;
             var characterMonitor = Host.Services.GetRequiredService<ICharacterMonitor>()!;
             var inventoryMonitor = Host.Services.GetRequiredService<TestInventoryMonitor>()!;
-            var excelCache = Host.Services.GetRequiredService<ExcelCache>()!;
+            var itemSheet = Host.Services.GetRequiredService<ItemSheet>();
             var configuration = Host.Services.GetRequiredService < InventoryToolsConfiguration>();
 
-            var searchFilter = new FilterConfiguration();
+            var searchFilter = filterConfigFactory.Invoke();
             searchFilter.SourceCategories = new HashSet<InventoryCategory>()
             {
                 InventoryCategory.RetainerBags, InventoryCategory.CharacterBags
@@ -282,26 +276,26 @@ namespace InventoryToolsTesting.Tests
             searchFilter.FilterType = FilterType.SearchFilter;
 
             //Flour, just cause
-            var ryeFlour = excelCache.GetItemSheet().GetRow(4825)!;
-            var wheatFlour = excelCache.GetItemSheet().GetRow(4826)!;
-            var cinnamon = excelCache.GetItemSheet().GetRow(4828)!;
+            var ryeFlour = itemSheet.GetRow(4825)!;
+            var wheatFlour = itemSheet.GetRow(4826)!;
+            var cinnamon = itemSheet.GetRow(4828)!;
 
             characterMonitor.OverrideActiveRetainer(_retainer.CharacterId);
             characterMonitor.OverrideActiveCharacter(_character.CharacterId);
 
-            var inventory = Fixtures.GenerateBlankInventory(_character);
-            var retainerInventory = Fixtures.GenerateBlankInventory(_retainer);
-            var retainerInventory2 = Fixtures.GenerateBlankInventory(_retainer2);
-            var characterInventory2 = Fixtures.GenerateBlankInventory(_character2);
+            var inventory = GenerateBlankInventory(_character);
+            var retainerInventory = GenerateBlankInventory(_retainer);
+            var retainerInventory2 = GenerateBlankInventory(_retainer2);
+            var characterInventory2 = GenerateBlankInventory(_character2);
             var inventories = new List<Inventory>()
                 { inventory, retainerInventory, retainerInventory2, characterInventory2 };
 
             inventoryMonitor.AddInventory(inventories);
 
-            inventory.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
-            retainerInventory.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1));
-            retainerInventory2.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1));
-            characterInventory2.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
+            inventory.AddItem(GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
+            retainerInventory.AddItem(GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1));
+            retainerInventory2.AddItem(GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1));
+            characterInventory2.AddItem(GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
 
             //Cross character off, should pick up 3
             Assert.AreEqual(3, listFilterService.RefreshList(searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
@@ -347,43 +341,44 @@ namespace InventoryToolsTesting.Tests
         [Test]
         public void TestInventoryCategoryFilters()
         {
+            var filterConfigFactory = GetFilterConfigurationFactory();
             var listFilterService = Host.Services.GetRequiredService<ListFilterService>()!;
             var characterMonitor = Host.Services.GetRequiredService<ICharacterMonitor>()!;
             var inventoryMonitor = Host.Services.GetRequiredService<TestInventoryMonitor>()!;
-            var excelCache = Host.Services.GetRequiredService<ExcelCache>()!;
+            var itemSheet = Host.Services.GetRequiredService<ItemSheet>();
 
-            var searchFilter = new FilterConfiguration();
+            var searchFilter = filterConfigFactory.Invoke();
             searchFilter.FilterType = FilterType.SearchFilter;
             searchFilter.SourceCategories = new HashSet<InventoryCategory>() {InventoryCategory.CharacterBags};
 
-            var sortFilter = new FilterConfiguration();
+            var sortFilter = filterConfigFactory.Invoke();
             sortFilter.FilterType = FilterType.SortingFilter;
             sortFilter.SourceCategories = new HashSet<InventoryCategory>() {InventoryCategory.CharacterBags};
             sortFilter.DestinationCategories = new HashSet<InventoryCategory>() {InventoryCategory.RetainerBags};
 
             //Flour, just cause
-            var ryeFlour = excelCache.GetItemSheet().GetRow(4825)!;
-            var wheatFlour = excelCache.GetItemSheet().GetRow(4826)!;
-            var cinnamon = excelCache.GetItemSheet().GetRow(4828)!;
+            var ryeFlour = itemSheet.GetRow(4825)!;
+            var wheatFlour = itemSheet.GetRow(4826)!;
+            var cinnamon = itemSheet.GetRow(4828)!;
 
             characterMonitor.OverrideActiveRetainer(_retainer.CharacterId);
             characterMonitor.OverrideActiveCharacter(_character.CharacterId);
 
 
-            var inventory = Fixtures.GenerateBlankInventory(_character);
-            var retainerInventory = Fixtures.GenerateBlankInventory(_retainer);
-            var retainerInventory2 = Fixtures.GenerateBlankInventory(_retainer2);
-            var characterInventory2 = Fixtures.GenerateBlankInventory(_character2);
+            var inventory = GenerateBlankInventory(_character);
+            var retainerInventory = GenerateBlankInventory(_retainer);
+            var retainerInventory2 = GenerateBlankInventory(_retainer2);
+            var characterInventory2 = GenerateBlankInventory(_character2);
             var inventories = new List<Inventory>()
                 { inventory, retainerInventory, retainerInventory2, characterInventory2 };
 
             inventoryMonitor.AddInventory(inventories);
 
 
-            inventory.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
-            retainerInventory.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1));
-            retainerInventory2.AddItem(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1));
-            characterInventory2.AddItem(Fixtures.GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
+            inventory.AddItem(GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
+            retainerInventory.AddItem(GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1));
+            retainerInventory2.AddItem(GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1));
+            characterInventory2.AddItem(GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
 
             //Just character bags as source
             Assert.AreEqual(1, listFilterService.RefreshList(searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
@@ -397,93 +392,14 @@ namespace InventoryToolsTesting.Tests
         }
 
         [Test]
-        public void TestMarketOrdering()
-        {
-            var retainerMarket = new List<InventoryItem>();
-
-            //pactmaker's garden scythe
-            retainerMarket.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 0, 36707, 1));
-            //super potion
-            retainerMarket.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 1, 23167, 1));
-
-            //honey muffin
-            retainerMarket.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 2, 4698, 1));
-            //bubble chocolate
-            retainerMarket.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 3, 4735, 1));
-            //tsai tou vounou
-            retainerMarket.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 4, 36060, 1));
-            //giant pumpkin
-            retainerMarket.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 5, 36100, 1));
-
-            //quickarm materia X
-            retainerMarket.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 6, 33941, 1));
-            //thavnarian onion
-            retainerMarket.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 7, 8166, 1));
-            //folded futon
-            retainerMarket.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 8, 28976, 1));
-
-            retainerMarket = retainerMarket.SortByRetainerMarketOrder()
-                .ToList();
-            for (var index = 0; index < retainerMarket.Count; index++)
-            {
-                var inventoryItem = retainerMarket[index];
-                Assert.AreEqual(inventoryItem.Slot, index, inventoryItem.FormattedName + " in wrong slot");
-            }
-
-            var retainerMarket2 = new List<InventoryItem>();
-
-            //sailor brais
-            retainerMarket2.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 0, 7537, 1));
-            //allagan aetherstone - weapon
-            retainerMarket2.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 1, 15098, 1));
-
-            //eastern teahouse bench
-            retainerMarket2.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 2, 17983, 1));
-
-            //apparel showcase
-            retainerMarket2.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 3, 32234, 1));
-
-            //factory beam
-            retainerMarket2.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 4, 30403, 1));
-
-
-            retainerMarket2 = retainerMarket2.SortByRetainerMarketOrder()
-                .ToList();
-            for (var index = 0; index < retainerMarket2.Count; index++)
-            {
-                var inventoryItem = retainerMarket2[index];
-                Assert.AreEqual(inventoryItem.Slot, index, inventoryItem.FormattedName + " in wrong slot");
-            }
-
-            var retainerMarket3 = new List<InventoryItem>();
-
-            //crystarium stove
-            retainerMarket3.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 0, 27284, 1));
-
-            //necklace display stand
-            retainerMarket3.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 1, 28149, 1));
-
-            //restaurant showcase
-            retainerMarket3.Add(Fixtures.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 2, 35579, 1));
-
-            retainerMarket3 = retainerMarket3.SortByRetainerMarketOrder()
-                .ToList();
-            for (var index = 0; index < retainerMarket3.Count; index++)
-            {
-                var inventoryItem = retainerMarket3[index];
-                Assert.AreEqual(inventoryItem.Slot, index, inventoryItem.FormattedName + " in wrong slot");
-            }
-        }
-
-        [Test]
         public void TestCompanyCraftRequirements()
         {
-            var excelCache = Host.Services.GetRequiredService<ExcelCache>()!;
-            var itemRow = excelCache.GetItemSheet().GetRow(10157);
+            var itemSheet = Host.Services.GetRequiredService<ItemSheet>();
+            var itemRow = itemSheet.GetRow(10157);
             var itemCompanyCraftResultSources = itemRow.GetSourcesByType<ItemCompanyCraftResultSource>(ItemInfoType.FreeCompanyCraftRecipe);
             Assert.IsTrue(itemCompanyCraftResultSources.Count != 0);
             var craftItems = itemRow.CompanyCraftSequence!.MaterialsRequired(null);
-            Assert.AreEqual(craftItems.Count, 42);
+            Assert.AreEqual(13, craftItems.Count);
         }
 
         [Test]

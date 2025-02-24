@@ -16,17 +16,24 @@ public class FilterStateTests : BaseTest
     [Test]
     public void TestBagHighlights()
     {
-        var filterConfiguration = new FilterConfiguration("Test", FilterType.SearchFilter);
+        var filterConfigurationFactory = GetFilterConfigurationFactory();
+        var itemFactory = GetInventoryItemFactory();
+        var characterFactory = GetCharacterFactory();
+
+        var filterConfiguration = filterConfigurationFactory.Invoke();
+        filterConfiguration.Name = "Test";
+        filterConfiguration.FilterType = FilterType.SearchFilter;
         filterConfiguration.HighlightColor = new Vector4(1,1,1,1);
         filterConfiguration.DestinationHighlightColor = new Vector4(2,2,2,2);
         var filterState = Host.Services.GetRequiredService<FilterState>();
         filterState.Initialize(filterConfiguration);
         var characterMonitor = Host.Services.GetRequiredService<ICharacterMonitor>();
         var inventoryMonitor = Host.Services.GetRequiredService<IInventoryMonitor>();
-        var fakeItem = new InventoryItem(InventoryType.Bag0, 0, 6677, 1, 0,00, FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None, 0,0,0,0,0,0,0,0,0,0,0,0,0);
+        var fakeItem = itemFactory.Invoke();
+        fakeItem.FromRaw(InventoryType.Bag0, 0, 6677, 1, 0,00, FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None, 0,0,0,0,0,0,0,0,0,0,0,0,0);;
         fakeItem.RetainerId = 1;
         var inventory = new List<InventoryItem>() { fakeItem};
-        var character = new Character();
+        var character = characterFactory.Invoke();
         character.CharacterId = 1;
         characterMonitor.LoadExistingRetainers(new Dictionary<ulong, Character>()
         {

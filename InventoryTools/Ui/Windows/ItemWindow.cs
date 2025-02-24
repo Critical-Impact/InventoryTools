@@ -27,6 +27,7 @@ using OtterGui;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
 using Humanizer;
+using InventoryTools.Localizers;
 using InventoryTools.Logic.ItemRenderers;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Mediator;
@@ -78,6 +79,9 @@ namespace InventoryTools.Ui
         private readonly IUnlockTrackerService _unlockTrackerService;
         private readonly ImGuiTooltipService _tooltipService;
         private readonly ImGuiTooltipModeSetting _tooltipModeSetting;
+        private readonly ItemLocalizer _itemLocalizer;
+        private readonly TeleporterService _teleporterService;
+        private readonly CraftList.Factory _craftListFactory;
         private HashSet<uint> _marketRefreshing = new();
         private HoverButton _refreshPricesButton = new();
 
@@ -87,7 +91,8 @@ namespace InventoryTools.Ui
             IGameInterface gameInterface, IMarketCache marketCache, IChatUtilities chatUtilities, Logger otterLogger,
             IInventoryMonitor inventoryMonitor, ICharacterMonitor characterMonitor, IClipboardService clipboardService,
             ItemInfoRenderService itemInfoRenderService, BNpcNameSheet bNpcNameSheet, MapSheet mapSheet, IUnlockTrackerService unlockTrackerService,
-            ImGuiTooltipService tooltipService, ImGuiTooltipModeSetting tooltipModeSetting,
+            ImGuiTooltipService tooltipService, ImGuiTooltipModeSetting tooltipModeSetting, ItemLocalizer itemLocalizer, TeleporterService teleporterService,
+            CraftList.Factory craftListFactory,
             string name = "Item Window") : base(
             logger, mediator, imGuiService, configuration, name)
         {
@@ -110,6 +115,9 @@ namespace InventoryTools.Ui
             _unlockTrackerService = unlockTrackerService;
             _tooltipService = tooltipService;
             _tooltipModeSetting = tooltipModeSetting;
+            _itemLocalizer = itemLocalizer;
+            _teleporterService = teleporterService;
+            _craftListFactory = craftListFactory;
         }
 
         private void MarketCacheUpdated(MarketCacheUpdatedMessage obj)
@@ -585,7 +593,7 @@ namespace InventoryTools.Ui
                     {
                         if (_craftItem == null)
                         {
-                            var craftList = new CraftList();
+                            var craftList = _craftListFactory.Invoke();
                             craftList.AddCraftItem(Item.RowId, 1, InventoryItem.ItemFlags.None,
                                 _craftTypeId == 0 ? null : _craftTypeId - 1);
                             craftList.GenerateCraftChildren();
@@ -596,7 +604,7 @@ namespace InventoryTools.Ui
                     {
                         if (_craftItem == null)
                         {
-                            var craftList = new CraftList();
+                            var craftList = _craftListFactory.Invoke();
                             craftList.AddCraftItem(Item.RowId);
                             if (_craftTypeId != null)
                             {
@@ -839,7 +847,7 @@ namespace InventoryTools.Ui
             ImGui.TableNextColumn();
             ImGui.TextWrapped(_characterMonitor.GetCharacterNameById(obj.RetainerId));
             ImGui.TableNextColumn();
-            ImGui.TextWrapped(obj.FormattedBagLocation);
+            ImGui.TextWrapped(_itemLocalizer.FormattedBagLocation(obj));
             if (obj.SortedCategory == InventoryCategory.GlamourChest && obj.GlamourId != 0)
             {
                 ImGui.SameLine();
@@ -880,7 +888,7 @@ namespace InventoryTools.Ui
                 if (ImGui.Button("Teleport##t" + tuple.shop.RowId + "_" + tuple.npc.RowId + "_" +
                                  tuple.location.Map.RowId))
                 {
-                    var nearestAetheryte = tuple.location.GetNearestAetheryte();
+                    var nearestAetheryte = _teleporterService.GetNearestAetheryte(tuple.location);
                     if (nearestAetheryte != null)
                     {
                         MediatorService.Publish(new RequestTeleportMessage(nearestAetheryte.Value.RowId));
@@ -997,7 +1005,7 @@ namespace InventoryTools.Ui
             void DrawMarketRow(MarketPricing obj)
             {
                 ImGui.TableNextColumn();
-                ImGui.TextWrapped(obj.World.Value.Name.ExtractText() ?? "Unknown");
+                ImGui.TextWrapped(_worldSheet.GetRowOrDefault(obj.WorldId)?.Name.ExtractText() ?? "Unknown");
                 ImGui.TableNextColumn();
                 ImGui.TextWrapped((obj.LastUpdate - DateTime.Now).Humanize(minUnit: TimeUnit.Minute, maxUnit: TimeUnit.Hour, precision: 1) + " ago");
                 ImGui.TableNextColumn();

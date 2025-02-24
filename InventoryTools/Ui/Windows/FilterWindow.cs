@@ -14,6 +14,7 @@ using ImGuiNET;
 using InventoryTools.Logic;
 using InventoryTools.Ui.Widgets;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin.Services;
 using InventoryTools.Lists;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
@@ -31,9 +32,10 @@ namespace InventoryTools.Ui
         private readonly IUniversalis _universalis;
         private readonly IFileDialogManager _fileDialogManager;
         private readonly IGameUiManager _gameUiManager;
+        private readonly IFramework _framework;
         private readonly InventoryToolsConfiguration _configuration;
 
-        public FilterWindow(ILogger<FilterWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, TableService tableService, IListService listService, ICharacterMonitor characterMonitor, IUniversalis universalis, IFileDialogManager fileDialogManager, IGameUiManager gameUiManager, string name = "Filter Window") : base(logger, mediator, imGuiService, configuration, name)
+        public FilterWindow(ILogger<FilterWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, TableService tableService, IListService listService, ICharacterMonitor characterMonitor, IUniversalis universalis, IFileDialogManager fileDialogManager, IGameUiManager gameUiManager, IFramework framework, string name = "Filter Window") : base(logger, mediator, imGuiService, configuration, name)
         {
             _tableService = tableService;
             _listService = listService;
@@ -41,6 +43,7 @@ namespace InventoryTools.Ui
             _universalis = universalis;
             _fileDialogManager = fileDialogManager;
             _gameUiManager = gameUiManager;
+            _framework = framework;
             _configuration = configuration;
         }
         public override void Initialize(string filterKey)
@@ -132,7 +135,7 @@ namespace InventoryTools.Ui
                         _configuration.ActiveUiFilter != filterConfiguration.Key &&
                         _configuration.ActiveUiFilter != null)
                     {
-                        Service.Framework.RunOnFrameworkThread(() =>
+                        _framework.RunOnFrameworkThread(() =>
                         {
                             _listService.ToggleActiveUiList(filterConfiguration);
                         });
@@ -143,7 +146,7 @@ namespace InventoryTools.Ui
                         _configuration.ActiveCraftList != null &&
                         filterConfiguration.FilterType == FilterType.CraftFilter)
                     {
-                        Service.Framework.RunOnFrameworkThread(() =>
+                        _framework.RunOnFrameworkThread(() =>
                         {
                             _listService.ToggleActiveCraftList(filterConfiguration);
                         });
@@ -158,7 +161,7 @@ namespace InventoryTools.Ui
                         _configuration.ActiveUiFilter != filterConfiguration.Key &&
                         _configuration.ActiveUiFilter != null)
                     {
-                        Service.Framework.RunOnFrameworkThread(() =>
+                        _framework.RunOnFrameworkThread(() =>
                         {
                             _listService.ToggleActiveUiList(filterConfiguration);
                         });
@@ -167,7 +170,7 @@ namespace InventoryTools.Ui
                         _configuration.ActiveCraftList != filterConfiguration.Key &&
                         _configuration.ActiveCraftList != null && filterConfiguration.FilterType == FilterType.CraftFilter)
                     {
-                        Service.Framework.RunOnFrameworkThread(() =>
+                        _framework.RunOnFrameworkThread(() =>
                         {
                             _listService.ToggleActiveCraftList(filterConfiguration);
                         });
@@ -189,7 +192,7 @@ namespace InventoryTools.Ui
                         ref highlightItems);
                     if (highlightItems != itemTable.HighlightItems)
                     {
-                        Service.Framework.RunOnFrameworkThread(() =>
+                        _framework.RunOnFrameworkThread(() =>
                         {
                             _listService.ToggleActiveUiList(itemTable.FilterConfiguration);
                         });
@@ -265,21 +268,17 @@ namespace InventoryTools.Ui
                             if (ImGui.Button("Add Company Craft to List"))
                             {
                                 var subAddon = (SubmarinePartsMenuAddon*)subMarinePartsMenu;
-                                for (int i = 0; i < 6; i++)
+                                for (byte i = 0; i < 6; i++)
                                 {
-                                    var itemRequired = subAddon->RequiredItemId(i);
-                                    if (itemRequired != 0)
+                                    var itemRequired = subAddon->GetItem(i);
+                                    if (itemRequired != null)
                                     {
-                                        var amountHandedIn = subAddon->AmountHandedIn(i);
-                                        var amountNeeded = subAddon->AmountNeeded(i);
-                                        var amountLeft = Math.Max((int)amountNeeded - (int)amountHandedIn,
-                                            0);
+                                        var amountLeft = itemRequired.Value.QtyRemaining;
                                         if (amountLeft > 0)
                                         {
-                                            Service.Framework.RunOnFrameworkThread(() =>
+                                            _framework.RunOnFrameworkThread(() =>
                                             {
-                                                filterConfiguration.CraftList.AddCraftItem(itemRequired,
-                                                    (uint)amountLeft, InventoryItem.ItemFlags.None);
+                                                filterConfiguration.CraftList.AddCraftItem(itemRequired.Value.ItemId, amountLeft);
                                                 filterConfiguration.NeedsRefresh = true;
                                             });
                                         }

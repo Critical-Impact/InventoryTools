@@ -33,6 +33,7 @@ namespace InventoryTools.Lists
         private readonly IChatUtilities _chatUtilities;
         private readonly IFramework _framework;
         private readonly Func<string, IColumn?> _columnFactory;
+        private readonly FilterConfiguration.Factory _filterConfigFactory;
         private readonly Func<Type, IColumn> _columnTypeFactory;
         private ConcurrentDictionary<string, FilterConfiguration> _lists;
 
@@ -40,6 +41,7 @@ namespace InventoryTools.Lists
             ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, HostedInventoryHistory history,
             ConfigurationManagerService configurationManagerService, InventoryToolsConfiguration configuration,
             IChatUtilities chatUtilities, IFramework framework, Func<string, IColumn?> columnFactory,
+            FilterConfiguration.Factory filterConfigFactory,
             Func<Type, IColumn> columnTypeFactory) : base(logger, mediatorService)
         {
             _history = history;
@@ -48,6 +50,7 @@ namespace InventoryTools.Lists
             _chatUtilities = chatUtilities;
             _framework = framework;
             _columnFactory = columnFactory;
+            _filterConfigFactory = filterConfigFactory;
             _columnTypeFactory = columnTypeFactory;
             _lists = new ConcurrentDictionary<string, FilterConfiguration>();
 
@@ -346,14 +349,16 @@ namespace InventoryTools.Lists
 
         public bool AddList(string name, FilterType filterType)
         {
-            var sampleFilter = new FilterConfiguration(name, filterType);
+            var sampleFilter = _filterConfigFactory.Invoke();
+            sampleFilter.Name = name;
+            sampleFilter.FilterType = filterType;
             AddDefaultColumns(sampleFilter);
             return AddList(sampleFilter);
         }
 
         public FilterConfiguration DuplicateList(FilterConfiguration configuration, string newName)
         {
-            var newConfiguration = configuration.Clone() ?? new FilterConfiguration();
+            var newConfiguration = configuration.Clone() ?? _filterConfigFactory.Invoke();
             newConfiguration.Key = Guid.NewGuid().ToString("N");
             newConfiguration.Name = newName;
             AddList(newConfiguration);
@@ -379,8 +384,9 @@ namespace InventoryTools.Lists
             var clonedFilter = GetDefaultCraftList().Clone();
             if (clonedFilter == null)
             {
-                var filter = new FilterConfiguration(fixedName,
-                    Guid.NewGuid().ToString("N"), FilterType.CraftFilter);
+                var filter = _filterConfigFactory.Invoke();
+                filter.Name = fixedName;
+                filter.FilterType = FilterType.CraftFilter;
                 AddDefaultColumns(filter);
                 filter.IsEphemeralCraftList = isEphemeralNN;
                 AddList(filter);
@@ -411,8 +417,9 @@ namespace InventoryTools.Lists
                 fixedName = name + " " + count;
             }
 
-            var filter = new FilterConfiguration(fixedName,
-                Guid.NewGuid().ToString("N"), FilterType.CuratedList);
+            var filter = _filterConfigFactory.Invoke();
+            filter.Name = fixedName;
+            filter.FilterType = FilterType.CuratedList;
             AddDefaultColumns(filter);
             AddList(filter);
             return filter;
@@ -996,7 +1003,9 @@ namespace InventoryTools.Lists
 
         public FilterConfiguration GenerateDefaultCraftList()
         {
-            var defaultFilter = new FilterConfiguration("Default Craft List", FilterType.CraftFilter);
+            var defaultFilter = _filterConfigFactory.Invoke();
+            defaultFilter.Name = "Default Craft List";
+            defaultFilter.FilterType = FilterType.CraftFilter;
             AddDefaultColumns(defaultFilter);
             defaultFilter.ApplyDefaultCraftFilterConfiguration();
             return defaultFilter;

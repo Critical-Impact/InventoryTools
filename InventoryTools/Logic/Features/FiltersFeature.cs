@@ -50,11 +50,13 @@ public class SampleFilter1Setting : BooleanSetting, ISampleFilterSetting
 {
     private readonly IListService _listService;
     private readonly BuyFromVendorPriceFilter buyFromVendorPriceFilter;
+    private readonly FilterConfiguration.Factory _filterConfigFactory;
 
-    public SampleFilter1Setting(ILogger<SampleFilter1Setting> logger, ImGuiService imGuiService, IListService listService, BuyFromVendorPriceFilter buyFromVendorPriceFilter) : base(logger, imGuiService)
+    public SampleFilter1Setting(ILogger<SampleFilter1Setting> logger, ImGuiService imGuiService, IListService listService, BuyFromVendorPriceFilter buyFromVendorPriceFilter, FilterConfiguration.Factory filterConfigFactory) : base(logger, imGuiService)
     {
         _listService = listService;
         this.buyFromVendorPriceFilter = buyFromVendorPriceFilter;
+        _filterConfigFactory = filterConfigFactory;
     }
     private bool _shouldAdd;
     public override bool DefaultValue { get; set; }
@@ -77,7 +79,9 @@ public class SampleFilter1Setting : BooleanSetting, ISampleFilterSetting
     public bool ShouldAdd => _shouldAdd;
     public void AddFilter()
     {
-        var sampleFilter = new FilterConfiguration(Name, FilterType.SearchFilter);
+        var sampleFilter = _filterConfigFactory.Invoke();
+        sampleFilter.Name = Name;
+        sampleFilter.FilterType = FilterType.SearchFilter;
         sampleFilter.DisplayInTabs = true;
         sampleFilter.SourceAllCharacters = true;
         sampleFilter.SourceAllRetainers = true;
@@ -92,10 +96,12 @@ public class SampleFilter1Setting : BooleanSetting, ISampleFilterSetting
 public class SampleFilter2Setting : BooleanSetting, ISampleFilterSetting
 {
     private readonly IListService _listService;
+    private readonly FilterConfiguration.Factory _filterConfigFactory;
 
-    public SampleFilter2Setting(ILogger<SampleFilter2Setting> logger, ImGuiService imGuiService, IListService listService) : base(logger, imGuiService)
+    public SampleFilter2Setting(ILogger<SampleFilter2Setting> logger, ImGuiService imGuiService, IListService listService, FilterConfiguration.Factory filterConfigFactory) : base(logger, imGuiService)
     {
         _listService = listService;
+        _filterConfigFactory = filterConfigFactory;
     }
     private bool _shouldAdd;
     public override bool DefaultValue { get; set; }
@@ -118,7 +124,9 @@ public class SampleFilter2Setting : BooleanSetting, ISampleFilterSetting
     public bool ShouldAdd => _shouldAdd;
     public void AddFilter()
     {
-        var sampleFilter = new FilterConfiguration(Name, FilterType.SortingFilter);
+        var sampleFilter = _filterConfigFactory.Invoke();
+        sampleFilter.Name = Name;
+        sampleFilter.FilterType = FilterType.SortingFilter;
         sampleFilter.DisplayInTabs = true;
         sampleFilter.SourceCategories = new HashSet<InventoryCategory>() {InventoryCategory.CharacterBags,InventoryCategory.RetainerBags};
         sampleFilter.DestinationCategories =  new HashSet<InventoryCategory>() {InventoryCategory.RetainerBags};
@@ -134,11 +142,13 @@ public class SampleFilter3Setting : BooleanSetting, ISampleFilterSetting
 {
     private readonly IListService _listService;
     private readonly Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter> _hasSourceCategoryFactory;
+    private readonly FilterConfiguration.Factory _filterConfigFactory;
 
-    public SampleFilter3Setting(ILogger<SampleFilter3Setting> logger, ImGuiService imGuiService, IListService listService, Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter> hasSourceCategoryFactory) : base(logger, imGuiService)
+    public SampleFilter3Setting(ILogger<SampleFilter3Setting> logger, ImGuiService imGuiService, IListService listService, Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter> hasSourceCategoryFactory, FilterConfiguration.Factory filterConfigFactory) : base(logger, imGuiService)
     {
         _listService = listService;
         _hasSourceCategoryFactory = hasSourceCategoryFactory;
+        _filterConfigFactory = filterConfigFactory;
     }
     private bool _shouldAdd;
     public override bool DefaultValue { get; set; }
@@ -161,7 +171,9 @@ public class SampleFilter3Setting : BooleanSetting, ISampleFilterSetting
     public bool ShouldAdd => _shouldAdd;
     public void AddFilter()
     {
-        var sampleFilter = new FilterConfiguration(Name, FilterType.SortingFilter);
+        var sampleFilter = _filterConfigFactory.Invoke();
+        sampleFilter.Name = Name;
+        sampleFilter.FilterType = FilterType.SortingFilter;
         sampleFilter.DisplayInTabs = true;
         sampleFilter.SourceCategories = new HashSet<InventoryCategory>() {InventoryCategory.CharacterBags};
         sampleFilter.DestinationCategories =  new HashSet<InventoryCategory>() {InventoryCategory.RetainerBags};

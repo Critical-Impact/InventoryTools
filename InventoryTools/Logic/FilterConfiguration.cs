@@ -18,6 +18,7 @@ namespace InventoryTools.Logic
 {
     public class FilterConfiguration
     {
+        private readonly CraftList.Factory _craftListFactory;
         private List<(ulong, InventoryCategory)> _destinationInventories = new();
         private bool _displayInTabs = true;
         private bool? _duplicatesOnly;
@@ -185,17 +186,11 @@ namespace InventoryTools.Logic
             set => _searchResults = value;
         }
 
-        public FilterConfiguration(string name, string key, FilterType filterType)
-        {
-            FilterType = filterType;
-            Name = name;
-            Key = key;
-        }
+        public delegate FilterConfiguration Factory();
 
-        public FilterConfiguration(string name, FilterType filterType)
+        public FilterConfiguration(CraftList.Factory craftListFactory)
         {
-            FilterType = filterType;
-            Name = name;
+            _craftListFactory = craftListFactory;
             Key = Guid.NewGuid().ToString("N");
         }
 
@@ -216,11 +211,6 @@ namespace InventoryTools.Logic
                 InventoryCategory.CharacterPremiumSaddleBags,
             };
         }
-
-        public FilterConfiguration()
-        {
-        }
-
 
         public List<(ulong, InventoryCategory)> SourceInventories
         {
@@ -1466,7 +1456,7 @@ namespace InventoryTools.Logic
             {
                 if (_craftList == null)
                 {
-                    _craftList = new CraftList();
+                    _craftList = _craftListFactory.Invoke();
                 }
                 return _craftList;
             }
@@ -1524,7 +1514,8 @@ namespace InventoryTools.Logic
             SearchResults = null;
             if (clone != null && this.FilterType == FilterType.CraftFilter)
             {
-                var clonedCraftList = CraftList.Clone();
+                var newCraftList = _craftListFactory.Invoke();
+                var clonedCraftList = CraftList.Clone(newCraftList);
                 clone._craftList = clonedCraftList;
             }
             return clone;

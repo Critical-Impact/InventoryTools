@@ -21,12 +21,17 @@ public class MockGameItemsWindow : GenericWindow
     private readonly IInventoryMonitor _inventoryMonitor;
     private readonly ICharacterMonitor _characterMonitor;
     private readonly IListService _listService;
+    private readonly InventoryItem.Factory _inventoryItemFactory;
 
-    public MockGameItemsWindow(ILogger<MockGameItemsWindow> logger, MediatorService mediator, ImGuiService imGuiService,InventoryToolsConfiguration configuration, IInventoryMonitor inventoryMonitor, ICharacterMonitor characterMonitor, IListService listService, string name = "Item Viewer") : base(logger, mediator, imGuiService, configuration, name)
+    public MockGameItemsWindow(ILogger<MockGameItemsWindow> logger, MediatorService mediator, ImGuiService imGuiService,
+        InventoryToolsConfiguration configuration, IInventoryMonitor inventoryMonitor,
+        ICharacterMonitor characterMonitor, IListService listService, InventoryItem.Factory inventoryItemFactory, string name = "Item Viewer") : base(logger,
+        mediator, imGuiService, configuration, name)
     {
         _inventoryMonitor = inventoryMonitor;
         _characterMonitor = characterMonitor;
         _listService = listService;
+        _inventoryItemFactory = inventoryItemFactory;
     }
     public override void Initialize()
     {
@@ -47,7 +52,7 @@ public class MockGameItemsWindow : GenericWindow
                 foreach (var inventory in _inventoryMonitor.Inventories)
                 {
                     var character = _characterMonitor.GetCharacterById(inventory.Key);
-                    var characterName = character?.Name ?? "Unknown"; 
+                    var characterName = character?.Name ?? "Unknown";
                     using (var tabItem = ImRaii.TabItem(characterName + "##" + inventory.Key))
                     {
                         if (tabItem.Success)
@@ -109,7 +114,7 @@ public class MockGameItemsWindow : GenericWindow
                                                                     }
                                                                     ImGuiUtil.HoverTooltip(item.FormattedName + " - " + item.Quantity + " in slot " + item.Slot);
                                                                     ImGui.SameLine();
-                                                                    
+
                                                                     if (ImGui.IsItemHovered() && ImGui.IsMouseReleased(ImGuiMouseButton.Right))
                                                                     {
                                                                         ImGui.OpenPopup("RightClick" + item.SortedContainer + "_" + item.SortedSlotIndex);
@@ -135,8 +140,8 @@ public class MockGameItemsWindow : GenericWindow
                                                                             {
                                                                                 if (_copyItem != null)
                                                                                 {
-                                                                                    _copyItem = new InventoryItem(
-                                                                                        _copyItem);
+                                                                                    _copyItem = _inventoryItemFactory.Invoke();
+                                                                                    _copyItem.FromInventoryItem(_copyItem);
                                                                                     _copyItem.SortedSlotIndex =
                                                                                         item.SortedSlotIndex;
                                                                                     _copyItem.SortedContainer =
@@ -173,7 +178,7 @@ public class MockGameItemsWindow : GenericWindow
                                     }
                                 }
                             }
-                            
+
                         }
                     }
                 }
@@ -183,7 +188,7 @@ public class MockGameItemsWindow : GenericWindow
 
     public override void Invalidate()
     {
-        
+
     }
 
     public override FilterConfiguration? SelectedConfiguration { get; } = null;
@@ -194,5 +199,5 @@ public class MockGameItemsWindow : GenericWindow
     public override Vector2? DefaultSize { get; } = new Vector2(1000, 1000);
     public override Vector2? MaxSize { get; } = new Vector2(2000, 2000);
     public override Vector2? MinSize { get; } = new Vector2(300, 300);
-    
+
 }

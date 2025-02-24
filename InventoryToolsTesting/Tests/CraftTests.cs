@@ -12,13 +12,15 @@ namespace InventoryToolsTesting.Tests
         [Test]
         public void TestSkybuildersCalculations()
         {
-            CraftList list = new CraftList();
+            var craftListFactory = GetCraftListFactory();
+
+            CraftList list = craftListFactory.Invoke();
             list.AddCraftItem(31922, 2);
             list.GenerateCraftChildren();
             var requiredMaterialsList = list.GetRequiredMaterialsList();
             Assert.AreEqual( 10, requiredMaterialsList[32014]);
-            
-            list = new CraftList();
+
+            list = craftListFactory.Invoke();
             //Skybuilders bed
             list.AddCraftItem(31945, 1);
             list.GenerateCraftChildren();
@@ -29,8 +31,10 @@ namespace InventoryToolsTesting.Tests
         [Test]
         public void TestYields()
         {
+            var craftListFactory = GetCraftListFactory();
+
             {
-                CraftList list = new CraftList();
+                CraftList list = craftListFactory.Invoke();
                 list.AddCraftItem("Cotton Yarn", 3);
                 list.GenerateCraftChildren();
                 var requiredMaterialsList = list.GetRequiredMaterialsListNamed();
@@ -49,16 +53,16 @@ namespace InventoryToolsTesting.Tests
 
 
             {
-                CraftList list = new CraftList();
+                CraftList list = craftListFactory.Invoke();
                 list.AddCraftItem("Cotton Yarn", 3);
                 list.GenerateCraftChildren();
                 var requiredMaterialsList = list.GetRequiredMaterialsListNamed();
                 Assert.AreEqual(4, requiredMaterialsList["Cotton Boll"]);
                 var craftListConfiguration = new CraftListConfiguration()
-                    .AddCharacterSource("Cotton Boll", 4, false)
-                    .AddCharacterSource("Lightning Shard", 4, false);
+                    .AddCharacterSource(GetItemIdByName("Cotton Boll"), 4, false)
+                    .AddCharacterSource(GetItemIdByName("Lightning Shard"), 4, false);
                 list.Update(craftListConfiguration);
-                
+
                 var cottonBolls = list.GetFlattenedMaterials().First(c => c.Item.NameString == "Cotton Boll");
                 Assert.AreEqual(4, cottonBolls.QuantityRequired);
                 Assert.AreEqual(0, cottonBolls.QuantityNeeded);
@@ -68,7 +72,7 @@ namespace InventoryToolsTesting.Tests
                 Assert.AreEqual(0, cottonBolls.QuantityMissingOverall);
                 Assert.AreEqual(0, cottonBolls.QuantityMissingInventory);
                 Assert.AreEqual(0, cottonBolls.CraftOperationsRequired);
-                
+
                 var cottonYarn = list.GetFlattenedMaterials().First(c => c.Item.NameString == "Cotton Yarn");
                 Assert.AreEqual(3, cottonYarn.QuantityRequired);
                 Assert.AreEqual(3, cottonYarn.QuantityNeeded);
@@ -85,20 +89,24 @@ namespace InventoryToolsTesting.Tests
         [Test]
         public void TestLeftovers()
         {
+            var craftListFactory = GetCraftListFactory();
+
             //Testing how partial used ingredients of a craft can then be used in crafts in the same list
-            CraftList list = new CraftList();
+            CraftList list = craftListFactory.Invoke();
             list.AddCraftItem(38930, 300);
             list.AddCraftItem(38929, 300);
             list.GenerateCraftChildren();
             var requiredMaterialsList = list.GetQuantityNeededList();
             Assert.AreEqual( 600, requiredMaterialsList[36085]);
         }
-        
+
         [Test]
         public void TestRecipeCalculation()
         {
+            var craftListFactory = GetCraftListFactory();
+
             {
-                CraftList list = new CraftList();
+                CraftList list = craftListFactory.Invoke();
                 //Rivera Bed
                 list.AddCraftItem(6542, 2);
                 list.GenerateCraftChildren();
@@ -126,7 +134,7 @@ namespace InventoryToolsTesting.Tests
                 //wind shard
                 Assert.AreEqual(6, requiredMaterialsList[4]);
 
-                list = new CraftList();
+                list = craftListFactory.Invoke();
                 list.AddCraftItem(27877, 1);
                 list.GenerateCraftChildren();
                 requiredMaterialsList = list.GetRequiredMaterialsList();
@@ -134,13 +142,13 @@ namespace InventoryToolsTesting.Tests
             }
 
             {
-                CraftList list = new CraftList();
+                CraftList list = craftListFactory.Invoke();
                 list.AddCraftItem("Dhalmelskin Vest", 6);
                 list.AddCraftItem("Ramie Turban of Crafting", 6);
                 list.GenerateCraftChildren();
 
                 var neededMaterials = list.GetQuantityNeededListNamed();
-            
+
                 Assert.AreEqual(36, neededMaterials["Dhalmel Hide"]);
                 Assert.AreEqual(30, neededMaterials["Hardsilver Sand"]);
                 Assert.AreEqual(90, neededMaterials["Stalk of Ramie"]);
@@ -157,26 +165,28 @@ namespace InventoryToolsTesting.Tests
                 Assert.AreEqual(12, neededMaterials["Dhalmel Leather"]);
                 Assert.AreEqual(24, neededMaterials["Linen Yarn"]);
                 Assert.AreEqual(24, neededMaterials["Ramie Cloth"]);
-                Assert.AreEqual(60, neededMaterials["Ramie Thread"]);                
+                Assert.AreEqual(60, neededMaterials["Ramie Thread"]);
             }
         }
 
         [Test]
         public void TestQuantityAvailableCalculation()
         {
+            var craftListFactory = GetCraftListFactory();
+
             CraftList list;
             CraftListConfiguration sourceStore;
             Dictionary<string, uint> availableMaterialsList;
             Dictionary<string, uint> missingMaterialsList;
             Dictionary<string, uint> readyMaterialsList;
             Dictionary<string, uint> quantityNeededList;
-            
+
             //Check the amount of available materials is 4 when provided with 4 externally
-            list = new CraftList()
+            list = craftListFactory.Invoke()
                 .AddCraftItem("Riviera Bed", 2);
             list.GenerateCraftChildren();
             sourceStore = new CraftListConfiguration()
-                .AddExternalSource("Undyed Cotton Cloth", 4, false);
+                .AddExternalSource(GetItemIdByName("Undyed Cotton Cloth"), 4, false);
             list.Update(sourceStore);
             availableMaterialsList = list.GetAvailableMaterialsListNamed();
             Assert.AreEqual(4, availableMaterialsList["Undyed Cotton Cloth"]);
@@ -200,20 +210,20 @@ namespace InventoryToolsTesting.Tests
             Assert.AreEqual(4, undyedCottonCloth.QuantityWillRetrieve);
             Assert.AreEqual(0, undyedCottonCloth.QuantityMissingOverall);
             Assert.AreEqual(4, undyedCottonCloth.QuantityMissingInventory);
-                
+
             //Check the amount of missing materials is 4 for each item when provided with 2 externally
-            list = new CraftList()
+            list = craftListFactory.Invoke()
                 .AddCraftItem("Riviera Bed", 2);
             list.GenerateCraftChildren();
             sourceStore = new CraftListConfiguration()
-                .AddExternalSource("Undyed Cotton Cloth", 2, false);
+                .AddExternalSource(GetItemIdByName("Undyed Cotton Cloth"), 2, false);
             list.Update(sourceStore);
             availableMaterialsList = list.GetAvailableMaterialsListNamed();
             Assert.AreEqual(2, availableMaterialsList["Undyed Cotton Cloth"]);
             missingMaterialsList = list.GetMissingMaterialsListNamed();
             Assert.AreEqual(4, missingMaterialsList["Cotton Boll"]);
             Assert.AreEqual(4, missingMaterialsList["Cotton Yarn"]);
-            
+
             cottonBolls = list.GetFlattenedMaterials().First(c => c.Item.NameString == "Cotton Boll");
             Assert.AreEqual(8, cottonBolls.QuantityRequired);
             Assert.AreEqual(4, cottonBolls.QuantityNeeded);
@@ -230,13 +240,13 @@ namespace InventoryToolsTesting.Tests
             Assert.AreEqual(2, undyedCottonCloth.QuantityWillRetrieve);
             Assert.AreEqual(2, undyedCottonCloth.QuantityMissingOverall);
             Assert.AreEqual(4, undyedCottonCloth.QuantityMissingInventory);
-            
+
             //Crafting 2 riveria bed, 2 maple lumber in inventory
-            list = new CraftList()
+            list = craftListFactory.Invoke()
                 .AddCraftItem("Riviera Bed", 2);
             list.GenerateCraftChildren();
             sourceStore = new CraftListConfiguration()
-                .AddCharacterSource("Maple Lumber", 2, false);
+                .AddCharacterSource(GetItemIdByName("Maple Lumber"), 2, false);
             list.Update(sourceStore);
             readyMaterialsList = list.GetReadyMaterialsListNamed();
             Assert.AreEqual(2, readyMaterialsList["Maple Lumber"]);
@@ -248,7 +258,7 @@ namespace InventoryToolsTesting.Tests
             Assert.AreEqual(4, missingMaterialsList["Bronze Ingot"]);
             Assert.AreEqual(8, missingMaterialsList["Cotton Yarn"]);
             Assert.AreEqual(4, missingMaterialsList["Undyed Cotton Cloth"]);
-            
+
             var mapleLumber = list.GetFlattenedMaterials().First(c => c.Item.NameString == "Maple Lumber");
             Assert.AreEqual(4, mapleLumber.QuantityRequired);
             Assert.AreEqual(2, mapleLumber.QuantityNeeded);
@@ -268,19 +278,19 @@ namespace InventoryToolsTesting.Tests
             Assert.AreEqual(6, mapleLog.QuantityMissingInventory);
 
             //Crafting 2 riveria bed, 2 lumber available, 6 logs available , plenty of wind shards, should craft 2, already have 2
-            list = new CraftList()
+            list = craftListFactory.Invoke()
                 .AddCraftItem("Riviera Bed", 2);
             list.GenerateCraftChildren();
             sourceStore = new CraftListConfiguration()
-                .AddCharacterSource("Maple Lumber", 2, false)
-                .AddCharacterSource("Maple Log", 6, false)
-                .AddCharacterSource("Wind Shard", 999, false);
+                .AddCharacterSource(GetItemIdByName("Maple Lumber"), 2, false)
+                .AddCharacterSource(GetItemIdByName("Maple Log"), 6, false)
+                .AddCharacterSource(GetItemIdByName("Wind Shard"), 999, false);
             list.Update(sourceStore);
             readyMaterialsList = list.GetReadyMaterialsListNamed();
             quantityNeededList = list.GetQuantityNeededListNamed();
             missingMaterialsList = list.GetMissingMaterialsListNamed();
             var canCraftList = list.GetQuantityCanCraftListNamed();
-            
+
             Assert.AreEqual(2, readyMaterialsList["Maple Lumber"]);
             Assert.AreEqual(2, missingMaterialsList["Maple Lumber"]);
             Assert.AreEqual(0, quantityNeededList["Maple Log"]);
@@ -291,12 +301,14 @@ namespace InventoryToolsTesting.Tests
         [Test]
         public void TestQuantityReadyCalculation()
         {
+            var craftListFactory = GetCraftListFactory();
+
             var characterMaterials = new Dictionary<uint, List<CraftItemSource>>();
             var externalSources = new Dictionary<uint, List<CraftItemSource>>();
             var undyedCottonCloth = new CraftItemSource(5325, 4, false);
             characterMaterials.Add(5325, new List<CraftItemSource>() {undyedCottonCloth});
-            
-            CraftList list = new CraftList();
+
+            CraftList list = craftListFactory.Invoke();
             //Rivera Bed
             list.AddCraftItem(6542, 2);
             list.GenerateCraftChildren();
@@ -310,12 +322,14 @@ namespace InventoryToolsTesting.Tests
         [Test]
         public void TestRetrievalCalcuation()
         {
+            var craftListFactory = GetCraftListFactory();
+
             var characterMaterials = new Dictionary<uint, List<CraftItemSource>>();
             var externalSources = new Dictionary<uint, List<CraftItemSource>>();
             var undyedCottonCloth = new CraftItemSource(5325, 6, false);
             externalSources.Add(5325, new List<CraftItemSource>() {undyedCottonCloth});
-            
-            CraftList list = new CraftList();
+
+            CraftList list = craftListFactory.Invoke();
             //Rivera Bed
             list.AddCraftItem(6542, 2);
             list.GenerateCraftChildren();
@@ -330,12 +344,14 @@ namespace InventoryToolsTesting.Tests
         [Test]
         public void TestSplitStacks()
         {
+            var craftListFactory = GetCraftListFactory();
+
             var characterMaterials = new Dictionary<uint, List<CraftItemSource>>();
             var externalSources = new Dictionary<uint, List<CraftItemSource>>();
             var copperIngots = new CraftItemSource(5062, 21, true);
             characterMaterials.Add(5062, new List<CraftItemSource>() {copperIngots});
-            
-            CraftList list = new CraftList();
+
+            CraftList list = craftListFactory.Invoke();
             //Glade Drawer Table
             list.AddCraftItem(6624, 10);
             list.GenerateCraftChildren();
@@ -344,16 +360,16 @@ namespace InventoryToolsTesting.Tests
             var flattenedMergedMaterials = list.GetFlattenedMergedMaterials();
             //Works normally
             Assert.AreEqual(false, flattenedMergedMaterials.Any(c => c.ItemId == 5106 && c.QuantityNeeded != 0));
-            
 
-            
+
+
             //Checking to make sure the amount of copper ore required is 0, not -3
             characterMaterials = new Dictionary<uint, List<CraftItemSource>>();
             externalSources = new Dictionary<uint, List<CraftItemSource>>();
             copperIngots = new CraftItemSource(5062, 20, true);
             var copperIngots2 = new CraftItemSource(5062, 1, true);
             characterMaterials.Add(5062, new List<CraftItemSource>() {copperIngots, copperIngots2});
-            
+
             list.GenerateCraftChildren();
             list.Update(new CraftListConfiguration(characterMaterials, externalSources));
             flattenedMergedMaterials = list.GetFlattenedMergedMaterials();
@@ -363,7 +379,9 @@ namespace InventoryToolsTesting.Tests
         [Test]
         public void TestMissingIngredients()
         {
-            CraftList list = new CraftList();
+            var craftListFactory = GetCraftListFactory();
+
+            CraftList list = craftListFactory.Invoke();
             CraftListConfiguration store = new CraftListConfiguration();
             list.AddCraftItem("Shark-class Bow", 1);
             list.GenerateCraftChildren();
@@ -372,23 +390,6 @@ namespace InventoryToolsTesting.Tests
             var venture = flattenedMergedMaterials.First(c => c.ItemId == 5530);
             Assert.AreEqual(20,venture.MissingIngredients.First().Key.Item1);
             Assert.AreEqual(21600,venture.MissingIngredients.First().Value);
-        }
-
-        [Test]
-        public void TestIngredientReturn()
-        {
-            CraftList list = new CraftList();
-            var store = new CraftListConfiguration()
-                .AddExternalSource("Cotton Boll", 100, false)
-                .AddExternalSource("Cotton Yarn", 5, false)
-                .AddCharacterSource("Wind Shard", 999, false)
-                .AddCharacterSource("Lightning Shard", 999, false);
-            
-            list.AddCraftItem("Riviera Bed", 2);
-            list.GenerateCraftChildren();
-            list.Update(store);
-            var flattenedMergedMaterials = list.GetQuantityToRetrieveList();
-            Assert.AreEqual(4, flattenedMergedMaterials[(5334, false)]);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Services;
-
+using InventoryTools.Localizers;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -10,10 +10,12 @@ namespace InventoryTools.Logic.Columns
     public class DestinationColumn : TextColumn
     {
         private readonly ICharacterMonitor _characterMonitor;
+        private readonly ItemLocalizer _itemLocalizer;
 
-        public DestinationColumn(ILogger<DestinationColumn> logger, ImGuiService imGuiService, ICharacterMonitor characterMonitor) : base(logger, imGuiService)
+        public DestinationColumn(ILogger<DestinationColumn> logger, ImGuiService imGuiService, ICharacterMonitor characterMonitor, ItemLocalizer itemLocalizer) : base(logger, imGuiService)
         {
             _characterMonitor = characterMonitor;
+            _itemLocalizer = itemLocalizer;
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Inventory;
 
@@ -21,10 +23,11 @@ namespace InventoryTools.Logic.Columns
         {
             if (searchResult.InventoryChange != null)
             {
-                var destination = searchResult.InventoryChange.ToItem != null
-                    ? _characterMonitor.Characters.ContainsKey(searchResult.InventoryChange.ToItem.RetainerId) ? _characterMonitor.Characters[searchResult.InventoryChange.ToItem.RetainerId].FormattedName : ""
+                var toItem = searchResult.InventoryChange.ToItem;
+                var destination = toItem != null
+                    ? _characterMonitor.Characters.ContainsKey(toItem.RetainerId) ? _characterMonitor.Characters[toItem.RetainerId].FormattedName : ""
                     : "Unknown";
-                var destinationBag = searchResult.InventoryChange.ToItem?.FormattedBagLocation ?? "";
+                var destinationBag = toItem != null ? _itemLocalizer.FormattedBagLocation(toItem) : "";
                 return destination + " - " + destinationBag;
             }
 

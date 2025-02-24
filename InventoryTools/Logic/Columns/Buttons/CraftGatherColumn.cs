@@ -16,6 +16,7 @@ using CriticalCommonLib.Services.Mediator;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Mediator;
@@ -31,12 +32,16 @@ namespace InventoryTools.Logic.Columns.Buttons
         private readonly IChatUtilities _chatUtilities;
         private readonly ISeTime _seTime;
         private readonly MapSheet _mapSheet;
+        private readonly ICommandManager _commandManager;
+        private readonly TeleporterService _teleporterService;
 
-        public CraftGatherColumn(ILogger<CraftGatherColumn> logger, ImGuiService imGuiService, IChatUtilities chatUtilities, ISeTime seTime, MapSheet mapSheet) : base(logger, imGuiService)
+        public CraftGatherColumn(ILogger<CraftGatherColumn> logger, ImGuiService imGuiService, IChatUtilities chatUtilities, ISeTime seTime, MapSheet mapSheet, ICommandManager commandManager, TeleporterService teleporterService) : base(logger, imGuiService)
         {
             _chatUtilities = chatUtilities;
             _seTime = seTime;
             _mapSheet = mapSheet;
+            _commandManager = commandManager;
+            _teleporterService = teleporterService;
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Buttons;
 
@@ -117,7 +122,7 @@ namespace InventoryTools.Logic.Columns.Buttons
                     if (ImGui.Button("Teleport##" + tuple.shop.RowId + "_" + tuple.npc.RowId + "_" +
                                      tuple.location.Map.RowId))
                     {
-                        var nearestAetheryte = tuple.location.GetNearestAetheryte();
+                        var nearestAetheryte = _teleporterService.GetNearestAetheryte(tuple.location);
                         if (nearestAetheryte != null)
                         {
                             messages.Add(new RequestTeleportMessage(nearestAetheryte.Value.RowId));
@@ -245,7 +250,7 @@ namespace InventoryTools.Logic.Columns.Buttons
                 }
                 if (ImGui.Button("Gather##Gather" + rowIndex))
                 {
-                    Service.Commands.ProcessCommand("/gather " + searchResult.Item.Base.Name.ExtractText());
+                    _commandManager.ProcessCommand("/gather " + searchResult.Item.Base.Name.ExtractText());
                 }
 
                 return true;
@@ -258,7 +263,7 @@ namespace InventoryTools.Logic.Columns.Buttons
                 }
                 if (ImGui.Button("Gather##Gather" + rowIndex))
                 {
-                    Service.Commands.ProcessCommand("/gatherfish " + searchResult.Item.Base.Name.ExtractText());
+                    _commandManager.ProcessCommand("/gatherfish " + searchResult.Item.Base.Name.ExtractText());
                 }
                 return true;
             }
@@ -284,7 +289,7 @@ namespace InventoryTools.Logic.Columns.Buttons
                     var vendor = GetLocations(item.Item).OrderBy(c => (c.location?.Map.RowId ?? 0) == mapId ? 0 : 1).FirstOrDefault();
                     if (vendor.location != null)
                     {
-                        var nearestAetheryte = vendor.location.GetNearestAetheryte();
+                        var nearestAetheryte = _teleporterService.GetNearestAetheryte(vendor.location);
                         if (nearestAetheryte != null)
                         {
                             messages.Add(new RequestTeleportMessage(nearestAetheryte.Value.RowId));

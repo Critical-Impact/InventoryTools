@@ -50,6 +50,7 @@ namespace InventoryTools.Ui
         private readonly ICharacterMonitor _characterMonitor;
         private readonly IGameGui gameGui;
         private readonly ItemSheet _itemSheet;
+        private readonly IClientState _clientState;
         private readonly InventoryToolsConfiguration _configuration;
         private InventoryType? _inventoryType;
 
@@ -63,6 +64,7 @@ namespace InventoryTools.Ui
             ICharacterMonitor characterMonitor,
             IGameGui gameGui,
             ItemSheet itemSheet,
+            IClientState clientState,
             string name = "Debug Window") : base(logger,
             mediator,
             imGuiService,
@@ -75,6 +77,7 @@ namespace InventoryTools.Ui
             _characterMonitor = characterMonitor;
             this.gameGui = gameGui;
             _itemSheet = itemSheet;
+            _clientState = clientState;
             _configuration = configuration;
         }
         public override void Initialize()
@@ -1741,7 +1744,7 @@ namespace InventoryTools.Ui
                 ImGui.TextUnformatted("Suggested Craftsmanship: " +
                     _craftMonitor.RecipeLevelTable?.Base.SuggestedCraftsmanship ?? "Unknown");
                 ImGui.TextUnformatted(
-                    "Current Craft Type: " + _craftMonitor.Agent?.CraftType ?? "Unknown");
+                    "Current Craft Type: " + _craftMonitor.CraftType ?? "Unknown");
             }
             else if (simpleCraftMonitorAgent != null)
             {
@@ -1756,7 +1759,7 @@ namespace InventoryTools.Ui
                 ImGui.TextUnformatted(
                     "Current Recipe: " + _craftMonitor.CurrentRecipe?.RowId ?? "Unknown");
                 ImGui.TextUnformatted(
-                    "Current Craft Type: " + _craftMonitor.Agent?.CraftType ?? "Unknown");
+                    "Current Craft Type: " + _craftMonitor.CraftType ?? "Unknown");
             }
             else
             {
@@ -1831,7 +1834,7 @@ namespace InventoryTools.Ui
                                   "Not Logged in Yet");
             ImGui.TextUnformatted("Local Character ID:" + _characterMonitor.LocalContentId.ToString());
             ImGui.TextUnformatted("Free Company ID:" + _characterMonitor.ActiveFreeCompanyId.ToString());
-            ImGui.TextUnformatted("Current Territory Id:" + Service.ClientState.TerritoryType.ToString());
+            ImGui.TextUnformatted("Current Territory Id:" + _clientState.TerritoryType.ToString());
             ImGui.Separator();
             ImGui.TextUnformatted("Cached Character ID:" + _characterMonitor.ActiveCharacterId.ToString());
             ImGui.TextUnformatted("Cached House Id:" + _characterMonitor.ActiveHouseId.ToString());
