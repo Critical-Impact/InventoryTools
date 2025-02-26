@@ -154,7 +154,6 @@ namespace InventoryTools.Logic.Columns
                 ImGui.Text("Ingredient Breakdown:");
                 ImGui.TextUnformatted("Amount Originally Required: " + searchResult.CraftItem.QuantityRequired);
                 ImGui.TextUnformatted("Amount Required: " + searchResult.CraftItem.QuantityNeededPreUpdate);
-                ImGui.TextUnformatted("Amount Needed: " + searchResult.CraftItem.QuantityNeeded);
                 ImGui.TextUnformatted("Amount in Inventory: " + searchResult.CraftItem.QuantityReady);
                 ImGui.TextUnformatted("Amount to Retrieve: " + searchResult.CraftItem.QuantityAvailable);
                 ImGui.Separator();
