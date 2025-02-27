@@ -17,15 +17,19 @@ public class DisplayUnlockTooltip : BaseTooltip
 {
     private readonly TooltipItemUnlockStatusColorSetting _colorSetting;
     private readonly TooltipDisplayUnlockSetting _tooltipDisplayUnlockSetting;
+    private readonly TooltipDisplayUnlockDisplayModeSetting _displayModeSetting;
+    private readonly TooltipDisplayUnlockHideUnlockedSetting _hideUnlockedSetting;
     private readonly ShowTooltipsSetting _showTooltipsSetting;
     private readonly TooltipDisplayUnlockCharacterSetting _tooltipDisplayUnlockCharacterSetting;
     private readonly ICharacterMonitor _characterMonitor;
     private readonly IUnlockTrackerService _unlockTrackerService;
 
-    public DisplayUnlockTooltip(ILogger<DisplayUnlockTooltip> logger, TooltipItemUnlockStatusColorSetting colorSetting, TooltipDisplayUnlockSetting tooltipDisplayUnlockSetting, ShowTooltipsSetting showTooltipsSetting, TooltipDisplayUnlockCharacterSetting tooltipDisplayUnlockCharacterSetting, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, ICharacterMonitor characterMonitor, IDalamudPluginInterface pluginInterface, IUnlockTrackerService unlockTrackerService) : base(6905, logger, itemSheet, configuration, gameGui, pluginInterface)
+    public DisplayUnlockTooltip(ILogger<DisplayUnlockTooltip> logger, TooltipItemUnlockStatusColorSetting colorSetting, TooltipDisplayUnlockSetting tooltipDisplayUnlockSetting, TooltipDisplayUnlockDisplayModeSetting displayModeSetting, TooltipDisplayUnlockHideUnlockedSetting hideUnlockedSetting, ShowTooltipsSetting showTooltipsSetting, TooltipDisplayUnlockCharacterSetting tooltipDisplayUnlockCharacterSetting, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, ICharacterMonitor characterMonitor, IDalamudPluginInterface pluginInterface, IUnlockTrackerService unlockTrackerService) : base(6905, logger, itemSheet, configuration, gameGui, pluginInterface)
     {
         _colorSetting = colorSetting;
         _tooltipDisplayUnlockSetting = tooltipDisplayUnlockSetting;
+        _displayModeSetting = displayModeSetting;
+        _hideUnlockedSetting = hideUnlockedSetting;
         _showTooltipsSetting = showTooltipsSetting;
         _tooltipDisplayUnlockCharacterSetting = tooltipDisplayUnlockCharacterSetting;
         _characterMonitor = characterMonitor;
@@ -74,27 +78,64 @@ public class DisplayUnlockTooltip : BaseTooltip
             seStr.Payloads.Add(RawPayload.LinkTerminator);
 
             var characterSetting = _tooltipDisplayUnlockCharacterSetting.CurrentValue(Configuration);
+            var hideUnlockedSetting = _hideUnlockedSetting.CurrentValue(Configuration);
+            var displayModeSetting = _displayModeSetting.CurrentValue(Configuration);
 
-            var textLines = Configuration.AcquiredItems.
-                Where(c => characterSetting.Count == 0 || characterSetting.Contains(c.Key)).
-                Where(c => _characterMonitor.Characters.ContainsKey(c.Key)).
-                Select(c => _characterMonitor.GetCharacterById(c.Key)!.FormattedName + " - " + (c.Value.Contains(item.RowId) ? "Acquired" : "Not Acquired") + "\n").OrderBy(c => c).ToList();
+
+            var unlockStatuses = Configuration.AcquiredItems
+                .Where(c => characterSetting.Count == 0 || characterSetting.Contains(c.Key))
+                .Where(c => _characterMonitor.Characters.ContainsKey(c.Key))
+                .Select(c => (c.Key, c.Value.Contains(item.RowId)))
+                .Where(c => !hideUnlockedSetting || !c.Item2).ToList();
 
             var newText = "";
-            if (textLines.Count != 0)
+
+            if (displayModeSetting == TooltipDisplayUnlockDisplayMode.CharacterPerLine)
             {
-                newText += "\n";
-                for (var index = 0; index < textLines.Count; index++)
+                var textLines = unlockStatuses.Select(c => _characterMonitor.GetCharacterById(c.Key)!.FormattedName + " - " + (c.Item2 ? "Acquired" : "Not Acquired") + "\n").OrderBy(c => c).ToList();
+                if (textLines.Count != 0)
                 {
-                    var line = textLines[index];
-                    if (index == textLines.Count)
+                    newText += "\n";
+                    for (var index = 0; index < textLines.Count; index++)
                     {
-                        line = line.TrimEnd('\n');
+                        var line = textLines[index];
+                        if (index == textLines.Count)
+                        {
+                            line = line.TrimEnd('\n');
+                        }
+                        newText += line;
                     }
-                    newText += line;
+                }
+            }
+            else
+            {
+                var unlocked = unlockStatuses.Where(c => c.Item2).ToList();
+                var locked = unlockStatuses.Where(c => !c.Item2).ToList();
+                if (locked.Count != 0)
+                {
+                    newText += "Not Acquired:\n";
+                    foreach (var lockedItem in locked)
+                    {
+                        newText += _characterMonitor.GetCharacterById(lockedItem.Key)!.FormattedName + "\n";
+                    }
+                }
+
+                if (unlocked.Count != 0)
+                {
+                    newText += "Acquired:\n";
+                    foreach (var lockedItem in unlocked)
+                    {
+                        newText += _characterMonitor.GetCharacterById(lockedItem.Key)!.FormattedName + "\n";
+                    }
+                }
+
+                if (locked.Count != 0 || unlocked.Count != 0)
+                {
+                    newText = "\n" + newText;
                 }
             }
 
+            newText = newText.TrimEnd('\n');
             if (newText != "")
             {
                 var lines = new List<Payload>()

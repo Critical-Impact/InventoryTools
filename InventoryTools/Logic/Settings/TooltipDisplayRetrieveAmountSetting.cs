@@ -29,6 +29,8 @@ public partial class TooltipDisplayRetrieveAmountSetting : BooleanSetting
     public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.AmountToRetrieve;
     public override string Version => "1.7.0.0";
 
+    public override uint? Order => 0;
+
     public TooltipDisplayRetrieveAmountSetting(ILogger<TooltipDisplayRetrieveAmountSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
     {
     }

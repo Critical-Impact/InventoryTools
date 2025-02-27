@@ -166,7 +166,7 @@ public class CraftSettingsColumn : IColumn
                 ImGui.Separator();
             }
         }
-        var ingredientPreferenceDefault = configuration.CraftList.GetIngredientPreference(searchResult.CraftItem.ItemId);
+        var ingredientPreferenceDefault = configuration.CraftList.GetIngredientPreference(searchResult.CraftItem);
         var retainerRetrievalDefault = configuration.CraftList.GetCraftRetainerRetrieval(searchResult.CraftItem.ItemId);
         var retainerRetrieval = retainerRetrievalDefault ?? (searchResult.CraftItem.IsOutputItem ? configuration.CraftList.CraftRetainerRetrievalOutput : configuration.CraftList.CraftRetainerRetrieval);
         var zonePreference = configuration.CraftList.GetZonePreference(searchResult.CraftItem.IngredientPreference.Type, searchResult.CraftItem.ItemId);
@@ -500,7 +500,7 @@ public class CraftSettingsColumn : IColumn
         if (ingredientPreferences.Count != 0)
         {
             var currentIngredientPreference =
-                configuration.CraftList.GetIngredientPreference(item.ItemId);
+                configuration.CraftList.GetIngredientPreference(item);
             var previewValue = currentIngredientPreference != null ? _ingredientPreferenceLocalizer.FormattedName(currentIngredientPreference) : "Use Default";
             ImGui.Text("Source Preference:");
             ImGui.SameLine();
@@ -519,7 +519,7 @@ public class CraftSettingsColumn : IColumn
 
                     foreach (var ingredientPreference in ingredientPreferences)
                     {
-                        if (ImGui.Selectable(_ingredientPreferenceLocalizer.FormattedName(ingredientPreference)))
+                        if ((item.LimitType == null || item.LimitType != ingredientPreference.Type) && ImGui.Selectable(_ingredientPreferenceLocalizer.FormattedName(ingredientPreference)))
                         {
                             configuration.CraftList.UpdateIngredientPreference(item.ItemId, ingredientPreference);
                             configuration.NeedsRefresh = true;

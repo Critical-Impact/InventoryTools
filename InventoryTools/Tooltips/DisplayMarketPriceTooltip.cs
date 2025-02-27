@@ -125,6 +125,7 @@ public class DisplayMarketPriceTooltip : BaseTooltip
                     }
                 }
 
+                newText = newText.TrimEnd('\n');
                 if (newText != "")
                 {
                     var lines = new List<Payload>()

@@ -30,6 +30,8 @@ namespace InventoryTools.Logic.Settings
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.MarketPricing;
         public override string Version => "1.7.0.0";
 
+        public override uint? Order => 0;
+
         public TooltipMinimumMarketPriceSetting(ILogger<TooltipMinimumMarketPriceSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
         {
         }

@@ -35,7 +35,7 @@ public class TooltipUseInformationModifierSetting : GenericEnumChoiceSetting<Too
     }, SettingCategory.ToolTips, SettingSubCategory.UseInformation, "1.11.0.11", logger, imGuiService)
     {
     }
-    public override uint? Order { get; } = 1;
+    public override uint? Order { get; } = 2;
 }
 
 public class TooltipUseInformationSetting : Setting<Dictionary<ItemInfoType, TooltipSourceSetting>>
@@ -47,7 +47,7 @@ public class TooltipUseInformationSetting : Setting<Dictionary<ItemInfoType, Too
     public TooltipUseInformationSetting(ILogger<TooltipUseInformationSetting> logger, IEnumerable<IItemInfoRenderer> itemInfoRenderers, ImGuiService imGuiService, IFont font) : base(logger, imGuiService)
     {
         _font = font;
-        _itemInfoRenderers = itemInfoRenderers.Where(c => c.RendererType == RendererType.Source).ToDictionary(c => c.Type, c => c);
+        _itemInfoRenderers = itemInfoRenderers.Where(c => c.RendererType == RendererType.Use).ToDictionary(c => c.Type, c => c);
         _choices = new Dictionary<SourceIconGrouping, string>()
         {
             {SourceIconGrouping.Default, "Default"},
@@ -109,10 +109,17 @@ public class TooltipUseInformationSetting : Setting<Dictionary<ItemInfoType, Too
 
                 ImGui.TableHeadersRow();
 
+                var toRemove = new List<ItemInfoType>();
+
                 var currentValues = currentValue.OrderBy(c => c.Value.Order).Select(c => c.Value).ToList();
                 for (var index = 0; index < currentValues.Count; index++)
                 {
                     var tooltipSourceSetting = currentValues[index];
+                    if (!_itemInfoRenderers.ContainsKey(tooltipSourceSetting.Type))
+                    {
+                        toRemove.Add(tooltipSourceSetting.Type);
+                        continue;
+                    }
                     var sourceRenderer = _itemInfoRenderers[tooltipSourceSetting.Type];
 
                     ImGui.TableNextColumn();
@@ -226,6 +233,18 @@ public class TooltipUseInformationSetting : Setting<Dictionary<ItemInfoType, Too
                         }
                     }
                 }
+
+                updated = false;
+                foreach (var item in toRemove)
+                {
+                    currentValue.Remove(item);
+                    updated = true;
+                }
+
+                if (updated)
+                {
+                    UpdateFilterConfiguration(configuration, currentValue);
+                }
             }
         }
 
@@ -240,7 +259,7 @@ public class TooltipUseInformationSetting : Setting<Dictionary<ItemInfoType, Too
     public override string Key { get; set; } = "TooltipUseInformation";
     public override string Name { get; set; } = "Use Information Configuration";
 
-    public override uint? Order { get; } = 2;
+    public override uint? Order { get; } = 3;
 
     public override string HelpText { get; set; } =
         "If the use information tooltip is enabled, how should the various uses be ordered/displayed/etc?";

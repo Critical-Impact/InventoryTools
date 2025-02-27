@@ -261,21 +261,16 @@ public class AmountOwnedTooltip : BaseTooltip
                 }
             }
 
-            var newText = "";
+            var newText = "\n";
             if (textLines.Count != 0)
             {
-                newText += "\n";
                 for (var index = 0; index < textLines.Count; index++)
                 {
-                    var line = textLines[index];
-                    if (index == textLines.Count)
-                    {
-                        line = line.TrimEnd('\n');
-                    }
-                    newText += line;
+                    newText += textLines[index];
                 }
             }
 
+            newText = newText.TrimEnd('\n');
             if (newText != "")
             {
                 var lines = new List<Payload>()

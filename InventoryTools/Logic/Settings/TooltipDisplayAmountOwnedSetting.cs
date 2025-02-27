@@ -26,6 +26,8 @@ namespace InventoryTools.Logic.Settings
         public override string HelpText { get; set; } =
             "When hovering an item, should the tooltip show the locations of any copies of the item you currently own?";
 
+        public override uint? Order { get; } = 0;
+
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.AddItemLocations;
         public override string Version => "1.7.0.0";

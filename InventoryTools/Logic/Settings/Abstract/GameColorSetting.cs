@@ -96,18 +96,25 @@ namespace InventoryTools.Logic.Settings.Abstract
             }
             var enabled = value != null;
 
-            if (ImGui.Checkbox("Enable##"+Key+"Boolean", ref enabled))
+            if (DefaultValue == null)
             {
-                if (value == null)
+                if (ImGui.Checkbox("Enable##" + Key + "Boolean", ref enabled))
                 {
-                    value = DefaultValue ?? uiColors.First().Key;
-                }
-                else
-                {
-                    value = null;
-                }
+                    if (value == null)
+                    {
+                        value = DefaultValue ?? uiColors.First().Key;
+                    }
+                    else
+                    {
+                        value = null;
+                    }
 
-                UpdateFilterConfiguration(configuration, value);
+                    UpdateFilterConfiguration(configuration, value);
+                }
+                ImGui.SameLine();
+            }
+            else
+            {
             }
 
             var currentColour = new Vector4(255, 255, 255, 255);
@@ -115,7 +122,6 @@ namespace InventoryTools.Logic.Settings.Abstract
             {
                 currentColour = Utils.ConvertUiColorToColor(uiColors[value.Value]);
             }
-            ImGui.SameLine();
 
             using (var disabled = ImRaii.Disabled(value == null))
             {

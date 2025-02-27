@@ -27,4 +27,6 @@ public class TooltipDisplayUnlockSetting : BooleanSetting
     public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
     public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.ItemUnlockStatus;
     public override string Version { get; } = "1.11.0.4";
+
+    public override uint? Order => 0;
 }

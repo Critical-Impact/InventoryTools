@@ -38,10 +38,14 @@ public class EnumDictionaryConverter : JsonConverter<Dictionary<string, Enum>>
             var assemblyString = property.Value["Assembly"]?.ToString();
             var valueString = property.Value["Value"]?.ToString();
 
-            Type enumType = AppDomain.CurrentDomain.GetAssemblies().First(c => c.GetName().Name == assemblyString).GetType(typeString);
+            Type? enumType = AppDomain.CurrentDomain.GetAssemblies().First(c => c.GetName().Name == assemblyString).GetType(typeString);
             if (enumType == null)
             {
-                throw new JsonSerializationException($"Unknown type: {typeString}");
+                enumType = typeof(InventoryToolsPlugin).Assembly.GetType(typeString);
+                if (enumType == null)
+                {
+                    throw new JsonSerializationException($"Unknown type: {typeString}");
+                }
             }
 
             var enumValue = Enum.Parse(enumType, valueString);

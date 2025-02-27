@@ -98,7 +98,7 @@ public class SourceInformationTooltip : BaseTooltip
 
             foreach (var groupedLine in groupedLines)
             {
-                if (currentValue[groupedLine.Key].Group == false)
+                if (currentValue.TryGetValue(groupedLine.Key, out var value) && value.Group == false)
                 {
                     foreach (var line in groupedLine)
                     {
@@ -114,12 +114,12 @@ public class SourceInformationTooltip : BaseTooltip
             var newText = "";
             if (textLines.Count != 0)
             {
-                newText = "Sources: " + string.Join(", ", textLines.Distinct());
+                newText = "\nSources: " + string.Join(", ", textLines.Distinct());
             }
 
+            newText = newText.TrimEnd('\n');
             if (newText != "")
             {
-                newText += "\n";
                 var lines = new List<Payload>()
                 {
                     new UIForegroundPayload((ushort)(_colorSetting.CurrentValue(Configuration) ?? Configuration.TooltipColor ?? 1)),

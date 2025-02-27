@@ -51,7 +51,7 @@ public class TooltipSourceInformationModifierSetting : GenericEnumChoiceSetting<
     }, SettingCategory.ToolTips, SettingSubCategory.SourceInformation, "1.11.0.11", logger, imGuiService)
     {
     }
-    public override uint? Order { get; } = 1;
+    public override uint? Order { get; } = 2;
 }
 
 public class TooltipSourceInformationSetting : Setting<Dictionary<ItemInfoType, TooltipSourceSetting>>
@@ -125,10 +125,17 @@ public class TooltipSourceInformationSetting : Setting<Dictionary<ItemInfoType, 
 
                 ImGui.TableHeadersRow();
 
+                var toRemove = new List<ItemInfoType>();
+
                 var currentValues = currentValue.OrderBy(c => c.Value.Order).Select(c => c.Value).ToList();
                 for (var index = 0; index < currentValues.Count; index++)
                 {
                     var tooltipSourceSetting = currentValues[index];
+                    if (!_itemInfoRenderers.ContainsKey(tooltipSourceSetting.Type))
+                    {
+                        toRemove.Add(tooltipSourceSetting.Type);
+                        continue;
+                    }
                     var sourceRenderer = _itemInfoRenderers[tooltipSourceSetting.Type];
 
                     ImGui.TableNextColumn();
@@ -242,6 +249,18 @@ public class TooltipSourceInformationSetting : Setting<Dictionary<ItemInfoType, 
                         }
                     }
                 }
+
+                updated = false;
+                foreach (var item in toRemove)
+                {
+                    currentValue.Remove(item);
+                    updated = true;
+                }
+
+                if (updated)
+                {
+                    UpdateFilterConfiguration(configuration, currentValue);
+                }
             }
         }
 
@@ -256,7 +275,7 @@ public class TooltipSourceInformationSetting : Setting<Dictionary<ItemInfoType, 
     public override string Key { get; set; } = "TooltipSourceInformation";
     public override string Name { get; set; } = "Source Information Configuration";
 
-    public override uint? Order { get; } = 2;
+    public override uint? Order { get; } = 3;
 
     public override string HelpText { get; set; } =
         "If the source information tooltip is enabled, how should the various sources be ordered/displayed/etc?";

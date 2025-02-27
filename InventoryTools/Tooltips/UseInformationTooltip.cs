@@ -114,12 +114,12 @@ public class UseInformationTooltip : BaseTooltip
             var newText = "";
             if (textLines.Count != 0)
             {
-                newText = "Uses: " + string.Join(", ", textLines.Distinct());
+                newText = "\nUses: " + string.Join(", ", textLines.Distinct());
             }
 
+            newText = newText.TrimEnd('\n');
             if (newText != "")
             {
-                newText += "\n";
                 var lines = new List<Payload>()
                 {
                     new UIForegroundPayload((ushort)(_colorSetting.CurrentValue(Configuration) ?? Configuration.TooltipColor ?? 1)),
