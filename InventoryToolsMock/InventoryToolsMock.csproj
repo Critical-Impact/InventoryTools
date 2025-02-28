@@ -74,4 +74,15 @@
     <ItemGroup>
       <Folder Include="Properties" />
     </ItemGroup>
+    <ItemGroup>
+      <None Update="cimgui.so">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="cimguizmo.so">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="cimplot.so">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
 </Project>

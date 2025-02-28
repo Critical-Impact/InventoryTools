@@ -538,15 +538,10 @@ public class ImGuiMenuService
                                 var firstLocation = eNpcBaseRow?.Locations.FirstOrDefault();
                                 if (firstLocation != null && eNpcBaseRow != null)
                                 {
-                                    if (firstLocation.TerritoryType.Value.Aetheryte.RowId !=
-                                        0)
-                                    {
-                                        messages.Add(
-                                            new RequestTeleportMessage(
-                                                firstLocation.TerritoryType.Value.Aetheryte.RowId));
-                                        _chatUtilities.PrintFullMapLink(firstLocation,
-                                            eNpcBaseRow.ENpcResidentRow.Base.Singular.ExtractText());
-                                    }
+                                    messages.Add(
+                                        new RequestTeleportToMapMessage(firstLocation.Map.RowId, new Vector2((float)firstLocation.MapX, (float)firstLocation.MapY)));
+                                    _chatUtilities.PrintFullMapLink(firstLocation,
+                                        eNpcBaseRow.ENpcResidentRow.Base.Singular.ExtractText());
                                 }
                             }
                         }
