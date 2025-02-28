@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using CriticalCommonLib.MarketBoard;
 
@@ -7,7 +8,7 @@ public class TestMarketCache : IMarketCache
 {
     public void Dispose()
     {
-        
+
     }
 
     public int AutomaticCheckTime { get; set; }
@@ -43,6 +44,13 @@ public class TestMarketCache : IMarketCache
         return null;
     }
 
+    public MarketCachePricingResult GetPricing(uint itemId, uint worldId, bool ignoreCache, bool forceCheck,
+        out MarketPricing? pricing)
+    {
+        pricing = null;
+        return MarketCachePricingResult.Disabled;
+    }
+
     public List<MarketPricing> GetPricing(uint itemId, List<uint> worldIds, bool forceCheck)
     {
         return new();
@@ -52,6 +60,8 @@ public class TestMarketCache : IMarketCache
     {
         return new();
     }
+
+    public ConcurrentDictionary<(uint, uint), MarketPricing> CachedPricing { get; set; }
 
     public bool RequestCheck(uint itemId, uint worldId, bool forceCheck)
     {

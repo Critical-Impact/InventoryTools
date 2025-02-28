@@ -1,3 +1,4 @@
+using CriticalCommonLib.MarketBoard;
 using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -6,6 +7,12 @@ namespace InventoryTools.Logic.Settings
 {
     public class AutomaticallyDownloadPricesSetting : BooleanSetting
     {
+        private readonly MarketCacheConfiguration _marketCacheConfiguration;
+
+        public AutomaticallyDownloadPricesSetting(ILogger<AutomaticallyDownloadPricesSetting> logger, ImGuiService imGuiService, MarketCacheConfiguration marketCacheConfiguration) : base(logger, imGuiService)
+        {
+            _marketCacheConfiguration = marketCacheConfiguration;
+        }
         public override bool DefaultValue { get; set; } = false;
         public override bool CurrentValue(InventoryToolsConfiguration configuration)
         {
@@ -15,6 +22,7 @@ namespace InventoryTools.Logic.Settings
         public override void UpdateFilterConfiguration(InventoryToolsConfiguration configuration, bool newValue)
         {
             configuration.AutomaticallyDownloadMarketPrices = newValue;
+            _marketCacheConfiguration.AutoRequest = newValue;
         }
 
         public override string Key { get; set; } = "AutomaticallyDownloadPrices";
@@ -25,9 +33,5 @@ namespace InventoryTools.Logic.Settings
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.MarketBoard;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Market;
         public override string Version => "1.7.0.0";
-
-        public AutomaticallyDownloadPricesSetting(ILogger<AutomaticallyDownloadPricesSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
-        {
-        }
     }
 }

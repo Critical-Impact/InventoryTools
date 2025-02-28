@@ -128,6 +128,8 @@ namespace InventoryTools
             typeof(IPCService),
             typeof(HostedCraftMonitor),
             typeof(ItemSearchService),
+            typeof(MarketRefreshService),
+            typeof(MarketCache),
         };
 
         public List<Type> GetHostedServices()
@@ -327,7 +329,6 @@ namespace InventoryTools
                 builder.RegisterType<InventoryMonitor>().As<IInventoryMonitor>().SingleInstance();
                 builder.RegisterType<InventoryScanner>().As<IInventoryScanner>().SingleInstance();
                 builder.RegisterType<MarketBoardService>().As<IMarketBoardService>().SingleInstance();
-                builder.RegisterType<MarketCache>().As<IMarketCache>().SingleInstance();
                 builder.RegisterType<MobTracker>().As<IMobTracker>().SingleInstance();
                 builder.RegisterType<ClipboardService>().As<IClipboardService>().SingleInstance();
                 builder.RegisterType<IPCService>().SingleInstance();
@@ -374,6 +375,7 @@ namespace InventoryTools
                 builder.RegisterType<CraftItemLocalizer>().SingleInstance();
                 builder.RegisterType<MarketOrderService>().AsImplementedInterfaces().SingleInstance();
                 builder.RegisterType<ContainerAwareCsvLoader>().SingleInstance();
+                builder.RegisterType<MarketCacheConfiguration>().SingleInstance();
 
                 //Transient
                 builder.RegisterType<FilterState>();

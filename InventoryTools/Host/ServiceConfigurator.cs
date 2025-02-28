@@ -22,8 +22,9 @@ public class ServiceConfigurator : IHostedService
     private readonly IMobTracker _mobTracker;
     private readonly IHostedUniversalisConfiguration _hostedUniversalisConfiguration;
     private readonly HostedInventoryHistory _hostedInventoryHistory;
+    private readonly MarketCacheConfiguration _marketCacheConfiguration;
 
-    public ServiceConfigurator(ILogger<ServiceConfigurator> logger, ConfigurationManagerService configurationManagerService, InventoryToolsConfiguration configuration, IMarketCache marketCache, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, IMobTracker mobTracker, IHostedUniversalisConfiguration hostedUniversalisConfiguration, HostedInventoryHistory hostedInventoryHistory)
+    public ServiceConfigurator(ILogger<ServiceConfigurator> logger, ConfigurationManagerService configurationManagerService, InventoryToolsConfiguration configuration, IMarketCache marketCache, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, IMobTracker mobTracker, IHostedUniversalisConfiguration hostedUniversalisConfiguration, HostedInventoryHistory hostedInventoryHistory, MarketCacheConfiguration marketCacheConfiguration)
     {
         _logger = logger;
         _configurationManagerService = configurationManagerService;
@@ -34,6 +35,7 @@ public class ServiceConfigurator : IHostedService
         _mobTracker = mobTracker;
         _hostedUniversalisConfiguration = hostedUniversalisConfiguration;
         _hostedInventoryHistory = hostedInventoryHistory;
+        _marketCacheConfiguration = marketCacheConfiguration;
     }
 
     public void ConfigureServices()
@@ -46,9 +48,9 @@ public class ServiceConfigurator : IHostedService
         {
             _mobTracker.SetEntries(entries);
         }
-        
-        _marketCache.CacheAutoRetrieve = _configuration.AutomaticallyDownloadMarketPrices;
-        _marketCache.CacheTimeHours = _configuration.MarketRefreshTimeHours;
+
+        _marketCacheConfiguration.AutoRequest = _configuration.AutomaticallyDownloadMarketPrices;
+        _marketCacheConfiguration.CacheMaxAgeHours = _configuration.MarketRefreshTimeHours;
         _hostedUniversalisConfiguration.SaleHistoryLimit = _configuration.MarketSaleHistoryLimit;
         if (_configuration.HistoryEnabled)
         {
@@ -58,7 +60,7 @@ public class ServiceConfigurator : IHostedService
         {
             _hostedInventoryHistory.Disable();
         }
-        
+
     }
 
     public Task StartAsync(CancellationToken cancellationToken)

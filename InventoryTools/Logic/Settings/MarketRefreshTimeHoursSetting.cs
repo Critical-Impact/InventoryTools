@@ -1,3 +1,4 @@
+using CriticalCommonLib.MarketBoard;
 using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -6,6 +7,13 @@ namespace InventoryTools.Logic.Settings
 {
     public class MarketRefreshTimeHoursSetting : IntegerSetting
     {
+        private readonly MarketCacheConfiguration _marketCacheConfiguration;
+
+        public MarketRefreshTimeHoursSetting(ILogger<MarketRefreshTimeHoursSetting> logger, ImGuiService imGuiService, MarketCacheConfiguration marketCacheConfiguration) : base(logger, imGuiService)
+        {
+            _marketCacheConfiguration = marketCacheConfiguration;
+        }
+
         public override int DefaultValue { get; set; } = 24;
         public override int CurrentValue(InventoryToolsConfiguration configuration)
         {
@@ -15,6 +23,7 @@ namespace InventoryTools.Logic.Settings
         public override void UpdateFilterConfiguration(InventoryToolsConfiguration configuration, int newValue)
         {
             configuration.MarketRefreshTimeHours = newValue;
+            _marketCacheConfiguration.CacheMaxAgeHours = newValue;
         }
 
         public override string Key { get; set; } = "MarketRefreshTime";
@@ -25,9 +34,5 @@ namespace InventoryTools.Logic.Settings
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.MarketBoard;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Market;
         public override string Version => "1.7.0.0";
-
-        public MarketRefreshTimeHoursSetting(ILogger<MarketRefreshTimeHoursSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)
-        {
-        }
     }
 }
