@@ -45,7 +45,7 @@ public class ItemGardeningCrossbreedSourceRenderer : ItemInfoRenderer<ItemGarden
                     ImGui.TableNextColumn();
                     foreach (var source in chunkedSource)
                     {
-                        ImGui.Text($"{source.Seed1.NameString} + {source.Seed2.NameString}");
+                        ImGui.Text($"{source.Seed1.NameString} x {source.Seed2.NameString}");
                     }
                 }
             }
@@ -77,6 +77,12 @@ public class ItemGardeningCrossbreedSourceRenderer : ItemInfoRenderer<ItemGarden
     };
 
     public override Func<ItemSource, int> GetIcon => _ => Icons.SeedBagIcon;
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        return $"{asSource.SeedResult.NameString} - {asSource.Seed1.NameString} x {asSource.Seed2.NameString}";
+    };
 }
 
 public class ItemGardeningCrossbreedSourceUseRenderer : ItemGardeningCrossbreedSourceRenderer
@@ -84,4 +90,10 @@ public class ItemGardeningCrossbreedSourceUseRenderer : ItemGardeningCrossbreedS
     public override RendererType RendererType => RendererType.Use;
     public override string SingularName => "Gardening Crossbreed Seed";
     public override string HelpText => "Is this item part of a crossbreed when gardening?";
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        return $"{asSource.SeedResult.NameString} - {asSource.Seed1.NameString} x {asSource.Seed2.NameString}";
+    };
 }

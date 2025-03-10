@@ -60,12 +60,14 @@ namespace InventoryTools.Logic.Columns
 
         public override string CsvExport(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return String.Join(", ", searchResult.Item.Uses.Select(c => _itemInfoRenderService.GetUseName(c)));
+            var itemUses = columnConfiguration.FilterText != "" ? searchResult.Item.Uses.Where(c => (_itemInfoRenderService.GetUseName(c).ToLower() + " " + _itemInfoRenderService.GetUseTypeName(c.GetType()).Singular.ToLower()).PassesFilterComparisonText(columnConfiguration.FilterComparisonText)) : searchResult.Item.Uses;
+            return String.Join(", ", itemUses.Select(c => _itemInfoRenderService.GetUseDescription(c)));
         }
 
         public override dynamic? JsonExport(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return String.Join(", ", searchResult.Item.Uses.Select(c => _itemInfoRenderService.GetUseName(c)));
+            var itemUses = columnConfiguration.FilterText != "" ? searchResult.Item.Uses.Where(c => (_itemInfoRenderService.GetUseName(c).ToLower() + " " + _itemInfoRenderService.GetUseTypeName(c.GetType()).Singular.ToLower()).PassesFilterComparisonText(columnConfiguration.FilterComparisonText)) : searchResult.Item.Uses;
+            return String.Join(", ", itemUses.Select(c => _itemInfoRenderService.GetUseDescription(c)));
         }
 
         public override float Width { get; set; } = 250;

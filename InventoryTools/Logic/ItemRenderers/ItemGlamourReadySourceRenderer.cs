@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using CriticalCommonLib.Models;
@@ -35,4 +36,10 @@ public class ItemGlamourReadySetItemSourceRenderer : ItemInfoRenderer<ItemGlamou
 
     public override Func<ItemSource, string> GetName => source => "";
     public override Func<ItemSource, int> GetIcon => _ => Icons.MannequinIcon;
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        return $"Part of {asSource.ConvertedItem.NameString} which contains {string.Join(", ", asSource.SetItems.Select(c => c.NameString))}";
+    };
 }

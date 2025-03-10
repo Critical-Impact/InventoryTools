@@ -33,4 +33,12 @@ public class ItemCraftLeveSourceRenderer : ItemInfoRenderer<ItemCraftLeveSource>
         return leveRow.Name.ExtractText();
     };
     public override Func<ItemSource, int> GetIcon => _ => Icons.LeveIcon;
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        var leveRow = asSource.CraftLeveRow.Base.Leve.Value;
+        return
+            $"{leveRow.Name.ExtractText()} ({leveRow.ClassJobCategory.Value.Name.ExtractText()}) ({leveRow.ExpReward} xp) ({leveRow.AllowanceCost} allowances)";
+    };
 }

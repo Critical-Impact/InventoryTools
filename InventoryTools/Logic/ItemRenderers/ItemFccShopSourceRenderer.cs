@@ -138,4 +138,13 @@ public class ItemFccShopSourceRenderer : ItemInfoRenderer<ItemFccShopSource>
     };
 
     public override Func<ItemSource, int> GetIcon => _ => Icons.FreeCompanyCreditIcon;
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        var description = $"{asSource.Shop.Name}";
+        var rewards = string.Join(", ", asSource.FccShopListing.Rewards.Select(c => c.Item.NameString + " x " + c.Count + ""));
+        var costs = string.Join(", ", asSource.FccShopListing.Costs.Select(c => c.Item.NameString + " x " + c.Count + ""));
+        return $"{description} ({rewards}) for ({costs})";
+    };
 }

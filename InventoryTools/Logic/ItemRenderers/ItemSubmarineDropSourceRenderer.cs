@@ -51,4 +51,10 @@ public class ItemSubmarineDropSourceRenderer : ItemInfoRenderer<ItemSubmarineDro
     {
         return Icons.SubmarineIcon;
     };
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        return $"{asSource.SubmarineExploration.Base.Location.ExtractText()}";
+    };
 }

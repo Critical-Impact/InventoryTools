@@ -48,6 +48,20 @@ public abstract class ItemHouseSourceRenderer<T> : ItemInfoRenderer<T> where T :
         //TODO: come up with an icon for each
         return Icons.RedXIcon;
     };
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        var setName = asSource.HousingPreset.Value.Singular.ExtractText();
+        if (setName == string.Empty)
+        {
+           return "Not default in any house.";
+        }
+        else
+        {
+            return "Default in " + setName;
+        }
+    };
 }
 
 public class ItemHouseDoorSourceRenderer : ItemHouseSourceRenderer<ItemHouseDoorSource>

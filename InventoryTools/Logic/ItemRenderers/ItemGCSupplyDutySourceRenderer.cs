@@ -39,4 +39,20 @@ public class ItemGcSupplyDutySourceRenderer : ItemInfoRenderer<ItemGCSupplyDutyS
         return rewardRow != null ? asSource.GCSupplyDutyRow.RowId.ToString() : "";
     };
     public override Func<ItemSource, int> GetIcon => _ => Icons.FlameSealIcon;
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        var rewardRow = asSource.DailySupplyRewardRow;
+        if (rewardRow != null)
+        {
+            var baseReward = rewardRow.Base.ExperienceSupply;
+            var sealsSupply = rewardRow.Base.SealsSupply;
+            return $"Level {asSource.GCSupplyDutyRow.RowId} ({baseReward} xp, {sealsSupply} seals)";
+        }
+        else
+        {
+            return "Unknown rewards";
+        }
+    };
 }

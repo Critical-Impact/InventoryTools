@@ -26,4 +26,11 @@ public class ItemGcExpertDeliverySourceRenderer : ItemInfoRenderer<ItemGCExpertD
         return "";
     };
     public override Func<ItemSource, int> GetIcon => _ => Icons.FlameSealIcon;
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        var sealsRewarded = asSource.SealsRewarded;
+        return asSource.SealsRewarded.ToString();
+    };
 }

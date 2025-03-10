@@ -75,4 +75,10 @@ public class ItemCraftResultSourceRenderer : ItemInfoRenderer<ItemCraftResultSou
 
         return Icons.CraftIcon;
     };
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        return $"{asSource.Recipe.Base.CraftType.Value.Name} ({asSource.Recipe.Base.AmountResult} yield) ({string.Join(", ", asSource.Recipe.IngredientCounts.Select(c => _itemSheet.GetRow(c.Key).NameString + " x " + c.Value))})";
+    };
 }

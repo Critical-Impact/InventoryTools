@@ -55,6 +55,7 @@ public class ItemGCShopUseRenderer : ItemGCShopSourceRenderer
     };
 
     public override RendererType RendererType => RendererType.Use;
+
 }
 
 public class ItemGCShopSourceRenderer : ItemInfoRenderer<ItemGCShopSource>
@@ -123,8 +124,21 @@ public class ItemGCShopSourceRenderer : ItemInfoRenderer<ItemGCShopSource>
         var grandCompanyRowId = asSource.GCScripShopItem.Category.GrandCompany.RowId;
         switch (grandCompanyRowId)
         {
+            case 1:
+            case 2:
+            case 3:
+                break;
 
         }
         return Icons.GrandCompany3;
+    };
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        var description = $"{asSource.Shop.Name}";
+        var rewards = string.Join(", ", asSource.GCScripShopItem.Rewards.Select(c => c.Item.NameString + " x " + c.Count + ""));
+        var costs = string.Join(", ", asSource.GCScripShopItem.Costs.Select(c => c.Item.NameString + " x " + c.Count + ""));
+        return $"{description} ({rewards}) for ({costs})";
     };
 }

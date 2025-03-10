@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Linq;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using CriticalCommonLib.Models;
@@ -42,4 +43,17 @@ public class ItemCashShopSourceRenderer : ItemInfoRenderer<ItemCashShopSource>
     };
 
     public override Func<ItemSource, int> GetIcon => source => Icons.BagStar;
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        var priceUsd = asSource.PriceUsd.ToString("C2", CultureInfo.GetCultureInfo("en-US"));
+        var description = $"Price(USD): {priceUsd}";
+        if (asSource.FittingShopItemSetRow != null)
+        {
+            description += $" (Part of {asSource.FittingShopItemSetRow.Base.Unknown6.ExtractText()} set)";
+            description += $" (Contains {String.Join(", ", asSource.FittingShopItemSetRow.Items.Select(c => c.NameString))}";
+        }
+        return description;
+    };
 }

@@ -34,4 +34,13 @@ public class ItemStainUseRenderer : ItemInfoRenderer<ItemStainSource>
     {
         return Icons.DyeIcon;
     };
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        var vec4Color = Utils.Convert3ChannelUintToColorVector4(asSource.Stain.Value.Color);
+        return $"{asSource.Stain.Value.Name.ExtractText()} ({Utils.ColorToHex(Utils.ColorFromVector4(vec4Color))})";
+    };
+
+
 }

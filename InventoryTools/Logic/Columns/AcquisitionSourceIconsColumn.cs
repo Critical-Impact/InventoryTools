@@ -76,12 +76,14 @@ namespace InventoryTools.Logic.Columns
 
         public override string CsvExport(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return String.Join(", ", searchResult.Item.Sources.Select(c => _itemInfoRenderService.GetSourceName(c)));
+            var itemSources = columnConfiguration.FilterText != "" ? searchResult.Item.Sources.Where(c => (_itemInfoRenderService.GetSourceName(c).ToLower() + " " + _itemInfoRenderService.GetSourceTypeName(c.GetType()).Singular.ToLower()).PassesFilterComparisonText(columnConfiguration.FilterComparisonText)) : searchResult.Item.Sources;
+            return String.Join(", ", itemSources.Select(c => _itemInfoRenderService.GetSourceDescription(c)));
         }
 
         public override dynamic? JsonExport(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
-            return String.Join(", ", searchResult.Item.Sources.Select(c => _itemInfoRenderService.GetSourceName(c)));
+            var itemSources = columnConfiguration.FilterText != "" ? searchResult.Item.Sources.Where(c => (_itemInfoRenderService.GetSourceName(c).ToLower() + " " + _itemInfoRenderService.GetSourceTypeName(c.GetType()).Singular.ToLower()).PassesFilterComparisonText(columnConfiguration.FilterComparisonText)) : searchResult.Item.Sources;
+            return String.Join(", ", itemSources.Select(c => _itemInfoRenderService.GetSourceDescription(c)));
         }
 
         public override string Name { get; set; } = "Acquisition";

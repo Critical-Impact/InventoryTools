@@ -42,4 +42,10 @@ public class ItemDungeonDropSourceRenderer : ItemInfoRenderer<ItemDungeonDropSou
         return new List<MessageBase>()
             { new OpenUintWindowMessage(typeof(DutyWindow), dungeonDropSource.ContentFinderCondition.RowId) };
     };
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        return $"{asSource.ContentFinderCondition.FormattedName}";
+    };
 }

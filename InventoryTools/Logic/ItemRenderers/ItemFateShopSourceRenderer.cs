@@ -140,4 +140,13 @@ public class ItemFateShopSourceRenderer : ItemInfoRenderer<ItemFateShopSource>
         var asSource = AsSource(source);
         return asSource.CostItems.FirstOrDefault()?.Icon ?? asSource.Item.Icon;
     };
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        var description = $"{asSource.Shop.Name}";
+        var rewards = string.Join(", ", asSource.ShopListing.Rewards.Select(c => c.Item.NameString + " x " + c.Count + ""));
+        var costs = string.Join(", ", asSource.ShopListing.Costs.Select(c => c.Item.NameString + " x " + c.Count + ""));
+        return $"{description} ({rewards}) for ({costs})";
+    };
 }

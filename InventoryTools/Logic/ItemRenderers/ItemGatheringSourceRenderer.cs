@@ -317,4 +317,19 @@ public abstract class ItemGatheringSourceRenderer<T> : ItemInfoRenderer<T> where
 
         return Icons.RedXIcon;
     };
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        var level = asSource.GatheringItem.Base.GatheringItemLevel.Value.GatheringItemLevel;
+        var perceptionRequired = asSource.GatheringItem.Base.PerceptionReq;
+        var stars = asSource.GatheringItem.Base.GatheringItemLevel.Value.Stars;
+        var starsString = "";
+        for (int i = 0; i < stars; i++)
+        {
+            starsString += "*";
+        }
+
+        return $"Level {(level == 0 ? "N/A" : level)} ({starsString}) ({perceptionRequired} perception required)";
+    };
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Sheets;
@@ -49,4 +50,11 @@ public class ItemCompanyCraftResultSourceRenderer : ItemInfoRenderer<ItemCompany
     };
 
     public override Func<ItemSource, int> GetIcon => _ => Icons.CraftIcon;
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        return
+            $"{asSource.CompanyCraftSequence.Base.CompanyCraftType.Value.Name} ({asSource.CompanyCraftSequence.CompanyCraftParts.Length}) ({asSource.CompanyCraftSequence.MaterialsRequired(null).Select(c => _itemSheet.GetRow(c.ItemId).NameString + " x " + c.Quantity)})";
+    };
 }

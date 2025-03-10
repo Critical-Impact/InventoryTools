@@ -18,9 +18,7 @@ public class ItemAchievementSourceRenderer : ItemInfoRenderer<ItemAchievementSou
 
     public override Action<ItemSource> DrawTooltip => source =>
     {
-        var achievementSource = AsSource(source);
-        ImGui.Text(
-            $"{achievementSource.Achievement.Value.Name.ExtractText()} ({achievementSource.Achievement.Value.AchievementCategory.Value.Name.ExtractText()})");
+        ImGui.Text(this.GetDescription(source));
     };
 
     public override Func<ItemSource, string> GetName => source =>
@@ -32,5 +30,12 @@ public class ItemAchievementSourceRenderer : ItemInfoRenderer<ItemAchievementSou
     public override Func<ItemSource, int> GetIcon => source =>
     {
         return Icons.AchievementCertIcon;
+    };
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        return
+            $"{asSource.Achievement.Value.Name.ExtractText()} ({asSource.Achievement.Value.AchievementCategory.Value.Name.ExtractText()})";
     };
 }

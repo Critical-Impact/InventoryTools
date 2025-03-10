@@ -47,4 +47,13 @@ public class ItemSkybuilderHandInSourceRenderer : ItemInfoRenderer<ItemSkybuilde
         return asSource.Item.NameString;
     };
     public override Func<ItemSource, int> GetIcon => _ => Icons.SkybuildersScripIcon;
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        var baseReward = asSource.HWDCrafterSupplyParams.BaseCollectableReward.Value;
+        var midReward = asSource.HWDCrafterSupplyParams.MidCollectableReward.Value;
+        var highReward = asSource.HWDCrafterSupplyParams.HighCollectableReward.Value;
+        return $"Levels {asSource.Level} - {asSource.LevelMax} ({baseReward.ExpReward} xp, {midReward.ExpReward} xp, {highReward.ExpReward} xp), ({baseReward.ScriptRewardAmount} script, {midReward.ScriptRewardAmount} script, {highReward.ScriptRewardAmount} script), ({baseReward.Points} points, {midReward.Points} points, {highReward.Points} points)";
+    };
 }

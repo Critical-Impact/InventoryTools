@@ -48,4 +48,19 @@ public class ItemCustomDeliverySourceRenderer : ItemInfoRenderer<ItemCustomDeliv
     };
 
     public override Func<ItemSource, int> GetIcon => _ => Icons.CustomDeliveryIcon;
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        var eNpcResident = asSource.SupplyRow.Npc?.Base.Npc.Value;
+        if (eNpcResident != null)
+        {
+            var collectabilityLow = asSource.SupplyRow.Base.CollectabilityLow;
+            var collectabilityMid = asSource.SupplyRow.Base.CollectabilityMid;
+            var collectabilityHigh = asSource.SupplyRow.Base.CollectabilityHigh;
+            return $"{eNpcResident.Value.Singular.ExtractText()} ({collectabilityLow}, {collectabilityMid}, {collectabilityHigh})";
+        }
+
+        return "Unknown NPC";
+    };
 }

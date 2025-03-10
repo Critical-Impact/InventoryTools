@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Numerics;
 using Autofac;
 using CriticalCommonLib.Enums;
+using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-
+using CriticalCommonLib.Services.Ui;
 using ImGuiNET;
 using InventoryTools.Logic;
 using InventoryTools.Services;
@@ -15,13 +16,17 @@ namespace InventoryTools.Ui.DebugWindows;
 
 public class DebugOverlayServiceWindow : GenericWindow
 {
+    private readonly ICharacterMonitor _characterMonitor;
+    private readonly IGameUiManager _gameUiManager;
     private readonly IComponentContext _componentContext;
     private IOverlayService? _overlayService;
-    
+
     public IOverlayService OverlayService => _overlayService ??= _componentContext.Resolve<IOverlayService>();
 
-    public DebugOverlayServiceWindow(ILogger<DebugOverlayServiceWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IComponentContext componentContext, string name = "Overlay Service - Debug") : base(logger, mediator, imGuiService, configuration, name)
+    public DebugOverlayServiceWindow(ILogger<DebugOverlayServiceWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ICharacterMonitor characterMonitor, IGameUiManager gameUiManager, IComponentContext componentContext, string name = "Overlay Service - Debug") : base(logger, mediator, imGuiService, configuration, name)
     {
+        _characterMonitor = characterMonitor;
+        _gameUiManager = gameUiManager;
         _componentContext = componentContext;
     }
 
@@ -32,6 +37,8 @@ public class DebugOverlayServiceWindow : GenericWindow
         {
             ImGui.Text($"Filter: {OverlayService.LastState.FilterConfiguration.NameFilter}");
             ImGui.Text($"Should Highlight: {(OverlayService.LastState.ShouldHighlight ? "Yes" : "No")}");
+            ImGui.TextUnformatted($"Active Retainer ID: {_characterMonitor.ActiveRetainerId}");
+            ImGui.TextUnformatted($"Retainer List Open?: {_gameUiManager.IsWindowVisible(CriticalCommonLib.Services.Ui.WindowName.RetainerList)}");
             ImGui.Text($"Should Highlight Destination: {(OverlayService.LastState.ShouldHighlightDestination ? "Yes" : "No")}");
             ImGui.Text($"Invert Highlighting: {(OverlayService.LastState.InvertHighlighting ? "Yes" : "No")}");
             ImGui.Text($"Has Filter Result: {(OverlayService.LastState.HasFilterResult ? "Yes" : "No")}");
@@ -39,16 +46,16 @@ public class DebugOverlayServiceWindow : GenericWindow
             var retainerBags1 = OverlayService.LastState.GetBagHighlights(InventoryType.RetainerBag0);
             var retainerBags2 = OverlayService.LastState.GetBagHighlights(InventoryType.RetainerBag1);
             var tabHighlights = OverlayService.LastState.GetTabHighlights(new List<Dictionary<Vector2, Vector4?>>()
-                { retainerBags1, retainerBags2 }); 
+                { retainerBags1, retainerBags2 });
             ImGui.Text($"{(tabHighlights.HasValue ? "Will Highlight Tab 1" : "No Highlight")}");
 
             var retainerBags3 = OverlayService.LastState.GetBagHighlights(InventoryType.RetainerBag2);
             var retainerBags4 = OverlayService.LastState.GetBagHighlights(InventoryType.RetainerBag3);
             var tabHighlights2 = OverlayService.LastState.GetTabHighlights(new List<Dictionary<Vector2, Vector4?>>()
-                { retainerBags3, retainerBags4 }); 
+                { retainerBags3, retainerBags4 });
             ImGui.Text($"{(tabHighlights2.HasValue ? "Will Highlight Tab 2" : "No Highlight")}");
         }
-        
+
         ImGui.Text("Overlays: ");
         foreach (var overlay in OverlayService.Overlays)
         {
@@ -56,7 +63,7 @@ public class DebugOverlayServiceWindow : GenericWindow
             ImGui.Text($"Needs State Refresh: {(overlay.NeedsStateRefresh ? "Yes" : "No")}");
             ImGui.Text($"Should Draw: {(overlay.ShouldDraw ? "Yes" : "No")}");
         }
-        
+
     }
 
     public override void Invalidate()

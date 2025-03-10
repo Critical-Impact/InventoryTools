@@ -165,4 +165,27 @@ public class ItemCalamitySalvagerShopSourceRenderer : ItemInfoRenderer<ItemCalam
     };
 
     public override Func<ItemSource, int> GetIcon => source => Icons.CalamitySalvagerBag;
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        var itemName = asSource.CostItem!.NameString;
+        var count = asSource.Cost;
+        var description = $"{itemName} x {count}";
+
+        if (asSource.GilShopItem.Base.AchievementRequired.RowId != 0)
+        {
+            description += $" (Requires achievement: {asSource.GilShopItem.Base.AchievementRequired.Value.Name.ExtractText()})";
+        }
+
+        foreach (var quest in asSource.GilShopItem.Base.QuestRequired)
+        {
+            if (quest.RowId != 0)
+            {
+                description += ($" (Requires quest: {quest.Value.Name.ExtractText()})");
+            }
+        }
+
+        return description;
+    };
 }

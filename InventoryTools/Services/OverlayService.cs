@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using CriticalCommonLib.Services.Mediator;
-
+using CriticalCommonLib.Services.Ui;
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Plugin.Services;
@@ -24,19 +24,21 @@ namespace InventoryTools.Services
         private readonly IAddonLifecycle _addonLifecycle;
         private readonly IFramework _frameworkService;
         private readonly Func<FilterConfiguration, FilterState> _filterStateFactory;
+        private readonly IGameUiManager _gameUiManager;
         private readonly ILogger<OverlayService> _logger;
         private readonly Dictionary<string, bool> _windowVisible = new();
         private readonly HashSet<string> _windowsToTrack = new();
         private readonly List<IGameOverlay> _overlays = new();
         private FilterState? _lastState;
 
-        public OverlayService(ILogger<OverlayService> logger, MediatorService mediatorService, IAddonLifecycle addonLifecycle, IListService listService,TableService tableService, IFramework frameworkService, Func<FilterConfiguration, FilterState> filterStateFactory, IEnumerable<IGameOverlay> gameOverlays) : base(logger, mediatorService)
+        public OverlayService(ILogger<OverlayService> logger, MediatorService mediatorService, IAddonLifecycle addonLifecycle, IListService listService,TableService tableService, IFramework frameworkService, Func<FilterConfiguration, FilterState> filterStateFactory, IEnumerable<IGameOverlay> gameOverlays, IGameUiManager gameUiManager) : base(logger, mediatorService)
         {
             _addonLifecycle = addonLifecycle;
             _listService = listService;
             _tableService = tableService;
             _frameworkService = frameworkService;
             _filterStateFactory = filterStateFactory;
+            _gameUiManager = gameUiManager;
             _logger = logger;
 
             foreach (var overlay in gameOverlays)
@@ -245,7 +247,19 @@ namespace InventoryTools.Services
             _addonLifecycle.RegisterListener(AddonEvent.PreFinalize, PreFinalize);
             _addonLifecycle.RegisterListener(AddonEvent.PostRequestedUpdate,PostRequestedUpdate );
             _frameworkService.Update += FrameworkOnUpdate;
+            _gameUiManager.UiVisibilityChanged += GameUiManagerOnUiVisibilityChanged;
             return Task.CompletedTask;
+        }
+
+        private void GameUiManagerOnUiVisibilityChanged(WindowName windowName, bool? windowState)
+        {
+            var windowNameString = windowName.ToString();
+            if (_windowsToTrack.Contains(windowNameString) && windowState != null)
+            {
+                _windowVisible[windowNameString] = windowState.Value;
+                UpdateState(_lastState);
+                DrawOverlays(windowNameString);
+            }
         }
 
         private void RefreshRequested(OverlaysRequestRefreshMessage obj)
@@ -265,6 +279,7 @@ namespace InventoryTools.Services
             _listService.ListConfigurationChanged -= ListServiceOnListModified;
             _listService.UiListToggled -= ListServiceOnListToggled;
             _listService.BackgroundListToggled -= ListServiceOnListToggled;
+            _gameUiManager.UiVisibilityChanged -= GameUiManagerOnUiVisibilityChanged;
             UnsubscribeAll();
             return Task.CompletedTask;
         }

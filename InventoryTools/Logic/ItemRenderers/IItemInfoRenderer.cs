@@ -25,6 +25,7 @@ public interface IItemInfoRenderer
     Func<ItemSource, List<MessageBase>>? DrawMenu { get; }
     Func<ItemSource, string> GetName { get; }
     Func<ItemSource, int> GetIcon { get; }
+    Func<ItemSource, string> GetDescription { get; }
     byte MaxColumns { get; }
     float TooltipChildWidth { get; }
     float TooltipChildHeight { get; }

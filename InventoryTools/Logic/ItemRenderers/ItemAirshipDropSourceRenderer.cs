@@ -30,16 +30,13 @@ public class ItemAirshipDropSourceRenderer : ItemInfoRenderer<ItemAirshipDropSou
         var airshipDropSources = AsSource(sources).DistinctBy(c => c.AirshipExplorationPoint.RowId);
         foreach (var source in airshipDropSources)
         {
-            ImGui.Text(
-                $"{source.AirshipExplorationPoint.Base.Name.ExtractText()}");
+            ImGui.Text(this.GetDescription(source));
         }
     };
 
     public override Action<ItemSource> DrawTooltip => source =>
     {
-        var airshipDropSource = AsSource(source);
-        ImGui.Text(
-            $"{airshipDropSource.AirshipExplorationPoint.Base.Name.ExtractText()}");
+        ImGui.Text(this.GetDescription(source));
     };
     public override Func<ItemSource, string> GetName => source =>
     {
@@ -50,5 +47,11 @@ public class ItemAirshipDropSourceRenderer : ItemInfoRenderer<ItemAirshipDropSou
     public override Func<ItemSource, int> GetIcon => source =>
     {
         return Icons.AirshipIcon;
+    };
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        return $"{asSource.AirshipExplorationPoint.Base.Name.ExtractText()}";
     };
 }

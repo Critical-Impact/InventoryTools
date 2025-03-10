@@ -81,4 +81,13 @@ public class ItemFishingSourceRenderer : ItemInfoRenderer<ItemFishingSource>
     };
 
     public override Func<ItemSource, int> GetIcon => _ => Icons.FishingIcon;
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        var level = asSource.FishParameter.Base.GatheringItemLevel.Value.GatheringItemLevel;
+        var fishingType = asSource.FishParameter.FishRecordType;
+
+        return $"Level {(level == 0 ? "N/A" : level)} {fishingType} spot";
+    };
 }

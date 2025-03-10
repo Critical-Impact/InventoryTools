@@ -53,4 +53,12 @@ public class ItemCompanyCraftRequirementSourceRenderer : ItemInfoRenderer<ItemCo
     };
 
     public override Func<ItemSource, int> GetIcon => _ => Icons.CraftIcon;
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        return asSource.Item.NameString + " (" +
+               (asSource.CompanyCraftSequence.Base.CompanyCraftType.ValueNullable?.Name.ExtractText() ?? "Unknown") +
+               ")";
+    };
 }

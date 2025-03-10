@@ -166,4 +166,13 @@ public class ItemGilShopSourceRenderer : ItemInfoRenderer<ItemGilShopSource>
     {
         return _itemSheet.GetRow(1).Icon;
     };
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        var description = $"{asSource.Shop.Name}";
+        var rewards = string.Join(", ", asSource.GilShopItem.Rewards.Select(c => c.Item.NameString + " x " + c.Count + ""));
+        var costs = string.Join(", ", asSource.GilShopItem.Costs.Select(c => c.Item.NameString + " x " + c.Count + ""));
+        return $"{description} ({rewards}) for ({costs})";
+    };
 }

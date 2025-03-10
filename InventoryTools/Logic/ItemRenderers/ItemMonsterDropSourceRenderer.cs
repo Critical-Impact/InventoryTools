@@ -104,4 +104,10 @@ public class ItemMonsterDropSourceRenderer : ItemInfoRenderer<ItemMonsterDropSou
         return new List<MessageBase>()
             { new OpenUintWindowMessage(typeof(BNpcWindow), asSource.BNpcName.RowId) };
     };
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        return asSource.MobDrop.BNpcName.Value.Singular.ExtractText().ToTitleCase();
+    };
 }

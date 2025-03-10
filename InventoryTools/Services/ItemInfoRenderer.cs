@@ -31,18 +31,20 @@ public class ItemInfoRenderService
     private readonly ImGuiService _imGuiService;
     private readonly IPluginLog _pluginLog;
     private readonly InventoryToolsConfiguration _configuration;
+    private readonly IClipboardService _clipboardService;
     private readonly Dictionary<Type,IItemInfoRenderer> _sourceRenderers;
     private readonly Dictionary<Type,IItemInfoRenderer> _useRenderers;
     private readonly Dictionary<ItemInfoType,IItemInfoRenderer> _sourceRenderersByItemInfoType;
     private readonly Dictionary<ItemInfoType,IItemInfoRenderer> _useRenderersByItemInfoType;
 
-    public ItemInfoRenderService(IEnumerable<IItemInfoRenderer> itemRenderers, SourceIconGroupingSetting sourceIconGroupingSetting, UseIconGroupingSetting useIconGroupingSetting, ImGuiService imGuiService, IPluginLog pluginLog, InventoryToolsConfiguration configuration)
+    public ItemInfoRenderService(IEnumerable<IItemInfoRenderer> itemRenderers, SourceIconGroupingSetting sourceIconGroupingSetting, UseIconGroupingSetting useIconGroupingSetting, ImGuiService imGuiService, IPluginLog pluginLog, InventoryToolsConfiguration configuration, IClipboardService clipboardService)
     {
         _sourceIconGroupingSetting = sourceIconGroupingSetting;
         _useIconGroupingSetting = useIconGroupingSetting;
         _imGuiService = imGuiService;
         _pluginLog = pluginLog;
         _configuration = configuration;
+        _clipboardService = clipboardService;
         var itemInfoRenderers = itemRenderers.ToList();
         _sourceRenderers = itemInfoRenderers.Where(c => c.RendererType == RendererType.Source).ToDictionary(c => c.ItemSourceType, c => c);
         _useRenderers = itemInfoRenderers.Where(c => c.RendererType == RendererType.Use).ToDictionary(c => c.ItemSourceType, c => c);
@@ -196,6 +198,12 @@ public class ItemInfoRenderService
         return sourceRenderer?.GetName(itemSource) ?? itemSource.Item.NameString;
     }
 
+    public string GetSourceDescription(ItemSource itemSource)
+    {
+        var sourceRenderer = this._sourceRenderers.ContainsKey(itemSource.GetType()) ? this._sourceRenderers[itemSource.GetType()] : null;
+        return sourceRenderer?.GetDescription(itemSource) ?? itemSource.Item.NameString;
+    }
+
     public int GetSourceIcon(ItemSource itemSource)
     {
         var sourceRenderer = this._sourceRenderers.ContainsKey(itemSource.GetType()) ? this._sourceRenderers[itemSource.GetType()] : null;
@@ -216,6 +224,12 @@ public class ItemInfoRenderService
     {
         var useRenderer = this._useRenderers.ContainsKey(itemSource.GetType()) ? this._useRenderers[itemSource.GetType()] : null;
         return useRenderer?.GetName(itemSource) ?? itemSource.Item.NameString;
+    }
+
+    public string GetUseDescription(ItemSource itemSource)
+    {
+        var useRenderer = this._useRenderers.ContainsKey(itemSource.GetType()) ? this._useRenderers[itemSource.GetType()] : null;
+        return useRenderer?.GetDescription(itemSource) ?? itemSource.Item.NameString;
     }
 
     public int GetUseIcon(ItemSource itemSource)
@@ -464,6 +478,24 @@ public class ItemInfoRenderService
                 else
                 {
                     _imGuiService.ImGuiMenuService.DrawRightClickPopup(rendererType == RendererType.Source ? firstItem.Item : (firstItem.CostItem ?? firstItem.Item), messages);
+                }
+
+                if (sourceRenderer != null)
+                {
+                    ImGui.Separator();
+                    if (ImGui.Selectable(rendererType == RendererType.Source
+                            ? "Copy Source Information"
+                            : "Copy Use Information"))
+                    {
+                        var typeName = rendererType == RendererType.Source
+                            ? this.GetSourceTypeName(firstItem.GetType())
+                            : this.GetUseTypeName(firstItem.GetType());
+                        var typeDescriptions =
+                            String.Join(", ", itemSources.Select(c => sourceRenderer.GetDescription(c)));
+                        var clipboardText =
+                            $"{firstItem.Item.NameString}:\n\n{(itemSources.Count > 1 ? (typeName.Plural ?? typeName.Singular) : typeName.Singular)}: {typeDescriptions}";
+                        _clipboardService.CopyToClipboard(clipboardText);
+                    }
                 }
             }
         }

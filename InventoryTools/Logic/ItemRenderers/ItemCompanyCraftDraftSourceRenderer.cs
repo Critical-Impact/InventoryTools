@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Sheets;
@@ -52,5 +53,31 @@ public class ItemCompanyCraftDraftSourceRenderer : ItemInfoRenderer<ItemCompanyC
     public override Func<ItemSource, int> GetIcon => source =>
     {
         return Icons.DraftBook;
+    };
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        var description = asSource.CompanyCraftDraft.Value.Name.ExtractText();
+        var materials = new List<string>();
+        for (var index = 0; index < asSource.CompanyCraftDraft.Value.RequiredItem.Count; index++)
+        {
+            var ingredient = asSource.CompanyCraftDraft.Value.RequiredItem[index];
+            var quantity = asSource.CompanyCraftDraft.Value.RequiredItemCount[index];
+            if (ingredient.RowId == 0)
+            {
+                continue;
+            }
+            var item = _itemSheet.GetRow(ingredient.RowId);
+
+            materials.Add($"{item.NameString} x {quantity}");
+        }
+
+        if (materials.Count != 0)
+        {
+            description += $" ({string.Join(", ", materials)})";
+        }
+
+        return description;
     };
 }

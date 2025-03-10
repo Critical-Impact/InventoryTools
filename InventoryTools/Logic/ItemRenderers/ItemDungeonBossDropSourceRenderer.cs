@@ -67,4 +67,10 @@ public class ItemDungeonBossDropSourceRenderer : ItemInfoRenderer<ItemDungeonBos
         return new List<MessageBase>()
             { new OpenUintWindowMessage(typeof(DutyWindow), asSource.ContentFinderCondition.RowId) };
     };
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        return $"{asSource.ContentFinderCondition.FormattedName} ({asSource.BNpcName.Base.Singular.ExtractText()})";
+    };
 }

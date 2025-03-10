@@ -28,4 +28,10 @@ public class ItemArmoireSourceRenderer : ItemInfoRenderer<ItemArmoireSource>
     };
 
     public override Func<ItemSource, int> GetIcon => _ => Icons.ArmoireIcon;
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        return $"Can be placed in the {asSource.Cabinet.CabinetCategory?.Base.Category.Value.Text}";
+    };
 }

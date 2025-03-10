@@ -65,4 +65,30 @@ public class ItemBuddySourceRenderer : ItemInfoRenderer<ItemBuddySource>
     };
 
     public override Func<ItemSource, int> GetIcon => _ => Icons.ChocoboIcon;
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        var usedField = asSource.BuddyItem.Value.UseField;
+        var usedTraining = asSource.BuddyItem.Value.UseTraining;
+        var usedDyeing = asSource.BuddyItem.Value.Unknown0;
+        var name = new List<string>();
+
+        if (usedField)
+        {
+            name.Add("battle");
+        }
+
+        if (usedTraining)
+        {
+            name.Add("training");
+        }
+
+        if (usedDyeing)
+        {
+            name.Add("dyeing");
+        }
+
+        return "Used for " + string.Join(", ", name);
+    };
 }

@@ -28,4 +28,10 @@ public class ItemFurnitureSourceRenderer : ItemInfoRenderer<ItemFurnitureSource>
         return source.Item.NameString;
     };
     public override Func<ItemSource, int> GetIcon => source => Icons.TableIcon;
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        return "Can be placed inside a house.";
+    };
 }

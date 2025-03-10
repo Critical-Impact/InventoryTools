@@ -50,4 +50,10 @@ public class ItemSkybuilderInspectionSourceRenderer : ItemInfoRenderer<ItemSkybu
         return asSource.Item.NameString;
     };
     public override Func<ItemSource, int> GetIcon => _ => Icons.SkybuildersScripIcon;
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        return $"{asSource.CostItem?.NameString} x {asSource.InspectionData.AmountRequired}";
+    };
 }

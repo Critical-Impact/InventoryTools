@@ -81,4 +81,12 @@ public class ItemSpearfishingSourceRenderer : ItemInfoRenderer<ItemSpearfishingS
     };
 
     public override Func<ItemSource, int> GetIcon => _ => Icons.Spearfishing;
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        var level = asSource.SpearfishingItemRow.Base.GatheringItemLevel.Value.GatheringItemLevel;
+
+        return $"Level {(level == 0 ? "N/A" : level)} spot";
+    };
 }

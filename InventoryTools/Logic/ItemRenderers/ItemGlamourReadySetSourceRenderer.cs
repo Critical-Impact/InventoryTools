@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using CriticalCommonLib.Models;
@@ -12,7 +13,7 @@ public class ItemGlamourReadySetSourceRenderer : ItemInfoRenderer<ItemGlamourRea
     public override RendererType RendererType => RendererType.Use;
     public override ItemInfoType Type => ItemInfoType.GlamourReadySet;
     public override string SingularName => "Glamour Ready Set";
-    public override string HelpText => "Is the item the glamour ready form of a 'Glamour Ready' outfit set?";
+    public override string HelpText => "Is this item the glamour ready form of a 'Glamour Ready' outfit set?";
 
     public override bool ShouldGroup => true;
 
@@ -34,4 +35,10 @@ public class ItemGlamourReadySetSourceRenderer : ItemInfoRenderer<ItemGlamourRea
 
     public override Func<ItemSource, string> GetName => source => "";
     public override Func<ItemSource, int> GetIcon => _ => Icons.MannequinIcon;
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        return "Contains " + string.Join(", ", asSource.SetItems.Select(c => c.NameString));
+    };
 }

@@ -40,4 +40,10 @@ public class ItemFateSourceRenderer : ItemInfoRenderer<ItemFateSource>
         return asSource.Fate.Base.Name.ExtractText();
     };
     public override Func<ItemSource, int> GetIcon => _ => Icons.Fate;
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        return asSource.Fate.Base.Name.ExtractText();
+    };
 }

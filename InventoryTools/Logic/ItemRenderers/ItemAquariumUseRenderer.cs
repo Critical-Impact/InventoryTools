@@ -40,4 +40,10 @@ public class ItemAquariumUseRenderer : ItemInfoRenderer<ItemAquariumSource>
         //Open an aquarium window or something
         return null;
     };
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        return $"Can be placed in {asSource.AquariumFish.Size} aquariums with {asSource.AquariumFish.Base.AquariumWater.Value.Name}";
+    };
 }

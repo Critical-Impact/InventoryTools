@@ -150,4 +150,11 @@ public abstract class ItemVentureSourceRenderer<T> : ItemInfoRenderer<T> where T
         return asSource.RetainerTaskRow.FormattedName;
     };
     public override Func<ItemSource, int> GetIcon => _ => Icons.VentureIcon;
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        return
+            $"{asSource.RetainerTaskRow.FormattedName} ({asSource.RetainerTaskRow.Base.VentureCost} ventures, {asSource.RetainerTaskRow.Base.MaxTimemin.Minutes().ToHumanReadableString()})";
+    };
 }

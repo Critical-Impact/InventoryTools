@@ -115,6 +115,12 @@ public abstract class ItemSupplementUseRenderer<T> : ItemSupplementSourceRendere
         ImGui.SameLine();
         ImGui.Text(source.Item.NameString);
     };
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        var asSource = AsSource(source);
+        return source.Item.NameString;
+    };
 }
 
 public abstract class ItemSupplementSourceRenderer<T> : ItemInfoRenderer<T> where T : ItemSupplementSource
@@ -156,4 +162,9 @@ public abstract class ItemSupplementSourceRenderer<T> : ItemInfoRenderer<T> wher
     public override Func<ItemSource, int> GetIcon => _ => _icon;
 
     public override Func<ItemSource, string> GetName => _ => "";
+
+    public override Func<ItemSource, string> GetDescription => source =>
+    {
+        return source.CostItem!.NameString;
+    };
 }
