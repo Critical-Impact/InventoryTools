@@ -369,6 +369,7 @@ namespace InventoryTools
                 builder.RegisterType<HostedUniversalisConfiguration>().AsSelf().As<IHostedUniversalisConfiguration>()
                     .SingleInstance();
                 builder.RegisterType<MinifyResolver>().SingleInstance();
+                builder.RegisterType<AutofacResolver>().SingleInstance();
                 builder.RegisterType<ItemLocalizer>().SingleInstance();
                 builder.RegisterType<IngredientPreferenceLocalizer>().SingleInstance();
                 builder.RegisterType<CraftGroupingLocalizer>().SingleInstance();

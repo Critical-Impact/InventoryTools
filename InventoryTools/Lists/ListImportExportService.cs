@@ -5,6 +5,7 @@ using System.Text;
 using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Resolvers;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Services;
@@ -23,11 +24,13 @@ public class ListImportExportService
 {
     private readonly ItemSheet _itemSheet;
     private readonly FilterConfiguration.Factory _filterConfigurationFactory;
+    private readonly AutofacResolver _autofacResolver;
 
-    public ListImportExportService(VersionInfo info , ItemSheet itemSheet, FilterConfiguration.Factory filterConfigurationFactory)
+    public ListImportExportService(VersionInfo info , ItemSheet itemSheet, FilterConfiguration.Factory filterConfigurationFactory, AutofacResolver autofacResolver)
     {
         _itemSheet = itemSheet;
         _filterConfigurationFactory = filterConfigurationFactory;
+        _autofacResolver = autofacResolver;
         CurrentVersion = (byte)info.ImportExportVersion;
     }
 
@@ -59,7 +62,10 @@ public class ListImportExportService
             }
 
             var json = Encoding.UTF8.GetString(bytes.AsSpan()[1..]);
-            var deserializeObject = JsonConvert.DeserializeObject<FilterConfiguration>(json);
+            var deserializeObject = JsonConvert.DeserializeObject<FilterConfiguration>(json,new JsonSerializerSettings()
+            {
+                ContractResolver = _autofacResolver
+            });
             if (deserializeObject == null)
             {
                 return false;

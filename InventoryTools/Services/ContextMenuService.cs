@@ -12,6 +12,7 @@ using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Mediator;
@@ -19,6 +20,7 @@ using InventoryTools.Services.Interfaces;
 using InventoryTools.Ui;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using ValueType = FFXIVClientStructs.FFXIV.Component.GUI.ValueType;
 
 namespace InventoryTools.Services;
 
@@ -168,25 +170,38 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
 
     private uint? GetGameObjectItemId(IMenuOpenedArgs args)
     {
-        var item = args.AddonName switch
+        uint? item;
+
+        //Need to handle ItemSearch/ItemSearchResult in a single case as the addon still gets detected as ItemSearch even if the menu gets spawned from ItemSearchResult
+        if (args.AddonName == "ItemSearch")
         {
-            null                 => HandleNulls(),
-            "Shop" => GetObjectItemId("Shop", ShopContextMenuItemId),
-            "GrandCompanySupplyList" => GetObjectItemId("GrandCompanySupplyList", GrandCompanySupplyListContextItemId),
-            "GrandCompanyExchange" => GetObjectItemId("GrandCompanyExchange", GrandCompanyExchangeContextItemId),
-            "ShopExchangeCurrency" => GetObjectItemId("ShopExchangeCurrency", ShopExchangeCurrencyContextItemId),
-            "SubmarinePartsMenu" => GetObjectItemId("SubmarinePartsMenu", SubmarinePartsMenuContextItemId),
-            "ShopExchangeItem" => GetObjectItemId("ShopExchangeItem", ShopExchangeItemContextItemId),
-            "ContentsInfoDetail" => GetObjectItemId("ContentsInfo",          ContentsInfoDetailContextItemId),
-            "RecipeNote"         => GetObjectItemId("RecipeNote",            RecipeNoteContextItemId),
-            "RecipeTree"         => GetObjectItemId(AgentById(AgentId.RecipeItemContext), AgentItemContextItemId),
-            "RecipeMaterialList" => GetObjectItemId(AgentById(AgentId.RecipeItemContext), AgentItemContextItemId),
-            "RecipeProductList" => GetObjectItemId(AgentById(AgentId.RecipeItemContext), AgentItemContextItemId),
-            "GatheringNote"      => GetObjectItemId("GatheringNote",         GatheringNoteContextItemId),
-            "ItemSearch"         => GetObjectItemId(args.AgentPtr,              ItemSearchContextItemId),
-            "ChatLog"            => GetObjectItemId("ChatLog",               ChatLogContextItemId),
-            _                    => null,
-        };
+            item = GetItemIdByAtkValue("ItemSearchResult", 0);
+            if (item == null)
+            {
+                item = GetObjectItemId(args.AgentPtr, ItemSearchContextItemId);
+            }
+        }
+        else
+        {
+            item = args.AddonName switch
+            {
+                null => HandleNulls(),
+                "Shop" => GetObjectItemId("Shop", ShopContextMenuItemId),
+                "GrandCompanySupplyList" => GetObjectItemId("GrandCompanySupplyList", GrandCompanySupplyListContextItemId),
+                "GrandCompanyExchange" => GetObjectItemId("GrandCompanyExchange", GrandCompanyExchangeContextItemId),
+                "ShopExchangeCurrency" => GetObjectItemId("ShopExchangeCurrency", ShopExchangeCurrencyContextItemId),
+                "SubmarinePartsMenu" => GetObjectItemId("SubmarinePartsMenu", SubmarinePartsMenuContextItemId),
+                "ShopExchangeItem" => GetObjectItemId("ShopExchangeItem", ShopExchangeItemContextItemId),
+                "ContentsInfoDetail" => GetObjectItemId("ContentsInfo", ContentsInfoDetailContextItemId),
+                "RecipeNote" => GetObjectItemId("RecipeNote", RecipeNoteContextItemId),
+                "RecipeTree" => GetObjectItemId(AgentById(AgentId.RecipeItemContext), AgentItemContextItemId),
+                "RecipeMaterialList" => GetObjectItemId(AgentById(AgentId.RecipeItemContext), AgentItemContextItemId),
+                "RecipeProductList" => GetObjectItemId(AgentById(AgentId.RecipeItemContext), AgentItemContextItemId),
+                "GatheringNote" => GetObjectItemId("GatheringNote", GatheringNoteContextItemId),
+                "ChatLog" => GetObjectItemId("ChatLog", ChatLogContextItemId),
+                _ => null,
+            };
+        }
 
         if (args.AddonName == "ChatLog" &&
             (item >= 1500000 || GetObjectItemId("ChatLog", ChatLogContextMenuType) != 3)) {
@@ -209,6 +224,30 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
             itemId -= 500000;
 
         return itemId;
+    }
+
+    private unsafe uint? GetItemIdByAtkValue(string addonName, int aktValue)
+    {
+        var addonPtr = this._gameGui.GetAddonByName(addonName);
+        if (addonPtr == IntPtr.Zero) return null;
+        var addon = (AtkUnitBase*)addonPtr;
+        var atkValue = addon->AtkValues[aktValue];
+        if (atkValue.Type is ValueType.Null or ValueType.Undefined)
+        {
+            return null;
+        }
+
+        if (atkValue.Type is ValueType.Int)
+        {
+            return (uint?)atkValue.Int;
+        }
+
+        if (atkValue.Type is ValueType.UInt)
+        {
+            return atkValue.UInt;
+        }
+
+        return null;
     }
 
     private unsafe uint? GetObjectItemId(IntPtr agent, int offset)
