@@ -36,7 +36,12 @@ public class IsRecipeCompletedFilter : BooleanFilter
 
         if (!item.CanBeCrafted)
         {
-            return false;
+            return null;
+        }
+
+        if (item.Recipes.All(c => c.RowId >= 30000))
+        {
+            return null;
         }
 
         switch (currentValue.Value)

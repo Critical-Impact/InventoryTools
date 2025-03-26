@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib.Services.Mediator;
 using Dalamud.Interface.Textures;

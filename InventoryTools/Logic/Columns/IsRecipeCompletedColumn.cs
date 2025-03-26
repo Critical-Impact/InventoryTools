@@ -25,6 +25,11 @@ public class IsRecipeCompletedColumn : CheckboxColumn
             return null;
         }
 
+        if (searchResult.Item.Recipes.All(c => c.RowId >= 30000))
+        {
+            return null;
+        }
+
         return searchResult.Item.Recipes.All(c => _questManagerService.IsRecipeComplete(c.RowId));
     }
 

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CriticalCommonLib.Services;
 using InventoryTools.Services;
 using Lumina.Excel;

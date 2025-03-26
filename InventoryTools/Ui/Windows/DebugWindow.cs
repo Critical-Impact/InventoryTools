@@ -783,8 +783,8 @@ namespace InventoryTools.Ui
                         if (_inventoryType != null)
                         {
                             var container = InventoryManager.Instance()->GetInventoryContainer(_inventoryType.Value);
-                            ImGui.Text(container->Loaded != 0 ? "Container Loaded" : "Container Unloaded");
-                            ImGui.Text(container->Loaded.ToString());
+                            ImGui.Text(container->IsLoaded ? "Container Loaded" : "Container Unloaded");
+                            ImGui.Text(container->IsLoaded.ToString());
 
                         }
                     }

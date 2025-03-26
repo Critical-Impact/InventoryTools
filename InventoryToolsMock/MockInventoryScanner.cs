@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using FFXIVClientStructs.FFXIV.Client.Game;

@@ -417,7 +417,7 @@ public class ShopTrackerService : IDisposable
                     if (activeTarget)
                     {
                          var freeCompanyShopAgent = UIModule.Instance()->GetAgentModule()->GetAgentByInternalId(AgentId.FreeCompanyCreditShop);
-                         if (freeCompanyShopAgent != null && freeCompanyShopAgent->IsAgentActive() && eventHandler.Item2.Value != null && eventHandler.Item2.Value->Info.EventId.ContentId == EventHandlerType.FreeCompanyCreditShop)
+                         if (freeCompanyShopAgent != null && freeCompanyShopAgent->IsAgentActive() && eventHandler.Item2.Value != null && eventHandler.Item2.Value->Info.EventId.ContentId == EventHandlerContent.FreeCompanyCreditShop)
                          {
                              shopId = shops.FirstOrDefault(c => c.Item2 == eventHandler.Item1);
                          }

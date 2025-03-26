@@ -1,15 +1,15 @@
 {
   "version": 1,
   "dependencies": {
-    "net8.0-windows7.0": {
+    "net9.0-windows7.0": {
       "DalaMock.Core": {
         "type": "Direct",
-        "requested": "[2.1.7, )",
-        "resolved": "2.1.7",
-        "contentHash": "NDgZXtdUo9M1p6hWfJfMcWbfJV/AjTAncWG0LogFInQyd6w499LWlUkQDbRRfa12u6RrhF0dvraZhZxG5e5pxw==",
+        "requested": "[2.2.0, )",
+        "resolved": "2.2.0",
+        "contentHash": "e0NelqOzZ6V/jqXdL18mItsFrnMuw5CXJRijmrrfBPPoQfwx4Zs32DdfGczG6RCwbIaL/9GbvHFHabHzw8iEjg==",
         "dependencies": {
           "Autofac": "8.0.0",
-          "DalaMock.Shared": "2.1.6",
+          "DalaMock.Shared": "2.2.0",
           "Microsoft.Extensions.Configuration": "8.0.0",
           "Microsoft.Extensions.DependencyModel": "9.0.0",
           "Microsoft.Extensions.Hosting": "8.0.0",
@@ -24,6 +24,12 @@
           "Veldrid.SDL2": "4.9.0",
           "Veldrid.StartupUtilities": "4.9.0"
         }
+      },
+      "DotNet.ReproducibleBuilds": {
+        "type": "Direct",
+        "requested": "[1.2.25, )",
+        "resolved": "1.2.25",
+        "contentHash": "xCXiw7BCxHJ8pF6wPepRUddlh2dlQlbr81gXA72hdk4FLHkKXas7EH/n+fk5UCA/YfMqG1Z6XaPiUjDbUNBUzg=="
       },
       "Humanizer.Core": {
         "type": "Direct",
@@ -85,11 +91,7 @@
         "type": "Direct",
         "requested": "[9.0.0, )",
         "resolved": "9.0.0",
-        "contentHash": "saxr2XzwgDU77LaQfYFXmddEDRUKHF4DaGMZkNB3qjdVSZlax3//dGJagJkKrGMIPNZs2jVFXITyCCR6UHJNdA==",
-        "dependencies": {
-          "System.Text.Encodings.Web": "9.0.0",
-          "System.Text.Json": "9.0.0"
-        }
+        "contentHash": "saxr2XzwgDU77LaQfYFXmddEDRUKHF4DaGMZkNB3qjdVSZlax3//dGJagJkKrGMIPNZs2jVFXITyCCR6UHJNdA=="
       },
       "Microsoft.Extensions.ObjectPool": {
         "type": "Direct",
@@ -176,8 +178,8 @@
       },
       "AllaganLib.Data": {
         "type": "Transitive",
-        "resolved": "1.1.12",
-        "contentHash": "MuqPiTjtqkcgPpDiQ0vxRCe6wjEVdrbfqbODxMORCbfkYZxZKZNFlRLTNzBbjPl8lmZ+GmRgfCcTDcfISVCmsw==",
+        "resolved": "1.2.0",
+        "contentHash": "fnp+cwnzh9tGZDeP0ZVgKMIbgIYnzbxVeo3veBNzvoZ+JXesZmTuaHwrD3mgT0maY6UZo0UcNmIPUlR6H1AZXA==",
         "dependencies": {
           "CSVFile": "3.1.0",
           "CsvHelper": "30.0.1"
@@ -185,29 +187,29 @@
       },
       "AllaganLib.GameSheets": {
         "type": "Transitive",
-        "resolved": "1.1.24",
-        "contentHash": "PplBYUWqTCW04047b6HVF3avBFUPuQF6o10AbDwIuE5QezEDfB82xoheG8XJfricTRwuL5j8pCRIDLzDdD2mkA==",
+        "resolved": "1.2.0",
+        "contentHash": "H8oyLkwxqEuFq1qF/C25+ZUAaVjn0KGT9fFgAOT0kj6wVR2lM4ye+yj+UvTbGOx/M+rAGR3VDq7Gm9Cxm3b/7w==",
         "dependencies": {
-          "AllaganLib.Shared": "1.1.12",
+          "AllaganLib.Shared": "1.2.0",
           "Autofac.Extensions.DependencyInjection": "9.0.0",
           "CSVFile": "3.2.0",
-          "LuminaSupplemental.Excel": "2.2.3"
+          "LuminaSupplemental.Excel": "2.3.0"
         }
       },
       "AllaganLib.Interface": {
         "type": "Transitive",
-        "resolved": "1.1.16",
-        "contentHash": "Xp4IJsm1Fm8RabWmXcgXj7mZ28xzOA0EOFqIrAwrSKTalfrGlX6/bwe3m2LqU7/+HzM+aWchKdht4F8E1QNK7g==",
+        "resolved": "1.2.0",
+        "contentHash": "SqntL7hFDVwLiXGQ37oAHRmBalwahQ0zUs+s/98QCfZSVpx1XIxcMEgXdW3UCuKd6ZSV8Mbye7z3cSuLgsXJKA==",
         "dependencies": {
-          "AllaganLib.Data": "1.1.12",
-          "AllaganLib.Shared": "1.1.12",
+          "AllaganLib.Data": "1.2.0",
+          "AllaganLib.Shared": "1.2.0",
           "NaturalSort.Extension": "4.3.0"
         }
       },
       "AllaganLib.Shared": {
         "type": "Transitive",
-        "resolved": "1.1.12",
-        "contentHash": "j48q3r3lk5S+AAbX2MmOI9+9xjA1GbNMqN7PZ6HKXk7toREDKPQVv2bgTLOeMtQVEmQPFsoBCSbdHOpGMmBreA==",
+        "resolved": "1.2.0",
+        "contentHash": "Wfu8H9r6Bbpvwl/UpGr80NyfY1ZMSpi7347Uc77N7fcdLQeSp9vzk0jLGs+7NbtG03TAp3I1EyAKIBQUW7m5tg==",
         "dependencies": {
           "Microsoft.Extensions.Hosting": "8.0.0",
           "Microsoft.Extensions.Hosting.Abstractions": "8.0.0"
@@ -242,11 +244,11 @@
       },
       "DalaMock.Host": {
         "type": "Transitive",
-        "resolved": "2.1.6",
-        "contentHash": "wCS8xL11kzT39jyMkNo9+kf/JmF3gcGaF1bk2avuf59+121xjv4lj/a5jTwjzOqZLomSVVKLxWdSEsk5EuRrjA==",
+        "resolved": "2.2.0",
+        "contentHash": "DJJqmS4QEMDnrVFUmXERq4g6X00yO5l56BLHrC6OJG89ePnSo/flkg1P8fHFPGMyShhJizN39jeBcXCgKvB1ag==",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "9.0.0",
-          "DalaMock.Shared": "2.1.6",
+          "DalaMock.Shared": "2.2.0",
           "Microsoft.Extensions.Hosting": "8.0.0",
           "Microsoft.Extensions.Hosting.Abstractions": "8.0.0",
           "Microsoft.Extensions.ObjectPool": "9.0.0-preview.6.24328.4"
@@ -254,8 +256,8 @@
       },
       "DalaMock.Shared": {
         "type": "Transitive",
-        "resolved": "2.1.6",
-        "contentHash": "F6LtlbpWN6H1tpZaXpg0JcXEsnmeVg+1UMahKsmxtPKipqhu8/BEcXz6T1HbKF/p/ZHFGiFfpXwR5ooIMt2nXw==",
+        "resolved": "2.2.0",
+        "contentHash": "cX7L+JNkqLaOxZZ5a+Kdtpj5hPLo1bQumhNczgdTQxP/Pz80I7q0w1ZobEpY21D2bAkHmuF7Q9oM8CJ9QTbXeg==",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "9.0.0",
           "Microsoft.Extensions.Hosting": "8.0.0",
@@ -264,18 +266,18 @@
       },
       "DalamudPackager": {
         "type": "Transitive",
-        "resolved": "11.0.0",
-        "contentHash": "bjT7XUlhIJSmsE/O76b7weUX+evvGQctbQB8aKXt94o+oPWxHpCepxAGMs7Thow3AzCyqWs7cOpp9/2wcgRRQA=="
+        "resolved": "12.0.0",
+        "contentHash": "J5TJLV3f16T/E2H2P17ClWjtfEBPpq3yxvqW46eN36JCm6wR+EaoaYkqG9Rm5sHqs3/nK/vKjWWyvEs/jhKoXw=="
       },
       "JetBrains.Annotations": {
         "type": "Transitive",
-        "resolved": "2024.2.0",
-        "contentHash": "GNnqCFW/163p1fOehKx0CnAqjmpPrUSqrgfHM6qca+P+RN39C9rhlfZHQpJhxmQG/dkOYe/b3Z0P8b6Kv5m1qw=="
+        "resolved": "2024.3.0",
+        "contentHash": "ox5pkeLQXjvJdyAB4b2sBYAlqZGLh3PjSnP1bQNVx72ONuTJ9+34/+Rq91Fc0dG29XG9RgZur9+NcP4riihTug=="
       },
       "LuminaSupplemental.Excel": {
         "type": "Transitive",
-        "resolved": "2.2.3",
-        "contentHash": "BtbA8G9aRqDhct33/w4Ge3hMuKmOaO80500wmngSCPUS0aupe5eETKkDKN8cCnOIQiCSiw7/V5EtevYZ4c6IaQ==",
+        "resolved": "2.3.0",
+        "contentHash": "gSvHph3Hii0SWmvRwKOvO1/W8uAP8Aaqqh6HQmQFPtxWujhLcjvcFZ5Co1MYvb6PGXcOcfLB6Shr9UkV8/GaIA==",
         "dependencies": {
           "CSVFile": "3.2.0",
           "CsvHelper": "30.0.1",
@@ -431,16 +433,16 @@
       },
       "Microsoft.Extensions.DependencyInjection": {
         "type": "Transitive",
-        "resolved": "8.0.1",
-        "contentHash": "BmANAnR5Xd4Oqw7yQ75xOAYODybZQRzdeNucg7kS5wWKd2PNnMdYtJ2Vciy0QLylRmv42DGl5+AFL9izA6F1Rw==",
+        "resolved": "9.0.2",
+        "contentHash": "ZffbJrskOZ40JTzcTyKwFHS5eACSWp2bUQBBApIgGV+es8RaTD4OxUG7XxFr3RIPLXtYQ1jQzF2DjKB5fZn7Qg==",
         "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.2"
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.2"
         }
       },
       "Microsoft.Extensions.DependencyInjection.Abstractions": {
         "type": "Transitive",
-        "resolved": "8.0.2",
-        "contentHash": "3iE7UF7MQkCv1cxzCahz+Y/guQbTqieyxyaWKhrRO91itI9cOKO76OHeQDahqG4MmW5umr3CcCvGmK92lWNlbg=="
+        "resolved": "9.0.2",
+        "contentHash": "MNe7GSTBf3jQx5vYrXF0NZvn6l7hUKF6J54ENfAgCO8y6xjN1XUmKKWG464LP2ye6QqDiA1dkaWEZBYnhoZzjg=="
       },
       "Microsoft.Extensions.Diagnostics": {
         "type": "Transitive",
@@ -721,8 +723,8 @@
       },
       "System.IO.Pipelines": {
         "type": "Transitive",
-        "resolved": "9.0.0",
-        "contentHash": "eA3cinogwaNB4jdjQHOP3Z3EuyiDII7MT35jgtnsA4vkn0LUrrSHsU0nzHTzFzmaFYeKV7MYyMxOocFzsBHpTw=="
+        "resolved": "8.0.0",
+        "contentHash": "FHNOatmUq0sqJOkTx+UF/9YK1f180cnW5FVqnQMvYUN0elp6wFzbtPSiqbo1/ru8ICp43JM1i7kKkk6GsNGHlA=="
       },
       "System.Memory": {
         "type": "Transitive",
@@ -753,20 +755,6 @@
         "type": "Transitive",
         "resolved": "6.0.0",
         "contentHash": "/iUeP3tq1S0XdNNoMz5C9twLSrM/TH+qElHkXWaPvuNOt+99G75NrV0OS2EqHx5wMN7popYjpc8oTjC1y16DLg=="
-      },
-      "System.Text.Encodings.Web": {
-        "type": "Transitive",
-        "resolved": "9.0.0",
-        "contentHash": "e2hMgAErLbKyUUwt18qSBf9T5Y+SFAL3ZedM8fLupkVj8Rj2PZ9oxQ37XX2LF8fTO1wNIxvKpihD7Of7D/NxZw=="
-      },
-      "System.Text.Json": {
-        "type": "Transitive",
-        "resolved": "9.0.0",
-        "contentHash": "js7+qAu/9mQvnhA4EfGMZNEzXtJCDxgkgj8ohuxq/Qxv+R56G+ljefhiJHOxTNiw54q8vmABCWUwkMulNdlZ4A==",
-        "dependencies": {
-          "System.IO.Pipelines": "9.0.0",
-          "System.Text.Encodings.Web": "9.0.0"
-        }
       },
       "System.Threading.Channels": {
         "type": "Transitive",
@@ -852,7 +840,7 @@
       "criticalcommonlib": {
         "type": "Project",
         "dependencies": {
-          "AllaganLib.GameSheets": "[1.1.24, )",
+          "AllaganLib.GameSheets": "[1.2.0, )",
           "Humanizer.Core": "[3.0.0-beta.54, )",
           "Microsoft.Extensions.Hosting": "[8.0.1, )",
           "NaturalSort.Extension": "[3.2.0, )",
@@ -863,13 +851,13 @@
       "inventorytools": {
         "type": "Project",
         "dependencies": {
-          "AllaganLib.Interface": "[1.1.16, )",
+          "AllaganLib.Interface": "[1.2.0, )",
           "Autofac": "[8.0.0, )",
           "Autofac.Extensions.DependencyInjection": "[9.0.0, )",
           "CriticalCommonLib": "[1.0.0, )",
           "CsvHelper": "[30.0.1, )",
-          "DalaMock.Host": "[2.1.6, )",
-          "DalamudPackager": "[11.0.0, )",
+          "DalaMock.Host": "[2.2.0, )",
+          "DalamudPackager": "[12.0.0, )",
           "Humanizer.Core": "[3.0.0-beta.54, )",
           "Microsoft.AspNetCore.SignalR.Client": "[7.0.11, )",
           "Microsoft.AspNetCore.SignalR.Protocols.MessagePack": "[7.0.11, )",
@@ -883,8 +871,8 @@
       "ottergui": {
         "type": "Project",
         "dependencies": {
-          "JetBrains.Annotations": "[2024.2.0, )",
-          "Microsoft.Extensions.DependencyInjection": "[8.0.0, )"
+          "JetBrains.Annotations": "[2024.3.0, )",
+          "Microsoft.Extensions.DependencyInjection": "[9.0.2, )"
         }
       },
       "tetris": {

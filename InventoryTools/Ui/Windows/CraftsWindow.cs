@@ -528,15 +528,37 @@ namespace InventoryTools.Ui
 
                     if (ImGui.MenuItem("Paste List Contents"))
                     {
-                        var importedList = _importExportService.FromTCString(_clipboardService.PasteFromClipboard(), false);
+                        var pasteFromClipboard = _clipboardService.PasteFromClipboard();
+                        var importedList = _importExportService.FromTCString(pasteFromClipboard, false);
                         if (importedList == null)
                         {
-                            _chatUtilities.PrintError("The contents of your clipboard could not be parsed.");
+                            importedList =
+                                _importExportService.FromGarlandToolsUrl(pasteFromClipboard);
+                            if (importedList == null)
+                            {
+                                _chatUtilities.PrintError("The contents of your clipboard could not be parsed.");
+                            }
+                            else
+                            {
+                                _chatUtilities.Print("The contents of your clipboard were imported.");
+                                this.SelectedConfiguration.AddItemsToList(importedList);
+                            }
                         }
                         else
                         {
                             _chatUtilities.Print("The contents of your clipboard were imported.");
                             this.SelectedConfiguration.AddItemsToList(importedList);
+                        }
+                    }
+
+                    if (ImGui.IsItemHovered())
+                    {
+                        using(var tooltip = ImRaii.Tooltip())
+                        {
+                            if (tooltip)
+                            {
+                                ImGui.TextUnformatted("This will paste the contents of items copied via the 'Copy List Contents' menu above, it also will attempt to parse Teamcraft lists if one is in your clipboard. If you have a garland tools URL in your clipboard that points to a group, it will also attempt to parse that add it to your craft list.");
+                            }
                         }
                     }
                     if (ImGui.MenuItem("Clear List"))

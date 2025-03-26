@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using AllaganLib.Shared.Time;
 using Autofac;
 using CriticalCommonLib.Crafting;
