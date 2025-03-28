@@ -327,13 +327,14 @@ namespace InventoryTools.Logic
                     }
                     return c.SortingResult is {SourceBag: InventoryType.Armoire};
                 });
-                var cabinetDictionary = _cabinetCategorySheet.Where(c => c.Category.RowId != 0).ToDictionary(c => c.Category.RowId, c => (uint)c.MenuOrder - 1);
+                var cabinetDictionary = _cabinetCategorySheet.Where(c => c.RowId != 0).ToDictionary(c => c.RowId, c => (uint)c.MenuOrder - 1);
                 foreach (var item in filteredItems)
                 {
                     if (item.Item.CabinetCategory == null)
                     {
                         continue;
                     }
+
                     if((MatchesFilter(FilterConfiguration, item, InvertHighlighting) || MatchesRetainerFilter(FilterConfiguration, item, InvertHighlighting)))
                     {
                         if (cabinetDictionary.ContainsKey(item.Item.CabinetCategory.RowId) && !bagHighlights.ContainsKey(cabinetDictionary[item.Item.CabinetCategory.RowId]))
@@ -349,18 +350,18 @@ namespace InventoryTools.Logic
 
                     foreach (var cab in cabinetDictionary)
                     {
-                        if (!bagHighlights.ContainsKey(cab.Value))
+                        if (bagHighlights.ContainsKey(cab.Value))
                         {
                             if (!invertedHighlights.ContainsKey(cab.Value))
                             {
-                                invertedHighlights.Add(cab.Value, TabHighlightColor);
+                                invertedHighlights.Add(cab.Value, null);
                             }
                         }
                         else
                         {
                             if (!invertedHighlights.ContainsKey(cab.Value))
                             {
-                                invertedHighlights.Add(cab.Value, null);
+                                invertedHighlights.Add(cab.Value, TabHighlightColor);
                             }
                         }
                     }

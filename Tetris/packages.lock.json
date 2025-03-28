@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net8.0-windows7.0": {
+    "net9.0-windows7.0": {
       "Humanizer.Core": {
         "type": "Direct",
         "requested": "[3.0.0-beta.54, )",

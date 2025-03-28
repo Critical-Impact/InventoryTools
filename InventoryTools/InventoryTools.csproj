@@ -1,4 +1,4 @@
-﻿<Project Sdk="Dalamud.NET.SDK/12.0.2">
+﻿<Project Sdk="Dalamud.NET.Sdk/12.0.2">
     <PropertyGroup>
         <Version>1.7.0.20</Version>
         <AssemblyName>InventoryTools</AssemblyName>
@@ -14,24 +14,23 @@
 
     <ItemGroup>
         <PackageReference Include="AllaganLib.Interface" Version="1.2.0" />
-        <PackageReference Include="Autofac" Version="8.0.0" />
-        <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="9.0.0" />
+        <PackageReference Include="Autofac" Version="8.2.0" />
+        <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
         <PackageReference Include="DalaMock.Host" Version="2.2.0" />
         <PackageReference Include="Humanizer.Core" Version="3.0.0-beta.54" />
-        <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.11" />
-        <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="7.0.11" />
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
-        <PackageReference Include="CsvHelper" Version="30.0.1" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.3" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="9.0.3" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.3" />
+        <PackageReference Include="CsvHelper" Version="33.0.1" />
         <PackageReference Include="SerialQueue" Version="2.1.0" />
-        <PackageReference Include="SonarAnalyzer.CSharp" Version="10.6.0.109712">
+        <PackageReference Include="SonarAnalyzer.CSharp" Version="10.7.0.110445">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="System.Reactive" Version="5.0.0" />
+        <PackageReference Include="System.Reactive" Version="6.0.1" />
         <ProjectReference Include="..\CriticalCommonLib\CriticalCommonLib.csproj" />
         <ProjectReference Include="..\OtterGui\OtterGui.csproj" />
         <ProjectReference Include="..\Tetris\Tetris.csproj" />
-        <PackageReference Update="DalamudPackager" Version="12.0.0" />
     </ItemGroup>
 
     <ItemGroup>

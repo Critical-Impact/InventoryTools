@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 using Autofac;
+using CriticalCommonLib;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
@@ -62,6 +63,18 @@ public class DebugOverlayServiceWindow : GenericWindow
             ImGui.Text($"{overlay.GetType()}");
             ImGui.Text($"Needs State Refresh: {(overlay.NeedsStateRefresh ? "Yes" : "No")}");
             ImGui.Text($"Should Draw: {(overlay.ShouldDraw ? "Yes" : "No")}");
+        }
+
+        if (ImGui.CollapsingHeader("Current State:") && OverlayService.LastState != null)
+        {
+            Utils.PrintOutObject(OverlayService.LastState, 0, new List<string>());
+            if (OverlayService.LastState.FilterResult != null)
+            {
+                foreach (var result in OverlayService.LastState.FilterResult)
+                {
+                    Utils.PrintOutObject(result, 0, new List<string>());
+                }
+            }
         }
 
     }

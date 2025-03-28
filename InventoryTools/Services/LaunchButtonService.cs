@@ -25,7 +25,6 @@ public class LaunchButtonService : DisposableMediatorSubscriberBase, IHostedServ
     private readonly InventoryToolsUi _inventoryToolsUi;
     private readonly InventoryToolsConfiguration _inventoryToolsConfiguration;
     private readonly ConfigurationManagerService _configurationManagerService;
-    private IDalamudTextureWrap?  _icon;
     private IReadOnlyTitleScreenMenuEntry? _entry;
     private readonly string           _fileName;
 
@@ -51,15 +50,7 @@ public class LaunchButtonService : DisposableMediatorSubscriberBase, IHostedServ
         }
         try
         {
-            _icon = _textureProvider.GetFromFile(_fileName).RentAsync().Result;
-            if (_icon != null)
-            {
-                _entry = _titleScreenMenu.AddEntry("Allagan Tools", _icon, OnTriggered);
-            }
-            else
-            {
-                _logger.LogError($"Could not load icon to add to title screen menu.");
-            }
+            _entry = _titleScreenMenu.AddEntry("Allagan Tools", _textureProvider.GetFromFile(_fileName), OnTriggered);
 
             _pluginInterfaceService.UiBuilder.Draw -= CreateEntry;
         }
@@ -90,7 +81,6 @@ public class LaunchButtonService : DisposableMediatorSubscriberBase, IHostedServ
 
     protected override void Dispose(bool disposing)
     {
-        _icon?.Dispose();
         RemoveEntry();
     }
 

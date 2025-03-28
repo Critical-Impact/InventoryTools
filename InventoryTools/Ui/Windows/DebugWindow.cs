@@ -9,7 +9,7 @@ using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-
+using CriticalCommonLib.Services.Ui;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using ImGuiNET;
 using InventoryTools.Logic;
@@ -18,6 +18,9 @@ using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
 using FFXIVClientStructs.FFXIV.Client.LayoutEngine.Layer;
+using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Ui.DebugWindows;
@@ -41,6 +44,7 @@ namespace InventoryTools.Ui
         GameInventory = 8,
         Unlocks = 9,
         LayerDebugger = 10,
+        AddonDebugger = 11,
     }
     public class DebugWindow : GenericWindow, IMenuWindow
     {
@@ -158,6 +162,11 @@ namespace InventoryTools.Ui
                         _configuration.SelectedDebugPage = (int)DebugMenu.LayerDebugger;
                     }
 
+                    if (ImGui.Selectable("Addon Debugger", _configuration.SelectedDebugPage == (int)DebugMenu.AddonDebugger))
+                    {
+                        _configuration.SelectedDebugPage = (int)DebugMenu.AddonDebugger;
+                    }
+
                 }
             }
             ImGui.SameLine();
@@ -193,6 +202,10 @@ namespace InventoryTools.Ui
                     else if (_configuration.SelectedDebugPage == (int)DebugMenu.LayerDebugger)
                     {
                         DrawLayerDebugger();
+                    }
+                    else if (_configuration.SelectedDebugPage == (int)DebugMenu.AddonDebugger)
+                    {
+                        DrawAddonDebugger();
                     }
                     else if (_configuration.SelectedDebugPage == (int)DebugMenu.Unlocks)
                     {
@@ -965,6 +978,66 @@ namespace InventoryTools.Ui
             }
         }
 
+        private string _addonName = "";
+        private int _componentId = 84;
+        private int _maxScanSize = 0x5000;
+        private int? _cachedOffset = null;
+        private string? _errorMessage = null;
+
+        private unsafe void DrawAddonDebugger()
+        {
+            ImGui.InputText("Addon Name", ref _addonName, 100);
+            ImGui.InputInt("Component ID", ref _componentId);
+            ImGui.InputInt("Max Scan Size", ref _maxScanSize);
+
+
+            if (ImGui.Button("Scan"))
+            {
+                _cachedOffset = null;
+                _errorMessage = null;
+
+                var addon = gameGui.GetAddonByName(_addonName);
+                if (addon != IntPtr.Zero)
+                {
+                    var unitBase = (AtkUnitBase*)addon;
+
+                    if (unitBase != null)
+                    {
+                        var buttonPtr = (IntPtr)unitBase->GetComponentByNodeId(_componentId < 0 ? 0 : (uint)_componentId);
+                        if (buttonPtr != IntPtr.Zero)
+                        {
+                            int offset = FindReferenceOffset((IntPtr)unitBase, buttonPtr, _maxScanSize);
+                            if (offset != -1)
+                            {
+                                _cachedOffset = offset;
+                            }
+                            else
+                            {
+                                _errorMessage = "Reference offset not found.";
+                            }
+                        }
+                        else
+                        {
+                            _errorMessage = "Component not found.";
+                        }
+                    }
+                }
+                else
+                {
+                    _errorMessage = "Addon not found.";
+                }
+            }
+
+            if (_cachedOffset.HasValue)
+            {
+                ImGui.TextColored(new System.Numerics.Vector4(0, 1, 0, 1), $"Potential field offset: 0x{_cachedOffset.Value:X}");
+            }
+            else if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 1), _errorMessage);
+            }
+        }
+
         private void DrawInventoryScannerDebugTab()
         {
 
@@ -1636,6 +1709,48 @@ namespace InventoryTools.Ui
                 ImGui.Text($"{characterPair.Value.Count} unlocked items");
             }
         }
+
+        public unsafe int FindReferenceOffset(IntPtr addonBasePtr, IntPtr buttonPtr, int maxScanSize = 0x5000)
+        {
+            if (addonBasePtr == IntPtr.Zero || buttonPtr == IntPtr.Zero)
+                throw new ArgumentException("Pointers must be valid");
+
+            byte* baseAddress = (byte*)addonBasePtr;
+            long targetAddress = buttonPtr.ToInt64();
+
+            // Scan the memory region of the addon for a pointer that matches buttonPtr
+            for (int offset = 0; offset < maxScanSize; offset += sizeof(void*))
+            {
+                try
+                {
+                    long* potentialPtr = (long*)(baseAddress + offset);
+                    if (potentialPtr != null && *potentialPtr == targetAddress)
+                    {
+                        return offset; // Found the reference inside the struct
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError($"Memory read error at offset 0x{offset:X}: {ex.Message}");
+                }
+            }
+
+            return -1; // Not found
+        }
+
+        public unsafe int FindFieldOffset(IntPtr addonBasePtr, IntPtr buttonPtr)
+        {
+            if (addonBasePtr == IntPtr.Zero || buttonPtr == IntPtr.Zero)
+            {
+                return -1;
+            }
+
+            // Compute the offset
+            int offset = (int)((long)buttonPtr - (long)addonBasePtr);
+
+            return offset;
+        }
+
         public unsafe void DrawAddons()
         {
             if (ImGui.CollapsingHeader("Free Company Chest"))
@@ -1655,11 +1770,17 @@ namespace InventoryTools.Ui
                 var addon = this.gameGui.GetAddonByName("MiragePrismPrismBox");
                 if (addon != IntPtr.Zero)
                 {
-                    var mirageAddon = (InventoryMiragePrismBoxAddon*)addon;
+
+                    var mirageAgent = AgentMiragePrismPrismBox.Instance();
+                    if (mirageAgent != null)
+                    {
+                        ImGui.Text($"Current Tab: { mirageAgent->TabIndex }");
+                    }
+
+                    var mirageAddon = (AddonMiragePrismPrismBox*)addon;
                     if (mirageAddon != null)
                     {
-                        ImGui.Text($"Current Tab: { mirageAddon->SelectedTab }");
-                        ImGui.Text($"Class/Job Selected: { mirageAddon->ClassJobSelected }");
+                        ImGui.Text($"Class/Job Selected: { mirageAddon->Param }");
                     }
                 }
             }
