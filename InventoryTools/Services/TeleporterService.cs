@@ -25,9 +25,10 @@ public class TeleporterService : DisposableMediatorSubscriberBase, IHostedServic
     private readonly SubrowExcelSheet<MapMarker> _mapMarkerSheet;
     private readonly ExcelSheet<Map> _mapSheet;
     private readonly IDataManager _dataManager;
+    private readonly IFramework _framework;
     private Dictionary<uint, List<AetheryteLookup>>? _aetheryteMap = null;
 
-    public TeleporterService(ILogger<TeleporterService> logger, MediatorService mediatorService, ITeleporterIpc teleporterIpc, ExcelSheet<Aetheryte> aetheryteSheet, ExcelSheet<Level> levelSheet, SubrowExcelSheet<MapMarker> mapMarkerSheet, ExcelSheet<Map> mapSheet, IDataManager dataManager) : base(logger, mediatorService)
+    public TeleporterService(ILogger<TeleporterService> logger, MediatorService mediatorService, ITeleporterIpc teleporterIpc, ExcelSheet<Aetheryte> aetheryteSheet, ExcelSheet<Level> levelSheet, SubrowExcelSheet<MapMarker> mapMarkerSheet, ExcelSheet<Map> mapSheet, IDataManager dataManager, IFramework framework) : base(logger, mediatorService)
     {
         _teleporterIpc = teleporterIpc;
         _aetheryteSheet = aetheryteSheet;
@@ -35,6 +36,7 @@ public class TeleporterService : DisposableMediatorSubscriberBase, IHostedServic
         _mapMarkerSheet = mapMarkerSheet;
         _mapSheet = mapSheet;
         _dataManager = dataManager;
+        _framework = framework;
     }
 
     public static readonly IReadOnlyDictionary<uint,uint> ZonesWithoutAetherytes = new Dictionary<uint, uint>
@@ -143,7 +145,10 @@ public class TeleporterService : DisposableMediatorSubscriberBase, IHostedServic
 
     private void TeleportRequested(RequestTeleportMessage obj)
     {
-        _teleporterIpc.Teleport(obj.aetheryteId);
+        _framework.RunOnFrameworkThread(() =>
+        {
+            _teleporterIpc.Teleport(obj.aetheryteId);
+        });
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
@@ -190,7 +195,7 @@ public class TeleporterService : DisposableMediatorSubscriberBase, IHostedServic
         if (aetherytes is { Count: > 0 })
         {
             var closestAetheryte = aetherytes.MinBy(c => c.DistanceToAetheryte(obj.mapCoordinates));
-            _teleporterIpc.Teleport(closestAetheryte!.Aetheryte.RowId);
+            _framework.RunOnFrameworkThread(() => { _teleporterIpc.Teleport(closestAetheryte!.Aetheryte.RowId); });
         }
     }
 
