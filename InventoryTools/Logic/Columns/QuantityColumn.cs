@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
+using CharacterTools.Logic.Editors;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-
+using FFXIVClientStructs.FFXIV.Client.Game;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Logic.Columns.ColumnSettings;
 using InventoryTools.Services;
 using InventoryTools.Ui.Widgets;
 using Microsoft.Extensions.Logging;
@@ -13,10 +15,14 @@ namespace InventoryTools.Logic.Columns
     public class QuantityColumn : IntegerColumn
     {
         private readonly IInventoryMonitor _inventoryMonitor;
+        private readonly CharacterScopePickerColumnSetting _scopePickerColumnSetting;
+        private readonly CharacterScopeCalculator _scopeCalculator;
 
-        public QuantityColumn(ILogger<QuantityColumn> logger, ImGuiService imGuiService, IInventoryMonitor inventoryMonitor) : base(logger, imGuiService)
+        public QuantityColumn(ILogger<QuantityColumn> logger, ImGuiService imGuiService, IInventoryMonitor inventoryMonitor, CharacterScopePickerColumnSetting scopePickerColumnSetting, CharacterScopeCalculator scopeCalculator) : base(logger, imGuiService)
         {
             _inventoryMonitor = inventoryMonitor;
+            _scopePickerColumnSetting = scopePickerColumnSetting;
+            _scopeCalculator = scopeCalculator;
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Inventory;
         public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
@@ -29,20 +35,48 @@ namespace InventoryTools.Logic.Columns
             {
                 return (int)searchResult.InventoryItem.Quantity;
             }
-            var qty = 0;
-            if (_inventoryMonitor.ItemCounts.ContainsKey((searchResult.Item.RowId,
-                    FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None)))
+
+            var scopes = _scopePickerColumnSetting.CurrentValue(columnConfiguration);
+            if (scopes != null)
             {
-                qty += _inventoryMonitor.ItemCounts[(searchResult.Item.RowId,
-                    FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None)];
+                return (int)_scopeCalculator.Count(scopes, searchResult.ItemId, InventoryItem.ItemFlags.None) + (int)_scopeCalculator.Count(scopes, searchResult.ItemId, InventoryItem.ItemFlags.HighQuality);
             }
-            if (_inventoryMonitor.ItemCounts.ContainsKey((searchResult.Item.RowId,
-                    FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HighQuality)))
+            else
             {
-                qty += _inventoryMonitor.ItemCounts[(searchResult.Item.RowId,
-                    FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HighQuality)];
+                var qty = 0;
+                if (_inventoryMonitor.ItemCounts.ContainsKey((searchResult.Item.RowId,
+                        FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None)))
+                {
+                    qty += _inventoryMonitor.ItemCounts[(searchResult.Item.RowId,
+                        FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None)];
+                }
+
+                if (_inventoryMonitor.ItemCounts.ContainsKey((searchResult.Item.RowId,
+                        FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HighQuality)))
+                {
+                    qty += _inventoryMonitor.ItemCounts[(searchResult.Item.RowId,
+                        FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HighQuality)];
+                }
+
+                return qty;
             }
-            return qty;
+        }
+
+        public override void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)
+        {
+            if (configuration.FilterType == Logic.FilterType.GameItemFilter ||
+                configuration.FilterType == Logic.FilterType.CraftFilter)
+            {
+                ImGui.NewLine();
+                ImGui.Separator();
+                ImGui.SetNextItemWidth(220);
+                ImGui.LabelText("##" + configuration.Key + "Search", "Characters to search in:");
+                ImGui.SetNextItemWidth(250);
+                ImGui.SameLine();
+                _scopePickerColumnSetting.Draw(columnConfiguration,
+                    "This lets you set which characters you want to generate a total based off.");
+                base.DrawEditor(columnConfiguration, configuration);
+            }
         }
 
         public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration, SearchResult searchResult,

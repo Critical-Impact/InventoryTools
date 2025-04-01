@@ -23,7 +23,11 @@ public abstract class MultiChoiceColumnSetting<T> : ColumnSetting<List<T>?>
     public override bool HasValueSet(ColumnConfiguration configuration)
     {
         var keyValuePair = CurrentValue(configuration);
-        return keyValuePair != null && !Equals(keyValuePair, DefaultValue);
+        if (DefaultValue == null)
+        {
+            return keyValuePair != null;
+        }
+        return keyValuePair != null && !keyValuePair.ToHashSet().SetEquals(DefaultValue.ToHashSet());
     }
 
     public abstract List<T> GetChoices(ColumnConfiguration configuration);

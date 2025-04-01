@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AllaganLib.GameSheets.Caches;
+using CharacterTools.Logic.Editors;
 using Dalamud.Game.Text;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Common.Math;
@@ -50,6 +52,8 @@ public class ColumnConfiguration
     private Dictionary<string, uint>? _uintSettings;
     private Dictionary<string, List<ItemInfoType>>? _itemInfoTypes;
     private Dictionary<string, List<InventorySearchScope>>? _inventorySearchScopes;
+    private Dictionary<string, List<CharacterSearchScope>>? _characterSearchScopes;
+    private Dictionary<string, List<int>>? _intListSettings;
 
     [JsonIgnore]
     private IColumn _column;
@@ -91,6 +95,18 @@ public class ColumnConfiguration
         }
     }
 
+    public void SetSetting(string key, List<CharacterSearchScope>? value)
+    {
+        if (value == null)
+        {
+            CharacterSearchScopes.Remove(key);
+        }
+        else
+        {
+            CharacterSearchScopes[key] = value;
+        }
+    }
+
     public void GetSetting(string key, out string? value)
     {
         value = StringSettings.ContainsKey(key) ? StringSettings[key] : null;
@@ -99,6 +115,11 @@ public class ColumnConfiguration
     public void GetSetting(string key, out uint? value)
     {
         value = UintSettings.ContainsKey(key) ? UintSettings[key] : null;
+    }
+
+    public void GetSetting<T>(string key, out List<T>? value) where T : Enum
+    {
+        value = IntListSettings.ContainsKey(key) ? IntListSettings[key].Select(c => (T)Enum.ToObject(typeof(T), c)).ToList() : null;
     }
 
     public void GetSetting(string key, out List<ItemInfoType>? value)
@@ -111,6 +132,11 @@ public class ColumnConfiguration
         value = InventorySearchScopes.ContainsKey(key) ? InventorySearchScopes[key] : null;
     }
 
+    public void GetSetting(string key, out List<CharacterSearchScope>? value)
+    {
+        value = CharacterSearchScopes.ContainsKey(key) ? CharacterSearchScopes[key] : null;
+    }
+
     public void SetSetting(string key, List<ItemInfoType>? value)
     {
         if (value == null)
@@ -120,6 +146,18 @@ public class ColumnConfiguration
         else
         {
             ItemInfoTypes[key] = value;
+        }
+    }
+
+    public void SetSetting<T>(string key, List<T>? value) where T : Enum
+    {
+        if (value == null)
+        {
+            IntListSettings.Remove(key);
+        }
+        else
+        {
+            IntListSettings[key] = value.Select(c => (int)(object)c).ToList();
         }
     }
 
@@ -156,7 +194,7 @@ public class ColumnConfiguration
 
             ImGui.TableSetColumnIndex(columnIndex);
             ImGui.PushItemWidth(-20.000000f);
-            ImGui.PushID(Column.Name);
+            ImGui.PushID(columnIndex);
             ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(0, 0));
             ImGui.InputText("##" + tableKey + "FilterI" + Column.Name, ref filter, Column.MaxFilterLength);
             ImGui.PopStyleVar();
@@ -177,7 +215,7 @@ public class ColumnConfiguration
             var hasChanged = false;
             ImGui.TableSetColumnIndex(columnIndex);
             ImGui.PushItemWidth(-20.000000f);
-            using (ImRaii.PushId(Column.Name))
+            using (ImRaii.PushId(columnIndex))
             {
                 using (ImRaii.PushStyle(ImGuiStyleVar.FramePadding, new Vector2(0, 0)))
                 {
@@ -220,7 +258,7 @@ public class ColumnConfiguration
             var hasChanged = false;
             ImGui.TableSetColumnIndex(columnIndex);
             ImGui.PushItemWidth(-20.000000f);
-            using (ImRaii.PushId(Column.Name))
+            using (ImRaii.PushId(columnIndex))
             {
                 using (ImRaii.PushStyle(ImGuiStyleVar.FramePadding, new Vector2(0, 0)))
                 {
@@ -314,10 +352,22 @@ public class ColumnConfiguration
         set => _itemInfoTypes = value;
     }
 
+    public Dictionary<string, List<int>> IntListSettings
+    {
+        get => _intListSettings ??= new Dictionary<string, List<int>>();
+        set => _intListSettings = value;
+    }
+
     public Dictionary<string, List<InventorySearchScope>> InventorySearchScopes
     {
         get => _inventorySearchScopes ??= new Dictionary<string, List<InventorySearchScope>>();
         set => _inventorySearchScopes = value;
+    }
+
+    public Dictionary<string, List<CharacterSearchScope>> CharacterSearchScopes
+    {
+        get => _characterSearchScopes ??= new Dictionary<string, List<CharacterSearchScope>>();
+        set => _characterSearchScopes = value;
     }
 
 }

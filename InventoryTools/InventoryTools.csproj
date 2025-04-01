@@ -16,7 +16,7 @@
         <PackageReference Include="AllaganLib.Interface" Version="1.2.0" />
         <PackageReference Include="Autofac" Version="8.2.0" />
         <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
-        <PackageReference Include="DalaMock.Host" Version="2.2.0" />
+        <PackageReference Include="DalaMock.Host" Version="2.2.1" />
         <PackageReference Include="Humanizer.Core" Version="3.0.0-beta.54" />
         <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.3" />
         <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="9.0.3" />

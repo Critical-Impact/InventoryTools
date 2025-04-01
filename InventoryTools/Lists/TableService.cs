@@ -4,12 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Services.Mediator;
 
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Logic;
+using InventoryTools.Logic.Filters;
 using InventoryTools.Mediator;
 using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -22,6 +24,7 @@ public class TableService : DisposableMediatorBackgroundService
     private readonly IFramework _framework;
     private readonly Func<FilterConfiguration, CraftItemTable> _craftItemTableFactory;
     private readonly Func<FilterConfiguration, FilterTable> _filterTableFactory;
+    private readonly CraftReverseListDisplayFilter _craftReverseListDisplayFilter;
     private ConcurrentDictionary<string, FilterTable> _itemListTables;
     private ConcurrentDictionary<string, CraftItemTable> _craftItemTables;
 
@@ -29,12 +32,13 @@ public class TableService : DisposableMediatorBackgroundService
     public event TableRefreshedDelegate TableRefreshed;
     public IBackgroundTaskQueue TableQueue { get; }
 
-    public TableService(ILogger<TableService> logger, MediatorService mediatorService, IListService listService, IBackgroundTaskQueue filterQueue, IFramework framework, Func<FilterConfiguration, CraftItemTable> craftItemTableFactory, Func<FilterConfiguration, FilterTable> filterTableFactory) : base(logger, mediatorService)
+    public TableService(ILogger<TableService> logger, MediatorService mediatorService, IListService listService, IBackgroundTaskQueue filterQueue, IFramework framework, Func<FilterConfiguration, CraftItemTable> craftItemTableFactory, Func<FilterConfiguration, FilterTable> filterTableFactory, CraftReverseListDisplayFilter craftReverseListDisplayFilter) : base(logger, mediatorService)
     {
         _listService = listService;
         _framework = framework;
         _craftItemTableFactory = craftItemTableFactory;
         _filterTableFactory = filterTableFactory;
+        _craftReverseListDisplayFilter = craftReverseListDisplayFilter;
         _listService.ListConfigurationChanged += ListConfigurationChanged;
         _listService.ListTableConfigurationChanged += ListTableConfigurationChanged;
         _listService.ListRefreshed += ListRefreshed;
@@ -119,7 +123,12 @@ public class TableService : DisposableMediatorBackgroundService
             craftItemTable.CraftItems = filterConfiguration.CraftList.GetFlattenedMergedMaterials().Select(c => new SearchResult(c)).ToList();
             filterConfiguration.CraftList.ClearGroupCache();
             var outputList = filterConfiguration.CraftList.GetOutputList();
-            craftItemTable.CraftGroups = outputList.Select(c => (c, c.CraftItems.Select(d => new SearchResult(d)).ToList())).ToList();
+            craftItemTable.CraftGroups = outputList.Select(c => (c, GetCraftItems(c))).ToList();
+            if (_craftReverseListDisplayFilter.CurrentValue(filterConfiguration) == true)
+            {
+                craftItemTable.CraftGroups.Reverse();
+            }
+
             craftItemTable.IsSearching = false;
             craftItemTable.NeedsRefresh = false;
             craftItemTable.Refreshing = false;
@@ -129,6 +138,15 @@ public class TableService : DisposableMediatorBackgroundService
         {
             craftItemTable.NeedsRefresh = false;
             craftItemTable.Refreshing = false;
+        }
+
+        List<SearchResult> GetCraftItems(CraftGrouping c)
+        {
+            if (_craftReverseListDisplayFilter.CurrentValue(filterConfiguration) == true)
+            {
+                return c.CraftItems.Select(d => new SearchResult(d)).Reverse().ToList();
+            }
+            return c.CraftItems.Select(d => new SearchResult(d)).ToList();
         }
     }
 

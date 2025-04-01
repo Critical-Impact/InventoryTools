@@ -15,9 +15,9 @@ public class GatherButtonColumn : ButtonColumn
     {
         _gameInterface = gameInterface;
     }
-    public override string Name { get; set; } = "Gather Button";
+    public override string Name { get; set; } = "Gathering Log Button";
     public override float Width { get; set; } = 80;
-    public override string HelpText { get; set; } = "Shows a button that calls gather buddy's /gather command";
+    public override string HelpText { get; set; } = "Shows a button that opens the item's gathering/fishing log entry if applicable.";
 
     public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
         SearchResult searchResult, int rowIndex, int columnIndex)
@@ -25,7 +25,7 @@ public class GatherButtonColumn : ButtonColumn
         ImGui.TableNextColumn();
         if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;
 
-        if (ImGui.Button("Gather##" + rowIndex + "_" + columnIndex))
+        if (ImGui.Button("Log##" + rowIndex + "_" + columnIndex))
         {
             if (searchResult.Item.ObtainedFishing)
             {

@@ -46,7 +46,7 @@ public class CraftBuyColumn : ButtonColumn
         return messages;
     }
 
-    List<(IShop shop, ENpcBaseRow? npc, ILocation? location)> GetLocations(ItemRow item)
+    public List<(IShop shop, ENpcBaseRow? npc, ILocation? location)> GetLocations(ItemRow item)
     {
         var vendors = new List<(IShop shop, ENpcBaseRow? npc, ILocation? location)>();
         var shops = item.GetSourcesByCategory<ItemShopSource>(ItemInfoCategory.Shop).Select(c => c.Shop);
@@ -132,7 +132,7 @@ public class CraftBuyColumn : ButtonColumn
         }
     }
 
-    private bool DrawVendorButton(ItemRow item, int rowIndex, List<MessageBase> messages)
+    public bool DrawVendorButton(ItemRow item, int rowIndex, List<MessageBase> messages)
     {
         var shops = item.GetSourcesByCategory<ItemShopSource>(ItemInfoCategory.Shop).Select(c => c.Shop);
         if (shops.Any())

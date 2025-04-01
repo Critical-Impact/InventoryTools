@@ -996,6 +996,14 @@ namespace InventoryTools.Ui
                                 SearchString = searchString;
                             }
 
+                            ImGui.SameLine();
+                            if(_clearIcon.Draw(ImGuiService.GetIconTexture(66308).ImGuiHandle, "clearSearch", new Vector2(18,18) * ImGui.GetIO().FontGlobalScale))
+                            {
+                                SearchString = "";
+                            }
+
+                            ImGuiUtil.HoverTooltip("Clear the current search.");
+
                             ImGui.Separator();
                             if (_searchString == "")
                             {
@@ -1400,7 +1408,7 @@ namespace InventoryTools.Ui
                 if (bottomBarChild.Success)
                 {
                     ImGuiService.VerticalCenter(
-                        "You are currently editing the filter's configuration. Press the tick on the right hand side to save configuration.");
+                        "You are currently editing the list's configuration. Press the tick on the right hand side to save configuration.");
 
                     ImGui.SameLine();
                     float width = ImGui.GetWindowSize().X;
@@ -1464,15 +1472,6 @@ namespace InventoryTools.Ui
                     ImGui.SameLine();
                     float width = ImGui.GetWindowSize().X;
 
-                    ImGui.SameLine();
-                    width -= 28 * ImGui.GetIO().FontGlobalScale;
-                    ImGui.SetCursorPosX(width);
-                    if (_editIcon.Draw(ImGuiService.GetImageTexture("edit").ImGuiHandle, "tb_edit"))
-                    {
-                        _settingsActive = !_settingsActive;
-                    }
-
-                    ImGuiUtil.HoverTooltip("Edit the filter's configuration.");
 
                     if (SelectedConfiguration is { FilterType: FilterType.CuratedList })
                     {
@@ -1483,7 +1482,19 @@ namespace InventoryTools.Ui
                         {
                             _addItemBarOpen = !_addItemBarOpen;
                         }
+
+                        ImGuiUtil.HoverTooltip("Toggles the add item side bar.");
                     }
+
+                    ImGui.SameLine();
+                    width -= 28 * ImGui.GetIO().FontGlobalScale;
+                    ImGui.SetCursorPosX(width);
+                    if (_editIcon.Draw(ImGuiService.GetImageTexture("edit").ImGuiHandle, "tb_edit"))
+                    {
+                        _settingsActive = !_settingsActive;
+                    }
+
+                    ImGuiUtil.HoverTooltip("Edit the list's configuration.");
                 }
             }
             using (var contentChild = ImRaii.Child("Content", new Vector2(0, -40) * ImGui.GetIO().FontGlobalScale, true,

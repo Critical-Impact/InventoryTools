@@ -12,24 +12,20 @@ using InventoryTools.Ui.Widgets;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
 
-namespace InventoryTools.Logic.Editors;
+namespace CharacterTools.Logic.Editors;
 
-public class InventorySearchScope
+public class CharacterSearchScope
 {
     public ulong? CharacterId { get; set; }
     public uint? WorldId { get; set; }
     public bool? ActiveCharacter { get; set; }
     public bool? ActiveWorld { get; set; }
 
-    public HashSet<InventoryCategory>? Categories { get; set; }
     public HashSet<CharacterType>? CharacterTypes { get; set; }
-    public InventorySearchScopeMode Mode { get; set; }
+    public CharacterSearchScopeMode Mode { get; set; }
     public bool Invert { get; set; }
 
     public bool IncludeOwned { get; set; }
-
-    //Add Enum With Mode, turn into combo box
-
 
     public void Reset()
     {
@@ -40,75 +36,78 @@ public class InventorySearchScope
     }
 }
 
-public enum InventorySearchScopeMode
+public enum CharacterSearchScopeMode
 {
     Normal,
     Invert
 }
 
-public class InventoryScopeCalculator
+
+public class CharacterScopeCalculator
 {
     private readonly ICharacterMonitor _characterMonitor;
+    private readonly IInventoryMonitor _inventoryMonitor;
     private Dictionary<ulong, uint> _characterWorldIds = new Dictionary<ulong, uint>();
     private Dictionary<ulong, CharacterType> _characterTypes = new Dictionary<ulong, CharacterType>();
 
-    public InventoryScopeCalculator(ICharacterMonitor characterMonitor)
+    public CharacterScopeCalculator(ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor)
     {
         _characterMonitor = characterMonitor;
+        _inventoryMonitor = inventoryMonitor;
     }
 
-    public bool Filter(IEnumerable<InventorySearchScope> searchScopes, InventoryItem inventoryItem)
+    public bool Filter(IEnumerable<CharacterSearchScope> searchScopes, InventoryItem characterItem)
     {
-        return searchScopes.Any(c => Filter(c, inventoryItem));
+        return searchScopes.Any(c => Filter(c, characterItem));
     }
 
-    public bool Filter(InventorySearchScope searchScope, InventoryItem inventoryItem)
+    public bool Filter(CharacterSearchScope searchScope, InventoryItem characterItem)
     {
         bool topLevelMatch = false;
         if (searchScope.CharacterId != null)
         {
-            if (inventoryItem.RetainerId == searchScope.CharacterId)
+            if (characterItem.RetainerId == searchScope.CharacterId)
             {
                 topLevelMatch = true;
             }
         }
         else if (searchScope.WorldId != null)
         {
-            if (!_characterWorldIds.ContainsKey(inventoryItem.RetainerId))
+            if (!_characterWorldIds.ContainsKey(characterItem.RetainerId))
             {
-                var character = _characterMonitor.GetCharacterById(inventoryItem.RetainerId);
+                var character = _characterMonitor.GetCharacterById(characterItem.RetainerId);
                 if (character == null)
                 {
                     return false;
                 }
-                _characterWorldIds[inventoryItem.RetainerId] = character.WorldId;
+                _characterWorldIds[characterItem.RetainerId] = character.WorldId;
             }
 
-            if (_characterWorldIds[inventoryItem.RetainerId] == searchScope.WorldId)
+            if (_characterWorldIds[characterItem.RetainerId] == searchScope.WorldId)
             {
                 topLevelMatch = true;
             }
         }
         else if (searchScope.ActiveCharacter is true)
         {
-            if(_characterMonitor.BelongsToActiveCharacter(inventoryItem.RetainerId))
+            if(_characterMonitor.BelongsToActiveCharacter(characterItem.RetainerId))
             {
                 topLevelMatch = true;
             }
         }
         else if (searchScope.ActiveWorld is true)
         {
-            if (!_characterWorldIds.ContainsKey(inventoryItem.RetainerId))
+            if (!_characterWorldIds.ContainsKey(characterItem.RetainerId))
             {
-                var character = _characterMonitor.GetCharacterById(inventoryItem.RetainerId);
+                var character = _characterMonitor.GetCharacterById(characterItem.RetainerId);
                 if (character == null)
                 {
                     return false;
                 }
-                _characterWorldIds[inventoryItem.RetainerId] = character.WorldId;
+                _characterWorldIds[characterItem.RetainerId] = character.WorldId;
             }
 
-            if (_characterWorldIds[inventoryItem.RetainerId] == _characterMonitor.ActiveCharacter?.WorldId)
+            if (_characterWorldIds[characterItem.RetainerId] == _characterMonitor.ActiveCharacter?.WorldId)
             {
                 topLevelMatch = true;
             }
@@ -121,26 +120,19 @@ public class InventoryScopeCalculator
         var secondLevelMatch = true;
         if (topLevelMatch)
         {
-            if (searchScope.Categories != null)
-            {
-                if (!searchScope.Categories.Contains(inventoryItem.SortedCategory))
-                {
-                    secondLevelMatch = false;
-                }
-            }
             if (searchScope.CharacterTypes != null)
             {
-                if (!_characterTypes.ContainsKey(inventoryItem.RetainerId))
+                if (!_characterTypes.ContainsKey(characterItem.RetainerId))
                 {
-                    var character = _characterMonitor.GetCharacterById(inventoryItem.RetainerId);
+                    var character = _characterMonitor.GetCharacterById(characterItem.RetainerId);
                     if (character == null)
                     {
                         return false;
                     }
-                    _characterTypes[inventoryItem.RetainerId] = character.CharacterType;
+                    _characterTypes[characterItem.RetainerId] = character.CharacterType;
                 }
 
-                if (!searchScope.CharacterTypes.Contains(_characterTypes[inventoryItem.RetainerId]))
+                if (!searchScope.CharacterTypes.Contains(_characterTypes[characterItem.RetainerId]))
                 {
                     secondLevelMatch = false;
                 }
@@ -153,16 +145,204 @@ public class InventoryScopeCalculator
 
         return searchScope.Invert ? !secondLevelMatch : secondLevelMatch;
     }
+
+    public bool Filter(IEnumerable<CharacterSearchScope> searchScopes, Character character)
+    {
+        return searchScopes.Any(c => Filter(c, character.CharacterId));
+    }
+
+    public bool Filter(IEnumerable<CharacterSearchScope> searchScopes, ulong characterId)
+    {
+        return searchScopes.Any(c => Filter(c, characterId));
+    }
+
+    public bool Filter(CharacterSearchScope searchScope, Character character)
+    {
+        return Filter(searchScope, character.CharacterId);
+    }
+
+    public bool Filter(CharacterSearchScope searchScope, ulong characterId)
+    {
+        bool topLevelMatch = false;
+        if (searchScope.CharacterId != null)
+        {
+            if (characterId == searchScope.CharacterId)
+            {
+                topLevelMatch = true;
+            }
+        }
+        else if (searchScope.WorldId != null)
+        {
+            if (!_characterWorldIds.ContainsKey(characterId))
+            {
+                var character = _characterMonitor.GetCharacterById(characterId);
+                if (character == null)
+                {
+                    return false;
+                }
+                _characterWorldIds[characterId] = character.WorldId;
+            }
+
+            if (_characterWorldIds[characterId] == searchScope.WorldId)
+            {
+                topLevelMatch = true;
+            }
+        }
+        else if (searchScope.ActiveCharacter is true)
+        {
+            if(_characterMonitor.BelongsToActiveCharacter(characterId))
+            {
+                topLevelMatch = true;
+            }
+        }
+        else if (searchScope.ActiveWorld is true)
+        {
+            if (!_characterWorldIds.ContainsKey(characterId))
+            {
+                var character = _characterMonitor.GetCharacterById(characterId);
+                if (character == null)
+                {
+                    return false;
+                }
+                _characterWorldIds[characterId] = character.WorldId;
+            }
+
+            if (_characterWorldIds[characterId] == _characterMonitor.ActiveCharacter?.WorldId)
+            {
+                topLevelMatch = true;
+            }
+        }
+        else
+        {
+            topLevelMatch = true;
+        }
+
+        var secondLevelMatch = true;
+        if (topLevelMatch)
+        {
+            if (searchScope.CharacterTypes != null)
+            {
+                if (!_characterTypes.ContainsKey(characterId))
+                {
+                    var character = _characterMonitor.GetCharacterById(characterId);
+                    if (character == null)
+                    {
+                        return false;
+                    }
+                    _characterTypes[characterId] = character.CharacterType;
+                }
+
+                if (!searchScope.CharacterTypes.Contains(_characterTypes[characterId]))
+                {
+                    secondLevelMatch = false;
+                }
+            }
+        }
+        else
+        {
+            secondLevelMatch = false;
+        }
+
+        return searchScope.Invert ? !secondLevelMatch : secondLevelMatch;
+    }
+
+    public uint Count(IEnumerable<CharacterSearchScope> searchScopes, uint itemId, FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags itemFlags = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None)
+    {
+        return (uint)searchScopes.Sum(c => Count(c, itemId, itemFlags));
+    }
+
+    public uint Count(CharacterSearchScope searchScope, uint itemId, FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags itemFlags = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None)
+    {
+        var characterIds = new HashSet<Character>();
+
+        foreach (var character in _characterMonitor.Characters.Select(c => c.Value))
+        {
+            if (searchScope.CharacterId != null)
+            {
+                if (character.CharacterId == searchScope.CharacterId || searchScope.Invert)
+                {
+                    characterIds.Add(character);
+                }
+            }
+            else if (searchScope.WorldId != null)
+            {
+                if (character.WorldId == searchScope.WorldId || searchScope.Invert)
+                {
+                    if (searchScope.CharacterTypes != null)
+                    {
+                        if (searchScope.CharacterTypes.Contains(character.CharacterType) || searchScope.Invert)
+                        {
+                            characterIds.Add(character);
+                        }
+                    }
+                    else
+                    {
+                        characterIds.Add(character);
+                    }
+                }
+            }
+            else if (searchScope.ActiveCharacter is true)
+            {
+                if(_characterMonitor.BelongsToActiveCharacter(character.CharacterId) || searchScope.Invert)
+                {
+                    if (searchScope.CharacterTypes != null)
+                    {
+                        if (searchScope.CharacterTypes.Contains(character.CharacterType) || searchScope.Invert)
+                        {
+                            characterIds.Add(character);
+                        }
+                    }
+                    else
+                    {
+                        characterIds.Add(character);
+                    }
+                }
+            }
+            else if (searchScope.ActiveWorld is true)
+            {
+                if (character.WorldId == _characterMonitor.ActiveCharacter?.WorldId || searchScope.Invert)
+                {
+                    if (searchScope.CharacterTypes != null)
+                    {
+                        if (searchScope.CharacterTypes.Contains(character.CharacterType) || searchScope.Invert)
+                        {
+                            characterIds.Add(character);
+                        }
+                    }
+                    else
+                    {
+                        characterIds.Add(character);
+                    }
+                }
+            }
+            else
+            {
+                if (searchScope.CharacterTypes != null)
+                {
+                    if (searchScope.CharacterTypes.Contains(character.CharacterType) || searchScope.Invert)
+                    {
+                        characterIds.Add(character);
+                    }
+                }
+                else
+                {
+                    characterIds.Add(character);
+                }
+            }
+        }
+
+        return (uint)characterIds.Select(c => _inventoryMonitor.CharacterItemCounts.GetValueOrDefault((itemId, itemFlags, c.CharacterId), 0)).Sum(c => c);
+    }
 }
 
-public class InventoryScopePicker
+public class CharacterScopePicker
 {
     private readonly ICharacterMonitor _characterMonitor;
     private readonly ImGuiService _imGuiService;
     private readonly ExcelSheet<World> _worldSheet;
     private readonly HoverImageButton _editButton;
 
-    public InventoryScopePicker(ICharacterMonitor characterMonitor, ImGuiService imGuiService, ExcelSheet<World> worldSheet)
+    public CharacterScopePicker(ICharacterMonitor characterMonitor, ImGuiService imGuiService, ExcelSheet<World> worldSheet)
     {
         _characterMonitor = characterMonitor;
         _imGuiService = imGuiService;
@@ -170,10 +350,10 @@ public class InventoryScopePicker
         _editButton = new("editButton");
     }
 
-    public string GetScopeName(InventorySearchScope scope)
+    public string GetScopeName(CharacterSearchScope scope)
     {
         var scopeName = "";
-        if (scope.Mode == InventorySearchScopeMode.Invert)
+        if (scope.Mode == CharacterSearchScopeMode.Invert)
         {
             scopeName += "Exclude ";
         }
@@ -206,9 +386,9 @@ public class InventoryScopePicker
         return scopeName;
     }
 
-    private InventorySearchScope? _selectedScope;
+    private CharacterSearchScope? _selectedScope;
 
-    public bool Draw(string label, List<InventorySearchScope> searchScopes)
+    public bool Draw(string label, List<CharacterSearchScope> searchScopes)
     {
 
         var changed = false;
@@ -227,16 +407,6 @@ public class InventoryScopePicker
             foreach (var searchScope in searchScopes)
             {
                 ImGui.TextUnformatted(GetScopeName(searchScope));
-                if (searchScope.Categories != null)
-                {
-                    using (var indent = ImRaii.PushIndent())
-                    {
-                        foreach (var category in searchScope.Categories)
-                        {
-                            ImGui.Text(category.FormattedDetailedName());
-                        }
-                    }
-                }
 
                 if (searchScope.CharacterTypes != null)
                 {
@@ -264,7 +434,7 @@ public class InventoryScopePicker
         {
             if (combo)
             {
-                ImGui.Text("Inventory Scope Editor");
+                ImGui.Text("Character Scope Editor");
                 using(var child = ImRaii.Child("selected", new Vector2(200, 0) * ImGui.GetIO().FontGlobalScale , true, ImGuiWindowFlags.NoScrollbar))
                 {
                     if (child)
@@ -284,17 +454,6 @@ public class InventoryScopePicker
                                     if (ImGui.Selectable(GetScopeName(searchScope) + "##" + index, _selectedScope == searchScope))
                                     {
                                         _selectedScope = searchScope;
-                                    }
-
-                                    if (searchScope.Categories != null)
-                                    {
-                                        using (var indent = ImRaii.PushIndent())
-                                        {
-                                            foreach (var category in searchScope.Categories)
-                                            {
-                                                ImGui.Text(category.FormattedDetailedName());
-                                            }
-                                        }
                                     }
 
                                     if (searchScope.CharacterTypes != null)
@@ -319,7 +478,7 @@ public class InventoryScopePicker
                             {
                                 if (ImGui.Button("Add"))
                                 {
-                                    _selectedScope = new InventorySearchScope();
+                                    _selectedScope = new CharacterSearchScope();
                                     searchScopes.Add(_selectedScope);
                                     changed = true;
                                 }
@@ -338,9 +497,9 @@ public class InventoryScopePicker
                 {
                     if (_selectedScope == null)
                     {
-                        ImGui.TextWrapped("The inventory scope editor allows you define which inventories you want to search across.");
-                        ImGui.TextWrapped("By default, every inventory Allagan Tools knows about is searched.");
-                        ImGui.TextWrapped("By providing a set of scopes, you are narrowing down from which inventories are displayed.");
+                        ImGui.TextWrapped("The character scope editor allows you define which characters you want to search across.");
+                        ImGui.TextWrapped("By default, every character Allagan Tools knows about is searched.");
+                        ImGui.TextWrapped("By providing a set of scopes, you are narrowing down from which characters are displayed/counted.");
                     }
                     else
                     {
@@ -360,7 +519,7 @@ public class InventoryScopePicker
                                         _selectedScope.Reset();
                                     }
                                     ImGui.SameLine();
-                                    _imGuiService.HelpMarker("Match against all inventories");
+                                    _imGuiService.HelpMarker("Match against all characters");
                                     ImGui.NewLine();
 
                                     if (ImGui.RadioButton("Character",isCharacter))
@@ -432,64 +591,6 @@ public class InventoryScopePicker
                                             }
                                         }
                                     }
-                                    ImGui.NewLine();
-                                    ImGui.Separator();
-
-                                    string categoryPreview;
-                                    if (_selectedScope.Categories != null)
-                                    {
-                                        categoryPreview = String.Join(", ", _selectedScope.Categories.Select(c => c.FormattedDetailedName()));
-                                    }
-                                    else
-                                    {
-                                        categoryPreview = "Select categories";
-                                    }
-
-                                    ImGui.LabelText("##categories", "Inventory Categories: ");
-                                    using (var categorySelector = ImRaii.Combo("##categories",categoryPreview))
-                                    {
-                                        if (categorySelector)
-                                        {
-                                            var inventoryCategories = Enum.GetValues<InventoryCategory>();
-                                            if (_selectedScope.CharacterId != null)
-                                            {
-                                                var character = _characterMonitor.GetCharacterById(_selectedScope.CharacterId.Value);
-                                                if (character != null)
-                                                {
-                                                    inventoryCategories = inventoryCategories.Where(c =>
-                                                        c.IsApplicable(character.CharacterType)).ToArray();
-                                                }
-                                            }
-                                            foreach (var category in inventoryCategories)
-                                            {
-                                                if (ImGui.Selectable(category.FormattedDetailedName(), _selectedScope.Categories?.Contains(category) ?? false))
-                                                {
-                                                    if (_selectedScope.Categories == null)
-                                                    {
-                                                        _selectedScope.Categories = new();
-                                                    }
-
-                                                    if (_selectedScope.Categories.Contains(category))
-                                                    {
-                                                        _selectedScope.Categories.Remove(category);
-                                                        if (_selectedScope.Categories.Count == 0)
-                                                        {
-                                                            _selectedScope.Categories = null;
-                                                        }
-                                                        changed = true;
-                                                    }
-                                                    else
-                                                    {
-                                                        _selectedScope.Categories.Add(category);
-                                                        changed = true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    ImGui.SameLine();
-                                    _imGuiService.HelpMarker("When a category is selected, only items from this category will be shown. Select an item again to unselect it.");
 
                                     if (_selectedScope.CharacterId == null)
                                     {
@@ -568,7 +669,7 @@ public class InventoryScopePicker
                                         changed = true;
                                     }
                                     ImGui.SameLine();
-                                    if (ImGui.Button("Delete"))
+                                    if (ImGui.Button("Delete") && _selectedScope != null)
                                     {
                                         searchScopes.Remove(_selectedScope);
                                         _selectedScope = null;

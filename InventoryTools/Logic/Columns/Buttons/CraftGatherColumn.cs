@@ -147,6 +147,11 @@ namespace InventoryTools.Logic.Columns.Buttons
             ImGui.TableNextColumn();
             if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;
 
+            return DrawButton(columnConfiguration, searchResult, rowIndex);
+        }
+
+        public List<MessageBase> DrawButton(ColumnConfiguration columnConfiguration, SearchResult searchResult, int rowIndex)
+        {
             var messages = new List<MessageBase>();
             if (CurrentValue(columnConfiguration, searchResult) == true)
             {
@@ -218,8 +223,8 @@ namespace InventoryTools.Logic.Columns.Buttons
                                         using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudRed))
                                         {
                                             ImGui.Text( " (Up in " +
-                                                       TimeInterval.DurationString(nextUptime.Item2.Start, TimeStamp.UtcNow,
-                                                           true) + ")");
+                                                        TimeInterval.DurationString(nextUptime.Item2.Start, TimeStamp.UtcNow,
+                                                            true) + ")");
                                         }
                                     }
                                     else

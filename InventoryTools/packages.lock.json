@@ -40,12 +40,12 @@
       },
       "DalaMock.Host": {
         "type": "Direct",
-        "requested": "[2.2.0, )",
-        "resolved": "2.2.0",
-        "contentHash": "DJJqmS4QEMDnrVFUmXERq4g6X00yO5l56BLHrC6OJG89ePnSo/flkg1P8fHFPGMyShhJizN39jeBcXCgKvB1ag==",
+        "requested": "[2.2.1, )",
+        "resolved": "2.2.1",
+        "contentHash": "tFA5LWmi2y1rdzgi/BwdBx0Aj/NJJ+8oUjilM97ZkkVMg1wIixzLHYxogBP20hGSZOJvIsfEUTo8gTCKPCgkjQ==",
         "dependencies": {
-          "Autofac.Extensions.DependencyInjection": "9.0.0",
-          "DalaMock.Shared": "2.2.0",
+          "Autofac.Extensions.DependencyInjection": "10.0.0",
+          "DalaMock.Shared": "2.2.1",
           "Microsoft.Extensions.Hosting": "8.0.0",
           "Microsoft.Extensions.Hosting.Abstractions": "8.0.0",
           "Microsoft.Extensions.ObjectPool": "9.0.0-preview.6.24328.4"
@@ -152,8 +152,8 @@
       },
       "AllaganLib.GameSheets": {
         "type": "Transitive",
-        "resolved": "1.2.0",
-        "contentHash": "H8oyLkwxqEuFq1qF/C25+ZUAaVjn0KGT9fFgAOT0kj6wVR2lM4ye+yj+UvTbGOx/M+rAGR3VDq7Gm9Cxm3b/7w==",
+        "resolved": "1.2.1",
+        "contentHash": "Eg0staUZMU3qGiI6RMf+xVZ0EvR2LMOjzLPN6UGmoqdBhnIbMEW88jGDhlOstsu893tyJiI+n71KYElYpyNsqA==",
         "dependencies": {
           "AllaganLib.Shared": "1.2.0",
           "Autofac.Extensions.DependencyInjection": "9.0.0",
@@ -177,10 +177,10 @@
       },
       "DalaMock.Shared": {
         "type": "Transitive",
-        "resolved": "2.2.0",
-        "contentHash": "cX7L+JNkqLaOxZZ5a+Kdtpj5hPLo1bQumhNczgdTQxP/Pz80I7q0w1ZobEpY21D2bAkHmuF7Q9oM8CJ9QTbXeg==",
+        "resolved": "2.2.1",
+        "contentHash": "qx2sBakRbPbZVEQOC4RAuDtlg6SlzeDbUd3YjoFegwkEgHQTNtl79J5qPQ5LN8hsRrQ4ojYnkwzOFf47QV9kUw==",
         "dependencies": {
-          "Autofac.Extensions.DependencyInjection": "9.0.0",
+          "Autofac.Extensions.DependencyInjection": "10.0.0",
           "Microsoft.Extensions.Hosting": "8.0.0",
           "Microsoft.Extensions.Hosting.Abstractions": "8.0.0"
         }
@@ -577,7 +577,7 @@
       "criticalcommonlib": {
         "type": "Project",
         "dependencies": {
-          "AllaganLib.GameSheets": "[1.2.0, )",
+          "AllaganLib.GameSheets": "[1.2.1, )",
           "Humanizer.Core": "[3.0.0-beta.54, )",
           "Microsoft.Extensions.Hosting": "[9.0.3, )",
           "NaturalSort.Extension": "[4.3.0, )",

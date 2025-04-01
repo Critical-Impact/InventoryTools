@@ -14,6 +14,7 @@ using Autofac;
 using Autofac.Core.Activators.Reflection;
 using Autofac.Extensions.DependencyInjection;
 using Autofac.Util;
+using CharacterTools.Logic.Editors;
 using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Interfaces;
@@ -363,6 +364,8 @@ namespace InventoryTools
                 builder.RegisterType<CraftPricer>().SingleInstance();
                 builder.RegisterType<InventoryScopePicker>();
                 builder.RegisterType<InventoryScopeCalculator>().SingleInstance();
+                builder.RegisterType<CharacterScopePicker>();
+                builder.RegisterType<CharacterScopeCalculator>().SingleInstance();
                 builder.RegisterType<GameInteropService>().As<IGameInteropService>().SingleInstance();
                 builder.RegisterType<WindowSystemFactory>().As<IWindowSystemFactory>().SingleInstance();
                 builder.RegisterType<DalamudWindowSystem>().As<IWindowSystem>();
