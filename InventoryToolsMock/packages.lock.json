@@ -195,8 +195,8 @@
       },
       "AllaganLib.Interface": {
         "type": "Transitive",
-        "resolved": "1.2.0",
-        "contentHash": "SqntL7hFDVwLiXGQ37oAHRmBalwahQ0zUs+s/98QCfZSVpx1XIxcMEgXdW3UCuKd6ZSV8Mbye7z3cSuLgsXJKA==",
+        "resolved": "1.2.2",
+        "contentHash": "pNGluLmELAaDNqGgLJ2mWiwJY0GEcoEtnjkkuy9xYvxa5+N8RLqLArtSBvC2Y4H17j1QyDqc4id7kMOyJXSIKg==",
         "dependencies": {
           "AllaganLib.Data": "1.2.0",
           "AllaganLib.Shared": "1.2.0",
@@ -214,8 +214,8 @@
       },
       "Autofac": {
         "type": "Transitive",
-        "resolved": "8.2.0",
-        "contentHash": "T+4+W4byzyUOarCbIcFRbxpYKC+cndfQm/+VeWpB60P2MCN0JMsewUhZqvH5Ooe936HQjn5uHvEY9tq6BfbiIw==",
+        "resolved": "8.2.1",
+        "contentHash": "q5xYBykgdvBlcmrXzHcDWcfeVktGEraluypkC0IRTupfxk+r+z+JcXgKj5kldKGe1fflyW3Ya3y9Soe9J2CqEA==",
         "dependencies": {
           "System.Diagnostics.DiagnosticSource": "8.0.1"
         }
@@ -241,8 +241,8 @@
       },
       "DalaMock.Host": {
         "type": "Transitive",
-        "resolved": "2.2.1",
-        "contentHash": "tFA5LWmi2y1rdzgi/BwdBx0Aj/NJJ+8oUjilM97ZkkVMg1wIixzLHYxogBP20hGSZOJvIsfEUTo8gTCKPCgkjQ==",
+        "resolved": "2.2.3",
+        "contentHash": "f0bwRoBN/8UVIj+rZLmKAjIPQv9wab49lv72LZ/UDNTYOjnIcxgbTge/uJi3XEP6lAhRH30R0EAFffJgzqjSOw==",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "10.0.0",
           "DalaMock.Shared": "2.2.1",
@@ -828,12 +828,12 @@
       "inventorytools": {
         "type": "Project",
         "dependencies": {
-          "AllaganLib.Interface": "[1.2.0, )",
-          "Autofac": "[8.2.0, )",
+          "AllaganLib.Interface": "[1.2.2, )",
+          "Autofac": "[8.2.1, )",
           "Autofac.Extensions.DependencyInjection": "[10.0.0, )",
           "CriticalCommonLib": "[1.0.0, )",
           "CsvHelper": "[33.0.1, )",
-          "DalaMock.Host": "[2.2.1, )",
+          "DalaMock.Host": "[2.2.3, )",
           "DalamudPackager": "[12.0.0, )",
           "Humanizer.Core": "[3.0.0-beta.54, )",
           "Microsoft.AspNetCore.SignalR.Client": "[9.0.3, )",
@@ -849,7 +849,7 @@
         "type": "Project",
         "dependencies": {
           "JetBrains.Annotations": "[2024.3.0, )",
-          "Microsoft.Extensions.DependencyInjection": "[9.0.2, )"
+          "Microsoft.Extensions.DependencyInjection": "[9.0.3, )"
         }
       },
       "tetris": {

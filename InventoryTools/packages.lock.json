@@ -4,9 +4,9 @@
     "net9.0-windows7.0": {
       "AllaganLib.Interface": {
         "type": "Direct",
-        "requested": "[1.2.0, )",
-        "resolved": "1.2.0",
-        "contentHash": "SqntL7hFDVwLiXGQ37oAHRmBalwahQ0zUs+s/98QCfZSVpx1XIxcMEgXdW3UCuKd6ZSV8Mbye7z3cSuLgsXJKA==",
+        "requested": "[1.2.2, )",
+        "resolved": "1.2.2",
+        "contentHash": "pNGluLmELAaDNqGgLJ2mWiwJY0GEcoEtnjkkuy9xYvxa5+N8RLqLArtSBvC2Y4H17j1QyDqc4id7kMOyJXSIKg==",
         "dependencies": {
           "AllaganLib.Data": "1.2.0",
           "AllaganLib.Shared": "1.2.0",
@@ -15,9 +15,9 @@
       },
       "Autofac": {
         "type": "Direct",
-        "requested": "[8.2.0, )",
-        "resolved": "8.2.0",
-        "contentHash": "T+4+W4byzyUOarCbIcFRbxpYKC+cndfQm/+VeWpB60P2MCN0JMsewUhZqvH5Ooe936HQjn5uHvEY9tq6BfbiIw==",
+        "requested": "[8.2.1, )",
+        "resolved": "8.2.1",
+        "contentHash": "q5xYBykgdvBlcmrXzHcDWcfeVktGEraluypkC0IRTupfxk+r+z+JcXgKj5kldKGe1fflyW3Ya3y9Soe9J2CqEA==",
         "dependencies": {
           "System.Diagnostics.DiagnosticSource": "8.0.1"
         }
@@ -40,9 +40,9 @@
       },
       "DalaMock.Host": {
         "type": "Direct",
-        "requested": "[2.2.1, )",
-        "resolved": "2.2.1",
-        "contentHash": "tFA5LWmi2y1rdzgi/BwdBx0Aj/NJJ+8oUjilM97ZkkVMg1wIixzLHYxogBP20hGSZOJvIsfEUTo8gTCKPCgkjQ==",
+        "requested": "[2.2.3, )",
+        "resolved": "2.2.3",
+        "contentHash": "f0bwRoBN/8UVIj+rZLmKAjIPQv9wab49lv72LZ/UDNTYOjnIcxgbTge/uJi3XEP6lAhRH30R0EAFffJgzqjSOw==",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "10.0.0",
           "DalaMock.Shared": "2.2.1",
@@ -589,7 +589,7 @@
         "type": "Project",
         "dependencies": {
           "JetBrains.Annotations": "[2024.3.0, )",
-          "Microsoft.Extensions.DependencyInjection": "[9.0.2, )"
+          "Microsoft.Extensions.DependencyInjection": "[9.0.3, )"
         }
       },
       "tetris": {
