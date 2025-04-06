@@ -141,6 +141,7 @@ public class ListImportExportService
     public List<(uint, uint)>? FromGarlandToolsUrl(string garlandToolsUrl)
     {
         garlandToolsUrl = HttpUtility.UrlDecode(garlandToolsUrl);
+        garlandToolsUrl = garlandToolsUrl.Replace("www.","");
         if (string.IsNullOrEmpty(garlandToolsUrl))
         {
             return null;
