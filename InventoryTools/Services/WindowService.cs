@@ -604,8 +604,9 @@ namespace InventoryTools.Services
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
+            Logger.LogTrace("Stopping service {Type} ({This})", GetType().Name, this);
             SaveWindowStates();
-            Logger.LogTrace("Stopping service {type} ({this})", GetType().Name, this);
+            Logger.LogTrace("Stopped service {Type} ({This})", GetType().Name, this);
             return Task.CompletedTask;
         }
     }

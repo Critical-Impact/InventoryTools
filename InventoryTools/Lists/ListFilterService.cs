@@ -964,10 +964,10 @@ public class ListFilterService : DisposableMediatorBackgroundService
         }
     }
 
-    public override async Task StopAsync(CancellationToken stoppingToken)
+    public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        Logger.LogTrace("Queued Hosted Service is stopping.");
-
-        await base.StopAsync(stoppingToken);
+        Logger.LogTrace("Stopping service {Type} ({This})", GetType().Name, this);
+        await base.StopAsync(cancellationToken);
+        Logger.LogTrace("Stopped service {Type} ({This})", GetType().Name, this);
     }
 }

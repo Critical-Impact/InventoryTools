@@ -99,8 +99,9 @@ namespace InventoryTools.Commands
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            Logger.LogTrace("Stopping service {type} ({this})", GetType().Name, this);
+            Logger.LogTrace("Stopping service {Type} ({This})", GetType().Name, this);
             RemoveCommandHandlers();
+            Logger.LogTrace("Stopped service {Type} ({This})", GetType().Name, this);
             return Task.CompletedTask;
         }
     }

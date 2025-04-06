@@ -81,10 +81,11 @@ namespace InventoryTools.Ui
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            Logger.LogTrace("Stopping service {type} ({this})", GetType().Name, this);
+            Logger.LogTrace("Stopping service {Type} ({This})", GetType().Name, this);
             _pluginInterfaceService.UiBuilder.Draw -= Draw;
             _pluginInterfaceService.UiBuilder.OpenConfigUi -= UiBuilderOnOpenConfigUi;
             _pluginInterfaceService.UiBuilder.OpenMainUi -= InterfaceOnOpenMainUi;
+            Logger.LogTrace("Stopped service {Type} ({This})", GetType().Name, this);
             return Task.CompletedTask;
         }
     }

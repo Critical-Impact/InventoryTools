@@ -476,7 +476,7 @@ namespace InventoryTools
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            Logger.LogTrace("Stopping service {type} ({this})", GetType().Name, this);
+            Logger.LogTrace("Stopping service {Type} ({This})", GetType().Name, this);
             _unlockTrackerService.ItemUnlockStatusChanged -= UnlockTrackerServiceOnAcquiredItemsUpdated;
             _configuration.SavedCharacters = _characterMonitor.Characters;
             _framework.Update -= FrameworkOnUpdate;
@@ -493,6 +493,7 @@ namespace InventoryTools
                 _mobTracker.SaveCsv(_configurationManagerService.MobSpawnFile,
                     _mobTracker.GetEntries());
             }
+            Logger.LogTrace("Stopped service {Type} ({This})", GetType().Name, this);
             return Task.CompletedTask;
         }
     }

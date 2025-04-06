@@ -269,6 +269,7 @@ namespace InventoryTools.Services
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
+            _logger.LogTrace("Stopping service {Type} ({This})", GetType().Name, this);
             _addonLifecycle.UnregisterListener(AddonEvent.PostRefresh, PostRefresh);
             _addonLifecycle.UnregisterListener(AddonEvent.PostSetup, PostSetup);
             _addonLifecycle.UnregisterListener(AddonEvent.PreFinalize, PreFinalize);
@@ -281,6 +282,7 @@ namespace InventoryTools.Services
             _listService.BackgroundListToggled -= ListServiceOnListToggled;
             _gameUiManager.UiVisibilityChanged -= GameUiManagerOnUiVisibilityChanged;
             UnsubscribeAll();
+            _logger.LogTrace("Stopped service {Type} ({This})", GetType().Name, this);
             return Task.CompletedTask;
         }
     }

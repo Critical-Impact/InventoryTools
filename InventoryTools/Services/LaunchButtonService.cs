@@ -105,7 +105,9 @@ public class LaunchButtonService : DisposableMediatorSubscriberBase, IHostedServ
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
+        _logger.LogTrace("Stopping service {Type} ({This})", GetType().Name, this);
         _configurationManagerService.ConfigurationChanged -= ConfigurationManagerServiceOnConfigurationChanged;
+        _logger.LogTrace("Stopped service {Type} ({This})", GetType().Name, this);
         return Task.CompletedTask;
     }
 }

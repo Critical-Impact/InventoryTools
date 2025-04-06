@@ -188,7 +188,7 @@ namespace InventoryTools.IPC
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            Logger.LogTrace("Stopping service {type} ({this})", GetType().Name, this);
+            Logger.LogTrace("Stopping service {Type} ({This})", GetType().Name, this);
             try
             {
                 _wotsitAvailable.Unsubscribe(FaAvailable);
@@ -207,6 +207,7 @@ namespace InventoryTools.IPC
                 _delayTimer.Elapsed -= DelayTimerOnElapsed;
                 _delayTimer?.Dispose();
             }
+            Logger.LogTrace("Stopped service {Type} ({This})", GetType().Name, this);
             return Task.CompletedTask;
         }
     }

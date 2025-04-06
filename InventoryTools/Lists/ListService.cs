@@ -960,22 +960,6 @@ namespace InventoryTools.Lists
         public event IListService.ListToggledDelegate? BackgroundListToggled;
         public event IListService.ListToggledDelegate? CraftListToggled;
 
-
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-            _framework.Update -= OnUpdate;
-            _configurationManagerService.ConfigurationChanged -= ConfigOnConfigurationChanged;
-            _characterMonitor.OnCharacterRemoved -= CharacterMonitorOnOnCharacterRemoved;
-            _characterMonitor.OnCharacterUpdated -= CharacterMonitorOnOnCharacterUpdated;
-            _characterMonitor.OnCharacterJobChanged -= CharacterMonitorOnOnCharacterJobChanged;
-            _characterMonitor.OnActiveRetainerChanged -= CharacterMonitorOnOnActiveRetainerChanged;
-            _inventoryMonitor.OnInventoryChanged -= InventoryMonitorOnOnInventoryChanged;
-            _characterMonitor.OnCharacterLoggedIn -= CharacterLoggedIn;
-            _characterMonitor.OnCharacterLoggedOut -= CharacterLoggedOut;
-            _history.OnHistoryLogged -= HistoryOnOnHistoryLogged;
-        }
-
         public Task StartAsync(CancellationToken cancellationToken)
         {
             Logger.LogTrace("Starting service {type} ({this})", GetType().Name, this);
@@ -1123,6 +1107,18 @@ namespace InventoryTools.Lists
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
+            Logger.LogTrace("Stopping service {Type} ({This})", GetType().Name, this);
+            _framework.Update -= OnUpdate;
+            _configurationManagerService.ConfigurationChanged -= ConfigOnConfigurationChanged;
+            _characterMonitor.OnCharacterRemoved -= CharacterMonitorOnOnCharacterRemoved;
+            _characterMonitor.OnCharacterUpdated -= CharacterMonitorOnOnCharacterUpdated;
+            _characterMonitor.OnCharacterJobChanged -= CharacterMonitorOnOnCharacterJobChanged;
+            _characterMonitor.OnActiveRetainerChanged -= CharacterMonitorOnOnActiveRetainerChanged;
+            _inventoryMonitor.OnInventoryChanged -= InventoryMonitorOnOnInventoryChanged;
+            _characterMonitor.OnCharacterLoggedIn -= CharacterLoggedIn;
+            _characterMonitor.OnCharacterLoggedOut -= CharacterLoggedOut;
+            _history.OnHistoryLogged -= HistoryOnOnHistoryLogged;
+            Logger.LogTrace("Stopped service {Type} ({This})", GetType().Name, this);
             return Task.CompletedTask;
         }
     }

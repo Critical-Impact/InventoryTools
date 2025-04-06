@@ -414,9 +414,10 @@ namespace InventoryTools.Services
 
         public override async Task StopAsync(CancellationToken stoppingToken)
         {
-            Logger.LogTrace("Configuration manager save queue is stopping.");
+            Logger.LogTrace("Stopping service {Type} ({This})", GetType().Name, this);
             Save();
             await base.StopAsync(stoppingToken);
+            Logger.LogTrace("Stopped service {Type} ({This})", GetType().Name, this);
         }
 
         private bool disposed = false;

@@ -376,12 +376,14 @@ public class TableService : DisposableMediatorBackgroundService
         }
     }
 
-    public override void Dispose()
+    public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        base.Dispose();
+        Logger.LogTrace("Stopping service {Type} ({This})", GetType().Name, this);
+        await base.StopAsync(cancellationToken);
         _framework.Update -= OnUpdate;
         _listService.ListConfigurationChanged -= ListConfigurationChanged;
         _listService.ListTableConfigurationChanged -= ListTableConfigurationChanged;
         _listService.ListRefreshed -= ListRefreshed;
+        Logger.LogTrace("Stopped service {Type} ({This})", GetType().Name, this);
     }
 }

@@ -550,7 +550,7 @@ public class IPCService : IHostedService
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        _logger.LogTrace("Stopping service {type} ({this})", GetType().Name, this);
+        _logger.LogTrace("Stopping service {Type} ({This})", GetType().Name, this);
         _characterMonitor.OnActiveRetainerChanged -= CharacterMonitorOnOnActiveRetainerChanged;
         _inventoryMonitor.OnInventoryChanged -= InventoryMonitorOnOnInventoryChanged;
         _inventoryCountByType?.UnregisterFunc();
@@ -582,6 +582,7 @@ public class IPCService : IHostedService
         _getCharacterItemsByType?.UnregisterFunc();
         _getCharactersOwnedByActive?.UnregisterFunc();
         _isInitialized?.UnregisterFunc();
+        _logger.LogTrace("Stopped service {Type} ({This})", GetType().Name, this);
         return Task.CompletedTask;
     }
 }

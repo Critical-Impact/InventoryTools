@@ -468,8 +468,9 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        Logger.LogTrace("Stopped service {type} ({this})", GetType().Name, this);
+        Logger.LogTrace("Stopping service {Type} ({This})", GetType().Name, this);
         ContextMenu.OnMenuOpened -= MenuOpened;
+        Logger.LogTrace("Stopped service {Type} ({This})", GetType().Name, this);
         return Task.CompletedTask;
     }
 }
