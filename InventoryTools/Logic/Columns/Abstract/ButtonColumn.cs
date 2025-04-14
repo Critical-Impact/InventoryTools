@@ -61,9 +61,10 @@ public abstract class ButtonColumn : IColumn
     public abstract List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
         SearchResult searchResult, int rowIndex, int columnIndex);
 
-    public virtual void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)
+    public virtual List<MessageBase>? DrawEditor(ColumnConfiguration columnConfiguration,
+        FilterConfiguration configuration)
     {
-
+        return null;
     }
 
     public virtual string CsvExport(ColumnConfiguration columnConfiguration, SearchResult item)

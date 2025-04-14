@@ -4,7 +4,7 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
-
+using CriticalCommonLib.Services.Mediator;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Logic.Columns.ColumnSettings;
@@ -51,7 +51,8 @@ public class CraftCalculatorColumn : IntegerColumn, IDisposable
     public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
     public override FilterType AvailableIn { get; } = Logic.FilterType.GameItemFilter;
 
-    public override void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)
+    public override List<MessageBase>? DrawEditor(ColumnConfiguration columnConfiguration,
+        FilterConfiguration configuration)
     {
         ImGui.NewLine();
         ImGui.Separator();
@@ -61,6 +62,7 @@ public class CraftCalculatorColumn : IntegerColumn, IDisposable
         ImGui.SameLine();
         _scopePickerColumnSetting.Draw(columnConfiguration, "Please make sure you include at least one inventory that contains crystals otherwise the craft calculator will not work. If no scopes are picked, the craft calculator will look in your active characters inventories and their retainers.");
         base.DrawEditor(columnConfiguration, configuration);
+        return null;
     }
 
 

@@ -340,14 +340,23 @@ namespace InventoryTools.Ui
                 }
                 ImGuiUtil.HoverTooltip("Open in Garland Tools");
                 ImGui.SameLine();
+
                 if (ImGui.ImageButton(ImGuiService.GetImageTexture("teamcraft").ImGuiHandle,
                         new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                 {
                     $"https://ffxivteamcraft.com/db/en/item/{_itemId}".OpenBrowser();
                 }
                 ImGuiUtil.HoverTooltip("Open in Teamcraft");
-
                 ImGui.SameLine();
+
+                if (ImGui.ImageButton(ImGuiService.GetImageTexture("universalis").ImGuiHandle,
+                        new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
+                {
+                    $"https://universalis.app/market/{_itemId}".OpenBrowser();
+                }
+                ImGuiUtil.HoverTooltip("Open in Universalis");
+                ImGui.SameLine();
+
                 if (ImGui.ImageButton(ImGuiService.GetImageTexture("gamerescape").ImGuiHandle,
                         new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                 {
@@ -359,8 +368,8 @@ namespace InventoryTools.Ui
                     $"https://ffxiv.gamerescape.com/wiki/{HttpUtility.UrlEncode(name)}?useskin=Vector".OpenBrowser();
                 }
                 ImGuiUtil.HoverTooltip("Open in Gamer Escape");
-
                 ImGui.SameLine();
+
                 if (ImGui.ImageButton(ImGuiService.GetImageTexture("consolegameswiki").ImGuiHandle,
                         new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                 {

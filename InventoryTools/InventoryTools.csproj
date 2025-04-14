@@ -138,6 +138,10 @@
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <TargetPath>Images\teamcraft.png</TargetPath>
         </ContentWithTargetPath>
+        <ContentWithTargetPath Include="Images\universalis.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>Images\universalis.png</TargetPath>
+        </ContentWithTargetPath>
         <ContentWithTargetPath Include="Images\garlandtools.png">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <TargetPath>Images\garlandtools.png</TargetPath>

@@ -38,11 +38,13 @@ namespace InventoryTools.Logic.Columns
             return searchResult.Item.Sources;
         }
 
-        public override void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)
+        public override List<MessageBase>? DrawEditor(ColumnConfiguration columnConfiguration,
+            FilterConfiguration configuration)
         {
             ImGui.NewLine();
             ImGui.Separator();
             SourceTypeSelectorSetting.Draw(columnConfiguration, null);
+            return null;
         }
 
         public override List<MessageBase>? DoDraw(SearchResult searchResult, List<ItemSource>? currentValue, int rowIndex,

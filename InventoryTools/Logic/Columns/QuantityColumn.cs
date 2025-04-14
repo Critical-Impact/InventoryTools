@@ -62,7 +62,8 @@ namespace InventoryTools.Logic.Columns
             }
         }
 
-        public override void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)
+        public override List<MessageBase>? DrawEditor(ColumnConfiguration columnConfiguration,
+            FilterConfiguration configuration)
         {
             if (configuration.FilterType == Logic.FilterType.GameItemFilter ||
                 configuration.FilterType == Logic.FilterType.CraftFilter)
@@ -77,6 +78,7 @@ namespace InventoryTools.Logic.Columns
                     "This lets you set which characters you want to generate a total based off.");
                 base.DrawEditor(columnConfiguration, configuration);
             }
+            return null;
         }
 
         public override List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration, SearchResult searchResult,

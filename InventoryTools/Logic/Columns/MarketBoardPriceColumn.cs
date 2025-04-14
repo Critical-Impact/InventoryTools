@@ -36,11 +36,13 @@ namespace InventoryTools.Logic.Columns
 
         public override bool IsConfigurable => true;
 
-        public override void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)
+        public override List<MessageBase>? DrawEditor(ColumnConfiguration columnConfiguration,
+            FilterConfiguration configuration)
         {
             ImGui.NewLine();
             ImGui.Separator();
             MarketboardWorldSetting.Draw(columnConfiguration, null);
+            return null;
         }
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,

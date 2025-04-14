@@ -2,11 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AllaganLib.GameSheets.Caches;
+using AllaganLib.GameSheets.Sheets;
 using Autofac;
 using CriticalCommonLib.Models;
 using InventoryTools.Logic.Filters;
 using InventoryTools.Logic.GenericFilters;
 using InventoryTools.Logic.ItemRenderers;
+using Lumina.Excel;
+using Lumina.Excel.Sheets;
+using OtterGui;
 
 namespace InventoryTools.Services;
 
@@ -23,20 +27,29 @@ public class FilterService : IFilterService
     private readonly GenericHasUseFilter.Factory _hasUseFactory;
     private readonly GenericHasSourceCategoryFilter.Factory _hasSourceCategoryFactory;
     private readonly GenericHasUseCategoryFilter.Factory _hasUseCategoryFactory;
-    public readonly List<FilterCategory> FilterCategoryOrder = new() { FilterCategory.Settings, FilterCategory.Display, FilterCategory.Inventories, FilterCategory.Columns,FilterCategory.CraftColumns,  FilterCategory.Basic, FilterCategory.Sources, FilterCategory.SourceCategories, FilterCategory.Uses, FilterCategory.UseCategories, FilterCategory.IngredientSourcing,FilterCategory.ZonePreference,FilterCategory.WorldPricePreference, FilterCategory.Acquisition, FilterCategory.Searching, FilterCategory.Market, FilterCategory.Searching, FilterCategory.Crafting, FilterCategory.Gathering, FilterCategory.Advanced};
+    private readonly GenericIntegerFilter.Factory _integerFilterFactory;
+    private readonly ExcelSheet<BaseParam> _baseParamSheet;
+    private readonly ItemSheet _itemSheet;
+    public readonly List<FilterCategory> FilterCategoryOrder = new() { FilterCategory.Settings, FilterCategory.Display, FilterCategory.Inventories, FilterCategory.Columns,FilterCategory.CraftColumns,  FilterCategory.Basic,   FilterCategory.Stats, FilterCategory.Sources, FilterCategory.SourceCategories, FilterCategory.Uses, FilterCategory.UseCategories, FilterCategory.IngredientSourcing,FilterCategory.ZonePreference,FilterCategory.WorldPricePreference, FilterCategory.Acquisition, FilterCategory.Searching, FilterCategory.Market, FilterCategory.Searching, FilterCategory.Crafting, FilterCategory.Gathering, FilterCategory.Advanced};
     public FilterService(IEnumerable<IFilter> filters,
         GenericBooleanFilter.Factory booleanFilterFactory,
         GenericHasSourceFilter.Factory hasSourceFactory,
         GenericHasUseFilter.Factory hasUseFactory,
         GenericHasSourceCategoryFilter.Factory hasSourceCategoryFactory,
         GenericHasUseCategoryFilter.Factory hasUseCategoryFactory,
-        ItemInfoRenderService itemInfoRenderService)
+        GenericIntegerFilter.Factory integerFilterFactory,
+        ItemInfoRenderService itemInfoRenderService,
+        ExcelSheet<BaseParam> baseParamSheet,
+        ItemSheet itemSheet)
     {
         _booleanFilterFactory = booleanFilterFactory;
         _hasSourceFactory = hasSourceFactory;
         _hasUseFactory = hasUseFactory;
         _hasSourceCategoryFactory = hasSourceCategoryFactory;
         _hasUseCategoryFactory = hasUseCategoryFactory;
+        _integerFilterFactory = integerFilterFactory;
+        _baseParamSheet = baseParamSheet;
+        _itemSheet = itemSheet;
 
         _availableFilters = filters.ToList();
 
@@ -70,6 +83,37 @@ public class FilterService : IFilterService
                 var genericFilter = hasUseCategoryFactory.Invoke(category);
                 _availableFilters.Add(genericFilter);
             }
+        }
+
+        foreach (var baseParam in baseParamSheet)
+        {
+            if (baseParam.RowId == 0 || baseParam.RowId == 15)
+            {
+                continue;
+            }
+            var baseParamId = baseParam.RowId;
+            var helpText = baseParam.Description.ExtractText();
+            var name = baseParam.Name.ExtractText();
+            if (helpText == string.Empty)
+            {
+                helpText = $"The {name} of the item.";
+            }
+            var genericFilter = _integerFilterFactory.Invoke("BaseParam" + baseParam.RowId, name, helpText, FilterCategory.Stats, null,
+                row =>
+                {
+                    var hasAttribute = row.Base.BaseParam.IndexOf(a => a.Value.RowId == baseParamId);
+
+                    if (hasAttribute == -1)
+                    {
+                        hasAttribute = row.Base.BaseParamSpecial.IndexOf(a => a.Value.RowId == baseParamId);
+                        return row.Base.BaseParamValueSpecial[hasAttribute];
+                        return null;
+                    }
+
+                    return row.Base.BaseParamValue[hasAttribute];
+                });
+            _availableFilters.Add(genericFilter);
+
         }
     }
 

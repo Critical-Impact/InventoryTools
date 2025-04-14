@@ -59,12 +59,14 @@ public class CharacterScopePickerColumnSetting : ColumnSetting<List<CharacterSea
     public override string HelpText { get; set; } = "Select the characters you want to search inside.";
     public override List<CharacterSearchScope>? DefaultValue { get; set; } = null;
 
-    public override void Draw(ColumnConfiguration configuration, string? helpText)
+    public override bool Draw(ColumnConfiguration configuration, string? helpText)
     {
+        var success = false;
         var characterSearchScopes = CurrentValue(configuration) ?? new();
         if (_scopePicker.Draw("##ScopePicker" + configuration.Key, characterSearchScopes))
         {
             this.UpdateColumnConfiguration(configuration, characterSearchScopes);
+            success = true;
         }
 
         if (helpText != null)
@@ -97,6 +99,8 @@ public class CharacterScopePickerColumnSetting : ColumnSetting<List<CharacterSea
                 ImGui.TextUnformatted(s.Name);
             }
         }
+
+        return success;
     }
 
     public override void ResetFilter(ColumnConfiguration configuration)

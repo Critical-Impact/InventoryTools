@@ -8,6 +8,7 @@ using CriticalCommonLib.Services.Mediator;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Services;
+using InventoryTools.Ui.Widgets;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns.Abstract
@@ -65,11 +66,13 @@ namespace InventoryTools.Logic.Columns.Abstract
             {
                 if (currentValue != null)
                 {
-                    ImGui.Text($"{currentValue.Value.ToString("N2", CultureInfo.InvariantCulture)}");
+                    var fmt = currentValue.Value.ToString("N2", CultureInfo.InvariantCulture);
+                    ImGuiUtil.VerticalAlignText(fmt, filterConfiguration.TableHeight, false);
+
                 }
                 else
                 {
-                    ImGui.Text(EmptyText);
+                    ImGuiUtil.VerticalAlignText(EmptyText, filterConfiguration.TableHeight, false);
                 }
             }
 

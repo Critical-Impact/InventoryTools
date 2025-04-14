@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -5,7 +6,7 @@ using AllaganLib.GameSheets.Sheets.Rows;
 using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
-
+using CriticalCommonLib.Services.Mediator;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 using InventoryTools.Logic.Columns;
@@ -13,22 +14,39 @@ using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Logic.Filters.Abstract;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
-    public class ColumnsFilter : SortedListFilter<ColumnConfiguration, IColumn>
+    public class ColumnsFilter : SortedListFilter<ColumnConfiguration, IColumn>, IDisposable, IMediatorSubscriber
     {
         private readonly IListService _listService;
         private readonly IEnumerable<IColumn> _columns;
 
-        public ColumnsFilter(ILogger<ColumnsFilter> logger, ImGuiService imGuiService, IListService listService, IEnumerable<IColumn> columns) : base(logger, imGuiService)
+        public ColumnsFilter(ILogger<ColumnsFilter> logger, ImGuiService imGuiService, IListService listService, IEnumerable<IColumn> columns, MediatorService mediatorService) : base(logger, imGuiService)
         {
             _listService = listService;
             _columns = columns;
+            MediatorService = mediatorService;
+            MediatorService.Subscribe<NewColumnSetNameMessage>(this, SetNewName);
         }
+
+        private void SetNewName(NewColumnSetNameMessage obj)
+        {
+            if (obj.name != null)
+            {
+                this._customName = obj.name;
+            }
+
+            if (obj.exportName != null)
+            {
+                this._exportName = obj.exportName;
+            }
+        }
+
         public override Dictionary<ColumnConfiguration, (string, string?)> CurrentValue(FilterConfiguration configuration)
         {
             (string, string?) GetColumnDetails(ColumnConfiguration c)
@@ -312,7 +330,7 @@ namespace InventoryTools.Logic.Filters
 
                         if (_selectedColumnConfiguration != null)
                         {
-                            _selectedColumnConfiguration.Column.DrawEditor(_selectedColumnConfiguration, configuration);
+                            MediatorService.Publish(_selectedColumnConfiguration.Column.DrawEditor(_selectedColumnConfiguration, configuration));
                         }
 
 
@@ -387,5 +405,12 @@ namespace InventoryTools.Logic.Filters
 
 
         }
+
+        public void Dispose()
+        {
+            MediatorService.UnsubscribeAll(this);
+        }
+
+        public MediatorService MediatorService { get; set; }
     }
 }

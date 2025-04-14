@@ -14,6 +14,7 @@ using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Columns;
 using InventoryTools.Logic.Columns.Buttons;
+using InventoryTools.Logic.Columns.Stats;
 using InventoryTools.Logic.Filters;
 using InventoryTools.Mediator;
 using InventoryTools.Services;

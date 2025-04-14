@@ -24,13 +24,14 @@ public abstract class ChoiceColumnSetting<T> : ColumnSetting<T?>
         var keyValuePair = CurrentValue(configuration);
         return keyValuePair != null && !Equals(keyValuePair, DefaultValue);
     }
-    
+
     public abstract List<T> GetChoices(ColumnConfiguration configuration);
 
     public abstract string GetFormattedChoice(ColumnConfiguration filterConfiguration, T choice);
-    
-    public override void Draw(ColumnConfiguration configuration, string? helpText)
+
+    public override bool Draw(ColumnConfiguration configuration, string? helpText)
     {
+        var success = false;
         ImGui.SetNextItemWidth(LabelSize);
         if (HasValueSet(configuration))
         {
@@ -59,6 +60,7 @@ public abstract class ChoiceColumnSetting<T> : ColumnSetting<T?>
                     {
                         ResetFilter(configuration);
                         configuration.IsDirty = true;
+                        success = true;
                     }
                 }
                 foreach (var item in choices)
@@ -75,6 +77,7 @@ public abstract class ChoiceColumnSetting<T> : ColumnSetting<T?>
                     {
                         UpdateColumnConfiguration(configuration, item);
                         configuration.IsDirty = true;
+                        success = true;
                     }
                 }
             }
@@ -88,7 +91,9 @@ public abstract class ChoiceColumnSetting<T> : ColumnSetting<T?>
             if (ImGui.Button("Reset##" + Key + "Reset"))
             {
                 ResetFilter(configuration);
+                success = true;
             }
         }
+        return success;
     }
 }

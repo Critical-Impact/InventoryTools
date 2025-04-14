@@ -23,12 +23,17 @@ public class BootService : DisposableMediatorSubscriberBase, IHostedService
     public Task StartAsync(CancellationToken cancellationToken)
     {
         Logger.LogTrace("Starting service {type} ({this})", GetType().Name, this);
+        MediatorService.Subscribe<PluginLoadedMessage>(this, PluginLoaded);
+        return Task.CompletedTask;
+    }
+
+    private void PluginLoaded(PluginLoadedMessage obj)
+    {
         if (_configurationWizardService.ShouldShowWizard)
         {
             MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWizard)));
         }
         MediatorService.Publish(new OpenSavedWindowsMessage());
-        return Task.CompletedTask;
     }
 
     public Task StopAsync(CancellationToken cancellationToken)

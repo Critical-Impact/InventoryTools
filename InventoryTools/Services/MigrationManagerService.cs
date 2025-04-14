@@ -7,12 +7,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using AllaganLib.GameSheets.Caches;
 using Autofac;
+using CriticalCommonLib.Crafting;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Colors;
 using Dalamud.Plugin;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Filters;
+using InventoryTools.Logic.Filters.Stats;
 using InventoryTools.Logic.ItemRenderers;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Services.Interfaces;
@@ -335,6 +337,24 @@ public class MigrationManagerService : IHostedService
             }
             config.InternalVersion++;
 
+        }
+
+        if (config.InternalVersion == 19)
+        {
+            foreach (var filterConfig in config.FilterConfigurations)
+            {
+                if (filterConfig.FilterType == FilterType.CraftFilter)
+                {
+                    var fishingIndex = filterConfig.CraftList.IngredientPreferenceTypeOrder.IndexOf((IngredientPreferenceType.Fishing,
+                        null));
+                    if (fishingIndex != -1)
+                    {
+                        filterConfig.CraftList.IngredientPreferenceTypeOrder.Insert(fishingIndex + 1, (IngredientPreferenceType.SpearFishing, null));
+                    }
+                }
+            }
+
+            config.InternalVersion++;
         }
     }
 

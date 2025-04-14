@@ -21,6 +21,7 @@ using InventoryTools.Tooltips;
 using InventoryTools.Ui;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 
 namespace InventoryTools
 {
@@ -114,11 +115,12 @@ namespace InventoryTools
 
         private void CraftMonitorOnCraftCompleted(uint itemid, FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags flags, uint quantity)
         {
-            _logger.LogTrace("Craft completed for item " + itemid);
+            _logger.LogTrace("Craft completed for {Quantity} qty of item {ItemId}", quantity, itemid);
 
             var activeCraftList = _listService.GetActiveCraftList();
             if (activeCraftList != null && activeCraftList.FilterType == FilterType.CraftFilter && activeCraftList.CraftList.CraftListMode == CraftListMode.Normal)
             {
+                _logger.LogTrace("Marking {Quantity} qty for item {ItemId} ({HqFlag}) as crafted.", quantity, itemid, flags == InventoryItem.ItemFlags.None ? "NQ" : "HQ");
                 activeCraftList.CraftList.MarkCrafted(itemid, flags, quantity);
                 if (activeCraftList is { IsEphemeralCraftList: true, CraftList.IsCompleted: true })
                 {
@@ -129,6 +131,10 @@ namespace InventoryTools
                 {
                     activeCraftList.NeedsRefresh = true;
                 }
+            }
+            else
+            {
+                _logger.LogTrace("Active craft list is either inactive or in stock mode.");
             }
         }
 

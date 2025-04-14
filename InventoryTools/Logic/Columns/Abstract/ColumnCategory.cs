@@ -4,6 +4,7 @@ public enum ColumnCategory
 {
     Unsorted,
     Basic,
+    Stats,
     Inventory,
     Crafting,
     Market,

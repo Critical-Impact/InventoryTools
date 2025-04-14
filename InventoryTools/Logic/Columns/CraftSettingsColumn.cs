@@ -798,9 +798,9 @@ public class CraftSettingsColumn : IColumn
         return false;
     }
 
-    public void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)
+    public List<MessageBase>? DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)
     {
-
+        return null;
     }
 
     public string CsvExport(ColumnConfiguration columnConfiguration, SearchResult item)

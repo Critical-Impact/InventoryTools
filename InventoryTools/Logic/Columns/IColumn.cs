@@ -41,7 +41,7 @@ namespace InventoryTools.Logic.Columns
         public List<MessageBase>? Draw(FilterConfiguration configuration, ColumnConfiguration columnConfiguration,
             SearchResult searchResult,
             int rowIndex, int columnIndex);
-        public void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration);
+        public List<MessageBase>? DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration);
         public string CsvExport(ColumnConfiguration columnConfiguration, SearchResult item);
         public dynamic? JsonExport(ColumnConfiguration columnConfiguration, SearchResult item);
 

@@ -45,3 +45,4 @@ public record RequestTeleportToSpearFishingSpotRowMessage(SpearfishingNotebookRo
 public record RequestTeleportToGatheringPointRowMessage(GatheringPointRow gatheringPoint) : MessageBase;
 public record OverlaysRequestRefreshMessage() : MessageBase;
 public record ItemSearchRequestedMessage(uint ItemId, InventoryItem.ItemFlags Flags) : MessageBase;
+public record NewColumnSetNameMessage(string? name, string? exportName) : MessageBase;

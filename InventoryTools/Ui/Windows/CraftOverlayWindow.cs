@@ -457,6 +457,15 @@ public class CraftOverlayWindow : OverlayWindow
 
     }
 
+    public override void OnClose()
+    {
+        if (SelectedConfiguration != null)
+        {
+            SelectedConfiguration.Active = false;
+        }
+        base.OnClose();
+    }
+
     public override FilterConfiguration? SelectedConfiguration => _listService.GetActiveCraftList();
     public override string GenericKey { get; } = "CraftOverlay";
     public override string GenericName { get; } = "Craft Overlay";

@@ -102,6 +102,7 @@ public class CraftIngredientPreferenceFilter : SortedListFilter<(IngredientPrefe
         IngredientPreferenceType.Crafting,
         IngredientPreferenceType.Desynthesis,
         IngredientPreferenceType.Fishing,
+        IngredientPreferenceType.SpearFishing,
         IngredientPreferenceType.Gardening,
         IngredientPreferenceType.Marketboard,
         IngredientPreferenceType.Mining,

@@ -62,12 +62,14 @@ public class ScopePickerColumnSetting : ColumnSetting<List<InventorySearchScope>
     public override string HelpText { get; set; } = "Select the inventories you want to search inside.";
     public override List<InventorySearchScope>? DefaultValue { get; set; } = null;
 
-    public override void Draw(ColumnConfiguration configuration, string? helpText)
+    public override bool Draw(ColumnConfiguration configuration, string? helpText)
     {
+        var success = false;
         var inventorySearchScopes = CurrentValue(configuration) ?? new();
         if (_scopePicker.Draw("##ScopePicker" + configuration.Key, inventorySearchScopes))
         {
             this.UpdateColumnConfiguration(configuration, inventorySearchScopes);
+            success = true;
         }
 
         if (helpText != null)
@@ -100,6 +102,8 @@ public class ScopePickerColumnSetting : ColumnSetting<List<InventorySearchScope>
                 ImGui.TextUnformatted((s.Character?.Name ?? "Unknown Character") + " - " + (string.Join(", ", s.Category.Select(c => c.FormattedDetailedName()).ToList())));
             }
         }
+
+        return success;
     }
 
     public override void ResetFilter(ColumnConfiguration configuration)

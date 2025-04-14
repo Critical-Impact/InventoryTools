@@ -6,6 +6,7 @@ using System.Numerics;
 using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib;
 using CriticalCommonLib.Crafting;
+using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;

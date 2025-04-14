@@ -9,13 +9,13 @@ using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
-    public class ItemLevelFilter : StringFilter
+    public class RequiredLevelFilter : StringFilter
     {
-        public override string Key { get; set; } = "ILvl";
-        public override string Name { get; set; } = "Item Level";
-        public override string HelpText { get; set; } = "The item level of the item";
+        public override string Key { get; set; } = "ItemLvl";
+        public override string Name { get; set; } = "Required Level";
+        public override string HelpText { get; set; } = "The required level to equip the item.";
 
-        public override FilterCategory FilterCategory { get; set; } = FilterCategory.Basic;
+        public override FilterCategory FilterCategory { get; set; } = FilterCategory.Stats;
 
         public override bool? FilterItem(FilterConfiguration configuration,InventoryItem item)
         {
@@ -27,7 +27,7 @@ namespace InventoryTools.Logic.Filters
             var currentValue = CurrentValue(configuration);
             if (!string.IsNullOrEmpty(currentValue))
             {
-                if (((int)item.Base.LevelItem.RowId).PassesFilter(currentValue.ToLower()))
+                if (((int)item.Base.LevelEquip).PassesFilter(currentValue.ToLower()))
                 {
                     return true;
                 }
@@ -37,7 +37,7 @@ namespace InventoryTools.Logic.Filters
             return true;
         }
 
-        public ItemLevelFilter(ILogger<ItemLevelFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+        public RequiredLevelFilter(ILogger<RequiredLevelFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
         {
             ShowOperatorTooltip = true;
         }

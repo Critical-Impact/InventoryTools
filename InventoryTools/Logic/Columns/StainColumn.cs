@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using CriticalCommonLib.Services.Mediator;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Logic.Columns.ColumnSettings;
@@ -39,12 +41,14 @@ public class StainColumn : TextColumn
         return "";
     }
 
-    public override void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)
+    public override List<MessageBase>? DrawEditor(ColumnConfiguration columnConfiguration,
+        FilterConfiguration configuration)
     {
         ImGui.NewLine();
         ImGui.Separator();
         _stainColumnSetting.Draw(columnConfiguration, null);
         base.DrawEditor(columnConfiguration, configuration);
+        return null;
     }
 
     public override string Name { get; set; } = "Dye";

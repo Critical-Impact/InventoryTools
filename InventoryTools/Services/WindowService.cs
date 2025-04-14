@@ -489,7 +489,18 @@ namespace InventoryTools.Services
         {
             foreach (var window in _allWindows)
             {
-                if (window.SaveState && window.SavePosition && window.IsOpen)
+                if(window.SaveState)
+                {
+                    if (window.IsOpen)
+                    {
+                        _configuration.OpenWindows.Add(window.GetType().ToString());
+                    }
+                    else
+                    {
+                        _configuration.OpenWindows.Remove(window.GetType().ToString());
+                    }
+                }
+                if (window.SavePosition && window.IsOpen)
                 {
                     _configuration.SavedWindowPositions[window.GetType().ToString()] = window.CurrentPosition;
                 }

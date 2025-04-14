@@ -68,6 +68,16 @@ public class IngredientPreferenceLocalizer
                 }
 
                 return "No item selected";
+            case IngredientPreferenceType.Desynthesis:
+                if (ingredientPreference.LinkedItemId != null && ingredientPreference.LinkedItemQuantity != null)
+                {
+                    var itemName =
+                        _itemSheet.GetRow(ingredientPreference.LinkedItemId.Value)?.NameString ??
+                        "Unknown Item";
+                    return "Desynthesis (" + itemName + " - " + ingredientPreference.LinkedItemQuantity.Value + ")";
+                }
+
+                return "No item selected";
         }
 
         return ingredientPreference.Type.FormattedName();
@@ -84,6 +94,7 @@ public class IngredientPreferenceLocalizer
                 .GetRow(ingredientPreference.RecipeCraftTypeId ?? 0)?.Icon ?? Icons.CraftIcon,
             IngredientPreferenceType.Desynthesis => Icons.DesynthesisIcon,
             IngredientPreferenceType.Fishing => Icons.FishingIcon,
+            IngredientPreferenceType.SpearFishing => Icons.Spearfishing,
             IngredientPreferenceType.Item => ingredientPreference.LinkedItemId != null
                 ? _itemSheet.GetRowOrDefault(ingredientPreference.LinkedItemId.Value)?.Icon ??
                   Icons.SpecialItemIcon

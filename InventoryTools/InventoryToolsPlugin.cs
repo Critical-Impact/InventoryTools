@@ -279,6 +279,10 @@ namespace InventoryTools
                     builder
                         .RegisterType(typeof(GenericBooleanFilter))
                         .AsSelf();
+
+                    builder
+                        .RegisterType(typeof(GenericIntegerFilter))
+                        .AsSelf();
                 });
 
             hostBuilder.ConfigureContainer<ContainerBuilder>(builder =>

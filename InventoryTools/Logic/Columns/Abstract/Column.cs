@@ -30,8 +30,10 @@ namespace InventoryTools.Logic.Columns.Abstract
 
         public abstract ColumnCategory ColumnCategory { get; }
         public abstract T CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult);
-        public virtual void DrawEditor(ColumnConfiguration columnConfiguration, FilterConfiguration configuration)
+        public virtual List<MessageBase>? DrawEditor(ColumnConfiguration columnConfiguration,
+            FilterConfiguration configuration)
         {
+            return null;
         }
 
         public abstract string CsvExport(ColumnConfiguration columnConfiguration, SearchResult searchResult);
