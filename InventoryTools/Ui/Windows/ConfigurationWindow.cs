@@ -15,6 +15,7 @@ using InventoryTools.Ui.MenuItems;
 using InventoryTools.Ui.Widgets;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin.Services;
 using InventoryTools.Extensions;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
@@ -22,12 +23,14 @@ using InventoryTools.Services.Interfaces;
 using InventoryTools.Ui.Pages;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Serilog.Events;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 
 namespace InventoryTools.Ui
 {
     public class ConfigurationWindow : GenericWindow, IMenuWindow
     {
+        private readonly IPluginLog _pluginLog;
         private readonly ConfigurationWizardService _configurationWizardService;
         private readonly IChatUtilities _chatUtilities;
         private readonly PluginLogic _pluginLogic;
@@ -43,6 +46,7 @@ namespace InventoryTools.Ui
         private IEnumerable<IMenuWindow>? _menuWindows;
 
         public ConfigurationWindow(ILogger<ConfigurationWindow> logger,
+            IPluginLog pluginLog,
             MediatorService mediator,
             ImGuiService imGuiService,
             InventoryToolsConfiguration configuration,
@@ -61,6 +65,7 @@ namespace InventoryTools.Ui
             configuration,
             "Configuration Window")
         {
+            _pluginLog = pluginLog;
             _configurationWizardService = configurationWizardService;
             _chatUtilities = chatUtilities;
             _pluginLogic = pluginLogic;
@@ -466,6 +471,18 @@ namespace InventoryTools.Ui
                     if (ImGui.MenuItem("Help"))
                     {
                         this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(HelpWindow)));
+                    }
+
+                    if (ImGui.MenuItem("Enable Verbose Logging", "", this._pluginLog.MinimumLogLevel == LogEventLevel.Verbose))
+                    {
+                        if (this._pluginLog.MinimumLogLevel == LogEventLevel.Verbose)
+                        {
+                            this._pluginLog.MinimumLogLevel = LogEventLevel.Debug;
+                        }
+                        else
+                        {
+                            this._pluginLog.MinimumLogLevel = LogEventLevel.Verbose;
+                        }
                     }
 
                     if (ImGui.MenuItem("Ko-Fi"))

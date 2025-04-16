@@ -32,6 +32,7 @@ using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
 using InventoryTools.Extensions;
 using Microsoft.Extensions.Logging;
+using Serilog.Events;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 
@@ -57,6 +58,7 @@ namespace InventoryTools.Ui
         private readonly PopupService _popupService;
         private readonly IKeyState _keyState;
         private readonly IFramework _framework;
+        private readonly IPluginLog _pluginLog;
         private IEnumerable<IMenuWindow>? _menuWindows;
         private readonly InventoryToolsConfiguration _configuration;
 
@@ -67,7 +69,7 @@ namespace InventoryTools.Ui
             HostedInventoryHistory inventoryHistory, ListImportExportService importExportService,
             IComponentContext context, FiltersWindowLayoutSetting layoutSetting, ItemSheet itemSheet,
             FilterConfiguration.Factory filterConfigFactory,
-            IClipboardService clipboardService, PopupService popupService, IKeyState keyState, IFramework framework) : base(logger, mediator, imGuiService, configuration, "Filters Window")
+            IClipboardService clipboardService, PopupService popupService, IKeyState keyState, IFramework framework, IPluginLog pluginLog) : base(logger, mediator, imGuiService, configuration, "Filters Window")
         {
             _listService = listService;
             _filterService = filterService;
@@ -87,6 +89,7 @@ namespace InventoryTools.Ui
             _popupService = popupService;
             _keyState = keyState;
             _framework = framework;
+            _pluginLog = pluginLog;
             _configuration = configuration;
             this.Flags = ImGuiWindowFlags.MenuBar;
         }
@@ -549,6 +552,17 @@ namespace InventoryTools.Ui
                     if (ImGui.MenuItem("Help"))
                     {
                         this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(HelpWindow)));
+                    }
+                    if (ImGui.MenuItem("Enable Verbose Logging", "", this._pluginLog.MinimumLogLevel == LogEventLevel.Verbose))
+                    {
+                        if (this._pluginLog.MinimumLogLevel == LogEventLevel.Verbose)
+                        {
+                            this._pluginLog.MinimumLogLevel = LogEventLevel.Debug;
+                        }
+                        else
+                        {
+                            this._pluginLog.MinimumLogLevel = LogEventLevel.Verbose;
+                        }
                     }
 
                     if (ImGui.MenuItem("Report a Issue"))
