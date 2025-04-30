@@ -107,7 +107,7 @@ namespace InventoryTools.Logic.Filters.Abstract
                 if (table.Success)
                 {
                     ImGui.TableSetupColumn(Key + "ColumnEditTableName", ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthFixed, LabelSize);
-                    ImGui.TableSetupColumn(Key + "ColumnEditTableDelete", ImGuiTableColumnFlags.NoSort, InputSize);
+                    ImGui.TableSetupColumn(Key + "ColumnEditTableDelete", ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthFixed, InputSize);
                     var index = 0;
                     foreach (var item in value)
                     {
@@ -129,7 +129,7 @@ namespace InventoryTools.Logic.Filters.Abstract
                 }
             }
         }
-        
+
         public override void Draw(FilterConfiguration configuration)
         {
             DrawTable(configuration);

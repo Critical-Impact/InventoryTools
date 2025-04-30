@@ -18,8 +18,11 @@ using ImGuiNET;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
 using InventoryTools.Extensions;
+using InventoryTools.Logic;
 using InventoryTools.Logic.ItemRenderers;
 using InventoryTools.Logic.Settings;
+using InventoryTools.Mediator;
+using InventoryTools.Ui;
 using Lumina.Data;
 
 namespace InventoryTools.Services;
@@ -32,12 +35,16 @@ public class ItemInfoRenderService
     private readonly IPluginLog _pluginLog;
     private readonly InventoryToolsConfiguration _configuration;
     private readonly IClipboardService _clipboardService;
+    private readonly ImGuiTooltipService _tooltipService;
     private readonly Dictionary<Type,IItemInfoRenderer> _sourceRenderers;
     private readonly Dictionary<Type,IItemInfoRenderer> _useRenderers;
     private readonly Dictionary<ItemInfoType,IItemInfoRenderer> _sourceRenderersByItemInfoType;
     private readonly Dictionary<ItemInfoType,IItemInfoRenderer> _useRenderersByItemInfoType;
 
-    public ItemInfoRenderService(IEnumerable<IItemInfoRenderer> itemRenderers, SourceIconGroupingSetting sourceIconGroupingSetting, UseIconGroupingSetting useIconGroupingSetting, ImGuiService imGuiService, IPluginLog pluginLog, InventoryToolsConfiguration configuration, IClipboardService clipboardService)
+    public ItemInfoRenderService(IEnumerable<IItemInfoRenderer> itemRenderers,
+        SourceIconGroupingSetting sourceIconGroupingSetting, UseIconGroupingSetting useIconGroupingSetting,
+        ImGuiService imGuiService, IPluginLog pluginLog, InventoryToolsConfiguration configuration,
+        IClipboardService clipboardService, ImGuiTooltipService tooltipService)
     {
         _sourceIconGroupingSetting = sourceIconGroupingSetting;
         _useIconGroupingSetting = useIconGroupingSetting;
@@ -45,6 +52,7 @@ public class ItemInfoRenderService
         _pluginLog = pluginLog;
         _configuration = configuration;
         _clipboardService = clipboardService;
+        _tooltipService = tooltipService;
         var itemInfoRenderers = itemRenderers.ToList();
         _sourceRenderers = itemInfoRenderers.Where(c => c.RendererType == RendererType.Source).ToDictionary(c => c.ItemSourceType, c => c);
         _useRenderers = itemInfoRenderers.Where(c => c.RendererType == RendererType.Use).ToDictionary(c => c.ItemSourceType, c => c);
@@ -109,6 +117,32 @@ public class ItemInfoRenderService
     public bool HasUseRenderer(ItemInfoType itemInfoType)
     {
         return _useRenderersByItemInfoType.ContainsKey(itemInfoType);
+    }
+
+    public bool InSourceCategory(ItemInfoType itemInfoType, ItemInfoRenderCategory renderCategory)
+    {
+        if (_sourceRenderersByItemInfoType.TryGetValue(itemInfoType, out var value))
+        {
+            if (value.Categories?.Contains(renderCategory) ?? false)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool InUseCategory(ItemInfoType itemInfoType, ItemInfoRenderCategory renderCategory)
+    {
+        if (_useRenderersByItemInfoType.TryGetValue(itemInfoType, out var value))
+        {
+            if (value.Categories?.Contains(renderCategory) ?? false)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public List<IItemInfoRenderer> GetSourcesByCategory(ItemInfoRenderCategory renderCategory)
@@ -320,12 +354,12 @@ public class ItemInfoRenderService
 
         var sourceIcon = _imGuiService.GetIconTexture(icon);
 
-        var isButton = sourceRenderer?.OnClick != null;
+        var hasCustomClick = sourceRenderer?.OnClick != null;
         var hasTooltip = sourceRenderer?.DrawTooltip != null;
         var hasGroupedTooltip = sourceRenderer?.DrawTooltipGrouped != null;
 
 
-        if (isButton && ImGui.ImageButton(sourceIcon.ImGuiHandle,
+        if (hasCustomClick && ImGui.ImageButton(sourceIcon.ImGuiHandle,
                 new Vector2(iconSize.X, iconSize.Y) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
                 new Vector2(1, 1), 0))
         {
@@ -342,14 +376,119 @@ public class ItemInfoRenderService
                 }
             }
         }
-        else if(!isButton)
+        else if(!hasCustomClick)
         {
-            ImGui.Image(sourceIcon.ImGuiHandle,
-                new Vector2(iconSize.X, iconSize.Y) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
-                new Vector2(1, 1));
+            if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                    new Vector2(iconSize.X, iconSize.Y) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
+                    new Vector2(1, 1), 0))
+            {
+                var items = itemSources.SelectMany(c => c.Items).DistinctBy(c => c.RowId).ToList();
+                var costItems = itemSources.SelectMany(c => c.CostItems).DistinctBy(c => c.RowId).ToList();
+                if (items.Count == 1 && costItems.Count == 0)
+                {
+                    messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), items[0].RowId));
+                }
+                else
+                {
+                    ImGui.OpenPopup("LeftClick");
+                }
+            }
         }
 
-        if (isButton && itemSources.Count > 1)
+        using (var popup = ImRaii.Popup("LeftClick"))
+        {
+            if (popup.Success)
+            {
+                var items = itemSources.SelectMany(c => c.Items).DistinctBy(c => c.RowId).ToList();
+                var costItems = itemSources.SelectMany(c => c.CostItems).DistinctBy(c => c.RowId).ToList();
+
+                if (rendererType == RendererType.Source)
+                {
+                    ImGui.Text("Item");
+                    ImGui.Separator();
+                    foreach (var item in items)
+                    {
+                        this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16), true);
+                        if (ImGui.IsItemHovered())
+                        {
+                            this._tooltipService.DrawItemTooltip(new SearchResult(item));
+                        }
+
+                        ImGui.SameLine();
+                        if (ImGui.Selectable(item.NameString))
+                        {
+                            messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), item.RowId));
+                        }
+                    }
+
+                    if (costItems.Count > 0)
+                    {
+                        ImGui.NewLine();
+                        ImGui.Text("Related Items:");
+                        ImGui.Separator();
+                        foreach (var item in costItems)
+                        {
+                            this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16), true);
+                            if (ImGui.IsItemHovered())
+                            {
+                                this._tooltipService.DrawItemTooltip(new SearchResult(item));
+                            }
+
+                            ImGui.SameLine();
+                            if (ImGui.Selectable(item.NameString))
+                            {
+                                messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), item.RowId));
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (costItems.Count > 0)
+                    {
+                        ImGui.Text("Items:");
+                        ImGui.Separator();
+                        foreach (var item in costItems)
+                        {
+                            this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16), true);
+                            if (ImGui.IsItemHovered())
+                            {
+                                this._tooltipService.DrawItemTooltip(new SearchResult(item));
+                            }
+
+                            ImGui.SameLine();
+                            if (ImGui.Selectable(item.NameString))
+                            {
+                                messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), item.RowId));
+                            }
+                        }
+                    }
+
+                    if (items.Count > 0)
+                    {
+                        ImGui.NewLine();
+                        ImGui.Text("Related Items");
+                        ImGui.Separator();
+                        foreach (var item in items)
+                        {
+                            this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16), true);
+                            if (ImGui.IsItemHovered())
+                            {
+                                this._tooltipService.DrawItemTooltip(new SearchResult(item));
+                            }
+
+                            ImGui.SameLine();
+                            if (ImGui.Selectable(item.NameString))
+                            {
+                                messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), item.RowId));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (hasCustomClick && itemSources.Count > 1)
         {
             using (var popup = ImRaii.Popup("PickItemSource"))
             {
@@ -477,7 +616,107 @@ public class ItemInfoRenderService
                 }
                 else
                 {
-                    _imGuiService.ImGuiMenuService.DrawRightClickPopup(rendererType == RendererType.Source ? firstItem.Item : (firstItem.CostItem ?? firstItem.Item), messages);
+                    var items = itemSources.SelectMany(c => c.Items).DistinctBy(c => c.RowId).ToList();
+                    var costItems = itemSources.SelectMany(c => c.CostItems).DistinctBy(c => c.RowId).ToList();
+
+                    if (items.Count == 1 && costItems.Count == 0)
+                    {
+                        _imGuiService.ImGuiMenuService.DrawRightClickPopup(rendererType == RendererType.Source ? firstItem.Item : (firstItem.CostItem ?? firstItem.Item), messages);
+                    }
+                    else
+                    {
+                        if (rendererType == RendererType.Source)
+                        {
+                            ImGui.Text("Item");
+                            ImGui.Separator();
+                            foreach (var item in items)
+                            {
+                                this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16), true);
+                                if (ImGui.IsItemHovered())
+                                {
+                                    this._tooltipService.DrawItemTooltip(new SearchResult(item));
+                                }
+
+                                ImGui.SameLine();
+                                using var menu = ImRaii.Menu(item.NameString);
+                                if (menu)
+                                {
+                                    _imGuiService.ImGuiMenuService.DrawRightClickPopup(item, messages);
+                                }
+                            }
+
+                            if (costItems.Count > 0)
+                            {
+                                ImGui.NewLine();
+                                ImGui.Text("Related Items:");
+                                ImGui.Separator();
+                                foreach (var item in costItems)
+                                {
+                                    this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16), true);
+                                    if (ImGui.IsItemHovered())
+                                    {
+                                        this._tooltipService.DrawItemTooltip(new SearchResult(item));
+                                    }
+
+                                    ImGui.SameLine();
+                                    using var menu = ImRaii.Menu(item.NameString);
+                                    if (menu)
+                                    {
+                                        _imGuiService.ImGuiMenuService.DrawRightClickPopup(item, messages);
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (costItems.Count > 0)
+                            {
+                                ImGui.Text("Items:");
+                                ImGui.Separator();
+                                foreach (var item in costItems)
+                                {
+                                    this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16), true);
+                                    if (ImGui.IsItemHovered())
+                                    {
+                                        this._tooltipService.DrawItemTooltip(new SearchResult(item));
+                                    }
+
+                                    ImGui.SameLine();
+                                    using var menu = ImRaii.Menu(item.NameString);
+                                    if (menu)
+                                    {
+                                        _imGuiService.ImGuiMenuService.DrawRightClickPopup(item, messages);
+                                    }
+                                }
+                            }
+
+                            if (items.Count > 0)
+                            {
+                                if (costItems.Count > 0)
+                                {
+                                    ImGui.NewLine();
+                                }
+
+                                ImGui.Text("Related Items");
+                                ImGui.Separator();
+                                foreach (var item in items)
+                                {
+                                    this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16), true);
+                                    if (ImGui.IsItemHovered())
+                                    {
+                                        this._tooltipService.DrawItemTooltip(new SearchResult(item));
+                                    }
+
+                                    ImGui.SameLine();
+                                    using var menu = ImRaii.Menu(item.NameString);
+                                    if (menu)
+                                    {
+                                        _imGuiService.ImGuiMenuService.DrawRightClickPopup(item, messages);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
 
                 if (sourceRenderer != null)

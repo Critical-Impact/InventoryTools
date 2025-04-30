@@ -1,36 +1,34 @@
 using System.Linq;
 using System.Numerics;
 using AllaganLib.GameSheets.Model;
-using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Services;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Colors;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
-using InventoryTools.Services;
+using InventoryTools.Logic;
 using OtterGui.Raii;
 
-namespace InventoryTools.Logic;
+namespace InventoryTools.Services;
 
 public class ImGuiTooltipService
 {
-
     private readonly IKeyState _keyState;
     private readonly ITextureProvider _textureProvider;
-    private readonly ItemInfoRenderService _itemInfoRenderService;
     private readonly TryOn _tryOn;
     private readonly IChatUtilities _chatUtilities;
+
+    // ReSharper disable once UnassignedGetOnlyAutoProperty
+    public ItemInfoRenderService InfoRenderService { get; set; }
 
     public ImGuiTooltipService(
         IKeyState keyState,
         ITextureProvider textureProvider,
-        ItemInfoRenderService itemInfoRenderService,
         TryOn tryOn,
         IChatUtilities chatUtilities)
     {
         _keyState = keyState;
         _textureProvider = textureProvider;
-        _itemInfoRenderService = itemInfoRenderService;
         _tryOn = tryOn;
         _chatUtilities = chatUtilities;
     }
@@ -122,7 +120,7 @@ public class ImGuiTooltipService
                         ImGui.Separator();
                         ImGui.PushTextWrapPos();
                         var sources = item.Sources.Select(c => c.Type).Distinct().Select(
-                                              c => this._itemInfoRenderService.GetSourceTypeName(c).Singular).Select(c => c!);
+                                              c => this.InfoRenderService.GetSourceTypeName(c).Singular).Select(c => c!);
                         ImGui.TextUnformatted(string.Join(", ", sources));
                         ImGui.PopTextWrapPos();
                     }
@@ -135,7 +133,7 @@ public class ImGuiTooltipService
                         ImGui.Separator();
                         ImGui.PushTextWrapPos();
                         var uses = item.Uses.Select(c => c.Type).Distinct().Select(
-                                              c => this._itemInfoRenderService.GetUseTypeName(c).Singular).Select(c => c!);
+                                              c => this.InfoRenderService.GetUseTypeName(c).Singular).Select(c => c!);
                         ImGui.TextUnformatted(string.Join(", ", uses));
                         ImGui.PopTextWrapPos();
                     }

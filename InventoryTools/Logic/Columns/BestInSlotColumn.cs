@@ -4,51 +4,45 @@ using AllaganLib.GameSheets.Sheets;
 using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
-
+using Dalamud.Interface;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Logic.Columns.ColumnSettings;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 using OtterGui.Widgets;
 
 namespace InventoryTools.Logic.Columns
 {
-    public class BestInSlotColumn : IntegerColumn
+    public sealed class BestInSlotColumn : IntegerColumn
     {
+        private readonly CharacterColumnSetting _characterColumnSetting;
         private readonly ICharacterMonitor _characterMonitor;
         private readonly IInventoryMonitor _inventoryMonitor;
         private readonly ClassJobCategorySheet _classJobCategorySheet;
 
-        public BestInSlotColumn(ILogger<BestInSlotColumn> logger, ImGuiService imGuiService, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, ClassJobCategorySheet classJobCategorySheet) : base(logger, imGuiService)
+        public BestInSlotColumn(ILogger<BestInSlotColumn> logger, CharacterColumnSetting.Factory characterColumnSettingFactory, ImGuiService imGuiService, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, ClassJobCategorySheet classJobCategorySheet) : base(logger, imGuiService)
         {
+            _characterColumnSetting = characterColumnSettingFactory.Invoke("Comparison Character", "Shows the relative item level of either your items or your retainers items compared to the item shown. This will show a drop down in the filter that lets you pick which character you are comparing against. A negative value indicates it's worse, a positive indicates it's better.", [CharacterType.Character, CharacterType.Retainer], true);
             _characterMonitor = characterMonitor;
             _inventoryMonitor = inventoryMonitor;
             _classJobCategorySheet = classJobCategorySheet;
+            this.FilterSettings = [_characterColumnSetting];
+            this.FilterIcon = FontAwesomeIcon.Cog.ToIconString();
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Tools;
 
-        private ClippedSelectableCombo<KeyValuePair<ulong, Character>>? _characters;
-        private ulong? _selectedCharacter;
-
-        public override IFilterEvent? DrawFooterFilter(ColumnConfiguration columnConfiguration, FilterTable table)
+        public override IEnumerable<SearchResult> Filter(ColumnConfiguration columnConfiguration, IEnumerable<SearchResult> searchResults)
         {
-            ImGui.SameLine();
-            var characterDictionary = _characterMonitor.Characters;
-            var currentCharacterId = _characterMonitor.ActiveCharacterId;
-            var allCharacters = characterDictionary.Where(c => c.Value.Name != "" && (c.Value.OwnerId == currentCharacterId || c.Key == currentCharacterId)).ToList();
-            var currentCharacterName = _selectedCharacter == null
-                ? ""
-                : characterDictionary.ContainsKey(_selectedCharacter.Value)
-                    ? characterDictionary[_selectedCharacter.Value].Name
-                    : "";
-            _characters = new ClippedSelectableCombo<KeyValuePair<ulong, Character>>("BestInSlotCharacterSelect", "BiS Character", 200,allCharacters, character => character.Value.NameWithClassAbv);
-            if (_characters.Draw(currentCharacterName, out var selected))
+            var characterSetting = this._characterColumnSetting.CurrentValue(columnConfiguration.FilterConfiguration);
+
+            var filter = base.Filter(columnConfiguration, searchResults);
+            if (characterSetting != null)
             {
-                _selectedCharacter = allCharacters[selected].Key;
-                return new RefreshFilterEvent();
+                filter = filter.Where(c => CurrentValue(columnConfiguration, c) > 0);
             }
 
-            return null;
+            return filter;
         }
 
         public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
@@ -65,10 +59,11 @@ namespace InventoryTools.Logic.Columns
                 }
             }
 
+            var character = _characterColumnSetting.CurrentValue(columnConfiguration.FilterConfiguration);
             var item = searchResult.Item;
-            if (item.EquipSlotCategory != null && CanCurrentJobEquip(item.Base.ClassJobCategory.RowId) && CanUse(item.Base.LevelEquip))
+            if (item.EquipSlotCategory != null && CanCurrentJobEquip(character, item.Base.ClassJobCategory.RowId) && CanUse(character, item.Base.LevelEquip))
             {
-                var equippedItem = GetEquippedItem(item);
+                var equippedItem = GetEquippedItem(character, item);
                 if (equippedItem != null)
                 {
                     if (item.EquipSlotCategory?.SimilarSlots(equippedItem.Item) ?? false)
@@ -83,7 +78,7 @@ namespace InventoryTools.Logic.Columns
         }
 
         public override string Name { get; set; } = "Relative Item Level";
-        public override float Width { get; set; } = 80;
+        public override float Width { get; set; } = 150;
 
         public override string HelpText { get; set; } =
             "Shows the relative item level of either your items or your retainers items compared to the item shown. This will show a drop down in the filter that lets you pick which character you are comparing against. A negative value indicates it's worse, a positive indicates it's better.";
@@ -91,13 +86,12 @@ namespace InventoryTools.Logic.Columns
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
 
-        public bool CanUse(uint itemLevel)
+        public bool CanUse(ulong? characterId, uint itemLevel)
         {
-            if (_selectedCharacter != null)
+            if (characterId != null)
             {
-                if (_characterMonitor.Characters.ContainsKey(_selectedCharacter.Value))
+                if (_characterMonitor.Characters.TryGetValue(characterId.Value, out var character))
                 {
-                    var character = _characterMonitor.Characters[_selectedCharacter.Value];
                     if (character.OwnerId != 0)
                     {
                         return character.Level >= itemLevel;
@@ -116,13 +110,12 @@ namespace InventoryTools.Logic.Columns
             return false;
         }
 
-        public bool CanCurrentJobEquip(uint classJobCategory)
+        public bool CanCurrentJobEquip(ulong? characterId, uint classJobCategory)
         {
-            if (_selectedCharacter != null)
+            if (characterId != null)
             {
-                if (_characterMonitor.Characters.ContainsKey(_selectedCharacter.Value))
+                if (_characterMonitor.Characters.TryGetValue(characterId.Value, out var character))
                 {
-                    var character = _characterMonitor.Characters[_selectedCharacter.Value];
                     if (character.OwnerId != 0)
                     {
                         if(_classJobCategorySheet.IsItemEquippableBy(classJobCategory, character.ClassJob))
@@ -149,13 +142,12 @@ namespace InventoryTools.Logic.Columns
             return false;
         }
 
-        public InventoryItem? GetEquippedItem(ItemRow comparingItem)
+        public InventoryItem? GetEquippedItem(ulong? characterId, ItemRow comparingItem)
         {
-            if (_selectedCharacter != null)
+            if (characterId != null)
             {
-                if (_characterMonitor.Characters.ContainsKey(_selectedCharacter.Value))
+                if (_characterMonitor.Characters.TryGetValue(characterId.Value, out var character))
                 {
-                    var character = _characterMonitor.Characters[_selectedCharacter.Value];
                     if (character.OwnerId != 0)
                     {
                         var equipped = _inventoryMonitor.GetSpecificInventory(character.CharacterId,InventoryCategory.RetainerEquipped);

@@ -131,6 +131,7 @@ namespace InventoryTools
             typeof(ItemSearchService),
             typeof(MarketRefreshService),
             typeof(MarketCache),
+            typeof(SimpleAcquisitionTrackerService),
         };
 
         public List<Type> GetHostedServices()
@@ -189,12 +190,13 @@ namespace InventoryTools
                     HashSet<Type> singletons = new HashSet<Type>()
                     {
                         typeof(IHotkey), typeof(BaseTooltip), typeof(IAtkOverlay), typeof(IColumn),
-                        typeof(IGameOverlay), typeof(ISetting), typeof(IColumnSetting),
+                        typeof(IGameOverlay), typeof(ISetting),
                         typeof(IFeature)
                     };
 
                     HashSet<Type> transients = new HashSet<Type>()
                     {
+                        typeof(IColumnSetting)
                     };
 
                     var loadableTypes = Assembly.GetExecutingAssembly().GetLoadableTypes().Where(c =>
@@ -349,6 +351,8 @@ namespace InventoryTools
                 builder.RegisterType<ItemInfoRenderService>().SingleInstance();
                 builder.RegisterType<ShopHighlighting>().SingleInstance();
                 builder.RegisterType<ShopTrackerService>().SingleInstance();
+                builder.RegisterType<ChangelogService>().SingleInstance();
+                builder.RegisterType<ClassJobService>().SingleInstance();
                 builder.Register<GameData>(c => c.Resolve<IDataManager>().GameData).SingleInstance().ExternallyOwned();
                 builder.RegisterGameSheetManager(new SheetManagerStartupOptions()
                 {
@@ -357,7 +361,7 @@ namespace InventoryTools
 
                 builder.RegisterType<PluginCommands>().SingleInstance();
                 builder.RegisterType<ImGuiMenuService>().SingleInstance();
-                builder.RegisterType<ImGuiTooltipService>().SingleInstance();
+                builder.RegisterType<ImGuiTooltipService>().PropertiesAutowired(PropertyWiringOptions.AllowCircularDependencies).SingleInstance();
                 builder.RegisterType<TryOn>().SingleInstance();
                 builder.RegisterType<TetrisGame>().SingleInstance();
                 builder.RegisterType<WotsitIpc>().As<IWotsitIpc>().SingleInstance();

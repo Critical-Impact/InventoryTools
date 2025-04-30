@@ -1112,6 +1112,10 @@ namespace InventoryTools.Ui
                                      }
                                  }
                              }
+                             else
+                             {
+                                 ImGui.TextUnformatted("No locations known.");
+                             }
                          }
                      }
                 }

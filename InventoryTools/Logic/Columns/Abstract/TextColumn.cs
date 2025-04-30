@@ -7,6 +7,7 @@ using CriticalCommonLib.Services.Mediator;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Services;
+using InventoryTools.Ui.Widgets;
 using Microsoft.Extensions.Logging;
 using NaturalSort.Extension;
 
@@ -68,12 +69,11 @@ namespace InventoryTools.Logic.Columns.Abstract
             {
                 if (currentValue != null)
                 {
-                    ImGui.AlignTextToFramePadding();
-                    ImGui.TextUnformatted(currentValue);
+                    ImGuiUtil.VerticalAlignText(currentValue, filterConfiguration.TableHeight, filterConfiguration.FilterType == Logic.FilterType.CraftFilter);
                 }
                 else
                 {
-                    ImGui.TextUnformatted(EmptyText);
+                    ImGuiUtil.VerticalAlignText(EmptyText, filterConfiguration.TableHeight, filterConfiguration.FilterType == Logic.FilterType.CraftFilter);
                 }
             }
 

@@ -13,12 +13,12 @@ using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Columns.ColumnSettings;
 
-public class SourceTypeSelectorSetting : MultiChoiceColumnSetting<(ItemInfoType,string)>
+public class UseTypeSelectorSetting : MultiChoiceColumnSetting<(ItemInfoType,string)>
 {
     private readonly ItemInfoRenderService _itemInfoRenderService;
     public override string EmptyText => "All";
 
-    public SourceTypeSelectorSetting(ILogger<MarketboardWorldSetting> logger, ImGuiService imGuiService, ItemInfoRenderService itemInfoRenderService) : base(logger, imGuiService)
+    public UseTypeSelectorSetting(ILogger<MarketboardWorldSetting> logger, ImGuiService imGuiService, ItemInfoRenderService itemInfoRenderService) : base(logger, imGuiService)
     {
         _itemInfoRenderService = itemInfoRenderService;
     }
@@ -30,7 +30,7 @@ public class SourceTypeSelectorSetting : MultiChoiceColumnSetting<(ItemInfoType,
             return null;
         }
 
-        return value.Select(c => (c, _itemInfoRenderService.GetSourceTypeName(c).Plural ?? _itemInfoRenderService.GetSourceTypeName(c).Singular)).ToList();
+        return value.Select(c => (c, _itemInfoRenderService.GetUseTypeName(c).Plural ?? _itemInfoRenderService.GetUseTypeName(c).Singular)).ToList();
     }
 
 
@@ -46,13 +46,13 @@ public class SourceTypeSelectorSetting : MultiChoiceColumnSetting<(ItemInfoType,
     }
 
 
-    public override string Key { get; set; } = "SourceTypes";
+    public override string Key { get; set; } = "UseTypes";
     public override string Name { get; set; } = "Types";
-    public override string HelpText { get; set; } = "Which source types should this display?";
+    public override string HelpText { get; set; } = "Which use types should this display?";
     public override List<(ItemInfoType,string)>? DefaultValue { get; set; } = null;
     public override List<(ItemInfoType,string)> GetChoices(ColumnConfiguration configuration)
     {
-        List<(ItemInfoType itemInfoType, string FormattedName)> itemInfoTypes = Enum.GetValues<ItemInfoType>().Where(c => _itemInfoRenderService.HasSourceRenderer(c)).Select(c => (c, _itemInfoRenderService.GetSourceTypeName(c).Plural ?? _itemInfoRenderService.GetSourceTypeName(c).Singular)).OrderBy(c => c.Item2).ToList();
+        List<(ItemInfoType itemInfoType, string FormattedName)> itemInfoTypes = Enum.GetValues<ItemInfoType>().Where(c => _itemInfoRenderService.HasUseRenderer(c)).Select(c => (c, _itemInfoRenderService.GetUseTypeName(c).Plural ?? _itemInfoRenderService.GetUseTypeName(c).Singular)).OrderBy(c => c.Item2).ToList();
         return itemInfoTypes;
     }
 

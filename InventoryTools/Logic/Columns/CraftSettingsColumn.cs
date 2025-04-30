@@ -13,6 +13,7 @@ using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Ui.Widgets;
 using Dalamud.Interface.Utility.Raii;
 using InventoryTools.Localizers;
+using InventoryTools.Logic.Columns.Abstract.ColumnSettings;
 using InventoryTools.Services;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
@@ -73,6 +74,11 @@ public class CraftSettingsColumn : IColumn
     }
 
     public bool? CraftOnly { get; } = true;
+
+    public List<IColumnSetting> FilterSettings { get; set; } = new();
+    public List<IColumnSetting> Settings { get; set; } = new();
+
+    public string? FilterIcon { get; set; } = null;
 
     public IEnumerable<SearchResult> Filter(ColumnConfiguration columnConfiguration, IEnumerable<SearchResult> items)
     {
@@ -816,6 +822,11 @@ public class CraftSettingsColumn : IColumn
     public void Setup(FilterConfiguration filterConfiguration, ColumnConfiguration columnConfiguration, int columnIndex)
     {
         ImGui.TableSetupColumn(columnConfiguration.Name ?? (RenderName ?? Name), ImGuiTableColumnFlags.WidthFixed, Width, (uint)columnIndex);
+    }
+
+    public bool? DrawFilter(ColumnConfiguration columnConfiguration, int columnIndex)
+    {
+        return null;
     }
 
     public IFilterEvent? DrawFooterFilter(ColumnConfiguration columnConfiguration, FilterTable filterTable)

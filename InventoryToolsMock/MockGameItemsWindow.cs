@@ -138,7 +138,7 @@ public class MockGameItemsWindow : GenericWindow
                                                                                 _cutItem = item;
                                                                                 _copyItem = null;
                                                                             }
-                                                                            if ((_copyItem != null || _cutItem != null) && ImGui.Selectable("Past item"))
+                                                                            if ((_copyItem != null || _cutItem != null) && ImGui.Selectable("Paste item"))
                                                                             {
                                                                                 if (_copyItem != null)
                                                                                 {

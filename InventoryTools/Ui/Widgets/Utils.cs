@@ -3,6 +3,7 @@ using Dalamud.Interface.Utility;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using ImGuiNET;
 using Dalamud.Interface.Utility.Raii;
+using FFXIVClientStructs;
 
 namespace InventoryTools.Ui.Widgets;
 
@@ -29,13 +30,13 @@ public static class ImGuiUtil
         ImGui.CloseCurrentPopup();
         return true;
     }
-    
+
     public static void VerticalAlignText( string text, int cellHeight, bool autoWrap, float? xOffset = null)
     {
         var columnWidth = ImGui.GetColumnWidth();
         var frameHeight = cellHeight / 2.0f;
         var calcText = ImGui.CalcTextSize(text);
-        var textHeight = calcText.X >= columnWidth ? 0 : calcText.Y / 2.0f;
+        var textHeight = autoWrap && calcText.X >= columnWidth ? 0 : calcText.Y / 2.0f;
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + frameHeight - textHeight);
         if (xOffset != null)
         {
@@ -45,7 +46,6 @@ public static class ImGuiUtil
         {
             ImGui.PushTextWrapPos();
         }
-        ImGui.AlignTextToFramePadding();    
         ImGui.TextUnformatted(text);
         if (autoWrap)
         {
@@ -68,7 +68,7 @@ public static class ImGuiUtil
         {
             ImGui.PushTextWrapPos();
         }
-        ImGui.AlignTextToFramePadding();    
+        ImGui.AlignTextToFramePadding();
         ImGui.TextDisabled(text);
         if (autoWrap)
         {
@@ -93,7 +93,7 @@ public static class ImGuiUtil
             ImGui.PushTextWrapPos();
         }
         using var _ = ImRaii.PushColor(ImGuiCol.Text,colour);
-        ImGui.AlignTextToFramePadding();    
+        ImGui.AlignTextToFramePadding();
         ImGui.TextUnformatted(text);
         if (autoWrap)
         {
@@ -107,10 +107,10 @@ public static class ImGuiUtil
     {
         var frameHeight = cellHeight / 2.0f;
         var textHeight = (ImGui.GetFontSize() * 1 + ImGui.GetStyle().FramePadding.Y * 2) / 2.0f;
-        ImGui.AlignTextToFramePadding();    
+        ImGui.AlignTextToFramePadding();
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + frameHeight - textHeight);
     }
-    
+
     public static bool? ConfirmPopup(string label, Vector2 size, Action content)
     {
         ImGui.SetNextWindowPos(ImGui.GetMainViewport().GetCenter(), ImGuiCond.Always, new Vector2(0.5f));

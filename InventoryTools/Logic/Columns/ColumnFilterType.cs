@@ -5,6 +5,7 @@ namespace InventoryTools.Logic.Columns
         None,
         Text,
         Boolean,
-        Choice
+        Choice,
+        Custom,
     }
 }

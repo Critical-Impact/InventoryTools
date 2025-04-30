@@ -8,8 +8,9 @@ public interface IColumnSetting
     public string Name { get; set; }
     public string HelpText { get; set; }
     public bool ShowReset { get; set; }
-        
+
     public bool HasValueSet(ColumnConfiguration configuration);
     public bool Draw(ColumnConfiguration configuration, string? helpText);
+    public bool DrawFilter(ColumnConfiguration configuration, string? helpText);
     public void ResetFilter(ColumnConfiguration configuration);
 }

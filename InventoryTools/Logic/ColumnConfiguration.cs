@@ -4,6 +4,8 @@ using System.Linq;
 using AllaganLib.GameSheets.Caches;
 using CharacterTools.Logic.Editors;
 using Dalamud.Game.Text;
+using Dalamud.Interface;
+using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using ImGuiNET;
@@ -48,8 +50,20 @@ public class ColumnConfiguration
         set => _exportName = value;
     }
 
+    //Used to store the filtering configuration for a column, not persisted
+    [JsonIgnore]
+    public ColumnConfiguration FilterConfiguration
+    {
+        get
+        {
+            return _columnConfiguration ??= new ColumnConfiguration();
+        }
+        set => _columnConfiguration = value;
+    }
+
     private Dictionary<string, string>? _stringSettings;
     private Dictionary<string, uint>? _uintSettings;
+    private Dictionary<string, ulong>? _ulongSettings;
     private Dictionary<string, List<ItemInfoType>>? _itemInfoTypes;
     private Dictionary<string, List<InventorySearchScope>>? _inventorySearchScopes;
     private Dictionary<string, List<CharacterSearchScope>>? _characterSearchScopes;
@@ -80,6 +94,18 @@ public class ColumnConfiguration
         else
         {
             UintSettings[key] = value.Value;
+        }
+    }
+
+    public void SetSetting(string key, ulong? value)
+    {
+        if (value == null)
+        {
+            UlongSettings.Remove(key);
+        }
+        else
+        {
+            UlongSettings[key] = value.Value;
         }
     }
 
@@ -115,6 +141,11 @@ public class ColumnConfiguration
     public void GetSetting(string key, out uint? value)
     {
         value = UintSettings.ContainsKey(key) ? UintSettings[key] : null;
+    }
+
+    public void GetSetting(string key, out ulong? value)
+    {
+        value = UlongSettings.ContainsKey(key) ? UlongSettings[key] : null;
     }
 
     public void GetSetting<T>(string key, out List<T>? value) where T : Enum
@@ -185,133 +216,8 @@ public class ColumnConfiguration
         }
     }
 
-    public virtual bool DrawFilter(string tableKey, int columnIndex)
-    {
-        if (Column.FilterType == ColumnFilterType.Text)
-        {
-            var filter = FilterText;
-            var hasChanged = false;
-
-            ImGui.TableSetColumnIndex(columnIndex);
-            ImGui.PushItemWidth(-20.000000f);
-            ImGui.PushID(columnIndex);
-            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(0, 0));
-            ImGui.InputText("##" + tableKey + "FilterI" + Column.Name, ref filter, Column.MaxFilterLength);
-            ImGui.PopStyleVar();
-            ImGui.SameLine(0.0f, ImGui.GetStyle().ItemInnerSpacing.X);
-            ImGui.TableHeader("");
-            ImGui.PopID();
-            ImGui.PopItemWidth();
-            if (filter != FilterText)
-            {
-                FilterText = filter;
-                hasChanged = true;
-            }
-
-            return hasChanged;
-        }
-        else if (Column.FilterType == ColumnFilterType.Choice)
-        {
-            var hasChanged = false;
-            ImGui.TableSetColumnIndex(columnIndex);
-            ImGui.PushItemWidth(-20.000000f);
-            using (ImRaii.PushId(columnIndex))
-            {
-                using (ImRaii.PushStyle(ImGuiStyleVar.FramePadding, new Vector2(0, 0)))
-                {
-
-                    var currentItem = FilterText;
-
-                    using (var combo = ImRaii.Combo("##Choice", currentItem))
-                    {
-                        if (combo.Success)
-                        {
-                            if (Column.FilterChoices != null)
-                            {
-                                if (ImGui.Selectable("", false))
-                                {
-                                    FilterText = "";
-                                    hasChanged = true;
-                                }
-
-                                foreach (var column in Column.FilterChoices)
-                                {
-                                    if (ImGui.Selectable(column, currentItem == column))
-                                    {
-                                        FilterText = column;
-                                        hasChanged = true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                ImGui.SameLine(0.0f, ImGui.GetStyle().ItemInnerSpacing.X);
-                ImGui.TableHeader("");
-            }
-            ImGui.PopItemWidth();
-            return hasChanged;
-        }
-        else if (Column.FilterType == ColumnFilterType.Boolean)
-        {
-            var hasChanged = false;
-            ImGui.TableSetColumnIndex(columnIndex);
-            ImGui.PushItemWidth(-20.000000f);
-            using (ImRaii.PushId(columnIndex))
-            {
-                using (ImRaii.PushStyle(ImGuiStyleVar.FramePadding, new Vector2(0, 0)))
-                {
-
-                    var currentItem = FilterText;
-
-                    if (currentItem == "true")
-                    {
-                        currentItem = "Yes";
-                    }
-                    else if(currentItem == "false")
-                    {
-                        currentItem = "No";
-                    }
-
-                    using (var combo = ImRaii.Combo("##Choice", currentItem))
-                    {
-                        if (combo.Success)
-                        {
-                            if (ImGui.Selectable("", false))
-                            {
-                                FilterText = "";
-                                hasChanged = true;
-                            }
-
-
-
-                            if (ImGui.Selectable("Yes", currentItem == "Yes"))
-                            {
-                                FilterText = "true";
-                                hasChanged = true;
-                            }
-
-                            if (ImGui.Selectable("No", currentItem == "No"))
-                            {
-                                FilterText = "false";
-                                hasChanged = true;
-                            }
-                        }
-                    }
-                }
-
-                ImGui.SameLine(0.0f, ImGui.GetStyle().ItemInnerSpacing.X);
-                ImGui.TableHeader("");
-            }
-            ImGui.PopItemWidth();
-            return hasChanged;
-        }
-
-        return false;
-    }
-
     private FilterComparisonExtensions.FilterComparisonText? _filterComparisonText;
+    private ColumnConfiguration? _columnConfiguration;
 
     [JsonIgnore]
     public FilterComparisonExtensions.FilterComparisonText FilterComparisonText
@@ -344,6 +250,12 @@ public class ColumnConfiguration
     {
         get => _uintSettings ??= new Dictionary<string, uint>();
         set => _uintSettings = value;
+    }
+
+    public Dictionary<string, ulong> UlongSettings
+    {
+        get => _ulongSettings ??= new Dictionary<string, ulong>();
+        set => _ulongSettings = value;
     }
 
     public Dictionary<string, List<ItemInfoType>> ItemInfoTypes

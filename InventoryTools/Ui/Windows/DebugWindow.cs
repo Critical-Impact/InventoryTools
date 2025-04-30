@@ -1039,9 +1039,8 @@ namespace InventoryTools.Ui
             }
         }
 
-        private void DrawInventoryScannerDebugTab()
+        private unsafe void DrawInventoryScannerDebugTab()
         {
-
             ImGui.TextUnformatted("Inventories Seen via Network Traffic");
             foreach (var inventory in _inventoryScanner.LoadedInventories)
             {

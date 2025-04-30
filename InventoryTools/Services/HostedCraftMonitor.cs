@@ -1,5 +1,8 @@
 using AllaganLib.GameSheets.Sheets;
+using CriticalCommonLib.Services;
 using Dalamud.Plugin.Services;
+using Lumina.Excel;
+using Lumina.Excel.Sheets;
 
 namespace InventoryTools.Services;
 
@@ -11,7 +14,7 @@ using Microsoft.Extensions.Hosting;
 
 public class HostedCraftMonitor : CraftMonitor, IHostedService
 {
-    public HostedCraftMonitor(IGameUiManager gameUiManager, RecipeSheet recipeSheet, IClientState clientState, IFramework framework, IPluginLog pluginLog) : base(gameUiManager, recipeSheet, clientState, framework, pluginLog)
+    public HostedCraftMonitor(IGameUiManager gameUiManager, RecipeSheet recipeSheet, IClientState clientState, IFramework framework, IPluginLog pluginLog, ClassJobService classJobService, ExcelSheet<GathererCrafterLvAdjustTable> adjustSheet, RecipeLevelTableSheet recipeLevelTableSheet) : base(gameUiManager, recipeSheet, clientState, framework, pluginLog, classJobService, adjustSheet, recipeLevelTableSheet)
     {
     }
 

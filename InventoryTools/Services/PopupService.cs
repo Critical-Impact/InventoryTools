@@ -23,8 +23,10 @@ public class PopupService : IDisposable
         {
             ImGui.OpenPopup(toOpen.Id);
         }
-        foreach (var popup in _popups)
+
+        for (var index = 0; index < _popups.Count; index++)
         {
+            var popup = _popups[index];
             if (popup.Window == windowType)
             {
                 popup.Draw();

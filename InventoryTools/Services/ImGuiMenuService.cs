@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -16,6 +17,7 @@ using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
+using InventoryTools.Experimental;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Mediator;
@@ -83,18 +85,19 @@ public class ImGuiMenuService
         ImGui.Separator();
         var curatedLists =
             _listService.Lists.Where(c => c.FilterType == FilterType.CuratedList).ToArray();
-        if (curatedLists.Length != 0 && ImGui.BeginMenu("Add to Curated List"))
+        if (curatedLists.Length != 0)
         {
-            foreach (var filter in curatedLists)
+            using var menu = ImRaii.Menu("Add to Curated List");
+            if(menu)
             {
-                if (ImGui.MenuItem(filter.Name))
+                foreach (var filter in curatedLists)
                 {
+                    if (!ImGui.MenuItem(filter.Name)) continue;
                     filter.AddCuratedItem(new CuratedItem(searchResult.Item.RowId));
                     messages.Add(new FocusListMessage(typeof(FiltersWindow), filter));
                     filter.NeedsRefresh = true;
                 }
             }
-            ImGui.EndMenu();
         }
 
         if (ImGui.Selectable("Add to new Curated List"))
@@ -115,19 +118,20 @@ public class ImGuiMenuService
         var craftFilters =
             _listService.Lists.Where(c =>
                 c.FilterType == Logic.FilterType.CraftFilter && !c.CraftListDefault).ToArray();
-        if (craftFilters.Length != 0 && ImGui.BeginMenu("Add to Craft List"))
+        if (craftFilters.Length != 0)
         {
-            foreach (var filter in craftFilters)
+            using var menu = ImRaii.Menu("Add to Craft List");
+            if(menu)
             {
-                if (ImGui.Selectable(filter.Name))
+                foreach (var filter in craftFilters)
                 {
+                    if (!ImGui.Selectable(filter.Name)) continue;
                     filter.CraftList.AddCraftItem(searchResult.Item.RowId);
                     messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
                     messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
                     filter.NeedsRefresh = true;
                 }
             }
-            ImGui.EndMenu();
         }
 
         if (ImGui.Selectable("Add to new Craft List"))
@@ -196,13 +200,14 @@ public class ImGuiMenuService
                 if (searchResult.Item.CanBeCrafted && !searchResult.Item.HasSourcesByType(ItemInfoType.FreeCompanyCraftRecipe))
                 {
                     ImGui.Separator();
-                    if (ImGui.BeginMenu("Add " + searchResult.CraftItem.QuantityNeeded + " " +
-                                        searchResult.Item.NameString + " to craft list"))
+                    using (var menu = ImRaii.Menu("Add " + searchResult.CraftItem.QuantityNeeded + " " +
+                                                  searchResult.Item.NameString + " to craft list"))
                     {
-                        foreach (var filter in craftFilters)
+                        if (menu)
                         {
-                            if (ImGui.Selectable(filter.Name))
+                            foreach (var filter in craftFilters)
                             {
+                                if (!ImGui.Selectable(filter.Name)) continue;
                                 filter.CraftList.AddCraftItem(searchResult.Item.RowId,
                                     searchResult.CraftItem.QuantityNeeded,
                                     InventoryItem.ItemFlags.None);
@@ -211,9 +216,8 @@ public class ImGuiMenuService
                                 filterConfiguration.NeedsRefresh = true;
                             }
                         }
-
-                        ImGui.EndMenu();
                     }
+
                     if (ImGui.Selectable("Add " + searchResult.CraftItem.QuantityNeeded + " item to new craft list"))
                     {
                         var filter = _listService.AddNewCraftList();
@@ -344,17 +348,18 @@ public class ImGuiMenuService
 
             if (searchResult.Item.Recipes.Count > 1)
             {
-                if (ImGui.BeginMenu("Open Crafting Log(Recipes)"))
+                using (var menu = ImRaii.Menu("Open Crafting Log(Recipes)"))
                 {
-                    foreach (var recipe in searchResult.Item.Recipes)
+                    if(menu)
                     {
-                        if (ImGui.MenuItem(recipe.CraftType?.FormattedName ?? "Unknown"))
+                        foreach (var recipe in searchResult.Item.Recipes)
                         {
-                            _gameInterface.OpenCraftingLog(searchResult.Item.RowId);
+                            if (ImGui.MenuItem(recipe.CraftType?.FormattedName ?? "Unknown"))
+                            {
+                                _gameInterface.OpenCraftingLog(searchResult.Item.RowId, recipe.RowId);
+                            }
                         }
                     }
-
-                    ImGui.EndMenu();
                 }
             }
         }
@@ -376,34 +381,64 @@ public class ImGuiMenuService
                 _commandManager.ProcessCommand("/gather " + searchResult.Item.Base.Name.ExtractText());
             }
             hasActions = true;
-            if (ImGui.BeginMenu("Gather (Advanced)"))
+            var gatheringSources = searchResult.Item
+                .GetSourcesByCategory<ItemGatheringSource>(ItemInfoCategory.Gathering);
+
+            var groupedGatheringSources = gatheringSources.SelectMany(c => c.GatheringItem.GatheringPoints).DistinctBy(c => c.RowId).GroupBy(c => c.Map.RowId).ToDictionary(c => c.Key, c => c);
+
+            using (var menu = ImRaii.Menu("Gather (Advanced)"))
             {
-                var gatheringSources = searchResult.Item
-                    .GetSourcesByCategory<ItemGatheringSource>(ItemInfoCategory.Gathering);
-
-                var groupedGatheringSources = gatheringSources.SelectMany(c => c.GatheringItem.GatheringPoints).DistinctBy(c => c.RowId).GroupBy(c => c.Map.RowId).ToDictionary(c => c.Key, c => c);
-
-                foreach (var groupedGathering in groupedGatheringSources)
+                if(menu)
                 {
-                    var map = _mapSheet.GetRow(groupedGathering.Key);
-                    if (ImGui.BeginMenu(map.FormattedName))
+                    foreach (var groupedGathering in groupedGatheringSources)
                     {
-                        foreach (var gatheringPoint in groupedGathering.Value.DistinctBy(c => (c.MapX, c.MapY)))
+                        var map = _mapSheet.GetRow(groupedGathering.Key);
+                        using (var menu2 =ImRaii.Menu(map.FormattedName))
                         {
-                            if (ImGui.MenuItem($"Teleport to ({gatheringPoint.GatheringPointNameRow.Base.Singular}) at ({gatheringPoint.MapX.ToString("N2", CultureInfo.InvariantCulture)}, {gatheringPoint.MapY.ToString("N2", CultureInfo.InvariantCulture)})"))
+                            if(menu2)
                             {
-                                messages.Add(new RequestTeleportToGatheringPointRowMessage(gatheringPoint));
-                                _chatUtilities.PrintFullMapLink(gatheringPoint, $"Lv. {gatheringPoint.GatheringPointBase.Base.GatheringLevel} {gatheringPoint.GatheringPointNameRow.Base.Singular.ExtractText().ToTitleCase()}");
-                                _chatUtilities.PrintGatheringMapLink(gatheringPoint);
+                                foreach (var gatheringPoint in groupedGathering.Value.DistinctBy(c => (c.MapX, c.MapY)))
+                                {
+                                    if (ImGui.MenuItem(
+                                            $"Teleport to ({gatheringPoint.GatheringPointNameRow.Base.Singular}) at ({gatheringPoint.MapX.ToString("N2", CultureInfo.InvariantCulture)}, {gatheringPoint.MapY.ToString("N2", CultureInfo.InvariantCulture)})"))
+                                    {
+                                        messages.Add(new RequestTeleportToGatheringPointRowMessage(gatheringPoint));
+                                        _chatUtilities.PrintFullMapLink(gatheringPoint,
+                                            $"Lv. {gatheringPoint.GatheringPointBase.Base.GatheringLevel} {gatheringPoint.GatheringPointNameRow.Base.Singular.ExtractText().ToTitleCase()}");
+                                        _chatUtilities.PrintGatheringMapLink(gatheringPoint);
+                                    }
+                                }
                             }
                         }
-
-
-                        ImGui.EndMenu();
                     }
                 }
+            }
 
-                ImGui.EndMenu();
+            using(var menu = ImRaii.Menu("Open Map"))
+            {
+                if (menu)
+                {
+                    foreach (var groupedGathering in groupedGatheringSources)
+                    {
+                        var map = _mapSheet.GetRow(groupedGathering.Key);
+                        using (var menu2 = ImRaii.Menu(map.FormattedName))
+                        {
+                            if (menu2)
+                            {
+                                foreach (var gatheringPoint in groupedGathering.Value.DistinctBy(c => (c.MapX, c.MapY)))
+                                {
+                                    if (ImGui.MenuItem(
+                                            $"Open map to ({gatheringPoint.GatheringPointNameRow.Base.Singular}) at ({gatheringPoint.MapX.ToString("N2", CultureInfo.InvariantCulture)}, {gatheringPoint.MapY.ToString("N2", CultureInfo.InvariantCulture)})"))
+                                    {
+                                        _chatUtilities.PrintFullMapLink(gatheringPoint,
+                                            $"Lv. {gatheringPoint.GatheringPointBase.Base.GatheringLevel} {gatheringPoint.GatheringPointNameRow.Base.Singular.ExtractText().ToTitleCase()}");
+                                        _chatUtilities.PrintGatheringMapLink(gatheringPoint);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -414,42 +449,82 @@ public class ImGuiMenuService
             {
                 _commandManager.ProcessCommand("/gatherfish " + searchResult.Item.Base.Name.ExtractText());
             }
-            if (ImGui.BeginMenu("Gather (Advanced)"))
+            using(var menu = ImRaii.Menu("Gather (Advanced)"))
             {
-
-                var gatheringSources = searchResult.Item
-                    .GetSourcesByType<ItemFishingSource>(ItemInfoType.Fishing);
-
-                if (gatheringSources.Any())
+                if (menu)
                 {
+                    var gatheringSources = searchResult.Item
+                        .GetSourcesByType<ItemFishingSource>(ItemInfoType.Fishing);
 
-                    var fishParameter = gatheringSources.First().FishParameter;
-                    var groupedGatheringSources = gatheringSources.SelectMany(c => c.FishingSpots)
-                        .DistinctBy(c => c.RowId).GroupBy(c => c.Map.RowId).ToDictionary(c => c.Key, c => c);
-
-                    foreach (var groupedGathering in groupedGatheringSources)
+                    if (gatheringSources.Any())
                     {
-                        var map = _mapSheet.GetRow(groupedGathering.Key);
-                        if (ImGui.BeginMenu(map.FormattedName))
+
+                        var fishParameter = gatheringSources[0].FishParameter;
+                        var groupedGatheringSources = gatheringSources.SelectMany(c => c.FishingSpots)
+                            .DistinctBy(c => c.RowId).GroupBy(c => c.Map.RowId).ToDictionary(c => c.Key, c => c);
+
+                        foreach (var groupedGathering in groupedGatheringSources)
                         {
-                            foreach (var fishingSpot in groupedGathering.Value.DistinctBy(c => (c.MapX, c.MapY)))
+                            var map = _mapSheet.GetRow(groupedGathering.Key);
+                            using (var menu2 = ImRaii.Menu(map.FormattedName))
                             {
-                                if (ImGui.MenuItem(
-                                        $"Teleport to ({fishingSpot.Base.PlaceName.Value.Name.ExtractText()}, {fishParameter.FishRecordType}) at ({fishingSpot.MapX.ToString("N2", CultureInfo.InvariantCulture)}, {fishingSpot.MapY.ToString("N2", CultureInfo.InvariantCulture)})"))
+                                if (menu2)
                                 {
-                                    messages.Add(new RequestTeleportToFishingSpotRowMessage(fishingSpot));
-                                    _chatUtilities.PrintFullMapLink(fishingSpot,
-                                        $"Lv. {fishingSpot.Base.GatheringLevel} {fishingSpot.Base.FishingSpotCategory}");
-                                    _chatUtilities.PrintGatheringMapLink(fishingSpot, fishParameter);
+                                    foreach (var fishingSpot in
+                                             groupedGathering.Value.DistinctBy(c => (c.MapX, c.MapY)))
+                                    {
+                                        if (ImGui.MenuItem(
+                                                $"Teleport to ({fishingSpot.Base.PlaceName.Value.Name.ExtractText()}, {fishParameter.FishRecordType}) at ({fishingSpot.MapX.ToString("N2", CultureInfo.InvariantCulture)}, {fishingSpot.MapY.ToString("N2", CultureInfo.InvariantCulture)})"))
+                                        {
+                                            messages.Add(new RequestTeleportToFishingSpotRowMessage(fishingSpot));
+                                            _chatUtilities.PrintFullMapLink(fishingSpot,
+                                                $"Lv. {fishingSpot.Base.GatheringLevel} {fishingSpot.Base.FishingSpotCategory}");
+                                            _chatUtilities.PrintGatheringMapLink(fishingSpot, fishParameter);
+                                        }
+                                    }
                                 }
                             }
-
-
-                            ImGui.EndMenu();
                         }
                     }
                 }
-                ImGui.EndMenu();
+            }
+            using(var menu = ImRaii.Menu("Open Map"))
+            {
+                if (menu)
+                {
+                    var gatheringSources = searchResult.Item
+                        .GetSourcesByType<ItemFishingSource>(ItemInfoType.Fishing);
+
+                    if (gatheringSources.Any())
+                    {
+
+                        var fishParameter = gatheringSources[0].FishParameter;
+                        var groupedGatheringSources = gatheringSources.SelectMany(c => c.FishingSpots)
+                            .DistinctBy(c => c.RowId).GroupBy(c => c.Map.RowId).ToDictionary(c => c.Key, c => c);
+
+                        foreach (var groupedGathering in groupedGatheringSources)
+                        {
+                            var map = _mapSheet.GetRow(groupedGathering.Key);
+                            using (var menu2 = ImRaii.Menu(map.FormattedName))
+                            {
+                                if (menu2)
+                                {
+                                    foreach (var fishingSpot in
+                                             groupedGathering.Value.DistinctBy(c => (c.MapX, c.MapY)))
+                                    {
+                                        if (ImGui.MenuItem(
+                                                $"Open map to ({fishingSpot.Base.PlaceName.Value.Name.ExtractText()}, {fishParameter.FishRecordType}) at ({fishingSpot.MapX.ToString("N2", CultureInfo.InvariantCulture)}, {fishingSpot.MapY.ToString("N2", CultureInfo.InvariantCulture)})"))
+                                        {
+                                            _chatUtilities.PrintFullMapLink(fishingSpot,
+                                                $"Lv. {fishingSpot.Base.GatheringLevel} {fishingSpot.Base.FishingSpotCategory}");
+                                            _chatUtilities.PrintGatheringMapLink(fishingSpot, fishParameter);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -461,9 +536,10 @@ public class ImGuiMenuService
             {
                 _commandManager.ProcessCommand("/gatherfish " + searchResult.Item.Base.Name.ExtractText());
             }
-            if (ImGui.BeginMenu("Gather (Advanced)"))
-            {
 
+            using var gatherMenu = ImRaii.Menu("Gather (Advanced)");
+            if(gatherMenu)
+            {
                 var gatheringSources = searchResult.Item
                     .GetSourcesByType<ItemSpearfishingSource>(ItemInfoType.Spearfishing);
 
@@ -476,25 +552,66 @@ public class ImGuiMenuService
                     foreach (var groupedGathering in groupedGatheringSources)
                     {
                         var map = _mapSheet.GetRow(groupedGathering.Key);
-                        if (ImGui.BeginMenu(map.FormattedName))
+                        using (var menu2 = ImRaii.Menu(map.FormattedName))
                         {
-                            foreach (var fishingSpot in groupedGathering.Value.DistinctBy(c => (c.SpearfishingNotebook!.MapX, c.SpearfishingNotebook!.MapY)))
+                            if (menu2)
                             {
-                                if (ImGui.MenuItem(
-                                        $"Teleport to ({fishingSpot.SpearfishingNotebook!.Base.PlaceName.Value.Name.ExtractText()}, {spearfishingItem.FishRecordType}) at ({fishingSpot.SpearfishingNotebook.MapX.ToString("N2", CultureInfo.InvariantCulture)}, {fishingSpot.SpearfishingNotebook.MapY.ToString("N2", CultureInfo.InvariantCulture)})"))
+                                foreach (var fishingSpot in groupedGathering.Value.DistinctBy(c =>
+                                             (c.SpearfishingNotebook!.MapX, c.SpearfishingNotebook!.MapY)))
                                 {
-                                    messages.Add(new RequestTeleportToSpearFishingSpotRowMessage(fishingSpot.SpearfishingNotebook));
-                                    _chatUtilities.PrintFullMapLink(fishingSpot.SpearfishingNotebook!, $"Lv. {fishingSpot.Base.GatheringLevel}");
-                                    _chatUtilities.PrintGatheringMapLink(fishingSpot.SpearfishingNotebook!, spearfishingItem);
+                                    if (ImGui.MenuItem(
+                                            $"Teleport to ({fishingSpot.SpearfishingNotebook!.Base.PlaceName.Value.Name.ExtractText()}, {spearfishingItem.FishRecordType}) at ({fishingSpot.SpearfishingNotebook.MapX.ToString("N2", CultureInfo.InvariantCulture)}, {fishingSpot.SpearfishingNotebook.MapY.ToString("N2", CultureInfo.InvariantCulture)})"))
+                                    {
+                                        messages.Add(
+                                            new RequestTeleportToSpearFishingSpotRowMessage(fishingSpot
+                                                .SpearfishingNotebook));
+                                        _chatUtilities.PrintFullMapLink(fishingSpot.SpearfishingNotebook!,
+                                            $"Lv. {fishingSpot.Base.GatheringLevel}");
+                                        _chatUtilities.PrintGatheringMapLink(fishingSpot.SpearfishingNotebook!,
+                                            spearfishingItem);
+                                    }
                                 }
                             }
-
-
-                            ImGui.EndMenu();
                         }
                     }
                 }
-                ImGui.EndMenu();
+            }
+
+            using var openMapMenu = ImRaii.Menu("Open Map");
+            if(openMapMenu)
+            {
+                var gatheringSources = searchResult.Item
+                    .GetSourcesByType<ItemSpearfishingSource>(ItemInfoType.Spearfishing);
+
+                if (gatheringSources.Any())
+                {
+                    var spearfishingItem = gatheringSources.First().SpearfishingItemRow;
+                    var groupedGatheringSources = gatheringSources.SelectMany(c => c.SpearfishingItemRow.GatheringPoints)
+                        .DistinctBy(c => c.RowId).GroupBy(c => c.SpearfishingNotebook!.TerritoryTypeRow!.Map!.RowId).ToDictionary(c => c.Key, c => c);
+
+                    foreach (var groupedGathering in groupedGatheringSources)
+                    {
+                        var map = _mapSheet.GetRow(groupedGathering.Key);
+                        using(var menu = ImRaii.Menu(map.FormattedName))
+                        {
+                            if (menu)
+                            {
+                                foreach (var fishingSpot in groupedGathering.Value.DistinctBy(c =>
+                                             (c.SpearfishingNotebook!.MapX, c.SpearfishingNotebook!.MapY)))
+                                {
+                                    if (ImGui.MenuItem(
+                                            $"Open map to ({fishingSpot.SpearfishingNotebook!.Base.PlaceName.Value.Name.ExtractText()}, {spearfishingItem.FishRecordType}) at ({fishingSpot.SpearfishingNotebook.MapX.ToString("N2", CultureInfo.InvariantCulture)}, {fishingSpot.SpearfishingNotebook.MapY.ToString("N2", CultureInfo.InvariantCulture)})"))
+                                    {
+                                        _chatUtilities.PrintFullMapLink(fishingSpot.SpearfishingNotebook!,
+                                            $"Lv. {fishingSpot.Base.GatheringLevel}");
+                                        _chatUtilities.PrintGatheringMapLink(fishingSpot.SpearfishingNotebook!,
+                                            spearfishingItem);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -509,48 +626,56 @@ public class ImGuiMenuService
                 hasActions = true;
             }
 
-            if (hasShopSources && ImGui.BeginMenu("Buy"))
+            if (hasShopSources)
             {
-                var shopSources = searchResult.Item
-                    .GetSourcesByCategory<ItemShopSource>(ItemInfoCategory.Shop)
-                    .Where(c => c.Shop.Name != string.Empty)
-                    .Where(c => c.Shop.ENpcs.Any(d => d.Locations.Any()));
-                var groupedShops = new Dictionary<uint, List<ItemShopSource>>();
-                foreach (var shopSource in shopSources)
+                using (var menu = ImRaii.Menu("Buy"))
                 {
-                    foreach (var mapId in shopSource.MapIds ?? [])
+                    if (menu)
                     {
-                        groupedShops.TryAdd(mapId, new());
-                        groupedShops[mapId].Add(shopSource);
-                    }
-                }
-
-                foreach (var groupedShop in groupedShops)
-                {
-                    var map = _mapSheet.GetRow(groupedShop.Key);
-                    if (ImGui.BeginMenu(map.FormattedName))
-                    {
-                        foreach (var shopSource in groupedShop.Value)
+                        var shopSources = searchResult.Item
+                            .GetSourcesByCategory<ItemShopSource>(ItemInfoCategory.Shop)
+                            .Where(c => c.Shop.Name != string.Empty)
+                            .Where(c => c.Shop.ENpcs.Any(d => d.Locations.Any()));
+                        var groupedShops = new Dictionary<uint, List<ItemShopSource>>();
+                        foreach (var shopSource in shopSources)
                         {
-                            if (ImGui.MenuItem(shopSource.Shop.Name + " - Teleport"))
+                            foreach (var mapId in shopSource.MapIds ?? [])
                             {
-                                var eNpcBaseRow = shopSource.Shop.ENpcs.FirstOrDefault(c => c.Locations.Any(d => d.Map.RowId == groupedShop.Key));
-                                var firstLocation = eNpcBaseRow?.Locations.FirstOrDefault();
-                                if (firstLocation != null && eNpcBaseRow != null)
-                                {
-                                    messages.Add(
-                                        new RequestTeleportToMapMessage(firstLocation.Map.RowId, new Vector2((float)firstLocation.MapX, (float)firstLocation.MapY)));
-                                    _chatUtilities.PrintFullMapLink(firstLocation,
-                                        eNpcBaseRow.ENpcResidentRow.Base.Singular.ExtractText());
-                                }
+                                groupedShops.TryAdd(mapId, new());
+                                groupedShops[mapId].Add(shopSource);
                             }
                         }
 
-                        ImGui.EndMenu();
+                        foreach (var groupedShop in groupedShops)
+                        {
+                            var map = _mapSheet.GetRow(groupedShop.Key);
+                            using (var menu2 = ImRaii.Menu(map.FormattedName))
+                            {
+                                if (menu2)
+                                {
+                                    foreach (var shopSource in groupedShop.Value)
+                                    {
+                                        if (ImGui.MenuItem(shopSource.Shop.Name + " - Teleport"))
+                                        {
+                                            var eNpcBaseRow = shopSource.Shop.ENpcs.FirstOrDefault(c =>
+                                                c.Locations.Any(d => d.Map.RowId == groupedShop.Key));
+                                            var firstLocation = eNpcBaseRow?.Locations.FirstOrDefault();
+                                            if (firstLocation != null && eNpcBaseRow != null)
+                                            {
+                                                messages.Add(
+                                                    new RequestTeleportToMapMessage(firstLocation.Map.RowId,
+                                                        new Vector2((float)firstLocation.MapX,
+                                                            (float)firstLocation.MapY)));
+                                                _chatUtilities.PrintFullMapLink(firstLocation,
+                                                    eNpcBaseRow.ENpcResidentRow.Base.Singular.ExtractText());
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
-
-                ImGui.EndMenu();
             }
         }
 

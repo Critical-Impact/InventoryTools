@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using CriticalCommonLib.Services.Mediator;
 
 using ImGuiNET;
+using InventoryTools.Logic.Columns.Abstract.ColumnSettings;
 
 namespace InventoryTools.Logic.Columns.Abstract;
 
@@ -48,6 +49,11 @@ public abstract class ButtonColumn : IColumn
     public bool IsConfigurable => false;
     public virtual string? RenderName { get; }
 
+    public List<IColumnSetting> FilterSettings { get; set; } = new();
+    public List<IColumnSetting> Settings { get; set; } = new();
+
+    public string? FilterIcon { get; set; } = null;
+
     public virtual IEnumerable<SearchResult> Filter(ColumnConfiguration columnConfiguration, IEnumerable<SearchResult> items)
     {
         return items;
@@ -91,6 +97,11 @@ public abstract class ButtonColumn : IColumn
             }
         }
         ImGui.TableSetupColumn(columnConfiguration.Name ?? (RenderName ?? Name), imGuiTableColumnFlags, Width, (uint)columnIndex);
+    }
+
+    public bool? DrawFilter(ColumnConfiguration columnConfiguration, int columnIndex)
+    {
+        return null;
     }
 
     public virtual IFilterEvent? DrawFooterFilter(ColumnConfiguration columnConfiguration, FilterTable filterTable)

@@ -62,6 +62,11 @@ public class ScopePickerColumnSetting : ColumnSetting<List<InventorySearchScope>
     public override string HelpText { get; set; } = "Select the inventories you want to search inside.";
     public override List<InventorySearchScope>? DefaultValue { get; set; } = null;
 
+    public override bool DrawFilter(ColumnConfiguration configuration, string? helpText)
+    {
+        return Draw(configuration, helpText);
+    }
+
     public override bool Draw(ColumnConfiguration configuration, string? helpText)
     {
         var success = false;

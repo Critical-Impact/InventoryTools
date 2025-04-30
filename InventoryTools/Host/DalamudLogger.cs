@@ -48,18 +48,27 @@ internal sealed class DalamudLogger : ILogger
             }
         }
 
-        if (logLevel == LogLevel.Trace)
-            _pluginLog.Verbose(sb.ToString());
-        else if (logLevel == LogLevel.Debug)
-            _pluginLog.Debug(sb.ToString());
-        else if (logLevel == LogLevel.Information)
-            _pluginLog.Information(sb.ToString());
-        else if (logLevel == LogLevel.Warning)
-            _pluginLog.Warning(sb.ToString());
-        else if (logLevel == LogLevel.Error)
-            _pluginLog.Error(sb.ToString());
-        else if (logLevel == LogLevel.Critical)
-            _pluginLog.Fatal(sb.ToString());
+        switch (logLevel)
+        {
+            case LogLevel.Trace:
+                _pluginLog.Verbose(sb.ToString());
+                break;
+            case LogLevel.Debug:
+                _pluginLog.Debug(sb.ToString());
+                break;
+            case LogLevel.Information:
+                _pluginLog.Information(sb.ToString());
+                break;
+            case LogLevel.Warning:
+                _pluginLog.Warning(sb.ToString());
+                break;
+            case LogLevel.Error:
+                _pluginLog.Error(sb.ToString());
+                break;
+            case LogLevel.Critical:
+                _pluginLog.Fatal(sb.ToString());
+                break;
+        }
 
     }
 }

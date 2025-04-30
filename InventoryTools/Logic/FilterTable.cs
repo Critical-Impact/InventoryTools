@@ -9,13 +9,15 @@ using System.Text;
 using CriticalCommonLib.Services.Mediator;
 
 using CsvHelper;
-
+using DalaMock.Shared.Interfaces;
+using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Logic.Columns;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Services;
 
@@ -23,9 +25,183 @@ namespace InventoryTools.Logic
 {
     public class FilterTable : RenderTableBase
     {
-        public FilterTable(ImGuiMenuService imGuiMenuService, ImGuiTooltipService imGuiTooltipService, InventoryToolsConfiguration configuration, ImGuiTooltipModeSetting tooltipModeSetting) : base(imGuiMenuService, imGuiTooltipService, tooltipModeSetting, configuration)
-        {
+        private readonly IFont _font;
 
+        public FilterTable(ImGuiMenuService imGuiMenuService, ImGuiTooltipService imGuiTooltipService, InventoryToolsConfiguration configuration, ImGuiTooltipModeSetting tooltipModeSetting, IFont font) : base(imGuiMenuService, imGuiTooltipService, tooltipModeSetting, configuration)
+        {
+            _font = font;
+        }
+
+
+        public virtual bool DrawFilter(ColumnConfiguration columnConfiguration, string tableKey, int columnIndex)
+        {
+            var hasSettings = columnConfiguration.Column.FilterSettings.Any();
+            var hasChanged = false;
+            ImGui.TableSetColumnIndex(columnIndex);
+            ImGui.PushID(columnIndex);
+            float totalWidth = ImGui.GetContentRegionAvail().X;
+            float spacing = ImGui.GetStyle().ItemInnerSpacing.X;
+            float inputWidth = totalWidth - spacing;
+            float buttonWidth = ImGui.GetFontSize() * 2.0f;
+
+            if (hasSettings)
+            {
+                inputWidth -= buttonWidth;
+            }
+
+            if (columnConfiguration.Column.FilterType == ColumnFilterType.Custom)
+            {
+                if (columnConfiguration.Column.DrawFilter(columnConfiguration, columnIndex) == true)
+                {
+                    return true;
+                }
+            }
+            else if (columnConfiguration.Column.FilterType == ColumnFilterType.Text)
+            {
+                var filter = columnConfiguration.FilterText;
+                ImGui.SetNextItemWidth(inputWidth);
+                ImGui.InputText("##" + tableKey + "FilterI" + columnConfiguration.Column.Name, ref filter, columnConfiguration.Column.MaxFilterLength);
+                if (filter != columnConfiguration.FilterText)
+                {
+                    columnConfiguration.FilterText = filter;
+                    hasChanged = true;
+                }
+            }
+            else if (columnConfiguration.Column.FilterType == ColumnFilterType.Choice)
+            {
+                var currentItem = columnConfiguration.FilterText;
+                ImGui.SetNextItemWidth(inputWidth);
+                using (var combo = ImRaii.Combo("##Choice", currentItem))
+                {
+                    if (combo.Success)
+                    {
+                        if (columnConfiguration.Column.FilterChoices != null)
+                        {
+                            if (ImGui.Selectable("", false))
+                            {
+                                columnConfiguration.FilterText = "";
+                                hasChanged = true;
+                            }
+
+                            foreach (var column in columnConfiguration.Column.FilterChoices)
+                            {
+                                if (ImGui.Selectable(column, currentItem == column))
+                                {
+                                    columnConfiguration.FilterText = column;
+                                    hasChanged = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else if (columnConfiguration.Column.FilterType == ColumnFilterType.Boolean)
+            {
+                var currentItem = columnConfiguration.FilterText;
+
+                if (currentItem == "true")
+                {
+                    currentItem = "Yes";
+                }
+                else if(currentItem == "false")
+                {
+                    currentItem = "No";
+                }
+                ImGui.SetNextItemWidth(inputWidth);
+                using (var combo = ImRaii.Combo("##Choice", currentItem))
+                {
+                    if (combo.Success)
+                    {
+                        if (ImGui.Selectable("", false))
+                        {
+                            columnConfiguration.FilterText = "";
+                            hasChanged = true;
+                        }
+
+
+
+                        if (ImGui.Selectable("Yes", currentItem == "Yes"))
+                        {
+                            columnConfiguration.FilterText = "true";
+                            hasChanged = true;
+                        }
+
+                        if (ImGui.Selectable("No", currentItem == "No"))
+                        {
+                            columnConfiguration.FilterText = "false";
+                            hasChanged = true;
+                        }
+                    }
+                }
+            }
+
+            if (hasSettings)
+            {
+                var popupLocation = new Vector2(ImGui.GetItemRectMin().X - ImGui.GetStyle().CellPadding.X, ImGui.GetItemRectMax().Y + ImGui.GetStyle().CellPadding.Y);
+
+                var hasFilterSettings = false;
+                foreach (var setting in columnConfiguration.Column.FilterSettings)
+                {
+                    if (setting.HasValueSet(columnConfiguration.FilterConfiguration))
+                    {
+                        hasFilterSettings = true;
+                        break;
+                    }
+                }
+
+                ImGui.SameLine();
+                using (var color = ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.HealerGreen, hasFilterSettings))
+                {
+                    using (var font = ImRaii.PushFont(_font.IconFont))
+                    {
+                        var opening = false;
+                        if (ImGui.Button(columnConfiguration.Column.FilterIcon ?? FontAwesomeIcon.Filter.ToIconString()))
+                        {
+                            ImGui.SetNextWindowPos(popupLocation, ImGuiCond.Appearing);
+
+                            ImGui.OpenPopup("ExtraFiltersPopup");
+                            opening = true;
+                        }
+
+                        if (!opening && ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+                        {
+                            foreach (var setting in columnConfiguration.Column.FilterSettings)
+                            {
+                                setting.ResetFilter(columnConfiguration.FilterConfiguration);
+                            }
+                            hasChanged = true;
+
+                        }
+
+                        if (!opening && ImGui.IsItemHovered())
+                        {
+                            font.Pop();
+                            color.Pop();
+                            using var tooltip = ImRaii.Tooltip();
+                            if (tooltip)
+                            {
+                                ImGui.Text("Extra Filters");
+                                ImGui.Text("Right Click: Clear All");
+                            }
+                        }
+                    }
+                }
+
+                if (ImGui.BeginPopup("ExtraFiltersPopup"))
+                {
+                    foreach (var setting in columnConfiguration.Column.FilterSettings)
+                    {
+                        if (setting.DrawFilter(columnConfiguration.FilterConfiguration, null))
+                        {
+                            hasChanged = true;
+                        }
+                    }
+                    ImGui.EndPopup();
+                }
+            }
+            ImGui.PopID();
+
+            return hasChanged;
         }
 
         public override void RefreshColumns()
@@ -86,7 +262,7 @@ namespace InventoryTools.Logic
                         }
 
                         var currentSortSpecs = ImGui.TableGetSortSpecs();
-                        if (_inititalSortingSetup == false)
+                        if (!_inititalSortingSetup)
                         {
                             currentSortSpecs.Specs.SortDirection = FilterConfiguration.DefaultSortOrder ?? ImGuiSortDirection.Ascending;
                             currentSortSpecs.Specs.ColumnIndex = FilterConfiguration.Columns != null ? (short)FilterConfiguration.Columns.FindIndex(c => c.Key == FilterConfiguration.DefaultSortColumn) : (short)0;
@@ -123,7 +299,7 @@ namespace InventoryTools.Logic
                             for (var index = 0; index < Columns.Count; index++)
                             {
                                 var column = Columns[index];
-                                if (column.Column.HasFilter && column.DrawFilter(Key, index))
+                                if (column.Column.HasFilter && DrawFilter(column, Key, index))
                                 {
                                     refresh = true;
                                 }

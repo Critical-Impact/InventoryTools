@@ -177,10 +177,10 @@ namespace InventoryTools.Logic.Columns
                     ImGui.TextUnformatted("Ingredients: ");
                     using (ImRaii.PushIndent())
                     {
-                        foreach (var ingredient in searchResult.CraftItem.Ingredients)
+                        foreach (var ingredient in searchResult.CraftItem.Recipe.IngredientCounts)
                         {
-                            var item = _itemSheet.GetRow(ingredient.Key.Item1);
-                            var quantityRequired = ingredient.Value;
+                            var item = _itemSheet.GetRow(ingredient.Key);
+                            var quantityRequired = (ingredient.Value * searchResult.CraftItem.QuantityNeededPreUpdate) / searchResult.CraftItem.Yield;
                             ImGui.TextUnformatted(item.NameString + ": " + quantityRequired);
                         }
                     }

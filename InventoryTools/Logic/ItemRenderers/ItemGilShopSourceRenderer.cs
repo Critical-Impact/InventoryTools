@@ -129,7 +129,7 @@ public class ItemGilShopSourceRenderer : ItemInfoRenderer<ItemGilShopSource>
 
             foreach (var quest in asSource.GilShopItem.Base.QuestRequired)
             {
-                if (quest.RowId != 0)
+                if (quest.RowId != 0 && quest.IsValid)
                 {
                     ImGui.Text(
                         $"Quest Required: {quest.Value.Name.ExtractText()}");

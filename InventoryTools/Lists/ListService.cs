@@ -1039,8 +1039,9 @@ namespace InventoryTools.Lists
                 AddColumn(configuration,typeof(FavouritesColumn), false);
                 AddColumn(configuration,typeof(IconColumn), false);
                 var nameColumn = AddColumn(configuration,typeof(NameColumn), false);
+                AddColumn(configuration,typeof(AcquisitionSourceIconsColumn), false);
+                AddColumn(configuration,typeof(UseIconsColumn), false);
                 AddColumn(configuration,typeof(UiCategoryColumn), false);
-                AddColumn(configuration,typeof(SearchCategoryColumn), false);
                 AddColumn(configuration,typeof(ItemILevelColumn), false);
                 AddColumn(configuration,typeof(ItemLevelColumn), false);
                 AddColumn(configuration,typeof(RarityColumn), false);
@@ -1051,7 +1052,6 @@ namespace InventoryTools.Lists
                 AddColumn(configuration,typeof(AcquiredColumn), false);
                 AddColumn(configuration,typeof(SellToVendorPriceColumn), false);
                 AddColumn(configuration,typeof(BuyFromVendorPriceColumn), false);
-                AddColumn(configuration,typeof(AcquisitionSourceIconsColumn), false);
                 configuration.DefaultSortColumn = nameColumn.Key;
                 configuration.DefaultSortOrder = ImGuiSortDirection.Ascending;
             }

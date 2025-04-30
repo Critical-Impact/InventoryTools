@@ -386,7 +386,10 @@ namespace InventoryTools.Ui
                     {
                         this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
                     }
-
+                    if (ImGui.MenuItem("Changelog"))
+                    {
+                        this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(ChangelogWindow)));
+                    }
                     if (ImGui.MenuItem("Help"))
                     {
                         this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(HelpWindow)));

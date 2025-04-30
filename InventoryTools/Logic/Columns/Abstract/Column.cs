@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using CriticalCommonLib.Services.Mediator;
 
 using ImGuiNET;
+using InventoryTools.Logic.Columns.Abstract.ColumnSettings;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -20,6 +21,8 @@ namespace InventoryTools.Logic.Columns.Abstract
         [JsonIgnore] protected ILogger Logger { get; }
         [JsonIgnore] protected ImGuiService ImGuiService { get; }
         public virtual uint MaxFilterLength { get; set; } = 200;
+        public List<IColumnSetting> FilterSettings { get; set; } = new();
+        public List<IColumnSetting> Settings { get; set; } = new();
 
         public virtual FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter |
                                                  Logic.FilterType.GameItemFilter | Logic.FilterType.CraftFilter | Logic.FilterType.HistoryFilter | Logic.FilterType.CuratedList;
@@ -33,6 +36,15 @@ namespace InventoryTools.Logic.Columns.Abstract
         public virtual List<MessageBase>? DrawEditor(ColumnConfiguration columnConfiguration,
             FilterConfiguration configuration)
         {
+            if (this.Settings.Count != 0)
+            {
+                ImGui.NewLine();
+                ImGui.Separator();
+                foreach (var setting in this.Settings)
+                {
+                    setting.Draw(columnConfiguration, null);
+                }
+            }
             return null;
         }
 
@@ -75,6 +87,8 @@ namespace InventoryTools.Logic.Columns.Abstract
             (AvailableIn.HasFlag(InventoryTools.Logic.FilterType.CuratedList) &&
              type.HasFlag(InventoryTools.Logic.FilterType.CuratedList));
 
+        public virtual string? FilterIcon { get; set; } = null;
+
         public abstract IEnumerable<SearchResult> Filter(ColumnConfiguration columnConfiguration,
             IEnumerable<SearchResult> searchResults);
 
@@ -110,6 +124,11 @@ namespace InventoryTools.Logic.Columns.Abstract
             ImGui.TableSetupColumn(columnConfiguration.Name ?? (RenderName ?? Name), imGuiTableColumnFlags, Width, (uint)columnIndex);
         }
         public virtual IFilterEvent? DrawFooterFilter(ColumnConfiguration columnConfiguration, FilterTable filterTable)
+        {
+            return null;
+        }
+
+        public virtual bool? DrawFilter(ColumnConfiguration columnConfiguration, int columnIndex)
         {
             return null;
         }

@@ -47,6 +47,7 @@ namespace InventoryTools
         private readonly FilterConfiguration.Factory _filterConfigFactory;
         private readonly Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter> _sourceCategoryFilterFactory;
         private readonly BuyFromVendorPriceFilter _buyFromVendorPriceFilter;
+        private readonly SimpleAcquisitionTrackerService _acquisitionTrackerService;
         private readonly Func<Type, IFilter> _filterFactory;
         private readonly IMarketCache _marketCache;
         private Dictionary<uint, InventoryMonitor.ItemChangesItem> _recentlyAddedSeen = new();
@@ -80,7 +81,7 @@ namespace InventoryTools
             IEnumerable<IHotkey> hotkeys, Func<Type, IFilter> filterFactory, IMarketCache marketCache,
             ITooltipService tooltipService, FilterConfiguration.Factory filterConfigFactory,
             Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter> sourceCategoryFilterFactory,
-            BuyFromVendorPriceFilter buyFromVendorPriceFilter) : base(logger, mediatorService)
+            BuyFromVendorPriceFilter buyFromVendorPriceFilter, SimpleAcquisitionTrackerService acquisitionTrackerService) : base(logger, mediatorService)
         {
             _configurationManagerService = configurationManagerService;
             _chatUtilities = chatUtilities;
@@ -102,6 +103,7 @@ namespace InventoryTools
             _filterConfigFactory = filterConfigFactory;
             _sourceCategoryFilterFactory = sourceCategoryFilterFactory;
             _buyFromVendorPriceFilter = buyFromVendorPriceFilter;
+            _acquisitionTrackerService = acquisitionTrackerService;
             _filterFactory = filterFactory;
             _marketCache = marketCache;
             this.MediatorService.Subscribe<PluginLoadedMessage>(this, PluginLoaded);
@@ -460,6 +462,7 @@ namespace InventoryTools
             _framework.Update += FrameworkOnUpdate;
             _configurationManagerService.ConfigurationChanged += ConfigOnConfigurationChanged;
 
+            _acquisitionTrackerService.ItemAcquired += AcquisitionTrackerServiceOnItemAcquired;
             _craftMonitor.CraftStarted += CraftMonitorOnCraftStarted;
             _craftMonitor.CraftFailed += CraftMonitorOnCraftFailed ;
             _craftMonitor.CraftCompleted += CraftMonitorOnCraftCompleted ;
@@ -480,6 +483,32 @@ namespace InventoryTools
             return Task.CompletedTask;
         }
 
+        private void AcquisitionTrackerServiceOnItemAcquired(InventoryItem item, int qtyIncrease, AcquisitionReason reason)
+        {
+            _logger.LogTrace("Item acquired through {Reason}, qty of {QtyIncrease}, item ID: {ItemId}", reason, qtyIncrease, item.ItemId);
+
+            var activeCraftList = _listService.GetActiveCraftList();
+            if (activeCraftList != null && activeCraftList.FilterType == FilterType.CraftFilter && activeCraftList.CraftList.CraftListMode == CraftListMode.Normal)
+            {
+                var flags = item.IsHighQuality() ? InventoryItem.ItemFlags.HighQuality : InventoryItem.ItemFlags.None;
+                _logger.LogTrace("Marking {Quantity} qty for item {ItemId} ({HqFlag}) as crafted.", qtyIncrease, item.ItemId, !item.IsHighQuality() ? "NQ" : "HQ");
+                activeCraftList.CraftList.MarkCrafted(item.ItemId, flags, (uint)qtyIncrease);
+                if (activeCraftList is { IsEphemeralCraftList: true, CraftList.IsCompleted: true })
+                {
+                    _chatUtilities.Print("Ephemeral craft list '" + activeCraftList.Name + "' completed. List has been removed.");
+                    _listService.RemoveList(activeCraftList);
+                }
+                else
+                {
+                    activeCraftList.NeedsRefresh = true;
+                }
+            }
+            else
+            {
+                _logger.LogTrace("Active craft list is either inactive or in stock mode.");
+            }
+        }
+
         public Task StopAsync(CancellationToken cancellationToken)
         {
             Logger.LogTrace("Stopping service {Type} ({This})", GetType().Name, this);
@@ -487,6 +516,7 @@ namespace InventoryTools
             _configuration.SavedCharacters = _characterMonitor.Characters;
             _framework.Update -= FrameworkOnUpdate;
             _inventoryMonitor.OnInventoryChanged -= InventoryMonitorOnOnInventoryChanged;
+            _acquisitionTrackerService.ItemAcquired -= AcquisitionTrackerServiceOnItemAcquired;
             _craftMonitor.CraftStarted -= CraftMonitorOnCraftStarted;
             _craftMonitor.CraftFailed -= CraftMonitorOnCraftFailed ;
             _craftMonitor.CraftCompleted -= CraftMonitorOnCraftCompleted ;

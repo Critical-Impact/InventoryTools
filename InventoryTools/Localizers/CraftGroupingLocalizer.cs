@@ -22,9 +22,9 @@ public class CraftGroupingLocalizer
             name = craftGrouping.Depth.Value.ConvertToOrdinal() + " Tier " + name;
         }
 
-        if (craftGrouping.ClassJobId != null)
+        if (craftGrouping.CraftTypeId != null)
         {
-            var classJob = _craftTypeSheet.GetRowOrDefault(craftGrouping.ClassJobId.Value);
+            var classJob = _craftTypeSheet.GetRowOrDefault(craftGrouping.CraftTypeId.Value);
             if (classJob != null)
             {
                 name = classJob.FormattedName + " - " + name;
