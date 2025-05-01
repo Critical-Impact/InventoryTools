@@ -44,6 +44,7 @@ namespace InventoryTools.Ui
         private readonly InventoryToolsConfiguration _configuration;
         private readonly VerticalSplitter _verticalSplitter;
         private IEnumerable<IMenuWindow>? _menuWindows;
+        private FilterConfiguration? _nextFilter;
 
         public ConfigurationWindow(ILogger<ConfigurationWindow> logger,
             IPluginLog pluginLog,
@@ -81,7 +82,6 @@ namespace InventoryTools.Ui
             this.Flags = ImGuiWindowFlags.MenuBar;
         }
 
-
         public override void Initialize()
         {
             WindowName = "Configuration";
@@ -102,6 +102,7 @@ namespace InventoryTools.Ui
             _configPages.Add(_settingPageFactory.Invoke(SettingCategory.MobSpawnTracker));
             _configPages.Add(_settingPageFactory.Invoke(SettingCategory.TitleMenuButtons));
             _configPages.Add(_settingPageFactory.Invoke(SettingCategory.CraftOverlay));
+            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.CraftTracker));
             _configPages.Add(_settingPageFactory.Invoke(SettingCategory.History));
             _configPages.Add(_settingPageFactory.Invoke(SettingCategory.Misc));
             _configPages.Add(new SeparatorPageItem("Data", true));
@@ -419,10 +420,9 @@ namespace InventoryTools.Ui
 
         public void SetActiveFilter(FilterConfiguration configuration)
         {
-            var filterIndex = _filterPages.ContainsKey(configuration.Key) ? _filterPages.Where(c => !c.Value.IsMenuItem).Select(c => c.Key).IndexOf(configuration.Key) - 2 : -1;
-            if (filterIndex != -1)
+            if (_filterPages.ContainsKey(configuration.Key))
             {
-                ConfigSelectedConfigurationPage = _configPages.Count + filterIndex;
+                _nextFilter = configuration;
             }
         }
 
@@ -587,6 +587,18 @@ namespace InventoryTools.Ui
                 foreach (var filter in _filterPages)
                 {
                     count++;
+                    if (_nextFilter != null)
+                    {
+                        if (filter.Value is FilterPage filterPage)
+                        {
+                            if (filterPage.FilterConfiguration == _nextFilter)
+                            {
+                                currentConfigPage = filterPage;
+                                ConfigSelectedConfigurationPage = count;
+                                _nextFilter = null;
+                            }
+                        }
+                    }
                     if (ConfigSelectedConfigurationPage == count)
                     {
                         currentConfigPage = filter.Value;
@@ -619,7 +631,7 @@ namespace InventoryTools.Ui
                         {
                             var hasChildren = configPage.ChildPages != null;
                             var isSelected = ConfigSelectedConfigurationPage == count;
-                            using (var node = ImRaii.TreeNode(configPage.Name, hasChildren ?  ImGuiTreeNodeFlags.DefaultOpen : isSelected ? ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.Selected : ImGuiTreeNodeFlags.Leaf))
+                            using (var node = ImRaii.TreeNode(configPage.Name, hasChildren ?  ImGuiTreeNodeFlags.None : isSelected ? ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.Selected : ImGuiTreeNodeFlags.Leaf))
                             {
                                 if (node)
                                 {

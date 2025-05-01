@@ -7,7 +7,9 @@ using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Models;
+using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Services;
 
@@ -17,13 +19,15 @@ public class ItemCalamitySalvagerShopUseRenderer : ItemCalamitySalvagerShopSourc
 {
     private readonly MapSheet _mapSheet;
     private readonly ItemSheet _itemSheet;
+    private readonly ITextureProvider _textureProvider;
 
     public override string HelpText => "Can the item be spent at the calamity salvager?";
 
-    public ItemCalamitySalvagerShopUseRenderer(MapSheet mapSheet, ItemSheet itemSheet) : base(mapSheet, itemSheet)
+    public ItemCalamitySalvagerShopUseRenderer(MapSheet mapSheet, ItemSheet itemSheet, ITextureProvider textureProvider) : base(mapSheet, itemSheet, textureProvider)
     {
         _mapSheet = mapSheet;
         _itemSheet = itemSheet;
+        _textureProvider = textureProvider;
     }
 
     public override Action<List<ItemSource>>? DrawTooltipGrouped => sources =>
@@ -45,11 +49,13 @@ public class ItemCalamitySalvagerShopSourceRenderer : ItemInfoRenderer<ItemCalam
 {
     private readonly MapSheet _mapSheet;
     private readonly ItemSheet _itemSheet;
+    private readonly ITextureProvider _textureProvider;
 
-    public ItemCalamitySalvagerShopSourceRenderer(MapSheet mapSheet, ItemSheet itemSheet)
+    public ItemCalamitySalvagerShopSourceRenderer(MapSheet mapSheet, ItemSheet itemSheet, ITextureProvider textureProvider)
     {
         _mapSheet = mapSheet;
         _itemSheet = itemSheet;
+        _textureProvider = textureProvider;
     }
 
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Shop];
@@ -78,6 +84,8 @@ public class ItemCalamitySalvagerShopSourceRenderer : ItemInfoRenderer<ItemCalam
             var itemName = firstItem.CostItem!.NameString;
             var count = firstItem.Cost;
             var costString = $"{itemName} x {count}";
+            ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(firstItem.Item.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
+            ImGui.SameLine();
             ImGui.Text(costString);
 
             if (firstItem.GilShopItem.Base.AchievementRequired.RowId != 0)
@@ -118,9 +126,12 @@ public class ItemCalamitySalvagerShopSourceRenderer : ItemInfoRenderer<ItemCalam
 
         using (ImRaii.PushIndent())
         {
+
             var itemName = asSource.CostItem!.NameString;
             var count = asSource.Cost;
             var costString = $"{itemName} x {count}";
+            ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(asSource.CostItem.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
+            ImGui.SameLine();
             ImGui.Text(costString);
 
             if (asSource.GilShopItem.Base.AchievementRequired.RowId != 0)

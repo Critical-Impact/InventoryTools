@@ -16,6 +16,8 @@ namespace InventoryTools.Extensions
                     return "Marketboard";
                 case SettingCategory.CraftOverlay:
                     return "Craft Overlay";
+                case SettingCategory.CraftTracker:
+                    return "Craft Tracker (Legacy)";
                 case SettingCategory.ToolTips:
                     return "Tooltips";
                 case SettingCategory.Hotkeys:

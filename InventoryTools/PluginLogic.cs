@@ -14,6 +14,7 @@ using InventoryTools.Hotkeys;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Filters;
 using InventoryTools.Logic.ItemRenderers;
+using InventoryTools.Logic.Settings;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
@@ -48,6 +49,12 @@ namespace InventoryTools
         private readonly Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter> _sourceCategoryFilterFactory;
         private readonly BuyFromVendorPriceFilter _buyFromVendorPriceFilter;
         private readonly SimpleAcquisitionTrackerService _acquisitionTrackerService;
+        private readonly CraftTrackerTrackCraftsFilter _trackCraftsFilter;
+        private readonly CraftTrackerTrackGatheringFilter _trackGatheringFilter;
+        private readonly CraftTrackerTrackShoppingFilter _trackShoppingFilter;
+        private readonly CraftTrackerTrackCombatDropFilter _trackCombatDropFilter;
+        private readonly CraftTrackerTrackOtherFilter _trackOtherFilter;
+        private readonly UseOldCraftTrackerSetting _useOldCraftTrackerSetting;
         private readonly Func<Type, IFilter> _filterFactory;
         private readonly IMarketCache _marketCache;
         private Dictionary<uint, InventoryMonitor.ItemChangesItem> _recentlyAddedSeen = new();
@@ -81,7 +88,10 @@ namespace InventoryTools
             IEnumerable<IHotkey> hotkeys, Func<Type, IFilter> filterFactory, IMarketCache marketCache,
             ITooltipService tooltipService, FilterConfiguration.Factory filterConfigFactory,
             Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter> sourceCategoryFilterFactory,
-            BuyFromVendorPriceFilter buyFromVendorPriceFilter, SimpleAcquisitionTrackerService acquisitionTrackerService) : base(logger, mediatorService)
+            BuyFromVendorPriceFilter buyFromVendorPriceFilter, SimpleAcquisitionTrackerService acquisitionTrackerService,
+            CraftTrackerTrackCraftsFilter trackCraftsFilter, CraftTrackerTrackGatheringFilter trackGatheringFilter,
+            CraftTrackerTrackShoppingFilter trackShoppingFilter, CraftTrackerTrackCombatDropFilter trackCombatDropFilter,
+            CraftTrackerTrackOtherFilter trackOtherFilter, UseOldCraftTrackerSetting useOldCraftTrackerSetting) : base(logger, mediatorService)
         {
             _configurationManagerService = configurationManagerService;
             _chatUtilities = chatUtilities;
@@ -104,6 +114,12 @@ namespace InventoryTools
             _sourceCategoryFilterFactory = sourceCategoryFilterFactory;
             _buyFromVendorPriceFilter = buyFromVendorPriceFilter;
             _acquisitionTrackerService = acquisitionTrackerService;
+            _trackCraftsFilter = trackCraftsFilter;
+            _trackGatheringFilter = trackGatheringFilter;
+            _trackShoppingFilter = trackShoppingFilter;
+            _trackCombatDropFilter = trackCombatDropFilter;
+            _trackOtherFilter = trackOtherFilter;
+            _useOldCraftTrackerSetting = useOldCraftTrackerSetting;
             _filterFactory = filterFactory;
             _marketCache = marketCache;
             this.MediatorService.Subscribe<PluginLoadedMessage>(this, PluginLoaded);
@@ -117,6 +133,11 @@ namespace InventoryTools
 
         private void CraftMonitorOnCraftCompleted(uint itemid, FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags flags, uint quantity)
         {
+            if (!_useOldCraftTrackerSetting.CurrentValue(_configuration))
+            {
+                _logger.LogTrace("Craft monitor event ignored as the acquisition tracker currently has precedence.");
+                return;
+            }
             _logger.LogTrace("Craft completed for {Quantity} qty of item {ItemId}", quantity, itemid);
 
             var activeCraftList = _listService.GetActiveCraftList();
@@ -485,12 +506,27 @@ namespace InventoryTools
 
         private void AcquisitionTrackerServiceOnItemAcquired(InventoryItem item, int qtyIncrease, AcquisitionReason reason)
         {
+            if (_useOldCraftTrackerSetting.CurrentValue(_configuration))
+            {
+                _logger.LogTrace("Acquisition tracker event ignored as the craft monitor currently has precedence.");
+                return;
+            }
             _logger.LogTrace("Item acquired through {Reason}, qty of {QtyIncrease}, item ID: {ItemId}", reason, qtyIncrease, item.ItemId);
 
             var activeCraftList = _listService.GetActiveCraftList();
             if (activeCraftList != null && activeCraftList.FilterType == FilterType.CraftFilter && activeCraftList.CraftList.CraftListMode == CraftListMode.Normal)
             {
-                var flags = item.IsHighQuality() ? InventoryItem.ItemFlags.HighQuality : InventoryItem.ItemFlags.None;
+                if ((reason == AcquisitionReason.Crafting && _trackCraftsFilter.CurrentValue(activeCraftList) == false) ||
+                    (reason == AcquisitionReason.Gathering && _trackGatheringFilter.CurrentValue(activeCraftList) == false) ||
+                    (reason == AcquisitionReason.Shopping && _trackShoppingFilter.CurrentValue(activeCraftList) == false) ||
+                    (reason == AcquisitionReason.CombatDrop && _trackCombatDropFilter.CurrentValue(activeCraftList) == false) ||
+                    (reason == AcquisitionReason.Other && _trackOtherFilter.CurrentValue(activeCraftList) == false)
+                    )
+                {
+                    _logger.LogTrace("Craft list configured to not track {Reason}, not altering required item counts.", reason);
+                    return;
+                }
+                var flags = item.Flags;
                 _logger.LogTrace("Marking {Quantity} qty for item {ItemId} ({HqFlag}) as crafted.", qtyIncrease, item.ItemId, !item.IsHighQuality() ? "NQ" : "HQ");
                 activeCraftList.CraftList.MarkCrafted(item.ItemId, flags, (uint)qtyIncrease);
                 if (activeCraftList is { IsEphemeralCraftList: true, CraftList.IsCompleted: true })

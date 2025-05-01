@@ -75,11 +75,11 @@ public class ItemSpecialShopSourceRenderer : ItemInfoRenderer<ItemSpecialShopSou
         {
             foreach (var reward in asSource.ShopListing.Rewards)
             {
-                ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(reward.Item.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
-                ImGui.SameLine();
                 var itemName = reward.Item.NameString;
                 var count = reward.Count;
                 var costString = $"{itemName} x {count}";
+                ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(reward.Item.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
+                ImGui.SameLine();
                 ImGui.Text(costString);
                 if (reward.IsHq == true)
                 {
@@ -93,11 +93,11 @@ public class ItemSpecialShopSourceRenderer : ItemInfoRenderer<ItemSpecialShopSou
         {
             foreach (var cost in asSource.ShopListing.Costs)
             {
-                ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(cost.Item.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
-                ImGui.SameLine();
                 var itemName = cost.Item.NameString;
                 var count = cost.Count;
                 var costString = $"{itemName} x {count}";
+                ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(cost.Item.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
+                ImGui.SameLine();
                 ImGui.Text(costString);
                 if (cost.IsHq == true)
                 {

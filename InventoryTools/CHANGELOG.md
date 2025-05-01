@@ -19,8 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.h
 ## [12.0.4] - 2025-04-14
 ### Added
 - Changelog window added
-- Acquiring items through Gathering/Crafting/Buying/Combat will now count towards craft completion for output items. These can be toggled per craft list.
+- Acquiring items through Gathering/Crafting/Buying/Combat will now count towards craft completion for output items. These can be toggled per craft list in the 'Completion Tracking' section. 
   - This uses a new acquisition tracker, please report any issues with it 
+  - It's possible to switch back to the old craft tracker, check settings, the old one only tracks crafts
 - Sources/Uses added for quests
 - The Acquisition/Use columns now have column filters allowing you to search for specific types, categories, rewards and requirements for items
 - Overhaul to right click menus on sources/uses. 
@@ -35,6 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.h
 - Fixes to the way text is vertically aligned within table cells 
 - Ingredient counts in the "Required" column will show the correct total
 - Squashed some imgui asserts
+- If there are no known locations of mobs, it'll display that instead of displaying nothing in the item window
+- Creating a new list will actually open the configuration window to the list correctly
  
 ## [12.0.3] - 2025-04-14
 -

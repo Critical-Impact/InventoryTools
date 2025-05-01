@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Models;
+using Dalamud.Interface.Textures;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using OtterGui.Raii;
 
@@ -12,10 +15,12 @@ namespace InventoryTools.Logic.ItemRenderers;
 public class ItemCompanyCraftDraftSourceRenderer : ItemInfoRenderer<ItemCompanyCraftDraftSource>
 {
     private readonly ItemSheet _itemSheet;
+    private readonly ITextureProvider _textureProvider;
 
-    public ItemCompanyCraftDraftSourceRenderer(ItemSheet itemSheet)
+    public ItemCompanyCraftDraftSourceRenderer(ItemSheet itemSheet, ITextureProvider textureProvider)
     {
         _itemSheet = itemSheet;
+        _textureProvider = textureProvider;
     }
     public override RendererType RendererType => RendererType.Use;
     public override ItemInfoType Type => ItemInfoType.CompanyCraftDraft;
@@ -38,7 +43,8 @@ public class ItemCompanyCraftDraftSourceRenderer : ItemInfoRenderer<ItemCompanyC
                     continue;
                 }
                 var item = _itemSheet.GetRow(ingredient.RowId);
-
+                ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(item.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
+                ImGui.SameLine();
                 ImGui.Text($"{item.NameString} x {quantity}");
             }
         }

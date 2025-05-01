@@ -19,5 +19,6 @@ namespace InventoryTools.Logic.Settings.Abstract
         CraftOverlay = 14,
         Items = 15,
         Highlighting = 16,
+        CraftTracker = 17,
     }
 }

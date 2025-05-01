@@ -22,5 +22,6 @@ namespace InventoryTools.Logic.Filters
         UseCategories = 17,
         Settings = 18,
         Stats = 19,
+        CompletionTracking = 20,
     }
 }

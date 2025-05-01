@@ -7,7 +7,9 @@ using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Models;
+using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Services;
 
@@ -19,7 +21,7 @@ public class ItemGilShopUseRenderer : ItemGilShopSourceRenderer
     private readonly ItemSheet _itemSheet;
     public override string HelpText => "Can the item be spent at a gil shop?";
 
-    public ItemGilShopUseRenderer(MapSheet mapSheet, ItemSheet itemSheet) : base(mapSheet, itemSheet)
+    public ItemGilShopUseRenderer(MapSheet mapSheet, ItemSheet itemSheet, ITextureProvider textureProvider) : base(mapSheet, itemSheet, textureProvider)
     {
         _mapSheet = mapSheet;
         _itemSheet = itemSheet;
@@ -43,11 +45,13 @@ public class ItemGilShopSourceRenderer : ItemInfoRenderer<ItemGilShopSource>
 {
     private readonly MapSheet _mapSheet;
     private readonly ItemSheet _itemSheet;
+    private readonly ITextureProvider _textureProvider;
 
-    public ItemGilShopSourceRenderer(MapSheet mapSheet, ItemSheet itemSheet)
+    public ItemGilShopSourceRenderer(MapSheet mapSheet, ItemSheet itemSheet, ITextureProvider textureProvider)
     {
         _mapSheet = mapSheet;
         _itemSheet = itemSheet;
+        _textureProvider = textureProvider;
     }
 
     public override RendererType RendererType => RendererType.Source;
@@ -76,6 +80,8 @@ public class ItemGilShopSourceRenderer : ItemInfoRenderer<ItemGilShopSource>
             var itemName = firstItem.CostItem!.NameString;
             var count = firstItem.Cost;
             var costString = $"{itemName} x {count}";
+            ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(firstItem.CostItem.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
+            ImGui.SameLine();
             ImGui.Text(costString);
 
             if (firstItem.GilShopItem.Base.AchievementRequired.RowId != 0)
@@ -119,6 +125,8 @@ public class ItemGilShopSourceRenderer : ItemInfoRenderer<ItemGilShopSource>
             var itemName = asSource.CostItem!.NameString;
             var count = asSource.Cost;
             var costString = $"{itemName} x {count}";
+            ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(asSource.CostItem.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
+            ImGui.SameLine();
             ImGui.Text(costString);
 
             if (asSource.GilShopItem.Base.AchievementRequired.RowId != 0)

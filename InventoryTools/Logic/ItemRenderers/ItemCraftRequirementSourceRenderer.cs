@@ -57,6 +57,8 @@ public class ItemCraftRequirementSourceRenderer : ItemInfoRenderer<ItemCraftRequ
         {
             foreach (var row in asSource)
             {
+                ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(row.Item.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(16,16));
+                ImGui.SameLine();
                 ImGui.TextUnformatted(GetName(row));
             }
         }

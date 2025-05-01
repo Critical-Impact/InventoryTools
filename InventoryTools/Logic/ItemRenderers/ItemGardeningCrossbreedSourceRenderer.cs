@@ -5,18 +5,26 @@ using System.Numerics;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using CriticalCommonLib.Models;
+using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 
 namespace InventoryTools.Logic.ItemRenderers;
 
 public class ItemGardeningCrossbreedSourceRenderer : ItemInfoRenderer<ItemGardeningCrossbreedSource>
 {
+    private readonly ITextureProvider _textureProvider;
     public override RendererType RendererType => RendererType.Source;
     public override ItemInfoType Type => ItemInfoType.GardeningCrossbreed;
     public override string SingularName => "Gardening Crossbreed";
     public override string HelpText => "Is this item created by crossbreeding 2 seeds?";
     public override bool ShouldGroup => true;
+
+    public ItemGardeningCrossbreedSourceRenderer(ITextureProvider textureProvider)
+    {
+        _textureProvider = textureProvider;
+    }
 
     public override Action<ItemSource> DrawTooltip => source =>
     {
@@ -45,7 +53,15 @@ public class ItemGardeningCrossbreedSourceRenderer : ItemInfoRenderer<ItemGarden
                     ImGui.TableNextColumn();
                     foreach (var source in chunkedSource)
                     {
-                        ImGui.Text($"{source.Seed1.NameString} x {source.Seed2.NameString}");
+                        ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(source.Seed1.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
+                        ImGui.SameLine();
+                        ImGui.Text($"{source.Seed1.NameString}");
+                        ImGui.SameLine();
+                        ImGui.Text(" x ");
+                        ImGui.SameLine();
+                        ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(source.Seed2.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
+                        ImGui.SameLine();
+                        ImGui.Text($"{source.Seed2.NameString}");
                     }
                 }
             }
@@ -87,6 +103,10 @@ public class ItemGardeningCrossbreedSourceRenderer : ItemInfoRenderer<ItemGarden
 
 public class ItemGardeningCrossbreedSourceUseRenderer : ItemGardeningCrossbreedSourceRenderer
 {
+    public ItemGardeningCrossbreedSourceUseRenderer(ITextureProvider textureProvider) : base(textureProvider)
+    {
+    }
+
     public override RendererType RendererType => RendererType.Use;
     public override string SingularName => "Gardening Crossbreed Seed";
     public override string HelpText => "Is this item part of a crossbreed when gardening?";

@@ -17,7 +17,7 @@ namespace InventoryTools.Logic.Filters.Abstract
 
         public override bool? CurrentValue(FilterConfiguration configuration)
         {
-            return configuration.GetBooleanFilter(Key);
+            return configuration.GetBooleanFilter(Key) ?? DefaultValue;
         }
 
         public string CurrentSelection(FilterConfiguration configuration)

@@ -58,7 +58,7 @@ public static class ImGuiUtil
         var columnWidth = ImGui.GetColumnWidth();
         var frameHeight = cellHeight / 2.0f;
         var calcText = ImGui.CalcTextSize(text);
-        var textHeight = calcText.X >= columnWidth ? 0 : calcText.Y / 2.0f;
+        var textHeight = autoWrap && calcText.X >= columnWidth ? 0 : calcText.Y / 2.0f;
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + frameHeight - textHeight);
         if (xOffset != null)
         {
@@ -107,7 +107,6 @@ public static class ImGuiUtil
     {
         var frameHeight = cellHeight / 2.0f;
         var textHeight = (ImGui.GetFontSize() * 1 + ImGui.GetStyle().FramePadding.Y * 2) / 2.0f;
-        ImGui.AlignTextToFramePadding();
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + frameHeight - textHeight);
     }
 

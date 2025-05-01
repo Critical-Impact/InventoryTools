@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
+using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Mediator;
 using InventoryTools.Ui;
@@ -14,6 +17,7 @@ namespace InventoryTools.Logic.ItemRenderers;
 
 public class ItemCompanyCraftRequirementSourceRenderer : ItemInfoRenderer<ItemCompanyCraftRequirementSource>
 {
+    private readonly ITextureProvider _textureProvider;
     public override RendererType RendererType => RendererType.Use;
     public override ItemInfoType Type => ItemInfoType.FreeCompanyCraftRecipe;
     public override string SingularName => "Company Craft Ingredient";
@@ -21,12 +25,19 @@ public class ItemCompanyCraftRequirementSourceRenderer : ItemInfoRenderer<ItemCo
     public override string HelpText => "Is the item a material in a company craft recipe?";
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Crafting];
 
+    public ItemCompanyCraftRequirementSourceRenderer(ITextureProvider textureProvider)
+    {
+        _textureProvider = textureProvider;
+    }
+
     public override Action<ItemSource> DrawTooltip => source =>
     {
         var asSource = AsSource(source);
         ImGui.TextUnformatted($"Ingredient of Craft Recipe:");
         using (ImRaii.PushIndent())
         {
+            ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(asSource.Item.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(16,16));
+            ImGui.SameLine();
             ImGui.TextUnformatted(GetName(source));
         }
     };
@@ -40,6 +51,8 @@ public class ItemCompanyCraftRequirementSourceRenderer : ItemInfoRenderer<ItemCo
         {
             foreach (var row in asSource)
             {
+                ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(row.Item.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(16,16));
+                ImGui.SameLine();
                 ImGui.TextUnformatted(GetName(row));
             }
         }

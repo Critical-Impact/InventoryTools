@@ -30,7 +30,7 @@ public class FilterService : IFilterService
     private readonly GenericIntegerFilter.Factory _integerFilterFactory;
     private readonly ExcelSheet<BaseParam> _baseParamSheet;
     private readonly ItemSheet _itemSheet;
-    public readonly List<FilterCategory> FilterCategoryOrder = new() { FilterCategory.Settings, FilterCategory.Display, FilterCategory.Inventories, FilterCategory.Columns,FilterCategory.CraftColumns,  FilterCategory.Basic,   FilterCategory.Stats, FilterCategory.Sources, FilterCategory.SourceCategories, FilterCategory.Uses, FilterCategory.UseCategories, FilterCategory.IngredientSourcing,FilterCategory.ZonePreference,FilterCategory.WorldPricePreference, FilterCategory.Acquisition, FilterCategory.Searching, FilterCategory.Market, FilterCategory.Searching, FilterCategory.Crafting, FilterCategory.Gathering, FilterCategory.Advanced};
+    public readonly List<FilterCategory> FilterCategoryOrder = new() { FilterCategory.Settings, FilterCategory.Display, FilterCategory.Inventories, FilterCategory.Columns,FilterCategory.CraftColumns,  FilterCategory.Basic,   FilterCategory.Stats, FilterCategory.Sources, FilterCategory.SourceCategories, FilterCategory.Uses, FilterCategory.UseCategories, FilterCategory.IngredientSourcing,FilterCategory.ZonePreference,FilterCategory.WorldPricePreference, FilterCategory.Acquisition, FilterCategory.Searching, FilterCategory.Market, FilterCategory.Searching, FilterCategory.Crafting, FilterCategory.Gathering, FilterCategory.Advanced, FilterCategory.CompletionTracking};
     public FilterService(IEnumerable<IFilter> filters,
         GenericBooleanFilter.Factory booleanFilterFactory,
         GenericHasSourceFilter.Factory hasSourceFactory,

@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Models;
+using Dalamud.Interface.Textures;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using OtterGui.Raii;
 
@@ -13,10 +16,12 @@ namespace InventoryTools.Logic.ItemRenderers;
 public class ItemCompanyCraftResultSourceRenderer : ItemInfoRenderer<ItemCompanyCraftResultSource>
 {
     private readonly ItemSheet _itemSheet;
+    private readonly ITextureProvider _textureProvider;
 
-    public ItemCompanyCraftResultSourceRenderer(ItemSheet itemSheet)
+    public ItemCompanyCraftResultSourceRenderer(ItemSheet itemSheet, ITextureProvider textureProvider)
     {
         _itemSheet = itemSheet;
+        _textureProvider = textureProvider;
     }
 
     public override RendererType RendererType => RendererType.Source;
@@ -36,6 +41,8 @@ public class ItemCompanyCraftResultSourceRenderer : ItemInfoRenderer<ItemCompany
             foreach (var ingredient in asSource.CompanyCraftSequence.MaterialsRequired(null))
             {
                 var item = _itemSheet.GetRow(ingredient.ItemId);
+                ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(item.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
+                ImGui.SameLine();
                 ImGui.Text($"{item.NameString} x {ingredient.Quantity}");
             }
         }

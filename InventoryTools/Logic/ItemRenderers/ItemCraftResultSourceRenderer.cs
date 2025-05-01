@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
+using Dalamud.Interface.Textures;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using OtterGui.Raii;
 
@@ -16,11 +19,13 @@ public class ItemCraftResultSourceRenderer : ItemInfoRenderer<ItemCraftResultSou
 {
     private readonly ItemSheet _itemSheet;
     private readonly IGameInterface _gameInterface;
+    private readonly ITextureProvider _textureProvider;
 
-    public ItemCraftResultSourceRenderer(ItemSheet itemSheet, IGameInterface gameInterface)
+    public ItemCraftResultSourceRenderer(ItemSheet itemSheet, IGameInterface gameInterface, ITextureProvider textureProvider)
     {
         _itemSheet = itemSheet;
         _gameInterface = gameInterface;
+        _textureProvider = textureProvider;
     }
 
     public override RendererType RendererType => RendererType.Source;
@@ -55,6 +60,8 @@ public class ItemCraftResultSourceRenderer : ItemInfoRenderer<ItemCraftResultSou
             foreach (var ingredient in asSource.Recipe.IngredientCounts)
             {
                 var item = _itemSheet.GetRow(ingredient.Key);
+                ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(item.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
+                ImGui.SameLine();
                 ImGui.Text($"{item.NameString} x {ingredient.Value}");
             }
         }

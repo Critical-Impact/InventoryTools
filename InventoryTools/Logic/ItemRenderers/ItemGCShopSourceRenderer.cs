@@ -7,7 +7,9 @@ using AllaganLib.GameSheets.Extensions;
 using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Models;
+using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Services;
 using Lumina.Excel;
@@ -17,7 +19,7 @@ namespace InventoryTools.Logic.ItemRenderers;
 
 public class ItemGCShopUseRenderer : ItemGCShopSourceRenderer
 {
-    public ItemGCShopUseRenderer(MapSheet mapSheet, ExcelSheet<GCRankGridaniaMaleText> rankSheet) : base(mapSheet, rankSheet)
+    public ItemGCShopUseRenderer(MapSheet mapSheet, ExcelSheet<GCRankGridaniaMaleText> rankSheet, ITextureProvider textureProvider) : base(mapSheet, rankSheet, textureProvider)
     {
     }
 
@@ -62,11 +64,13 @@ public class ItemGCShopSourceRenderer : ItemInfoRenderer<ItemGCShopSource>
 {
     public MapSheet MapSheet { get; }
     private readonly ExcelSheet<GCRankGridaniaMaleText> _rankSheet;
+    private readonly ITextureProvider _textureProvider;
 
-    public ItemGCShopSourceRenderer(MapSheet mapSheet, ExcelSheet<GCRankGridaniaMaleText> rankSheet)
+    public ItemGCShopSourceRenderer(MapSheet mapSheet, ExcelSheet<GCRankGridaniaMaleText> rankSheet, ITextureProvider textureProvider)
     {
         MapSheet = mapSheet;
         _rankSheet = rankSheet;
+        _textureProvider = textureProvider;
     }
 
     public override RendererType RendererType => RendererType.Source;
@@ -84,7 +88,9 @@ public class ItemGCShopSourceRenderer : ItemInfoRenderer<ItemGCShopSource>
         var asSource = AsSource(source);
         var maps = asSource.MapIds?.Distinct().Select(c => MapSheet.GetRow(c).FormattedName).ToList() ?? new List<string>();
 
-        ImGui.Text($"Cost: {asSource.CostItem!.NameString} x {asSource.GCScripShopItem.Base.CostGCSeals}");
+        ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(asSource.CostItem!.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
+        ImGui.SameLine();
+        ImGui.Text($"Cost: {asSource.CostItem.NameString} x {asSource.GCScripShopItem.Base.CostGCSeals}");
         if (asSource.GCScripShopItem.Base.RequiredGrandCompanyRank.IsValid)
         {
             var genericRank = _rankSheet
