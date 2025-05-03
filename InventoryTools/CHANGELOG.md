@@ -8,7 +8,7 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
-## [12.0.4] - 2025-05-03
+## [12.0.5] - 2025-05-03
 
 ### Added
 - Changelog window added
@@ -32,6 +32,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.h
 - If there are no known locations of mobs, it'll display that instead of displaying nothing in the item window
 - Creating a new list will actually open the configuration window to the list correctly
 - Universalis requests will now contain a user agent matching the plugin's internal name and version
+
+## [12.0.4] - 2025-04-17
+
+### Added
+- Added ability to enable verbose logging
  
 ## [12.0.3] - 2025-04-14
 

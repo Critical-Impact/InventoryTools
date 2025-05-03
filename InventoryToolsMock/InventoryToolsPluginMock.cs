@@ -72,7 +72,7 @@ public class InventoryToolsPluginMock : InventoryToolsPlugin
             container.Register<UniversalisUserAgent>(c =>
             {
                 var pluginInterface = c.Resolve<IDalamudPluginInterface>();
-                return new UniversalisUserAgent(pluginInterface.InternalName, "1.12.0.4");
+                return new UniversalisUserAgent(pluginInterface.InternalName, "1.12.0.5");
             });
             container.RegisterInstance(seriLog).As<ILogger>().SingleInstance();
         });
