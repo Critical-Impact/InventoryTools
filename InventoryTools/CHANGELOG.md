@@ -8,15 +8,8 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
-## [Unreleased]
+## [12.0.4] - 2025-05-03
 
-### Added
-
-### Changed
-
-### Removed
-
-## [12.0.4] - 2025-04-14
 ### Added
 - Changelog window added
 - Acquiring items through Gathering/Crafting/Buying/Combat will now count towards craft completion for output items. These can be toggled per craft list in the 'Completion Tracking' section. 

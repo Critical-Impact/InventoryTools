@@ -165,8 +165,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <EmbeddedResource Include="CHANGELOG.md">
+      <Content Include="CHANGELOG.md">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </EmbeddedResource>
+      </Content>
     </ItemGroup>
 </Project>
