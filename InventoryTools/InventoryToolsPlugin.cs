@@ -388,6 +388,12 @@ namespace InventoryTools
                 builder.RegisterType<MarketOrderService>().AsImplementedInterfaces().SingleInstance();
                 builder.RegisterType<ContainerAwareCsvLoader>().SingleInstance();
                 builder.RegisterType<MarketCacheConfiguration>().SingleInstance();
+                builder.Register<UniversalisUserAgent>(c =>
+                {
+                    var pluginInterface = c.Resolve<IDalamudPluginInterface>();
+                    return new UniversalisUserAgent("AllaganTools",
+                        pluginInterface.Manifest.AssemblyVersion.ToString());
+                });
 
                 //Transient
                 builder.RegisterType<FilterState>();

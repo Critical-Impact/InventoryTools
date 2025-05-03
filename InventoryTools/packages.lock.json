@@ -40,15 +40,26 @@
       },
       "DalaMock.Host": {
         "type": "Direct",
-        "requested": "[2.2.4, )",
-        "resolved": "2.2.4",
-        "contentHash": "E/2AyEFzCyUO2jSc9L2hB0b93pM/D5okEVCPvz74xI2sMGWakJqzbjSvOVLoZPj4MjYRt3UN8tp7J90yqVbirg==",
+        "requested": "[2.2.5, )",
+        "resolved": "2.2.5",
+        "contentHash": "JLlr0fJDV5BfCSBwqinkjELoTY6Thd1ie+sAN31RK7otVpNlh8c0SkELHTdqLWtzOFXuecN2HLgnBVdw/1k1+w==",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "10.0.0",
           "DalaMock.Shared": "2.2.4",
           "Microsoft.Extensions.Hosting": "9.0.4",
           "Microsoft.Extensions.Hosting.Abstractions": "9.0.4",
           "Microsoft.Extensions.ObjectPool": "9.0.4"
+        }
+      },
+      "DalaMock.Shared": {
+        "type": "Direct",
+        "requested": "[2.2.6, )",
+        "resolved": "2.2.6",
+        "contentHash": "J1vYNSne1OWqumI/JCYqtftKu36cwgLjWRIWjW2hWDHD7geL+QbKc2e3GJnbCJDA0NQsMENMOdPceiI0MaWn+A==",
+        "dependencies": {
+          "Autofac": "8.2.1",
+          "Microsoft.Extensions.Hosting": "9.0.4",
+          "Microsoft.Extensions.Hosting.Abstractions": "9.0.4"
         }
       },
       "DalamudPackager": {
@@ -141,10 +152,22 @@
           "CsvHelper": "30.0.1"
         }
       },
+      "AllaganLib.GameSheets": {
+        "type": "Transitive",
+        "resolved": "1.2.8",
+        "contentHash": "WUWk07P0hkn0vY+twUhnmW1c3bY/sD/oiRShAVD4RNwL+z0/oDMFtpgyBA79p9PcRql1JtYh7X6jVAtb7ipS9Q==",
+        "dependencies": {
+          "AllaganLib.Shared": "1.2.8",
+          "Autofac": "8.2.1",
+          "Autofac.Extensions.DependencyInjection": "10.0.0",
+          "CSVFile": "3.2.0",
+          "LuminaSupplemental.Excel": "2.3.2"
+        }
+      },
       "AllaganLib.Shared": {
         "type": "Transitive",
-        "resolved": "1.2.7",
-        "contentHash": "8bCbe6j9ce/XbLlHCE701gNNeS+h1N2ORavhj/3v2wNxhuyolo5fQ45V+wewzBG/hh3VQJnT/Rn6Ea5lauheDw==",
+        "resolved": "1.2.8",
+        "contentHash": "P3c5gEINYmXnHv8N59e31B87omWxsTOB2wh38FaDOvkkGDw4L7OGynQoEK/WuF7N6pdoGbgOt8he0jok+p/o9A==",
         "dependencies": {
           "Microsoft.Extensions.Hosting": "9.0.4",
           "Microsoft.Extensions.Hosting.Abstractions": "9.0.4"
@@ -152,18 +175,8 @@
       },
       "CSVFile": {
         "type": "Transitive",
-        "resolved": "3.1.0",
-        "contentHash": "yz/FptkwDL0bxhaxoyrFPI5SyxUUfuZtbH1E2yLiHHFZFFrSXNnWJHfXSt5Anvy1gWpHCLpC520Bxy6G/Opp1g=="
-      },
-      "DalaMock.Shared": {
-        "type": "Transitive",
-        "resolved": "2.2.4",
-        "contentHash": "/1SlvsJXeV/SvxHQEYNkQKMTZlXSdhRgQPiSVtv5tnMcsTnBq6lGxed50jaKkwWt1UgEj2GDmNJ5HZeskVQTPw==",
-        "dependencies": {
-          "Autofac": "8.2.1",
-          "Microsoft.Extensions.Hosting": "9.0.4",
-          "Microsoft.Extensions.Hosting.Abstractions": "9.0.4"
-        }
+        "resolved": "3.2.0",
+        "contentHash": "sEVTg2rdBomJbh5bKCQqBtTgA0ojnkMab/hGwQ73UWy20n8jcJTLZ2dDKmnKPD0kTHMEeJK9TXpCgHn+RMcBYg=="
       },
       "FParsec": {
         "type": "Transitive",
@@ -182,6 +195,16 @@
         "type": "Transitive",
         "resolved": "2024.3.0",
         "contentHash": "ox5pkeLQXjvJdyAB4b2sBYAlqZGLh3PjSnP1bQNVx72ONuTJ9+34/+Rq91Fc0dG29XG9RgZur9+NcP4riihTug=="
+      },
+      "LuminaSupplemental.Excel": {
+        "type": "Transitive",
+        "resolved": "2.3.2",
+        "contentHash": "sGLnuc/fZbQn7FINSxAsvMhvXW0j3DIzMYLukFR+X3pwXuNYQWy2YBU8DoHvNnfcE07DLz8OyRlF/8yrY4rQ5Q==",
+        "dependencies": {
+          "CSVFile": "3.2.0",
+          "CsvHelper": "30.0.1",
+          "Sylvan.Data.Csv": "1.3.9"
+        }
       },
       "Microsoft.Extensions.Configuration": {
         "type": "Transitive",
@@ -447,6 +470,11 @@
         "resolved": "2.1.0",
         "contentHash": "Iu2aBSZ+WQPMjNAP9FzVum7IjkOZrq6Vqsn78c6IVi1Mpna4WKue2stmuVPqBB5aPcZciuHPPp343/fCY9ONMw=="
       },
+      "Sylvan.Data.Csv": {
+        "type": "Transitive",
+        "resolved": "1.3.9",
+        "contentHash": "ej6VghLaUn5/GK6jGFvd5aHn3Wue+Yp2tpmyI507PBRb/lFA6WAPS+3yKGr5wtFzh0zaE53CnCxhjc0ZW8xu3g=="
+      },
       "System.Diagnostics.DiagnosticSource": {
         "type": "Transitive",
         "resolved": "8.0.1",
@@ -470,6 +498,7 @@
       "criticalcommonlib": {
         "type": "Project",
         "dependencies": {
+          "AllaganLib.GameSheets": "[1.2.8, )",
           "Humanizer.Core": "[3.0.0-beta.54, )",
           "Microsoft.Extensions.Hosting": "[9.0.4, )",
           "NaturalSort.Extension": "[4.3.0, )",

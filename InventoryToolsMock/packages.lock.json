@@ -4,12 +4,12 @@
     "net9.0-windows7.0": {
       "DalaMock.Core": {
         "type": "Direct",
-        "requested": "[2.2.4, )",
-        "resolved": "2.2.4",
-        "contentHash": "/x4ehCXL+XRXBqPrwTuYj/iGRQ9RDKLCtQ4cufE7joyKL/6JBXxMHKlq6EBB99+wWTBHmTVMfDiZLY+2v+6N4w==",
+        "requested": "[2.2.6, )",
+        "resolved": "2.2.6",
+        "contentHash": "wrsMUKYPfE6Y8w9nNmpLrKarX5LWv2o7gJIxZlFwUhV9OaUIrHYg6ol3TlgaUo2L3ZoQFaselJtZoIvoYzS95Q==",
         "dependencies": {
           "Autofac": "8.2.1",
-          "DalaMock.Shared": "2.2.4",
+          "DalaMock.Shared": "2.2.6",
           "Microsoft.Extensions.Configuration": "9.0.4",
           "Microsoft.Extensions.DependencyModel": "9.0.4",
           "Microsoft.Extensions.Hosting": "9.0.4",
@@ -241,8 +241,8 @@
       },
       "DalaMock.Host": {
         "type": "Transitive",
-        "resolved": "2.2.4",
-        "contentHash": "E/2AyEFzCyUO2jSc9L2hB0b93pM/D5okEVCPvz74xI2sMGWakJqzbjSvOVLoZPj4MjYRt3UN8tp7J90yqVbirg==",
+        "resolved": "2.2.5",
+        "contentHash": "JLlr0fJDV5BfCSBwqinkjELoTY6Thd1ie+sAN31RK7otVpNlh8c0SkELHTdqLWtzOFXuecN2HLgnBVdw/1k1+w==",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "10.0.0",
           "DalaMock.Shared": "2.2.4",
@@ -253,8 +253,8 @@
       },
       "DalaMock.Shared": {
         "type": "Transitive",
-        "resolved": "2.2.4",
-        "contentHash": "/1SlvsJXeV/SvxHQEYNkQKMTZlXSdhRgQPiSVtv5tnMcsTnBq6lGxed50jaKkwWt1UgEj2GDmNJ5HZeskVQTPw==",
+        "resolved": "2.2.6",
+        "contentHash": "J1vYNSne1OWqumI/JCYqtftKu36cwgLjWRIWjW2hWDHD7geL+QbKc2e3GJnbCJDA0NQsMENMOdPceiI0MaWn+A==",
         "dependencies": {
           "Autofac": "8.2.1",
           "Microsoft.Extensions.Hosting": "9.0.4",
@@ -753,7 +753,8 @@
           "Autofac.Extensions.DependencyInjection": "[10.0.0, )",
           "CriticalCommonLib": "[1.0.0, )",
           "CsvHelper": "[33.0.1, )",
-          "DalaMock.Host": "[2.2.4, )",
+          "DalaMock.Host": "[2.2.5, )",
+          "DalaMock.Shared": "[2.2.6, )",
           "DalamudPackager": "[12.0.0, )",
           "Humanizer.Core": "[3.0.0-beta.54, )",
           "Ionide.KeepAChangelog": "[0.2.0, )",

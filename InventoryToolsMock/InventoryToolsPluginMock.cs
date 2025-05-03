@@ -4,6 +4,7 @@ using AllaganLib.Shared.Time;
 using Autofac;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Interfaces;
+using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
 
@@ -68,6 +69,11 @@ public class InventoryToolsPluginMock : InventoryToolsPlugin
             container.RegisterType<MockQuestManagerService>().AsImplementedInterfaces().SingleInstance();
             container.RegisterType<MockStartup>().AsImplementedInterfaces().SingleInstance();
             container.RegisterType<MockFileDialogManager>().AsImplementedInterfaces().SingleInstance();
+            container.Register<UniversalisUserAgent>(c =>
+            {
+                var pluginInterface = c.Resolve<IDalamudPluginInterface>();
+                return new UniversalisUserAgent(pluginInterface.InternalName, "1.12.0.4");
+            });
             container.RegisterInstance(seriLog).As<ILogger>().SingleInstance();
         });
     }

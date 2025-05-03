@@ -20,6 +20,7 @@ public abstract class MultiChoiceColumnSetting<T> : ColumnSetting<List<T>?>
     private string _filter = "";
     private bool _forceScroll = false;
     private int _selectedIdx = -1;
+    private bool _needsScrollFix = false;
 
     public MultiChoiceColumnSetting(ILogger logger, ImGuiService imGuiService)
     {
@@ -55,11 +56,19 @@ public abstract class MultiChoiceColumnSetting<T> : ColumnSetting<List<T>?>
         {
             if (combo.Success)
             {
-                if (ImGui.IsWindowAppearing())
+                var isWindowAppearing = ImGui.IsWindowAppearing();
+                if (isWindowAppearing)
                 {
                     ImGui.SetKeyboardFocusHere();
+                    _needsScrollFix = true;
                     _filter = "";
                     _selectedIdx = -1;
+                }
+
+                if (_needsScrollFix && ImGui.GetScrollY() > 0)
+                {
+                    ImGui.SetScrollY(0);
+                    _needsScrollFix = false;
                 }
 
                 ImGui.SetNextItemWidth(-1);
@@ -78,6 +87,7 @@ public abstract class MultiChoiceColumnSetting<T> : ColumnSetting<List<T>?>
                     }
                     ImGui.CloseCurrentPopup();
                 }
+
 
                 if (ImGui.IsItemActive())
                 {

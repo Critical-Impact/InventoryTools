@@ -38,9 +38,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.h
 - Squashed some imgui asserts
 - If there are no known locations of mobs, it'll display that instead of displaying nothing in the item window
 - Creating a new list will actually open the configuration window to the list correctly
+- Universalis requests will now contain a user agent matching the plugin's internal name and version
  
 ## [12.0.3] - 2025-04-14
--
 
 ### Added
 - Universalis button added to item window
