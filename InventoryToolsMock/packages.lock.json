@@ -183,8 +183,8 @@
       },
       "AllaganLib.GameSheets": {
         "type": "Transitive",
-        "resolved": "1.2.8",
-        "contentHash": "WUWk07P0hkn0vY+twUhnmW1c3bY/sD/oiRShAVD4RNwL+z0/oDMFtpgyBA79p9PcRql1JtYh7X6jVAtb7ipS9Q==",
+        "resolved": "1.2.10",
+        "contentHash": "y33HU5xo1Q9bUyT4BaFt5cDYPNCF5/rMfUzCCWaZ5DUf+vLWR1+qFHm235Gpmk+K3aRsMS6p23mZN9ZoAq6TIg==",
         "dependencies": {
           "AllaganLib.Shared": "1.2.8",
           "Autofac": "8.2.1",
@@ -737,7 +737,7 @@
       "criticalcommonlib": {
         "type": "Project",
         "dependencies": {
-          "AllaganLib.GameSheets": "[1.2.8, )",
+          "AllaganLib.GameSheets": "[1.2.10, )",
           "Humanizer.Core": "[3.0.0-beta.54, )",
           "Microsoft.Extensions.Hosting": "[9.0.4, )",
           "NaturalSort.Extension": "[4.3.0, )",

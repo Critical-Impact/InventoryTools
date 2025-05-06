@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
+using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
+using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using Humanizer;
 using ImGuiNET;
 using InventoryTools.Extensions;
@@ -16,7 +19,8 @@ namespace InventoryTools.Logic.ItemRenderers;
 public class ItemWoodlandExplorationVentureSourceRenderer : ItemVentureSourceRenderer<ItemWoodlandExplorationVentureSource>
 {
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.ExplorationVenture];
-    public ItemWoodlandExplorationVentureSourceRenderer() : base(ItemInfoType.BotanyExplorationVenture)
+    public ItemWoodlandExplorationVentureSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, ItemInfoType.BotanyExplorationVenture, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -26,7 +30,8 @@ public class ItemWoodlandExplorationVentureSourceRenderer : ItemVentureSourceRen
 public class ItemWatersideExplorationVentureSourceRenderer : ItemVentureSourceRenderer<ItemWatersideExplorationVentureSource>
 {
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.ExplorationVenture];
-    public ItemWatersideExplorationVentureSourceRenderer() : base(ItemInfoType.FishingExplorationVenture)
+    public ItemWatersideExplorationVentureSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, ItemInfoType.FishingExplorationVenture, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -36,7 +41,8 @@ public class ItemWatersideExplorationVentureSourceRenderer : ItemVentureSourceRe
 public class ItemHighlandExplorationVentureSourceRenderer : ItemVentureSourceRenderer<ItemHighlandExplorationVentureSource>
 {
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.ExplorationVenture];
-    public ItemHighlandExplorationVentureSourceRenderer() : base(ItemInfoType.MiningExplorationVenture)
+    public ItemHighlandExplorationVentureSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, ItemInfoType.MiningExplorationVenture, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -47,7 +53,8 @@ public class ItemHighlandExplorationVentureSourceRenderer : ItemVentureSourceRen
 public class ItemFieldExplorationVentureSourceRenderer : ItemVentureSourceRenderer<ItemFieldExplorationVentureSource>
 {
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.ExplorationVenture];
-    public ItemFieldExplorationVentureSourceRenderer() : base(ItemInfoType.CombatExplorationVenture)
+    public ItemFieldExplorationVentureSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, ItemInfoType.CombatExplorationVenture, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -58,7 +65,7 @@ public class ItemFieldExplorationVentureSourceRenderer : ItemVentureSourceRender
 public class ItemBotanistVentureSourceRenderer : ItemVentureSourceRenderer<ItemBotanistVentureSource>
 {
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Venture];
-    public ItemBotanistVentureSourceRenderer() : base(ItemInfoType.BotanyVenture)
+    public ItemBotanistVentureSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, ItemInfoType.BotanyVenture, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -68,7 +75,7 @@ public class ItemBotanistVentureSourceRenderer : ItemVentureSourceRenderer<ItemB
 public class ItemFishingVentureSourceRenderer : ItemVentureSourceRenderer<ItemFishingVentureSource>
 {
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Venture];
-    public ItemFishingVentureSourceRenderer() : base(ItemInfoType.FishingVenture)
+    public ItemFishingVentureSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, ItemInfoType.FishingVenture, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -78,7 +85,7 @@ public class ItemFishingVentureSourceRenderer : ItemVentureSourceRenderer<ItemFi
 public class ItemMiningVentureSourceRenderer : ItemVentureSourceRenderer<ItemMiningVentureSource>
 {
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Venture];
-    public ItemMiningVentureSourceRenderer() : base(ItemInfoType.MiningVenture)
+    public ItemMiningVentureSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, ItemInfoType.MiningVenture, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -89,7 +96,7 @@ public class ItemMiningVentureSourceRenderer : ItemVentureSourceRenderer<ItemMin
 public class ItemHuntingVentureSourceRenderer : ItemVentureSourceRenderer<ItemHuntingVentureSource>
 {
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Venture];
-    public ItemHuntingVentureSourceRenderer() : base(ItemInfoType.CombatVenture)
+    public ItemHuntingVentureSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, ItemInfoType.CombatVenture, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -101,7 +108,8 @@ public abstract class ItemVentureSourceRenderer<T> : ItemInfoRenderer<T> where T
 {
     private readonly ItemInfoType _itemInfoType;
 
-    public ItemVentureSourceRenderer(ItemInfoType itemInfoType)
+    public ItemVentureSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ItemInfoType itemInfoType,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(textureProvider, dalamudPluginInterface, itemSheet, mapSheet)
     {
         _itemInfoType = itemInfoType;
     }

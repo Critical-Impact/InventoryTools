@@ -7,6 +7,8 @@ using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
+using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Mediator;
 using InventoryTools.Ui;
@@ -21,8 +23,8 @@ public class ItemMonsterDropSourceRenderer : ItemInfoRenderer<ItemMonsterDropSou
     private readonly MapSheet _mapSheet;
     private readonly BNpcNameSheet _bnpcNameSheet;
 
-    public ItemMonsterDropSourceRenderer(TerritoryTypeSheet territoryTypeSheet, MapSheet mapSheet,
-        BNpcNameSheet bnpcNameSheet)
+    public ItemMonsterDropSourceRenderer(TerritoryTypeSheet territoryTypeSheet, ItemSheet itemSheet, MapSheet mapSheet,
+        BNpcNameSheet bnpcNameSheet, ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(textureProvider, dalamudPluginInterface, itemSheet, mapSheet)
     {
         _territoryTypeSheet = territoryTypeSheet;
         _mapSheet = mapSheet;
@@ -44,12 +46,19 @@ public class ItemMonsterDropSourceRenderer : ItemInfoRenderer<ItemMonsterDropSou
         ImGui.Text("Locations: ");
         using (ImRaii.PushIndent())
         {
-            foreach (var spawnPosition in asSource.BNpcName.MobSpawnPositions)
+            foreach (var groupedSpawns in asSource.BNpcName.MobSpawnPositions.GroupBy(c => c.TerritoryTypeId))
             {
-                var map = _territoryTypeSheet.GetRowOrDefault(spawnPosition.TerritoryType.RowId)?.Map;
+                var map = _territoryTypeSheet.GetRowOrDefault(groupedSpawns.Key)?.Map;
                 if (map != null)
                 {
-                    ImGui.Text($"{map.FormattedName} - {spawnPosition.Position.X} / {spawnPosition.Position.Y}");
+                    var spawns = string.Join(", ", groupedSpawns.Select(spawnPosition => $"{spawnPosition.Position.X}/{spawnPosition.Position.Y}"));
+                    ImGui.Text($"{map.FormattedName}");
+                    using (ImRaii.PushIndent())
+                    {
+                        ImGui.PushTextWrapPos();
+                        ImGui.TextUnformatted(spawns);
+                        ImGui.PopTextWrapPos();
+                    }
                 }
             }
         }
@@ -62,38 +71,6 @@ public class ItemMonsterDropSourceRenderer : ItemInfoRenderer<ItemMonsterDropSou
         return asSource.MobDrop.BNpcName.Value.Singular.ExtractText().ToTitleCase();
     };
 
-    public override Action<List<ItemSource>>? DrawTooltipGrouped => sources =>
-    {
-        var asSources = AsSource(sources);
-        Dictionary<uint, HashSet<MobSpawnPosition>> positionsGroupedByNpcId = new();
-        foreach (var asSource in asSources)
-        {
-            foreach (var position in asSource.BNpcName.MobSpawnPositions)
-            {
-                if (position.TerritoryType.IsValid && position.TerritoryType.ValueNullable?.Map.ValueNullable != null)
-                {
-                    positionsGroupedByNpcId.TryAdd(position.TerritoryType.Value.Map.RowId, new());
-                    positionsGroupedByNpcId[position.TerritoryType.Value.Map.RowId].Add(position);
-                }
-
-            }
-        }
-
-        foreach (var npcGroup in positionsGroupedByNpcId)
-        {
-            ImGui.Text("Map: " + _mapSheet.GetRow(npcGroup.Key).FormattedName);
-            ImGui.Text("Locations:");
-            using (ImRaii.PushIndent())
-            {
-                foreach (var mobSpawnPosition in npcGroup.Value)
-                {
-                    ImGui.Text(
-                        $"{mobSpawnPosition.BNpcName.Value.Singular.ExtractText().ToTitleCase()} - {mobSpawnPosition.Position.X} / {mobSpawnPosition.Position.Y}");
-                }
-            }
-        }
-
-    };
 
     public override Func<ItemSource, int> GetIcon => _ => Icons.MobIcon;
 

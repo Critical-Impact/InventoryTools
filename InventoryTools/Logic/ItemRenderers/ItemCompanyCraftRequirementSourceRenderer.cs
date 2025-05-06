@@ -4,10 +4,12 @@ using System.Linq;
 using System.Numerics;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
+using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Mediator;
@@ -25,7 +27,8 @@ public class ItemCompanyCraftRequirementSourceRenderer : ItemInfoRenderer<ItemCo
     public override string HelpText => "Is the item a material in a company craft recipe?";
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Crafting];
 
-    public ItemCompanyCraftRequirementSourceRenderer(ITextureProvider textureProvider)
+    public ItemCompanyCraftRequirementSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(textureProvider, dalamudPluginInterface, itemSheet, mapSheet)
     {
         _textureProvider = textureProvider;
     }

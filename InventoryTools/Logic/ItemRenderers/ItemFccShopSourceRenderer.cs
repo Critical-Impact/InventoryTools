@@ -8,6 +8,8 @@ using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Services;
 
@@ -17,7 +19,8 @@ public class ItemFccShopUseRenderer : ItemFccShopSourceRenderer
 {
     private readonly ItemSheet _itemSheet;
     public override string HelpText => "Can the item be spent at a free company shop?";
-    public ItemFccShopUseRenderer(MapSheet mapSheet, ItemSheet itemSheet) : base(mapSheet, itemSheet)
+    public ItemFccShopUseRenderer(MapSheet mapSheet, ItemSheet itemSheet, ITextureProvider textureProvider,
+        IDalamudPluginInterface dalamudPluginInterface) : base(mapSheet, itemSheet, textureProvider, dalamudPluginInterface)
     {
         _itemSheet = itemSheet;
     }
@@ -40,17 +43,7 @@ public class ItemFccShopUseRenderer : ItemFccShopSourceRenderer
             }
         }
 
-        if (maps.Count != 0)
-        {
-            ImGui.Text("Maps:");
-            using (ImRaii.PushIndent())
-            {
-                foreach (var map in maps)
-                {
-                    ImGui.Text(map);
-                }
-            }
-        }
+        DrawMaps(sources);
     };
 
     public override RendererType RendererType => RendererType.Use;
@@ -61,7 +54,8 @@ public class ItemFccShopSourceRenderer : ItemInfoRenderer<ItemFccShopSource>
     public MapSheet MapSheet { get; }
     private readonly ItemSheet _itemSheet;
 
-    public ItemFccShopSourceRenderer(MapSheet mapSheet, ItemSheet itemSheet)
+    public ItemFccShopSourceRenderer(MapSheet mapSheet, ItemSheet itemSheet, ITextureProvider textureProvider,
+        IDalamudPluginInterface dalamudPluginInterface) : base(textureProvider, dalamudPluginInterface, itemSheet, mapSheet)
     {
         MapSheet = mapSheet;
         _itemSheet = itemSheet;
@@ -80,49 +74,25 @@ public class ItemFccShopSourceRenderer : ItemInfoRenderer<ItemFccShopSource>
     public override Action<List<ItemSource>>? DrawTooltipGrouped => sources =>
     {
         var asSources = AsSource(sources);
-        var maps = asSources.SelectMany(shopSource => shopSource.MapIds == null || shopSource.MapIds.Count == 0
-            ? new List<string>()
-            : shopSource.MapIds.Select(c => MapSheet.GetRow(c).FormattedName)).Distinct().ToList();
 
         using (ImRaii.PushIndent())
         {
             ImGui.Text($"Cost: Company Credit x {asSources.First().FccShopListing.Cost.Count}");
         }
 
-        if (maps.Count != 0)
-        {
-            ImGui.Text("Maps:");
-            using (ImRaii.PushIndent())
-            {
-                foreach (var map in maps)
-                {
-                    ImGui.Text(map);
-                }
-            }
-        }
+        DrawMaps(sources);
     };
 
     public override Action<ItemSource> DrawTooltip => source =>
     {
         var asSource = AsSource(source);
-        var maps = asSource.MapIds?.Distinct().Select(c => MapSheet.GetRow(c).FormattedName).ToList() ?? new List<string>();
 
         using (ImRaii.PushIndent())
         {
             ImGui.Text($"Cost: Company Credit x {asSource.FccShopListing.Cost.Count}");
         }
 
-        if (maps.Count != 0)
-        {
-            ImGui.Text("Maps:");
-            using (ImRaii.PushIndent())
-            {
-                foreach (var map in maps)
-                {
-                    ImGui.Text(map);
-                }
-            }
-        }
+        DrawMaps(source);
     };
 
     public override Func<ItemSource, string> GetName => source =>

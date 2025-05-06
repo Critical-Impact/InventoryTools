@@ -9,6 +9,7 @@ using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Services;
@@ -21,7 +22,8 @@ public class ItemGilShopUseRenderer : ItemGilShopSourceRenderer
     private readonly ItemSheet _itemSheet;
     public override string HelpText => "Can the item be spent at a gil shop?";
 
-    public ItemGilShopUseRenderer(MapSheet mapSheet, ItemSheet itemSheet, ITextureProvider textureProvider) : base(mapSheet, itemSheet, textureProvider)
+    public ItemGilShopUseRenderer(MapSheet mapSheet, ItemSheet itemSheet, ITextureProvider textureProvider,
+        IDalamudPluginInterface dalamudPluginInterface) : base(mapSheet, itemSheet, textureProvider, dalamudPluginInterface)
     {
         _mapSheet = mapSheet;
         _itemSheet = itemSheet;
@@ -47,7 +49,8 @@ public class ItemGilShopSourceRenderer : ItemInfoRenderer<ItemGilShopSource>
     private readonly ItemSheet _itemSheet;
     private readonly ITextureProvider _textureProvider;
 
-    public ItemGilShopSourceRenderer(MapSheet mapSheet, ItemSheet itemSheet, ITextureProvider textureProvider)
+    public ItemGilShopSourceRenderer(MapSheet mapSheet, ItemSheet itemSheet, ITextureProvider textureProvider,
+        IDalamudPluginInterface dalamudPluginInterface) : base(textureProvider, dalamudPluginInterface, itemSheet, mapSheet)
     {
         _mapSheet = mapSheet;
         _itemSheet = itemSheet;
@@ -67,11 +70,7 @@ public class ItemGilShopSourceRenderer : ItemInfoRenderer<ItemGilShopSource>
     public override Action<List<ItemSource>>? DrawTooltipGrouped => sources =>
     {
         var asSources = AsSource(sources);
-        var firstItem = asSources.First();
-        var allGilShops = asSources.Cast<ItemGilShopSource>().ToList();
-        var maps = allGilShops.SelectMany(shopSource => shopSource.MapIds == null || shopSource.MapIds.Count == 0
-            ? new List<string>()
-            : shopSource.MapIds.Select(c => _mapSheet.GetRow(c).FormattedName)).Distinct().ToList();
+        var firstItem = asSources[0];
 
         ImGui.Text("Costs:");
 
@@ -100,17 +99,7 @@ public class ItemGilShopSourceRenderer : ItemInfoRenderer<ItemGilShopSource>
             }
         }
 
-        if (maps.Count != 0)
-        {
-            ImGui.Text("Maps:");
-            using (ImRaii.PushIndent())
-            {
-                foreach (var map in maps)
-                {
-                    ImGui.Text(map);
-                }
-            }
-        }
+        DrawMaps(sources);
     };
 
     public override Action<ItemSource> DrawTooltip => source =>
@@ -145,17 +134,7 @@ public class ItemGilShopSourceRenderer : ItemInfoRenderer<ItemGilShopSource>
             }
         }
 
-        if (maps.Count != 0)
-        {
-            ImGui.Text("Maps:");
-            using (ImRaii.PushIndent())
-            {
-                foreach (var map in maps)
-                {
-                    ImGui.Text(map);
-                }
-            }
-        }
+        DrawMaps(source);
     };
 
     public override Func<ItemSource, string> GetName => source =>

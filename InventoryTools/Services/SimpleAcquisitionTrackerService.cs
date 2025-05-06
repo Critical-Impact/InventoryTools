@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CriticalCommonLib.Services;
+using CriticalCommonLib.Services.Ui;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -16,6 +17,7 @@ public enum AcquisitionReason
     Gathering,
     Shopping,
     CombatDrop,
+    Marketboard,
     Other
 }
 
@@ -26,6 +28,7 @@ public class SimpleAcquisitionTrackerService : IHostedService
     private readonly IClientState _clientState;
     private readonly ICondition _condition;
     private readonly ShopTrackerService _shopTrackerService;
+    private readonly IGameUiManager _gameUiManager;
     private InventoryItem[]? _bags1 = null;
     private InventoryItem[]? _bags2 = null;
     private InventoryItem[]? _bags3 = null;
@@ -37,12 +40,13 @@ public class SimpleAcquisitionTrackerService : IHostedService
 
     public event ItemAcquiredDelegate? ItemAcquired;
 
-    public SimpleAcquisitionTrackerService(IInventoryScanner inventoryScanner, IClientState clientState, ICondition condition, ShopTrackerService shopTrackerService)
+    public SimpleAcquisitionTrackerService(IInventoryScanner inventoryScanner, IClientState clientState, ICondition condition, ShopTrackerService shopTrackerService, IGameUiManager gameUiManager)
     {
         _inventoryScanner = inventoryScanner;
         _clientState = clientState;
         _condition = condition;
         _shopTrackerService = shopTrackerService;
+        _gameUiManager = gameUiManager;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
@@ -166,6 +170,10 @@ public class SimpleAcquisitionTrackerService : IHostedService
                 else if (_condition[ConditionFlag.InCombat])
                 {
                     acquisitionReason = AcquisitionReason.CombatDrop;
+                }
+                else if (_gameUiManager.IsWindowVisible(WindowName.ItemSearch))
+                {
+                    acquisitionReason = AcquisitionReason.Marketboard;
                 }
 
                 if (qtyIncrease != 0)

@@ -15,14 +15,14 @@ using InventoryTools.Extensions;
 
 namespace InventoryTools.Logic.ItemRenderers;
 
-public class ItemCraftLeveSourceRenderer : ItemInfoRenderer<ItemCraftLeveSource>
+public class ItemBattleLeveSourceRenderer : ItemInfoRenderer<ItemBattleLeveSource>
 {
     private readonly ITextureProvider _textureProvider;
     private readonly ItemSheet _itemSheet;
     private readonly MapSheet _mapSheet;
     private readonly IDalamudPluginInterface _pluginInterface;
 
-    public ItemCraftLeveSourceRenderer(ITextureProvider textureProvider, ItemSheet itemSheet, MapSheet mapSheet, IDalamudPluginInterface pluginInterface) : base(textureProvider, pluginInterface, itemSheet, mapSheet)
+    public ItemBattleLeveSourceRenderer(ITextureProvider textureProvider, ItemSheet itemSheet, MapSheet mapSheet, IDalamudPluginInterface pluginInterface) : base(textureProvider, pluginInterface, itemSheet, mapSheet)
     {
         _textureProvider = textureProvider;
         _itemSheet = itemSheet;
@@ -31,17 +31,16 @@ public class ItemCraftLeveSourceRenderer : ItemInfoRenderer<ItemCraftLeveSource>
     }
 
     public override RendererType RendererType => RendererType.Source;
-    public override ItemInfoType Type => ItemInfoType.CraftLeve;
-    public override string SingularName => "Craft Leve";
-    public override string PluralName => "Craft Leves";
-    public override string HelpText => "Is this item obtained from a craft leve?";
+    public override ItemInfoType Type => ItemInfoType.BattleLeve;
+    public override string SingularName => "Battle Leve";
+    public override string PluralName => "Battle Leves";
+    public override string HelpText => "Is this item obtained from a battle leve?";
     public override bool ShouldGroup => true;
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Leve];
     public override Action<ItemSource> DrawTooltip => source =>
     {
         var asSource = AsSource(source);
         var leveRow = asSource.Leve.Value;
-
         ImGui.TextUnformatted("Leve: " + leveRow.Name.ExtractText());
         ImGui.TextUnformatted("Class: " + leveRow.ClassJobCategory.Value.Name.ExtractText());
         ImGui.TextUnformatted("EXP Reward: " + asSource.ExpReward);
@@ -60,8 +59,7 @@ public class ItemCraftLeveSourceRenderer : ItemInfoRenderer<ItemCraftLeveSource>
         }
 
         DrawItems("Possible Reward Items: ", rewardItems);
-
-        DrawMaps(source);
+        DrawMaps(asSource);
     };
 
     public override Func<ItemSource, string> GetName => source =>

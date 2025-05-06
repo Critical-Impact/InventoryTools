@@ -8,6 +8,18 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [12.0.6] - 2025-05-06
+
+### Added
+- Added sources/uses for Battle/Gathering/Crafting/Company leves
+- Added sources for Triple Triad Cards
+- The acquisition tracker now supports Market Board purchases and craft lists have a setting to toggle tracking these purchases
+
+### Fixed
+- Changes to the way grouped sources are displayed
+- Fixed potential crash in the new acquisition tracker
+- Improvements to the way certain sources are drawn
+
 ## [12.0.5] - 2025-05-03
 
 ### Added

@@ -54,6 +54,7 @@ namespace InventoryTools
         private readonly CraftTrackerTrackShoppingFilter _trackShoppingFilter;
         private readonly CraftTrackerTrackCombatDropFilter _trackCombatDropFilter;
         private readonly CraftTrackerTrackOtherFilter _trackOtherFilter;
+        private readonly CraftTrackerTrackMarketBoardFilter _trackMarketBoardFilter;
         private readonly UseOldCraftTrackerSetting _useOldCraftTrackerSetting;
         private readonly Func<Type, IFilter> _filterFactory;
         private readonly IMarketCache _marketCache;
@@ -91,7 +92,8 @@ namespace InventoryTools
             BuyFromVendorPriceFilter buyFromVendorPriceFilter, SimpleAcquisitionTrackerService acquisitionTrackerService,
             CraftTrackerTrackCraftsFilter trackCraftsFilter, CraftTrackerTrackGatheringFilter trackGatheringFilter,
             CraftTrackerTrackShoppingFilter trackShoppingFilter, CraftTrackerTrackCombatDropFilter trackCombatDropFilter,
-            CraftTrackerTrackOtherFilter trackOtherFilter, UseOldCraftTrackerSetting useOldCraftTrackerSetting) : base(logger, mediatorService)
+            CraftTrackerTrackOtherFilter trackOtherFilter, UseOldCraftTrackerSetting useOldCraftTrackerSetting,
+            CraftTrackerTrackMarketBoardFilter trackMarketBoardFilter) : base(logger, mediatorService)
         {
             _configurationManagerService = configurationManagerService;
             _chatUtilities = chatUtilities;
@@ -120,6 +122,7 @@ namespace InventoryTools
             _trackCombatDropFilter = trackCombatDropFilter;
             _trackOtherFilter = trackOtherFilter;
             _useOldCraftTrackerSetting = useOldCraftTrackerSetting;
+            _trackMarketBoardFilter = trackMarketBoardFilter;
             _filterFactory = filterFactory;
             _marketCache = marketCache;
             this.MediatorService.Subscribe<PluginLoadedMessage>(this, PluginLoaded);
@@ -520,14 +523,15 @@ namespace InventoryTools
                     (reason == AcquisitionReason.Gathering && _trackGatheringFilter.CurrentValue(activeCraftList) == false) ||
                     (reason == AcquisitionReason.Shopping && _trackShoppingFilter.CurrentValue(activeCraftList) == false) ||
                     (reason == AcquisitionReason.CombatDrop && _trackCombatDropFilter.CurrentValue(activeCraftList) == false) ||
-                    (reason == AcquisitionReason.Other && _trackOtherFilter.CurrentValue(activeCraftList) == false)
+                    (reason == AcquisitionReason.Other && _trackOtherFilter.CurrentValue(activeCraftList) == false) ||
+                    (reason == AcquisitionReason.Marketboard && _trackMarketBoardFilter.CurrentValue(activeCraftList) == false)
                     )
                 {
                     _logger.LogTrace("Craft list configured to not track {Reason}, not altering required item counts.", reason);
                     return;
                 }
                 var flags = item.Flags;
-                _logger.LogTrace("Marking {Quantity} qty for item {ItemId} ({HqFlag}) as crafted.", qtyIncrease, item.ItemId, !item.IsHighQuality() ? "NQ" : "HQ");
+                _logger.LogTrace("Marking {Quantity} qty for item {ItemId} ({HqFlag}) as crafted.", qtyIncrease, item.ItemId, item.Flags == InventoryItem.ItemFlags.None ? "NQ" : "HQ");
                 activeCraftList.CraftList.MarkCrafted(item.ItemId, flags, (uint)qtyIncrease);
                 if (activeCraftList is { IsEphemeralCraftList: true, CraftList.IsCompleted: true })
                 {

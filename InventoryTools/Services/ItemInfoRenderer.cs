@@ -8,6 +8,9 @@ using AllaganLib.Shared.Extensions;
 using AllaganLib.Shared.Time;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
+using DalaMock.Shared.Interfaces;
+using Dalamud.Game.ClientState.Keys;
+using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
@@ -27,7 +30,7 @@ using Lumina.Data;
 
 namespace InventoryTools.Services;
 
-public class ItemInfoRenderService
+public class ItemInfoRenderService : IDisposable
 {
     private readonly SourceIconGroupingSetting _sourceIconGroupingSetting;
     private readonly UseIconGroupingSetting _useIconGroupingSetting;
@@ -36,6 +39,9 @@ public class ItemInfoRenderService
     private readonly InventoryToolsConfiguration _configuration;
     private readonly IClipboardService _clipboardService;
     private readonly ImGuiTooltipService _tooltipService;
+    private readonly IFont _font;
+    private readonly IKeyState _keyState;
+    private readonly IFramework _framework;
     private readonly Dictionary<Type,IItemInfoRenderer> _sourceRenderers;
     private readonly Dictionary<Type,IItemInfoRenderer> _useRenderers;
     private readonly Dictionary<ItemInfoType,IItemInfoRenderer> _sourceRenderersByItemInfoType;
@@ -44,7 +50,7 @@ public class ItemInfoRenderService
     public ItemInfoRenderService(IEnumerable<IItemInfoRenderer> itemRenderers,
         SourceIconGroupingSetting sourceIconGroupingSetting, UseIconGroupingSetting useIconGroupingSetting,
         ImGuiService imGuiService, IPluginLog pluginLog, InventoryToolsConfiguration configuration,
-        IClipboardService clipboardService, ImGuiTooltipService tooltipService)
+        IClipboardService clipboardService, ImGuiTooltipService tooltipService, IFont font, IKeyState keyState, IFramework framework)
     {
         _sourceIconGroupingSetting = sourceIconGroupingSetting;
         _useIconGroupingSetting = useIconGroupingSetting;
@@ -53,11 +59,16 @@ public class ItemInfoRenderService
         _configuration = configuration;
         _clipboardService = clipboardService;
         _tooltipService = tooltipService;
+        _font = font;
+        _keyState = keyState;
+        _framework = framework;
         var itemInfoRenderers = itemRenderers.ToList();
         _sourceRenderers = itemInfoRenderers.Where(c => c.RendererType == RendererType.Source).ToDictionary(c => c.ItemSourceType, c => c);
         _useRenderers = itemInfoRenderers.Where(c => c.RendererType == RendererType.Use).ToDictionary(c => c.ItemSourceType, c => c);
         _sourceRenderersByItemInfoType = itemInfoRenderers.Where(c => c.RendererType == RendererType.Source).ToDictionary(c => c.Type, c => c);
         _useRenderersByItemInfoType = itemInfoRenderers.Where(c => c.RendererType == RendererType.Use).ToDictionary(c => c.Type, c => c);
+
+        _framework.Update += CheckKeys;
 
         #if DEBUG
         foreach (var itemType in Enum.GetValues<ItemInfoType>())
@@ -68,6 +79,27 @@ public class ItemInfoRenderService
             }
         }
         #endif
+    }
+
+    private bool _scrollLeft;
+    private bool _scrollRight;
+    private bool _inTooltip;
+
+    private void CheckKeys(IFramework framework)
+    {
+        if (_inTooltip)
+        {
+            if (_keyState[VirtualKey.LEFT])
+            {
+                _keyState[VirtualKey.LEFT] = false;
+                _scrollLeft = true;
+            }
+            if (_keyState[VirtualKey.RIGHT])
+            {
+                _keyState[VirtualKey.RIGHT] = false;
+                _scrollRight = true;
+            }
+        }
     }
 
     public Dictionary<Type,IItemInfoRenderer> SourceRenderers => _sourceRenderers;
@@ -343,6 +375,8 @@ public class ItemInfoRenderService
         return groupedItems;
     }
 
+    private int _itemTooltipIndex;
+
     private List<MessageBase> DrawItemSource(RendererType rendererType, string id, List<ItemSource> itemSources, Vector2 iconSize)
     {
         using var pushId = ImRaii.PushId(id);
@@ -408,7 +442,7 @@ public class ItemInfoRenderService
                     ImGui.Separator();
                     foreach (var item in items)
                     {
-                        this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16), true);
+                        this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16));
                         if (ImGui.IsItemHovered())
                         {
                             this._tooltipService.DrawItemTooltip(new SearchResult(item));
@@ -428,7 +462,7 @@ public class ItemInfoRenderService
                         ImGui.Separator();
                         foreach (var item in costItems)
                         {
-                            this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16), true);
+                            this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16));
                             if (ImGui.IsItemHovered())
                             {
                                 this._tooltipService.DrawItemTooltip(new SearchResult(item));
@@ -450,7 +484,7 @@ public class ItemInfoRenderService
                         ImGui.Separator();
                         foreach (var item in costItems)
                         {
-                            this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16), true);
+                            this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16));
                             if (ImGui.IsItemHovered())
                             {
                                 this._tooltipService.DrawItemTooltip(new SearchResult(item));
@@ -471,7 +505,7 @@ public class ItemInfoRenderService
                         ImGui.Separator();
                         foreach (var item in items)
                         {
-                            this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16), true);
+                            this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16));
                             if (ImGui.IsItemHovered())
                             {
                                 this._tooltipService.DrawItemTooltip(new SearchResult(item));
@@ -516,8 +550,18 @@ public class ItemInfoRenderService
             }
         }
 
+        if (!ImGui.IsAnyItemHovered())
+        {
+            _inTooltip = false;
+            _scrollLeft = false;
+            _scrollRight = false;
+            _itemTooltipIndex = 0;
+        }
+
         if ((hasTooltip || hasGroupedTooltip) && ImGui.IsItemHovered())
         {
+            _inTooltip = true;
+            ImGui.SetNextWindowSizeConstraints( new System.Numerics.Vector2(250, -1), new System.Numerics.Vector2(1000,1000));
             using var tt = ImRaii.Tooltip();
             if (tt.Success)
             {
@@ -533,46 +577,71 @@ public class ItemInfoRenderService
                     else
                     {
 
-                        byte itemsPerRow = sourceRenderer?.MaxColumns ?? 3;
-                        float childWidth = sourceRenderer?.TooltipChildWidth ?? 250;
-                        float childHeight = sourceRenderer?.TooltipChildHeight ?? 150;
+                        int totalSources = itemSources.Count;
 
-                        if (itemsPerRow == 1)
+                        if (totalSources > 0)
                         {
-                            for (var index = 0; index < itemSources.Count; index++)
-                            {
-                                var source = itemSources[index];
+                            var currentIndex = _itemTooltipIndex;
 
-                                sourceRenderer?.DrawTooltip.Invoke(source);
-                                if (index != itemSources.Count - 1)
-                                {
-                                    ImGui.Separator();
-                                }
+                            if (currentIndex < 0 || currentIndex >= itemSources.Count)
+                            {
+                                currentIndex = 0;
+                            }
+
+                            var source = itemSources[currentIndex];
+                            sourceRenderer?.DrawTooltip.Invoke(source);
+
+                            ImGui.Spacing();
+                            ImGui.Separator();
+                            ImGui.Spacing();
+
+                            float windowWidth = ImGui.GetContentRegionAvail().X;
+                            string leftText = FontAwesomeIcon.ArrowLeft.ToIconString();
+                            string centerText = $"Source {currentIndex + 1} of {totalSources}";
+                            string rightText =  FontAwesomeIcon.ArrowRight.ToIconString();
+                            string keyboardIcon = FontAwesomeIcon.Keyboard.ToIconString();
+
+                            float centerWidth = ImGui.CalcTextSize(centerText).X;
+
+
+                            using (ImRaii.PushFont(_font.IconFont))
+                            {
+                                ImGui.TextUnformatted(leftText);
+                                ImGui.SameLine();
+                                ImGui.TextUnformatted(keyboardIcon);
+                            }
+
+                            ImGui.SameLine();
+
+                            ImGui.SetCursorPosX((windowWidth - centerWidth) * 0.5f);
+                            ImGui.TextUnformatted(centerText);
+
+
+                            ImGui.SameLine();
+
+                            using (ImRaii.PushFont(_font.IconFont))
+                            {
+                                float rightWidth = ImGui.CalcTextSize(rightText).X;
+                                float keyboardIconWidth = ImGui.CalcTextSize(keyboardIcon).X;
+                                ImGui.SetCursorPosX(windowWidth - rightWidth - keyboardIconWidth);
+                                ImGui.TextUnformatted(keyboardIcon);
+                                ImGui.SameLine();
+                                ImGui.TextUnformatted(rightText);
+                            }
+
+                            if (_scrollLeft)
+                            {
+                                currentIndex = (currentIndex - 1 + totalSources) % totalSources;
+                                _itemTooltipIndex = currentIndex;
+                                _scrollLeft = false;
+                            }
+                            if (_scrollRight)
+                            {
+                                currentIndex = (currentIndex + 1) % totalSources;
+                                _itemTooltipIndex = currentIndex;
+                                _scrollRight = false;
                             }
                         }
-                        else
-                        {
-
-                            for (var index = 0; index < itemSources.Count; index++)
-                            {
-                                var source = itemSources[index];
-
-                                using (var child = ImRaii.Child($"Tooltip_{index}", new(childWidth, childHeight), false,
-                                           ImGuiWindowFlags.NoScrollbar))
-                                {
-                                    if (child.Success)
-                                    {
-                                        sourceRenderer?.DrawTooltip.Invoke(source);
-                                    }
-                                }
-
-                                if ((index + 1) % itemsPerRow != 0)
-                                {
-                                    ImGui.SameLine();
-                                }
-                            }
-                        }
-
                     }
                 }
                 else
@@ -587,6 +656,7 @@ public class ItemInfoRenderService
         }
         else if(ImGui.IsItemHovered())
         {
+            _inTooltip = true;
             using var tt = ImRaii.Tooltip();
             if (tt.Success)
             {
@@ -627,11 +697,11 @@ public class ItemInfoRenderService
                     {
                         if (rendererType == RendererType.Source)
                         {
-                            ImGui.Text("Item");
+                            ImGui.Text(items.Count == 1 ? "Item" : "Items");
                             ImGui.Separator();
                             foreach (var item in items)
                             {
-                                this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16), true);
+                                this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16));
                                 if (ImGui.IsItemHovered())
                                 {
                                     this._tooltipService.DrawItemTooltip(new SearchResult(item));
@@ -648,11 +718,11 @@ public class ItemInfoRenderService
                             if (costItems.Count > 0)
                             {
                                 ImGui.NewLine();
-                                ImGui.Text("Related Items:");
+                                ImGui.Text("Related Items");
                                 ImGui.Separator();
                                 foreach (var item in costItems)
                                 {
-                                    this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16), true);
+                                    this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16));
                                     if (ImGui.IsItemHovered())
                                     {
                                         this._tooltipService.DrawItemTooltip(new SearchResult(item));
@@ -675,7 +745,7 @@ public class ItemInfoRenderService
                                 ImGui.Separator();
                                 foreach (var item in costItems)
                                 {
-                                    this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16), true);
+                                    this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16));
                                     if (ImGui.IsItemHovered())
                                     {
                                         this._tooltipService.DrawItemTooltip(new SearchResult(item));
@@ -701,7 +771,7 @@ public class ItemInfoRenderService
                                 ImGui.Separator();
                                 foreach (var item in items)
                                 {
-                                    this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16), true);
+                                    this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16));
                                     if (ImGui.IsItemHovered())
                                     {
                                         this._tooltipService.DrawItemTooltip(new SearchResult(item));
@@ -828,5 +898,10 @@ public class ItemInfoRenderService
             });
 
         return messages;
+    }
+
+    public void Dispose()
+    {
+        _framework.Update -= CheckKeys;
     }
 }

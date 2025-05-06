@@ -8,6 +8,8 @@ using AllaganLib.Shared.Time;
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 
 namespace InventoryTools.Logic.ItemRenderers;
@@ -16,7 +18,8 @@ public class ItemFishingSourceRenderer : ItemInfoRenderer<ItemFishingSource>
 {
     private readonly MapSheet _mapSheet;
 
-    public ItemFishingSourceRenderer(MapSheet mapSheet)
+    public ItemFishingSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider,
+        IDalamudPluginInterface dalamudPluginInterface) : base(textureProvider, dalamudPluginInterface, itemSheet, mapSheet)
     {
         _mapSheet = mapSheet;
     }
@@ -32,46 +35,20 @@ public class ItemFishingSourceRenderer : ItemInfoRenderer<ItemFishingSource>
     {
         var asSources = AsSource(sources);
 
-        var maps = asSources.SelectMany(shopSource => shopSource.MapIds == null || shopSource.MapIds.Count == 0
-            ? new List<string>()
-            : shopSource.MapIds.Select(c => _mapSheet.GetRow(c).FormattedName)).Distinct().ToList();
-
         var level = asSources.First().FishParameter.Base.GatheringItemLevel.Value.GatheringItemLevel;
         ImGui.Text("Level:" + (level == 0 ? "N/A" : level));
 
-        if (maps.Count != 0)
-        {
-            ImGui.Text("Maps:");
-            using (ImRaii.PushIndent())
-            {
-                foreach (var map in maps)
-                {
-                    ImGui.Text(map);
-                }
-            }
-        }
+        DrawMaps(sources);
     };
 
     public override Action<ItemSource> DrawTooltip => source =>
     {
         var asSource = AsSource(source);
 
-        var maps = asSource.MapIds?.Select(c => _mapSheet.GetRow(c).FormattedName).Distinct().ToList() ?? [];
-
         var level = asSource.FishParameter.Base.GatheringItemLevel.Value.GatheringItemLevel;
         ImGui.Text("Level:" + (level == 0 ? "N/A" : level));
 
-        if (maps.Count != 0)
-        {
-            ImGui.Text("Maps:");
-            using (ImRaii.PushIndent())
-            {
-                foreach (var map in maps)
-                {
-                    ImGui.Text(map);
-                }
-            }
-        }
+        DrawMaps(source);
     };
 
     public override Func<ItemSource, string> GetName => source =>

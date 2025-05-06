@@ -3,13 +3,17 @@ using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Models;
+using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 
 namespace InventoryTools.Logic.ItemRenderers;
 
 public class ItemSkybuilderInspectionUseRenderer : ItemSkybuilderInspectionSourceRenderer
 {
-    public ItemSkybuilderInspectionUseRenderer(GatheringItemSheet gatheringItemSheet) : base(gatheringItemSheet)
+    public ItemSkybuilderInspectionUseRenderer(ItemSheet itemSheet, MapSheet mapSheet,
+        GatheringItemSheet gatheringItemSheet, ITextureProvider textureProvider,
+        IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, gatheringItemSheet, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -27,7 +31,9 @@ public class ItemSkybuilderInspectionSourceRenderer : ItemInfoRenderer<ItemSkybu
 {
     private readonly GatheringItemSheet _gatheringItemSheet;
 
-    public ItemSkybuilderInspectionSourceRenderer(GatheringItemSheet gatheringItemSheet)
+    public ItemSkybuilderInspectionSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet,
+        GatheringItemSheet gatheringItemSheet, ITextureProvider textureProvider,
+        IDalamudPluginInterface dalamudPluginInterface) : base(textureProvider, dalamudPluginInterface, itemSheet, mapSheet)
     {
         _gatheringItemSheet = gatheringItemSheet;
     }

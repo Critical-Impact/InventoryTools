@@ -6,6 +6,7 @@ using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Textures;
+using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using OtterGui.Raii;
@@ -17,7 +18,8 @@ public class ItemCompanyCraftDraftSourceRenderer : ItemInfoRenderer<ItemCompanyC
     private readonly ItemSheet _itemSheet;
     private readonly ITextureProvider _textureProvider;
 
-    public ItemCompanyCraftDraftSourceRenderer(ItemSheet itemSheet, ITextureProvider textureProvider)
+    public ItemCompanyCraftDraftSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider,
+        IDalamudPluginInterface dalamudPluginInterface) : base(textureProvider, dalamudPluginInterface, itemSheet, mapSheet)
     {
         _itemSheet = itemSheet;
         _textureProvider = textureProvider;
@@ -31,23 +33,19 @@ public class ItemCompanyCraftDraftSourceRenderer : ItemInfoRenderer<ItemCompanyC
     {
         var asSource = AsSource(source);
         ImGui.Text($"Name: {asSource.CompanyCraftDraft.Value.Name.ExtractText()}");
-        ImGui.Text("Ingredients:");
-        using (ImRaii.PushIndent())
+
+        Span<ItemInfo> rewardItems = stackalloc ItemInfo[asSource.CompanyCraftDraft.Value.RequiredItem.Count];
+
+        for (var index = 0; index < asSource.CompanyCraftDraft.Value.RequiredItem.Count; index++)
         {
-            for (var index = 0; index < asSource.CompanyCraftDraft.Value.RequiredItem.Count; index++)
-            {
-                var ingredient = asSource.CompanyCraftDraft.Value.RequiredItem[index];
-                var quantity = asSource.CompanyCraftDraft.Value.RequiredItemCount[index];
-                if (ingredient.RowId == 0)
-                {
-                    continue;
-                }
-                var item = _itemSheet.GetRow(ingredient.RowId);
-                ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(item.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
-                ImGui.SameLine();
-                ImGui.Text($"{item.NameString} x {quantity}");
-            }
+            rewardItems[index] = new ItemInfo(
+                asSource.CompanyCraftDraft.Value.RequiredItem[index].RowId,
+                asSource.CompanyCraftDraft.Value.RequiredItemCount[index],
+                false
+            );
         }
+
+        DrawItems("Ingredients: ", rewardItems);
     };
 
     public override Func<ItemSource, string> GetName => source =>

@@ -2,14 +2,22 @@ using System;
 using System.Collections.Generic;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
+using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
+using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 
 namespace InventoryTools.Logic.ItemRenderers;
 
 public class ItemAquariumUseRenderer : ItemInfoRenderer<ItemAquariumSource>
 {
+    public ItemAquariumUseRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider,
+        IDalamudPluginInterface dalamudPluginInterface) : base(textureProvider, dalamudPluginInterface, itemSheet, mapSheet)
+    {
+    }
+
     public override RendererType RendererType => RendererType.Use;
     public override ItemInfoType Type => ItemInfoType.Aquarium;
     public override string SingularName => "Aquarium";

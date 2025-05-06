@@ -9,6 +9,7 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using Dalamud.Interface.Textures;
+using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using OtterGui.Raii;
@@ -21,7 +22,8 @@ public class ItemCraftResultSourceRenderer : ItemInfoRenderer<ItemCraftResultSou
     private readonly IGameInterface _gameInterface;
     private readonly ITextureProvider _textureProvider;
 
-    public ItemCraftResultSourceRenderer(ItemSheet itemSheet, IGameInterface gameInterface, ITextureProvider textureProvider)
+    public ItemCraftResultSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, IGameInterface gameInterface,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(textureProvider, dalamudPluginInterface, itemSheet, mapSheet)
     {
         _itemSheet = itemSheet;
         _gameInterface = gameInterface;

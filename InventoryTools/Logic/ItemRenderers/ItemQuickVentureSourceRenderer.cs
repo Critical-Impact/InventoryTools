@@ -1,7 +1,10 @@
 using System;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
+using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Models;
+using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using Humanizer;
 using ImGuiNET;
 using InventoryTools.Extensions;
@@ -11,6 +14,11 @@ namespace InventoryTools.Logic.ItemRenderers;
 
 public class ItemQuickVentureSourceRenderer : ItemInfoRenderer<ItemQuickVentureSource>
 {
+    public ItemQuickVentureSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider,
+        IDalamudPluginInterface dalamudPluginInterface) : base(textureProvider, dalamudPluginInterface, itemSheet, mapSheet)
+    {
+    }
+
     public override RendererType RendererType => RendererType.Source;
     public override ItemInfoType Type => ItemInfoType.QuickVenture;
     public override string SingularName => "Quick Venture";

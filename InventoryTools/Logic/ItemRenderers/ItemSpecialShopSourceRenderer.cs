@@ -19,7 +19,7 @@ namespace InventoryTools.Logic.ItemRenderers;
 
 public class ItemSpecialShopUseRenderer : ItemSpecialShopSourceRenderer
 {
-    public ItemSpecialShopUseRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface, MapSheet mapSheet) : base(textureProvider, pluginInterface, mapSheet)
+    public ItemSpecialShopUseRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface, ItemSheet itemSheet, MapSheet mapSheet) : base(textureProvider, pluginInterface, itemSheet, mapSheet)
     {
     }
 
@@ -40,7 +40,7 @@ public class ItemSpecialShopSourceRenderer : ItemInfoRenderer<ItemSpecialShopSou
     private readonly IDalamudPluginInterface _pluginInterface;
     private readonly MapSheet _mapSheet;
 
-    public ItemSpecialShopSourceRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface, MapSheet mapSheet)
+    public ItemSpecialShopSourceRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface, ItemSheet itemSheet, MapSheet mapSheet) : base(textureProvider, pluginInterface, itemSheet, mapSheet)
     {
         _textureProvider = textureProvider;
         _pluginInterface = pluginInterface;
@@ -65,9 +65,6 @@ public class ItemSpecialShopSourceRenderer : ItemInfoRenderer<ItemSpecialShopSou
     public override Action<ItemSource> DrawTooltip => source =>
     {
         var asSource = AsSource(source);
-        var maps = asSource.MapIds == null || asSource.MapIds.Count == 0
-            ? null
-            : asSource.MapIds.Select(c => _mapSheet.GetRow(c).FormattedName);
 
         ImGui.Text($"Shop: {asSource.Shop.Name}");
         ImGui.Text("Rewards:");
@@ -83,6 +80,7 @@ public class ItemSpecialShopSourceRenderer : ItemInfoRenderer<ItemSpecialShopSou
                 ImGui.Text(costString);
                 if (reward.IsHq == true)
                 {
+                    ImGui.SameLine();
                     ImGui.Image(_textureProvider.GetPluginImageTexture(_pluginInterface, "hq").GetWrapOrEmpty().ImGuiHandle,
                         new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
                 }
@@ -101,23 +99,14 @@ public class ItemSpecialShopSourceRenderer : ItemInfoRenderer<ItemSpecialShopSou
                 ImGui.Text(costString);
                 if (cost.IsHq == true)
                 {
+                    ImGui.SameLine();
                     ImGui.Image(_textureProvider.GetPluginImageTexture(_pluginInterface, "hq").GetWrapOrEmpty().ImGuiHandle,
                         new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
                 }
             }
         }
 
-        if (maps != null)
-        {
-            ImGui.Text("Maps:");
-            using (ImRaii.PushIndent())
-            {
-                foreach (var map in maps)
-                {
-                    ImGui.Text(map);
-                }
-            }
-        }
+        DrawMaps(source);
     };
 
     public override Func<ItemSource, string> GetName => source =>

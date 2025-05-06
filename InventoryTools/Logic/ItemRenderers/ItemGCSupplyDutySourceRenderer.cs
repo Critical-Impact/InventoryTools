@@ -1,13 +1,21 @@
 using System;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
+using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Models;
+using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 
 namespace InventoryTools.Logic.ItemRenderers;
 
 public class ItemGcSupplyDutySourceRenderer : ItemInfoRenderer<ItemGCSupplyDutySource>
 {
+    public ItemGcSupplyDutySourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider,
+        IDalamudPluginInterface dalamudPluginInterface) : base(textureProvider, dalamudPluginInterface, itemSheet, mapSheet)
+    {
+    }
+
     public override RendererType RendererType => RendererType.Use;
     public override ItemInfoType Type => ItemInfoType.GCDailySupply;
     public override string SingularName => "Grand Company Supply & Provisioning";

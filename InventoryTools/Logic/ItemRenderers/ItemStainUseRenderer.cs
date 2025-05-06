@@ -1,14 +1,22 @@
 using System;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
+using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib;
 using CriticalCommonLib.Models;
+using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 
 namespace InventoryTools.Logic.ItemRenderers;
 
 public class ItemStainUseRenderer : ItemInfoRenderer<ItemStainSource>
 {
+    public ItemStainUseRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider,
+        IDalamudPluginInterface dalamudPluginInterface) : base(textureProvider, dalamudPluginInterface, itemSheet, mapSheet)
+    {
+    }
+
     public override RendererType RendererType => RendererType.Use;
     public override ItemInfoType Type => ItemInfoType.Stain;
     public override string SingularName => "Dye";

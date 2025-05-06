@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
+using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Textures;
 using Dalamud.Plugin;
@@ -14,7 +15,7 @@ namespace InventoryTools.Logic.ItemRenderers;
 
 public class ItemDesynthSourceRenderer : ItemSupplementSourceRenderer<ItemDesynthSource>
 {
-    public ItemDesynthSourceRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(textureProvider, pluginInterface,  ItemInfoType.Desynthesis, Icons.DesynthesisIcon)
+    public ItemDesynthSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(itemSheet, mapSheet, textureProvider, pluginInterface,  ItemInfoType.Desynthesis, Icons.DesynthesisIcon)
     {
     }
 
@@ -24,7 +25,7 @@ public class ItemDesynthSourceRenderer : ItemSupplementSourceRenderer<ItemDesynt
 
 public class ItemReductionSourceRenderer : ItemSupplementSourceRenderer<ItemReductionSource>
 {
-    public ItemReductionSourceRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(textureProvider, pluginInterface,  ItemInfoType.Reduction, Icons.ReductionIcon)
+    public ItemReductionSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(itemSheet, mapSheet, textureProvider, pluginInterface,  ItemInfoType.Reduction, Icons.ReductionIcon)
     {
     }
 
@@ -34,7 +35,7 @@ public class ItemReductionSourceRenderer : ItemSupplementSourceRenderer<ItemRedu
 
 public class ItemLootSourceRenderer : ItemSupplementSourceRenderer<ItemLootSource>
 {
-    public ItemLootSourceRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(textureProvider, pluginInterface,  ItemInfoType.Loot, Icons.LootIcon)
+    public ItemLootSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(itemSheet, mapSheet, textureProvider, pluginInterface,  ItemInfoType.Loot, Icons.LootIcon)
     {
     }
 
@@ -44,7 +45,7 @@ public class ItemLootSourceRenderer : ItemSupplementSourceRenderer<ItemLootSourc
 
 public class ItemGardeningSourceRenderer : ItemSupplementSourceRenderer<ItemGardeningSource>
 {
-    public ItemGardeningSourceRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(textureProvider, pluginInterface,  ItemInfoType.Gardening, Icons.SproutIcon)
+    public ItemGardeningSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(itemSheet, mapSheet, textureProvider, pluginInterface,  ItemInfoType.Gardening, Icons.SproutIcon)
     {
     }
 
@@ -53,7 +54,7 @@ public class ItemGardeningSourceRenderer : ItemSupplementSourceRenderer<ItemGard
 }
 public class ItemDesynthUseRenderer : ItemSupplementUseRenderer<ItemDesynthSource>
 {
-    public ItemDesynthUseRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(textureProvider, pluginInterface,  ItemInfoType.Desynthesis, Icons.DesynthesisIcon)
+    public ItemDesynthUseRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(itemSheet, mapSheet, textureProvider, pluginInterface,  ItemInfoType.Desynthesis, Icons.DesynthesisIcon)
     {
     }
 
@@ -63,7 +64,7 @@ public class ItemDesynthUseRenderer : ItemSupplementUseRenderer<ItemDesynthSourc
 
 public class ItemReductionUseRenderer : ItemSupplementUseRenderer<ItemReductionSource>
 {
-    public ItemReductionUseRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(textureProvider, pluginInterface,  ItemInfoType.Reduction, Icons.ReductionIcon)
+    public ItemReductionUseRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(itemSheet, mapSheet, textureProvider, pluginInterface,  ItemInfoType.Reduction, Icons.ReductionIcon)
     {
     }
 
@@ -73,7 +74,7 @@ public class ItemReductionUseRenderer : ItemSupplementUseRenderer<ItemReductionS
 
 public class ItemLootUseRenderer : ItemSupplementUseRenderer<ItemLootSource>
 {
-    public ItemLootUseRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(textureProvider, pluginInterface,  ItemInfoType.Loot, Icons.LootIcon)
+    public ItemLootUseRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(itemSheet, mapSheet, textureProvider, pluginInterface,  ItemInfoType.Loot, Icons.LootIcon)
     {
     }
 
@@ -83,7 +84,7 @@ public class ItemLootUseRenderer : ItemSupplementUseRenderer<ItemLootSource>
 
 public class ItemGardeningUseRenderer : ItemSupplementUseRenderer<ItemGardeningSource>
 {
-    public ItemGardeningUseRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(textureProvider, pluginInterface, ItemInfoType.Gardening, Icons.SproutIcon)
+    public ItemGardeningUseRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(itemSheet, mapSheet, textureProvider, pluginInterface, ItemInfoType.Gardening, Icons.SproutIcon)
     {
     }
 
@@ -95,7 +96,7 @@ public abstract class ItemSupplementUseRenderer<T> : ItemSupplementSourceRendere
 {
     public override RendererType RendererType => RendererType.Use;
 
-    protected ItemSupplementUseRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface, ItemInfoType itemInfoType, ushort icon) : base(textureProvider, pluginInterface, itemInfoType, icon)
+    protected ItemSupplementUseRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface, ItemInfoType itemInfoType, ushort icon) : base(itemSheet, mapSheet, textureProvider, pluginInterface, itemInfoType, icon)
     {
     }
 
@@ -130,7 +131,7 @@ public abstract class ItemSupplementSourceRenderer<T> : ItemInfoRenderer<T> wher
     private readonly ItemInfoType _itemInfoType;
     private readonly ushort _icon;
 
-    public ItemSupplementSourceRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface, ItemInfoType itemInfoType, ushort icon)
+    public ItemSupplementSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface, ItemInfoType itemInfoType, ushort icon) : base(textureProvider, pluginInterface, itemSheet, mapSheet)
     {
         TextureProvider = textureProvider;
         _pluginInterface = pluginInterface;

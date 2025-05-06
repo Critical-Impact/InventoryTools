@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
+using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
+using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Mediator;
 using InventoryTools.Ui;
@@ -13,6 +16,11 @@ namespace InventoryTools.Logic.ItemRenderers;
 
 public class ItemAirshipDropSourceRenderer : ItemInfoRenderer<ItemAirshipDropSource>
 {
+    public ItemAirshipDropSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider,
+        IDalamudPluginInterface dalamudPluginInterface) : base(textureProvider, dalamudPluginInterface, itemSheet, mapSheet)
+    {
+    }
+
     public override RendererType RendererType => RendererType.Source;
     public override ItemInfoType Type => ItemInfoType.Airship;
     public override string SingularName => "Airship Exploration";

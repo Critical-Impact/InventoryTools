@@ -9,6 +9,7 @@ using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Services;
@@ -23,7 +24,8 @@ public class ItemCalamitySalvagerShopUseRenderer : ItemCalamitySalvagerShopSourc
 
     public override string HelpText => "Can the item be spent at the calamity salvager?";
 
-    public ItemCalamitySalvagerShopUseRenderer(MapSheet mapSheet, ItemSheet itemSheet, ITextureProvider textureProvider) : base(mapSheet, itemSheet, textureProvider)
+    public ItemCalamitySalvagerShopUseRenderer(MapSheet mapSheet, ItemSheet itemSheet, ITextureProvider textureProvider,
+        IDalamudPluginInterface dalamudPluginInterface) : base(mapSheet, itemSheet, textureProvider, dalamudPluginInterface)
     {
         _mapSheet = mapSheet;
         _itemSheet = itemSheet;
@@ -47,15 +49,9 @@ public class ItemCalamitySalvagerShopUseRenderer : ItemCalamitySalvagerShopSourc
 
 public class ItemCalamitySalvagerShopSourceRenderer : ItemInfoRenderer<ItemCalamitySalvagerShopSource>
 {
-    private readonly MapSheet _mapSheet;
-    private readonly ItemSheet _itemSheet;
-    private readonly ITextureProvider _textureProvider;
-
-    public ItemCalamitySalvagerShopSourceRenderer(MapSheet mapSheet, ItemSheet itemSheet, ITextureProvider textureProvider)
+    public ItemCalamitySalvagerShopSourceRenderer(MapSheet mapSheet, ItemSheet itemSheet,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(textureProvider, dalamudPluginInterface, itemSheet, mapSheet)
     {
-        _mapSheet = mapSheet;
-        _itemSheet = itemSheet;
-        _textureProvider = textureProvider;
     }
 
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Shop];
@@ -71,96 +67,108 @@ public class ItemCalamitySalvagerShopSourceRenderer : ItemInfoRenderer<ItemCalam
     public override Action<List<ItemSource>>? DrawTooltipGrouped => sources =>
     {
         var asSources = AsSource(sources);
-        var firstItem = asSources.First();
-        var allCalamitySalvagerShops = asSources.Cast<ItemCalamitySalvagerShopSource>().ToList();
-        var maps = allCalamitySalvagerShops.SelectMany(shopSource => shopSource.MapIds == null || shopSource.MapIds.Count == 0
-            ? new List<string>()
-            : shopSource.MapIds.Select(c => _mapSheet.GetRow(c).FormattedName)).ToList();
+        var firstItem = asSources[0];
 
-        ImGui.Text("Costs:");
+        var costItems = asSources.SelectMany(c => c.GilShopItem.Costs).DistinctBy(d => d.Item.RowId).ToList();
 
-        using (ImRaii.PushIndent())
+        Span<ItemInfo> costItemInfos = stackalloc ItemInfo[costItems.Count];
+
+        for (var index = 0; index < costItems.Count; index++)
         {
-            var itemName = firstItem.CostItem!.NameString;
-            var count = firstItem.Cost;
-            var costString = $"{itemName} x {count}";
-            ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(firstItem.Item.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
-            ImGui.SameLine();
-            ImGui.Text(costString);
+            costItemInfos[index] = new ItemInfo(
+                costItems[index].Item.RowId,
+                costItems[index].Count,
+                costItems[index].IsHq ?? false
+            );
+        }
 
-            if (firstItem.GilShopItem.Base.AchievementRequired.RowId != 0)
+        DrawItems("Costs: ", costItemInfos);
+
+        var rewardItems = asSources.SelectMany(c => c.GilShopItem.Rewards).DistinctBy(d => d.Item.RowId).ToList();
+
+        Span<ItemInfo> rewardItemInfos = stackalloc ItemInfo[rewardItems.Count];
+
+        for (var index = 0; index < rewardItems.Count; index++)
+        {
+            rewardItemInfos[index] = new ItemInfo(
+                rewardItems[index].Item.RowId,
+                rewardItems[index].Count,
+                rewardItems[index].IsHq ?? false
+            );
+        }
+
+        DrawItems("Rewards: ", rewardItemInfos);
+
+
+
+        if (firstItem.GilShopItem.Base.AchievementRequired.RowId != 0)
+        {
+            ImGui.Text(
+                $"Achievement Required: {firstItem.GilShopItem.Base.AchievementRequired.Value.Name.ExtractText()}");
+        }
+
+        foreach (var quest in firstItem.GilShopItem.Base.QuestRequired)
+        {
+            if (quest.RowId != 0)
             {
                 ImGui.Text(
-                    $"Achievement Required: {firstItem.GilShopItem.Base.AchievementRequired.Value.Name.ExtractText()}");
-            }
-
-            foreach (var quest in firstItem.GilShopItem.Base.QuestRequired)
-            {
-                if (quest.RowId != 0)
-                {
-                    ImGui.Text(
-                        $"Quest Required: {quest.Value.Name.ExtractText()}");
-                }
+                    $"Quest Required: {quest.Value.Name.ExtractText()}");
             }
         }
 
-        if (maps.Count != 0)
-        {
-            ImGui.Text("Maps:");
-            using (ImRaii.PushIndent())
-            {
-                foreach (var map in maps)
-                {
-                    ImGui.Text(map);
-                }
-            }
-        }
+        DrawMaps(sources);
     };
 
     public override Action<ItemSource> DrawTooltip => source =>
     {
         var asSource = AsSource(source);
-        var maps = source.MapIds?.Select(c => _mapSheet.GetRow(c).FormattedName).ToList() ?? new List<string>();
 
-        ImGui.Text("Costs:");
+        var costs = asSource.GilShopItem.Costs.ToList();
 
-        using (ImRaii.PushIndent())
+        Span<ItemInfo> costItemInfos = stackalloc ItemInfo[costs.Count()];
+
+        for (var index = 0; index < costs.Count; index++)
         {
+            costItemInfos[index] = new ItemInfo(
+                costs[index].Item.RowId,
+                costs[index].Count,
+                costs[index].IsHq ?? false
+            );
+        }
 
-            var itemName = asSource.CostItem!.NameString;
-            var count = asSource.Cost;
-            var costString = $"{itemName} x {count}";
-            ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(asSource.CostItem.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
-            ImGui.SameLine();
-            ImGui.Text(costString);
+        DrawItems("Costs: ", costItemInfos);
 
-            if (asSource.GilShopItem.Base.AchievementRequired.RowId != 0)
+        var rewardItems = asSource.GilShopItem.Rewards.ToList();
+
+        Span<ItemInfo> rewardItemInfos = stackalloc ItemInfo[rewardItems.Count];
+
+        for (var index = 0; index < rewardItems.Count; index++)
+        {
+            rewardItemInfos[index] = new ItemInfo(
+                rewardItems[index].Item.RowId,
+                rewardItems[index].Count,
+                rewardItems[index].IsHq ?? false
+            );
+        }
+
+        DrawItems("Rewards: ", rewardItemInfos);
+
+        if (asSource.GilShopItem.Base.AchievementRequired.RowId != 0)
+        {
+            ImGui.Text(
+                $"Achievement Required: {asSource.GilShopItem.Base.AchievementRequired.Value.Name.ExtractText()}");
+        }
+
+        foreach (var quest in asSource.GilShopItem.Base.QuestRequired)
+        {
+            if (quest.RowId != 0)
             {
                 ImGui.Text(
-                    $"Achievement Required: {asSource.GilShopItem.Base.AchievementRequired.Value.Name.ExtractText()}");
-            }
-
-            foreach (var quest in asSource.GilShopItem.Base.QuestRequired)
-            {
-                if (quest.RowId != 0)
-                {
-                    ImGui.Text(
-                        $"Quest Required: {quest.Value.Name.ExtractText()}");
-                }
+                    $"Quest Required: {quest.Value.Name.ExtractText()}");
             }
         }
 
-        if (maps.Count != 0)
-        {
-            ImGui.Text("Maps:");
-            using (ImRaii.PushIndent())
-            {
-                foreach (var map in maps)
-                {
-                    ImGui.Text(map);
-                }
-            }
-        }
+        DrawMaps(asSource);
     };
 
     public override Func<ItemSource, string> GetName => source =>
@@ -171,7 +179,7 @@ public class ItemCalamitySalvagerShopSourceRenderer : ItemInfoRenderer<ItemCalam
             return asSource.GilShop.Name;
         }
 
-        var maps = asSource.MapIds.Select(c => _mapSheet.GetRow(c).FormattedName);
+        var maps = asSource.MapIds.Select(c => MapSheet.GetRow(c).FormattedName);
         return asSource.GilShop.Name + "(" + maps + ")";
     };
 

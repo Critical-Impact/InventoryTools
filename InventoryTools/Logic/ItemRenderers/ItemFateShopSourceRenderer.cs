@@ -19,7 +19,7 @@ namespace InventoryTools.Logic.ItemRenderers;
 
 public class ItemFateShopUseRenderer : ItemFateShopSourceRenderer
 {
-    public ItemFateShopUseRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface, MapSheet mapSheet) : base(textureProvider, pluginInterface, mapSheet)
+    public ItemFateShopUseRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface, ItemSheet itemSheet, MapSheet mapSheet) : base(textureProvider, pluginInterface, itemSheet, mapSheet)
     {
     }
 
@@ -40,7 +40,7 @@ public class ItemFateShopSourceRenderer : ItemInfoRenderer<ItemFateShopSource>
     private readonly IDalamudPluginInterface _pluginInterface;
     public MapSheet MapSheet { get; }
 
-    public ItemFateShopSourceRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface, MapSheet mapSheet)
+    public ItemFateShopSourceRenderer(ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface, ItemSheet itemSheet, MapSheet mapSheet) : base(textureProvider, pluginInterface, itemSheet, mapSheet)
     {
         _textureProvider = textureProvider;
         _pluginInterface = pluginInterface;
@@ -65,9 +65,6 @@ public class ItemFateShopSourceRenderer : ItemInfoRenderer<ItemFateShopSource>
     public override Action<ItemSource> DrawTooltip => source =>
     {
         var asSource = AsSource(source);
-        var maps = asSource.MapIds == null || asSource.MapIds.Count == 0
-            ? null
-            : asSource.MapIds.Select(c => MapSheet.GetRow(c).FormattedName);
 
         ImGui.Text($"Shop: {asSource.Shop.Name}");
         ImGui.Text("Rewards:");
@@ -83,6 +80,7 @@ public class ItemFateShopSourceRenderer : ItemInfoRenderer<ItemFateShopSource>
                 ImGui.Text(costString);
                 if (reward.IsHq == true)
                 {
+                    ImGui.SameLine();
                     ImGui.Image(_textureProvider.GetPluginImageTexture(_pluginInterface, "hq").GetWrapOrEmpty().ImGuiHandle,
                         new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
                 }
@@ -101,23 +99,14 @@ public class ItemFateShopSourceRenderer : ItemInfoRenderer<ItemFateShopSource>
                 ImGui.Text(costString);
                 if (cost.IsHq == true)
                 {
+                    ImGui.SameLine();
                     ImGui.Image(_textureProvider.GetPluginImageTexture(_pluginInterface, "hq").GetWrapOrEmpty().ImGuiHandle,
                         new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
                 }
             }
         }
 
-        if (maps != null)
-        {
-            ImGui.Text("Maps:");
-            using (ImRaii.PushIndent())
-            {
-                foreach (var map in maps)
-                {
-                    ImGui.Text(map);
-                }
-            }
-        }
+        DrawMaps(source);
     };
 
     public override Func<ItemSource, string> GetName => source =>

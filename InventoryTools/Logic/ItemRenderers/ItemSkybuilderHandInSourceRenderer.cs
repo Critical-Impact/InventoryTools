@@ -4,6 +4,8 @@ using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 
 namespace InventoryTools.Logic.ItemRenderers;
@@ -12,7 +14,9 @@ public class ItemSkybuilderHandInSourceRenderer : ItemInfoRenderer<ItemSkybuilde
 {
     private readonly GatheringItemSheet _gatheringItemSheet;
 
-    public ItemSkybuilderHandInSourceRenderer(GatheringItemSheet gatheringItemSheet)
+    public ItemSkybuilderHandInSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet,
+        GatheringItemSheet gatheringItemSheet, ITextureProvider textureProvider,
+        IDalamudPluginInterface dalamudPluginInterface) : base(textureProvider, dalamudPluginInterface, itemSheet, mapSheet)
     {
         _gatheringItemSheet = gatheringItemSheet;
     }

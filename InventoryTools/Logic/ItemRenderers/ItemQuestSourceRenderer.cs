@@ -8,6 +8,7 @@ using AllaganLib.GameSheets.Sheets;
 using AllaganLib.Shared.Extensions;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using ImGuiNET;
@@ -18,7 +19,8 @@ namespace InventoryTools.Logic.ItemRenderers;
 
 public class ItemQuestUseRenderer : ItemQuestSourceRenderer
 {
-    public ItemQuestUseRenderer(ITextureProvider textureProvider, ItemSheet itemSheet, List<FestivalName> festivalNames) : base(textureProvider, itemSheet, festivalNames)
+    public ItemQuestUseRenderer(ITextureProvider textureProvider, ItemSheet itemSheet, MapSheet mapSheet,
+        List<FestivalName> festivalNames, IDalamudPluginInterface dalamudPluginInterface) : base(textureProvider, itemSheet, mapSheet, festivalNames, dalamudPluginInterface)
     {
     }
 
@@ -38,7 +40,8 @@ public class ItemQuestSourceRenderer : ItemInfoRenderer<ItemQuestSource>
     public override string HelpText { get; } = "Does this item come from a quest?";
     public override bool ShouldGroup { get; } = true;
 
-    public ItemQuestSourceRenderer(ITextureProvider textureProvider, ItemSheet itemSheet, List<FestivalName> festivalNames)
+    public ItemQuestSourceRenderer(ITextureProvider textureProvider, ItemSheet itemSheet, MapSheet mapSheet,
+        List<FestivalName> festivalNames, IDalamudPluginInterface dalamudPluginInterface) : base(textureProvider, dalamudPluginInterface, itemSheet, mapSheet)
     {
         _textureProvider = textureProvider;
         _itemSheet = itemSheet;

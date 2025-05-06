@@ -4,9 +4,11 @@ using System.Linq;
 using System.Numerics;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
+using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 
@@ -21,7 +23,8 @@ public class ItemGardeningCrossbreedSourceRenderer : ItemInfoRenderer<ItemGarden
     public override string HelpText => "Is this item created by crossbreeding 2 seeds?";
     public override bool ShouldGroup => true;
 
-    public ItemGardeningCrossbreedSourceRenderer(ITextureProvider textureProvider)
+    public ItemGardeningCrossbreedSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(textureProvider, dalamudPluginInterface, itemSheet, mapSheet)
     {
         _textureProvider = textureProvider;
     }
@@ -103,7 +106,8 @@ public class ItemGardeningCrossbreedSourceRenderer : ItemInfoRenderer<ItemGarden
 
 public class ItemGardeningCrossbreedSourceUseRenderer : ItemGardeningCrossbreedSourceRenderer
 {
-    public ItemGardeningCrossbreedSourceUseRenderer(ITextureProvider textureProvider) : base(textureProvider)
+    public ItemGardeningCrossbreedSourceUseRenderer(ItemSheet itemSheet, MapSheet mapSheet,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, textureProvider, dalamudPluginInterface)
     {
     }
 

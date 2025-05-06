@@ -2,9 +2,12 @@ using System;
 using System.Collections.Generic;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
+using AllaganLib.GameSheets.Sheets;
 using AllaganLib.Shared.Time;
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Colors;
+using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 
 namespace InventoryTools.Logic.ItemRenderers;
@@ -15,7 +18,8 @@ public abstract class ItemHouseSourceRenderer<T> : ItemInfoRenderer<T> where T :
 
     public override IReadOnlyList<ItemInfoRenderCategory>? Categories => [ItemInfoRenderCategory.House];
 
-    public ItemHouseSourceRenderer(ItemInfoType type)
+    public ItemHouseSourceRenderer(ItemInfoType type, ItemSheet itemSheet, MapSheet mapSheet,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(textureProvider, dalamudPluginInterface, itemSheet, mapSheet)
     {
         _type = type;
     }
@@ -66,7 +70,8 @@ public abstract class ItemHouseSourceRenderer<T> : ItemInfoRenderer<T> where T :
 
 public class ItemHouseDoorSourceRenderer : ItemHouseSourceRenderer<ItemHouseDoorSource>
 {
-    public ItemHouseDoorSourceRenderer() : base(ItemInfoType.HouseDoor)
+    public ItemHouseDoorSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider,
+        IDalamudPluginInterface dalamudPluginInterface) : base(ItemInfoType.HouseDoor, itemSheet, mapSheet, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -78,7 +83,8 @@ public class ItemHouseDoorSourceRenderer : ItemHouseSourceRenderer<ItemHouseDoor
 
 public class ItemHouseFlooringSourceRenderer : ItemHouseSourceRenderer<ItemHouseFlooringSource>
 {
-    public ItemHouseFlooringSourceRenderer() : base(ItemInfoType.HouseFlooring)
+    public ItemHouseFlooringSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider,
+        IDalamudPluginInterface dalamudPluginInterface) : base(ItemInfoType.HouseFlooring, itemSheet, mapSheet, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -88,7 +94,8 @@ public class ItemHouseFlooringSourceRenderer : ItemHouseSourceRenderer<ItemHouse
 
 public class ItemHouseLightingSourceRenderer : ItemHouseSourceRenderer<ItemHouseLightingSource>
 {
-    public ItemHouseLightingSourceRenderer() : base(ItemInfoType.HouseLighting)
+    public ItemHouseLightingSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider,
+        IDalamudPluginInterface dalamudPluginInterface) : base(ItemInfoType.HouseLighting, itemSheet, mapSheet, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -98,7 +105,8 @@ public class ItemHouseLightingSourceRenderer : ItemHouseSourceRenderer<ItemHouse
 
 public class ItemHouseRoofSourceRenderer : ItemHouseSourceRenderer<ItemHouseRoofSource>
 {
-    public ItemHouseRoofSourceRenderer() : base(ItemInfoType.HouseRoof)
+    public ItemHouseRoofSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider,
+        IDalamudPluginInterface dalamudPluginInterface) : base(ItemInfoType.HouseRoof, itemSheet, mapSheet, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -108,7 +116,8 @@ public class ItemHouseRoofSourceRenderer : ItemHouseSourceRenderer<ItemHouseRoof
 
 public class ItemHouseWallpaperSourceRenderer : ItemHouseSourceRenderer<ItemHouseWallpaperSource>
 {
-    public ItemHouseWallpaperSourceRenderer() : base(ItemInfoType.HouseWallpaper)
+    public ItemHouseWallpaperSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider,
+        IDalamudPluginInterface dalamudPluginInterface) : base(ItemInfoType.HouseWallpaper, itemSheet, mapSheet, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -118,7 +127,8 @@ public class ItemHouseWallpaperSourceRenderer : ItemHouseSourceRenderer<ItemHous
 
 public class ItemHouseWallSourceRenderer : ItemHouseSourceRenderer<ItemHouseWallSource>
 {
-    public ItemHouseWallSourceRenderer() : base(ItemInfoType.HouseWall)
+    public ItemHouseWallSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider,
+        IDalamudPluginInterface dalamudPluginInterface) : base(ItemInfoType.HouseWall, itemSheet, mapSheet, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -128,7 +138,8 @@ public class ItemHouseWallSourceRenderer : ItemHouseSourceRenderer<ItemHouseWall
 
 public class ItemHouseWindowSourceRenderer : ItemHouseSourceRenderer<ItemHouseWindowSource>
 {
-    public ItemHouseWindowSourceRenderer() : base(ItemInfoType.HouseWindow)
+    public ItemHouseWindowSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider,
+        IDalamudPluginInterface dalamudPluginInterface) : base(ItemInfoType.HouseWindow, itemSheet, mapSheet, textureProvider, dalamudPluginInterface)
     {
     }
 

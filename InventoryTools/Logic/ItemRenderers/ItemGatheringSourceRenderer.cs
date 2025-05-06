@@ -7,6 +7,8 @@ using AllaganLib.GameSheets.Sheets;
 using AllaganLib.Shared.Time;
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Colors;
+using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using OtterGui.Raii;
 
@@ -16,7 +18,8 @@ public class ItemMiningSourceRenderer : ItemGatheringSourceRenderer<ItemMiningSo
 {
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Mining];
     public override string HelpText => "Can the item be gathered from a regular mining node?";
-    public ItemMiningSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.Mining)
+    public ItemMiningSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ISeTime seTime,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, seTime, ItemInfoType.Mining, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -27,7 +30,8 @@ public class ItemQuarryingSourceRenderer : ItemGatheringSourceRenderer<ItemQuarr
 {
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Mining];
     public override string HelpText => "Can the item be gathered from a regular quarrying node?";
-    public ItemQuarryingSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.Quarrying)
+    public ItemQuarryingSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ISeTime seTime,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, seTime, ItemInfoType.Quarrying, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -38,7 +42,8 @@ public class ItemLoggingSourceRenderer : ItemGatheringSourceRenderer<ItemLogging
 {
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Botany];
     public override string HelpText => "Can the item be gathered from a regular logging node?";
-    public ItemLoggingSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.Logging)
+    public ItemLoggingSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ISeTime seTime,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet,mapSheet, seTime, ItemInfoType.Logging, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -50,7 +55,8 @@ public class ItemHarvestingSourceRenderer : ItemGatheringSourceRenderer<ItemHarv
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Botany];
     public override string HelpText => "Can the item be gathered from a regular harvesting node?";
 
-    public ItemHarvestingSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.Harvesting)
+    public ItemHarvestingSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ISeTime seTime,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, seTime, ItemInfoType.Harvesting, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -62,7 +68,8 @@ public class ItemHiddenMiningSourceRenderer : ItemGatheringSourceRenderer<ItemHi
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Mining, ItemInfoRenderCategory.HiddenGathering];
     public override string HelpText => "Can the item be gathered from a hidden mining node?";
 
-    public ItemHiddenMiningSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.HiddenMining)
+    public ItemHiddenMiningSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ISeTime seTime,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, seTime, ItemInfoType.HiddenMining, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -74,7 +81,8 @@ public class ItemHiddenQuarryingSourceRenderer : ItemGatheringSourceRenderer<Ite
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Mining, ItemInfoRenderCategory.HiddenGathering];
     public override string HelpText => "Can the item be gathered from a hidden quarrying node?";
 
-    public ItemHiddenQuarryingSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.HiddenQuarrying)
+    public ItemHiddenQuarryingSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ISeTime seTime,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, seTime, ItemInfoType.HiddenQuarrying, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -86,7 +94,8 @@ public class ItemHiddenLoggingSourceRenderer : ItemGatheringSourceRenderer<ItemH
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Botany, ItemInfoRenderCategory.HiddenGathering];
     public override string HelpText => "Can the item be gathered from a hidden logging node?";
 
-    public ItemHiddenLoggingSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.HiddenLogging)
+    public ItemHiddenLoggingSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ISeTime seTime,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, seTime, ItemInfoType.HiddenLogging, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -98,7 +107,8 @@ public class ItemHiddenHarvestingSourceRenderer : ItemGatheringSourceRenderer<It
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Botany, ItemInfoRenderCategory.HiddenGathering];
     public override string HelpText => "Can the item be gathered from a hidden harvesting node?";
 
-    public ItemHiddenHarvestingSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.HiddenHarvesting)
+    public ItemHiddenHarvestingSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ISeTime seTime,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, seTime, ItemInfoType.HiddenHarvesting, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -110,7 +120,8 @@ public class ItemTimedMiningSourceRenderer : ItemGatheringSourceRenderer<ItemTim
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Mining, ItemInfoRenderCategory.TimedGathering];
     public override string HelpText => "Can the item be gathered from a timed mining node?";
 
-    public ItemTimedMiningSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.TimedMining)
+    public ItemTimedMiningSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ISeTime seTime,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, seTime, ItemInfoType.TimedMining, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -122,7 +133,8 @@ public class ItemTimedQuarryingSourceRenderer : ItemGatheringSourceRenderer<Item
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Mining, ItemInfoRenderCategory.TimedGathering];
     public override string HelpText => "Can the item be gathered from a timed quarrying node?";
 
-    public ItemTimedQuarryingSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.TimedQuarrying)
+    public ItemTimedQuarryingSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ISeTime seTime,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, seTime, ItemInfoType.TimedQuarrying, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -134,7 +146,8 @@ public class ItemTimedLoggingSourceRenderer : ItemGatheringSourceRenderer<ItemTi
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Botany, ItemInfoRenderCategory.TimedGathering];
     public override string HelpText => "Can the item be gathered from a timed logging node?";
 
-    public ItemTimedLoggingSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.TimedLogging)
+    public ItemTimedLoggingSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ISeTime seTime,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, seTime, ItemInfoType.TimedLogging, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -146,7 +159,8 @@ public class ItemTimedHarvestingSourceRenderer : ItemGatheringSourceRenderer<Ite
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Botany, ItemInfoRenderCategory.TimedGathering];
     public override string HelpText => "Can the item be gathered from a timed harvesting node?";
 
-    public ItemTimedHarvestingSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.TimedHarvesting)
+    public ItemTimedHarvestingSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ISeTime seTime,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, seTime, ItemInfoType.TimedHarvesting, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -158,7 +172,8 @@ public class ItemEphemeralMiningSourceRenderer : ItemGatheringSourceRenderer<Ite
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Mining, ItemInfoRenderCategory.EphemeralGathering];
     public override string HelpText => "Can the item be gathered from a ephemeral mining node?";
 
-    public ItemEphemeralMiningSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.EphemeralMining)
+    public ItemEphemeralMiningSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ISeTime seTime,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, seTime, ItemInfoType.EphemeralMining, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -169,7 +184,8 @@ public class ItemEphemeralQuarryingSourceRenderer : ItemGatheringSourceRenderer<
 {
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Mining, ItemInfoRenderCategory.EphemeralGathering];
     public override string HelpText => "Can the item be gathered from a ephemeral quarrying node?";
-    public ItemEphemeralQuarryingSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.EphemeralQuarrying)
+    public ItemEphemeralQuarryingSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ISeTime seTime,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, seTime, ItemInfoType.EphemeralQuarrying, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -180,7 +196,8 @@ public class ItemEphemeralLoggingSourceRenderer : ItemGatheringSourceRenderer<It
 {
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.Botany, ItemInfoRenderCategory.EphemeralGathering];
     public override string HelpText => "Can the item be gathered from a ephemeral logging node?";
-    public ItemEphemeralLoggingSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.EphemeralLogging)
+    public ItemEphemeralLoggingSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ISeTime seTime,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, seTime, ItemInfoType.EphemeralLogging, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -192,7 +209,8 @@ public class ItemEphemeralHarvestingSourceRenderer : ItemGatheringSourceRenderer
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Gathering, ItemInfoRenderCategory.EphemeralGathering];
     public override string HelpText => "Can the item be gathered from a ephemeral harvesting node?";
 
-    public ItemEphemeralHarvestingSourceRenderer(MapSheet mapSheet, ISeTime seTime) : base(mapSheet, seTime, ItemInfoType.EphemeralHarvesting)
+    public ItemEphemeralHarvestingSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ISeTime seTime,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, seTime, ItemInfoType.EphemeralHarvesting, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -205,7 +223,8 @@ public abstract class ItemGatheringSourceRenderer<T> : ItemInfoRenderer<T> where
     private readonly ISeTime _seTime;
     private readonly ItemInfoType _type;
 
-    public ItemGatheringSourceRenderer(MapSheet mapSheet, ISeTime seTime, ItemInfoType type)
+    public ItemGatheringSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ISeTime seTime, ItemInfoType type,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(textureProvider, dalamudPluginInterface, itemSheet, mapSheet)
     {
         _mapSheet = mapSheet;
         _seTime = seTime;
@@ -219,9 +238,6 @@ public abstract class ItemGatheringSourceRenderer<T> : ItemInfoRenderer<T> where
     public override Action<ItemSource> DrawTooltip => source =>
     {
         var asSource = (ItemGatheringSource)source;
-         var maps = asSource.MapIds == null || asSource.MapIds.Count == 0
-             ? null
-             : asSource.MapIds.Select(c => _mapSheet.GetRow(c).FormattedName);
 
          var level = asSource.GatheringItem.Base.GatheringItemLevel.Value.GatheringItemLevel;
          ImGui.Text("Level:" + (level == 0 ? "N/A" : level));
@@ -270,17 +286,7 @@ public abstract class ItemGatheringSourceRenderer<T> : ItemInfoRenderer<T> where
          }
          else
          {
-             if (maps != null)
-             {
-                 ImGui.Text("Maps:");
-                 using (ImRaii.PushIndent())
-                 {
-                     foreach (var map in maps)
-                     {
-                         ImGui.Text(map);
-                     }
-                 }
-             }
+             DrawMaps(source);
          }
     };
 

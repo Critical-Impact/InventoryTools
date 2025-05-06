@@ -9,6 +9,7 @@ using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using InventoryTools.Services;
@@ -19,7 +20,8 @@ namespace InventoryTools.Logic.ItemRenderers;
 
 public class ItemGCShopUseRenderer : ItemGCShopSourceRenderer
 {
-    public ItemGCShopUseRenderer(MapSheet mapSheet, ExcelSheet<GCRankGridaniaMaleText> rankSheet, ITextureProvider textureProvider) : base(mapSheet, rankSheet, textureProvider)
+    public ItemGCShopUseRenderer(ItemSheet itemSheet, MapSheet mapSheet, ExcelSheet<GCRankGridaniaMaleText> rankSheet,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(itemSheet, mapSheet, rankSheet, textureProvider, dalamudPluginInterface)
     {
     }
 
@@ -28,10 +30,6 @@ public class ItemGCShopUseRenderer : ItemGCShopSourceRenderer
     public override Action<List<ItemSource>>? DrawTooltipGrouped => sources =>
     {
         var asSources = AsSource(sources);
-
-        var maps = asSources.SelectMany(shopSource => shopSource.MapIds == null || shopSource.MapIds.Count == 0
-            ? new List<string>()
-            : shopSource.MapIds.Select(c => MapSheet.GetRow(c).FormattedName)).Distinct().ToList();
 
         ImGui.Text("Items that can be purchased:");
 
@@ -43,17 +41,7 @@ public class ItemGCShopUseRenderer : ItemGCShopSourceRenderer
             }
         }
 
-        if (maps.Count != 0)
-        {
-            ImGui.Text("Maps:");
-            using (ImRaii.PushIndent())
-            {
-                foreach (var map in maps)
-                {
-                    ImGui.Text(map);
-                }
-            }
-        }
+        DrawMaps(sources);
     };
 
     public override RendererType RendererType => RendererType.Use;
@@ -66,7 +54,9 @@ public class ItemGCShopSourceRenderer : ItemInfoRenderer<ItemGCShopSource>
     private readonly ExcelSheet<GCRankGridaniaMaleText> _rankSheet;
     private readonly ITextureProvider _textureProvider;
 
-    public ItemGCShopSourceRenderer(MapSheet mapSheet, ExcelSheet<GCRankGridaniaMaleText> rankSheet, ITextureProvider textureProvider)
+    public ItemGCShopSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet,
+        ExcelSheet<GCRankGridaniaMaleText> rankSheet, ITextureProvider textureProvider,
+        IDalamudPluginInterface dalamudPluginInterface) : base(textureProvider, dalamudPluginInterface, itemSheet, mapSheet)
     {
         MapSheet = mapSheet;
         _rankSheet = rankSheet;
@@ -86,7 +76,6 @@ public class ItemGCShopSourceRenderer : ItemInfoRenderer<ItemGCShopSource>
     public override Action<ItemSource> DrawTooltip => source =>
     {
         var asSource = AsSource(source);
-        var maps = asSource.MapIds?.Distinct().Select(c => MapSheet.GetRow(c).FormattedName).ToList() ?? new List<string>();
 
         ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(asSource.CostItem!.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
         ImGui.SameLine();
@@ -99,17 +88,7 @@ public class ItemGCShopSourceRenderer : ItemInfoRenderer<ItemGCShopSource>
             ImGui.Text($"Rank Required: " + genericRank);
         }
 
-        if (maps.Count != 0)
-        {
-            ImGui.Text("Maps:");
-            using (ImRaii.PushIndent())
-            {
-                foreach (var map in maps)
-                {
-                    ImGui.Text(map);
-                }
-            }
-        }
+        DrawMaps(source);
     };
 
     public override Func<ItemSource, string> GetName => source =>

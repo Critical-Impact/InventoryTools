@@ -7,6 +7,7 @@ using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Textures;
+using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using OtterGui.Raii;
@@ -18,7 +19,8 @@ public class ItemCompanyCraftResultSourceRenderer : ItemInfoRenderer<ItemCompany
     private readonly ItemSheet _itemSheet;
     private readonly ITextureProvider _textureProvider;
 
-    public ItemCompanyCraftResultSourceRenderer(ItemSheet itemSheet, ITextureProvider textureProvider)
+    public ItemCompanyCraftResultSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet,
+        ITextureProvider textureProvider, IDalamudPluginInterface dalamudPluginInterface) : base(textureProvider, dalamudPluginInterface, itemSheet, mapSheet)
     {
         _itemSheet = itemSheet;
         _textureProvider = textureProvider;
@@ -35,17 +37,20 @@ public class ItemCompanyCraftResultSourceRenderer : ItemInfoRenderer<ItemCompany
         var asSource = AsSource(source);
         ImGui.Text($"Craft Type: {asSource.CompanyCraftSequence.Base.CompanyCraftType.Value.Name}");
         ImGui.Text($"Parts: {asSource.CompanyCraftSequence.CompanyCraftParts.Length}");
-        ImGui.Text("Ingredients:");
-        using (ImRaii.PushIndent())
+
+        var materialsRequired = asSource.CompanyCraftSequence.MaterialsRequired(null);
+        Span<ItemInfo> rewardItems = stackalloc ItemInfo[materialsRequired.Count];
+
+        for (var index = 0; index < materialsRequired.Count; index++)
         {
-            foreach (var ingredient in asSource.CompanyCraftSequence.MaterialsRequired(null))
-            {
-                var item = _itemSheet.GetRow(ingredient.ItemId);
-                ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(item.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
-                ImGui.SameLine();
-                ImGui.Text($"{item.NameString} x {ingredient.Quantity}");
-            }
+            rewardItems[index] = new ItemInfo(
+                materialsRequired[index].ItemId,
+                materialsRequired[index].Quantity,
+                false
+            );
         }
+
+        DrawItems("Ingredients: ", rewardItems);
     };
 
     public override Func<ItemSource, string> GetName => source =>
