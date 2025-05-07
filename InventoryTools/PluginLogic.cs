@@ -507,14 +507,14 @@ namespace InventoryTools
             return Task.CompletedTask;
         }
 
-        private void AcquisitionTrackerServiceOnItemAcquired(InventoryItem item, int qtyIncrease, AcquisitionReason reason)
+        private void AcquisitionTrackerServiceOnItemAcquired(uint itemId, ItemType itemType, int qtyIncrease, AcquisitionReason reason)
         {
             if (_useOldCraftTrackerSetting.CurrentValue(_configuration))
             {
                 _logger.LogTrace("Acquisition tracker event ignored as the craft monitor currently has precedence.");
                 return;
             }
-            _logger.LogTrace("Item acquired through {Reason}, qty of {QtyIncrease}, item ID: {ItemId}", reason, qtyIncrease, item.ItemId);
+            _logger.LogTrace("Item acquired through {Reason}, qty of {QtyIncrease}, item ID: {ItemId}", reason, qtyIncrease, itemId);
 
             var activeCraftList = _listService.GetActiveCraftList();
             if (activeCraftList != null && activeCraftList.FilterType == FilterType.CraftFilter && activeCraftList.CraftList.CraftListMode == CraftListMode.Normal)
@@ -530,9 +530,15 @@ namespace InventoryTools
                     _logger.LogTrace("Craft list configured to not track {Reason}, not altering required item counts.", reason);
                     return;
                 }
-                var flags = item.Flags;
-                _logger.LogTrace("Marking {Quantity} qty for item {ItemId} ({HqFlag}) as crafted.", qtyIncrease, item.ItemId, item.Flags == InventoryItem.ItemFlags.None ? "NQ" : "HQ");
-                activeCraftList.CraftList.MarkCrafted(item.ItemId, flags, (uint)qtyIncrease);
+
+                if (itemType == ItemType.Collectable)
+                {
+                    _logger.LogTrace("Item is a collectable, ignoring.");
+                    return;
+                }
+                var flags = itemType == ItemType.Hq ? InventoryItem.ItemFlags.HighQuality : InventoryItem.ItemFlags.None;
+                _logger.LogTrace("Marking {Quantity} qty for item {ItemId} ({HqFlag}) as crafted.", qtyIncrease, itemId, flags == InventoryItem.ItemFlags.None ? "NQ" : "HQ");
+                activeCraftList.CraftList.MarkCrafted(itemId, flags, (uint)qtyIncrease);
                 if (activeCraftList is { IsEphemeralCraftList: true, CraftList.IsCompleted: true })
                 {
                     _chatUtilities.Print("Ephemeral craft list '" + activeCraftList.Name + "' completed. List has been removed.");

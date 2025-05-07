@@ -62,7 +62,8 @@ public class ImGuiService
         ref float currentCursorX,
         string? tooltip = null,
         bool reverseCursor = false,
-        Vector4? textColor = null)
+        Vector4? textColor = null,
+        bool invisible = false)
     {
         var success = false;
         var iconString = icon.ToIconString();
@@ -82,11 +83,23 @@ public class ImGuiService
 
         ImGui.SetCursorPosX(currentCursorX);
 
+        var col1 = ImRaii.PushColor(ImGuiCol.Button,        new Vector4(0, 0, 0, 0), invisible);
+        var col2 = ImRaii.PushColor(ImGuiCol.ButtonHovered, new Vector4(0, 0, 0, 0), invisible);
+        var col3 = ImRaii.PushColor(ImGuiCol.ButtonActive,  new Vector4(0, 0, 0, 0), invisible);
+        var col4 = ImRaii.PushColor(ImGuiCol.Border,  new Vector4(0, 0, 0, 0), invisible);
+        var style1 = ImRaii.PushStyle(ImGuiStyleVar.FrameRounding, 0.0f, invisible);
+        var style2 = ImRaii.PushStyle(ImGuiStyleVar.FramePadding,  new Vector2(0, 0), invisible);
         if (ImGui.Button(iconString, buttonSize))
         {
             success = true;
         }
 
+        style2.Pop();
+        style1.Pop();
+        col4.Pop();
+        col3.Pop();
+        col2.Pop();
+        col1.Pop();
         pushColor.Pop();
         pushFont.Pop();
 

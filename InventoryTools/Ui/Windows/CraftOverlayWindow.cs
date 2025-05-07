@@ -5,6 +5,7 @@ using System.Numerics;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Sheets;
+using AllaganLib.Shared.Time;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
@@ -21,6 +22,7 @@ using InventoryTools.Logic.Settings;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
+using Lumina.Extensions;
 using Microsoft.Extensions.Logging;
 using OtterGui.Raii;
 
@@ -47,6 +49,7 @@ public class CraftOverlayWindow : OverlayWindow
     private readonly CraftOverlayHideSetting _overlayHideSetting;
     private readonly ShopTrackerService _shopTrackerService;
     private readonly CraftGroupingLocalizer _craftGroupingLocalizer;
+    private readonly ISeTime _seTime;
     private readonly MapSheet _mapSheet;
 
     public CraftOverlayWindow(ILogger<CraftOverlayWindow> logger,
@@ -69,7 +72,8 @@ public class CraftOverlayWindow : OverlayWindow
         CraftOverlayWindowStateSetting windowStateSetting,
         CraftOverlayHideSetting overlayHideSetting,
         ShopTrackerService shopTrackerService,
-        CraftGroupingLocalizer craftGroupingLocalizer) : base(logger,
+        CraftGroupingLocalizer craftGroupingLocalizer,
+        ISeTime seTime) : base(logger,
         configuration,
         addonLifecycle,
         gameGui,
@@ -92,6 +96,7 @@ public class CraftOverlayWindow : OverlayWindow
         _overlayHideSetting = overlayHideSetting;
         _shopTrackerService = shopTrackerService;
         _craftGroupingLocalizer = craftGroupingLocalizer;
+        _seTime = seTime;
     }
 
     public override void Initialize()
@@ -259,7 +264,6 @@ public class CraftOverlayWindow : OverlayWindow
         }
 
 
-
         ImGui.SameLine();
         if (currentGroup != null)
         {
@@ -273,7 +277,7 @@ public class CraftOverlayWindow : OverlayWindow
 
         ImGui.SameLine();
 
-        currentCursorPosX = ImGui.GetWindowSize().X;
+        currentCursorPosX = ImGui.GetWindowSize().X - 5;
 
         if (ImGuiService.DrawIconButton(
                 _font,
@@ -313,6 +317,16 @@ public class CraftOverlayWindow : OverlayWindow
         }
 
         ImGui.SameLine();
+        if (ImGuiService.DrawIconButton(
+                _font,
+                FontAwesomeIcon.Bars,
+                ref currentCursorPosX,
+                "Select active craft list",
+                true))
+        {
+            ImGui.OpenPopup("SelectCraftList");
+        }
+
         using (var popup = ImRaii.Popup("SelectCraftList"))
         {
             if (popup)
@@ -327,15 +341,6 @@ public class CraftOverlayWindow : OverlayWindow
                 }
             }
         }
-        if (ImGuiService.DrawIconButton(
-                _font,
-                FontAwesomeIcon.Bars,
-                ref currentCursorPosX,
-                "Select active craft list",
-                true))
-        {
-            ImGui.OpenPopup("SelectCraftList");
-        }
 
         ImGui.Separator();
 
@@ -347,7 +352,7 @@ public class CraftOverlayWindow : OverlayWindow
         {
             if (nextItems != null)
             {
-                using (ImRaii.Table("CraftList", 5, ImGuiTableFlags.SizingStretchProp))
+                using (ImRaii.Table("CraftList", 5, ImGuiTableFlags.SizingFixedFit))
                 {
                     ImGui.TableSetupColumn("Icon", ImGuiTableColumnFlags.WidthFixed,
                         20 * ImGui.GetIO().FontGlobalScale);
@@ -428,6 +433,33 @@ public class CraftOverlayWindow : OverlayWindow
                                     ref buttonPosX))
                             {
                                 ImGui.OpenPopup("ItemAction");
+                            }
+                            if (currentItem.UpTimes != null)
+                            {
+                                var currentUptimes = currentItem.UpTimes.Select(c => c.NextUptime(_seTime.ServerTime)).Where(c => !c.Equals(TimeInterval.Always) && !c.Equals(TimeInterval.Invalid) && !c.Equals(TimeInterval.Never)).OrderBy(c => c).FirstOrNull();
+                                if (currentUptimes != null)
+                                {
+                                    ImGui.SameLine();
+                                    buttonPosX = ImGui.GetCursorPosX();
+                                    bool active = currentUptimes.Value.Start <= TimeStamp.UtcNow;
+
+                                    var color = active ? ImGuiColors.HealerGreen : ImGuiColors.DalamudRed;
+                                    var tooltip = active
+                                        ? " Up for " + TimeInterval.DurationString(currentUptimes.Value.End,
+                                            TimeStamp.UtcNow, true)
+                                        : " Up in " + TimeInterval.DurationString(currentUptimes.Value.Start,
+                                            TimeStamp.UtcNow, true);
+
+                                    ImGuiService.DrawIconButton(
+                                        _font,
+                                        FontAwesomeIcon.Clock,
+                                        ref buttonPosX,
+                                        tooltip,
+                                        false,
+                                        color,
+                                        true);
+                                }
+
                             }
 
                             using (var popup = ImRaii.Popup("ItemAction"))
