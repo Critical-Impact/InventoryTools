@@ -70,6 +70,15 @@ public abstract class ButtonColumn : IColumn
     public virtual List<MessageBase>? DrawEditor(ColumnConfiguration columnConfiguration,
         FilterConfiguration configuration)
     {
+        if (this.Settings.Count != 0)
+        {
+            ImGui.NewLine();
+            ImGui.Separator();
+            foreach (var setting in this.Settings)
+            {
+                setting.Draw(columnConfiguration, null);
+            }
+        }
         return null;
     }
 

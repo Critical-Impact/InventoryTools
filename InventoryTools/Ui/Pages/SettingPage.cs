@@ -18,15 +18,15 @@ namespace InventoryTools.Ui.Pages
         private readonly IEnumerable<ISetting> _settings;
         private readonly InventoryToolsConfiguration _configuration;
 
-        public delegate SettingPage Factory(SettingCategory settingCategory, SettingSubCategory? subCategory = null);
+        public delegate SettingPage Factory(SettingCategory settingCategory, SettingSubCategory? subCategory = null, bool forceSubcategories = false);
 
-        public SettingPage(SettingPage.Factory settingPageFactory, SettingCategory settingCategory, ILogger<SettingPage> logger, ImGuiService imGuiService, IEnumerable<ISetting> settings, InventoryToolsConfiguration configuration, SettingSubCategory? subCategory = null) : base(logger, imGuiService)
+        public SettingPage(SettingPage.Factory settingPageFactory, SettingCategory settingCategory, ILogger<SettingPage> logger, ImGuiService imGuiService, IEnumerable<ISetting> settings, InventoryToolsConfiguration configuration, SettingSubCategory? subCategory = null, bool forceSubcategories = false) : base(logger, imGuiService)
         {
             _settingPageFactory = settingPageFactory;
             SubCategory = subCategory;
             _settings = settings;
             _configuration = configuration;
-            this.Initialize(settingCategory);
+            this.Initialize(settingCategory, forceSubcategories);
         }
 
         public SettingPage(SettingPage.Factory settingPageFactory, ILogger<SettingPage> logger, ImGuiService imGuiService, IEnumerable<ISetting> settings, InventoryToolsConfiguration configuration) : base(logger, imGuiService)
@@ -36,7 +36,7 @@ namespace InventoryTools.Ui.Pages
             _configuration = configuration;
         }
 
-        public void Initialize(SettingCategory settingCategory)
+        public void Initialize(SettingCategory settingCategory, bool forceSubcategories = false)
         {
             Category = settingCategory;
             Settings = _settings.Where(c => c.SettingCategory == Category && c.SettingCategory != SettingCategory.None)
@@ -45,7 +45,7 @@ namespace InventoryTools.Ui.Pages
                 .ToDictionary(c => c.Key, c => c.OrderBy(s => s.Name).ToList());
             if (SubCategory == null)
             {
-                if (this.Settings.Select(c => c.Key).Distinct().Count() > 1)
+                if (this.Settings.Select(c => c.Key).Distinct().Count() > 1 || forceSubcategories)
                 {
                     this.ChildPages = Settings.Select(c => c.Key).Distinct().OrderBy(c =>
                         {

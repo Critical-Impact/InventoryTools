@@ -99,6 +99,22 @@ public class ItemInfoRenderService : IDisposable
                 _keyState[VirtualKey.RIGHT] = false;
                 _scrollRight = true;
             }
+
+            if (ImGui.GetIO().KeyCtrl)
+            {
+                var wheel = (int)ImGui.GetIO().MouseWheel;
+                if (wheel != 0)
+                {
+                    if (wheel > 0)
+                    {
+                        _scrollLeft = true;
+                    }
+                    else
+                    {
+                        _scrollRight = true;
+                    }
+                }
+            }
         }
     }
 

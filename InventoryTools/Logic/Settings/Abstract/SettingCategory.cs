@@ -20,5 +20,6 @@ namespace InventoryTools.Logic.Settings.Abstract
         Items = 15,
         Highlighting = 16,
         CraftTracker = 17,
+        Troubleshooting = 18,
     }
 }

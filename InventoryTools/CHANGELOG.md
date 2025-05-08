@@ -8,6 +8,17 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [12.0.8] - 2025-05-08
+
+### Added
+- Custom Button and Custom Link Button columns added
+- Troubleshooting section allowing you to tweak the acquisition tracker's timings
+- Holding down CTRL and scrolling while viewing a grouped source will let you scroll through each tooltip
+
+### Fixed
+- Improvements to the acquisition tracker
+
+
 ## [12.0.7] - 2025-05-07
 
 ### Added
@@ -17,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.h
 - More safety around the ODR scanner
 
 ### Fixed
-- Improvements to the acqusition tracker, should hopefully be more accurate and take into account processing delays
+- Improvements to the acquisition tracker, should hopefully be more accurate and take into account processing delays
 
 ## [12.0.6] - 2025-05-06
 

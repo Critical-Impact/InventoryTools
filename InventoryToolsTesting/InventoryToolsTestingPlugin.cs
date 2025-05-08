@@ -42,10 +42,10 @@ public class InventoryToolsTestingPlugin : InventoryToolsPlugin
         ICondition condition, IDataManager dataManager, IFramework framework, IGameGui gameGui,
         IGameInteropProvider gameInteropProvider, IKeyState keyState, IGameNetwork gameNetwork,
         IObjectTable objectTable, ITargetManager targetManager, ITextureProvider textureProvider, IToastGui toastGui,
-        IContextMenu contextMenu, ITitleScreenMenu titleScreenMenu) : base(pluginInterface, pluginLog,
+        IContextMenu contextMenu, ITitleScreenMenu titleScreenMenu, IGameInventory gameInventory) : base(pluginInterface, pluginLog,
         addonLifecycle, chatGui, clientState, commandManager, condition, dataManager, framework, gameGui,
         gameInteropProvider, keyState, gameNetwork, objectTable, targetManager, textureProvider, toastGui, contextMenu,
-        titleScreenMenu)
+        titleScreenMenu, gameInventory)
     {
     }
 

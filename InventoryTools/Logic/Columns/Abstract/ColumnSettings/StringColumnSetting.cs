@@ -6,10 +6,13 @@ namespace InventoryTools.Logic.Columns.Abstract.ColumnSettings;
 
 public sealed class StringColumnSetting : ColumnSetting<string?>
 {
-    public delegate StringColumnSetting Factory(string key, string name, string helpText, string? defaultValue);
+    private readonly string? _placeHolder;
 
-    public StringColumnSetting(string key, string name, string helpText, string? defaultValue, ImGuiService imGuiService)
+    public delegate StringColumnSetting Factory(string key, string name, string helpText, string? defaultValue, string? placeHolder = null);
+
+    public StringColumnSetting(string key, string name, string helpText, string? defaultValue, ImGuiService imGuiService, string? placeHolder = null)
     {
+        _placeHolder = placeHolder;
         this.Key = key;
         this.Name = name;
         this.HelpText = helpText;
@@ -63,7 +66,7 @@ public sealed class StringColumnSetting : ColumnSetting<string?>
 
         ImGui.SameLine();
         ImGui.SetNextItemWidth(InputSize);
-        if (ImGui.InputText("##"+Key+"Input", ref value, 500))
+        if (_placeHolder != null ? ImGui.InputTextWithHint("##"+Key+"Input", _placeHolder, ref value, 500) : ImGui.InputText("##"+Key+"Input", ref value, 500))
         {
             UpdateColumnConfiguration(configuration, value);
             success = true;

@@ -28,5 +28,6 @@ namespace InventoryTools.Logic.Settings.Abstract
         ItemUnlockStatus,
         SourceInformation,
         UseInformation,
+        AcquisitionTracker,
     }
 }

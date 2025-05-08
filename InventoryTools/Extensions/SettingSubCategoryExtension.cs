@@ -59,6 +59,8 @@ namespace InventoryTools.Extensions
                     return "Source Information";
                 case SettingSubCategory.UseInformation:
                     return "Use Information";
+                case SettingSubCategory.AcquisitionTracker:
+                    return "Acquisition Tracker";
             }
             return settingSubCategory.ToString();
         }
