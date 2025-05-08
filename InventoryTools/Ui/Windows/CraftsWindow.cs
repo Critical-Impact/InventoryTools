@@ -653,7 +653,7 @@ namespace InventoryTools.Ui
 
                                     foreach (var searchResult in searchResults)
                                     {
-                                        craft.CraftList.AddCraftItem(searchResult.ItemId, searchResult.QuantityRequired,
+                                        craft.CraftList.AddCraftItem(searchResult.ItemId, searchResult.QuantityMissingOverall,
                                             searchResult.Flags);
                                     }
                                     MediatorService.Publish(new OpenGenericWindowMessage(typeof(CraftsWindow)));
@@ -771,7 +771,7 @@ namespace InventoryTools.Ui
                                             var craftList = _listService.AddNewCraftList(result.Item2);
                                             foreach (var searchResult in searchResults)
                                             {
-                                                craftList.CraftList.AddCraftItem(searchResult.ItemId, searchResult.QuantityRequired,
+                                                craftList.CraftList.AddCraftItem(searchResult.ItemId, searchResult.QuantityMissingOverall,
                                                     searchResult.Flags);
                                             }
                                         }
@@ -891,7 +891,7 @@ namespace InventoryTools.Ui
                                             var craftList = _listService.AddNewCraftList(result.Item2, true);
                                             foreach (var searchResult in searchResults)
                                             {
-                                                craftList.CraftList.AddCraftItem(searchResult.ItemId, searchResult.QuantityRequired,
+                                                craftList.CraftList.AddCraftItem(searchResult.ItemId, searchResult.QuantityMissingOverall,
                                                     searchResult.Flags);
                                             }
                                         }
@@ -1118,7 +1118,7 @@ namespace InventoryTools.Ui
                                             var curatedList = _listService.AddNewCuratedList(result.Item2);
                                             foreach (var searchResult in searchResults)
                                             {
-                                                curatedList.AddCuratedItem(new CuratedItem(searchResult.ItemId, searchResult.QuantityRequired,
+                                                curatedList.AddCuratedItem(new CuratedItem(searchResult.ItemId, searchResult.QuantityMissingOverall,
                                                     searchResult.Flags));
                                             }
                                             this.MediatorService.Publish(new FocusListMessage(typeof(FiltersWindow), curatedList));
