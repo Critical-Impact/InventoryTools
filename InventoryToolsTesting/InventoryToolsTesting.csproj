@@ -5,6 +5,7 @@
         <OutputType>Exe</OutputType>
     </PropertyGroup>
 
+
     <ItemGroup>
       <ProjectReference Include="..\InventoryToolsMock\InventoryToolsMock.csproj" />
       <ProjectReference Include="..\InventoryTools\InventoryTools.csproj" />

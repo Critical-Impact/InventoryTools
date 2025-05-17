@@ -183,8 +183,8 @@
       },
       "AllaganLib.GameSheets": {
         "type": "Transitive",
-        "resolved": "1.2.10",
-        "contentHash": "y33HU5xo1Q9bUyT4BaFt5cDYPNCF5/rMfUzCCWaZ5DUf+vLWR1+qFHm235Gpmk+K3aRsMS6p23mZN9ZoAq6TIg==",
+        "resolved": "1.2.11",
+        "contentHash": "FdEPFAFsFzW7q0Fq/iDHPyVRgrjnezVIkTSgk/e6EhdCn7+oSgIwtTQIvDohVA0cS/4ez7wOHUSsJ5dvyGu/nQ==",
         "dependencies": {
           "AllaganLib.Shared": "1.2.8",
           "Autofac": "8.2.1",
@@ -737,7 +737,7 @@
       "criticalcommonlib": {
         "type": "Project",
         "dependencies": {
-          "AllaganLib.GameSheets": "[1.2.10, )",
+          "AllaganLib.GameSheets": "[1.2.11, )",
           "Humanizer.Core": "[3.0.0-beta.54, )",
           "Microsoft.Extensions.Hosting": "[9.0.4, )",
           "NaturalSort.Extension": "[4.3.0, )",
@@ -761,8 +761,7 @@
           "Microsoft.Extensions.Hosting": "[9.0.4, )",
           "OtterGui": "[1.0.0, )",
           "SerialQueue": "[2.1.0, )",
-          "System.Reactive": "[6.0.1, )",
-          "Tetris": "[1.0.0, )"
+          "System.Reactive": "[6.0.1, )"
         }
       },
       "ottergui": {
@@ -770,12 +769,6 @@
         "dependencies": {
           "JetBrains.Annotations": "[2024.3.0, )",
           "Microsoft.Extensions.DependencyInjection": "[9.0.2, )"
-        }
-      },
-      "tetris": {
-        "type": "Project",
-        "dependencies": {
-          "Humanizer.Core": "[3.0.0-beta.54, )"
         }
       }
     }

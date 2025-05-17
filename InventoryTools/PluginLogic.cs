@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
@@ -48,7 +49,7 @@ namespace InventoryTools
         private readonly FilterConfiguration.Factory _filterConfigFactory;
         private readonly Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter> _sourceCategoryFilterFactory;
         private readonly BuyFromVendorPriceFilter _buyFromVendorPriceFilter;
-        private readonly SimpleAcquisitionTrackerService _acquisitionTrackerService;
+        private readonly ISimpleAcquisitionTrackerService _acquisitionTrackerService;
         private readonly CraftTrackerTrackCraftsFilter _trackCraftsFilter;
         private readonly CraftTrackerTrackGatheringFilter _trackGatheringFilter;
         private readonly CraftTrackerTrackShoppingFilter _trackShoppingFilter;
@@ -89,11 +90,11 @@ namespace InventoryTools
             IEnumerable<IHotkey> hotkeys, Func<Type, IFilter> filterFactory, IMarketCache marketCache,
             ITooltipService tooltipService, FilterConfiguration.Factory filterConfigFactory,
             Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter> sourceCategoryFilterFactory,
-            BuyFromVendorPriceFilter buyFromVendorPriceFilter, SimpleAcquisitionTrackerService acquisitionTrackerService,
+            BuyFromVendorPriceFilter buyFromVendorPriceFilter, ISimpleAcquisitionTrackerService acquisitionTrackerService,
             CraftTrackerTrackCraftsFilter trackCraftsFilter, CraftTrackerTrackGatheringFilter trackGatheringFilter,
             CraftTrackerTrackShoppingFilter trackShoppingFilter, CraftTrackerTrackCombatDropFilter trackCombatDropFilter,
             CraftTrackerTrackOtherFilter trackOtherFilter, UseOldCraftTrackerSetting useOldCraftTrackerSetting,
-            CraftTrackerTrackMarketBoardFilter trackMarketBoardFilter) : base(logger, mediatorService)
+            CraftTrackerTrackMarketBoardFilter trackMarketBoardFilter, ItemSheet itemSheet) : base(logger, mediatorService)
         {
             _configurationManagerService = configurationManagerService;
             _chatUtilities = chatUtilities;
@@ -507,7 +508,7 @@ namespace InventoryTools
             return Task.CompletedTask;
         }
 
-        private void AcquisitionTrackerServiceOnItemAcquired(uint itemId, ItemType itemType, int qtyIncrease, AcquisitionReason reason)
+        private void AcquisitionTrackerServiceOnItemAcquired(uint itemId, InventoryItem.ItemFlags itemFlags, int qtyIncrease, AcquisitionReason reason)
         {
             if (_useOldCraftTrackerSetting.CurrentValue(_configuration))
             {
@@ -531,14 +532,8 @@ namespace InventoryTools
                     return;
                 }
 
-                if (itemType == ItemType.Collectable)
-                {
-                    _logger.LogTrace("Item is a collectable, ignoring.");
-                    return;
-                }
-                var flags = itemType == ItemType.Hq ? InventoryItem.ItemFlags.HighQuality : InventoryItem.ItemFlags.None;
-                _logger.LogTrace("Marking {Quantity} qty for item {ItemId} ({HqFlag}) as crafted.", qtyIncrease, itemId, flags == InventoryItem.ItemFlags.None ? "NQ" : "HQ");
-                activeCraftList.CraftList.MarkCrafted(itemId, flags, (uint)qtyIncrease);
+                _logger.LogTrace("Marking {Quantity} qty for item {ItemId} ({HqFlag}) as crafted.", qtyIncrease, itemId, itemFlags.ToString());
+                activeCraftList.CraftList.MarkCrafted(itemId, itemFlags, (uint)qtyIncrease);
                 if (activeCraftList is { IsEphemeralCraftList: true, CraftList.IsCompleted: true })
                 {
                     _chatUtilities.Print("Ephemeral craft list '" + activeCraftList.Name + "' completed. List has been removed.");

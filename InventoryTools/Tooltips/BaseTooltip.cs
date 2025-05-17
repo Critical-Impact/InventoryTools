@@ -5,6 +5,8 @@ using CriticalCommonLib.Services;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using Dalamud.Utility;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Tooltips;
@@ -45,19 +47,22 @@ public abstract class BaseTooltip : TooltipService.TooltipTweak, IDisposable
 
     public virtual uint TooltipIdentifier { get; set; }
 
-    public bool HoverItemIsHq
+    public bool HoverItemIsHq => ItemUtil.IsHighQuality((uint)GameGui.HoveredItem);
+
+    public bool HoverItemIsCollectable => ItemUtil.IsCollectible((uint)GameGui.HoveredItem);
+
+    public InventoryItem.ItemFlags HoverItemFlags
     {
         get
         {
-            var itemId = GameGui.HoveredItem;
-            if (itemId < 2000000)
-            {
-                return  itemId > 1000000;
-            }
-
-            return false;
+            if (HoverItemIsCollectable)
+                return InventoryItem.ItemFlags.Collectable;
+            if (HoverItemIsHq)
+                return InventoryItem.ItemFlags.HighQuality;
+            return InventoryItem.ItemFlags.None;
         }
     }
+
     public uint HoverItemId
     {
         get

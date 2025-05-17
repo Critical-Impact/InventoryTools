@@ -30,7 +30,6 @@
         <PackageReference Include="System.Reactive" Version="6.0.1" />
         <ProjectReference Include="..\CriticalCommonLib\CriticalCommonLib.csproj" />
         <ProjectReference Include="..\OtterGui\OtterGui.csproj" />
-        <ProjectReference Include="..\Tetris\Tetris.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -166,6 +165,12 @@
 
     <ItemGroup>
       <Content Include="CHANGELOG.md">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <Content Include="Images\collectable.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <Content Include="Images\quality.png">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
     </ItemGroup>

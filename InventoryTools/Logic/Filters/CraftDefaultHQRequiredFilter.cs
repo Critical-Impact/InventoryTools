@@ -25,6 +25,11 @@ public class CraftDefaultHQRequiredFilter : BooleanFilter
         return null;
     }
 
+    public override string[] GetChoices()
+    {
+        return ["Yes", "No"];
+    }
+
     public override void UpdateFilterConfiguration(FilterConfiguration configuration, bool? newValue)
     {
         configuration.CraftList.HQRequired = newValue ?? false;

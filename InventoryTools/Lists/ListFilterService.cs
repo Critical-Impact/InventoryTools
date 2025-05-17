@@ -84,7 +84,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
                 {
                     characterSources.Add(item.ItemId,new List<CraftItemSource>());
                 }
-                characterSources[item.ItemId].Add(new CraftItemSource(item.ItemId, item.Quantity, item.IsHQ));
+                characterSources[item.ItemId].Add(new CraftItemSource(item.ItemId, item.Quantity, item.Flags));
             }
             foreach (var item in crystalBags)
             {
@@ -92,7 +92,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
                 {
                     characterSources.Add(item.ItemId,new List<CraftItemSource>());
                 }
-                characterSources[item.ItemId].Add(new CraftItemSource(item.ItemId, item.Quantity, item.IsHQ));
+                characterSources[item.ItemId].Add(new CraftItemSource(item.ItemId, item.Quantity, item.Flags));
             }
             foreach (var item in currencyBags)
             {
@@ -100,7 +100,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
                 {
                     characterSources.Add(item.ItemId,new List<CraftItemSource>());
                 }
-                characterSources[item.ItemId].Add(new CraftItemSource(item.ItemId, item.Quantity, item.IsHQ));
+                characterSources[item.ItemId].Add(new CraftItemSource(item.ItemId, item.Quantity, item.Flags));
             }
 
             foreach (var inventory in sourceInventories)
@@ -115,7 +115,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
                         {
                             externalSources.Add(item.ItemId,new List<CraftItemSource>());
                         }
-                        externalSources[item.ItemId].Add(new CraftItemSource(item.ItemId, item.Quantity, item.IsHQ));
+                        externalSources[item.ItemId].Add(new CraftItemSource(item.ItemId, item.Quantity, item.Flags));
                     }
                 }
             }
@@ -168,6 +168,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
             filterConfiguration.NeedsRefresh = false;
 
             searchResult = GenerateFilterResult(filterConfiguration, inventories.ToList());
+            filterConfiguration.CraftList.CalculateCosts(craftListConfiguration, _craftPricer);
             filterConfiguration.NeedsRefresh = false;
             filterConfiguration.Refreshing = false;
             filterConfiguration.SearchResults = searchResult;

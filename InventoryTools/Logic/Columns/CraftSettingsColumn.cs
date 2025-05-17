@@ -7,7 +7,7 @@ using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
-
+using Dalamud.Game.Text;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Ui.Widgets;
@@ -19,6 +19,7 @@ using Lumina.Excel;
 using Lumina.Excel.Sheets;
 using Microsoft.Extensions.Logging;
 using ImGuiUtil = OtterGui.ImGuiUtil;
+using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 using Vector2 = FFXIVClientStructs.FFXIV.Common.Math.Vector2;
 
 namespace InventoryTools.Logic.Columns;
@@ -173,8 +174,8 @@ public class CraftSettingsColumn : IColumn
             }
         }
         var ingredientPreferenceDefault = configuration.CraftList.GetIngredientPreference(searchResult.CraftItem);
-        var retainerRetrievalDefault = configuration.CraftList.GetCraftRetainerRetrieval(searchResult.CraftItem.ItemId);
-        var retainerRetrieval = retainerRetrievalDefault ?? (searchResult.CraftItem.IsOutputItem ? configuration.CraftList.CraftRetainerRetrievalOutput : configuration.CraftList.CraftRetainerRetrieval);
+        var perItemRetainerRetrieval = configuration.CraftList.GetCraftRetainerRetrieval(searchResult.CraftItem.ItemId);
+        var retainerRetrievalDefault = searchResult.CraftItem.IsOutputItem ? configuration.CraftList.CraftRetainerRetrievalOutput : configuration.CraftList.CraftRetainerRetrieval;
         var zonePreference = configuration.CraftList.GetZonePreference(searchResult.CraftItem.IngredientPreference.Type, searchResult.CraftItem.ItemId);
         var worldPreference = configuration.CraftList.GetMarketItemWorldPreference(searchResult.CraftItem.ItemId);
         var priceOverride = configuration.CraftList.GetMarketItemPriceOverride(searchResult.CraftItem.ItemId);
@@ -183,7 +184,7 @@ public class CraftSettingsColumn : IColumn
         ImGui.SetCursorPosY(originalPos);
         DrawHqIcon(configuration, rowIndex, searchResult.CraftItem);
         ImGui.SetCursorPosY(originalPos);
-        DrawRetainerIcon(configuration, rowIndex, searchResult.CraftItem, retainerRetrievalDefault, retainerRetrieval);
+        DrawRetainerIcon(configuration, rowIndex, searchResult.CraftItem, perItemRetainerRetrieval, retainerRetrievalDefault);
         ImGui.SetCursorPosY(originalPos);
 
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
@@ -201,7 +202,7 @@ public class CraftSettingsColumn : IColumn
                 {
 
                     ImGui.TextUnformatted("Sourcing: " + (ingredientPreferenceDefault != null ? _ingredientPreferenceLocalizer.FormattedName(ingredientPreferenceDefault) : "Use Default"));
-                    ImGui.TextUnformatted("Retainer: " + (retainerRetrievalDefault?.FormattedName() ?? "Use Default"));
+                    ImGui.TextUnformatted("Retainer: " + (perItemRetainerRetrieval?.FormattedName() ?? "Use Default"));
                     ImGui.TextUnformatted("Zone: " + (zonePreference != null ? _mapSheet.GetRowOrDefault(zonePreference.Value)?.FormattedName ?? "Use Default" : "Use Default"));
                     if (searchResult.Item.CanBePlacedOnMarket)
                     {
@@ -214,14 +215,16 @@ public class CraftSettingsColumn : IColumn
         return null;
     }
 
-    private void DrawRetainerIcon(FilterConfiguration configuration, int rowIndex, CraftItem item, CraftRetainerRetrieval? defaultRetainerRetrieval, CraftRetainerRetrieval retainerRetrieval)
+    private void DrawRetainerIcon(FilterConfiguration configuration, int rowIndex, CraftItem item, CraftRetainerRetrieval? perItemRetainerRetrieval, CraftRetainerRetrieval retainerRetrievalDefault)
     {
-        if (retainerRetrieval is CraftRetainerRetrieval.HQOnly or CraftRetainerRetrieval.Yes)
+        var retainerRetrieval = perItemRetainerRetrieval ?? retainerRetrievalDefault;
+
+        if (retainerRetrievalDefault != perItemRetainerRetrieval)
         {
             ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
             ImGui.Image(ImGuiService.GetIconTexture(Icons.RetainerIcon).ImGuiHandle, new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale,
                 new System.Numerics.Vector2(0, 0), new System.Numerics.Vector2(1, 1),
-                retainerRetrieval == CraftRetainerRetrieval.HQOnly
+                retainerRetrieval == CraftRetainerRetrieval.HqOnly
                     ? new Vector4(0.9f, 0.75f, 0.14f, 1f)
                     : new Vector4(1f, 1f, 1f, 1f));
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
@@ -232,7 +235,7 @@ public class CraftSettingsColumn : IColumn
                     {
                         ImGui.Text("Retainer Retrieval: ");
                         ImGui.Separator();
-                        ImGui.Text((retainerRetrieval == CraftRetainerRetrieval.HQOnly ? "HQ Only" : "Yes") + (defaultRetainerRetrieval == null ? " (Default)" : ""));
+                        ImGui.Text(retainerRetrieval.FormattedName() + (perItemRetainerRetrieval == null ? " (Default)" : ""));
                     }
                 }
             }
@@ -251,7 +254,7 @@ public class CraftSettingsColumn : IColumn
                     {
                         ImGui.Text("Retainer Retrieval: ");
                         ImGui.Separator();
-                        ImGui.Text("No" + (defaultRetainerRetrieval == null ? " (Default)" : ""));
+                        ImGui.Text(retainerRetrieval.FormattedName() + " (Default)");
                     }
                 }
             }
@@ -260,22 +263,49 @@ public class CraftSettingsColumn : IColumn
         if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
         {
             CraftRetainerRetrieval? newRetainerRetrieval;
-            if (defaultRetainerRetrieval != null && retainerRetrieval == CraftRetainerRetrieval.No)
+            if (item.Item.IsCollectable)
             {
-                newRetainerRetrieval = CraftRetainerRetrieval.Yes;
-            }
-            else if (defaultRetainerRetrieval != null && retainerRetrieval == CraftRetainerRetrieval.Yes)
-            {
-                newRetainerRetrieval = CraftRetainerRetrieval.HQOnly;
-            }
-            else if (defaultRetainerRetrieval != null && retainerRetrieval == CraftRetainerRetrieval.HQOnly)
-            {
-                newRetainerRetrieval = null;
+                if (perItemRetainerRetrieval == CraftRetainerRetrieval.No)
+                {
+                    newRetainerRetrieval = CraftRetainerRetrieval.Yes;
+                }
+                else if (perItemRetainerRetrieval == CraftRetainerRetrieval.Yes)
+                {
+                    newRetainerRetrieval = CraftRetainerRetrieval.CollectableOnly;
+                }
+                else if (perItemRetainerRetrieval == CraftRetainerRetrieval.CollectableOnly)
+                {
+                    newRetainerRetrieval = null;
+                }
+                else
+                {
+                    newRetainerRetrieval = CraftRetainerRetrieval.No;
+                }
             }
             else
             {
-                newRetainerRetrieval = CraftRetainerRetrieval.No;
+                if (perItemRetainerRetrieval == CraftRetainerRetrieval.No)
+                {
+                    newRetainerRetrieval = CraftRetainerRetrieval.Yes;
+                }
+                else if (perItemRetainerRetrieval == CraftRetainerRetrieval.Yes)
+                {
+                    newRetainerRetrieval = CraftRetainerRetrieval.HqOnly;
+                }
+                else if (perItemRetainerRetrieval == CraftRetainerRetrieval.HqOnly)
+                {
+                    newRetainerRetrieval = CraftRetainerRetrieval.NqOnly;
+                }
+                else if (perItemRetainerRetrieval == CraftRetainerRetrieval.NqOnly)
+                {
+                    newRetainerRetrieval = null;
+                }
+                else
+                {
+                    newRetainerRetrieval = CraftRetainerRetrieval.No;
+                }
             }
+
             configuration.NeedsRefresh = true;
             configuration.CraftList.UpdateCraftRetainerRetrieval(item.ItemId, newRetainerRetrieval);
         }
@@ -288,89 +318,100 @@ public class CraftSettingsColumn : IColumn
     private void DrawHqIcon(FilterConfiguration configuration, int rowIndex, CraftItem item)
     {
         var hqRequired = configuration.CraftList.GetHQRequired(item.ItemId);
+        var isCollectable = item.Item.IsCollectable;
 
         var calculatedHqRequired = hqRequired ?? configuration.CraftList.HQRequired;
 
-        if (calculatedHqRequired == true && item.Item.Base.CanBeHq)
+        var canBeHq = item.Item.Base.CanBeHq;
+
+        nint textureHandle;
+        Vector4 iconTint;
+
+        if (isCollectable)
         {
-            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
-            ImGui.Image(ImGuiService.GetImageTexture("hq").ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale,
-                new System.Numerics.Vector2(0, 0), new System.Numerics.Vector2(1, 1), new Vector4(0.9f, 0.75f, 0.14f, 1f));
-            if (item.Item.Base.CanBeHq && ImGui.IsItemClicked(ImGuiMouseButton.Left))
+            textureHandle = ImGuiService.GetImageTexture("collectable").ImGuiHandle;
+            iconTint = new Vector4(0.9f, 0.75f, 0.14f, 1f);
+        }
+        else if (canBeHq && (hqRequired == true || (hqRequired == null && calculatedHqRequired)))
+        {
+            textureHandle = ImGuiService.GetImageTexture("hq").ImGuiHandle;
+            iconTint = new Vector4(0.9f, 0.75f, 0.14f, 1f);
+        }
+        else if (hqRequired == false || !canBeHq)
+        {
+            textureHandle = ImGuiService.GetImageTexture("hq").ImGuiHandle;
+            iconTint = new Vector4(1.0f,1.0f, 1.0f, 0.5f);
+        }
+        else
+        {
+            textureHandle = ImGuiService.GetImageTexture("quality").ImGuiHandle;
+            iconTint = new Vector4(1.0f, 1.0f, 1.0f, 1f);
+        }
+
+        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
+        ImGui.Image(textureHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale,
+            new System.Numerics.Vector2(0, 0), new System.Numerics.Vector2(1, 1), iconTint);
+        if (canBeHq)
+        {
+            if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
             {
-                if (hqRequired != null)
+                if (hqRequired == null)
+                {
+                    configuration.CraftList.UpdateHQRequired(item.ItemId, true);
+                    configuration.NeedsRefresh = true;
+                }
+                else if (hqRequired == true)
                 {
                     configuration.CraftList.UpdateHQRequired(item.ItemId, false);
                     configuration.NeedsRefresh = true;
                 }
                 else
                 {
-                    configuration.CraftList.UpdateHQRequired(item.ItemId, true);
-                    configuration.NeedsRefresh = true;
-                }
-
-            }
-            else if (item.Item.Base.CanBeHq && ImGui.IsItemClicked(ImGuiMouseButton.Right))
-            {
-                ImGui.OpenPopup("ConfigureHQSettings" + rowIndex);
-            }
-
-            if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
-            {
-                using (var tt = ImRaii.Tooltip())
-                {
-                    if (tt)
-                    {
-                        ImGui.Text("HQ Required: ");
-                        ImGui.Separator();
-                        ImGui.Text("HQ" + (hqRequired == null ? " (Default)" : ""));
-                    }
-                }
-            }
-
-            ImGui.SameLine();
-        }
-        else
-        {
-            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
-            ImGui.Image(ImGuiService.GetImageTexture("hq").ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale,
-                new System.Numerics.Vector2(0, 0), new System.Numerics.Vector2(1, 1),
-                new Vector4(0.9f, 0.75f, 0.14f, 0.2f));
-            if (item.Item.Base.CanBeHq && ImGui.IsItemClicked(ImGuiMouseButton.Left))
-            {
-                if (hqRequired != null)
-                {
                     configuration.CraftList.UpdateHQRequired(item.ItemId, null);
                     configuration.NeedsRefresh = true;
                 }
-                else
-                {
-                    configuration.CraftList.UpdateHQRequired(item.ItemId, true);
-                    configuration.NeedsRefresh = true;
-                }
             }
             else if (item.Item.Base.CanBeHq && ImGui.IsItemClicked(ImGuiMouseButton.Right))
             {
                 ImGui.OpenPopup("ConfigureHQSettings" + rowIndex);
             }
-
-            if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
+        }
+        if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
+        {
+            using (var tt = ImRaii.Tooltip())
             {
-                using (var tt = ImRaii.Tooltip())
+                if (tt)
                 {
-                    if (tt)
+                    ImGui.Text("Item Quality: ");
+                    ImGui.Separator();
+                    if (isCollectable)
                     {
-                        ImGui.Text("HQ Required: ");
-                        ImGui.Separator();
-                        ImGui.Text(item.Item.Base.CanBeHq
-                            ? "No" + (hqRequired == null ? " (Default)" : "")
-                            : "Cannot be HQ");
+                        ImGui.Text("Collectable");
                     }
+                    else if (hqRequired == true)
+                    {
+                        ImGui.Text("HQ Only (Overridden)");
+                    }
+                    else if (hqRequired == false)
+                    {
+                        ImGui.Text("NQ Only (Overridden)");
+                    }
+                    else if(canBeHq)
+                    {
+                        ImGui.Text(configuration.CraftList.HQRequired ? "HQ Only (List Default)" : "HQ/NQ (List Default)");
+                    }
+                    else
+                    {
+                        ImGui.Text("NQ Only (List Default)");
+                    }
+
+                    ImGui.Text(canBeHq ? "Can be HQ" : "Can't be HQ");
+                    ImGui.Text(isCollectable ? "Always Collectable" : "Can't be Collectable");
                 }
             }
-
-            ImGui.SameLine();
         }
+
+        ImGui.SameLine();
 
     }
 
@@ -666,8 +707,14 @@ public class CraftSettingsColumn : IColumn
                 case CraftRetainerRetrieval.No:
                     previewValue = "No";
                     break;
-                case CraftRetainerRetrieval.HQOnly:
+                case CraftRetainerRetrieval.HqOnly:
                     previewValue = "HQ Only";
+                    break;
+                case CraftRetainerRetrieval.NqOnly:
+                    previewValue = "NQ Only";
+                    break;
+                case CraftRetainerRetrieval.CollectableOnly:
+                    previewValue = "Collectable Only";
                     break;
             }
         }
@@ -703,9 +750,25 @@ public class CraftSettingsColumn : IColumn
                     return true;
                 }
 
-                if (ImGui.Selectable("HQ Only"))
+                if (!item.Item.IsCollectable && item.Item.Base.CanBeHq && ImGui.Selectable("HQ Only"))
                 {
-                    configuration.CraftList.UpdateCraftRetainerRetrieval(item.ItemId, CraftRetainerRetrieval.HQOnly);
+                    configuration.CraftList.UpdateCraftRetainerRetrieval(item.ItemId, CraftRetainerRetrieval.HqOnly);
+                    configuration.NeedsRefresh = true;
+                    configuration.NotifyConfigurationChange();
+                    return true;
+                }
+
+                if (!item.Item.IsCollectable && ImGui.Selectable("NQ Only"))
+                {
+                    configuration.CraftList.UpdateCraftRetainerRetrieval(item.ItemId, CraftRetainerRetrieval.NqOnly);
+                    configuration.NeedsRefresh = true;
+                    configuration.NotifyConfigurationChange();
+                    return true;
+                }
+
+                if (item.Item.IsCollectable && ImGui.Selectable("Collectable Only"))
+                {
+                    configuration.CraftList.UpdateCraftRetainerRetrieval(item.ItemId, CraftRetainerRetrieval.CollectableOnly);
                     configuration.NeedsRefresh = true;
                     configuration.NotifyConfigurationChange();
                     return true;

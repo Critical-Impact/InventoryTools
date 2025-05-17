@@ -31,7 +31,15 @@ public class InventoryToolsPluginMock : InventoryToolsPlugin
 {
     private Logger seriLog;
 
-    public InventoryToolsPluginMock(IDalamudPluginInterface pluginInterface, IPluginLog pluginLog, IAddonLifecycle addonLifecycle, IChatGui chatGui, IClientState clientState, ICommandManager commandManager, ICondition condition, IDataManager dataManager, IFramework framework, IGameGui gameGui, IGameInteropProvider gameInteropProvider, IKeyState keyState, IGameNetwork gameNetwork, IObjectTable objectTable, ITargetManager targetManager, ITextureProvider textureProvider, IToastGui toastGui, IContextMenu contextMenu, ITitleScreenMenu titleScreenMenu, IGameInventory gameInventory) : base(pluginInterface, pluginLog, addonLifecycle, chatGui, clientState, commandManager, condition, dataManager, framework, gameGui, gameInteropProvider, keyState, gameNetwork, objectTable, targetManager, textureProvider, toastGui, contextMenu, titleScreenMenu, gameInventory)
+    public InventoryToolsPluginMock(IDalamudPluginInterface pluginInterface, IPluginLog pluginLog,
+        IAddonLifecycle addonLifecycle, IChatGui chatGui, IClientState clientState, ICommandManager commandManager,
+        ICondition condition, IDataManager dataManager, IFramework framework, IGameGui gameGui,
+        IGameInteropProvider gameInteropProvider, IKeyState keyState, IGameNetwork gameNetwork,
+        IObjectTable objectTable, ITargetManager targetManager, ITextureProvider textureProvider, IToastGui toastGui,
+        IContextMenu contextMenu, ITitleScreenMenu titleScreenMenu, IGameInventory gameInventory) : base(
+        pluginInterface, pluginLog, addonLifecycle, chatGui, clientState, commandManager, condition, dataManager,
+        framework, gameGui, gameInteropProvider, keyState, gameNetwork, objectTable, targetManager, textureProvider,
+        toastGui, contextMenu, titleScreenMenu, gameInventory)
     {
     }
 
@@ -40,6 +48,7 @@ public class InventoryToolsPluginMock : InventoryToolsPlugin
         replacements.Add(typeof(WotsitIpc),typeof(MockWotsitIpc));
         replacements.Add(typeof(CraftMonitor),typeof(MockHostedCraftMonitor));
         replacements.Add(typeof(OdrScanner),typeof(MockOdrScanner));
+        replacements.Add(typeof(SimpleAcquisitionTrackerService),typeof(MockAcquisitionTrackerService));
     }
 
     public override void PreBuild(IHostBuilder hostBuilder)

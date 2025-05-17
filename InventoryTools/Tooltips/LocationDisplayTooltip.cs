@@ -79,9 +79,9 @@ public class LocationDisplayTooltip : BaseTooltip
                     {
                         if (filterConfiguration.FilterType == FilterType.CraftFilter)
                         {
-                            var hoverItemIsHq = HoverItemIsHq;
+                            var hoverItemFlags = HoverItemFlags;
                             var hoverItemId = HoverItemId;
-                            var craftItem = filterConfiguration.CraftList.GetItemById(hoverItemId, hoverItemIsHq, HoverItem?.Base.CanBeHq ?? false);
+                            var craftItem = filterConfiguration.CraftList.GetItemById(hoverItemId, hoverItemFlags);
                             if (craftItem != null)
                             {
                                 var filterResult = filterConfiguration.SearchResults;
@@ -99,7 +99,7 @@ public class LocationDisplayTooltip : BaseTooltip
                                     if (filterResult != null)
                                     {
                                         var sortedItems = filterResult.Where(c => c.InventoryItem != null &&
-                                            c.InventoryItem.ItemId == hoverItemId && c.InventoryItem.IsHQ == hoverItemIsHq).ToList();
+                                            c.InventoryItem.ItemId == hoverItemId && c.InventoryItem.Flags == hoverItemFlags).ToList();
                                         if (sortedItems.Any())
                                         {
                                             var sortedItem = sortedItems.First();

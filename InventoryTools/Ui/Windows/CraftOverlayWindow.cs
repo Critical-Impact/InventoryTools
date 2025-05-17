@@ -12,6 +12,7 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Shared.Interfaces;
+using Dalamud.Game.Text;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Plugin.Services;
@@ -396,10 +397,23 @@ public class CraftOverlayWindow : OverlayWindow
                             ImGui.TableNextColumn();
                             var nextStep = craftList.GetNextStep(currentItem);
                             var nextCraftStep = craftList.GetNextCraftStep(currentItem);
-                            using (ImRaii.PushColor(ImGuiCol.Text, nextStep.Item1))
+                            using (var color = ImRaii.PushColor(ImGuiCol.Text, nextStep.Item1))
                             {
                                 ImGui.PushTextWrapPos();
                                 ImGui.Text(nextStep.Item2);
+                                if (currentItem.Flags == FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.Collectable)
+                                {
+                                    color.Pop();
+                                    ImGui.SameLine();
+                                    ImGui.Text($" {(char)SeIconChar.Collectible}");
+                                }
+
+                                if (currentItem.Flags == FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HighQuality)
+                                {
+                                    color.Pop();
+                                    ImGui.SameLine();
+                                    ImGui.Text($" {(char)SeIconChar.Collectible}");
+                                }
                                 ImGui.PopTextWrapPos();
                             }
                             ImGui.TableNextColumn();

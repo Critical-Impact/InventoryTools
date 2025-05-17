@@ -8,6 +8,20 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [12.0.9] - 2025-05-17
+
+### Changed
+- Collectable items are now supported in craft lists
+- Retainer Retrieval can now be configured to only show NQ/Collectable items
+- The acquisition tracker now counts collectables when crafted
+
+### Fixed
+- The market pricing column was not updating for items that were not specifically set to be bought off the market
+
+### Added
+- Added Is Collectable filter/column
+- Added Can Be HQ filter/column
+
 ## [12.0.8] - 2025-05-08
 
 ### Added
@@ -17,7 +31,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.h
 
 ### Fixed
 - Improvements to the acquisition tracker
-
 
 ## [12.0.7] - 2025-05-07
 

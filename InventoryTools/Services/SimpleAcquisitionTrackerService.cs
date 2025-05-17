@@ -9,9 +9,9 @@ using Dalamud.Game.Inventory;
 using Dalamud.Game.Inventory.InventoryEventArgTypes;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using InventoryTools.Logic.Settings;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Services;
@@ -26,14 +26,7 @@ public enum AcquisitionReason
     Other
 }
 
-public enum ItemType
-{
-    Normal,
-    Hq,
-    Collectable
-}
-
-public class SimpleAcquisitionTrackerService : IHostedService, IDisposable
+public class SimpleAcquisitionTrackerService : ISimpleAcquisitionTrackerService
 {
     private readonly IGameInventory _gameInventory;
     private readonly IClientState _clientState;
@@ -46,7 +39,7 @@ public class SimpleAcquisitionTrackerService : IHostedService, IDisposable
     private readonly AcquisitionTrackerPersistStateSetting _persistStateSetting;
     private readonly AcquisitionTrackerLoginDelaySetting _loginDelaySetting;
     private readonly InventoryToolsConfiguration _configuration;
-    private Dictionary<(uint, ItemType), long> _itemCounts = new();
+    private Dictionary<(uint, InventoryItem.ItemFlags), long> _itemCounts = new();
     private AcquisitionReason _currentState = AcquisitionReason.Other;
     private DateTime? _stateChangeTime;
     private bool _initialCheckPerformed;
@@ -54,7 +47,7 @@ public class SimpleAcquisitionTrackerService : IHostedService, IDisposable
     private DateTime? _lastLoginTime;
     private Hook<RaptureAtkModuleUpdateDelegate>? _raptureAtkModuleUpdateHook;
 
-    public delegate void ItemAcquiredDelegate(uint itemId, ItemType itemType, int qtyIncrease, AcquisitionReason reason);
+    public delegate void ItemAcquiredDelegate(uint itemId, InventoryItem.ItemFlags itemFlags, int qtyIncrease, AcquisitionReason reason);
     private unsafe delegate void RaptureAtkModuleUpdateDelegate(RaptureAtkModule* ram, float f1);
 
     public event ItemAcquiredDelegate? ItemAcquired;
@@ -139,19 +132,19 @@ public class SimpleAcquisitionTrackerService : IHostedService, IDisposable
             GameInventoryType.Inventory4, GameInventoryType.Currency, GameInventoryType.Crystals
         ];
 
-        var newItemCounts = new Dictionary<(uint, ItemType), long>();
+        var newItemCounts = new Dictionary<(uint, InventoryItem.ItemFlags), long>();
         foreach (var inventory in inventories)
         {
             foreach (var item in _gameInventory.GetInventoryItems(inventory))
             {
-                var itemType = ItemType.Normal;
+                var itemType = InventoryItem.ItemFlags.None;
                 if (item.IsHq)
                 {
-                    itemType = ItemType.Hq;
+                    itemType = InventoryItem.ItemFlags.None;
                 }
                 else if (item.IsCollectable)
                 {
-                    itemType = ItemType.Collectable;
+                    itemType = InventoryItem.ItemFlags.Collectable;
                 }
 
                 newItemCounts.TryAdd((item.BaseItemId, itemType), 0);
@@ -161,7 +154,7 @@ public class SimpleAcquisitionTrackerService : IHostedService, IDisposable
 
         if (notify)
         {
-            var changed = new Dictionary<(uint, ItemType), long>();
+            var changed = new Dictionary<(uint, InventoryItem.ItemFlags), long>();
 
             foreach (var itemCount in newItemCounts)
             {

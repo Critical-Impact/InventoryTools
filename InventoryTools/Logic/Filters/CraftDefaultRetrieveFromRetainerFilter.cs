@@ -53,7 +53,9 @@ public class CraftDefaultRetrieveFromRetainerFilter : ChoiceFilter<CraftRetainer
         {
             CraftRetainerRetrieval.No,
             CraftRetainerRetrieval.Yes,
-            CraftRetainerRetrieval.HQOnly
+            CraftRetainerRetrieval.HqOnly,
+            CraftRetainerRetrieval.NqOnly,
+            CraftRetainerRetrieval.CollectableOnly,
         };
     }
 
