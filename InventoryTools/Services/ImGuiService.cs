@@ -26,13 +26,13 @@ public struct GameIcon
     public Vector2? Uv1;
 }
 
-public class ImGuiService
+public class ImGuiService : AllaganLib.Interface.Services.ImGuiService
 {
     private readonly IDalamudPluginInterface pluginInterface;
     public ITextureProvider TextureProvider { get; }
     public ImGuiMenuService ImGuiMenuService { get; }
 
-    public ImGuiService(ITextureProvider textureProvider, ImGuiMenuService imGuiMenuService, IDalamudPluginInterface pluginInterface)
+    public ImGuiService(ITextureProvider textureProvider, ImGuiMenuService imGuiMenuService, IDalamudPluginInterface pluginInterface) : base(pluginInterface, textureProvider)
     {
         this.pluginInterface = pluginInterface;
         TextureProvider = textureProvider;
@@ -271,6 +271,41 @@ public class ImGuiService
         var assemblyLocation = pluginInterface.AssemblyLocation.DirectoryName!;
         var imagePath = Path.Combine(assemblyLocation, Path.Combine("Images", $"{imageName}.png"));
         return TextureProvider.GetFromFile(new FileInfo(imagePath));
+    }
+
+    public void WrapTableColumnElements<T>(string windowId, IEnumerable<T> items, float elementSize, float rowSize,
+        Func<T, bool> drawElement)
+    {
+        using var pushId = ImRaii.PushId(windowId);
+        using (var wrapTableChild = ImRaii.Child("ScrollBox",
+                   new Vector2(ImGui.GetContentRegionAvail().X,
+                       rowSize + ImGui.GetStyle().CellPadding.Y + ImGui.GetStyle().ItemSpacing.Y), false))
+        {
+            if (wrapTableChild.Success)
+            {
+                var columnWidth = ImGui.GetContentRegionAvail().X * ImGui.GetIO().FontGlobalScale;
+                var itemWidth = (elementSize + ImGui.GetStyle().ItemSpacing.X) * ImGui.GetIO().FontGlobalScale;
+                var maxItems = itemWidth != 0 ? (int)Math.Floor(columnWidth / itemWidth) : 0;
+                maxItems = maxItems == 0 ? 1 : maxItems;
+                var enumerable = items.ToList();
+                var count = 1;
+                for (var index = 0; index < enumerable.Count; index++)
+                {
+                    using (ImRaii.PushId(index))
+                    {
+                        if (drawElement.Invoke(enumerable[index]))
+                        {
+                            if (count % maxItems != 0)
+                            {
+                                ImGui.SameLine();
+                            }
+
+                            count++;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public void WrapTableColumnElements<T>(string windowId, IEnumerable<T> items, float rowSize,

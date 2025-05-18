@@ -4,11 +4,13 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using AllaganLib.Data.Service;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.Extensions;
 using AllaganLib.GameSheets.Model;
 using AllaganLib.GameSheets.Service;
 using AllaganLib.GameSheets.Sheets;
+using AllaganLib.Interface.Grid.ColumnFilters;
 using AllaganLib.Shared.Time;
 using Autofac;
 using Autofac.Core.Activators.Reflection;
@@ -36,6 +38,7 @@ using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using InventoryTools.Commands;
+using InventoryTools.EquipmentSuggest;
 using InventoryTools.Highlighting;
 using InventoryTools.Host;
 using InventoryTools.Hotkeys;
@@ -390,6 +393,27 @@ namespace InventoryTools
                 builder.RegisterType<MarketOrderService>().AsImplementedInterfaces().SingleInstance();
                 builder.RegisterType<ContainerAwareCsvLoader>().SingleInstance();
                 builder.RegisterType<MarketCacheConfiguration>().SingleInstance();
+
+                //Equipment Recommendation System
+                builder.RegisterType<EquipmentSuggestGrid>().SingleInstance();
+                builder.RegisterType<EquipmentSuggestConfig>().SingleInstance();
+                builder.RegisterType<EquipmentSuggestItem>().SingleInstance();
+                builder.RegisterType<EquipmentSuggestSlotColumn>().SingleInstance();
+                builder.RegisterType<EquipmentSuggestSelectedItemColumn>().SingleInstance();
+                builder.RegisterType<EquipmentSuggestSuggestionColumn>();
+                builder.RegisterType<EquipmentSuggestClassJobFormField>().SingleInstance();
+                builder.RegisterType<EquipmentSuggestSourceTypeField>().SingleInstance();
+                builder.RegisterType<EquipmentSuggestExcludeSourceTypeField>().SingleInstance();
+                builder.RegisterType<EquipmentSuggestLevelFormField>().SingleInstance();
+                builder.RegisterType<EquipmentSuggestFilterStatsField>().SingleInstance();
+                builder.RegisterType<EquipmentSuggestToolModeCategorySetting>().SingleInstance();
+                builder.RegisterType<EquipmentSuggestModeSetting>().SingleInstance();
+                builder.RegisterType<EquipmentSuggestSelectedSecondaryItemColumn>().SingleInstance();
+                builder.RegisterType<EquipmentSuggestService>().SingleInstance();
+                builder.RegisterType<StringColumnFilter>();
+                builder.RegisterType<ChoiceColumnFilter>();
+                builder.RegisterType<CsvLoaderService>().SingleInstance();
+
                 builder.Register<UniversalisUserAgent>(c =>
                 {
                     var pluginInterface = c.Resolve<IDalamudPluginInterface>();

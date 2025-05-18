@@ -183,8 +183,8 @@
       },
       "AllaganLib.GameSheets": {
         "type": "Transitive",
-        "resolved": "1.2.11",
-        "contentHash": "FdEPFAFsFzW7q0Fq/iDHPyVRgrjnezVIkTSgk/e6EhdCn7+oSgIwtTQIvDohVA0cS/4ez7wOHUSsJ5dvyGu/nQ==",
+        "resolved": "1.2.12",
+        "contentHash": "0pQmlzsDYx55N/ZfFO+UvUuRBTNdh3hrxcDU6fxR5rOTZfiHKtwsyffc2g3sVxR5I15a1zLFLqlCBRSRCo9aLA==",
         "dependencies": {
           "AllaganLib.Shared": "1.2.8",
           "Autofac": "8.2.1",
@@ -195,11 +195,11 @@
       },
       "AllaganLib.Interface": {
         "type": "Transitive",
-        "resolved": "1.2.7",
-        "contentHash": "9K2LDeViGKiX3NlI3UZkcXo87vyq9tWY9am8gW64TvSv2V2uro69sy435KOnc+KPLrC9CWatNW6BVOljoQ2ZDQ==",
+        "resolved": "1.2.12",
+        "contentHash": "K3HHDeMy8DjsywZqL4mC4WuQ1UCnjifzp0owDLIiT2DICihdl7bjoCkWXQgrHjDxICSuPqp/Cze++6wen7pdzw==",
         "dependencies": {
           "AllaganLib.Data": "1.2.0",
-          "AllaganLib.Shared": "1.2.7",
+          "AllaganLib.Shared": "1.2.8",
           "NaturalSort.Extension": "4.3.0"
         }
       },
@@ -737,7 +737,7 @@
       "criticalcommonlib": {
         "type": "Project",
         "dependencies": {
-          "AllaganLib.GameSheets": "[1.2.11, )",
+          "AllaganLib.GameSheets": "[1.2.12, )",
           "Humanizer.Core": "[3.0.0-beta.54, )",
           "Microsoft.Extensions.Hosting": "[9.0.4, )",
           "NaturalSort.Extension": "[4.3.0, )",
@@ -748,7 +748,7 @@
       "inventorytools": {
         "type": "Project",
         "dependencies": {
-          "AllaganLib.Interface": "[1.2.7, )",
+          "AllaganLib.Interface": "[1.2.12, )",
           "Autofac": "[8.2.1, )",
           "Autofac.Extensions.DependencyInjection": "[10.0.0, )",
           "CriticalCommonLib": "[1.0.0, )",

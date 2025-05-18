@@ -40,6 +40,8 @@ namespace InventoryTools.Extensions
                     return "Items";
                 case SettingCategory.Highlighting:
                     return "Highlighting";
+                case SettingCategory.EquipmentRecommendation:
+                    return "Equipment Recommendations";
             }
             return settingCategory.ToString();
         }

@@ -1,6 +1,8 @@
 using System.Linq;
 using System.Numerics;
 using AllaganLib.GameSheets.Model;
+using AllaganLib.GameSheets.Sheets.Rows;
+using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Services;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Colors;
@@ -79,39 +81,72 @@ public class ImGuiTooltipService
                         }
                     }
 
-                    ImGui.TextUnformatted($"Item Level {item.Base.LevelItem.RowId}");
-                    if (item.ClassJobCategory != null)
+                    if (searchResult.Item.Base.BaseParamValue.All(c => c == 0))
                     {
-                        ImGui.TextUnformatted($"Equip Level {item.Base.LevelEquip}");
+                        DrawBaseAttributes(item);
                     }
-
-                    ImGui.TextUnformatted(item.FormattedRarity);
-
-                    if (item.EquipRace != CharacterRace.Any && item.EquipRace != CharacterRace.None)
+                    else
                     {
-                        ImGui.TextUnformatted($"Only equippable by {item.EquipRace}");
-                    }
 
-                    if (item.EquippableByGender != CharacterSex.Both && item.EquippableByGender != CharacterSex.NotApplicable)
-                    {
-                        ImGui.TextUnformatted($"Only equippable by {item.EquippableByGender.ToString()}");
-                    }
+                        using (var table = ImRaii.Table("StatsTable", 2,
+                                   ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
+                        {
+                            if (table)
+                            {
+                                ImGui.TableNextRow();
+                                ImGui.TableSetColumnIndex(0);
+                                {
+                                    DrawBaseAttributes(item);
+                                }
 
-                    if (item.Base.CanBeHq)
-                    {
-                        ImGui.TextUnformatted("Can be HQ");
-                    }
+                                ImGui.TableSetColumnIndex(1);
+                                {
+                                    for (var index = 0; index < searchResult.Item.Base.BaseParam.Count; index++)
+                                    {
+                                        var baseParam = searchResult.Item.Base.BaseParam[index];
+                                        if (baseParam.RowId == 0)
+                                        {
+                                            continue;
+                                        }
 
-                    if (item.Base.IsUnique)
-                    {
-                        ImGui.TextUnformatted("Unique");
-                    }
+                                        var baseParamValue = searchResult.Item.Base.BaseParamValue[index];
+                                        if (baseParamValue == 0)
+                                        {
+                                            continue;
+                                        }
 
-                    if (item.Base.IsUntradable)
-                    {
-                        ImGui.TextUnformatted("Untradable");
-                    }
+                                        ImGui.Text(baseParam.Value.Name.ToImGuiString() + ": " +
+                                                   baseParamValue);
+                                    }
 
+                                    if (searchResult.Item.Base.BaseParamValueSpecial.Any(c => c != 0))
+                                    {
+                                        ImGui.NewLine();
+                                        ImGui.Separator();
+                                        ImGui.Text("When HQ:");
+                                        for (var index = 0; index < searchResult.Item.Base.BaseParamSpecial.Count; index++)
+                                        {
+                                            var baseParam = searchResult.Item.Base.BaseParamSpecial[index];
+                                            if (baseParam.RowId == 0)
+                                            {
+                                                continue;
+                                            }
+
+                                            var baseParamValue = searchResult.Item.Base.BaseParamValueSpecial[index];
+                                            if (baseParamValue == 0)
+                                            {
+                                                continue;
+                                            }
+
+                                            ImGui.Text(baseParam.Value.Name.ToImGuiString() + ": +" +
+                                                       baseParamValue);
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+                    }
 
                     if (item.Sources.Count > 0)
                     {
@@ -149,6 +184,42 @@ public class ImGuiTooltipService
                     }
                 }
             }
+        }
+    }
+
+    private static void DrawBaseAttributes(ItemRow item)
+    {
+        ImGui.TextUnformatted($"Item Level {item.Base.LevelItem.RowId}");
+        if (item.ClassJobCategory != null)
+        {
+            ImGui.TextUnformatted($"Equip Level {item.Base.LevelEquip}");
+        }
+
+        ImGui.TextUnformatted(item.FormattedRarity);
+
+        if (item.EquipRace != CharacterRace.Any && item.EquipRace != CharacterRace.None)
+        {
+            ImGui.TextUnformatted($"Only equippable by {item.EquipRace}");
+        }
+
+        if (item.EquippableByGender != CharacterSex.Both && item.EquippableByGender != CharacterSex.NotApplicable)
+        {
+            ImGui.TextUnformatted($"Only equippable by {item.EquippableByGender.ToString()}");
+        }
+
+        if (item.Base.CanBeHq)
+        {
+            ImGui.TextUnformatted("Can be HQ");
+        }
+
+        if (item.Base.IsUnique)
+        {
+            ImGui.TextUnformatted("Unique");
+        }
+
+        if (item.Base.IsUntradable)
+        {
+            ImGui.TextUnformatted("Untradable");
         }
     }
 }

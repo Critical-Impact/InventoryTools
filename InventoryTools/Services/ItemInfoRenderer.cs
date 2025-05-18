@@ -405,9 +405,6 @@ public class ItemInfoRenderService : IDisposable
         var sourceIcon = _imGuiService.GetIconTexture(icon);
 
         var hasCustomClick = sourceRenderer?.OnClick != null;
-        var hasTooltip = sourceRenderer?.DrawTooltip != null;
-        var hasGroupedTooltip = sourceRenderer?.DrawTooltipGrouped != null;
-
 
         if (hasCustomClick && ImGui.ImageButton(sourceIcon.ImGuiHandle,
                 new Vector2(iconSize.X, iconSize.Y) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
@@ -574,113 +571,7 @@ public class ItemInfoRenderService : IDisposable
             _itemTooltipIndex = 0;
         }
 
-        if ((hasTooltip || hasGroupedTooltip) && ImGui.IsItemHovered())
-        {
-            _inTooltip = true;
-            ImGui.SetNextWindowSizeConstraints( new System.Numerics.Vector2(250, -1), new System.Numerics.Vector2(1000,1000));
-            using var tt = ImRaii.Tooltip();
-            if (tt.Success)
-            {
-                if (itemSources.Count > 1)
-                {
-                    var typeName = (rendererType == RendererType.Source ? this.GetSourceTypeName(firstItem.GetType()) : this.GetUseTypeName(firstItem.GetType()));
-                    ImGui.Text(typeName.Plural ?? typeName.Singular);
-                    ImGui.Separator();
-                    if (hasGroupedTooltip)
-                    {
-                        sourceRenderer?.DrawTooltipGrouped?.Invoke(itemSources);
-                    }
-                    else
-                    {
-
-                        int totalSources = itemSources.Count;
-
-                        if (totalSources > 0)
-                        {
-                            var currentIndex = _itemTooltipIndex;
-
-                            if (currentIndex < 0 || currentIndex >= itemSources.Count)
-                            {
-                                currentIndex = 0;
-                            }
-
-                            var source = itemSources[currentIndex];
-                            sourceRenderer?.DrawTooltip.Invoke(source);
-
-                            ImGui.Spacing();
-                            ImGui.Separator();
-                            ImGui.Spacing();
-
-                            float windowWidth = ImGui.GetContentRegionAvail().X;
-                            string leftText = FontAwesomeIcon.ArrowLeft.ToIconString();
-                            string centerText = $"Source {currentIndex + 1} of {totalSources}";
-                            string rightText =  FontAwesomeIcon.ArrowRight.ToIconString();
-                            string keyboardIcon = FontAwesomeIcon.Keyboard.ToIconString();
-
-                            float centerWidth = ImGui.CalcTextSize(centerText).X;
-
-
-                            using (ImRaii.PushFont(_font.IconFont))
-                            {
-                                ImGui.TextUnformatted(leftText);
-                                ImGui.SameLine();
-                                ImGui.TextUnformatted(keyboardIcon);
-                            }
-
-                            ImGui.SameLine();
-
-                            ImGui.SetCursorPosX((windowWidth - centerWidth) * 0.5f);
-                            ImGui.TextUnformatted(centerText);
-
-
-                            ImGui.SameLine();
-
-                            using (ImRaii.PushFont(_font.IconFont))
-                            {
-                                float rightWidth = ImGui.CalcTextSize(rightText).X;
-                                float keyboardIconWidth = ImGui.CalcTextSize(keyboardIcon).X;
-                                ImGui.SetCursorPosX(windowWidth - rightWidth - keyboardIconWidth);
-                                ImGui.TextUnformatted(keyboardIcon);
-                                ImGui.SameLine();
-                                ImGui.TextUnformatted(rightText);
-                            }
-
-                            if (_scrollLeft)
-                            {
-                                currentIndex = (currentIndex - 1 + totalSources) % totalSources;
-                                _itemTooltipIndex = currentIndex;
-                                _scrollLeft = false;
-                            }
-                            if (_scrollRight)
-                            {
-                                currentIndex = (currentIndex + 1) % totalSources;
-                                _itemTooltipIndex = currentIndex;
-                                _scrollRight = false;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    ImGui.Text((rendererType == RendererType.Source
-                        ? this.GetSourceTypeName(firstItem.GetType())
-                        : this.GetUseTypeName(firstItem.GetType())).Singular);
-                    ImGui.Separator();
-                    sourceRenderer?.DrawTooltip.Invoke(firstItem);
-                }
-            }
-        }
-        else if(ImGui.IsItemHovered())
-        {
-            _inTooltip = true;
-            using var tt = ImRaii.Tooltip();
-            if (tt.Success)
-            {
-                ImGui.Text("No tooltip configured for " + (rendererType == RendererType.Source
-                    ? this.GetSourceTypeName(firstItem.GetType())
-                    : this.GetUseTypeName(firstItem.GetType())).Singular + ", please report this!");
-            }
-        }
+        DrawItemSourceTooltip(rendererType, itemSources);
 
         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
                                 ImGuiHoveredFlags.AllowWhenOverlapped &
@@ -826,6 +717,127 @@ public class ItemInfoRenderService : IDisposable
         }
 
         return messages;
+    }
+
+    public void DrawItemSourceTooltip(RendererType rendererType, List<ItemSource> itemSources)
+    {
+        if (itemSources.Count == 0)
+        {
+            return;
+        }
+        var firstItem = itemSources[0];
+        var renderers = rendererType == RendererType.Source ? _sourceRenderers : _useRenderers;
+        var sourceRenderer = renderers.ContainsKey(firstItem.GetType()) ? renderers[firstItem.GetType()] : null;
+        var hasTooltip = sourceRenderer?.DrawTooltip != null;
+        var hasGroupedTooltip = sourceRenderer?.DrawTooltipGrouped != null;
+
+        if ((hasTooltip || hasGroupedTooltip) && ImGui.IsItemHovered())
+        {
+            _inTooltip = true;
+            ImGui.SetNextWindowSizeConstraints( new System.Numerics.Vector2(250, -1), new System.Numerics.Vector2(1000,1000));
+            using var tt = ImRaii.Tooltip();
+            if (tt.Success)
+            {
+                if (itemSources.Count > 1)
+                {
+                    var typeName = (rendererType == RendererType.Source ? this.GetSourceTypeName(firstItem.GetType()) : this.GetUseTypeName(firstItem.GetType()));
+                    ImGui.Text(typeName.Plural ?? typeName.Singular);
+                    ImGui.Separator();
+                    if (hasGroupedTooltip)
+                    {
+                        sourceRenderer?.DrawTooltipGrouped?.Invoke(itemSources);
+                    }
+                    else
+                    {
+
+                        int totalSources = itemSources.Count;
+
+                        if (totalSources > 0)
+                        {
+                            var currentIndex = _itemTooltipIndex;
+
+                            if (currentIndex < 0 || currentIndex >= itemSources.Count)
+                            {
+                                currentIndex = 0;
+                            }
+
+                            var source = itemSources[currentIndex];
+                            sourceRenderer?.DrawTooltip.Invoke(source);
+
+                            ImGui.Spacing();
+                            ImGui.Separator();
+                            ImGui.Spacing();
+
+                            float windowWidth = ImGui.GetContentRegionAvail().X;
+                            string leftText = FontAwesomeIcon.ArrowLeft.ToIconString();
+                            string centerText = $"Source {currentIndex + 1} of {totalSources}";
+                            string rightText =  FontAwesomeIcon.ArrowRight.ToIconString();
+                            string keyboardIcon = FontAwesomeIcon.Keyboard.ToIconString();
+
+                            float centerWidth = ImGui.CalcTextSize(centerText).X;
+
+
+                            using (ImRaii.PushFont(_font.IconFont))
+                            {
+                                ImGui.TextUnformatted(leftText);
+                                ImGui.SameLine();
+                                ImGui.TextUnformatted(keyboardIcon);
+                            }
+
+                            ImGui.SameLine();
+
+                            ImGui.SetCursorPosX((windowWidth - centerWidth) * 0.5f);
+                            ImGui.TextUnformatted(centerText);
+
+
+                            ImGui.SameLine();
+
+                            using (ImRaii.PushFont(_font.IconFont))
+                            {
+                                float rightWidth = ImGui.CalcTextSize(rightText).X;
+                                float keyboardIconWidth = ImGui.CalcTextSize(keyboardIcon).X;
+                                ImGui.SetCursorPosX(windowWidth - rightWidth - keyboardIconWidth);
+                                ImGui.TextUnformatted(keyboardIcon);
+                                ImGui.SameLine();
+                                ImGui.TextUnformatted(rightText);
+                            }
+
+                            if (_scrollLeft)
+                            {
+                                currentIndex = (currentIndex - 1 + totalSources) % totalSources;
+                                _itemTooltipIndex = currentIndex;
+                                _scrollLeft = false;
+                            }
+                            if (_scrollRight)
+                            {
+                                currentIndex = (currentIndex + 1) % totalSources;
+                                _itemTooltipIndex = currentIndex;
+                                _scrollRight = false;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    ImGui.Text((rendererType == RendererType.Source
+                        ? this.GetSourceTypeName(firstItem.GetType())
+                        : this.GetUseTypeName(firstItem.GetType())).Singular);
+                    ImGui.Separator();
+                    sourceRenderer?.DrawTooltip.Invoke(firstItem);
+                }
+            }
+        }
+        else if(ImGui.IsItemHovered())
+        {
+            _inTooltip = true;
+            using var tt = ImRaii.Tooltip();
+            if (tt.Success)
+            {
+                ImGui.Text("No tooltip configured for " + (rendererType == RendererType.Source
+                    ? this.GetSourceTypeName(firstItem.GetType())
+                    : this.GetUseTypeName(firstItem.GetType())).Singular + ", please report this!");
+            }
+        }
     }
 
     public List<MessageBase> DrawItemSourceIconsContainer(string id, float rowSize, Vector2 iconSize, List<ItemSource> itemSources)

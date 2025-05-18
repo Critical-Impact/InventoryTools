@@ -8,6 +8,20 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [12.0.10] - 2025-05-18
+
+### Added
+- Equipment Recommendations System was added, it's available from Windows inside any AT plugin window
+  - This new window helps you find gear which you can then add to a craft/curated list
+  - It has two modes
+  - Class/Job - Find levelling gear for a specific class/level
+  - Tool/Weapon - Find all the main hand/off hand items for a set of classes(Crafting, Gathering, Combat)
+  - Can be opened with /atrecommend or /atr
+
+### Changed
+- Item tooltips inside plugin windows now include stats
+
+
 ## [12.0.9] - 2025-05-17
 
 ### Changed

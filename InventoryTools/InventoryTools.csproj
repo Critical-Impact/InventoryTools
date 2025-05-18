@@ -13,7 +13,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="AllaganLib.Interface" Version="1.2.7" />
+        <PackageReference Include="AllaganLib.Interface" Version="1.2.12" />
         <PackageReference Include="DalaMock.Host" Version="2.2.5" />
         <PackageReference Include="DalaMock.Shared" Version="2.2.6" />
         <PackageReference Include="Autofac" Version="8.2.1" />
