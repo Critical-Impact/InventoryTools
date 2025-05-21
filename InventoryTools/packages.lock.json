@@ -4,9 +4,9 @@
     "net9.0-windows7.0": {
       "AllaganLib.Interface": {
         "type": "Direct",
-        "requested": "[1.2.12, )",
-        "resolved": "1.2.12",
-        "contentHash": "K3HHDeMy8DjsywZqL4mC4WuQ1UCnjifzp0owDLIiT2DICihdl7bjoCkWXQgrHjDxICSuPqp/Cze++6wen7pdzw==",
+        "requested": "[1.2.13, )",
+        "resolved": "1.2.13",
+        "contentHash": "p1UatJYQjRHvTuRH+WPAPHIwtmdmsSvvyUm+7BCF1kmTQ665KMQS3JmTkfI3FmN6UdZUH7MxfIi6o7XDGR+bFA==",
         "dependencies": {
           "AllaganLib.Data": "1.2.0",
           "AllaganLib.Shared": "1.2.8",

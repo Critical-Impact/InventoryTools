@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
 using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
@@ -37,6 +38,7 @@ public class EquipmentSuggestWindow : GenericWindow, IMenuWindow
     private readonly EquipmentSuggestToolModeCategorySetting _toolModeCategorySetting;
     private readonly EquipmentSuggestService _equipmentSuggestService;
     private readonly ICharacterMonitor _characterMonitor;
+    private Task? _currentTask;
 
     public EquipmentSuggestWindow(ILogger<EquipmentSuggestWindow> logger, MediatorService mediator,
         ImGuiService imGuiService, InventoryToolsConfiguration configuration,
@@ -168,6 +170,10 @@ public class EquipmentSuggestWindow : GenericWindow, IMenuWindow
 
     public override void Draw()
     {
+        if (_currentTask is { IsCompleted: true })
+        {
+            _currentTask = null;
+        }
         DrawMenuBar();
         DrawTopFilters();
         DrawGrid();
@@ -265,7 +271,7 @@ public class EquipmentSuggestWindow : GenericWindow, IMenuWindow
                 }
 
                 ImGui.SameLine();
-                var text = "Use Current Class/Level";
+                var text = _modeSetting.CurrentValue(_configuration) == EquipmentSuggestMode.Tool ? "Use Current Level" : "Use Current Class/Level";
                 var textSize = ImGui.CalcTextSize(text).X + ImGui.GetStyle().ItemSpacing.X * 2;
                 var childSize = new Vector2(textSize, 50) * ImGui.GetIO().FontGlobalScale;
                 using (var child = ImRaii.Child("5", childSize, false, ImGuiWindowFlags.NoScrollbar))
@@ -302,7 +308,26 @@ public class EquipmentSuggestWindow : GenericWindow, IMenuWindow
                         using var disabled = ImRaii.Disabled(classJob == 0 && _modeSetting.CurrentValue(_configuration) == EquipmentSuggestMode.Class);
                         if (ImGui.Button(text))
                         {
-                            _equipmentSuggestService.SelectHighestILvl();
+                            if (_currentTask == null || _currentTask.IsCompleted)
+                            {
+                                _currentTask = Task.Run(() => _equipmentSuggestService.SelectHighestILvl());
+                            }
+                        }
+                    }
+                }
+                ImGui.SameLine();
+                childSize = new Vector2(100, 50) * ImGui.GetIO().FontGlobalScale;
+                using (var child = ImRaii.Child("Spin", childSize, false, ImGuiWindowFlags.NoScrollbar))
+                {
+                    if (child)
+                    {
+                        using var color = ImRaii.PushColor(ImGuiCol.Text, new Vector4(0, 0, 0, 0));
+                        ImGui.LabelText("SpinLabel", text);
+                        if (_equipmentSuggestGrid.Value.IsLoading || _currentTask != null)
+                        {
+                            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 5 * ImGui.GetIO().FontGlobalScale);
+                            float nextDot = 3.0f;
+                            ImGuiService.SpinnerDots("Loading", ref nextDot, 7, 1);
                         }
                     }
                 }

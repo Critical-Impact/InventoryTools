@@ -75,8 +75,12 @@ public class EquipmentSuggestSelectedSecondaryItemColumn  : StringFormField<Equi
                                 new Vector2(iconSize, iconSize) * ImGui.GetIO().FontGlobalScale,
                                 new Vector2(0, 0), new Vector2(1, 1), 0))
                         {
-                            item.SelectedItem = null;
+                            item.SecondarySelectedItem = null;
                             return null;
+                        }
+                        if (ImGui.IsItemHovered())
+                        {
+                            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
                         }
                         _tooltipService.DrawItemTooltip(item.SecondarySelectedItem);
 

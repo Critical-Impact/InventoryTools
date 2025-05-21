@@ -6,6 +6,7 @@ using Autofac;
 using CSVFile;
 using Lumina;
 using LuminaSupplemental.Excel.Model;
+using Sylvan.Data.Csv;
 
 namespace InventoryTools.Services;
 
@@ -43,41 +44,35 @@ public class ContainerAwareCsvLoader
 
     public List< T > LoadCsv<T>(string filePath, out List<string> failedLines, out List<Exception> exceptions) where T : ICsv
     {
-        using var fileStream = new FileStream( filePath, FileMode.Open );
-        using( StreamReader reader = new StreamReader( fileStream ) )
+        failedLines = new List< string >();
+        exceptions = new List< Exception >();
+        var items = new List< T >();
+
+        using CsvDataReader dr = CsvDataReader.Create(filePath, new CsvDataReaderOptions(){HasHeaders = false});
+        while (dr.Read())
         {
-            failedLines = new List< string >();
-            exceptions = new List< Exception >();
-            var items = new List< T >();
+            string[] fields = new string[dr.FieldCount];
 
-            if( reader.EndOfStream )
+            for(int i = 0; i < dr.FieldCount; i++)
             {
-                return items;
+                fields[i] = dr.GetString(i);
             }
-
-            FileInfo f = new FileInfo(filePath);
-            var fileContents = reader.ReadToEnd();
-            fileContents = fileContents.ReplaceLineEndings("\n");
-            var csvReader = CSVFile.CSVReader.FromString( fileContents, new CSVSettings { Encoding = Encoding.UTF8, LineSeparator = "\n", BufferSize = (int)f.Length} ); //BufferSize fixes a infinite loop
-            foreach( var line in csvReader.Lines() )
+            T item = _componentContext.Resolve<T>();
+            try
             {
-                T item = _componentContext.Resolve<T>();
-                try
+                item.FromCsv( fields );
+                if( _gameData != null )
                 {
-                    item.FromCsv( line );
-                    if( _gameData != null)
-                    {
-                        item.PopulateData( _gameData.Excel, _gameData.Options.DefaultExcelLanguage );
-                    }
-                    items.Add( item );
+                    item.PopulateData( _gameData.Excel, _gameData.Options.DefaultExcelLanguage );
                 }
-                catch( Exception e )
-                {
-                    exceptions.Add(e);
-                    failedLines.Add( String.Join( ",",line ) );
-                }
+                items.Add( item );
             }
-            return items;
+            catch( Exception e )
+            {
+                exceptions.Add(e);
+                failedLines.Add( String.Join( ",",fields ) );
+            }
         }
+        return items;
     }
 }

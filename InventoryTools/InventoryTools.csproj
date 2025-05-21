@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Dalamud.NET.Sdk/12.0.2">
     <PropertyGroup>
-        <Version>1.7.0.20</Version>
+        <Version>12.0.11</Version>
         <AssemblyName>InventoryTools</AssemblyName>
             <NoWarn>IDE0003</NoWarn>
         <OutputType>Library</OutputType>
@@ -13,7 +13,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="AllaganLib.Interface" Version="1.2.12" />
+        <PackageReference Include="AllaganLib.Interface" Version="1.2.13" />
         <PackageReference Include="DalaMock.Host" Version="2.2.5" />
         <PackageReference Include="DalaMock.Shared" Version="2.2.6" />
         <PackageReference Include="Autofac" Version="8.2.1" />

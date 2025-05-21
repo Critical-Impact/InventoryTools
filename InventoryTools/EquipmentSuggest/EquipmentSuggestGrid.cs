@@ -3,7 +3,9 @@ using System.Linq;
 using AllaganLib.Data.Service;
 using AllaganLib.GameSheets.Model;
 using AllaganLib.GameSheets.Sheets;
+using AllaganLib.GameSheets.Sheets.Rows;
 using AllaganLib.Interface.Grid;
+using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Services.Mediator;
 using ImGuiNET;
 using InventoryTools.Logic;
@@ -27,6 +29,7 @@ public sealed class EquipmentSuggestGrid : RenderTable<EquipmentSuggestConfig, E
     private readonly EquipmentSuggestConfig _config;
     private EquipmentSuggestMode? _mode;
     private EquipmentSuggestToolModeCategory? _toolMode;
+    private List<ItemRow>? applicableItems;
     private List<EquipmentSuggestItem> items = [];
     private List<EquipmentSuggestSuggestionColumn> suggestionColumns = [];
     public
@@ -87,7 +90,7 @@ public sealed class EquipmentSuggestGrid : RenderTable<EquipmentSuggestConfig, E
             {
                 if (_toolMode == EquipmentSuggestToolModeCategory.Crafting)
                 {
-                    var classes = _classJobSheet.Where(c => _classJobCategorySheet.GetRow(c.Base.ClassJobCategory.RowId).IsCrafting);
+                    var classes = _classJobSheet.Where(c => _classJobCategorySheet.GetRow(c.Base.ClassJobCategory.RowId).IsCrafting).OrderBy(c => c.Base.Name.ToImGuiString());
                     foreach (var classRow in classes)
                     {
                         items.Add(new EquipmentSuggestItem(classRow));
@@ -95,7 +98,39 @@ public sealed class EquipmentSuggestGrid : RenderTable<EquipmentSuggestConfig, E
                 }
                 else if (_toolMode == EquipmentSuggestToolModeCategory.Combat)
                 {
-                    var classes = _classJobSheet.Where(c => _classJobCategorySheet.GetRow(c.Base.ClassJobCategory.RowId).IsCombat && c.RowId != 0);
+                    var classes = _classJobSheet.Where(c => _classJobCategorySheet.GetRow(c.Base.ClassJobCategory.RowId).IsCombat && c.RowId != 0).OrderBy(c => c.Base.ClassJobCategory.RowId).ThenBy(c => c.Base.Name.ToImGuiString());
+                    foreach (var classRow in classes)
+                    {
+                        items.Add(new EquipmentSuggestItem(classRow));
+                    }
+                }
+                else if (_toolMode == EquipmentSuggestToolModeCategory.CombatTank)
+                {
+                    var classes = _classJobSheet.Where(c => _classJobCategorySheet.GetRow(c.Base.ClassJobCategory.RowId).IsCombat && c.Base.Role == 1 && c.RowId != 0).OrderBy(c => c.Base.ClassJobCategory.RowId).ThenBy(c => c.Base.Name.ToImGuiString());
+                    foreach (var classRow in classes)
+                    {
+                        items.Add(new EquipmentSuggestItem(classRow));
+                    }
+                }
+                else if (_toolMode == EquipmentSuggestToolModeCategory.CombatRanged)
+                {
+                    var classes = _classJobSheet.Where(c => _classJobCategorySheet.GetRow(c.Base.ClassJobCategory.RowId).IsCombat && c.Base.Role == 3 && c.RowId != 0).OrderBy(c => c.Base.ClassJobCategory.RowId).ThenBy(c => c.Base.Name.ToImGuiString());
+                    foreach (var classRow in classes)
+                    {
+                        items.Add(new EquipmentSuggestItem(classRow));
+                    }
+                }
+                else if (_toolMode == EquipmentSuggestToolModeCategory.CombatHealer)
+                {
+                    var classes = _classJobSheet.Where(c => _classJobCategorySheet.GetRow(c.Base.ClassJobCategory.RowId).IsCombat && c.Base.Role == 4 && c.RowId != 0).OrderBy(c => c.Base.ClassJobCategory.RowId).ThenBy(c => c.Base.Name.ToImGuiString());
+                    foreach (var classRow in classes)
+                    {
+                        items.Add(new EquipmentSuggestItem(classRow));
+                    }
+                }
+                else if (_toolMode == EquipmentSuggestToolModeCategory.CombatMelee)
+                {
+                    var classes = _classJobSheet.Where(c => _classJobCategorySheet.GetRow(c.Base.ClassJobCategory.RowId).IsCombat && c.Base.Role == 2 && c.RowId != 0).OrderBy(c => c.Base.ClassJobCategory.RowId).ThenBy(c => c.Base.Name.ToImGuiString());
                     foreach (var classRow in classes)
                     {
                         items.Add(new EquipmentSuggestItem(classRow));
@@ -103,7 +138,7 @@ public sealed class EquipmentSuggestGrid : RenderTable<EquipmentSuggestConfig, E
                 }
                 else if (_toolMode == EquipmentSuggestToolModeCategory.Gathering)
                 {
-                    var classes = _classJobSheet.Where(c => _classJobCategorySheet.GetRow(c.Base.ClassJobCategory.RowId).IsGathering);
+                    var classes = _classJobSheet.Where(c => _classJobCategorySheet.GetRow(c.Base.ClassJobCategory.RowId).IsGathering).OrderBy(c => c.Base.Name.ToImGuiString());
                     foreach (var classRow in classes)
                     {
                         items.Add(new EquipmentSuggestItem(classRow));
@@ -148,6 +183,134 @@ public sealed class EquipmentSuggestGrid : RenderTable<EquipmentSuggestConfig, E
             count++;
         }
 
+        if (_modeSetting.CurrentValue(_configuration) == EquipmentSuggestMode.Class)
+        {
+            //Check each item's cache to see if we have any items available for the level selected, if not, we'll need to iterate back until we find some items
+            for (var index = 0; index < items.Count; index++)
+            {
+                if (resultCache.TryGetValue(index, out var value))
+                {
+                    var maxLevel = _levelField.GetCenteredValue(_config, 2);
+                    var hasItem = false;
+                    var lowestLevel = maxLevel;
+                    count = 0;
+                    foreach (var currentLevel in _levelField.GetCenteredRange(_config))
+                    {
+                        if (currentLevel < lowestLevel)
+                        {
+                            lowestLevel = currentLevel;
+                        }
+
+                        if (currentLevel > maxLevel)
+                        {
+                            break;
+                        }
+
+                        if (value.TryGetValue(count, out var result))
+                        {
+                            if (result.Count > 0)
+                            {
+                                hasItem = true;
+                            }
+                        }
+
+                        count++;
+                    }
+
+                    if (!hasItem)
+                    {
+                        while (lowestLevel != 1)
+                        {
+                            lowestLevel--;
+                            var item = items[index];
+                            var suggestedItems = GetSuggestedItems(item, lowestLevel);
+                            if (suggestedItems.Count > 0)
+                            {
+                                resultCache[index][0] = suggestedItems;
+                                break;
+                            }
+                        }
+                    }
+
+
+                }
+            }
+        }
+        else
+        {
+            //Check each item's cache to see if we have any items available for the level selected, if not, we'll need to iterate back until we find some items
+            for (var index = 0; index < items.Count; index++)
+            {
+                if (resultCache.TryGetValue(index, out var value))
+                {
+                    var maxLevel = _levelField.GetCenteredValue(_config, 2);
+                    var hasMainHand = false;
+                    var hasOffHand = false;
+                    var lowestLevel = maxLevel;
+                    count = 0;
+                    foreach (var currentLevel in _levelField.GetCenteredRange(_config))
+                    {
+                        if (currentLevel < lowestLevel)
+                        {
+                            lowestLevel = currentLevel;
+                        }
+
+                        if (currentLevel > maxLevel)
+                        {
+                            break;
+                        }
+
+                        if (value.TryGetValue(count, out var result))
+                        {
+                            if (result.Any(c => c.Item.Base.EquipSlotCategory.Value.MainHand == 1))
+                            {
+                                hasMainHand = true;
+                            }
+                            if (result.Any(c => c.Item.Base.EquipSlotCategory.Value.OffHand == 1))
+                            {
+                                hasOffHand = true;
+                            }
+                        }
+
+                        count++;
+                    }
+
+                    if (!hasOffHand || !hasMainHand)
+                    {
+                        while (lowestLevel != 1)
+                        {
+                            lowestLevel--;
+                            var item = items[index];
+                            var suggestedItems = GetSuggestedItems(item, lowestLevel);
+                            var includeResults = false;
+                            if (!hasOffHand && suggestedItems.Any(c => c.Item.Base.EquipSlotCategory.Value.OffHand == 1))
+                            {
+                                hasOffHand = true;
+                                includeResults = true;
+                            }
+                            if (!hasMainHand && suggestedItems.Any(c => c.Item.Base.EquipSlotCategory.Value.MainHand == 1))
+                            {
+                                hasMainHand = true;
+                                includeResults = true;
+                            }
+
+                            if (includeResults)
+                            {
+                                resultCache[index].TryAdd(0, []);
+                                resultCache[index][0].AddRange(suggestedItems);
+                                if (hasMainHand && hasOffHand)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+
+                }
+            }
+        }
+
         count = 0;
         foreach(var unused in _levelField.GetCenteredRange(_config))
         {
@@ -171,6 +334,10 @@ public sealed class EquipmentSuggestGrid : RenderTable<EquipmentSuggestConfig, E
 
     public List<SearchResult> GetSuggestedItems(EquipmentSuggestItem suggestItem, int level)
     {
+        if (applicableItems == null)
+        {
+            applicableItems = _itemSheet.Where(c => c.Base.EquipSlotCategory.RowId != 0 && c.Base.ClassJobCategory.RowId != 0).ToList();
+        }
         var currentClassJob = _classJobFormField.CurrentValue(this._config);
         if (currentClassJob == 0 && _modeSetting.CurrentValue(_configuration) == EquipmentSuggestMode.Class)
         {
@@ -182,31 +349,11 @@ public sealed class EquipmentSuggestGrid : RenderTable<EquipmentSuggestConfig, E
         var sourceTypes = _sourceTypesField.CurrentValue(this._config);
         var excludeTypes = _excludeSourcesField.CurrentValue(this._config);
         var filterStats = _filterStatsField.CurrentValue(this._config);
-        var items = _itemSheet.Where(c => c.Base.LevelEquip == level && c.Base.EquipSlotCategory.RowId != 0);
+        var items = applicableItems.Where(c => c.Base.LevelEquip == level && c.Base.EquipSlotCategory.RowId != 0);
 
         if (suggestItem.EquipmentSlot != null)
         {
-            items = items.Where(c =>
-                c.ClassJobCategory != null && c.ClassJobCategory.ClassJobIds.Contains(currentClassJob));
-            if (filterStats)
-            {
-                if (classJobCategory.IsCombat)
-                {
-                    items = items.Where(c =>
-                        c.Base.BaseParam.All(c =>
-                            c.RowId is not 10 and not 11 and not 70 and not 71 and not 72 and not 73));
-                }
 
-                if (classJobCategory.IsGathering)
-                {
-                    items = items.Where(c => c.Base.BaseParam.Any(c => c.RowId is 10 or 72 or 73));
-                }
-
-                if (classJobCategory.IsCrafting)
-                {
-                    items = items.Where(c => c.Base.BaseParam.Any(c => c.RowId is 11 or 70 or 71));
-                }
-            }
             switch (suggestItem.EquipmentSlot)
             {
                 case EquipSlot.MainHand:
@@ -249,6 +396,27 @@ public sealed class EquipmentSuggestGrid : RenderTable<EquipmentSuggestConfig, E
                     break;
                 default:
                     return [];
+            }
+            items = items.Where(c =>
+                c.ClassJobCategory != null && c.ClassJobCategory.ClassJobIds.Contains(currentClassJob));
+            if (filterStats)
+            {
+                if (classJobCategory.IsCombat)
+                {
+                    items = items.Where(c =>
+                        c.Base.BaseParam.All(c =>
+                            c.RowId is not 10 and not 11 and not 70 and not 71 and not 72 and not 73));
+                }
+
+                if (classJobCategory.IsGathering)
+                {
+                    items = items.Where(c => c.Base.BaseParam.Any(c => c.RowId is 10 or 72 or 73));
+                }
+
+                if (classJobCategory.IsCrafting)
+                {
+                    items = items.Where(c => c.Base.BaseParam.Any(c => c.RowId is 11 or 70 or 71));
+                }
             }
         }
         else if (suggestItem.ClassJobRow != null)

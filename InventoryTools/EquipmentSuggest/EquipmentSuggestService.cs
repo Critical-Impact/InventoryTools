@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using CriticalCommonLib.Services;
+using Dalamud.Plugin.Services;
 using InventoryTools.Logic;
 
 namespace InventoryTools.EquipmentSuggest;
@@ -12,13 +14,13 @@ public class EquipmentSuggestService
     private readonly Lazy<EquipmentSuggestGrid> _equipmentSuggestGrid;
     private readonly EquipmentSuggestSourceTypeField _typeField;
     private readonly EquipmentSuggestModeSetting _modeSetting;
-    private readonly ICharacterMonitor _characterMonitor;
+    private readonly IClientState _clientState;
     private readonly EquipmentSuggestClassJobFormField _classJobField;
     private readonly InventoryToolsConfiguration _configuration;
 
     public EquipmentSuggestService(EquipmentSuggestLevelFormField levelField, EquipmentSuggestConfig config,
         Lazy<EquipmentSuggestGrid> equipmentSuggestGrid, EquipmentSuggestSourceTypeField typeField,
-        EquipmentSuggestModeSetting modeSetting, ICharacterMonitor characterMonitor,
+        EquipmentSuggestModeSetting modeSetting, IClientState clientState,
         EquipmentSuggestClassJobFormField classJobField,
         InventoryToolsConfiguration configuration)
     {
@@ -27,21 +29,21 @@ public class EquipmentSuggestService
         _equipmentSuggestGrid = equipmentSuggestGrid;
         _typeField = typeField;
         _modeSetting = modeSetting;
-        _characterMonitor = characterMonitor;
+        _clientState = clientState;
         _classJobField = classJobField;
         _configuration = configuration;
     }
 
     public void UseCurrentClassLevel()
     {
-        var activeCharacter = _characterMonitor.ActiveCharacter;
+        var activeCharacter = _clientState.LocalPlayer;
         if (activeCharacter != null)
         {
             var currentMode = _modeSetting.CurrentValue(_configuration);
             if (currentMode == EquipmentSuggestMode.Class)
             {
                 this._levelField.UpdateFilterConfiguration(_config, (int)activeCharacter.Level);
-                this._classJobField.UpdateFilterConfiguration(_config, activeCharacter.ClassJob);
+                this._classJobField.UpdateFilterConfiguration(_config, activeCharacter.ClassJob.RowId);
             }
             else
             {
@@ -50,13 +52,13 @@ public class EquipmentSuggestService
         }
     }
 
-    public void SelectHighestILvl()
+    public async Task SelectHighestILvl()
     {
         var currentMode = _modeSetting.CurrentValue(_configuration);
         if (currentMode == EquipmentSuggestMode.Class)
         {
             var level = _levelField.CurrentValue(_config);
-            var items = _equipmentSuggestGrid.Value.GetItems();
+            var items = await _equipmentSuggestGrid.Value.GetItemsAsync();
             foreach (var item in items)
             {
                 var highestILvl = item.SuggestedItems.SelectMany(c => c.Value.Select(d => d.Item))
@@ -92,7 +94,7 @@ public class EquipmentSuggestService
         else if (currentMode == EquipmentSuggestMode.Tool)
         {
             var level = _levelField.CurrentValue(_config);
-            var items = _equipmentSuggestGrid.Value.GetItems();
+            var items = await _equipmentSuggestGrid.Value.GetItemsAsync();
             foreach (var item in items)
             {
                 var mainHand = item.SuggestedItems.SelectMany(c => c.Value.Select(d => d.Item))

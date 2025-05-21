@@ -126,8 +126,8 @@ public class ImGuiTooltipService
                                         ImGui.Text("When HQ:");
                                         for (var index = 0; index < searchResult.Item.Base.BaseParamSpecial.Count; index++)
                                         {
-                                            var baseParam = searchResult.Item.Base.BaseParamSpecial[index];
-                                            if (baseParam.RowId == 0)
+                                            var baseParamSpecial = searchResult.Item.Base.BaseParamSpecial[index];
+                                            if (baseParamSpecial.RowId == 0)
                                             {
                                                 continue;
                                             }
@@ -138,7 +138,18 @@ public class ImGuiTooltipService
                                                 continue;
                                             }
 
-                                            ImGui.Text(baseParam.Value.Name.ToImGuiString() + ": +" +
+                                            for (var baseParamIndex = 0; baseParamIndex < searchResult.Item.Base.BaseParam.Count; baseParamIndex++)
+                                            {
+                                                var baseParam = searchResult.Item.Base.BaseParam[baseParamIndex];
+
+                                                if (baseParam.RowId == baseParamSpecial.RowId)
+                                                {
+                                                    baseParamValue += searchResult.Item.Base.BaseParamValue[baseParamIndex];
+                                                }
+
+                                            }
+
+                                            ImGui.Text(baseParamSpecial.Value.Name.ToImGuiString() + ": " +
                                                        baseParamValue);
                                         }
                                     }

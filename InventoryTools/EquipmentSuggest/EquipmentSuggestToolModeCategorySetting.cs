@@ -12,7 +12,11 @@ public enum EquipmentSuggestToolModeCategory
 {
     Crafting,
     Gathering,
-    Combat
+    Combat,
+    CombatTank,
+    CombatHealer,
+    CombatMelee,
+    CombatRanged,
 }
 
 public class EquipmentSuggestToolModeCategorySetting : EnumFormField<EquipmentSuggestToolModeCategory, EquipmentSuggestConfig>
@@ -30,7 +34,12 @@ public class EquipmentSuggestToolModeCategorySetting : EnumFormField<EquipmentSu
     public override Dictionary<Enum, string> Choices { get; } = new()
     {
         { EquipmentSuggestToolModeCategory.Crafting, "Crafting" },
+        { EquipmentSuggestToolModeCategory.Gathering, "Gathering" },
         { EquipmentSuggestToolModeCategory.Combat, "Combat" },
-        { EquipmentSuggestToolModeCategory.Gathering, "Gathering" }
+        { EquipmentSuggestToolModeCategory.CombatTank, "Combat (Tank)" },
+        { EquipmentSuggestToolModeCategory.CombatHealer, "Combat (Healer)" },
+        { EquipmentSuggestToolModeCategory.CombatMelee, "Combat (Melee)" },
+        { EquipmentSuggestToolModeCategory.CombatRanged, "Combat (Ranged)" },
+
     };
 }

@@ -5,6 +5,7 @@ using AllaganLib.GameSheets.Sheets;
 using AllaganLib.Interface.FormFields;
 using AllaganLib.Interface.Grid;
 using CriticalCommonLib.Services.Mediator;
+using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using InventoryTools.Services;
@@ -65,6 +66,14 @@ public sealed class EquipmentSuggestSuggestionColumn : StringFormField<Equipment
                 iconSize * ImGui.GetIO().FontGlobalScale, containerSize * ImGui.GetIO().FontGlobalScale,
                 searchResult =>
                 {
+                    var cursorPos = ImGui.GetCursorScreenPos();
+                    var iconVec2 = new Vector2(iconSize);
+                    var drawList = ImGui.GetWindowDrawList();
+                    var outsideRange = searchResult.Item.Base.LevelEquip < this._levelFormField.CurrentValue(_config) - 3;
+                    cursorPos.X -= iconSize / 2.0f - 1 * ImGui.GetIO().FontGlobalScale;
+                    cursorPos.Y += iconSize / 2.0f - 8 * ImGui.GetIO().FontGlobalScale;
+
+
                     if (ImGui.ImageButton(ImGuiService.GetIconTexture(searchResult.Item.Icon).ImGuiHandle,
                             new Vector2(iconSize, iconSize) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
                             new Vector2(1, 1), 0))
@@ -124,10 +133,33 @@ public sealed class EquipmentSuggestSuggestionColumn : StringFormField<Equipment
 
                     }
                     _imGuiTooltipService.DrawItemTooltip(searchResult);
+                    if (outsideRange && ImGui.IsItemHovered())
+                    {
+                        using (var tooltip = ImRaii.Tooltip())
+                        {
+                            ImGui.Separator();
+                            ImGui.PushTextWrapPos();
+                            ImGui.Text("This item is from outside the range visible as it's the closest item that matches, it has a lower level than the level of this column.");
+                            ImGui.PopTextWrapPos();
+                        }
+                    }
+
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+                    }
+
                     if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right))
                     {
                         ImGui.OpenPopup("RightClickMenu");
                     }
+
+                    if (outsideRange)
+                    {
+                        drawList.AddImage(ImGuiService.GetIconTexture(60955).ImGuiHandle, cursorPos,
+                            cursorPos + iconVec2, Vector2.Zero, Vector2.One, ImGui.GetColorU32(ImGuiColors.ParsedGold));
+                    }
+
 
                     using (var popup = ImRaii.Popup("RightClickMenu"))
                     {

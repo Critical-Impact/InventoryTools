@@ -48,7 +48,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
     public const int ShopExchangeItemContextItemId            = 84;
     public const int ShopContextMenuItemId            = 84;
     public const int ShopExchangeCurrencyContextItemId            = 84;
-    public const int HWDSupplyContextItemId            = 908;
+    public const int HWDSupplyContextItemId            = 1068;
     public const int GrandCompanySupplyListContextItemId            = 84;
     public const int GrandCompanyExchangeContextItemId            = 84;
 

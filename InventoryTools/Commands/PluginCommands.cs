@@ -8,6 +8,7 @@ using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 
 using InventoryTools.Attributes;
+using InventoryTools.EquipmentSuggest;
 using InventoryTools.Mediator;
 using InventoryTools.Services.Interfaces;
 using InventoryTools.Ui;
@@ -192,6 +193,13 @@ namespace InventoryTools.Commands
         public void CraftOverlay(string command, string args)
         {
             _mediatorService.Publish(new ToggleGenericWindowMessage(typeof(CraftOverlayWindow)));
+        }
+
+        [Command("/atrecommend", "/atr")]
+        [HelpMessage("Toggles the equipment recommendation window.")]
+        public void EquipmentRecommendation(string command, string args)
+        {
+            _mediatorService.Publish(new ToggleGenericWindowMessage(typeof(EquipmentSuggestWindow)));
         }
 
         [Command("/moreinfo")]

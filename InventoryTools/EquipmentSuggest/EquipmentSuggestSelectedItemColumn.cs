@@ -86,6 +86,10 @@ public class EquipmentSuggestSelectedItemColumn  : StringFormField<EquipmentSugg
                             item.SelectedItem = null;
                             return null;
                         }
+                        if (ImGui.IsItemHovered())
+                        {
+                            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+                        }
                         _tooltipService.DrawItemTooltip(item.SelectedItem);
                         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled & ImGuiHoveredFlags.AllowWhenOverlapped & ImGuiHoveredFlags.AllowWhenBlockedByPopup & ImGuiHoveredFlags.AllowWhenBlockedByActiveItem & ImGuiHoveredFlags.AnyWindow) && ImGui.IsMouseReleased(ImGuiMouseButton.Right))
                         {

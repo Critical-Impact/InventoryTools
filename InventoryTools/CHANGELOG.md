@@ -8,6 +8,22 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [12.0.11] - 2025-05-21
+
+### Fixed
+- Fixed an issue in craft lists where multiple items requiring the same item would want more than was actually needed. This only occurred on sub-items that had a Yield above 1.
+- The off-hand item can now be unselected in the equipment suggestion window
+- The context menu integration has been fixed when right clicking on an item in the hand-in npc in the firmament
+
+### Added
+- The equipment suggestion category drop down now has extra options for combat, Melee/Tank/Ranged/Caster
+- A loading icon was added to the equipment suggestion window when results are being calculated.
+
+### Changed
+- The HQ stats in item tooltips are now absolute
+- Large inventory files should load faster
+- The equipment suggestion system will now suggest items outside the range shown if no items are available. An icon will be displayed indicating if this is the case.
+
 ## [12.0.10] - 2025-05-18
 
 ### Added
@@ -20,7 +36,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.h
 
 ### Changed
 - Item tooltips inside plugin windows now include stats
-
 
 ## [12.0.9] - 2025-05-17
 
