@@ -28,7 +28,7 @@ jobs:
           Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/latest.zip -OutFile latest.zip
           Expand-Archive -Force latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev\"
       - name: Restore
-        run: dotnet restore -r win
+        run: dotnet restore InventoryTools
       - name: Build
         run: dotnet build -c ${{ env.CONFIGURATION }} --no-restore ${{ env.INTERNAL_NAME }}
       - name: Push artifacts
