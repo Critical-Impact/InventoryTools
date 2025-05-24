@@ -29,5 +29,6 @@ namespace InventoryTools.Logic.Settings.Abstract
         SourceInformation,
         UseInformation,
         AcquisitionTracker,
+        IngredientPatch,
     }
 }

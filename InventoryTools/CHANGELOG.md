@@ -8,6 +8,18 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [12.0.12] - 2025-05-24
+
+### Fixed
+- Fixed a bug where HQ items were not correctly handled by the acquisition tracker.
+
+### Added
+- Duties added as a source to craft lists.
+- Added a ingredient patch filter/column/tooltip. This lets you determine the highest patch a ingredient is used in.
+
+### Changed
+- The equipment recommendation's select highest iLvl button now takes item stats into consideration.
+
 ## [12.0.11] - 2025-05-21
 
 ### Fixed

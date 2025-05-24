@@ -140,7 +140,7 @@ public class SimpleAcquisitionTrackerService : ISimpleAcquisitionTrackerService
                 var itemType = InventoryItem.ItemFlags.None;
                 if (item.IsHq)
                 {
-                    itemType = InventoryItem.ItemFlags.None;
+                    itemType = InventoryItem.ItemFlags.HighQuality;
                 }
                 else if (item.IsCollectable)
                 {

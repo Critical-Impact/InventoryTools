@@ -61,6 +61,8 @@ namespace InventoryTools.Extensions
                     return "Use Information";
                 case SettingSubCategory.AcquisitionTracker:
                     return "Acquisition Tracker";
+                case SettingSubCategory.IngredientPatch:
+                    return "Ingredient Patch";
             }
             return settingSubCategory.ToString();
         }

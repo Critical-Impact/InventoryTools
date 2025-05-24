@@ -105,6 +105,7 @@ public class IngredientPreferenceLocalizer
             IngredientPreferenceType.None => null,
             IngredientPreferenceType.Reduction => Icons.ReductionIcon,
             IngredientPreferenceType.Venture => Icons.VentureIcon,
+            IngredientPreferenceType.Duty => Icons.DutyIcon,
             IngredientPreferenceType.ExplorationVenture => Icons.VentureIcon,
             IngredientPreferenceType.Empty => Icons.RedXIcon,
             IngredientPreferenceType.ResourceInspection => Icons.SkybuildersScripIcon,

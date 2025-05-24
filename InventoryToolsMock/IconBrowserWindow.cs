@@ -19,7 +19,7 @@ public class IconBrowserWindow : GenericWindow
     public IconBrowserWindow(ILogger<IconBrowserWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, string name = "Icon Browser") : base(logger, mediator, imGuiService, configuration, name)
     {
     }
-    
+
     public bool iconBrowserOpen = false;
     public bool doPasteIcon = false;
     public int pasteIcon = 0;
@@ -38,7 +38,7 @@ public class IconBrowserWindow : GenericWindow
     private readonly Dictionary<string, List<int>> _iconCache = new();
 
     public void ToggleIconBrowser() => iconBrowserOpen = !iconBrowserOpen;
-    
+
     public override void Initialize()
     {
         WindowName = "Icon Browser";

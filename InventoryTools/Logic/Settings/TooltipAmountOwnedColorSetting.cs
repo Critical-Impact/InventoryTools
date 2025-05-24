@@ -64,3 +64,12 @@ public class TooltipUseInformationColorSetting : GenericGameColorSetting
         this.DefaultValue = 60;
     }
 }
+public class TooltipIngredientPatchTooltipColorSetting : GenericGameColorSetting
+{
+    public override uint? Order { get; } = 1;
+
+    public TooltipIngredientPatchTooltipColorSetting(ILogger<TooltipIngredientPatchTooltipColorSetting> logger, ImGuiService imGuiService, ExcelSheet<UIColor> uiColorSheet) : base("TooltipIngredientPatchTooltipColor", "Text Colour", "When enabled, what colour should the text be for the 'Ingredient Patch' tooltip text be?", null, SettingCategory.ToolTips, SettingSubCategory.IngredientPatch, "1.12.0.12", logger, imGuiService, uiColorSheet)
+    {
+        this.DefaultValue = 540;
+    }
+}

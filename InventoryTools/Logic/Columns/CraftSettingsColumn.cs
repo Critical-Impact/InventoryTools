@@ -649,7 +649,7 @@ public class CraftSettingsColumn : IColumn
 
     private  bool DrawZoneSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
     {
-        if (item.IngredientPreference.Type is IngredientPreferenceType.Buy or IngredientPreferenceType.Item or IngredientPreferenceType.Mobs or IngredientPreferenceType.Mining or IngredientPreferenceType.Botany or IngredientPreferenceType.HouseVendor )
+        if (item.IngredientPreference.Type is IngredientPreferenceType.Buy or IngredientPreferenceType.Item or IngredientPreferenceType.Mobs or IngredientPreferenceType.Mining or IngredientPreferenceType.Botany or IngredientPreferenceType.HouseVendor or IngredientPreferenceType.Duty )
         {
             var mapIds = item.Item.GetSourceMaps(item.IngredientPreference.Type.ToItemInfoTypes(), item.IngredientPreference.LinkedItemId);
             if (mapIds.Count != 0)

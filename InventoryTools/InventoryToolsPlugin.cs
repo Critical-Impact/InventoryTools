@@ -358,6 +358,7 @@ namespace InventoryTools
                 builder.RegisterType<ShopTrackerService>().SingleInstance();
                 builder.RegisterType<ChangelogService>().SingleInstance();
                 builder.RegisterType<ClassJobService>().SingleInstance();
+                builder.RegisterType<IngredientPatchService>().SingleInstance();
                 builder.Register<GameData>(c => c.Resolve<IDataManager>().GameData).SingleInstance().ExternallyOwned();
                 builder.RegisterGameSheetManager(new SheetManagerStartupOptions()
                 {

@@ -61,7 +61,7 @@ public sealed class EquipmentSuggestSuggestionColumn : StringFormField<Equipment
         {
             var iconSize = _viewModeSetting.GetIconSize(_configuration);
             var containerSize = _viewModeSetting.GetIconContainerSize(_configuration);
-            var items = item.SuggestedItems[Index].ToList();
+            var items = item.SuggestedItems[Index].OrderByDescending(c => c.Item.Base.LevelItem.RowId).ToList();
             ImGuiService.WrapTableColumnElements("Items", items,
                 iconSize * ImGui.GetIO().FontGlobalScale, containerSize * ImGui.GetIO().FontGlobalScale,
                 searchResult =>

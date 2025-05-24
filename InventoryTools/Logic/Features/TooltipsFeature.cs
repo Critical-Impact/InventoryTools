@@ -13,6 +13,7 @@ public class TooltipsFeature : Feature
             typeof(TooltipDisplayUnlockSetting),
             typeof(TooltipSourceInformationEnabledSetting),
             typeof(TooltipUseInformationEnabledSetting),
+            typeof(TooltipDisplayIngredientPatchSetting),
         },
         settings)
     {

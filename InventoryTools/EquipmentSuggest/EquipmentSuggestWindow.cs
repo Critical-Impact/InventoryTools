@@ -293,7 +293,7 @@ public class EquipmentSuggestWindow : GenericWindow, IMenuWindow
                 }
 
                 ImGui.SameLine();
-                text = "Auto Select Highest iLvl";
+                text = "Auto Select Best Items";
                 textSize = ImGui.CalcTextSize(text).X + ImGui.GetStyle().ItemSpacing.X * 2;
                 childSize = new Vector2(textSize, 50) * ImGui.GetIO().FontGlobalScale;
                 using (var child = ImRaii.Child("6", childSize, false, ImGuiWindowFlags.NoScrollbar))
@@ -311,6 +311,18 @@ public class EquipmentSuggestWindow : GenericWindow, IMenuWindow
                             if (_currentTask == null || _currentTask.IsCompleted)
                             {
                                 _currentTask = Task.Run(() => _equipmentSuggestService.SelectHighestILvl());
+                            }
+                        }
+
+                        if (ImGui.IsItemHovered())
+                        {
+                            using (var tooltip = ImRaii.Tooltip())
+                            {
+                                if (tooltip.Success)
+                                {
+                                    ImGui.Text(
+                                        "Hitting this will pick the highest iLvl items while also factoring in the relevant stats for the seleted class/item.");
+                                }
                             }
                         }
                     }

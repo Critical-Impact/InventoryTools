@@ -281,6 +281,7 @@ namespace InventoryTools.Ui
             else
             {
                 ImGui.TextUnformatted("Item Level " + Item.Base.LevelItem.RowId.ToString());
+                ImGui.TextUnformatted("Patch " + Item.Patch);
                 var description = Item.Base.Description.ExtractText();
                 if (description != "")
                 {

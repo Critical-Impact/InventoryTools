@@ -625,8 +625,8 @@
       },
       "Sylvan.Data.Csv": {
         "type": "Transitive",
-        "resolved": "1.3.9",
-        "contentHash": "ej6VghLaUn5/GK6jGFvd5aHn3Wue+Yp2tpmyI507PBRb/lFA6WAPS+3yKGr5wtFzh0zaE53CnCxhjc0ZW8xu3g=="
+        "resolved": "1.4.2",
+        "contentHash": "Kwopl8Nuc++DH/Bu5pvFBBuX8Mu4lsLFZuH5+efVJfAFcDLWiPNVhs43lNfvnn7Zkt0oIAKGlUjqnA3BQYpZyw=="
       },
       "System.Collections.Immutable": {
         "type": "Transitive",
@@ -742,6 +742,7 @@
           "Microsoft.Extensions.Hosting": "[9.0.4, )",
           "NaturalSort.Extension": "[4.3.0, )",
           "SerialQueue": "[2.1.0, )",
+          "Sylvan.Data.Csv": "[1.4.2, )",
           "System.Reactive": "[6.0.1, )"
         }
       },

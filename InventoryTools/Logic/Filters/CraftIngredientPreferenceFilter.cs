@@ -109,6 +109,7 @@ public class CraftIngredientPreferenceFilter : SortedListFilter<(IngredientPrefe
         IngredientPreferenceType.Mobs,
         IngredientPreferenceType.Reduction,
         IngredientPreferenceType.Venture,
+        IngredientPreferenceType.Duty,
         IngredientPreferenceType.ExplorationVenture,
         IngredientPreferenceType.ResourceInspection,
         IngredientPreferenceType.HouseVendor,

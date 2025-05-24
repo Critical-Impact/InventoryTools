@@ -356,6 +356,24 @@ public class MigrationManagerService : IHostedService
 
             config.InternalVersion++;
         }
+
+        if (config.InternalVersion == 20)
+        {
+            foreach (var filterConfig in config.FilterConfigurations)
+            {
+                if (filterConfig.FilterType == FilterType.CraftFilter)
+                {
+                    var dutyIndex = filterConfig.CraftList.IngredientPreferenceTypeOrder.IndexOf((IngredientPreferenceType.Duty,
+                        null));
+                    if (dutyIndex == -1 && filterConfig.CraftList.IngredientPreferenceTypeOrder.Count > 0)
+                    {
+                        filterConfig.CraftList.IngredientPreferenceTypeOrder.Insert(filterConfig.CraftList.IngredientPreferenceTypeOrder.Count - 1, (IngredientPreferenceType.Duty, null));
+                    }
+                }
+            }
+
+            config.InternalVersion++;
+        }
     }
 
     private string GetNewFileName(string fileName, string extension)

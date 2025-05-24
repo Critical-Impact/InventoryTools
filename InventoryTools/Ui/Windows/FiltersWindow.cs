@@ -1345,10 +1345,14 @@ namespace InventoryTools.Ui
                                                 {
                                                     if (craftColumns.Success)
                                                     {
-                                                        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
-                                                        group.Value.Single(c => c is CraftColumnsFilter or ColumnsFilter).Draw(filterConfiguration);
-                                                        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
-                                                        ImGui.Separator();
+                                                        var filter = group.Value.SingleOrDefault(c => c is CraftColumnsFilter or ColumnsFilter);
+                                                        if (filter != null)
+                                                        {
+                                                            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
+                                                            filter.Draw(filterConfiguration);
+                                                            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
+                                                            ImGui.Separator();
+                                                        }
                                                     }
                                                 }
                                                 using (var otherFilters = ImRaii.Child("otherFilters", new (0, 0)))

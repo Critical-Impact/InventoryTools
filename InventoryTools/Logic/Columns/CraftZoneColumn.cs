@@ -81,6 +81,12 @@ public class CraftZoneColumn : TextColumn
                 ? preference
                 : null;
         }
+        else if (item.IngredientPreference.Type == IngredientPreferenceType.Duty)
+        {
+            mapPreference = configuration.CraftList.ZoneDutyPreferences.TryGetValue(item.ItemId, out var preference)
+                ? preference
+                : null;
+        }
         else
         {
             mapPreference = null;
