@@ -19,6 +19,11 @@ namespace InventoryToolsTesting.Services
             return null!;
         }
 
+        public IDrawListTextureWrap CreateDrawListTexture(string? debugName = null)
+        {
+            return null!;
+        }
+
         public Task<IDalamudTextureWrap> CreateFromExistingTextureAsync(IDalamudTextureWrap wrap,
             TextureModificationArgs args, bool leaveWrapOpen = false, string? debugName = null,
             CancellationToken cancellationToken = new CancellationToken())
@@ -72,6 +77,11 @@ namespace InventoryToolsTesting.Services
             return null!;
         }
 
+        public Task<IDalamudTextureWrap> CreateFromClipboardAsync(string? debugName = null, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return null!;
+        }
+
         public IEnumerable<IBitmapCodecInfo> GetSupportedImageDecoderInfos()
         {
             return null!;
@@ -80,6 +90,11 @@ namespace InventoryToolsTesting.Services
         public ISharedImmediateTexture GetFromGameIcon(in GameIconLookup lookup)
         {
             return null!;
+        }
+
+        public bool HasClipboardImage()
+        {
+            return false;
         }
 
         public bool TryGetFromGameIcon(in GameIconLookup lookup, [NotNullWhen(true)] out ISharedImmediateTexture? texture)

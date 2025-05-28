@@ -128,7 +128,7 @@ public class FilterService : IFilterService
         {
             if (_groupedFilters == null)
             {
-                _groupedFilters = AvailableFilters.OrderBy(c => c.Order).ThenBy(c => c.Name).GroupBy(c => c.FilterCategory).OrderBy(c => FilterCategoryOrder.IndexOf(c.Key)).ToDictionary(c => c.Key, c => c.OrderBy(d => d.Name).ToList());
+                _groupedFilters = AvailableFilters.GroupBy(c => c.FilterCategory).OrderBy(c => FilterCategoryOrder.IndexOf(c.Key)).ToDictionary(c => c.Key, c => c.OrderBy(c => c.Order).ThenBy(d => d.Name).ToList());
             }
 
             return _groupedFilters;

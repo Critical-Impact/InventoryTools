@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib.Crafting;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using InventoryToolsTesting.Tests.Abstract;
 using NUnit.Framework;
 
@@ -59,8 +60,8 @@ namespace InventoryToolsTesting.Tests
                 var requiredMaterialsList = list.GetRequiredMaterialsListNamed();
                 Assert.AreEqual(4, requiredMaterialsList["Cotton Boll"]);
                 var craftListConfiguration = new CraftListConfiguration()
-                    .AddCharacterSource(GetItemIdByName("Cotton Boll"), 4, false)
-                    .AddCharacterSource(GetItemIdByName("Lightning Shard"), 4, false);
+                    .AddCharacterSource(GetItemIdByName("Cotton Boll"), 4, InventoryItem.ItemFlags.None)
+                    .AddCharacterSource(GetItemIdByName("Lightning Shard"), 4, InventoryItem.ItemFlags.None);
                 list.Update(craftListConfiguration);
 
                 var cottonBolls = list.GetFlattenedMaterials().First(c => c.Item.NameString == "Cotton Boll");
@@ -186,7 +187,7 @@ namespace InventoryToolsTesting.Tests
                 .AddCraftItem("Riviera Bed", 2);
             list.GenerateCraftChildren();
             sourceStore = new CraftListConfiguration()
-                .AddExternalSource(GetItemIdByName("Undyed Cotton Cloth"), 4, false);
+                .AddExternalSource(GetItemIdByName("Undyed Cotton Cloth"), 4, InventoryItem.ItemFlags.None);
             list.Update(sourceStore);
             availableMaterialsList = list.GetAvailableMaterialsListNamed();
             Assert.AreEqual(4, availableMaterialsList["Undyed Cotton Cloth"]);
@@ -216,7 +217,7 @@ namespace InventoryToolsTesting.Tests
                 .AddCraftItem("Riviera Bed", 2);
             list.GenerateCraftChildren();
             sourceStore = new CraftListConfiguration()
-                .AddExternalSource(GetItemIdByName("Undyed Cotton Cloth"), 2, false);
+                .AddExternalSource(GetItemIdByName("Undyed Cotton Cloth"), 2, InventoryItem.ItemFlags.None);
             list.Update(sourceStore);
             availableMaterialsList = list.GetAvailableMaterialsListNamed();
             Assert.AreEqual(2, availableMaterialsList["Undyed Cotton Cloth"]);
@@ -246,7 +247,7 @@ namespace InventoryToolsTesting.Tests
                 .AddCraftItem("Riviera Bed", 2);
             list.GenerateCraftChildren();
             sourceStore = new CraftListConfiguration()
-                .AddCharacterSource(GetItemIdByName("Maple Lumber"), 2, false);
+                .AddCharacterSource(GetItemIdByName("Maple Lumber"), 2, InventoryItem.ItemFlags.None);
             list.Update(sourceStore);
             readyMaterialsList = list.GetReadyMaterialsListNamed();
             Assert.AreEqual(2, readyMaterialsList["Maple Lumber"]);
@@ -282,9 +283,9 @@ namespace InventoryToolsTesting.Tests
                 .AddCraftItem("Riviera Bed", 2);
             list.GenerateCraftChildren();
             sourceStore = new CraftListConfiguration()
-                .AddCharacterSource(GetItemIdByName("Maple Lumber"), 2, false)
-                .AddCharacterSource(GetItemIdByName("Maple Log"), 6, false)
-                .AddCharacterSource(GetItemIdByName("Wind Shard"), 999, false);
+                .AddCharacterSource(GetItemIdByName("Maple Lumber"), 2, InventoryItem.ItemFlags.None)
+                .AddCharacterSource(GetItemIdByName("Maple Log"), 6, InventoryItem.ItemFlags.None)
+                .AddCharacterSource(GetItemIdByName("Wind Shard"), 999, InventoryItem.ItemFlags.None);
             list.Update(sourceStore);
             readyMaterialsList = list.GetReadyMaterialsListNamed();
             quantityNeededList = list.GetQuantityNeededListNamed();
@@ -305,7 +306,7 @@ namespace InventoryToolsTesting.Tests
 
             var characterMaterials = new Dictionary<uint, List<CraftItemSource>>();
             var externalSources = new Dictionary<uint, List<CraftItemSource>>();
-            var undyedCottonCloth = new CraftItemSource(5325, 4, false);
+            var undyedCottonCloth = new CraftItemSource(5325, 4, InventoryItem.ItemFlags.None);
             characterMaterials.Add(5325, new List<CraftItemSource>() {undyedCottonCloth});
 
             CraftList list = craftListFactory.Invoke();
@@ -326,7 +327,7 @@ namespace InventoryToolsTesting.Tests
 
             var characterMaterials = new Dictionary<uint, List<CraftItemSource>>();
             var externalSources = new Dictionary<uint, List<CraftItemSource>>();
-            var undyedCottonCloth = new CraftItemSource(5325, 6, false);
+            var undyedCottonCloth = new CraftItemSource(5325, 6, InventoryItem.ItemFlags.None);
             externalSources.Add(5325, new List<CraftItemSource>() {undyedCottonCloth});
 
             CraftList list = craftListFactory.Invoke();
@@ -348,7 +349,7 @@ namespace InventoryToolsTesting.Tests
 
             var characterMaterials = new Dictionary<uint, List<CraftItemSource>>();
             var externalSources = new Dictionary<uint, List<CraftItemSource>>();
-            var copperIngots = new CraftItemSource(5062, 21, true);
+            var copperIngots = new CraftItemSource(5062, 21, InventoryItem.ItemFlags.HighQuality);
             characterMaterials.Add(5062, new List<CraftItemSource>() {copperIngots});
 
             CraftList list = craftListFactory.Invoke();
@@ -366,8 +367,8 @@ namespace InventoryToolsTesting.Tests
             //Checking to make sure the amount of copper ore required is 0, not -3
             characterMaterials = new Dictionary<uint, List<CraftItemSource>>();
             externalSources = new Dictionary<uint, List<CraftItemSource>>();
-            copperIngots = new CraftItemSource(5062, 20, true);
-            var copperIngots2 = new CraftItemSource(5062, 1, true);
+            copperIngots = new CraftItemSource(5062, 20, InventoryItem.ItemFlags.HighQuality);
+            var copperIngots2 = new CraftItemSource(5062, 1, InventoryItem.ItemFlags.HighQuality);
             characterMaterials.Add(5062, new List<CraftItemSource>() {copperIngots, copperIngots2});
 
             list.GenerateCraftChildren();

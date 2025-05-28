@@ -40,11 +40,9 @@ namespace InventoryTools
         private readonly ICharacterMonitor _characterMonitor;
         private readonly InventoryToolsConfiguration _configuration;
         private readonly IMobTracker _mobTracker;
-        private readonly IHotkeyService _hotkeyService;
         private readonly ICraftMonitor _craftMonitor;
         private readonly IUnlockTrackerService _unlockTrackerService;
         private readonly IEnumerable<BaseTooltip> tooltips;
-        private readonly IEnumerable<IHotkey> hotkeys;
         private readonly ITooltipService _tooltipService;
         private readonly FilterConfiguration.Factory _filterConfigFactory;
         private readonly Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter> _sourceCategoryFilterFactory;
@@ -85,16 +83,16 @@ namespace InventoryTools
             IListService listService, ILogger<PluginLogic> logger, IFramework framework,
             MediatorService mediatorService, HostedInventoryHistory hostedInventoryHistory,
             IInventoryMonitor inventoryMonitor, IInventoryScanner inventoryScanner, ICharacterMonitor characterMonitor,
-            InventoryToolsConfiguration configuration, IMobTracker mobTracker, IHotkeyService hotkeyService,
+            InventoryToolsConfiguration configuration, IMobTracker mobTracker,
             ICraftMonitor craftMonitor, IUnlockTrackerService unlockTrackerService, IEnumerable<BaseTooltip> tooltips,
-            IEnumerable<IHotkey> hotkeys, Func<Type, IFilter> filterFactory, IMarketCache marketCache,
+            Func<Type, IFilter> filterFactory, IMarketCache marketCache,
             ITooltipService tooltipService, FilterConfiguration.Factory filterConfigFactory,
             Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter> sourceCategoryFilterFactory,
             BuyFromVendorPriceFilter buyFromVendorPriceFilter, ISimpleAcquisitionTrackerService acquisitionTrackerService,
             CraftTrackerTrackCraftsFilter trackCraftsFilter, CraftTrackerTrackGatheringFilter trackGatheringFilter,
             CraftTrackerTrackShoppingFilter trackShoppingFilter, CraftTrackerTrackCombatDropFilter trackCombatDropFilter,
             CraftTrackerTrackOtherFilter trackOtherFilter, UseOldCraftTrackerSetting useOldCraftTrackerSetting,
-            CraftTrackerTrackMarketBoardFilter trackMarketBoardFilter, ItemSheet itemSheet) : base(logger, mediatorService)
+            CraftTrackerTrackMarketBoardFilter trackMarketBoardFilter) : base(logger, mediatorService)
         {
             _configurationManagerService = configurationManagerService;
             _chatUtilities = chatUtilities;
@@ -107,11 +105,9 @@ namespace InventoryTools
             _characterMonitor = characterMonitor;
             _configuration = configuration;
             _mobTracker = mobTracker;
-            _hotkeyService = hotkeyService;
             _craftMonitor = craftMonitor;
             _unlockTrackerService = unlockTrackerService;
             this.tooltips = tooltips;
-            this.hotkeys = hotkeys;
             _tooltipService = tooltipService;
             _filterConfigFactory = filterConfigFactory;
             _sourceCategoryFilterFactory = sourceCategoryFilterFactory;
