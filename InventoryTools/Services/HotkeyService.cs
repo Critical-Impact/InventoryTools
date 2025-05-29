@@ -2,15 +2,18 @@ using System.Collections.Generic;
 using Dalamud.Game.ClientState.Keys;
 using InventoryTools.Hotkeys;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using CriticalCommonLib.Services.Mediator;
 
 using Dalamud.Plugin.Services;
 using InventoryTools.Services.Interfaces;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Services;
 
-public class HotkeyService : DisposableMediatorSubscriberBase, IHotkeyService
+public class HotkeyService : DisposableMediatorSubscriberBase, IHotkeyService, IHostedService
 {
     private IFramework _frameworkService;
     private IKeyState _keyStateService;
@@ -25,7 +28,6 @@ public class HotkeyService : DisposableMediatorSubscriberBase, IHotkeyService
         _logger = logger;
         _mediatorService = mediatorService;
         _hotKeys = hotkeys.ToList();
-        _frameworkService.Update += FrameworkServiceOnUpdate;
     }
 
     public void AddHotkey<T>() where T : IHotkey, new()
@@ -88,9 +90,15 @@ public class HotkeyService : DisposableMediatorSubscriberBase, IHotkeyService
         return hotKeyPressed;
     }
 
-    protected override void Dispose(bool disposing)
+    public Task StartAsync(CancellationToken cancellationToken)
     {
-        base.Dispose(disposing);
+        _frameworkService.Update += FrameworkServiceOnUpdate;
+        return Task.CompletedTask;
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
         _frameworkService.Update -= FrameworkServiceOnUpdate;
+        return Task.CompletedTask;
     }
 }

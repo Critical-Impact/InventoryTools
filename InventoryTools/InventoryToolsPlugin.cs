@@ -137,6 +137,7 @@ namespace InventoryTools
             typeof(MarketRefreshService),
             typeof(MarketCache),
             typeof(SimpleAcquisitionTrackerService),
+            typeof(HotkeyService),
         };
 
         public List<Type> GetHostedServices()

@@ -353,7 +353,7 @@ public class CraftOverlayWindow : OverlayWindow
         {
             if (nextItems != null)
             {
-                using (ImRaii.Table("CraftList", 5, ImGuiTableFlags.SizingFixedFit))
+                using (ImRaii.Table("CraftList", 6, ImGuiTableFlags.SizingFixedFit))
                 {
                     ImGui.TableSetupColumn("Icon", ImGuiTableColumnFlags.WidthFixed,
                         20 * ImGui.GetIO().FontGlobalScale);
@@ -361,6 +361,8 @@ public class CraftOverlayWindow : OverlayWindow
                         150 * ImGui.GetIO().FontGlobalScale);
                     ImGui.TableSetupColumn("Step", ImGuiTableColumnFlags.WidthFixed,
                         80 * ImGui.GetIO().FontGlobalScale);
+                    ImGui.TableSetupColumn("Icon", ImGuiTableColumnFlags.WidthFixed,
+                        10 * ImGui.GetIO().FontGlobalScale);
                     ImGui.TableSetupColumn("Bell", ImGuiTableColumnFlags.WidthFixed,
                         20 * ImGui.GetIO().FontGlobalScale);
                     ImGui.TableSetupColumn("Action", ImGuiTableColumnFlags.WidthFixed,
@@ -397,24 +399,23 @@ public class CraftOverlayWindow : OverlayWindow
                             ImGui.TableNextColumn();
                             var nextStep = craftList.GetNextStep(currentItem);
                             var nextCraftStep = craftList.GetNextCraftStep(currentItem);
-                            using (var color = ImRaii.PushColor(ImGuiCol.Text, nextStep.Item1))
+                            using (ImRaii.PushColor(ImGuiCol.Text, nextStep.Item1))
                             {
                                 ImGui.PushTextWrapPos();
                                 ImGui.Text(nextStep.Item2);
-                                if (currentItem.Flags == FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.Collectable)
-                                {
-                                    color.Pop();
-                                    ImGui.SameLine();
-                                    ImGui.Text($" {(char)SeIconChar.Collectible}");
-                                }
-
-                                if (currentItem.Flags == FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HighQuality)
-                                {
-                                    color.Pop();
-                                    ImGui.SameLine();
-                                    ImGui.Text($" {(char)SeIconChar.Collectible}");
-                                }
                                 ImGui.PopTextWrapPos();
+                            }
+                            ImGui.TableNextColumn();
+                            if (currentItem.Flags == FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.Collectable)
+                            {
+                                ImGui.SameLine();
+                                ImGui.Text($" {(char)SeIconChar.Collectible}");
+                            }
+
+                            if (currentItem.Flags == FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HighQuality)
+                            {
+                                ImGui.SameLine();
+                                ImGui.Text($" {(char)SeIconChar.HighQuality}");
                             }
                             ImGui.TableNextColumn();
                             if (nextCraftStep == NextCraftStep.Retrieve)
