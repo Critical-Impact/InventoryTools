@@ -13,7 +13,9 @@ using CriticalCommonLib.Models;
 using Dalamud.Interface.Colors;
 using Dalamud.Plugin;
 using InventoryTools.Logic;
+using InventoryTools.Logic.Editors;
 using InventoryTools.Logic.Filters;
+using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Logic.Filters.Stats;
 using InventoryTools.Logic.ItemRenderers;
 using InventoryTools.Logic.Settings;
@@ -387,6 +389,94 @@ public class MigrationManagerService : IHostedService
 
             config.InternalVersion++;
         }
+
+        if (config.InternalVersion == 22)
+        {
+            foreach (var filterConfig in config.FilterConfigurations)
+            {
+                if (filterConfig.FilterType == FilterType.CraftFilter)
+                {
+                    var sourceScopes = MigrateSourceScopes(filterConfig, _configuration);
+                    _componentContext.Resolve<CraftSourceInventoriesFilter>().UpdateFilterConfiguration(filterConfig, sourceScopes);
+                }
+            }
+
+            config.InternalVersion++;
+        }
+    }
+
+    private List<InventorySearchScope> MigrateSourceScopes(FilterConfiguration filterConfiguration, InventoryToolsConfiguration configuration)
+    {
+        List<InventorySearchScope> scopeFilters = new List<InventorySearchScope>();
+
+        if (filterConfiguration.SourceAllCharacters == true)
+        {
+            if (filterConfiguration.SourceIncludeCrossCharacter ?? configuration.DisplayCrossCharacter)
+            {
+                scopeFilters.Add(new InventorySearchScope() {  CharacterTypes = [CharacterType.Character]});
+            }
+            else
+            {
+                scopeFilters.Add(new InventorySearchScope() { ActiveCharacter = true, CharacterTypes = [CharacterType.Character]});
+            }
+        }
+        if (filterConfiguration.SourceAllFreeCompanies == true)
+        {
+            if (filterConfiguration.SourceIncludeCrossCharacter ?? configuration.DisplayCrossCharacter)
+            {
+                scopeFilters.Add(new InventorySearchScope() {  CharacterTypes = [CharacterType.FreeCompanyChest]});
+            }
+            else
+            {
+                scopeFilters.Add(new InventorySearchScope() { ActiveCharacter = true, CharacterTypes = [CharacterType.FreeCompanyChest]});
+            }
+        }
+        if (filterConfiguration.SourceAllHouses == true)
+        {
+            if (filterConfiguration.SourceIncludeCrossCharacter ?? configuration.DisplayCrossCharacter)
+            {
+                scopeFilters.Add(new InventorySearchScope() {  CharacterTypes = [CharacterType.Housing]});
+            }
+            else
+            {
+                scopeFilters.Add(new InventorySearchScope() { ActiveCharacter = true, CharacterTypes = [CharacterType.Housing]});
+            }
+        }
+        if (filterConfiguration.SourceAllRetainers == true)
+        {
+            if (filterConfiguration.SourceIncludeCrossCharacter ?? configuration.DisplayCrossCharacter)
+            {
+                scopeFilters.Add(new InventorySearchScope() {  CharacterTypes = [CharacterType.Retainer]});
+            }
+            else
+            {
+                scopeFilters.Add(new InventorySearchScope() { ActiveCharacter = true, CharacterTypes = [CharacterType.Retainer]});
+            }
+        }
+        if (filterConfiguration.SourceCategories != null)
+        {
+            if (filterConfiguration.SourceIncludeCrossCharacter ?? configuration.DisplayCrossCharacter)
+            {
+                scopeFilters.Add(new InventorySearchScope() {  Categories = filterConfiguration.SourceCategories.ToHashSet()});
+            }
+            else
+            {
+                scopeFilters.Add(new InventorySearchScope() { ActiveCharacter = true, Categories = filterConfiguration.SourceCategories.ToHashSet()});
+            }
+        }
+        foreach(var sourceInventory in filterConfiguration.SourceInventories)
+        {
+            scopeFilters.Add(new InventorySearchScope() { CharacterId  = sourceInventory.Item1, Categories = [sourceInventory.Item2]});
+        }
+        if(filterConfiguration.SourceWorlds != null)
+        {
+            foreach (var sourceWorld in filterConfiguration.SourceWorlds)
+            {
+                scopeFilters.Add(new InventorySearchScope() { WorldId = sourceWorld });
+            }
+        }
+
+        return scopeFilters;
     }
 
     private string GetNewFileName(string fileName, string extension)

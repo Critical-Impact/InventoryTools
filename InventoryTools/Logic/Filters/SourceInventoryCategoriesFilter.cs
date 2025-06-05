@@ -35,7 +35,7 @@ namespace InventoryTools.Logic.Filters
 
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Inventories;
         public override List<InventoryCategory> DefaultValue { get; set; } = new();
-        public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter | FilterType.CraftFilter | FilterType.HistoryFilter;
+        public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter | FilterType.HistoryFilter;
 
         public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
         {

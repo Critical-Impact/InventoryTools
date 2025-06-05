@@ -14,6 +14,8 @@ using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using InventoryTools.Logic;
+using InventoryTools.Logic.Editors;
+using InventoryTools.Logic.Filters;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -35,6 +37,9 @@ public class ListFilterService : DisposableMediatorBackgroundService
     private readonly IFilterService _filterService;
     private readonly ItemSheet _itemSheet;
     private readonly InventoryItem.Factory _inventoryItemFactory;
+    private readonly CraftSourceInventoriesFilter _craftSourceInventoriesFilter;
+    private readonly CraftDestinationInventoriesFilter _craftDestinationInventoriesFilter;
+    private readonly InventoryScopeCalculator _inventoryScopeCalculator;
 
     public IBackgroundTaskQueue FilterQueue { get; }
 
@@ -42,7 +47,9 @@ public class ListFilterService : DisposableMediatorBackgroundService
         HostedInventoryHistory inventoryHistory, IInventoryMonitor inventoryMonitor, IBackgroundTaskQueue filterQueue,
         ILogger<ListFilterService> logger, IMarketCache marketCache, CraftPricer craftPricer,
         IFilterService filterService, MediatorService mediatorService, ItemSheet itemSheet,
-        InventoryItem.Factory inventoryItemFactory) : base(logger,
+        InventoryItem.Factory inventoryItemFactory,
+        CraftSourceInventoriesFilter craftSourceInventoriesFilter, CraftDestinationInventoriesFilter craftDestinationInventoriesFilter,
+        InventoryScopeCalculator inventoryScopeCalculator) : base(logger,
         mediatorService)
     {
         _configuration = configuration;
@@ -54,6 +61,9 @@ public class ListFilterService : DisposableMediatorBackgroundService
         _filterService = filterService;
         _itemSheet = itemSheet;
         _inventoryItemFactory = inventoryItemFactory;
+        _craftSourceInventoriesFilter = craftSourceInventoriesFilter;
+        _craftDestinationInventoriesFilter = craftDestinationInventoriesFilter;
+        _inventoryScopeCalculator = inventoryScopeCalculator;
         FilterQueue = filterQueue;
         MediatorService.Subscribe<RequestListUpdateMessage>(this, message => RequestRefresh(message.FilterConfiguration));
     }
@@ -664,8 +674,36 @@ public class ListFilterService : DisposableMediatorBackgroundService
 
     private void GenerateSources(FilterConfiguration filter, List<Inventory> inventories, out Dictionary<(ulong, InventoryType), InventoryItem?[]> sourceInventories)
     {
-        var displaySourceCrossCharacter = filter.SourceIncludeCrossCharacter ?? _configuration.DisplayCrossCharacter;
         sourceInventories = new();
+
+        if (filter.FilterType == FilterType.CraftFilter)
+        {
+            var craftSourceInventories = _craftSourceInventoriesFilter.CurrentValue(filter);
+            if (craftSourceInventories == null)
+            {
+                return;
+            }
+
+            foreach (var character in inventories)
+            {
+                foreach (var inventory in character.GetAllInventoriesByType())
+                {
+                    var inventoryKey = (character.CharacterId, inventory.Key);
+                    if (!_inventoryScopeCalculator.Filter(craftSourceInventories, character.CharacterId, inventory.Key))
+                    {
+                        continue;
+                    }
+                    if (!sourceInventories.ContainsKey(inventoryKey))
+                    {
+                        sourceInventories.Add(inventoryKey, inventory.Value);
+                    }
+                }
+            }
+
+            return;
+        }
+
+        var displaySourceCrossCharacter = filter.SourceIncludeCrossCharacter ?? _configuration.DisplayCrossCharacter;
 
         foreach (var character in inventories)
         {
@@ -755,6 +793,59 @@ public class ListFilterService : DisposableMediatorBackgroundService
 
         sourceInventories = new();
         destinationInventories = new();
+
+        if (filter.FilterType == FilterType.CraftFilter)
+        {
+            var craftSourceInventories = _craftSourceInventoriesFilter.CurrentValue(filter);
+            if (craftSourceInventories == null)
+            {
+                return;
+            }
+
+            foreach (var character in inventories)
+            {
+                foreach (var inventory in character.GetAllInventoriesByType())
+                {
+                    var type = inventory.Key;
+                    var inventoryKey = (character.CharacterId, inventory.Key);
+                    if (!_inventoryScopeCalculator.Filter(craftSourceInventories, character.CharacterId, inventory.Key))
+                    {
+                        continue;
+                    }
+                    if (!sourceInventories.ContainsKey(inventoryKey))
+                    {
+                        sourceInventories.Add(inventoryKey,
+                            inventory.Value.Where(c => c != null && c.SortedContainer == type).ToList()!);
+                    }
+                }
+            }
+            var craftDestinationInventories = _craftDestinationInventoriesFilter.CurrentValue(filter);
+            if (craftDestinationInventories == null)
+            {
+                return;
+            }
+
+            foreach (var character in inventories)
+            {
+                foreach (var inventory in character.GetAllInventoriesByType())
+                {
+                    var type = inventory.Key;
+                    var inventoryKey = (character.CharacterId, inventory.Key);
+                    if (!_inventoryScopeCalculator.Filter(craftDestinationInventories, character.CharacterId, inventory.Key))
+                    {
+                        continue;
+                    }
+                    if (!destinationInventories.ContainsKey(inventoryKey))
+                    {
+                        destinationInventories.Add(inventoryKey,
+                            inventory.Value.Where(c => c != null && c.SortedContainer == type).ToList()!);
+                    }
+                }
+            }
+
+            return;
+        }
+
         foreach (var character in inventories)
         {
             foreach (var inventory in character.GetAllInventoriesByType())
