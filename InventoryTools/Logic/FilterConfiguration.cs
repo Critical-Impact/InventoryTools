@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
 using AllaganLib.GameSheets.Sheets.Rows;
+using CharacterTools.Logic.Editors;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
@@ -11,6 +12,7 @@ using CriticalCommonLib.Models;
 using Dalamud.Bindings.ImGui;
 using InventoryTools.Attributes;
 using InventoryTools.Converters;
+using InventoryTools.Logic.Editors;
 using InventoryTools.Logic.Filters;
 using Newtonsoft.Json;
 
@@ -38,6 +40,8 @@ namespace InventoryTools.Logic
         private Dictionary<string, List<ulong>>? _ulongChoiceFilters = new();
         private Dictionary<string, List<string>>? _stringChoiceFilters = new();
         private Dictionary<string, Vector4>? _colorFilters = new();
+        private Dictionary<string, List<CharacterSearchScope>>? _characterSearchScopes;
+        private Dictionary<string, List<InventorySearchScope>>? _inventorySearchScopes;
         private List<CuratedItem>? _curatedItems;
         private string? _name = "";
         private string _key = "";
@@ -1181,6 +1185,16 @@ namespace InventoryTools.Logic
             return new List<string>();
         }
 
+        public void GetFilter(string key, out List<CharacterSearchScope>? value)
+        {
+            value = CharacterSearchScopes.ContainsKey(key) ? CharacterSearchScopes[key] : null;
+        }
+
+        public void GetFilter(string key, out List<InventorySearchScope>? value)
+        {
+            value = InventorySearchScopes.ContainsKey(key) ? InventorySearchScopes[key] : null;
+        }
+
         public void UpdateBooleanFilter(string key, bool value)
         {
             if (BooleanFilters.ContainsKey(key) && BooleanFilters[key] == value)
@@ -1310,6 +1324,34 @@ namespace InventoryTools.Logic
             ConfigurationDirty = true;
         }
 
+        public void SetFilter(string key, List<CharacterSearchScope>? value)
+        {
+            if (value == null)
+            {
+                CharacterSearchScopes.Remove(key);
+                ConfigurationDirty = true;
+            }
+            else
+            {
+                CharacterSearchScopes[key] = value;
+                ConfigurationDirty = true;
+            }
+        }
+
+        public void SetFilter(string key, List<InventorySearchScope>? value)
+        {
+            if (value == null)
+            {
+                InventorySearchScopes.Remove(key);
+                ConfigurationDirty = true;
+            }
+            else
+            {
+                InventorySearchScopes[key] = value;
+                ConfigurationDirty = true;
+            }
+        }
+
         public Dictionary<string, bool> BooleanFilters
         {
             get
@@ -1321,6 +1363,18 @@ namespace InventoryTools.Logic
                 return _booleanFilters;
             }
             set => _booleanFilters = value;
+        }
+
+        public Dictionary<string, List<CharacterSearchScope>> CharacterSearchScopes
+        {
+            get => _characterSearchScopes ??= new Dictionary<string, List<CharacterSearchScope>>();
+            set => _characterSearchScopes = value;
+        }
+
+        public Dictionary<string, List<InventorySearchScope>> InventorySearchScopes
+        {
+            get => _inventorySearchScopes ??= new Dictionary<string, List<InventorySearchScope>>();
+            set => _inventorySearchScopes = value;
         }
 
         public Dictionary<string, Vector4> ColorFilters
