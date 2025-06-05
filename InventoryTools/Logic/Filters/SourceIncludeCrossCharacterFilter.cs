@@ -13,7 +13,7 @@ namespace InventoryTools.Logic.Filters
         public override string Key { get; set; } = "SourceIncludeCrossCharacter";
         public override string Name { get; set; } = "Source - Cross Character?";
         public override string HelpText { get; set; } = "Should items be sourced from cross character? Will default to using the default configuration in the main allagan tools configuration if not selected.";
-        public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter | FilterType.CraftFilter | FilterType.HistoryFilter;
+        public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter | FilterType.HistoryFilter;
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Inventories;
 
         public override bool? CurrentValue(FilterConfiguration configuration)

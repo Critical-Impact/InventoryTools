@@ -47,6 +47,7 @@ namespace InventoryTools.Ui
         Unlocks = 9,
         LayerDebugger = 10,
         AddonDebugger = 11,
+        QuestManager = 12,
     }
     public class DebugWindow : GenericWindow, IMenuWindow
     {
@@ -169,6 +170,11 @@ namespace InventoryTools.Ui
                         _configuration.SelectedDebugPage = (int)DebugMenu.AddonDebugger;
                     }
 
+                    if (ImGui.Selectable("Quest Manager", _configuration.SelectedDebugPage == (int)DebugMenu.QuestManager))
+                    {
+                        _configuration.SelectedDebugPage = (int)DebugMenu.QuestManager;
+                    }
+
                 }
             }
             ImGui.SameLine();
@@ -212,6 +218,10 @@ namespace InventoryTools.Ui
                     else if (_configuration.SelectedDebugPage == (int)DebugMenu.Unlocks)
                     {
                         DrawUnlocks();
+                    }
+                    else if (_configuration.SelectedDebugPage == (int)DebugMenu.QuestManager)
+                    {
+                        DrawQuestManager();
                     }
 /*
                     else if (_configuration.SelectedDebugPage == 2)
@@ -1708,6 +1718,16 @@ namespace InventoryTools.Ui
                 var character = _characterMonitor.GetCharacterById(characterPair.Key);
                 ImGui.TextUnformatted(character?.FormattedName ?? "Unknown Character");
                 ImGui.Text($"{characterPair.Value.Count} unlocked items");
+            }
+        }
+
+        public unsafe void DrawQuestManager()
+        {
+            var questManager = QuestManager.Instance();
+            for (var index = 0; index < questManager->LeveQuests.Length; index++)
+            {
+                var leveWork = questManager->LeveQuests[index];
+                Utils.PrintOutObject(leveWork, 1, new List<string>());
             }
         }
 

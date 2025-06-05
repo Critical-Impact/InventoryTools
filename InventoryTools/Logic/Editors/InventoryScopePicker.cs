@@ -15,7 +15,7 @@ using Lumina.Excel.Sheets;
 
 namespace InventoryTools.Logic.Editors;
 
-public class InventorySearchScope
+public class InventorySearchScope : IEquatable<InventorySearchScope>
 {
     public ulong? CharacterId { get; set; }
     public uint? WorldId { get; set; }
@@ -39,6 +39,40 @@ public class InventorySearchScope
         ActiveCharacter = null;
         ActiveWorld = null;
     }
+
+    public bool Equals(InventorySearchScope? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        var inventoryCategories = Categories ?? [];
+        var otherCategories = other.Categories ?? [];
+        var characterTypes = CharacterTypes ?? [];
+        var otherCharacterTypes = other.CharacterTypes ?? [];
+        return CharacterId == other.CharacterId && WorldId == other.WorldId && ActiveCharacter == other.ActiveCharacter && ActiveWorld == other.ActiveWorld && inventoryCategories.SetEquals(otherCategories) && characterTypes.SetEquals(otherCharacterTypes) && Mode == other.Mode && Invert == other.Invert && IncludeOwned == other.IncludeOwned;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((InventorySearchScope)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        var hashCode = new HashCode();
+        hashCode.Add(CharacterId);
+        hashCode.Add(WorldId);
+        hashCode.Add(ActiveCharacter);
+        hashCode.Add(ActiveWorld);
+        hashCode.Add(Categories);
+        hashCode.Add(CharacterTypes);
+        hashCode.Add((int)Mode);
+        hashCode.Add(Invert);
+        hashCode.Add(IncludeOwned);
+        return hashCode.ToHashCode();
+    }
 }
 
 public enum InventorySearchScopeMode
@@ -60,56 +94,67 @@ public class InventoryScopeCalculator
 
     public bool Filter(IEnumerable<InventorySearchScope> searchScopes, InventoryItem inventoryItem)
     {
-        return searchScopes.Any(c => Filter(c, inventoryItem));
+        return searchScopes.Any(c => Filter(c, inventoryItem.RetainerId, inventoryItem.SortedCategory));
     }
 
-    public bool Filter(InventorySearchScope searchScope, InventoryItem inventoryItem)
+    public bool Filter(IEnumerable<InventorySearchScope> searchScopes, ulong characterId, InventoryCategory category)
+    {
+        return searchScopes.Any(c => Filter(c, characterId, category));
+    }
+
+    public bool Filter(IEnumerable<InventorySearchScope> searchScopes, ulong characterId, InventoryType inventoryType)
+    {
+        return searchScopes.Any(c => Filter(c, characterId, inventoryType.ToInventoryCategory()));
+    }
+
+    public bool Filter(InventorySearchScope searchScope, ulong characterId, InventoryCategory category)
     {
         bool topLevelMatch = false;
+
         if (searchScope.CharacterId != null)
         {
-            if (inventoryItem.RetainerId == searchScope.CharacterId)
+            if (characterId == searchScope.CharacterId)
             {
                 topLevelMatch = true;
             }
         }
         else if (searchScope.WorldId != null)
         {
-            if (!_characterWorldIds.ContainsKey(inventoryItem.RetainerId))
+            if (!_characterWorldIds.ContainsKey(characterId))
             {
-                var character = _characterMonitor.GetCharacterById(inventoryItem.RetainerId);
+                var character = _characterMonitor.GetCharacterById(characterId);
                 if (character == null)
                 {
                     return false;
                 }
-                _characterWorldIds[inventoryItem.RetainerId] = character.WorldId;
+                _characterWorldIds[characterId] = character.WorldId;
             }
 
-            if (_characterWorldIds[inventoryItem.RetainerId] == searchScope.WorldId)
+            if (_characterWorldIds[characterId] == searchScope.WorldId)
             {
                 topLevelMatch = true;
             }
         }
         else if (searchScope.ActiveCharacter is true)
         {
-            if(_characterMonitor.BelongsToActiveCharacter(inventoryItem.RetainerId))
+            if(_characterMonitor.BelongsToActiveCharacter(characterId))
             {
                 topLevelMatch = true;
             }
         }
         else if (searchScope.ActiveWorld is true)
         {
-            if (!_characterWorldIds.ContainsKey(inventoryItem.RetainerId))
+            if (!_characterWorldIds.ContainsKey(characterId))
             {
-                var character = _characterMonitor.GetCharacterById(inventoryItem.RetainerId);
+                var character = _characterMonitor.GetCharacterById(characterId);
                 if (character == null)
                 {
                     return false;
                 }
-                _characterWorldIds[inventoryItem.RetainerId] = character.WorldId;
+                _characterWorldIds[characterId] = character.WorldId;
             }
 
-            if (_characterWorldIds[inventoryItem.RetainerId] == _characterMonitor.ActiveCharacter?.WorldId)
+            if (_characterWorldIds[characterId] == _characterMonitor.ActiveCharacter?.WorldId)
             {
                 topLevelMatch = true;
             }
@@ -124,24 +169,24 @@ public class InventoryScopeCalculator
         {
             if (searchScope.Categories != null)
             {
-                if (!searchScope.Categories.Contains(inventoryItem.SortedCategory))
+                if (!searchScope.Categories.Contains(category))
                 {
                     secondLevelMatch = false;
                 }
             }
             if (searchScope.CharacterTypes != null)
             {
-                if (!_characterTypes.ContainsKey(inventoryItem.RetainerId))
+                if (!_characterTypes.ContainsKey(characterId))
                 {
-                    var character = _characterMonitor.GetCharacterById(inventoryItem.RetainerId);
+                    var character = _characterMonitor.GetCharacterById(characterId);
                     if (character == null)
                     {
                         return false;
                     }
-                    _characterTypes[inventoryItem.RetainerId] = character.CharacterType;
+                    _characterTypes[characterId] = character.CharacterType;
                 }
 
-                if (!searchScope.CharacterTypes.Contains(_characterTypes[inventoryItem.RetainerId]))
+                if (!searchScope.CharacterTypes.Contains(_characterTypes[characterId]))
                 {
                     secondLevelMatch = false;
                 }
@@ -213,7 +258,7 @@ public class InventoryScopePicker
     {
 
         var changed = false;
-        var fakeRef = searchScopes.Count + " items selected.";
+        var fakeRef = searchScopes.Count + " scopes defined.";
         using (var disabled = ImRaii.Disabled())
         {
             if (disabled)
@@ -405,7 +450,7 @@ public class InventoryScopePicker
                                         _selectedScope.ActiveCharacter = true;
                                     }
                                     ImGui.SameLine();
-                                    _imGuiService.HelpMarker("Match against the currently logged in character.");
+                                    _imGuiService.HelpMarker("Match against the currently logged in character. This includes all retainers/free companies/etc owned by the character. Use categories or character types to filter down further.");
                                     ImGui.NewLine();
 
                                     if (ImGui.RadioButton("World",isWorld))
