@@ -59,7 +59,7 @@ public class ItemSpecialShopSourceRenderer : ItemInfoRenderer<ItemSpecialShopSou
 
     public override Func<List<ItemSource>, List<List<ItemSource>>>? CustomGroup => sources =>
     {
-        return sources.GroupBy(c => (c.CostItems.Count, c.CostItems.FirstOrDefault()?.RowId ?? null)).Select(c => c.ToList()).ToList();
+        return sources.GroupBy(c => (c.CostItems.Count, c.CostItems.FirstOrDefault().ItemRow?.RowId ?? null)).Select(c => c.ToList()).ToList();
     };
 
     public override Action<ItemSource> DrawTooltip => source =>
@@ -67,6 +67,7 @@ public class ItemSpecialShopSourceRenderer : ItemInfoRenderer<ItemSpecialShopSou
         var asSource = AsSource(source);
 
         ImGui.Text($"Shop: {asSource.Shop.Name}");
+
         ImGui.Text("Rewards:");
         using (ImRaii.PushIndent())
         {
@@ -118,7 +119,7 @@ public class ItemSpecialShopSourceRenderer : ItemInfoRenderer<ItemSpecialShopSou
     public override Func<ItemSource, int> GetIcon => source =>
     {
         var asSource = AsSource(source);
-        return asSource.CostItems.FirstOrDefault()?.Icon ?? asSource.Item.Icon;
+        return asSource.CostItems.FirstOrDefault().ItemRow?.Icon ?? asSource.Item.Icon;
     };
 
     public override Func<ItemSource, string> GetDescription => source =>

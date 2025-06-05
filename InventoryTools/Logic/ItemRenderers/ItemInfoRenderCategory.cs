@@ -16,4 +16,10 @@ public enum ItemInfoRenderCategory
     Duty = 11,
     Shop = 12,
     House = 13,
+    FieldOperation = 14,
+    OccultCrescent = 15,
+    Pagos = 16,
+    Pyros = 17,
+    Hydatos = 18,
+    DeepDungeon = 19,
 }

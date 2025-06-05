@@ -7,7 +7,7 @@ using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Sheets;
 using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Services.Mediator;
-
+using DalaMock.Host.Mediator;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Columns.Abstract;
@@ -98,13 +98,13 @@ namespace InventoryTools.Logic.Columns
                 if (rewardsValue != null)
                 {
                     var filterText = new FilterComparisonText(rewardsValue);
-                    search = search.Where(c => c.Item.NameString.ToLower().PassesFilter(filterText) || c.Items.Any(d => d.NameString.ToLower().PassesFilter(filterText)));
+                    search = search.Where(c => c.Item.NameString.ToLower().PassesFilter(filterText) || c.RewardItems.Any(d => d.ItemRow.NameString.ToLower().PassesFilter(filterText)));
                 }
                 var requirementsValue = this.requirementSetting.CurrentValue(columnConfiguration.FilterConfiguration);
                 if (requirementsValue != null)
                 {
                     var filterText = new FilterComparisonText(requirementsValue);
-                    search = search.Where(c => (c.CostItem != null && c.CostItem.NameString.ToLower().PassesFilter(filterText)) || c.CostItems.Any(d => d.NameString.ToLower().PassesFilter(filterText)));
+                    search = search.Where(c => (c.CostItem != null && c.CostItem.NameString.ToLower().PassesFilter(filterText)) || c.CostItems.Any(d => d.ItemRow.NameString.ToLower().PassesFilter(filterText)));
                 }
                 var mapsValue = this.mapSetting.CurrentValue(columnConfiguration.FilterConfiguration);
                 if (mapsValue != null)
@@ -195,14 +195,14 @@ public override IEnumerable<SearchResult> Filter(ColumnConfiguration columnConfi
                     }
                     if (rewardsValue != null)
                     {
-                        if (!c.Items.Any(d => d.NameString.ToLower().PassesFilter(rewardsValue)))
+                        if (!c.RewardItems.Any(d => d.ItemRow.NameString.ToLower().PassesFilter(rewardsValue)))
                         {
                             return false;
                         }
                     }
                     if (requirementsValue != null)
                     {
-                         if (!c.CostItems.Any(d => d.NameString.ToLower().PassesFilter(requirementsValue)))
+                         if (!c.CostItems.Any(d => d.ItemRow.NameString.ToLower().PassesFilter(requirementsValue)))
                          {
                              return false;
                          }

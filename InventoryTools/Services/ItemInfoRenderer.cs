@@ -8,6 +8,7 @@ using AllaganLib.Shared.Extensions;
 using AllaganLib.Shared.Time;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
+using DalaMock.Host.Mediator;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface;
@@ -429,11 +430,11 @@ public class ItemInfoRenderService : IDisposable
                     new Vector2(iconSize.X, iconSize.Y) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
                     new Vector2(1, 1), 0))
             {
-                var items = itemSources.SelectMany(c => c.Items).DistinctBy(c => c.RowId).ToList();
-                var costItems = itemSources.SelectMany(c => c.CostItems).DistinctBy(c => c.RowId).ToList();
+                var items = itemSources.SelectMany(c => c.RewardItems).DistinctBy(c => c.ItemId).ToList();
+                var costItems = itemSources.SelectMany(c => c.CostItems).DistinctBy(c => c.ItemId).ToList();
                 if (items.Count == 1 && costItems.Count == 0)
                 {
-                    messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), items[0].RowId));
+                    messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), items[0].ItemId));
                 }
                 else
                 {
@@ -446,8 +447,8 @@ public class ItemInfoRenderService : IDisposable
         {
             if (popup.Success)
             {
-                var items = itemSources.SelectMany(c => c.Items).DistinctBy(c => c.RowId).ToList();
-                var costItems = itemSources.SelectMany(c => c.CostItems).DistinctBy(c => c.RowId).ToList();
+                var items = itemSources.SelectMany(c => c.RewardItems).DistinctBy(c => c.ItemId).ToList();
+                var costItems = itemSources.SelectMany(c => c.CostItems).DistinctBy(c => c.ItemId).ToList();
 
                 if (rendererType == RendererType.Source)
                 {
@@ -455,16 +456,16 @@ public class ItemInfoRenderService : IDisposable
                     ImGui.Separator();
                     foreach (var item in items)
                     {
-                        this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16));
+                        this._imGuiService.DrawIcon(item.ItemRow.Icon, new Vector2(16, 16));
                         if (ImGui.IsItemHovered())
                         {
                             this._tooltipService.DrawItemTooltip(new SearchResult(item));
                         }
 
                         ImGui.SameLine();
-                        if (ImGui.Selectable(item.NameString))
+                        if (ImGui.Selectable(item.ItemRow.NameString))
                         {
-                            messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), item.RowId));
+                            messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), item.ItemId));
                         }
                     }
 
@@ -475,16 +476,16 @@ public class ItemInfoRenderService : IDisposable
                         ImGui.Separator();
                         foreach (var item in costItems)
                         {
-                            this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16));
+                            this._imGuiService.DrawIcon(item.ItemRow.Icon, new Vector2(16, 16));
                             if (ImGui.IsItemHovered())
                             {
                                 this._tooltipService.DrawItemTooltip(new SearchResult(item));
                             }
 
                             ImGui.SameLine();
-                            if (ImGui.Selectable(item.NameString))
+                            if (ImGui.Selectable(item.ItemRow.NameString))
                             {
-                                messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), item.RowId));
+                                messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), item.ItemId));
                             }
                         }
                     }
@@ -497,16 +498,16 @@ public class ItemInfoRenderService : IDisposable
                         ImGui.Separator();
                         foreach (var item in costItems)
                         {
-                            this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16));
+                            this._imGuiService.DrawIcon(item.ItemRow.Icon, new Vector2(16, 16));
                             if (ImGui.IsItemHovered())
                             {
                                 this._tooltipService.DrawItemTooltip(new SearchResult(item));
                             }
 
                             ImGui.SameLine();
-                            if (ImGui.Selectable(item.NameString))
+                            if (ImGui.Selectable(item.ItemRow.NameString))
                             {
-                                messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), item.RowId));
+                                messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), item.ItemRow.RowId));
                             }
                         }
                     }
@@ -518,16 +519,16 @@ public class ItemInfoRenderService : IDisposable
                         ImGui.Separator();
                         foreach (var item in items)
                         {
-                            this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16));
+                            this._imGuiService.DrawIcon(item.ItemRow.Icon, new Vector2(16, 16));
                             if (ImGui.IsItemHovered())
                             {
                                 this._tooltipService.DrawItemTooltip(new SearchResult(item));
                             }
 
                             ImGui.SameLine();
-                            if (ImGui.Selectable(item.NameString))
+                            if (ImGui.Selectable(item.ItemRow.NameString))
                             {
-                                messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), item.RowId));
+                                messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), item.ItemId));
                             }
                         }
                     }
@@ -593,8 +594,8 @@ public class ItemInfoRenderService : IDisposable
                 }
                 else
                 {
-                    var items = itemSources.SelectMany(c => c.Items).DistinctBy(c => c.RowId).ToList();
-                    var costItems = itemSources.SelectMany(c => c.CostItems).DistinctBy(c => c.RowId).ToList();
+                    var items = itemSources.SelectMany(c => c.RewardItems).DistinctBy(c => c.ItemId).ToList();
+                    var costItems = itemSources.SelectMany(c => c.CostItems).DistinctBy(c => c.ItemId).ToList();
 
                     if (items.Count == 1 && costItems.Count == 0)
                     {
@@ -608,17 +609,17 @@ public class ItemInfoRenderService : IDisposable
                             ImGui.Separator();
                             foreach (var item in items)
                             {
-                                this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16));
+                                this._imGuiService.DrawIcon(item.ItemRow.Icon, new Vector2(16, 16));
                                 if (ImGui.IsItemHovered())
                                 {
                                     this._tooltipService.DrawItemTooltip(new SearchResult(item));
                                 }
 
                                 ImGui.SameLine();
-                                using var menu = ImRaii.Menu(item.NameString);
+                                using var menu = ImRaii.Menu(item.ItemRow.NameString);
                                 if (menu)
                                 {
-                                    _imGuiService.ImGuiMenuService.DrawRightClickPopup(item, messages);
+                                    _imGuiService.ImGuiMenuService.DrawRightClickPopup(item.ItemRow, messages);
                                 }
                             }
 
@@ -629,17 +630,17 @@ public class ItemInfoRenderService : IDisposable
                                 ImGui.Separator();
                                 foreach (var item in costItems)
                                 {
-                                    this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16));
+                                    this._imGuiService.DrawIcon(item.ItemRow.Icon, new Vector2(16, 16));
                                     if (ImGui.IsItemHovered())
                                     {
-                                        this._tooltipService.DrawItemTooltip(new SearchResult(item));
+                                        this._tooltipService.DrawItemTooltip(new SearchResult(item.ItemRow));
                                     }
 
                                     ImGui.SameLine();
-                                    using var menu = ImRaii.Menu(item.NameString);
+                                    using var menu = ImRaii.Menu(item.ItemRow.NameString);
                                     if (menu)
                                     {
-                                        _imGuiService.ImGuiMenuService.DrawRightClickPopup(item, messages);
+                                        _imGuiService.ImGuiMenuService.DrawRightClickPopup(item.ItemRow, messages);
                                     }
                                 }
                             }
@@ -652,17 +653,17 @@ public class ItemInfoRenderService : IDisposable
                                 ImGui.Separator();
                                 foreach (var item in costItems)
                                 {
-                                    this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16));
+                                    this._imGuiService.DrawIcon(item.ItemRow.Icon, new Vector2(16, 16));
                                     if (ImGui.IsItemHovered())
                                     {
-                                        this._tooltipService.DrawItemTooltip(new SearchResult(item));
+                                        this._tooltipService.DrawItemTooltip(new SearchResult(item.ItemRow));
                                     }
 
                                     ImGui.SameLine();
-                                    using var menu = ImRaii.Menu(item.NameString);
+                                    using var menu = ImRaii.Menu(item.ItemRow.NameString);
                                     if (menu)
                                     {
-                                        _imGuiService.ImGuiMenuService.DrawRightClickPopup(item, messages);
+                                        _imGuiService.ImGuiMenuService.DrawRightClickPopup(item.ItemRow, messages);
                                     }
                                 }
                             }
@@ -678,17 +679,17 @@ public class ItemInfoRenderService : IDisposable
                                 ImGui.Separator();
                                 foreach (var item in items)
                                 {
-                                    this._imGuiService.DrawIcon(item.Icon, new Vector2(16, 16));
+                                    this._imGuiService.DrawIcon(item.ItemRow.Icon, new Vector2(16, 16));
                                     if (ImGui.IsItemHovered())
                                     {
                                         this._tooltipService.DrawItemTooltip(new SearchResult(item));
                                     }
 
                                     ImGui.SameLine();
-                                    using var menu = ImRaii.Menu(item.NameString);
+                                    using var menu = ImRaii.Menu(item.ItemRow.NameString);
                                     if (menu)
                                     {
-                                        _imGuiService.ImGuiMenuService.DrawRightClickPopup(item, messages);
+                                        _imGuiService.ImGuiMenuService.DrawRightClickPopup(item.ItemRow, messages);
                                     }
                                 }
                             }

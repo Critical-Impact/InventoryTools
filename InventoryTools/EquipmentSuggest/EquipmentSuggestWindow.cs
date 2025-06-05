@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
+using DalaMock.Host.Mediator;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
@@ -78,15 +79,15 @@ public class EquipmentSuggestWindow : GenericWindow, IMenuWindow
             {
                 if (ImGui.MenuItem("Configuration"))
                 {
-                    this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
+                    MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
                 }
                 if (ImGui.MenuItem("Changelog"))
                 {
-                    this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(ChangelogWindow)));
+                    MediatorService.Publish(new OpenGenericWindowMessage(typeof(ChangelogWindow)));
                 }
                 if (ImGui.MenuItem("Help"))
                 {
-                    this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(HelpWindow)));
+                    MediatorService.Publish(new OpenGenericWindowMessage(typeof(HelpWindow)));
                 }
                 if (ImGui.MenuItem("Enable Verbose Logging", "", this._pluginLog.MinimumLogLevel == LogEventLevel.Verbose))
                 {
@@ -156,7 +157,7 @@ public class EquipmentSuggestWindow : GenericWindow, IMenuWindow
                 {
                     if (ImGui.MenuItem(window.GenericName))
                     {
-                        this.MediatorService.Publish(new OpenGenericWindowMessage(window.GetType()));
+                        MediatorService.Publish(new OpenGenericWindowMessage(window.GetType()));
                     }
                 }
 
@@ -186,7 +187,7 @@ public class EquipmentSuggestWindow : GenericWindow, IMenuWindow
         {
             if (contentChild)
             {
-                this.MediatorService.Publish(_equipmentSuggestGrid.Value.Draw(_config, new Vector2(0, 0)));
+                MediatorService.Publish(_equipmentSuggestGrid.Value.Draw(_config, new Vector2(0, 0)));
             }
         }
     }
@@ -197,7 +198,7 @@ public class EquipmentSuggestWindow : GenericWindow, IMenuWindow
         {
             if (bottomBarChild.Success)
             {
-                this.MediatorService.Publish(_equipmentSuggestGrid.Value.DrawFooter(_config, new Vector2(0, 0)));
+                MediatorService.Publish(_equipmentSuggestGrid.Value.DrawFooter(_config, new Vector2(0, 0)));
             }
         }
     }

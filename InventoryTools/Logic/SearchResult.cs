@@ -1,4 +1,5 @@
-﻿using AllaganLib.GameSheets.Sheets.Rows;
+﻿using AllaganLib.GameSheets.Model;
+using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Models;
 
@@ -79,6 +80,10 @@ namespace InventoryTools.Logic
         public SearchResult(ItemRow item)
         {
             _item = item;
+        }
+        public SearchResult(ItemInfo item)
+        {
+            _item = item.ItemRow;
         }
 
         public SearchResult(InventoryItem inventoryItem)

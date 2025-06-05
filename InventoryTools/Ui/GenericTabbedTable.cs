@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib.Services.Mediator;
-
+using DalaMock.Host.Mediator;
 using ImGuiNET;
 using Dalamud.Interface.Utility.Raii;
 using InventoryTools.Services;
@@ -14,13 +14,13 @@ public abstract class GenericTabbedTable<T> : GenericWindow, IGenericTabbedTable
 {
     private readonly ImGuiService _imGuiService;
 
-    protected GenericTabbedTable(ILogger logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, string name) : base(logger, mediator, imGuiService, configuration, name)
+    protected GenericTabbedTable(ILogger<GenericTabbedTable<T>> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, string name) : base(logger, mediator, imGuiService, configuration, name)
     {
         _imGuiService = imGuiService;
     }
-    
+
     private uint _currentTab = 0;
-    
+
     public uint CurrentTab
     {
         get
@@ -250,10 +250,10 @@ public abstract class GenericTabbedTable<T> : GenericWindow, IGenericTabbedTable
                 ImGui.PopID();
             }
         }
-        
+
         clipper.End();
         clipper.Destroy();
-        
+
         if (refresh)
         {
             Items.Remove(contentTypeId);
@@ -275,9 +275,9 @@ public abstract class GenericTabbedTable<T> : GenericWindow, IGenericTabbedTable
     public int? SortColumn => _sortColumn;
 
     public ImGuiSortDirection? SortDirection => _sortDirection;
-    
+
     public abstract bool UseClipper { get; }
 
     public float RowSize => _rowSize;
-    
+
 }

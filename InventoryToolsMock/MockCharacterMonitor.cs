@@ -109,6 +109,10 @@ public class MockCharacterMonitor : ICharacterMonitor
 
     public bool BelongsToActiveCharacter(ulong characterId)
     {
+        if (_activeCharacterId == 0)
+        {
+            return false;
+        }
         if (IsFreeCompany(characterId))
         {
             var activeCharacter = ActiveCharacter;
@@ -119,9 +123,22 @@ public class MockCharacterMonitor : ICharacterMonitor
 
             return activeCharacter.FreeCompanyId == characterId;
         }
+        if (IsHousing(characterId))
+        {
+            var activeCharacter = ActiveCharacter;
+            if (activeCharacter == null)
+            {
+                return false;
+            }
+
+            if (Characters.ContainsKey(characterId))
+            {
+                return Characters[characterId].Owners.Contains(activeCharacter.CharacterId);
+            }
+        }
         if (characterId != 0 && Characters.ContainsKey(characterId))
         {
-            return Characters[characterId].OwnerId == ActiveCharacterId || Characters[characterId].CharacterId == ActiveCharacterId;
+            return Characters[characterId].OwnerId == _activeCharacterId || Characters[characterId].CharacterId == _activeCharacterId;
         }
         return false;
     }

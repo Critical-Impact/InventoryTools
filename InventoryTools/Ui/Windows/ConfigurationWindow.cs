@@ -7,7 +7,7 @@ using AllaganLib.Shared.Extensions;
 using Autofac;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-
+using DalaMock.Host.Mediator;
 using ImGuiNET;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings.Abstract;
@@ -470,11 +470,11 @@ namespace InventoryTools.Ui
                     }
                     if (ImGui.MenuItem("Changelog"))
                     {
-                        this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(ChangelogWindow)));
+                        MediatorService.Publish(new OpenGenericWindowMessage(typeof(ChangelogWindow)));
                     }
                     if (ImGui.MenuItem("Help"))
                     {
-                        this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(HelpWindow)));
+                        MediatorService.Publish(new OpenGenericWindowMessage(typeof(HelpWindow)));
                     }
 
                     if (ImGui.MenuItem("Enable Verbose Logging", "", this._pluginLog.MinimumLogLevel == LogEventLevel.Verbose))
@@ -508,7 +508,7 @@ namespace InventoryTools.Ui
                     using var disabled = ImRaii.Disabled(!hasNewFeatures);
                     if (ImGui.MenuItem("Configure New Features"))
                     {
-                        this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWizard)));
+                        MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWizard)));
                     }
 
                     disabled.Dispose();
@@ -516,7 +516,7 @@ namespace InventoryTools.Ui
                     if (ImGui.MenuItem("Reconfigure All Features"))
                     {
                         this._configurationWizardService.ClearFeaturesSeen();
-                        this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWizard)));
+                        MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWizard)));
                     }
 
                     ImGui.EndMenu();
@@ -530,7 +530,7 @@ namespace InventoryTools.Ui
                         {
                             if (ImGui.MenuItem(window.GenericName))
                             {
-                                this.MediatorService.Publish(new OpenGenericWindowMessage(window.GetType()));
+                                MediatorService.Publish(new OpenGenericWindowMessage(window.GetType()));
                             }
                         }
                     }

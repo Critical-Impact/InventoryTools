@@ -41,6 +41,7 @@ public class ItemCompanyLeveSourceRenderer : ItemInfoRenderer<ItemCompanyLeveSou
         var leveRow = asSource.Leve.Value;
         return leveRow.Name.ExtractText();
     };
+
     public override Func<ItemSource, int> GetIcon => _ => Icons.LeveIcon;
 
     public override Func<ItemSource, string> GetDescription => source =>

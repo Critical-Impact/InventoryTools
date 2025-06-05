@@ -6,6 +6,7 @@ using CriticalCommonLib.Services.Mediator;
 using DalaMock.Core.DI;
 using DalaMock.Core.Mocks;
 using DalaMock.Core.Plugin;
+using DalaMock.Host.Mediator;
 using Dalamud.Plugin.Services;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.Extensions.Hosting;

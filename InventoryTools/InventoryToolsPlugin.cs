@@ -30,7 +30,7 @@ using CriticalCommonLib.Services.Ui;
 
 using DalaMock.Host.Factories;
 using DalaMock.Host.Hosting;
-
+using DalaMock.Host.Mediator;
 using DalaMock.Shared.Classes;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Game.ClientState.Objects;
@@ -166,7 +166,6 @@ namespace InventoryTools
                 .ConfigureLogging(lb =>
                 {
                     lb.ClearProviders();
-                    lb.AddDalamudLogging();
                     lb.SetMinimumLevel(LogLevel.Trace);
                 });
             //Load tooltips, hotkeys, filters

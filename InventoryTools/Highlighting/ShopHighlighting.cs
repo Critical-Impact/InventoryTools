@@ -6,6 +6,7 @@ using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using ImGuiNET;
+using InventoryTools.Logic.Settings;
 using ValueType = FFXIVClientStructs.FFXIV.Component.GUI.ValueType;
 
 namespace InventoryTools.Highlighting;
@@ -15,16 +16,25 @@ public class ShopHighlighting : IDisposable
     private readonly IGameGui gameGui;
     private readonly IAddonLifecycle addonLifecycle;
     private readonly IPluginLog pluginLog;
+    private readonly ShopHighlightingDisableItemsSetting _shopHighlightingDisableItemsSetting;
+    private readonly InventoryToolsConfiguration _configuration;
     private uint shopItemsAtkIndex = 441;
     private uint shopCountAtkIndex = 2;
     private HashSet<uint> highlightedItems = new HashSet<uint>();
     private Dictionary<int, uint>? itemIndexMap = null;
 
-    public ShopHighlighting(IGameGui gameGui, IAddonLifecycle addonLifecycle, IPluginLog pluginLog)
+
+    public ShopHighlighting(IGameGui gameGui,
+        IAddonLifecycle addonLifecycle,
+        IPluginLog pluginLog,
+        ShopHighlightingDisableItemsSetting shopHighlightingDisableItemsSetting,
+        InventoryToolsConfiguration configuration)
     {
         this.gameGui = gameGui;
         this.addonLifecycle = addonLifecycle;
         this.pluginLog = pluginLog;
+        _shopHighlightingDisableItemsSetting = shopHighlightingDisableItemsSetting;
+        _configuration = configuration;
         addonLifecycle.RegisterListener(AddonEvent.PostSetup, "Shop", AddonSetup);
         addonLifecycle.RegisterListener(AddonEvent.PostDraw, "Shop", AddonPostDraw);
     }
@@ -122,7 +132,10 @@ public class ShopHighlighting : IDisposable
                 {
                     if (!highlightedItems.Any())
                     {
-                        listNode->SetItemDisabledState(i, false);
+                        if (_shopHighlightingDisableItemsSetting.CurrentValue(_configuration))
+                        {
+                            listNode->SetItemDisabledState(i, false);
+                        }
                         listNode->SetItemHighlightedState(i, false);
                     }
                     else if (itemIndexMap!.ContainsKey(i))
@@ -133,17 +146,25 @@ public class ShopHighlighting : IDisposable
                             {
                                 listNode->SetItemHighlightedState(i, true);
                             }
-                            if (listNode->GetItemDisabledState(i))
+
+                            if (_shopHighlightingDisableItemsSetting.CurrentValue(_configuration))
                             {
-                                listNode->SetItemDisabledState(i, false);
+                                if (listNode->GetItemDisabledState(i))
+                                {
+                                    listNode->SetItemDisabledState(i, false);
+                                }
                             }
                         }
                         else
                         {
-                            if (!listNode->GetItemDisabledState(i))
+                            if (_shopHighlightingDisableItemsSetting.CurrentValue(_configuration))
                             {
-                                listNode->SetItemDisabledState(i, true);
+                                if (!listNode->GetItemDisabledState(i))
+                                {
+                                    listNode->SetItemDisabledState(i, true);
+                                }
                             }
+
                             if (listNode->GetItemHighlightedState(i))
                             {
                                 listNode->SetItemHighlightedState(i, false);

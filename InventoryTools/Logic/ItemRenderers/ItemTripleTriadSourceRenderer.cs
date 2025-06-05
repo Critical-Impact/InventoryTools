@@ -38,7 +38,6 @@ public class ItemTripleTriadSourceRenderer : ItemInfoRenderer<ItemTripleTriadSou
         foreach (var npc in asSource.TripleTriadRow.ENpcBaseRows)
         {
             DrawLocations(npc.Resident.Value.Singular.ToImGuiString(), npc.Locations.ToList());
-
         }
     };
 

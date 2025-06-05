@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Services.Mediator;
+using DalaMock.Host.Mediator;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Interface;
 using ImGuiNET;

@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Services.Ui;
+using DalaMock.Host.Mediator;
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Plugin.Services;

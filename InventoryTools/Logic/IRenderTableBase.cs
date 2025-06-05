@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib.Services.Mediator;
+using DalaMock.Host.Mediator;
 
 
 namespace InventoryTools.Logic
@@ -13,6 +14,6 @@ namespace InventoryTools.Logic
         public List<MessageBase> Draw(Vector2 size, bool shouldDraw = true);
 
         bool ShowFilterRow { get; set; }
-        
+
     }
 }

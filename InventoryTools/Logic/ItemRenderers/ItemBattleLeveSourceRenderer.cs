@@ -47,18 +47,7 @@ public class ItemBattleLeveSourceRenderer : ItemInfoRenderer<ItemBattleLeveSourc
         ImGui.TextUnformatted("Allowance Cost: " + leveRow.AllowanceCost);
         ImGui.TextUnformatted("Loot Chance: " + asSource.LeveRewardItem.Value.ProbabilityPercent[asSource.RewardItemIndex] + "%");
 
-        Span<ItemInfo> rewardItems = stackalloc ItemInfo[asSource.LeveRewardItemGroup.Value.Item.Count];
-
-        for (var index = 0; index < asSource.LeveRewardItemGroup.Value.Item.Count; index++)
-        {
-            rewardItems[index] = new ItemInfo(
-                asSource.LeveRewardItemGroup.Value.Item[index].RowId,
-                asSource.LeveRewardItemGroup.Value.Count[index],
-                asSource.LeveRewardItemGroup.Value.IsHQ[index]
-            );
-        }
-
-        DrawItems("Possible Reward Items: ", rewardItems);
+        DrawItems("Possible Reward Items: ", asSource.RewardItems);
         DrawMaps(asSource);
     };
 

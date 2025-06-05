@@ -48,7 +48,7 @@
                  return null;
              }
 
-             return currentValue.Any(u => item.GetSourcesByCategory<ItemShopSource>(ItemInfoCategory.Shop).Any(c => c.CostItems.Any(e => e.RowId == u)));
+             return currentValue.Any(u => item.GetSourcesByCategory<ItemShopSource>(ItemInfoCategory.Shop).Any(c => c.CostItems.Any(e => e.ItemRow.RowId == u)));
          }
 
          public override Dictionary<uint, string> GetChoices(FilterConfiguration configuration)

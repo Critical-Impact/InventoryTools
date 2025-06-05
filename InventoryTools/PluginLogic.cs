@@ -9,7 +9,7 @@ using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-
+using DalaMock.Host.Mediator;
 using Dalamud.Plugin.Services;
 using InventoryTools.Hotkeys;
 using InventoryTools.Logic;
@@ -122,7 +122,7 @@ namespace InventoryTools
             _trackMarketBoardFilter = trackMarketBoardFilter;
             _filterFactory = filterFactory;
             _marketCache = marketCache;
-            this.MediatorService.Subscribe<PluginLoadedMessage>(this, PluginLoaded);
+            MediatorService.Subscribe<PluginLoadedMessage>(this, PluginLoaded);
         }
 
         private void PluginLoaded(PluginLoadedMessage obj)

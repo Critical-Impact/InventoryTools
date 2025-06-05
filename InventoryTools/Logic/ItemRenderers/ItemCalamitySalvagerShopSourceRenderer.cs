@@ -5,6 +5,7 @@ using System.Linq;
 using System.Numerics;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
+using AllaganLib.GameSheets.Model;
 using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Models;
 using Dalamud.Interface.Textures;
@@ -69,37 +70,10 @@ public class ItemCalamitySalvagerShopSourceRenderer : ItemInfoRenderer<ItemCalam
         var asSources = AsSource(sources);
         var firstItem = asSources[0];
 
-        var costItems = asSources.SelectMany(c => c.GilShopItem.Costs).DistinctBy(d => d.Item.RowId).ToList();
-
-        Span<ItemInfo> costItemInfos = stackalloc ItemInfo[costItems.Count];
-
-        for (var index = 0; index < costItems.Count; index++)
-        {
-            costItemInfos[index] = new ItemInfo(
-                costItems[index].Item.RowId,
-                costItems[index].Count,
-                costItems[index].IsHq ?? false
-            );
-        }
-
-        DrawItems("Costs: ", costItemInfos);
-
-        var rewardItems = asSources.SelectMany(c => c.GilShopItem.Rewards).DistinctBy(d => d.Item.RowId).ToList();
-
-        Span<ItemInfo> rewardItemInfos = stackalloc ItemInfo[rewardItems.Count];
-
-        for (var index = 0; index < rewardItems.Count; index++)
-        {
-            rewardItemInfos[index] = new ItemInfo(
-                rewardItems[index].Item.RowId,
-                rewardItems[index].Count,
-                rewardItems[index].IsHq ?? false
-            );
-        }
-
-        DrawItems("Rewards: ", rewardItemInfos);
-
-
+        var costItems = asSources.SelectMany(c => c.CostItems).DistinctBy(d => d.ItemId).ToList();
+        DrawItems("Costs: ", costItems);
+        var rewardItems = asSources.SelectMany(c => c.RewardItems).DistinctBy(d => d.ItemId).ToList();
+        DrawItems("Rewards: ", rewardItems);
 
         if (firstItem.GilShopItem.Base.AchievementRequired.RowId != 0)
         {
@@ -123,35 +97,8 @@ public class ItemCalamitySalvagerShopSourceRenderer : ItemInfoRenderer<ItemCalam
     {
         var asSource = AsSource(source);
 
-        var costs = asSource.GilShopItem.Costs.ToList();
-
-        Span<ItemInfo> costItemInfos = stackalloc ItemInfo[costs.Count()];
-
-        for (var index = 0; index < costs.Count; index++)
-        {
-            costItemInfos[index] = new ItemInfo(
-                costs[index].Item.RowId,
-                costs[index].Count,
-                costs[index].IsHq ?? false
-            );
-        }
-
-        DrawItems("Costs: ", costItemInfos);
-
-        var rewardItems = asSource.GilShopItem.Rewards.ToList();
-
-        Span<ItemInfo> rewardItemInfos = stackalloc ItemInfo[rewardItems.Count];
-
-        for (var index = 0; index < rewardItems.Count; index++)
-        {
-            rewardItemInfos[index] = new ItemInfo(
-                rewardItems[index].Item.RowId,
-                rewardItems[index].Count,
-                rewardItems[index].IsHq ?? false
-            );
-        }
-
-        DrawItems("Rewards: ", rewardItemInfos);
+        DrawItems("Costs: ", asSource.CostItems);
+        DrawItems("Rewards: ", asSource.RewardItems);
 
         if (asSource.GilShopItem.Base.AchievementRequired.RowId != 0)
         {

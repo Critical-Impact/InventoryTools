@@ -1,5 +1,5 @@
 using CriticalCommonLib.Services.Mediator;
-
+using DalaMock.Host.Mediator;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Mediator;
 using InventoryTools.Ui;

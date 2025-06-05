@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CriticalCommonLib.Services.Mediator;
-
+using DalaMock.Host.Mediator;
 using ImGuiNET;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -50,7 +50,7 @@ namespace InventoryTools.Logic.Columns.Abstract
                 return !currentValue.Value;
             });
         }
-        
+
         private int GetSortOrder(ColumnConfiguration columnConfiguration, SearchResult c)
         {
             var currentValue = CurrentValue(columnConfiguration, c);

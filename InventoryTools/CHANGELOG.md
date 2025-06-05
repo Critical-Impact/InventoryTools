@@ -8,6 +8,25 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [12.0.15] - 2025-06-05
+
+### Added
+- Sources for Card Packs, PoTD, HoH, Orthos, Anemos, Pagos, Pyros, Hydatos, Bozja, Logograms, Occult, PvP Series and Collectable Shops added (thanks to tracky's data for some of this!)
+- Certain quests will now show rewards 
+- Certain sources will now show the probability of dropping and min and max drop amounts.
+- Setting to disable items when highlighting in shops(off by default)
+
+### Fixed
+- Crystals could sometimes ignore the retrieval order in craft lists
+- The craft overlay will now display properly when using a different ui scale
+
+
+## [12.0.14] - 2025-05-29
+
+### Fixed
+- Hotkeys should be working and stay working
+- The collectable/hq icon should now display correctly in the craft overlay
+
 ## [12.0.13] - 2025-05-28
 
 ### Added

@@ -1,6 +1,6 @@
 using System;
 using CriticalCommonLib.Services.Mediator;
-
+using DalaMock.Host.Mediator;
 using Dalamud.Game.ClientState.Keys;
 using InventoryTools.Extensions;
 using Microsoft.Extensions.Logging;
@@ -16,7 +16,7 @@ public abstract class Hotkey : IHotkey, IMediatorSubscriber, IDisposable
 
     private VirtualKey[]? _keys;
     private ModifiableHotkey? _currentHotkey;
-    
+
     public VirtualKey[]? VirtualKeys
     {
         get
@@ -53,13 +53,13 @@ public abstract class Hotkey : IHotkey, IMediatorSubscriber, IDisposable
     public abstract ModifiableHotkey? ModifiableHotkey { get; }
     public abstract bool OnHotKey();
     public bool PassToGame { get; }
-    
+
     public void Dispose()
     {
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
-    
+
     protected virtual void Dispose(bool disposing)
     {
         Logger.LogDebug("Disposing {type}", GetType());

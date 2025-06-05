@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using CriticalCommonLib.Services.Mediator;
+using DalaMock.Host.Mediator;
 
 
 namespace InventoryTools.Logic.ItemRenderers;

@@ -1,6 +1,6 @@
 using System.Numerics;
 using CriticalCommonLib.Services.Mediator;
-
+using DalaMock.Host.Mediator;
 using ImGuiNET;
 using InventoryTools.Logic;
 using InventoryTools.Services;
@@ -15,7 +15,7 @@ namespace InventoryTools.Ui
         public ImGuiService ImGuiService { get; }
         public InventoryToolsConfiguration Configuration { get; }
 
-        public Window(ILogger logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, string name = "") : base(logger, mediator, name)
+        public Window(ILogger<Window> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, string name = "") : base(logger, mediator, name)
         {
             ImGuiService = imGuiService;
             Configuration = configuration;

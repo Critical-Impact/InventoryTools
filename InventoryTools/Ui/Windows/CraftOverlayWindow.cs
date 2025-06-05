@@ -11,6 +11,7 @@ using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
+using DalaMock.Host.Mediator;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Game.Text;
 using Dalamud.Interface;
@@ -133,7 +134,7 @@ public class CraftOverlayWindow : OverlayWindow
 
         this.SizeConstraints = new WindowSizeConstraints()
         {
-            MaximumSize = new Vector2(450, 800) * ImGui.GetIO().FontGlobalScale,
+            MaximumSize = new Vector2(450, 800),
         };
 
         if (WindowState == CraftOverlayWindowState.Collapsed && ImGuiService.DrawIconButton(_font, FontAwesomeIcon.ChevronRight, ref currentCursorPosX))
@@ -273,7 +274,7 @@ public class CraftOverlayWindow : OverlayWindow
         else
         {
             ImGui.Text("Nothing to do.");
-            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 150 + 70 + 80);
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (150 + 70 + 80 * ImGui.GetIO().FontGlobalScale));
         }
 
         ImGui.SameLine();
@@ -382,7 +383,7 @@ public class CraftOverlayWindow : OverlayWindow
 
                             ImGui.TableNextRow();
                             ImGui.TableNextColumn();
-                            if (ImGui.ImageButton(ImGuiService.GetIconTexture(currentItem.Item.Icon).ImGuiHandle, new Vector2(16,16)))
+                            if (ImGui.ImageButton(ImGuiService.GetIconTexture(currentItem.Item.Icon).ImGuiHandle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale))
                             {
                                 this.MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), currentItem.ItemId));
                             }
@@ -420,7 +421,7 @@ public class CraftOverlayWindow : OverlayWindow
                             ImGui.TableNextColumn();
                             if (nextCraftStep == NextCraftStep.Retrieve)
                             {
-                                ImGuiService.DrawIcon(Icons.RetainerIcon, new (20,20));
+                                ImGuiService.DrawIcon(Icons.RetainerIcon, new Vector2(20,20) * ImGui.GetIO().FontGlobalScale);
                                 if (SelectedConfiguration.SearchResults != null &&ImGui.IsItemHovered())
                                 {
                                     using (var tooltip = ImRaii.Tooltip())

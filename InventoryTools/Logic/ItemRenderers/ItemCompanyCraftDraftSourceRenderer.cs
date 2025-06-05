@@ -34,18 +34,8 @@ public class ItemCompanyCraftDraftSourceRenderer : ItemInfoRenderer<ItemCompanyC
         var asSource = AsSource(source);
         ImGui.Text($"Name: {asSource.CompanyCraftDraft.Value.Name.ExtractText()}");
 
-        Span<ItemInfo> rewardItems = stackalloc ItemInfo[asSource.CompanyCraftDraft.Value.RequiredItem.Count];
-
-        for (var index = 0; index < asSource.CompanyCraftDraft.Value.RequiredItem.Count; index++)
-        {
-            rewardItems[index] = new ItemInfo(
-                asSource.CompanyCraftDraft.Value.RequiredItem[index].RowId,
-                asSource.CompanyCraftDraft.Value.RequiredItemCount[index],
-                false
-            );
-        }
-
-        DrawItems("Ingredients: ", rewardItems);
+        DrawItems("Possible Reward Items: ", asSource.RewardItems);
+        DrawItems("Ingredients: ", asSource.CostItems);
     };
 
     public override Func<ItemSource, string> GetName => source =>

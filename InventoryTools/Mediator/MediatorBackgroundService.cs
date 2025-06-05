@@ -1,5 +1,5 @@
 using CriticalCommonLib.Services.Mediator;
-
+using DalaMock.Host.Mediator;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 

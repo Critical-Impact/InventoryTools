@@ -37,20 +37,7 @@ public class ItemCompanyCraftResultSourceRenderer : ItemInfoRenderer<ItemCompany
         var asSource = AsSource(source);
         ImGui.Text($"Craft Type: {asSource.CompanyCraftSequence.Base.CompanyCraftType.Value.Name}");
         ImGui.Text($"Parts: {asSource.CompanyCraftSequence.CompanyCraftParts.Length}");
-
-        var materialsRequired = asSource.CompanyCraftSequence.MaterialsRequired(null);
-        Span<ItemInfo> rewardItems = stackalloc ItemInfo[materialsRequired.Count];
-
-        for (var index = 0; index < materialsRequired.Count; index++)
-        {
-            rewardItems[index] = new ItemInfo(
-                materialsRequired[index].ItemId,
-                materialsRequired[index].Quantity,
-                false
-            );
-        }
-
-        DrawItems("Ingredients: ", rewardItems);
+        DrawItems("Ingredients: ", asSource.CostItems);
     };
 
     public override Func<ItemSource, string> GetName => source =>

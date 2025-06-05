@@ -7,6 +7,7 @@ using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
+using DalaMock.Host.Mediator;
 using Dalamud.Game.Text;
 using ImGuiNET;
 using InventoryTools.Logic.Columns.Abstract;

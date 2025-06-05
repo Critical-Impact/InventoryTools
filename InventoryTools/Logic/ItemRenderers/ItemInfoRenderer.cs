@@ -8,6 +8,7 @@ using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Model;
 using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Services.Mediator;
+using DalaMock.Host.Mediator;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin;
@@ -35,9 +36,9 @@ public abstract class ItemInfoRenderer<T> : IItemInfoRenderer where T : ItemSour
         MapSheet = mapSheet;
     }
 
-    public void DrawItems(string sectionName, ReadOnlySpan<ItemInfo> items)
+    public void DrawItems(string sectionName, IReadOnlyList<ItemInfo> items)
     {
-        if (items.Length == 0)
+        if (items.Count == 0)
         {
             return;
         }
@@ -51,11 +52,30 @@ public abstract class ItemInfoRenderer<T> : IItemInfoRenderer where T : ItemSour
 
                 var item = ItemSheet.GetRow(itemInfo.ItemId);
                 ImGui.Image(
-                    TextureProvider.GetFromGameIcon(new GameIconLookup(item.Icon, itemInfo.IsHighQuality)).GetWrapOrEmpty().ImGuiHandle,
+                    TextureProvider.GetFromGameIcon(new GameIconLookup(item.Icon, itemInfo.IsHighQuality ?? false)).GetWrapOrEmpty().ImGuiHandle,
                     new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale
                 );
                 ImGui.SameLine();
-                ImGui.TextUnformatted($"{item.NameString} x {itemInfo.Count}");
+                if (itemInfo.Count == null)
+                {
+                    ImGui.TextUnformatted($"{item.NameString}" + (itemInfo.IsOptional ?? false ? " (Optional)" : ""));
+                }
+                else
+                {
+                    ImGui.TextUnformatted($"{item.NameString} x {itemInfo.Count}" + (itemInfo.IsOptional ?? false ? " (Optional)" : ""));
+                }
+                if (itemInfo.Min != null && itemInfo.Max != null)
+                {
+                    ImGui.SameLine();
+                    if (itemInfo.Min == itemInfo.Max)
+                    {
+                        ImGui.Text("(Drops 1)");
+                    }
+                    else
+                    {
+                        ImGui.Text("(Drops " + itemInfo.Min.Value + " - " + itemInfo.Max.Value + ")");
+                    }
+                }
             }
         }
     }
@@ -182,19 +202,5 @@ public abstract class ItemInfoRenderer<T> : IItemInfoRenderer where T : ItemSour
     public List<T> AsSource(List<ItemSource> source)
     {
         return source.Cast<T>().ToList();
-    }
-}
-
-public readonly struct ItemInfo
-{
-    public readonly uint ItemId;
-    public readonly uint Count;
-    public readonly bool IsHighQuality;
-
-    public ItemInfo(uint itemId, uint count, bool isHighQuality)
-    {
-        ItemId = itemId;
-        Count = count;
-        IsHighQuality = isHighQuality;
     }
 }
