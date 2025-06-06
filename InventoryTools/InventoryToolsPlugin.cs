@@ -138,6 +138,7 @@ namespace InventoryTools
             typeof(MarketCache),
             typeof(SimpleAcquisitionTrackerService),
             typeof(HotkeyService),
+            typeof(Chat2Ipc)
         };
 
         public List<Type> GetHostedServices()
@@ -161,13 +162,6 @@ namespace InventoryTools
 
         public override void PreBuild(IHostBuilder hostBuilder)
         {
-            hostBuilder
-                .UseContentRoot(PluginInterface!.ConfigDirectory.FullName)
-                .ConfigureLogging(lb =>
-                {
-                    lb.ClearProviders();
-                    lb.SetMinimumLevel(LogLevel.Trace);
-                });
             //Load tooltips, hotkeys, filters
             hostBuilder
                 .UseServiceProviderFactory(new AutofacServiceProviderFactory())

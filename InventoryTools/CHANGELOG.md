@@ -8,6 +8,15 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [12.0.16] - 2025-06-06
+
+### Added
+- Chat2 integration for item context menu
+
+### Fixed
+- When a craft list was set to use HQ by default, items that cannot be HQ were being checked resulting in items not being considered for retrieval
+- Fixed loggers being cleared
+
 ## [12.0.15] - 2025-06-05
 
 ### Added

@@ -49,6 +49,7 @@ public class InventoryToolsPluginMock : InventoryToolsPlugin
         replacements.Add(typeof(CraftMonitor),typeof(MockHostedCraftMonitor));
         replacements.Add(typeof(OdrScanner),typeof(MockOdrScanner));
         replacements.Add(typeof(SimpleAcquisitionTrackerService),typeof(MockAcquisitionTrackerService));
+        replacements.Add(typeof(Chat2Ipc),typeof(MockChat2Ipc));
     }
 
     public override void PreBuild(IHostBuilder hostBuilder)
