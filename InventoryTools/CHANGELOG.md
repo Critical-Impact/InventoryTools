@@ -8,6 +8,11 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [12.0.17] - 2025-06-06
+
+### Fixed
+- Fixed potential crash when loading if Chat2 is not installed
+
 ## [12.0.16] - 2025-06-06
 
 ### Added

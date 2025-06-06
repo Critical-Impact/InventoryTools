@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -50,17 +51,41 @@ public class Chat2Ipc : IChat2Ipc
     }
 
     private void Register() {
-        _id = RegisterCallGate.InvokeFunc();
-        _logger.LogTrace("Attempting to register with chat2");
+        try
+        {
+            _id = RegisterCallGate.InvokeFunc();
+            _logger.LogTrace("Attempting to register with chat2");
+        }
+        catch (Exception exception)
+        {
+            _logger.LogWarning(exception, "Something went wrong while trying to register with Chat2's IPC. Ignore this if you don't have it installed.");
+        }
+
     }
 
     public void Disable() {
+
         if (_id != null) {
-            UnregisterCallGate.InvokeAction(_id);
+            try
+            {
+                UnregisterCallGate.InvokeAction(_id);
+                _logger.LogTrace("Attempting to unregister with chat2's IPC");
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Something went wrong while trying to unregister with Chat2's IPC. Ignore this if you don't have it installed.");
+            }
             _id = null;
         }
-
-        InvokeCallGate.Unsubscribe(Integration);
+        try
+        {
+            InvokeCallGate.Unsubscribe(Integration);
+            _logger.LogTrace("Attempting to unsubscribe with chat2's IPC");
+        }
+        catch (Exception exception)
+        {
+            _logger.LogWarning(exception, "Something went wrong while trying to unsubscribe from Chat2's IPC. Ignore this if you don't have it installed.");
+        }
     }
 
     private void Integration(string id, PlayerPayload? sender, ulong contentId, Payload? payload, SeString? senderString, SeString? content) {

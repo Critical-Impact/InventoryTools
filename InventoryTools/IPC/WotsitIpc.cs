@@ -62,9 +62,9 @@ namespace InventoryTools.IPC
             {
                 InitForWotsit();
             }
-            catch (Exception)
+            catch (Exception exception)
             {
-                Logger.LogError("Something went wrong while trying to unregister and reregister with wotsit's IPC.");
+                Logger.LogWarning(exception, "Something went wrong while trying to unregister and reregister with wotsit's IPC.");
             }
         }
 
@@ -77,9 +77,9 @@ namespace InventoryTools.IPC
                     InitForWotsit();
                 }
             }
-            catch (Exception)
+            catch (Exception exception)
             {
-                Logger.LogError("Something went wrong while trying to unregister and reregister with wotsit's IPC.");
+                Logger.LogWarning(exception, "Something went wrong while trying to unregister and reregister with wotsit's IPC.");
             }
         }
 
