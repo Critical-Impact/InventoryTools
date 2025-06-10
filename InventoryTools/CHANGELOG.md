@@ -8,6 +8,12 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [12.0.18] - 2025-06-10
+
+### Fixed
+- Changed the default ingredient preference order making desynthesis & reduction less likely to be selected when there are better options available
+- Added checks to stop sources being self-referential in craft lists
+
 ## [12.0.17] - 2025-06-06
 
 ### Fixed

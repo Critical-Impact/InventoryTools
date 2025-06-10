@@ -567,7 +567,7 @@ public class CraftSettingsColumn : IColumn
 
                     foreach (var ingredientPreference in ingredientPreferences)
                     {
-                        if ((item.LimitType == null || item.LimitType != ingredientPreference.Type) && ImGui.Selectable(_ingredientPreferenceLocalizer.FormattedName(ingredientPreference)))
+                        if (ImGui.Selectable(_ingredientPreferenceLocalizer.FormattedName(ingredientPreference)))
                         {
                             configuration.CraftList.UpdateIngredientPreference(item.ItemId, ingredientPreference);
                             configuration.NeedsRefresh = true;
