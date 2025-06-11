@@ -8,6 +8,12 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [12.0.19] - 2025-06-11
+
+### Fixed
+- When a list was set to require HQs but individual items were set to be NQ, they'd still be counted as HQ
+- Changed the ingredient preference loop detection logic to consider preferences further up the tree
+
 ## [12.0.18] - 2025-06-10
 
 ### Fixed
