@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.h
 ### Added
 - Added a new tree view mode for craft lists for quick configuration and visualization of each output item.
 
+### Changed
+- The Total Quantity Available column is now available in curated lists
+- The "Total Quantity Available" column was renamed "Quantity/Total Quantity Available"
+
 ## [12.0.19] - 2025-06-11
 
 ### Fixed

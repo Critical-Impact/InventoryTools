@@ -15,6 +15,7 @@ namespace InventoryTools.Logic.Columns
             _inventoryMonitor = inventoryMonitor;
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Inventory;
+
         public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {
             var qty = 0;
@@ -41,6 +42,6 @@ namespace InventoryTools.Logic.Columns
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
 
-        public override FilterType AvailableIn => Logic.FilterType.CraftFilter;
+        public override FilterType AvailableIn => Logic.FilterType.CraftFilter | Logic.FilterType.CuratedList;
     }
 }
