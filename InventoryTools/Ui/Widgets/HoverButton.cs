@@ -48,6 +48,7 @@ public class HoverButton
 
         if (ImGui.IsItemHovered())
         {
+            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
             _buttonState[id] = true;
         }
         else

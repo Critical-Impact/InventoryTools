@@ -63,7 +63,8 @@ public class ImGuiService : AllaganLib.Interface.Services.ImGuiService
         string? tooltip = null,
         bool reverseCursor = false,
         Vector4? textColor = null,
-        bool invisible = false)
+        bool invisible = false,
+        float? minWidth = null)
     {
         var success = false;
         var iconString = icon.ToIconString();
@@ -79,6 +80,11 @@ public class ImGuiService : AllaganLib.Interface.Services.ImGuiService
         if (reverseCursor)
         {
             currentCursorX -= buttonSize.X + ImGui.GetStyle().ItemSpacing.X;
+        }
+
+        if (minWidth != null && minWidth >= buttonSize.X)
+        {
+            buttonSize.X = minWidth.Value;
         }
 
         ImGui.SetCursorPosX(currentCursorX);

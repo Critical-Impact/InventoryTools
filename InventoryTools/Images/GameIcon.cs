@@ -1,4 +1,0 @@
-namespace InventoryTools.Images
-{
-
-}

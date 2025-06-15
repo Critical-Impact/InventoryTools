@@ -216,7 +216,7 @@ public class CraftSettingsColumn : IColumn
         return null;
     }
 
-    private void DrawRetainerIcon(FilterConfiguration configuration, int rowIndex, CraftItem item, CraftRetainerRetrieval? perItemRetainerRetrieval, CraftRetainerRetrieval retainerRetrievalDefault)
+    public void DrawRetainerIcon(FilterConfiguration configuration, int rowIndex, CraftItem item, CraftRetainerRetrieval? perItemRetainerRetrieval, CraftRetainerRetrieval retainerRetrievalDefault)
     {
         var retainerRetrieval = perItemRetainerRetrieval ?? retainerRetrievalDefault;
 
@@ -316,7 +316,7 @@ public class CraftSettingsColumn : IColumn
         }
     }
 
-    private void DrawHqIcon(FilterConfiguration configuration, int rowIndex, CraftItem item)
+    public void DrawHqIcon(FilterConfiguration configuration, int rowIndex, CraftItem item)
     {
         var hqRequired = configuration.CraftList.GetHQRequired(item.ItemId);
         var isCollectable = item.Item.IsCollectable;
@@ -416,7 +416,7 @@ public class CraftSettingsColumn : IColumn
 
     }
 
-    private void DrawRecipeIcon(FilterConfiguration configuration, int rowIndex, CraftItem item)
+    public void DrawRecipeIcon(FilterConfiguration configuration, int rowIndex, CraftItem item)
     {
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
         var icon = _craftItemLocalizer.SourceIcon(item);
@@ -542,7 +542,7 @@ public class CraftSettingsColumn : IColumn
         ImGui.SameLine();
     }
 
-    private bool DrawSourceSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
+    public bool DrawSourceSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
     {
         var ingredientPreferences = _craftingCache.GetIngredientPreferences(item.ItemId);
         if (ingredientPreferences.Count != 0)
@@ -582,7 +582,7 @@ public class CraftSettingsColumn : IColumn
         return false;
     }
 
-    private bool DrawMarketPriceSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
+    public bool DrawMarketPriceSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
     {
         if (item.IngredientPreference.Type is IngredientPreferenceType.Marketboard)
         {
@@ -609,7 +609,7 @@ public class CraftSettingsColumn : IColumn
         return false;
     }
 
-    private bool DrawMarketWorldSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
+    public bool DrawMarketWorldSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
     {
         if (item.IngredientPreference.Type is IngredientPreferenceType.Marketboard)
         {
@@ -648,7 +648,7 @@ public class CraftSettingsColumn : IColumn
         return false;
     }
 
-    private  bool DrawZoneSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
+    public bool DrawZoneSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
     {
         if (item.IngredientPreference.Type is IngredientPreferenceType.Buy or IngredientPreferenceType.Item or IngredientPreferenceType.Mobs or IngredientPreferenceType.Mining or IngredientPreferenceType.Botany or IngredientPreferenceType.HouseVendor or IngredientPreferenceType.Duty )
         {
@@ -693,7 +693,7 @@ public class CraftSettingsColumn : IColumn
         return false;
     }
 
-    private bool DrawRetainerRetrievalSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
+    public bool DrawRetainerRetrievalSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
     {
         //Retrieve from retainer combo
         var craftRetainerRetrieval = configuration.CraftList.GetCraftRetainerRetrieval(item.ItemId);
@@ -780,7 +780,7 @@ public class CraftSettingsColumn : IColumn
         return false;
     }
 
-    private bool DrawHqSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
+    public bool DrawHqSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
     {
         if (item.Item.Base.CanBeHq)
         {
@@ -827,7 +827,7 @@ public class CraftSettingsColumn : IColumn
         return false;
     }
 
-    private bool DrawRecipeSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
+    public bool DrawRecipeSelector(FilterConfiguration configuration, CraftItem item, int rowIndex)
     {
         var itemRecipes = item.Item.Recipes.OrderBy(c => c.CraftType?.FormattedName ?? "").ToList();
         if (itemRecipes.Count > 1)
