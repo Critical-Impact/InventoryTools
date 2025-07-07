@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.h
 - Switched the majority of ImGui Begin/End's to ImRaii, @ me if you notice anything amiss in the UI
 
 ### Added
-- Empty is now an ingredient sourcing options for all items allowing you to source the item in whatever way you wish`
+- Empty is now an ingredient sourcing options for all items allowing you to source the item in whatever way you wish
 
 ## [12.0.20] - 2025-06-15
 
