@@ -409,982 +409,1299 @@ namespace InventoryTools.Ui
 
         private void DrawMenuBar()
         {
-            if (ImGui.BeginMenuBar())
+            using(var menuBar = ImRaii.MenuBar())
             {
-                if (ImGui.BeginMenu("File"))
+                if (menuBar)
                 {
-                    if (ImGui.MenuItem("Configuration"))
+                    using (var menu = ImRaii.Menu("File"))
                     {
-                        this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
-                    }
-                    if (ImGui.MenuItem("Changelog"))
-                    {
-                        this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(ChangelogWindow)));
-                    }
-                    if (ImGui.MenuItem("Help"))
-                    {
-                        this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(HelpWindow)));
-                    }
-
-                    if (ImGui.MenuItem("Report a Issue"))
-                    {
-                        "https://github.com/Critical-Impact/InventoryTools".OpenBrowser();
-                    }
-
-                    if (ImGui.MenuItem("Ko-Fi"))
-                    {
-                        "https://ko-fi.com/critical_impact".OpenBrowser();
-                    }
-
-                    if (ImGui.MenuItem("Close"))
-                    {
-                        this.IsOpen = false;
-                    }
-
-                    ImGui.EndMenu();
-                }
-
-                if (this.SelectedConfiguration != null && ImGui.BeginMenu("Edit"))
-                {
-                    if (ImGui.MenuItem("Clear Search"))
-                    {
-                        _tableService.GetListTable(SelectedConfiguration).ClearFilters();
-                    }
-
-                    ImGui.Separator();
-
-                    if (ImGui.BeginMenu("Copy List Contents"))
-                    {
-                        if (ImGui.MenuItem("Craft List (All)"))
+                        if (menu)
                         {
-                            var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                .ToList();
-                            var tcString = _importExportService.ToTCString(searchResults);
-                            _clipboardService.CopyToClipboard(tcString);
-                            _chatUtilities.Print("The craft list's contents were copied to your clipboard.");
-                        }
-                        if (ImGui.MenuItem("Craft List (Outputs)"))
-                        {
-                            var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                .Where(c => c.IsOutputItem)
-                                .ToList();
-
-                            var tcString = _importExportService.ToTCString(searchResults);
-                            _clipboardService.CopyToClipboard(tcString);
-                            _chatUtilities.Print("The craft list's outputs were copied to your clipboard.");
-                        }
-                        if (ImGui.MenuItem("Craft List (Precrafts)"))
-                        {
-                            var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                .Where(c => c is { IsOutputItem: false, IngredientPreference.Type: IngredientPreferenceType.Crafting })
-                                .ToList();
-
-                            var tcString = _importExportService.ToTCString(searchResults);
-                            _clipboardService.CopyToClipboard(tcString);
-                            _chatUtilities.Print("The craft list's outputs were copied to your clipboard.");
-                        }
-                        if (ImGui.MenuItem("Craft List (Gatherables)"))
-                        {
-                            var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
-                                .ToList();
-
-                            var tcString = _importExportService.ToTCString(searchResults);
-                            _clipboardService.CopyToClipboard(tcString);
-                            _chatUtilities.Print("The craft list's gatherables were copied to your clipboard.");
-                        }
-                        if (ImGui.MenuItem("Craft List (Missing Gatherables)"))
-                        {
-                            var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
-                                .ToList();
-
-                            var tcString = _importExportService.ToTCString(searchResults, TCExportMode.Missing);
-                            _clipboardService.CopyToClipboard(tcString);
-                            _chatUtilities.Print("The craft list's gatherables were copied to your clipboard.");
-                        }
-                        if (ImGui.MenuItem("Retainer/Bag List"))
-                        {
-                            var searchResults = _tableService.GetListTable(SelectedConfiguration).SearchResults
-                                .ToList();
-                            var tcString = _importExportService.ToTCString(searchResults);
-                            _clipboardService.CopyToClipboard(tcString);
-                            _chatUtilities.Print("The retainer/bag were copied to your clipboard.");
-                        }
-                        ImGui.EndMenu();
-                    }
-
-                    if (ImGui.BeginMenu("Copy List Contents (JSON)"))
-                    {
-                        if (ImGui.MenuItem("Craft List (All)"))
-                        {
-                            var craftTable = _tableService.GetCraftTable(SelectedConfiguration);
-                            var searchResults = craftTable.CraftItems
-                                .ToList();
-                            _clipboardService.CopyToClipboard(craftTable.ExportToJson(searchResults));
-                            _chatUtilities.Print("The craft list's contents were copied to your clipboard.");
-                        }
-                        if (ImGui.MenuItem("Craft List (Outputs)"))
-                        {
-                            var craftTable = _tableService.GetCraftTable(SelectedConfiguration);
-                            var searchResults = craftTable.CraftItems
-                                .Where(c => c.CraftItem?.IsOutputItem ?? false)
-                                .ToList();
-                            _clipboardService.CopyToClipboard(craftTable.ExportToJson(searchResults));
-                            _chatUtilities.Print("The craft list's outputs were copied to your clipboard.");
-                        }
-                        if (ImGui.MenuItem("Craft List (Precrafts)"))
-                        {
-                            var craftTable = _tableService.GetCraftTable(SelectedConfiguration);
-                            var searchResults = craftTable.CraftItems
-                                .Where(c => c.CraftItem is { IsOutputItem: false, IngredientPreference.Type: IngredientPreferenceType.Crafting })
-                                .ToList();
-                            _clipboardService.CopyToClipboard(craftTable.ExportToJson(searchResults));
-                            _chatUtilities.Print("The craft list's outputs were copied to your clipboard.");
-                        }
-                        if (ImGui.MenuItem("Craft List (Gatherables)"))
-                        {
-                            var craftTable = _tableService.GetCraftTable(SelectedConfiguration);
-                            var searchResults = craftTable.CraftItems
-                                .Where(c => c.Item.ObtainedGathering && (c.CraftItem?.IsOutputItem ?? false))
-                                .ToList();
-                            _clipboardService.CopyToClipboard(craftTable.ExportToJson(searchResults));
-                            _chatUtilities.Print("The craft list's gatherables were copied to your clipboard.");
-                        }
-                        if (ImGui.MenuItem("Retainer/Bag List"))
-                        {
-                            var itemTable = _tableService.GetListTable(SelectedConfiguration);
-                            _clipboardService.CopyToClipboard(itemTable.ExportToJson());
-                        }
-
-                        ImGui.EndMenu();
-                    }
-
-                    if (ImGui.MenuItem("Paste List Contents"))
-                    {
-                        var pasteFromClipboard = _clipboardService.PasteFromClipboard();
-                        var importedList = _importExportService.FromTCString(pasteFromClipboard, false);
-                        if (importedList == null)
-                        {
-                            importedList =
-                                _importExportService.FromGarlandToolsUrl(pasteFromClipboard);
-                            if (importedList == null)
+                            if (ImGui.MenuItem("Configuration"))
                             {
-                                _chatUtilities.PrintError("The contents of your clipboard could not be parsed.");
+                                this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
                             }
-                            else
-                            {
-                                _chatUtilities.Print("The contents of your clipboard were imported.");
-                                this.SelectedConfiguration.AddItemsToList(importedList);
-                            }
-                        }
-                        else
-                        {
-                            _chatUtilities.Print("The contents of your clipboard were imported.");
-                            this.SelectedConfiguration.AddItemsToList(importedList);
-                        }
-                    }
 
-                    if (ImGui.IsItemHovered())
-                    {
-                        using(var tooltip = ImRaii.Tooltip())
-                        {
-                            if (tooltip)
+                            if (ImGui.MenuItem("Changelog"))
                             {
-                                ImGui.TextUnformatted("This will paste the contents of items copied via the 'Copy List Contents' menu above, it also will attempt to parse Teamcraft lists if one is in your clipboard. If you have a garland tools URL in your clipboard that points to a group, it will also attempt to parse that add it to your craft list.");
+                                this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(ChangelogWindow)));
+                            }
+
+                            if (ImGui.MenuItem("Help"))
+                            {
+                                this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(HelpWindow)));
+                            }
+
+                            if (ImGui.MenuItem("Report a Issue"))
+                            {
+                                "https://github.com/Critical-Impact/InventoryTools".OpenBrowser();
+                            }
+
+                            if (ImGui.MenuItem("Ko-Fi"))
+                            {
+                                "https://ko-fi.com/critical_impact".OpenBrowser();
+                            }
+
+                            if (ImGui.MenuItem("Close"))
+                            {
+                                this.IsOpen = false;
                             }
                         }
                     }
-                    if (ImGui.MenuItem("Clear List"))
+
+                    if (this.SelectedConfiguration != null)
                     {
-                        _popupService.AddPopup(new ConfirmPopup(GetType(), "craftListDelete",
-                            "Are you sure you want to clear your craft list?",
-                            result =>
+                        using(var editMenu = ImRaii.Menu("Edit"))
+                        {
+                            if (editMenu)
                             {
-                                if (result)
+                                if (ImGui.MenuItem("Clear Search"))
                                 {
-                                    this.SelectedConfiguration.CraftList.CraftItems.Clear();
-                                    this.SelectedConfiguration.CraftList.NeedsRefresh = true;
+                                    _tableService.GetListTable(SelectedConfiguration).ClearFilters();
                                 }
-                            }));
 
-                    }
-                    ImGui.Separator();
-                    if (ImGui.BeginMenu("Add to Craft List"))
-                    {
-                        var craftLists = _listService.Lists
-                            .Where(c => c.FilterType == FilterType.CraftFilter && c.CraftListDefault == false)
-                            .OrderBy(c => c.Order)
-                            .ToList();
+                                ImGui.Separator();
 
-                        foreach (var craft in craftLists)
-                        {
-                            if (ImGui.BeginMenu(craft.Name))
-                            {
-                                if (ImGui.MenuItem("Craft List (All)"))
+                                using (var menu = ImRaii.Menu("Copy List Contents"))
                                 {
-                                    var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                        .ToList();
-
-                                    foreach (var searchResult in searchResults)
+                                    if (menu)
                                     {
-                                        craft.CraftList.AddCraftItem(searchResult.ItemId, searchResult.QuantityRequired,
-                                            searchResult.Flags);
-                                    }
-                                    MediatorService.Publish(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                                    MediatorService.Publish(new FocusListMessage(typeof(CraftsWindow), craft));
-                                }
-                                if (ImGui.MenuItem("Craft List (Outputs)"))
-                                {
-                                    var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                        .Where(c => c.IsOutputItem)
-                                        .ToList();
-
-                                    foreach (var searchResult in searchResults)
-                                    {
-                                        craft.CraftList.AddCraftItem(searchResult.ItemId, searchResult.QuantityRequired,
-                                            searchResult.Flags);
-                                    }
-                                    MediatorService.Publish(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                                    MediatorService.Publish(new FocusListMessage(typeof(CraftsWindow), craft));
-                                }
-                                if (ImGui.MenuItem("Craft List (Precrafts)"))
-                                {
-                                    var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                        .Where(c => c is { IsOutputItem: false, IngredientPreference.Type: IngredientPreferenceType.Crafting })
-                                        .ToList();
-
-                                    foreach (var searchResult in searchResults)
-                                    {
-                                        craft.CraftList.AddCraftItem(searchResult.ItemId, searchResult.QuantityRequired,
-                                            searchResult.Flags);
-                                    }
-                                    MediatorService.Publish(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                                    MediatorService.Publish(new FocusListMessage(typeof(CraftsWindow), craft));
-                                }
-                                if (ImGui.MenuItem("Craft List (Gatherables)"))
-                                {
-                                    var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                        .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
-                                        .ToList();
-
-                                    foreach (var searchResult in searchResults)
-                                    {
-                                        craft.CraftList.AddCraftItem(searchResult.ItemId, searchResult.QuantityRequired,
-                                            searchResult.Flags);
-                                    }
-                                    MediatorService.Publish(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                                    MediatorService.Publish(new FocusListMessage(typeof(CraftsWindow), craft));
-                                }
-                                if (ImGui.MenuItem("Craft List (Missing Gatherables)"))
-                                {
-                                    var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                        .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
-                                        .ToList();
-
-                                    foreach (var searchResult in searchResults)
-                                    {
-                                        craft.CraftList.AddCraftItem(searchResult.ItemId, searchResult.QuantityMissingOverall,
-                                            searchResult.Flags);
-                                    }
-                                    MediatorService.Publish(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                                    MediatorService.Publish(new FocusListMessage(typeof(CraftsWindow), craft));
-                                }
-                                if (ImGui.MenuItem("Retainer/Bag List"))
-                                {
-                                    var searchResults = _tableService.GetListTable(SelectedConfiguration).SearchResults
-                                        .ToList();
-                                    foreach (var searchResult in searchResults)
-                                    {
-                                        craft.CraftList.AddCraftItem(searchResult.ItemId, searchResult.Quantity,
-                                            searchResult.Flags);
-                                    }
-                                    MediatorService.Publish(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                                    MediatorService.Publish(new FocusListMessage(typeof(CraftsWindow), craft));
-                                }
-                                ImGui.EndMenu();
-                            }
-                        }
-                        if (craftLists.Count != 0)
-                        {
-                            ImGui.Separator();
-                        }
-
-                        if (ImGui.BeginMenu("New Craft List"))
-                        {
-                            if (ImGui.MenuItem("Craft List (All)"))
-                            {
-                                var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                    .ToList();
-
-                                _popupService.AddPopup(new NamePopup(typeof(CraftsWindow), "newCraftList", "New Craft List",
-                                    result =>
-                                    {
-                                        if (result.Item1)
+                                        if (ImGui.MenuItem("Craft List (All)"))
                                         {
-                                            var craftList = _listService.AddNewCraftList(result.Item2);
-                                            foreach (var searchResult in searchResults)
-                                            {
-                                                craftList.CraftList.AddCraftItem(searchResult.ItemId, searchResult.QuantityRequired,
-                                                    searchResult.Flags);
-                                            }
+                                            var searchResults = SelectedConfiguration.CraftList
+                                                .GetFlattenedMergedMaterials()
+                                                .ToList();
+                                            var tcString = _importExportService.ToTCString(searchResults);
+                                            _clipboardService.CopyToClipboard(tcString);
+                                            _chatUtilities.Print(
+                                                "The craft list's contents were copied to your clipboard.");
                                         }
-                                    }));
-                            }
-                            if (ImGui.MenuItem("Craft List (Outputs)"))
-                            {
-                                var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                    .Where(c => c.IsOutputItem)
-                                    .ToList();
 
-                                _popupService.AddPopup(new NamePopup(typeof(CraftsWindow), "newCraftList", "New Craft List",
-                                    result =>
-                                    {
-                                        if (result.Item1)
+                                        if (ImGui.MenuItem("Craft List (Outputs)"))
                                         {
-                                            var craftList = _listService.AddNewCraftList(result.Item2);
-                                            foreach (var searchResult in searchResults)
-                                            {
-                                                craftList.CraftList.AddCraftItem(searchResult.ItemId, searchResult.QuantityRequired,
-                                                    searchResult.Flags);
-                                            }
+                                            var searchResults = SelectedConfiguration.CraftList
+                                                .GetFlattenedMergedMaterials()
+                                                .Where(c => c.IsOutputItem)
+                                                .ToList();
+
+                                            var tcString = _importExportService.ToTCString(searchResults);
+                                            _clipboardService.CopyToClipboard(tcString);
+                                            _chatUtilities.Print(
+                                                "The craft list's outputs were copied to your clipboard.");
                                         }
-                                    }));
-                            }
-                            if (ImGui.MenuItem("Craft List (Precrafts)"))
-                            {
-                                var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                    .Where(c => c is { IsOutputItem: false, IngredientPreference.Type: IngredientPreferenceType.Crafting })
-                                    .ToList();
-                                _popupService.AddPopup(new NamePopup(typeof(CraftsWindow), "newCraftList", "New Craft List",
-                                    result =>
-                                    {
-                                        if (result.Item1)
+
+                                        if (ImGui.MenuItem("Craft List (Precrafts)"))
                                         {
-                                            var craftList = _listService.AddNewCraftList(result.Item2);
-                                            foreach (var searchResult in searchResults)
-                                            {
-                                                craftList.CraftList.AddCraftItem(searchResult.ItemId, searchResult.QuantityRequired,
-                                                    searchResult.Flags);
-                                            }
+                                            var searchResults = SelectedConfiguration.CraftList
+                                                .GetFlattenedMergedMaterials()
+                                                .Where(c => c is
+                                                {
+                                                    IsOutputItem: false,
+                                                    IngredientPreference.Type: IngredientPreferenceType.Crafting
+                                                })
+                                                .ToList();
+
+                                            var tcString = _importExportService.ToTCString(searchResults);
+                                            _clipboardService.CopyToClipboard(tcString);
+                                            _chatUtilities.Print(
+                                                "The craft list's outputs were copied to your clipboard.");
                                         }
-                                    }));
-                            }
-                            if (ImGui.MenuItem("Craft List (Gatherables)"))
-                            {
-                                var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                    .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
-                                    .ToList();
-                                _popupService.AddPopup(new NamePopup(typeof(CraftsWindow), "newCraftList", "New Craft List",
-                                    result =>
-                                    {
-                                        if (result.Item1)
+
+                                        if (ImGui.MenuItem("Craft List (Gatherables)"))
                                         {
-                                            var craftList = _listService.AddNewCraftList(result.Item2);
-                                            foreach (var searchResult in searchResults)
-                                            {
-                                                craftList.CraftList.AddCraftItem(searchResult.ItemId, searchResult.QuantityRequired,
-                                                    searchResult.Flags);
-                                            }
+                                            var searchResults = SelectedConfiguration.CraftList
+                                                .GetFlattenedMergedMaterials()
+                                                .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
+                                                .ToList();
+
+                                            var tcString = _importExportService.ToTCString(searchResults);
+                                            _clipboardService.CopyToClipboard(tcString);
+                                            _chatUtilities.Print(
+                                                "The craft list's gatherables were copied to your clipboard.");
                                         }
-                                    }));
-                            }
-                            if (ImGui.MenuItem("Craft List (Missing Gatherables)"))
-                            {
-                                var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                    .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
-                                    .ToList();
-                                _popupService.AddPopup(new NamePopup(typeof(CraftsWindow), "newCraftList", "New Craft List",
-                                    result =>
-                                    {
-                                        if (result.Item1)
+
+                                        if (ImGui.MenuItem("Craft List (Missing Gatherables)"))
                                         {
-                                            var craftList = _listService.AddNewCraftList(result.Item2);
-                                            foreach (var searchResult in searchResults)
-                                            {
-                                                craftList.CraftList.AddCraftItem(searchResult.ItemId, searchResult.QuantityMissingOverall,
-                                                    searchResult.Flags);
-                                            }
+                                            var searchResults = SelectedConfiguration.CraftList
+                                                .GetFlattenedMergedMaterials()
+                                                .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
+                                                .ToList();
+
+                                            var tcString =
+                                                _importExportService.ToTCString(searchResults, TCExportMode.Missing);
+                                            _clipboardService.CopyToClipboard(tcString);
+                                            _chatUtilities.Print(
+                                                "The craft list's gatherables were copied to your clipboard.");
                                         }
-                                    }));
-                            }
-                            if (ImGui.MenuItem("Retainer/Bag List"))
-                            {
-                                var searchResults = _tableService.GetListTable(SelectedConfiguration).SearchResults
-                                    .ToList();
-                                _popupService.AddPopup(new NamePopup(typeof(CraftsWindow), "newCraftList", "New Craft List",
-                                    result =>
-                                    {
-                                        if (result.Item1)
+
+                                        if (ImGui.MenuItem("Retainer/Bag List"))
                                         {
-                                            var craftList = _listService.AddNewCraftList(result.Item2);
-                                            foreach (var searchResult in searchResults)
-                                            {
-                                                craftList.CraftList.AddCraftItem(searchResult.ItemId, searchResult.Quantity,
-                                                    searchResult.Flags);
-                                            }
+                                            var searchResults = _tableService.GetListTable(SelectedConfiguration)
+                                                .SearchResults
+                                                .ToList();
+                                            var tcString = _importExportService.ToTCString(searchResults);
+                                            _clipboardService.CopyToClipboard(tcString);
+                                            _chatUtilities.Print("The retainer/bag were copied to your clipboard.");
                                         }
-                                    }));
-                            }
-
-                            ImGui.EndMenu();
-                        }
-
-                        if (ImGui.BeginMenu("New Craft List (Ephemeral)"))
-                        {
-                            if (ImGui.MenuItem("Craft List (All)"))
-                            {
-                                var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                    .ToList();
-
-                                _popupService.AddPopup(new NamePopup(typeof(CraftsWindow), "newCraftList", "New Craft List",
-                                    result =>
-                                    {
-                                        if (result.Item1)
-                                        {
-                                            var craftList = _listService.AddNewCraftList(result.Item2, true);
-                                            foreach (var searchResult in searchResults)
-                                            {
-                                                craftList.CraftList.AddCraftItem(searchResult.ItemId, searchResult.QuantityRequired,
-                                                    searchResult.Flags);
-                                            }
-                                        }
-                                    }));
-                            }
-                            if (ImGui.MenuItem("Craft List (Outputs)"))
-                            {
-                                var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                    .Where(c => c.IsOutputItem)
-                                    .ToList();
-
-                                _popupService.AddPopup(new NamePopup(typeof(CraftsWindow), "newCraftList", "New Craft List",
-                                    result =>
-                                    {
-                                        if (result.Item1)
-                                        {
-                                            var craftList = _listService.AddNewCraftList(result.Item2, true);
-                                            foreach (var searchResult in searchResults)
-                                            {
-                                                craftList.CraftList.AddCraftItem(searchResult.ItemId, searchResult.QuantityRequired,
-                                                    searchResult.Flags);
-                                            }
-                                        }
-                                    }));
-                            }
-                            if (ImGui.MenuItem("Craft List (Precrafts)"))
-                            {
-                                var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                    .Where(c => c is { IsOutputItem: false, IngredientPreference.Type: IngredientPreferenceType.Crafting })
-                                    .ToList();
-                                _popupService.AddPopup(new NamePopup(typeof(CraftsWindow), "newCraftList", "New Craft List",
-                                    result =>
-                                    {
-                                        if (result.Item1)
-                                        {
-                                            var craftList = _listService.AddNewCraftList(result.Item2, true);
-                                            foreach (var searchResult in searchResults)
-                                            {
-                                                craftList.CraftList.AddCraftItem(searchResult.ItemId, searchResult.QuantityRequired,
-                                                    searchResult.Flags);
-                                            }
-                                        }
-                                    }));
-                            }
-                            if (ImGui.MenuItem("Craft List (Gatherables)"))
-                            {
-                                var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                    .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
-                                    .ToList();
-                                _popupService.AddPopup(new NamePopup(typeof(CraftsWindow), "newCraftList", "New Craft List",
-                                    result =>
-                                    {
-                                        if (result.Item1)
-                                        {
-                                            var craftList = _listService.AddNewCraftList(result.Item2, true);
-                                            foreach (var searchResult in searchResults)
-                                            {
-                                                craftList.CraftList.AddCraftItem(searchResult.ItemId, searchResult.QuantityRequired,
-                                                    searchResult.Flags);
-                                            }
-                                        }
-                                    }));
-                            }
-                            if (ImGui.MenuItem("Craft List (Missing Gatherables)"))
-                            {
-                                var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                    .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
-                                    .ToList();
-                                _popupService.AddPopup(new NamePopup(typeof(CraftsWindow), "newCraftList", "New Craft List",
-                                    result =>
-                                    {
-                                        if (result.Item1)
-                                        {
-                                            var craftList = _listService.AddNewCraftList(result.Item2, true);
-                                            foreach (var searchResult in searchResults)
-                                            {
-                                                craftList.CraftList.AddCraftItem(searchResult.ItemId, searchResult.QuantityMissingOverall,
-                                                    searchResult.Flags);
-                                            }
-                                        }
-                                    }));
-                            }
-                            if (ImGui.MenuItem("Retainer/Bag List"))
-                            {
-                                var searchResults = _tableService.GetListTable(SelectedConfiguration).SearchResults
-                                    .ToList();
-                                _popupService.AddPopup(new NamePopup(typeof(CraftsWindow), "newCraftList", "New Craft List",
-                                    result =>
-                                    {
-                                        if (result.Item1)
-                                        {
-                                            var craftList = _listService.AddNewCraftList(result.Item2, true);
-                                            foreach (var searchResult in searchResults)
-                                            {
-                                                craftList.CraftList.AddCraftItem(searchResult.ItemId, searchResult.Quantity,
-                                                    searchResult.Flags);
-                                            }
-                                        }
-                                    }));
-                            }
-
-                            ImGui.EndMenu();
-                        }
-                        ImGui.EndMenu();
-                    }
-                    if (ImGui.BeginMenu("Add to Curated List"))
-                    {
-
-                        var curatedLists = _listService.Lists
-                            .Where(c => c.FilterType == FilterType.CuratedList)
-                            .OrderBy(c => c.Order)
-                            .ToList();
-
-                        foreach (var curatedList in curatedLists)
-                        {
-                            if (ImGui.MenuItem(curatedList.Name))
-                            {
-                                if (ImGui.MenuItem("Craft List (All)"))
-                                {
-                                    var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                        .ToList();
-
-                                    foreach (var searchResult in searchResults)
-                                    {
-                                        curatedList.AddCuratedItem(new CuratedItem(searchResult.ItemId, searchResult.QuantityRequired,
-                                            searchResult.Flags));
-                                    }
-                                }
-                                if (ImGui.MenuItem("Craft List (Outputs)"))
-                                {
-                                    var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                        .Where(c => c.IsOutputItem)
-                                        .ToList();
-
-                                    foreach (var searchResult in searchResults)
-                                    {
-                                        curatedList.AddCuratedItem(new CuratedItem(searchResult.ItemId, searchResult.QuantityRequired,
-                                            searchResult.Flags));
-                                    }
-                                }
-                                if (ImGui.MenuItem("Craft List (Precrafts)"))
-                                {
-                                    var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                        .Where(c => c is { IsOutputItem: false, IngredientPreference.Type: IngredientPreferenceType.Crafting })
-                                        .ToList();
-
-                                    foreach (var searchResult in searchResults)
-                                    {
-                                        curatedList.AddCuratedItem(new CuratedItem(searchResult.ItemId, searchResult.QuantityRequired,
-                                            searchResult.Flags));
-                                    }
-                                }
-                                if (ImGui.MenuItem("Craft List (Gatherables)"))
-                                {
-                                    var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                        .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
-                                        .ToList();
-
-                                    foreach (var searchResult in searchResults)
-                                    {
-                                        curatedList.AddCuratedItem(new CuratedItem(searchResult.ItemId, searchResult.QuantityRequired,
-                                            searchResult.Flags));
-                                    }
-                                }
-                                if (ImGui.MenuItem("Craft List (Missing Gatherables)"))
-                                {
-                                    var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                        .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
-                                        .ToList();
-
-                                    foreach (var searchResult in searchResults)
-                                    {
-                                        curatedList.AddCuratedItem(new CuratedItem(searchResult.ItemId, searchResult.QuantityRequired,
-                                            searchResult.Flags));
-                                    }
-                                }
-                                if (ImGui.MenuItem("Retainer/Bag List"))
-                                {
-                                    var searchResults = _tableService.GetListTable(SelectedConfiguration).SearchResults
-                                        .ToList();
-                                    foreach (var searchResult in searchResults)
-                                    {
-                                        curatedList.AddCuratedItem(new CuratedItem(searchResult.ItemId, searchResult.Quantity,
-                                            searchResult.Flags));
                                     }
                                 }
 
-                            }
-                        }
-
-                        if (curatedLists.Count != 0)
-                        {
-                            ImGui.Separator();
-                        }
-
-                        if (ImGui.BeginMenu("New Curated List"))
-                        {
-                            if (ImGui.MenuItem("Craft List (All)"))
-                            {
-                                var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                    .ToList();
-
-                                _popupService.AddPopup(new NamePopup(typeof(CraftsWindow), "newCuratedList", "New Curated List",
-                                    result =>
-                                    {
-                                        if (result.Item1)
-                                        {
-                                            var curatedList = _listService.AddNewCuratedList(result.Item2);
-                                            foreach (var searchResult in searchResults)
-                                            {
-                                                curatedList.AddCuratedItem(new CuratedItem(searchResult.ItemId, searchResult.QuantityRequired,
-                                                    searchResult.Flags));
-                                            }
-                                            this.MediatorService.Publish(new FocusListMessage(typeof(FiltersWindow), curatedList));
-                                            curatedList.NeedsRefresh = true;
-                                        }
-                                    }));
-                            }
-
-                            if (ImGui.MenuItem("Craft List (Outputs)"))
-                            {
-                                var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                    .Where(c => c.IsOutputItem)
-                                    .ToList();
-
-                                _popupService.AddPopup(new NamePopup(typeof(CraftsWindow), "newCuratedList", "New Curated List",
-                                    result =>
-                                    {
-                                        if (result.Item1)
-                                        {
-                                            var curatedList = _listService.AddNewCuratedList(result.Item2);
-                                            foreach (var searchResult in searchResults)
-                                            {
-                                                curatedList.AddCuratedItem(new CuratedItem(searchResult.ItemId, searchResult.QuantityRequired,
-                                                    searchResult.Flags));
-                                            }
-                                            this.MediatorService.Publish(new FocusListMessage(typeof(FiltersWindow), curatedList));
-                                            curatedList.NeedsRefresh = true;
-                                        }
-                                    }));
-                            }
-
-                            if (ImGui.MenuItem("Craft List (Precrafts)"))
-                            {
-                                var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                    .Where(c => c is
-                                    {
-                                        IsOutputItem: false,
-                                        IngredientPreference.Type: IngredientPreferenceType.Crafting
-                                    })
-                                    .ToList();
-                                _popupService.AddPopup(new NamePopup(typeof(CraftsWindow), "newCuratedList", "New Curated List",
-                                    result =>
-                                    {
-                                        if (result.Item1)
-                                        {
-                                            var curatedList = _listService.AddNewCuratedList(result.Item2);
-                                            foreach (var searchResult in searchResults)
-                                            {
-                                                curatedList.AddCuratedItem(new CuratedItem(searchResult.ItemId, searchResult.QuantityRequired,
-                                                    searchResult.Flags));
-                                            }
-                                            this.MediatorService.Publish(new FocusListMessage(typeof(FiltersWindow), curatedList));
-                                            curatedList.NeedsRefresh = true;
-                                        }
-                                    }));
-                            }
-
-                            if (ImGui.MenuItem("Craft List (Gatherables)"))
-                            {
-                                var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                    .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
-                                    .ToList();
-                                _popupService.AddPopup(new NamePopup(typeof(CraftsWindow), "newCuratedList", "New Curated List",
-                                    result =>
-                                    {
-                                        if (result.Item1)
-                                        {
-                                            var curatedList = _listService.AddNewCuratedList(result.Item2);
-                                            foreach (var searchResult in searchResults)
-                                            {
-                                                curatedList.AddCuratedItem(new CuratedItem(searchResult.ItemId, searchResult.QuantityRequired,
-                                                    searchResult.Flags));
-                                            }
-                                            this.MediatorService.Publish(new FocusListMessage(typeof(FiltersWindow), curatedList));
-                                            curatedList.NeedsRefresh = true;
-                                        }
-                                    }));
-                            }
-
-                            if (ImGui.MenuItem("Craft List (Missing Gatherables)"))
-                            {
-                                var searchResults = SelectedConfiguration.CraftList.GetFlattenedMergedMaterials()
-                                    .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
-                                    .ToList();
-                                _popupService.AddPopup(new NamePopup(typeof(CraftsWindow), "newCuratedList", "New Curated List",
-                                    result =>
-                                    {
-                                        if (result.Item1)
-                                        {
-                                            var curatedList = _listService.AddNewCuratedList(result.Item2);
-                                            foreach (var searchResult in searchResults)
-                                            {
-                                                curatedList.AddCuratedItem(new CuratedItem(searchResult.ItemId, searchResult.QuantityMissingOverall,
-                                                    searchResult.Flags));
-                                            }
-                                            this.MediatorService.Publish(new FocusListMessage(typeof(FiltersWindow), curatedList));
-                                            curatedList.NeedsRefresh = true;
-                                        }
-                                    }));
-                            }
-
-                            if (ImGui.MenuItem("Retainer/Bag List"))
-                            {
-                                var searchResults = _tableService.GetListTable(SelectedConfiguration).SearchResults
-                                    .ToList();
-                                _popupService.AddPopup(new NamePopup(typeof(CraftsWindow), "newCuratedList", "New Curated List",
-                                    result =>
-                                    {
-                                        if (result.Item1)
-                                        {
-                                            var curatedList = _listService.AddNewCuratedList(result.Item2);
-                                            foreach (var searchResult in searchResults)
-                                            {
-                                                curatedList.AddCuratedItem(new CuratedItem(searchResult.ItemId, searchResult.Quantity,
-                                                    searchResult.Flags));
-                                            }
-                                            this.MediatorService.Publish(new FocusListMessage(typeof(FiltersWindow), curatedList));
-                                            curatedList.NeedsRefresh = true;
-                                        }
-                                    }));
-                            }
-
-                            ImGui.EndMenu();
-                        }
-                        ImGui.EndMenu();
-                    }
-
-                    ImGui.EndMenu();
-                }
-
-
-                if (ImGui.BeginMenu("View"))
-                {
-                    if (ImGui.MenuItem("Tabs", "", _layoutSetting.CurrentValue(_configuration) == WindowLayout.Tabs))
-                    {
-                        _layoutSetting.UpdateFilterConfiguration(_configuration, WindowLayout.Tabs);
-                    }
-                    if (ImGui.MenuItem("Sidebar", "", _layoutSetting.CurrentValue(_configuration) == WindowLayout.Sidebar))
-                    {
-                        _layoutSetting.UpdateFilterConfiguration(_configuration, WindowLayout.Sidebar);
-                    }
-                    if (ImGui.MenuItem("Single", "", _layoutSetting.CurrentValue(_configuration) == WindowLayout.Single))
-                    {
-                        _layoutSetting.UpdateFilterConfiguration(_configuration, WindowLayout.Single);
-                    }
-
-                    ImGui.Separator();
-
-                    if (ImGui.MenuItem("Crafts", "", _craftWindowViewSetting.CurrentValue(_configuration) == CraftWindowView.Crafts))
-                    {
-                        _craftWindowViewSetting.UpdateFilterConfiguration(_configuration, CraftWindowView.Crafts);
-                    }
-
-                    if (ImGui.MenuItem("Tree View", "", _craftWindowViewSetting.CurrentValue(_configuration) == CraftWindowView.Tree))
-                    {
-                        _craftWindowViewSetting.UpdateFilterConfiguration(_configuration, CraftWindowView.Tree);
-                    }
-
-                    if (ImGui.MenuItem("Configuration", "", _craftWindowViewSetting.CurrentValue(_configuration) == CraftWindowView.Configuration))
-                    {
-                        _craftWindowViewSetting.UpdateFilterConfiguration(_configuration, CraftWindowView.Configuration);
-                    }
-
-                    ImGui.EndMenu();
-                }
-
-                if (ImGui.BeginMenu("Export"))
-                {
-                    if (ImGui.MenuItem("Craft List (CSV)"))
-                    {
-                        if (SelectedConfiguration != null)
-                        {
-                            _fileDialogManager.SaveFileDialog("Save to csv", "*.csv",
-                                "export-craft-list.csv", ".csv",
-                                (b, s) =>
+                                using (var menu = ImRaii.Menu("Copy List Contents (JSON)"))
                                 {
-                                    var craftTable = _tableService.GetCraftTable(SelectedConfiguration);
-                                    SaveCraftCallback(craftTable, b, s);
-                                }, null, true);
-                        }
-                    }
-                    if (ImGui.MenuItem("Retainer/Bag List (CSV)"))
-                    {
-                        if (SelectedConfiguration != null)
-                        {
-                            var itemTable = _tableService.GetListTable(SelectedConfiguration);
-                            _fileDialogManager.SaveFileDialog("Save to csv", "*.csv", "export.csv", ".csv",
-                                (b, s) => { SaveCallback(itemTable, b, s); }, null, true);
-                        }
-                    }
-
-                    ImGui.EndMenu();
-                }
-
-                if (ImGui.BeginMenu("Market"))
-                {
-                    if (ImGui.MenuItem("Refresh All Prices (Craft List)"))
-                    {
-                        var activeCharacter = _characterMonitor.ActiveCharacter;
-                        if (activeCharacter != null && SelectedConfiguration != null)
-                        {
-                            var itemTable = _tableService.GetCraftTable(SelectedConfiguration);
-                            foreach (var item in itemTable.CraftItems)
-                            {
-                                _universalis.QueuePriceCheck(item.Item.RowId, activeCharacter.WorldId);
-                            }
-                        }
-                    }
-                    if (ImGui.MenuItem("Refresh All Prices (Retainer/Bags)"))
-                    {
-                        var activeCharacter = _characterMonitor.ActiveCharacter;
-                        if (activeCharacter != null && SelectedConfiguration != null)
-                        {
-                            var itemTable = _tableService.GetListTable(SelectedConfiguration);
-                            foreach (var item in itemTable.RenderSearchResults)
-                            {
-                                _universalis.QueuePriceCheck(item.Item.RowId, activeCharacter.WorldId);
-                            }
-                        }
-                    }
-                    ImGui.EndMenu();
-                }
-
-                if (ImGui.BeginMenu("Lists"))
-                {
-                    if (ImGui.BeginMenu("Add"))
-                    {
-                        if (ImGui.MenuItem("Craft List"))
-                        {
-                            _popupService.AddPopup(new NamePopup(GetType(),"addCraftList", "", result =>
-                            {
-                                if (result.Item1)
-                                {
-                                    AddCraftFilter(result.Item2);
-                                }
-                            }));
-                        }
-                        if (ImGui.MenuItem("Craft List (Ephemeral)"))
-                        {
-                            _popupService.AddPopup(new NamePopup(GetType(),"addCraftListEphemeral", "", result =>
-                            {
-                                if (result.Item1)
-                                {
-                                    AddCraftFilter(result.Item2);
-                                }
-                            }));
-                        }
-                        ImGui.EndMenu();
-                    }
-                    ImGui.NewLine();
-
-                    var windowGroups = _listService.Lists.GroupBy(c => c.FilterType).OrderBySequence([FilterType.CraftFilter, FilterType.SearchFilter, FilterType.SortingFilter, FilterType.GameItemFilter, FilterType.HistoryFilter, FilterType.CuratedList], grouping => grouping.Key).ToList();
-                    for (var index = 0; index < windowGroups.Count; index++)
-                    {
-                        var windowGroup = windowGroups[index];
-                        ImGui.Text(windowGroup.Key.FormattedName());
-                        ImGui.Separator();
-                        foreach (var window in windowGroup.OrderBy(c => c.CraftListDefault).ThenBy(c => c.Order))
-                        {
-                            if (ImGui.MenuItem(window.Name, "", SelectedConfiguration == window || (SelectedConfiguration == null && window.CraftListDefault)))
-                            {
-                                if (window.FilterType == FilterType.CraftFilter)
-                                {
-                                    if (_keyState[VirtualKey.CONTROL])
+                                    if (menu)
                                     {
-                                        this.MediatorService.Publish(new OpenStringWindowMessage(typeof(FilterWindow), window.Key));
+                                        if (ImGui.MenuItem("Craft List (All)"))
+                                        {
+                                            var craftTable = _tableService.GetCraftTable(SelectedConfiguration);
+                                            var searchResults = craftTable.CraftItems
+                                                .ToList();
+                                            _clipboardService.CopyToClipboard(craftTable.ExportToJson(searchResults));
+                                            _chatUtilities.Print(
+                                                "The craft list's contents were copied to your clipboard.");
+                                        }
+
+                                        if (ImGui.MenuItem("Craft List (Outputs)"))
+                                        {
+                                            var craftTable = _tableService.GetCraftTable(SelectedConfiguration);
+                                            var searchResults = craftTable.CraftItems
+                                                .Where(c => c.CraftItem?.IsOutputItem ?? false)
+                                                .ToList();
+                                            _clipboardService.CopyToClipboard(craftTable.ExportToJson(searchResults));
+                                            _chatUtilities.Print(
+                                                "The craft list's outputs were copied to your clipboard.");
+                                        }
+
+                                        if (ImGui.MenuItem("Craft List (Precrafts)"))
+                                        {
+                                            var craftTable = _tableService.GetCraftTable(SelectedConfiguration);
+                                            var searchResults = craftTable.CraftItems
+                                                .Where(c => c.CraftItem is
+                                                {
+                                                    IsOutputItem: false,
+                                                    IngredientPreference.Type: IngredientPreferenceType.Crafting
+                                                })
+                                                .ToList();
+                                            _clipboardService.CopyToClipboard(craftTable.ExportToJson(searchResults));
+                                            _chatUtilities.Print(
+                                                "The craft list's outputs were copied to your clipboard.");
+                                        }
+
+                                        if (ImGui.MenuItem("Craft List (Gatherables)"))
+                                        {
+                                            var craftTable = _tableService.GetCraftTable(SelectedConfiguration);
+                                            var searchResults = craftTable.CraftItems
+                                                .Where(c => c.Item.ObtainedGathering &&
+                                                            (c.CraftItem?.IsOutputItem ?? false))
+                                                .ToList();
+                                            _clipboardService.CopyToClipboard(craftTable.ExportToJson(searchResults));
+                                            _chatUtilities.Print(
+                                                "The craft list's gatherables were copied to your clipboard.");
+                                        }
+
+                                        if (ImGui.MenuItem("Retainer/Bag List"))
+                                        {
+                                            var itemTable = _tableService.GetListTable(SelectedConfiguration);
+                                            _clipboardService.CopyToClipboard(itemTable.ExportToJson());
+                                        }
                                     }
-                                    else
+                                }
+
+                                if (ImGui.MenuItem("Paste List Contents"))
+                                {
+                                    var pasteFromClipboard = _clipboardService.PasteFromClipboard();
+                                    var importedList = _importExportService.FromTCString(pasteFromClipboard, false);
+                                    if (importedList == null)
                                     {
-                                        if (window.CraftListDefault)
+                                        importedList =
+                                            _importExportService.FromGarlandToolsUrl(pasteFromClipboard);
+                                        if (importedList == null)
                                         {
-                                            _selectedFilterTab = Filters.Count + 1;
+                                            _chatUtilities.PrintError(
+                                                "The contents of your clipboard could not be parsed.");
                                         }
                                         else
                                         {
-                                            MediatorService.Publish(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                                            MediatorService.Publish(new FocusListMessage(typeof(CraftsWindow), window));
+                                            _chatUtilities.Print("The contents of your clipboard were imported.");
+                                            this.SelectedConfiguration.AddItemsToList(importedList);
                                         }
-                                    }
-
-                                }
-                                else
-                                {
-                                    if (_keyState[VirtualKey.CONTROL])
-                                    {
-                                        this.MediatorService.Publish(new OpenStringWindowMessage(typeof(FilterWindow), window.Key));
                                     }
                                     else
                                     {
-                                        MediatorService.Publish(new OpenGenericWindowMessage(typeof(FiltersWindow)));
-                                        MediatorService.Publish(new FocusListMessage(typeof(FiltersWindow), window));
+                                        _chatUtilities.Print("The contents of your clipboard were imported.");
+                                        this.SelectedConfiguration.AddItemsToList(importedList);
+                                    }
+                                }
+
+                                if (ImGui.IsItemHovered())
+                                {
+                                    using (var tooltip = ImRaii.Tooltip())
+                                    {
+                                        if (tooltip)
+                                        {
+                                            ImGui.TextUnformatted(
+                                                "This will paste the contents of items copied via the 'Copy List Contents' menu above, it also will attempt to parse Teamcraft lists if one is in your clipboard. If you have a garland tools URL in your clipboard that points to a group, it will also attempt to parse that add it to your craft list.");
+                                        }
+                                    }
+                                }
+
+                                if (ImGui.MenuItem("Clear List"))
+                                {
+                                    _popupService.AddPopup(new ConfirmPopup(GetType(), "craftListDelete",
+                                        "Are you sure you want to clear your craft list?",
+                                        result =>
+                                        {
+                                            if (result)
+                                            {
+                                                this.SelectedConfiguration.CraftList.CraftItems.Clear();
+                                                this.SelectedConfiguration.CraftList.NeedsRefresh = true;
+                                            }
+                                        }));
+
+                                }
+
+                                ImGui.Separator();
+                                using (var addToCraftListMenu = ImRaii.Menu("Add to Craft List"))
+                                {
+                                    if (addToCraftListMenu)
+                                    {
+                                        var craftLists = _listService.Lists
+                                            .Where(c => c.FilterType == FilterType.CraftFilter &&
+                                                        c.CraftListDefault == false)
+                                            .OrderBy(c => c.Order)
+                                            .ToList();
+
+                                        foreach (var craft in craftLists)
+                                        {
+                                            using (var menu = ImRaii.Menu(craft.Name))
+                                            {
+                                                if (menu)
+                                                {
+                                                    if (ImGui.MenuItem("Craft List (All)"))
+                                                    {
+                                                        var searchResults = SelectedConfiguration.CraftList
+                                                            .GetFlattenedMergedMaterials()
+                                                            .ToList();
+
+                                                        foreach (var searchResult in searchResults)
+                                                        {
+                                                            craft.CraftList.AddCraftItem(searchResult.ItemId,
+                                                                searchResult.QuantityRequired,
+                                                                searchResult.Flags);
+                                                        }
+
+                                                        MediatorService.Publish(
+                                                            new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                                                        MediatorService.Publish(new FocusListMessage(
+                                                            typeof(CraftsWindow),
+                                                            craft));
+                                                    }
+
+                                                    if (ImGui.MenuItem("Craft List (Outputs)"))
+                                                    {
+                                                        var searchResults = SelectedConfiguration.CraftList
+                                                            .GetFlattenedMergedMaterials()
+                                                            .Where(c => c.IsOutputItem)
+                                                            .ToList();
+
+                                                        foreach (var searchResult in searchResults)
+                                                        {
+                                                            craft.CraftList.AddCraftItem(searchResult.ItemId,
+                                                                searchResult.QuantityRequired,
+                                                                searchResult.Flags);
+                                                        }
+
+                                                        MediatorService.Publish(
+                                                            new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                                                        MediatorService.Publish(new FocusListMessage(
+                                                            typeof(CraftsWindow),
+                                                            craft));
+                                                    }
+
+                                                    if (ImGui.MenuItem("Craft List (Precrafts)"))
+                                                    {
+                                                        var searchResults = SelectedConfiguration.CraftList
+                                                            .GetFlattenedMergedMaterials()
+                                                            .Where(c => c is
+                                                            {
+                                                                IsOutputItem: false,
+                                                                IngredientPreference.Type: IngredientPreferenceType
+                                                                    .Crafting
+                                                            })
+                                                            .ToList();
+
+                                                        foreach (var searchResult in searchResults)
+                                                        {
+                                                            craft.CraftList.AddCraftItem(searchResult.ItemId,
+                                                                searchResult.QuantityRequired,
+                                                                searchResult.Flags);
+                                                        }
+
+                                                        MediatorService.Publish(
+                                                            new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                                                        MediatorService.Publish(new FocusListMessage(
+                                                            typeof(CraftsWindow),
+                                                            craft));
+                                                    }
+
+                                                    if (ImGui.MenuItem("Craft List (Gatherables)"))
+                                                    {
+                                                        var searchResults = SelectedConfiguration.CraftList
+                                                            .GetFlattenedMergedMaterials()
+                                                            .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
+                                                            .ToList();
+
+                                                        foreach (var searchResult in searchResults)
+                                                        {
+                                                            craft.CraftList.AddCraftItem(searchResult.ItemId,
+                                                                searchResult.QuantityRequired,
+                                                                searchResult.Flags);
+                                                        }
+
+                                                        MediatorService.Publish(
+                                                            new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                                                        MediatorService.Publish(new FocusListMessage(
+                                                            typeof(CraftsWindow),
+                                                            craft));
+                                                    }
+
+                                                    if (ImGui.MenuItem("Craft List (Missing Gatherables)"))
+                                                    {
+                                                        var searchResults = SelectedConfiguration.CraftList
+                                                            .GetFlattenedMergedMaterials()
+                                                            .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
+                                                            .ToList();
+
+                                                        foreach (var searchResult in searchResults)
+                                                        {
+                                                            craft.CraftList.AddCraftItem(searchResult.ItemId,
+                                                                searchResult.QuantityMissingOverall,
+                                                                searchResult.Flags);
+                                                        }
+
+                                                        MediatorService.Publish(
+                                                            new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                                                        MediatorService.Publish(new FocusListMessage(
+                                                            typeof(CraftsWindow),
+                                                            craft));
+                                                    }
+
+                                                    if (ImGui.MenuItem("Retainer/Bag List"))
+                                                    {
+                                                        var searchResults = _tableService
+                                                            .GetListTable(SelectedConfiguration)
+                                                            .SearchResults
+                                                            .ToList();
+                                                        foreach (var searchResult in searchResults)
+                                                        {
+                                                            craft.CraftList.AddCraftItem(searchResult.ItemId,
+                                                                searchResult.Quantity,
+                                                                searchResult.Flags);
+                                                        }
+
+                                                        MediatorService.Publish(
+                                                            new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                                                        MediatorService.Publish(new FocusListMessage(
+                                                            typeof(CraftsWindow),
+                                                            craft));
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        if (craftLists.Count != 0)
+                                        {
+                                            ImGui.Separator();
+                                        }
+
+                                        using (var menu = ImRaii.Menu("New Craft List"))
+                                        {
+                                            if (menu)
+                                            {
+                                                if (ImGui.MenuItem("Craft List (All)"))
+                                                {
+                                                    var searchResults = SelectedConfiguration.CraftList
+                                                        .GetFlattenedMergedMaterials()
+                                                        .ToList();
+
+                                                    _popupService.AddPopup(new NamePopup(typeof(CraftsWindow),
+                                                        "newCraftList",
+                                                        "New Craft List",
+                                                        result =>
+                                                        {
+                                                            if (result.Item1)
+                                                            {
+                                                                var craftList =
+                                                                    _listService.AddNewCraftList(result.Item2);
+                                                                foreach (var searchResult in searchResults)
+                                                                {
+                                                                    craftList.CraftList.AddCraftItem(
+                                                                        searchResult.ItemId,
+                                                                        searchResult.QuantityRequired,
+                                                                        searchResult.Flags);
+                                                                }
+                                                            }
+                                                        }));
+                                                }
+
+                                                if (ImGui.MenuItem("Craft List (Outputs)"))
+                                                {
+                                                    var searchResults = SelectedConfiguration.CraftList
+                                                        .GetFlattenedMergedMaterials()
+                                                        .Where(c => c.IsOutputItem)
+                                                        .ToList();
+
+                                                    _popupService.AddPopup(new NamePopup(typeof(CraftsWindow),
+                                                        "newCraftList",
+                                                        "New Craft List",
+                                                        result =>
+                                                        {
+                                                            if (result.Item1)
+                                                            {
+                                                                var craftList =
+                                                                    _listService.AddNewCraftList(result.Item2);
+                                                                foreach (var searchResult in searchResults)
+                                                                {
+                                                                    craftList.CraftList.AddCraftItem(
+                                                                        searchResult.ItemId,
+                                                                        searchResult.QuantityRequired,
+                                                                        searchResult.Flags);
+                                                                }
+                                                            }
+                                                        }));
+                                                }
+
+                                                if (ImGui.MenuItem("Craft List (Precrafts)"))
+                                                {
+                                                    var searchResults = SelectedConfiguration.CraftList
+                                                        .GetFlattenedMergedMaterials()
+                                                        .Where(c => c is
+                                                        {
+                                                            IsOutputItem: false,
+                                                            IngredientPreference.Type: IngredientPreferenceType.Crafting
+                                                        })
+                                                        .ToList();
+                                                    _popupService.AddPopup(new NamePopup(typeof(CraftsWindow),
+                                                        "newCraftList",
+                                                        "New Craft List",
+                                                        result =>
+                                                        {
+                                                            if (result.Item1)
+                                                            {
+                                                                var craftList =
+                                                                    _listService.AddNewCraftList(result.Item2);
+                                                                foreach (var searchResult in searchResults)
+                                                                {
+                                                                    craftList.CraftList.AddCraftItem(
+                                                                        searchResult.ItemId,
+                                                                        searchResult.QuantityRequired,
+                                                                        searchResult.Flags);
+                                                                }
+                                                            }
+                                                        }));
+                                                }
+
+                                                if (ImGui.MenuItem("Craft List (Gatherables)"))
+                                                {
+                                                    var searchResults = SelectedConfiguration.CraftList
+                                                        .GetFlattenedMergedMaterials()
+                                                        .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
+                                                        .ToList();
+                                                    _popupService.AddPopup(new NamePopup(typeof(CraftsWindow),
+                                                        "newCraftList",
+                                                        "New Craft List",
+                                                        result =>
+                                                        {
+                                                            if (result.Item1)
+                                                            {
+                                                                var craftList =
+                                                                    _listService.AddNewCraftList(result.Item2);
+                                                                foreach (var searchResult in searchResults)
+                                                                {
+                                                                    craftList.CraftList.AddCraftItem(
+                                                                        searchResult.ItemId,
+                                                                        searchResult.QuantityRequired,
+                                                                        searchResult.Flags);
+                                                                }
+                                                            }
+                                                        }));
+                                                }
+
+                                                if (ImGui.MenuItem("Craft List (Missing Gatherables)"))
+                                                {
+                                                    var searchResults = SelectedConfiguration.CraftList
+                                                        .GetFlattenedMergedMaterials()
+                                                        .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
+                                                        .ToList();
+                                                    _popupService.AddPopup(new NamePopup(typeof(CraftsWindow),
+                                                        "newCraftList",
+                                                        "New Craft List",
+                                                        result =>
+                                                        {
+                                                            if (result.Item1)
+                                                            {
+                                                                var craftList =
+                                                                    _listService.AddNewCraftList(result.Item2);
+                                                                foreach (var searchResult in searchResults)
+                                                                {
+                                                                    craftList.CraftList.AddCraftItem(
+                                                                        searchResult.ItemId,
+                                                                        searchResult.QuantityMissingOverall,
+                                                                        searchResult.Flags);
+                                                                }
+                                                            }
+                                                        }));
+                                                }
+
+                                                if (ImGui.MenuItem("Retainer/Bag List"))
+                                                {
+                                                    var searchResults = _tableService
+                                                        .GetListTable(SelectedConfiguration)
+                                                        .SearchResults
+                                                        .ToList();
+                                                    _popupService.AddPopup(new NamePopup(typeof(CraftsWindow),
+                                                        "newCraftList",
+                                                        "New Craft List",
+                                                        result =>
+                                                        {
+                                                            if (result.Item1)
+                                                            {
+                                                                var craftList =
+                                                                    _listService.AddNewCraftList(result.Item2);
+                                                                foreach (var searchResult in searchResults)
+                                                                {
+                                                                    craftList.CraftList.AddCraftItem(
+                                                                        searchResult.ItemId,
+                                                                        searchResult.Quantity,
+                                                                        searchResult.Flags);
+                                                                }
+                                                            }
+                                                        }));
+                                                }
+
+                                            }
+                                        }
+
+                                        using (var menu = ImRaii.Menu("New Craft List (Ephemeral)"))
+                                        {
+                                            if (menu)
+                                            {
+                                                if (ImGui.MenuItem("Craft List (All)"))
+                                                {
+                                                    var searchResults = SelectedConfiguration.CraftList
+                                                        .GetFlattenedMergedMaterials()
+                                                        .ToList();
+
+                                                    _popupService.AddPopup(new NamePopup(typeof(CraftsWindow),
+                                                        "newCraftList",
+                                                        "New Craft List",
+                                                        result =>
+                                                        {
+                                                            if (result.Item1)
+                                                            {
+                                                                var craftList =
+                                                                    _listService.AddNewCraftList(result.Item2, true);
+                                                                foreach (var searchResult in searchResults)
+                                                                {
+                                                                    craftList.CraftList.AddCraftItem(
+                                                                        searchResult.ItemId,
+                                                                        searchResult.QuantityRequired,
+                                                                        searchResult.Flags);
+                                                                }
+                                                            }
+                                                        }));
+                                                }
+
+                                                if (ImGui.MenuItem("Craft List (Outputs)"))
+                                                {
+                                                    var searchResults = SelectedConfiguration.CraftList
+                                                        .GetFlattenedMergedMaterials()
+                                                        .Where(c => c.IsOutputItem)
+                                                        .ToList();
+
+                                                    _popupService.AddPopup(new NamePopup(typeof(CraftsWindow),
+                                                        "newCraftList",
+                                                        "New Craft List",
+                                                        result =>
+                                                        {
+                                                            if (result.Item1)
+                                                            {
+                                                                var craftList =
+                                                                    _listService.AddNewCraftList(result.Item2, true);
+                                                                foreach (var searchResult in searchResults)
+                                                                {
+                                                                    craftList.CraftList.AddCraftItem(
+                                                                        searchResult.ItemId,
+                                                                        searchResult.QuantityRequired,
+                                                                        searchResult.Flags);
+                                                                }
+                                                            }
+                                                        }));
+                                                }
+
+                                                if (ImGui.MenuItem("Craft List (Precrafts)"))
+                                                {
+                                                    var searchResults = SelectedConfiguration.CraftList
+                                                        .GetFlattenedMergedMaterials()
+                                                        .Where(c => c is
+                                                        {
+                                                            IsOutputItem: false,
+                                                            IngredientPreference.Type: IngredientPreferenceType.Crafting
+                                                        })
+                                                        .ToList();
+                                                    _popupService.AddPopup(new NamePopup(typeof(CraftsWindow),
+                                                        "newCraftList",
+                                                        "New Craft List",
+                                                        result =>
+                                                        {
+                                                            if (result.Item1)
+                                                            {
+                                                                var craftList =
+                                                                    _listService.AddNewCraftList(result.Item2, true);
+                                                                foreach (var searchResult in searchResults)
+                                                                {
+                                                                    craftList.CraftList.AddCraftItem(
+                                                                        searchResult.ItemId,
+                                                                        searchResult.QuantityRequired,
+                                                                        searchResult.Flags);
+                                                                }
+                                                            }
+                                                        }));
+                                                }
+
+                                                if (ImGui.MenuItem("Craft List (Gatherables)"))
+                                                {
+                                                    var searchResults = SelectedConfiguration.CraftList
+                                                        .GetFlattenedMergedMaterials()
+                                                        .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
+                                                        .ToList();
+                                                    _popupService.AddPopup(new NamePopup(typeof(CraftsWindow),
+                                                        "newCraftList",
+                                                        "New Craft List",
+                                                        result =>
+                                                        {
+                                                            if (result.Item1)
+                                                            {
+                                                                var craftList =
+                                                                    _listService.AddNewCraftList(result.Item2, true);
+                                                                foreach (var searchResult in searchResults)
+                                                                {
+                                                                    craftList.CraftList.AddCraftItem(
+                                                                        searchResult.ItemId,
+                                                                        searchResult.QuantityRequired,
+                                                                        searchResult.Flags);
+                                                                }
+                                                            }
+                                                        }));
+                                                }
+
+                                                if (ImGui.MenuItem("Craft List (Missing Gatherables)"))
+                                                {
+                                                    var searchResults = SelectedConfiguration.CraftList
+                                                        .GetFlattenedMergedMaterials()
+                                                        .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
+                                                        .ToList();
+                                                    _popupService.AddPopup(new NamePopup(typeof(CraftsWindow),
+                                                        "newCraftList",
+                                                        "New Craft List",
+                                                        result =>
+                                                        {
+                                                            if (result.Item1)
+                                                            {
+                                                                var craftList =
+                                                                    _listService.AddNewCraftList(result.Item2, true);
+                                                                foreach (var searchResult in searchResults)
+                                                                {
+                                                                    craftList.CraftList.AddCraftItem(
+                                                                        searchResult.ItemId,
+                                                                        searchResult.QuantityMissingOverall,
+                                                                        searchResult.Flags);
+                                                                }
+                                                            }
+                                                        }));
+                                                }
+
+                                                if (ImGui.MenuItem("Retainer/Bag List"))
+                                                {
+                                                    var searchResults = _tableService
+                                                        .GetListTable(SelectedConfiguration)
+                                                        .SearchResults
+                                                        .ToList();
+                                                    _popupService.AddPopup(new NamePopup(typeof(CraftsWindow),
+                                                        "newCraftList",
+                                                        "New Craft List",
+                                                        result =>
+                                                        {
+                                                            if (result.Item1)
+                                                            {
+                                                                var craftList =
+                                                                    _listService.AddNewCraftList(result.Item2, true);
+                                                                foreach (var searchResult in searchResults)
+                                                                {
+                                                                    craftList.CraftList.AddCraftItem(
+                                                                        searchResult.ItemId,
+                                                                        searchResult.Quantity,
+                                                                        searchResult.Flags);
+                                                                }
+                                                            }
+                                                        }));
+                                                }
+                                            }
+                                        }
+
+                                    }
+                                }
+
+                                using (var menu = ImRaii.Menu("Add to Curated List"))
+                                {
+                                    if (menu)
+                                    {
+                                        var curatedLists = _listService.Lists
+                                            .Where(c => c.FilterType == FilterType.CuratedList)
+                                            .OrderBy(c => c.Order)
+                                            .ToList();
+
+                                        foreach (var curatedList in curatedLists)
+                                        {
+                                            if (ImGui.MenuItem(curatedList.Name))
+                                            {
+                                                if (ImGui.MenuItem("Craft List (All)"))
+                                                {
+                                                    var searchResults = SelectedConfiguration.CraftList
+                                                        .GetFlattenedMergedMaterials()
+                                                        .ToList();
+
+                                                    foreach (var searchResult in searchResults)
+                                                    {
+                                                        curatedList.AddCuratedItem(new CuratedItem(searchResult.ItemId,
+                                                            searchResult.QuantityRequired,
+                                                            searchResult.Flags));
+                                                    }
+                                                }
+
+                                                if (ImGui.MenuItem("Craft List (Outputs)"))
+                                                {
+                                                    var searchResults = SelectedConfiguration.CraftList
+                                                        .GetFlattenedMergedMaterials()
+                                                        .Where(c => c.IsOutputItem)
+                                                        .ToList();
+
+                                                    foreach (var searchResult in searchResults)
+                                                    {
+                                                        curatedList.AddCuratedItem(new CuratedItem(searchResult.ItemId,
+                                                            searchResult.QuantityRequired,
+                                                            searchResult.Flags));
+                                                    }
+                                                }
+
+                                                if (ImGui.MenuItem("Craft List (Precrafts)"))
+                                                {
+                                                    var searchResults = SelectedConfiguration.CraftList
+                                                        .GetFlattenedMergedMaterials()
+                                                        .Where(c => c is
+                                                        {
+                                                            IsOutputItem: false,
+                                                            IngredientPreference.Type: IngredientPreferenceType.Crafting
+                                                        })
+                                                        .ToList();
+
+                                                    foreach (var searchResult in searchResults)
+                                                    {
+                                                        curatedList.AddCuratedItem(new CuratedItem(searchResult.ItemId,
+                                                            searchResult.QuantityRequired,
+                                                            searchResult.Flags));
+                                                    }
+                                                }
+
+                                                if (ImGui.MenuItem("Craft List (Gatherables)"))
+                                                {
+                                                    var searchResults = SelectedConfiguration.CraftList
+                                                        .GetFlattenedMergedMaterials()
+                                                        .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
+                                                        .ToList();
+
+                                                    foreach (var searchResult in searchResults)
+                                                    {
+                                                        curatedList.AddCuratedItem(new CuratedItem(searchResult.ItemId,
+                                                            searchResult.QuantityRequired,
+                                                            searchResult.Flags));
+                                                    }
+                                                }
+
+                                                if (ImGui.MenuItem("Craft List (Missing Gatherables)"))
+                                                {
+                                                    var searchResults = SelectedConfiguration.CraftList
+                                                        .GetFlattenedMergedMaterials()
+                                                        .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
+                                                        .ToList();
+
+                                                    foreach (var searchResult in searchResults)
+                                                    {
+                                                        curatedList.AddCuratedItem(new CuratedItem(searchResult.ItemId,
+                                                            searchResult.QuantityRequired,
+                                                            searchResult.Flags));
+                                                    }
+                                                }
+
+                                                if (ImGui.MenuItem("Retainer/Bag List"))
+                                                {
+                                                    var searchResults = _tableService
+                                                        .GetListTable(SelectedConfiguration)
+                                                        .SearchResults
+                                                        .ToList();
+                                                    foreach (var searchResult in searchResults)
+                                                    {
+                                                        curatedList.AddCuratedItem(new CuratedItem(searchResult.ItemId,
+                                                            searchResult.Quantity,
+                                                            searchResult.Flags));
+                                                    }
+                                                }
+
+                                            }
+                                        }
+
+                                        if (curatedLists.Count != 0)
+                                        {
+                                            ImGui.Separator();
+                                        }
+
+                                        using (var newCuratedListMenu = ImRaii.Menu("New Curated List"))
+                                        {
+                                            if (newCuratedListMenu)
+                                            {
+                                                if (ImGui.MenuItem("Craft List (All)"))
+                                                {
+                                                    var searchResults = SelectedConfiguration.CraftList
+                                                        .GetFlattenedMergedMaterials()
+                                                        .ToList();
+
+                                                    _popupService.AddPopup(new NamePopup(typeof(CraftsWindow),
+                                                        "newCuratedList",
+                                                        "New Curated List",
+                                                        result =>
+                                                        {
+                                                            if (result.Item1)
+                                                            {
+                                                                var curatedList =
+                                                                    _listService.AddNewCuratedList(result.Item2);
+                                                                foreach (var searchResult in searchResults)
+                                                                {
+                                                                    curatedList.AddCuratedItem(new CuratedItem(
+                                                                        searchResult.ItemId,
+                                                                        searchResult.QuantityRequired,
+                                                                        searchResult.Flags));
+                                                                }
+
+                                                                this.MediatorService.Publish(
+                                                                    new FocusListMessage(typeof(FiltersWindow),
+                                                                        curatedList));
+                                                                curatedList.NeedsRefresh = true;
+                                                            }
+                                                        }));
+                                                }
+
+                                                if (ImGui.MenuItem("Craft List (Outputs)"))
+                                                {
+                                                    var searchResults = SelectedConfiguration.CraftList
+                                                        .GetFlattenedMergedMaterials()
+                                                        .Where(c => c.IsOutputItem)
+                                                        .ToList();
+
+                                                    _popupService.AddPopup(new NamePopup(typeof(CraftsWindow),
+                                                        "newCuratedList",
+                                                        "New Curated List",
+                                                        result =>
+                                                        {
+                                                            if (result.Item1)
+                                                            {
+                                                                var curatedList =
+                                                                    _listService.AddNewCuratedList(result.Item2);
+                                                                foreach (var searchResult in searchResults)
+                                                                {
+                                                                    curatedList.AddCuratedItem(new CuratedItem(
+                                                                        searchResult.ItemId,
+                                                                        searchResult.QuantityRequired,
+                                                                        searchResult.Flags));
+                                                                }
+
+                                                                this.MediatorService.Publish(
+                                                                    new FocusListMessage(typeof(FiltersWindow),
+                                                                        curatedList));
+                                                                curatedList.NeedsRefresh = true;
+                                                            }
+                                                        }));
+                                                }
+
+                                                if (ImGui.MenuItem("Craft List (Precrafts)"))
+                                                {
+                                                    var searchResults = SelectedConfiguration.CraftList
+                                                        .GetFlattenedMergedMaterials()
+                                                        .Where(c => c is
+                                                        {
+                                                            IsOutputItem: false,
+                                                            IngredientPreference.Type: IngredientPreferenceType.Crafting
+                                                        })
+                                                        .ToList();
+                                                    _popupService.AddPopup(new NamePopup(typeof(CraftsWindow),
+                                                        "newCuratedList",
+                                                        "New Curated List",
+                                                        result =>
+                                                        {
+                                                            if (result.Item1)
+                                                            {
+                                                                var curatedList =
+                                                                    _listService.AddNewCuratedList(result.Item2);
+                                                                foreach (var searchResult in searchResults)
+                                                                {
+                                                                    curatedList.AddCuratedItem(new CuratedItem(
+                                                                        searchResult.ItemId,
+                                                                        searchResult.QuantityRequired,
+                                                                        searchResult.Flags));
+                                                                }
+
+                                                                this.MediatorService.Publish(
+                                                                    new FocusListMessage(typeof(FiltersWindow),
+                                                                        curatedList));
+                                                                curatedList.NeedsRefresh = true;
+                                                            }
+                                                        }));
+                                                }
+
+                                                if (ImGui.MenuItem("Craft List (Gatherables)"))
+                                                {
+                                                    var searchResults = SelectedConfiguration.CraftList
+                                                        .GetFlattenedMergedMaterials()
+                                                        .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
+                                                        .ToList();
+                                                    _popupService.AddPopup(new NamePopup(typeof(CraftsWindow),
+                                                        "newCuratedList",
+                                                        "New Curated List",
+                                                        result =>
+                                                        {
+                                                            if (result.Item1)
+                                                            {
+                                                                var curatedList =
+                                                                    _listService.AddNewCuratedList(result.Item2);
+                                                                foreach (var searchResult in searchResults)
+                                                                {
+                                                                    curatedList.AddCuratedItem(new CuratedItem(
+                                                                        searchResult.ItemId,
+                                                                        searchResult.QuantityRequired,
+                                                                        searchResult.Flags));
+                                                                }
+
+                                                                this.MediatorService.Publish(
+                                                                    new FocusListMessage(typeof(FiltersWindow),
+                                                                        curatedList));
+                                                                curatedList.NeedsRefresh = true;
+                                                            }
+                                                        }));
+                                                }
+
+                                                if (ImGui.MenuItem("Craft List (Missing Gatherables)"))
+                                                {
+                                                    var searchResults = SelectedConfiguration.CraftList
+                                                        .GetFlattenedMergedMaterials()
+                                                        .Where(c => c.Item.ObtainedGathering && !c.IsOutputItem)
+                                                        .ToList();
+                                                    _popupService.AddPopup(new NamePopup(typeof(CraftsWindow),
+                                                        "newCuratedList",
+                                                        "New Curated List",
+                                                        result =>
+                                                        {
+                                                            if (result.Item1)
+                                                            {
+                                                                var curatedList =
+                                                                    _listService.AddNewCuratedList(result.Item2);
+                                                                foreach (var searchResult in searchResults)
+                                                                {
+                                                                    curatedList.AddCuratedItem(new CuratedItem(
+                                                                        searchResult.ItemId,
+                                                                        searchResult.QuantityMissingOverall,
+                                                                        searchResult.Flags));
+                                                                }
+
+                                                                this.MediatorService.Publish(
+                                                                    new FocusListMessage(typeof(FiltersWindow),
+                                                                        curatedList));
+                                                                curatedList.NeedsRefresh = true;
+                                                            }
+                                                        }));
+                                                }
+
+                                                if (ImGui.MenuItem("Retainer/Bag List"))
+                                                {
+                                                    var searchResults = _tableService
+                                                        .GetListTable(SelectedConfiguration)
+                                                        .SearchResults
+                                                        .ToList();
+                                                    _popupService.AddPopup(new NamePopup(typeof(CraftsWindow),
+                                                        "newCuratedList",
+                                                        "New Curated List",
+                                                        result =>
+                                                        {
+                                                            if (result.Item1)
+                                                            {
+                                                                var curatedList =
+                                                                    _listService.AddNewCuratedList(result.Item2);
+                                                                foreach (var searchResult in searchResults)
+                                                                {
+                                                                    curatedList.AddCuratedItem(new CuratedItem(
+                                                                        searchResult.ItemId,
+                                                                        searchResult.Quantity,
+                                                                        searchResult.Flags));
+                                                                }
+
+                                                                this.MediatorService.Publish(
+                                                                    new FocusListMessage(typeof(FiltersWindow),
+                                                                        curatedList));
+                                                                curatedList.NeedsRefresh = true;
+                                                            }
+                                                        }));
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
-                            ImGuiUtil.HoverTooltip("[CTRL] to open in a new window.");
-                        }
-
-                        if (index != windowGroups.Count - 1)
-                        {
-                            ImGui.NewLine();
                         }
                     }
 
-                    ImGui.EndMenu();
-                }
 
-                if (ImGui.BeginMenu("Windows"))
-                {
-                    if (_menuWindows != null)
+                    using (var menu = ImRaii.Menu("View"))
                     {
-                        foreach (var window in _menuWindows)
+                        if (menu)
                         {
-                            if (ImGui.MenuItem(window.GenericName))
+                            if (ImGui.MenuItem("Tabs", "",
+                                    _layoutSetting.CurrentValue(_configuration) == WindowLayout.Tabs))
                             {
-                                this.MediatorService.Publish(new OpenGenericWindowMessage(window.GetType()));
+                                _layoutSetting.UpdateFilterConfiguration(_configuration, WindowLayout.Tabs);
+                            }
+
+                            if (ImGui.MenuItem("Sidebar", "",
+                                    _layoutSetting.CurrentValue(_configuration) == WindowLayout.Sidebar))
+                            {
+                                _layoutSetting.UpdateFilterConfiguration(_configuration, WindowLayout.Sidebar);
+                            }
+
+                            if (ImGui.MenuItem("Single", "",
+                                    _layoutSetting.CurrentValue(_configuration) == WindowLayout.Single))
+                            {
+                                _layoutSetting.UpdateFilterConfiguration(_configuration, WindowLayout.Single);
+                            }
+
+                            ImGui.Separator();
+
+                            if (ImGui.MenuItem("Crafts", "",
+                                    _craftWindowViewSetting.CurrentValue(_configuration) == CraftWindowView.Crafts))
+                            {
+                                _craftWindowViewSetting.UpdateFilterConfiguration(_configuration,
+                                    CraftWindowView.Crafts);
+                            }
+
+                            if (ImGui.MenuItem("Tree View", "",
+                                    _craftWindowViewSetting.CurrentValue(_configuration) == CraftWindowView.Tree))
+                            {
+                                _craftWindowViewSetting.UpdateFilterConfiguration(_configuration, CraftWindowView.Tree);
+                            }
+
+                            if (ImGui.MenuItem("Configuration", "",
+                                    _craftWindowViewSetting.CurrentValue(_configuration) ==
+                                    CraftWindowView.Configuration))
+                            {
+                                _craftWindowViewSetting.UpdateFilterConfiguration(_configuration,
+                                    CraftWindowView.Configuration);
                             }
                         }
                     }
 
-                    ImGui.EndMenu();
-                }
+                    using (var menu = ImRaii.Menu("Export"))
+                    {
+                        if (menu)
+                        {
+                            if (ImGui.MenuItem("Craft List (CSV)"))
+                            {
+                                if (SelectedConfiguration != null)
+                                {
+                                    _fileDialogManager.SaveFileDialog("Save to csv", "*.csv",
+                                        "export-craft-list.csv", ".csv",
+                                        (b, s) =>
+                                        {
+                                            var craftTable = _tableService.GetCraftTable(SelectedConfiguration);
+                                            SaveCraftCallback(craftTable, b, s);
+                                        }, null, true);
+                                }
+                            }
 
-                if (ImGui.MenuItem("Toggle Crafting Overlay"))
-                {
-                    this.MediatorService.Publish(new ToggleGenericWindowMessage(typeof(CraftOverlayWindow)));
-                }
+                            if (ImGui.MenuItem("Retainer/Bag List (CSV)"))
+                            {
+                                if (SelectedConfiguration != null)
+                                {
+                                    var itemTable = _tableService.GetListTable(SelectedConfiguration);
+                                    _fileDialogManager.SaveFileDialog("Save to csv", "*.csv", "export.csv", ".csv",
+                                        (b, s) => { SaveCallback(itemTable, b, s); }, null, true);
+                                }
+                            }
+                        }
+                    }
 
-                ImGui.EndMenuBar();
+                    using (var menu = ImRaii.Menu("Market"))
+                    {
+                        if (menu)
+                        {
+                            if (ImGui.MenuItem("Refresh All Prices (Craft List)"))
+                            {
+                                var activeCharacter = _characterMonitor.ActiveCharacter;
+                                if (activeCharacter != null && SelectedConfiguration != null)
+                                {
+                                    var itemTable = _tableService.GetCraftTable(SelectedConfiguration);
+                                    foreach (var item in itemTable.CraftItems)
+                                    {
+                                        _universalis.QueuePriceCheck(item.Item.RowId, activeCharacter.WorldId);
+                                    }
+                                }
+                            }
+
+                            if (ImGui.MenuItem("Refresh All Prices (Retainer/Bags)"))
+                            {
+                                var activeCharacter = _characterMonitor.ActiveCharacter;
+                                if (activeCharacter != null && SelectedConfiguration != null)
+                                {
+                                    var itemTable = _tableService.GetListTable(SelectedConfiguration);
+                                    foreach (var item in itemTable.RenderSearchResults)
+                                    {
+                                        _universalis.QueuePriceCheck(item.Item.RowId, activeCharacter.WorldId);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    using (var menu = ImRaii.Menu("Lists"))
+                    {
+                        if (menu)
+                        {
+                            using (var addMenu = ImRaii.Menu("Add"))
+                            {
+                                if (addMenu)
+                                {
+                                    if (ImGui.MenuItem("Craft List"))
+                                    {
+                                        _popupService.AddPopup(new NamePopup(GetType(), "addCraftList", "", result =>
+                                        {
+                                            if (result.Item1)
+                                            {
+                                                AddCraftFilter(result.Item2);
+                                            }
+                                        }));
+                                    }
+
+                                    if (ImGui.MenuItem("Craft List (Ephemeral)"))
+                                    {
+                                        _popupService.AddPopup(new NamePopup(GetType(), "addCraftListEphemeral", "",
+                                            result =>
+                                            {
+                                                if (result.Item1)
+                                                {
+                                                    AddCraftFilter(result.Item2);
+                                                }
+                                            }));
+                                    }
+                                }
+                            }
+
+                            ImGui.NewLine();
+
+                            var windowGroups = _listService.Lists.GroupBy(c => c.FilterType).OrderBySequence(
+                            [
+                                FilterType.CraftFilter, FilterType.SearchFilter, FilterType.SortingFilter,
+                                FilterType.GameItemFilter, FilterType.HistoryFilter, FilterType.CuratedList
+                            ], grouping => grouping.Key).ToList();
+                            for (var index = 0; index < windowGroups.Count; index++)
+                            {
+                                var windowGroup = windowGroups[index];
+                                ImGui.Text(windowGroup.Key.FormattedName());
+                                ImGui.Separator();
+                                foreach (var window in windowGroup.OrderBy(c => c.CraftListDefault)
+                                             .ThenBy(c => c.Order))
+                                {
+                                    if (ImGui.MenuItem(window.Name, "",
+                                            SelectedConfiguration == window ||
+                                            (SelectedConfiguration == null && window.CraftListDefault)))
+                                    {
+                                        if (window.FilterType == FilterType.CraftFilter)
+                                        {
+                                            if (_keyState[VirtualKey.CONTROL])
+                                            {
+                                                this.MediatorService.Publish(
+                                                    new OpenStringWindowMessage(typeof(FilterWindow), window.Key));
+                                            }
+                                            else
+                                            {
+                                                if (window.CraftListDefault)
+                                                {
+                                                    _selectedFilterTab = Filters.Count + 1;
+                                                }
+                                                else
+                                                {
+                                                    MediatorService.Publish(
+                                                        new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                                                    MediatorService.Publish(new FocusListMessage(typeof(CraftsWindow),
+                                                        window));
+                                                }
+                                            }
+
+                                        }
+                                        else
+                                        {
+                                            if (_keyState[VirtualKey.CONTROL])
+                                            {
+                                                this.MediatorService.Publish(
+                                                    new OpenStringWindowMessage(typeof(FilterWindow), window.Key));
+                                            }
+                                            else
+                                            {
+                                                MediatorService.Publish(
+                                                    new OpenGenericWindowMessage(typeof(FiltersWindow)));
+                                                MediatorService.Publish(new FocusListMessage(typeof(FiltersWindow),
+                                                    window));
+                                            }
+                                        }
+                                    }
+
+                                    ImGuiUtil.HoverTooltip("[CTRL] to open in a new window.");
+                                }
+
+                                if (index != windowGroups.Count - 1)
+                                {
+                                    ImGui.NewLine();
+                                }
+                            }
+                        }
+                    }
+
+                    using (var menu = ImRaii.Menu("Windows"))
+                    {
+                        if (menu)
+                        {
+                            if (_menuWindows != null)
+                            {
+                                foreach (var window in _menuWindows)
+                                {
+                                    if (ImGui.MenuItem(window.GenericName))
+                                    {
+                                        this.MediatorService.Publish(new OpenGenericWindowMessage(window.GetType()));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (ImGui.MenuItem("Toggle Crafting Overlay"))
+                    {
+                        this.MediatorService.Publish(new ToggleGenericWindowMessage(typeof(CraftOverlayWindow)));
+                    }
+
+                }
             }
         }
 

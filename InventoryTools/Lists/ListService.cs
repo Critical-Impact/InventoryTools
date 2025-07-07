@@ -873,6 +873,7 @@ namespace InventoryTools.Lists
             }
             configuration.NotifyConfigurationChange();
             ListRepositioned?.Invoke(configuration);
+            _mediatorService.Publish(new ListRepositionedMessage(configuration));
 
             return true;
         }

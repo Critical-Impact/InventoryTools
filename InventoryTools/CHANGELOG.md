@@ -8,6 +8,18 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [12.0.21] - 2025-07-07
+
+### Fixed
+- Duties are now stored based off their ID and not the map of the duty as some maps may host more than 1 duty. 
+- Fixed a bug that'd cause the craft system to think more crafts were capable then actually were
+- Fixed a bug where the wrong slot was being accessed in glamour chests
+- Fixed a bug when moving the position of a list would not reflect correctly in the UI
+- Switched the majority of ImGui Begin/End's to ImRaii, @ me if you notice anything amiss in the UI
+
+### Added
+- Empty is now an ingredient sourcing options for all items allowing you to source the item in whatever way you wish`
+
 ## [12.0.20] - 2025-06-15
 
 ### Added

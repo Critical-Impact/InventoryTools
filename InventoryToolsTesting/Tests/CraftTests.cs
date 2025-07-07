@@ -392,5 +392,49 @@ namespace InventoryToolsTesting.Tests
             Assert.AreEqual(20,venture.MissingIngredients.First().Key.Item1);
             Assert.AreEqual(21600,venture.MissingIngredients.First().Value);
         }
+
+        [Test(Description = "Checks that the next step calculated is correct")]
+        public void TestNextStepYield()
+        {
+            var craftListFactory = GetCraftListFactory();
+
+            CraftList list = craftListFactory.Invoke();
+            CraftListConfiguration store = new CraftListConfiguration();
+            store
+                .AddCharacterSource(GetItemIdByName("Fire Crystal"), 500, InventoryItem.ItemFlags.None)
+                .AddCharacterSource(GetItemIdByName("Mountain Salt"), 6, InventoryItem.ItemFlags.None)
+                .AddCharacterSource(GetItemIdByName("Night Vinegar"), 6, InventoryItem.ItemFlags.None)
+                .AddCharacterSource(GetItemIdByName("Turali Corn"), 1, InventoryItem.ItemFlags.None)
+                .AddCharacterSource(GetItemIdByName("Turali Corn Oil"), 1, InventoryItem.ItemFlags.None);
+
+            list.AddCraftItem("Rroneek Steak", 6);
+            list.GenerateCraftChildren();
+            list.Update(store);
+            var flattenedMergedMaterials = list.GetFlattenedMergedMaterials();
+            var cornOil = flattenedMergedMaterials.First(c => c.ItemId == 43976);
+            var nextStep = list.GetNextCraftStep(cornOil);
+
+            Assert.AreEqual(NextCraftStep.MissingIngredients, nextStep);
+
+
+
+            list = craftListFactory.Invoke();
+            store = new CraftListConfiguration();
+            store
+                .AddCharacterSource(GetItemIdByName("Fire Crystal"), 500, InventoryItem.ItemFlags.None)
+                .AddCharacterSource(GetItemIdByName("Mountain Salt"), 6, InventoryItem.ItemFlags.None)
+                .AddCharacterSource(GetItemIdByName("Night Vinegar"), 6, InventoryItem.ItemFlags.None)
+                .AddCharacterSource(GetItemIdByName("Turali Corn"), 6, InventoryItem.ItemFlags.None)
+                .AddCharacterSource(GetItemIdByName("Turali Corn Oil"), 1, InventoryItem.ItemFlags.None);
+
+            list.AddCraftItem("Rroneek Steak", 6);
+            list.GenerateCraftChildren();
+            list.Update(store);
+            flattenedMergedMaterials = list.GetFlattenedMergedMaterials();
+            cornOil = flattenedMergedMaterials.First(c => c.ItemId == 43976);
+            nextStep = list.GetNextCraftStep(cornOil);
+
+            Assert.AreEqual(NextCraftStep.Craft, nextStep);
+        }
     }
 }

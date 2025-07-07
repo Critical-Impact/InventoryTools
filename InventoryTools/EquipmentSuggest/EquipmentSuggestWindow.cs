@@ -73,98 +73,117 @@ public class EquipmentSuggestWindow : GenericWindow, IMenuWindow
 
     private void DrawMenuBar()
     {
-        if (ImGui.BeginMenuBar())
+        using (var menuBar = ImRaii.MenuBar())
         {
-            if (ImGui.BeginMenu("File"))
+            if (menuBar)
             {
-                if (ImGui.MenuItem("Configuration"))
+                using (var menu = ImRaii.Menu("File"))
                 {
-                    MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
-                }
-                if (ImGui.MenuItem("Changelog"))
-                {
-                    MediatorService.Publish(new OpenGenericWindowMessage(typeof(ChangelogWindow)));
-                }
-                if (ImGui.MenuItem("Help"))
-                {
-                    MediatorService.Publish(new OpenGenericWindowMessage(typeof(HelpWindow)));
-                }
-                if (ImGui.MenuItem("Enable Verbose Logging", "", this._pluginLog.MinimumLogLevel == LogEventLevel.Verbose))
-                {
-                    if (this._pluginLog.MinimumLogLevel == LogEventLevel.Verbose)
+                    if (menu)
                     {
-                        this._pluginLog.MinimumLogLevel = LogEventLevel.Debug;
-                    }
-                    else
-                    {
-                        this._pluginLog.MinimumLogLevel = LogEventLevel.Verbose;
-                    }
-                }
+                        if (ImGui.MenuItem("Configuration"))
+                        {
+                            MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
+                        }
 
-                if (ImGui.MenuItem("Report a Issue"))
-                {
-                    "https://github.com/Critical-Impact/InventoryTools".OpenBrowser();
-                }
+                        if (ImGui.MenuItem("Changelog"))
+                        {
+                            MediatorService.Publish(new OpenGenericWindowMessage(typeof(ChangelogWindow)));
+                        }
 
-                if (ImGui.MenuItem("Ko-Fi"))
-                {
-                    "https://ko-fi.com/critical_impact".OpenBrowser();
-                }
+                        if (ImGui.MenuItem("Help"))
+                        {
+                            MediatorService.Publish(new OpenGenericWindowMessage(typeof(HelpWindow)));
+                        }
 
-                if (ImGui.MenuItem("Close"))
-                {
-                    this.IsOpen = false;
-                }
+                        if (ImGui.MenuItem("Enable Verbose Logging", "",
+                                this._pluginLog.MinimumLogLevel == LogEventLevel.Verbose))
+                        {
+                            if (this._pluginLog.MinimumLogLevel == LogEventLevel.Verbose)
+                            {
+                                this._pluginLog.MinimumLogLevel = LogEventLevel.Debug;
+                            }
+                            else
+                            {
+                                this._pluginLog.MinimumLogLevel = LogEventLevel.Verbose;
+                            }
+                        }
 
-                ImGui.EndMenu();
-            }
+                        if (ImGui.MenuItem("Report a Issue"))
+                        {
+                            "https://github.com/Critical-Impact/InventoryTools".OpenBrowser();
+                        }
 
-            if (ImGui.BeginMenu("Mode"))
-            {
-                if (ImGui.MenuItem("Class/Job", "", _modeSetting.CurrentValue(_configuration) == EquipmentSuggestMode.Class))
-                {
-                    _modeSetting.UpdateFilterConfiguration(_configuration, EquipmentSuggestMode.Class);
-                }
-                if (ImGui.MenuItem("Tool/Weapon", "", _modeSetting.CurrentValue(_configuration) == EquipmentSuggestMode.Tool))
-                {
-                    _modeSetting.UpdateFilterConfiguration(_configuration, EquipmentSuggestMode.Tool);
-                }
+                        if (ImGui.MenuItem("Ko-Fi"))
+                        {
+                            "https://ko-fi.com/critical_impact".OpenBrowser();
+                        }
 
-                ImGui.EndMenu();
-            }
-
-            if (ImGui.BeginMenu("View"))
-            {
-                if (ImGui.MenuItem("Normal", "", _viewModeSetting.CurrentValue(_configuration) == EquipmentSuggestViewMode.Normal))
-                {
-                    _viewModeSetting.UpdateFilterConfiguration(_configuration, EquipmentSuggestViewMode.Normal);
-                }
-                if (ImGui.MenuItem("Expanded", "", _viewModeSetting.CurrentValue(_configuration) == EquipmentSuggestViewMode.Expanded))
-                {
-                    _viewModeSetting.UpdateFilterConfiguration(_configuration, EquipmentSuggestViewMode.Expanded);
-                }
-                if (ImGui.MenuItem("Compact", "", _viewModeSetting.CurrentValue(_configuration) == EquipmentSuggestViewMode.Compact))
-                {
-                    _viewModeSetting.UpdateFilterConfiguration(_configuration, EquipmentSuggestViewMode.Compact);
-                }
-
-                ImGui.EndMenu();
-            }
-
-            if (ImGui.BeginMenu("Windows"))
-            {
-                foreach (var window in _menuWindows.Value)
-                {
-                    if (ImGui.MenuItem(window.GenericName))
-                    {
-                        MediatorService.Publish(new OpenGenericWindowMessage(window.GetType()));
+                        if (ImGui.MenuItem("Close"))
+                        {
+                            this.IsOpen = false;
+                        }
                     }
                 }
 
-                ImGui.EndMenu();
-            }
+                using (var menu = ImRaii.Menu("Mode"))
+                {
+                    if (menu)
+                    {
+                        if (ImGui.MenuItem("Class/Job", "",
+                                _modeSetting.CurrentValue(_configuration) == EquipmentSuggestMode.Class))
+                        {
+                            _modeSetting.UpdateFilterConfiguration(_configuration, EquipmentSuggestMode.Class);
+                        }
 
-            ImGui.EndMenuBar();
+                        if (ImGui.MenuItem("Tool/Weapon", "",
+                                _modeSetting.CurrentValue(_configuration) == EquipmentSuggestMode.Tool))
+                        {
+                            _modeSetting.UpdateFilterConfiguration(_configuration, EquipmentSuggestMode.Tool);
+                        }
+                    }
+                }
+
+                using (var menu = ImRaii.Menu("View"))
+                {
+                    if (menu)
+                    {
+                        if (ImGui.MenuItem("Normal", "",
+                                _viewModeSetting.CurrentValue(_configuration) == EquipmentSuggestViewMode.Normal))
+                        {
+                            _viewModeSetting.UpdateFilterConfiguration(_configuration, EquipmentSuggestViewMode.Normal);
+                        }
+
+                        if (ImGui.MenuItem("Expanded", "",
+                                _viewModeSetting.CurrentValue(_configuration) == EquipmentSuggestViewMode.Expanded))
+                        {
+                            _viewModeSetting.UpdateFilterConfiguration(_configuration,
+                                EquipmentSuggestViewMode.Expanded);
+                        }
+
+                        if (ImGui.MenuItem("Compact", "",
+                                _viewModeSetting.CurrentValue(_configuration) == EquipmentSuggestViewMode.Compact))
+                        {
+                            _viewModeSetting.UpdateFilterConfiguration(_configuration,
+                                EquipmentSuggestViewMode.Compact);
+                        }
+                    }
+                }
+
+                using (var menu = ImRaii.Menu("Windows"))
+                {
+                    if (menu)
+                    {
+                        foreach (var window in _menuWindows.Value)
+                        {
+                            if (ImGui.MenuItem(window.GenericName))
+                            {
+                                MediatorService.Publish(new OpenGenericWindowMessage(window.GetType()));
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

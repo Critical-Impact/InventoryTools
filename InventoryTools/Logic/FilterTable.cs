@@ -188,16 +188,18 @@ namespace InventoryTools.Logic
                     }
                 }
 
-                if (ImGui.BeginPopup("ExtraFiltersPopup"))
+                using (var popup = ImRaii.Popup("ExtraFiltersPopup"))
                 {
-                    foreach (var setting in columnConfiguration.Column.FilterSettings)
+                    if (popup)
                     {
-                        if (setting.DrawFilter(columnConfiguration.FilterConfiguration, null))
+                        foreach (var setting in columnConfiguration.Column.FilterSettings)
                         {
-                            hasChanged = true;
+                            if (setting.DrawFilter(columnConfiguration.FilterConfiguration, null))
+                            {
+                                hasChanged = true;
+                            }
                         }
                     }
-                    ImGui.EndPopup();
                 }
             }
             ImGui.PopID();

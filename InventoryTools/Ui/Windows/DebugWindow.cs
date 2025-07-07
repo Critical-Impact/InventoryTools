@@ -1990,37 +1990,42 @@ namespace InventoryTools.Ui
                                   (_characterMonitor.InternalHasHousePermission || _characterMonitor.GetOwnedHouseIds().Contains(_characterMonitor.InternalHouseId) ? "Yes" : "No"));
             ImGui.NewLine();
             ImGui.TextUnformatted("Retainers:");
-            ImGui.BeginTable("retainerTable", 6);
-            ImGui.TableSetupColumn("Hire Order");
-            ImGui.TableSetupColumn("Name");
-            ImGui.TableSetupColumn("Type");
-            ImGui.TableSetupColumn("Gil");
-            ImGui.TableSetupColumn("ID");
-            ImGui.TableSetupColumn("Owner ID");
-            ImGui.TableHeadersRow();
-            var retainers = _characterMonitor.Characters;
-            foreach (var retainer in retainers)
+                var retainers = _characterMonitor.Characters;
+            using (var table = ImRaii.Table("retainerTable", 6))
             {
-                if (retainer.Value.Name != "Unhired")
+                if (table)
                 {
-                    ImGui.TableNextColumn();
-                    ImGui.TextUnformatted((retainer.Value.HireOrder + 1).ToString());
-                    ImGui.TableNextColumn();
-                    ImGui.TextUnformatted(retainer.Value.CharacterType == CharacterType.Housing
-                        ? retainer.Value.HousingName
-                        : retainer.Value.Name);
-                    ImGui.TableNextColumn();
-                    ImGui.TextUnformatted(retainer.Value.CharacterType.ToString());
-                    ImGui.TableNextColumn();
-                    ImGui.TextUnformatted(retainer.Value.Gil.ToString());
-                    ImGui.TableNextColumn();
-                    ImGui.TextUnformatted(retainer.Value.CharacterId.ToString());
-                    ImGui.TableNextColumn();
-                    ImGui.TextUnformatted(retainer.Value.OwnerId.ToString());
+                    ImGui.TableSetupColumn("Hire Order");
+                    ImGui.TableSetupColumn("Name");
+                    ImGui.TableSetupColumn("Type");
+                    ImGui.TableSetupColumn("Gil");
+                    ImGui.TableSetupColumn("ID");
+                    ImGui.TableSetupColumn("Owner ID");
+                    ImGui.TableHeadersRow();
+                    foreach (var retainer in retainers)
+                    {
+                        if (retainer.Value.Name != "Unhired")
+                        {
+                            ImGui.TableNextColumn();
+                            ImGui.TextUnformatted((retainer.Value.HireOrder + 1).ToString());
+                            ImGui.TableNextColumn();
+                            ImGui.TextUnformatted(retainer.Value.CharacterType == CharacterType.Housing
+                                ? retainer.Value.HousingName
+                                : retainer.Value.Name);
+                            ImGui.TableNextColumn();
+                            ImGui.TextUnformatted(retainer.Value.CharacterType.ToString());
+                            ImGui.TableNextColumn();
+                            ImGui.TextUnformatted(retainer.Value.Gil.ToString());
+                            ImGui.TableNextColumn();
+                            ImGui.TextUnformatted(retainer.Value.CharacterId.ToString());
+                            ImGui.TableNextColumn();
+                            ImGui.TextUnformatted(retainer.Value.OwnerId.ToString());
+                        }
+                    }
+
                 }
             }
 
-            ImGui.EndTable();
             ImGui.Separator();
             ImGui.TextUnformatted("Character Objects:");
             foreach (var retainer in retainers)

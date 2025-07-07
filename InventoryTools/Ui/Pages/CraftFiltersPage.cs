@@ -4,6 +4,7 @@ using System.Numerics;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using InventoryTools.Lists;
 using InventoryTools.Logic;
@@ -117,55 +118,57 @@ namespace InventoryTools.Ui.Pages
             if (ImGui.CollapsingHeader("Craft Lists", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
             {
                 ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(5, 5) * ImGui.GetIO().FontGlobalScale);
-                if (ImGui.BeginTable("FilterConfigTable", 3, ImGuiTableFlags.BordersV |
-                                                             ImGuiTableFlags.BordersOuterV |
-                                                             ImGuiTableFlags.BordersInnerV |
-                                                             ImGuiTableFlags.BordersH |
-                                                             ImGuiTableFlags.BordersOuterH |
-                                                             ImGuiTableFlags.BordersInnerH))
+                using (var table = ImRaii.Table("FilterConfigTable", 3, ImGuiTableFlags.BordersV |
+                                                                         ImGuiTableFlags.BordersOuterV |
+                                                                         ImGuiTableFlags.BordersInnerV |
+                                                                         ImGuiTableFlags.BordersH |
+                                                                         ImGuiTableFlags.BordersOuterH |
+                                                                         ImGuiTableFlags.BordersInnerH))
                 {
-                    ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint) 0);
-                    ImGui.TableSetupColumn("Order", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint) 1);
-                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint) 2);
-                    ImGui.TableHeadersRow();
-                    if (filterConfigurations.Count == 0)
+                    if (table)
                     {
-                        ImGui.TableNextRow();
-                        ImGui.TableNextColumn();
-                        ImGui.TextUnformatted("No craft lists created yet!");
-                        ImGui.TableNextColumn();
-                        ImGui.TableNextColumn();
-                    }
-
-                    for (var index = 0; index < filterConfigurations.Count; index++)
-                    {
-                        ImGui.TableNextRow();
-                        var filterConfiguration = filterConfigurations[index];
-                        ImGui.TableNextColumn();
-                        if (filterConfiguration.Name != "")
+                        ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)0);
+                        ImGui.TableSetupColumn("Order", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)1);
+                        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)2);
+                        ImGui.TableHeadersRow();
+                        if (filterConfigurations.Count == 0)
                         {
-                            ImGui.TextUnformatted(filterConfiguration.Name);
+                            ImGui.TableNextRow();
+                            ImGui.TableNextColumn();
+                            ImGui.TextUnformatted("No craft lists created yet!");
+                            ImGui.TableNextColumn();
+                            ImGui.TableNextColumn();
+                        }
+
+                        for (var index = 0; index < filterConfigurations.Count; index++)
+                        {
+                            ImGui.TableNextRow();
+                            var filterConfiguration = filterConfigurations[index];
+                            ImGui.TableNextColumn();
+                            if (filterConfiguration.Name != "")
+                            {
+                                ImGui.TextUnformatted(filterConfiguration.Name);
+                                ImGui.SameLine();
+                            }
+
+                            ImGui.TableNextColumn();
+                            if (ImGui.SmallButton("Up##" + index))
+                            {
+                                _listService.MoveListUp(filterConfiguration);
+                            }
+
                             ImGui.SameLine();
-                        }
+                            if (ImGui.SmallButton("Down##" + index))
+                            {
+                                _listService.MoveListDown(filterConfiguration);
+                            }
 
-                        ImGui.TableNextColumn();
-                        if (ImGui.SmallButton("Up##" + index))
-                        {
-                            _listService.MoveListUp(filterConfiguration);
-                        }
-                        ImGui.SameLine();
-                        if (ImGui.SmallButton("Down##" + index))
-                        {
-                            _listService.MoveListDown(filterConfiguration);
-                        }
+                            ImGui.TableNextColumn();
 
-                        ImGui.TableNextColumn();
-
-                        ImGui.Button("...");
-                        GetFilterMenu(filterConfiguration).Draw();
+                            ImGui.Button("...");
+                            GetFilterMenu(filterConfiguration).Draw();
+                        }
                     }
-
-                    ImGui.EndTable();
                 }
 
                 ImGui.PopStyleVar();

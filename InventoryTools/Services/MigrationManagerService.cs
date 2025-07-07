@@ -374,6 +374,19 @@ public class MigrationManagerService : IHostedService
 
             config.InternalVersion++;
         }
+
+        if (config.InternalVersion == 21)
+        {
+            foreach (var filterConfig in config.FilterConfigurations)
+            {
+                if (filterConfig.FilterType == FilterType.CraftFilter)
+                {
+                    filterConfig.CraftList.ZoneDutyPreferences.Clear();
+                }
+            }
+
+            config.InternalVersion++;
+        }
     }
 
     private string GetNewFileName(string fileName, string extension)

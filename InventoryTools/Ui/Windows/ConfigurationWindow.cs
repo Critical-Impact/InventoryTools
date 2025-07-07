@@ -460,85 +460,92 @@ namespace InventoryTools.Ui
 
         private void DrawMenuBar()
         {
-            if (ImGui.BeginMenuBar())
+            using (var menuBar = ImRaii.MenuBar())
             {
-                if (ImGui.BeginMenu("File"))
+                if (menuBar)
                 {
-                    if (ImGui.MenuItem("Report a Issue"))
+                    using (var menu = ImRaii.Menu("File"))
                     {
-                        "https://github.com/Critical-Impact/AllaganMarket".OpenBrowser();
-                    }
-                    if (ImGui.MenuItem("Changelog"))
-                    {
-                        MediatorService.Publish(new OpenGenericWindowMessage(typeof(ChangelogWindow)));
-                    }
-                    if (ImGui.MenuItem("Help"))
-                    {
-                        MediatorService.Publish(new OpenGenericWindowMessage(typeof(HelpWindow)));
-                    }
-
-                    if (ImGui.MenuItem("Enable Verbose Logging", "", this._pluginLog.MinimumLogLevel == LogEventLevel.Verbose))
-                    {
-                        if (this._pluginLog.MinimumLogLevel == LogEventLevel.Verbose)
+                        if (menu)
                         {
-                            this._pluginLog.MinimumLogLevel = LogEventLevel.Debug;
-                        }
-                        else
-                        {
-                            this._pluginLog.MinimumLogLevel = LogEventLevel.Verbose;
-                        }
-                    }
-
-                    if (ImGui.MenuItem("Ko-Fi"))
-                    {
-                        "https://ko-fi.com/critical_impact".OpenBrowser();
-                    }
-
-                    if (ImGui.MenuItem("Close"))
-                    {
-                        this.IsOpen = false;
-                    }
-
-                    ImGui.EndMenu();
-                }
-
-                if (ImGui.BeginMenu("Wizard"))
-                {
-                    var hasNewFeatures = this._configurationWizardService.HasNewFeatures;
-                    using var disabled = ImRaii.Disabled(!hasNewFeatures);
-                    if (ImGui.MenuItem("Configure New Features"))
-                    {
-                        MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWizard)));
-                    }
-
-                    disabled.Dispose();
-
-                    if (ImGui.MenuItem("Reconfigure All Features"))
-                    {
-                        this._configurationWizardService.ClearFeaturesSeen();
-                        MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWizard)));
-                    }
-
-                    ImGui.EndMenu();
-                }
-
-                if (ImGui.BeginMenu("Windows"))
-                {
-                    if (_menuWindows != null)
-                    {
-                        foreach (var window in _menuWindows)
-                        {
-                            if (ImGui.MenuItem(window.GenericName))
+                            if (ImGui.MenuItem("Report a Issue"))
                             {
-                                MediatorService.Publish(new OpenGenericWindowMessage(window.GetType()));
+                                "https://github.com/Critical-Impact/AllaganMarket".OpenBrowser();
+                            }
+
+                            if (ImGui.MenuItem("Changelog"))
+                            {
+                                MediatorService.Publish(new OpenGenericWindowMessage(typeof(ChangelogWindow)));
+                            }
+
+                            if (ImGui.MenuItem("Help"))
+                            {
+                                MediatorService.Publish(new OpenGenericWindowMessage(typeof(HelpWindow)));
+                            }
+
+                            if (ImGui.MenuItem("Enable Verbose Logging", "",
+                                    this._pluginLog.MinimumLogLevel == LogEventLevel.Verbose))
+                            {
+                                if (this._pluginLog.MinimumLogLevel == LogEventLevel.Verbose)
+                                {
+                                    this._pluginLog.MinimumLogLevel = LogEventLevel.Debug;
+                                }
+                                else
+                                {
+                                    this._pluginLog.MinimumLogLevel = LogEventLevel.Verbose;
+                                }
+                            }
+
+                            if (ImGui.MenuItem("Ko-Fi"))
+                            {
+                                "https://ko-fi.com/critical_impact".OpenBrowser();
+                            }
+
+                            if (ImGui.MenuItem("Close"))
+                            {
+                                this.IsOpen = false;
                             }
                         }
                     }
 
-                    ImGui.EndMenu();
-                }
+                    using (var menu = ImRaii.Menu("Wizard"))
+                    {
+                        if (menu)
+                        {
+                            var hasNewFeatures = this._configurationWizardService.HasNewFeatures;
+                            using var disabled = ImRaii.Disabled(!hasNewFeatures);
+                            if (ImGui.MenuItem("Configure New Features"))
+                            {
+                                MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWizard)));
+                            }
 
-                ImGui.EndMenuBar();
+                            disabled.Dispose();
+
+                            if (ImGui.MenuItem("Reconfigure All Features"))
+                            {
+                                this._configurationWizardService.ClearFeaturesSeen();
+                                MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWizard)));
+                            }
+                        }
+                    }
+
+                    using (var menu = ImRaii.Menu("Windows"))
+                    {
+                        if (menu)
+                        {
+                            if (_menuWindows != null)
+                            {
+                                foreach (var window in _menuWindows)
+                                {
+                                    if (ImGui.MenuItem(window.GenericName))
+                                    {
+                                        MediatorService.Publish(new OpenGenericWindowMessage(window.GetType()));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 

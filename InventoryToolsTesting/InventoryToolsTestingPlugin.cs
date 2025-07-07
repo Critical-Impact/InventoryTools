@@ -37,6 +37,8 @@ namespace InventoryToolsTesting;
 
 public class InventoryToolsTestingPlugin : InventoryToolsPlugin
 {
+    private Logger seriLog;
+
     public InventoryToolsTestingPlugin(IDalamudPluginInterface pluginInterface, IPluginLog pluginLog,
         IAddonLifecycle addonLifecycle, IChatGui chatGui, IClientState clientState, ICommandManager commandManager,
         ICondition condition, IDataManager dataManager, IFramework framework, IGameGui gameGui,
@@ -54,20 +56,34 @@ public class InventoryToolsTestingPlugin : InventoryToolsPlugin
         replacements.Add(typeof(WotsitIpc),typeof(MockWotsitIpc));
         replacements.Add(typeof(CraftMonitor),typeof(MockHostedCraftMonitor));
         replacements.Add(typeof(OdrScanner),typeof(MockOdrScanner));
+        replacements.Add(typeof(SimpleAcquisitionTrackerService),typeof(MockAcquisitionTrackerService));
+        replacements.Add(typeof(Chat2Ipc),typeof(MockChat2Ipc));
+        replacements.Add(typeof(AddonService),typeof(MockAddonService));
     }
 
     public override void PreBuild(IHostBuilder hostBuilder)
     {
         base.PreBuild(hostBuilder);
 
+        this.seriLog = new LoggerConfiguration()
+            .WriteTo.Console(standardErrorFromLevel: LogEventLevel.Verbose)
+            .CreateLogger();
+
         hostBuilder.ConfigureContainer<ContainerBuilder>(containerBuilder =>
             {
+                containerBuilder.Register<UniversalisUserAgent>(c =>
+                {
+                    var pluginInterface = c.Resolve<IDalamudPluginInterface>();
+                    return new UniversalisUserAgent("AllaganTools", "TEST");
+                });
+
                 containerBuilder.RegisterType<TestInventoryMonitor>().AsSelf().As<IInventoryMonitor>().SingleInstance();
                 containerBuilder.RegisterType<TestMarketCache>().As<IMarketCache>().SingleInstance();
                 containerBuilder.RegisterType<MockSeTime>().As<ISeTime>().SingleInstance();
                 containerBuilder.RegisterType<MockWotsitIpc>().As<IWotsitIpc>().SingleInstance();
                 containerBuilder.RegisterType<MockHostedCraftMonitor>().As<ICraftMonitor>().SingleInstance();
                 containerBuilder.RegisterType<MockOdrScanner>().As<IOdrScanner>().SingleInstance();
+                containerBuilder.RegisterInstance(seriLog).As<ILogger>().SingleInstance();
             }
         );
     }

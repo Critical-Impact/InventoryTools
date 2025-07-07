@@ -138,10 +138,14 @@ namespace InventoryTools.Ui
                                 ImGui.OpenPopup("RightClickUse" + drop.Item.RowId);
                             }
 
-                            if (ImGui.BeginPopup("RightClickUse" + drop.Item.RowId))
+                            using (var popup = ImRaii.Popup("RightClickUse"+ drop.Item.RowId))
                             {
-                                MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(_itemSheet.GetRow(drop.Item.RowId)));
-                                ImGui.EndPopup();
+                                if (popup)
+                                {
+                                    MediatorService.Publish(
+                                        ImGuiService.ImGuiMenuService.DrawRightClickPopup(
+                                            _itemSheet.GetRow(drop.Item.RowId)));
+                                }
                             }
 
                             float lastButtonX2 = ImGui.GetItemRectMax().X;

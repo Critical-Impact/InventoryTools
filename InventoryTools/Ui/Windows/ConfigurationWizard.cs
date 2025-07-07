@@ -220,20 +220,14 @@ public class ConfigurationWizard : GenericWindow
                         else
                         {
                             var canGoPrevious = CanGoPrevious;
-                            if (!canGoPrevious)
-                            {
-                                ImGui.BeginDisabled();
-                            }
+                            using var disabled = ImRaii.Disabled(!canGoPrevious);
 
                             if (ImGui.Button("Previous"))
                             {
                                 PreviousStep();
                             }
 
-                            if (!canGoPrevious)
-                            {
-                                ImGui.EndDisabled();
-                            }
+                            disabled.Dispose();
 
                             ImGui.SameLine();
                             var canGoNext = CanGoNext;

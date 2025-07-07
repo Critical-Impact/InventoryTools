@@ -212,18 +212,22 @@ public class ImGuiService : AllaganLib.Interface.Services.ImGuiService
         ImGui.TextDisabled("(?)");
         if (ImGui.IsItemHovered())
         {
-            ImGui.BeginTooltip();
-            ImGui.PushTextWrapPos(ImGui.GetFontSize() * 35.0f);
-            ImGui.TextUnformatted(helpText);
-            ImGui.PopTextWrapPos();
-            if (imagePath != null)
+            using (var tooltip = ImRaii.Tooltip())
             {
-                var sourceIcon = LoadImage(imagePath);
-                ImGui.Image(sourceIcon.GetWrapOrEmpty().ImGuiHandle, imageSize ??
-                                                    new Vector2(200, 200) * ImGui.GetIO().FontGlobalScale);
+                if (tooltip)
+                {
+                    ImGui.PushTextWrapPos(ImGui.GetFontSize() * 35.0f);
+                    ImGui.TextUnformatted(helpText);
+                    ImGui.PopTextWrapPos();
+                    if (imagePath != null)
+                    {
+                        var sourceIcon = LoadImage(imagePath);
+                        ImGui.Image(sourceIcon.GetWrapOrEmpty().ImGuiHandle, imageSize ??
+                                                                             new Vector2(200, 200) *
+                                                                             ImGui.GetIO().FontGlobalScale);
+                    }
+                }
             }
-
-            ImGui.EndTooltip();
         }
     }
 
@@ -233,29 +237,33 @@ public class ImGuiService : AllaganLib.Interface.Services.ImGuiService
         ImGui.TextDisabled("(?)");
         if (ImGui.IsItemHovered())
         {
-            ImGui.BeginTooltip();
-            ImGui.PushTextWrapPos(ImGui.GetFontSize() * 35.0f);
-            foreach (var line in helpText)
+            using (var tooltip = ImRaii.Tooltip())
             {
-                if (line == "")
+                if (tooltip)
                 {
-                    ImGui.Separator();
-                }
-                else
-                {
-                    ImGui.TextUnformatted(line);
+                    ImGui.PushTextWrapPos(ImGui.GetFontSize() * 35.0f);
+                    foreach (var line in helpText)
+                    {
+                        if (line == "")
+                        {
+                            ImGui.Separator();
+                        }
+                        else
+                        {
+                            ImGui.TextUnformatted(line);
+                        }
+                    }
+
+                    ImGui.PopTextWrapPos();
+                    if (imagePath != null)
+                    {
+                        var sourceIcon = LoadImage(imagePath);
+                        ImGui.Image(sourceIcon.GetWrapOrEmpty().ImGuiHandle, imageSize ??
+                                                                             new Vector2(200, 200) *
+                                                                             ImGui.GetIO().FontGlobalScale);
+                    }
                 }
             }
-
-            ImGui.PopTextWrapPos();
-            if (imagePath != null)
-            {
-                var sourceIcon = LoadImage(imagePath);
-                ImGui.Image(sourceIcon.GetWrapOrEmpty().ImGuiHandle, imageSize ??
-                                                    new Vector2(200, 200) * ImGui.GetIO().FontGlobalScale);
-            }
-
-            ImGui.EndTooltip();
         }
     }
 

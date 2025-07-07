@@ -181,7 +181,7 @@ namespace InventoryTools.Logic.Columns
                         foreach (var ingredient in searchResult.CraftItem.Recipe.IngredientCounts)
                         {
                             var item = _itemSheet.GetRow(ingredient.Key);
-                            var quantityRequired = (ingredient.Value * searchResult.CraftItem.QuantityNeededPreUpdate) / searchResult.CraftItem.Yield;
+                            var quantityRequired = ingredient.Value * (uint)Math.Ceiling((double)searchResult.CraftItem.QuantityNeededPreUpdate / searchResult.CraftItem.Yield);
                             ImGui.TextUnformatted(item.NameString + ": " + quantityRequired);
                         }
                     }

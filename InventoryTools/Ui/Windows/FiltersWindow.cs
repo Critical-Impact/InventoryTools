@@ -540,389 +540,474 @@ namespace InventoryTools.Ui
 
         private void DrawMenuBar()
         {
-            if (ImGui.BeginMenuBar())
+            using (var menuBar = ImRaii.MenuBar())
             {
-                if (ImGui.BeginMenu("File"))
+                if (menuBar)
                 {
-                    if (ImGui.MenuItem("Configuration"))
+                    using (var menu = ImRaii.Menu("File"))
                     {
-                        this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
-                    }
-                    if (ImGui.MenuItem("Changelog"))
-                    {
-                        this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(ChangelogWindow)));
-                    }
-                    if (ImGui.MenuItem("Help"))
-                    {
-                        this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(HelpWindow)));
-                    }
-                    if (ImGui.MenuItem("Enable Verbose Logging", "", this._pluginLog.MinimumLogLevel == LogEventLevel.Verbose))
-                    {
-                        if (this._pluginLog.MinimumLogLevel == LogEventLevel.Verbose)
+                        if (menu)
                         {
-                            this._pluginLog.MinimumLogLevel = LogEventLevel.Debug;
-                        }
-                        else
-                        {
-                            this._pluginLog.MinimumLogLevel = LogEventLevel.Verbose;
-                        }
-                    }
-
-                    if (ImGui.MenuItem("Report a Issue"))
-                    {
-                        "https://github.com/Critical-Impact/InventoryTools".OpenBrowser();
-                    }
-
-                    if (ImGui.MenuItem("Ko-Fi"))
-                    {
-                        "https://ko-fi.com/critical_impact".OpenBrowser();
-                    }
-
-                    if (ImGui.MenuItem("Close"))
-                    {
-                        this.IsOpen = false;
-                    }
-
-                    ImGui.EndMenu();
-                }
-
-                if (ImGui.BeginMenu("Edit") && this.SelectedConfiguration != null)
-                {
-                    if (ImGui.MenuItem("Clear Search"))
-                    {
-                        _tableService.GetListTable(SelectedConfiguration).ClearFilters();
-                    }
-
-                    ImGui.Separator();
-
-                    if (ImGui.BeginMenu("Copy List Contents"))
-                    {
-                        if (ImGui.MenuItem("Teamcraft Format"))
-                        {
-                            var searchResults = _tableService.GetListTable(SelectedConfiguration).SearchResults;
-                            var tcString = _importExportService.ToTCString(searchResults);
-                            _clipboardService.CopyToClipboard(tcString);
-                            _chatUtilities.Print("The list's contents were copied to your clipboard.");
-                        }
-                        if (ImGui.MenuItem("JSON Format"))
-                        {
-                            var itemTable = _tableService.GetListTable(SelectedConfiguration);
-                            _clipboardService.CopyToClipboard(itemTable.ExportToJson());
-                        }
-                        ImGui.EndMenu();
-                    }
-
-                    if (SelectedConfiguration.FilterType == FilterType.CuratedList && ImGui.MenuItem("Paste List Contents"))
-                    {
-                        var importedList = _importExportService.FromTCString(_clipboardService.PasteFromClipboard(), false);
-                        if (importedList == null)
-                        {
-                            _chatUtilities.PrintError("The contents of your clipboard could not be parsed.");
-                        }
-                        else
-                        {
-                            _chatUtilities.Print("The contents of your clipboard were imported.");
-                            SelectedConfiguration.AddItemsToList(importedList);
-                        }
-                    }
-                    if (SelectedConfiguration.FilterType == FilterType.CuratedList && ImGui.MenuItem("Clear List"))
-                    {
-                        _popupService.AddPopup(new ConfirmPopup(GetType(), "craftListDelete",
-                            "Are you sure you want to clear this curated list?",
-                            result =>
+                            if (ImGui.MenuItem("Configuration"))
                             {
-                                if (result)
-                                {
-                                    SelectedConfiguration.ClearCuratedItems();
-                                }
-                            }));
-                    }
-                    ImGui.Separator();
-                    if (ImGui.BeginMenu("Add to Craft List"))
-                    {
-                        var craftLists = _listService.Lists
-                            .Where(c => c.FilterType == FilterType.CraftFilter && c.CraftListDefault == false)
-                            .OrderBy(c => c.Order)
-                            .ToList();
-                        foreach (var craft in craftLists)
-                        {
-                            if (ImGui.MenuItem(craft.Name))
-                            {
-                                var searchResults = _tableService.GetListTable(SelectedConfiguration).SearchResults;
-                                foreach (var searchResult in searchResults)
-                                {
-                                    craft.CraftList.AddCraftItem(searchResult.ItemId, searchResult.Quantity,
-                                        searchResult.Flags);
-                                }
-                                MediatorService.Publish(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                                MediatorService.Publish(new FocusListMessage(typeof(CraftsWindow), craft));
+                                this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
                             }
-                        }
-                        if (craftLists.Count != 0)
-                        {
-                            ImGui.Separator();
-                        }
 
-                        if (ImGui.MenuItem("New Craft List"))
-                        {
-                            _popupService.AddPopup(new NamePopup(typeof(FiltersWindow), "newCraftList", "New Craft List",
-                                result =>
-                                {
-                                    if (result.Item1)
-                                    {
-                                        var craftList = _listService.AddNewCraftList(result.Item2);
-                                        var searchResults = _tableService.GetListTable(SelectedConfiguration).SearchResults;
-                                        foreach (var searchResult in searchResults)
-                                        {
-                                            craftList.CraftList.AddCraftItem(searchResult.ItemId, searchResult.Quantity,
-                                                searchResult.Flags);
-                                        }
-                                        MediatorService.Publish(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                                        this.MediatorService.Publish(new FocusListMessage(typeof(CraftsWindow), craftList));
-                                    }
-                                }));
-                        }
-
-                        if (ImGui.MenuItem("New Craft List (Ephemeral)"))
-                        {
-                            _popupService.AddPopup(new NamePopup(typeof(FiltersWindow), "newCraftList", "New Craft List",
-                                result =>
-                                {
-                                    if (result.Item1)
-                                    {
-                                        var craftList = _listService.AddNewCraftList(result.Item2, true);
-                                        var searchResults = _tableService.GetListTable(SelectedConfiguration).SearchResults;
-                                        foreach (var searchResult in searchResults)
-                                        {
-                                            craftList.CraftList.AddCraftItem(searchResult.ItemId, searchResult.Quantity,
-                                                searchResult.Flags);
-                                        }
-                                        MediatorService.Publish(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                                        this.MediatorService.Publish(new FocusListMessage(typeof(CraftsWindow), craftList));
-                                    }
-                                }));
-                        }
-                        ImGui.EndMenu();
-                    }
-                    if (ImGui.BeginMenu("Add to Curated List"))
-                    {
-                        var curatedLists = _listService.Lists
-                            .Where(c => c.FilterType == FilterType.CuratedList)
-                            .OrderBy(c => c.Order)
-                            .ToList();
-                        foreach (var curatedList in curatedLists)
-                        {
-                            if (ImGui.MenuItem(curatedList.Name))
+                            if (ImGui.MenuItem("Changelog"))
                             {
-                                var searchResults = _tableService.GetListTable(SelectedConfiguration).SearchResults;
-                                foreach (var searchResult in searchResults)
-                                {
-                                    curatedList.AddCuratedItem(new CuratedItem(searchResult.ItemId, searchResult.Quantity,
-                                        searchResult.Flags));
-                                }
+                                this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(ChangelogWindow)));
                             }
-                        }
-                        if (curatedLists.Count != 0)
-                        {
-                            ImGui.Separator();
-                        }
 
-                        if (ImGui.MenuItem("New Curated List"))
-                        {
-                            _popupService.AddPopup(new NamePopup(typeof(FiltersWindow), "newCuratedList", "New Curated List",
-                                result =>
-                                {
-                                    if (result.Item1)
-                                    {
-                                        var curatedList = _listService.AddNewCuratedList(result.Item2);
-                                        var searchResults = _tableService.GetListTable(SelectedConfiguration).SearchResults;
-                                        foreach (var searchResult in searchResults)
-                                        {
-                                            curatedList.AddCuratedItem(new CuratedItem(searchResult.ItemId, searchResult.Quantity,
-                                                searchResult.Flags));
-                                        }
-                                        this.MediatorService.Publish(new FocusListMessage(typeof(FiltersWindow), curatedList));
-                                        curatedList.NeedsRefresh = true;
-                                    }
-                                }));
-                        }
-                        ImGui.EndMenu();
-                    }
-
-                    ImGui.EndMenu();
-                }
-
-
-                if (ImGui.BeginMenu("View"))
-                {
-                    if (ImGui.MenuItem("Tabs", "", _layoutSetting.CurrentValue(_configuration) == WindowLayout.Tabs))
-                    {
-                        _layoutSetting.UpdateFilterConfiguration(_configuration, WindowLayout.Tabs);
-                    }
-                    if (ImGui.MenuItem("Sidebar", "", _layoutSetting.CurrentValue(_configuration) == WindowLayout.Sidebar))
-                    {
-                        _layoutSetting.UpdateFilterConfiguration(_configuration, WindowLayout.Sidebar);
-                    }
-                    if (ImGui.MenuItem("Single", "", _layoutSetting.CurrentValue(_configuration) == WindowLayout.Single))
-                    {
-                        _layoutSetting.UpdateFilterConfiguration(_configuration, WindowLayout.Single);
-                    }
-
-                    ImGui.EndMenu();
-                }
-
-                if (ImGui.MenuItem("Export"))
-                {
-                    if (SelectedConfiguration != null)
-                    {
-                        var itemTable = _tableService.GetListTable(SelectedConfiguration);
-                        _fileDialogManager.SaveFileDialog("Save to csv", "*.csv", "export.csv", ".csv",
-                            (b, s) => { SaveCallback(itemTable, b, s); }, null, true);
-                    }
-                }
-
-                if (ImGui.BeginMenu("Market"))
-                {
-                    if (ImGui.MenuItem("Refresh All Prices"))
-                    {
-                        var activeCharacter = _characterMonitor.ActiveCharacter;
-                        if (activeCharacter != null && SelectedConfiguration != null)
-                        {
-                            var itemTable = _tableService.GetListTable(SelectedConfiguration);
-                            foreach (var item in itemTable.RenderSearchResults)
+                            if (ImGui.MenuItem("Help"))
                             {
-                                _universalis.QueuePriceCheck(item.Item.RowId, activeCharacter.WorldId);
+                                this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(HelpWindow)));
                             }
-                        }
-                    }
-                    ImGui.EndMenu();
-                }
 
-                if (ImGui.BeginMenu("Lists"))
-                {
-                    if (ImGui.BeginMenu("Add"))
-                    {
-                        if (ImGui.MenuItem("Search List"))
-                        {
-                            _popupService.AddPopup(new NamePopup(GetType(), "addSearchList", "", result =>
+                            if (ImGui.MenuItem("Enable Verbose Logging", "",
+                                    this._pluginLog.MinimumLogLevel == LogEventLevel.Verbose))
                             {
-                                if (result.Item1)
+                                if (this._pluginLog.MinimumLogLevel == LogEventLevel.Verbose)
                                 {
-                                    AddSearchFilter(result.Item2, "");
-                                }
-                            }));
-                        }
-
-                        if (ImGui.MenuItem("Sort List"))
-                        {
-                            _popupService.AddPopup(new NamePopup(GetType(), "addSortList", "", result =>
-                            {
-                                if (result.Item1)
-                                {
-                                    AddSortFilter(result.Item2, "");
-                                }
-                            }));
-                        }
-
-                        if (ImGui.MenuItem("Game Item List"))
-                        {
-                            _popupService.AddPopup(new NamePopup(GetType(), "addGameItemList", "", result =>
-                            {
-                                if (result.Item1)
-                                {
-                                    AddGameItemFilter(result.Item2, "");
-                                }
-                            }));
-                        }
-
-                        if (ImGui.MenuItem("Curated List"))
-                        {
-                            _popupService.AddPopup(new NamePopup(GetType(), "addCuratedList", "", result =>
-                            {
-                                if (result.Item1)
-                                {
-                                    AddCuratedFilter(result.Item2, "");
-                                }
-                            }));
-                        }
-
-                        if (ImGui.MenuItem("History List"))
-                        {
-                            _popupService.AddPopup(new NamePopup(GetType(), "addHistoryList", "", result =>
-                            {
-                                if (result.Item1)
-                                {
-                                    AddHistoryFilter(result.Item2, "");
-                                }
-                            }));
-                        }
-                        ImGui.EndMenu();
-                    }
-
-                    ImGui.NewLine();
-
-                    var windowGroups = _listService.Lists.GroupBy(c => c.FilterType).OrderBySequence([FilterType.SearchFilter, FilterType.SortingFilter, FilterType.GameItemFilter, FilterType.HistoryFilter, FilterType.CuratedList, FilterType.CraftFilter], grouping => grouping.Key).ToList();
-                    for (var index = 0; index < windowGroups.Count; index++)
-                    {
-                        var windowGroup = windowGroups[index];
-                        ImGui.Text(windowGroup.Key.FormattedName());
-                        ImGui.Separator();
-                        foreach (var window in windowGroup)
-                        {
-                            if (ImGui.MenuItem(window.Name, "", SelectedConfiguration == window))
-                            {
-                                if (window.FilterType == FilterType.CraftFilter)
-                                {
-                                    if (_keyState[VirtualKey.CONTROL])
-                                    {
-                                        this.MediatorService.Publish(new OpenStringWindowMessage(typeof(FilterWindow), window.Key));
-                                    }
-                                    else
-                                    {
-                                        MediatorService.Publish(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                                        MediatorService.Publish(new FocusListMessage(typeof(CraftsWindow), window));
-                                    }
+                                    this._pluginLog.MinimumLogLevel = LogEventLevel.Debug;
                                 }
                                 else
                                 {
-                                    if (_keyState[VirtualKey.CONTROL])
+                                    this._pluginLog.MinimumLogLevel = LogEventLevel.Verbose;
+                                }
+                            }
+
+                            if (ImGui.MenuItem("Report a Issue"))
+                            {
+                                "https://github.com/Critical-Impact/InventoryTools".OpenBrowser();
+                            }
+
+                            if (ImGui.MenuItem("Ko-Fi"))
+                            {
+                                "https://ko-fi.com/critical_impact".OpenBrowser();
+                            }
+
+                            if (ImGui.MenuItem("Close"))
+                            {
+                                this.IsOpen = false;
+                            }
+                        }
+                    }
+
+                    using (var menu = ImRaii.Menu("Edit"))
+                    {
+                        if (menu)
+                        {
+                            if (this.SelectedConfiguration != null)
+                            {
+                                if (ImGui.MenuItem("Clear Search"))
+                                {
+                                    _tableService.GetListTable(SelectedConfiguration).ClearFilters();
+                                }
+
+                                ImGui.Separator();
+
+                                using (var copyListContentsMenu = ImRaii.Menu("Copy List Contents"))
+                                {
+                                    if (copyListContentsMenu)
                                     {
-                                        this.MediatorService.Publish(new OpenStringWindowMessage(typeof(FilterWindow), window.Key));
+                                        if (ImGui.MenuItem("Teamcraft Format"))
+                                        {
+                                            var searchResults = _tableService.GetListTable(SelectedConfiguration)
+                                                .SearchResults;
+                                            var tcString = _importExportService.ToTCString(searchResults);
+                                            _clipboardService.CopyToClipboard(tcString);
+                                            _chatUtilities.Print("The list's contents were copied to your clipboard.");
+                                        }
+
+                                        if (ImGui.MenuItem("JSON Format"))
+                                        {
+                                            var itemTable = _tableService.GetListTable(SelectedConfiguration);
+                                            _clipboardService.CopyToClipboard(itemTable.ExportToJson());
+                                        }
+                                    }
+                                }
+
+                                if (SelectedConfiguration.FilterType == FilterType.CuratedList &&
+                                    ImGui.MenuItem("Paste List Contents"))
+                                {
+                                    var importedList =
+                                        _importExportService.FromTCString(_clipboardService.PasteFromClipboard(),
+                                            false);
+                                    if (importedList == null)
+                                    {
+                                        _chatUtilities.PrintError(
+                                            "The contents of your clipboard could not be parsed.");
                                     }
                                     else
                                     {
-                                        FocusFilter(window);
+                                        _chatUtilities.Print("The contents of your clipboard were imported.");
+                                        SelectedConfiguration.AddItemsToList(importedList);
+                                    }
+                                }
+
+                                if (SelectedConfiguration.FilterType == FilterType.CuratedList &&
+                                    ImGui.MenuItem("Clear List"))
+                                {
+                                    _popupService.AddPopup(new ConfirmPopup(GetType(), "craftListDelete",
+                                        "Are you sure you want to clear this curated list?",
+                                        result =>
+                                        {
+                                            if (result)
+                                            {
+                                                SelectedConfiguration.ClearCuratedItems();
+                                            }
+                                        }));
+                                }
+
+                                ImGui.Separator();
+                                using (var addCraftListMenu = ImRaii.Menu("Add to Craft List"))
+                                {
+                                    if (addCraftListMenu)
+                                    {
+                                        var craftLists = _listService.Lists
+                                            .Where(c => c.FilterType == FilterType.CraftFilter &&
+                                                        c.CraftListDefault == false)
+                                            .OrderBy(c => c.Order)
+                                            .ToList();
+                                        foreach (var craft in craftLists)
+                                        {
+                                            if (ImGui.MenuItem(craft.Name))
+                                            {
+                                                var searchResults = _tableService.GetListTable(SelectedConfiguration)
+                                                    .SearchResults;
+                                                foreach (var searchResult in searchResults)
+                                                {
+                                                    craft.CraftList.AddCraftItem(searchResult.ItemId,
+                                                        searchResult.Quantity,
+                                                        searchResult.Flags);
+                                                }
+
+                                                MediatorService.Publish(
+                                                    new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                                                MediatorService.Publish(new FocusListMessage(typeof(CraftsWindow),
+                                                    craft));
+                                            }
+                                        }
+
+                                        if (craftLists.Count != 0)
+                                        {
+                                            ImGui.Separator();
+                                        }
+
+                                        if (ImGui.MenuItem("New Craft List"))
+                                        {
+                                            _popupService.AddPopup(new NamePopup(typeof(FiltersWindow), "newCraftList",
+                                                "New Craft List",
+                                                result =>
+                                                {
+                                                    if (result.Item1)
+                                                    {
+                                                        var craftList = _listService.AddNewCraftList(result.Item2);
+                                                        var searchResults = _tableService
+                                                            .GetListTable(SelectedConfiguration)
+                                                            .SearchResults;
+                                                        foreach (var searchResult in searchResults)
+                                                        {
+                                                            craftList.CraftList.AddCraftItem(searchResult.ItemId,
+                                                                searchResult.Quantity,
+                                                                searchResult.Flags);
+                                                        }
+
+                                                        MediatorService.Publish(
+                                                            new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                                                        this.MediatorService.Publish(new FocusListMessage(
+                                                            typeof(CraftsWindow),
+                                                            craftList));
+                                                    }
+                                                }));
+                                        }
+
+                                        if (ImGui.MenuItem("New Craft List (Ephemeral)"))
+                                        {
+                                            _popupService.AddPopup(new NamePopup(typeof(FiltersWindow), "newCraftList",
+                                                "New Craft List",
+                                                result =>
+                                                {
+                                                    if (result.Item1)
+                                                    {
+                                                        var craftList =
+                                                            _listService.AddNewCraftList(result.Item2, true);
+                                                        var searchResults = _tableService
+                                                            .GetListTable(SelectedConfiguration)
+                                                            .SearchResults;
+                                                        foreach (var searchResult in searchResults)
+                                                        {
+                                                            craftList.CraftList.AddCraftItem(searchResult.ItemId,
+                                                                searchResult.Quantity,
+                                                                searchResult.Flags);
+                                                        }
+
+                                                        MediatorService.Publish(
+                                                            new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                                                        this.MediatorService.Publish(new FocusListMessage(
+                                                            typeof(CraftsWindow),
+                                                            craftList));
+                                                    }
+                                                }));
+                                        }
+                                    }
+                                }
+
+                                using (var curatedListMenu = ImRaii.Menu("Add to Curated List"))
+                                {
+                                    if (curatedListMenu)
+                                    {
+                                        var curatedLists = _listService.Lists
+                                            .Where(c => c.FilterType == FilterType.CuratedList)
+                                            .OrderBy(c => c.Order)
+                                            .ToList();
+                                        foreach (var curatedList in curatedLists)
+                                        {
+                                            if (ImGui.MenuItem(curatedList.Name))
+                                            {
+                                                var searchResults = _tableService.GetListTable(SelectedConfiguration)
+                                                    .SearchResults;
+                                                foreach (var searchResult in searchResults)
+                                                {
+                                                    curatedList.AddCuratedItem(new CuratedItem(searchResult.ItemId,
+                                                        searchResult.Quantity,
+                                                        searchResult.Flags));
+                                                }
+                                            }
+                                        }
+
+                                        if (curatedLists.Count != 0)
+                                        {
+                                            ImGui.Separator();
+                                        }
+
+                                        if (ImGui.MenuItem("New Curated List"))
+                                        {
+                                            _popupService.AddPopup(new NamePopup(typeof(FiltersWindow),
+                                                "newCuratedList",
+                                                "New Curated List",
+                                                result =>
+                                                {
+                                                    if (result.Item1)
+                                                    {
+                                                        var curatedList = _listService.AddNewCuratedList(result.Item2);
+                                                        var searchResults = _tableService
+                                                            .GetListTable(SelectedConfiguration)
+                                                            .SearchResults;
+                                                        foreach (var searchResult in searchResults)
+                                                        {
+                                                            curatedList.AddCuratedItem(new CuratedItem(
+                                                                searchResult.ItemId,
+                                                                searchResult.Quantity,
+                                                                searchResult.Flags));
+                                                        }
+
+                                                        this.MediatorService.Publish(new FocusListMessage(
+                                                            typeof(FiltersWindow),
+                                                            curatedList));
+                                                        curatedList.NeedsRefresh = true;
+                                                    }
+                                                }));
+                                        }
                                     }
                                 }
                             }
-                            ImGuiUtil.HoverTooltip("[CTRL] to open in a new window.");
-                        }
-
-                        if (index != windowGroups.Count - 1)
-                        {
-                            ImGui.NewLine();
                         }
                     }
-                    ImGui.EndMenu();
-                }
 
-                if (ImGui.BeginMenu("Windows"))
-                {
-                    if (_menuWindows != null)
+
+                    using (var menu = ImRaii.Menu("View"))
                     {
-                        foreach (var window in _menuWindows)
+                        if (menu)
                         {
-                            if (ImGui.MenuItem(window.GenericName))
+                            if (ImGui.MenuItem("Tabs", "",
+                                    _layoutSetting.CurrentValue(_configuration) == WindowLayout.Tabs))
                             {
-                                this.MediatorService.Publish(new OpenGenericWindowMessage(window.GetType()));
+                                _layoutSetting.UpdateFilterConfiguration(_configuration, WindowLayout.Tabs);
+                            }
+
+                            if (ImGui.MenuItem("Sidebar", "",
+                                    _layoutSetting.CurrentValue(_configuration) == WindowLayout.Sidebar))
+                            {
+                                _layoutSetting.UpdateFilterConfiguration(_configuration, WindowLayout.Sidebar);
+                            }
+
+                            if (ImGui.MenuItem("Single", "",
+                                    _layoutSetting.CurrentValue(_configuration) == WindowLayout.Single))
+                            {
+                                _layoutSetting.UpdateFilterConfiguration(_configuration, WindowLayout.Single);
                             }
                         }
                     }
 
-                    ImGui.EndMenu();
-                }
+                    if (ImGui.MenuItem("Export"))
+                    {
+                        if (SelectedConfiguration != null)
+                        {
+                            var itemTable = _tableService.GetListTable(SelectedConfiguration);
+                            _fileDialogManager.SaveFileDialog("Save to csv", "*.csv", "export.csv", ".csv",
+                                (b, s) => { SaveCallback(itemTable, b, s); }, null, true);
+                        }
+                    }
 
-                ImGui.EndMenuBar();
+                    using (var menu = ImRaii.Menu("Market"))
+                    {
+                        if (menu)
+                        {
+                            if (ImGui.MenuItem("Refresh All Prices"))
+                            {
+                                var activeCharacter = _characterMonitor.ActiveCharacter;
+                                if (activeCharacter != null && SelectedConfiguration != null)
+                                {
+                                    var itemTable = _tableService.GetListTable(SelectedConfiguration);
+                                    foreach (var item in itemTable.RenderSearchResults)
+                                    {
+                                        _universalis.QueuePriceCheck(item.Item.RowId, activeCharacter.WorldId);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    using (var menu = ImRaii.Menu("Lists"))
+                    {
+                        if (menu)
+                        {
+                            using (var addMenu = ImRaii.Menu("Add"))
+                            {
+                                if (addMenu)
+                                {
+                                    if (ImGui.MenuItem("Search List"))
+                                    {
+                                        _popupService.AddPopup(new NamePopup(GetType(), "addSearchList", "", result =>
+                                        {
+                                            if (result.Item1)
+                                            {
+                                                AddSearchFilter(result.Item2, "");
+                                            }
+                                        }));
+                                    }
+
+                                    if (ImGui.MenuItem("Sort List"))
+                                    {
+                                        _popupService.AddPopup(new NamePopup(GetType(), "addSortList", "", result =>
+                                        {
+                                            if (result.Item1)
+                                            {
+                                                AddSortFilter(result.Item2, "");
+                                            }
+                                        }));
+                                    }
+
+                                    if (ImGui.MenuItem("Game Item List"))
+                                    {
+                                        _popupService.AddPopup(new NamePopup(GetType(), "addGameItemList", "", result =>
+                                        {
+                                            if (result.Item1)
+                                            {
+                                                AddGameItemFilter(result.Item2, "");
+                                            }
+                                        }));
+                                    }
+
+                                    if (ImGui.MenuItem("Curated List"))
+                                    {
+                                        _popupService.AddPopup(new NamePopup(GetType(), "addCuratedList", "", result =>
+                                        {
+                                            if (result.Item1)
+                                            {
+                                                AddCuratedFilter(result.Item2, "");
+                                            }
+                                        }));
+                                    }
+
+                                    if (ImGui.MenuItem("History List"))
+                                    {
+                                        _popupService.AddPopup(new NamePopup(GetType(), "addHistoryList", "", result =>
+                                        {
+                                            if (result.Item1)
+                                            {
+                                                AddHistoryFilter(result.Item2, "");
+                                            }
+                                        }));
+                                    }
+                                }
+                            }
+
+                            ImGui.NewLine();
+
+                            var windowGroups = _listService.Lists.GroupBy(c => c.FilterType).OrderBySequence(
+                            [
+                                FilterType.SearchFilter, FilterType.SortingFilter, FilterType.GameItemFilter,
+                                FilterType.HistoryFilter, FilterType.CuratedList, FilterType.CraftFilter
+                            ], grouping => grouping.Key).ToList();
+                            for (var index = 0; index < windowGroups.Count; index++)
+                            {
+                                var windowGroup = windowGroups[index];
+                                ImGui.Text(windowGroup.Key.FormattedName());
+                                ImGui.Separator();
+                                foreach (var window in windowGroup)
+                                {
+                                    if (ImGui.MenuItem(window.Name, "", SelectedConfiguration == window))
+                                    {
+                                        if (window.FilterType == FilterType.CraftFilter)
+                                        {
+                                            if (_keyState[VirtualKey.CONTROL])
+                                            {
+                                                this.MediatorService.Publish(
+                                                    new OpenStringWindowMessage(typeof(FilterWindow), window.Key));
+                                            }
+                                            else
+                                            {
+                                                MediatorService.Publish(
+                                                    new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                                                MediatorService.Publish(new FocusListMessage(typeof(CraftsWindow),
+                                                    window));
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (_keyState[VirtualKey.CONTROL])
+                                            {
+                                                this.MediatorService.Publish(
+                                                    new OpenStringWindowMessage(typeof(FilterWindow), window.Key));
+                                            }
+                                            else
+                                            {
+                                                FocusFilter(window);
+                                            }
+                                        }
+                                    }
+
+                                    ImGuiUtil.HoverTooltip("[CTRL] to open in a new window.");
+                                }
+
+                                if (index != windowGroups.Count - 1)
+                                {
+                                    ImGui.NewLine();
+                                }
+                            }
+                        }
+                    }
+
+                    using (var menu = ImRaii.Menu("Windows"))
+                    {
+                        if (menu)
+                        {
+                            if (_menuWindows != null)
+                            {
+                                foreach (var window in _menuWindows)
+                                {
+                                    if (ImGui.MenuItem(window.GenericName))
+                                    {
+                                        this.MediatorService.Publish(new OpenGenericWindowMessage(window.GetType()));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
             }
         }
 
@@ -1154,65 +1239,72 @@ namespace InventoryTools.Ui
                     }
                 }
 
-                if (_configuration.ShowFilterTab && ImGui.BeginTabItem("All Lists"))
+                if (_configuration.ShowFilterTab)
                 {
-                    using (var child = ImRaii.Child("filterLeft", new Vector2(100, -1) * ImGui.GetIO().FontGlobalScale,
-                               true))
+                    using (var tabItem = ImRaii.TabItem("All Lists"))
                     {
-                        if (child.Success)
+                        if (tabItem)
                         {
-                            for (var index = 0; index < filterConfigurations.Count; index++)
+                            using (var child = ImRaii.Child("filterLeft",
+                                       new Vector2(100, -1) * ImGui.GetIO().FontGlobalScale,
+                                       true))
                             {
-                                var filterConfiguration = filterConfigurations[index];
-                                if (ImGui.Selectable(filterConfiguration.Name + "###fl" + filterConfiguration.Key,
-                                        index == _selectedFilterTab))
+                                if (child.Success)
                                 {
-                                    if (_configuration.SwitchFiltersAutomatically &&
-                                        _configuration.ActiveUiFilter != filterConfiguration.Key)
+                                    for (var index = 0; index < filterConfigurations.Count; index++)
                                     {
-                                        _framework.RunOnFrameworkThread(() =>
+                                        var filterConfiguration = filterConfigurations[index];
+                                        if (ImGui.Selectable(
+                                                filterConfiguration.Name + "###fl" + filterConfiguration.Key,
+                                                index == _selectedFilterTab))
                                         {
-                                            _listService.ToggleActiveUiList(filterConfiguration);
-                                        });
-                                    }
+                                            if (_configuration.SwitchFiltersAutomatically &&
+                                                _configuration.ActiveUiFilter != filterConfiguration.Key)
+                                            {
+                                                _framework.RunOnFrameworkThread(() =>
+                                                {
+                                                    _listService.ToggleActiveUiList(filterConfiguration);
+                                                });
+                                            }
 
-                                    _selectedFilterTab = index;
+                                            _selectedFilterTab = index;
+                                        }
+                                    }
                                 }
                             }
-                        }
-                    }
-                    ImGui.SameLine();
-                    using (var child = ImRaii.Child("filterRight", new Vector2(-1, -1), true,
-                               ImGuiWindowFlags.HorizontalScrollbar))
-                    {
-                        if (child.Success)
-                        {
-                            for (var index = 0; index < filterConfigurations.Count; index++)
+
+                            ImGui.SameLine();
+                            using (var child = ImRaii.Child("filterRight", new Vector2(-1, -1), true,
+                                       ImGuiWindowFlags.HorizontalScrollbar))
                             {
-                                if (_selectedFilterTab == index)
+                                if (child.Success)
                                 {
-                                    var filterConfiguration = filterConfigurations[index];
-                                    var table = _tableService.GetListTable(filterConfiguration);
-                                    var activeFilter = DrawFilter(table, filterConfiguration);
-                                    if (_activeFilter != activeFilter)
+                                    for (var index = 0; index < filterConfigurations.Count; index++)
                                     {
-                                        if (_configuration.SwitchFiltersAutomatically &&
-                                            _configuration.ActiveUiFilter != filterConfiguration.Key &&
-                                            _configuration.ActiveUiFilter != null)
+                                        if (_selectedFilterTab == index)
                                         {
-                                            _framework.RunOnFrameworkThread(() =>
+                                            var filterConfiguration = filterConfigurations[index];
+                                            var table = _tableService.GetListTable(filterConfiguration);
+                                            var activeFilter = DrawFilter(table, filterConfiguration);
+                                            if (_activeFilter != activeFilter)
                                             {
-                                                _listService.ToggleActiveUiList(
-                                                    filterConfiguration);
-                                            });
+                                                if (_configuration.SwitchFiltersAutomatically &&
+                                                    _configuration.ActiveUiFilter != filterConfiguration.Key &&
+                                                    _configuration.ActiveUiFilter != null)
+                                                {
+                                                    _framework.RunOnFrameworkThread(() =>
+                                                    {
+                                                        _listService.ToggleActiveUiList(
+                                                            filterConfiguration);
+                                                    });
+                                                }
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
                     }
-
-                    ImGui.EndTabItem();
                 }
 
                 if (ImGui.TabItemButton("+", ImGuiTabItemFlags.Trailing | ImGuiTabItemFlags.NoTooltip))

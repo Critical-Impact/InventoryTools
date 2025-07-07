@@ -8,6 +8,7 @@ using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
@@ -238,10 +239,12 @@ public class AirshipsWindow : GenericTabbedTable<AirshipExplorationPointRow>, IM
                             MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), drop.Base.RowId));
                         }
 
-                        if (ImGui.BeginPopup("RightClick" + drop.RowId))
+                        using(var popup = ImRaii.Popup("RightClick" + drop.RowId))
                         {
-                            MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(drop));
-                            ImGui.EndPopup();
+                            if (popup)
+                            {
+                                MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(drop));
+                            }
                         }
                         ImGuiUtil.HoverTooltip(drop.NameString);
 

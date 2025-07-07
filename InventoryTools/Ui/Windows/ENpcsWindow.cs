@@ -200,12 +200,13 @@ public class ENpcsWindow : GenericTabbedTable<ENpcResidentRow>, IMenuWindow
                                     MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), drop.RowId));
                                 }
 
-                                if (ImGui.BeginPopup("RightClick" + drop.RowId))
+                                using (var popup = ImRaii.Popup("RightClick" + drop.RowId))
                                 {
-                                    MediatorService.Publish(
-                                        ImGuiService.ImGuiMenuService.DrawRightClickPopup(drop));
-
-                                    ImGui.EndPopup();
+                                    if (popup)
+                                    {
+                                        MediatorService.Publish(
+                                            ImGuiService.ImGuiMenuService.DrawRightClickPopup(drop));
+                                    }
                                 }
 
 

@@ -328,10 +328,13 @@ namespace InventoryTools.Ui
                     ImGui.OpenPopup("RightClick" + _itemId);
                 }
 
-                if (ImGui.BeginPopup("RightClick" + _itemId))
+
+                using (var popup = ImRaii.Popup("RightClick" + _itemId))
                 {
-                    this.MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(Item));
-                    ImGui.EndPopup();
+                    if (popup)
+                    {
+                        this.MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(Item));
+                    }
                 }
 
                 if (ImGui.ImageButton(ImGuiService.GetImageTexture("garlandtools").ImGuiHandle,
@@ -407,28 +410,30 @@ namespace InventoryTools.Ui
                         ImGui.OpenPopup("AddCraftList" + _itemId);
                     }
 
-                    if (ImGui.BeginPopup("AddCraftList" + _itemId))
+                    using (var popup = ImRaii.Popup("AddCraftList" + _itemId))
                     {
-                        var craftFilters =
-                            _listService.Lists.Where(c =>
-                                c.FilterType == Logic.FilterType.CraftFilter && !c.CraftListDefault);
-                        foreach (var filter in craftFilters)
+                        if (popup)
                         {
-                            using (ImRaii.PushId(filter.Key))
+                            var craftFilters =
+                                _listService.Lists.Where(c =>
+                                    c.FilterType == Logic.FilterType.CraftFilter && !c.CraftListDefault);
+                            foreach (var filter in craftFilters)
                             {
-                                if (ImGui.Selectable("Add item to craft list - " + filter.Name))
+                                using (ImRaii.PushId(filter.Key))
                                 {
-                                    _framework.RunOnFrameworkThread(() =>
+                                    if (ImGui.Selectable("Add item to craft list - " + filter.Name))
                                     {
-                                        filter.CraftList.AddCraftItem(_itemId, 1, InventoryItem.ItemFlags.None);
-                                        filter.NeedsRefresh = true;
-                                        MediatorService.Publish(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                                        MediatorService.Publish(new FocusListMessage(typeof(CraftsWindow), filter));
-                                    });
+                                        _framework.RunOnFrameworkThread(() =>
+                                        {
+                                            filter.CraftList.AddCraftItem(_itemId, 1, InventoryItem.ItemFlags.None);
+                                            filter.NeedsRefresh = true;
+                                            MediatorService.Publish(new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                                            MediatorService.Publish(new FocusListMessage(typeof(CraftsWindow), filter));
+                                        });
+                                    }
                                 }
                             }
                         }
-                        ImGui.EndPopup();
                     }
 
                     ImGuiUtil.HoverTooltip("Craftable - Add to Craft List");
@@ -651,10 +656,13 @@ namespace InventoryTools.Ui
                                     ImGui.OpenPopup("RightClick" + item.RowId);
                                 }
 
-                                if (ImGui.BeginPopup("RightClick" + item.RowId))
+                                using (var popup = ImRaii.Popup("RightClick" + item.RowId))
                                 {
-                                    MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(item));
-                                    ImGui.EndPopup();
+                                    if (popup)
+                                    {
+                                        MediatorService.Publish(ImGuiService.ImGuiMenuService
+                                            .DrawRightClickPopup(item));
+                                    }
                                 }
 
                                 float lastButtonX2 = ImGui.GetItemRectMax().X;
@@ -710,10 +718,13 @@ namespace InventoryTools.Ui
                                 ImGui.OpenPopup("RightClick" + sharedModel.RowId);
                             }
 
-                            if (ImGui.BeginPopup("RightClick" + sharedModel.RowId))
+                            using (var popup = ImRaii.Popup("RightClick" + sharedModel.RowId))
                             {
-                                MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(sharedModel));
-                                ImGui.EndPopup();
+                                if (popup)
+                                {
+                                    MediatorService.Publish(
+                                        ImGuiService.ImGuiMenuService.DrawRightClickPopup(sharedModel));
+                                }
                             }
 
                             float lastButtonX2 = ImGui.GetItemRectMax().X;
@@ -766,15 +777,16 @@ namespace InventoryTools.Ui
                                     ImGui.OpenPopup("RightClick" + recipe.RowId);
                                 }
 
-                                if (ImGui.BeginPopup("RightClick" + recipe.RowId))
+                                using (var popup = ImRaii.Popup("RightClick" + recipe.RowId))
                                 {
-                                    if (recipe.ItemResult != null)
+                                    if (popup)
                                     {
-                                        MediatorService.Publish(
-                                            ImGuiService.ImGuiMenuService.DrawRightClickPopup(recipe.ItemResult));
+                                        if (recipe.ItemResult != null)
+                                        {
+                                            MediatorService.Publish(
+                                                ImGuiService.ImGuiMenuService.DrawRightClickPopup(recipe.ItemResult));
+                                        }
                                     }
-
-                                    ImGui.EndPopup();
                                 }
 
                                 float lastButtonX2 = ImGui.GetItemRectMax().X;

@@ -9,6 +9,7 @@ using AllaganLib.Shared.Extensions;
 using CriticalCommonLib;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
@@ -134,10 +135,13 @@ namespace InventoryTools.Ui
                                         ImGui.OpenPopup("RightClickUse" + item.Item.RowId);
                                     }
 
-                                    if (ImGui.BeginPopup("RightClickUse" + item.Item.RowId))
+                                    using (var popup = ImRaii.Popup("RightClickUse"+ item.Item.RowId))
                                     {
-                                        MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(item.Item));
-                                        ImGui.EndPopup();
+                                        if (popup)
+                                        {
+                                            MediatorService.Publish(
+                                                ImGuiService.ImGuiMenuService.DrawRightClickPopup(item.Item));
+                                        }
                                     }
 
                                     float lastButtonX2 = ImGui.GetItemRectMax().X;

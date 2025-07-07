@@ -32,7 +32,7 @@ namespace InventoryToolsTesting.Tests
             var gatheringSources = uplandWheatFlour.GetSourcesByCategory<ItemGatheringSource>(ItemInfoCategory.Gathering);
             Assert.AreEqual(0, gatheringSources.Count);
             var sources = uplandWheatFlour.Sources;
-            Assert.AreEqual(1, sources.Count);
+            Assert.AreEqual(2, sources.Count);
             Assert.AreEqual(false, uplandWheatFlour.ObtainedGathering);
         }
 
@@ -47,16 +47,16 @@ namespace InventoryToolsTesting.Tests
             Assert.AreEqual(3, shops.Count);
             var actualVendors = shops.SelectMany(shop => shop.Shop.ENpcs.SelectMany(npc => npc.Locations.Select(location => (shop, npc, location)))).ToList();
 
-            Assert.AreEqual(18, actualVendors.Count);
+            Assert.AreEqual(20, actualVendors.Count);
 
             //Wool Top 16906
             var woolTop = itemSheet.GetRow(16906)!;
-            Assert.AreEqual(7, woolTop.Sources.Count);
+            Assert.AreEqual(11, woolTop.Sources.Count);
             shops = woolTop.GetSourcesByCategory<ItemShopSource>(ItemInfoCategory.Shop);
             Assert.AreEqual(4, shops.Count);
             actualVendors = shops.SelectMany(shop => shop.Shop.ENpcs.SelectMany(npc => npc.Locations.Select(location => (shop, npc, location)))).ToList();
 
-            Assert.AreEqual(36, actualVendors.Count);
+            Assert.AreEqual(40, actualVendors.Count);
         }
 
         [Test]

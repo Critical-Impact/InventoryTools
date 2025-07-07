@@ -5,6 +5,7 @@ using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using InventoryTools.Logic;
 using InventoryTools.Mediator;
@@ -98,15 +99,16 @@ namespace InventoryTools.Ui
                             ImGui.OpenPopup("RightClickUse" + drop.RowId);
                         }
 
-                        if (ImGui.BeginPopup("RightClickUse"+ drop.RowId))
+                        using (var popup = ImRaii.Popup("RightClickUse"+ drop.RowId))
                         {
-                            var itemRow = _itemSheet.GetRowOrDefault(drop.RowId);
-                            if (itemRow != null)
+                            if (popup)
                             {
-                                MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(itemRow));
+                                var itemRow = _itemSheet.GetRowOrDefault(drop.RowId);
+                                if (itemRow != null)
+                                {
+                                    MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(itemRow));
+                                }
                             }
-
-                            ImGui.EndPopup();
                         }
 
                         float lastButtonX2 = ImGui.GetItemRectMax().X;

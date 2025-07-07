@@ -10,6 +10,7 @@ using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
@@ -167,16 +168,18 @@ namespace InventoryTools.Ui
                                             ImGui.OpenPopup("RightClickUse" + item.Item1.RowId);
                                         }
 
-                                        if (ImGui.BeginPopup("RightClickUse" + item.Item1.RowId))
+                                        using (var popup = ImRaii.Popup("RightClickUse" + item.Item1.RowId))
                                         {
-                                            var itemRow = _itemSheet
-                                                .GetRowOrDefault(item.Item1.RowId);
-                                            if (itemRow != null)
+                                            if (popup)
                                             {
-                                                MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(itemRow));
+                                                var itemRow = _itemSheet
+                                                    .GetRowOrDefault(item.Item1.RowId);
+                                                if (itemRow != null)
+                                                {
+                                                    MediatorService.Publish(
+                                                        ImGuiService.ImGuiMenuService.DrawRightClickPopup(itemRow));
+                                                }
                                             }
-
-                                            ImGui.EndPopup();
                                         }
 
                                         float lastButtonX2 = ImGui.GetItemRectMax().X;
@@ -220,16 +223,18 @@ namespace InventoryTools.Ui
                                         ImGui.OpenPopup("RightClickUse" + item.RowId);
                                     }
 
-                                    if (ImGui.BeginPopup("RightClickUse" + item.RowId))
+                                    using (var popup = ImRaii.Popup("RightClickUse" + item.RowId))
                                     {
-                                        var itemRow = _itemSheet
-                                            .GetRowOrDefault(item.RowId);
-                                        if (itemRow != null)
+                                        if (popup)
                                         {
-                                            MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(itemRow));
+                                            var itemRow = _itemSheet
+                                                .GetRowOrDefault(item.RowId);
+                                            if (itemRow != null)
+                                            {
+                                                MediatorService.Publish(
+                                                    ImGuiService.ImGuiMenuService.DrawRightClickPopup(itemRow));
+                                            }
                                         }
-
-                                        ImGui.EndPopup();
                                     }
 
                                     float lastButtonX2 = ImGui.GetItemRectMax().X;
@@ -265,15 +270,16 @@ namespace InventoryTools.Ui
                             ImGui.OpenPopup("RightClickUse" + use.RowId);
                         }
 
-                        if (ImGui.BeginPopup("RightClickUse"+ use.RowId))
+                        using (var popup = ImRaii.Popup("RightClickUse" + use.RowId))
                         {
-                            var itemRow = _itemSheet.GetRowOrDefault(use.RowId);
-                            if (itemRow != null)
+                            if (popup)
                             {
-                                MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(itemRow));
+                                var itemRow = _itemSheet.GetRowOrDefault(use.RowId);
+                                if (itemRow != null)
+                                {
+                                    MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(itemRow));
+                                }
                             }
-
-                            ImGui.EndPopup();
                         }
 
                         float lastButtonX2 = ImGui.GetItemRectMax().X;
@@ -308,15 +314,16 @@ namespace InventoryTools.Ui
                             ImGui.OpenPopup("RightClickUse" + use.RowId);
                         }
 
-                        if (ImGui.BeginPopup("RightClickUse"+ use.RowId))
+                        using (var popup = ImRaii.Popup("RightClickUse" + use.RowId))
                         {
-                            var itemRow = _itemSheet.GetRowOrDefault(use.RowId);
-                            if (itemRow != null)
+                            if (popup)
                             {
-                                MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(itemRow));
+                                var itemRow = _itemSheet.GetRowOrDefault(use.RowId);
+                                if (itemRow != null)
+                                {
+                                    MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(itemRow));
+                                }
                             }
-
-                            ImGui.EndPopup();
                         }
 
                         float lastButtonX2 = ImGui.GetItemRectMax().X;

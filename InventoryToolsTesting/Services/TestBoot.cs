@@ -32,7 +32,9 @@ namespace InventoryToolsTesting.Services
             });
             var pluginLoader = mockContainer.GetPluginLoader();
             var mockPlugin = pluginLoader.AddPlugin(typeof(InventoryToolsTestingPlugin));
-            pluginLoader.StartPlugin(mockPlugin, new PluginLoadSettings(new DirectoryInfo(Environment.CurrentDirectory), new FileInfo(Path.Combine(Environment.CurrentDirectory, "test.json"))));
+            var pluginLoadSettings = new PluginLoadSettings(new DirectoryInfo(Environment.CurrentDirectory), new FileInfo(Path.Combine(Environment.CurrentDirectory, "test.json")));
+            pluginLoadSettings.AssemblyLocation = this.GetType().Assembly.Location;
+            pluginLoader.StartPlugin(mockPlugin, pluginLoadSettings);
             if (mockPlugin.Container == null)
             {
                 throw new Exception("Container was not built.");

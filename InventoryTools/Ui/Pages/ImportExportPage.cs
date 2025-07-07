@@ -4,6 +4,7 @@ using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using Dalamud.Interface.Colors;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using InventoryTools.Lists;
 using InventoryTools.Logic;
@@ -43,56 +44,57 @@ namespace InventoryTools.Ui.Pages
             {
                 var filterConfigurations = _listService.Lists;
                 ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(5, 5) * ImGui.GetIO().FontGlobalScale);
-                if (ImGui.BeginTable("FilterConfigTable", 3, ImGuiTableFlags.BordersV |
+                using (var table = ImRaii.Table("FilterConfigTable", 3, ImGuiTableFlags.BordersV |
                                                              ImGuiTableFlags.BordersOuterV |
                                                              ImGuiTableFlags.BordersInnerV |
                                                              ImGuiTableFlags.BordersH |
                                                              ImGuiTableFlags.BordersOuterH |
                                                              ImGuiTableFlags.BordersInnerH))
                 {
-                    ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint) 0);
-                    ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint) 1);
-                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint) 2);
-                    ImGui.TableHeadersRow();
-                    if (filterConfigurations.Count == 0)
+                    if (table)
                     {
-                        ImGui.TableNextRow();
-                        ImGui.TableNextColumn();
-                        ImGui.TextUnformatted("No lists created yet!");
-                        ImGui.TableNextColumn();
-                        ImGui.TableNextColumn();
-                    }
-
-                    for (var index = 0; index < filterConfigurations.Count; index++)
-                    {
-                        ImGui.TableNextRow();
-                        var filterConfiguration = filterConfigurations[index];
-                        ImGui.TableNextColumn();
-                        if (filterConfiguration.Name != "")
+                        ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)0);
+                        ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)1);
+                        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch, 100.0f, (uint)2);
+                        ImGui.TableHeadersRow();
+                        if (filterConfigurations.Count == 0)
                         {
-                            ImGui.TextUnformatted(filterConfiguration.Name);
-                            ImGui.SameLine();
+                            ImGui.TableNextRow();
+                            ImGui.TableNextColumn();
+                            ImGui.TextUnformatted("No lists created yet!");
+                            ImGui.TableNextColumn();
+                            ImGui.TableNextColumn();
                         }
 
-                        /*if (PluginFont.AppIcons.HasValue && filterConfiguration.Icon != null)
+                        for (var index = 0; index < filterConfigurations.Count; index++)
                         {
-                            ImGui.PushFont(PluginFont.AppIcons.Value);
-                            ImGui.Text(filterConfiguration.Icon);
-                            ImGui.PopFont();
-                        }*/
+                            ImGui.TableNextRow();
+                            var filterConfiguration = filterConfigurations[index];
+                            ImGui.TableNextColumn();
+                            if (filterConfiguration.Name != "")
+                            {
+                                ImGui.TextUnformatted(filterConfiguration.Name);
+                                ImGui.SameLine();
+                            }
 
-                        ImGui.TableNextColumn();
-                        ImGui.TextUnformatted(filterConfiguration.FormattedFilterType);
-                        ImGui.TableNextColumn();
-                        if (ImGui.SmallButton("Export Configuration##" + index))
-                        {
-                            var base64 = _importExportService.ToBase64(filterConfiguration);
-                            _clipboardService.CopyToClipboard(base64);
-                            _chatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
+                            /*if (PluginFont.AppIcons.HasValue && filterConfiguration.Icon != null)
+                            {
+                                ImGui.PushFont(PluginFont.AppIcons.Value);
+                                ImGui.Text(filterConfiguration.Icon);
+                                ImGui.PopFont();
+                            }*/
+
+                            ImGui.TableNextColumn();
+                            ImGui.TextUnformatted(filterConfiguration.FormattedFilterType);
+                            ImGui.TableNextColumn();
+                            if (ImGui.SmallButton("Export Configuration##" + index))
+                            {
+                                var base64 = _importExportService.ToBase64(filterConfiguration);
+                                _clipboardService.CopyToClipboard(base64);
+                                _chatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
+                            }
                         }
                     }
-
-                    ImGui.EndTable();
                 }
 
                 ImGui.PopStyleVar();

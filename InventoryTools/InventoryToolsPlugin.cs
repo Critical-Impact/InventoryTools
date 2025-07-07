@@ -604,6 +604,14 @@ namespace InventoryTools
             });
         }
 
+        public override HostedPluginOptions ConfigureOptions()
+        {
+            return new HostedPluginOptions()
+            {
+                UseMediatorService = true
+            };
+        }
+
         public override void ConfigureContainer(ContainerBuilder containerBuilder)
         {
 

@@ -9,6 +9,7 @@ using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using InventoryTools.Logic;
 using InventoryTools.Mediator;
@@ -257,10 +258,12 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskRow>, IMenuWin
                             MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), drop.RowId));
                         }
 
-                        if (ImGui.BeginPopup("RightClick" + drop.RowId))
+                        using (var popup = ImRaii.Popup("RightClickUse"+ drop.RowId))
                         {
-                            MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(drop));
-                            ImGui.EndPopup();
+                            if (popup)
+                            {
+                                MediatorService.Publish(ImGuiService.ImGuiMenuService.DrawRightClickPopup(drop));
+                            }
                         }
                         ImGuiUtil.HoverTooltip(drop.NameString);
 
