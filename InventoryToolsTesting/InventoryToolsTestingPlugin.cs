@@ -58,7 +58,6 @@ public class InventoryToolsTestingPlugin : InventoryToolsPlugin
         replacements.Add(typeof(OdrScanner),typeof(MockOdrScanner));
         replacements.Add(typeof(SimpleAcquisitionTrackerService),typeof(MockAcquisitionTrackerService));
         replacements.Add(typeof(Chat2Ipc),typeof(MockChat2Ipc));
-        replacements.Add(typeof(AddonService),typeof(MockAddonService));
     }
 
     public override void PreBuild(IHostBuilder hostBuilder)

@@ -623,11 +623,6 @@
           "SharpGen.Runtime": "2.0.0-beta.13"
         }
       },
-      "SixLabors.ImageSharp": {
-        "type": "Transitive",
-        "resolved": "3.1.7",
-        "contentHash": "9fIOOAsyLFid6qKypM2Iy0Z3Q9yoanV8VoYAHtI2sYGMNKzhvRTjgFDHonIiVe+ANtxIxM6SuqUzj0r91nItpA=="
-      },
       "Sylvan.Data.Csv": {
         "type": "Transitive",
         "resolved": "1.4.2",
@@ -765,17 +760,10 @@
           "DalamudPackager": "[12.0.0, )",
           "Humanizer.Core": "[3.0.0-beta.54, )",
           "Ionide.KeepAChangelog": "[0.2.0, )",
-          "KamiToolKit": "[1.0.0, )",
           "Microsoft.Extensions.Hosting": "[9.0.6, )",
           "OtterGui": "[1.0.0, )",
           "SerialQueue": "[2.1.0, )",
           "System.Reactive": "[6.0.1, )"
-        }
-      },
-      "kamitoolkit": {
-        "type": "Project",
-        "dependencies": {
-          "SixLabors.ImageSharp": "[3.1.7, )"
         }
       },
       "ottergui": {
