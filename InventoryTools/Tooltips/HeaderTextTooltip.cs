@@ -18,8 +18,12 @@ public class HeaderTextTooltip : BaseTooltip
     {
     }
     public override bool IsEnabled =>
-        Configuration.DisplayTooltip && (Configuration.TooltipHeaderLines != 0 ||
-                                         Configuration.TooltipDisplayHeader);
+        Configuration.DisplayTooltip 
+        && (
+            Configuration.TooltipHeaderLines != 0 ||
+            Configuration.TooltipDisplayHeader ||
+            Configuration.TooltipSeparatorGlobalEnable
+            );
 
     public override unsafe void OnGenerateItemTooltip(NumberArrayData* numberArrayData, StringArrayData* stringArrayData)
     {
@@ -75,6 +79,11 @@ public class HeaderTextTooltip : BaseTooltip
                 if (Configuration.TooltipDisplayHeader)
                 {
                     newText += "\n[Allagan Tools]";
+                }
+                
+                if (Configuration.TooltipSeparatorGlobalEnable)
+                {
+                    newText = $"{separator}" +  newText;
                 }
 
                 if (newText != "")

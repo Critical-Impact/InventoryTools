@@ -34,7 +34,6 @@ public class AmountOwnedTooltip : BaseTooltip
         _itemLocalizer = itemLocalizer;
     }
     private const string indentation = "      ";
-    private const string separator = "──────────────────────────\n";
 
     public override bool IsEnabled => Configuration.DisplayTooltip && Configuration.TooltipDisplayAmountOwned;
     public override unsafe void OnGenerateItemTooltip(NumberArrayData* numberArrayData, StringArrayData* stringArrayData)
@@ -253,7 +252,6 @@ public class AmountOwnedTooltip : BaseTooltip
 
             if (storageCount > 0)
             {
-                textLines.Add($"{separator}");
                 textLines.Add($"Owned: {storageCount}\n");
                 textLines.Add($"Locations:\n");
                 for (var index = 0; index < locations.Count; index++)
@@ -261,10 +259,9 @@ public class AmountOwnedTooltip : BaseTooltip
                     var location = locations[index];
                     textLines.Add($"{indentation}{location}\n");
                 }
-                textLines.Add($"{separator}");
             }
 
-            var newText = "\n";
+            var newText = Configuration.TooltipSeparatorGlobalEnable ? "" : "\n";
             if (textLines.Count != 0)
             {
                 for (var index = 0; index < textLines.Count; index++)

@@ -364,6 +364,8 @@ namespace InventoryTools
         private WindowLayout _craftWindowLayout =  WindowLayout.Tabs;
         private WindowLayout _filtersLayout = WindowLayout.Tabs;
         private uint? _tooltipColor;
+        private bool _tooltipSeparator;
+        private bool _tooltipSeparatorGlobalEnable;
         private HashSet<NotificationPopup>? _notificationsSeen = new ();
 
         [Vector4Default("0.007, 0.008,0.007, 0.212")]
@@ -820,6 +822,26 @@ namespace InventoryTools
         {
             get => _tooltipColor;
             set => _tooltipColor = value;
+        }
+        
+        public bool TooltipSeparator
+        {
+            get => _tooltipSeparator;
+            set
+            {
+                _tooltipSeparator = value;
+                IsDirty = true;
+            }
+        }
+        
+        public bool TooltipSeparatorGlobalEnable
+        {
+            get => _tooltipSeparatorGlobalEnable;
+            set
+            {
+                _tooltipSeparatorGlobalEnable = value;
+                IsDirty = true;
+            }
         }
 
         public ModifiableHotkey? MoreInformationHotKey

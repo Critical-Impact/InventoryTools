@@ -18,7 +18,9 @@ public class FooterTextTooltip : BaseTooltip
     {
     }
     public override bool IsEnabled =>
-        Configuration.DisplayTooltip && Configuration.TooltipFooterLines != 0;
+        Configuration.DisplayTooltip 
+        && 
+        (Configuration.TooltipFooterLines != 0 || Configuration.TooltipSeparatorGlobalEnable);
 
     public override unsafe void OnGenerateItemTooltip(NumberArrayData* numberArrayData, StringArrayData* stringArrayData)
     {
@@ -69,6 +71,11 @@ public class FooterTextTooltip : BaseTooltip
                     {
                         newText += "\n";
                     }
+                }
+                
+                if (Configuration.TooltipSeparatorGlobalEnable)
+                {
+                    newText += $"{separator}";
                 }
 
                 if (newText != "")

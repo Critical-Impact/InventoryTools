@@ -13,6 +13,7 @@ namespace InventoryTools.Tooltips;
 
 public abstract class BaseTooltip : TooltipService.TooltipTweak, IDisposable
 {
+    public const string separator = "\n──────────────────────────\n";
     public InventoryToolsConfiguration Configuration { get; }
     public IGameGui GameGui { get; }
 
