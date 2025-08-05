@@ -11,7 +11,7 @@ using DalaMock.Host.Mediator;
 using Dalamud.Interface.Textures;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Ui;
@@ -46,7 +46,7 @@ public class ItemCraftRequirementSourceRenderer : ItemInfoRenderer<ItemCraftRequ
         ImGui.TextUnformatted($"Ingredient of Craft Recipe:");
         using (ImRaii.PushIndent())
         {
-            ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(asSource.Item.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(16,16));
+            ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(asSource.Item.Icon)).GetWrapOrEmpty().Handle, new Vector2(16,16));
             ImGui.SameLine();
             ImGui.TextUnformatted(GetName(source));
         }
@@ -61,7 +61,7 @@ public class ItemCraftRequirementSourceRenderer : ItemInfoRenderer<ItemCraftRequ
         {
             foreach (var row in asSource)
             {
-                ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(row.Item.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(16,16));
+                ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(row.Item.Icon)).GetWrapOrEmpty().Handle, new Vector2(16,16));
                 ImGui.SameLine();
                 ImGui.TextUnformatted(GetName(row));
             }

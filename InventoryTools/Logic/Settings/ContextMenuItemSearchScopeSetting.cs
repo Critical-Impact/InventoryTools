@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Dalamud.Interface.Colors;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic.Editors;
 using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Services;

@@ -5,7 +5,7 @@ using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools;
 using InventoryTools.Logic;
 using InventoryTools.Services;
@@ -346,7 +346,7 @@ public class IconBrowserWindow : GenericWindow
         {
             if (ImGuiService.TextureProvider.TryGetFromGameIcon(new GameIconLookup((uint)index), out var icon))
             {
-                ImGui.Image(icon.GetWrapOrEmpty().ImGuiHandle, new Vector2(64, 64));
+                ImGui.Image(icon.GetWrapOrEmpty().Handle, new Vector2(64, 64));
 
                 ImGuiUtil.HoverTooltip(index.ToString());
 
@@ -371,7 +371,7 @@ public class IconBrowserWindow : GenericWindow
         var cache = _iconCache[_name];
 
         ImGuiListClipperPtr clipper;
-        unsafe { clipper = new(ImGuiNative.ImGuiListClipper_ImGuiListClipper()); }
+        unsafe { clipper = ImGui.ImGuiListClipper(); }
         clipper.Begin((cache.Count - 1) / _columns + 1, _iconSize + ImGui.GetStyle().ItemSpacing.Y);
 
         var iconSize = new Vector2(_iconSize);
@@ -386,7 +386,7 @@ public class IconBrowserWindow : GenericWindow
                     var icon = cache[i];
                     if(ImGuiService.TextureProvider.TryGetFromGameIcon(new GameIconLookup((uint)icon), out var texture))
                     {
-                        ImGui.Image(texture.GetWrapOrEmpty().ImGuiHandle, iconSize);
+                        ImGui.Image(texture.GetWrapOrEmpty().Handle, iconSize);
                     }
                     else
                     {

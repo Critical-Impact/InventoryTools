@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace InventoryTools.Ui;
 

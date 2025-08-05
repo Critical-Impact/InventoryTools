@@ -11,7 +11,7 @@ using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Services;
 
 namespace InventoryTools.Logic.ItemRenderers;
@@ -79,7 +79,7 @@ public class ItemGilShopSourceRenderer : ItemInfoRenderer<ItemGilShopSource>
             var itemName = firstItem.CostItem!.NameString;
             var count = firstItem.Cost;
             var costString = $"{itemName} x {count}";
-            ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(firstItem.CostItem.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
+            ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(firstItem.CostItem.Icon)).GetWrapOrEmpty().Handle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
             ImGui.SameLine();
             ImGui.Text(costString);
 
@@ -114,7 +114,7 @@ public class ItemGilShopSourceRenderer : ItemInfoRenderer<ItemGilShopSource>
             var itemName = asSource.CostItem!.NameString;
             var count = asSource.Cost;
             var costString = $"{itemName} x {count}";
-            ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(asSource.CostItem.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
+            ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(asSource.CostItem.Icon)).GetWrapOrEmpty().Handle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
             ImGui.SameLine();
             ImGui.Text(costString);
 

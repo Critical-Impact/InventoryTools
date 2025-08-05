@@ -3,7 +3,7 @@ using System.Numerics;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using Dalamud.Interface.Colors;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Features;
 using InventoryTools.Mediator;
@@ -101,7 +101,7 @@ public class ConfigurationWizard : GenericWindow
                     if (sideBarImage)
                     {
                         ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 12.5f);
-                        ImGui.Image(ImGuiService.GetImageTexture("icon").ImGuiHandle, new (100,100));
+                        ImGui.Image(ImGuiService.GetImageTexture("icon").Handle, new (100,100));
                     }
                 }
             }

@@ -1,7 +1,7 @@
 using System.Numerics;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic;
 using Dalamud.Interface.Utility.Raii;
 using InventoryTools.Mediator;
@@ -40,7 +40,7 @@ namespace InventoryTools.Ui
                 if (leftChild.Success)
                 {
                     ImGui.SetCursorPosY(40);
-                    ImGui.Image(ImGuiService.GetImageTexture("icon-hor").ImGuiHandle, new Vector2(200, 200) * ImGui.GetIO().FontGlobalScale);
+                    ImGui.Image(ImGuiService.GetImageTexture("icon-hor").Handle, new Vector2(200, 200) * ImGui.GetIO().FontGlobalScale);
                 }
             }
             ImGui.SameLine();

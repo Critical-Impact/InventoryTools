@@ -1,5 +1,5 @@
 using Dalamud.Interface.Colors;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Services;
 
 namespace InventoryTools.Logic.Columns.Abstract.ColumnSettings;

@@ -1,4 +1,4 @@
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace InventoryTools.Services;
 
@@ -11,7 +11,7 @@ public class ClipboardService : IClipboardService
 
     public string PasteFromClipboard()
     {
-        return ImGui.GetClipboardText();
+        return ImGui.GetClipboardTextS();
     }
 }
 

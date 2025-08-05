@@ -5,7 +5,7 @@ using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using Dalamud.Interface;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Logic.Columns.ColumnSettings;
 using InventoryTools.Services;

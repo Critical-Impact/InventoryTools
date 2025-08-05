@@ -11,7 +11,7 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Mediator;
@@ -118,10 +118,10 @@ namespace InventoryTools.Ui
                 ImGui.TextUnformatted("Item Level Required: " + ContentFinderCondition.Base.ItemLevelRequired);
                 ;
                 var itemIcon = ImGuiService.GetIconTexture((int)(ContentFinderCondition.Base.ContentType.ValueNullable?.IconDutyFinder ?? Icons.DutyIcon));
-                ImGui.Image(itemIcon.ImGuiHandle, new Vector2(100, 100) * ImGui.GetIO().FontGlobalScale);
+                ImGui.Image(itemIcon.Handle, new Vector2(100, 100) * ImGui.GetIO().FontGlobalScale);
 
                 var garlandIcon = ImGuiService.GetImageTexture("garlandtools");
-                if (ImGui.ImageButton(garlandIcon.ImGuiHandle,
+                if (ImGui.ImageButton(garlandIcon.Handle,
                         new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                 {
                     $"https://www.garlandtools.org/db/#instance/{ContentFinderCondition.Base.Content}".OpenBrowser();
@@ -151,7 +151,7 @@ namespace InventoryTools.Ui
                                         var item = items[index];
                                         if (item.Item1 == null) continue;
                                         ImGui.PushID("dbc" + dungeonBoss.RowId + "_" + chest.Key + "_" + index);
-                                        if (ImGui.ImageButton(ImGuiService.GetIconTexture(item.Item1.Icon).ImGuiHandle,
+                                        if (ImGui.ImageButton(ImGuiService.GetIconTexture(item.Item1.Icon).Handle,
                                                 new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0),
                                                 new(1, 1), 0))
                                         {
@@ -206,7 +206,7 @@ namespace InventoryTools.Ui
                                 {
                                     var item = drops[index];
                                     ImGui.PushID("dbd" + dungeonBoss.RowId + "_" + index);
-                                    if (ImGui.ImageButton(ImGuiService.GetIconTexture(item.Icon).ImGuiHandle,
+                                    if (ImGui.ImageButton(ImGuiService.GetIconTexture(item.Icon).Handle,
                                             new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0),
                                             new(1, 1), 0))
                                     {
@@ -260,7 +260,7 @@ namespace InventoryTools.Ui
                     {
                         ImGui.PushID("Use"+index);
                         var use = uses[index];
-                        if (ImGui.ImageButton(ImGuiService.GetIconTexture(use.Icon).ImGuiHandle,
+                        if (ImGui.ImageButton(ImGuiService.GetIconTexture(use.Icon).Handle,
                                 new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1), 0))
                         {
                             MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), use.RowId));
@@ -304,7 +304,7 @@ namespace InventoryTools.Ui
                         ImGui.PushID("Use"+index);
                         var use = uses[index];
 
-                        if (ImGui.ImageButton(ImGuiService.GetIconTexture(use.Icon).ImGuiHandle,
+                        if (ImGui.ImageButton(ImGuiService.GetIconTexture(use.Icon).Handle,
                                 new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1), 0))
                         {
                             MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), use.RowId));

@@ -14,7 +14,7 @@ using CriticalCommonLib.Services.Ui;
 using DalaMock.Host.Mediator;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Interface.ImGuiFileDialog;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools;
 using InventoryTools.Logic;
 using InventoryTools.Ui;

@@ -5,7 +5,7 @@ using DalaMock.Host.Mediator;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Mediator;
@@ -61,7 +61,7 @@ namespace InventoryTools.Logic.Columns
                 using (ImRaii.PushId("icon" + rowIndex))
                 {
                     if (ImGui.ImageButton(
-                            ImGuiService.GetIconTexture(currentValue.Value.Item1, currentValue.Value.Item2).ImGuiHandle,
+                            ImGuiService.GetIconTexture(currentValue.Value.Item1, currentValue.Value.Item2).Handle,
                             new Vector2(filterConfiguration.TableHeight - 1, filterConfiguration.TableHeight - 1) *
                             ImGui.GetIO().FontGlobalScale, new Vector2(0, 0), new Vector2(1, 1), 2))
                     {

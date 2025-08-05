@@ -8,7 +8,7 @@ using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Services;
 
 namespace InventoryTools.EquipmentSuggest;
@@ -75,7 +75,7 @@ public sealed class EquipmentSuggestSuggestionColumn : StringFormField<Equipment
                     cursorPos.Y += iconSize / 2.0f - 8 * ImGui.GetIO().FontGlobalScale;
 
 
-                    if (ImGui.ImageButton(ImGuiService.GetIconTexture(searchResult.Item.Icon).ImGuiHandle,
+                    if (ImGui.ImageButton(ImGuiService.GetIconTexture(searchResult.Item.Icon).Handle,
                             new Vector2(iconSize, iconSize) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
                             new Vector2(1, 1), 0))
                     {
@@ -157,7 +157,7 @@ public sealed class EquipmentSuggestSuggestionColumn : StringFormField<Equipment
 
                     if (outsideRange)
                     {
-                        drawList.AddImage(ImGuiService.GetIconTexture(60955).ImGuiHandle, cursorPos,
+                        drawList.AddImage(ImGuiService.GetIconTexture(60955).Handle, cursorPos,
                             cursorPos + iconVec2, Vector2.Zero, Vector2.One, ImGui.GetColorU32(ImGuiColors.ParsedGold));
                     }
 

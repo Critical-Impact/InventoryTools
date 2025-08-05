@@ -7,7 +7,7 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
@@ -73,7 +73,7 @@ namespace InventoryTools.Ui
                 ImGui.TextUnformatted("Unlocked Via: " + SubmarineExploration.Unlock?.Base.Location.ExtractText() ?? "N/A");
                 ImGui.TextUnformatted("Rank Required: " + SubmarineExploration.Base.RankReq);
                 ;
-                ImGui.Image(ImGuiService.GetIconTexture(Icons.AirshipIcon).ImGuiHandle, new Vector2(100, 100) * ImGui.GetIO().FontGlobalScale);
+                ImGui.Image(ImGuiService.GetIconTexture(Icons.AirshipIcon).Handle, new Vector2(100, 100) * ImGui.GetIO().FontGlobalScale);
 
 
                 if (ImGui.CollapsingHeader("Rewards (" + _drops.Count + ")", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
@@ -86,7 +86,7 @@ namespace InventoryTools.Ui
                         ImGui.PushID("Reward"+index);
                         var drop = _drops[index];
 
-                        if (ImGui.ImageButton(ImGuiService.GetIconTexture(drop.Icon).ImGuiHandle,
+                        if (ImGui.ImageButton(ImGuiService.GetIconTexture(drop.Icon).Handle,
                                 new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1), 0))
                         {
                             MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), drop.RowId));

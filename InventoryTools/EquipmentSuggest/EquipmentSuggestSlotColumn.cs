@@ -4,7 +4,7 @@ using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using Humanizer;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Services;
 
 namespace InventoryTools.EquipmentSuggest;

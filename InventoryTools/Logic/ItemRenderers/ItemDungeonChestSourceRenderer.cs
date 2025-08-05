@@ -11,7 +11,7 @@ using DalaMock.Host.Mediator;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Mediator;
 using InventoryTools.Ui;
 

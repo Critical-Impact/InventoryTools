@@ -6,7 +6,7 @@ using CriticalCommonLib;
 using CriticalCommonLib.Comparer;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Services;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
@@ -18,6 +18,46 @@ namespace InventoryTools.Logic.Settings.Abstract
     {
         private readonly ExcelSheet<UIColor> _uiColorSheet;
 
+        void RGBtoHSV(float r, float g, float b, out float h, out float s, out float v)
+        {
+            float max = Math.Max(r, Math.Max(g, b));
+            float min = Math.Min(r, Math.Min(g, b));
+
+            v = max;
+            float delta = max - min;
+
+            if (max != 0)
+                s = delta / max;
+            else
+            {
+                // r = g = b = 0
+                s = 0;
+                h = 0;
+                return;
+            }
+
+            if (delta == 0)
+            {
+                h = 0;
+            }
+            else if (max == r)
+            {
+                h = (g - b) / delta;
+                if (g < b)
+                    h += 6;
+            }
+            else if (max == g)
+            {
+                h = (b - r) / delta + 2;
+            }
+            else // max == b
+            {
+                h = (r - g) / delta + 4;
+            }
+
+            h /= 6;
+        }
+
         public GameColorSetting(ILogger logger, ImGuiService imGuiService, ExcelSheet<UIColor> uiColorSheet) : base(logger, imGuiService)
         {
             _uiColorSheet = uiColorSheet;
@@ -26,8 +66,9 @@ namespace InventoryTools.Logic.Settings.Abstract
             {
                 var colorA = Utils.ConvertUiColorToColor(a);
                 var colorB = Utils.ConvertUiColorToColor(b);
-                ImGui.ColorConvertRGBtoHSV(colorA.X, colorA.Y, colorA.Z, out var aH, out var aS, out var aV);
-                ImGui.ColorConvertRGBtoHSV(colorB.X, colorB.Y, colorB.Z, out var bH, out var bS, out var bV);
+
+                RGBtoHSV(colorA.X, colorA.Y, colorA.Z, out var aH, out var aS, out var aV);
+                RGBtoHSV(colorB.X, colorB.Y, colorB.Z, out var bH, out var bS, out var bV);
 
                 var hue = aH.CompareTo(bH);
                 if (hue != 0)

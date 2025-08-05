@@ -3,7 +3,7 @@ using System.Numerics;
 using Autofac;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
@@ -15,7 +15,7 @@ public class DebugListServiceWindow : GenericWindow
 {
     private readonly IComponentContext _componentContext;
     private IListService? _listService;
-    
+
     public IListService ListService => _listService ??= _componentContext.Resolve<IListService>();
 
     public DebugListServiceWindow(ILogger<DebugListServiceWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, IComponentContext componentContext, string name = "List Service - Debug") : base(logger, mediator, imGuiService, configuration, name)

@@ -1,7 +1,7 @@
 using System;
 using System.Numerics;
 using Dalamud.Interface.Colors;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 
 namespace InventoryTools.Ui.Widgets;
@@ -250,7 +250,7 @@ public class HorizontalSplitter
                         ImGui.Button("DraggerBtn", new(-1, -1));
                         if (ImGui.IsItemHovered() || ImGui.IsItemActive())
                         {
-                            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeNS);
+                            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeNs);
                             if (ImGui.IsMouseDown(ImGuiMouseButton.Left))
                             {
                                 if (_splitterResizeBuffer == null)

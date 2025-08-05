@@ -10,7 +10,7 @@ using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
@@ -38,7 +38,7 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskRow>, IMenuWin
                 OnLeftClick = OnLeftClick,
                 Draw = (ex, contentTypeId) =>
                 {
-                    if (ImGui.ImageButton(ImGuiService.GetIconTexture(65049).ImGuiHandle,
+                    if (ImGui.ImageButton(ImGuiService.GetIconTexture(65049).Handle,
                             new Vector2(RowSize, RowSize)))
                     {
                         _columns[0].OnLeftClick?.Invoke(ex);
@@ -236,7 +236,7 @@ public class RetainerTasksWindow : GenericTabbedTable<RetainerTaskRow>, IMenuWin
                     RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X,
                     drop =>
                     {
-                        ImGui.Image(ImGuiService.GetIconTexture(drop.Icon).ImGuiHandle,
+                        ImGui.Image(ImGuiService.GetIconTexture(drop.Icon).Handle,
                             new Vector2(RowSize, RowSize) * ImGui.GetIO().FontGlobalScale);
                         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
                                                 ImGuiHoveredFlags.AllowWhenOverlapped &

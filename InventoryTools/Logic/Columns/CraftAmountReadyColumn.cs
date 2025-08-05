@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using Dalamud.Interface.Colors;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -24,13 +24,13 @@ namespace InventoryTools.Logic.Columns
             }
             return (int?) searchResult.CraftItem.QuantityReady;
         }
-        
+
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
             SearchResult searchResult, int rowIndex, int columnIndex)
         {
             if (searchResult.CraftItem == null) return null;
-            
+
             if (searchResult.CraftItem.IsOutputItem)
             {
                 ImGui.TableNextColumn();

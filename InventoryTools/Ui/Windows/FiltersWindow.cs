@@ -19,7 +19,7 @@ using DalaMock.Host.Mediator;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Colors;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Ui.Widgets;
@@ -1099,7 +1099,7 @@ namespace InventoryTools.Ui
                             }
 
                             ImGui.SameLine();
-                            if(_clearIcon.Draw(ImGuiService.GetIconTexture(66308).ImGuiHandle, "clearSearch", new Vector2(18,18) * ImGui.GetIO().FontGlobalScale))
+                            if(_clearIcon.Draw(ImGuiService.GetIconTexture(66308).Handle, "clearSearch", new Vector2(18,18) * ImGui.GetIO().FontGlobalScale))
                             {
                                 SearchString = "";
                             }
@@ -1170,7 +1170,7 @@ namespace InventoryTools.Ui
                         {
                             float height = ImGui.GetWindowSize().Y;
                             ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
-                            if (_addIcon.Draw(ImGuiService.GetIconTexture(66315).ImGuiHandle, "cb_af"))
+                            if (_addIcon.Draw(ImGuiService.GetIconTexture(66315).Handle, "cb_af"))
                             {
                             }
 
@@ -1187,7 +1187,7 @@ namespace InventoryTools.Ui
 
         private unsafe void DrawTabBar()
         {
-            using (var tabBar = ImRaii.TabBar("InventoryTabs" + _tabLayout, ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.TabListPopupButton))
+            using (var tabBar = ImRaii.TabBar("InventoryTabs" + _tabLayout, ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.ListPopupButton))
             {
                 if (!tabBar.Success) return;
                 var filterConfigurations = Filters;
@@ -1527,7 +1527,7 @@ namespace InventoryTools.Ui
                     float width = ImGui.GetWindowSize().X;
                     ImGui.SetCursorPosX(width - 42 * ImGui.GetIO().FontGlobalScale);
                     ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                    if (_closeSettingsIcon.Draw(ImGuiService.GetIconTexture(66311).ImGuiHandle, "bb_settings"))
+                    if (_closeSettingsIcon.Draw(ImGuiService.GetIconTexture(66311).Handle, "bb_settings"))
                     {
                         _settingsActive = false;
                     }
@@ -1575,7 +1575,7 @@ namespace InventoryTools.Ui
 
                     ImGui.SameLine();
                     ImGuiService.CenterElement(20 * ImGui.GetIO().FontGlobalScale);
-                    if(_clearIcon.Draw(ImGuiService.GetIconTexture(66308).ImGuiHandle, "clearSearch"))
+                    if(_clearIcon.Draw(ImGuiService.GetIconTexture(66308).Handle, "clearSearch"))
                     {
                         itemTable.ClearFilters();
                     }
@@ -1591,7 +1591,7 @@ namespace InventoryTools.Ui
                         ImGui.SameLine();
                         width -= 28 * ImGui.GetIO().FontGlobalScale;
                         ImGui.SetCursorPosX(width);
-                        if (_searchIcon.Draw(ImGuiService.GetIconTexture(66320).ImGuiHandle, "tb_oib"))
+                        if (_searchIcon.Draw(ImGuiService.GetIconTexture(66320).Handle, "tb_oib"))
                         {
                             _addItemBarOpen = !_addItemBarOpen;
                         }
@@ -1602,7 +1602,7 @@ namespace InventoryTools.Ui
                     ImGui.SameLine();
                     width -= 28 * ImGui.GetIO().FontGlobalScale;
                     ImGui.SetCursorPosX(width);
-                    if (_editIcon.Draw(ImGuiService.GetImageTexture("edit").ImGuiHandle, "tb_edit"))
+                    if (_editIcon.Draw(ImGuiService.GetImageTexture("edit").Handle, "tb_edit"))
                     {
                         _settingsActive = !_settingsActive;
                     }
@@ -1636,7 +1636,7 @@ namespace InventoryTools.Ui
                 if (bottomBarChild.Success)
                 {
                     ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                    if(_marketIcon.Draw(ImGuiService.GetImageTexture("refresh-web").ImGuiHandle, "refreshMarket"))
+                    if(_marketIcon.Draw(ImGuiService.GetImageTexture("refresh-web").Handle, "refreshMarket"))
                     {
                         var activeCharacter = _characterMonitor.ActiveCharacter;
                         if (activeCharacter != null)
@@ -1707,7 +1707,7 @@ namespace InventoryTools.Ui
                     width -= 30 * ImGui.GetIO().FontGlobalScale;
                     ImGui.SetCursorPosX(width);
                     ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                    if (_menuIcon.Draw(ImGuiService.GetImageTexture("menu").ImGuiHandle, "openMenu"))
+                    if (_menuIcon.Draw(ImGuiService.GetImageTexture("menu").Handle, "openMenu"))
                     {
                     }
                     _settingsMenu.Draw();
@@ -1715,7 +1715,7 @@ namespace InventoryTools.Ui
                     width -= 30 * ImGui.GetIO().FontGlobalScale;
                     ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                     ImGui.SetCursorPosX(width);
-                    if (_settingsIcon.Draw(ImGuiService.GetIconTexture(66319).ImGuiHandle, "openConfig"))
+                    if (_settingsIcon.Draw(ImGuiService.GetIconTexture(66319).Handle, "openConfig"))
                     {
                         MediatorService.Publish(new ToggleGenericWindowMessage(typeof(ConfigurationWindow)));
                     }
@@ -1726,7 +1726,7 @@ namespace InventoryTools.Ui
                     width -= 30 * ImGui.GetIO().FontGlobalScale;
                     ImGui.SetCursorPosX(width);
                     ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                    if (_craftIcon.Draw(ImGuiService.GetImageTexture("craft").ImGuiHandle, "openCraft"))
+                    if (_craftIcon.Draw(ImGuiService.GetImageTexture("craft").Handle, "openCraft"))
                     {
                         MediatorService.Publish(new ToggleGenericWindowMessage(typeof(CraftsWindow)));
                     }
@@ -1739,7 +1739,7 @@ namespace InventoryTools.Ui
                         width -= 30 * ImGui.GetIO().FontGlobalScale;
                         ImGui.SetCursorPosX(width);
                         ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                        if (_clearIcon.Draw(ImGuiService.GetIconTexture(66308).ImGuiHandle, "clearHistory"))
+                        if (_clearIcon.Draw(ImGuiService.GetIconTexture(66308).Handle, "clearHistory"))
                         {
                             ImGui.OpenPopup("confirmHistoryDelete");
                         }
@@ -1820,7 +1820,7 @@ namespace InventoryTools.Ui
             ImGui.TableNextColumn();
             using (ImRaii.PushId("s_" + item.RowId))
             {
-                if (_addIcon.Draw(ImGuiService.GetIconTexture(66315).ImGuiHandle, "bbadd_" + item.RowId, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale))
+                if (_addIcon.Draw(ImGuiService.GetIconTexture(66315).Handle, "bbadd_" + item.RowId, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale))
                 {
                     _framework.RunOnFrameworkThread(() =>
                     {

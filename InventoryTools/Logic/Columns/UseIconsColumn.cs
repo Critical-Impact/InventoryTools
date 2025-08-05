@@ -8,7 +8,7 @@ using AllaganLib.GameSheets.Sheets;
 using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Columns.Abstract;
 using OtterGui;

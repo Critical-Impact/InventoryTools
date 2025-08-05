@@ -13,7 +13,7 @@ using DalaMock.Host.Mediator;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using OtterGui;
@@ -321,7 +321,7 @@ namespace InventoryTools.Logic
                             ImGuiListClipperPtr clipper;
                             unsafe
                             {
-                                clipper = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper_ImGuiListClipper());
+                                clipper = ImGui.ImGuiListClipper();
                                 clipper.ItemsHeight = 32;
                             }
 
@@ -367,7 +367,7 @@ namespace InventoryTools.Logic
                             ImGuiListClipperPtr clipper;
                             unsafe
                             {
-                                clipper = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper_ImGuiListClipper());
+                                clipper = ImGui.ImGuiListClipper();
                                 clipper.ItemsHeight = 32;
                             }
 
@@ -411,7 +411,7 @@ namespace InventoryTools.Logic
                             ImGuiListClipperPtr clipper;
                             unsafe
                             {
-                                clipper = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper_ImGuiListClipper());
+                                clipper = ImGui.ImGuiListClipper();
                                 clipper.ItemsHeight = 32;
                             }
 

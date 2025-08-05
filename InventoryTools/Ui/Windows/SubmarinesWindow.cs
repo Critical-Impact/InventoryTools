@@ -8,7 +8,7 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Mediator;
@@ -43,7 +43,7 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationRow>, IMe
                 OnLeftClick = OnLeftClick,
                 Draw = (ex, contentTypeId) =>
                 {
-                    if (ImGui.ImageButton(_imGuiService.GetIconTexture(Icons.AirshipIcon).ImGuiHandle,
+                    if (ImGui.ImageButton(_imGuiService.GetIconTexture(Icons.AirshipIcon).Handle,
                             new Vector2(RowSize, RowSize)))
                     {
                         _columns[0].OnLeftClick?.Invoke(ex);
@@ -152,7 +152,7 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationRow>, IMe
                     {
 
                         var sourceIcon = _imGuiService.GetIconTexture(drop.Icon);
-                        ImGui.Image(sourceIcon.ImGuiHandle,
+                        ImGui.Image(sourceIcon.Handle,
                             new Vector2(RowSize, RowSize) * ImGui.GetIO().FontGlobalScale);
                         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
                                                 ImGuiHoveredFlags.AllowWhenOverlapped &

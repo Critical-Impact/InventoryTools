@@ -1,7 +1,7 @@
 using System;
 using Dalamud.Interface.Utility;
 using FFXIVClientStructs.FFXIV.Common.Math;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs;
 
@@ -112,7 +112,7 @@ public static class ImGuiUtil
 
     public static bool? ConfirmPopup(string label, Vector2 size, Action content)
     {
-        ImGui.SetNextWindowPos(ImGui.GetMainViewport().GetCenter(), ImGuiCond.Always, new Vector2(0.5f));
+        ImGui.SetNextWindowPos(ImGui.GetCenter(ImGui.GetMainViewport()), ImGuiCond.Always, new Vector2(0.5f));
         ImGui.SetNextWindowSize(size);
         using var pop = ImRaii.Popup(label, ImGuiWindowFlags.Modal | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove);
         if (pop)

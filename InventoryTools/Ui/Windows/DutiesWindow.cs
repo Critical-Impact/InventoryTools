@@ -6,7 +6,7 @@ using AllaganLib.GameSheets.Sheets.Rows;
 using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Mediator;
@@ -41,7 +41,7 @@ public class DutiesWindow : GenericTabbedTable<ContentFinderConditionRow>, IMenu
                 OnLeftClick = OnLeftClick,
                 Draw = (ex, contentTypeId) =>
                 {
-                    if (ImGui.ImageButton(ImGuiService.GetIconTexture((int)ex.Base.ContentType.Value.IconDutyFinder).ImGuiHandle,
+                    if (ImGui.ImageButton(ImGuiService.GetIconTexture((int)ex.Base.ContentType.Value.IconDutyFinder).Handle,
                             new Vector2(RowSize, RowSize)))
                     {
                         _columns[0].OnLeftClick?.Invoke(ex);

@@ -1,0 +1,55 @@
+{
+  "solution": "InventoryTools.sln",
+  "solutionFolder": null,
+  "mappings": {
+    "DalaMock.Host": "../DalaMock/DalaMock.Host/DalaMock.Host.csproj",
+    "DalaMock.Core": "../DalaMock/DalaMock/DalaMock.Core.csproj",
+    "DalaMock.Shared": "../DalaMock/DalaMock.Shared/DalaMock.Shared.csproj",
+    "AllaganLib.Data": "../AllaganLib/AllaganLib.Data/AllaganLib.Data.csproj",
+    "AllaganLib.GameSheets": "../AllaganLib/AllaganLib.GameSheets/AllaganLib.GameSheets.csproj",
+    "AllaganLib.Interface": "../AllaganLib/AllaganLib.Interface/AllaganLib.Interface.csproj",
+    "AllaganLib.Shared": "../AllaganLib/AllaganLib.Shared/AllaganLib.Shared.csproj"
+  },
+  "restore": [
+    {
+      "name": "InventoryTools",
+      "packages": [
+        {
+          "packageName": "DalaMock.Host",
+          "version": "2.3.0"
+        },
+        {
+          "packageName": "DalaMock.Shared",
+          "version": "2.3.0"
+        },
+        {
+          "packageName": "AllaganLib.Interface",
+          "version": "1.2.17"
+        }
+      ]
+    },
+    {
+      "name": "CriticalCommonLib",
+      "packages": [
+        {
+          "packageName": "DalaMock.Host",
+          "version": "2.3.0"
+        },
+        {
+          "packageName": "AllaganLib.GameSheets",
+          "version": "1.2.17"
+        }
+      ]
+    },
+    {
+      "name": "InventoryToolsMock",
+      "packages": [
+        {
+          "packageName": "DalaMock.Core",
+          "version": "2.3.0"
+        }
+      ]
+    }
+  ],
+  "removeProjects": true
+}

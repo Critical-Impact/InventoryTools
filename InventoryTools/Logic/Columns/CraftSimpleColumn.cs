@@ -7,7 +7,7 @@ using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Interface;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Ui.Widgets;
 using Dalamud.Interface.Utility.Raii;
@@ -51,7 +51,7 @@ namespace InventoryTools.Logic.Columns
             {
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
-                ImGui.Image(ImGuiService.GetIconTexture(Icons.RedXIcon).ImGuiHandle, new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale,
+                ImGui.Image(ImGuiService.GetIconTexture(Icons.RedXIcon).Handle, new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale,
                     new System.Numerics.Vector2(0, 0), new System.Numerics.Vector2(1, 1));
                 if (ImGui.IsItemHovered())
                 {
@@ -86,7 +86,7 @@ namespace InventoryTools.Logic.Columns
                             if (searchResult.CraftItem.MarketUnitPrice != 0 && searchResult.CraftItem.MarketUnitPrice < searchResult.Item.BuyFromVendorPrice)
                             {
                                 ImGui.SameLine();
-                                ImGui.Image(ImGuiService.GetIconTexture(Icons.QuestionMarkIcon).ImGuiHandle, new Vector2(16, 16));
+                                ImGui.Image(ImGuiService.GetIconTexture(Icons.QuestionMarkIcon).Handle, new Vector2(16, 16));
                                 OtterGui.ImGuiUtil.HoverTooltip(
                                     "The market price of this item is cheaper than buying it from a vendor and you prefer vendors over the current ingredient preference.");
                             }
@@ -102,7 +102,7 @@ namespace InventoryTools.Logic.Columns
                 if (craftPrices != null && craftPrices.Count != 0)
                 {
                     ImGui.SameLine();
-                    ImGui.Image(ImGuiService.GetIconTexture(Icons.MarketboardIcon).ImGuiHandle, new Vector2(16,16));
+                    ImGui.Image(ImGuiService.GetIconTexture(Icons.MarketboardIcon).Handle, new Vector2(16,16));
                     if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
                     {
                         using (var tooltip = ImRaii.Tooltip())

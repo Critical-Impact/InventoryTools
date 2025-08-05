@@ -1,5 +1,5 @@
 using System.Numerics;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 
 namespace InventoryTools.Ui.Widgets;
@@ -14,7 +14,7 @@ public class HoverImageButton
         _id = id;
     }
 
-    public bool Draw(nint textureId, Vector2 size, int framePadding = 0, Vector2? uv0 = null, Vector2? uv1 = null, Vector4? bgColor = null, Vector4? tintColor = null, Vector4? bgColorHover = null, Vector4? tintColorHover = null)
+    public bool Draw(ImTextureID textureId, Vector2 size, int framePadding = 0, Vector2? uv0 = null, Vector2? uv1 = null, Vector4? bgColor = null, Vector4? tintColor = null, Vector4? bgColorHover = null, Vector4? tintColorHover = null)
     {
         bgColorHover ??= new Vector4(1, 1, 1, 0);
         bgColor ??= bgColorHover;

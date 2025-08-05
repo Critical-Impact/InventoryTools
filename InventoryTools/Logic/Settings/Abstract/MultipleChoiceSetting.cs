@@ -4,7 +4,7 @@ using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Extensions;
 using Dalamud.Interface.Colors;
 using FFXIVClientStructs.FFXIV.Common.Math;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Extensions;
 using Dalamud.Interface.Utility.Raii;
 using InventoryTools.Services;

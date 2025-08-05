@@ -12,7 +12,7 @@ using DalaMock.Host.Mediator;
 using Dalamud.Interface.Textures;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using OtterGui.Raii;
 
 namespace InventoryTools.Logic.ItemRenderers;
@@ -63,7 +63,7 @@ public class ItemCraftResultSourceRenderer : ItemInfoRenderer<ItemCraftResultSou
             foreach (var ingredient in asSource.Recipe.IngredientCounts)
             {
                 var item = _itemSheet.GetRow(ingredient.Key);
-                ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(item.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
+                ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(item.Icon)).GetWrapOrEmpty().Handle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
                 ImGui.SameLine();
                 ImGui.Text($"{item.NameString} x {ingredient.Value}");
             }

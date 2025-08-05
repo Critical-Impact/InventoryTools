@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Services;
 using Dalamud.Interface.Colors;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Lists;
 using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Services;

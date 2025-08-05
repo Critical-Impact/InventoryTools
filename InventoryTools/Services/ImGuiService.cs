@@ -8,7 +8,7 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Common.Math;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 
@@ -152,16 +152,16 @@ public class ImGuiService : AllaganLib.Interface.Services.ImGuiService
         var wrap = iconTex.GetWrapOrEmpty();
         if (uvStart.HasValue && uvEnd.HasValue)
         {
-            ImGui.Image(wrap.ImGuiHandle, size, uvStart.Value,
+            ImGui.Image(wrap.Handle, size, uvStart.Value,
                 uvEnd.Value);
         }
         else if (uvStart.HasValue)
         {
-            ImGui.Image(wrap.ImGuiHandle, size, uvStart.Value);
+            ImGui.Image(wrap.Handle, size, uvStart.Value);
         }
         else
         {
-            ImGui.Image(wrap.ImGuiHandle, size);
+            ImGui.Image(wrap.Handle, size);
         }
     }
 
@@ -170,7 +170,7 @@ public class ImGuiService : AllaganLib.Interface.Services.ImGuiService
         if (icon <= 65103)
         {
             var iconTex = TextureProvider.GetFromGameIcon(new GameIconLookup(icon, hqIcon));
-            ImGui.Image(iconTex.GetWrapOrEmpty().ImGuiHandle, size);
+            ImGui.Image(iconTex.GetWrapOrEmpty().Handle, size);
         }
         else
         {
@@ -190,16 +190,16 @@ public class ImGuiService : AllaganLib.Interface.Services.ImGuiService
         {
             if (uvStart.HasValue && uvEnd.HasValue)
             {
-                return ImGui.ImageButton(iconTex.GetWrapOrEmpty().ImGuiHandle, size, uvStart.Value,
+                return ImGui.ImageButton(iconTex.GetWrapOrEmpty().Handle, size, uvStart.Value,
                     uvEnd.Value);
             }
             else if (uvStart.HasValue)
             {
-                return ImGui.ImageButton(iconTex.GetWrapOrEmpty().ImGuiHandle, size, uvStart.Value);
+                return ImGui.ImageButton(iconTex.GetWrapOrEmpty().Handle, size, uvStart.Value);
             }
             else
             {
-                return ImGui.ImageButton(iconTex.GetWrapOrEmpty().ImGuiHandle, size);
+                return ImGui.ImageButton(iconTex.GetWrapOrEmpty().Handle, size);
             }
         }
 
@@ -222,7 +222,7 @@ public class ImGuiService : AllaganLib.Interface.Services.ImGuiService
                     if (imagePath != null)
                     {
                         var sourceIcon = LoadImage(imagePath);
-                        ImGui.Image(sourceIcon.GetWrapOrEmpty().ImGuiHandle, imageSize ??
+                        ImGui.Image(sourceIcon.GetWrapOrEmpty().Handle, imageSize ??
                                                                              new Vector2(200, 200) *
                                                                              ImGui.GetIO().FontGlobalScale);
                     }
@@ -258,7 +258,7 @@ public class ImGuiService : AllaganLib.Interface.Services.ImGuiService
                     if (imagePath != null)
                     {
                         var sourceIcon = LoadImage(imagePath);
-                        ImGui.Image(sourceIcon.GetWrapOrEmpty().ImGuiHandle, imageSize ??
+                        ImGui.Image(sourceIcon.GetWrapOrEmpty().Handle, imageSize ??
                                                                              new Vector2(200, 200) *
                                                                              ImGui.GetIO().FontGlobalScale);
                     }

@@ -3,7 +3,7 @@ using System.Linq;
 using System.Numerics;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
@@ -38,7 +38,7 @@ public abstract class GenericTabbedTable<T> : GenericWindow, IGenericTabbedTable
     }
     public void DrawTabs()
     {
-        using (var tabBar = ImRaii.TabBar("###Tab" + TableName, ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.TabListPopupButton))
+        using (var tabBar = ImRaii.TabBar("###Tab" + TableName, ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.ListPopupButton))
         {
             if (tabBar.Success)
             {
@@ -137,7 +137,7 @@ public abstract class GenericTabbedTable<T> : GenericWindow, IGenericTabbedTable
         index = 0;
         for (var columnIndex = 0; columnIndex < tableColumns.Count; columnIndex++)
         {
-            var name = ImGui.TableGetColumnName(index);
+            var name = ImGui.TableGetColumnNameS(index);
             var column = tableColumns[columnIndex];
             if (column.AllTabOnly && contentTypeId != 0)
             {
@@ -218,7 +218,7 @@ public abstract class GenericTabbedTable<T> : GenericWindow, IGenericTabbedTable
         ImGuiListClipperPtr clipper;
         unsafe
         {
-            clipper = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper_ImGuiListClipper());
+            clipper = ImGui.ImGuiListClipper();
             clipper.ItemsHeight = RowSize;
         }
 

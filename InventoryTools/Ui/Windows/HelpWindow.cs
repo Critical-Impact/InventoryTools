@@ -2,7 +2,7 @@ using System.Numerics;
 using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using Dalamud.Interface.Utility.Raii;

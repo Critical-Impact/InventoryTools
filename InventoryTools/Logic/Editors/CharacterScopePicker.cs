@@ -6,7 +6,7 @@ using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Services;
 using InventoryTools.Ui.Widgets;
 using Lumina.Excel;
@@ -423,7 +423,7 @@ public class CharacterScopePicker
 
         ImGui.SameLine();
         var cursorScreenPos = ImGui.GetCursorScreenPos();
-        if (_editButton.Draw(_imGuiService.LoadImage("edit").GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale))
+        if (_editButton.Draw(_imGuiService.LoadImage("edit").GetWrapOrEmpty().Handle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale))
         {
             ImGui.OpenPopup("scopePopup");
             ImGui.SetNextWindowPos(cursorScreenPos);

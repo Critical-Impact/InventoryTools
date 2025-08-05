@@ -10,7 +10,7 @@ using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace InventoryTools.Logic.ItemRenderers;
 
@@ -56,13 +56,13 @@ public class ItemGardeningCrossbreedSourceRenderer : ItemInfoRenderer<ItemGarden
                     ImGui.TableNextColumn();
                     foreach (var source in chunkedSource)
                     {
-                        ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(source.Seed1.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
+                        ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(source.Seed1.Icon)).GetWrapOrEmpty().Handle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
                         ImGui.SameLine();
                         ImGui.Text($"{source.Seed1.NameString}");
                         ImGui.SameLine();
                         ImGui.Text(" x ");
                         ImGui.SameLine();
-                        ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(source.Seed2.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
+                        ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(source.Seed2.Icon)).GetWrapOrEmpty().Handle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
                         ImGui.SameLine();
                         ImGui.Text($"{source.Seed2.NameString}");
                     }

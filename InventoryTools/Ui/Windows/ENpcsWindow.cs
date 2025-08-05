@@ -8,7 +8,7 @@ using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using OtterGui;
@@ -55,7 +55,7 @@ public class ENpcsWindow : GenericTabbedTable<ENpcResidentRow>, IMenuWindow
                 Draw = (ex, contentTypeId) =>
                 {
                     if (ImGui.ImageButton(
-                            ImGuiService.GetIconTexture(62043).ImGuiHandle,
+                            ImGuiService.GetIconTexture(62043).Handle,
                             new Vector2(RowSize, RowSize)))
                     {
                         _columns[0].OnLeftClick?.Invoke(ex);
@@ -96,7 +96,7 @@ public class ENpcsWindow : GenericTabbedTable<ENpcResidentRow>, IMenuWindow
                     var positions = ex.ENpcBase.Locations;
                     ImGuiService.WrapTableColumnElements("Scroll" + ex.RowId,positions, RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X, position =>
                     {
-                        if (ImGui.ImageButton(ImGuiService.GetIconTexture(60561).ImGuiHandle,
+                        if (ImGui.ImageButton(ImGuiService.GetIconTexture(60561).Handle,
                                 new Vector2(RowSize * ImGui.GetIO().FontGlobalScale,
                                     RowSize * ImGui.GetIO().FontGlobalScale), new Vector2(0, 0),
                                 new Vector2(1, 1), 0))
@@ -178,7 +178,7 @@ public class ENpcsWindow : GenericTabbedTable<ENpcResidentRow>, IMenuWindow
                             drop =>
                             {
                                 var sourceIcon = ImGuiService.GetIconTexture(drop.Icon);
-                                ImGui.Image(sourceIcon.ImGuiHandle,
+                                ImGui.Image(sourceIcon.Handle,
                                     new Vector2(RowSize, RowSize) * ImGui.GetIO().FontGlobalScale);
                                 if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
                                                         ImGuiHoveredFlags.AllowWhenOverlapped &

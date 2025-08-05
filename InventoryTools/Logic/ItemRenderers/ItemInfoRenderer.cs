@@ -13,7 +13,7 @@ using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Extensions;
 using Lumina.Excel.Sheets;
 
@@ -52,7 +52,7 @@ public abstract class ItemInfoRenderer<T> : IItemInfoRenderer where T : ItemSour
 
                 var item = ItemSheet.GetRow(itemInfo.ItemId);
                 ImGui.Image(
-                    TextureProvider.GetFromGameIcon(new GameIconLookup(item.Icon, itemInfo.IsHighQuality ?? false)).GetWrapOrEmpty().ImGuiHandle,
+                    TextureProvider.GetFromGameIcon(new GameIconLookup(item.Icon, itemInfo.IsHighQuality ?? false)).GetWrapOrEmpty().Handle,
                     new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale
                 );
                 ImGui.SameLine();

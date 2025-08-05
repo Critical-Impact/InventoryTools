@@ -7,7 +7,7 @@ using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using Dalamud.Interface.Textures;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools;
 using InventoryTools.Logic;
 using InventoryTools.Ui;
@@ -48,7 +48,7 @@ public class MockGameItemsWindow : GenericWindow
     public Dictionary<ulong, InventoryCategory> _selectedCategory;
     public override void Draw()
     {
-        using (var tabBar = ImRaii.TabBar("Bags", ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.TabListPopupButton))
+        using (var tabBar = ImRaii.TabBar("Bags", ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.ListPopupButton))
         {
             if (tabBar.Success)
             {
@@ -109,7 +109,7 @@ public class MockGameItemsWindow : GenericWindow
                                                                             new GameIconLookup(62574))
                                                                         : ImGuiService.TextureProvider.GetFromGameIcon(
                                                                             new GameIconLookup(item.Icon));
-                                                                    if(ImGui.ImageButton(texture.GetWrapOrEmpty().ImGuiHandle,
+                                                                    if(ImGui.ImageButton(texture.GetWrapOrEmpty().Handle,
                                                                         new Vector2(32, 32)))
                                                                     {
                                                                         item.ItemId = 0;

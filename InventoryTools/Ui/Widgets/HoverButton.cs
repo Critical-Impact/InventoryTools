@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Numerics;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 
 namespace InventoryTools.Ui.Widgets;
@@ -32,10 +32,10 @@ public class HoverButton
 
     public bool Draw(ISharedImmediateTexture sharedImmediateTexture, string id, Vector2? size = null)
     {
-        return Draw(sharedImmediateTexture.GetWrapOrEmpty().ImGuiHandle, id, size);
+        return Draw(sharedImmediateTexture.GetWrapOrEmpty().Handle, id, size);
     }
 
-    public bool Draw(nint imGuiHandle, string id, Vector2? size = null)
+    public bool Draw(ImTextureID imGuiHandle, string id, Vector2? size = null)
     {
         var isHovered = _buttonState.ContainsKey(id) && _buttonState[id];
         var success = false;

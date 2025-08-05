@@ -11,7 +11,7 @@ using CriticalCommonLib.Services.Mediator;
 using CsvHelper;
 using DalaMock.Host.Mediator;
 using Dalamud.Interface.Colors;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using OtterGui;
@@ -81,7 +81,7 @@ namespace InventoryTools.Logic
                 {
                     if (craftContentChild.Success)
                     {
-                        using var tabBar = ImRaii.TabBar("CraftTabs", ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.TabListPopupButton);
+                        using var tabBar = ImRaii.TabBar("CraftTabs", ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.ListPopupButton);
                         if (!tabBar.Success) return messages;
 
                         var groupedCrafts = CraftGroups;

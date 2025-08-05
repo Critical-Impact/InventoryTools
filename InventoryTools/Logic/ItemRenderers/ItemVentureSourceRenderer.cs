@@ -9,7 +9,7 @@ using DalaMock.Host.Mediator;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Humanizer;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Extensions;
 using InventoryTools.Mediator;
 using InventoryTools.Ui;

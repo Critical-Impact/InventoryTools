@@ -9,7 +9,7 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using Dalamud.Game.Text;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Ui.Widgets;
 using Dalamud.Interface.Utility.Raii;
@@ -190,7 +190,7 @@ public class CraftSettingsColumn : IColumn
 
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
 
-        if (_settingsIcon.Draw(ImGuiService.GetIconTexture(66319).ImGuiHandle, "cnf_" + rowIndex))
+        if (_settingsIcon.Draw(ImGuiService.GetIconTexture(66319).Handle, "cnf_" + rowIndex))
         {
             ImGui.OpenPopup("ConfigureItemSettings" + columnIndex + searchResult.CraftItem.ItemId + (searchResult.CraftItem.IsOutputItem ? "o" : ""));
         }
@@ -223,7 +223,7 @@ public class CraftSettingsColumn : IColumn
         if (retainerRetrievalDefault != perItemRetainerRetrieval)
         {
             ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
-            ImGui.Image(ImGuiService.GetIconTexture(Icons.RetainerIcon).ImGuiHandle, new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale,
+            ImGui.Image(ImGuiService.GetIconTexture(Icons.RetainerIcon).Handle, new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale,
                 new System.Numerics.Vector2(0, 0), new System.Numerics.Vector2(1, 1),
                 retainerRetrieval == CraftRetainerRetrieval.HqOnly
                     ? new Vector4(0.9f, 0.75f, 0.14f, 1f)
@@ -245,7 +245,7 @@ public class CraftSettingsColumn : IColumn
         else
         {
             ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
-            ImGui.Image(ImGuiService.GetIconTexture(Icons.RetainerIcon).ImGuiHandle, new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale,
+            ImGui.Image(ImGuiService.GetIconTexture(Icons.RetainerIcon).Handle, new Vector2(20, 20) * ImGui.GetIO().FontGlobalScale,
                 new System.Numerics.Vector2(0, 0), new System.Numerics.Vector2(1, 1), new Vector4(1f, 1f, 1f, 0.2f));
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
             {
@@ -325,27 +325,27 @@ public class CraftSettingsColumn : IColumn
 
         var canBeHq = item.Item.Base.CanBeHq;
 
-        nint textureHandle;
+        ImTextureID textureHandle;
         Vector4 iconTint;
 
         if (isCollectable)
         {
-            textureHandle = ImGuiService.GetImageTexture("collectable").ImGuiHandle;
+            textureHandle = ImGuiService.GetImageTexture("collectable").Handle;
             iconTint = new Vector4(0.9f, 0.75f, 0.14f, 1f);
         }
         else if (canBeHq && (hqRequired == true || (hqRequired == null && calculatedHqRequired)))
         {
-            textureHandle = ImGuiService.GetImageTexture("hq").ImGuiHandle;
+            textureHandle = ImGuiService.GetImageTexture("hq").Handle;
             iconTint = new Vector4(0.9f, 0.75f, 0.14f, 1f);
         }
         else if (hqRequired == false || !canBeHq)
         {
-            textureHandle = ImGuiService.GetImageTexture("hq").ImGuiHandle;
+            textureHandle = ImGuiService.GetImageTexture("hq").Handle;
             iconTint = new Vector4(1.0f,1.0f, 1.0f, 0.5f);
         }
         else
         {
-            textureHandle = ImGuiService.GetImageTexture("quality").ImGuiHandle;
+            textureHandle = ImGuiService.GetImageTexture("quality").Handle;
             iconTint = new Vector4(1.0f, 1.0f, 1.0f, 1f);
         }
 
@@ -420,7 +420,7 @@ public class CraftSettingsColumn : IColumn
     {
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
         var icon = _craftItemLocalizer.SourceIcon(item);
-        ImGui.Image(ImGuiService.GetIconTexture(icon).ImGuiHandle,
+        ImGui.Image(ImGuiService.GetIconTexture(icon).Handle,
             new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
         var itemRecipe = item.Recipe;
         if (itemRecipe != null)

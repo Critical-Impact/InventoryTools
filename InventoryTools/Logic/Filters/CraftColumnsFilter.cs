@@ -7,7 +7,7 @@ using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 
 using Dalamud.Interface.Colors;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic.Columns;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Logic.Filters.Abstract;
@@ -227,14 +227,14 @@ namespace InventoryTools.Logic.Filters
                                     if (column.Value.DefaultIn.HasFlag(configuration.FilterType))
                                     {
                                         ImGui.SameLine();
-                                        ImGui.Image(ImGuiService.GetIconTexture(Icons.SproutIcon).ImGuiHandle, new Vector2(16,16));
+                                        ImGui.Image(ImGuiService.GetIconTexture(Icons.SproutIcon).Handle, new Vector2(16,16));
                                         ImGuiUtil.HoverTooltip("Default Column");
                                     }
 
                                     if (column.Value.IsConfigurable)
                                     {
                                         ImGui.SameLine();
-                                        ImGui.Image(ImGuiService.GetIconTexture(Icons.WrenchIcon).ImGuiHandle, new Vector2(16,16));
+                                        ImGui.Image(ImGuiService.GetIconTexture(Icons.WrenchIcon).Handle, new Vector2(16,16));
                                         ImGuiUtil.HoverTooltip("Configurable");
                                     }
 

@@ -7,7 +7,7 @@ using CriticalCommonLib.Services;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Colors;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic;
 using OtterGui.Raii;
 
@@ -69,7 +69,7 @@ public class ImGuiTooltipService
                     ImGui.PopTextWrapPos();
                     ImGui.SameLine();
                     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X - 32);
-                    ImGui.Image(this._textureProvider.GetFromGameIcon(new(item.Base.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(32, 32));
+                    ImGui.Image(this._textureProvider.GetFromGameIcon(new(item.Base.Icon)).GetWrapOrEmpty().Handle, new Vector2(32, 32));
                     ImGui.TextUnformatted(item.Base.ItemUICategory.Value.Name.ExtractText());
                     ImGui.Separator();
                     if (item.ClassJobCategory != null)

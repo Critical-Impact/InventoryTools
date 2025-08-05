@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic.Columns.Abstract;
 using Dalamud.Interface.Utility.Raii;
 using InventoryTools.Logic.Settings;

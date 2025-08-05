@@ -7,7 +7,7 @@ using CriticalCommonLib;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
@@ -67,7 +67,7 @@ namespace InventoryTools.Ui
                 ImGui.TextUnformatted("Rank Required: " + AirshipExplorationPoint.Base.RankReq);
                 ;
                 var itemIcon = ImGuiService.GetIconTexture(Icons.AirshipIcon);
-                ImGui.Image(itemIcon.ImGuiHandle, new Vector2(100, 100) * ImGui.GetIO().FontGlobalScale);
+                ImGui.Image(itemIcon.Handle, new Vector2(100, 100) * ImGui.GetIO().FontGlobalScale);
 
 
                 if (ImGui.CollapsingHeader("Rewards (" + _drops.Count + ")", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.CollapsingHeader))
@@ -81,7 +81,7 @@ namespace InventoryTools.Ui
                         var drop = _drops[index];
 
                         var useIcon = ImGuiService.GetIconTexture(drop.Icon);
-                        if (ImGui.ImageButton(useIcon.ImGuiHandle,
+                        if (ImGui.ImageButton(useIcon.Handle,
                                 new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale, new(0, 0), new(1, 1), 0))
                         {
                             MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), drop.RowId));

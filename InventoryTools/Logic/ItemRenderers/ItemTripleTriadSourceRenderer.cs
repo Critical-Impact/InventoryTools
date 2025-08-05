@@ -8,7 +8,7 @@ using CriticalCommonLib.Models;
 using Dalamud.Game.Text;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using OtterGui.Raii;
 
 namespace InventoryTools.Logic.ItemRenderers;

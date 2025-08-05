@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace InventoryTools.Ui;
 
@@ -19,10 +19,10 @@ public class TableColumn<T>
     public ImGuiTableColumnFlags ColumnFlags { get; private set; }
     public Func<ImGuiSortDirection?, IEnumerable<T>, IEnumerable<T>>? Sort { get; set; }
     public Func<T, bool>? OnLeftClick { get; set; }
-    
+
     public Func<string?, IEnumerable<T>, IEnumerable<T>>? Filter { get; set; }
     public Func<bool?, IEnumerable<T>, IEnumerable<T>>? FilterBool { get; set; }
-    
+
     public Action<T, uint>? Draw { get; set; }
     public string FilterText = "";
     public bool? FilterBoolean = null;

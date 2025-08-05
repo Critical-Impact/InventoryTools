@@ -8,7 +8,7 @@ using AllaganLib.Interface.Grid;
 using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic;
 
 namespace InventoryTools.EquipmentSuggest;

@@ -9,7 +9,7 @@ using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Ui.Widgets;
@@ -123,7 +123,7 @@ namespace InventoryTools.Ui.Pages
                             if (character.Value.ActualClassJob != null)
                             {
                                 var icon = ImGuiService.GetIconTexture(character.Value.Icon);
-                                ImGui.Image(icon.ImGuiHandle, new Vector2(16, 16) * ImGui.GetIO().FontGlobalScale);
+                                ImGui.Image(icon.Handle, new Vector2(16, 16) * ImGui.GetIO().FontGlobalScale);
                             }
                         }
                     }
@@ -154,7 +154,7 @@ namespace InventoryTools.Ui.Pages
                         {
                             ImGui.SameLine();
                             var icon = ImGuiService.GetIconTexture(freeCompany.Value.Icon);
-                            ImGui.Image(icon.ImGuiHandle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale);
+                            ImGui.Image(icon.Handle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale);
                         }
                     }
                     ImGui.NewLine();
@@ -185,7 +185,7 @@ namespace InventoryTools.Ui.Pages
                         {
                             ImGui.SameLine();
                             var icon = ImGuiService.GetIconTexture(house.Value.Icon);
-                            ImGui.Image(icon.ImGuiHandle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale);
+                            ImGui.Image(icon.Handle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale);
                         }
                     }
                     ImGui.NewLine();
@@ -226,7 +226,7 @@ namespace InventoryTools.Ui.Pages
                             {
                                 ImGui.SameLine();
                                 var icon = ImGuiService.GetIconTexture(characterRetainer.Value.Icon);
-                                ImGui.Image(icon.ImGuiHandle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale);
+                                ImGui.Image(icon.Handle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale);
                             }
                         }
                         ImGui.NewLine();
@@ -262,7 +262,7 @@ namespace InventoryTools.Ui.Pages
                             {
                                 ImGui.SameLine();
                                 var icon = ImGuiService.GetIconTexture(characterRetainer.Value.Icon);
-                                ImGui.Image(icon.ImGuiHandle, new Vector2(16, 16) * ImGui.GetIO().FontGlobalScale);
+                                ImGui.Image(icon.Handle, new Vector2(16, 16) * ImGui.GetIO().FontGlobalScale);
                             }
                         }
 
@@ -312,7 +312,7 @@ namespace InventoryTools.Ui.Pages
                             {
                                 ImGui.SameLine();
                                 var icon = ImGuiService.GetIconTexture((uint)character.Icon);
-                                ImGui.Image(icon.ImGuiHandle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale);
+                                ImGui.Image(icon.Handle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale);
                             }
 
                             ImGui.SameLine();
@@ -403,7 +403,7 @@ namespace InventoryTools.Ui.Pages
                             {
                                 var categories = inventories.GetAllInventoriesByCategory();
 
-                                using (var tabBar = ImRaii.TabBar("categories", ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.TabListPopupButton))
+                                using (var tabBar = ImRaii.TabBar("categories", ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.ListPopupButton))
                                 {
                                     if (tabBar.Success)
                                     {
@@ -414,7 +414,7 @@ namespace InventoryTools.Ui.Pages
                                             {
                                                 if (tabItem.Success)
                                                 {
-                                                    using (var tabBar2 = ImRaii.TabBar("types", ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.TabListPopupButton))
+                                                    using (var tabBar2 = ImRaii.TabBar("types", ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.ListPopupButton))
                                                     {
                                                         if (tabBar2.Success)
                                                         {
@@ -439,10 +439,10 @@ namespace InventoryTools.Ui.Pages
                                                                                     if (ImGui.ImageButton(item.ItemId == 0
                                                                                                 ? ImGuiService
                                                                                                     .GetIconTexture(62574)
-                                                                                                    .ImGuiHandle
+                                                                                                    .Handle
                                                                                                 : ImGuiService
                                                                                                     .GetIconTexture(item.Icon)
-                                                                                                    .ImGuiHandle,
+                                                                                                    .Handle,
                                                                                             new Vector2(32, 32)))
                                                                                     {
 

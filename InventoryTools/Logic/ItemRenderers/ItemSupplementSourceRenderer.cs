@@ -10,7 +10,7 @@ using CriticalCommonLib.Models;
 using Dalamud.Interface.Textures;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Services;
 
 namespace InventoryTools.Logic.ItemRenderers;
@@ -356,7 +356,7 @@ public abstract class ItemSupplementUseRenderer<T> : ItemSupplementSourceRendere
         var asSources = AsSource(sources);
         foreach (var source in asSources.OrderBy(c => c.Item.NameString))
         {
-            ImGui.Image(TextureProvider.GetFromGameIcon(new GameIconLookup(source.Item.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18,18) * ImGui.GetIO().FontGlobalScale);
+            ImGui.Image(TextureProvider.GetFromGameIcon(new GameIconLookup(source.Item.Icon)).GetWrapOrEmpty().Handle, new Vector2(18,18) * ImGui.GetIO().FontGlobalScale);
             ImGui.SameLine();
             ImGui.Text(source.Item.NameString);
             if (source.Supplement.Min != null && source.Supplement.Max != null)
@@ -383,7 +383,7 @@ public abstract class ItemSupplementUseRenderer<T> : ItemSupplementSourceRendere
     public override Action<ItemSource> DrawTooltip => source =>
     {
         var asSource = AsSource(source);
-        ImGui.Image(TextureProvider.GetFromGameIcon(new GameIconLookup(source.Item.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18,18) * ImGui.GetIO().FontGlobalScale);
+        ImGui.Image(TextureProvider.GetFromGameIcon(new GameIconLookup(source.Item.Icon)).GetWrapOrEmpty().Handle, new Vector2(18,18) * ImGui.GetIO().FontGlobalScale);
         ImGui.SameLine();
         ImGui.Text(source.Item.NameString);
         if (asSource.Supplement.Min != null && asSource.Supplement.Max != null)

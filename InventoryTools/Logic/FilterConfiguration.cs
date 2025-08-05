@@ -8,7 +8,7 @@ using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Attributes;
 using InventoryTools.Converters;
 using InventoryTools.Logic.Filters;

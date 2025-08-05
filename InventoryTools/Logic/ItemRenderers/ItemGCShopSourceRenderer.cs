@@ -11,7 +11,7 @@ using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Services;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
@@ -77,7 +77,7 @@ public class ItemGCShopSourceRenderer : ItemInfoRenderer<ItemGCShopSource>
     {
         var asSource = AsSource(source);
 
-        ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(asSource.CostItem!.Icon)).GetWrapOrEmpty().ImGuiHandle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
+        ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(asSource.CostItem!.Icon)).GetWrapOrEmpty().Handle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
         ImGui.SameLine();
         ImGui.Text($"Cost: {asSource.CostItem.NameString} x {asSource.GCScripShopItem.Base.CostGCSeals}");
         if (asSource.GCScripShopItem.Base.RequiredGrandCompanyRank.IsValid)

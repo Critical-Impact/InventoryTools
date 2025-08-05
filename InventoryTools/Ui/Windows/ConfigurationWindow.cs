@@ -8,7 +8,7 @@ using Autofac;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Ui.MenuItems;
@@ -736,7 +736,7 @@ namespace InventoryTools.Ui
                     float height = ImGui.GetWindowSize().Y;
                     ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
 
-                    if(_addIcon.Draw(ImGuiService.GetIconTexture(66315).ImGuiHandle, "addFilter"))
+                    if(_addIcon.Draw(ImGuiService.GetIconTexture(66315).Handle, "addFilter"))
                     {
 
                     }
@@ -747,7 +747,7 @@ namespace InventoryTools.Ui
                     ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
                     ImGui.SetCursorPosX(26 * ImGui.GetIO().FontGlobalScale);
 
-                    if (_lightBulbIcon.Draw(ImGuiService.GetIconTexture(66318).ImGuiHandle,"addSample"))
+                    if (_lightBulbIcon.Draw(ImGuiService.GetIconTexture(66318).Handle,"addSample"))
                     {
 
                     }
@@ -761,7 +761,7 @@ namespace InventoryTools.Ui
                     ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
                     ImGui.SetCursorPosX(width);
 
-                    if (_menuIcon.Draw(ImGuiService.GetImageTexture("menu").ImGuiHandle, "openMenu"))
+                    if (_menuIcon.Draw(ImGuiService.GetImageTexture("menu").Handle, "openMenu"))
                     {
 
                     }
@@ -774,7 +774,7 @@ namespace InventoryTools.Ui
                     ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
                     ImGui.SetCursorPosX(width);
 
-                    if (_wizardStart.Draw(ImGuiService.GetImageTexture("wizard").ImGuiHandle, "openMenu"))
+                    if (_wizardStart.Draw(ImGuiService.GetImageTexture("wizard").Handle, "openMenu"))
                     {
                         _wizardMenu.Open();
                     }

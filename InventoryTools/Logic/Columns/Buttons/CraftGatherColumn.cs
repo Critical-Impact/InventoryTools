@@ -17,13 +17,14 @@ using Dalamud.Interface.Colors;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using Lumina.Extensions;
 using Microsoft.Extensions.Logging;
 using OtterGui;
+using ImGuiTable = OtterGui.ImGuiTable;
 
 namespace InventoryTools.Logic.Columns.Buttons
 {
@@ -204,7 +205,7 @@ namespace InventoryTools.Logic.Columns.Buttons
 
                     ImGui.SameLine();
                     var wrap = ImGuiService.TextureProvider.GetFromGameIcon(new GameIconLookup(66317)).GetWrapOrEmpty();
-                    ImGui.Image(wrap.ImGuiHandle, new(16, 16));
+                    ImGui.Image(wrap.Handle, new(16, 16));
 
                     if (ImGui.IsItemHovered())
                     {

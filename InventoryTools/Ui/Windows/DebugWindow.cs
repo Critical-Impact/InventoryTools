@@ -13,7 +13,7 @@ using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Services.Ui;
 using DalaMock.Host.Mediator;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic;
 using LuminaSupplemental.Excel.Model;
 using Dalamud.Interface.Utility.Raii;

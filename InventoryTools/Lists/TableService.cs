@@ -9,7 +9,7 @@ using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Filters;
 using InventoryTools.Mediator;

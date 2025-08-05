@@ -10,7 +10,7 @@ using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Mediator;
@@ -86,7 +86,7 @@ namespace InventoryTools.Ui
                 var garlandId = bNpc.GarlandToolsId;
                 if (garlandId != null)
                 {
-                    if (ImGui.ImageButton(ImGuiService.GetImageTexture("garlandtools").ImGuiHandle,
+                    if (ImGui.ImageButton(ImGuiService.GetImageTexture("garlandtools").Handle,
                             new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                     {
                         $"https://www.garlandtools.org/db/#mob/{garlandId}".OpenBrowser();
@@ -96,7 +96,7 @@ namespace InventoryTools.Ui
                     ImGui.SameLine();
                 }
 
-                if (ImGui.ImageButton(ImGuiService.GetImageTexture("teamcraft").ImGuiHandle,
+                if (ImGui.ImageButton(ImGuiService.GetImageTexture("teamcraft").Handle,
                         new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                 {
                     $"https://ffxivteamcraft.com/db/en/mob/{_bNpcId}".OpenBrowser();
@@ -119,7 +119,7 @@ namespace InventoryTools.Ui
                         if (drop.Item.IsValid)
                         {
                             var useIcon = ImGuiService.GetIconTexture(drop.Item.Value.Icon);
-                            if (ImGui.ImageButton(useIcon.ImGuiHandle,
+                            if (ImGui.ImageButton(useIcon.Handle,
                                     new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale,
                                     new(0, 0), new(1, 1),
                                     0))
@@ -175,7 +175,7 @@ namespace InventoryTools.Ui
                             .GetRowOrDefault(spawn.TerritoryTypeId);
                         if (territory != null)
                         {
-                            if (ImGui.ImageButton(ImGuiService.GetIconTexture(60561).ImGuiHandle,
+                            if (ImGui.ImageButton(ImGuiService.GetIconTexture(60561).Handle,
                                     new Vector2(32 * ImGui.GetIO().FontGlobalScale,32 * ImGui.GetIO().FontGlobalScale), new Vector2(0, 0),
                                     new Vector2(1, 1), 0))
                             {

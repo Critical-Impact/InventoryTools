@@ -15,7 +15,7 @@ using CriticalCommonLib.Services.Mediator;
 
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using Microsoft.Extensions.Logging;
 using Services;
 
@@ -67,7 +67,7 @@ public class UptimeColumn : TimeIntervalColumn
 
                 ImGui.SameLine();
                 var wrap = ImGuiService.TextureProvider.GetFromGameIcon(new GameIconLookup(66317)).GetWrapOrEmpty();
-                ImGui.Image(wrap.ImGuiHandle, new(16, 16));
+                ImGui.Image(wrap.Handle, new(16, 16));
 
                 if (ImGui.IsItemHovered())
                 {

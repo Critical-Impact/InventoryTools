@@ -8,7 +8,7 @@ using CriticalCommonLib.Models;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace InventoryTools.Logic.ItemRenderers;
 

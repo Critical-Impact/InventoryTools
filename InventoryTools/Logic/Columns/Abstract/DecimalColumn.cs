@@ -5,7 +5,7 @@ using System.Linq;
 using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Extensions;
 using InventoryTools.Services;
 using InventoryTools.Ui.Widgets;

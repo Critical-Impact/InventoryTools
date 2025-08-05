@@ -3,7 +3,7 @@ using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
@@ -32,7 +32,7 @@ namespace InventoryTools.Logic.Columns
             "Provides a series of small buttons that allow opening garland tools and trying on items.";
         public override bool HasFilter { get; set; } = false;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
-        
+
         public override List<MessageBase>? Draw(FilterConfiguration configuration,
             ColumnConfiguration columnConfiguration,
             SearchResult searchResult, int rowIndex, int columnIndex)

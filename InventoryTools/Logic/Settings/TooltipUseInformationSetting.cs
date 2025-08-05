@@ -5,7 +5,7 @@ using AllaganLib.GameSheets.ItemSources;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic.ItemRenderers;
 using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Logic.Settings.Abstract.Generic;
@@ -130,7 +130,7 @@ public class TooltipUseInformationSetting : Setting<Dictionary<ItemInfoType, Too
 
                     if (ImGui.IsItemHovered())
                     {
-                        ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeNS);
+                        ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeNs);
                     }
                     if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
                     {

@@ -7,7 +7,7 @@ using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Logic.Columns.ColumnSettings;
 using InventoryTools.Services;
@@ -87,7 +87,7 @@ namespace InventoryTools.Logic.Columns
                 if (activeCharacter != null)
                 {
                     ImGui.SameLine();
-                    ImGui.Image(ImGuiService.GetIconTexture(Icons.MarketboardIcon).ImGuiHandle, new Vector2(16, 16));
+                    ImGui.Image(ImGuiService.GetIconTexture(Icons.MarketboardIcon).Handle, new Vector2(16, 16));
                     if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
                     {
                         using (var tooltip = ImRaii.Tooltip())

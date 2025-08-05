@@ -8,7 +8,7 @@ using DalaMock.Host.Mediator;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic.ItemRenderers;
 using InventoryTools.Services;
 
@@ -72,7 +72,7 @@ public class EquipmentSuggestSelectedSecondaryItemColumn  : StringFormField<Equi
                     if (group)
                     {
                         if (ImGui.ImageButton(
-                                ImGuiService.GetIconTexture(item.SecondarySelectedItem.Item.Icon).ImGuiHandle,
+                                ImGuiService.GetIconTexture(item.SecondarySelectedItem.Item.Icon).Handle,
                                 new Vector2(iconSize, iconSize) * ImGui.GetIO().FontGlobalScale,
                                 new Vector2(0, 0), new Vector2(1, 1), 0))
                         {
@@ -122,7 +122,7 @@ public class EquipmentSuggestSelectedSecondaryItemColumn  : StringFormField<Equi
                 //                 if (group)
                 //                 {
                 //                     if (ImGui.ImageButton(
-                //                             ImGuiService.GetIconTexture(item.SecondarySelectedItem.Item.Icon).ImGuiHandle,
+                //                             ImGuiService.GetIconTexture(item.SecondarySelectedItem.Item.Icon).Handle,
                 //                             new Vector2(iconSize, iconSize) * ImGui.GetIO().FontGlobalScale,
                 //                             new Vector2(0, 0), new Vector2(1, 1), 0))
                 //                     {
@@ -159,7 +159,7 @@ public class EquipmentSuggestSelectedSecondaryItemColumn  : StringFormField<Equi
                 //                     var tint = firstItem.Type == item.SecondaryAcquisitionSource
                 //                         ? Vector4.One
                 //                         : new Vector4(1.0f, 1.0f, 1.0f, 0.5f);
-                //                     if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+                //                     if (ImGui.ImageButton(sourceIcon.Handle,
                 //                             new Vector2(iconSize, iconSize) * ImGui.GetIO().FontGlobalScale,
                 //                             new Vector2(0, 0),
                 //                             new Vector2(1, 1), 0, Vector4.Zero, tint))

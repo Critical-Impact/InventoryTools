@@ -18,7 +18,7 @@ using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using Humanizer;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
 using InventoryTools.Extensions;
@@ -407,7 +407,7 @@ public class ItemInfoRenderService : IDisposable
 
         var hasCustomClick = sourceRenderer?.OnClick != null;
 
-        if (hasCustomClick && ImGui.ImageButton(sourceIcon.ImGuiHandle,
+        if (hasCustomClick && ImGui.ImageButton(sourceIcon.Handle,
                 new Vector2(iconSize.X, iconSize.Y) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
                 new Vector2(1, 1), 0))
         {
@@ -426,7 +426,7 @@ public class ItemInfoRenderService : IDisposable
         }
         else if(!hasCustomClick)
         {
-            if (ImGui.ImageButton(sourceIcon.ImGuiHandle,
+            if (ImGui.ImageButton(sourceIcon.Handle,
                     new Vector2(iconSize.X, iconSize.Y) * ImGui.GetIO().FontGlobalScale, new Vector2(0, 0),
                     new Vector2(1, 1), 0))
             {

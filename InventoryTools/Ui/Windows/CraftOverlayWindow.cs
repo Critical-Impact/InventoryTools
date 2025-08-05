@@ -17,7 +17,7 @@ using Dalamud.Game.Text;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Localizers;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
@@ -383,7 +383,7 @@ public class CraftOverlayWindow : OverlayWindow
 
                             ImGui.TableNextRow();
                             ImGui.TableNextColumn();
-                            if (ImGui.ImageButton(ImGuiService.GetIconTexture(currentItem.Item.Icon).ImGuiHandle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale))
+                            if (ImGui.ImageButton(ImGuiService.GetIconTexture(currentItem.Item.Icon).Handle, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale))
                             {
                                 this.MediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), currentItem.ItemId));
                             }

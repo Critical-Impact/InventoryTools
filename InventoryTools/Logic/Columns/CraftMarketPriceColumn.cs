@@ -6,7 +6,7 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using Dalamud.Game.Text;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic.Columns.Abstract;
 using InventoryTools.Services;
 using Lumina.Excel;
@@ -62,7 +62,7 @@ public class CraftMarketPriceColumn : GilColumn
                     if (searchResult.CraftItem.MarketUnitPrice != 0 && searchResult.CraftItem.MarketUnitPrice < searchResult.Item.BuyFromVendorPrice)
                     {
                         ImGui.SameLine();
-                        ImGui.Image(ImGuiService.GetIconTexture(Icons.QuestionMarkIcon).ImGuiHandle, new Vector2(16, 16));
+                        ImGui.Image(ImGuiService.GetIconTexture(Icons.QuestionMarkIcon).Handle, new Vector2(16, 16));
                         ImGuiUtil.HoverTooltip(
                             "The market price of this item is cheaper than buying it from a vendor and you prefer vendors over the current ingredient preference.");
                     }
@@ -78,7 +78,7 @@ public class CraftMarketPriceColumn : GilColumn
         if (craftPrices != null && craftPrices.Count != 0)
         {
             ImGui.SameLine();
-            ImGui.Image(ImGuiService.GetIconTexture(Icons.MarketboardIcon).ImGuiHandle, new Vector2(16,16));
+            ImGui.Image(ImGuiService.GetIconTexture(Icons.MarketboardIcon).Handle, new Vector2(16,16));
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.None))
             {
                 using (var tooltip = ImRaii.Tooltip())

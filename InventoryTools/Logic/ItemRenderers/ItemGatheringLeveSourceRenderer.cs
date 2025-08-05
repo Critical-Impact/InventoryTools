@@ -11,7 +11,7 @@ using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Extensions;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
@@ -77,7 +77,7 @@ public class ItemGatheringLeveSourceRenderer : ItemInfoRenderer<ItemGatheringLev
                     var item = _itemSheet.GetRow(itemId);
 
                     ImGui.Image(
-                        _textureProvider.GetFromGameIcon(new GameIconLookup(item.Icon)).GetWrapOrEmpty().ImGuiHandle,
+                        _textureProvider.GetFromGameIcon(new GameIconLookup(item.Icon)).GetWrapOrEmpty().Handle,
                         new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
                     ImGui.SameLine();
                     ImGui.TextUnformatted($"{item.NameString} x {count}");
@@ -85,7 +85,7 @@ public class ItemGatheringLeveSourceRenderer : ItemInfoRenderer<ItemGatheringLev
                     {
                         ImGui.SameLine();
                         ImGui.Image(
-                            _textureProvider.GetPluginImageTexture(_pluginInterface, "hq").GetWrapOrEmpty().ImGuiHandle,
+                            _textureProvider.GetPluginImageTexture(_pluginInterface, "hq").GetWrapOrEmpty().Handle,
                             new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
                     }
                 }

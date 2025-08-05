@@ -9,7 +9,7 @@ using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using OtterGui;
@@ -69,7 +69,7 @@ public class BNpcsWindow : GenericTabbedTable<BNpcNameRow>, IMenuWindow
                 OnLeftClick = OnLeftClick,
                 Draw = (ex, contentTypeId) =>
                 {
-                    if (ImGui.ImageButton(ImGuiService.GetIconTexture(Icons.MobIcon).ImGuiHandle,
+                    if (ImGui.ImageButton(ImGuiService.GetIconTexture(Icons.MobIcon).Handle,
                             new Vector2(RowSize, RowSize)))
                     {
                         _columns[0].OnLeftClick?.Invoke(ex);
@@ -159,7 +159,7 @@ public class BNpcsWindow : GenericTabbedTable<BNpcNameRow>, IMenuWindow
                             .GetRowOrDefault(position.TerritoryTypeId);
                         if (territory != null)
                         {
-                            if (ImGui.ImageButton(ImGuiService.GetIconTexture(60561).ImGuiHandle,
+                            if (ImGui.ImageButton(ImGuiService.GetIconTexture(60561).Handle,
                                     new Vector2(RowSize * ImGui.GetIO().FontGlobalScale,
                                         RowSize * ImGui.GetIO().FontGlobalScale), new Vector2(0, 0),
                                     new Vector2(1, 1), 0))
@@ -207,7 +207,7 @@ public class BNpcsWindow : GenericTabbedTable<BNpcNameRow>, IMenuWindow
                         RowSize * ImGui.GetIO().FontGlobalScale - ImGui.GetStyle().FramePadding.X,
                         drop =>
                     {
-                        ImGui.Image(ImGuiService.GetIconTexture(drop.Icon).ImGuiHandle,
+                        ImGui.Image(ImGuiService.GetIconTexture(drop.Icon).Handle,
                             new Vector2(RowSize, RowSize) * ImGui.GetIO().FontGlobalScale);
                         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
                                                 ImGuiHoveredFlags.AllowWhenOverlapped &

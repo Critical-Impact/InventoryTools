@@ -10,7 +10,7 @@ using CriticalCommonLib;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using InventoryTools.Extensions;
 using InventoryTools.Logic;
 using InventoryTools.Mediator;
@@ -80,14 +80,14 @@ namespace InventoryTools.Ui
             }
             else
             {
-                if (ImGui.ImageButton(ImGuiService.GetImageTexture("garlandtools").ImGuiHandle,
+                if (ImGui.ImageButton(ImGuiService.GetImageTexture("garlandtools").Handle,
                         new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                 {
                     $"https://www.garlandtools.org/db/#eNpc/{_eNpcId}".OpenBrowser();
                 }
                 ImGuiUtil.HoverTooltip("Open in Garland Tools");
                 ImGui.SameLine();
-                if (ImGui.ImageButton(ImGuiService.GetImageTexture("teamcraft").ImGuiHandle,
+                if (ImGui.ImageButton(ImGuiService.GetImageTexture("teamcraft").Handle,
                         new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale))
                 {
                     $"https://ffxivteamcraft.com/db/en/eNpc/{_eNpcId}".OpenBrowser();
@@ -116,7 +116,7 @@ namespace InventoryTools.Ui
                                 foreach (var item in listing.Rewards)
                                 {
                                     var useIcon = ImGuiService.GetIconTexture(item.Item.Icon);
-                                    if (ImGui.ImageButton(useIcon.ImGuiHandle,
+                                    if (ImGui.ImageButton(useIcon.Handle,
                                             new Vector2(32, 32) * ImGui.GetIO().FontGlobalScale,
                                             new(0, 0), new(1, 1),
                                             0))
