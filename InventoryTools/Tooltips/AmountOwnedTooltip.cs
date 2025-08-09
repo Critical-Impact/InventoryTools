@@ -14,6 +14,7 @@ using InventoryTools.Logic.Editors;
 using InventoryTools.Logic.Settings;
 using Microsoft.Extensions.Logging;
 using OtterGui;
+using OtterGui.Extensions;
 
 namespace InventoryTools.Tooltips;
 
@@ -25,7 +26,7 @@ public class AmountOwnedTooltip : BaseTooltip
     private readonly InventoryScopeCalculator _inventoryScopeCalculator;
     private readonly ItemLocalizer _itemLocalizer;
 
-    public AmountOwnedTooltip(ILogger<AmountOwnedTooltip> logger, TooltipAmountOwnedColorSetting colorSetting, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, InventoryScopeCalculator inventoryScopeCalculator, IDalamudPluginInterface pluginInterface, ItemLocalizer itemLocalizer) : base(6900, logger, itemSheet, configuration, gameGui, pluginInterface)
+    public AmountOwnedTooltip(ILogger<AmountOwnedTooltip> logger, TooltipAmountOwnedColorSetting colorSetting, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, InventoryScopeCalculator inventoryScopeCalculator, IChatGui chatGui, ItemLocalizer itemLocalizer) : base(6900, logger, itemSheet, configuration, gameGui, chatGui)
     {
         _colorSetting = colorSetting;
         _characterMonitor = characterMonitor;

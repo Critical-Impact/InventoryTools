@@ -11,6 +11,7 @@ using InventoryTools.Logic.ItemRenderers;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
 using OtterGui;
+using OtterGui.Extensions;
 
 namespace InventoryTools.Services;
 

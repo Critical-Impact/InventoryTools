@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Model;
@@ -323,7 +324,7 @@ namespace InventoryTools.Logic.Columns.Buttons
                 }
 
                 ImGui.SameLine(0, 0);
-                if (ImGui.ArrowButton("select##" + rowIndex, ImGuiDir.Down))
+                if (ImGuiP.ArrowButtonEx("select##" + rowIndex, ImGuiDir.Down, new Vector2(24,24)))
                 {
                     ImGui.OpenPopup("buyLocations" + rowIndex);
                 }

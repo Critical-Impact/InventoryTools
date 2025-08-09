@@ -22,7 +22,7 @@ public class LocationDisplayTooltip : BaseTooltip
     private readonly TooltipAmountToRetrieveColorSetting _colorSetting;
     private readonly IListService _listService;
 
-    public LocationDisplayTooltip(ILogger<LocationDisplayTooltip> logger, TooltipAmountToRetrieveColorSetting colorSetting, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, IListService listService, IDalamudPluginInterface pluginInterface) : base(6904, logger, itemSheet, configuration, gameGui, pluginInterface)
+    public LocationDisplayTooltip(ILogger<LocationDisplayTooltip> logger, TooltipAmountToRetrieveColorSetting colorSetting, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, IListService listService, IChatGui chatGui) : base(6904, logger, itemSheet, configuration, gameGui, chatGui)
     {
         _colorSetting = colorSetting;
         _listService = listService;

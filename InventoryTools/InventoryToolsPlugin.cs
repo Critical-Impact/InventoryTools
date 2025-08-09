@@ -82,14 +82,13 @@ namespace InventoryTools
         public InventoryToolsPlugin(IDalamudPluginInterface pluginInterface, IPluginLog pluginLog,
             IAddonLifecycle addonLifecycle, IChatGui chatGui, IClientState clientState, ICommandManager commandManager,
             ICondition condition, IDataManager dataManager, IFramework framework, IGameGui gameGui,
-            IGameInteropProvider gameInteropProvider, IKeyState keyState, IGameNetwork gameNetwork,
-            IObjectTable objectTable, ITargetManager targetManager, ITextureProvider textureProvider,
+            IGameInteropProvider gameInteropProvider, IKeyState keyState, IObjectTable objectTable, ITargetManager targetManager, ITextureProvider textureProvider,
             IToastGui toastGui, IContextMenu contextMenu, ITitleScreenMenu titleScreenMenu,
             IGameInventory gameInventory) : base(pluginInterface,
             pluginLog, addonLifecycle, chatGui, clientState, commandManager,
             condition, dataManager, framework, gameGui,
-            gameInteropProvider, keyState, gameNetwork,
-            objectTable, targetManager, textureProvider,
+            gameInteropProvider, keyState, objectTable,
+            targetManager, textureProvider,
             toastGui, contextMenu, titleScreenMenu,
             gameInventory)
         {

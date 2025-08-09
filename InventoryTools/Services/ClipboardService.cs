@@ -11,7 +11,7 @@ public class ClipboardService : IClipboardService
 
     public string PasteFromClipboard()
     {
-        return ImGui.GetClipboardTextS();
+        return ImGui.GetClipboardText();
     }
 }
 

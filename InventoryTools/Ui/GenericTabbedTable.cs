@@ -137,7 +137,7 @@ public abstract class GenericTabbedTable<T> : GenericWindow, IGenericTabbedTable
         index = 0;
         for (var columnIndex = 0; columnIndex < tableColumns.Count; columnIndex++)
         {
-            var name = ImGui.TableGetColumnNameS(index);
+            var name = ImGui.TableGetColumnName(index);
             var column = tableColumns[columnIndex];
             if (column.AllTabOnly && contentTypeId != 0)
             {

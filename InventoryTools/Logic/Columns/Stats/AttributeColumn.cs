@@ -10,6 +10,7 @@ using Lumina.Excel;
 using Lumina.Excel.Sheets;
 using Microsoft.Extensions.Logging;
 using OtterGui;
+using OtterGui.Extensions;
 
 namespace InventoryTools.Logic.Columns.Stats;
 

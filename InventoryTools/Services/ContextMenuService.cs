@@ -230,7 +230,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
     {
         var addonPtr = this._gameGui.GetAddonByName(addonName);
         if (addonPtr == IntPtr.Zero) return null;
-        var addon = (AtkUnitBase*)addonPtr;
+        var addon = (AtkUnitBase*)addonPtr.Address;
         var atkValue = addon->AtkValues[aktValue];
         if (atkValue.Type is ValueType.Null or ValueType.Undefined)
         {
@@ -341,7 +341,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
 
     private unsafe IntPtr AgentById(AgentId id)
     {
-        var uiModule = (UIModule*)_gameGui.GetUIModule();
+        var uiModule = (UIModule*)_gameGui.GetUIModule().Address;
         var agents   = uiModule->GetAgentModule();
         var agent    = agents->GetAgentByInternalId(id);
         return (IntPtr)agent;

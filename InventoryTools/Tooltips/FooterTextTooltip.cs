@@ -14,7 +14,7 @@ namespace InventoryTools.Tooltips;
 
 public class FooterTextTooltip : BaseTooltip
 {
-    public FooterTextTooltip(ILogger<FooterTextTooltip> logger, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, IDalamudPluginInterface pluginInterface) : base(6902, logger, itemSheet, configuration, gameGui, pluginInterface)
+    public FooterTextTooltip(ILogger<FooterTextTooltip> logger, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, IChatGui chatGui) : base(6902, logger, itemSheet, configuration, gameGui, chatGui)
     {
     }
     public override bool IsEnabled =>

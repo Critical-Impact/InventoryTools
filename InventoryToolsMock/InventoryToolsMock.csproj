@@ -1,114 +1,111 @@
-<Project Sdk="Dalamud.NET.Sdk/12.0.2">
-    <PropertyGroup>
-        <Use_DalamudPackager>false</Use_DalamudPackager>
-        <OutputType>Exe</OutputType>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\InventoryTools\InventoryTools.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <Reference Include="Dalamud">
-            <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
-            <Private>True</Private>
-        </Reference>
-        <Reference Include="Dalamud.Bindings.ImGui">
-            <HintPath>$(DalamudLibPath)Dalamud.Bindings.ImGui.dll</HintPath>
-            <Private>True</Private>
-        </Reference>
-        <Reference Include="Dalamud.Bindings.ImGuizmo">
-            <HintPath>$(DalamudLibPath)Dalamud.Bindings.ImGuizmo.dll</HintPath>
-            <Private>True</Private>
-        </Reference>
-        <Reference Include="Dalamud.Bindings.ImPlot">
-            <HintPath>$(DalamudLibPath)Dalamud.Bindings.ImPlot.dll</HintPath>
-            <Private>True</Private>
-        </Reference>
-        <Reference Include="ImGuiScene">
-            <HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
-            <Private>True</Private>
-        </Reference>
-        <Reference Include="Lumina">
-            <HintPath>$(DalamudLibPath)Lumina.dll</HintPath>
-            <Private>True</Private>
-        </Reference>
-        <Reference Include="Lumina.Excel">
-            <HintPath>$(DalamudLibPath)Lumina.Excel.dll</HintPath>
-            <Private>True</Private>
-        </Reference>
-        <Reference Include="FFXIVClientStructs">
-            <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
-            <Private>True</Private>
-        </Reference>
-        <Reference Include="Newtonsoft.Json" PrivateAssets="All">
-            <HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
-            <Private>True</Private>
-        </Reference>
-        <Reference Include="StbiSharp">
-            <HintPath>$(DalamudLibPath)StbiSharp.dll</HintPath>
-        </Reference>
-        <Reference Include="InteropGenerator.Runtime">
-            <HintPath>$(DalamudLibPath)InteropGenerator.Runtime.dll</HintPath>
-            <Private>True</Private>
-        </Reference>
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="DalaMock.Core" Version="2.3.0" />
-      <PackageReference Include="Humanizer.Core" Version="3.0.0-beta.54" />
-      <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="9.0.6" />
-      <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="5.0.0-preview.5.20278.1" />
-      <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.6" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.6" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.6" />
-      <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="9.0.6" />
-      <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="9.0.6" />
-      <PackageReference Include="StbiSharp" Version="1.2.1" />
-      <PackageReference Include="TextCopy" Version="6.2.1" />
-      <PackageReference Include="Veldrid" Version="4.9.0" />
-      <PackageReference Include="Veldrid.SDL2" Version="4.9.0" />
-      <PackageReference Include="Veldrid.StartupUtilities" Version="4.9.0" />
-      <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
-      <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
-      <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-    </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Properties" />
-    </ItemGroup>
-    <ItemGroup>
-      <Content Include="cimgui.dll">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-      <Content Include="cimgui.pdb">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-      <Content Include="cimgui.so">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-      <Content Include="cimgui.so.bak">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-      <Content Include="cimguizmo.dll">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-      <Content Include="cimguizmo.pdb">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-      <Content Include="cimguizmo.so">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-      <Content Include="cimplot.dll">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-      <Content Include="cimplot.pdb">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-      <Content Include="cimplot.so">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-      <Content Include="Fonts\FontAwesomeFreeSolid.otf">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-    </ItemGroup>
+<Project Sdk="Dalamud.NET.Sdk/13.0.0">
+  <PropertyGroup>
+    <Use_DalamudPackager>false</Use_DalamudPackager>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\InventoryTools\InventoryTools.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Dalamud">
+      <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Dalamud.Bindings.ImGui">
+      <HintPath>$(DalamudLibPath)Dalamud.Bindings.ImGui.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Dalamud.Bindings.ImGuizmo">
+      <HintPath>$(DalamudLibPath)Dalamud.Bindings.ImGuizmo.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Dalamud.Bindings.ImPlot">
+      <HintPath>$(DalamudLibPath)Dalamud.Bindings.ImPlot.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ImGuiScene">
+      <HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Lumina">
+      <HintPath>$(DalamudLibPath)Lumina.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Lumina.Excel">
+      <HintPath>$(DalamudLibPath)Lumina.Excel.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FFXIVClientStructs">
+      <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json" PrivateAssets="All">
+      <HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="StbiSharp">
+      <HintPath>$(DalamudLibPath)StbiSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="InteropGenerator.Runtime">
+      <HintPath>$(DalamudLibPath)InteropGenerator.Runtime.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="DalaMock.Core" Version="3.0.1" />
+    <PackageReference Include="Humanizer.Core" Version="3.0.0-beta.54" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="9.0.8" />
+    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="5.0.0-preview.5.20278.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="9.0.8" />
+    <PackageReference Include="StbiSharp" Version="1.2.1" />
+    <PackageReference Include="TextCopy" Version="6.2.1" />
+    <PackageReference Include="Veldrid" Version="4.9.0" />
+    <PackageReference Include="Veldrid.SDL2" Version="4.9.0" />
+    <PackageReference Include="Veldrid.StartupUtilities" Version="4.9.0" />
+    <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="cimgui.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="cimgui.pdb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="cimgui.so">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="cimgui.so.bak">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="cimguizmo.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="cimguizmo.pdb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="cimguizmo.so">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="cimplot.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="cimplot.pdb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="cimplot.so">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Fonts\FontAwesomeFreeSolid.otf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

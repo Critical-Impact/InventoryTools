@@ -23,7 +23,7 @@ public class IngredientPatchTooltip : BaseTooltip
     private readonly TooltipDisplayIngredientPatchSetting _tooltipIngredientPatchTooltipSetting;
     private readonly ShowTooltipsSetting _showTooltipsSetting;
 
-    public IngredientPatchTooltip(ILogger<IngredientPatchTooltip> logger, IngredientPatchService ingredientPatchService, TooltipIngredientPatchTooltipColorSetting colorSetting, TooltipDisplayIngredientPatchSetting tooltipIngredientPatchTooltipSetting, ShowTooltipsSetting showTooltipsSetting, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, IDalamudPluginInterface pluginInterface) : base(6908, logger, itemSheet, configuration, gameGui, pluginInterface)
+    public IngredientPatchTooltip(ILogger<IngredientPatchTooltip> logger, IngredientPatchService ingredientPatchService, TooltipIngredientPatchTooltipColorSetting colorSetting, TooltipDisplayIngredientPatchSetting tooltipIngredientPatchTooltipSetting, ShowTooltipsSetting showTooltipsSetting, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, IChatGui chatGui) : base(6908, logger, itemSheet, configuration, gameGui, chatGui)
     {
         _ingredientPatchService = ingredientPatchService;
         _colorSetting = colorSetting;

@@ -21,7 +21,7 @@ public class DisplayMarketPriceTooltip : BaseTooltip
     private readonly ICharacterMonitor _characterMonitor;
     private readonly IMarketCache _marketCache;
 
-    public DisplayMarketPriceTooltip(ILogger<DisplayMarketPriceTooltip> logger, TooltipMarketPricingColorSetting colorSetting, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, ICharacterMonitor characterMonitor, IMarketCache marketCache, IDalamudPluginInterface pluginInterface) : base(6901, logger, itemSheet, configuration, gameGui, pluginInterface)
+    public DisplayMarketPriceTooltip(ILogger<DisplayMarketPriceTooltip> logger, TooltipMarketPricingColorSetting colorSetting, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, ICharacterMonitor characterMonitor, IMarketCache marketCache, IChatGui chatGui) : base(6901, logger, itemSheet, configuration, gameGui, chatGui)
     {
         _colorSetting = colorSetting;
         _characterMonitor = characterMonitor;

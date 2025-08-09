@@ -24,7 +24,7 @@ public class DisplayUnlockTooltip : BaseTooltip
     private readonly ICharacterMonitor _characterMonitor;
     private readonly IUnlockTrackerService _unlockTrackerService;
 
-    public DisplayUnlockTooltip(ILogger<DisplayUnlockTooltip> logger, TooltipItemUnlockStatusColorSetting colorSetting, TooltipDisplayUnlockSetting tooltipDisplayUnlockSetting, TooltipDisplayUnlockDisplayModeSetting displayModeSetting, TooltipDisplayUnlockHideUnlockedSetting hideUnlockedSetting, ShowTooltipsSetting showTooltipsSetting, TooltipDisplayUnlockCharacterSetting tooltipDisplayUnlockCharacterSetting, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, ICharacterMonitor characterMonitor, IDalamudPluginInterface pluginInterface, IUnlockTrackerService unlockTrackerService) : base(6905, logger, itemSheet, configuration, gameGui, pluginInterface)
+    public DisplayUnlockTooltip(ILogger<DisplayUnlockTooltip> logger, TooltipItemUnlockStatusColorSetting colorSetting, TooltipDisplayUnlockSetting tooltipDisplayUnlockSetting, TooltipDisplayUnlockDisplayModeSetting displayModeSetting, TooltipDisplayUnlockHideUnlockedSetting hideUnlockedSetting, ShowTooltipsSetting showTooltipsSetting, TooltipDisplayUnlockCharacterSetting tooltipDisplayUnlockCharacterSetting, ItemSheet itemSheet, InventoryToolsConfiguration configuration, IGameGui gameGui, ICharacterMonitor characterMonitor, IChatGui chatGui, IUnlockTrackerService unlockTrackerService) : base(6905, logger, itemSheet, configuration, gameGui, chatGui)
     {
         _colorSetting = colorSetting;
         _tooltipDisplayUnlockSetting = tooltipDisplayUnlockSetting;

@@ -72,7 +72,7 @@ public class ShopHighlighting : IDisposable
         var addon = gameGui.GetAddonByName("Shop");
         if (addon != IntPtr.Zero)
         {
-            var atkUnitBase = (AtkUnitBase*)addon;
+            var atkUnitBase = (AtkUnitBase*)addon.Address;
             var atkComponentBase = atkUnitBase->GetComponentByNodeId(16);
             if (atkComponentBase != null)
             {
@@ -118,7 +118,7 @@ public class ShopHighlighting : IDisposable
     {
         if (args.Addon != IntPtr.Zero)
         {
-            var atkUnitBase = (AtkUnitBase*)args.Addon;
+            var atkUnitBase = (AtkUnitBase*)args.Addon.Address;
             var atkComponentBase = atkUnitBase->GetComponentByNodeId(16);
             if (atkComponentBase != null)
             {
@@ -197,7 +197,7 @@ public class ShopHighlighting : IDisposable
     {
         if (args.Addon != IntPtr.Zero)
         {
-            var atkUnitBase = (AtkUnitBase*)args.Addon;
+            var atkUnitBase = (AtkUnitBase*)args.Addon.Address;
             CalculateItemIndexMap(atkUnitBase);
         }
     }

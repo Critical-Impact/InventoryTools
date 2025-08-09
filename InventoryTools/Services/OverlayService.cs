@@ -87,7 +87,7 @@ namespace InventoryTools.Services
         private unsafe void PostRefresh(AddonEvent type, AddonArgs args)
         {
             //Window shown/hidden/needs redraw
-            var addon = (AtkUnitBase*)args.Addon;
+            var addon = (AtkUnitBase*)args.Addon.Address;
             if (_windowsToTrack.Contains(args.AddonName))
             {
                 var newState = addon->IsVisible;

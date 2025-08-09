@@ -1001,7 +1001,7 @@ namespace InventoryTools.Ui
                 var addon = gameGui.GetAddonByName(_addonName);
                 if (addon != IntPtr.Zero)
                 {
-                    var unitBase = (AtkUnitBase*)addon;
+                    var unitBase = (AtkUnitBase*)addon.Address;
 
                     if (unitBase != null)
                     {
@@ -1759,7 +1759,7 @@ namespace InventoryTools.Ui
                 var freeCompanyChest = this.gameGui.GetAddonByName("FreeCompanyChest");
                 if (freeCompanyChest != IntPtr.Zero)
                 {
-                    var freeCompanyChestAddon = (InventoryFreeCompanyChestAddon*)freeCompanyChest;
+                    var freeCompanyChestAddon = (InventoryFreeCompanyChestAddon*)freeCompanyChest.Address;
                     if (freeCompanyChestAddon != null)
                     {
                         ImGui.Text($"Current Tab: { freeCompanyChestAddon->CurrentTab }");
@@ -1778,7 +1778,7 @@ namespace InventoryTools.Ui
                         ImGui.Text($"Current Tab: { mirageAgent->TabIndex }");
                     }
 
-                    var mirageAddon = (AddonMiragePrismPrismBox*)addon;
+                    var mirageAddon = (AddonMiragePrismPrismBox*)addon.Address;
                     if (mirageAddon != null)
                     {
                         ImGui.Text($"Class/Job Selected: { mirageAddon->Param }");
@@ -1800,7 +1800,7 @@ namespace InventoryTools.Ui
                 var addon = this.gameGui.GetAddonByName("CabinetWithdraw");
                 if (addon != IntPtr.Zero)
                 {
-                    var cabinetWithdraw = (AddonCabinetWithdraw*)addon;
+                    var cabinetWithdraw = (AddonCabinetWithdraw*)addon.Address;
                     if (cabinetWithdraw != null)
                     {
                         ImGui.Text($"Artifact Armor Selected: { (cabinetWithdraw->ArtifactArmorRadioButton->IsChecked ? "yes" : "no") }");
@@ -1821,7 +1821,7 @@ namespace InventoryTools.Ui
                 var addon = this.gameGui.GetAddonByName("HousingGoods");
                 if (addon != IntPtr.Zero)
                 {
-                    var housingGoods = (AddonHousingGoods*)addon;
+                    var housingGoods = (AddonHousingGoods*)addon.Address;
                     if (housingGoods != null)
                     {
                         ImGui.Text($"Current Tab: { (housingGoods->CurrentTab) }");

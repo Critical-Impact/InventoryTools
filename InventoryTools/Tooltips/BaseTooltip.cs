@@ -16,32 +16,32 @@ public abstract class BaseTooltip : TooltipService.TooltipTweak, IDisposable
     public InventoryToolsConfiguration Configuration { get; }
     public IGameGui GameGui { get; }
 
-    public IDalamudPluginInterface PluginInterface { get; }
+    public IChatGui ChatGui { get; }
     public ILogger Logger { get; }
     public ItemSheet ItemSheet { get; }
     public abstract uint Order { get; }
 
     public BaseTooltip(uint tooltipIdentifier, ILogger logger, ItemSheet itemSheet,
-        InventoryToolsConfiguration configuration, IGameGui gameGui, IDalamudPluginInterface pluginInterface) : base(logger)
+        InventoryToolsConfiguration configuration, IGameGui gameGui, IChatGui chatGui) : base(logger)
     {
         TooltipIdentifier = tooltipIdentifier;
         Configuration = configuration;
         GameGui = gameGui;
-        PluginInterface = pluginInterface;
+        ChatGui = chatGui;
         Logger = logger;
         ItemSheet = itemSheet;
     }
 
     public DalamudLinkPayload GetLinkPayload()
     {
-        return this.IdentifierPayload ??= PluginInterface.AddChatLinkHandler(TooltipIdentifier, (_, _) => { });
+        return this.IdentifierPayload ??= ChatGui.AddChatLinkHandler(TooltipIdentifier, (_, _) => { });
     }
 
     public void ClearLinkPayload()
     {
         if (this.IdentifierPayload != null)
         {
-            PluginInterface.RemoveChatLinkHandler(TooltipIdentifier);
+            ChatGui.RemoveChatLinkHandler(TooltipIdentifier);
         }
     }
 
