@@ -359,7 +359,8 @@ namespace InventoryTools.Lists
 
         public FilterConfiguration DuplicateList(FilterConfiguration configuration, string newName)
         {
-            var newConfiguration = configuration.Clone() ?? _filterConfigFactory.Invoke();
+            var newConfiguration = _filterConfigFactory.Invoke();
+            newConfiguration.CopyFrom(configuration);
             newConfiguration.Key = Guid.NewGuid().ToString("N");
             newConfiguration.Name = newName;
             AddList(newConfiguration);
@@ -382,18 +383,8 @@ namespace InventoryTools.Lists
                 fixedName = newNameNN + " " + count;
             }
 
-            var clonedFilter = GetDefaultCraftList().Clone();
-            if (clonedFilter == null)
-            {
-                var filter = _filterConfigFactory.Invoke();
-                filter.Name = fixedName;
-                filter.FilterType = FilterType.CraftFilter;
-                AddDefaultColumns(filter);
-                filter.IsEphemeralCraftList = isEphemeralNN;
-                AddList(filter);
-                return filter;
-            }
-
+            var clonedFilter = _filterConfigFactory.Invoke();
+            clonedFilter.CopyFrom(GetDefaultCraftList());
             clonedFilter.Name = fixedName;
             clonedFilter.GenerateNewTableId();
             clonedFilter.GenerateNewCraftTableId();

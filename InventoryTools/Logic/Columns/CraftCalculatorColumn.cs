@@ -85,7 +85,6 @@ public class CraftCalculatorColumn : IntegerColumn, IDisposable
 
                 if (scopeSetting == null)
                 {
-
                     var items = new List<CriticalCommonLib.Models.InventoryItem>();
                     var playerBags = _inventoryMonitor.GetSpecificInventory(_characterMonitor.ActiveCharacterId,
                         InventoryCategory.CharacterBags);

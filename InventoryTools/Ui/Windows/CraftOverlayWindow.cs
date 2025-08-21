@@ -5,6 +5,7 @@ using System.Numerics;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Sheets;
+using AllaganLib.Monitors.Services;
 using AllaganLib.Shared.Time;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
@@ -49,7 +50,7 @@ public class CraftOverlayWindow : OverlayWindow
     private readonly CraftOverlayRememberStateSetting _rememberStateSetting;
     private readonly CraftOverlayWindowStateSetting _windowStateSetting;
     private readonly CraftOverlayHideSetting _overlayHideSetting;
-    private readonly ShopTrackerService _shopTrackerService;
+    private readonly ShopMonitorService _shopMonitorService;
     private readonly CraftGroupingLocalizer _craftGroupingLocalizer;
     private readonly ISeTime _seTime;
     private readonly MapSheet _mapSheet;
@@ -73,7 +74,7 @@ public class CraftOverlayWindow : OverlayWindow
         CraftOverlayRememberStateSetting rememberStateSetting,
         CraftOverlayWindowStateSetting windowStateSetting,
         CraftOverlayHideSetting overlayHideSetting,
-        ShopTrackerService shopTrackerService,
+        ShopMonitorService shopMonitorService,
         CraftGroupingLocalizer craftGroupingLocalizer,
         ISeTime seTime) : base(logger,
         configuration,
@@ -96,7 +97,7 @@ public class CraftOverlayWindow : OverlayWindow
         _rememberStateSetting = rememberStateSetting;
         _windowStateSetting = windowStateSetting;
         _overlayHideSetting = overlayHideSetting;
-        _shopTrackerService = shopTrackerService;
+        _shopMonitorService = shopMonitorService;
         _craftGroupingLocalizer = craftGroupingLocalizer;
         _seTime = seTime;
     }

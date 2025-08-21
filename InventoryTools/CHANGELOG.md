@@ -8,7 +8,19 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [13.0.1] - 2025-08-21
 
+### Added
+- Added debug windows available for end-users when debugging specific issues
+
+### Fixed
+- Fixed a silent crash when trying to duplicate a list
+- The Gather column will show a button for spearfishing
+- Removed bad mob data causing the mob window to crash
+- Hotkeys now work even if you continue to down a modifier key(shift, ctrl, alt)
+
+### Removed
+- Tetris has been removed as Allagan Tetris supersedes it
 
 ## [13.0.0] - 2025-08-09
 

@@ -53,7 +53,7 @@ namespace InventoryTools.Logic.Columns.Buttons
             {
                 return true;
             }
-            return searchResult.Item.ObtainedGathering || searchResult.Item.ObtainedFishing;
+            return searchResult.Item.ObtainedGathering || searchResult.Item.ObtainedFishing || searchResult.Item.ObtainedSpearFishing;
         }
 
         List<(IShop shop, ENpcBaseRow? npc, ILocation? location)> GetLocations(ItemRow item)
@@ -262,7 +262,7 @@ namespace InventoryTools.Logic.Columns.Buttons
 
                 return true;
             }
-            else if (searchResult.Item.ObtainedFishing)
+            else if (searchResult.Item.ObtainedFishing || searchResult.Item.ObtainedSpearFishing)
             {
                 if (needsSameLine)
                 {

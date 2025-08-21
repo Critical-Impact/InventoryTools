@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using AllaganLib.Shared.Windows;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Models;
@@ -380,13 +381,6 @@ public class MockWindow : GenericWindow
                 MediatorService.Publish(new OpenGenericWindowMessage(typeof(HelpWindow)));
             }
 
-            #if DEBUG
-            if (ImGui.Button("Debug Window"))
-            {
-                MediatorService.Publish(new OpenGenericWindowMessage(typeof(DebugWindow)));
-            }
-            #endif
-
             if (ImGui.Button("Configuration Window"))
             {
                 MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
@@ -443,9 +437,14 @@ public class MockWindow : GenericWindow
                 MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWizard)));
             }
 
-            if (ImGui.Button("ListDebugWindow"))
+            if (ImGui.Button("List Debug Window"))
             {
                 MediatorService.Publish(new OpenGenericWindowMessage(typeof(ListDebugWindow)));
+            }
+
+            if (ImGui.Button("Allagan Debug Window"))
+            {
+                MediatorService.Publish(new OpenDalamudWindowMessage(typeof(AllaganDebugWindow)));
             }
 
             if (ImGui.Button("Stack Tool"))

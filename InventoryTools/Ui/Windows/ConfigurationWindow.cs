@@ -147,7 +147,6 @@ namespace InventoryTools.Ui
                     new PopupMenu.PopupMenuItemSelectable("Airships Window", "airships", OpenAirshipsWindow,"Open the airships window."),
                     new PopupMenu.PopupMenuItemSelectable("Submarines Window", "submarines", OpenSubmarinesWindow,"Open the submarines window."),
                     new PopupMenu.PopupMenuItemSelectable("Retainer Ventures Window", "ventures", OpenRetainerVenturesWindow,"Open the retainer ventures window."),
-                    new PopupMenu.PopupMenuItemSelectable("Tetris", "tetris", OpenTetrisWindow,"Open the tetris window.", () => _configuration.TetrisEnabled),
                     new PopupMenu.PopupMenuItemSeparator(),
                     new PopupMenu.PopupMenuItemSelectable("Help", "help", OpenHelpWindow,"Open the help window."),
                 });
@@ -254,12 +253,6 @@ namespace InventoryTools.Ui
         {
             MediatorService.Publish(new OpenGenericWindowMessage(typeof(ENpcsWindow)));
         }
-
-        private void OpenTetrisWindow(string obj)
-        {
-            MediatorService.Publish(new OpenGenericWindowMessage(typeof(TetrisWindow)));
-        }
-
         private void AddAllGameItemsFilter(string arg1, string arg2)
         {
             _pluginLogic.AddAllGameItemsFilter(arg1);

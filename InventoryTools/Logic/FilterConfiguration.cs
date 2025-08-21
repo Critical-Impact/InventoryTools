@@ -18,6 +18,7 @@ namespace InventoryTools.Logic
 {
     public class FilterConfiguration
     {
+        [JsonIgnore] //Stops the object copy from erasing the field
         private readonly CraftList.Factory _craftListFactory;
         private List<(ulong, InventoryCategory)> _destinationInventories = new();
         private bool _displayInTabs = true;
@@ -1507,18 +1508,18 @@ namespace InventoryTools.Logic
         }
 
 
-        public FilterConfiguration? Clone()
+        public void CopyFrom(FilterConfiguration originalFilterConfiguration)
         {
             SearchResults = null;
-            var clone = this.Copy();
+            originalFilterConfiguration.CopyFields(this);
             SearchResults = null;
-            if (clone != null && this.FilterType == FilterType.CraftFilter)
+
+            if (this.FilterType == FilterType.CraftFilter)
             {
                 var newCraftList = _craftListFactory.Invoke();
                 var clonedCraftList = CraftList.Clone(newCraftList);
-                clone._craftList = clonedCraftList;
+                _craftList = clonedCraftList;
             }
-            return clone;
         }
     }
 

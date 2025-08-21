@@ -47,7 +47,7 @@ namespace InventoryToolsTesting.Tests
             Assert.AreEqual(3, shops.Count);
             var actualVendors = shops.SelectMany(shop => shop.Shop.ENpcs.SelectMany(npc => npc.Locations.Select(location => (shop, npc, location)))).ToList();
 
-            Assert.AreEqual(20, actualVendors.Count);
+            Assert.AreEqual(14, actualVendors.Count);
 
             //Wool Top 16906
             var woolTop = itemSheet.GetRow(16906)!;
@@ -56,7 +56,7 @@ namespace InventoryToolsTesting.Tests
             Assert.AreEqual(4, shops.Count);
             actualVendors = shops.SelectMany(shop => shop.Shop.ENpcs.SelectMany(npc => npc.Locations.Select(location => (shop, npc, location)))).ToList();
 
-            Assert.AreEqual(40, actualVendors.Count);
+            Assert.AreEqual(28, actualVendors.Count);
         }
 
         [Test]

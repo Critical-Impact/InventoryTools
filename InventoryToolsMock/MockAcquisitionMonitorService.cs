@@ -1,10 +1,11 @@
 using System.Threading;
 using System.Threading.Tasks;
+using AllaganLib.Monitors.Interfaces;
 using InventoryTools.Services;
 
 namespace InventoryToolsMock;
 
-public class MockAcquisitionTrackerService : ISimpleAcquisitionTrackerService
+public class MockAcquisitionMonitorService : IAcquisitionMonitorService
 {
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -20,7 +21,10 @@ public class MockAcquisitionTrackerService : ISimpleAcquisitionTrackerService
     {
     }
 
-    public event SimpleAcquisitionTrackerService.ItemAcquiredDelegate? ItemAcquired;
+    public event IAcquisitionMonitorService.ItemAcquiredDelegate? ItemAcquired;
+
+    public IAcquisitionMonitorConfiguration Configuration { get; set; }
+
     public void CalculateItemCounts(bool notify = true)
     {
     }

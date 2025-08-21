@@ -40,7 +40,8 @@ public class ListImportExportService
 
     public string ToBase64(FilterConfiguration configuration)
     {
-        var toExport = configuration.Clone()!;
+        var toExport = _filterConfigurationFactory.Invoke();
+        toExport.CopyFrom(configuration);
         toExport.DestinationInventories = new List<(ulong, InventoryCategory)>();
         toExport.SourceInventories = new List<(ulong, InventoryCategory)>();
         var json  = JsonConvert.SerializeObject(toExport);

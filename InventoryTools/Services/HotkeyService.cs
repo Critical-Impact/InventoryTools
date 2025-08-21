@@ -66,6 +66,10 @@ public class HotkeyService : DisposableMediatorSubscriberBase, IHotkeyService, I
                     {
                         foreach (var k in hotkeyVirtualKeys)
                         {
+                            if (k is VirtualKey.CONTROL or VirtualKey.SHIFT or VirtualKey.LSHIFT or VirtualKey.RSHIFT or VirtualKey.LMENU or VirtualKey.MENU)
+                            {
+                                continue;
+                            }
                             _keyStateService[(int)k] = false;
                         }
                     }

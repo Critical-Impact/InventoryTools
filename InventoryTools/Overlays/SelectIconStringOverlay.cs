@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using AllaganLib.Monitors.Services;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Ui;
 using Dalamud.Game.Addon.Lifecycle;
@@ -15,13 +16,13 @@ namespace InventoryTools.Overlays
     public class SelectIconStringOverlay: GameOverlay<AtkSelectIconString>, IAtkOverlayState, IDisposable
     {
         private readonly ICharacterMonitor _characterMonitor;
-        private readonly ShopTrackerService _shopTrackerService;
+        private readonly ShopMonitorService _shopMonitorService;
         private readonly IAddonLifecycle _addonLifecycle;
 
-        public SelectIconStringOverlay(ILogger<SelectIconStringOverlay> logger, AtkSelectIconString overlay, ICharacterMonitor characterMonitor, ShopTrackerService shopTrackerService, IAddonLifecycle addonLifecycle) : base(logger,overlay)
+        public SelectIconStringOverlay(ILogger<SelectIconStringOverlay> logger, AtkSelectIconString overlay, ICharacterMonitor characterMonitor, ShopMonitorService shopMonitorService, IAddonLifecycle addonLifecycle) : base(logger,overlay)
         {
             _characterMonitor = characterMonitor;
-            _shopTrackerService = shopTrackerService;
+            _shopMonitorService = shopMonitorService;
             _addonLifecycle = addonLifecycle;
             _addonLifecycle.RegisterListener(AddonEvent.PostSetup, this.WindowName.ToString(),AddonPostSetup);
         }
@@ -74,10 +75,10 @@ namespace InventoryTools.Overlays
                 if (filterResult != null)
                 {
                     Logger.LogTrace("Attempting to update state for SelectIconString");
-                    var currentShopTypes = _shopTrackerService.GetCurrentShopType();
+                    var currentShopTypes = _shopMonitorService.GetCurrentShopType();
                     if (currentShopTypes != null)
                     {
-                        SelectItems = newState.GetSelectIconStringItems(currentShopTypes.Value.shops);
+                        SelectItems = newState.GetSelectIconStringItems(currentShopTypes.Value.Shops);
                     }
                     else
                     {

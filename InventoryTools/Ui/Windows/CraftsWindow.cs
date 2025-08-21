@@ -149,8 +149,6 @@ namespace InventoryTools.Ui
                         "Open the submarines window."),
                     new PopupMenu.PopupMenuItemSelectable("Retainer Ventures Window", "ventures",
                         OpenRetainerVenturesWindow, "Open the retainer ventures window."),
-                    new PopupMenu.PopupMenuItemSelectable("Tetris", "tetris", OpenTetrisWindow,
-                        "Open the tetris window.", () => _configuration.TetrisEnabled),
                     new PopupMenu.PopupMenuItemSeparator(),
                     new PopupMenu.PopupMenuItemSelectable("Help", "help", OpenHelpWindow, "Open the help window."),
                 });
@@ -254,11 +252,6 @@ namespace InventoryTools.Ui
         private void OpenNpcsWindow(string obj)
         {
             MediatorService.Publish(new OpenGenericWindowMessage(typeof(ENpcsWindow)));
-        }
-
-        private void OpenTetrisWindow(string obj)
-        {
-            MediatorService.Publish(new OpenGenericWindowMessage(typeof(TetrisWindow)));
         }
 
         private void RefreshCraftList()

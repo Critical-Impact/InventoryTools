@@ -20,8 +20,7 @@ namespace InventoryToolsTesting.Services
         {
             var mockContainer = new MockContainer(new MockDalamudConfiguration()
             {
-                GamePath = new DirectoryInfo("/home/blair/.xlcore/ffxiv/game/sqpack"),
-                PluginSavePath = new DirectoryInfo("/home/blair/.xlcore/DalaMockConfigs/"),
+                CreateWindow = false
             }, builder =>
             {
                 builder.RegisterType<MediatorService>();
@@ -29,7 +28,7 @@ namespace InventoryToolsTesting.Services
             {
                 {typeof(IKeyState), typeof(TestKeyState)},
                 {typeof(ITextureProvider), typeof(TestTextureProvider)}
-            });
+            }, false);
             var pluginLoader = mockContainer.GetPluginLoader();
             var mockPlugin = pluginLoader.AddPlugin(typeof(InventoryToolsTestingPlugin));
             var pluginLoadSettings = new PluginLoadSettings(new DirectoryInfo(Environment.CurrentDirectory), new FileInfo(Path.Combine(Environment.CurrentDirectory, "test.json")));

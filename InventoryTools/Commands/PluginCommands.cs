@@ -2,6 +2,7 @@ using System;
 using AllaganLib.GameSheets.Sheets;
 using AllaganLib.GameSheets.Sheets.Rows;
 using AllaganLib.Shared.Extensions;
+using AllaganLib.Shared.Windows;
 using CriticalCommonLib;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Services;
@@ -138,20 +139,17 @@ namespace InventoryTools.Commands
 
         [Command("/athelp")]
         [HelpMessage("Opens the allagan tools help window")]
-        public  void OpenHelpWindow(string command, string args)
+        public void OpenHelpWindow(string command, string args)
         {
             _mediatorService.Publish(new ToggleGenericWindowMessage(typeof(HelpWindow)));
         }
 
-        #if DEBUG
-
         [Command("/atdebug")]
         [HelpMessage("Opens the allagan tools debug window")]
-        public  void ToggleDebugWindow(string command, string args)
+        public void ToggleDebugWindow(string command, string args)
         {
-            _mediatorService.Publish(new ToggleGenericWindowMessage(typeof(DebugWindow)));
+            _mediatorService.Publish(new ToggleDalamudWindowMessage(typeof(AllaganDebugWindow)));
         }
-#endif
 
         [Command("/atclearhighlights", "/atclearfilter")]
         [HelpMessage("Clears the currently active highlighting. Pass in background or ui to turn off highlighting for the background and ui highlighting respectively.")]

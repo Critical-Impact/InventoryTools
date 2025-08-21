@@ -54,10 +54,6 @@ public class FilterService : IFilterService
 
         _availableFilters = filters.ToList();
 
-        _availableFilters.Add(_booleanFilterFactory.Invoke("grCombined", "Glamour Ready Combined",
-            "Is the item combined in the glamour chest?", FilterCategory.Basic,
-            item => item.SortedCategory == InventoryCategory.GlamourChest && item.GlamourId != 0, null));
-
         foreach (var itemInfoType in Enum.GetValues<ItemInfoType>())
         {
             if (itemInfoRenderService.HasSourceRenderer(itemInfoType))

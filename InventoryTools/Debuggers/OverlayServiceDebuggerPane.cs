@@ -1,38 +1,34 @@
-#if DEBUG
+using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Autofac;
+using AllaganLib.Shared.Interfaces;
 using CriticalCommonLib;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Services;
-using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Services.Ui;
-using DalaMock.Host.Mediator;
 using Dalamud.Bindings.ImGui;
-using InventoryTools.Logic;
-using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
-using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Ui.DebugWindows;
 
-public class DebugOverlayServiceWindow : GenericWindow
+public class OverlayServiceDebuggerPane : IDebugPane
 {
     private readonly ICharacterMonitor _characterMonitor;
     private readonly IGameUiManager _gameUiManager;
-    private readonly IComponentContext _componentContext;
-    private IOverlayService? _overlayService;
+    private readonly Lazy<IOverlayService> _overlayService;
 
-    public IOverlayService OverlayService => _overlayService ??= _componentContext.Resolve<IOverlayService>();
+    public IOverlayService OverlayService => _overlayService.Value;
 
-    public DebugOverlayServiceWindow(ILogger<DebugOverlayServiceWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ICharacterMonitor characterMonitor, IGameUiManager gameUiManager, IComponentContext componentContext, string name = "Overlay Service - Debug") : base(logger, mediator, imGuiService, configuration, name)
+    public OverlayServiceDebuggerPane(ICharacterMonitor characterMonitor, IGameUiManager gameUiManager, Lazy<IOverlayService> overlayService)
     {
         _characterMonitor = characterMonitor;
         _gameUiManager = gameUiManager;
-        _componentContext = componentContext;
+        _overlayService = overlayService;
     }
 
-    public override void Draw()
+    public string Name => "Overlay System";
+
+    public void Draw()
     {
         ImGui.Text($"Current State: {(OverlayService.LastState == null ? "No State" : "Has State")}");
         if (OverlayService.LastState != null)
@@ -79,21 +75,4 @@ public class DebugOverlayServiceWindow : GenericWindow
         }
 
     }
-
-    public override void Invalidate()
-    {
-    }
-
-    public override FilterConfiguration? SelectedConfiguration => null;
-    public override string GenericKey => "DebugOverlayService";
-    public override string GenericName => "Overlay Service - Debug";
-    public override bool DestroyOnClose => true;
-    public override bool SaveState => false;
-    public override Vector2? DefaultSize { get; } = new Vector2(500, 500);
-    public override Vector2? MaxSize => null;
-    public override Vector2? MinSize => null;
-    public override void Initialize()
-    {
-    }
 }
-#endif

@@ -42,4 +42,9 @@ public class EquipmentSuggestToolModeCategorySetting : EnumFormField<EquipmentSu
         { EquipmentSuggestToolModeCategory.CombatRanged, "Combat (Ranged)" },
 
     };
+
+    public override bool Equal(Enum item1, Enum item2)
+    {
+        return item1.Equals(item2);
+    }
 }

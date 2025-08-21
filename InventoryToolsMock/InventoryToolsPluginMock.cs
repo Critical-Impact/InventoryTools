@@ -1,5 +1,4 @@
-using System;
-using System.Collections.Generic;
+using AllaganLib.Monitors.Services;
 using AllaganLib.Shared.Time;
 using Autofac;
 using CriticalCommonLib.Crafting;
@@ -10,16 +9,13 @@ using CriticalCommonLib.Services.Ui;
 
 using DalaMock.Core.Mocks;
 using DalaMock.Core.Windows;
-using DalaMock.Host.Factories;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using InventoryTools;
 using InventoryTools.IPC;
-using InventoryTools.Logic;
 using InventoryTools.Services;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Core;
@@ -43,18 +39,15 @@ public class InventoryToolsPluginMock : InventoryToolsPlugin
     {
     }
 
-    public override void ReplaceHostedServices(Dictionary<Type, Type> replacements)
-    {
-        replacements.Add(typeof(WotsitIpc),typeof(MockWotsitIpc));
-        replacements.Add(typeof(CraftMonitor),typeof(MockHostedCraftMonitor));
-        replacements.Add(typeof(OdrScanner),typeof(MockOdrScanner));
-        replacements.Add(typeof(SimpleAcquisitionTrackerService),typeof(MockAcquisitionTrackerService));
-        replacements.Add(typeof(Chat2Ipc),typeof(MockChat2Ipc));
-    }
-
     public override void PreBuild(IHostBuilder hostBuilder)
     {
         base.PreBuild(hostBuilder);
+
+        this.ReplaceHostedService(typeof(WotsitIpc),typeof(MockWotsitIpc));
+        this.ReplaceHostedService(typeof(CraftMonitor),typeof(MockHostedCraftMonitor));
+        this.ReplaceHostedService(typeof(OdrScanner),typeof(MockOdrScanner));
+        this.ReplaceHostedService(typeof(Chat2Ipc),typeof(MockChat2Ipc));
+        this.ReplaceHostedService(typeof(AcquisitionMonitorService),typeof(MockAcquisitionMonitorService));
 
         this.seriLog = new LoggerConfiguration()
             .WriteTo.Console(standardErrorFromLevel: LogEventLevel.Verbose)
@@ -79,6 +72,8 @@ public class InventoryToolsPluginMock : InventoryToolsPlugin
             container.RegisterType<MockQuestManagerService>().AsImplementedInterfaces().SingleInstance();
             container.RegisterType<MockStartup>().AsImplementedInterfaces().SingleInstance();
             container.RegisterType<MockFileDialogManager>().AsImplementedInterfaces().SingleInstance();
+
+
             container.Register<UniversalisUserAgent>(c =>
             {
                 var pluginInterface = c.Resolve<IDalamudPluginInterface>();

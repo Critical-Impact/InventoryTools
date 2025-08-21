@@ -10,13 +10,16 @@ using Lumina.Excel.Sheets;
 
 namespace InventoryTools.Mediator;
 
+public record ToggleDalamudWindowMessage(Type windowType) : MessageBase;
 public record ToggleGenericWindowMessage(Type windowType) : MessageBase;
 public record ToggleUintWindowMessage(Type windowType, uint windowId) : MessageBase;
 public record ToggleStringWindowMessage(Type windowType, string windowId) : MessageBase;
+public record OpenDalamudWindowMessage(Type windowType) : MessageBase;
 public record OpenGenericWindowMessage(Type windowType) : MessageBase;
 public record OpenUintWindowMessage(Type windowType, uint windowId) : MessageBase;
 public record OpenStringWindowMessage(Type windowType, string windowId) : MessageBase;
 public record CloseWindowMessage(Type windowType) : MessageBase;
+public record CloseDalamudWindowMessage(Type windowType) : MessageBase;
 public record CloseUintWindowMessage(Type windowType, uint windowId) : MessageBase;
 public record CloseStringWindowMessage(Type windowType, string windowId) : MessageBase;
 public record CloseWindowsByTypeMessage(Type windowType) : MessageBase;

@@ -247,7 +247,7 @@ namespace InventoryTools.Services
             }
             catch (Exception e)
             {
-                Logger.LogError($"Failed to save allagan tools configuration due to {e.Message}");
+                Logger.LogWarning($"Failed to save allagan tools configuration due to {e.Message}");
             }
         }
 

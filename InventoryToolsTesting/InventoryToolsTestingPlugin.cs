@@ -51,18 +51,14 @@ public class InventoryToolsTestingPlugin : InventoryToolsPlugin
     {
     }
 
-    public override void ReplaceHostedServices(Dictionary<Type, Type> replacements)
-    {
-        replacements.Add(typeof(WotsitIpc),typeof(MockWotsitIpc));
-        replacements.Add(typeof(CraftMonitor),typeof(MockHostedCraftMonitor));
-        replacements.Add(typeof(OdrScanner),typeof(MockOdrScanner));
-        replacements.Add(typeof(SimpleAcquisitionTrackerService),typeof(MockAcquisitionTrackerService));
-        replacements.Add(typeof(Chat2Ipc),typeof(MockChat2Ipc));
-    }
-
     public override void PreBuild(IHostBuilder hostBuilder)
     {
         base.PreBuild(hostBuilder);
+
+        this.ReplaceHostedService(typeof(WotsitIpc),typeof(MockWotsitIpc));
+        this.ReplaceHostedService(typeof(CraftMonitor),typeof(MockHostedCraftMonitor));
+        this.ReplaceHostedService(typeof(OdrScanner),typeof(MockOdrScanner));
+        this.ReplaceHostedService(typeof(Chat2Ipc),typeof(MockChat2Ipc));
 
         this.seriLog = new LoggerConfiguration()
             .WriteTo.Console(standardErrorFromLevel: LogEventLevel.Verbose)

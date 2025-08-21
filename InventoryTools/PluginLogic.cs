@@ -4,6 +4,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AllaganLib.GameSheets.Sheets;
+using AllaganLib.Monitors.Enums;
+using AllaganLib.Monitors.Interfaces;
+using AllaganLib.Monitors.Services;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
@@ -47,7 +50,7 @@ namespace InventoryTools
         private readonly FilterConfiguration.Factory _filterConfigFactory;
         private readonly Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter> _sourceCategoryFilterFactory;
         private readonly BuyFromVendorPriceFilter _buyFromVendorPriceFilter;
-        private readonly ISimpleAcquisitionTrackerService _acquisitionTrackerService;
+        private readonly IAcquisitionMonitorService _acquisitionMonitorService;
         private readonly CraftTrackerTrackCraftsFilter _trackCraftsFilter;
         private readonly CraftTrackerTrackGatheringFilter _trackGatheringFilter;
         private readonly CraftTrackerTrackShoppingFilter _trackShoppingFilter;
@@ -88,7 +91,7 @@ namespace InventoryTools
             Func<Type, IFilter> filterFactory, IMarketCache marketCache,
             ITooltipService tooltipService, FilterConfiguration.Factory filterConfigFactory,
             Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter> sourceCategoryFilterFactory,
-            BuyFromVendorPriceFilter buyFromVendorPriceFilter, ISimpleAcquisitionTrackerService acquisitionTrackerService,
+            BuyFromVendorPriceFilter buyFromVendorPriceFilter, IAcquisitionMonitorService acquisitionMonitorService,
             CraftTrackerTrackCraftsFilter trackCraftsFilter, CraftTrackerTrackGatheringFilter trackGatheringFilter,
             CraftTrackerTrackShoppingFilter trackShoppingFilter, CraftTrackerTrackCombatDropFilter trackCombatDropFilter,
             CraftTrackerTrackOtherFilter trackOtherFilter, UseOldCraftTrackerSetting useOldCraftTrackerSetting,
@@ -112,7 +115,7 @@ namespace InventoryTools
             _filterConfigFactory = filterConfigFactory;
             _sourceCategoryFilterFactory = sourceCategoryFilterFactory;
             _buyFromVendorPriceFilter = buyFromVendorPriceFilter;
-            _acquisitionTrackerService = acquisitionTrackerService;
+            _acquisitionMonitorService = acquisitionMonitorService;
             _trackCraftsFilter = trackCraftsFilter;
             _trackGatheringFilter = trackGatheringFilter;
             _trackShoppingFilter = trackShoppingFilter;
@@ -483,7 +486,7 @@ namespace InventoryTools
             _framework.Update += FrameworkOnUpdate;
             _configurationManagerService.ConfigurationChanged += ConfigOnConfigurationChanged;
 
-            _acquisitionTrackerService.ItemAcquired += AcquisitionTrackerServiceOnItemAcquired;
+            _acquisitionMonitorService.ItemAcquired += AcquisitionMonitorServiceOnItemAcquired;
             _craftMonitor.CraftStarted += CraftMonitorOnCraftStarted;
             _craftMonitor.CraftFailed += CraftMonitorOnCraftFailed ;
             _craftMonitor.CraftCompleted += CraftMonitorOnCraftCompleted ;
@@ -504,7 +507,7 @@ namespace InventoryTools
             return Task.CompletedTask;
         }
 
-        private void AcquisitionTrackerServiceOnItemAcquired(uint itemId, InventoryItem.ItemFlags itemFlags, int qtyIncrease, AcquisitionReason reason)
+        private void AcquisitionMonitorServiceOnItemAcquired(uint itemId, InventoryItem.ItemFlags itemFlags, int qtyIncrease, AcquisitionReason reason)
         {
             if (_useOldCraftTrackerSetting.CurrentValue(_configuration))
             {
@@ -553,7 +556,7 @@ namespace InventoryTools
             _configuration.SavedCharacters = _characterMonitor.Characters;
             _framework.Update -= FrameworkOnUpdate;
             _inventoryMonitor.OnInventoryChanged -= InventoryMonitorOnOnInventoryChanged;
-            _acquisitionTrackerService.ItemAcquired -= AcquisitionTrackerServiceOnItemAcquired;
+            _acquisitionMonitorService.ItemAcquired -= AcquisitionMonitorServiceOnItemAcquired;
             _craftMonitor.CraftStarted -= CraftMonitorOnCraftStarted;
             _craftMonitor.CraftFailed -= CraftMonitorOnCraftFailed ;
             _craftMonitor.CraftCompleted -= CraftMonitorOnCraftCompleted ;

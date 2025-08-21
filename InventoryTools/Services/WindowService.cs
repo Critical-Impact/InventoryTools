@@ -24,16 +24,18 @@ namespace InventoryTools.Services
         private readonly Func<Type, uint, UintWindow> _uintWindowFactory;
         private readonly Func<Type, string, StringWindow> _stringWindowFactory;
         private readonly Func<Type, GenericWindow> _genericWindowFactory;
+        private readonly Func<Type, Dalamud.Interface.Windowing.Window> _dalamudWindowFactory;
         private readonly InventoryToolsConfiguration _configuration;
         private readonly MediatorService _mediatorService;
 
-        public WindowService(ILogger<WindowService> logger, MediatorService mediatorService, IEnumerable<Window> windows, Func<Type, uint, UintWindow> uintWindowFactory, Func<Type, string, StringWindow> stringWindowFactory, Func<Type,GenericWindow> genericWindowFactory, InventoryToolsConfiguration configuration, IWindowSystemFactory windowSystemFactory) : base(logger, mediatorService)
+        public WindowService(ILogger<WindowService> logger, MediatorService mediatorService, IEnumerable<Window> windows, Func<Type, uint, UintWindow> uintWindowFactory, Func<Type, string, StringWindow> stringWindowFactory, Func<Type,GenericWindow> genericWindowFactory, Func<Type, Dalamud.Interface.Windowing.Window> dalamudWindowFactory, InventoryToolsConfiguration configuration, IWindowSystemFactory windowSystemFactory) : base(logger, mediatorService)
         {
             _windowSystem = windowSystemFactory.Create("AllaganTools");
             _windows = windows.ToDictionary(c => c.GetType(), c => c);
             _uintWindowFactory = uintWindowFactory;
             _stringWindowFactory = stringWindowFactory;
             _genericWindowFactory = genericWindowFactory;
+            _dalamudWindowFactory = dalamudWindowFactory;
             _configuration = configuration;
             _mediatorService = mediatorService;
         }
@@ -46,6 +48,11 @@ namespace InventoryTools.Services
         private void GenericWindowMessage(OpenGenericWindowMessage obj)
         {
             OpenWindow(obj.windowType);
+        }
+
+        private void DalamudWindowMessage(OpenDalamudWindowMessage obj)
+        {
+            OpenDalamudWindow(obj.windowType);
         }
 
         public void UpdateRespectCloseHotkey(Type windowType, bool newSetting)
@@ -63,6 +70,8 @@ namespace InventoryTools.Services
         private ConcurrentDictionary<(Type,string), IWindow> _stringWindows = new();
         private ConcurrentDictionary<(Type,uint), IWindow> _uintWindows = new();
         private ConcurrentDictionary<Type, IWindow> _genericWindows = new();
+
+        private ConcurrentDictionary<Type, Dalamud.Interface.Windowing.Window> _dalamudWindows = new();
 
         private MethodInfo? _openWindowMethod;
         private readonly Dictionary<Type,Window> _windows;
@@ -119,13 +128,23 @@ namespace InventoryTools.Services
             return (T)newWindow;
         }
 
+        public Dalamud.Interface.Windowing.Window GetDalamudWindow(Type type)
+        {
+            if (_dalamudWindows.ContainsKey(type))
+            {
+                return _dalamudWindows[type];
+            }
+            var newWindow = _dalamudWindowFactory.Invoke(type);
+            AddDalamudWindow(type, newWindow);
+            return newWindow;
+        }
+
         public GenericWindow GetWindow(Type type)
         {
             if (_genericWindows.ContainsKey(type))
             {
                 return (GenericWindow)_genericWindows[type];
             }
-            ;
             var newWindow = _genericWindowFactory.Invoke(type);
             AddWindow(type, newWindow);
             return newWindow;
@@ -195,6 +214,12 @@ namespace InventoryTools.Services
             return true;
         }
 
+        public bool ToggleDalamudWindow(Type window)
+        {
+            GetDalamudWindow(window).Toggle();
+            return true;
+        }
+
         public bool ToggleWindow(Type window)
         {
             GetWindow(window).Toggle();
@@ -212,6 +237,21 @@ namespace InventoryTools.Services
             GetWindow(window, windowId).Toggle();
             return true;
         }
+
+        public bool OpenDalamudWindow(Type type,bool refocus = true)
+        {
+            var window = GetDalamudWindow(type);
+            if (window.IsOpen)
+            {
+                window.BringToFront();
+            }
+            else
+            {
+                window.IsOpen = true;
+            }
+            return true;
+        }
+
         public bool OpenWindow(Type type,bool refocus = true)
         {
             var window = GetWindow(type);
@@ -294,6 +334,16 @@ namespace InventoryTools.Services
             return true;
         }
 
+        private bool CloseDalamudWindow(Type windowType)
+        {
+            if (_dalamudWindows.ContainsKey(windowType))
+            {
+                _dalamudWindows[windowType].IsOpen = false;
+                return true;
+            }
+            return false;
+        }
+
         private bool CloseWindow(Type windowType)
         {
             if (_genericWindows.ContainsKey(windowType))
@@ -345,6 +395,16 @@ namespace InventoryTools.Services
             }
 
             return true;
+        }
+
+        private bool AddDalamudWindow(Type windowType, Dalamud.Interface.Windowing.Window window)
+        {
+            if (_dalamudWindows.TryAdd(windowType, window))
+            {
+                _windowSystem.AddWindow(window);
+                return true;
+            }
+            return false;
         }
 
         private bool AddWindow(Type windowType, GenericWindow window)
@@ -546,10 +606,12 @@ namespace InventoryTools.Services
         public Task StartAsync(CancellationToken cancellationToken)
         {
             Logger.LogTrace("Starting service {type} ({this})", GetType().Name, this);
+            _mediatorService.Subscribe(this, new Action<ToggleDalamudWindowMessage>(ToggleDalamudWindow) );
             _mediatorService.Subscribe(this, new Action<ToggleGenericWindowMessage>(ToggleGenericWindow) );
             _mediatorService.Subscribe(this, new Action<ToggleUintWindowMessage>(ToggleUintWindowMessage) );
             _mediatorService.Subscribe(this, new Action<ToggleStringWindowMessage>(ToggleStringWindow));
             _mediatorService.Subscribe(this, new Action<OpenGenericWindowMessage>(GenericWindowMessage) );
+            _mediatorService.Subscribe(this, new Action<OpenDalamudWindowMessage>(DalamudWindowMessage) );
             _mediatorService.Subscribe(this, new Action<OpenUintWindowMessage>(UintWindowMessage) );
             _mediatorService.Subscribe(this, new Action<OpenStringWindowMessage>(OpenStringWindow) );
             _mediatorService.Subscribe(this, new Action<CloseWindowMessage>(CloseWindow) );
@@ -611,6 +673,12 @@ namespace InventoryTools.Services
         private void ToggleGenericWindow(ToggleGenericWindowMessage obj)
         {
             ToggleWindow(obj.windowType);
+        }
+
+
+        private void ToggleDalamudWindow(ToggleDalamudWindowMessage obj)
+        {
+            ToggleDalamudWindow(obj.windowType);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

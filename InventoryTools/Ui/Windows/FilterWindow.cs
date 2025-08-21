@@ -76,8 +76,6 @@ namespace InventoryTools.Ui
                         "Open the submarines window."),
                     new PopupMenu.PopupMenuItemSelectable("Retainer Ventures Window", "ventures",_ => MediatorService.Publish(new OpenGenericWindowMessage(typeof(RetainerTasksWindow))),
                         "Open the retainer ventures window."),
-                    new PopupMenu.PopupMenuItemSelectable("Tetris", "tetris", _ => MediatorService.Publish(new OpenGenericWindowMessage(typeof(TetrisWindow))),
-                        "Open the tetris window.", () => _configuration.TetrisEnabled),
                     new PopupMenu.PopupMenuItemSeparator(),
                     new PopupMenu.PopupMenuItemSelectable("Help", "help", _ => MediatorService.Publish(new OpenGenericWindowMessage(typeof(HelpWindow))), "Open the help window."),
                 });
