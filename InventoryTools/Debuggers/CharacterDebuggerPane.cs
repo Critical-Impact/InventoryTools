@@ -133,14 +133,15 @@ public class CharacterDebuggerPane : DebugLogPane
             ImGui.TextUnformatted($"Cached Division Id: {_characterMonitor.InternalDivisionId}");
             ImGui.TextUnformatted($"Cached Room Id: {_characterMonitor.InternalRoomId}");
             ImGui.TextUnformatted($"Cached House Id: {_characterMonitor.InternalHouseId}");
+            ImGui.TextUnformatted($"Territory Type Id: {_characterMonitor.CorrectedTerritoryTypeId}");
 
             var hm = HousingManager.Instance();
             if (hm != null)
             {
                 if (hm->OutdoorTerritory != null)
-                    ImGui.TextUnformatted($"Outdoor HouseId: {(ulong)hm->OutdoorTerritory->HouseId}");
+                    ImGui.TextUnformatted($"Outdoor HouseId: {hm->OutdoorTerritory->HouseId.Id}");
                 if (hm->IndoorTerritory != null)
-                    ImGui.TextUnformatted($"Indoor HouseId: {(ulong)hm->IndoorTerritory->HouseId}");
+                    ImGui.TextUnformatted($"Indoor HouseId: {hm->IndoorTerritory->HouseId.Id}");
                 if (hm->CurrentTerritory != null)
                     ImGui.TextUnformatted($"Current Territory: {(ulong)hm->CurrentTerritory:X}");
             }

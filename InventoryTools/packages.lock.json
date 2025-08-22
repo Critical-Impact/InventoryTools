@@ -4,11 +4,11 @@
     "net9.0-windows7.0": {
       "AllaganLib.Interface": {
         "type": "Direct",
-        "requested": "[1.3.3, )",
-        "resolved": "1.3.3",
-        "contentHash": "R0GNgB9TvjStWSt1g5Z0D2SSozUN6TrgzPiKizQJxVwF2Txut7n8gQeAQXrnjrw78Z/SNRuwViuWt3/LXPeY3g==",
+        "requested": "[1.3.4, )",
+        "resolved": "1.3.4",
+        "contentHash": "zr6zprmOusV6X/jju3aZZxCLauPV1Fz7ZAWBia0EXRfqjCVtkt8frY72wEmF3bZJ14d0zaESTVVMuUV1KO1ZRw==",
         "dependencies": {
-          "AllaganLib.Data": "1.3.3",
+          "AllaganLib.Data": "1.3.4",
           "AllaganLib.Shared": "1.3.3",
           "Autofac": "8.4.0",
           "Microsoft.Extensions.Logging.Abstractions": "9.0.8",
@@ -162,8 +162,8 @@
       },
       "AllaganLib.Data": {
         "type": "Transitive",
-        "resolved": "1.3.3",
-        "contentHash": "7lIg/z6a/9eel3QXLx1WoUI0Xr4kYZsAiVU+8pIyD/WUgVRq0sn/TOt6PI4LvIiBx8+CY8N9VTOSBPyjYgakGg==",
+        "resolved": "1.3.4",
+        "contentHash": "US0VpZ8HoG2LaOTfARVEmC/E4J7iudP3WiXqZFIkcd8dSvCz7s1HWiHUGGfdthJDu8kifU5xb6RHG2jUikm4nQ==",
         "dependencies": {
           "CSVFile": "3.2.0"
         }
