@@ -271,7 +271,7 @@ namespace InventoryTools
             builder.RegisterSingletonSelfAndInterfaces<EquipmentSuggestItem>();
             builder.RegisterSingletonSelfAndInterfaces<EquipmentSuggestSlotColumn>();
             builder.RegisterSingletonSelfAndInterfaces<EquipmentSuggestSelectedItemColumn>();
-            builder.RegisterSingletonSelfAndInterfaces<EquipmentSuggestSuggestionColumn>();
+            builder.RegisterTransientSelfAndInterfaces<EquipmentSuggestSuggestionColumn>();
             builder.RegisterSingletonSelfAndInterfaces<EquipmentSuggestClassJobFormField>();
             builder.RegisterSingletonSelfAndInterfaces<EquipmentSuggestSourceTypeField>();
             builder.RegisterSingletonSelfAndInterfaces<EquipmentSuggestExcludeSourceTypeField>();
