@@ -286,6 +286,7 @@ public class MockCharacterMonitor : ICharacterMonitor
     public sbyte InternalPlotId { get; }
     public sbyte InternalWardId { get; }
     public ulong InternalHouseId { get; }
+    public uint CorrectedTerritoryTypeId { get; set; }
 
     public Character? ActiveCharacter =>
         _characters.ContainsKey(_activeCharacterId) ? _characters[_activeCharacterId] : null;
