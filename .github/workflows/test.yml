@@ -53,7 +53,7 @@ jobs:
       - name: Build
         run: dotnet build -c ${{ env.CONFIGURATION }} --no-restore ${{ env.INTERNAL_NAME }}
       - name: Run tests
-        run: dotnet test --verbosity diag -c ${{ env.CONFIGURATION }} ${{ env.INTERNAL_NAME }} --logger "junit;LogFilePath=test-results.xml"
+        run: dotnet test --verbosity detailed -c ${{ env.CONFIGURATION }} ${{ env.INTERNAL_NAME }} --logger "junit;LogFilePath=test-results.xml"
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
