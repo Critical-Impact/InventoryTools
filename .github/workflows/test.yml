@@ -48,7 +48,7 @@ jobs:
         run: dotnet restore InventoryTools
 
       - name: Set EXD_DATA_DIR
-        run: echo "EXD_DATA_DIR=${{ github.workspace }}/exd-data" >> $GITHUB_ENV
+        run: echo "EXD_DATA_DIR=${{ github.workspace }}/exd-data/sqpack" >> $GITHUB_ENV
 
       - name: Set DALAMOCK_DIR
         run: echo "DALAMOCK_SAVE_DIR=${{ github.workspace }}" >> $GITHUB_ENV
