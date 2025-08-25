@@ -46,6 +46,8 @@ jobs:
       - name: Set EXD_DATA_DIR
         run: echo "EXD_DATA_DIR=${{ github.workspace }}\exd-data" >> $env:GITHUB_ENV
         shell: pwsh
+      - name: Build
+        run: dotnet build -c ${{ env.CONFIGURATION }} --no-restore ${{ env.INTERNAL_NAME }}
       - name: Run tests
         run: dotnet test --verbosity diag  -c ${{ env.CONFIGURATION }} --no-restore ${{ env.INTERNAL_NAME }} --logger "junit;LogFilePath=test-results.xml"
       - name: Upload test results
