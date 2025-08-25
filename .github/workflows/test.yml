@@ -51,7 +51,7 @@ jobs:
         run: dotnet restore ${{ env.INTERNAL_NAME }}
 
       - name: Show contents
-        run: ls -la "${{ github.workspace }}/exd-data/sqpack"
+        run: ls -la "${{ github.workspace }}/exd-data/sqpack/ffxiv"
 
       - name: Build
         run: dotnet build -c ${{ env.CONFIGURATION }} --no-restore ${{ env.INTERNAL_NAME }}
