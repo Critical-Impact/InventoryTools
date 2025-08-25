@@ -42,7 +42,7 @@ jobs:
       - name: Download Dalamud
         run: |
           wget https://goatcorp.github.io/dalamud-distrib/latest.zip -O latest.zip
-          mkdir -p $HOME/.xlcore/addon/Hooks/dev/ && unzip -o latest.zip -d "$HOME/.xlcore/addon/Hooks/dev/"
+          mkdir -p $HOME/.xlcore/dalamud/Hooks/dev/ && unzip -o latest.zip -d "$HOME/.xlcore/dalamud/Hooks/dev/"
 
       - name: Restore (main project)
         run: dotnet restore InventoryTools
