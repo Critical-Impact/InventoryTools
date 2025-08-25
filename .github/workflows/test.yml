@@ -51,7 +51,10 @@ jobs:
         run: dotnet restore ${{ env.INTERNAL_NAME }}
 
       - name: Show contents
-        run: ls -la "${{ github.workspace }}/exd-data"
+
+        run: ls -la "${{ github.workspace }}"
+      - name: Show contents2
+        run: ls -la "${{ github.workspace }}/../"
 
       - name: Build
         run: dotnet build -c ${{ env.CONFIGURATION }} --no-restore ${{ env.INTERNAL_NAME }}
