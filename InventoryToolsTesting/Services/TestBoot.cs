@@ -18,6 +18,15 @@ namespace InventoryToolsTesting.Services
     {
         public IHost CreateHost()
         {
+            var exdDataDir = Environment.GetEnvironmentVariable("EXD_DATA_DIR");
+            if (exdDataDir is not null)
+            {
+                Console.WriteLine("Attempting to use EXD_DATA_DIR environment variable.");
+                if (Path.Exists(exdDataDir))
+                {
+                    Console.WriteLine("EXD_DATA_DIR environment variable set to " + exdDataDir);
+                }
+            }
             var mockContainer = new MockContainer(new MockDalamudConfiguration()
             {
                 CreateWindow = false
