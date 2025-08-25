@@ -1,0 +1,69 @@
+name: Run Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - inventory-scopes
+
+env:
+  INTERNAL_NAME: InventoryToolsTesting
+  CONFIGURATION: Debug
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  run-tests:
+    name: "Download EXD, build and test"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Retrieve cache
+        uses: actions/cache@v4
+        with:
+          path: exd-data
+          # Use the .cachemeta.json file to invalidate the cache when the data changes.
+          key: exd-files-data-${{hashFiles('exd-data/.cachemeta.json')}}
+          restore-keys: |
+            exd-files-data-
+      - name: Download EXD Files
+        uses: WorkingRobot/ffxiv-downloader@v7
+        with:
+          output-path: exd-data
+          regex: '^sqpack\/ffxiv\/0a0000\..+$'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Download Dalamud
+        run: |
+          wget https://goatcorp.github.io/dalamud-distrib/latest.zip -O latest.zip
+          mkdir -p $HOME/.xlcore/dalamud/Hooks/dev/ && unzip -o latest.zip -d "$HOME/.xlcore/dalamud/Hooks/dev/"
+
+      - name: Restore (main project)
+        run: dotnet restore InventoryTools
+
+      - name: Set DALAMOCK_DIR
+        run: echo "DALAMOCK_SAVE_DIR=${{ github.workspace }}" >> $GITHUB_ENV
+
+      - name: Restore (test project)
+        run: dotnet restore ${{ env.INTERNAL_NAME }}
+
+      - name: Build
+        run: dotnet build -c ${{ env.CONFIGURATION }} --no-restore ${{ env.INTERNAL_NAME }}
+
+      - name: Run tests
+        run: DALAMOCK_SAVE_DIR=${{github.workspace}} EXD_DATA_DIR=${{ github.workspace }}/exd-data/sqpack dotnet test -c ${{ env.CONFIGURATION }} ${{ env.INTERNAL_NAME }} --logger "junit;LogFilePath=${{ github.workspace }}/test-results/test-results.xml"
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: ./test-results/test-results.xml
+
+      - name: Publish GitHub Test Report
+        uses: mikepenz/action-junit-report@v4
+        with:
+          report_paths: ./test-results/test-results.xml

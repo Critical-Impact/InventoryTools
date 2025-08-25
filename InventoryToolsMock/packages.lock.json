@@ -4,12 +4,12 @@
     "net9.0-windows7.0": {
       "DalaMock.Core": {
         "type": "Direct",
-        "requested": "[3.0.2, )",
-        "resolved": "3.0.2",
-        "contentHash": "45CLpklFUKVOOjEyiCFGySZSuYqlEbJXiQuo4XrETXQiDHwCA+Gov9QC/mYR+fP5YzCbK6/hpMdN0HBA06o1oQ==",
+        "requested": "[3.0.5, )",
+        "resolved": "3.0.5",
+        "contentHash": "nA0/YAKu66/ezhj6wtMguIjimq+E95Y8qtci+sEaUg0Jt21I2ruxqNqbbGhSJluCzoNK/qdi2uO+AkaK592i5w==",
         "dependencies": {
           "Autofac": "8.4.0",
-          "DalaMock.Shared": "3.0.2",
+          "DalaMock.Shared": "3.0.3",
           "Microsoft.Extensions.Configuration": "9.0.8",
           "Microsoft.Extensions.DependencyModel": "9.0.8",
           "Microsoft.Extensions.Hosting": "9.0.8",
