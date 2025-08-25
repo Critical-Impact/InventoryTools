@@ -47,20 +47,20 @@ jobs:
       - name: Restore (main project)
         run: dotnet restore InventoryTools
 
-      - name: Set EXD_DATA_DIR
-        run: echo "EXD_DATA_DIR=${{ github.workspace }}/exd-data/sqpack" >> $GITHUB_ENV
-
       - name: Set DALAMOCK_DIR
         run: echo "DALAMOCK_SAVE_DIR=${{ github.workspace }}" >> $GITHUB_ENV
 
       - name: Restore (test project)
         run: dotnet restore ${{ env.INTERNAL_NAME }}
 
+      - name: Show contents
+        run: ls -la "${{ github.workspace }}/exd-data"
+
       - name: Build
         run: dotnet build -c ${{ env.CONFIGURATION }} --no-restore ${{ env.INTERNAL_NAME }}
 
       - name: Run tests
-        run: dotnet test -c ${{ env.CONFIGURATION }} ${{ env.INTERNAL_NAME }} --logger "junit;LogFilePath=./test-results/test-results.xml"
+        run: DALAMOCK_SAVE_DIR="${{github.workspace}}" EXD_DATA_DIR="${{ github.workspace }}/exd-data/sqpack" dotnet test -c ${{ env.CONFIGURATION }} ${{ env.INTERNAL_NAME }} --logger "junit;LogFilePath=./test-results/test-results.xml"
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
