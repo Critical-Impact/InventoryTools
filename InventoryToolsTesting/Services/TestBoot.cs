@@ -27,6 +27,10 @@ namespace InventoryToolsTesting.Services
                     Console.WriteLine("EXD_DATA_DIR environment variable set to " + exdDataDir);
                 }
             }
+            else
+            {
+                Console.WriteLine("No EXD_DATA_DIR environment variable set.");
+            }
             var mockContainer = new MockContainer(new MockDalamudConfiguration()
             {
                 CreateWindow = false
