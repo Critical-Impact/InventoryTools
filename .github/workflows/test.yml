@@ -43,15 +43,18 @@ jobs:
           Expand-Archive -Force latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev\"
       - name: Restore
         run: dotnet restore InventoryTools
+      - name: Set EXD_DATA_DIR
+        run: echo "EXD_DATA_DIR=${{ github.workspace }}\\exd-data" >> $env:GITHUB_ENV
+        shell: pwsh
       - name: Run tests
-        run: dotnet test  -c ${{ env.CONFIGURATION }} --no-restore ${{ env.INTERNAL_NAME }} --logger "junit;LogFilePath=./test-results/test-results.xml"
+        run: dotnet test  -c ${{ env.CONFIGURATION }} --no-restore ${{ env.INTERNAL_NAME }} --logger "junit;LogFilePath=test-results.xml"
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: ./test-results/test-results.xml
+          path: test-results.xml
       - name: Publish GitHub Test Report
         uses: mikepenz/action-junit-report@v4
         with:
-          report_paths: ./test-results/test-results.xml
+          report_paths: test-results.xml
 
