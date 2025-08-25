@@ -44,10 +44,10 @@ jobs:
       - name: Restore
         run: dotnet restore InventoryTools
       - name: Set EXD_DATA_DIR
-        run: echo "EXD_DATA_DIR=${{ github.workspace }}\\exd-data" >> $env:GITHUB_ENV
+        run: echo "EXD_DATA_DIR=${{ github.workspace }}\exd-data" >> $env:GITHUB_ENV
         shell: pwsh
       - name: Run tests
-        run: dotnet test  -c ${{ env.CONFIGURATION }} --no-restore ${{ env.INTERNAL_NAME }} --logger "junit;LogFilePath=test-results.xml"
+        run: dotnet test --verbosity diag  -c ${{ env.CONFIGURATION }} --no-restore ${{ env.INTERNAL_NAME }} --logger "junit;LogFilePath=test-results.xml"
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
