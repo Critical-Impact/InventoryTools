@@ -136,12 +136,12 @@ namespace InventoryTools
             builder.RegisterExternalTransientsSelfAndInterfaces<StringWindow>(dataAccess, typeof(Window));
 
             //Register our generic filters
-            builder.RegisterSingletonSelf<GenericHasSourceFilter>();
-            builder.RegisterSingletonSelf<GenericHasSourceCategoryFilter>();
-            builder.RegisterSingletonSelf<GenericHasUseFilter>();
-            builder.RegisterSingletonSelf<GenericHasUseCategoryFilter>();
-            builder.RegisterSingletonSelf<GenericBooleanFilter>();
-            builder.RegisterSingletonSelf<GenericIntegerFilter>();
+            builder.RegisterType<GenericHasSourceFilter>();
+            builder.RegisterType<GenericHasSourceCategoryFilter>();
+            builder.RegisterType<GenericHasUseFilter>();
+            builder.RegisterType<GenericHasUseCategoryFilter>();
+            builder.RegisterType<GenericBooleanFilter>();
+            builder.RegisterType<GenericIntegerFilter>();
 
             //Hosted service registrations
             this.RegisterHostedService(typeof(BootService));
