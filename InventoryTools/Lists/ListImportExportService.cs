@@ -105,11 +105,6 @@ public class ListImportExportService
                 return false;
             }
 
-            if (deserializeObject.Version != FilterConfiguration.CurrentVersion)
-            {
-                throw new ListImportVersionException(FilterConfiguration.CurrentVersion, deserializeObject.Version);
-            }
-
             deserializeObject.Key = Guid.NewGuid().ToString("N");
             filterConfiguration = deserializeObject;
 
@@ -118,10 +113,6 @@ public class ListImportExportService
         }
         catch (Exception e)
         {
-            if (e.Message.Contains("Version"))
-            {
-                throw new ListImportVersionException(FilterConfiguration.CurrentVersion, null);
-            }
             return false;
         }
     }
