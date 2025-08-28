@@ -13,6 +13,8 @@ using CriticalCommonLib.Services;
 using InventoryTools;
 using InventoryTools.Lists;
 using InventoryTools.Logic;
+using InventoryTools.Logic.Editors;
+using InventoryTools.Logic.Filters;
 using InventoryToolsTesting.Services;
 using InventoryToolsTesting.Tests.Abstract;
 using Microsoft.Extensions.DependencyInjection;
@@ -49,6 +51,12 @@ namespace InventoryToolsTesting.Tests
             characters.Add(_retainer2.CharacterId, _retainer2);
             characters.Add(_character2.CharacterId, _character2);
             characterMonitor.LoadExistingRetainers(characters);
+
+            var inventoryMonitor = Host.Services.GetRequiredService<IInventoryMonitor>()!;
+            foreach (var inventory in inventoryMonitor.Inventories)
+            {
+                inventoryMonitor.ClearCharacterInventories(inventory.Key);
+            }
         }
         [Test]
         public void TestSearchFilter()
@@ -57,9 +65,16 @@ namespace InventoryToolsTesting.Tests
             var listFilterService = Host.Services.GetRequiredService<ListFilterService>()!;
             var characterMonitor = Host.Services.GetRequiredService<ICharacterMonitor>()!;
             var inventoryMonitor = Host.Services.GetRequiredService<TestInventoryMonitor>()!;
+            var sourceInventoriesFilter = Host.Services.GetRequiredService < SourceInventoriesFilter>();
+
 
             var searchFilter = filterConfigFactory.Invoke();
-            searchFilter.SourceAllCharacters = true;
+            sourceInventoriesFilter.UpdateFilterConfiguration(searchFilter, [
+                new InventorySearchScope()
+                {
+                    CharacterTypes = [CharacterType.Character]
+                }
+            ]);
             searchFilter.FilterType = FilterType.SearchFilter;
 
             characterMonitor.OverrideActiveCharacter(_character.CharacterId);
@@ -80,12 +95,27 @@ namespace InventoryToolsTesting.Tests
             var characterMonitor = Host.Services.GetRequiredService<ICharacterMonitor>()!;
             var inventoryMonitor = Host.Services.GetRequiredService<TestInventoryMonitor>()!;
             var itemSheet = Host.Services.GetRequiredService<ItemSheet>();
+            var sourceInventoriesFilter = Host.Services.GetRequiredService < SourceInventoriesFilter>();
+            var destinationInventoriesFilter = Host.Services.GetRequiredService < DestinationInventoriesFilter>();
 
 
 
             var searchFilter = filterConfigFactory.Invoke();
-            searchFilter.SourceAllCharacters = true;
-            searchFilter.DestinationAllRetainers = true;
+
+            sourceInventoriesFilter.UpdateFilterConfiguration(searchFilter, [
+                new InventorySearchScope()
+                {
+                    ActiveCharacter = true,
+                    CharacterTypes = [CharacterType.Character]
+                }
+            ]);
+
+            destinationInventoriesFilter.UpdateFilterConfiguration(searchFilter, [
+                new InventorySearchScope()
+                {
+                    CharacterTypes = [CharacterType.Retainer]
+                }
+            ]);
             searchFilter.FilterType = FilterType.SortingFilter;
 
             //Flour, just cause
@@ -175,9 +205,16 @@ namespace InventoryToolsTesting.Tests
             var characterMonitor = Host.Services.GetRequiredService<ICharacterMonitor>()!;
             var inventoryMonitor = Host.Services.GetRequiredService<TestInventoryMonitor>()!;
             var itemSheet = Host.Services.GetRequiredService<ItemSheet>();
+            var sourceInventoriesFilter = Host.Services.GetRequiredService < SourceInventoriesFilter>();
+            var destinationInventoriesFilter = Host.Services.GetRequiredService < DestinationInventoriesFilter>();
 
             var searchFilter = filterConfigFactory.Invoke();
-            searchFilter.SourceAllCharacters = true;
+            sourceInventoriesFilter.UpdateFilterConfiguration(searchFilter, [
+                new InventorySearchScope()
+                {
+                    CharacterTypes = [CharacterType.Character]
+                }
+            ]);
             searchFilter.FilterType = FilterType.SortingFilter;
 
             //Flour, just cause
@@ -186,7 +223,13 @@ namespace InventoryToolsTesting.Tests
             var cinnamon = itemSheet.GetRow(4828)!;
 
 
-            searchFilter.DestinationInventories = new List<(ulong, InventoryCategory)>() {(_character.CharacterId, InventoryCategory.CharacterSaddleBags)};
+            destinationInventoriesFilter.UpdateFilterConfiguration(searchFilter, [
+                new InventorySearchScope()
+                {
+                    Categories = [InventoryCategory.CharacterSaddleBags],
+                    CharacterId = _character.CharacterId
+                }
+            ]);
             characterMonitor.OverrideActiveCharacter(_character.CharacterId);
 
             var inventory = GenerateBlankInventory(_character);
@@ -212,11 +255,22 @@ namespace InventoryToolsTesting.Tests
             var characterMonitor = Host.Services.GetRequiredService<ICharacterMonitor>()!;
             var inventoryMonitor = Host.Services.GetRequiredService<TestInventoryMonitor>()!;
             var itemSheet = Host.Services.GetRequiredService<ItemSheet>();
+            var sourceInventoriesFilter = Host.Services.GetRequiredService < SourceInventoriesFilter>();
+            var destinationInventoriesFilter = Host.Services.GetRequiredService < DestinationInventoriesFilter>();
 
             var searchFilter = filterConfigFactory.Invoke();
-            searchFilter.SourceAllCharacters = true;
-            searchFilter.SourceAllRetainers = true;
-            searchFilter.DestinationAllRetainers = true;
+            sourceInventoriesFilter.UpdateFilterConfiguration(searchFilter, [
+                new InventorySearchScope()
+                {
+                    CharacterTypes = [CharacterType.Character, CharacterType.Retainer]
+                }
+            ]);
+            destinationInventoriesFilter.UpdateFilterConfiguration(searchFilter, [
+                new InventorySearchScope()
+                {
+                    CharacterTypes = [CharacterType.Retainer]
+                }
+            ]);
             searchFilter.FilterType = FilterType.SortingFilter;
             searchFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
 
@@ -267,12 +321,18 @@ namespace InventoryToolsTesting.Tests
             var inventoryMonitor = Host.Services.GetRequiredService<TestInventoryMonitor>()!;
             var itemSheet = Host.Services.GetRequiredService<ItemSheet>();
             var configuration = Host.Services.GetRequiredService < InventoryToolsConfiguration>();
+            var sourceInventoriesFilter = Host.Services.GetRequiredService < SourceInventoriesFilter>();
+            var destinationInventoriesFilter = Host.Services.GetRequiredService < DestinationInventoriesFilter>();
 
             var searchFilter = filterConfigFactory.Invoke();
-            searchFilter.SourceCategories = new HashSet<InventoryCategory>()
-            {
-                InventoryCategory.RetainerBags, InventoryCategory.CharacterBags
-            };
+            sourceInventoriesFilter.UpdateFilterConfiguration(searchFilter, [
+                new InventorySearchScope
+                {
+                    ActiveCharacter = true,
+                    Categories = [InventoryCategory.RetainerBags, InventoryCategory.CharacterBags]
+                }
+            ]);
+
             searchFilter.FilterType = FilterType.SearchFilter;
 
             //Flour, just cause
@@ -301,21 +361,23 @@ namespace InventoryToolsTesting.Tests
             Assert.AreEqual(3, listFilterService.RefreshList(searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
 
             //Cross character on, should pick up 4
-            configuration.DisplayCrossCharacter = true;
+            sourceInventoriesFilter.UpdateFilterConfiguration(searchFilter, [
+                new InventorySearchScope
+                {
+                    Categories = [InventoryCategory.RetainerBags, InventoryCategory.CharacterBags]
+                }
+            ]);
             Assert.AreEqual(4, listFilterService.RefreshList(searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
 
-            //Test cross character source filter setting
-            configuration.DisplayCrossCharacter = false;
-            searchFilter.SourceIncludeCrossCharacter = true;
-            Assert.AreEqual(4, listFilterService.RefreshList(searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
 
             //Test cross character destination filter setting
-            searchFilter.DestinationIncludeCrossCharacter = true;
+            destinationInventoriesFilter.UpdateFilterConfiguration(searchFilter, [
+                new InventorySearchScope
+                {
+                    Categories = [InventoryCategory.CharacterBags]
+                }
+            ]);
             searchFilter.FilterType = FilterType.SortingFilter;
-            searchFilter.DestinationCategories = new HashSet<InventoryCategory>()
-            {
-                InventoryCategory.CharacterBags
-            };
             searchFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
             //With a active retainer and filter items in retainers set to yes, only 1 item shows up
             var resultSortedItems = listFilterService.RefreshList(searchFilter);
@@ -327,13 +389,19 @@ namespace InventoryToolsTesting.Tests
 
 
             //Test cross character destination filter setting override
-            searchFilter.SourceCategories = new HashSet<InventoryCategory>()
-            {
-                InventoryCategory.CharacterBags
-            };
-            configuration.DisplayCrossCharacter = true;
-            searchFilter.DestinationIncludeCrossCharacter = false;
-            searchFilter.SourceIncludeCrossCharacter = true;
+            sourceInventoriesFilter.UpdateFilterConfiguration(searchFilter, [
+                new InventorySearchScope
+                {
+                    Categories = [InventoryCategory.CharacterBags]
+                }
+            ]);
+            destinationInventoriesFilter.UpdateFilterConfiguration(searchFilter, [
+                new InventorySearchScope
+                {
+                    ActiveCharacter = true,
+                    Categories = [InventoryCategory.CharacterBags]
+                }
+            ]);
 
             Assert.AreEqual(1, listFilterService.RefreshList(searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
         }
@@ -346,15 +414,36 @@ namespace InventoryToolsTesting.Tests
             var characterMonitor = Host.Services.GetRequiredService<ICharacterMonitor>()!;
             var inventoryMonitor = Host.Services.GetRequiredService<TestInventoryMonitor>()!;
             var itemSheet = Host.Services.GetRequiredService<ItemSheet>();
+            var sourceInventoriesFilter = Host.Services.GetRequiredService < SourceInventoriesFilter>();
+            var destinationInventoriesFilter = Host.Services.GetRequiredService < DestinationInventoriesFilter>();
 
             var searchFilter = filterConfigFactory.Invoke();
+
             searchFilter.FilterType = FilterType.SearchFilter;
-            searchFilter.SourceCategories = new HashSet<InventoryCategory>() {InventoryCategory.CharacterBags};
+            sourceInventoriesFilter.UpdateFilterConfiguration(searchFilter, [
+                new InventorySearchScope()
+                {
+                    ActiveCharacter = true,
+                    Categories = [InventoryCategory.CharacterBags]
+                }
+            ]);
 
             var sortFilter = filterConfigFactory.Invoke();
             sortFilter.FilterType = FilterType.SortingFilter;
-            sortFilter.SourceCategories = new HashSet<InventoryCategory>() {InventoryCategory.CharacterBags};
-            sortFilter.DestinationCategories = new HashSet<InventoryCategory>() {InventoryCategory.RetainerBags};
+            sourceInventoriesFilter.UpdateFilterConfiguration(sortFilter, [
+                new InventorySearchScope()
+                {
+                    ActiveCharacter = true,
+                    Categories = [InventoryCategory.CharacterBags]
+                }
+            ]);
+            destinationInventoriesFilter.UpdateFilterConfiguration(sortFilter, [
+                new InventorySearchScope()
+                {
+                    ActiveCharacter = true,
+                    Categories = [InventoryCategory.RetainerBags]
+                }
+            ]);
 
             //Flour, just cause
             var ryeFlour = itemSheet.GetRow(4825)!;
@@ -378,13 +467,19 @@ namespace InventoryToolsTesting.Tests
             inventory.AddItem(GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
             retainerInventory.AddItem(GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1));
             retainerInventory2.AddItem(GenerateItem(_retainer.CharacterId, InventoryType.RetainerBag0, 0, ryeFlour.RowId, 1));
-            characterInventory2.AddItem(GenerateItem(_character.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
+            characterInventory2.AddItem(GenerateItem(_character2.CharacterId, InventoryType.Bag0, 0, ryeFlour.RowId, 1));
 
             //Just character bags as source
             Assert.AreEqual(1, listFilterService.RefreshList(searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
 
             //Add retainer bags as source
-            searchFilter.SourceCategories.Add(InventoryCategory.RetainerBags);
+            sourceInventoriesFilter.UpdateFilterConfiguration(searchFilter, [
+                new InventorySearchScope()
+                {
+                    ActiveCharacter = true,
+                    Categories = [InventoryCategory.CharacterBags, InventoryCategory.RetainerBags]
+                }
+            ]);
             Assert.AreEqual(3, listFilterService.RefreshList(searchFilter).Count(c => c.InventoryItem != null && !c.InventoryItem.IsEmpty));
 
             //Sort filter, character to retainer bags

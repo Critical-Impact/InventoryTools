@@ -126,11 +126,11 @@ public class CraftIngredientPreferenceFilter : SortedListFilter<(IngredientPrefe
 
     public override void Draw(FilterConfiguration configuration)
     {
-        ImGui.TextUnformatted(Name);
+        ImGui.TextUnformatted(GetName(configuration));
         ImGui.Separator();
         DrawTable(configuration);
         ImGui.SameLine();
-        ImGuiService.HelpMarker(HelpText);
+        ImGuiService.HelpMarker(GetHelpText(configuration));
 
         var currentAddColumn = "";
         ImGui.SetNextItemWidth(LabelSize);

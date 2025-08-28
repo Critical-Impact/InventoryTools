@@ -64,7 +64,7 @@ public abstract class CharacterScopeFilter : Filter<List<CharacterSearchScope>?>
             {
                 ImGui.Text("?");
             }
-            ImGuiUtil.HoverTooltip(HelpText);
+            ImGuiUtil.HoverTooltip(GetHelpText(configuration));
         }
 
         var currentValue = CurrentValue(configuration);

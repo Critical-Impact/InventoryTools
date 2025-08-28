@@ -14,7 +14,7 @@ public class GenericHasSourceCategoryFilter : BooleanFilter, IGenericFilter
 {
     private readonly ItemInfoRenderCategory _renderCategory;
     private readonly ItemInfoRenderService _infoRenderService;
-    private ItemInfoType[] _sourceTypes;
+    private ItemInfoType[]? _sourceTypes;
 
     public override int LabelSize { get; set; } = 250;
 
@@ -65,7 +65,7 @@ public class GenericHasSourceCategoryFilter : BooleanFilter, IGenericFilter
             return null;
         }
 
-        _sourceTypes = _infoRenderService.GetSourcesByCategory(_renderCategory).Select(c => c.Type).ToArray();
+        _sourceTypes ??= _infoRenderService.GetSourcesByCategory(_renderCategory).Select(c => c.Type).ToArray();
 
         return currentValue == true ? item.HasSourcesByType(_sourceTypes) : !item.HasSourcesByType(_sourceTypes);
     }

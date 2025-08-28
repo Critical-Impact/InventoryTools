@@ -129,6 +129,86 @@ public class NamePopup : IPopup
     }
 }
 
+public class MultiLineTextPopup : IPopup
+{
+    private readonly Type _window;
+    private readonly string _id;
+    private readonly string _explanation;
+    private string _text;
+    private readonly Action<(bool, string)> _callback;
+    private bool _drawnOnce = false;
+
+    public event IPopup.FinalizedDelegate? Finalized;
+
+    public MultiLineTextPopup(Type window, string id, string explanation, Action<(bool, string)> callback)
+    {
+        _window = window;
+        _id = id;
+        _explanation = explanation;
+        _callback = callback;
+    }
+
+    public Type Window => _window;
+    public string Id => _id;
+
+    public void Draw()
+    {
+        using var popup = ImRaii.Popup(_id);
+        if (!popup)
+        {
+            if (_drawnOnce)
+            {
+                _callback.Invoke((false, _text));
+                Finalized?.Invoke(this);
+            }
+            return;
+        }
+
+        _drawnOnce = true;
+
+        if (ImGui.IsKeyPressed(ImGuiKey.Escape))
+        {
+            _callback.Invoke((false, _text));
+            Finalized?.Invoke(this);
+            ImGui.CloseCurrentPopup();
+            return;
+        }
+
+        ImGui.TextWrapped(_explanation);
+        ImGui.Separator();
+
+        ImGui.SetNextItemWidth(400 * ImGuiHelpers.GlobalScale);
+        if (ImGui.IsWindowAppearing())
+        {
+            ImGui.SetKeyboardFocusHere();
+        }
+
+
+        ImGui.InputTextMultiline("##multiline", ref _text, 2048, new System.Numerics.Vector2(400, 150));
+
+        ImGui.Separator();
+
+        if (ImGui.Button("OK", new System.Numerics.Vector2(100, 0)))
+        {
+            _callback.Invoke((true, _text));
+            Finalized?.Invoke(this);
+            ImGui.CloseCurrentPopup();
+        }
+
+        ImGui.SameLine();
+
+        if (ImGui.Button("Cancel", new System.Numerics.Vector2(100, 0)))
+        {
+            _callback.Invoke((false, _text));
+            Finalized?.Invoke(this);
+            ImGui.CloseCurrentPopup();
+        }
+    }
+
+    public void Finalize()
+    {
+    }
+}
 
 public class ConfirmPopup : IPopup
 {

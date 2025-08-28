@@ -25,6 +25,16 @@ namespace InventoryTools.Logic.Filters.Abstract
         public bool ShowOperatorTooltip { get; set; } = false;
         public abstract FilterCategory FilterCategory { get; set; }
         public abstract bool HasValueSet(FilterConfiguration configuration);
+        public virtual string GetName(FilterConfiguration configuration)
+        {
+            return Name;
+        }
+
+        public virtual string GetHelpText(FilterConfiguration configuration)
+        {
+            return HelpText;
+        }
+
         public bool ShowReset { get; set; } = false;
         public abstract FilterType AvailableIn { get; set; }
 

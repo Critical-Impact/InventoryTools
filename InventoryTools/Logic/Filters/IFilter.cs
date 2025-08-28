@@ -20,6 +20,9 @@ namespace InventoryTools.Logic.Filters
 
         public bool HasValueSet(FilterConfiguration configuration);
 
+        public string GetName(FilterConfiguration configuration);
+        public string GetHelpText(FilterConfiguration configuration);
+
         public FilterType AvailableIn { get; set; }
         public bool? FilterItem(FilterConfiguration configuration, InventoryItem item);
         public bool? FilterItem(FilterConfiguration configuration, ItemRow item);

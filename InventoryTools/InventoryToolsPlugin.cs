@@ -120,7 +120,8 @@ namespace InventoryTools
             builder.RegisterSingletonsSelfAndInterfaces<IAtkOverlay>(cclAssembly);
             builder.RegisterSingletonsSelfAndInterfaces<IGameOverlay>(dataAccess);
             builder.RegisterSingletonsSelfAndInterfaces<IColumn>(dataAccess);
-            builder.RegisterSingletonsSelfAndInterfaces<ISetting>(dataAccess);
+            builder.RegisterSingletonsSelfAndInterfaces<ISetting>(dataAccess).AsImplementedInterfaces();
+            builder.RegisterSingletonsSelfAndInterfaces<ISampleFilter>(dataAccess);
             builder.RegisterSingletonsSelfAndInterfaces<IFeature>(dataAccess);
             builder.RegisterSingletonsSelfAndInterfaces<IItemInfoRenderer>(dataAccess);
             builder.RegisterSingletonsSelfAndInterfaces<IDebugPane>(typeof(ShopMonitorDebugPane).Assembly); //Register AllaganLib.Monitor debug panes
@@ -136,12 +137,12 @@ namespace InventoryTools
             builder.RegisterExternalTransientsSelfAndInterfaces<StringWindow>(dataAccess, typeof(Window));
 
             //Register our generic filters
-            builder.RegisterSingletonSelf<GenericHasSourceFilter>();
-            builder.RegisterSingletonSelf<GenericHasSourceCategoryFilter>();
-            builder.RegisterSingletonSelf<GenericHasUseFilter>();
-            builder.RegisterSingletonSelf<GenericHasUseCategoryFilter>();
-            builder.RegisterSingletonSelf<GenericBooleanFilter>();
-            builder.RegisterSingletonSelf<GenericIntegerFilter>();
+            builder.RegisterTransientSelf<GenericHasSourceFilter>();
+            builder.RegisterTransientSelf<GenericHasSourceCategoryFilter>();
+            builder.RegisterTransientSelf<GenericHasUseFilter>();
+            builder.RegisterTransientSelf<GenericHasUseCategoryFilter>();
+            builder.RegisterTransientSelf<GenericBooleanFilter>();
+            builder.RegisterTransientSelf<GenericIntegerFilter>();
 
             //Hosted service registrations
             this.RegisterHostedService(typeof(BootService));
@@ -224,7 +225,6 @@ namespace InventoryTools
             builder.RegisterSingletonSelfAndInterfaces<InventoryScopeCalculator>();
             builder.RegisterSingletonSelfAndInterfaces<ItemInfoRenderService>();
             builder.RegisterSingletonSelfAndInterfaces<ItemLocalizer>();
-            builder.RegisterSingletonSelfAndInterfaces<ListCategoryService>();
             builder.RegisterSingletonSelfAndInterfaces<ListImportExportService>();
             builder.RegisterSingletonSelfAndInterfaces<Logger>();
             builder.RegisterSingletonSelfAndInterfaces<MarketBoardService>();

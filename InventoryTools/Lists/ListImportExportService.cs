@@ -22,6 +22,17 @@ public enum TCExportMode
     Missing,
 }
 
+public class ListImportVersionException : Exception
+{
+    public uint RequiredVersion { get; }
+    public uint? ImportingVersion { get; }
+    public ListImportVersionException(uint requiredVersion, uint? importingVersion)
+    {
+        RequiredVersion = requiredVersion;
+        ImportingVersion = importingVersion;
+    }
+}
+
 public class ListImportExportService
 {
     private readonly ItemSheet _itemSheet;
@@ -42,8 +53,28 @@ public class ListImportExportService
     {
         var toExport = _filterConfigurationFactory.Invoke();
         toExport.CopyFrom(configuration);
-        toExport.DestinationInventories = new List<(ulong, InventoryCategory)>();
-        toExport.SourceInventories = new List<(ulong, InventoryCategory)>();
+
+        //Invalidate the character IDs
+        foreach (var searchScope in toExport.CharacterSearchScopes)
+        {
+            foreach (var characterSearchScope in searchScope.Value)
+            {
+                if (characterSearchScope.CharacterId != null)
+                {
+                    characterSearchScope.CharacterId = 1;
+                }
+            }
+        }
+        foreach (var searchScope in toExport.InventorySearchScopes)
+        {
+            foreach (var inventorySearchScope in searchScope.Value)
+            {
+                if (inventorySearchScope.CharacterId != null)
+                {
+                    inventorySearchScope.CharacterId = 1;
+                }
+            }
+        }
         var json  = JsonConvert.SerializeObject(toExport);
         if (json == null)
         {
@@ -67,20 +98,30 @@ public class ListImportExportService
             var json = Encoding.UTF8.GetString(bytes.AsSpan()[1..]);
             var deserializeObject = JsonConvert.DeserializeObject<FilterConfiguration>(json,new JsonSerializerSettings()
             {
-                ContractResolver = _autofacResolver
+                ContractResolver = _autofacResolver,
             });
             if (deserializeObject == null)
             {
                 return false;
             }
 
+            if (deserializeObject.Version != FilterConfiguration.CurrentVersion)
+            {
+                throw new ListImportVersionException(FilterConfiguration.CurrentVersion, deserializeObject.Version);
+            }
+
             deserializeObject.Key = Guid.NewGuid().ToString("N");
             filterConfiguration = deserializeObject;
 
+
             return true;
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            if (e.Message.Contains("Version"))
+            {
+                throw new ListImportVersionException(FilterConfiguration.CurrentVersion, null);
+            }
             return false;
         }
     }

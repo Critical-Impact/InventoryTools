@@ -1812,23 +1812,20 @@ namespace InventoryTools.Ui
                         var filterConfiguration = filterConfigurations[index];
                         using var id = ImRaii.PushId(index);
                         var imGuiTabItemFlags = _newTab == index && SwitchNewTab ? ImGuiTabItemFlags.SetSelected : ImGuiTabItemFlags.None;
-                        fixed (byte* namePtr = filterConfiguration.NameAsBytes)
+                        using (var tabItem = ImRaii.TabItem(filterConfiguration.NameFormatted, imGuiTabItemFlags))
                         {
-                            using (var tabItem = ImRaii.TabItem(namePtr, imGuiTabItemFlags))
+                            if (SwitchNewTab && _newTab != null && _newTab == index)
                             {
-                                if (SwitchNewTab && _newTab != null && _newTab == index)
-                                {
-                                    _newTab = null;
-                                    _applyNewTabTime = null;
-                                    _selectedFilterTab = index;
-                                }
-                                GetFilterMenu(filterConfiguration, WindowLayout.Tabs).Draw();
+                                _newTab = null;
+                                _applyNewTabTime = null;
+                                _selectedFilterTab = index;
+                            }
+                            GetFilterMenu(filterConfiguration, WindowLayout.Tabs).Draw();
 
-                                if (tabItem.Success)
-                                {
-                                    _selectedFilterTab = index;
-                                    DrawMainWindow();
-                                }
+                            if (tabItem.Success)
+                            {
+                                _selectedFilterTab = index;
+                                DrawMainWindow();
                             }
                         }
                     }

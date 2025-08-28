@@ -46,6 +46,16 @@ namespace InventoryTools.Logic.Filters.Abstract
         public abstract T DefaultValue { get; set; }
 
         public abstract bool HasValueSet(FilterConfiguration configuration);
+        public virtual string GetName(FilterConfiguration configuration)
+        {
+            return Name;
+        }
+
+        public virtual string GetHelpText(FilterConfiguration configuration)
+        {
+            return HelpText;
+        }
+
         public virtual FilterType AvailableIn { get; set; } =
             FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter | FilterType.CuratedList;
         public abstract bool? FilterItem(FilterConfiguration configuration,InventoryItem item);
