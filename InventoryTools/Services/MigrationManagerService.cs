@@ -420,16 +420,6 @@ public class MigrationManagerService : IHostedService
 
             config.InternalVersion++;
         }
-
-        if (config.InternalVersion == 23)
-        {
-            foreach (var filterConfig in config.FilterConfigurations)
-            {
-                filterConfig.Version = FilterConfiguration.CurrentVersion;
-            }
-
-            config.InternalVersion++;
-        }
     }
 
     private List<InventorySearchScope> MigrateSourceScopes(FilterConfiguration filterConfiguration, InventoryToolsConfiguration configuration)
