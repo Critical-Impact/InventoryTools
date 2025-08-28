@@ -100,14 +100,6 @@ namespace InventoryTools.Logic
         private string? _defaultSortColumn = null;
         private ImGuiSortDirection? _defaultSortOrder = null;
 
-        public const uint CurrentVersion = 1;
-
-        /// <summary>
-        /// The version of the configuration
-        /// </summary>
-        [JsonProperty(NullValueHandling = NullValueHandling.Include, Required = Required.Always)]
-        public uint Version { get; set; } = 1;
-
         /// <summary>
         /// Is the configuration dirty?
         /// </summary>
@@ -204,7 +196,6 @@ namespace InventoryTools.Logic
         public FilterConfiguration(CraftList.Factory craftListFactory)
         {
             _craftListFactory = craftListFactory;
-            Version = CurrentVersion;
             Key = Guid.NewGuid().ToString("N");
         }
 
