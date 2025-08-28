@@ -16,6 +16,7 @@ using DalaMock.Host.Mediator;
 using Dalamud.Plugin.Services;
 using InventoryTools.Hotkeys;
 using InventoryTools.Logic;
+using InventoryTools.Logic.Features;
 using InventoryTools.Logic.Filters;
 using InventoryTools.Logic.ItemRenderers;
 using InventoryTools.Logic.Settings;
@@ -48,8 +49,6 @@ namespace InventoryTools
         private readonly IEnumerable<BaseTooltip> tooltips;
         private readonly ITooltipService _tooltipService;
         private readonly FilterConfiguration.Factory _filterConfigFactory;
-        private readonly Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter> _sourceCategoryFilterFactory;
-        private readonly BuyFromVendorPriceFilter _buyFromVendorPriceFilter;
         private readonly IAcquisitionMonitorService _acquisitionMonitorService;
         private readonly CraftTrackerTrackCraftsFilter _trackCraftsFilter;
         private readonly CraftTrackerTrackGatheringFilter _trackGatheringFilter;
@@ -58,8 +57,8 @@ namespace InventoryTools
         private readonly CraftTrackerTrackOtherFilter _trackOtherFilter;
         private readonly CraftTrackerTrackMarketBoardFilter _trackMarketBoardFilter;
         private readonly UseOldCraftTrackerSetting _useOldCraftTrackerSetting;
-        private readonly Func<Type, IFilter> _filterFactory;
         private readonly IMarketCache _marketCache;
+        private readonly IEnumerable<ISampleFilter> _sampleFilters;
         private Dictionary<uint, InventoryMonitor.ItemChangesItem> _recentlyAddedSeen = new();
 
         public bool WasRecentlySeen(uint itemId)
@@ -88,10 +87,9 @@ namespace InventoryTools
             IInventoryMonitor inventoryMonitor, IInventoryScanner inventoryScanner, ICharacterMonitor characterMonitor,
             InventoryToolsConfiguration configuration, IMobTracker mobTracker,
             ICraftMonitor craftMonitor, IUnlockTrackerService unlockTrackerService, IEnumerable<BaseTooltip> tooltips,
-            Func<Type, IFilter> filterFactory, IMarketCache marketCache,
+            IMarketCache marketCache, IEnumerable<ISampleFilter> sampleFilters,
             ITooltipService tooltipService, FilterConfiguration.Factory filterConfigFactory,
-            Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter> sourceCategoryFilterFactory,
-            BuyFromVendorPriceFilter buyFromVendorPriceFilter, IAcquisitionMonitorService acquisitionMonitorService,
+            IAcquisitionMonitorService acquisitionMonitorService,
             CraftTrackerTrackCraftsFilter trackCraftsFilter, CraftTrackerTrackGatheringFilter trackGatheringFilter,
             CraftTrackerTrackShoppingFilter trackShoppingFilter, CraftTrackerTrackCombatDropFilter trackCombatDropFilter,
             CraftTrackerTrackOtherFilter trackOtherFilter, UseOldCraftTrackerSetting useOldCraftTrackerSetting,
@@ -113,8 +111,6 @@ namespace InventoryTools
             this.tooltips = tooltips;
             _tooltipService = tooltipService;
             _filterConfigFactory = filterConfigFactory;
-            _sourceCategoryFilterFactory = sourceCategoryFilterFactory;
-            _buyFromVendorPriceFilter = buyFromVendorPriceFilter;
             _acquisitionMonitorService = acquisitionMonitorService;
             _trackCraftsFilter = trackCraftsFilter;
             _trackGatheringFilter = trackGatheringFilter;
@@ -123,8 +119,8 @@ namespace InventoryTools
             _trackOtherFilter = trackOtherFilter;
             _useOldCraftTrackerSetting = useOldCraftTrackerSetting;
             _trackMarketBoardFilter = trackMarketBoardFilter;
-            _filterFactory = filterFactory;
             _marketCache = marketCache;
+            _sampleFilters = sampleFilters;
             MediatorService.Subscribe<PluginLoadedMessage>(this, PluginLoaded);
         }
 
@@ -261,117 +257,14 @@ namespace InventoryTools
         public void LoadDefaultData()
         {
             _listService.GetDefaultCraftList();
-
-            AddAllFilter();
-
-            AddRetainerFilter();
-
-            AddPlayerFilter();
-
-            AddFreeCompanyFilter();
-
-            AddHousingFilter();
-
-            AddAllGameItemsFilter();
-
-            AddFavouritesFilter();
-
             AddCraftFilter();
-
-            AddHistoryFilter();
-        }
-
-        public void AddAllFilter(string newName = "All")
-        {
-            var allItemsFilter = _filterConfigFactory.Invoke();
-            allItemsFilter.Name = newName;
-            allItemsFilter.FilterType = FilterType.SearchFilter;
-            allItemsFilter.DisplayInTabs = true;
-            allItemsFilter.SourceAllCharacters = true;
-            allItemsFilter.SourceAllRetainers = true;
-            allItemsFilter.SourceAllFreeCompanies = true;
-            _listService.AddDefaultColumns(allItemsFilter);
-            _listService.AddList(allItemsFilter);
-        }
-
-        public void AddRetainerFilter(string newName = "Retainers")
-        {
-            var retainerItemsFilter = _filterConfigFactory.Invoke();
-            retainerItemsFilter.Name = newName;
-            retainerItemsFilter.FilterType = FilterType.SearchFilter;
-            retainerItemsFilter.DisplayInTabs = true;
-            retainerItemsFilter.SourceAllRetainers = true;
-            _listService.AddDefaultColumns(retainerItemsFilter);
-            _listService.AddList(retainerItemsFilter);
-        }
-
-        public void AddPlayerFilter(string newName = "Player")
-        {
-            var playerItemsFilter = _filterConfigFactory.Invoke();
-            playerItemsFilter.Name = newName;
-            playerItemsFilter.FilterType = FilterType.SearchFilter;
-            playerItemsFilter.DisplayInTabs = true;
-            playerItemsFilter.SourceAllCharacters = true;
-            _listService.AddDefaultColumns(playerItemsFilter);
-            _listService.AddList(playerItemsFilter);
-        }
-
-        public void AddHistoryFilter(string newName = "History")
-        {
-            var historyFilter = _filterConfigFactory.Invoke();
-            historyFilter.Name = newName;
-            historyFilter.FilterType = FilterType.HistoryFilter;
-            historyFilter.DisplayInTabs = true;
-            historyFilter.SourceAllCharacters = true;
-            historyFilter.SourceAllRetainers = true;
-            historyFilter.SourceAllFreeCompanies = true;
-            historyFilter.SourceAllHouses = true;
-            _listService.AddDefaultColumns(historyFilter);
-            _listService.AddList(historyFilter);
-        }
-
-        public void AddFreeCompanyFilter(string newName = "Free Company")
-        {
-            var newFilter = _filterConfigFactory.Invoke();
-            newFilter.Name = newName;
-            newFilter.FilterType = FilterType.SearchFilter;
-            newFilter.DisplayInTabs = true;
-            newFilter.SourceAllFreeCompanies = true;
-            _listService.AddDefaultColumns(newFilter);
-            _listService.AddList(newFilter);
-        }
-
-        public void AddHousingFilter(string newName = "Housing")
-        {
-            var newFilter = _filterConfigFactory.Invoke();
-            newFilter.Name = newName;
-            newFilter.FilterType = FilterType.SearchFilter;
-            newFilter.DisplayInTabs = true;
-            newFilter.SourceAllHouses = true;
-            _listService.AddDefaultColumns(newFilter);
-            _listService.AddList(newFilter);
-        }
-
-        public void AddAllGameItemsFilter(string newName = "All Game Items")
-        {
-            var allGameItemsFilter = _filterConfigFactory.Invoke();
-            allGameItemsFilter.Name = newName;
-            allGameItemsFilter.FilterType = FilterType.GameItemFilter;
-            allGameItemsFilter.DisplayInTabs = true;
-            _listService.AddDefaultColumns(allGameItemsFilter);
-            _listService.AddList(allGameItemsFilter);
-        }
-
-        public void AddFavouritesFilter(string newName = "Favourites")
-        {
-            var newFilter = _filterConfigFactory.Invoke();
-            newFilter.Name = newName;
-            newFilter.FilterType = FilterType.GameItemFilter;
-            var favouritesFilter = (FavouritesFilter)_filterFactory.Invoke(typeof(FavouritesFilter));
-            favouritesFilter.UpdateFilterConfiguration(newFilter, true);
-            newFilter.DisplayInTabs = true;
-            _listService.AddDefaultColumns(newFilter);
-            _listService.AddList(newFilter);
+            foreach (var sampleFilter in _sampleFilters.OrderBy(c => c.Name))
+            {
+                if (sampleFilter.SampleFilterType == SampleFilterType.Default)
+                {
+                    sampleFilter.AddFilter();
+                }
+            }
         }
 
         public void AddCraftFilter(string newName = "Craft List")
@@ -388,57 +281,8 @@ namespace InventoryTools
 
         public void AddFilter(FilterConfiguration filterConfiguration)
         {
-            filterConfiguration.DestinationInventories.Clear();
-            filterConfiguration.SourceInventories.Clear();
             _listService.AddList(filterConfiguration);
         }
-
-        public void AddSampleFilter100Gil(string newName = "100 gil or less")
-        {
-            var sampleFilter = _filterConfigFactory.Invoke();
-            sampleFilter.Name = newName;
-            sampleFilter.FilterType = FilterType.SearchFilter;
-            sampleFilter.DisplayInTabs = true;
-            sampleFilter.SourceAllCharacters = true;
-            sampleFilter.SourceAllRetainers = true;
-            sampleFilter.SourceAllFreeCompanies = true;
-            _sourceCategoryFilterFactory.Invoke(ItemInfoRenderCategory.Shop).UpdateFilterConfiguration(sampleFilter, true);
-            _buyFromVendorPriceFilter.UpdateFilterConfiguration(sampleFilter, "<=100");
-            _listService.AddList(sampleFilter);
-            _listService.AddDefaultColumns(sampleFilter);
-        }
-
-        public void AddSampleFilterMaterials(string newName = "Put away materials")
-        {
-            var sampleFilter = _filterConfigFactory.Invoke();
-            sampleFilter.Name = newName;
-            sampleFilter.FilterType = FilterType.SortingFilter;
-            sampleFilter.DisplayInTabs = true;
-            sampleFilter.SourceCategories = new HashSet<InventoryCategory>() {InventoryCategory.CharacterBags};
-            sampleFilter.DestinationCategories =  new HashSet<InventoryCategory>() {InventoryCategory.RetainerBags};
-            sampleFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
-            sampleFilter.HighlightWhen = "Always";
-            var gatherFilter = _sourceCategoryFilterFactory.Invoke(ItemInfoRenderCategory.Gathering);
-            gatherFilter.UpdateFilterConfiguration(sampleFilter, true);
-            _listService.AddList(sampleFilter);
-            _listService.AddDefaultColumns(sampleFilter);
-        }
-
-        public void AddSampleFilterDuplicatedItems(string newName = "Duplicated SortItems")
-        {
-            var sampleFilter = _filterConfigFactory.Invoke();
-            sampleFilter.Name = newName;
-            sampleFilter.FilterType = FilterType.SortingFilter;
-            sampleFilter.DisplayInTabs = true;
-            sampleFilter.SourceCategories = new HashSet<InventoryCategory>() {InventoryCategory.CharacterBags,InventoryCategory.RetainerBags};
-            sampleFilter.DestinationCategories =  new HashSet<InventoryCategory>() {InventoryCategory.RetainerBags};
-            sampleFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
-            sampleFilter.DuplicatesOnly = true;
-            sampleFilter.HighlightWhen = "Always";
-            _listService.AddList(sampleFilter);
-            _listService.AddDefaultColumns(sampleFilter);
-        }
-
 
         public DateTime? NextSaveTime => _nextSaveTime;
 

@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-#
+# 
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryTools", "InventoryTools\InventoryTools.csproj", "{0DF8BDD0-5058-42A6-8E4E-4DD4FA7D5392}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CriticalCommonLib", "CriticalCommonLib\CriticalCommonLib.csproj", "{1A9469D2-F846-4804-AFD8-B46653E52F68}"

@@ -58,18 +58,18 @@ public abstract class InventoryScopeFilter : Filter<List<InventorySearchScope>?>
         if (HasValueSet(configuration))
         {
             ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);
-            ImGui.LabelText("##Label", Name + ":");
+            ImGui.LabelText("##Label", GetName(configuration) + ":");
             ImGui.PopStyleColor();
         }
         else
         {
-            ImGui.LabelText("##Label", Name + ":");
+            ImGui.LabelText("##Label", GetName(configuration) + ":");
         }
         ImGui.Indent();
         using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudGrey))
         {
             ImGui.PushTextWrapPos();
-            ImGui.TextUnformatted(HelpText);
+            ImGui.TextUnformatted(GetHelpText(configuration));
             ImGui.PopTextWrapPos();
         }
         ImGui.SetNextItemWidth(InputSize);

@@ -114,11 +114,11 @@ public class ZonePreferenceFilter : SortedListFilter<uint, uint>
 
     public override void Draw(FilterConfiguration configuration)
     {
-        ImGui.TextUnformatted(Name);
+        ImGui.TextUnformatted(GetName(configuration));
         ImGui.Separator();
         DrawTable(configuration);
         ImGui.SameLine();
-        ImGuiService.HelpMarker(HelpText);
+        ImGuiService.HelpMarker(GetHelpText(configuration));
 
         var currentValue = CurrentValue(configuration);
         ImGui.SetNextItemWidth(LabelSize);

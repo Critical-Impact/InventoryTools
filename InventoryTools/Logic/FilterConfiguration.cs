@@ -100,6 +100,14 @@ namespace InventoryTools.Logic
         private string? _defaultSortColumn = null;
         private ImGuiSortDirection? _defaultSortOrder = null;
 
+        public const uint CurrentVersion = 1;
+
+        /// <summary>
+        /// The version of the configuration
+        /// </summary>
+        [JsonProperty(NullValueHandling = NullValueHandling.Include, Required = Required.Always)]
+        public uint Version { get; set; } = 1;
+
         /// <summary>
         /// Is the configuration dirty?
         /// </summary>
@@ -196,27 +204,17 @@ namespace InventoryTools.Logic
         public FilterConfiguration(CraftList.Factory craftListFactory)
         {
             _craftListFactory = craftListFactory;
+            Version = CurrentVersion;
             Key = Guid.NewGuid().ToString("N");
         }
 
         public void ApplyDefaultCraftFilterConfiguration()
         {
             CraftListDefault = true;
-            DestinationAllCharacters = true;
-            DestinationIncludeCrossCharacter = false;
-            SourceAllCharacters = false;
-            SourceAllRetainers = true;
-            SourceAllFreeCompanies = true;
-            SourceIncludeCrossCharacter = false;
             HighlightWhen = "Always";
-            SourceCategories = new HashSet<InventoryCategory>()
-            {
-                InventoryCategory.FreeCompanyBags,
-                InventoryCategory.CharacterSaddleBags,
-                InventoryCategory.CharacterPremiumSaddleBags,
-            };
         }
 
+        [Obsolete("Remove with API14")]
         public List<(ulong, InventoryCategory)> SourceInventories
         {
             get => _sourceInventories;
@@ -226,6 +224,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public List<uint> ItemUiCategoryId
         {
             get => _itemUiCategoryId;
@@ -235,6 +234,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public List<uint> ItemSearchCategoryId
         {
             get => _itemSearchCategoryId;
@@ -244,6 +244,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public List<uint> EquipSlotCategoryId
         {
             get => _equipSlotCategoryId;
@@ -283,6 +284,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public List<uint> ItemSortCategoryId
         {
             get => _itemSortCategoryId;
@@ -292,6 +294,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public List<(ulong, InventoryCategory)> DestinationInventories
         {
             get => _destinationInventories;
@@ -301,6 +304,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public bool? IsHq
         {
             get => _isHq;
@@ -310,6 +314,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public bool? IsCollectible
         {
             get => _isCollectible;
@@ -335,32 +340,24 @@ namespace InventoryTools.Logic
                 unsafe
                 {
                     _name = value;
-                    _nameAsBytes = null;
                     ConfigurationDirty = true;
                 }
             }
         }
 
         [JsonIgnore]
-        public byte[] NameAsBytes
+        public string NameFormatted
         {
             get
             {
-                if (_nameAsBytes == null)
+                var actualName = Name == "" ? "Untitled" : Name;
+                if (IsEphemeralCraftList)
                 {
-                    var actualName = Name == "" ? "Untitled" : Name;
-                    if (IsEphemeralCraftList)
-                    {
-                        actualName += " (*)";
-                    }
-                    _nameAsBytes = System.Text.Encoding.UTF8.GetBytes(actualName);
+                    actualName += " (*)";
                 }
-
-                return _nameAsBytes;
+                return actualName;
             }
         }
-
-        private byte[]? _nameAsBytes;
 
         public bool? DuplicatesOnly
         {
@@ -413,6 +410,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public string Quantity
         {
             get => _quantity;
@@ -422,6 +420,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public string ILevel
         {
             get => _iLevel;
@@ -431,6 +430,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public string Spiritbond
         {
             get => _spiritbond;
@@ -440,6 +440,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public string NameFilter
         {
             get => _nameFilter;
@@ -461,6 +462,7 @@ namespace InventoryTools.Logic
             set => _key = value;
         }
 
+        [Obsolete("Remove with API14")]
         public bool? SourceAllRetainers
         {
             get => _sourceAllRetainers;
@@ -470,6 +472,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public bool? SourceAllHouses
         {
             get => _sourceAllHouses;
@@ -479,6 +482,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public bool? SourceAllFreeCompanies
         {
             get => _sourceAllFreeCompanies;
@@ -509,6 +513,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public bool? SourceAllCharacters
         {
             get => _sourceAllCharacters;
@@ -518,6 +523,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public bool? DestinationAllRetainers
         {
             get => _destinationAllRetainers;
@@ -527,6 +533,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public bool? DestinationAllFreeCompanies
         {
             get => _destinationAllFreeCompanies;
@@ -536,6 +543,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public bool? DestinationAllHouses
         {
             get => _destinationAllHouses;
@@ -545,6 +553,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public bool? SourceIncludeCrossCharacter
         {
             get => _sourceIncludeCrossCharacter;
@@ -554,6 +563,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public bool? DestinationIncludeCrossCharacter
         {
             get => _destinationIncludeCrossCharacter;
@@ -581,6 +591,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public HashSet<InventoryCategory>? DestinationCategories
         {
             get => _destinationCategories;
@@ -590,6 +601,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public HashSet<InventoryCategory>? SourceCategories
         {
             get => _sourceCategories;
@@ -599,6 +611,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public bool? DestinationAllCharacters
         {
             get => _destinationAllCharacters;
@@ -608,6 +621,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public string ShopSellingPrice
         {
             get => _shopSellingPrice;
@@ -619,6 +633,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public string ShopBuyingPrice
         {
             get => _shopBuyingPrice;
@@ -630,6 +645,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public string MarketAveragePrice
         {
             get => _marketAveragePrice;
@@ -641,6 +657,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public string MarketTotalAveragePrice
         {
             get => _marketTotalAveragePrice;
@@ -652,6 +669,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public bool? CanBeBought
         {
             get => _canBeBought;
@@ -663,6 +681,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public bool? IsAvailableAtTimedNode
         {
             get => _isAvailableAtTimedNode;
@@ -806,6 +825,7 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public HashSet<uint>? SourceWorlds
         {
             get => _sourceWorlds;

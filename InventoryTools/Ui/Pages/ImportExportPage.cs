@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib.Services;
@@ -119,15 +120,24 @@ namespace InventoryTools.Ui.Pages
                     }
                     else
                     {
-                        if (_importExportService.FromBase64(ImportData, out FilterConfiguration newFilter))
+                        try
                         {
-                            _pluginLogic.AddFilter(newFilter);
+                            if (_importExportService.FromBase64(ImportData, out var newFilter))
+                            {
+                                _pluginLogic.AddFilter(newFilter);
+                            }
+                            else
+                            {
+                                ImportFailed = true;
+                                FailedReason =
+                                    "Invalid data detected in import string. Please make sure this string is valid.";
+                            }
                         }
-                        else
+                        catch (ListImportVersionException e)
                         {
                             ImportFailed = true;
                             FailedReason =
-                                "Invalid data detected in import string. Please make sure this string is valid.";
+                                $"This list is no longer valid. It's version is {(e.ImportingVersion?.ToString() ?? "0")} and it's required version is {e.RequiredVersion}.";
                         }
                     }
                 }

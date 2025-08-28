@@ -12,6 +12,8 @@ public class PopupMenu
     private PopupMenuButtons _openButtons;
     private string _id;
 
+    public List<IPopupMenuItem> Items => _items;
+
     public enum PopupMenuButtons
     {
         Left,

@@ -27,18 +27,18 @@ namespace InventoryTools.Logic.Filters.Abstract
             if (HasValueSet(configuration))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);
-                ImGui.LabelText("##" + Key + "Label", Name + ":");
+                ImGui.LabelText("##" + Key + "Label", GetName(configuration) + ":");
                 ImGui.PopStyleColor();
             }
             else
             {
-                ImGui.LabelText("##" + Key + "Label", Name + ":");
+                ImGui.LabelText("##" + Key + "Label", GetName(configuration) + ":");
             }
             ImGui.Indent();
             using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudGrey))
             {
                 ImGui.PushTextWrapPos();
-                ImGui.TextUnformatted(HelpText);
+                ImGui.TextUnformatted(GetHelpText(configuration));
                 ImGui.PopTextWrapPos();
             }
             ImGui.SetNextItemWidth(InputSize);

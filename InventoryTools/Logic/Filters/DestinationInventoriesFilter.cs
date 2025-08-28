@@ -4,117 +4,32 @@ using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
-
+using InventoryTools.Logic.Editors;
 using InventoryTools.Logic.Filters.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
-    public class DestinationInventoriesFilter : MultipleChoiceFilter<(ulong, InventoryCategory)>
+    public class DestinationInventoriesFilter : InventoryScopeFilter
     {
-        private readonly ICharacterMonitor _characterMonitor;
-        private readonly InventoryToolsConfiguration _configuration;
-
-        public DestinationInventoriesFilter(ILogger<DestinationInventoriesFilter> logger, ImGuiService imGuiService, ICharacterMonitor characterMonitor, InventoryToolsConfiguration configuration) : base(logger, imGuiService)
+        public DestinationInventoriesFilter(ILogger<DestinationInventoriesFilter> logger, InventoryScopePicker scopePicker, ImGuiService imGuiService) : base(scopePicker, logger, imGuiService)
         {
-            _characterMonitor = characterMonitor;
-            _configuration = configuration;
         }
         public override int LabelSize { get; set; } = 240;
         public override string Key { get; set; } = "DestinationInventories";
-        public override string Name { get; set; } = "Destination - Inventories";
+        public override string Name { get; set; } = "Destination Inventories";
         public override string HelpText { get; set; } =
-            "This is a list of destinations to sort items into.";
+            "Define which inventories you want as destinations, the plugin will attempt try to take the items found in your 'Source Inventories' and sort them into your 'Destination Inventories'. You can see which inventories have been found based on the scope configuration below.";
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Inventories;
-        public override List<(ulong, InventoryCategory)> DefaultValue { get; set; } = new();
+        public override List<InventorySearchScope>? DefaultValue { get; set; } = null;
         public override FilterType AvailableIn { get; set; } = FilterType.SortingFilter;
 
-        public override bool? FilterItem(FilterConfiguration configuration, InventoryItem item)
+        public override List<InventorySearchScope>? GenerateDefaultScope()
         {
-            return null;
-        }
-
-        public override bool? FilterItem(FilterConfiguration configuration, ItemRow item)
-        {
-            return null;
-        }
-
-        public override Dictionary<(ulong, InventoryCategory), string> GetChoices(FilterConfiguration configuration)
-        {
-            var allCharacters = _characterMonitor.AllCharacters();
-            if (!_configuration.DisplayCrossCharacter)
+            return new List<InventorySearchScope>()
             {
-                allCharacters = allCharacters.Where(c =>
-                    _characterMonitor.BelongsToActiveCharacter(c.Key)).ToArray();
-            }
-            
-            var dict = new Dictionary<(ulong, InventoryCategory), string>();
-            foreach (var character in allCharacters)
-            {
-                if (_characterMonitor.IsRetainer(character.Key))
-                {
-                    dict.Add((character.Key, InventoryCategory.RetainerBags), character.Value.FormattedName + " - " + InventoryCategory.RetainerBags.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.RetainerMarket), character.Value.FormattedName + " - " + InventoryCategory.RetainerMarket.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.RetainerEquipped), character.Value.FormattedName + " - " + InventoryCategory.RetainerEquipped.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.Currency), character.Value.FormattedName + " - " + InventoryCategory.Currency.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.Crystals), character.Value.FormattedName + " - " + InventoryCategory.Crystals.FormattedName());
-                }
-                else if (_characterMonitor.IsFreeCompany(character.Key))
-                {
-                    dict.Add((character.Key, InventoryCategory.FreeCompanyBags), character.Value.FormattedName + " - " + InventoryCategory.FreeCompanyBags.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.Currency), character.Value.FormattedName + " - " + InventoryCategory.Currency.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.Crystals), character.Value.FormattedName + " - " + InventoryCategory.Crystals.FormattedName());
-                }
-                else if (_characterMonitor.IsHousing(character.Key))
-                {
-                    dict.Add((character.Key, InventoryCategory.HousingInteriorAppearance), character.Value.FormattedName + " - " + InventoryCategory.HousingInteriorAppearance.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.HousingInteriorItems), character.Value.FormattedName + " - " + InventoryCategory.HousingInteriorItems.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.HousingInteriorStoreroom), character.Value.FormattedName + " - " + InventoryCategory.HousingInteriorStoreroom.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.HousingExteriorAppearance), character.Value.FormattedName + " - " + InventoryCategory.HousingExteriorAppearance.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.HousingExteriorItems), character.Value.FormattedName + " - " + InventoryCategory.HousingExteriorItems.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.HousingExteriorStoreroom), character.Value.FormattedName + " - " + InventoryCategory.HousingExteriorStoreroom.FormattedName());
-                }
-                else
-                {
-                    dict.Add((character.Key, InventoryCategory.CharacterBags), character.Value.FormattedName + " - " + InventoryCategory.CharacterBags.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.CharacterSaddleBags), character.Value.FormattedName + " - " + InventoryCategory.CharacterSaddleBags.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.CharacterPremiumSaddleBags), character.Value.FormattedName + " - " + InventoryCategory.CharacterPremiumSaddleBags.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.FreeCompanyBags), character.Value.FormattedName + " - " + InventoryCategory.FreeCompanyBags.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.CharacterArmoryChest), character.Value.FormattedName + " - " + InventoryCategory.CharacterArmoryChest.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.GlamourChest), character.Value.FormattedName + " - " + InventoryCategory.GlamourChest.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.Armoire), character.Value.FormattedName + " - " + InventoryCategory.Armoire.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.Crystals), character.Value.FormattedName + " - " + InventoryCategory.Crystals.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.Currency), character.Value.FormattedName + " - " + InventoryCategory.Currency.FormattedName());
-                    dict.Add((character.Key, InventoryCategory.CharacterEquipped), character.Value.FormattedName + " - " + InventoryCategory.CharacterEquipped.FormattedName());
-                   
-                }
-            }
-
-            return dict;
+            };
         }
-
-        public override List<(ulong, InventoryCategory)> CurrentValue(FilterConfiguration configuration)
-        {
-            return configuration.DestinationInventories.ToList();
-        }
-
-        public override void ResetFilter(FilterConfiguration configuration)
-        {
-            UpdateFilterConfiguration(configuration, new List<(ulong, InventoryCategory)>());
-        }
-
-        public override void UpdateFilterConfiguration(FilterConfiguration configuration, List<(ulong, InventoryCategory)> newValue)
-        {
-            List<(ulong, InventoryCategory)> newDestinationInventories = new();
-            foreach (var item in newValue)
-            {
-                newDestinationInventories.Add(item);
-            }
-
-            configuration.DestinationInventories = newDestinationInventories;
-        }
-
-        public override bool HideAlreadyPicked { get; set; } = true;
     }
 }

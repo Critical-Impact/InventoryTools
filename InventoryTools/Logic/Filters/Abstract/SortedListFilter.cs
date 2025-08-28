@@ -134,7 +134,7 @@ namespace InventoryTools.Logic.Filters.Abstract
         {
             DrawTable(configuration);
             ImGui.SameLine();
-            ImGuiService.HelpMarker(HelpText);
+            ImGuiService.HelpMarker(GetHelpText(configuration));
             if (HasValueSet(configuration) && ShowReset)
             {
                 ImGui.SameLine();

@@ -33,7 +33,7 @@ public class OverlayServiceDebuggerPane : IDebugPane
         ImGui.Text($"Current State: {(OverlayService.LastState == null ? "No State" : "Has State")}");
         if (OverlayService.LastState != null)
         {
-            ImGui.Text($"Filter: {OverlayService.LastState.FilterConfiguration.NameFilter}");
+            ImGui.Text($"Filter: {OverlayService.LastState.FilterConfiguration.Name}");
             ImGui.Text($"Should Highlight: {(OverlayService.LastState.ShouldHighlight ? "Yes" : "No")}");
             ImGui.TextUnformatted($"Active Retainer ID: {_characterMonitor.ActiveRetainerId}");
             ImGui.TextUnformatted($"Retainer List Open?: {_gameUiManager.IsWindowVisible(CriticalCommonLib.Services.Ui.WindowName.RetainerList)}");

@@ -17,7 +17,7 @@ public class CraftStagingAreaFilter : InventoryScopeFilter
     public override string Name { get; set; } = "Staging Area";
 
     public override string HelpText { get; set; } =
-        "When crafting, what inventories should be considered the staging area? Any items in the staging area are considered in the users inventories. By default just the current character's bags are the staging area but if you wanted to include the saddlebag you could.";
+        "When crafting, what inventories should be considered the staging area? Any items in the staging area are considered in the users inventories. By default the current character's bags, crystals and currency are the staging area but if you wanted to include the saddlebag you could.";
 
     public override FilterCategory FilterCategory { get; set; } = FilterCategory.Inventories;
 
@@ -28,7 +28,7 @@ public class CraftStagingAreaFilter : InventoryScopeFilter
     {
         return new List<InventorySearchScope>()
         {
-            new InventorySearchScope() { ActiveCharacter = true, Categories = [InventoryCategory.CharacterBags] }
+            new InventorySearchScope() { ActiveCharacter = true, Categories = [InventoryCategory.CharacterBags, InventoryCategory.Currency, InventoryCategory.Crystals] }
         };
     }
 
