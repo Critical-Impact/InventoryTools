@@ -12,12 +12,7 @@ namespace InventoryTools.Logic.Filters;
 public class OutdatedGearFilter : BooleanFilter
 {
     private readonly IGameInteropService _gameInteropService;
-    private string _key;
-    private string _name;
-    private string _helpText;
-    private FilterCategory _filterCategory;
-    private FilterType _availableIn;
-    private Dictionary<uint, short>? _jobClassLevels = null;
+    private Dictionary<uint, short>? _jobClassLevels;
 
     public OutdatedGearFilter(ILogger<OutdatedGearFilter> logger, ImGuiService imGuiService, IGameInteropService gameInteropService) : base(logger, imGuiService)
     {

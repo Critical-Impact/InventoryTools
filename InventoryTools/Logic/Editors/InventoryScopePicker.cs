@@ -290,7 +290,7 @@ public class InventoryScopePicker
                     {
                         foreach (var characterType in searchScope.CharacterTypes)
                         {
-                            ImGui.Text(characterType.FormattedName());
+                            ImGui.Text(characterType.FormattedName() + " (All Inventories)");
                         }
                     }
                 }
@@ -386,7 +386,7 @@ public class InventoryScopePicker
                     {
                         ImGui.TextWrapped("The inventory scope editor allows you define which inventories you want to search across.");
                         ImGui.TextWrapped("By default, every inventory Allagan Tools knows about is searched.");
-                        ImGui.TextWrapped("By providing a set of scopes, you are narrowing down from which inventories are displayed.");
+                        ImGui.TextWrapped("By providing a set of scopes, you are narrowing down which inventories are displayed.");
                     }
                     else
                     {

@@ -31,6 +31,7 @@ using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
 using InventoryTools.Extensions;
+using InventoryTools.Logic.Features;
 using Microsoft.Extensions.Logging;
 using Serilog.Events;
 using ImGuiUtil = OtterGui.ImGuiUtil;
@@ -54,6 +55,7 @@ namespace InventoryTools.Ui
         private readonly FiltersWindowLayoutSetting _layoutSetting;
         private readonly ItemSheet _itemSheet;
         private readonly FilterConfiguration.Factory _filterConfigFactory;
+        private readonly IEnumerable<ISampleFilter> _sampleFilters;
         private readonly IClipboardService _clipboardService;
         private readonly PopupService _popupService;
         private readonly IKeyState _keyState;
@@ -68,7 +70,7 @@ namespace InventoryTools.Ui
             IUniversalis universalis, IFileDialogManager fileDialogManager, IGameUiManager gameUiManager,
             HostedInventoryHistory inventoryHistory, ListImportExportService importExportService,
             IComponentContext context, FiltersWindowLayoutSetting layoutSetting, ItemSheet itemSheet,
-            FilterConfiguration.Factory filterConfigFactory,
+            FilterConfiguration.Factory filterConfigFactory, IEnumerable<ISampleFilter> sampleFilters,
             IClipboardService clipboardService, PopupService popupService, IKeyState keyState, IFramework framework, IPluginLog pluginLog) : base(logger, mediator, imGuiService, configuration, "Filters Window")
         {
             _listService = listService;
@@ -85,6 +87,7 @@ namespace InventoryTools.Ui
             _layoutSetting = layoutSetting;
             _itemSheet = itemSheet;
             _filterConfigFactory = filterConfigFactory;
+            _sampleFilters = sampleFilters;
             _clipboardService = clipboardService;
             _popupService = popupService;
             _keyState = keyState;
@@ -166,8 +169,6 @@ namespace InventoryTools.Ui
         private HoverButton _editIcon = new();
         private HoverButton _settingsIcon = new();
         private HoverButton _craftIcon = new();
-        private HoverButton _csvIcon = new();
-        private HoverButton _clipboardIcon = new();
         private HoverButton _clearIcon = new();
         private HoverButton _closeSettingsIcon = new();
         private HoverButton _marketIcon = new();
@@ -927,6 +928,87 @@ namespace InventoryTools.Ui
                                 }
                             }
 
+                            using (var addMenu = ImRaii.Menu("Add (Preconfigured)"))
+                            {
+                                if (addMenu)
+                                {
+                                    foreach (var defaultFilter in _sampleFilters.OrderBy(c => c.Name))
+                                    {
+                                        if (defaultFilter.SampleFilterType == SampleFilterType.Default)
+                                        {
+                                            if (ImGui.MenuItem(defaultFilter.Name))
+                                            {
+                                                _popupService.AddPopup(new NamePopup(GetType(), "addDefault" + defaultFilter.Name, defaultFilter.SampleDefaultName, result =>
+                                                {
+                                                    if (result.Item1)
+                                                    {
+                                                        var newFilter = defaultFilter.AddFilter();
+                                                        newFilter.Name = result.Item2;
+                                                        Invalidate();
+                                                        MediatorService.Publish(new OpenGenericWindowMessage(typeof(ConfigurationWindow)));
+                                                        MediatorService.Publish(new ConfigurationWindowEditFilter(newFilter));
+                                                        FocusFilter(newFilter);
+                                                    }
+                                                }));
+                                            }
+
+                                            ImGuiUtil.HoverTooltip(defaultFilter.SampleDescription);
+                                        }
+                                    }
+                                }
+                            }
+
+                            using (var addMenu = ImRaii.Menu("Import/Export"))
+                            {
+                                if (addMenu)
+                                {
+                                    if (ImGui.MenuItem("Export Current List (Share Code)"))
+                                    {
+                                        if (SelectedConfiguration != null)
+                                        {
+                                            var base64 = _importExportService.ToBase64(SelectedConfiguration);
+                                            _clipboardService.CopyToClipboard(base64);
+                                            _chatUtilities.PrintClipboardMessage("[Export] ", "Filter Configuration");
+                                        }
+                                    }
+
+                                    if (ImGui.MenuItem("Import List (Share Code)"))
+                                    {
+                                        _popupService.AddPopup(new MultiLineTextPopup(GetType(), "addSearchList", "Please enter a valid share code for a list below and then hit ok to import it.", result =>
+                                        {
+                                            if (result.Item1)
+                                            {
+                                                var importData = result.Item2;
+                                                if (importData == "")
+                                                {
+                                                    _chatUtilities.PrintClipboardMessage("[Import] ", "You must paste a list generated via the export function or that was shared with you before pressing ok.");
+                                                }
+                                                else
+                                                {
+                                                    try
+                                                    {
+                                                        if (_importExportService.FromBase64(importData,
+                                                                out var newList))
+                                                        {
+                                                            _chatUtilities.PrintClipboardMessage("[Import] ", "The list was imported successfully.");
+                                                            _listService.AddList(newList);
+                                                        }
+                                                        else
+                                                        {
+                                                            _chatUtilities.PrintClipboardMessage("[Import] ", "Invalid data detected in import string. Please make sure this string is valid.");
+                                                        }
+                                                    }
+                                                    catch (ListImportVersionException e)
+                                                    {
+                                                        _chatUtilities.PrintClipboardMessage("[Import] ", $"This list is no longer valid. It's version is {(e.ImportingVersion?.ToString() ?? "0")} and it's required version is {e.RequiredVersion}.");
+                                                    }
+                                                }
+                                            }
+                                        }));
+                                    }
+                                }
+                            }
+
                             ImGui.NewLine();
 
                             var windowGroups = _listService.Lists.GroupBy(c => c.FilterType).OrderBySequence(
@@ -1193,38 +1275,36 @@ namespace InventoryTools.Ui
                     {
                         var imGuiTabItemFlags = _newTab == index && SwitchNewTab ? ImGuiTabItemFlags.SetSelected : ImGuiTabItemFlags.None;
                         using var id = ImRaii.PushId(index);
-                        fixed (byte* namePtr = filterConfiguration.NameAsBytes)
+
+                        using (var tabItem = ImRaii.TabItem(filterConfiguration.NameFormatted + "##" + filterConfiguration.Key, imGuiTabItemFlags))
                         {
-                            using (var tabItem = ImRaii.TabItem(namePtr, imGuiTabItemFlags))
+                            GetFilterMenu(filterConfiguration, WindowLayout.Tabs).Draw();
+
+                            if (SwitchNewTab && _newTab != null && _newTab == index)
                             {
-                                GetFilterMenu(filterConfiguration, WindowLayout.Tabs).Draw();
+                                _newTab = null;
+                                _applyNewTabTime = null;
+                            }
+                            if (!tabItem.Success) continue;
 
-                                if (SwitchNewTab && _newTab != null && _newTab == index)
+                            _selectedFilterTab = index;
+                            if (_settingsActive)
+                            {
+                                DrawSettingsPanel(filterConfiguration);
+                            }
+                            else
+                            {
+                                var activeFilter = DrawFilter(itemTable, filterConfiguration);
+                                if (_activeFilter != activeFilter && ImGui.IsWindowFocused())
                                 {
-                                    _newTab = null;
-                                    _applyNewTabTime = null;
-                                }
-                                if (!tabItem.Success) continue;
-
-                                _selectedFilterTab = index;
-                                if (_settingsActive)
-                                {
-                                    DrawSettingsPanel(filterConfiguration);
-                                }
-                                else
-                                {
-                                    var activeFilter = DrawFilter(itemTable, filterConfiguration);
-                                    if (_activeFilter != activeFilter && ImGui.IsWindowFocused())
+                                    if (_configuration.SwitchFiltersAutomatically &&
+                                        _configuration.ActiveUiFilter != filterConfiguration.Key &&
+                                        _configuration.ActiveUiFilter != null)
                                     {
-                                        if (_configuration.SwitchFiltersAutomatically &&
-                                            _configuration.ActiveUiFilter != filterConfiguration.Key &&
-                                            _configuration.ActiveUiFilter != null)
+                                        _framework.RunOnFrameworkThread(() =>
                                         {
-                                            _framework.RunOnFrameworkThread(() =>
-                                            {
-                                                _listService.ToggleActiveUiList(filterConfiguration);
-                                            });
-                                        }
+                                            _listService.ToggleActiveUiList(filterConfiguration);
+                                        });
                                     }
                                 }
                             }

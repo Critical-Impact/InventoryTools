@@ -51,12 +51,12 @@
       },
       "DalaMock.Host": {
         "type": "Direct",
-        "requested": "[3.0.3, )",
-        "resolved": "3.0.3",
-        "contentHash": "RCb6BvWHFpfQ5RSqdqvI5uUGQCFNi5yZt/Bg5vXlAP85lW3LxXdpGoCe+pxIVs/OkJD0osTvf9ryO3lHbqvVxQ==",
+        "requested": "[3.0.6, )",
+        "resolved": "3.0.6",
+        "contentHash": "HZ/pxQIErvTOX7+x+uE1u90J+5l/uYmKy+F7aU2GnWLs5S4Ba7VXgwlkSBQzzKkp9LnG8QNWRzrBu2OJvTRmvw==",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "10.0.0",
-          "DalaMock.Shared": "3.0.2",
+          "DalaMock.Shared": "3.0.6",
           "Microsoft.Extensions.Hosting": "9.0.8",
           "Microsoft.Extensions.Hosting.Abstractions": "9.0.8",
           "Microsoft.Extensions.ObjectPool": "9.0.8"
@@ -64,9 +64,9 @@
       },
       "DalaMock.Shared": {
         "type": "Direct",
-        "requested": "[3.0.3, )",
-        "resolved": "3.0.3",
-        "contentHash": "otJtFPTX6vBrrMR8KkYYyUxri1zyd4g9Vb1QPifhsdrARDwLmh5Y01cuQqifaX4rIp+hnijweWfy5eBkpLYO5w==",
+        "requested": "[3.0.6, )",
+        "resolved": "3.0.6",
+        "contentHash": "b2mISUcDti/VeOyo2JW9aABiwCImi+Xv4j7L90h3bHftpUMxa2DG9h/FxB9DjzXvEAiY2dBYRLcGCfcHf7rvcw==",
         "dependencies": {
           "Autofac": "8.4.0",
           "Microsoft.Extensions.Hosting": "9.0.8",
@@ -75,9 +75,9 @@
       },
       "DalamudPackager": {
         "type": "Direct",
-        "requested": "[13.0.0, )",
-        "resolved": "13.0.0",
-        "contentHash": "Mb3cUDSK/vDPQ8gQIeuCw03EMYrej1B4J44a1AvIJ9C759p9XeqdU9Hg4WgOmlnlPe0G7ILTD32PKSUpkQNa8w=="
+        "requested": "[13.1.0, )",
+        "resolved": "13.1.0",
+        "contentHash": "XdoNhJGyFby5M/sdcRhnc5xTop9PHy+H50PTWpzLhJugjB19EDBiHD/AsiDF66RETM+0qKUdJBZrNuebn7qswQ=="
       },
       "DotNet.ReproducibleBuilds": {
         "type": "Direct",
@@ -517,7 +517,7 @@
         "type": "Project",
         "dependencies": {
           "AllaganLib.GameSheets": "[1.3.3, )",
-          "DalaMock.Host": "[3.0.3, )",
+          "DalaMock.Host": "[3.0.6, )",
           "Humanizer.Core": "[3.0.0-beta.54, )",
           "Microsoft.Extensions.Hosting": "[9.0.8, )",
           "NaturalSort.Extension": "[4.3.0, )",

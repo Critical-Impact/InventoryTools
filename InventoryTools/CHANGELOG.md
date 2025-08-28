@@ -8,6 +8,21 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [13.1.0] - 2025-08-28
+
+### List Source/Destination Changes
+- The way that sources and destinations work has changed, the individual dropdowns have been removed and replaced with a new scope picker.
+- From the scope picker you can define a set of inventories, characters, categories or worlds you want to match against.
+- Craft lists have received the same upgrade and also include a "Staging Area" scope that lets you pick which items are considered to be in your inventory
+- Your previous settings will have been migrated
+- Lists exported as "import codes" made on previous versions will not longer import and will need to be remade on this version.
+
+The other following additions were made:
+
+### Added
+- Preconfigured/sample lists were added to the lists menu in the lists window
+- A import/export menu item was added to the lists menu
+
 ## [13.0.4] - 2025-08-27
 
 ### Fixed

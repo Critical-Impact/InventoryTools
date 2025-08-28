@@ -23,11 +23,11 @@ public class ListServiceDebuggerPane : IDebugPane
         var activeBackgroundList = ListService.GetActiveBackgroundList();
         var activeUiList = ListService.GetActiveUiList(false);
         var lists = ListService.Lists;
-        ImGui.Text($"Active Background List: {(activeBackgroundList == null ? "No List" : activeBackgroundList.NameFilter)}");
-        ImGui.Text($"Active UI List: {(activeUiList == null ? "No List" : activeUiList.NameFilter)}");
+        ImGui.Text($"Active Background List: {(activeBackgroundList == null ? "No List" : activeBackgroundList.Name)}");
+        ImGui.Text($"Active UI List: {(activeUiList == null ? "No List" : activeUiList.Name)}");
         foreach (var list in lists)
         {
-            ImGui.Text($"{list.NameFilter}:");
+            ImGui.Text($"{list.Name}:");
             ImGui.Text($"{(list.Active ? "Active" : "Not Active")}");
         }
     }

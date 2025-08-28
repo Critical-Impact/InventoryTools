@@ -17,6 +17,7 @@ using OtterGui;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
 using InventoryTools.Extensions;
+using InventoryTools.Logic.Features;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
@@ -38,6 +39,7 @@ namespace InventoryTools.Ui
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly SettingPage.Factory _settingPageFactory;
         private readonly FilterConfiguration.Factory _filterConfigurationFactory;
+        private readonly IEnumerable<ISampleFilter> _sampleFilters;
         private readonly Func<Type, IConfigPage> _configPageFactory;
         private readonly Func<FilterConfiguration, FilterPage> _filterPageFactory;
         private readonly IComponentContext _context;
@@ -60,6 +62,7 @@ namespace InventoryTools.Ui
             Func<FilterConfiguration, FilterPage> filterPageFactory,
             SettingPage.Factory settingPageFactory,
             FilterConfiguration.Factory filterConfigurationFactory,
+            IEnumerable<ISampleFilter> sampleFilters,
             IComponentContext context) : base(logger,
             mediator,
             imGuiService,
@@ -74,6 +77,7 @@ namespace InventoryTools.Ui
             _serviceScopeFactory = serviceScopeFactory;
             _settingPageFactory = settingPageFactory;
             _filterConfigurationFactory = filterConfigurationFactory;
+            _sampleFilters = sampleFilters;
             _configPageFactory = configPageFactory;
             _filterPageFactory = filterPageFactory;
             _context = context;
@@ -121,19 +125,38 @@ namespace InventoryTools.Ui
                     new PopupMenu.PopupMenuItemSelectableAskName("History List", "af4", "New History Item List", AddHistoryFilter, "This will create a list that lets you view historical data of how your inventory has changed."),
                 });
 
-            _addSampleMenu = new PopupMenu("addSampleFilter", PopupMenu.PopupMenuButtons.LeftRight,
-                new List<PopupMenu.IPopupMenuItem>()
+            _addSampleMenu = new PopupMenu("addSampleFilter", PopupMenu.PopupMenuButtons.LeftRight, []);
+
+            var sampleId = 0;
+            foreach (var sampleFilter in _sampleFilters)
+            {
+                if (sampleFilter.SampleFilterType == SampleFilterType.Default)
                 {
-                    new PopupMenu.PopupMenuItemSelectableAskName("All", "af4", "All", AddAllFilter, "This will add a list that will be preconfigured to show items across all inventories."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Player", "af5", "Player", AddPlayerFilter, "This will add a list that will be preconfigured to show items across all character inventories."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Retainers", "af6", "Retainers", AddRetainersFilter, "This will add a list that will be preconfigured to show items across all retainer inventories."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Free Company", "af7", "Free Company", AddFreeCompanyFilter, "This will add a list that will be preconfigured to show items across all free company inventories."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("All Game Items", "af8", "All Game Items", AddAllGameItemsFilter, "This will add a list that will be preconfigured to show all of the game's items."),
-                    new PopupMenu.PopupMenuItemSeparator(),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Purchased for less than 100 gil", "af9", "Less than 100 gil", AddLessThan100GilFilter, "This will add a list that will show all items that can be purchased from gil shops under 100 gil. It will look in both character and retainer inventories."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Put away materials +", "af10", "Put away materials", AddPutAwayMaterialsFilter, "This will add a list that will be setup to quickly put away any excess materials. It will have all the material categories automatically added. When calculating where to put items it will try to prioritise existing stacks of items."),
-                    new PopupMenu.PopupMenuItemSelectableAskName("Duplicated items across characters/retainers +", "af11", "Duplicated items", AddDuplicatedItemsFilter, "This will add a list that will provide a list of all the distinct stacks that appear in 2 sets of inventories. You can use this to make sure only one retainer has a specific type of item.")
-                });
+                    _addSampleMenu.Items.Add(new PopupMenu.PopupMenuItemSelectableAskName(sampleFilter.Name,
+                        $"sf{sampleId}", sampleFilter.SampleDefaultName, (newName, id) =>
+                        {
+                            var createdFilter = sampleFilter.AddFilter();
+                            createdFilter.Name = newName;
+                        }, sampleFilter.SampleDescription));
+                    sampleId++;
+                }
+            }
+
+            _addSampleMenu.Items.Add(new PopupMenu.PopupMenuItemSeparator());
+
+            foreach (var sampleFilter in _sampleFilters)
+            {
+                if (sampleFilter.SampleFilterType == SampleFilterType.Sample)
+                {
+                    _addSampleMenu.Items.Add(new PopupMenu.PopupMenuItemSelectableAskName(sampleFilter.Name,
+                        $"sf{sampleId}", sampleFilter.SampleDefaultName, (newName, id) =>
+                        {
+                            var createdFilter = sampleFilter.AddFilter();
+                            createdFilter.Name = newName;
+                        }, sampleFilter.SampleDescription));
+                    sampleId++;
+                }
+            }
 
             _settingsMenu = new PopupMenu("configMenu", PopupMenu.PopupMenuButtons.All,
                 new List<PopupMenu.IPopupMenuItem>()
@@ -253,35 +276,6 @@ namespace InventoryTools.Ui
         {
             MediatorService.Publish(new OpenGenericWindowMessage(typeof(ENpcsWindow)));
         }
-        private void AddAllGameItemsFilter(string arg1, string arg2)
-        {
-            _pluginLogic.AddAllGameItemsFilter(arg1);
-            SetNewFilterActive();
-        }
-
-        private void AddFreeCompanyFilter(string arg1, string arg2)
-        {
-            _pluginLogic.AddFreeCompanyFilter(arg1);
-            SetNewFilterActive();
-        }
-
-        private void AddRetainersFilter(string arg1, string arg2)
-        {
-            _pluginLogic.AddRetainerFilter(arg1);
-            SetNewFilterActive();
-        }
-
-        private void AddPlayerFilter(string arg1, string arg2)
-        {
-            _pluginLogic.AddPlayerFilter(arg1);
-            SetNewFilterActive();
-        }
-
-        private void AddAllFilter(string arg1, string arg2)
-        {
-            _pluginLogic.AddAllFilter(arg1);
-            SetNewFilterActive();
-        }
 
         private Dictionary<FilterConfiguration, PopupMenu> _popupMenus = new();
         public PopupMenu GetFilterMenu(FilterConfiguration configuration)
@@ -345,24 +339,6 @@ namespace InventoryTools.Ui
                 _listService.DuplicateList(existingFilter, filterName);
                 SetNewFilterActive();
             }
-        }
-
-        private void AddDuplicatedItemsFilter(string newName, string id)
-        {
-            _pluginLogic.AddSampleFilterDuplicatedItems(newName);
-            SetNewFilterActive();
-        }
-
-        private void AddPutAwayMaterialsFilter(string newName, string id)
-        {
-            _pluginLogic.AddSampleFilterMaterials(newName);
-            SetNewFilterActive();
-        }
-
-        private void AddLessThan100GilFilter(string newName, string id)
-        {
-            _pluginLogic.AddSampleFilter100Gil(newName);
-            SetNewFilterActive();
         }
 
         private void AddSearchFilter(string newName, string id)

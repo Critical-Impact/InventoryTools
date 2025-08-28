@@ -465,37 +465,26 @@ namespace InventoryTools.Logic
             {
                 case InventoryCategory.CharacterBags:
                     return _characterMonitor.ActiveCharacterId;
-                    break;
                 case InventoryCategory.CharacterSaddleBags:
                     return _characterMonitor.ActiveCharacterId;
-                    break;
                 case InventoryCategory.CharacterPremiumSaddleBags:
                     return _characterMonitor.ActiveCharacterId;
-                    break;
                 case InventoryCategory.RetainerBags:
                     return ActiveRetainerId;
-                    break;
                 case InventoryCategory.CharacterArmoryChest:
                     return _characterMonitor.ActiveCharacterId;
-                    break;
                 case InventoryCategory.CharacterEquipped:
                     return _characterMonitor.ActiveCharacterId;
-                    break;
                 case InventoryCategory.RetainerEquipped:
                     return ActiveRetainerId;
-                    break;
                 case InventoryCategory.RetainerMarket:
                     return ActiveRetainerId;
-                    break;
                 case InventoryCategory.GlamourChest:
                     return _characterMonitor.ActiveCharacterId;
-                    break;
                 case InventoryCategory.Armoire:
                     return _characterMonitor.ActiveCharacterId;
-                    break;
                 case InventoryCategory.FreeCompanyBags:
                     return _characterMonitor.ActiveFreeCompanyId;
-                    break;
                 default:
                     return null;
             }
