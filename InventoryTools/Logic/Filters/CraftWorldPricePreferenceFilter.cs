@@ -69,7 +69,7 @@ public class CraftWorldPricePreference : SortedListFilter<uint, uint>
 
     public override bool HasValueSet(FilterConfiguration configuration)
     {
-        return true;
+        return configuration.CraftList.WorldPricePreference.Count != 0;
     }
 
     public override FilterType AvailableIn { get; set; } = FilterType.CraftFilter;

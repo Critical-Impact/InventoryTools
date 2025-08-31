@@ -391,17 +391,37 @@ public class MigrationManagerService : IHostedService
             config.InternalVersion++;
         }
 
-        if (config.InternalVersion == 22)
+        //Bump the version to 30 to bypass some versioning weirdness
+        if (config.InternalVersion < 30)
         {
+            config.InternalVersion = 30;
             foreach (var filterConfig in config.FilterConfigurations)
             {
                 if (filterConfig.FilterType == FilterType.CraftFilter)
                 {
                     var sourceScopes = MigrateSourceScopes(filterConfig, _configuration);
-                    _componentContext.Resolve<CraftSourceInventoriesFilter>().UpdateFilterConfiguration(filterConfig, sourceScopes);
+                    if (sourceScopes.Count == 0)
+                    {
+                        _componentContext.Resolve<CraftSourceInventoriesFilter>()
+                            .ResetFilter(filterConfig);
+                    }
+                    else
+                    {
+                        _componentContext.Resolve<CraftSourceInventoriesFilter>()
+                            .UpdateFilterConfiguration(filterConfig, sourceScopes);
+                    }
 
                     var destinationScopes = MigrateDestinationScopes(filterConfig, _configuration);
-                    _componentContext.Resolve<CraftDestinationInventoriesFilter>().UpdateFilterConfiguration(filterConfig, destinationScopes);
+                    if (destinationScopes.Count == 0)
+                    {
+                        _componentContext.Resolve<CraftDestinationInventoriesFilter>()
+                            .ResetFilter(filterConfig);
+                    }
+                    else
+                    {
+                        _componentContext.Resolve<CraftDestinationInventoriesFilter>()
+                            .UpdateFilterConfiguration(filterConfig, destinationScopes);
+                    }
                 }
                 else if (filterConfig.FilterType == FilterType.SortingFilter)
                 {

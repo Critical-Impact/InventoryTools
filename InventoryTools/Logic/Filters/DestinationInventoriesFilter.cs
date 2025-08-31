@@ -27,9 +27,7 @@ namespace InventoryTools.Logic.Filters
 
         public override List<InventorySearchScope>? GenerateDefaultScope()
         {
-            return new List<InventorySearchScope>()
-            {
-            };
+            return null;
         }
     }
 }

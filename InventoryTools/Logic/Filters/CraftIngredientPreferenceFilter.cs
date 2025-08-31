@@ -70,7 +70,7 @@ public class CraftIngredientPreferenceFilter : SortedListFilter<(IngredientPrefe
 
     public override bool HasValueSet(FilterConfiguration configuration)
     {
-        return true;
+        return false;
     }
 
     public override FilterType AvailableIn { get; set; } = FilterType.CraftFilter;

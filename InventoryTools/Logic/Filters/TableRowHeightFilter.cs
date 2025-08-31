@@ -15,7 +15,8 @@ public class TableRowHeightFilter : IntegerFilter
     public override string Key { get; set; } = "TableRowHeight";
     public override string Name { get; set; } = "Table Row Height";
     public override string HelpText { get; set; } = "How many pixels high should each item row try to display at?";
-    public override bool ShowReset { get; set; } = false;
+    public override bool ShowReset { get; set; } = true;
+    public override int? DefaultValue { get; set; } = 24;
     public override FilterCategory FilterCategory { get; set; } = FilterCategory.Display;
 
     public override int? CurrentValue(FilterConfiguration configuration)

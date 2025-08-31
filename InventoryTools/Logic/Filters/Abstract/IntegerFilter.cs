@@ -12,7 +12,7 @@ namespace InventoryTools.Logic.Filters.Abstract
 
         public override bool HasValueSet(FilterConfiguration configuration)
         {
-            return CurrentValue(configuration) != null;
+            return CurrentValue(configuration) != DefaultValue;
         }
 
         public override int? CurrentValue(FilterConfiguration configuration)
