@@ -77,7 +77,7 @@ namespace InventoryTools.Logic.Filters
 
         public override bool HasValueSet(FilterConfiguration configuration)
         {
-            return configuration.Columns != null && configuration.Columns.Count != 0;
+            return false;
         }
 
         public override FilterType AvailableIn { get; set; } =

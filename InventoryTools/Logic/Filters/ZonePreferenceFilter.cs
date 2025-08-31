@@ -65,7 +65,7 @@ public class ZonePreferenceFilter : SortedListFilter<uint, uint>
 
     public override bool HasValueSet(FilterConfiguration configuration)
     {
-        return true;
+        return configuration.CraftList.ZonePreferenceOrder.Count != 0;
     }
 
     public override FilterType AvailableIn { get; set; } = FilterType.CraftFilter;
