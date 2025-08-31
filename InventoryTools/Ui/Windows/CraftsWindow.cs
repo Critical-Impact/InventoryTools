@@ -2675,7 +2675,7 @@ namespace InventoryTools.Ui
                                 var hasValuesSet = false;
                                 foreach (var filter in group.Value)
                                 {
-                                    if (filter.HasValueSet(filterConfiguration))
+                                    if (filter.HasValueSet(filterConfiguration) && filter.AvailableIn.HasFlag(filterConfiguration.FilterType))
                                     {
                                         hasValuesSet = true;
                                         break;

@@ -26,6 +26,10 @@ public abstract class InventoryScopeFilter : Filter<List<InventorySearchScope>?>
 
     public override List<InventorySearchScope>? CurrentValue(FilterConfiguration configuration)
     {
+        if (DefaultValue == null)
+        {
+            DefaultValue = GenerateDefaultScope();
+        }
         configuration.GetFilter(Key, out List<InventorySearchScope>? list);
         return list ?? DefaultValue;
     }

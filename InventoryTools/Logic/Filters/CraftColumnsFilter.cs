@@ -45,7 +45,6 @@ namespace InventoryTools.Logic.Filters
             return (configuration.CraftColumns ?? new List<ColumnConfiguration>()).ToDictionary(c => c, GetColumnDetails);
         }
 
-
         public override void UpdateFilterConfiguration(FilterConfiguration configuration, Dictionary<ColumnConfiguration, (string, string?)> newValue)
         {
             configuration.CraftColumns = newValue.Select(c => c.Key).ToList();
@@ -66,7 +65,7 @@ namespace InventoryTools.Logic.Filters
 
         public override bool HasValueSet(FilterConfiguration configuration)
         {
-            return configuration.CraftColumns != null && configuration.CraftColumns.Count != 0;
+            return false;
         }
 
         public override FilterType AvailableIn { get; set; } = FilterType.CraftFilter;

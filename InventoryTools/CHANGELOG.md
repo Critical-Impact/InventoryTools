@@ -8,6 +8,14 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [13.1.1] - 2025-08-31
+
+### Fixed
+- Changing a inventory search scope will validate the categories selected and remove them if they are no longer applicable
+- Certain filters would report as being changed from the default which would highlight the tab as green even if they hadn't been
+- Certain inventory scopes were not respecting the default value
+- Your inventory scopes may get migrated again so any changes you made since 13.1.0 was released will be overwritten. This will only be the case if you had installed 13.1.0 before installing the update.
+
 ## [13.1.0] - 2025-08-28
 
 ### List Source/Destination Changes

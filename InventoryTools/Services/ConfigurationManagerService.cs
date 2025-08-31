@@ -204,17 +204,21 @@ namespace InventoryTools.Services
             else if (!Config.InventoriesMigratedToCsv)
             {
                 Logger.LogTrace("Marked inventories to now load from CSV");
-                var parsedInventories = LoadInventoriesJson(InventoryFile) ?? new();
-                foreach (var parsedInventory in parsedInventories)
+                if (File.Exists(InventoryFile))
                 {
-                    foreach (var category in parsedInventory.Value)
+                    var parsedInventories = LoadInventoriesJson(InventoryFile) ?? new();
+                    foreach (var parsedInventory in parsedInventories)
                     {
-                        foreach (var item in category.Value)
+                        foreach (var category in parsedInventory.Value)
                         {
-                            inventories.Add(item);
+                            foreach (var item in category.Value)
+                            {
+                                inventories.Add(item);
+                            }
                         }
                     }
                 }
+
                 Config.InventoriesMigratedToCsv = true;
             }
             else
@@ -368,8 +372,7 @@ namespace InventoryTools.Services
                 catch (Exception e)
                 {
                     success = false;
-                    Logger.LogError("Failed to load history from CSV");
-                    Logger.LogError(e.Message);
+                    Logger.LogError(e, "Failed to load history from CSV");
                 }
             }
             else
