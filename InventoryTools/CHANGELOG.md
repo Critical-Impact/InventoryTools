@@ -43,6 +43,11 @@ The other following additions were made:
 - Preconfigured/sample lists were added to the lists menu in the lists window
 - A import/export menu item was added to the lists menu
 
+## [13.0.4] - 2025-08-27
+
+### Fixed
+- Fixed a bug in source/use loading, those filters should now work correctly
+
 ## [13.0.3] - 2025-08-23
 
 ### Fixed
