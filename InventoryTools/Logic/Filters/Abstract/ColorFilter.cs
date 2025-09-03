@@ -23,7 +23,7 @@ namespace InventoryTools.Logic.Filters.Abstract
 
         public override void Draw(FilterConfiguration configuration)
         {
-            var value = CurrentValue(configuration) ?? Vector4.Zero;
+            var value = CurrentValue(configuration);
             if (HasValueSet(configuration))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.HealerGreen);
@@ -42,10 +42,27 @@ namespace InventoryTools.Logic.Filters.Abstract
                 ImGui.PopTextWrapPos();
             }
             ImGui.SetNextItemWidth(InputSize);
-            if (ImGui.ColorEdit4("##" + Key + "Color", ref value, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel))
+            if (value == null)
             {
-                UpdateFilterConfiguration(configuration, value);
+                var isChecked = false;
+                if (ImGui.Checkbox("Override Color##" + Key + "ColorEnable", ref isChecked))
+                {
+                    if (isChecked)
+                    {
+                        UpdateFilterConfiguration(configuration, Vector4.Zero);
+                    }
+                }
             }
+            else
+            {
+                var editValue = value.Value;
+                if (ImGui.ColorEdit4("##" + Key + "Color", ref editValue,
+                        ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel))
+                {
+                    UpdateFilterConfiguration(configuration, editValue);
+                }
+            }
+
             if (HasValueSet(configuration))
             {
                 ImGui.SameLine();
@@ -54,7 +71,7 @@ namespace InventoryTools.Logic.Filters.Abstract
                     UpdateFilterConfiguration(configuration, null);
                 }
             }
-            if (HasValueSet(configuration) && value.W == 0)
+            if (HasValueSet(configuration) && value?.W == 0)
             {
                 ImGui.SameLine();
                 ImGui.TextColored(ImGuiColors.DalamudRed, "The alpha is currently set to 0, this will be invisible.");

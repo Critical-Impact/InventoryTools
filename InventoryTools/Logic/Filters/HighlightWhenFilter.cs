@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AllaganLib.GameSheets.Sheets.Rows;
@@ -9,17 +10,16 @@ using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Filters
 {
-    public class HighlightWhenFilter : ChoiceFilter<string>
+    public class HighlightWhenFilter : ChoiceFilter<HighlightWhen>
     {
-        public readonly string[] HighlightWhenItemsFilter = new string[] {"N/A", "Always", "When Searching"};
-        public override string? CurrentValue(FilterConfiguration configuration)
+        public override HighlightWhen CurrentValue(FilterConfiguration configuration)
         {
-            return configuration.HighlightWhen ?? DefaultValue;
+            return configuration.HighlightWhenEnum;
         }
 
-        public override void UpdateFilterConfiguration(FilterConfiguration configuration, string? newValue)
+        public override void UpdateFilterConfiguration(FilterConfiguration configuration, HighlightWhen newValue)
         {
-            configuration.HighlightWhen = newValue != null && newValue != DefaultValue ? newValue : null;
+            configuration.HighlightWhenEnum = newValue;
         }
 
         public override void ResetFilter(FilterConfiguration configuration)
@@ -27,7 +27,7 @@ namespace InventoryTools.Logic.Filters
             UpdateFilterConfiguration(configuration, DefaultValue);
         }
 
-        public override string? DefaultValue { get; set; } = "N/A";
+        public override HighlightWhen DefaultValue { get; set; } = HighlightWhen.UseGlobalConfiguration;
 
 
         public override string Key { get; set; } = "HighlightWhen";
@@ -45,14 +45,24 @@ namespace InventoryTools.Logic.Filters
             return null;
         }
 
-        public override List<string> GetChoices(FilterConfiguration configuration)
+        public override List<HighlightWhen> GetChoices(FilterConfiguration configuration)
         {
-            return HighlightWhenItemsFilter.ToList();
+            return [HighlightWhen.UseGlobalConfiguration, HighlightWhen.WhenSearching, HighlightWhen.Always];
         }
 
-        public override string GetFormattedChoice(FilterConfiguration filterConfiguration, string choice)
+        public override string GetFormattedChoice(FilterConfiguration filterConfiguration, HighlightWhen choice)
         {
-            return choice;
+            switch (choice)
+            {
+                case HighlightWhen.UseGlobalConfiguration:
+                    return "Use Global Configuration";
+                case HighlightWhen.WhenSearching:
+                    return "When Searching";
+                case HighlightWhen.Always:
+                    return "Always";
+            }
+
+            return choice.ToString();
         }
 
         public HighlightWhenFilter(ILogger<HighlightWhenFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)

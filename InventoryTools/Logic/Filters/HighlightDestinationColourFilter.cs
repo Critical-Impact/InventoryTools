@@ -33,17 +33,12 @@ namespace InventoryTools.Logic.Filters
 
         public override Vector4? CurrentValue(FilterConfiguration configuration)
         {
-            return configuration.HighlightColor;
-        }
-
-        public override bool HasValueSet(FilterConfiguration configuration)
-        {
-            return configuration.HighlightColor != null;
+            return configuration.DestinationHighlightColor;
         }
 
         public override void UpdateFilterConfiguration(FilterConfiguration configuration, Vector4? newValue)
         {
-            configuration.HighlightColor = newValue;
+            configuration.DestinationHighlightColor = newValue;
         }
 
         public HighlightDestinationColourFilter(ILogger<HighlightDestinationColourFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)

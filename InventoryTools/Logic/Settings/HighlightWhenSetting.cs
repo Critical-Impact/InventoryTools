@@ -1,27 +1,28 @@
 using System.Collections.Generic;
+using InventoryTools.Logic.Filters;
 using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Logic.Settings
 {
-    public class HighlightWhenSetting : ChoiceSetting<string>
+    public class HighlightWhenSetting : ChoiceSetting<HighlightWhen>
     {
-        public Dictionary<string, string> StaticChoices = new Dictionary<string, string>()
+        private readonly Dictionary<HighlightWhen, string> _staticChoices = new()
         {
-            {"Always", "Always"}, {"When Searching", "When Searching"}
+            {HighlightWhen.Always, "Always"}, {HighlightWhen.WhenSearching, "When Searching"}
         };
 
-        public override string DefaultValue { get; set; } = "When Searching";
+        public override HighlightWhen DefaultValue { get; set; } = HighlightWhen.WhenSearching;
 
-        public override string CurrentValue(InventoryToolsConfiguration configuration)
+        public override HighlightWhen CurrentValue(InventoryToolsConfiguration configuration)
         {
-            return configuration.HighlightWhen;
+            return configuration.HighlightWhenEnum;
         }
 
-        public override void UpdateFilterConfiguration(InventoryToolsConfiguration configuration, string newValue)
+        public override void UpdateFilterConfiguration(InventoryToolsConfiguration configuration, HighlightWhen newValue)
         {
-            configuration.HighlightWhen = newValue;
+            configuration.HighlightWhenEnum = newValue;
         }
 
         public override string Key { get; set; } = "HighlightWhen";
@@ -30,13 +31,7 @@ namespace InventoryTools.Logic.Settings
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.Highlighting;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
 
-        public override Dictionary<string, string> Choices
-        {
-            get
-            {
-                return StaticChoices;
-            }
-        }
+        public override Dictionary<HighlightWhen, string> Choices => _staticChoices;
         public override string Version => "1.7.0.0";
 
         public HighlightWhenSetting(ILogger<HighlightWhenSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)

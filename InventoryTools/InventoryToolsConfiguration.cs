@@ -12,6 +12,7 @@ using InventoryTools.Attributes;
 using InventoryTools.Converters;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Editors;
+using InventoryTools.Logic.Filters;
 using InventoryTools.Logic.Settings;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -637,12 +638,23 @@ namespace InventoryTools
             }
         }
 
+        [Obsolete("Remove with API14")]
         public string HighlightWhen
         {
             get => _highlightWhen;
             set
             {
                 _highlightWhen = value;
+                IsDirty = true;
+            }
+        }
+
+        public HighlightWhen HighlightWhenEnum
+        {
+            get => _highlightWhenEnum;
+            set
+            {
+                _highlightWhenEnum = value;
                 IsDirty = true;
             }
         }
@@ -878,6 +890,7 @@ namespace InventoryTools
         private bool _marketBoardUseActiveWorld = true;
         private bool _marketBoardUseHomeWorld = true;
         private List<uint>? _marketBoardWorldIds;
+        private HighlightWhen _highlightWhenEnum;
 
         public ModifiableHotkey? GetHotkey(string hotkey)
         {

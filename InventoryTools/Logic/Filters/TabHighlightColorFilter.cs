@@ -16,7 +16,7 @@ namespace InventoryTools.Logic.Filters
         public override string Name { get; set; } = "Tab Highlight Color";
 
         public override string HelpText { get; set; } =
-            "The color to set the highlighted tabs(which contain filtered items) to for this specific filter.";
+            "The color to set the highlighted tabs(which contain filtered items) to for this specific filter. If not overridden the tab highlighting color will be used.";
 
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Display;
 
@@ -33,11 +33,6 @@ namespace InventoryTools.Logic.Filters
         public override Vector4? CurrentValue(FilterConfiguration configuration)
         {
             return configuration.TabHighlightColor;
-        }
-
-        public override bool HasValueSet(FilterConfiguration configuration)
-        {
-            return configuration.TabHighlightColor != null;
         }
 
         public override void UpdateFilterConfiguration(FilterConfiguration configuration, Vector4? newValue)
