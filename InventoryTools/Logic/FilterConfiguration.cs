@@ -176,6 +176,7 @@ namespace InventoryTools.Logic
 
         private string? _tableId = null;
         private string? _craftTableId = null;
+        private HighlightWhen _highlightWhenEnum;
         public HighlightMode HighlightMode { get; set; } = HighlightMode.Never;
 
         public List<CuratedItem>? CuratedItems
@@ -202,7 +203,7 @@ namespace InventoryTools.Logic
         public void ApplyDefaultCraftFilterConfiguration()
         {
             CraftListDefault = true;
-            HighlightWhen = "Always";
+            HighlightWhenEnum = Filters.HighlightWhen.Always;
         }
 
         [Obsolete("Remove with API14")]
@@ -483,12 +484,23 @@ namespace InventoryTools.Logic
             }
         }
 
+        [Obsolete("Remove with API14")]
         public string? HighlightWhen
         {
             get => _highlightWhen;
             set
             {
                 _highlightWhen = value;
+                ConfigurationDirty = true;
+            }
+        }
+
+        public HighlightWhen HighlightWhenEnum
+        {
+            get => _highlightWhenEnum;
+            set
+            {
+                _highlightWhenEnum = value;
                 ConfigurationDirty = true;
             }
         }

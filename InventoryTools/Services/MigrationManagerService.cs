@@ -440,6 +440,37 @@ public class MigrationManagerService : IHostedService
 
             config.InternalVersion++;
         }
+
+        //Bump the version to 30 to bypass some versioning weirdness
+        if (config.InternalVersion == 31)
+        {
+            foreach (var filterConfig in config.FilterConfigurations)
+            {
+                if (filterConfig.HighlightWhen == "Always")
+                {
+                    filterConfig.HighlightWhenEnum = HighlightWhen.Always;
+                }
+                else if (filterConfig.HighlightWhen == "When Searching")
+                {
+                    filterConfig.HighlightWhenEnum = HighlightWhen.WhenSearching;
+                }
+                else
+                {
+                    filterConfig.HighlightWhenEnum = HighlightWhen.UseGlobalConfiguration;
+                }
+            }
+
+            if (config.HighlightWhen == "Always")
+            {
+                config.HighlightWhenEnum = HighlightWhen.Always;
+            }
+            else if (config.HighlightWhen == "When Searching")
+            {
+                config.HighlightWhenEnum = HighlightWhen.WhenSearching;
+            }
+
+            config.InternalVersion++;
+        }
     }
 
     private List<InventorySearchScope> MigrateSourceScopes(FilterConfiguration filterConfiguration, InventoryToolsConfiguration configuration)

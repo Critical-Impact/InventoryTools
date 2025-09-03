@@ -18,14 +18,19 @@ public class SampleFilterMaterialCleanup : BooleanSetting, ISampleFilter
     private readonly FilterConfiguration.Factory _filterConfigFactory;
     private readonly SourceInventoriesFilter _sourceInventoriesFilter;
     private readonly DestinationInventoriesFilter _destinationInventoriesFilter;
+    private readonly HighlightWhenFilter _highlightWhenFilter;
 
-    public SampleFilterMaterialCleanup(ILogger<SampleFilterMaterialCleanup> logger, ImGuiService imGuiService, IListService listService, Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter> hasSourceCategoryFactory, FilterConfiguration.Factory filterConfigFactory, SourceInventoriesFilter sourceInventoriesFilter, DestinationInventoriesFilter destinationInventoriesFilter) : base(logger, imGuiService)
+    public SampleFilterMaterialCleanup(ILogger<SampleFilterMaterialCleanup> logger, ImGuiService imGuiService,
+        IListService listService, Func<ItemInfoRenderCategory, GenericHasSourceCategoryFilter> hasSourceCategoryFactory,
+        FilterConfiguration.Factory filterConfigFactory, SourceInventoriesFilter sourceInventoriesFilter,
+        DestinationInventoriesFilter destinationInventoriesFilter, HighlightWhenFilter highlightWhenFilter) : base(logger, imGuiService)
     {
         _listService = listService;
         _hasSourceCategoryFactory = hasSourceCategoryFactory;
         _filterConfigFactory = filterConfigFactory;
         _sourceInventoriesFilter = sourceInventoriesFilter;
         _destinationInventoriesFilter = destinationInventoriesFilter;
+        _highlightWhenFilter = highlightWhenFilter;
     }
     private bool _shouldAdd;
     public override bool DefaultValue { get; set; }
@@ -70,9 +75,9 @@ public class SampleFilterMaterialCleanup : BooleanSetting, ISampleFilter
                 Categories = [InventoryCategory.RetainerBags]
             }
         ]);
+        _highlightWhenFilter.UpdateFilterConfiguration(sampleFilter, HighlightWhen.Always);
 
         sampleFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
-        sampleFilter.HighlightWhen = "Always";
         var gatherFilter = _hasSourceCategoryFactory.Invoke(ItemInfoRenderCategory.Gathering);
         gatherFilter.UpdateFilterConfiguration(sampleFilter, true);
         _listService.AddDefaultColumns(sampleFilter);

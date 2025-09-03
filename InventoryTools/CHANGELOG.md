@@ -8,6 +8,18 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [13.1.2] - 2025-09-01
+
+### Changed
+- Added data for 7.31
+- This stable release includes the major changes introduced for the source/destination system, please see the change log accessible inside the File menu within any of the plugin's windows
+
+### Fixed
+- Fixed a bug that would cause a craft list to not highlight in certain cases
+- The way interior housing sources are calculated was reworked so items not visible in the in-game housing catalog are shown
+- The highlighting colors configurable in each list will now show a override button instead of the previous unintuitive behaviour
+- The highlight when setting inside a list's configuration will now list "Use Global Configuration" if the list is using the highlighting mode setting in the main configuration
+
 ## [13.1.1] - 2025-08-31
 
 ### Fixed
