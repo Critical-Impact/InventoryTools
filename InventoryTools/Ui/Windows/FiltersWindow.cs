@@ -61,6 +61,8 @@ namespace InventoryTools.Ui
         private readonly IKeyState _keyState;
         private readonly IFramework _framework;
         private readonly IPluginLog _pluginLog;
+        private readonly HighlightWhenFilter _highlightWhenFilter;
+        private readonly HighlightWhenSetting _highlightWhenSetting;
         private IEnumerable<IMenuWindow>? _menuWindows;
         private readonly InventoryToolsConfiguration _configuration;
 
@@ -71,7 +73,8 @@ namespace InventoryTools.Ui
             HostedInventoryHistory inventoryHistory, ListImportExportService importExportService,
             IComponentContext context, FiltersWindowLayoutSetting layoutSetting, ItemSheet itemSheet,
             FilterConfiguration.Factory filterConfigFactory, IEnumerable<ISampleFilter> sampleFilters,
-            IClipboardService clipboardService, PopupService popupService, IKeyState keyState, IFramework framework, IPluginLog pluginLog) : base(logger, mediator, imGuiService, configuration, "Filters Window")
+            IClipboardService clipboardService, PopupService popupService, IKeyState keyState, IFramework framework,
+            IPluginLog pluginLog, HighlightWhenFilter highlightWhenFilter, HighlightWhenSetting highlightWhenSetting) : base(logger, mediator, imGuiService, configuration, "Filters Window")
         {
             _listService = listService;
             _filterService = filterService;
@@ -93,6 +96,8 @@ namespace InventoryTools.Ui
             _keyState = keyState;
             _framework = framework;
             _pluginLog = pluginLog;
+            _highlightWhenFilter = highlightWhenFilter;
+            _highlightWhenSetting = highlightWhenSetting;
             _configuration = configuration;
             this.Flags = ImGuiWindowFlags.MenuBar;
         }
@@ -1633,8 +1638,11 @@ namespace InventoryTools.Ui
                         });
                     }
 
-                    if ((filterConfiguration.HighlightWhen ?? _configuration.HighlightWhen) ==
-                        "When Searching")
+                    var filterHighlightWhen = _highlightWhenFilter.CurrentValue(filterConfiguration);
+                    var configHighlightWhen = _highlightWhenSetting.CurrentValue(_configuration);
+                    var highlightMode = filterHighlightWhen == HighlightWhen.UseGlobalConfiguration ? configHighlightWhen : filterHighlightWhen;
+
+                    if (highlightMode == HighlightWhen.WhenSearching)
                     {
                         ImGuiUtil.HoverTooltip(
                             "When checked, any items matching the filter will be highlighted once you search in any of the columns.");

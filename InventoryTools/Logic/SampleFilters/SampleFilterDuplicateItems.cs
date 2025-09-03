@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using CriticalCommonLib.Models;
 using InventoryTools.Logic.Editors;
 using InventoryTools.Logic.Filters;
+using InventoryTools.Logic.Settings;
 using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
@@ -15,13 +16,19 @@ public class SampleFilterDuplicateItems : BooleanSetting, ISampleFilter
     private readonly FilterConfiguration.Factory _filterConfigFactory;
     private readonly SourceInventoriesFilter _sourceInventoriesFilter;
     private readonly DestinationInventoriesFilter _destinationInventoriesFilter;
+    private readonly HighlightWhenFilter _highlightWhenFilter;
 
-    public SampleFilterDuplicateItems(ILogger<SampleFilterDuplicateItems> logger, ImGuiService imGuiService, IListService listService, FilterConfiguration.Factory filterConfigFactory, SourceInventoriesFilter sourceInventoriesFilter, DestinationInventoriesFilter destinationInventoriesFilter) : base(logger, imGuiService)
+    public SampleFilterDuplicateItems(ILogger<SampleFilterDuplicateItems> logger, ImGuiService imGuiService,
+        IListService listService, FilterConfiguration.Factory filterConfigFactory,
+        SourceInventoriesFilter sourceInventoriesFilter,
+        DestinationInventoriesFilter destinationInventoriesFilter,
+        HighlightWhenFilter highlightWhenFilter) : base(logger, imGuiService)
     {
         _listService = listService;
         _filterConfigFactory = filterConfigFactory;
         _sourceInventoriesFilter = sourceInventoriesFilter;
         _destinationInventoriesFilter = destinationInventoriesFilter;
+        _highlightWhenFilter = highlightWhenFilter;
     }
     private bool _shouldAdd;
     public override bool DefaultValue { get; set; }
@@ -66,9 +73,9 @@ public class SampleFilterDuplicateItems : BooleanSetting, ISampleFilter
                 Categories = [InventoryCategory.RetainerBags]
             }
         ]);
+        _highlightWhenFilter.UpdateFilterConfiguration(sampleFilter, HighlightWhen.Always);
         sampleFilter.FilterItemsInRetainersEnum = FilterItemsRetainerEnum.Yes;
         sampleFilter.DuplicatesOnly = true;
-        sampleFilter.HighlightWhen = "Always";
         _listService.AddDefaultColumns(sampleFilter);
         _listService.AddList(sampleFilter);
         return sampleFilter;

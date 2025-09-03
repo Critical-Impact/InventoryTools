@@ -16,7 +16,7 @@ namespace InventoryTools.Logic.Filters
         public override string Name { get; set; } = "Highlight Color";
 
         public override string HelpText { get; set; } =
-            "The color to set the highlighted items to for this specific filter.";
+            "The color to set the highlighted items to for this specific filter. If not overridden the global highlighting color will be used.";
 
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Display;
 
@@ -34,11 +34,6 @@ namespace InventoryTools.Logic.Filters
         public override Vector4? CurrentValue(FilterConfiguration configuration)
         {
             return configuration.HighlightColor;
-        }
-
-        public override bool HasValueSet(FilterConfiguration configuration)
-        {
-            return configuration.HighlightColor != null;
         }
 
         public override void UpdateFilterConfiguration(FilterConfiguration configuration, Vector4? newValue)
