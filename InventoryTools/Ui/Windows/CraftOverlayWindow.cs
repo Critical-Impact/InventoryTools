@@ -125,7 +125,7 @@ public class CraftOverlayWindow : OverlayWindow
 
     public override void Draw()
     {
-        if (ImGui.GetWindowPos() != CurrentPosition)
+        if (ImGui.GetWindowPos() != CurrentPosition && ImGui.GetWindowPos() != Vector2.Zero)
         {
             CurrentPosition = ImGui.GetWindowPos();
         }
