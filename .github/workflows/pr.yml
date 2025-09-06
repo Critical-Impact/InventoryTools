@@ -8,6 +8,7 @@ on:
 env:
   INTERNAL_NAME: InventoryTools
   PLUGIN_NAME: Allagan Tools
+  UPDATE_NAME: AT
 
 jobs:
   update-repo:
@@ -39,7 +40,7 @@ jobs:
           cd external
           git remote add goatcorp https://github.com/goatcorp/DalamudPluginsD17.git
           git fetch goatcorp
-          git checkout -b update-${{ steps.changelog.outputs.version }} goatcorp/main
+          git checkout -b ${{ env.UPDATE_NAME }}-${{ steps.changelog.outputs.version }} goatcorp/main
 
       - name: Configure git author
         run: |
