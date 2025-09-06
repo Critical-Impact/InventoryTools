@@ -3,6 +3,10 @@ name: Create D17 PR
 on:
   workflow_dispatch:
 
+env:
+  INTERNAL_NAME: InventoryTools
+  PLUGIN_NAME: Allagan Tools
+
 jobs:
   update-repo:
     runs-on: ubuntu-latest
@@ -13,9 +17,9 @@ jobs:
       - name: Extract version and changelog
         id: changelog
         run: |
-          VERSION=$(grep -m1 -oP '(?<=## \[)[0-9]+\.[0-9]+\.[0-9]+' InventoryTools/CHANGELOG.md)
+          VERSION=$(grep -m1 -oP '(?<=## \[)[0-9]+\.[0-9]+\.[0-9]+' ${{ env.INTERNAL_NAME }}/CHANGELOG.md)
           echo "version=1.$VERSION" >> $GITHUB_OUTPUT
-          CHANGELOG=$(awk -v ver=$VERSION '/^#+ \[/ { if (p) { exit }; if ($2 == "["ver"]") { p=1; next} } p && NF' InventoryTools/CHANGELOG.md)
+          CHANGELOG=$(awk -v ver=$VERSION '/^#+ \[/ { if (p) { exit }; if ($2 == "["ver"]") { p=1; next} } p && NF' ${{ env.INTERNAL_NAME }}/CHANGELOG.md)
           echo "log<<EOF" >> $GITHUB_OUTPUT
           echo "$CHANGELOG" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
@@ -49,7 +53,7 @@ jobs:
           import toml
           from pathlib import Path
           
-          manifest_path = Path("stable/InventoryTools/manifest.toml")
+          manifest_path = Path("stable/${{ env.INTERNAL_NAME }}/manifest.toml")
           data = toml.load(manifest_path)
           
           # Update commit and changelog
@@ -60,8 +64,8 @@ jobs:
           with manifest_path.open("w") as f:
               toml.dump(data, f)
           EOF
-          git add stable/InventoryTools/manifest.toml
-          git commit -m "Update plugin commit and changelog to ${{ steps.changelog.outputs.version }}"          
+          git add stable/${{ env.INTERNAL_NAME }}/manifest.toml
+          git commit -m "${{ env.PLUGIN_NAME }} ${{ steps.changelog.outputs.version }}"          
 
       - name: Push branch to fork
         run: |
