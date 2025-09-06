@@ -773,7 +773,7 @@ namespace InventoryTools.Logic
 
             if (searchResult.InventoryItem.IsEmpty && invertHighlighting)
             {
-                return false;
+                return true;
             }
 
             return false;

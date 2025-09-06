@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AllaganLib.Shared.Interfaces;
+using AllaganLib.Shared.Services;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Services.Mediator;
@@ -30,9 +32,9 @@ public class TableService : DisposableMediatorBackgroundService
 
     public delegate void TableRefreshedDelegate(RenderTableBase table);
     public event TableRefreshedDelegate TableRefreshed;
-    public IBackgroundTaskQueue TableQueue { get; }
+    public BackgroundTaskQueue TableQueue { get; }
 
-    public TableService(ILogger<TableService> logger, MediatorService mediatorService, IListService listService, IBackgroundTaskQueue filterQueue, IFramework framework, Func<FilterConfiguration, CraftItemTable> craftItemTableFactory, Func<FilterConfiguration, FilterTable> filterTableFactory, CraftReverseListDisplayFilter craftReverseListDisplayFilter) : base(logger, mediatorService)
+    public TableService(ILogger<TableService> logger, MediatorService mediatorService, IListService listService, BackgroundTaskQueue.Factory taskQueueFactory, IFramework framework, Func<FilterConfiguration, CraftItemTable> craftItemTableFactory, Func<FilterConfiguration, FilterTable> filterTableFactory, CraftReverseListDisplayFilter craftReverseListDisplayFilter) : base(logger, mediatorService)
     {
         _listService = listService;
         _framework = framework;
@@ -44,7 +46,7 @@ public class TableService : DisposableMediatorBackgroundService
         _listService.ListRefreshed += ListRefreshed;
         _itemListTables = new ConcurrentDictionary<string, FilterTable>();
         _craftItemTables = new ConcurrentDictionary<string, CraftItemTable>();
-        TableQueue = filterQueue;
+        TableQueue = taskQueueFactory.Invoke("Table Queue", 3);
         _framework.Update += OnUpdate;
     }
 

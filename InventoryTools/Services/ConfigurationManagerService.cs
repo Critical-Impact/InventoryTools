@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using AllaganLib.Shared.Interfaces;
+using AllaganLib.Shared.Services;
 using CriticalCommonLib.Interfaces;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Resolvers;
@@ -33,11 +35,11 @@ namespace InventoryTools.Services
 
         public event ConfigurationChangedDelegate? ConfigurationChanged;
 
-        public ConfigurationManagerService(IFramework framework, IDalamudPluginInterface pluginInterfaceService, ILogger<ConfigurationManagerService> logger, IBackgroundTaskQueue saveQueue, MinifyResolver minifyResolver, ContainerAwareCsvLoader containerAwareCsvLoader)
+        public ConfigurationManagerService(IFramework framework, IDalamudPluginInterface pluginInterfaceService, ILogger<ConfigurationManagerService> logger, BackgroundTaskQueue.Factory taskQueueFactory, MinifyResolver minifyResolver, ContainerAwareCsvLoader containerAwareCsvLoader)
         {
             Logger = logger;
             _pluginInterfaceService = pluginInterfaceService;
-            _saveQueue = saveQueue;
+            _saveQueue = taskQueueFactory.Invoke("Configuration Save Queue");
             _minifyResolver = minifyResolver;
             _containerAwareCsvLoader = containerAwareCsvLoader;
             _framework = framework;
@@ -290,7 +292,7 @@ namespace InventoryTools.Services
         private MinifyResolver _minifyResolver;
         private readonly ContainerAwareCsvLoader _containerAwareCsvLoader;
         private readonly IDalamudPluginInterface _pluginInterfaceService;
-        private readonly IBackgroundTaskQueue _saveQueue;
+        private readonly BackgroundTaskQueue _saveQueue;
 
         [Obsolete]
         public void SaveInventoriesToJson(

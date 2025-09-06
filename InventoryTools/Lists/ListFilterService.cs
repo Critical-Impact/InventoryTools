@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AllaganLib.GameSheets.Sheets;
+using AllaganLib.Shared.Interfaces;
+using AllaganLib.Shared.Services;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Enums;
 using CriticalCommonLib.Extensions;
@@ -44,10 +46,10 @@ public class ListFilterService : DisposableMediatorBackgroundService
     private readonly DestinationInventoriesFilter _destinationInventoriesFilter;
     private readonly InventoryScopeCalculator _inventoryScopeCalculator;
 
-    public IBackgroundTaskQueue FilterQueue { get; }
+    public NamedBackgroundTaskQueue FilterQueue { get; }
 
     public ListFilterService(InventoryToolsConfiguration configuration, ICharacterMonitor characterMonitor,
-        HostedInventoryHistory inventoryHistory, IInventoryMonitor inventoryMonitor, IBackgroundTaskQueue filterQueue,
+        HostedInventoryHistory inventoryHistory, IInventoryMonitor inventoryMonitor, NamedBackgroundTaskQueue.Factory taskQueueFactory,
         ILogger<ListFilterService> logger, IMarketCache marketCache, CraftPricer craftPricer,
         IFilterService filterService, MediatorService mediatorService, ItemSheet itemSheet,
         InventoryItem.Factory inventoryItemFactory,
@@ -72,11 +74,11 @@ public class ListFilterService : DisposableMediatorBackgroundService
         _sourceInventoriesFilter = sourceInventoriesFilter;
         _destinationInventoriesFilter = destinationInventoriesFilter;
         _inventoryScopeCalculator = inventoryScopeCalculator;
-        FilterQueue = filterQueue;
+        FilterQueue = taskQueueFactory.Invoke("List Filter Queue", 1);
         MediatorService.Subscribe<RequestListUpdateMessage>(this, message => RequestRefresh(message.FilterConfiguration));
     }
 
-    public List<SearchResult> RefreshList(FilterConfiguration filterConfiguration)
+    public List<SearchResult> RefreshList(FilterConfiguration filterConfiguration, CancellationToken ct = default)
     {
         var inventories = _inventoryMonitor.Inventories.Select(c => c.Value).ToList();
 
@@ -112,6 +114,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
                 }
             }
 
+            ct.ThrowIfCancellationRequested();
             GenerateSources(filterConfiguration, inventories.ToList(), out var sourceInventories);
 
             foreach (var inventory in sourceInventories)
@@ -133,7 +136,9 @@ public class ListFilterService : DisposableMediatorBackgroundService
             var craftListConfiguration = new CraftListConfiguration(characterSources, externalSources, null, _craftPricer);
 
             filterConfiguration.CraftList.UpdateStockItems(craftListConfiguration);
+            ct.ThrowIfCancellationRequested();
             filterConfiguration.CraftList.GenerateCraftChildren();
+            ct.ThrowIfCancellationRequested();
             var materials = filterConfiguration.CraftList.GetMaterialsList().ToList();
             if (craftListConfiguration.WorldPreferences == null)
             {
@@ -171,6 +176,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
                     craftListConfiguration.WorldPreferences.Add(worldId);
                 }
             }
+            ct.ThrowIfCancellationRequested();
             var pricingData = _craftPricer.GetItemPricingDictionary(materials, craftListConfiguration.WorldPreferences ?? new(), true);
             craftListConfiguration.PricingSource = pricingData;
             filterConfiguration.CraftList.Update(craftListConfiguration, _craftPricer);
@@ -178,7 +184,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
             filterConfiguration.CraftList.NeedsRefresh = false;
             filterConfiguration.NeedsRefresh = false;
 
-            searchResult = GenerateFilterResult(filterConfiguration, inventories.ToList());
+            searchResult = GenerateFilterResult(filterConfiguration, inventories.ToList(), ct);
             filterConfiguration.CraftList.CalculateCosts(craftListConfiguration, _craftPricer);
             filterConfiguration.NeedsRefresh = false;
             filterConfiguration.Refreshing = false;
@@ -186,8 +192,9 @@ public class ListFilterService : DisposableMediatorBackgroundService
             MediatorService.Publish(new ListUpdatedMessage(filterConfiguration));
             return searchResult;
         }
-
-        searchResult = GenerateFilterResult(filterConfiguration, inventories.ToList());
+        ct.ThrowIfCancellationRequested();
+        searchResult = GenerateFilterResult(filterConfiguration, inventories.ToList(), ct);
+        ct.ThrowIfCancellationRequested();
         filterConfiguration.NeedsRefresh = false;
         filterConfiguration.Refreshing = false;
         filterConfiguration.SearchResults = searchResult;
@@ -195,7 +202,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
         return searchResult;
     }
 
-    private List<SearchResult> GenerateFilterResult(FilterConfiguration filter, List<Inventory> inventories)
+    private List<SearchResult> GenerateFilterResult(FilterConfiguration filter, List<Inventory> inventories, CancellationToken ct = default)
     {
         var searchResults = new List<SearchResult>();
 
@@ -206,11 +213,14 @@ public class ListFilterService : DisposableMediatorBackgroundService
         Logger.LogTrace("Filter Name:" + filter.Name);
         Logger.LogTrace("Filter Type: " + filter.FilterType);
 
+        var filtersWithValues = _filterService.AvailableFilters.Where(c => c.HasValueSet(filter) && c.AvailableIn.HasFlag(filter.FilterType)).ToList();
+
         if (filter.FilterType == FilterType.SortingFilter || filter.FilterType == FilterType.CraftFilter)
         {
+            ct.ThrowIfCancellationRequested();
             //Determine which source and destination inventories we actually need to examine
             GenerateSourceAndDestinations(filter, inventories, out var sourceInventories, out var destinationInventories);
-
+            ct.ThrowIfCancellationRequested();
             //Filter the source and destination inventories based on the applicable items so we have less to sort
             Dictionary<(ulong, InventoryType), List<FilteredItem>> filteredSources = new();
             //Dictionary<(ulong, InventoryCategory), List<InventoryItem>> filteredDestinations = new();
@@ -221,7 +231,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
                 filter.CraftList.GetFlattenedMergedMaterials(true);
             }
 
-            foreach (var availableFilter in _filterService.AvailableFilters)
+            foreach (var availableFilter in filtersWithValues)
             {
                 availableFilter.InvalidateSearchCache();
             }
@@ -235,7 +245,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
 
                 foreach (var item in sourceInventory.Value)
                 {
-                    var filteredItem = filter.FilterItem(_filterService.AvailableFilters, item);
+                    var filteredItem = filter.FilterItem(filtersWithValues, item);
                     if (filteredItem != null)
                     {
                         filteredSources[sourceInventory.Key].Add(filteredItem);
@@ -262,7 +272,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
                     }
                     else
                     {
-                        var filteredDestinationItem = filter.FilterItem(_filterService.AvailableFilters, destinationItem);
+                        var filteredDestinationItem = filter.FilterItem(filtersWithValues, destinationItem);
                         if (filteredDestinationItem != null)
                         {
                             var itemHashCode = destinationItem.GenerateHashCode(filter.IgnoreHQWhenSorting ?? false);
@@ -282,6 +292,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
                 //_logger.LogTrace("Found " + sourceInventory.Value.Count + " items in " + sourceInventory.Key + " " + sourceInventory.Key.Item2.ToString());
                 for (var index = 0; index < sourceInventory.Value.Count; index++)
                 {
+                    ct.ThrowIfCancellationRequested();
                     var filteredItem = sourceInventory.Value[index];
                     var sourceItem = filteredItem.Item;
                     if (sourceItem.IsEmpty) continue;
@@ -299,6 +310,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
                     {
                         for (var i = 0; i < itemLocations[hashCode].Count; i++)
                         {
+                            ct.ThrowIfCancellationRequested();
                             var existingItem = itemLocations[hashCode][i];
                             //Don't compare inventory to itself
                             if (existingItem.RetainerId == sourceItem.RetainerId && existingItem.SortedCategory == sourceItem.SortedCategory)
@@ -365,6 +377,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
                                 var seenInventoryLocations = absoluteItemLocations[hashCode];
                                 while (seenInventoryLocations.Count != 0 && sourceItem.TempQuantity != 0)
                                 {
+                                    ct.ThrowIfCancellationRequested();
                                     var seenInventoryLocation = seenInventoryLocations.First();
                                     if (slotsAvailable.ContainsKey(seenInventoryLocation))
                                     {
@@ -497,15 +510,17 @@ public class ListFilterService : DisposableMediatorBackgroundService
             Logger.LogTrace(sourceInventories.Count() + " inventories to examine.");
             foreach (var sourceInventory in sourceInventories)
             {
+                ct.ThrowIfCancellationRequested();
                 if (!filteredSources.ContainsKey(sourceInventory.Key))
                 {
                     filteredSources.Add(sourceInventory.Key, new List<FilteredItem>());
                 }
                 foreach (var item in sourceInventory.Value)
                 {
+                    ct.ThrowIfCancellationRequested();
                     if (item != null)
                     {
-                        var filteredItem = filter.FilterItem(_filterService.AvailableFilters, item);
+                        var filteredItem = filter.FilterItem(filtersWithValues, item);
                         if (filteredItem != null)
                         {
                             filteredSources[sourceInventory.Key].Add(filteredItem);
@@ -517,8 +532,10 @@ public class ListFilterService : DisposableMediatorBackgroundService
             {
                 foreach (var filteredSource in filteredSources)
                 {
+                    ct.ThrowIfCancellationRequested();
                     foreach (var item in filteredSource.Value)
                     {
+                        ct.ThrowIfCancellationRequested();
                         var hashCode = item.Item.GenerateHashCode(filter.IgnoreHQWhenSorting ?? false);
                         if (distinctItems.Contains(hashCode))
                         {
@@ -537,8 +554,10 @@ public class ListFilterService : DisposableMediatorBackgroundService
 
             foreach (var filteredSource in filteredSources)
             {
+                ct.ThrowIfCancellationRequested();
                 foreach (var filteredItem in filteredSource.Value)
                 {
+                    ct.ThrowIfCancellationRequested();
                     var item = filteredItem.Item;
                     if (filter.DuplicatesOnly.HasValue && filter.DuplicatesOnly == true)
                     {
@@ -570,6 +589,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
             {
                 foreach (var item in history)
                 {
+                    ct.ThrowIfCancellationRequested();
                     var wasMatched = false;
                     if (item.FromItem != null)
                     {
@@ -593,7 +613,8 @@ public class ListFilterService : DisposableMediatorBackgroundService
 
             foreach (var change in matchedItems.OrderByDescending(c => c.ChangeDate ?? new DateTime()))
             {
-                if (filter.FilterItem(_filterService.AvailableFilters, change))
+                ct.ThrowIfCancellationRequested();
+                if (filter.FilterItem(filtersWithValues, change))
                 {
                     searchResults.Add(new SearchResult(change));
                 }
@@ -605,6 +626,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
             {
                 foreach (var curatedItem in filter.CuratedItems)
                 {
+                    ct.ThrowIfCancellationRequested();
                     var itemRow = _itemSheet.GetRowOrDefault(curatedItem.ItemId);
                     if (itemRow != null)
                     {
@@ -615,7 +637,8 @@ public class ListFilterService : DisposableMediatorBackgroundService
         }
         else
         {
-            searchResults = _itemSheet.Where(c => filter.FilterItem(_filterService.AvailableFilters, c)).Where(c => c.RowId != 0).Select(c => new SearchResult(c)).ToList();
+            ct.ThrowIfCancellationRequested();
+            searchResults = _itemSheet.Where(c => filter.FilterItem(filtersWithValues, c)).Where(c => c.RowId != 0).Select(c => new SearchResult(c)).ToList();
         }
 
 
@@ -825,9 +848,16 @@ public class ListFilterService : DisposableMediatorBackgroundService
             return Task.CompletedTask;
         }
         configuration.Refreshing = true;
-        return FilterQueue.QueueBackgroundWorkItemAsync(token =>
+        return FilterQueue.QueueBackgroundWorkItemAsync(configuration.Key,token =>
         {
-            return Task.Run(() => RefreshList(configuration), token);
+            return Task.Run(() =>
+            {
+                try
+                {
+                    RefreshList(configuration, token);
+                }
+                catch (OperationCanceledException) {}
+            }, token);
         });
     }
 
@@ -847,6 +877,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
             {
                 await workItem(stoppingToken);
             }
+            catch (TaskCanceledException){}
             catch (Exception ex)
             {
                 Logger.LogError(ex,

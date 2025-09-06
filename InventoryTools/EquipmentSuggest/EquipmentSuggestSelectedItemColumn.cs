@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
 using AllaganLib.Interface.FormFields;
 using AllaganLib.Interface.Grid;
 using CriticalCommonLib.Services.Mediator;
@@ -233,38 +234,51 @@ public class EquipmentSuggestSelectedItemColumn  : StringFormField<EquipmentSugg
                         foreach (var filter in craftFilters)
                         {
                             if (!ImGui.Selectable(filter.Name)) continue;
-                            foreach (var toAdd in GetItems())
+                            Task.Run(() =>
                             {
-                                filter.CraftList.AddCraftItem(toAdd.Item.RowId);
-                            }
-                            messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                            messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
-                            filter.NeedsRefresh = true;
+                                foreach (var toAdd in GetItems())
+                                {
+                                    filter.CraftList.AddCraftItem(toAdd.Item.RowId);
+                                }
+
+                                messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                                messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
+                                filter.NeedsRefresh = true;
+                            });
+
                         }
                     }
                 }
 
                 if (ImGui.Selectable("Add to new Craft List"))
                 {
-                    var filter = _listService.AddNewCraftList();
-                    foreach (var toAdd in GetItems())
+                    Task.Run(() =>
                     {
-                        filter.CraftList.AddCraftItem(toAdd.Item.RowId);
-                    }
-                    messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                    messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
-                    filter.NeedsRefresh = true;
+                        var filter = _listService.AddNewCraftList();
+                        foreach (var toAdd in GetItems())
+                        {
+                            filter.CraftList.AddCraftItem(toAdd.Item.RowId);
+                        }
+
+                        messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                        messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
+                        filter.NeedsRefresh = true;
+                    });
                 }
                 if (ImGui.Selectable("Add to new Craft List (ephemeral)"))
                 {
-                    var filter = _listService.AddNewCraftList(null,true);
-                    foreach (var toAdd in GetItems())
+                    Task.Run(() =>
                     {
-                        filter.CraftList.AddCraftItem(toAdd.Item.RowId);
-                    }
-                    messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
-                    messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
-                    filter.NeedsRefresh = true;
+                        var filter = _listService.AddNewCraftList(null, true);
+                        foreach (var toAdd in GetItems())
+                        {
+                            filter.CraftList.AddCraftItem(toAdd.Item.RowId);
+                        }
+
+                        messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                        messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
+                        filter.NeedsRefresh = true;
+                    });
                 }
                 ImGui.Separator();
                 var curatedLists =
@@ -277,25 +291,33 @@ public class EquipmentSuggestSelectedItemColumn  : StringFormField<EquipmentSugg
                         foreach (var filter in curatedLists)
                         {
                             if (!ImGui.MenuItem(filter.Name)) continue;
-                            foreach (var toAdd in GetItems())
+                            Task.Run(() =>
                             {
-                                filter.AddCuratedItem(new CuratedItem(toAdd.Item.RowId));
-                            }
-                            messages.Add(new FocusListMessage(typeof(FiltersWindow), filter));
-                            filter.NeedsRefresh = true;
+                                foreach (var toAdd in GetItems())
+                                {
+                                    filter.AddCuratedItem(new CuratedItem(toAdd.Item.RowId));
+                                }
+
+                                messages.Add(new FocusListMessage(typeof(FiltersWindow), filter));
+                                filter.NeedsRefresh = true;
+                            });
                         }
                     }
                 }
 
                 if (ImGui.Selectable("Add to new Curated List"))
                 {
-                    var filter = _listService.AddNewCuratedList();
-                    foreach (var toAdd in GetItems())
+                    Task.Run(() =>
                     {
-                        filter.AddCuratedItem(new CuratedItem(toAdd.Item.RowId));
-                    }
-                    messages.Add(new FocusListMessage(typeof(FiltersWindow), filter));
-                    filter.NeedsRefresh = true;
+                        var filter = _listService.AddNewCuratedList();
+                        foreach (var toAdd in GetItems())
+                        {
+                            filter.AddCuratedItem(new CuratedItem(toAdd.Item.RowId));
+                        }
+
+                        messages.Add(new FocusListMessage(typeof(FiltersWindow), filter));
+                        filter.NeedsRefresh = true;
+                    });
                 }
 
             }

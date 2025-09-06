@@ -15,6 +15,7 @@ public class GenericHasSourceCategoryFilter : BooleanFilter, IGenericFilter
     private readonly ItemInfoRenderCategory _renderCategory;
     private readonly ItemInfoRenderService _infoRenderService;
     private ItemInfoType[]? _sourceTypes;
+    private readonly string _key;
 
     public override int LabelSize { get; set; } = 250;
 
@@ -24,13 +25,11 @@ public class GenericHasSourceCategoryFilter : BooleanFilter, IGenericFilter
     {
         _renderCategory = renderCategory;
         _infoRenderService = infoRenderService;
+        _key = "HasSourceCat" + (uint)_renderCategory;
     }
 
     public override string Key {
-        get
-        {
-            return "HasSourceCat" + (uint)_renderCategory;
-        }
+        get => _key;
         set
         {
 

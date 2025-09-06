@@ -10,6 +10,7 @@ namespace InventoryTools.Logic.Filters;
 public class GenericHasUseFilter : BooleanFilter, IGenericFilter, IItemTypeFilter
 {
     private readonly ItemInfoRenderService _infoRenderService;
+    private readonly string _key;
     public ItemInfoType ItemType { get; }
 
     public override int LabelSize { get; set; } = 250;
@@ -19,13 +20,11 @@ public class GenericHasUseFilter : BooleanFilter, IGenericFilter, IItemTypeFilte
     {
         _infoRenderService = infoRenderService;
         ItemType = itemType;
+        _key = "HasUse" + ItemType;
     }
 
     public override string Key {
-        get
-        {
-            return "HasUse" + ItemType;
-        }
+        get => _key;
         set
         {
 

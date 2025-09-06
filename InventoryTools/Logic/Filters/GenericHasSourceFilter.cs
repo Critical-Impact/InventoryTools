@@ -15,6 +15,7 @@ public interface IItemTypeFilter : IFilter
 public class GenericHasSourceFilter : BooleanFilter, IGenericFilter, IItemTypeFilter
 {
     private readonly ItemInfoRenderService _infoRenderService;
+    private readonly string _key;
     public ItemInfoType ItemType { get; }
 
     public override int LabelSize { get; set; } = 250;
@@ -25,13 +26,11 @@ public class GenericHasSourceFilter : BooleanFilter, IGenericFilter, IItemTypeFi
     {
         _infoRenderService = infoRenderService;
         ItemType = itemType;
+        _key = "HasSource" + ItemType;
     }
 
     public override string Key {
-        get
-        {
-            return "HasSource" + ItemType;
-        }
+        get => _key;
         set
         {
 

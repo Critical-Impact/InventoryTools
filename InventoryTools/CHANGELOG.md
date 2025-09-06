@@ -8,6 +8,20 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [13.1.4] - 2025-09-06
+
+### Change
+- Made several optimizations, this should make list results generate much faster, if you notice any filter not applying correctly let me know via github issue or via the xivlauncher/dalamud discord
+
+### Fixed
+- Fixed a bug with how task queues were being assigned in the background
+- Adding items from the equipment recommendation window should not longer lock up the UI while doing so
+
+## [13.1.3] - 2025-09-05
+
+### Fixed
+- Fixed signature mismatch
+
 ## [13.1.2] - 2025-09-01
 
 ### Changed

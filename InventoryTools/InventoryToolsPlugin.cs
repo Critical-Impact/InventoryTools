@@ -11,6 +11,7 @@ using AllaganLib.Interface.Grid.ColumnFilters;
 using AllaganLib.Monitors.Debuggers;
 using AllaganLib.Monitors.Services;
 using AllaganLib.Shared.Interfaces;
+using AllaganLib.Shared.Services;
 using AllaganLib.Shared.Time;
 using AllaganLib.Shared.Windows;
 using Autofac;
@@ -60,7 +61,6 @@ using Lumina;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OtterGui.Log;
-using IBackgroundTaskQueue = CriticalCommonLib.Interfaces.IBackgroundTaskQueue;
 using Window = InventoryTools.Ui.Window;
 
 namespace InventoryTools
@@ -187,7 +187,6 @@ namespace InventoryTools
             //Singleton registrations
             builder.RegisterSingletonSelfAndInterfaces<AutofacResolver>();
             builder.RegisterSingletonSelfAndInterfaces<AllaganDebugWindow>();
-            builder.RegisterSingletonSelfAndInterfaces<BackgroundTaskQueue>();
             builder.RegisterSingletonSelfAndInterfaces<ChangelogService>();
             builder.RegisterSingletonSelfAndInterfaces<CharacterMonitor>();
             builder.RegisterSingletonSelfAndInterfaces<CharacterRetainerPage>();
@@ -230,7 +229,6 @@ namespace InventoryTools
             builder.RegisterSingletonSelfAndInterfaces<MarketBoardService>();
             builder.RegisterSingletonSelfAndInterfaces<MarketCacheConfiguration>();
             builder.RegisterSingletonSelfAndInterfaces<MarketOrderService>();
-            builder.RegisterSingletonSelfAndInterfaces<MarketboardTaskQueue>();
             builder.RegisterSingletonSelfAndInterfaces<MinifyResolver>();
             builder.RegisterSingletonSelfAndInterfaces<MobTracker>();
             builder.RegisterSingletonSelfAndInterfaces<PluginCommands>();
@@ -245,8 +243,11 @@ namespace InventoryTools
             builder.RegisterSingletonSelfAndInterfaces<VersionInfo>();
             builder.RegisterSingletonSelfAndInterfaces<WindowSystemFactory>();
             builder.RegisterSingletonSelfAndInterfaces<CsvLoaderService>();
+            builder.RegisterSingletonSelfAndInterfaces<BackgroundTaskCollector>();
 
             //Transient registrations
+            builder.RegisterTransientSelfAndInterfaces<BackgroundTaskQueue>();
+            builder.RegisterTransientSelfAndInterfaces<NamedBackgroundTaskQueue>();
             builder.RegisterTransientSelfAndInterfaces<InventoryScopePicker>();
             builder.RegisterTransientSelfAndInterfaces<FilterTable>();
             builder.RegisterTransientSelfAndInterfaces<CraftItemTable>();
@@ -445,15 +446,6 @@ namespace InventoryTools
             {
                 var context = c.Resolve<IComponentContext>();
                 return renderCategory => context.Resolve<GenericHasUseCategoryFilter>(new NamedParameter("renderCategory", renderCategory));
-            });
-
-            builder.Register<Func<int, IBackgroundTaskQueue>>(c =>
-            {
-                return capacity =>
-                {
-                    var filter = new BackgroundTaskQueue(capacity);
-                    return filter;
-                };
             });
         }
 
