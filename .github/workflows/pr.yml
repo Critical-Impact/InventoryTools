@@ -3,7 +3,7 @@ name: Create D17 PR
 on:
   push:
     tags:
-      - *
+      - '*'
 
 env:
   INTERNAL_NAME: InventoryTools
