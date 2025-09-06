@@ -1,20 +1,80 @@
-name: Automatically PR plogon
+name: Update External Repo
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
 
 jobs:
-  pull_request:
+  update-repo:
     runs-on: ubuntu-latest
     steps:
-      - name: Create pull request
-        uses: daemitus/DalamudPluginPR2@master
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+      - name: Extract version and changelog
+        id: changelog
+        run: |
+          VERSION=1.$(grep -m1 -oP '(?<=## \[)[0-9]+\.[0-9]+\.[0-9]+' InventoryTools\CHANGELOG.md)
+          echo "version=1.$VERSION" >> $GITHUB_OUTPUT
+          CHANGELOG=$(awk -v ver=$VERSION '/^#+ \[/ { if (p) { exit }; if ($2 == "["ver"]") { p=1; next} } p && NF' InventoryTools/CHANGELOG.md)
+          echo "log<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Checkout fork of external repo
+        uses: actions/checkout@v4
         with:
-          token: ${{ secrets.PAT }}
-          plugin_name: InventoryTools
-          testing: "[Testing]"
-          project_path: InventoryTools
-          plugin_owners: Critical_Impact
+          repository: Critical-Impact/DalamudPluginsD17
+          fetch-depth: '1'
+          path: external
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Configure git and create branch
+        run: |
+          cd external
+          git remote add goatcorp https://github.com/goatcorp/DalamudPluginsD17.git
+          git fetch goatcorp
+          git checkout -b update-${{ steps.changelog.outputs.version }} goatcorp/main
+
+      - name: Update manifest.toml
+        run: |
+          cd external
+          pip install toml
+          python - <<EOF
+          import toml
+          from pathlib import Path
+          
+          manifest_path = Path("stable/InventoryTools/manifest.toml")
+          data = toml.load(manifest_path)
+          
+          # Update commit and changelog
+          data["plugin"]["commit"] = "${GITHUB_SHA}"
+          data["plugin"]["version"] = "${{ steps.changelog.outputs.version }}"
+          data["plugin"]["changelog"] = """${{ steps.changelog.outputs.log }}"""
+          
+          with manifest_path.open("w") as f:
+              toml.dump(data, f)
+          EOF
+          git add stable/InventoryTools/manifest.toml
+          git commit -m "Update plugin commit and changelog to ${{ steps.changelog.outputs.version }}"          
+
+      - name: Push branch to fork
+        run: |
+          cd external
+          git push origin HEAD:update-${{ steps.changelog.outputs.version }}
+#
+#      - name: Create Pull Request in original repo
+#        uses: peter-evans/create-pull-request@v6
+#        with:
+#          path: external
+#          token: ${{ secrets.PAT_TOKEN }}
+#          base: main
+#          base-repo: original/external-repo
+#          branch: update-${{ steps.changelog.outputs.version }}
+#          title: "Update to ${{ steps.changelog.outputs.version }}"
+#          body: |
+#            Automated PR updating to version ${{ steps.changelog.outputs.version }}.
+#
+#            Changelog:
+#            ```
+#            ${{ steps.changelog.outputs.log }}
+#            ```
