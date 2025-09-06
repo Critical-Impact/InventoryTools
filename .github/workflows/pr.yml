@@ -73,4 +73,4 @@ jobs:
       - name: Push branch to fork
         run: |
           cd external
-          git push origin -f HEAD:update-${{ steps.changelog.outputs.version }}
+          git push origin -f HEAD:${{ env.UPDATE_NAME }}-${{ steps.changelog.outputs.version }}
