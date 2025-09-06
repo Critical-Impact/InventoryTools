@@ -1,7 +1,9 @@
 name: Create D17 PR
 
 on:
-  workflow_dispatch:
+  push:
+    tags:
+      - *
 
 env:
   INTERNAL_NAME: InventoryTools
@@ -71,20 +73,3 @@ jobs:
         run: |
           cd external
           git push origin -f HEAD:update-${{ steps.changelog.outputs.version }}
-#
-#      - name: Create Pull Request in original repo
-#        uses: peter-evans/create-pull-request@v6
-#        with:
-#          path: external
-#          token: ${{ secrets.PR_PAT }}
-#          base: main
-#          base-repo: original/external-repo
-#          branch: update-${{ steps.changelog.outputs.version }}
-#          title: "Update to ${{ steps.changelog.outputs.version }}"
-#          body: |
-#            Automated PR updating to version ${{ steps.changelog.outputs.version }}.
-#
-#            Changelog:
-#            ```
-#            ${{ steps.changelog.outputs.log }}
-#            ```
