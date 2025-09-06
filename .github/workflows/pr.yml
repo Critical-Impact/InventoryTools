@@ -1,4 +1,4 @@
-name: Update External Repo
+name: Create D17 PR
 
 on:
   workflow_dispatch:
