@@ -35,6 +35,12 @@ jobs:
           git fetch goatcorp
           git checkout -b update-${{ steps.changelog.outputs.version }} goatcorp/main
 
+      - name: Configure git author
+        run: |
+          cd external
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+
       - name: Update manifest.toml
         run: |
           cd external
