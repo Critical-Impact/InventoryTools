@@ -26,7 +26,7 @@ jobs:
           repository: Critical-Impact/DalamudPluginsD17
           fetch-depth: '1'
           path: external
-          token: ${{ secrets.PAT }}
+          token: ${{ secrets.PR_PAT }}
 
       - name: Configure git and create branch
         run: |
@@ -66,7 +66,7 @@ jobs:
 #        uses: peter-evans/create-pull-request@v6
 #        with:
 #          path: external
-#          token: ${{ secrets.PAT_TOKEN }}
+#          token: ${{ secrets.PR_PAT }}
 #          base: main
 #          base-repo: original/external-repo
 #          branch: update-${{ steps.changelog.outputs.version }}
