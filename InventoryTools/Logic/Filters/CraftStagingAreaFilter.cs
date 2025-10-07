@@ -28,7 +28,7 @@ public class CraftStagingAreaFilter : InventoryScopeFilter
     {
         return new List<InventorySearchScope>()
         {
-            new InventorySearchScope() { ActiveCharacter = true, Categories = [InventoryCategory.CharacterBags, InventoryCategory.Currency, InventoryCategory.Crystals] }
+            new InventorySearchScope() { ActiveCharacter = true, CharacterTypes = [CharacterType.Character], Categories = [InventoryCategory.CharacterBags, InventoryCategory.Currency, InventoryCategory.Crystals] }
         };
     }
 
