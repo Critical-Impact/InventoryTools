@@ -38,6 +38,7 @@ public class EquipmentSuggestWindow : GenericWindow, IMenuWindow
     private readonly EquipmentSuggestModeSetting _modeSetting;
     private readonly EquipmentSuggestToolModeCategorySetting _toolModeCategorySetting;
     private readonly EquipmentSuggestService _equipmentSuggestService;
+    private readonly EquipmentSuggestOwnedGearOnlyFormField _ownedGearOnlyFormField;
     private readonly ICharacterMonitor _characterMonitor;
     private Task? _currentTask;
 
@@ -48,7 +49,7 @@ public class EquipmentSuggestWindow : GenericWindow, IMenuWindow
         EquipmentSuggestLevelFormField levelField, EquipmentSuggestConfig config, EquipmentSuggestSourceTypeField typeField,
         IPluginLog pluginLog, EquipmentSuggestViewModeSetting viewModeSetting, Lazy<IEnumerable<IMenuWindow>> menuWindows,
         EquipmentSuggestFilterStatsField statsField, EquipmentSuggestModeSetting modeSetting, EquipmentSuggestToolModeCategorySetting toolModeCategorySetting,
-        EquipmentSuggestService equipmentSuggestService,
+        EquipmentSuggestService equipmentSuggestService, EquipmentSuggestOwnedGearOnlyFormField ownedGearOnlyFormField,
         ICharacterMonitor characterMonitor) : base(logger, mediator, imGuiService, configuration,
         "Equipment Recommendations")
     {
@@ -67,6 +68,7 @@ public class EquipmentSuggestWindow : GenericWindow, IMenuWindow
         _modeSetting = modeSetting;
         _toolModeCategorySetting = toolModeCategorySetting;
         _equipmentSuggestService = equipmentSuggestService;
+        _ownedGearOnlyFormField = ownedGearOnlyFormField;
         _characterMonitor = characterMonitor;
         this.Flags = ImGuiWindowFlags.MenuBar;
     }
@@ -282,11 +284,20 @@ public class EquipmentSuggestWindow : GenericWindow, IMenuWindow
                 }
 
                 ImGui.SameLine();
-                using (var child = ImRaii.Child("statsField", new Vector2(100, 50) * ImGui.GetIO().FontGlobalScale, false, ImGuiWindowFlags.NoScrollbar))
+                using (var child = ImRaii.Child("statsField", new Vector2(150, 50) * ImGui.GetIO().FontGlobalScale, false, ImGuiWindowFlags.NoScrollbar))
                 {
                     if (child)
                     {
                         _statsField.Draw(_config);
+                    }
+                }
+
+                ImGui.SameLine();
+                using (var child = ImRaii.Child("ownedGearOnlyFormField", new Vector2(100, 50) * ImGui.GetIO().FontGlobalScale, false, ImGuiWindowFlags.NoScrollbar))
+                {
+                    if (child)
+                    {
+                        _ownedGearOnlyFormField.Draw(_config);
                     }
                 }
 

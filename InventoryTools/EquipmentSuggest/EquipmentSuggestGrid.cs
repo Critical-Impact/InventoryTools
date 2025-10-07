@@ -30,6 +30,9 @@ public sealed class EquipmentSuggestGrid : RenderTable<EquipmentSuggestConfig, E
     private readonly EquipmentSuggestModeSetting _modeSetting;
     private readonly EquipmentSuggestToolModeCategorySetting _toolModeSetting;
     private readonly InventoryToolsConfiguration _configuration;
+    private readonly EquipmentSuggestOwnedGearOnlyFormField _equipmentSuggestOwnedGearOnlyFormField;
+    private readonly InventoryScopeCalculator _scopeCalculator;
+    private readonly IInventoryMonitor _inventoryMonitor;
     private readonly EquipmentSuggestConfig _config;
     private EquipmentSuggestMode? _mode;
     private EquipmentSuggestToolModeCategory? _toolMode;
@@ -45,7 +48,8 @@ public sealed class EquipmentSuggestGrid : RenderTable<EquipmentSuggestConfig, E
             ClassJobSheet classJobSheet, ClassJobCategorySheet classJobCategorySheet,
             EquipmentSuggestFilterStatsField filterStatsField, EquipmentSuggestModeSetting modeSetting,
             EquipmentSuggestToolModeCategorySetting toolModeSetting, EquipmentSuggestSelectedSecondaryItemColumn secondarySlotColumn,
-            InventoryToolsConfiguration configuration,
+            InventoryToolsConfiguration configuration, EquipmentSuggestOwnedGearOnlyFormField equipmentSuggestOwnedGearOnlyFormField,
+            InventoryScopeCalculator scopeCalculator, IInventoryMonitor inventoryMonitor,
             EquipmentSuggestConfig config) : base(
         csvLoaderService, searchFilter, [slotColumn, selectedItemColumn, secondarySlotColumn],
         ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.Hideable | ImGuiTableFlags.Resizable |
@@ -67,6 +71,9 @@ public sealed class EquipmentSuggestGrid : RenderTable<EquipmentSuggestConfig, E
         _modeSetting = modeSetting;
         _toolModeSetting = toolModeSetting;
         _configuration = configuration;
+        _equipmentSuggestOwnedGearOnlyFormField = equipmentSuggestOwnedGearOnlyFormField;
+        _scopeCalculator = scopeCalculator;
+        _inventoryMonitor = inventoryMonitor;
         _config = config;
         this.GenerateItems();
         for (int i = 0; i < 5; i++)
@@ -171,6 +178,35 @@ public sealed class EquipmentSuggestGrid : RenderTable<EquipmentSuggestConfig, E
     public override List<EquipmentSuggestItem> GetItems()
     {
         GenerateItems();
+        HashSet<uint> ownedItemIds = new HashSet<uint>();
+        var ownedGearOnly = _equipmentSuggestOwnedGearOnlyFormField.CurrentValue(this._config);
+        if (ownedGearOnly)
+        {
+            List<InventorySearchScope> scopes =
+            [
+                new()
+                {
+                    ActiveCharacter = true,
+                    Categories = [InventoryCategory.RetainerBags, InventoryCategory.CharacterPremiumSaddleBags, InventoryCategory.CharacterSaddleBags, InventoryCategory.FreeCompanyBags, InventoryCategory.CharacterEquipped, InventoryCategory.CharacterArmoryChest]
+                }
+            ];
+
+            foreach (var inventory in _inventoryMonitor.Inventories)
+            {
+                var categories = inventory.Value.GetAllInventoryCategories();
+                foreach (var category in categories)
+                {
+                    if (_scopeCalculator.Filter(scopes, inventory.Key, category))
+                    {
+                        foreach (var item in inventory.Value.GetItemsByCategory(category))
+                        {
+                            ownedItemIds.Add(item.ItemId);
+                        }
+                    }
+                }
+            }
+        }
+
         var count = 0;
         Dictionary<int, Dictionary<int, List<SearchResult>>> resultCache = new Dictionary<int, Dictionary<int, List<SearchResult>>>();
 
@@ -181,7 +217,7 @@ public sealed class EquipmentSuggestGrid : RenderTable<EquipmentSuggestConfig, E
                 resultCache.TryAdd(index, new Dictionary<int, List<SearchResult>>());
                 var item = items[index];
                 resultCache[index].TryAdd(count, new List<SearchResult>());
-                resultCache[index][count] = GetSuggestedItems(item, currentLevel);
+                resultCache[index][count] = GetSuggestedItems(item, currentLevel, ownedItemIds);
             }
 
             count++;
@@ -227,7 +263,7 @@ public sealed class EquipmentSuggestGrid : RenderTable<EquipmentSuggestConfig, E
                         {
                             lowestLevel--;
                             var item = items[index];
-                            var suggestedItems = GetSuggestedItems(item, lowestLevel);
+                            var suggestedItems = GetSuggestedItems(item, lowestLevel, ownedItemIds);
                             if (suggestedItems.Count > 0)
                             {
                                 resultCache[index][0] = suggestedItems;
@@ -285,7 +321,7 @@ public sealed class EquipmentSuggestGrid : RenderTable<EquipmentSuggestConfig, E
                         {
                             lowestLevel--;
                             var item = items[index];
-                            var suggestedItems = GetSuggestedItems(item, lowestLevel);
+                            var suggestedItems = GetSuggestedItems(item, lowestLevel, ownedItemIds);
                             var includeResults = false;
                             if (!hasOffHand && suggestedItems.Any(c => c.Item.Base.EquipSlotCategory.Value.OffHand == 1))
                             {
@@ -336,7 +372,7 @@ public sealed class EquipmentSuggestGrid : RenderTable<EquipmentSuggestConfig, E
         return items;
     }
 
-    public List<SearchResult> GetSuggestedItems(EquipmentSuggestItem suggestItem, int level)
+    public List<SearchResult> GetSuggestedItems(EquipmentSuggestItem suggestItem, int level, HashSet<uint> ownedItemIds)
     {
         if (applicableItems == null)
         {
@@ -353,6 +389,7 @@ public sealed class EquipmentSuggestGrid : RenderTable<EquipmentSuggestConfig, E
         var sourceTypes = _sourceTypesField.CurrentValue(this._config);
         var excludeTypes = _excludeSourcesField.CurrentValue(this._config);
         var filterStats = _filterStatsField.CurrentValue(this._config);
+        var ownedGearOnly = _equipmentSuggestOwnedGearOnlyFormField.CurrentValue(this._config);
         var items = applicableItems.Where(c => c.Base.LevelEquip == level && c.Base.EquipSlotCategory.RowId != 0);
 
         if (suggestItem.EquipmentSlot != null)
@@ -427,6 +464,11 @@ public sealed class EquipmentSuggestGrid : RenderTable<EquipmentSuggestConfig, E
         {
             items = items.Where(c => c.Base.EquipSlotCategory.Value.MainHand == 1 ||  c.Base.EquipSlotCategory.Value.OffHand == 1);
             items = items.Where(c => c.ClassJobCategory?.ClassJobIds.Contains(suggestItem.ClassJobRow.RowId) ?? false);
+        }
+
+        if (ownedGearOnly)
+        {
+            items = items.Where(c => ownedItemIds.Contains(c.RowId));
         }
 
         return items.Where(c => c.Sources.Count != 0  && c.Base.BaseParam.Any(baseParam => baseParam.RowId != 0)).Where(c => c.HasSourcesByType(sourceTypes.ToArray())).Where(c => !c.HasSourcesByType(excludeTypes.ToArray())).Select(c => new SearchResult(c)).ToList();

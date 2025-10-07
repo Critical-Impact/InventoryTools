@@ -281,6 +281,7 @@ namespace InventoryTools
             builder.RegisterSingletonSelfAndInterfaces<EquipmentSuggestToolModeCategorySetting>();
             builder.RegisterSingletonSelfAndInterfaces<EquipmentSuggestModeSetting>();
             builder.RegisterSingletonSelfAndInterfaces<EquipmentSuggestSelectedSecondaryItemColumn>();
+            builder.RegisterSingletonSelfAndInterfaces<EquipmentSuggestOwnedGearOnlyFormField>();
             builder.RegisterSingletonSelfAndInterfaces<EquipmentSuggestService>();
 
             builder.Register<UniversalisUserAgent>(c =>
