@@ -24,7 +24,7 @@ public abstract class ButtonColumn : IColumn
     public virtual bool IsDebug { get; set; } = false;
     public virtual FilterType AvailableIn { get; } = Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter |
                                                       Logic.FilterType.GameItemFilter | Logic.FilterType.HistoryFilter |
-                                                      Logic.FilterType.CraftFilter | Logic.FilterType.CuratedList;
+                                                      Logic.FilterType.CraftFilter | Logic.FilterType.CuratedList | Logic.FilterType.GroupedList;
 
     public bool AvailableInType(FilterType type) =>
         AvailableIn.HasFlag(InventoryTools.Logic.FilterType.SearchFilter) &&
@@ -41,6 +41,9 @@ public abstract class ButtonColumn : IColumn
         ||
         (AvailableIn.HasFlag(InventoryTools.Logic.FilterType.HistoryFilter) &&
          type.HasFlag(InventoryTools.Logic.FilterType.HistoryFilter))
+        ||
+        (AvailableIn.HasFlag(InventoryTools.Logic.FilterType.GroupedList) &&
+         type.HasFlag(InventoryTools.Logic.FilterType.GroupedList))
         ||
         (AvailableIn.HasFlag(InventoryTools.Logic.FilterType.CuratedList) &&
          type.HasFlag(InventoryTools.Logic.FilterType.CuratedList));

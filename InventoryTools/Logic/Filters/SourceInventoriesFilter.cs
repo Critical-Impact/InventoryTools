@@ -25,7 +25,7 @@ namespace InventoryTools.Logic.Filters
         public override FilterCategory FilterCategory { get; set; } = FilterCategory.Inventories;
 
         public override List<InventorySearchScope>? DefaultValue { get; set; } = null;
-        public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter | FilterType.HistoryFilter;
+        public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter | FilterType.HistoryFilter | FilterType.GroupedList;
 
         public override string GetName(FilterConfiguration configuration)
         {

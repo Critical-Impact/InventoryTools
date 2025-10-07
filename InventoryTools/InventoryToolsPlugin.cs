@@ -199,6 +199,7 @@ namespace InventoryTools
             builder.RegisterSingletonSelfAndInterfaces<ContainerAwareCsvLoader>();
             builder.RegisterSingletonSelfAndInterfaces<CraftFiltersPage>();
             builder.RegisterSingletonSelfAndInterfaces<CraftGroupingLocalizer>();
+            builder.RegisterSingletonSelfAndInterfaces<GroupedItemLocalizer>();
             builder.RegisterSingletonSelfAndInterfaces<CraftItemLocalizer>();
             builder.RegisterSingletonSelfAndInterfaces<CraftPricer>();
             builder.RegisterSingletonSelfAndInterfaces<CraftingCache>();

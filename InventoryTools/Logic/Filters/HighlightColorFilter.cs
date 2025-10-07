@@ -11,7 +11,7 @@ namespace InventoryTools.Logic.Filters
     public class HighlightColorFilter : ColorFilter
     {
         public override FilterType AvailableIn { get; set; } =
-            FilterType.SearchFilter | FilterType.CraftFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter | FilterType.CuratedList;
+            FilterType.SearchFilter | FilterType.CraftFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter | FilterType.CuratedList | FilterType.GroupedList;
         public override string Key { get; set; } = "HighlightColor";
         public override string Name { get; set; } = "Highlight Color";
 

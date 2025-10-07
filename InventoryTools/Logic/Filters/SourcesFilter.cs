@@ -41,7 +41,7 @@ namespace InventoryTools.Logic.Filters
             return false;
         }
 
-        public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter | FilterType.CraftFilter | FilterType.HistoryFilter;
+        public override FilterType AvailableIn { get; set; } = FilterType.SearchFilter | FilterType.SortingFilter | FilterType.CraftFilter | FilterType.HistoryFilter | FilterType.GroupedList;
 
         public override void Draw(FilterConfiguration configuration)
         {

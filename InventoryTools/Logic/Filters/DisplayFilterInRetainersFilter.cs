@@ -47,7 +47,7 @@ namespace InventoryTools.Logic.Filters
         public override FilterItemsRetainerEnum DefaultValue { get; set; } = FilterItemsRetainerEnum.No;
 
         public override FilterType AvailableIn { get; set; } =
-            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter | FilterType.CuratedList | FilterType.CraftFilter;
+            FilterType.SearchFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter | FilterType.CuratedList | FilterType.CraftFilter | FilterType.GroupedList;
 
         public override List<FilterItemsRetainerEnum> GetChoices(FilterConfiguration configuration)
         {

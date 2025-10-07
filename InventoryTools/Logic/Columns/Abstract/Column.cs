@@ -25,7 +25,7 @@ namespace InventoryTools.Logic.Columns.Abstract
         public List<IColumnSetting> Settings { get; set; } = new();
 
         public virtual FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter |
-                                                 Logic.FilterType.GameItemFilter | Logic.FilterType.CraftFilter | Logic.FilterType.HistoryFilter | Logic.FilterType.CuratedList;
+                                                 Logic.FilterType.GameItemFilter | Logic.FilterType.CraftFilter | Logic.FilterType.HistoryFilter | Logic.FilterType.CuratedList | Logic.FilterType.GroupedList;
 
         public virtual bool? CraftOnly => null;
         public bool CanBeRemoved => true;
@@ -83,6 +83,9 @@ namespace InventoryTools.Logic.Columns.Abstract
             ||
             (AvailableIn.HasFlag(InventoryTools.Logic.FilterType.HistoryFilter) &&
              type.HasFlag(InventoryTools.Logic.FilterType.HistoryFilter))
+            ||
+            (AvailableIn.HasFlag(InventoryTools.Logic.FilterType.GroupedList) &&
+             type.HasFlag(InventoryTools.Logic.FilterType.GroupedList))
             ||
             (AvailableIn.HasFlag(InventoryTools.Logic.FilterType.CuratedList) &&
              type.HasFlag(InventoryTools.Logic.FilterType.CuratedList));

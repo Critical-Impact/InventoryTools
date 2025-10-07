@@ -1019,7 +1019,7 @@ namespace InventoryTools.Ui
                             var windowGroups = _listService.Lists.GroupBy(c => c.FilterType).OrderBySequence(
                             [
                                 FilterType.SearchFilter, FilterType.SortingFilter, FilterType.GameItemFilter,
-                                FilterType.HistoryFilter, FilterType.CuratedList, FilterType.CraftFilter
+                                FilterType.HistoryFilter, FilterType.CuratedList, FilterType.GroupedList, FilterType.CraftFilter
                             ], grouping => grouping.Key).ToList();
                             for (var index = 0; index < windowGroups.Count; index++)
                             {
@@ -1499,6 +1499,10 @@ namespace InventoryTools.Ui
                                      filterConfiguration.FilterType.HasFlag(FilterType
                                          .CuratedList))
                                     ||
+                                    (filter.AvailableIn.HasFlag(FilterType.GroupedList) &&
+                                     filterConfiguration.FilterType.HasFlag(FilterType
+                                         .GroupedList))
+                                    ||
                                     (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
                                      filterConfiguration.FilterType.HasFlag(FilterType
                                          .GameItemFilter)));
@@ -1561,6 +1565,10 @@ namespace InventoryTools.Ui
                                                          (filter.AvailableIn.HasFlag(FilterType.CuratedList) &&
                                                           filterConfiguration.FilterType.HasFlag(FilterType
                                                               .CuratedList))
+                                                         ||
+                                                         (filter.AvailableIn.HasFlag(FilterType.GroupedList) &&
+                                                          filterConfiguration.FilterType.HasFlag(FilterType
+                                                              .GroupedList))
                                                          ||
                                                          (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
                                                           filterConfiguration.FilterType.HasFlag(FilterType

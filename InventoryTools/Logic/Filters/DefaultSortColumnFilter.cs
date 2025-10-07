@@ -12,7 +12,7 @@ namespace InventoryTools.Logic.Filters;
 public class DefaultSortColumnFilter : ChoiceFilter<string>
 {
     public override FilterType AvailableIn { get; set; } =
-        FilterType.SearchFilter | FilterType.CraftFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter | FilterType.CuratedList;
+        FilterType.SearchFilter | FilterType.CraftFilter | FilterType.SortingFilter | FilterType.GameItemFilter | FilterType.HistoryFilter | FilterType.CuratedList | FilterType.GroupedList;
 
     public override string? CurrentValue(FilterConfiguration configuration)
     {

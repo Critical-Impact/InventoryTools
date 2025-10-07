@@ -15,6 +15,7 @@ public static class FilterTypeExtensions
             FilterType.CraftFilter => "Craft List",
             FilterType.HistoryFilter => "History List",
             FilterType.CuratedList => "Curated List",
+            FilterType.GroupedList => "Grouped List",
             _ => "Unknown"
         };
     }

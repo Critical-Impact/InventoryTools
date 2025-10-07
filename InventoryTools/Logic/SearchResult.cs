@@ -14,6 +14,8 @@ namespace InventoryTools.Logic
         private InventoryChange? _inventoryChange;
         private CuratedItem? _curatedItem;
         private CraftItem? _craftItem;
+        private GroupedItem? _groupedItem;
+        private GroupedItemKey? _groupedItemKey;
 
         public ItemRow Item => _item;
         public InventoryItem? InventoryItem => _inventoryItem;
@@ -25,11 +27,17 @@ namespace InventoryTools.Logic
         public CuratedItem? CuratedItem => _curatedItem;
 
         public CraftItem? CraftItem => _craftItem;
+        public GroupedItem? GroupedItem => _groupedItem;
+        public GroupedItemKey? GroupedItemKey => _groupedItemKey;
 
         public uint Quantity
         {
             get
             {
+                if (GroupedItem != null)
+                {
+                    return GroupedItem.Quantity;
+                }
                 if (CraftItem != null)
                 {
                     return CraftItem.QuantityRequired;
@@ -54,6 +62,17 @@ namespace InventoryTools.Logic
         {
             get
             {
+                if (GroupedItem != null)
+                {
+                    if (GroupedItem.IsHq ?? false)
+                    {
+                        return FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HighQuality;
+                    }
+                    if (GroupedItem.IsCollectable ?? false)
+                    {
+                        return FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.Collectable;
+                    }
+                }
                 if (CraftItem != null)
                 {
                     return CraftItem.Flags;
@@ -116,6 +135,12 @@ namespace InventoryTools.Logic
         {
             _item = item;
             _curatedItem = curatedItem;
+        }
+
+        public SearchResult(GroupedItemKey groupedItemKey, ItemRow item, GroupedItem groupedItem)
+        {
+            _item = item;
+            _groupedItem = groupedItem;
         }
     }
 }

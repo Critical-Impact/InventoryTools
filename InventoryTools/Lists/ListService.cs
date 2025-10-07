@@ -1089,6 +1089,15 @@ namespace InventoryTools.Lists
                 configuration.DefaultSortColumn = nameColumn.Key;
                 configuration.DefaultSortOrder = ImGuiSortDirection.Ascending;
             }
+            else if (configuration.FilterType == FilterType.GroupedList)
+            {
+                AddColumn(configuration, typeof(FavouritesColumn));
+                AddColumn(configuration,typeof(IconColumn), false);
+                var nameColumn = AddColumn(configuration,typeof(NameColumn), false);
+                AddColumn(configuration,typeof(QuantityColumn), false);
+                configuration.DefaultSortColumn = nameColumn.Key;
+                configuration.DefaultSortOrder = ImGuiSortDirection.Ascending;
+            }
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

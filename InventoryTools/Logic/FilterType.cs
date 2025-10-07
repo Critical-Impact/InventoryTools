@@ -2,7 +2,7 @@
 
 namespace InventoryTools.Logic
 {
-    [Flags] 
+    [Flags]
     public enum FilterType
     {
         None = 0,
@@ -11,6 +11,7 @@ namespace InventoryTools.Logic
         GameItemFilter = 4, //For displaying all the items
         CraftFilter = 8, //For crafting items
         HistoryFilter = 16, //For showing historical movement of items
-        CuratedList = 32 //Manually curated lists
+        CuratedList = 32, //Manually curated lists
+        GroupedList = 64 //Grouped lists
     }
 }

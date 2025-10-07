@@ -137,7 +137,11 @@ namespace InventoryTools.Ui.Pages
                             ||
                             (filter.AvailableIn.HasFlag(FilterType.CuratedList) &&
                              filterConfiguration.FilterType.HasFlag(FilterType
-                                 .CuratedList)));
+                                 .CuratedList))
+                            ||
+                            (filter.AvailableIn.HasFlag(FilterType.GroupedList) &&
+                             filterConfiguration.FilterType.HasFlag(FilterType
+                                 .GroupedList)));
                         if (hasValues)
                         {
                             using (var tabItem = ImRaii.TabItem(group.Key.FormattedName()))
@@ -186,6 +190,9 @@ namespace InventoryTools.Ui.Pages
                                                  ||
                                                  (filter.AvailableIn.HasFlag(FilterType.CuratedList) &&
                                                   filterConfiguration.FilterType.HasFlag(FilterType.CuratedList))
+                                                 ||
+                                                 (filter.AvailableIn.HasFlag(FilterType.GroupedList) &&
+                                                  filterConfiguration.FilterType.HasFlag(FilterType.GroupedList))
                                                  ||
                                                  (filter.AvailableIn.HasFlag(FilterType.GameItemFilter) &&
                                                   filterConfiguration.FilterType.HasFlag(FilterType.GameItemFilter))

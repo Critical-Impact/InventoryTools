@@ -45,6 +45,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
     private readonly SourceInventoriesFilter _sourceInventoriesFilter;
     private readonly DestinationInventoriesFilter _destinationInventoriesFilter;
     private readonly InventoryScopeCalculator _inventoryScopeCalculator;
+    private readonly GroupedGroupByFilter _groupByFilter;
 
     public NamedBackgroundTaskQueue FilterQueue { get; }
 
@@ -56,7 +57,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
         CraftSourceInventoriesFilter craftSourceInventoriesFilter, CraftDestinationInventoriesFilter craftDestinationInventoriesFilter,
         CraftStagingAreaFilter craftStagingAreaFilter,
         SourceInventoriesFilter sourceInventoriesFilter, DestinationInventoriesFilter destinationInventoriesFilter,
-        InventoryScopeCalculator inventoryScopeCalculator) : base(logger,
+        InventoryScopeCalculator inventoryScopeCalculator, GroupedGroupByFilter groupByFilter) : base(logger,
         mediatorService)
     {
         _configuration = configuration;
@@ -74,6 +75,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
         _sourceInventoriesFilter = sourceInventoriesFilter;
         _destinationInventoriesFilter = destinationInventoriesFilter;
         _inventoryScopeCalculator = inventoryScopeCalculator;
+        _groupByFilter = groupByFilter;
         FilterQueue = taskQueueFactory.Invoke("List Filter Queue", 1);
         MediatorService.Subscribe<RequestListUpdateMessage>(this, message => RequestRefresh(message.FilterConfiguration));
     }
@@ -496,7 +498,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
                 }
             }
         }
-        else if(filter.FilterType == FilterType.SearchFilter)
+        else if(filter.FilterType == FilterType.SearchFilter || filter.FilterType == FilterType.GroupedList)
         {
             //Determine which source and destination inventories we actually need to examine
             GenerateSources(filter, inventories, out var sourceInventories);
@@ -639,6 +641,31 @@ public class ListFilterService : DisposableMediatorBackgroundService
         {
             ct.ThrowIfCancellationRequested();
             searchResults = _itemSheet.Where(c => filter.FilterItem(filtersWithValues, c)).Where(c => c.RowId != 0).Select(c => new SearchResult(c)).ToList();
+        }
+
+        //todo: add group by field
+        //might need to do the inventory item -> grouped item key inside the service or anther service maybe
+        if (filter.FilterType == FilterType.GroupedList)
+        {
+            var groupedSearchResults = new List<SearchResult>();
+            var groupedResults = searchResults
+                .GroupBy(item =>
+                {
+                    return GroupedItemKey.FromInventoryItem(item.InventoryItem!, _groupByFilter.CurrentValue(filter), _characterMonitor, []);
+                })
+                .ToList();
+            foreach (var groupedSearchResult in groupedResults)
+            {
+                var groupedItem = new GroupedItem(groupedSearchResult.Key);
+                var firstItem = groupedSearchResult.First();
+                groupedItem.ItemId = firstItem.ItemId;
+                groupedItem.IsHq = firstItem.InventoryItem!.IsHQ;
+                groupedItem.IsCollectable = firstItem.InventoryItem!.IsCollectible;
+                groupedItem.Quantity = (uint)groupedSearchResult.Sum(c => c.Quantity);
+                groupedSearchResults.Add(new SearchResult(groupedSearchResult.Key, firstItem.Item, groupedItem));
+            }
+
+            searchResults = groupedSearchResults;
         }
 
 

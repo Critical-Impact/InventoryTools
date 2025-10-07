@@ -18,7 +18,7 @@ using Newtonsoft.Json;
 
 namespace InventoryTools.Logic
 {
-    public class FilterConfiguration
+    public class FilterConfiguration : IConfigurable<GroupedItemGroup?>
     {
         [JsonIgnore] //Stops the object copy from erasing the field
         private readonly CraftList.Factory _craftListFactory;
@@ -40,6 +40,7 @@ namespace InventoryTools.Logic
         private Dictionary<string, List<ulong>>? _ulongChoiceFilters = new();
         private Dictionary<string, List<string>>? _stringChoiceFilters = new();
         private Dictionary<string, Vector4>? _colorFilters = new();
+        private Dictionary<string, GroupedItemGroup>? _groupedItemFilters = new();
         private Dictionary<string, List<CharacterSearchScope>>? _characterSearchScopes;
         private Dictionary<string, List<InventorySearchScope>>? _inventorySearchScopes;
         private List<CuratedItem>? _curatedItems;
@@ -1593,6 +1594,35 @@ namespace InventoryTools.Logic
                 var newCraftList = _craftListFactory.Invoke();
                 var clonedCraftList = CraftList.Clone(newCraftList);
                 _craftList = clonedCraftList;
+            }
+        }
+
+        public GroupedItemGroup? Get(string key, GroupedItemGroup? defaultValue)
+        {
+            return this.GroupedItemFilters.TryGetValue(key, out var value) ? value : null;
+
+        }
+
+        public void Set(string key, GroupedItemGroup? newValue)
+        {
+            if (newValue == null)
+            {
+                this.GroupedItemFilters.Remove(key);
+            }
+            else
+            {
+                this.GroupedItemFilters[key] = newValue.Value;
+            }
+
+            this.ConfigurationDirty = true;
+        }
+
+        public Dictionary<string, GroupedItemGroup> GroupedItemFilters
+        {
+            get => _groupedItemFilters ??= new Dictionary<string, GroupedItemGroup>();
+            set { _groupedItemFilters = value;
+                NeedsRefresh = true;
+                ConfigurationDirty = true;
             }
         }
     }

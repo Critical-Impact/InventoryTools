@@ -36,6 +36,10 @@ namespace InventoryTools.Logic.Columns
             {
                 return (int)searchResult.InventoryItem.Quantity;
             }
+            if (searchResult.GroupedItem != null)
+            {
+                return (int)searchResult.GroupedItem.Quantity;
+            }
 
             var scopes = _scopePickerColumnSetting.CurrentValue(columnConfiguration);
             if (scopes != null)
@@ -127,7 +131,7 @@ namespace InventoryTools.Logic.Columns
         public override bool HasFilter { get; set; } = true;
         public override ColumnFilterType FilterType { get; set; } = ColumnFilterType.Text;
 
-        public override FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter | Logic.FilterType.GameItemFilter | Logic.FilterType.HistoryFilter | Logic.FilterType.CuratedList;
-        public override FilterType DefaultIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter | Logic.FilterType.CraftFilter | Logic.FilterType.HistoryFilter | Logic.FilterType.CuratedList;
+        public override FilterType AvailableIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter | Logic.FilterType.GameItemFilter | Logic.FilterType.HistoryFilter | Logic.FilterType.CuratedList | Logic.FilterType.GroupedList;
+        public override FilterType DefaultIn => Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter | Logic.FilterType.CraftFilter | Logic.FilterType.HistoryFilter | Logic.FilterType.CuratedList | Logic.FilterType.GroupedList;
     }
 }

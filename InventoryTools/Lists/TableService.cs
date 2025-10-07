@@ -212,7 +212,7 @@ public class TableService : DisposableMediatorBackgroundService
                 filterTable.NeedsRefresh = false;
                 TableRefreshed?.Invoke(filterTable);
             }
-            else if(filterConfiguration.FilterType == FilterType.CuratedList)
+            else if(filterConfiguration.FilterType is FilterType.CuratedList or FilterType.GroupedList)
             {
                 var items = filterConfiguration.SearchResults.AsEnumerable();
                 filterTable.IsSearching = false;
