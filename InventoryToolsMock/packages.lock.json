@@ -4,9 +4,9 @@
     "net9.0-windows7.0": {
       "DalaMock.Core": {
         "type": "Direct",
-        "requested": "[3.0.7, )",
-        "resolved": "3.0.7",
-        "contentHash": "dLUVhvxYnepohnJju0w003szFmL6/6Snahwp5LXGbYMtr57gU/jgmF7c7qs8QJJidvf/jdbrwSgmYTWge1yahw==",
+        "requested": "[3.0.9, )",
+        "resolved": "3.0.9",
+        "contentHash": "rmIdJUbHfV5YE5ZryH4BTgc9vR3op/39FyjVwTvEmTLbAi061LaQRyMu/U34AenAAUphpcdmxJK98+LhwC1f6Q==",
         "dependencies": {
           "Autofac": "8.4.0",
           "DalaMock.Shared": "3.0.6",
@@ -183,14 +183,14 @@
       },
       "AllaganLib.GameSheets": {
         "type": "Transitive",
-        "resolved": "1.3.7",
-        "contentHash": "X0FilI8Vj+q41jdNMukIB7mO9vjQ0WiGpb0idaPyU6Je0HGFyw28+5ZeORWV+iO16UFrYUWnovDAlon03WWJuA==",
+        "resolved": "1.3.8",
+        "contentHash": "0BH6do7vnln/U9rUHx49p1Ng9ySK95JoOeY48fMIAvbO1h+1H1X1Ni7GgFJvw31ZCBopolS36Cz2Zw+oYRU0RQ==",
         "dependencies": {
           "AllaganLib.Shared": "1.3.7",
           "Autofac": "8.4.0",
           "Autofac.Extensions.DependencyInjection": "10.0.0",
           "CSVFile": "3.2.0",
-          "LuminaSupplemental.Excel": "3.0.4"
+          "LuminaSupplemental.Excel": "3.0.5"
         }
       },
       "AllaganLib.Interface": {
@@ -308,8 +308,8 @@
       },
       "LuminaSupplemental.Excel": {
         "type": "Transitive",
-        "resolved": "3.0.4",
-        "contentHash": "arwlsVOOmRVZK0geHdzQLK0R5l/3IRg13Vne0ROlTelmSCesS7ExZoHaleSDcSzhRTV7+U/ZXDTVGlxPeZAu+w==",
+        "resolved": "3.0.5",
+        "contentHash": "wcsIHasdWJy0BqIdQV5Wqj5pq2f9ZbNmVU7rT61ZYpba/rur0/RpMVPeetn8tFTNLJvzPUbp0BVzEBsFujaVtg==",
         "dependencies": {
           "CSVFile": "3.2.0",
           "CsvHelper": "30.0.1",
@@ -749,7 +749,7 @@
       "criticalcommonlib": {
         "type": "Project",
         "dependencies": {
-          "AllaganLib.GameSheets": "[1.3.7, )",
+          "AllaganLib.GameSheets": "[1.3.8, )",
           "DalaMock.Host": "[3.0.7, )",
           "Humanizer.Core": "[3.0.0-beta.54, )",
           "Microsoft.Extensions.Hosting": "[9.0.9, )",
