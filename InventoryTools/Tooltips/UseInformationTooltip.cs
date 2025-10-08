@@ -98,11 +98,16 @@ public class UseInformationTooltip : BaseTooltip
 
             foreach (var groupedLine in groupedLines)
             {
-                if (currentValue.ContainsKey(groupedLine.Key) && currentValue[groupedLine.Key].Group == false)
+                if (currentValue.TryGetValue(groupedLine.Key, out var value) && value.Group == false)
                 {
-                    foreach (var line in groupedLine)
+                    foreach (var line in groupedLine.Take(20))
                     {
                         textLines.Add(_itemInfoRenderService.GetUseName(line));
+                    }
+
+                    if (groupedLine.Count() > 20)
+                    {
+                        textLines[^1] += " (" + (groupedLine.Count() - 20) + " more)";
                     }
                 }
                 else

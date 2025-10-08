@@ -100,9 +100,14 @@ public class SourceInformationTooltip : BaseTooltip
             {
                 if (currentValue.TryGetValue(groupedLine.Key, out var value) && value.Group == false)
                 {
-                    foreach (var line in groupedLine)
+                    foreach (var line in groupedLine.Take(20))
                     {
                         textLines.Add(_itemInfoRenderService.GetSourceName(line));
+                    }
+
+                    if (groupedLine.Count() > 20)
+                    {
+                        textLines[^1] += " (" + (groupedLine.Count() - 20) + " more)";
                     }
                 }
                 else
