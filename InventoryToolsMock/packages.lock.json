@@ -4,12 +4,12 @@
     "net9.0-windows7.0": {
       "DalaMock.Core": {
         "type": "Direct",
-        "requested": "[3.0.9, )",
-        "resolved": "3.0.9",
-        "contentHash": "rmIdJUbHfV5YE5ZryH4BTgc9vR3op/39FyjVwTvEmTLbAi061LaQRyMu/U34AenAAUphpcdmxJK98+LhwC1f6Q==",
+        "requested": "[3.0.10, )",
+        "resolved": "3.0.10",
+        "contentHash": "oISN8Rw5TbfhAN9EZrQ2rYZSyFxLBfWASNB51j1rjG3+qLo3iASQMWrZex68zCH9DaaItqX6IS3PILTr45EMxA==",
         "dependencies": {
           "Autofac": "8.4.0",
-          "DalaMock.Shared": "3.0.6",
+          "DalaMock.Shared": "3.0.10",
           "Microsoft.Extensions.Configuration": "9.0.8",
           "Microsoft.Extensions.DependencyModel": "9.0.8",
           "Microsoft.Extensions.Hosting": "9.0.8",
@@ -183,14 +183,14 @@
       },
       "AllaganLib.GameSheets": {
         "type": "Transitive",
-        "resolved": "1.3.8",
-        "contentHash": "0BH6do7vnln/U9rUHx49p1Ng9ySK95JoOeY48fMIAvbO1h+1H1X1Ni7GgFJvw31ZCBopolS36Cz2Zw+oYRU0RQ==",
+        "resolved": "1.3.10",
+        "contentHash": "9GVn+7uZyecYUEug8nGoVtT1XuVLWhAaarsDJgoaWsPy4DXeaU3/b4TIf+SE/bE6D+l7mPvLqnA6j9xzxH77Hw==",
         "dependencies": {
           "AllaganLib.Shared": "1.3.7",
           "Autofac": "8.4.0",
           "Autofac.Extensions.DependencyInjection": "10.0.0",
           "CSVFile": "3.2.0",
-          "LuminaSupplemental.Excel": "3.0.5"
+          "LuminaSupplemental.Excel": "3.0.7"
         }
       },
       "AllaganLib.Interface": {
@@ -215,8 +215,8 @@
       },
       "AllaganLib.Shared": {
         "type": "Transitive",
-        "resolved": "1.3.7",
-        "contentHash": "lzzuedMHNXa1mCf9sX6nQ23VLBdixAcM9FIXeQtIg3+o2/8JmJ+ohk35/XjibuUsl+g07aWlRgocI8B3czb1LQ==",
+        "resolved": "1.3.10",
+        "contentHash": "ng7ezQMqLNQXHAv31nC4jfgXWNWUKunMrFMJT8qGOtId21ahOu281CZqr+OcNvIZOcFiAsFEwCGoaFP+TlxqmA==",
         "dependencies": {
           "Autofac": "8.4.0",
           "Microsoft.Extensions.Hosting": "9.0.8",
@@ -253,11 +253,11 @@
       },
       "DalaMock.Host": {
         "type": "Transitive",
-        "resolved": "3.0.7",
-        "contentHash": "9GP21qNGeCZaLIgg+08iTad4nV2DBwM3togzO9h1AcDN00ZesS1o0zJ1r5OZCkLJ/JhCjjO2/uKl/9g0rlRtnw==",
+        "resolved": "3.0.10",
+        "contentHash": "ZBa+tOcUCWHzrHMxJRDs1SelU2L2K1sLljA6BoWEyeAGVZcTZAHNULmwVvnuUNtReDu0Eh/deWJBw5x2P9gIfg==",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "10.0.0",
-          "DalaMock.Shared": "3.0.6",
+          "DalaMock.Shared": "3.0.10",
           "Microsoft.Extensions.Hosting": "9.0.8",
           "Microsoft.Extensions.Hosting.Abstractions": "9.0.8",
           "Microsoft.Extensions.ObjectPool": "9.0.8"
@@ -265,8 +265,8 @@
       },
       "DalaMock.Shared": {
         "type": "Transitive",
-        "resolved": "3.0.6",
-        "contentHash": "b2mISUcDti/VeOyo2JW9aABiwCImi+Xv4j7L90h3bHftpUMxa2DG9h/FxB9DjzXvEAiY2dBYRLcGCfcHf7rvcw==",
+        "resolved": "3.0.10",
+        "contentHash": "nOBupQT0ES5v4PMC9M2hcMaMB2T7Nh0/7smvcgLpI7woGST2bDCju5s36k/hnyaXUb77s0SV2La7tPCOOxW+og==",
         "dependencies": {
           "Autofac": "8.4.0",
           "Microsoft.Extensions.Hosting": "9.0.8",
@@ -308,8 +308,8 @@
       },
       "LuminaSupplemental.Excel": {
         "type": "Transitive",
-        "resolved": "3.0.5",
-        "contentHash": "wcsIHasdWJy0BqIdQV5Wqj5pq2f9ZbNmVU7rT61ZYpba/rur0/RpMVPeetn8tFTNLJvzPUbp0BVzEBsFujaVtg==",
+        "resolved": "3.0.7",
+        "contentHash": "/IBscZH8ppRP6CdTL8aExOJGaXR4uIjr+JvomUGNdXPJq5iqY6Lg4KuVP3kB1XxxzB7C91zYfytm8uOm7I1sPg==",
         "dependencies": {
           "CSVFile": "3.2.0",
           "CsvHelper": "30.0.1",
@@ -749,8 +749,9 @@
       "criticalcommonlib": {
         "type": "Project",
         "dependencies": {
-          "AllaganLib.GameSheets": "[1.3.8, )",
-          "DalaMock.Host": "[3.0.7, )",
+          "AllaganLib.GameSheets": "[1.3.10, )",
+          "AllaganLib.Shared": "[1.3.10, )",
+          "DalaMock.Host": "[3.0.10, )",
           "Humanizer.Core": "[3.0.0-beta.54, )",
           "Microsoft.Extensions.Hosting": "[9.0.9, )",
           "NaturalSort.Extension": "[4.4.0, )",
@@ -768,8 +769,8 @@
           "Autofac.Extensions.DependencyInjection": "[10.0.0, )",
           "CriticalCommonLib": "[1.0.0, )",
           "CsvHelper": "[33.1.0, )",
-          "DalaMock.Host": "[3.0.7, )",
-          "DalaMock.Shared": "[3.0.6, )",
+          "DalaMock.Host": "[3.0.10, )",
+          "DalaMock.Shared": "[3.0.10, )",
           "DalamudPackager": "[13.1.0, )",
           "Humanizer.Core": "[3.0.0-beta.54, )",
           "Ionide.KeepAChangelog": "[0.2.0, )",

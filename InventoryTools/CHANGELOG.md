@@ -8,6 +8,20 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [13.1.7] - 2025-11-16
+
+### Added
+- Certain items required for anima weapons will show up as shops and are now available in craft lists
+- The Item Window will show an items Desynth Class if available
+- Added Anima and Zodiac Weapons as Uses
+- Added Anima Shops as a source
+
+### Changed
+- Data update including more mob spawns thanks to user provided data
+
+### Fixed
+- Fixed an exception being thrown with the mobs window when trying to sort the Type column
+
 ## [13.1.6] - 2025-10-17
 
 ### Fixed

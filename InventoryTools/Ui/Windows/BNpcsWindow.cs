@@ -133,7 +133,7 @@ public class BNpcsWindow : GenericTabbedTable<BNpcNameRow>, IMenuWindow
                         return exes;
                     }
 
-                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.MobTypes) : exes.OrderByDescending(c => c.MobTypes);
+                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.MobTypes.Count) : exes.OrderByDescending(c => c.MobTypes.Count);
                 },
                 Filter = (s, exes) =>
                 {

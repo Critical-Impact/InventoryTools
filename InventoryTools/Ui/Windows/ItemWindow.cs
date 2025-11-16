@@ -283,6 +283,11 @@ namespace InventoryTools.Ui
             {
                 ImGui.TextUnformatted("Item Level " + Item.Base.LevelItem.RowId.ToString());
                 ImGui.TextUnformatted("Patch " + Item.Patch);
+                if (Item.CanBeDesynthed && Item.Base.ClassJobRepair.RowId != 0)
+                {
+                    ImGui.TextUnformatted("Desynth with " + (Item.Base.ClassJobRepair.ValueNullable?.Name.ToString().ToTitleCase() ?? "Unknown"));
+                }
+
                 var description = Item.Base.Description.ExtractText();
                 if (description != "")
                 {
