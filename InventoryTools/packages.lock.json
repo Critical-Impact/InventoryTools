@@ -51,12 +51,12 @@
       },
       "DalaMock.Host": {
         "type": "Direct",
-        "requested": "[3.0.10, )",
-        "resolved": "3.0.10",
-        "contentHash": "ZBa+tOcUCWHzrHMxJRDs1SelU2L2K1sLljA6BoWEyeAGVZcTZAHNULmwVvnuUNtReDu0Eh/deWJBw5x2P9gIfg==",
+        "requested": "[3.0.11, )",
+        "resolved": "3.0.11",
+        "contentHash": "6pnB8tF7NxXYE4jYPew5ZQuxoBvsXxnuzJyDG3N1qiGQ6erE4evqABH4uwA55LjcSQc/VrTG/v21aAmgNt7tXA==",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "10.0.0",
-          "DalaMock.Shared": "3.0.10",
+          "DalaMock.Shared": "3.0.11",
           "Microsoft.Extensions.Hosting": "9.0.8",
           "Microsoft.Extensions.Hosting.Abstractions": "9.0.8",
           "Microsoft.Extensions.ObjectPool": "9.0.8"
@@ -64,9 +64,9 @@
       },
       "DalaMock.Shared": {
         "type": "Direct",
-        "requested": "[3.0.10, )",
-        "resolved": "3.0.10",
-        "contentHash": "nOBupQT0ES5v4PMC9M2hcMaMB2T7Nh0/7smvcgLpI7woGST2bDCju5s36k/hnyaXUb77s0SV2La7tPCOOxW+og==",
+        "requested": "[3.0.11, )",
+        "resolved": "3.0.11",
+        "contentHash": "GHkV6zMW8yr8Xgx6XQgQpKbI00/xSxvAInkTmE/ylsVl2lFyRDJs9e1I3aNt0krvKIVJbU2BhtJvFnfleM6Yqw==",
         "dependencies": {
           "Autofac": "8.4.0",
           "Microsoft.Extensions.Hosting": "9.0.8",
@@ -170,10 +170,10 @@
       },
       "AllaganLib.GameSheets": {
         "type": "Transitive",
-        "resolved": "1.3.10",
-        "contentHash": "9GVn+7uZyecYUEug8nGoVtT1XuVLWhAaarsDJgoaWsPy4DXeaU3/b4TIf+SE/bE6D+l7mPvLqnA6j9xzxH77Hw==",
+        "resolved": "1.3.11",
+        "contentHash": "FEQrm+wKtqMfxyjpiLagmF4IUTmesElXZH1N6rvdXwICNJKRNlKUIVI0D401pXQ82wKC0FlwuErJaClKgv2XGg==",
         "dependencies": {
-          "AllaganLib.Shared": "1.3.7",
+          "AllaganLib.Shared": "1.3.10",
           "Autofac": "8.4.0",
           "Autofac.Extensions.DependencyInjection": "10.0.0",
           "CSVFile": "3.2.0",
@@ -516,9 +516,9 @@
       "criticalcommonlib": {
         "type": "Project",
         "dependencies": {
-          "AllaganLib.GameSheets": "[1.3.10, )",
+          "AllaganLib.GameSheets": "[1.3.11, )",
           "AllaganLib.Shared": "[1.3.10, )",
-          "DalaMock.Host": "[3.0.10, )",
+          "DalaMock.Host": "[3.0.11, )",
           "Humanizer.Core": "[3.0.0-beta.54, )",
           "Microsoft.Extensions.Hosting": "[9.0.9, )",
           "NaturalSort.Extension": "[4.4.0, )",
