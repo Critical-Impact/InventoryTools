@@ -18,7 +18,7 @@ public class SourceTypeSelectorSetting : MultiChoiceColumnSetting<(ItemInfoType,
     private readonly ItemInfoRenderService _itemInfoRenderService;
     public override string EmptyText => "All";
 
-    public SourceTypeSelectorSetting(ILogger<MarketboardWorldSetting> logger, ImGuiService imGuiService, ItemInfoRenderService itemInfoRenderService) : base(logger, imGuiService)
+    public SourceTypeSelectorSetting(ILogger<SourceTypeSelectorSetting> logger, ImGuiService imGuiService, ItemInfoRenderService itemInfoRenderService) : base(logger, imGuiService)
     {
         _itemInfoRenderService = itemInfoRenderService;
     }

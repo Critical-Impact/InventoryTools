@@ -8,7 +8,7 @@ public static class ItemFlagsExtensions
     {
         return flags switch
         {
-            InventoryItem.ItemFlags.None => "None",
+            InventoryItem.ItemFlags.None => "Normal Quality",
             InventoryItem.ItemFlags.HighQuality => "High Quality",
             InventoryItem.ItemFlags.CompanyCrestApplied => "Company Crest Applied",
             InventoryItem.ItemFlags.Relic => "Relic",

@@ -9,6 +9,7 @@ using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using Dalamud.Bindings.ImGui;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using InventoryTools.Extensions;
 using InventoryTools.Logic.Columns;
 using InventoryTools.Logic.Editors;
@@ -65,6 +66,7 @@ public class ColumnConfiguration
     private Dictionary<string, uint>? _uintSettings;
     private Dictionary<string, ulong>? _ulongSettings;
     private Dictionary<string, List<ItemInfoType>>? _itemInfoTypes;
+    private Dictionary<string, List<InventoryItem.ItemFlags>>? _itemFlags;
     private Dictionary<string, List<InventorySearchScope>>? _inventorySearchScopes;
     private Dictionary<string, List<CharacterSearchScope>>? _characterSearchScopes;
     private Dictionary<string, List<int>>? _intListSettings;
@@ -158,6 +160,11 @@ public class ColumnConfiguration
         value = ItemInfoTypes.ContainsKey(key) ? ItemInfoTypes[key] : null;
     }
 
+    public void GetSetting(string key, out List<InventoryItem.ItemFlags>? value)
+    {
+        value = ItemFlags.ContainsKey(key) ? ItemFlags[key] : null;
+    }
+
     public void GetSetting(string key, out List<InventorySearchScope>? value)
     {
         value = InventorySearchScopes.ContainsKey(key) ? InventorySearchScopes[key] : null;
@@ -177,6 +184,18 @@ public class ColumnConfiguration
         else
         {
             ItemInfoTypes[key] = value;
+        }
+    }
+
+    public void SetSetting(string key, List<InventoryItem.ItemFlags>? value)
+    {
+        if (value == null)
+        {
+            ItemFlags.Remove(key);
+        }
+        else
+        {
+            ItemFlags[key] = value;
         }
     }
 
@@ -262,6 +281,12 @@ public class ColumnConfiguration
     {
         get => _itemInfoTypes ??= new Dictionary<string, List<ItemInfoType>>();
         set => _itemInfoTypes = value;
+    }
+
+    public Dictionary<string, List<InventoryItem.ItemFlags>> ItemFlags
+    {
+        get => _itemFlags ??= new Dictionary<string, List<InventoryItem.ItemFlags>>();
+        set => _itemFlags = value;
     }
 
     public Dictionary<string, List<int>> IntListSettings

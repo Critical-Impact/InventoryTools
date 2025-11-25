@@ -7,7 +7,7 @@ namespace InventoryTools.Logic.Settings;
 
 public class ContextMenuAddToCuratedListSetting : GenericBooleanSetting
 {
-    public ContextMenuAddToCuratedListSetting(ILogger<CraftOverlayRememberStateSetting> logger,
+    public ContextMenuAddToCuratedListSetting(ILogger<ContextMenuAddToCuratedListSetting> logger,
         ImGuiService imGuiService) : base("AddToCuratedListContextMenu",
         "Context Menu - Add to Curated List",
         "Add a submenu to add the item to a curated list?",

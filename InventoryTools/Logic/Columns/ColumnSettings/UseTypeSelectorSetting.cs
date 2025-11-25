@@ -18,7 +18,7 @@ public class UseTypeSelectorSetting : MultiChoiceColumnSetting<(ItemInfoType,str
     private readonly ItemInfoRenderService _itemInfoRenderService;
     public override string EmptyText => "All";
 
-    public UseTypeSelectorSetting(ILogger<MarketboardWorldSetting> logger, ImGuiService imGuiService, ItemInfoRenderService itemInfoRenderService) : base(logger, imGuiService)
+    public UseTypeSelectorSetting(ILogger<UseTypeSelectorSetting> logger, ImGuiService imGuiService, ItemInfoRenderService itemInfoRenderService) : base(logger, imGuiService)
     {
         _itemInfoRenderService = itemInfoRenderService;
     }

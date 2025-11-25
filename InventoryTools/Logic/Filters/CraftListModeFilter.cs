@@ -10,7 +10,7 @@ namespace InventoryTools.Logic.Filters;
 
 public class CraftListModeFilter : ChoiceFilter<CraftListMode>
 {
-    public CraftListModeFilter(ILogger<CraftListMode> logger, ImGuiService imGuiService) : base(logger, imGuiService)
+    public CraftListModeFilter(ILogger<CraftListModeFilter> logger, ImGuiService imGuiService) : base(logger, imGuiService)
     {
     }
 

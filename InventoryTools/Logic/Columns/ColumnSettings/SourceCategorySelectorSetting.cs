@@ -19,7 +19,7 @@ public class SourceCategorySelectorSetting : MultiChoiceColumnSetting<(ItemInfoR
     private readonly ItemInfoRenderService _itemInfoRenderService;
     public override string EmptyText => "All";
 
-    public SourceCategorySelectorSetting(ILogger<MarketboardWorldSetting> logger, ImGuiService imGuiService, ItemInfoRenderService itemInfoRenderService) : base(logger, imGuiService)
+    public SourceCategorySelectorSetting(ILogger<SourceCategorySelectorSetting> logger, ImGuiService imGuiService, ItemInfoRenderService itemInfoRenderService) : base(logger, imGuiService)
     {
         _itemInfoRenderService = itemInfoRenderService;
     }

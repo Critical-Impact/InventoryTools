@@ -17,11 +17,11 @@
       },
       "AllaganLib.Monitors": {
         "type": "Direct",
-        "requested": "[1.3.7, )",
-        "resolved": "1.3.7",
-        "contentHash": "RNRl9ZOm5wx7oVLpWRIKLXqvb9RyEK4QnQ37dmAiLwdhNuJd7grgYZJzaYLznPZma1MwHK4h8NuvtqXz4Klnbw==",
+        "requested": "[1.3.12, )",
+        "resolved": "1.3.12",
+        "contentHash": "q7GGmpCuCnjIBlnOwDduIPkH8zK/UebVT4RPEVLnAzO7slLnvN+ukdRX/GP9kMojh/s4l+AKsVQ+DlRZk0Sl+Q==",
         "dependencies": {
-          "AllaganLib.GameSheets": "1.3.7"
+          "AllaganLib.GameSheets": "1.3.12"
         }
       },
       "Autofac": {
@@ -170,10 +170,10 @@
       },
       "AllaganLib.GameSheets": {
         "type": "Transitive",
-        "resolved": "1.3.11",
-        "contentHash": "FEQrm+wKtqMfxyjpiLagmF4IUTmesElXZH1N6rvdXwICNJKRNlKUIVI0D401pXQ82wKC0FlwuErJaClKgv2XGg==",
+        "resolved": "1.3.12",
+        "contentHash": "oeyRQDoMaeedehSENoDmU4l8Wb2dkrV8VAhitj7AIkgwZnF6MTfR7BG/TCmUFZcuunLEGFn4WG/bFvxjSY4Vhw==",
         "dependencies": {
-          "AllaganLib.Shared": "1.3.10",
+          "AllaganLib.Shared": "1.3.12",
           "Autofac": "8.4.0",
           "Autofac.Extensions.DependencyInjection": "10.0.0",
           "CSVFile": "3.2.0",
@@ -182,8 +182,8 @@
       },
       "AllaganLib.Shared": {
         "type": "Transitive",
-        "resolved": "1.3.10",
-        "contentHash": "ng7ezQMqLNQXHAv31nC4jfgXWNWUKunMrFMJT8qGOtId21ahOu281CZqr+OcNvIZOcFiAsFEwCGoaFP+TlxqmA==",
+        "resolved": "1.3.12",
+        "contentHash": "iuWXu/YaN6It+DEW+6ASlwZunA2pE0I5W3qyIZpcfBrGvHVoOTsyPyosJBQExMWnvyrSIW+7myhzVxtLjOWRew==",
         "dependencies": {
           "Autofac": "8.4.0",
           "Microsoft.Extensions.Hosting": "9.0.8",
@@ -516,8 +516,8 @@
       "criticalcommonlib": {
         "type": "Project",
         "dependencies": {
-          "AllaganLib.GameSheets": "[1.3.11, )",
-          "AllaganLib.Shared": "[1.3.10, )",
+          "AllaganLib.GameSheets": "[1.3.12, )",
+          "AllaganLib.Shared": "[1.3.12, )",
           "DalaMock.Host": "[3.0.11, )",
           "Humanizer.Core": "[3.0.0-beta.54, )",
           "Microsoft.Extensions.Hosting": "[9.0.9, )",

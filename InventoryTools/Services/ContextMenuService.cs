@@ -33,6 +33,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
     private readonly ItemSheet _itemSheet;
     private readonly IGameInterface _gameInterface;
     private readonly ContextMenuAddToCuratedListSetting _curatedListSetting;
+    private readonly ContextMenuAddToFavouritesSetting _addToFavouritesSetting;
     public const int SatisfactionSupplyItemIdx       = 84;
     public const int SatisfactionSupplyItem1Id       = 128 + 1 * 60;
     public const int SatisfactionSupplyItem2Id       = 128 + 2 * 60;
@@ -52,7 +53,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
     public const int GrandCompanySupplyListContextItemId            = 84;
     public const int GrandCompanyExchangeContextItemId            = 84;
 
-    public ContextMenuService(ILogger<ContextMenuService> logger, IListService listService, IContextMenu contextMenu, IGameGui gameGui, MediatorService mediatorService, InventoryToolsConfiguration configuration, ItemSheet itemSheet, IGameInterface gameInterface, ContextMenuAddToCuratedListSetting curatedListSetting) : base(logger, mediatorService)
+    public ContextMenuService(ILogger<ContextMenuService> logger, IListService listService, IContextMenu contextMenu, IGameGui gameGui, MediatorService mediatorService, InventoryToolsConfiguration configuration, ItemSheet itemSheet, IGameInterface gameInterface, ContextMenuAddToCuratedListSetting curatedListSetting, ContextMenuAddToFavouritesSetting addToFavouritesSetting) : base(logger, mediatorService)
     {
         ContextMenu = contextMenu;
         _listService = listService;
@@ -61,6 +62,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
         _itemSheet = itemSheet;
         _gameInterface = gameInterface;
         _curatedListSetting = curatedListSetting;
+        _addToFavouritesSetting = addToFavouritesSetting;
     }
 
     private void MenuOpened(IMenuOpenedArgs args)
@@ -125,6 +127,14 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
                 args.AddMenuItem(menuItem);
             }
 
+            if (_addToFavouritesSetting.CurrentValue(_configuration))
+            {
+                var menuItem = new MenuItem();
+                menuItem.Name = _configuration.IsFavouriteItem(itemId.Value) ? "Remove from Favourites" : "Add to Favourites";
+                menuItem.PrefixChar = 'A';
+                menuItem.OnClicked += _ => _configuration.ToggleFavouriteItem(itemId.Value);
+                args.AddMenuItem(menuItem);
+            }
 
             if (_configuration.OpenCraftingLogContextMenu)
             {

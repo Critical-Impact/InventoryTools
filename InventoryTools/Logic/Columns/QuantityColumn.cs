@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using CharacterTools.Logic.Editors;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
@@ -18,12 +19,16 @@ namespace InventoryTools.Logic.Columns
         private readonly IInventoryMonitor _inventoryMonitor;
         private readonly CharacterScopePickerColumnSetting _scopePickerColumnSetting;
         private readonly CharacterScopeCalculator _scopeCalculator;
+        private readonly QualitySelectorSetting _qualitySelectorSetting;
 
-        public QuantityColumn(ILogger<QuantityColumn> logger, ImGuiService imGuiService, IInventoryMonitor inventoryMonitor, CharacterScopePickerColumnSetting scopePickerColumnSetting, CharacterScopeCalculator scopeCalculator) : base(logger, imGuiService)
+        public QuantityColumn(ILogger<QuantityColumn> logger, ImGuiService imGuiService, IInventoryMonitor inventoryMonitor, CharacterScopePickerColumnSetting scopePickerColumnSetting, CharacterScopeCalculator scopeCalculator, QualitySelectorSetting qualitySelectorSetting) : base(logger, imGuiService)
         {
             _inventoryMonitor = inventoryMonitor;
             _scopePickerColumnSetting = scopePickerColumnSetting;
             _scopeCalculator = scopeCalculator;
+            _qualitySelectorSetting = qualitySelectorSetting;
+            this.Settings.Add(qualitySelectorSetting);
+            this.FilterSettings.Add(qualitySelectorSetting);
         }
         public override ColumnCategory ColumnCategory => ColumnCategory.Inventory;
         public override int? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
@@ -37,26 +42,42 @@ namespace InventoryTools.Logic.Columns
                 return (int)searchResult.InventoryItem.Quantity;
             }
 
+            var qualitySetting = _qualitySelectorSetting.CurrentValue(columnConfiguration)?.Select(c => c.Item1).ToList() ?? null;
+
             var scopes = _scopePickerColumnSetting.CurrentValue(columnConfiguration);
             if (scopes != null)
             {
-                return (int)_scopeCalculator.Count(scopes, searchResult.ItemId, InventoryItem.ItemFlags.None) + (int)_scopeCalculator.Count(scopes, searchResult.ItemId, InventoryItem.ItemFlags.HighQuality);
+                if (qualitySetting != null)
+                {
+                    return (int)qualitySetting.Sum(c => _scopeCalculator.Count(scopes, searchResult.ItemId, c));
+                }
+                else
+                {
+                    return (int)_scopeCalculator.Count(scopes, searchResult.ItemId) + (int)_scopeCalculator.Count(scopes, searchResult.ItemId, InventoryItem.ItemFlags.HighQuality);
+                }
             }
             else
             {
                 var qty = 0;
-                if (_inventoryMonitor.ItemCounts.ContainsKey((searchResult.Item.RowId,
+                if ((qualitySetting == null || qualitySetting.Contains(InventoryItem.ItemFlags.None)) && _inventoryMonitor.ItemCounts.ContainsKey((searchResult.Item.RowId,
                         FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None)))
                 {
                     qty += _inventoryMonitor.ItemCounts[(searchResult.Item.RowId,
                         FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.None)];
                 }
 
-                if (_inventoryMonitor.ItemCounts.ContainsKey((searchResult.Item.RowId,
+                if ((qualitySetting == null || qualitySetting.Contains(InventoryItem.ItemFlags.HighQuality)) && _inventoryMonitor.ItemCounts.ContainsKey((searchResult.Item.RowId,
                         FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HighQuality)))
                 {
                     qty += _inventoryMonitor.ItemCounts[(searchResult.Item.RowId,
                         FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HighQuality)];
+                }
+
+                if ((qualitySetting == null || qualitySetting.Contains(InventoryItem.ItemFlags.Collectable)) && _inventoryMonitor.ItemCounts.ContainsKey((searchResult.Item.RowId,
+                        FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.Collectable)))
+                {
+                    qty += _inventoryMonitor.ItemCounts[(searchResult.Item.RowId,
+                        FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.Collectable)];
                 }
 
                 return qty;

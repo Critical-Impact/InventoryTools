@@ -8,6 +8,16 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [13.1.9] - 2025-11-25
+
+### Fixed
+- Shops that yield more than 1 item when being purchased will be factored into craft lists correctly
+- Fixed certain shops not highlighting correctly when there was more than 1 shop listing available
+
+### Added
+- The total quantity available column can now be configured to provide a total of any combination of NQ/HQ/Collectible items
+- Added a "Add to Favourites" context menu setting
+
 ## [13.1.8] - 2025-11-17
 
 ### Fixed

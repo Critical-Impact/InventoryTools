@@ -69,6 +69,10 @@ namespace InventoryTools.Logic.Columns
                                 }
 
                                 var number = searchResult.CraftItem.GetRoundedQuantity((uint)parsedNumber);
+                                if (parsedNumber != 0 && number == 0)
+                                {
+                                    number = searchResult.CraftItem.Yield;
+                                }
                                 if (number != searchResult.CraftItem.QuantityRequired &&
                                     configuration.CraftList.BeenGenerated && configuration.CraftList.BeenUpdated)
                                 {
