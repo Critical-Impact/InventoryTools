@@ -44,6 +44,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
     public const int ItemSearchContextItemId         = 6096;
     public const int ChatLogContextMenuType          = ChatLogContextItemId + 8;
     public const int ChatLogContextItemId            = 2392;
+    public const int AgentMiragePrismPrismItemDetailId = 84;
 
     public const int SubmarinePartsMenuContextItemId            = 84;
     public const int ShopExchangeItemContextItemId            = 84;
@@ -209,6 +210,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
                 "RecipeProductList" => GetObjectItemId(AgentById(AgentId.RecipeItemContext), AgentItemContextItemId),
                 "GatheringNote" => GetObjectItemId("GatheringNote", GatheringNoteContextItemId),
                 "ChatLog" => GetObjectItemId("ChatLog", ChatLogContextItemId),
+                "MiragePrismPrismBoxCrystallize" => GetObjectItemId(AgentById(AgentId.MiragePrismPrismItemDetail), AgentMiragePrismPrismItemDetailId),
                 _ => null,
             };
         }

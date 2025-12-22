@@ -5,6 +5,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Dalamud.Interface.ImGuiSeStringRenderer;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Plugin.Services;
@@ -78,6 +79,12 @@ namespace InventoryToolsTesting.Services
         }
 
         public Task<IDalamudTextureWrap> CreateFromClipboardAsync(string? debugName = null, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return null!;
+        }
+
+        public IDalamudTextureWrap CreateTextureFromSeString(ReadOnlySpan<byte> text,
+            scoped in SeStringDrawParams drawParams = new SeStringDrawParams(), string? debugName = null)
         {
             return null!;
         }

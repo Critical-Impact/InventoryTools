@@ -9,7 +9,8 @@
     "AllaganLib.GameSheets": "../AllaganLib/AllaganLib.GameSheets/AllaganLib.GameSheets.csproj",
     "AllaganLib.Interface": "../AllaganLib/AllaganLib.Interface/AllaganLib.Interface.csproj",
     "AllaganLib.Shared": "../AllaganLib/AllaganLib.Shared/AllaganLib.Shared.csproj",
-    "AllaganLib.Monitors": "../AllaganLib/AllaganLib.Monitors/AllaganLib.Monitors.csproj"
+    "AllaganLib.Monitors": "../AllaganLib/AllaganLib.Monitors/AllaganLib.Monitors.csproj",
+    "LuminaSupplemental.Excel": "../LuminaSupplemental/src/LuminaSupplemental.Excel/LuminaSupplemental.Excel.csproj"
   },
   "removeProjects": true
 }

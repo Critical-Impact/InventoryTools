@@ -32,7 +32,7 @@ public class ItemCashShopSourceRenderer : ItemInfoRenderer<ItemCashShopSource>
         ImGui.TextUnformatted($"Price(USD): {priceUsd}");
         if (asSource.FittingShopItemSetRow?.Items.Count > 1)
         {
-            ImGui.TextUnformatted($"Set: {asSource.FittingShopItemSetRow.Base.Unknown6.ExtractText()}");
+            ImGui.TextUnformatted($"Set: {asSource.FittingShopItemSetRow.Base.Name.ExtractText()}");
             ImGui.TextUnformatted($"Contains:");
             using (ImRaii.PushIndent())
             {
@@ -47,7 +47,7 @@ public class ItemCashShopSourceRenderer : ItemInfoRenderer<ItemCashShopSource>
     public override Func<ItemSource, string> GetName => source =>
     {
         var asSource = AsSource(source);
-        return (asSource.FittingShopItemSetRow?.Base.Unknown6.ExtractText() ?? "Not in a set");
+        return (asSource.FittingShopItemSetRow?.Base.Name.ExtractText() ?? "Not in a set");
     };
 
     public override Func<ItemSource, int> GetIcon => source => Icons.BagStar;
@@ -59,7 +59,7 @@ public class ItemCashShopSourceRenderer : ItemInfoRenderer<ItemCashShopSource>
         var description = $"Price(USD): {priceUsd}";
         if (asSource.FittingShopItemSetRow != null)
         {
-            description += $" (Part of {asSource.FittingShopItemSetRow.Base.Unknown6.ExtractText()} set)";
+            description += $" (Part of {asSource.FittingShopItemSetRow.Base.Name.ExtractText()} set)";
             description += $" (Contains {String.Join(", ", asSource.FittingShopItemSetRow.Items.Select(c => c.NameString))}";
         }
         return description;

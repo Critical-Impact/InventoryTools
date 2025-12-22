@@ -1,4 +1,4 @@
-<Project Sdk="Dalamud.NET.Sdk/13.1.0">
+<Project Sdk="Dalamud.NET.Sdk/14.0.1">
     <PropertyGroup>
         <Use_DalamudPackager>false</Use_DalamudPackager>
         <OutputType>Exe</OutputType>
@@ -60,10 +60,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Humanizer.Core" Version="3.0.0-beta.54" />
-      <PackageReference Include="JunitXml.TestLogger" Version="7.0.1" />
-      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.9" />
-      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+      <PackageReference Include="Humanizer.Core" Version="3.0.1" />
+      <PackageReference Include="JunitXml.TestLogger" Version="7.1.0" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.1" />
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
       <PackageReference Include="NUnit" Version="3.13.3" />
       <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
       <PackageReference Update="DotNet.ReproducibleBuilds" Version="1.2.39" />

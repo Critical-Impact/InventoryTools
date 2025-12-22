@@ -8,6 +8,16 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [14.0.0] - 2025-12-22
+
+### Added
+- Support for 7.4
+- Initial data for 7.4
+- Pilgrims Traverse loot is now available as a source
+
+### Changed
+- The mob tracker was reworked to use the games object table
+
 ## [13.1.9] - 2025-11-25
 
 ### Fixed
