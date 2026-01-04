@@ -10,6 +10,7 @@ using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
 using InventoryTools.Logic.Columns.Abstract;
+using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Ui.Widgets;
 using Lumina.Excel;
@@ -30,11 +31,36 @@ public class DesynthesisSkillDeltaColumn : Column<(decimal, DesynthResult)?>
     private readonly IPlayerState _playerState;
     private readonly ExcelSheet<ClassJob> _classJobSheet;
     private readonly uint _maxDesynthLevel = 590;
+    private Dictionary<uint, decimal> _desynthLevels = new Dictionary<uint, decimal>();
+    private DateTime? _lastUpdate;
 
     public DesynthesisSkillDeltaColumn(ILogger<DesynthesisSkillDeltaColumn> logger, ImGuiService imGuiService, IPlayerState playerState, ExcelSheet<ClassJob> classJobSheet) : base(logger, imGuiService)
     {
         _playerState = playerState;
         _classJobSheet = classJobSheet;
+    }
+
+    private void UpdateDesynthLevels()
+    {
+        if (_lastUpdate == null || _lastUpdate.Value.AddSeconds(5) <= DateTime.Now)
+        {
+            _lastUpdate = DateTime.Now;
+            UpdateDesynthLevels();
+            if (!_playerState.IsLoaded)
+            {
+                return;
+            }
+
+            foreach (var classJob in _classJobSheet.Where(c => c.DohDolJobIndex != -1))
+            {
+                var desynthesisLevel = (decimal)_playerState.GetDesynthesisLevel(classJob);
+                if (!_desynthLevels.TryGetValue(classJob.RowId, out var value) || desynthesisLevel != value)
+                {
+                    value = desynthesisLevel;
+                    _desynthLevels[classJob.RowId] = value;
+                }
+            }
+        }
     }
 
     public override ColumnCategory ColumnCategory => ColumnCategory.Desynthesis;
@@ -155,7 +181,9 @@ public class DesynthesisSkillDeltaColumn : Column<(decimal, DesynthResult)?>
             return null;
         }
 
-        var desynthesisLevel = _playerState.GetDesynthesisLevel(_classJobSheet.GetRow(searchResult.Item.Base.ClassJobRepair.RowId));
+        UpdateDesynthLevels();
+
+        var desynthesisLevel = _desynthLevels.GetValueOrDefault(searchResult.Item.Base.ClassJobRepair.RowId, 0);
 
         var result = DesynthResult.Optimal;
 
@@ -179,4 +207,5 @@ public class DesynthesisSkillDeltaColumn : Column<(decimal, DesynthResult)?>
 
     public override string HelpText { get; set; } =
         "Shows the difference between the iLvl of the item and your desynthesis skill and if desynthesis is optimal";
+
 }
