@@ -43,7 +43,7 @@ namespace InventoryTools.Ui
             if (SubmarineExploration != null)
             {
                 Key = "sepid_" + submarineExplorationPointId;
-                WindowName = "" + SubmarineExploration.Base.Location.ExtractText();
+                WindowName = "" + SubmarineExploration.Base.Destination.ExtractText();
                 _drops = SubmarineExploration.DropItems;
             }
             else
@@ -69,8 +69,8 @@ namespace InventoryTools.Ui
             }
             else
             {
-                ImGui.TextUnformatted(SubmarineExploration.Base.Location.ExtractText());
-                ImGui.TextUnformatted("Unlocked Via: " + SubmarineExploration.Unlock?.Base.Location.ExtractText() ?? "N/A");
+                ImGui.TextUnformatted(SubmarineExploration.Base.Destination.ExtractText());
+                ImGui.TextUnformatted("Unlocked Via: " + SubmarineExploration.Unlock?.Base.Destination.ExtractText() ?? "N/A");
                 ImGui.TextUnformatted("Rank Required: " + SubmarineExploration.Base.RankReq);
                 ;
                 ImGui.Image(ImGuiService.GetIconTexture(Icons.AirshipIcon).Handle, new Vector2(100, 100) * ImGui.GetIO().FontGlobalScale);

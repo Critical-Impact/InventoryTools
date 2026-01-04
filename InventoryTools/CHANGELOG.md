@@ -8,6 +8,19 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [14.0.1] - 2026-01-04
+
+### Added
+- Added the desynthesis skill delta column
+- Added the is glamour ready set column
+- Added the is glamour ready set item column
+
+### Fixed
+- Fixed error being thrown if a character was deleted but still referenced by another character in the owner column
+- Fixed submarine locations being shown as the letter instead of the name and letter
+- Context menu actions taken at the marketboard should provide the correct item instead of gil
+
+
 ## [14.0.0] - 2025-12-22
 
 ### Added

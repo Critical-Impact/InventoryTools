@@ -32,10 +32,10 @@ public class InventoryToolsPluginMock : InventoryToolsPlugin
         ICondition condition, IDataManager dataManager, IFramework framework, IGameGui gameGui,
         IGameInteropProvider gameInteropProvider, IKeyState keyState, IObjectTable objectTable, ITargetManager targetManager,
         ITextureProvider textureProvider, IToastGui toastGui,
-        IContextMenu contextMenu, ITitleScreenMenu titleScreenMenu, IGameInventory gameInventory) : base(
+        IContextMenu contextMenu, ITitleScreenMenu titleScreenMenu, IGameInventory gameInventory, IPlayerState playerState) : base(
         pluginInterface, pluginLog, addonLifecycle, chatGui, clientState, commandManager, condition, dataManager,
         framework, gameGui, gameInteropProvider, keyState, objectTable, targetManager, textureProvider,
-        toastGui, contextMenu, titleScreenMenu, gameInventory)
+        toastGui, contextMenu, titleScreenMenu, gameInventory, playerState)
     {
     }
 

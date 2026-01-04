@@ -5,6 +5,7 @@ public enum ColumnCategory
     Unsorted,
     Basic,
     Stats,
+    Desynthesis,
     Inventory,
     Crafting,
     Market,

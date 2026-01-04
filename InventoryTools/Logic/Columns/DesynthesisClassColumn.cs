@@ -10,7 +10,7 @@ public class DesynthesisClassColumn : TextColumn
     public DesynthesisClassColumn(ILogger<DesynthesisClassColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
     {
     }
-    public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
+    public override ColumnCategory ColumnCategory => ColumnCategory.Desynthesis;
     public override string? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
     {
         if (!searchResult.Item.CanBeDesynthed || searchResult.Item.Base.ClassJobRepair.RowId == 0)

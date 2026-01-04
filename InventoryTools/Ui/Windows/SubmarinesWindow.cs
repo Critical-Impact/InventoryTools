@@ -59,7 +59,7 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationRow>, IMe
                         return exes;
                     }
 
-                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.Base.Location.ExtractText()) : exes.OrderByDescending(c => c.Base.Location.ExtractText());
+                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.Base.Destination.ExtractText()) : exes.OrderByDescending(c => c.Base.Destination.ExtractText());
                 },
                 Filter = (s, exes) =>
                 {
@@ -67,11 +67,11 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationRow>, IMe
                     {
                         return exes;
                     }
-                    return s == "" ? exes : exes.Where(c => c.Base.Location.ExtractText().ToLower().PassesFilter(s.ToLower()));
+                    return s == "" ? exes : exes.Where(c => c.Base.Destination.ExtractText().ToLower().PassesFilter(s.ToLower()));
                 },
                 Draw = (ex, tabId) =>
                 {
-                    ImGui.TextUnformatted(ex.Base.Location.ExtractText());
+                    ImGui.TextUnformatted(ex.Base.Destination.ExtractText());
                 }
             },
             new("Unlock Zone", 200, ImGuiTableColumnFlags.WidthFixed)
@@ -83,7 +83,7 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationRow>, IMe
                         return exes;
                     }
 
-                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.Unlock?.Base.Location.ExtractText() ?? "") : exes.OrderByDescending(c => c.Unlock?.Base.Location.ExtractText() ?? "");
+                    return specs == ImGuiSortDirection.Ascending ? exes.OrderBy(c => c.Unlock?.Base.Destination.ExtractText() ?? "") : exes.OrderByDescending(c => c.Unlock?.Base.Destination.ExtractText() ?? "");
                 },
                 Filter = (s, exes) =>
                 {
@@ -91,13 +91,13 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationRow>, IMe
                     {
                         return exes;
                     }
-                    return s == "" ? exes : exes.Where(c => (c.Unlock?.Base.Location.ExtractText() ?? "").ToLower().PassesFilter(s.ToLower()));
+                    return s == "" ? exes : exes.Where(c => (c.Unlock?.Base.Destination.ExtractText() ?? "").ToLower().PassesFilter(s.ToLower()));
                 },
                 Draw = (ex, tabId) =>
                 {
                     if (ex.Unlock != null)
                     {
-                        ImGui.TextUnformatted((ex.Unlock?.Base.Location.ExtractText() ?? "").ToString());
+                        ImGui.TextUnformatted((ex.Unlock?.Base.Destination.ExtractText() ?? "").ToString());
                     }
                 }
             },
@@ -250,12 +250,12 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationRow>, IMe
         {
             if (tabId == 0)
             {
-                var duties = _submarineExplorationSheet.Where(c => c.Base.Location.ExtractText() != "").ToList();
+                var duties = _submarineExplorationSheet.Where(c => c.Base.Destination.ExtractText() != "").ToList();
                 _items.Add(tabId, duties);
             }
             else
             {
-                var duties = _submarineExplorationSheet.Where(c => c.Base.Location.ExtractText() != "" && c.Base.Map.RowId == tabId).ToList();
+                var duties = _submarineExplorationSheet.Where(c => c.Base.Destination.ExtractText() != "" && c.Base.Map.RowId == tabId).ToList();
                 _items.Add(tabId, duties);
             }
         }

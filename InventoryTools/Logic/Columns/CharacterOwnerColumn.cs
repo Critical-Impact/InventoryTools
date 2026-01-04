@@ -98,7 +98,12 @@ public class CharacterOwnerColumn : TextColumn
             }
         }
 
-        return characterOwners[item.RetainerId];
+        if (characterOwners.TryGetValue(item.RetainerId, out var currentValue))
+        {
+            return currentValue;
+        }
+
+        return string.Empty;
     }
 
     public override void Dispose()

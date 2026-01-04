@@ -9,7 +9,7 @@ namespace InventoryTools.Logic.Columns
         public CanBeDesynthedColumn(ILogger<CanBeDesynthedColumn> logger, ImGuiService imGuiService) : base(logger, imGuiService)
         {
         }
-        public override ColumnCategory ColumnCategory => ColumnCategory.Basic;
+        public override ColumnCategory ColumnCategory => ColumnCategory.Desynthesis;
 
         public override bool? CurrentValue(ColumnConfiguration columnConfiguration, SearchResult searchResult)
         {

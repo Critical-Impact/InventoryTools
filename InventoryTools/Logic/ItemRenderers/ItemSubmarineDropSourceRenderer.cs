@@ -40,7 +40,7 @@ public class ItemSubmarineDropSourceRenderer : ItemInfoRenderer<ItemSubmarineDro
         foreach (var source in submarineDropSources)
         {
             ImGui.Text(
-                $"{source.SubmarineExploration.Base.Location.ExtractText()}");
+                $"{source.SubmarineExploration.Base.Destination.ExtractText()}");
         }
     };
 
@@ -48,12 +48,12 @@ public class ItemSubmarineDropSourceRenderer : ItemInfoRenderer<ItemSubmarineDro
     {
         var submarineDropSource = AsSource(source);
         ImGui.Text(
-            $"{submarineDropSource.SubmarineExploration.Base.Location.ExtractText()}");
+            $"{submarineDropSource.SubmarineExploration.Base.Destination.ExtractText()}");
     };
     public override Func<ItemSource, string> GetName => source =>
     {
         var submarineDropSource = AsSource(source);
-        return submarineDropSource.SubmarineExploration.Base.Location.ExtractText();
+        return submarineDropSource.SubmarineExploration.Base.Destination.ExtractText();
     };
 
     public override Func<ItemSource, int> GetIcon => source =>
@@ -64,6 +64,6 @@ public class ItemSubmarineDropSourceRenderer : ItemInfoRenderer<ItemSubmarineDro
     public override Func<ItemSource, string> GetDescription => source =>
     {
         var asSource = AsSource(source);
-        return $"{asSource.SubmarineExploration.Base.Location.ExtractText()}";
+        return $"{asSource.SubmarineExploration.Base.Destination.ExtractText()}";
     };
 }

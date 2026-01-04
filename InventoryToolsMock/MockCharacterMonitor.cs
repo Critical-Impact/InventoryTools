@@ -58,7 +58,6 @@ public class MockCharacterMonitor : ICharacterMonitor
                 character.CharacterId = LocalContentId;
                 _characters[character.CharacterId] = character;
             }
-            //character.UpdateFromCurrentPlayer(Service.ClientState.LocalPlayer);
             _framework.RunOnFrameworkThread(() => { OnCharacterUpdated?.Invoke(character); });
         }
         else

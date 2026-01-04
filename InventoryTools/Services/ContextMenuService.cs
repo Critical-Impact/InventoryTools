@@ -41,7 +41,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
     public const int RecipeNoteContextItemId         = 920;
     public const int AgentItemContextItemId          = 40;
     public const int GatheringNoteContextItemId      = 160;
-    public const int ItemSearchContextItemId         = 6096;
+    public const int ItemSearchContextItemId         = 6192;
     public const int ChatLogContextMenuType          = ChatLogContextItemId + 8;
     public const int ChatLogContextItemId            = 2392;
     public const int AgentMiragePrismPrismItemDetailId = 84;
