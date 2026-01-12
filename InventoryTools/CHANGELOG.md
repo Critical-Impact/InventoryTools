@@ -8,6 +8,17 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [14.0.2] - 2026-01-12
+
+### Added
+- Added a 'More Information' context menu setting for NPCs and Monsters
+- Added a 'Shared Models' panel to the NPC and Monster windows
+- Added 'Amount Owned' to the tooltip inside the imgui windows when hovering items
+- More spawn data added thanks to Tracky(props to Infi)
+
+### Fixed
+- Certain items were shown as being available on the market even though they aren't
+
 ## [14.0.1] - 2026-01-04
 
 ### Added
@@ -19,7 +30,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.h
 - Fixed error being thrown if a character was deleted but still referenced by another character in the owner column
 - Fixed submarine locations being shown as the letter instead of the name and letter
 - Context menu actions taken at the marketboard should provide the correct item instead of gil
-
 
 ## [14.0.0] - 2025-12-22
 

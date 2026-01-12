@@ -42,7 +42,7 @@ public class CraftMarketPriceColumn : GilColumn
 
         ImGui.TableNextColumn();
         if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;
-        if (!searchResult.CraftItem.Item.CanBeTraded) return new List<MessageBase>();
+        if (!searchResult.CraftItem.Item.CanBePlacedOnMarket) return new List<MessageBase>();
         if (searchResult.CraftItem.MarketTotalPrice != null && searchResult.CraftItem.MarketUnitPrice != null)
         {
             ImGui.Text($"{searchResult.CraftItem.MarketUnitPrice.Value:n0}" + SeIconChar.Gil.ToIconString() + " (" + $"{searchResult.CraftItem.MarketTotalPrice.Value:n0}" + SeIconChar.Gil.ToIconString() + ")");

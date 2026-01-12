@@ -18,12 +18,12 @@ namespace InventoryTools.Logic.Settings
         }
 
         public override string Key { get; set; } = "moreInfoContextMenu";
-        public override string Name { get; set; } = "Context Menu - More Information";
+        public override string Name { get; set; } = "Context Menu - More Information (Items)";
 
         public override string WizardName { get; } = "More Information";
 
         public override string HelpText { get; set; } =
-            "Add the more information item to the right click/context menu for items?";
+            "Add the more information menu item to the right click/context menu for items?";
 
         public override SettingCategory SettingCategory { get; set; } = SettingCategory.ContextMenu;
         public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;

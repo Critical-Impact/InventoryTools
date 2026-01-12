@@ -7,6 +7,8 @@ using AllaganLib.GameSheets.Sheets;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
+using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Gui.ContextMenu;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -32,8 +34,11 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
     private readonly InventoryToolsConfiguration _configuration;
     private readonly ItemSheet _itemSheet;
     private readonly IGameInterface _gameInterface;
+    private readonly ITargetManager _targetManager;
     private readonly ContextMenuAddToCuratedListSetting _curatedListSetting;
     private readonly ContextMenuAddToFavouritesSetting _addToFavouritesSetting;
+    private readonly ContextMenuMoreInformationNpcsSetting _moreInformationNpcsSetting;
+    private readonly ContextMenuMoreInformationMonstersSetting _moreInformationMonstersSetting;
     public const int SatisfactionSupplyItemIdx       = 84;
     public const int SatisfactionSupplyItem1Id       = 128 + 1 * 60;
     public const int SatisfactionSupplyItem2Id       = 128 + 2 * 60;
@@ -54,7 +59,19 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
     public const int GrandCompanySupplyListContextItemId            = 84;
     public const int GrandCompanyExchangeContextItemId            = 84;
 
-    public ContextMenuService(ILogger<ContextMenuService> logger, IListService listService, IContextMenu contextMenu, IGameGui gameGui, MediatorService mediatorService, InventoryToolsConfiguration configuration, ItemSheet itemSheet, IGameInterface gameInterface, ContextMenuAddToCuratedListSetting curatedListSetting, ContextMenuAddToFavouritesSetting addToFavouritesSetting) : base(logger, mediatorService)
+    public ContextMenuService(ILogger<ContextMenuService> logger,
+        IListService listService,
+        IContextMenu contextMenu,
+        IGameGui gameGui,
+        MediatorService mediatorService,
+        InventoryToolsConfiguration configuration,
+        ItemSheet itemSheet,
+        IGameInterface gameInterface,
+        ITargetManager targetManager,
+        ContextMenuAddToCuratedListSetting curatedListSetting,
+        ContextMenuAddToFavouritesSetting addToFavouritesSetting,
+        ContextMenuMoreInformationNpcsSetting moreInformationNpcsSetting,
+        ContextMenuMoreInformationMonstersSetting moreInformationMonstersSetting) : base(logger, mediatorService)
     {
         ContextMenu = contextMenu;
         _listService = listService;
@@ -62,18 +79,44 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
         _configuration = configuration;
         _itemSheet = itemSheet;
         _gameInterface = gameInterface;
+        _targetManager = targetManager;
         _curatedListSetting = curatedListSetting;
         _addToFavouritesSetting = addToFavouritesSetting;
+        _moreInformationNpcsSetting = moreInformationNpcsSetting;
+        _moreInformationMonstersSetting = moreInformationMonstersSetting;
     }
 
     private void MenuOpened(IMenuOpenedArgs args)
     {
-        uint? itemId;
-        Logger.LogDebug($"{args.AddonName}");
-        Logger.LogDebug($"{(ulong)args.AgentPtr:X}");
+        Logger.LogDebug("MenuType: {MenuType}" ,((int)args.MenuType).ToString());
+        uint? itemId = null;
+        uint? bNpcNameId = null;
+        uint? eNpcResidentId = null;
+        Logger.LogDebug("AddonName:{AddonName} ", args.AddonName);
+        Logger.LogDebug("AgentPtr: {AgentPtr}", ((ulong)args.AgentPtr).ToString("X"));
+        if (args.Target is MenuTargetDefault targetDefault)
+        {
+            var targetObject = targetDefault.TargetObject;
+            if (targetObject is INpc npc)
+            {
+                Logger.LogDebug("BaseId: {BaseID}", npc.BaseId );
+                eNpcResidentId = npc.BaseId;
+            }
+            else if (targetObject is IBattleNpc battleNpc)
+            {
+                Logger.LogDebug("BaseId: {BaseID}", battleNpc.BaseId );
+                Logger.LogDebug("NameId: {NameId}", battleNpc.NameId );
+                bNpcNameId = battleNpc.NameId;
+            }
+            else if(targetObject != null)
+            {
+                Logger.LogDebug("Type: {Type}", targetObject.BaseId );
+                Logger.LogDebug("Type: {Type}", targetObject.GetType() );
+            }
+        }
         itemId = GetGameObjectItemId(args);
         itemId %= 500000;
-        Logger.LogDebug($"{itemId}");
+        Logger.LogDebug("ItemId: {ItemId}", itemId);
 
         if (itemId != null)
         {
@@ -174,9 +217,30 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
                     args.AddMenuItem(menuItem);
                 }
             }
-
-
         }
+        else if (eNpcResidentId != null)
+        {
+            if (_moreInformationNpcsSetting.CurrentValue(_configuration))
+            {
+                var menuItem = new MenuItem();
+                menuItem.Name = "More Information";
+                menuItem.PrefixChar = 'A';
+                menuItem.OnClicked += _ => MediatorService.Publish(new OpenUintWindowMessage(typeof(ENpcWindow), eNpcResidentId.Value));
+                args.AddMenuItem(menuItem);
+            }
+        }
+        else if (bNpcNameId != null)
+        {
+            if (_moreInformationMonstersSetting.CurrentValue(_configuration))
+            {
+                var menuItem = new MenuItem();
+                menuItem.Name = "More Information";
+                menuItem.PrefixChar = 'A';
+                menuItem.OnClicked += _ => MediatorService.Publish(new OpenUintWindowMessage(typeof(BNpcWindow), bNpcNameId.Value));
+                args.AddMenuItem(menuItem);
+            }
+        }
+
     }
 
     private uint? GetGameObjectItemId(IMenuOpenedArgs args)

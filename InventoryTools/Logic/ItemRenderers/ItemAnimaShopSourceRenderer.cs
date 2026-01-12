@@ -68,44 +68,8 @@ public class ItemAnimaShopSourceRenderer : ItemInfoRenderer<ItemAnimaShopSource>
 
         ImGui.Text($"Shop: {asSource.Shop.Name}");
 
-        ImGui.Text("Rewards:");
-        using (ImRaii.PushIndent())
-        {
-            foreach (var reward in asSource.ShopListing.Rewards)
-            {
-                var itemName = reward.Item.NameString;
-                var count = reward.Count;
-                var costString = $"{itemName} x {count}";
-                ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(reward.Item.Icon)).GetWrapOrEmpty().Handle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
-                ImGui.SameLine();
-                ImGui.Text(costString);
-                if (reward.IsHq == true)
-                {
-                    ImGui.SameLine();
-                    ImGui.Image(_textureProvider.GetPluginImageTexture(_pluginInterface, "hq").GetWrapOrEmpty().Handle,
-                        new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
-                }
-            }
-        }
-        ImGui.Text("Costs:");
-        using (ImRaii.PushIndent())
-        {
-            foreach (var cost in asSource.ShopListing.Costs)
-            {
-                var itemName = cost.Item.NameString;
-                var count = cost.Count;
-                var costString = $"{itemName} x {count}";
-                ImGui.Image(_textureProvider.GetFromGameIcon(new GameIconLookup(cost.Item.Icon)).GetWrapOrEmpty().Handle, new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
-                ImGui.SameLine();
-                ImGui.Text(costString);
-                if (cost.IsHq == true)
-                {
-                    ImGui.SameLine();
-                    ImGui.Image(_textureProvider.GetPluginImageTexture(_pluginInterface, "hq").GetWrapOrEmpty().Handle,
-                        new Vector2(18, 18) * ImGui.GetIO().FontGlobalScale);
-                }
-            }
-        }
+        this.DrawItems("Rewards:", asSource.RewardItems);
+        this.DrawItems("Costs:", asSource.CostItems);
 
         DrawMaps(source);
     };

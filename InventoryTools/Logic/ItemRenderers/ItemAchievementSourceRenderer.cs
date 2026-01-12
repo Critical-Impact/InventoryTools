@@ -1,11 +1,14 @@
 using System;
+using System.Numerics;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Sheets;
+using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Models;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Textures;
 
 namespace InventoryTools.Logic.ItemRenderers;
 
@@ -26,7 +29,13 @@ public class ItemAchievementSourceRenderer : ItemInfoRenderer<ItemAchievementSou
 
     public override Action<ItemSource> DrawTooltip => source =>
     {
+        var asSource = AsSource(source);
+        var icon = TextureProvider.GetFromGameIcon(new GameIconLookup(asSource.Achievement.Value.Icon));
+        ImGui.Image(icon.GetWrapOrEmpty().Handle, new Vector2(ImGui.GetTextLineHeight(), ImGui.GetTextLineHeight()));
+        ImGui.AlignTextToFramePadding();
+        ImGui.SameLine();
         ImGui.Text(this.GetDescription(source));
+        ImGui.Text(asSource.Achievement.Value.Description.ToImGuiString());
     };
 
     public override Func<ItemSource, string> GetName => source =>

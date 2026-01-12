@@ -159,6 +159,41 @@ public class ItemInfoRenderService : IDisposable
         return renderCategory.ToString().Titleize();
     }
 
+    public string GetRelationshipName(RelationshipType relationshipType)
+    {
+        switch (relationshipType)
+        {
+            case RelationshipType.None:
+                return "None";
+            case RelationshipType.CraftedInto:
+                return "Crafted Into";
+            case RelationshipType.CraftedFrom:
+                return "Crafted From";
+            case RelationshipType.Rewards:
+                return "Rewards";
+            case RelationshipType.Required:
+                return "Required For";
+            case RelationshipType.DropsFrom:
+                return "Drops From";
+            case RelationshipType.Purchaseable:
+                return "Purchaseable";
+            case RelationshipType.RelatedTo:
+                return "Related To";
+            case RelationshipType.PurchasedWith:
+                return "Purchased With";
+            case RelationshipType.UsedIn:
+                return "Used In";
+            case RelationshipType.StoredIn:
+                return "Stored In";
+            case RelationshipType.CollectedFrom:
+                return "Collected From";
+            case RelationshipType.InSet:
+                return "In Set";
+        }
+
+        return relationshipType.Humanize();
+    }
+
     public bool HasSourceRenderer(ItemInfoType itemInfoType)
     {
         return _sourceRenderersByItemInfoType.ContainsKey(itemInfoType);

@@ -9,6 +9,8 @@ public class ContextMenuFeature : Feature
     public ContextMenuFeature(IEnumerable<ISetting> settings) : base(new[]
         {
             typeof(ContextMenuMoreInformationSetting),
+            typeof(ContextMenuMoreInformationNpcsSetting),
+            typeof(ContextMenuMoreInformationMonstersSetting),
             typeof(ContextMenuAddToCraftListSetting),
             typeof(ContextMenuAddToActiveCraftListSetting),
             typeof(ContextMenuAddToCuratedListSetting),

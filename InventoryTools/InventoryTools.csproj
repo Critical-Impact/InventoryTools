@@ -10,8 +10,8 @@
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AllaganLib.Interface" Version="2.0.0" />
-    <PackageReference Include="AllaganLib.Monitors" Version="2.0.0" />
+    <PackageReference Include="AllaganLib.Interface" Version="2.0.3" />
+    <PackageReference Include="AllaganLib.Monitors" Version="2.0.3" />
     <PackageReference Include="Autofac" Version="9.0.0" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
     <PackageReference Include="DalaMock.Host" Version="4.0.0" />

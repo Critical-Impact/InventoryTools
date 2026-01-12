@@ -4,12 +4,14 @@ using System.Linq;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Sheets;
+using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Utility.Raii;
 using InventoryTools.Mediator;
 using InventoryTools.Ui;
 
@@ -39,18 +41,34 @@ public class ItemAirshipDropSourceRenderer : ItemInfoRenderer<ItemAirshipDropSou
         var airshipDropSources = AsSource(sources).DistinctBy(c => c.AirshipExplorationPoint.RowId);
         foreach (var source in airshipDropSources)
         {
+            var asSource = AsSource(source);
             ImGui.Text(this.GetDescription(source));
+            if (asSource.AirshipExplorationPoint.Unlock != null)
+            {
+                using (ImRaii.PushIndent())
+                {
+                    ImGui.TextUnformatted("Unlocks via: " + asSource.AirshipExplorationPoint.Unlock.Base.Name.ToImGuiString());
+                }
+            }
         }
     };
 
     public override Action<ItemSource> DrawTooltip => source =>
     {
+        var asSource = AsSource(source);
         ImGui.Text(this.GetDescription(source));
+        if (asSource.AirshipExplorationPoint.Unlock != null)
+        {
+            using (ImRaii.PushIndent())
+            {
+                ImGui.TextUnformatted("Unlocks via: " + asSource.AirshipExplorationPoint.Unlock.Base.Name.ToImGuiString());
+            }
+        }
     };
     public override Func<ItemSource, string> GetName => source =>
     {
         var airshipDropSource = AsSource(source);
-        return airshipDropSource.AirshipExplorationPoint.Base.Name.ExtractText();
+        return airshipDropSource.AirshipExplorationPoint.Base.Name.ToImGuiString();
     };
 
     public override Func<ItemSource, int> GetIcon => source =>

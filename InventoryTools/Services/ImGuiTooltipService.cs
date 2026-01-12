@@ -1,22 +1,33 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using AllaganLib.GameSheets.Model;
 using AllaganLib.GameSheets.Sheets.Rows;
 using AllaganLib.Shared.Extensions;
+using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Services;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Colors;
 using Dalamud.Plugin.Services;
 using Dalamud.Bindings.ImGui;
+using InventoryTools.Localizers;
 using InventoryTools.Logic;
+using InventoryTools.Logic.Editors;
+using InventoryTools.Logic.Settings;
+using OtterGui.Extensions;
 using OtterGui.Raii;
 
 namespace InventoryTools.Services;
 
 public class ImGuiTooltipService
 {
+    private readonly InventoryToolsConfiguration _configuration;
+    private readonly IInventoryMonitor _inventoryMonitor;
+    private readonly ICharacterMonitor _characterMonitor;
+    private readonly InventoryScopeCalculator _inventoryScopeCalculator;
     private readonly IKeyState _keyState;
     private readonly ITextureProvider _textureProvider;
+    private readonly ItemLocalizer _itemLocalizer;
     private readonly TryOn _tryOn;
     private readonly IChatUtilities _chatUtilities;
 
@@ -24,13 +35,23 @@ public class ImGuiTooltipService
     public ItemInfoRenderService InfoRenderService { get; set; }
 
     public ImGuiTooltipService(
+        InventoryToolsConfiguration configuration,
+        IInventoryMonitor inventoryMonitor,
+        ICharacterMonitor characterMonitor,
+        InventoryScopeCalculator inventoryScopeCalculator,
         IKeyState keyState,
         ITextureProvider textureProvider,
+        ItemLocalizer itemLocalizer,
         TryOn tryOn,
         IChatUtilities chatUtilities)
     {
+        _configuration = configuration;
+        _inventoryMonitor = inventoryMonitor;
+        _characterMonitor = characterMonitor;
+        _inventoryScopeCalculator = inventoryScopeCalculator;
         _keyState = keyState;
         _textureProvider = textureProvider;
+        _itemLocalizer = itemLocalizer;
         _tryOn = tryOn;
         _chatUtilities = chatUtilities;
     }
@@ -182,6 +203,195 @@ public class ImGuiTooltipService
                                               c => this.InfoRenderService.GetUseTypeName(c).Singular).Select(c => c!);
                         ImGui.TextUnformatted(string.Join(", ", uses));
                         ImGui.PopTextWrapPos();
+                    }
+
+                    var sortMode = _configuration.TooltipAmountOwnedSort;
+
+                    var enumerable = _inventoryMonitor.AllItems.Where(item =>
+                        item.ItemId == searchResult.ItemId &&
+                        _characterMonitor.Characters.ContainsKey(item.RetainerId) &&
+                        ((_configuration.TooltipCurrentCharacter &&
+                          _characterMonitor.BelongsToActiveCharacter(item.RetainerId)) ||
+                         !_configuration.TooltipCurrentCharacter)
+                    );
+                    if (_configuration.TooltipSearchScope != null && _configuration.TooltipSearchScope.Count != 0)
+                    {
+                        enumerable = enumerable.Where(c => _inventoryScopeCalculator.Filter(_configuration.TooltipSearchScope, c));
+                    }
+
+                    if (sortMode == TooltipAmountOwnedSort.Alphabetically)
+                    {
+                        var characterNames = _characterMonitor.Characters.OrderBy(c => c.Value.FormattedName).ToList();
+                        enumerable = enumerable.OrderBy(c => characterNames.IndexOf(d => d.Key == c.RetainerId));
+                    }
+                    else if(sortMode == TooltipAmountOwnedSort.Categorically)
+                    {
+                        var characterNames = _characterMonitor.Characters.OrderBy(c => c.Value.FormattedName).ToList();
+                        enumerable = enumerable.OrderBy(c => c.SortedCategory.FormattedName()).ThenBy(c => characterNames.IndexOf(d => d.Key == c.RetainerId));
+                    }
+                    else if(sortMode == TooltipAmountOwnedSort.Quantity)
+                    {
+                        enumerable = enumerable.OrderByDescending(c => c.Quantity);
+                    }
+
+                    var ownedItems = enumerable
+                        .ToList();
+
+
+
+                    uint storageCount = 0;
+                    List<string> locations = new List<string>();
+
+                    if (_configuration.TooltipLocationDisplayMode ==
+                        TooltipLocationDisplayMode.CharacterBagSlotQuality)
+                    {
+                        foreach (var oItem in ownedItems)
+                        {
+                            storageCount += oItem.Quantity;
+
+                            if (locations.Count >= _configuration.TooltipLocationLimit)
+                                continue;
+
+                            var name = _characterMonitor.GetCharacterNameById(oItem.RetainerId);
+                            if (_configuration.TooltipAddCharacterNameOwned)
+                            {
+                                var owner = _characterMonitor.GetCharacterNameById(
+                                    oItem.RetainerId, true);
+                                if (owner.Trim().Length != 0)
+                                    name += " (" + owner + ")";
+                            }
+
+                            var typeIcon = "";
+                            if (oItem.IsHQ)
+                            {
+                                typeIcon = "\uE03c";
+                            }
+                            else if (oItem.IsCollectible)
+                            {
+                                typeIcon = "\uE03d";
+                            }
+
+                            locations.Add($"{name} - {_itemLocalizer.FormattedBagLocation(oItem)} " + typeIcon);
+                        }
+                        if (ownedItems.Count > _configuration.TooltipLocationLimit)
+                        {
+                            locations.Add(ownedItems.Count - _configuration.TooltipLocationLimit + " other locations.");
+                        }
+                    }
+                    if (_configuration.TooltipLocationDisplayMode ==
+                        TooltipLocationDisplayMode.CharacterBagSlotQuantity)
+                    {
+                        foreach (var oItem in ownedItems)
+                        {
+                            storageCount += oItem.Quantity;
+
+                            if (locations.Count >= _configuration.TooltipLocationLimit)
+                                continue;
+
+                            var name = _characterMonitor.GetCharacterNameById(oItem.RetainerId);
+                            if (_configuration.TooltipAddCharacterNameOwned)
+                            {
+                                var owner = _characterMonitor.GetCharacterNameById(
+                                    oItem.RetainerId, true);
+                                if (owner.Trim().Length != 0)
+                                    name += " (" + owner + ")";
+                            }
+
+                            locations.Add($"{name} - {_itemLocalizer.FormattedBagLocation(oItem)} - {+ oItem.Quantity} ");
+                        }
+                        if (ownedItems.Count > _configuration.TooltipLocationLimit)
+                        {
+                            locations.Add(ownedItems.Count - _configuration.TooltipLocationLimit + " other locations.");
+                        }
+                    }
+                    else if (_configuration.TooltipLocationDisplayMode == TooltipLocationDisplayMode.CharacterCategoryQuantityQuality)
+                    {
+                        var groupedItems = ownedItems.GroupBy(c => (c.RetainerId, c.SortedCategory, c.Flags)).ToList();
+                        foreach (var oGroup in groupedItems)
+                        {
+                            var quantity = oGroup.Sum(c => c.Quantity);
+                            storageCount += (uint)quantity;
+
+                            if (locations.Count >= _configuration.TooltipLocationLimit)
+                                continue;
+
+                            var name = _characterMonitor.GetCharacterNameById(oGroup.Key.RetainerId);
+                            if (_configuration.TooltipAddCharacterNameOwned)
+                            {
+                                var owner = _characterMonitor.GetCharacterNameById(
+                                    oGroup.Key.RetainerId, true);
+                                if (owner.Trim().Length != 0)
+                                    name += " (" + owner + ")";
+                            }
+
+                            var typeIcon = "";
+                            if ((oGroup.Key.Flags & FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HighQuality) != 0)
+                            {
+                                typeIcon = "\uE03c";
+                            }
+                            else if ((oGroup.Key.Flags & FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.Collectable) != 0)
+                            {
+                                typeIcon = "\uE03d";
+                            }
+
+                            locations.Add($"{name} - {oGroup.Key.SortedCategory.FormattedName()} - " + quantity + " " + typeIcon);
+                        }
+                        if (groupedItems.Count > _configuration.TooltipLocationLimit)
+                        {
+                            locations.Add(groupedItems.Count - _configuration.TooltipLocationLimit + " other locations.");
+                        }
+                    }
+                    else if (_configuration.TooltipLocationDisplayMode == TooltipLocationDisplayMode.CharacterQuantityQuality)
+                    {
+                        var groupedItems = ownedItems.GroupBy(c => (c.RetainerId, c.Flags)).ToList();
+                        foreach (var oGroup in groupedItems)
+                        {
+                            var quantity = oGroup.Sum(c => c.Quantity);
+                            storageCount += (uint)quantity;
+
+                            if (locations.Count >= _configuration.TooltipLocationLimit)
+                                continue;
+
+                            var name = _characterMonitor.GetCharacterNameById(oGroup.Key.RetainerId);
+                            if (_configuration.TooltipAddCharacterNameOwned)
+                            {
+                                var owner = _characterMonitor.GetCharacterNameById(
+                                    oGroup.Key.RetainerId, true);
+                                if (owner.Trim().Length != 0)
+                                    name += " (" + owner + ")";
+                            }
+
+                            var typeIcon = "";
+                            if ((oGroup.Key.Flags & FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.HighQuality) != 0)
+                            {
+                                typeIcon = "\uE03c";
+                            }
+                            else if ((oGroup.Key.Flags & FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags.Collectable) != 0)
+                            {
+                                typeIcon = "\uE03d";
+                            }
+
+                            locations.Add($"{name} - " + quantity + " " + typeIcon);
+                        }
+                        if (groupedItems.Count > _configuration.TooltipLocationLimit)
+                        {
+                            locations.Add(groupedItems.Count - _configuration.TooltipLocationLimit + " other locations.");
+                        }
+                    }
+
+                    if (storageCount > 0)
+                    {
+                        ImGui.Separator();
+                        ImGui.TextUnformatted($"Owned: {storageCount}");
+                        ImGui.TextUnformatted($"Locations:");
+                        using (Dalamud.Interface.Utility.Raii.ImRaii.PushIndent())
+                        {
+                            for (var index = 0; index < locations.Count; index++)
+                            {
+                                var location = locations[index];
+                                ImGui.TextUnformatted($"{location}\n");
+                            }
+                        }
                     }
 
                     ImGui.Separator();

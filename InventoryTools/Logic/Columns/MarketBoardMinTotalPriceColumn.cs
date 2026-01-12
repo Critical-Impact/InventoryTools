@@ -61,7 +61,7 @@ namespace InventoryTools.Logic.Columns
         {
             if (searchResult.CraftItem != null)
             {
-                if (!searchResult.Item.CanBeTraded)
+                if (!searchResult.Item.CanBePlacedOnMarket)
                 {
                     return (Untradable, Untradable);
                 }

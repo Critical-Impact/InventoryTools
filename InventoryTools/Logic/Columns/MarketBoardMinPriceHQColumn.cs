@@ -99,7 +99,7 @@ namespace InventoryTools.Logic.Columns
             {
                 return Untradable;
             }
-            if (!searchResult.Item.CanBeTraded)
+            if (!searchResult.Item.CanBePlacedOnMarket)
             {
                 return Untradable;
             }
