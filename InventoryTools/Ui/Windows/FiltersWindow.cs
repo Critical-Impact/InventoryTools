@@ -25,6 +25,8 @@ using InventoryTools.Logic.Settings;
 using InventoryTools.Ui.Widgets;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
+using InventoryTools.Compendium;
+using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Lists;
 using InventoryTools.Logic.Filters;
 using InventoryTools.Mediator;
@@ -63,6 +65,7 @@ namespace InventoryTools.Ui
         private readonly IPluginLog _pluginLog;
         private readonly HighlightWhenFilter _highlightWhenFilter;
         private readonly HighlightWhenSetting _highlightWhenSetting;
+        private readonly IEnumerable<ICompendiumType> _compendiumTypes;
         private IEnumerable<IMenuWindow>? _menuWindows;
         private readonly InventoryToolsConfiguration _configuration;
 
@@ -74,7 +77,7 @@ namespace InventoryTools.Ui
             IComponentContext context, FiltersWindowLayoutSetting layoutSetting, ItemSheet itemSheet,
             FilterConfiguration.Factory filterConfigFactory, IEnumerable<ISampleFilter> sampleFilters,
             IClipboardService clipboardService, PopupService popupService, IKeyState keyState, IFramework framework,
-            IPluginLog pluginLog, HighlightWhenFilter highlightWhenFilter, HighlightWhenSetting highlightWhenSetting) : base(logger, mediator, imGuiService, configuration, "Filters Window")
+            IPluginLog pluginLog, HighlightWhenFilter highlightWhenFilter, HighlightWhenSetting highlightWhenSetting, IEnumerable<ICompendiumType> compendiumTypes) : base(logger, mediator, imGuiService, configuration, "Filters Window")
         {
             _listService = listService;
             _filterService = filterService;
@@ -98,6 +101,7 @@ namespace InventoryTools.Ui
             _pluginLog = pluginLog;
             _highlightWhenFilter = highlightWhenFilter;
             _highlightWhenSetting = highlightWhenSetting;
+            _compendiumTypes = compendiumTypes;
             _configuration = configuration;
             this.Flags = ImGuiWindowFlags.MenuBar;
         }
@@ -1087,6 +1091,27 @@ namespace InventoryTools.Ui
                         }
                     }
 
+                    using (var menu = ImRaii.Menu("Compendium"))
+                    {
+                        if (menu)
+                        {
+                            foreach (var compendiumType in _compendiumTypes)
+                            {
+                                if (ImGui.MenuItem(compendiumType.Plural))
+                                {
+                                    this.MediatorService.Publish(new OpenCompendiumListMessage(compendiumType));
+                                }
+                            }
+                        }
+                    }
+
+                    if (ImGui.IsItemHovered())
+                    {
+                        using (ImRaii.Tooltip())
+                        {
+                            ImGui.Text("Compendium is a WIP feature, expect more here soon!");
+                        }
+                    }
                 }
             }
         }

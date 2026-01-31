@@ -5,6 +5,8 @@ using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using InventoryTools.Compendium;
+using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Logic;
 using Lumina.Excel.Sheets;
 
@@ -49,3 +51,5 @@ public record RequestTeleportToGatheringPointRowMessage(GatheringPointRow gather
 public record OverlaysRequestRefreshMessage() : MessageBase;
 public record ItemSearchRequestedMessage(uint ItemId, InventoryItem.ItemFlags Flags) : MessageBase;
 public record NewColumnSetNameMessage(string? name, string? exportName) : MessageBase;
+public record OpenCompendiumListMessage(ICompendiumType CompendiumType) : MessageBase;
+public record OpenCompendiumViewMessage(ICompendiumType CompendiumType) : MessageBase;

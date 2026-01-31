@@ -22,5 +22,6 @@ namespace InventoryTools.Logic.Settings.Abstract
         CraftTracker = 17,
         Troubleshooting = 18,
         EquipmentRecommendation = 19,
+        Compendium = 20,
     }
 }

@@ -7,8 +7,13 @@ using System.Reflection;
 using AllaganLib.Data.Service;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.Modules;
+using AllaganLib.GameSheets.Sheets;
+using AllaganLib.GameSheets.Sheets.Rows;
+using AllaganLib.Interface.FormFields;
+using AllaganLib.Interface.Grid;
 using AllaganLib.Interface.Grid.ColumnFilters;
 using AllaganLib.Monitors.Debuggers;
+using AllaganLib.Monitors.Interfaces;
 using AllaganLib.Monitors.Services;
 using AllaganLib.Shared.Interfaces;
 using AllaganLib.Shared.Services;
@@ -35,6 +40,11 @@ using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using InventoryTools.Commands;
+using InventoryTools.Compendium;
+using InventoryTools.Compendium.Columns;
+using InventoryTools.Compendium.Interfaces;
+using InventoryTools.Compendium.Models;
+using InventoryTools.Compendium.Services;
 using InventoryTools.EquipmentSuggest;
 using InventoryTools.Highlighting;
 using InventoryTools.Host;
@@ -132,7 +142,7 @@ namespace InventoryTools
             builder.RegisterTransientsSelfAndInterfaces<IColumnSetting>(dataAccess);
 
             //Register all classes that are externally owned transients and implement a particular interface/class
-            builder.RegisterExternalTransientsSelfAndInterfaces<GenericWindow>(dataAccess, typeof(Window));
+            builder.RegisterSingletonsSelfAndInterfaces<GenericWindow>(dataAccess, typeof(Window)).AsImplementedInterfaces();
             builder.RegisterExternalTransientsSelfAndInterfaces<UintWindow>(dataAccess, typeof(Window));
             builder.RegisterExternalTransientsSelfAndInterfaces<StringWindow>(dataAccess, typeof(Window));
 
@@ -284,6 +294,35 @@ namespace InventoryTools
             builder.RegisterSingletonSelfAndInterfaces<EquipmentSuggestModeSetting>();
             builder.RegisterSingletonSelfAndInterfaces<EquipmentSuggestSelectedSecondaryItemColumn>();
             builder.RegisterSingletonSelfAndInterfaces<EquipmentSuggestService>();
+
+            //Compendium
+            builder.RegisterTransientSelfAndInterfaces<WindowState>();
+            builder.RegisterTransientSelfAndInterfaces<CompendiumMenuRenderer>();
+            builder.RegisterSingletonSelfAndInterfaces<CompendiumMenuBuilder>();
+            builder.RegisterSingletonsSelfAndInterfaces<ICompendiumType>(dataAccess);
+            builder.RegisterSingletonsSelfAndInterfaces<ICompendiumTable>(dataAccess);
+            builder.RegisterTransientsSelfAndInterfaces<CompendiumWindow>(dataAccess, typeof(Window)).AsImplementedInterfaces();
+            builder.RegisterTransientsSelfAndInterfaces<IFormField<WindowState>>(dataAccess);
+
+            builder.RegisterGeneric(typeof(GenericStringTableColumn<>))
+                .AsSelf();
+            builder.RegisterGeneric(typeof(GenericIntegerTableColumn<>))
+                .AsSelf();
+            builder.RegisterGeneric(typeof(GenericIconTableColumn<>))
+                .AsSelf();
+            builder.RegisterGeneric(typeof(GenericItemSourcesTableColumn<>))
+                .AsSelf();
+            builder.RegisterGeneric(typeof(GenericItemsTableColumn<>))
+                .AsSelf();
+            builder.RegisterGeneric(typeof(GenericBooleanTableColumn<>))
+                .AsSelf();
+            builder.RegisterGeneric(typeof(GenericItemTableColumn<>))
+                .AsSelf();
+
+            builder.RegisterGeneric(typeof(CompendiumTable<>))
+                .AsSelf();
+            builder.RegisterGeneric(typeof(CompendiumColumnBuilder<>))
+                .AsSelf();
 
             builder.Register<UniversalisUserAgent>(c =>
             {
