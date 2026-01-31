@@ -523,5 +523,111 @@ namespace InventoryToolsTesting.Tests
                 }
             }
         }
+
+        [Test]
+        public void TestMarketOrdering()
+        {
+            var retainerMarket = new List<InventoryItem>();
+            var marketOrderService = this.Host.Services.GetRequiredService<IMarketOrderService>();
+
+            //pactmaker's garden scythe
+            retainerMarket.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 0, 36707, 1));
+            //super potion
+            retainerMarket.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 1, 23167, 1));
+
+            //honey muffin
+            retainerMarket.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 2, 4698, 1));
+            //bubble chocolate
+            retainerMarket.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 3, 4735, 1));
+            //tsai tou vounou
+            retainerMarket.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 4, 36060, 1));
+            //giant pumpkin
+            retainerMarket.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 5, 36100, 1));
+
+            //quickarm materia X
+            retainerMarket.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 6, 33941, 1));
+            //thavnarian onion
+            retainerMarket.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 7, 8166, 1));
+            //folded futon
+            retainerMarket.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 8, 28976, 1));
+
+            retainerMarket = marketOrderService.SortByRetainerMarketOrder(retainerMarket)
+                .ToList();
+            for (var index = 0; index < retainerMarket.Count; index++)
+            {
+                var inventoryItem = retainerMarket[index];
+                Assert.AreEqual(inventoryItem.Slot, index, inventoryItem.FormattedName + " in wrong slot");
+            }
+
+            var retainerMarket2 = new List<InventoryItem>();
+
+            //sailor brais
+            retainerMarket2.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 0, 7537, 1));
+            //allagan aetherstone - weapon
+            retainerMarket2.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 1, 15098, 1));
+
+            //eastern teahouse bench
+            retainerMarket2.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 2, 17983, 1));
+
+            //apparel showcase
+            retainerMarket2.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 3, 32234, 1));
+
+            //factory beam
+            retainerMarket2.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 4, 30403, 1));
+
+
+            retainerMarket2 = marketOrderService.SortByRetainerMarketOrder(retainerMarket2)
+                .ToList();
+            for (var index = 0; index < retainerMarket2.Count; index++)
+            {
+                var inventoryItem = retainerMarket2[index];
+                Assert.AreEqual(inventoryItem.Slot, index, inventoryItem.FormattedName + " in wrong slot");
+            }
+
+            var retainerMarket3 = new List<InventoryItem>();
+
+            //crystarium stove
+            retainerMarket3.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 0, 27284, 1));
+
+            //necklace display stand
+            retainerMarket3.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 1, 28149, 1));
+
+            //restaurant showcase
+            retainerMarket3.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 2, 35579, 1));
+
+            retainerMarket3 = marketOrderService.SortByRetainerMarketOrder(retainerMarket3)
+                .ToList();
+            for (var index = 0; index < retainerMarket3.Count; index++)
+            {
+                var inventoryItem = retainerMarket3[index];
+                Assert.AreEqual(inventoryItem.Slot, index, inventoryItem.FormattedName + " in wrong slot");
+            }
+
+            var retainerMarket4 = new List<InventoryItem>();
+
+            retainerMarket4.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 0, 34420, 1));
+
+            retainerMarket4.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 1, 13263, 1));
+
+            retainerMarket4.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 2, 39318, 1));
+
+            retainerMarket4.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 3, 20471, 1));
+
+            retainerMarket4.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 4, 28829, 1));
+
+            retainerMarket4.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 5, 34423, 1));
+            retainerMarket4.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 6, 28876, 1));
+            retainerMarket4.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 7, 24169, 1));
+            retainerMarket4.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 8, 21813, 1));
+            retainerMarket4.Add(this.GenerateItem(_retainer.CharacterId, InventoryType.RetainerMarket, 9, 38653, 1));
+
+            retainerMarket4 = marketOrderService.SortByRetainerMarketOrder(retainerMarket4)
+                .ToList();
+            for (var index = 0; index < retainerMarket4.Count; index++)
+            {
+                var inventoryItem = retainerMarket4[index];
+                Assert.AreEqual(inventoryItem.Slot, index, inventoryItem.FormattedName + " in wrong slot");
+            }
+        }
     }
 }

@@ -28,7 +28,7 @@ public class MockCharacterMonitor : ICharacterMonitor
         _characters = new Dictionary<ulong, Character>();
     }
 
-    public void UpdateCharacter(Character character)
+    public void InvokeCharacterUpdated(Character character)
     {
         _framework.RunOnFrameworkThread(() => { OnCharacterUpdated?.Invoke(character); });
     }

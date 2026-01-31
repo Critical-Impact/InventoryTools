@@ -48,6 +48,7 @@ public class InventoryToolsPluginMock : InventoryToolsPlugin
         this.ReplaceHostedService(typeof(OdrScanner),typeof(MockOdrScanner));
         this.ReplaceHostedService(typeof(Chat2Ipc),typeof(MockChat2Ipc));
         this.ReplaceHostedService(typeof(AcquisitionMonitorService),typeof(MockAcquisitionMonitorService));
+        this.ReplaceHostedService(typeof(AchievementMonitorService),typeof(MockAchievementMonitorService));
 
         this.seriLog = new LoggerConfiguration()
             .WriteTo.Console(standardErrorFromLevel: LogEventLevel.Verbose)

@@ -23,6 +23,8 @@ using InventoryTools.Logic;
 using InventoryTools.Mediator;
 using InventoryTools.Services.Interfaces;
 using InventoryTools.Ui;
+using Lumina.Excel;
+using Lumina.Excel.Sheets;
 using LuminaSupplemental.Excel.Model;
 using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 
@@ -38,6 +40,7 @@ public class ImGuiMenuService
     private readonly InventoryToolsConfiguration _configuration;
     private readonly IClipboardService _clipboardService;
     private readonly MapSheet _mapSheet;
+    private readonly ItemSheet _itemSheet;
 
     public ImGuiMenuService(IListService listService,
         IChatUtilities chatUtilities,
@@ -46,7 +49,8 @@ public class ImGuiMenuService
         ICommandManager commandManager,
         InventoryToolsConfiguration configuration,
         IClipboardService clipboardService,
-        MapSheet mapSheet)
+        MapSheet mapSheet,
+        ItemSheet itemSheet)
     {
         _listService = listService;
         _chatUtilities = chatUtilities;
@@ -56,11 +60,18 @@ public class ImGuiMenuService
         _configuration = configuration;
         _clipboardService = clipboardService;
         _mapSheet = mapSheet;
+        _itemSheet = itemSheet;
     }
 
     public List<MessageBase> DrawRightClickPopup(SearchResult searchResult, FilterConfiguration? filterConfiguration = null)
     {
         return DrawRightClickPopup(searchResult, new List<MessageBase>(), filterConfiguration);
+    }
+
+    public List<MessageBase> DrawRightClickPopup(RowRef<Item> itemRow, FilterConfiguration? filterConfiguration = null)
+    {
+        if (!itemRow.IsValid || itemRow.RowId == 0) return [];
+        return DrawRightClickPopup(new SearchResult(_itemSheet.GetRow(itemRow.RowId)), new List<MessageBase>(), filterConfiguration);
     }
     public List<MessageBase> DrawRightClickPopup(ItemRow itemRow, FilterConfiguration? filterConfiguration = null)
     {
@@ -70,6 +81,10 @@ public class ImGuiMenuService
     {
         return DrawRightClickPopup(new SearchResult(itemRow), messages, filterConfiguration);
     }
+    public List<MessageBase> DrawRightClickPopup(List<ItemRow> itemRows, List<MessageBase>? messages = null)
+    {
+        return DrawRightClickPopup(itemRows.Select(c => new SearchResult(c)).ToList(), messages ?? []);
+    }
     public List<MessageBase> DrawRightClickPopup(CriticalCommonLib.Models.InventoryItem inventoryItem, FilterConfiguration? filterConfiguration = null)
     {
         return DrawRightClickPopup(new SearchResult(inventoryItem), new List<MessageBase>(), filterConfiguration);
@@ -78,6 +93,123 @@ public class ImGuiMenuService
     {
         return DrawRightClickPopup(new SearchResult(inventoryItem), messages, filterConfiguration);
     }
+
+    public List<MessageBase> DrawRightClickPopup(List<SearchResult> searchResults, List<MessageBase> messages)
+    {
+        ImGui.Text(searchResults.Count + (searchResults.Count == 1 ? " item" : " items"));
+        ImGui.Separator();
+        if (searchResults.Any(c => c.Item.CanTryOn) && ImGui.MenuItem("Try on"))
+        {
+            if (_tryOn.CanUseTryOn)
+            {
+                _tryOn.TryOnItem(searchResults.Select(c => c.Item).ToList());
+            }
+        }
+
+        ImGui.Separator();
+
+        if (ImGui.MenuItem("Mark as favourite"))
+        {
+            foreach (var item in searchResults)
+            {
+                _configuration.FavouriteItem(item.Item.RowId);
+            }
+        }
+
+        if (ImGui.MenuItem("Unmark as favourite"))
+        {
+            foreach (var item in searchResults)
+            {
+                _configuration.UnfavouriteItem(item.Item.RowId);
+            }
+        }
+
+        ImGui.Separator();
+        var curatedLists =
+            _listService.Lists.Where(c => c.FilterType == FilterType.CuratedList).ToArray();
+        if (curatedLists.Length != 0)
+        {
+            using var menu = ImRaii.Menu("Add to Curated List");
+            if(menu)
+            {
+                foreach (var filter in curatedLists)
+                {
+                    if (!ImGui.MenuItem(filter.Name)) continue;
+                    foreach (var item in searchResults)
+                    {
+                        filter.AddCuratedItem(new CuratedItem(item.Item.RowId));
+                    }
+
+                    messages.Add(new FocusListMessage(typeof(FiltersWindow), filter));
+                    filter.NeedsRefresh = true;
+                }
+            }
+        }
+
+        if (ImGui.MenuItem("Add to new Curated List"))
+        {
+            var filter = _listService.AddNewCuratedList();
+            foreach (var item in searchResults)
+            {
+                filter.AddCuratedItem(new CuratedItem(item.Item.RowId));
+            }
+
+            messages.Add(new FocusListMessage(typeof(FiltersWindow), filter));
+            filter.NeedsRefresh = true;
+        }
+
+        ImGui.Separator();
+        var craftFilters =
+            _listService.Lists.Where(c =>
+                c.FilterType == Logic.FilterType.CraftFilter && !c.CraftListDefault).ToArray();
+        if (craftFilters.Length != 0)
+        {
+            using var menu = ImRaii.Menu("Add to Craft List");
+            if(menu)
+            {
+                foreach (var filter in craftFilters)
+                {
+                    if (!ImGui.MenuItem(filter.Name)) continue;
+                    foreach (var item in searchResults)
+                    {
+                        filter.CraftList.AddCraftItem(item.Item.RowId);
+                    }
+
+                    messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
+                    messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
+                    filter.NeedsRefresh = true;
+                }
+            }
+        }
+
+        if (ImGui.MenuItem("Add to new Craft List"))
+        {
+             var filter = _listService.AddNewCraftList();
+             foreach (var item in searchResults)
+             {
+                 filter.CraftList.AddCraftItem(item.Item.RowId);
+             }
+
+             messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
+             messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
+             filter.NeedsRefresh = true;
+        }
+        if (ImGui.MenuItem("Add to new Craft List (ephemeral)"))
+        {
+             var filter = _listService.AddNewCraftList(null,true);
+             foreach (var item in searchResults)
+             {
+                 filter.CraftList.AddCraftItem(item.Item.RowId);
+             }
+
+             messages.Add(new OpenGenericWindowMessage(typeof(CraftsWindow)));
+             messages.Add(new FocusListMessage(typeof(CraftsWindow), filter));
+             filter.NeedsRefresh = true;
+        }
+
+        return messages;
+    }
+
     public List<MessageBase> DrawRightClickPopup(SearchResult searchResult, List<MessageBase> messages, FilterConfiguration? filterConfiguration = null)
     {
         DrawMenuItems(searchResult, messages);

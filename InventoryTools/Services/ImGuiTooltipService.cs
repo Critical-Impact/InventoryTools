@@ -114,13 +114,13 @@ public class ImGuiTooltipService
                         {
                             if (table)
                             {
+                                ImGui.TableSetupColumn("BaseAttributes");
+                                ImGui.TableSetupColumn("Attributes");
                                 ImGui.TableNextRow();
-                                ImGui.TableSetColumnIndex(0);
-                                {
-                                    DrawBaseAttributes(item);
-                                }
+                                ImGui.TableNextColumn();
+                                DrawBaseAttributes(item);
 
-                                ImGui.TableSetColumnIndex(1);
+                                ImGui.TableNextColumn();
                                 {
                                     for (var index = 0; index < searchResult.Item.Base.BaseParam.Count; index++)
                                     {
@@ -179,7 +179,7 @@ public class ImGuiTooltipService
                             }
                         }
                     }
-
+                    ImGui.Dummy(new Vector2(0, 0));
                     if (item.Sources.Count > 0)
                     {
                         ImGui.NewLine();

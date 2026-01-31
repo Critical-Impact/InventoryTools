@@ -631,8 +631,9 @@ public class ItemInfoRenderService : IDisposable
                 {
                     var items = itemSources.SelectMany(c => c.RewardItems).DistinctBy(c => c.ItemId).ToList();
                     var costItems = itemSources.SelectMany(c => c.CostItems).DistinctBy(c => c.ItemId).ToList();
+                    var relatedItems = itemSources.SelectMany(c => c.RelatedItems).ToList();
 
-                    if (items.Count == 1 && costItems.Count == 0)
+                    if (items.Count == 1 && costItems.Count == 0 && relatedItems.Count == 0)
                     {
                         _imGuiService.ImGuiMenuService.DrawRightClickPopup(rendererType == RendererType.Source ? firstItem.Item : (firstItem.CostItem ?? firstItem.Item), messages);
                     }
@@ -679,26 +680,54 @@ public class ItemInfoRenderService : IDisposable
                                     }
                                 }
                             }
+
+                            if (relatedItems.Count > 0)
+                            {
+                                foreach (var relatedItem in relatedItems)
+                                {
+                                    ImGui.NewLine();
+                                    ImGui.Text(relatedItem.Key.Name);
+                                    ImGui.Separator();
+                                    foreach (var item in relatedItem.Value)
+                                    {
+                                        this._imGuiService.DrawIcon(item.ItemRow.Icon, new Vector2(16, 16));
+                                        if (ImGui.IsItemHovered())
+                                        {
+                                            this._tooltipService.DrawItemTooltip(new SearchResult(item.ItemRow));
+                                        }
+
+                                        ImGui.SameLine();
+                                        using var menu = ImRaii.Menu(item.ItemRow.NameString);
+                                        if (menu)
+                                        {
+                                            _imGuiService.ImGuiMenuService.DrawRightClickPopup(item.ItemRow, messages);
+                                        }
+                                    }
+                                }
+                            }
                         }
                         else
                         {
                             if (costItems.Count > 0)
                             {
-                                ImGui.Text("Items:");
-                                ImGui.Separator();
-                                foreach (var item in costItems)
+                                using (ImRaii.PushId("costItem"))
                                 {
-                                    this._imGuiService.DrawIcon(item.ItemRow.Icon, new Vector2(16, 16));
-                                    if (ImGui.IsItemHovered())
+                                    ImGui.Text("Items:");
+                                    ImGui.Separator();
+                                    foreach (var item in costItems)
                                     {
-                                        this._tooltipService.DrawItemTooltip(new SearchResult(item.ItemRow));
-                                    }
+                                        this._imGuiService.DrawIcon(item.ItemRow.Icon, new Vector2(16, 16));
+                                        if (ImGui.IsItemHovered())
+                                        {
+                                            this._tooltipService.DrawItemTooltip(new SearchResult(item.ItemRow));
+                                        }
 
-                                    ImGui.SameLine();
-                                    using var menu = ImRaii.Menu(item.ItemRow.NameString);
-                                    if (menu)
-                                    {
-                                        _imGuiService.ImGuiMenuService.DrawRightClickPopup(item.ItemRow, messages);
+                                        ImGui.SameLine();
+                                        using var menu = ImRaii.Menu(item.ItemRow.NameString);
+                                        if (menu)
+                                        {
+                                            _imGuiService.ImGuiMenuService.DrawRightClickPopup(item.ItemRow, messages);
+                                        }
                                     }
                                 }
                             }
@@ -710,21 +739,57 @@ public class ItemInfoRenderService : IDisposable
                                     ImGui.NewLine();
                                 }
 
-                                ImGui.Text("Related Items");
-                                ImGui.Separator();
-                                foreach (var item in items)
+                                using (ImRaii.PushId("relatedItem"))
                                 {
-                                    this._imGuiService.DrawIcon(item.ItemRow.Icon, new Vector2(16, 16));
-                                    if (ImGui.IsItemHovered())
+                                    ImGui.Text("Related Items");
+                                    ImGui.Separator();
+                                    foreach (var item in items)
                                     {
-                                        this._tooltipService.DrawItemTooltip(new SearchResult(item));
-                                    }
+                                        this._imGuiService.DrawIcon(item.ItemRow.Icon, new Vector2(16, 16));
+                                        if (ImGui.IsItemHovered())
+                                        {
+                                            this._tooltipService.DrawItemTooltip(new SearchResult(item));
+                                        }
 
-                                    ImGui.SameLine();
-                                    using var menu = ImRaii.Menu(item.ItemRow.NameString);
-                                    if (menu)
+                                        ImGui.SameLine();
+                                        using var menu = ImRaii.Menu(item.ItemRow.NameString);
+                                        if (menu)
+                                        {
+                                            _imGuiService.ImGuiMenuService.DrawRightClickPopup(item.ItemRow, messages);
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (relatedItems.Count > 0)
+                            {
+                                if (items.Count > 0)
+                                {
+                                    ImGui.NewLine();
+                                }
+
+                                foreach (var relatedItem in relatedItems)
+                                {
+                                    using (ImRaii.PushId(relatedItem.Key.Key))
                                     {
-                                        _imGuiService.ImGuiMenuService.DrawRightClickPopup(item.ItemRow, messages);
+                                        ImGui.Text(relatedItem.Key.Name);
+                                        ImGui.Separator();
+                                        foreach (var item in relatedItem.Value)
+                                        {
+                                            this._imGuiService.DrawIcon(item.ItemRow.Icon, new Vector2(16, 16));
+                                            if (ImGui.IsItemHovered())
+                                            {
+                                                this._tooltipService.DrawItemTooltip(new SearchResult(item));
+                                            }
+
+                                            ImGui.SameLine();
+                                            using var menu = ImRaii.Menu(item.ItemRow.NameString);
+                                            if (menu)
+                                            {
+                                                _imGuiService.ImGuiMenuService.DrawRightClickPopup(item.ItemRow,
+                                                    messages);
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -812,30 +877,41 @@ public class ItemInfoRenderService : IDisposable
 
                             float centerWidth = ImGui.CalcTextSize(centerText).X;
 
+                            var windowPos = ImGui.GetCursorScreenPos();
+
+                            float leftWidth;
+                            float rightWidth;
 
                             using (ImRaii.PushFont(_font.IconFont))
                             {
-                                ImGui.TextUnformatted(leftText);
-                                ImGui.SameLine();
-                                ImGui.TextUnformatted(keyboardIcon);
+                                leftWidth = ImGui.CalcTextSize(leftText).X + ImGui.CalcTextSize(keyboardIcon).X + ImGui.GetStyle().ItemSpacing.X;
+                                rightWidth = ImGui.CalcTextSize(rightText).X + ImGui.CalcTextSize(keyboardIcon).X + ImGui.GetStyle().ItemSpacing.X;
                             }
 
-                            ImGui.SameLine();
+                            float availableWidth = windowWidth - leftWidth - rightWidth;
+                            float centerStartPos = leftWidth + (availableWidth - centerWidth) * 0.5f;
 
-                            ImGui.SetCursorPosX((windowWidth - centerWidth) * 0.5f);
+                            ImGui.SetCursorPosX(centerStartPos);
                             ImGui.TextUnformatted(centerText);
 
-
-                            ImGui.SameLine();
+                            var drawList = ImGui.GetWindowDrawList();
+                            var textColor = ImGui.GetColorU32(ImGuiCol.Text);
 
                             using (ImRaii.PushFont(_font.IconFont))
                             {
-                                float rightWidth = ImGui.CalcTextSize(rightText).X;
-                                float keyboardIconWidth = ImGui.CalcTextSize(keyboardIcon).X;
-                                ImGui.SetCursorPosX(windowWidth - rightWidth - keyboardIconWidth);
-                                ImGui.TextUnformatted(keyboardIcon);
-                                ImGui.SameLine();
-                                ImGui.TextUnformatted(rightText);
+
+
+                                var leftArrowPos = new System.Numerics.Vector2(windowPos.X, windowPos.Y);
+                                drawList.AddText(_font.IconFont, ImGui.GetFontSize(), leftArrowPos, textColor, leftText);
+
+                                var leftIconPos = new System.Numerics.Vector2(windowPos.X+ ImGui.CalcTextSize(keyboardIcon).X + ImGui.GetStyle().ItemSpacing.X, windowPos.Y);
+                                drawList.AddText(_font.IconFont, ImGui.GetFontSize(), leftIconPos, textColor, keyboardIcon);
+
+                                var rightIconPos = new System.Numerics.Vector2(windowPos.X + windowWidth - rightWidth, windowPos.Y);
+                                drawList.AddText(_font.IconFont, ImGui.GetFontSize(), rightIconPos, textColor, keyboardIcon);
+
+                                var rightArrowPos = new System.Numerics.Vector2(windowPos.X + windowWidth - rightWidth + ImGui.CalcTextSize(keyboardIcon).X + ImGui.GetStyle().ItemSpacing.X, windowPos.Y);
+                                drawList.AddText(_font.IconFont, ImGui.GetFontSize(), rightArrowPos, textColor, rightText);
                             }
 
                             if (_scrollLeft)

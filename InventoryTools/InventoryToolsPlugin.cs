@@ -173,6 +173,7 @@ namespace InventoryTools
             this.RegisterHostedService(typeof(WotsitIpc));
             this.RegisterHostedService(typeof(ShopMonitorService));
             this.RegisterHostedService(typeof(AcquisitionMonitorService));
+            this.RegisterHostedService(typeof(AchievementMonitorService));
 
             //AllaganLib modules
             builder.RegisterModule(new GameSheetManagerModule());
@@ -244,6 +245,7 @@ namespace InventoryTools
             builder.RegisterSingletonSelfAndInterfaces<WindowSystemFactory>();
             builder.RegisterSingletonSelfAndInterfaces<CsvLoaderService>();
             builder.RegisterSingletonSelfAndInterfaces<BackgroundTaskCollector>();
+            builder.RegisterSingletonSelfAndInterfaces<AchievementMonitorConfiguration>();
 
             //Transient registrations
             builder.RegisterTransientSelfAndInterfaces<BackgroundTaskQueue>();

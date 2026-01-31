@@ -72,7 +72,7 @@ namespace InventoryTools.Ui
         private readonly ItemSheet _itemSheet;
         private readonly IFramework _framework;
         private IEnumerable<IMenuWindow> _menuWindows;
-        private ThrottleDispatcher _throttleDispatcher;
+        private ThrottleDispatcher? _throttleDispatcher;
 
         public CraftsWindow(ILogger<CraftsWindow> logger,
             MediatorService mediator,
@@ -256,7 +256,7 @@ namespace InventoryTools.Ui
 
         private void RefreshCraftList()
         {
-            _throttleDispatcher.ThrottleAsync(RequestRefresh);
+            _throttleDispatcher?.ThrottleAsync(RequestRefresh);
         }
 
         private Task RequestRefresh()
@@ -3029,7 +3029,7 @@ namespace InventoryTools.Ui
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
-            _throttleDispatcher.Dispose();
+            _throttleDispatcher?.Dispose();
         }
 
         public override void OnClose()

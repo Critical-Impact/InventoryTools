@@ -4,9 +4,9 @@
     "net10.0-windows7.0": {
       "AllaganLib.Interface": {
         "type": "Direct",
-        "requested": "[2.0.3, )",
-        "resolved": "2.0.3",
-        "contentHash": "/UlgeaNosMRBTDgJ6hoP+opES93CS4q7CQeYfa+2Y3Tvv/kZlvR6anxAc74Il0hesqSVbGAQmLAkUMXf7I3ttg==",
+        "requested": "[2.0.5, )",
+        "resolved": "2.0.5",
+        "contentHash": "UgeP4WILvnfpM1TpKuzAi1AVCiALLfbDijZziMvUCNfqkb/gC5I8sJnIGvzXJ6+Ywui64pw6fbxjqkP1yauQfQ==",
         "dependencies": {
           "AllaganLib.Data": "2.0.3",
           "AllaganLib.Shared": "2.0.3",
@@ -17,11 +17,11 @@
       },
       "AllaganLib.Monitors": {
         "type": "Direct",
-        "requested": "[2.0.3, )",
-        "resolved": "2.0.3",
-        "contentHash": "YN2OJlW7mKF7fssfgyiD1vNfIStJurBKJuxVystTWFuAZFNz6hqPyltFSOtwIWhfjI0SqTGmA0K49gmlP//T8A==",
+        "requested": "[2.0.4, )",
+        "resolved": "2.0.4",
+        "contentHash": "qmR44hXuKlgdUinm8GtPW6qdcB6vGBdcFi2FjYEOXPevKp9Ua5d5TLVLGo/EahjM+cl/7QrMfJFrKEdmBRG6tw==",
         "dependencies": {
-          "AllaganLib.GameSheets": "2.0.3"
+          "AllaganLib.GameSheets": "2.0.4"
         }
       },
       "Autofac": {
@@ -48,12 +48,12 @@
       },
       "DalaMock.Host": {
         "type": "Direct",
-        "requested": "[4.0.0, )",
-        "resolved": "4.0.0",
-        "contentHash": "wmlZL54TBH9LLrEk5bXzmEsWMIaroN8qI63slB2nYIM9wDOeLQ59e4a6r3XViJ+BIWiO2ViK04jGvdr+Cz5U5g==",
+        "requested": "[4.0.4, )",
+        "resolved": "4.0.4",
+        "contentHash": "GEv1sy/1ZiayEtfHygsnWPP72uvwhNcpFF4Rk4hyutJncyGlXi3+Rl/uGqI8X8Z2SuF4GeIgyVCf3vhB3bZigA==",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "10.0.0",
-          "DalaMock.Shared": "4.0.0",
+          "DalaMock.Shared": "4.0.4",
           "Microsoft.Extensions.Hosting": "10.0.1",
           "Microsoft.Extensions.Hosting.Abstractions": "10.0.1",
           "Microsoft.Extensions.ObjectPool": "10.0.1"
@@ -61,9 +61,9 @@
       },
       "DalaMock.Shared": {
         "type": "Direct",
-        "requested": "[4.0.0, )",
-        "resolved": "4.0.0",
-        "contentHash": "31CIXD0QkMryDkpFlVZb7otbQh4+kqxgQfzUT9WI87CKXc3/XQYDC9V0kIo5QTd5RHNImLyXABD5xDvY5MC92w==",
+        "requested": "[4.0.4, )",
+        "resolved": "4.0.4",
+        "contentHash": "TwU9h8EMzqULXaXogsz1jpZRGaL5v1VMM32FlIgcGZ+dts7TZdb+1k7Lp4+Hgv3qmT09n53FE8Fhk2/J07etKw==",
         "dependencies": {
           "Autofac": "9.0.0",
           "Microsoft.Extensions.Hosting": "10.0.1",
@@ -163,14 +163,14 @@
       },
       "AllaganLib.GameSheets": {
         "type": "Transitive",
-        "resolved": "2.0.3",
-        "contentHash": "2X1CRe87jbJKRYaWczDTPady5axYLz+yYDZslj1toedO4R3bS7vaAQQ5NSLqAxlpZ5ACBe3Utj3lELTOAY5Kww==",
+        "resolved": "2.0.5",
+        "contentHash": "1+V7UN6GcKpR/zM305hDeHAoqt/eYVw5KuPGKVK5Xb6FBkNuVSJW4bqT1yE8F9M/EIWbxm/fMZjMzy4ij2vCig==",
         "dependencies": {
           "AllaganLib.Shared": "2.0.3",
           "Autofac": "9.0.0",
           "Autofac.Extensions.DependencyInjection": "10.0.0",
           "CSVFile": "3.2.1",
-          "LuminaSupplemental.Excel": "4.1.1"
+          "LuminaSupplemental.Excel": "4.1.7"
         }
       },
       "AllaganLib.Shared": {
@@ -209,8 +209,8 @@
       },
       "LuminaSupplemental.Excel": {
         "type": "Transitive",
-        "resolved": "4.1.1",
-        "contentHash": "wD4p7TPzIHzWWzcYqTgWgyluJsU+h19UFzd5grhLr2Mc5pXnbcwiuMsJksP2TxJLcHsTmvBVGH02f7/VmkLqcA==",
+        "resolved": "4.1.7",
+        "contentHash": "qvLha4mwqNtide/Oc/myqaFB3Gkg0RdlunwAxx6zSn8qkFhmK5k7GuZBg8XMGkakGZMvlH3xv06l8pxsnuXUdg==",
         "dependencies": {
           "CSVFile": "3.2.1",
           "CsvHelper": "30.0.1",
@@ -495,9 +495,10 @@
       "criticalcommonlib": {
         "type": "Project",
         "dependencies": {
-          "AllaganLib.GameSheets": "[2.0.3, )",
+          "AllaganLib.GameSheets": "[2.0.5, )",
+          "AllaganLib.Monitors": "[2.0.4, )",
           "AllaganLib.Shared": "[2.0.3, )",
-          "DalaMock.Host": "[4.0.0, )",
+          "DalaMock.Host": "[4.0.4, )",
           "Humanizer.Core": "[3.0.1, )",
           "Microsoft.Extensions.Hosting": "[10.0.1, )",
           "NaturalSort.Extension": "[4.4.1, )",

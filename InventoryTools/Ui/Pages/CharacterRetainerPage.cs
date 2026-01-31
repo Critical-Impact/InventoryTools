@@ -344,13 +344,13 @@ namespace InventoryTools.Ui.Pages
                                     if (_newName == "" || _newName == character.Name)
                                     {
                                         character.AlternativeName = null;
-                                        _characterMonitor.UpdateCharacter(character);
+                                        _characterMonitor.InvokeCharacterUpdated(character);
                                         _editMode = false;
                                     }
                                     else
                                     {
                                         character.AlternativeName = _newName;
-                                        _characterMonitor.UpdateCharacter(character);
+                                        _characterMonitor.InvokeCharacterUpdated(character);
                                         _editMode = false;
                                     }
                                 }

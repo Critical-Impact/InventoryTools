@@ -298,6 +298,18 @@ public class ItemPilgrimsTraverseSourceRenderer : ItemSupplementSourceRenderer<I
     public override string HelpText => "Can the item be obtained from a loot item in Pilgrim's Traverse?";
 }
 
+public class ItemOizysSourceRenderer : ItemSupplementSourceRenderer<ItemOizysSource>
+{
+    public override IReadOnlyList<ItemInfoRenderCategory>? Categories { get; } =
+        [ItemInfoRenderCategory.FieldOperation];
+    public ItemOizysSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(itemSheet, mapSheet, textureProvider, pluginInterface, ItemInfoType.Oizys, Icons.FieldOpsIcon)
+    {
+    }
+
+    public override string SingularName => "Oizys";
+    public override string HelpText => "Can the item be obtained from a loot item in Oizys?";
+}
+
 public class ItemHydatosUseRenderer : ItemSupplementUseRenderer<ItemHydatosSource>
 {
     public override IReadOnlyList<ItemInfoRenderCategory>? Categories { get; } =
