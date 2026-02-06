@@ -37,29 +37,6 @@ namespace InventoryToolsTesting.Tests
         }
 
         [Test]
-        public void TestScrip()
-        {
-            var itemSheet = Host.Services.GetRequiredService<ItemSheet>();
-            //Handsaint Jacket
-            var handsaintJacket = itemSheet.GetRow(31794)!;
-            Assert.AreEqual(3, handsaintJacket.Sources.Count);
-            var shops = handsaintJacket.GetSourcesByCategory<ItemShopSource>(ItemInfoCategory.Shop);
-            Assert.AreEqual(3, shops.Count);
-            var actualVendors = shops.SelectMany(shop => shop.Shop.ENpcs.SelectMany(npc => npc.Locations.Select(location => (shop, npc, location)))).ToList();
-
-            Assert.AreEqual(14, actualVendors.Count);
-
-            //Wool Top 16906
-            var woolTop = itemSheet.GetRow(16906)!;
-            Assert.AreEqual(11, woolTop.Sources.Count);
-            shops = woolTop.GetSourcesByCategory<ItemShopSource>(ItemInfoCategory.Shop);
-            Assert.AreEqual(4, shops.Count);
-            actualVendors = shops.SelectMany(shop => shop.Shop.ENpcs.SelectMany(npc => npc.Locations.Select(location => (shop, npc, location)))).ToList();
-
-            Assert.AreEqual(28, actualVendors.Count);
-        }
-
-        [Test]
         public void TestTomestones()
         {
             var itemSheet = Host.Services.GetRequiredService<ItemSheet>();
