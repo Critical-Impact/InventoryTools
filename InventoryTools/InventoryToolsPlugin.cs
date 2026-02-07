@@ -186,7 +186,7 @@ namespace InventoryTools
             {
                 StartupOptions = new SheetManagerStartupOptions()
                 {
-                    CacheInDataShare = bootService.Configuration.PersistLuminaCache
+                    PersistInDataShare = bootService.Configuration.PersistLuminaCache
                 }
 
             });
