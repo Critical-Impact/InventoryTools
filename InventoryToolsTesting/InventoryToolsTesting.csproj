@@ -51,16 +51,12 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\InventoryToolsMock\InventoryToolsMock.csproj" />
       <ProjectReference Include="..\InventoryTools\InventoryTools.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
+      <ProjectReference Include="..\InventoryToolsMock\InventoryToolsMock.csproj" />
       <ProjectReference Include="..\CriticalCommonLib\CriticalCommonLib.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Humanizer.Core" Version="3.0.1" />
       <PackageReference Include="JunitXml.TestLogger" Version="7.1.0" />
       <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.1" />
       <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />

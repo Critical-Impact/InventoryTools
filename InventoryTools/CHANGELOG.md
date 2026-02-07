@@ -8,6 +8,13 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [14.0.5] - 2026-02-07
+
+### Added
+- Some of the data required by Allagan Tools is now cached in dalamud's DataShare. 
+- Boot time after the initial load will be increased and other plugins relying on this will take advantage of it once updated.
+- If you prefer the data is not persisted, you can turn it off in settings via Troubleshooting -> Persist Cached Data
+
 ## [14.0.4] - 2026-02-05
 
 ### Fixed

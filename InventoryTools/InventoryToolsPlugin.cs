@@ -7,6 +7,7 @@ using System.Reflection;
 using AllaganLib.Data.Service;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.Modules;
+using AllaganLib.GameSheets.Service;
 using AllaganLib.Interface.Grid.ColumnFilters;
 using AllaganLib.Monitors.Debuggers;
 using AllaganLib.Monitors.Services;
@@ -34,6 +35,7 @@ using Dalamud.Game.ClientState.Objects;
 using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using InventoryTools.Boot;
 using InventoryTools.Commands;
 using InventoryTools.EquipmentSuggest;
 using InventoryTools.Highlighting;
@@ -65,10 +67,11 @@ using Window = InventoryTools.Ui.Window;
 
 namespace InventoryTools
 {
-    public class InventoryToolsPlugin : HostedPlugin
+    public class InventoryToolsPlugin : HostedPlugin, IDisposable
     {
         private readonly IPluginLog _pluginLog;
         private readonly IFramework _framework;
+        private readonly BootConfigurationService bootService;
         private IDalamudPluginInterface? PluginInterface { get; set; }
 
         public InventoryToolsPlugin(IDalamudPluginInterface pluginInterface, IPluginLog pluginLog,
@@ -84,6 +87,7 @@ namespace InventoryTools
             toastGui, contextMenu, titleScreenMenu,
             gameInventory, playerState)
         {
+            bootService = new BootConfigurationService(pluginInterface, framework, pluginLog);
             Stopwatch loadConfigStopwatch = new Stopwatch();
             loadConfigStopwatch.Start();
             pluginLog.Verbose("Starting Allagan Tools.");
@@ -113,6 +117,8 @@ namespace InventoryTools
             var cclAssembly = typeof(CriticalCommonLib.Services.ICharacterMonitor).Assembly;
 
             builder.Register(c => new HttpClient()).As<HttpClient>();
+            builder.RegisterInstance(bootService).ExternallyOwned().AsSelf();
+            builder.RegisterInstance(bootService.Configuration).ExternallyOwned().AsSelf();
 
             //Register all classes that are singletons and implement a particular interface/class
             builder.RegisterSingletonsSelfAndInterfaces<IHotkey>(dataAccess);
@@ -176,7 +182,14 @@ namespace InventoryTools
             this.RegisterHostedService(typeof(AchievementMonitorService));
 
             //AllaganLib modules
-            builder.RegisterModule(new GameSheetManagerModule());
+            builder.RegisterModule(new GameSheetManagerModule()
+            {
+                StartupOptions = new SheetManagerStartupOptions()
+                {
+                    CacheInDataShare = bootService.Configuration.PersistLuminaCache
+                }
+
+            });
             builder.RegisterModule(new GameDataModule());
 
             //Service configuration
@@ -455,6 +468,21 @@ namespace InventoryTools
         {
 
 
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                bootService.Dispose();
+            }
+        }
+
+        public new void Dispose()
+        {
+            base.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

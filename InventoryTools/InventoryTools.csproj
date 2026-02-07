@@ -14,8 +14,8 @@
     <PackageReference Include="AllaganLib.Monitors" Version="2.0.4" />
     <PackageReference Include="Autofac" Version="9.0.0" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
-    <PackageReference Include="DalaMock.Host" Version="4.0.4" />
-    <PackageReference Include="DalaMock.Shared" Version="4.0.4" />
+    <PackageReference Include="DalaMock.Host" Version="4.0.5" />
+    <PackageReference Include="DalaMock.Shared" Version="4.0.5" />
     <PackageReference Include="Humanizer.Core" Version="3.0.1" />
     <PackageReference Include="Ionide.KeepAChangelog" Version="0.2.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="4.14.0">
