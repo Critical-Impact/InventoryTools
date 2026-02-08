@@ -116,7 +116,7 @@ namespace InventoryTools.Ui
             base.OnClose();
         }
 
-        public override void Draw()
+        public override void DrawWindow()
         {
             var filterConfiguration = SelectedConfiguration;
             if (filterConfiguration != null)

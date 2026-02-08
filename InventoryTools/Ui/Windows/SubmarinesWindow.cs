@@ -208,7 +208,7 @@ public class SubmarinesWindow : GenericTabbedTable<SubmarineExplorationRow>, IMe
     public override Vector2? MinSize { get; } = new(200, 200);
     public override Vector2? DefaultSize { get; } = new(600, 600);
 
-    public override void Draw()
+    public override void DrawWindow()
     {
         DrawTabs();
     }

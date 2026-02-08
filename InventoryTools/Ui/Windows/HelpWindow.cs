@@ -34,7 +34,7 @@ namespace InventoryTools.Ui
         public override bool DestroyOnClose => true;
 
 
-        public override void Draw()
+        public override void DrawWindow()
         {
             using (var sideBarChild =
                    ImRaii.Child("SideBar", new Vector2(150, -1) * ImGui.GetIO().FontGlobalScale, true))

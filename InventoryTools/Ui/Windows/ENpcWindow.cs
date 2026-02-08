@@ -74,13 +74,8 @@ namespace InventoryTools.Ui
         public List<IShop>? Shops;
         public override string GenericName => "Npcs";
         public override bool DestroyOnClose => true;
-        public override void Draw()
+        public override void DrawWindow()
         {
-            if (ImGui.GetWindowPos() != CurrentPosition)
-            {
-                CurrentPosition = ImGui.GetWindowPos();
-            }
-
             if (ENpcResidentRow == null)
             {
                 ImGui.TextUnformatted("eNpc with the ID " + _eNpcId + " could not be found.");

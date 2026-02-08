@@ -22,7 +22,7 @@ public class ChangelogWindow : GenericWindow, IMenuWindow
         _changelogService = changelogService;
     }
 
-    public override void Draw()
+    public override void DrawWindow()
     {
         ImGui.SetNextWindowSize(new Vector2(600, 400), ImGuiCond.FirstUseEver);
         ImGui.Begin("Changelog");

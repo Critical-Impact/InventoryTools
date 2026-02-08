@@ -38,7 +38,7 @@ public class TeamCraftImportWindow : GenericWindow
     {
     }
 
-    public override void Draw()
+    public override void DrawWindow()
     {
         ImGui.Text("Import to Craft List: ");
         ImGui.SameLine();

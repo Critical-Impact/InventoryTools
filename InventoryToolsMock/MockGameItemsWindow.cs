@@ -46,7 +46,7 @@ public class MockGameItemsWindow : GenericWindow
     public InventoryItem? _cutItem;
     public InventoryItem? _copyItem;
     public Dictionary<ulong, InventoryCategory> _selectedCategory;
-    public override void Draw()
+    public override void DrawWindow()
     {
         using (var tabBar = ImRaii.TabBar("Bags", ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.ListPopupButton))
         {

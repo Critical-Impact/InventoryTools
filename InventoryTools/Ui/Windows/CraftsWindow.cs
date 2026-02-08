@@ -1698,7 +1698,7 @@ namespace InventoryTools.Ui
             }
         }
 
-        public override unsafe void Draw()
+        public override unsafe void DrawWindow()
         {
             DrawMenuBar();
             _popupService.Draw(GetType());

@@ -123,12 +123,8 @@ public class CraftOverlayWindow : OverlayWindow
         return this._overlayHideSetting.ShouldShow();
     }
 
-    public override void Draw()
+    public override void DrawWindow()
     {
-        if (ImGui.GetWindowPos() != CurrentPosition && ImGui.GetWindowPos() != Vector2.Zero)
-        {
-            CurrentPosition = ImGui.GetWindowPos();
-        }
         var collapsed = this.WindowState;
 
         var currentCursorPosX = ImGui.GetCursorPosX();

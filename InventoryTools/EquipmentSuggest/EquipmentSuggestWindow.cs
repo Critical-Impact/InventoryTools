@@ -188,8 +188,18 @@ public class EquipmentSuggestWindow : GenericWindow, IMenuWindow
     }
 
 
-    public override void Draw()
+    public override void DrawWindow()
     {
+        if (ImGui.GetWindowPos() != CurrentPosition)
+        {
+            CurrentPosition = ImGui.GetWindowPos();
+        }
+
+        if (ImGui.GetWindowPos() == Position)
+        {
+            Position = null;
+        }
+
         if (_currentTask is { IsCompleted: true })
         {
             _currentTask = null;

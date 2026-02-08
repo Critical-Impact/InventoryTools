@@ -268,13 +268,8 @@ namespace InventoryTools.Ui
 
         public override string GenericName { get; } = "Item";
         public override bool DestroyOnClose => true;
-        public override void Draw()
+        public override void DrawWindow()
         {
-            if (ImGui.GetWindowPos() != CurrentPosition)
-            {
-                CurrentPosition = ImGui.GetWindowPos();
-            }
-
             if (Item == null)
             {
                 ImGui.TextUnformatted("Item with the ID " + _itemId + " could not be found.");

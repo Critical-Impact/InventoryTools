@@ -36,7 +36,7 @@ public class ListDebugWindow : GenericWindow
         _lists = _listService.Lists;
     }
 
-    public override void Draw()
+    public override void DrawWindow()
     {
         foreach (var list in _lists)
         {

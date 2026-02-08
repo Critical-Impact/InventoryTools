@@ -61,7 +61,7 @@ namespace InventoryTools.Ui
         public override string GenericKey { get; } = "retainertask";
         public override string GenericName { get; } = "Retainer Task";
         public override bool DestroyOnClose => true;
-        public override void Draw()
+        public override void DrawWindow()
         {
             if (RetainerTask == null)
             {

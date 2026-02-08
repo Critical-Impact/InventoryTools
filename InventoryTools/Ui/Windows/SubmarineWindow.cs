@@ -61,7 +61,7 @@ namespace InventoryTools.Ui
         public override string GenericKey { get; } = "submarine";
         public override string GenericName { get; } = "Submarines";
         public override bool DestroyOnClose => true;
-        public override void Draw()
+        public override void DrawWindow()
         {
             if (SubmarineExploration == null)
             {

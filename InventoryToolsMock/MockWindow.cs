@@ -102,7 +102,7 @@ public class MockWindow : GenericWindow
     private WorldPicker _activeWorldPicker;
     private WorldPicker _homeWorldPicker;
 
-    public override void Draw()
+    public override void DrawWindow()
     {
         ImGui.ShowStackToolWindow();
         if (ImGui.BeginTabBar("MockTabs"))

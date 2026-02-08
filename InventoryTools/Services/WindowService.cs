@@ -493,8 +493,10 @@ namespace InventoryTools.Services
 
         private void WindowOnOpened(IWindow window)
         {
+            Logger.LogTrace("{WindowName} opened at {X}/{Y}", window.GenericName, window.CurrentPosition.X, window.CurrentPosition.Y);
             if(window.SaveState && !_configuration.OpenWindows.Contains(window.GetType().ToString()))
             {
+                Logger.LogTrace("{WindowName} opened, restoring state and position {X}/{Y}", window.GenericName, window.CurrentPosition.X, window.CurrentPosition.Y);
                 _configuration.OpenWindows.Add(window.GetType().ToString());
                 _configuration.IsDirty = true;
             }
@@ -502,6 +504,7 @@ namespace InventoryTools.Services
             {
                 if (_configuration.SavedWindowPositions.ContainsKey(window.GetType().ToString()))
                 {
+                    Logger.LogTrace("{WindowName} opened, restoring position, {X}/{Y}", window.GenericName, window.CurrentPosition.X, window.CurrentPosition.Y);
                     window.SetPosition(_configuration.SavedWindowPositions[window.GetType().ToString()], true);
                     _configuration.IsDirty = true;
                 }
@@ -511,6 +514,7 @@ namespace InventoryTools.Services
 
         private void WindowOnClosed(IWindow window)
         {
+            Logger.LogTrace("{WindowName} closed at {X}/{Y}", window.GenericName, window.CurrentPosition.X, window.CurrentPosition.Y);
             if(window.SaveState && _configuration.OpenWindows.Contains(window.GetType().ToString()))
             {
                 _configuration.OpenWindows.Remove(window.GetType().ToString());
@@ -530,10 +534,15 @@ namespace InventoryTools.Services
                     }
                 }
 
-                if (hasOtherWindowOpen == false)
+                if (!hasOtherWindowOpen)
                 {
+                    Logger.LogTrace("{WindowName} closed, saving position, {X}/{Y}", window.GenericName, window.CurrentPosition.X, window.CurrentPosition.Y);
                     _configuration.SavedWindowPositions[window.GetType().ToString()] = window.CurrentPosition;
                     _configuration.IsDirty = true;
+                }
+                else
+                {
+                    Logger.LogTrace("{WindowName} has other instances open, not saving", window.GenericName);
                 }
 
             }

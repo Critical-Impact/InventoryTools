@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility;
@@ -121,7 +120,7 @@ public class IconBrowserWindow : GenericWindow
         },
     };
 
-    public override void Draw()
+    public override void DrawWindow()
     {
         var iconSize = 64 * ImGuiHelpers.GlobalScale;
 

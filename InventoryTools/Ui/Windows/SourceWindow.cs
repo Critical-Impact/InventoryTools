@@ -39,7 +39,7 @@ public class SourceWindow : GenericTabbedTable<(SourceType, ItemInfoType)>
         _useTypes = _itemInfoRenderService.UseRenderers.Select(c => (SourceType.Use, c.Value.Type)).Distinct().ToList();
     }
 
-    public override void Draw()
+    public override void DrawWindow()
     {
         DrawTabs();
     }

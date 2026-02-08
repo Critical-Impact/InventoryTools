@@ -54,7 +54,7 @@ namespace InventoryTools.Ui
         public override string GenericKey => "airship";
         public override string GenericName => "Airship";
         public override bool DestroyOnClose => true;
-        public override void Draw()
+        public override void DrawWindow()
         {
             if (AirshipExplorationPoint == null)
             {

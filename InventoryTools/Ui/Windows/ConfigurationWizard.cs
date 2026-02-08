@@ -67,7 +67,7 @@ public class ConfigurationWizard : GenericWindow
         }
     }
 
-    public override void Draw()
+    public override void DrawWindow()
     {
         using (var sideBar = ImRaii.Child("sideBar", new Vector2(150, 0) * ImGui.GetIO().FontGlobalScale, true))
         {

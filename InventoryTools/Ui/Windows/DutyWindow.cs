@@ -104,7 +104,7 @@ namespace InventoryTools.Ui
         public override string GenericKey => "duty";
         public override string GenericName => "Duty";
         public override bool DestroyOnClose => true;
-        public override void Draw()
+        public override void DrawWindow()
         {
             if (ContentFinderCondition == null)
             {

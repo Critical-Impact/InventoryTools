@@ -37,13 +37,32 @@ namespace InventoryTools.Ui
             RespectCloseHotkey = !Configuration.DoesWindowIgnoreEscape(this.GetType());
         }
 
+        public abstract void DrawWindow();
+
+        public override void Draw()
+        {
+            if (ImGui.GetWindowPos() != CurrentPosition)
+            {
+                CurrentPosition = ImGui.GetWindowPos();
+            }
+
+            if (ImGui.GetWindowPos() == Position)
+            {
+                Position = null;
+            }
+
+            DrawWindow();
+        }
+
         public override void OnOpen()
         {
+            Logger.LogTrace("{WindowName} opened", this.GenericName);
             Opened?.Invoke(this);
         }
 
         public override void OnClose()
         {
+            Logger.LogTrace("{WindowName} closed", this.GenericName);
             Closed?.Invoke(this);
         }
 

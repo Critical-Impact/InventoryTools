@@ -33,7 +33,7 @@ namespace InventoryTools.Ui
         public override string GenericName { get; } = "Intro";
         public override bool DestroyOnClose => true;
 
-        public override void Draw()
+        public override void DrawWindow()
         {
             using (var leftChild = ImRaii.Child("Left", new Vector2(200, 0)))
             {

@@ -79,13 +79,8 @@ namespace InventoryTools.Ui
         private BNpcNameRow? bNpc => _bNpcNameSheet.GetRowOrDefault(_bNpcId);
         public override string GenericName => "Mob";
         public override bool DestroyOnClose => true;
-        public override void Draw()
+        public override void DrawWindow()
         {
-            if (ImGui.GetWindowPos() != CurrentPosition)
-            {
-                CurrentPosition = ImGui.GetWindowPos();
-            }
-
             if (bNpc == null)
             {
                 ImGui.TextUnformatted("bNpc with the ID " + _bNpcId + " could not be found.");

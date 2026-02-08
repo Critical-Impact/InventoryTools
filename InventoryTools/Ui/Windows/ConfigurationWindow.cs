@@ -518,7 +518,7 @@ namespace InventoryTools.Ui
             }
         }
 
-        public override void Draw()
+        public override void DrawWindow()
         {
             DrawMenuBar();
             _verticalSplitter.Draw(DrawSideBar, DrawMainWindow);

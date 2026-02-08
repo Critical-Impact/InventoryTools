@@ -502,7 +502,7 @@ namespace InventoryTools.Ui
             base.OnClose();
         }
 
-        public override unsafe void Draw()
+        public override unsafe void DrawWindow()
         {
             foreach (var filter in Filters)
             {
