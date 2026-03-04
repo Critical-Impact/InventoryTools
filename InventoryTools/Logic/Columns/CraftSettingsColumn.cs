@@ -60,8 +60,8 @@ public class CraftSettingsColumn : IColumn
     public string HelpText { get; set; } = "Modify each items craft settings in this column";
     public string FilterText { get; set; } = "";
 
-    public string RenderName { get; } = "";
-
+    public string RenderName { get; } = "Settings";
+    public virtual bool HideHeaderLabel => true;
     public List<string>? FilterChoices { get; set; } = null;
     public bool HasFilter { get; set; } = false;
     public ColumnFilterType FilterType { get; set; } = ColumnFilterType.None;

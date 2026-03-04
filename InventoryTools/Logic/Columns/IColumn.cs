@@ -28,6 +28,7 @@ namespace InventoryTools.Logic.Columns
         public List<IColumnSetting> FilterSettings { get; set; }
         public List<IColumnSetting> Settings { get; set; }
         public string? FilterIcon { get; }
+        public bool HideHeaderLabel { get; }
         public IEnumerable<SearchResult> Filter(ColumnConfiguration columnConfiguration,
             IEnumerable<SearchResult> items);
         public IEnumerable<SearchResult> Sort(ColumnConfiguration columnConfiguration, ImGuiSortDirection direction,

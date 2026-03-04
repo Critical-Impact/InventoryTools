@@ -22,6 +22,7 @@ public abstract class ButtonColumn : IColumn
     public virtual bool HasFilter { get; set; } = false;
     public virtual ColumnFilterType FilterType { get; set; } = ColumnFilterType.None;
     public virtual bool IsDebug { get; set; } = false;
+    public virtual bool HideHeaderLabel => false;
     public virtual FilterType AvailableIn { get; } = Logic.FilterType.SearchFilter | Logic.FilterType.SortingFilter |
                                                       Logic.FilterType.GameItemFilter | Logic.FilterType.HistoryFilter |
                                                       Logic.FilterType.CraftFilter | Logic.FilterType.CuratedList;
@@ -105,7 +106,14 @@ public abstract class ButtonColumn : IColumn
                     : ImGuiTableColumnFlags.PreferSortDescending;
             }
         }
-        ImGui.TableSetupColumn(columnConfiguration.Name ?? (RenderName ?? Name), imGuiTableColumnFlags, Width, (uint)columnIndex);
+
+        if (this.HideHeaderLabel)
+        {
+            imGuiTableColumnFlags |= ImGuiTableColumnFlags.NoHeaderLabel;
+        }
+
+        var tableName = columnConfiguration.Name ?? (RenderName ?? Name);
+        ImGui.TableSetupColumn(tableName, imGuiTableColumnFlags, Width, (uint)columnIndex);
     }
 
     public bool? DrawFilter(ColumnConfiguration columnConfiguration, int columnIndex)

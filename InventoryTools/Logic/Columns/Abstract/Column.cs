@@ -88,6 +88,7 @@ namespace InventoryTools.Logic.Columns.Abstract
              type.HasFlag(InventoryTools.Logic.FilterType.CuratedList));
 
         public virtual string? FilterIcon { get; set; } = null;
+        public virtual bool HideHeaderLabel => false;
 
         public abstract IEnumerable<SearchResult> Filter(ColumnConfiguration columnConfiguration,
             IEnumerable<SearchResult> searchResults);
@@ -120,6 +121,11 @@ namespace InventoryTools.Logic.Columns.Abstract
             if (columnIndex == 0)
             {
                 imGuiTableColumnFlags |= ImGuiTableColumnFlags.NoHide;
+            }
+
+            if (this.HideHeaderLabel)
+            {
+                imGuiTableColumnFlags |= ImGuiTableColumnFlags.NoHeaderLabel;
             }
             ImGui.TableSetupColumn(columnConfiguration.Name ?? (RenderName ?? Name), imGuiTableColumnFlags, Width, (uint)columnIndex);
         }

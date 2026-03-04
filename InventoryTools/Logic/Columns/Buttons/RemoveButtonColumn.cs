@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Numerics;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using Dalamud.Bindings.ImGui;
@@ -30,6 +31,7 @@ public class RemoveButtonColumn : ButtonColumn
 
         if (searchResult.CraftItem != null && !searchResult.CraftItem.IsOutputItem)
         {
+            ImGui.Dummy(new Vector2(0,0));
             return null;
         }
         if (ImGui.Button("X##RM" + rowIndex + "_" + columnIndex))
@@ -48,7 +50,7 @@ public class RemoveButtonColumn : ButtonColumn
         return null;
     }
 
-    public override string? RenderName { get; } = "";
+    public override bool HideHeaderLabel => true;
     public override string Name { get; set; } = "Remove";
     public override float Width { get; set; } = 60;
     public override string HelpText { get; set; } = "Adds a button for quickly removing items from your list";
