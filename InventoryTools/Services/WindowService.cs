@@ -5,10 +5,12 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Autofac.Features.OwnedInstances;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Factories;
 using DalaMock.Host.Mediator;
 using DalaMock.Shared.Interfaces;
+using Dalamud.Interface.Windowing;
 using InventoryTools.Compendium;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Windows;
@@ -16,6 +18,7 @@ using InventoryTools.Mediator;
 using InventoryTools.Ui;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using IWindow = InventoryTools.Ui.IWindow;
 using Window = InventoryTools.Ui.Window;
 
 namespace InventoryTools.Services
@@ -29,6 +32,7 @@ namespace InventoryTools.Services
         private readonly Func<Type, GenericWindow> _genericWindowFactory;
         private readonly Func<Type, Dalamud.Interface.Windowing.Window> _dalamudWindowFactory;
         private readonly CompendiumListWindow.Factory _compendiumListWindowFactory;
+        private readonly CompendiumViewWindow.Factory _compendiumViewWindowFactory;
         private readonly List<ICompendiumType> _compendiumTypes;
         private readonly InventoryToolsConfiguration _configuration;
         private readonly MediatorService _mediatorService;
@@ -40,6 +44,7 @@ namespace InventoryTools.Services
             Func<Type, GenericWindow> genericWindowFactory,
             Func<Type, Dalamud.Interface.Windowing.Window> dalamudWindowFactory,
             CompendiumListWindow.Factory compendiumListWindowFactory,
+            CompendiumViewWindow.Factory compendiumViewWindowFactory,
             IEnumerable<ICompendiumType> compendiumTypes,
             InventoryToolsConfiguration configuration,
             IWindowSystemFactory windowSystemFactory) : base(logger,
@@ -51,6 +56,7 @@ namespace InventoryTools.Services
             _genericWindowFactory = genericWindowFactory;
             _dalamudWindowFactory = dalamudWindowFactory;
             _compendiumListWindowFactory = compendiumListWindowFactory;
+            _compendiumViewWindowFactory = compendiumViewWindowFactory;
             _compendiumTypes = compendiumTypes.ToList();
             _configuration = configuration;
             _mediatorService = mediatorService;
@@ -86,8 +92,8 @@ namespace InventoryTools.Services
         private ConcurrentDictionary<(Type,string), IWindow> _stringWindows = new();
         private ConcurrentDictionary<(Type,uint), IWindow> _uintWindows = new();
         private ConcurrentDictionary<Type, IWindow> _genericWindows = new();
-        private ConcurrentDictionary<ICompendiumType, IWindow> _compendiumListWindows = new();
-        private ConcurrentDictionary<ICompendiumType, IWindow> _compendiumViewWindows = new();
+        private ConcurrentDictionary<ICompendiumType, Owned<CompendiumListWindow>> _compendiumListWindows = new();
+        private ConcurrentDictionary<(ICompendiumType, uint), Owned<CompendiumViewWindow>> _compendiumViewWindows = new();
 
         private ConcurrentDictionary<Type, Dalamud.Interface.Windowing.Window> _dalamudWindows = new();
 
@@ -167,15 +173,15 @@ namespace InventoryTools.Services
             return newWindow;
         }
 
-        public UintWindow GetWindow(Type type, uint windowId)
+        public UintWindow GetWindow(Type type, uint entryId)
         {
-            if (_uintWindows.ContainsKey((type,windowId)))
+            if (_uintWindows.ContainsKey((type,entryId)))
             {
-                return (UintWindow)_uintWindows[(type,windowId)];
+                return (UintWindow)_uintWindows[(type,entryId)];
             }
             ;
-            var newWindow = _uintWindowFactory.Invoke(type, windowId);
-            AddWindow(type, newWindow, windowId);
+            var newWindow = _uintWindowFactory.Invoke(type, entryId);
+            AddWindow(type, newWindow, entryId);
             return newWindow;
         }
 
@@ -191,7 +197,7 @@ namespace InventoryTools.Services
             return newWindow;
         }
 
-        public CompendiumListWindow GetWindow(ICompendiumType compendiumType)
+        public Owned<CompendiumListWindow> GetWindow(ICompendiumType compendiumType)
         {
             if (!_compendiumListWindows.TryGetValue(compendiumType, out var window))
             {
@@ -200,7 +206,19 @@ namespace InventoryTools.Services
                 window = listWindow;
             }
 
-            return (CompendiumListWindow)window;
+            return window;
+        }
+
+
+        public Owned<CompendiumViewWindow> GetWindow(ICompendiumType compendiumType, uint entryId)
+        {
+            if (_compendiumViewWindows.ContainsKey((compendiumType,entryId)))
+            {
+                return _compendiumViewWindows[(compendiumType,entryId)];
+            }
+            var newWindow = _compendiumViewWindowFactory.Invoke(compendiumType, entryId);
+            AddWindow(newWindow, compendiumType, entryId);
+            return newWindow;
         }
 
         public T GetWindow<T>(uint windowId) where T: UintWindow
@@ -225,7 +243,7 @@ namespace InventoryTools.Services
             return (T)newWindow;
         }
 
-        public T GetWindow<T>(ICompendiumType compendiumType) where T: CompendiumListWindow
+        public T GetWindow<T>(ICompendiumType compendiumType) where T: Owned<CompendiumListWindow>
         {
             if (!_compendiumListWindows.TryGetValue(compendiumType, out var window))
             {
@@ -276,6 +294,18 @@ namespace InventoryTools.Services
         public bool ToggleWindow(Type window, uint windowId)
         {
             GetWindow(window, windowId).Toggle();
+            return true;
+        }
+
+        private bool ToggleWindow(ICompendiumType compendiumType, uint windowId)
+        {
+            GetWindow(compendiumType, windowId).Value.Toggle();
+            return true;
+        }
+
+        private bool ToggleWindow(ICompendiumType compendiumType)
+        {
+            GetWindow(compendiumType).Value.Toggle();
             return true;
         }
 
@@ -335,13 +365,26 @@ namespace InventoryTools.Services
         public bool OpenWindow(ICompendiumType compendiumType, bool refocus = true)
         {
             var window = GetWindow(compendiumType);
-            if (window.IsOpen)
+            if (window.Value.IsOpen)
             {
-                window.BringToFront();
+                window.Value.BringToFront();
             }
             else
             {
-                window.Open();
+                window.Value.Open();
+            }
+            return true;
+        }
+        public bool OpenWindow(ICompendiumType type, uint windowId, bool refocus = true)
+        {
+            var window = GetWindow(type, windowId);
+            if (window.Value.IsOpen)
+            {
+                window.Value.BringToFront();
+            }
+            else
+            {
+                window.Value.Open();
             }
             return true;
         }
@@ -545,15 +588,29 @@ namespace InventoryTools.Services
             return false;
         }
 
-        private bool AddWindow<T>(T window, ICompendiumType compendiumType) where T: CompendiumListWindow
+        private bool AddWindow<T>(T window, ICompendiumType compendiumType) where T: Owned<CompendiumListWindow>
         {
-            window.Logger = Logger;
+            window.Value.Logger = Logger;
             if (_compendiumListWindows.TryAdd(compendiumType, window))
             {
-                _allWindows.Add(window);
-                _windowSystem.AddWindow(window);
-                window.Closed += WindowOnClosed;
-                window.Opened += WindowOnOpened;
+                _allWindows.Add(window.Value);
+                _windowSystem.AddWindow(window.Value);
+                window.Value.Closed += WindowOnClosed;
+                window.Value.Opened += WindowOnOpened;
+                return true;
+            }
+            return false;
+        }
+
+        private bool AddWindow<T>(T window, ICompendiumType compendiumType, uint entryId) where T: Owned<CompendiumViewWindow>
+        {
+            window.Value.Logger = Logger;
+            if (_compendiumViewWindows.TryAdd((compendiumType,entryId), window))
+            {
+                _allWindows.Add(window.Value);
+                _windowSystem.AddWindow(window.Value);
+                window.Value.Closed += WindowOnClosed;
+                window.Value.Opened += WindowOnOpened;
                 return true;
             }
             return false;
@@ -617,7 +674,28 @@ namespace InventoryTools.Services
 
             if (window.DestroyOnClose)
             {
-                RemoveWindow(window);
+                if (window is CompendiumListWindow compendiumListWindow)
+                {
+                    var listWindow = GetWindow(compendiumListWindow.CompendiumType);
+                    RemoveWindow(window);
+                    listWindow.Dispose();
+                }
+                else if (window is CompendiumViewWindow compendiumViewWindow)
+                {
+                    var viewWindow = GetWindow(compendiumViewWindow.CompendiumType, compendiumViewWindow.EntityId);
+                    RemoveWindow(window);
+                    viewWindow.Dispose();
+                }
+                else
+                {
+                    RemoveWindow(window);
+                    if (window is IDisposable disposable)
+                    {
+                        disposable.Dispose();
+                    }
+                }
+
+
             }
             MediatorService.Publish(new OverlaysRequestRefreshMessage());
         }
@@ -666,6 +744,11 @@ namespace InventoryTools.Services
                 _compendiumListWindows.Remove(listWindow.CompendiumType, out _);
             }
 
+            if (window is CompendiumViewWindow viewWindow)
+            {
+                _compendiumViewWindows.Remove((viewWindow.CompendiumType, viewWindow.EntityId), out _);
+            }
+
             if (window is Window actualWindow)
             {
                 WindowSystem.RemoveWindow(actualWindow);
@@ -704,8 +787,15 @@ namespace InventoryTools.Services
             _mediatorService.Subscribe(this, new Action<OpenSavedWindowsMessage>(OpenSavedWindows) );
             _mediatorService.Subscribe(this, new Action<UpdateWindowRespectClose>(close => UpdateRespectCloseHotkey(close.windowType, close.newSetting)) );
             _mediatorService.Subscribe(this, new Action<OpenCompendiumListMessage>(OpenCompendiumListWindow));
-            //_mediatorService.Subscribe(this, new Action<OpenCompendiumViewMessage>(OpenCompendiumViewWindow));
+            _mediatorService.Subscribe(this, new Action<OpenCompendiumViewMessage>(OpenCompendiumViewWindow));
+            _mediatorService.Subscribe(this, new Action<ToggleCompendiumListMessage>(ToggleCompendiumListWindow));
+            _mediatorService.Subscribe(this, new Action<ToggleCompendiumViewMessage>(ToggleCompendiumViewWindow));
             return Task.CompletedTask;
+        }
+
+        private void OpenCompendiumViewWindow(OpenCompendiumViewMessage obj)
+        {
+            OpenWindow(obj.CompendiumType, obj.rowId);
         }
 
         private void OpenCompendiumListWindow(OpenCompendiumListMessage obj)
@@ -713,6 +803,15 @@ namespace InventoryTools.Services
             OpenWindow(obj.CompendiumType);
         }
 
+        private void ToggleCompendiumViewWindow(ToggleCompendiumViewMessage obj)
+        {
+            ToggleWindow(obj.CompendiumType, obj.rowId);
+        }
+
+        private void ToggleCompendiumListWindow(ToggleCompendiumListMessage obj)
+        {
+            ToggleWindow(obj.CompendiumType);
+        }
 
         private void OpenSavedWindows(OpenSavedWindowsMessage obj)
         {

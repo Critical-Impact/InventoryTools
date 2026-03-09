@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Threading;
 using AllaganLib.Interface.Grid;
 using AllaganLib.Shared.Extensions;
 using Autofac;
+using Autofac.Features.OwnedInstances;
 using DalaMock.Host.Mediator;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
@@ -27,9 +29,13 @@ public class CompendiumListWindow : CompendiumWindow
     private readonly IPluginLog _pluginLog;
     private readonly IEnumerable<IMenuWindow> _menuWindows;
     private readonly IEnumerable<ICompendiumType> _compendiumTypes;
-    private readonly Lazy<IRenderTable<WindowState, MessageBase>> _table;
+    private readonly Lazy<ICompendiumTable<WindowState, MessageBase>> _table;
+    private ICompendiumGrouping? _compendiumGrouping = null;
+    private List<KeyValuePair<object, string>>? _compendiumTabs = null;
+    private object? _currentTab = null;
+    private bool _defaultGroupSet = false;
 
-    public delegate CompendiumListWindow Factory(ICompendiumType compendiumType);
+    public delegate Owned<CompendiumListWindow> Factory(ICompendiumType compendiumType);
 
     public CompendiumListWindow(ILogger<CompendiumListWindow> logger, WindowState windowState, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ICompendiumType compendiumType, IComponentContext context, IPluginLog pluginLog, IEnumerable<IMenuWindow> menuWindows, IEnumerable<ICompendiumType> compendiumTypes) : base(logger, mediator, imGuiService, configuration, compendiumType.Plural + " Window")
     {
@@ -38,17 +44,73 @@ public class CompendiumListWindow : CompendiumWindow
         _pluginLog = pluginLog;
         _menuWindows = menuWindows;
         _compendiumTypes = compendiumTypes;
-        _table = new Lazy<IRenderTable<WindowState, MessageBase>>(
+        _table = new Lazy<ICompendiumTable<WindowState, MessageBase>>(
             compendiumType.BuildTable,
             LazyThreadSafetyMode.PublicationOnly);
         Flags = ImGuiWindowFlags.MenuBar;
     }
 
-    public override void Draw()
+    private List<KeyValuePair<object, string>>? GetTabs(ICompendiumGrouping compendiumGrouping)
+    {
+        return _compendiumType.GetGroups(compendiumGrouping)?.OrderBy(k => k.Value).ToList();
+    }
+
+    public override void DrawWindow()
     {
         DrawMenuBar();
 
-        MediatorService.Publish(_table.Value.Draw(_windowState, new Vector2(0,0)));
+        if (!_defaultGroupSet)
+        {
+            _defaultGroupSet = true;
+            var defaultGrouping = _compendiumType.GetDefaultGrouping();
+            if (defaultGrouping != string.Empty)
+            {
+                var groupings = _compendiumType.GetGroupings();
+                if (groupings != null)
+                {
+                    _compendiumGrouping = groupings.FirstOrDefault(c => c.Key == defaultGrouping);
+                }
+            }
+        }
+
+        if (_compendiumGrouping == null)
+        {
+            MediatorService.Publish(_table.Value.Draw(_windowState, new Vector2(0, 0)));
+        }
+        else
+        {
+            using (var tabBar = ImRaii.TabBar(_compendiumGrouping.Key, ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.ListPopupButton))
+            {
+                if (tabBar)
+                {
+                    _compendiumTabs ??= GetTabs(_compendiumGrouping);
+                    if (_compendiumTabs == null)
+                    {
+                        MediatorService.Publish(_table.Value.Draw(_windowState, new Vector2(0, 0)));
+                    }
+                    else
+                    {
+                        foreach (var tab in _compendiumTabs)
+                        {
+                            using (var tabItem = ImRaii.TabItem(tab.Value, ImGuiTabItemFlags.NoReorder))
+                            {
+                                if (tabItem)
+                                {
+                                    if (_currentTab == null || _currentTab != tab.Key)
+                                    {
+                                        _currentTab = tab.Key;
+                                        _table.Value.SetGrouping(_compendiumGrouping, tab.Key);
+                                    }
+                                    MediatorService.Publish(_table.Value.Draw(_windowState, new Vector2(0, 0)));
+
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
     }
 
     private void DrawMenuBar()
@@ -106,11 +168,27 @@ public class CompendiumListWindow : CompendiumWindow
                         }
                     }
 
-                    if (ImGui.MenuItem("Export"))
-                    {
-                        if (SelectedConfiguration != null)
-                        {
 
+                    var groupings = _compendiumType.GetGroupings();
+                    if (groupings != null)
+                    {
+                        using (var groupingMenu = ImRaii.Menu("Group By"))
+                        {
+                            if (groupingMenu)
+                            {
+                                if (ImGui.MenuItem("None", _compendiumGrouping == null))
+                                {
+                                    _compendiumGrouping = null;
+                                    _table.Value.ClearGrouping();
+                                }
+                                foreach (var grouping in groupings)
+                                {
+                                    if (ImGui.MenuItem(grouping.Name, _compendiumGrouping?.Equals(grouping) ?? false))
+                                    {
+                                        _compendiumGrouping = grouping;
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -118,14 +196,11 @@ public class CompendiumListWindow : CompendiumWindow
                     {
                         if (menu)
                         {
-                            if (_menuWindows != null)
+                            foreach (var window in _menuWindows)
                             {
-                                foreach (var window in _menuWindows)
+                                if (ImGui.MenuItem(window.GenericName))
                                 {
-                                    if (ImGui.MenuItem(window.GenericName))
-                                    {
-                                        this.MediatorService.Publish(new OpenGenericWindowMessage(window.GetType()));
-                                    }
+                                    this.MediatorService.Publish(new OpenGenericWindowMessage(window.GetType()));
                                 }
                             }
                         }
@@ -139,7 +214,7 @@ public class CompendiumListWindow : CompendiumWindow
                             {
                                 if (ImGui.MenuItem(compendiumType.Plural))
                                 {
-                                    this.MediatorService.Publish(new OpenCompendiumListMessage(compendiumType));
+                                    this.MediatorService.Publish(new ToggleCompendiumListMessage(compendiumType));
                                 }
                             }
                         }

@@ -322,6 +322,73 @@ public class ImGuiService : AllaganLib.Interface.Services.ImGuiService
         }
     }
 
+    /// <summary>
+    /// Wraps elements in a child and automatically wraps the items to the next line based on the available space
+    /// </summary>
+    /// <param name="id">The child ID to push.</param>
+    /// <param name="items">A list of items you want to display.</param>
+    /// <param name="scaledElementSize">The scaled size of the elements. They should be the same size. The base size should be multipled by FontGlobalScale. Any FramePadding/etc should not be included in the multiplication.</param>
+    /// <param name="elementSpacingWidth">The padding between each element. This should not be scaled by FontGlobalScale</param>
+    /// <param name="drawElement">A Func that draws the element, returning true or false if the item should be rendered.</param>
+    /// <param name="maxHeight">The maximum height of the wrapping child.</param>
+    /// <typeparam name="T">The type of element to wrap.</typeparam>
+    public void WrapElements<T>(
+        string id,
+        IEnumerable<T> items,
+        float scaledElementSize,
+        float elementSpacingWidth,
+        Func<T, bool> drawElement,
+        int maxHeight = -1)
+    {
+        using var pushId = ImRaii.PushId(id);
+
+        var enumerable = items.ToList();
+        if (enumerable.Count == 0)
+            return;
+
+        var columnWidth = ImGui.GetContentRegionAvail().X;
+        var itemWidth = scaledElementSize + elementSpacingWidth;
+
+        var maxItems = itemWidth > 0
+            ? (int)Math.Floor((columnWidth + elementSpacingWidth) / itemWidth)
+            : 1;
+
+        maxItems = Math.Max(maxItems, 1);
+
+        var rows = (int)Math.Ceiling(enumerable.Count / (float)maxItems);
+
+        var height = rows * scaledElementSize
+                     + (rows - 1) * elementSpacingWidth;
+
+        if (maxHeight > 0)
+            height = Math.Min(height, maxHeight);
+
+        using var wrapTableChild = ImRaii.Child(
+            "ScrollBox",
+            new Vector2(ImGui.GetContentRegionAvail().X, height),
+            false);
+
+        if (!wrapTableChild.Success)
+            return;
+
+        var count = 0;
+
+        for (var index = 0; index < enumerable.Count; index++)
+        {
+            using (ImRaii.PushId(index))
+            {
+                if (drawElement.Invoke(enumerable[index]))
+                {
+                    count++;
+
+                    if (count % maxItems != 0)
+                        ImGui.SameLine();
+                }
+            }
+        }
+    }
+
+
     public void WrapTableColumnElements<T>(string windowId, IEnumerable<T> items, float rowSize,
         Func<T, bool> drawElement)
     {
@@ -398,5 +465,199 @@ public class ImGuiService : AllaganLib.Interface.Services.ImGuiService
                     ImGui.GetCursorScreenPos().Y + ImGui.GetStyle().FramePadding.Y + radius * (float)Math.Sin(-a)), th,
                 color, 8);
         }
+    }
+
+    public readonly record struct HeaderButton()
+    {
+        public required string Id { get; init; }
+
+        public required string Label { get; init; }
+
+        public required Action Callback { get; init; }
+
+        public uint? Icon { get; init; } = null;
+        public string? Image { get; init; } = null;
+        public ImFontPtr? Font { get; init; } = null;
+        public string? Tooltip { get; init; } = null;
+    }
+
+    /// <summary>
+    /// Draws a collapsing header with optional header buttons.
+    /// </summary>
+    /// <param name="label">The label for the collapsing header.</param>
+    /// <param name="buttonClicked">The button that was clicked, for use in popup opening.</param>
+    /// <param name="buttons">The buttons to show in the header.</param>
+    /// <param name="flags">The flags to draw the collapsing header with.</param>
+    /// <returns>A boolean indicating if the collapsing header is open.</returns>
+    public bool CollapsingHeader(
+    ImU8String label,
+    out string? buttonClicked,
+    IReadOnlyList<HeaderButton>? buttons = null,
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.None)
+    {
+        buttonClicked = null;
+
+        var nodeFlags =
+            flags |
+            ImGuiTreeNodeFlags.CollapsingHeader |
+            ImGuiTreeNodeFlags.SpanAvailWidth |
+            ImGuiTreeNodeFlags.AllowItemOverlap;
+
+        var treeNode = ImRaii.TreeNode(label, nodeFlags);
+
+        if (buttons is { Count: > 0 })
+        {
+            ImGui.SameLine();
+
+            var style = ImGui.GetStyle();
+            var spacing = style.ItemSpacing.X * ImGui.GetIO().FontGlobalScale;
+            var iconSize = ImGui.GetTextLineHeight();
+
+            var totalWidth = 0f;
+
+            for (var i = 0; i < buttons.Count; i++)
+            {
+                var btn = buttons[i];
+                float buttonWidth;
+
+                if (btn.Icon != null || btn.Image != null)
+                {
+                    buttonWidth = iconSize + (spacing);
+                }
+                else
+                {
+                    using var font = ImRaii.PushFont(btn.Font ?? ImGui.GetIO().FontDefault, btn.Font != null);
+                    var size = ImGui.CalcTextSize(btn.Label);
+                    buttonWidth = size.X + (style.FramePadding.X * 2f);
+                }
+
+                totalWidth += buttonWidth;
+            }
+
+            totalWidth -= spacing;
+
+            var availableWidth = ImGui.GetContentRegionAvail().X;
+
+            var useOverflow = totalWidth > availableWidth;
+
+            if (!useOverflow)
+            {
+                var cursorX =
+                    (ImGui.GetCursorPosX() + availableWidth) -
+                    spacing -
+                    totalWidth;
+
+                ImGui.SetCursorPosX(cursorX);
+
+                for (var i = 0; i < buttons.Count; i++)
+                {
+                    var btn = buttons[i];
+
+                    var id = ImRaii.PushId(btn.Id);
+
+                    bool clicked;
+                    if (btn.Icon != null)
+                    {
+                        var texture = this.TextureProvider
+                            .GetFromGameIcon(new GameIconLookup(btn.Icon.Value));
+
+                        var wrap = texture.GetWrapOrEmpty();
+
+                        clicked = ImGui.ImageButton(
+                            wrap.Handle,
+                            new Vector2(iconSize, iconSize));
+                    }
+                    else if (btn.Image != null)
+                    {
+                        var wrap = this.GetImageTexture(btn.Image);
+                        clicked = ImGui.ImageButton(
+                            wrap.Handle,
+                            new Vector2(iconSize, iconSize), Vector2.Zero, Vector2.One);
+                        if (ImGui.IsItemHovered())
+                        {
+                            using (var tooltip = ImRaii.Tooltip())
+                            {
+                                if (tooltip)
+                                {
+                                    ImGui.Text(btn.Tooltip ?? btn.Label);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        using var pushStyle = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, Vector2.Zero);
+                        using var font = ImRaii.PushFont(btn.Font ?? ImGui.GetIO().FontDefault, btn.Font != null);
+                        clicked = ImGui.SmallButton(btn.Label);
+
+                        if (ImGui.IsItemHovered())
+                        {
+                            font.Pop();
+                            using (var tooltip = ImRaii.Tooltip())
+                            {
+                                if (tooltip)
+                                {
+                                    ImGui.Text(btn.Tooltip);
+                                }
+                            }
+                        }
+                    }
+
+                    if (clicked)
+                    {
+                        buttonClicked = btn.Id;
+                        btn.Callback?.Invoke();
+                    }
+
+                    id.Pop();
+
+                    if (i < buttons.Count - 1)
+                    {
+                        ImGui.SameLine();
+                    }
+                }
+            }
+            else
+            {
+                const string popupId = "##HeaderOverflow";
+
+                var overflowButtonWidth = ImGui.CalcTextSize("...").X;
+
+                var cursorX =
+                    (ImGui.GetCursorPosX() + availableWidth) -
+                    overflowButtonWidth;
+
+                ImGui.SetCursorPosX(cursorX);
+
+                if (ImGui.SmallButton("..."))
+                {
+                    ImGui.OpenPopup(popupId);
+                }
+
+                if (ImGui.BeginPopup(popupId))
+                {
+                    for (var i = 0; i < buttons.Count; i++)
+                    {
+                        var btn = buttons[i];
+
+                        ImGui.PushID(btn.Id);
+
+                        if (ImGui.Selectable(btn.Label))
+                        {
+                            buttonClicked = btn.Id;
+                            btn.Callback?.Invoke();
+                            ImGui.CloseCurrentPopup();
+                        }
+
+                        ImGui.PopID();
+                    }
+
+                    ImGui.EndPopup();
+                }
+            }
+        }
+
+        treeNode.Dispose();
+        return treeNode.Success;
     }
 }

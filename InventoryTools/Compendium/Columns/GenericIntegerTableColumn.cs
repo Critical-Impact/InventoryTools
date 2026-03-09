@@ -3,6 +3,7 @@ using AllaganLib.Interface.Grid;
 using AllaganLib.Interface.Grid.ColumnFilters;
 using DalaMock.Host.Mediator;
 using Dalamud.Bindings.ImGui;
+using InventoryTools.Compendium.Columns.Options;
 using InventoryTools.Compendium.Models;
 using InventoryTools.Services;
 
@@ -45,5 +46,5 @@ public class GenericIntegerTableColumn<TData> : IntegerColumn<WindowState, TData
     }
 
     public override string HelpText { get; set; }
-    public override string Version { get; }
+    public override string Version { get; set; }
 }

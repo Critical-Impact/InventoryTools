@@ -65,6 +65,9 @@
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageReference Update="DotNet.ReproducibleBuilds" Version="1.2.39" />
   </ItemGroup>
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);Dalamud001</NoWarn>
+  </PropertyGroup>
   <ItemGroup>
     <Folder Include="Properties" />
   </ItemGroup>

@@ -4,6 +4,7 @@ using AllaganLib.Interface.Grid;
 using DalaMock.Host.Mediator;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Plugin.Services;
+using InventoryTools.Compendium.Columns.Options;
 using InventoryTools.Compendium.Models;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Services;
@@ -16,7 +17,7 @@ public class GenericIconTableColumn<TData> : IconColumn<WindowState, TData, Mess
 
     private readonly CompendiumRowHeightSetting _rowHeightSetting;
     private readonly InventoryToolsConfiguration _configuration;
-    private readonly Func<TData, int?> _valueSelector;
+    private readonly Func<TData, int> _valueSelector;
 
     public GenericIconTableColumn(
         ITextureProvider textureProvider,
@@ -60,5 +61,5 @@ public class GenericIconTableColumn<TData> : IconColumn<WindowState, TData, Mess
         => _valueSelector(item);
 
     public override string HelpText { get; set; }
-    public override string Version { get; }
+    public override string Version { get; set; }
 }

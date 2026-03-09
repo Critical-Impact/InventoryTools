@@ -6,7 +6,6 @@ using AllaganLib.Interface.Grid;
 using AllaganLib.Interface.Grid.ColumnFilters;
 using DalaMock.Host.Mediator;
 using Dalamud.Bindings.ImGui;
-using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Services;

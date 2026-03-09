@@ -216,7 +216,7 @@ public sealed class EquipmentSuggestSuggestionColumn : StringFormField<Equipment
     public bool IsHidden { get; set; }
     public ImGuiTableColumnFlags ColumnFlags { get; set; } = ImGuiTableColumnFlags.WidthStretch;
     public override string HelpText { get; set; } = "";
-    public override string Version { get; } = "1.12.0.10";
+    public override string Version { get; set; } = "1.12.0.10";
     public string? CurrentValue(EquipmentSuggestItem item)
     {
         return "";

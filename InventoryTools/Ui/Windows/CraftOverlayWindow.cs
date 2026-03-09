@@ -19,6 +19,7 @@ using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Plugin.Services;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Windowing;
 using InventoryTools.Localizers;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;

@@ -11,6 +11,7 @@ using DalaMock.Core.Mocks;
 using DalaMock.Core.Windows;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Game.ClientState.Objects;
+using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using InventoryTools;
@@ -32,10 +33,10 @@ public class InventoryToolsPluginMock : InventoryToolsPlugin
         ICondition condition, IDataManager dataManager, IFramework framework, IGameGui gameGui,
         IGameInteropProvider gameInteropProvider, IKeyState keyState, IObjectTable objectTable, ITargetManager targetManager,
         ITextureProvider textureProvider, IToastGui toastGui,
-        IContextMenu contextMenu, ITitleScreenMenu titleScreenMenu, IGameInventory gameInventory, IPlayerState playerState) : base(
+        IContextMenu contextMenu, ITitleScreenMenu titleScreenMenu, IGameInventory gameInventory, IPlayerState playerState, IReliableFileStorage reliableFileStorage) : base(
         pluginInterface, pluginLog, addonLifecycle, chatGui, clientState, commandManager, condition, dataManager,
         framework, gameGui, gameInteropProvider, keyState, objectTable, targetManager, textureProvider,
-        toastGui, contextMenu, titleScreenMenu, gameInventory, playerState)
+        toastGui, contextMenu, titleScreenMenu, gameInventory, playerState, reliableFileStorage)
     {
     }
 

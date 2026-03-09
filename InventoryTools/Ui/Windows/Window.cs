@@ -2,6 +2,7 @@ using System.Numerics;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Windowing;
 using InventoryTools.Logic;
 using InventoryTools.Services;
 using Microsoft.Extensions.Logging;

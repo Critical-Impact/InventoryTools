@@ -29,7 +29,7 @@ public class EquipmentSuggestToolModeCategorySetting : EnumFormField<EquipmentSu
     public override string Key { get; set; } = "ToolModeCategory";
     public override string Name { get; set; } = "Category";
     public override string HelpText { get; set; } = "The category to use when in tool mode";
-    public override string Version { get; } = "12.0.10";
+    public override string Version { get; set; } = "12.0.10";
 
     public override Dictionary<Enum, string> Choices { get; } = new()
     {

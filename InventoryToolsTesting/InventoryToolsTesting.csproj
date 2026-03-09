@@ -56,6 +56,10 @@
       <ProjectReference Include="..\CriticalCommonLib\CriticalCommonLib.csproj" />
     </ItemGroup>
 
+    <PropertyGroup>
+        <NoWarn>$(NoWarn);Dalamud001</NoWarn>
+    </PropertyGroup>
+
     <ItemGroup>
       <PackageReference Include="JunitXml.TestLogger" Version="7.1.0" />
       <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />

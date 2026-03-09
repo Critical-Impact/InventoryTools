@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using AllaganLib.Data.Service;
 using AllaganLib.GameSheets.Caches;
+using AllaganLib.GameSheets.LuminaSheets;
 using AllaganLib.GameSheets.Modules;
 using AllaganLib.Interface.FormFields;
 using AllaganLib.GameSheets.Service;
@@ -42,6 +44,7 @@ using InventoryTools.Compendium;
 using InventoryTools.Compendium.Columns;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
+using InventoryTools.Compendium.Sections;
 using InventoryTools.Compendium.Services;
 using InventoryTools.EquipmentSuggest;
 using InventoryTools.Highlighting;
@@ -66,6 +69,7 @@ using InventoryTools.Tooltips;
 using InventoryTools.Ui;
 using InventoryTools.Ui.Pages;
 using Lumina;
+using Lumina.Excel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OtterGui.Log;
@@ -85,13 +89,13 @@ namespace InventoryTools
             ICondition condition, IDataManager dataManager, IFramework framework, IGameGui gameGui,
             IGameInteropProvider gameInteropProvider, IKeyState keyState, IObjectTable objectTable, ITargetManager targetManager, ITextureProvider textureProvider,
             IToastGui toastGui, IContextMenu contextMenu, ITitleScreenMenu titleScreenMenu,
-            IGameInventory gameInventory, IPlayerState playerState) : base(pluginInterface,
+            IGameInventory gameInventory, IPlayerState playerState, IReliableFileStorage reliableFileStorage) : base(pluginInterface,
             pluginLog, addonLifecycle, chatGui, clientState, commandManager,
             condition, dataManager, framework, gameGui,
             gameInteropProvider, keyState, objectTable,
             targetManager, textureProvider,
             toastGui, contextMenu, titleScreenMenu,
-            gameInventory, playerState)
+            gameInventory, playerState, reliableFileStorage)
         {
             bootService = new BootConfigurationService(pluginInterface, framework, pluginLog);
             Stopwatch loadConfigStopwatch = new Stopwatch();
@@ -306,12 +310,17 @@ namespace InventoryTools
 
             //Compendium
             builder.RegisterTransientSelfAndInterfaces<WindowState>();
-            builder.RegisterTransientSelfAndInterfaces<CompendiumMenuRenderer>();
+            builder.RegisterTransientSelfAndInterfaces<CompendiumViewBuilder>();
             builder.RegisterSingletonSelfAndInterfaces<CompendiumMenuBuilder>();
             builder.RegisterSingletonsSelfAndInterfaces<ICompendiumType>(dataAccess);
             builder.RegisterSingletonsSelfAndInterfaces<ICompendiumTable>(dataAccess);
             builder.RegisterTransientsSelfAndInterfaces<CompendiumWindow>(dataAccess, typeof(Window)).AsImplementedInterfaces();
             builder.RegisterTransientsSelfAndInterfaces<IFormField<WindowState>>(dataAccess);
+            builder.RegisterTransientsSelfAndInterfaces<ICompendiumViewSection>(dataAccess);
+            builder.RegisterSingletonSelfAndInterfaces<CompendiumSectionStateService>();
+            builder.RegisterType<CompendiumTypeFactory>()
+                .As<ICompendiumTypeFactory>()
+                .SingleInstance();
 
             builder.RegisterGeneric(typeof(GenericStringTableColumn<>))
                 .AsSelf();
@@ -327,11 +336,31 @@ namespace InventoryTools
                 .AsSelf();
             builder.RegisterGeneric(typeof(GenericItemTableColumn<>))
                 .AsSelf();
+            builder.RegisterGeneric(typeof(CompendiumOpenViewTableColumn<>))
+                .AsSelf();
 
             builder.RegisterGeneric(typeof(CompendiumTable<>))
                 .AsSelf();
             builder.RegisterGeneric(typeof(CompendiumColumnBuilder<>))
                 .AsSelf();
+
+            builder.RegisterAssemblyTypes(dataAccess)
+                .AsClosedTypesOf(typeof(ILocalizer<>))
+                .SingleInstance();
+
+            builder.RegisterAssemblyTypes(dataAccess)
+                .AsClosedTypesOf(typeof(IMenuProvider<>))
+                .InstancePerDependency();
+
+            builder.Register<Func<string, ExcelSheet<QuestDialogue>>>(c =>
+            {
+                var dataManager = c.Resolve<IDataManager>();
+                return name =>
+                {
+                    var dir = name.Substring(name.Length - 5, 3);
+                    return dataManager.GetExcelSheet<QuestDialogue>(name: $"quest/{dir}/{name}");
+                };
+            });
 
             builder.Register<UniversalisUserAgent>(c =>
             {

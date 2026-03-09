@@ -44,6 +44,56 @@
         "resolved": "10.0.1",
         "contentHash": "Vvos4CyBam5dCsH3eD1c9MQI4ESWwzNSJsToFz4i6NmfPsaySzNSiv0QYRmSAAIBXb8GXxPmuy42TkIrw2xCzQ=="
       },
+      "Microsoft.DotNet.PlatformAbstractions": {
+        "type": "Direct",
+        "requested": "[5.0.0-preview.5.20278.1, )",
+        "resolved": "5.0.0-preview.5.20278.1",
+        "contentHash": "vjHO72XmJdmdFUF/YWvJwetuaop38vljZ7U6icj8HiRhEqJSEBBPvYjdoxBDYW5/bJk+4GAXq18yS4L5XKD2UA=="
+      },
+      "Microsoft.Extensions.Configuration": {
+        "type": "Direct",
+        "requested": "[10.0.1, )",
+        "resolved": "10.0.1",
+        "contentHash": "njoRekyMIK+smav8B6KL2YgIfUtlsRNuT7wvurpLW+m/hoRKVnoELk2YxnUnWRGScCd1rukLMxShwLqEOKowDg==",
+        "dependencies": {
+          "Microsoft.Extensions.Configuration.Abstractions": "10.0.1",
+          "Microsoft.Extensions.Primitives": "10.0.1"
+        }
+      },
+      "Microsoft.Extensions.Configuration.Binder": {
+        "type": "Direct",
+        "requested": "[10.0.1, )",
+        "resolved": "10.0.1",
+        "contentHash": "Lp4CZIuTVXtlvkAnTq6QvMSW7+H62gX2cU2vdFxHQUxvrWTpi7LwYI3X+YAyIS0r12/p7gaosco7efIxL4yFNw==",
+        "dependencies": {
+          "Microsoft.Extensions.Configuration": "10.0.1",
+          "Microsoft.Extensions.Configuration.Abstractions": "10.0.1"
+        }
+      },
+      "Microsoft.Extensions.Configuration.Json": {
+        "type": "Direct",
+        "requested": "[10.0.1, )",
+        "resolved": "10.0.1",
+        "contentHash": "0zW3eYBJlRctmgqk5s0kFIi5o5y2g80mvGCD8bkYxREPQlKUnr0ndU/Sop+UDIhyWN0fIi4RW63vo7BKTi7ncA==",
+        "dependencies": {
+          "Microsoft.Extensions.Configuration": "10.0.1",
+          "Microsoft.Extensions.Configuration.Abstractions": "10.0.1",
+          "Microsoft.Extensions.Configuration.FileExtensions": "10.0.1",
+          "Microsoft.Extensions.FileProviders.Abstractions": "10.0.1"
+        }
+      },
+      "Microsoft.Extensions.DependencyModel": {
+        "type": "Direct",
+        "requested": "[10.0.1, )",
+        "resolved": "10.0.1",
+        "contentHash": "IiWPd4j8JLNjSkyXl5hvJwX2ZENDVQVPDHYgZmYdw8+YkY2xp9iQt0vjdnAQZLpo/ipeW1xgOqfSBEnivKWPYQ=="
+      },
+      "Microsoft.Extensions.ObjectPool": {
+        "type": "Direct",
+        "requested": "[10.0.1, )",
+        "resolved": "10.0.1",
+        "contentHash": "HqAEbtoAhgvH53c54IV5e4vQ60PYvl7Z/WIHsbet+UGGE7n+7dwVNXw1mb9LZlWbsxnupCevvtgIne5P//ZKpQ=="
+      },
       "Serilog.Sinks.Async": {
         "type": "Direct",
         "requested": "[2.1.0, )",
@@ -129,23 +179,23 @@
       },
       "AllaganLib.GameSheets": {
         "type": "Transitive",
-        "resolved": "2.0.6",
-        "contentHash": "gIgX/vqBfet3aZA7a48S7Va7XJH285KbbiLYiQYwSDe8m0AuPvOsyjH8rE/RcD7oPCDb2u6GpGXixEis3izYww==",
+        "resolved": "2.1.1",
+        "contentHash": "MATC+U11812zoA0WU3UlL5Mn03X609kqsa+4V5BJcF1VPQ+HfhOxHYQQwwJk1a9nFH4+0J8naKBF0LM7bzS78w==",
         "dependencies": {
-          "AllaganLib.Shared": "2.0.3",
+          "AllaganLib.Shared": "2.1.0",
           "Autofac": "9.0.0",
           "Autofac.Extensions.DependencyInjection": "10.0.0",
           "CSVFile": "3.2.1",
-          "LuminaSupplemental.Excel": "4.1.8"
+          "LuminaSupplemental.Excel": "4.2.1"
         }
       },
       "AllaganLib.Interface": {
         "type": "Transitive",
-        "resolved": "2.0.5",
-        "contentHash": "UgeP4WILvnfpM1TpKuzAi1AVCiALLfbDijZziMvUCNfqkb/gC5I8sJnIGvzXJ6+Ywui64pw6fbxjqkP1yauQfQ==",
+        "resolved": "2.1.0",
+        "contentHash": "ppYglvUhW5FFpBokqOblOKS11yBizbKSrNpcY8/za1oIy3cRbWvY6IBHrCXjLvdrRsUfyKFvZifuerQzKCyHFQ==",
         "dependencies": {
           "AllaganLib.Data": "2.0.3",
-          "AllaganLib.Shared": "2.0.3",
+          "AllaganLib.Shared": "2.1.0",
           "Autofac": "9.0.0",
           "Microsoft.Extensions.Logging.Abstractions": "10.0.1",
           "NaturalSort.Extension": "4.4.1"
@@ -153,16 +203,16 @@
       },
       "AllaganLib.Monitors": {
         "type": "Transitive",
-        "resolved": "2.0.4",
-        "contentHash": "qmR44hXuKlgdUinm8GtPW6qdcB6vGBdcFi2FjYEOXPevKp9Ua5d5TLVLGo/EahjM+cl/7QrMfJFrKEdmBRG6tw==",
+        "resolved": "2.1.0",
+        "contentHash": "1ze8yqcoy0AU6zPhqWOOU+BodnW2sroS7M/49mG8QCbvUJWDlJBj0P6z/qZqxv25MOGzjAEsbcNlYYDVtmI73g==",
         "dependencies": {
-          "AllaganLib.GameSheets": "2.0.4"
+          "AllaganLib.GameSheets": "2.1.0"
         }
       },
       "AllaganLib.Shared": {
         "type": "Transitive",
-        "resolved": "2.0.3",
-        "contentHash": "M4xbFzrhczZ9MlzAFMI2w058WMIxh/woGlwJVwbC/AodLkaUmryCQF8ilkZ41yklQT1caGmHfiUuiwM9pw1Ndw==",
+        "resolved": "2.1.0",
+        "contentHash": "idrUYGQKy4Ot+nqZKhyO9WED37AxbxlBw8uv0QyWkSldyBHYuLrGOae1QybblEaDbLJtW0FuHcLYgYi8AA1tiw==",
         "dependencies": {
           "Autofac": "9.0.0",
           "Microsoft.Extensions.Hosting": "10.0.1",
@@ -251,26 +301,12 @@
       },
       "LuminaSupplemental.Excel": {
         "type": "Transitive",
-        "resolved": "4.1.8",
-        "contentHash": "DItgH9A3c6RO7iCeyzss5yDTp6LktepZSDLsZPM3KJX847F4MTlEt8q8UTfrURM1cO1SyzftUoncoCtOqFDcFg==",
+        "resolved": "4.2.1",
+        "contentHash": "U6SyxbITCefBqq+jzdWd6BDGO68zh55hewEqfxpdSMjxUC6q0162AmF75FbbN8zkSJA6/jiyyl1bQeQRIQRxzg==",
         "dependencies": {
           "CSVFile": "3.2.1",
           "CsvHelper": "30.0.1",
           "Sylvan.Data.Csv": "1.4.3"
-        }
-      },
-      "Microsoft.DotNet.PlatformAbstractions": {
-        "type": "Transitive",
-        "resolved": "3.1.6",
-        "contentHash": "jek4XYaQ/PGUwDKKhwR8K47Uh1189PFzMeLqO83mXrXQVIpARZCcfuDedH50YDTepBkfijCZN5U/vZi++erxtg=="
-      },
-      "Microsoft.Extensions.Configuration": {
-        "type": "Transitive",
-        "resolved": "10.0.1",
-        "contentHash": "njoRekyMIK+smav8B6KL2YgIfUtlsRNuT7wvurpLW+m/hoRKVnoELk2YxnUnWRGScCd1rukLMxShwLqEOKowDg==",
-        "dependencies": {
-          "Microsoft.Extensions.Configuration.Abstractions": "10.0.1",
-          "Microsoft.Extensions.Primitives": "10.0.1"
         }
       },
       "Microsoft.Extensions.Configuration.Abstractions": {
@@ -279,15 +315,6 @@
         "contentHash": "kPlU11hql+L9RjrN2N9/0GcRcRcZrNFlLLjadasFWeBORT6pL6OE+RYRk90GGCyVGSxTK+e1/f3dsMj5zpFFiQ==",
         "dependencies": {
           "Microsoft.Extensions.Primitives": "10.0.1"
-        }
-      },
-      "Microsoft.Extensions.Configuration.Binder": {
-        "type": "Transitive",
-        "resolved": "10.0.1",
-        "contentHash": "Lp4CZIuTVXtlvkAnTq6QvMSW7+H62gX2cU2vdFxHQUxvrWTpi7LwYI3X+YAyIS0r12/p7gaosco7efIxL4yFNw==",
-        "dependencies": {
-          "Microsoft.Extensions.Configuration": "10.0.1",
-          "Microsoft.Extensions.Configuration.Abstractions": "10.0.1"
         }
       },
       "Microsoft.Extensions.Configuration.CommandLine": {
@@ -320,17 +347,6 @@
           "Microsoft.Extensions.Primitives": "10.0.1"
         }
       },
-      "Microsoft.Extensions.Configuration.Json": {
-        "type": "Transitive",
-        "resolved": "10.0.1",
-        "contentHash": "0zW3eYBJlRctmgqk5s0kFIi5o5y2g80mvGCD8bkYxREPQlKUnr0ndU/Sop+UDIhyWN0fIi4RW63vo7BKTi7ncA==",
-        "dependencies": {
-          "Microsoft.Extensions.Configuration": "10.0.1",
-          "Microsoft.Extensions.Configuration.Abstractions": "10.0.1",
-          "Microsoft.Extensions.Configuration.FileExtensions": "10.0.1",
-          "Microsoft.Extensions.FileProviders.Abstractions": "10.0.1"
-        }
-      },
       "Microsoft.Extensions.Configuration.UserSecrets": {
         "type": "Transitive",
         "resolved": "10.0.1",
@@ -354,11 +370,6 @@
         "type": "Transitive",
         "resolved": "10.0.1",
         "contentHash": "oIy8fQxxbUsSrrOvgBqlVgOeCtDmrcynnTG+FQufcUWBrwyPfwlUkCDB2vaiBeYPyT+20u9/HeuHeBf+H4F/8g=="
-      },
-      "Microsoft.Extensions.DependencyModel": {
-        "type": "Transitive",
-        "resolved": "10.0.1",
-        "contentHash": "IiWPd4j8JLNjSkyXl5hvJwX2ZENDVQVPDHYgZmYdw8+YkY2xp9iQt0vjdnAQZLpo/ipeW1xgOqfSBEnivKWPYQ=="
       },
       "Microsoft.Extensions.Diagnostics": {
         "type": "Transitive",
@@ -521,11 +532,6 @@
           "Microsoft.Extensions.Options": "10.0.1",
           "Microsoft.Extensions.Primitives": "10.0.1"
         }
-      },
-      "Microsoft.Extensions.ObjectPool": {
-        "type": "Transitive",
-        "resolved": "10.0.1",
-        "contentHash": "HqAEbtoAhgvH53c54IV5e4vQ60PYvl7Z/WIHsbet+UGGE7n+7dwVNXw1mb9LZlWbsxnupCevvtgIne5P//ZKpQ=="
       },
       "Microsoft.Extensions.Options": {
         "type": "Transitive",
@@ -703,11 +709,12 @@
       "criticalcommonlib": {
         "type": "Project",
         "dependencies": {
-          "AllaganLib.GameSheets": "[2.0.6, )",
-          "AllaganLib.Monitors": "[2.0.4, )",
-          "AllaganLib.Shared": "[2.0.3, )",
+          "AllaganLib.GameSheets": "[2.1.1, )",
+          "AllaganLib.Monitors": "[2.1.0, )",
+          "AllaganLib.Shared": "[2.1.0, )",
           "DalaMock.Host": "[4.1.1, )",
           "Humanizer.Core": "[3.0.1, )",
+          "Microsoft.Extensions.Hosting": "[10.0.1, )",
           "NaturalSort.Extension": "[4.4.1, )",
           "SerialQueue": "[2.1.0, )",
           "Sylvan.Data.Csv": "[1.4.3, )",
@@ -717,8 +724,10 @@
       "inventorytools": {
         "type": "Project",
         "dependencies": {
-          "AllaganLib.Interface": "[2.0.5, )",
-          "AllaganLib.Monitors": "[2.0.4, )",
+          "AllaganLib.Interface": "[2.1.0, )",
+          "AllaganLib.Monitors": "[2.1.0, )",
+          "Autofac": "[9.0.0, )",
+          "Autofac.Extensions.DependencyInjection": "[10.0.0, )",
           "CriticalCommonLib": "[1.0.0, )",
           "CsvHelper": "[33.1.0, )",
           "DalaMock.Host": "[4.1.1, )",
@@ -726,15 +735,17 @@
           "DalamudPackager": "[14.0.1, )",
           "Humanizer.Core": "[3.0.1, )",
           "Ionide.KeepAChangelog": "[0.2.0, )",
+          "Microsoft.Extensions.Hosting": "[10.0.1, )",
           "OtterGui": "[1.0.0, )",
-          "SerialQueue": "[2.1.0, )"
+          "SerialQueue": "[2.1.0, )",
+          "System.Reactive": "[6.1.0, )"
         }
       },
       "ottergui": {
         "type": "Project",
         "dependencies": {
           "JetBrains.Annotations": "[2024.3.0, )",
-          "Microsoft.Extensions.DependencyInjection": "[9.0.2, )"
+          "Microsoft.Extensions.DependencyInjection": "[10.0.1, )"
         }
       }
     }

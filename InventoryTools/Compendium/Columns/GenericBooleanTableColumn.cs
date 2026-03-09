@@ -2,6 +2,7 @@ using System;
 using AllaganLib.Interface.Grid;
 using DalaMock.Host.Mediator;
 using Dalamud.Bindings.ImGui;
+using InventoryTools.Compendium.Columns.Options;
 using InventoryTools.Compendium.Models;
 using InventoryTools.Services;
 
@@ -46,5 +47,5 @@ public class GenericBooleanTableColumn<TData> : BooleanColumn<WindowState, TData
     }
 
     public override string HelpText { get; set; }
-    public override string Version { get; }
+    public override string Version { get; set; }
 }

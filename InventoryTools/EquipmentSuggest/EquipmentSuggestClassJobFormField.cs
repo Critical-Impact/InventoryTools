@@ -22,7 +22,7 @@ public class EquipmentSuggestClassJobFormField : ChoiceFormField<uint, Equipment
     public override string Key { get; set; } = "ClassJob";
     public override string Name { get; set; } = "Job";
     public override string HelpText { get; set; } = "The job to recommend items for";
-    public override string Version { get; } = "1.12.0.10";
+    public override string Version { get; set; } = "1.12.0.10";
     public override Dictionary<uint, string> Choices => _choices;
     public override bool Equal(uint item1, uint item2)
     {
