@@ -8,6 +8,7 @@ using AllaganLib.Interface.Grid.ColumnFilters;
 using DalaMock.Host.Mediator;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
+using InventoryTools.Compendium.Columns.Options;
 using InventoryTools.Compendium.Models;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Mediator;
@@ -123,5 +124,5 @@ public class GenericItemsTableColumn<TData> : StringColumn<WindowState, TData, M
     }
 
     public override string HelpText { get; set; }
-    public override string Version { get; }
+    public override string Version { get; set; }
 }

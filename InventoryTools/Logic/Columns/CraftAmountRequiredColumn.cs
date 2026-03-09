@@ -54,7 +54,6 @@ namespace InventoryTools.Logic.Columns
                 if (configuration.CraftList.CraftListMode == CraftListMode.Normal)
                 {
                     var value = CurrentValue(columnConfiguration, searchResult)?.Item2.ToString() ?? "";
-                    ImGuiUtil.VerticalAlignButton(configuration.TableHeight);
                     if (ImGui.InputText("##" + searchResult.CraftItem.ItemId + "RequiredInput" + columnIndex, ref value,
                             4, ImGuiInputTextFlags.CharsDecimal))
                     {
@@ -92,7 +91,6 @@ namespace InventoryTools.Logic.Columns
                     var widthAvailable = ImGui.GetContentRegionAvail().X / 2;
 
                     var value = searchResult.CraftItem.QuantityReady.ToString();
-                    ImGuiUtil.VerticalAlignButton(configuration.TableHeight);
                     ImGui.SetNextItemWidth(widthAvailable - ImGui.GetStyle().ItemSpacing.X);
                     using (var disabled = ImRaii.Disabled())
                     {

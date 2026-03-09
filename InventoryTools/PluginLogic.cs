@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.Sheets;
 using AllaganLib.Monitors.Enums;
 using AllaganLib.Monitors.Interfaces;

@@ -52,4 +52,6 @@ public record OverlaysRequestRefreshMessage() : MessageBase;
 public record ItemSearchRequestedMessage(uint ItemId, InventoryItem.ItemFlags Flags) : MessageBase;
 public record NewColumnSetNameMessage(string? name, string? exportName) : MessageBase;
 public record OpenCompendiumListMessage(ICompendiumType CompendiumType) : MessageBase;
-public record OpenCompendiumViewMessage(ICompendiumType CompendiumType) : MessageBase;
+public record OpenCompendiumViewMessage(ICompendiumType CompendiumType, uint rowId) : MessageBase;
+public record ToggleCompendiumListMessage(ICompendiumType CompendiumType) : MessageBase;
+public record ToggleCompendiumViewMessage(ICompendiumType CompendiumType, uint rowId) : MessageBase;

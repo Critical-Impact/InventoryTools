@@ -42,7 +42,6 @@ public class NameIconColumn : TextIconColumn
         SearchResult searchResult, int rowIndex, int columnIndex)
     {
         base.Draw(configuration, columnConfiguration, searchResult, rowIndex, columnIndex);
-        _tooltipService.DrawItemTooltip(searchResult);
         if (_tooltipModeSetting.CurrentValue(_configuration) == ImGuiTooltipMode.Icons)
         {
             if (ImGui.IsItemHovered())

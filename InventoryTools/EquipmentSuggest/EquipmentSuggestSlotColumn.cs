@@ -31,7 +31,7 @@ public class EquipmentSuggestSlotColumn : AllaganLib.Interface.Grid.StringColumn
     }
 
     public override string HelpText { get; set; } = "The slot to fill";
-    public override string Version { get; } = "1.12.0.10";
+    public override string Version { get; set; } = "1.12.0.10";
     public override string? CurrentValue(EquipmentSuggestItem item)
     {
         if (item.EquipmentSlot != null)

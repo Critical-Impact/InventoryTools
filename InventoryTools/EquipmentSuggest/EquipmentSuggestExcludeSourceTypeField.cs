@@ -25,7 +25,7 @@ public sealed class EquipmentSuggestExcludeSourceTypeField : MultipleChoiceFormF
     public override string Key { get; set; } = "ExcludeSourceType";
     public override string Name { get; set; } = "Exclude Sources";
     public override string HelpText { get; set; } = "When recommending an item, what sources should be excluded?";
-    public override string Version { get; } = "1.12.0.10";
+    public override string Version { get; set; } = "1.12.0.10";
 
     public override Dictionary<ItemInfoType, string> GetChoices(EquipmentSuggestConfig configuration)
     {

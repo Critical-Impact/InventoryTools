@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using AllaganLib.Interface.Grid;
 using DalaMock.Host.Mediator;
 using InventoryTools.Compendium.Columns;
+using InventoryTools.Compendium.Columns.Options;
 
 namespace InventoryTools.Compendium.Models;
 
@@ -13,26 +14,29 @@ public sealed class CompendiumColumnBuilder<TData>
     private readonly GenericIntegerTableColumn<TData>.Factory _integerColumnFactory;
     private readonly GenericBooleanTableColumn<TData>.Factory _booleanColumnFactory;
     private readonly GenericIconTableColumn<TData>.Factory _iconColumnFactory;
-    private readonly GenericItemSourcesTableColumn<TData>.Factory _itemSourcesTableColumn;
-    private readonly GenericItemsTableColumn<TData>.Factory _itemsTableColumn;
-    private readonly GenericItemTableColumn<TData>.Factory _itemTableColumn;
+    private readonly GenericItemSourcesTableColumn<TData>.Factory _itemSourcesTableColumnFactory;
+    private readonly GenericItemsTableColumn<TData>.Factory _itemsTableColumnFactory;
+    private readonly GenericItemTableColumn<TData>.Factory _itemTableColumnFactory;
+    private readonly CompendiumOpenViewTableColumn<TData>.Factory _compendiumOpenViewTableColumnFactory;
 
     public CompendiumColumnBuilder(
         GenericStringTableColumn<TData>.Factory stringColumnFactory,
         GenericIntegerTableColumn<TData>.Factory integerColumnFactory,
         GenericBooleanTableColumn<TData>.Factory booleanColumnFactory,
         GenericIconTableColumn<TData>.Factory iconColumnFactory,
-        GenericItemSourcesTableColumn<TData>.Factory  itemSourcesTableColumn,
-        GenericItemsTableColumn<TData>.Factory  itemsTableColumn,
-        GenericItemTableColumn<TData>.Factory  itemTableColumn)
+        GenericItemSourcesTableColumn<TData>.Factory  itemSourcesTableColumnFactory,
+        GenericItemsTableColumn<TData>.Factory  itemsTableColumnFactory,
+        GenericItemTableColumn<TData>.Factory  itemTableColumnFactory,
+        CompendiumOpenViewTableColumn<TData>.Factory compendiumOpenViewTableColumnFactory)
     {
         _stringColumnFactory = stringColumnFactory;
         _integerColumnFactory = integerColumnFactory;
         _booleanColumnFactory = booleanColumnFactory;
         _iconColumnFactory = iconColumnFactory;
-        _itemSourcesTableColumn = itemSourcesTableColumn;
-        _itemsTableColumn = itemsTableColumn;
-        _itemTableColumn = itemTableColumn;
+        _itemSourcesTableColumnFactory = itemSourcesTableColumnFactory;
+        _itemsTableColumnFactory = itemsTableColumnFactory;
+        _itemTableColumnFactory = itemTableColumnFactory;
+        _compendiumOpenViewTableColumnFactory = compendiumOpenViewTableColumnFactory;
     }
 
     public CompendiumColumnBuilder<TData> AddStringColumn(CompendiumStringColumnOptions<TData> options)
@@ -44,14 +48,14 @@ public sealed class CompendiumColumnBuilder<TData>
 
     public CompendiumColumnBuilder<TData> AddItemSourcesColumn(CompendiumItemSourceColumnOptions<TData> options)
     {
-        var column = _itemSourcesTableColumn(options);
+        var column = _itemSourcesTableColumnFactory(options);
         _columns.Add(column);
         return this;
     }
 
     public CompendiumColumnBuilder<TData> AddItemsColumn(CompendiumItemsColumnOptions<TData> options)
     {
-        var column = _itemsTableColumn(options);
+        var column = _itemsTableColumnFactory(options);
         _columns.Add(column);
         return this;
     }
@@ -77,9 +81,23 @@ public sealed class CompendiumColumnBuilder<TData>
         return this;
     }
 
+    public CompendiumColumnBuilder<TData> AddImageIconColumn(CompendiumIconColumnOptions<TData>  options)
+    {
+        var column = _iconColumnFactory(options);
+        _columns.Add(column);
+        return this;
+    }
+
+    public CompendiumColumnBuilder<TData> AddCompendiumOpenViewColumn(CompendiumOpenViewTableColumnOptions<TData> options)
+    {
+        var column = _compendiumOpenViewTableColumnFactory(options);
+        _columns.Add(column);
+        return this;
+    }
+
     public CompendiumColumnBuilder<TData> AddItemColumn(CompendiumItemColumnOptions<TData>  options)
     {
-        var column = _itemTableColumn(options);
+        var column = _itemTableColumnFactory(options);
         _columns.Add(column);
         return this;
     }

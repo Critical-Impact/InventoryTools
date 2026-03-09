@@ -27,6 +27,7 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
 using InventoryTools.Compendium;
 using InventoryTools.Compendium.Interfaces;
+using InventoryTools.Compendium.Windows;
 using InventoryTools.Lists;
 using InventoryTools.Logic.Filters;
 using InventoryTools.Mediator;
@@ -1095,11 +1096,16 @@ namespace InventoryTools.Ui
                     {
                         if (menu)
                         {
+                            if (ImGui.Selectable("Compendium Viewer"))
+                            {
+                                this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(CompendiumTypesWindow)));
+                            }
+                            ImGui.Separator();
                             foreach (var compendiumType in _compendiumTypes)
                             {
                                 if (ImGui.MenuItem(compendiumType.Plural))
                                 {
-                                    this.MediatorService.Publish(new OpenCompendiumListMessage(compendiumType));
+                                    this.MediatorService.Publish(new ToggleCompendiumListMessage(compendiumType));
                                 }
                             }
                         }

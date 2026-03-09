@@ -56,21 +56,29 @@ public class ImGuiTooltipService
         _chatUtilities = chatUtilities;
     }
 
+    public void DrawItemTooltip(ItemInfo itemInfo)
+    {
+        DrawItemTooltip(itemInfo.ItemRow);
+    }
+
     public void DrawItemTooltip(SearchResult searchResult)
     {
-        //need to include setting inside this instead of other way around
-        var item = searchResult.Item;
+        DrawItemTooltip(searchResult.Item);
+    }
+
+    public void DrawItemTooltip(ItemRow item)
+    {
         if (ImGui.IsItemHovered())
         {
             if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
             {
                 if (this._keyState[VirtualKey.CONTROL])
                 {
-                    this._chatUtilities.LinkItem(searchResult.Item);
+                    this._chatUtilities.LinkItem(item);
                 }
                 else if (this._keyState[VirtualKey.SHIFT])
                 {
-                    this._tryOn.TryOnItem(searchResult.Item);
+                    this._tryOn.TryOnItem(item);
                 }
             }
 
@@ -102,7 +110,7 @@ public class ImGuiTooltipService
                         }
                     }
 
-                    if (searchResult.Item.Base.BaseParamValue.All(c => c == 0))
+                    if (item.Base.BaseParamValue.All(c => c == 0))
                     {
                         DrawBaseAttributes(item);
                     }
@@ -122,15 +130,15 @@ public class ImGuiTooltipService
 
                                 ImGui.TableNextColumn();
                                 {
-                                    for (var index = 0; index < searchResult.Item.Base.BaseParam.Count; index++)
+                                    for (var index = 0; index < item.Base.BaseParam.Count; index++)
                                     {
-                                        var baseParam = searchResult.Item.Base.BaseParam[index];
+                                        var baseParam = item.Base.BaseParam[index];
                                         if (baseParam.RowId == 0)
                                         {
                                             continue;
                                         }
 
-                                        var baseParamValue = searchResult.Item.Base.BaseParamValue[index];
+                                        var baseParamValue = item.Base.BaseParamValue[index];
                                         if (baseParamValue == 0)
                                         {
                                             continue;
@@ -140,32 +148,32 @@ public class ImGuiTooltipService
                                                    baseParamValue);
                                     }
 
-                                    if (searchResult.Item.Base.BaseParamValueSpecial.Any(c => c != 0))
+                                    if (item.Base.BaseParamValueSpecial.Any(c => c != 0))
                                     {
                                         ImGui.NewLine();
                                         ImGui.Separator();
                                         ImGui.Text("When HQ:");
-                                        for (var index = 0; index < searchResult.Item.Base.BaseParamSpecial.Count; index++)
+                                        for (var index = 0; index < item.Base.BaseParamSpecial.Count; index++)
                                         {
-                                            var baseParamSpecial = searchResult.Item.Base.BaseParamSpecial[index];
+                                            var baseParamSpecial = item.Base.BaseParamSpecial[index];
                                             if (baseParamSpecial.RowId == 0)
                                             {
                                                 continue;
                                             }
 
-                                            var baseParamValue = searchResult.Item.Base.BaseParamValueSpecial[index];
+                                            var baseParamValue = item.Base.BaseParamValueSpecial[index];
                                             if (baseParamValue == 0)
                                             {
                                                 continue;
                                             }
 
-                                            for (var baseParamIndex = 0; baseParamIndex < searchResult.Item.Base.BaseParam.Count; baseParamIndex++)
+                                            for (var baseParamIndex = 0; baseParamIndex < item.Base.BaseParam.Count; baseParamIndex++)
                                             {
-                                                var baseParam = searchResult.Item.Base.BaseParam[baseParamIndex];
+                                                var baseParam = item.Base.BaseParam[baseParamIndex];
 
                                                 if (baseParam.RowId == baseParamSpecial.RowId)
                                                 {
-                                                    baseParamValue += searchResult.Item.Base.BaseParamValue[baseParamIndex];
+                                                    baseParamValue += item.Base.BaseParamValue[baseParamIndex];
                                                 }
 
                                             }
@@ -207,11 +215,11 @@ public class ImGuiTooltipService
 
                     var sortMode = _configuration.TooltipAmountOwnedSort;
 
-                    var enumerable = _inventoryMonitor.AllItems.Where(item =>
-                        item.ItemId == searchResult.ItemId &&
-                        _characterMonitor.Characters.ContainsKey(item.RetainerId) &&
+                    var enumerable = _inventoryMonitor.AllItems.Where(inventoryItem =>
+                        item.RowId == inventoryItem.ItemId &&
+                        _characterMonitor.Characters.ContainsKey(inventoryItem.RetainerId) &&
                         ((_configuration.TooltipCurrentCharacter &&
-                          _characterMonitor.BelongsToActiveCharacter(item.RetainerId)) ||
+                          _characterMonitor.BelongsToActiveCharacter(inventoryItem.RetainerId)) ||
                          !_configuration.TooltipCurrentCharacter)
                     );
                     if (_configuration.TooltipSearchScope != null && _configuration.TooltipSearchScope.Count != 0)

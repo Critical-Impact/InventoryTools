@@ -346,7 +346,7 @@ public class EquipmentSuggestSelectedItemColumn  : StringFormField<EquipmentSugg
     }
 
     public override string HelpText { get; set; } = "The item you've selected from the list of recommendations";
-    public override string Version { get; } = "1.12.0.10";
+    public override string Version { get; set; } = "1.12.0.10";
 
     public string? CurrentValue(EquipmentSuggestItem item)
     {

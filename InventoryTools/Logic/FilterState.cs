@@ -195,7 +195,7 @@ namespace InventoryTools.Logic
             }
         }
 
-        public List<Vector4?> GetSelectIconStringItems(List<IShop> shops, List<SearchResult>? resultOverride = null)
+        public List<Vector4?> GetSelectIconStringItems(List<List<IShop>> shops, List<SearchResult>? resultOverride = null)
         {
             var itemHighlights = new List<Vector4?>();
             if (_characterMonitor.ActiveCharacterId == 0)
@@ -222,7 +222,42 @@ namespace InventoryTools.Logic
 
                 foreach (var shop in shops)
                 {
-                    var shouldHighlight = shop.Items.Any(c => requiredItems.Contains(c.RowId));
+                    var shouldHighlight = shop.SelectMany(c => c.Items).Any(c => requiredItems.Contains(c.RowId));
+                    itemHighlights.Add(shouldHighlight ? FilterConfiguration.RetainerListColor ?? _configuration.RetainerListColor : null);
+                }
+            }
+
+            return itemHighlights;
+        }
+
+        public List<Vector4?> GetSelectStringItems(List<List<IShop>> shops, List<SearchResult>? resultOverride = null)
+        {
+            var itemHighlights = new List<Vector4?>();
+            if (_characterMonitor.ActiveCharacterId == 0)
+            {
+                return itemHighlights;
+            }
+            var filterResult = resultOverride ?? FilterResult;
+            if (filterResult != null)
+            {
+                HashSet<uint> requiredItems;
+                if (FilterConfiguration.FilterType == FilterType.CraftFilter)
+                {
+                    requiredItems = FilterConfiguration.CraftList.GetFlattenedMergedMaterials().Where(c => c.IngredientPreference.Type is IngredientPreferenceType.Buy or IngredientPreferenceType.Item or IngredientPreferenceType.HouseVendor ).Select(c => c.Item.RowId).Distinct()
+                        .ToHashSet();
+                }
+                else if (filterResult.Count != 0)
+                {
+                    requiredItems = filterResult.Select(c => c.Item.RowId).Distinct().ToHashSet();
+                }
+                else
+                {
+                    requiredItems = new HashSet<uint>();
+                }
+
+                foreach (var shop in shops)
+                {
+                    var shouldHighlight = shop.SelectMany(c => c.Items).Any(c => requiredItems.Contains(c.RowId));
                     itemHighlights.Add(shouldHighlight ? FilterConfiguration.RetainerListColor ?? _configuration.RetainerListColor : null);
                 }
             }

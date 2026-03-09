@@ -8,6 +8,7 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
+using InventoryTools.Compendium.Columns.Options;
 using InventoryTools.Compendium.Models;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
@@ -85,14 +86,13 @@ public class GenericItemTableColumn<TData> : IconColumn<WindowState, TData, Mess
             if (currentValue != null)
             {
                 var itemRow = _itemSheet.GetRow((uint)currentValue.Value);
-                bool isHq = currentValue > 500000;
+                var isHq = currentValue > 500000;
                 currentValue %= 500000;
 
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() + ImGui.GetStyle().CellPadding.Y);
                 ImGui.Image(this._textureProvider.GetFromGameIcon(new GameIconLookup(itemRow.Icon, isHq)).GetWrapOrEmpty().Handle, this.IconSize * ImGui.GetIO().FontGlobalScale);
                 if (ImGui.IsItemHovered())
                 {
-
                     if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
                     {
                         messages.Add(new OpenUintWindowMessage(typeof(ItemWindow), itemRow.RowId));
@@ -125,5 +125,5 @@ public class GenericItemTableColumn<TData> : IconColumn<WindowState, TData, Mess
     }
 
     public override string HelpText { get; set; }
-    public override string Version { get; }
+    public override string Version { get; set; }
 }

@@ -16,5 +16,5 @@ public class EquipmentSuggestFilterStatsField : BooleanFormField<EquipmentSugges
 
     public override string HelpText { get; set; } =
         "Should items be filtered on their stats, this means when a crafter is selected only items with crafting related stats show, etc";
-    public override string Version { get; } = "1.12.0.10";
+    public override string Version { get; set; } = "1.12.0.10";
 }
