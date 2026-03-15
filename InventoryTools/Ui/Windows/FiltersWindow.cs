@@ -1103,7 +1103,7 @@ namespace InventoryTools.Ui
                             ImGui.Separator();
                             foreach (var compendiumType in _compendiumTypes)
                             {
-                                if (ImGui.MenuItem(compendiumType.Plural))
+                                if (compendiumType.ShowInListing && ImGui.MenuItem(compendiumType.Plural))
                                 {
                                     this.MediatorService.Publish(new ToggleCompendiumListMessage(compendiumType));
                                 }

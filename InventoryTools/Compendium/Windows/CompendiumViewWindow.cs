@@ -58,7 +58,7 @@ public class CompendiumViewWindow : CompendiumWindow
         {
             if (_sectionStateTask == null)
             {
-                _sectionStateTask = _sectionStateService.GetState(_compendiumType);
+                _sectionStateTask = _sectionStateService.GetState(_compendiumType, CompendiumSectionType.View);
             }
 
             if (_sectionStateTask.IsCompleted)
@@ -80,11 +80,14 @@ public class CompendiumViewWindow : CompendiumWindow
     public void DrawDebug()
     {
 #if DEBUG
-        ImGui.TextUnformatted("Entity ID: " + _entityId);
-        var relatedObject = _compendiumType.GetObject(_entityId);
-        if (relatedObject != null)
+        if (ImGui.CollapsingHeader("Debug"))
         {
-            Utils.PrintOutObject(relatedObject, 0, new List<string>());
+            ImGui.TextUnformatted("Entity ID: " + _entityId);
+            var relatedObject = _compendiumType.GetObject(_entityId);
+            if (relatedObject != null)
+            {
+                Utils.PrintOutObject(relatedObject, 0, new List<string>());
+            }
         }
 #endif
     }

@@ -21,6 +21,9 @@ public class SingleRowRefSection : CompendiumViewSection
     private readonly MediatorService _mediatorService;
     private ICompendiumType? _relatedCompendiumType = null;
     private Type? refType;
+    private string? _title;
+    private string? _subTitle;
+    private (string?, uint?)? _icon;
 
     public delegate SingleRowRefSection Factory(SingleRowRefSectionOptions options);
 
@@ -72,7 +75,7 @@ public class SingleRowRefSection : CompendiumViewSection
                 return;
             }
 
-            var icon = _relatedCompendiumType.GetIcon(_options.RelatedRef.RowId);
+            var icon = _icon ??= _relatedCompendiumType.GetIcon(_options.RelatedRef.RowId);
             var iconSize = 32f * ImGui.GetIO().FontGlobalScale;
             if (icon.Item2 != null)
             {
@@ -83,8 +86,8 @@ public class SingleRowRefSection : CompendiumViewSection
                 ImGui.SameLine();
             }
 
-            var name = _relatedCompendiumType.GetName(_options.RelatedRef.RowId) ?? "";
-            var subTitle = _relatedCompendiumType.GetSubtitle(_options.RelatedRef.RowId);
+            var name = _title ??= _relatedCompendiumType.GetName(_options.RelatedRef.RowId) ?? "";
+            var subTitle = _subTitle ??= _relatedCompendiumType.GetSubtitle(_options.RelatedRef.RowId) ?? "";
 
             var style = ImGui.GetStyle();
             var textHeight = ImGui.CalcTextSize(name).Y;

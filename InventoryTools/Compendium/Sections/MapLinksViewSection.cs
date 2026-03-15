@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using CriticalCommonLib.Services;
+using DalaMock.Host.Mediator;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Textures;
 using Dalamud.Plugin.Services;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
+using InventoryTools.Mediator;
 using InventoryTools.Services;
 
 namespace InventoryTools.Compendium.Sections;
@@ -16,6 +19,7 @@ public sealed class MapLinksViewSection : CompendiumViewSection
     private readonly MapLinksViewSectionOptions _options;
     private readonly ITextureProvider _textureProvider;
     private readonly IMenuProvider<MapLinkEntry> _menuProvider;
+    private readonly IChatUtilities _chatUtilities;
 
     public delegate MapLinksViewSection Factory(MapLinksViewSectionOptions options);
 
@@ -23,11 +27,13 @@ public sealed class MapLinksViewSection : CompendiumViewSection
         MapLinksViewSectionOptions options,
         ITextureProvider textureProvider,
         IMenuProvider<MapLinkEntry> menuProvider,
-        ImGuiService imGuiService) : base(imGuiService)
+        ImGuiService imGuiService,
+        IChatUtilities chatUtilities) : base(imGuiService)
     {
         _options = options;
         _textureProvider = textureProvider;
         _menuProvider = menuProvider;
+        _chatUtilities = chatUtilities;
     }
 
     public override string SectionName => _options.SectionName;
@@ -53,6 +59,7 @@ public sealed class MapLinksViewSection : CompendiumViewSection
                         .Handle,
                     new Vector2(iconSize, iconSize)))
             {
+                _chatUtilities.PrintFullMapLink(entry.Location);
             }
 
             if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
@@ -100,6 +107,8 @@ public sealed class MapLinksViewSection : CompendiumViewSection
             }
 
             ImGui.EndGroup();
+
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY() - offsetY);
 
             ImGui.PopID();
         }

@@ -299,6 +299,10 @@ namespace InventoryTools.Services
 
         private bool ToggleWindow(ICompendiumType compendiumType, uint windowId)
         {
+            if (compendiumType.ViewRedirection != null)
+            {
+                return OpenWindow(compendiumType.ViewRedirection, windowId);
+            }
             GetWindow(compendiumType, windowId).Value.Toggle();
             return true;
         }
@@ -377,6 +381,10 @@ namespace InventoryTools.Services
         }
         public bool OpenWindow(ICompendiumType type, uint windowId, bool refocus = true)
         {
+            if (type.ViewRedirection != null)
+            {
+                return OpenWindow(type.ViewRedirection, windowId, refocus);
+            }
             var window = GetWindow(type, windowId);
             if (window.Value.IsOpen)
             {

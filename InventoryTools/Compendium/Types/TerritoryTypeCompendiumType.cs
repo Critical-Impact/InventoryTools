@@ -93,6 +93,8 @@ public class TerritoryTypeCompendiumType : CompendiumType<IGrouping<string, Terr
         return _territoryTypeSheet.GetRowOrDefault(rowId) != null;
     }
 
+    public override bool ShowInListing => false;
+
     public override string Singular => "Territory";
     public override string Plural => "Territories";
     public override string Description => "Territories available in the game";

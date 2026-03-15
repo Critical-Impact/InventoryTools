@@ -38,4 +38,6 @@ public interface ICompendiumType
     public List<ICompendiumGrouping>? GetGroupings();
     public Dictionary<object, string>? GetGroups(ICompendiumGrouping compendiumGrouping);
     public string? GetDefaultGrouping();
+    public bool ShowInListing { get; }
+    public Type? ViewRedirection { get; }
 }

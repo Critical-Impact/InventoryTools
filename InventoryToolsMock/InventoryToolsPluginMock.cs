@@ -28,15 +28,7 @@ public class InventoryToolsPluginMock : InventoryToolsPlugin
 {
     private Logger seriLog;
 
-    public InventoryToolsPluginMock(IDalamudPluginInterface pluginInterface, IPluginLog pluginLog,
-        IAddonLifecycle addonLifecycle, IChatGui chatGui, IClientState clientState, ICommandManager commandManager,
-        ICondition condition, IDataManager dataManager, IFramework framework, IGameGui gameGui,
-        IGameInteropProvider gameInteropProvider, IKeyState keyState, IObjectTable objectTable, ITargetManager targetManager,
-        ITextureProvider textureProvider, IToastGui toastGui,
-        IContextMenu contextMenu, ITitleScreenMenu titleScreenMenu, IGameInventory gameInventory, IPlayerState playerState, IReliableFileStorage reliableFileStorage) : base(
-        pluginInterface, pluginLog, addonLifecycle, chatGui, clientState, commandManager, condition, dataManager,
-        framework, gameGui, gameInteropProvider, keyState, objectTable, targetManager, textureProvider,
-        toastGui, contextMenu, titleScreenMenu, gameInventory, playerState, reliableFileStorage)
+    public InventoryToolsPluginMock(IDalamudPluginInterface pluginInterface, IPluginLog pluginLog, IFramework framework) : base(pluginInterface, pluginLog, framework)
     {
     }
 

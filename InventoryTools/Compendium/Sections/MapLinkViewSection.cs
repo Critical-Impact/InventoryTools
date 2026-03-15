@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using CriticalCommonLib.Services;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Textures;
@@ -15,6 +16,7 @@ public sealed class MapLinkViewSection : CompendiumViewSection
     private readonly MapLinkViewSectionOptions _options;
     private readonly ITextureProvider _textureProvider;
     private readonly IMenuProvider<MapLinkEntry> _menuProvider;
+    private readonly IChatUtilities _chatUtilities;
 
     public delegate MapLinkViewSection Factory(MapLinkViewSectionOptions options);
 
@@ -22,11 +24,13 @@ public sealed class MapLinkViewSection : CompendiumViewSection
         MapLinkViewSectionOptions options,
         ITextureProvider textureProvider,
         IMenuProvider<MapLinkEntry> menuProvider,
-        ImGuiService imGuiService) : base(imGuiService)
+        ImGuiService imGuiService,
+        IChatUtilities chatUtilities) : base(imGuiService)
     {
         _options = options;
         _textureProvider = textureProvider;
         _menuProvider = menuProvider;
+        _chatUtilities = chatUtilities;
     }
 
     public override string SectionName => _options.SectionName;
@@ -47,6 +51,7 @@ public sealed class MapLinkViewSection : CompendiumViewSection
                     .Handle,
                 new Vector2(iconSize, iconSize)))
         {
+                _chatUtilities.PrintFullMapLink(entry.Location);
         }
 
         if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
@@ -94,5 +99,7 @@ public sealed class MapLinkViewSection : CompendiumViewSection
         }
 
         ImGui.EndGroup();
+
+        ImGui.SetCursorPosY(ImGui.GetCursorPosY() - offsetY);
     }
 }
