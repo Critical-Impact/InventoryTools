@@ -23,6 +23,9 @@ public class CollectionRowRefSection : CompendiumViewSection
     private readonly ITextureProvider _textureProvider;
     private readonly MediatorService _mediatorService;
     private readonly List<RowRefItem> _rowRefItems;
+    private Dictionary<uint, string> _titles;
+    private Dictionary<uint, string> _subtitles;
+    private Dictionary<uint, (string?, uint?)> _icons;
 
     private sealed class RowRefItem
     {
@@ -39,6 +42,9 @@ public class CollectionRowRefSection : CompendiumViewSection
         _textureProvider = textureProvider;
         _mediatorService = mediatorService;
         _rowRefItems = new List<RowRefItem>();
+        _titles = new Dictionary<uint, string>();
+        _subtitles = new Dictionary<uint, string>();
+        _icons = new Dictionary<uint, (string?, uint?)>();
 
         foreach (var rowRef in _options.RelatedRefs.Where(c => options.Filter == null || c.RowType == options.Filter))
         {
@@ -120,7 +126,11 @@ public class CollectionRowRefSection : CompendiumViewSection
         var compendiumType = item.CompendiumType!;
         var rowRef = item.RowRef;
 
-        var icon = compendiumType.GetIcon(rowRef.RowId);
+        if (!_icons.TryGetValue(rowRef.RowId, out var icon))
+        {
+            icon = compendiumType.GetIcon(rowRef.RowId);
+            _icons.Add(rowRef.RowId, icon);
+        }
         var iconSize = 32f * ImGui.GetIO().FontGlobalScale;
 
         if (icon.Item2 != null)
@@ -132,11 +142,20 @@ public class CollectionRowRefSection : CompendiumViewSection
             ImGui.SameLine();
         }
 
-        var name = compendiumType.GetName(rowRef.RowId) ?? "";
-        var subTitle = compendiumType.GetSubtitle(rowRef.RowId);
+        if (!_titles.TryGetValue(rowRef.RowId, out var title))
+        {
+            title = compendiumType.GetName(rowRef.RowId) ?? "";
+            _titles.Add(rowRef.RowId, title);
+        }
+
+        if (!_subtitles.TryGetValue(rowRef.RowId, out var subTitle))
+        {
+            subTitle = compendiumType.GetSubtitle(rowRef.RowId) ?? "";
+            _subtitles.Add(rowRef.RowId, subTitle);
+        }
 
         var style = ImGui.GetStyle();
-        var textHeight = ImGui.CalcTextSize(name).Y;
+        var textHeight = ImGui.CalcTextSize(title).Y;
 
         if (!string.IsNullOrEmpty(subTitle))
             textHeight += ImGui.CalcTextSize(subTitle).Y;
@@ -153,7 +172,7 @@ public class CollectionRowRefSection : CompendiumViewSection
 
         ImGui.BeginGroup();
 
-        ImGui.TextUnformatted(compendiumType.GetName(rowRef.RowId));
+        ImGui.TextUnformatted(title);
 
         if (!string.IsNullOrEmpty(subTitle))
         {

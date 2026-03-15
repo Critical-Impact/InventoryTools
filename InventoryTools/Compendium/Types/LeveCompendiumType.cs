@@ -220,6 +220,11 @@ public class LeveCompendiumType : CompendiumType<LeveRow>
         }
     }
 
+    public override string GetDefaultGrouping()
+    {
+        return "type";
+    }
+
     public override List<ICompendiumGrouping>? GetGroupings()
     {
         return new List<ICompendiumGrouping>()

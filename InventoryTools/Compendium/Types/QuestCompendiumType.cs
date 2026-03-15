@@ -11,6 +11,7 @@ using Lumina.Excel.Sheets;
 using AllaganLib.GameSheets.Extensions;
 using AllaganLib.GameSheets.Sheets;
 using AllaganLib.Shared.Misc;
+using Dalamud.Utility;
 using InventoryTools.Compendium.Interfaces;
 
 namespace InventoryTools.Compendium.Types;
@@ -18,14 +19,18 @@ namespace InventoryTools.Compendium.Types;
 public class QuestCompendiumType : CompendiumType<Quest>
 {
     private readonly LevelSheet _levelSheet;
-    private readonly ExcelSheet<ENpcBase> _eNpcBaseSheet;
+    private readonly ENpcBaseSheet _eNpcBaseSheet;
+    private readonly ExcelSheet<JournalGenre> _journalGenreSheet;
+    private readonly ExcelSheet<ExVersion> _expansionSheet;
     private readonly ExcelSheet<Quest> _questSheet;
     private readonly Func<string, ExcelSheet<QuestDialogue>> _questDialogueFactory;
 
-    public QuestCompendiumType(LevelSheet levelSheet, ExcelSheet<ENpcBase> eNpcBaseSheet, ExcelSheet<Quest> questSheet, Func<string, ExcelSheet<QuestDialogue>> questDialogueFactory, CompendiumTable<Quest>.Factory tableFactory, Func<CompendiumColumnBuilder<Quest>> columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory, columnBuilder, viewBuilderFactory)
+    public QuestCompendiumType(LevelSheet levelSheet, ENpcBaseSheet eNpcBaseSheet, ExcelSheet<JournalGenre> journalGenreSheet, ExcelSheet<ExVersion> expansionSheet, ExcelSheet<Quest> questSheet, Func<string, ExcelSheet<QuestDialogue>> questDialogueFactory, CompendiumTable<Quest>.Factory tableFactory, Func<CompendiumColumnBuilder<Quest>> columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory, columnBuilder, viewBuilderFactory)
     {
         _levelSheet = levelSheet;
         _eNpcBaseSheet = eNpcBaseSheet;
+        _journalGenreSheet = journalGenreSheet;
+        _expansionSheet = expansionSheet;
         _questSheet = questSheet;
         _questDialogueFactory = questDialogueFactory;
     }
@@ -87,6 +92,10 @@ public class QuestCompendiumType : CompendiumType<Quest>
     {
         builder.AddCompendiumOpenViewColumn(new(){Key = "icon", Name = "##Icon", HelpText = "The icon of the quest", Version = "14.0.3", ValueSelector = this.GetIcon, CompendiumType = this, RowIdSelector = row => row.RowId});
         builder.AddStringColumn(new (){Key = "name", Name = "Name", HelpText = "The name of the quest", Version = "14.0.3", ValueSelector = this.GetName});
+        builder.AddStringColumn(new (){Key = "category", Name = "Category", HelpText = "The category of the quest", Version = "14.0.3", ValueSelector = row => row.JournalGenre.Value.Name.ToImGuiString()});
+        builder.AddStringColumn(new (){Key = "required_class", Name = "Required Class", HelpText = "The required class of the quest", Version = "14.0.3", ValueSelector = row => row.ClassJobRequired.ValueNullable?.Name.ToImGuiString().FirstCharToUpper() ?? ""});
+        builder.AddStringColumn(new (){Key = "level", Name = "Level", HelpText = "The required level of the quest", Version = "14.0.3", ValueSelector = row => row.ClassJobLevel[0].ToString() ?? ""});
+        builder.AddStringColumn(new (){Key = "expansion", Name = "Expansion", HelpText = "The expansion the quest corresponds to.", Version = "14.0.3", ValueSelector = row => row.Expansion.Value.Name.ToImGuiString() ?? ""});
     }
 
     public override void BuildViewFields(CompendiumViewBuilder viewBuilder, Quest row)
@@ -148,8 +157,7 @@ public class QuestCompendiumType : CompendiumType<Quest>
                 SectionName = "Issuer Location"
             });
         }
-
-        var relatedNpcs = _eNpcBaseSheet.Where(c => c.ENpcData.Any(c => c.RowId == row.RowId)).Select(c => c.AsUntypedRowRef()).ToList();
+        var relatedNpcs = _eNpcBaseSheet.Where(c => c.Base.ENpcDataRaw.Any(c => c == row.RowId)).DistinctBy(c => c.Name).Select(c => c.Base.AsUntypedRowRef()).DistinctBy(c => c.RowId).ToList();
 
         viewBuilder.AddCollectionRowRefSection(new CollectionRowRefSectionOptions()
         {
@@ -157,6 +165,45 @@ public class QuestCompendiumType : CompendiumType<Quest>
             SectionName = "Related NPCs",
             Filter = typeof(ENpcBase)
         });
+    }
+
+    public override List<ICompendiumGrouping>? GetGroupings()
+    {
+        return
+        [
+            new CompendiumGrouping<Quest>()
+            {
+                Name = "Category",
+                Key = "category",
+                GroupFunc = quest => quest.JournalGenre.RowId,
+                GroupMapping = row =>
+                {
+                    var categoryId = (uint)row;
+                    var name = _journalGenreSheet.GetRowOrDefault(categoryId)?.Name.ToImGuiString() ?? "";
+                    if (name == string.Empty)
+                    {
+                        name = "Ungrouped";
+                    }
+                    return name;
+                }
+            },
+            new CompendiumGrouping<Quest>()
+            {
+                Name = "Expansion",
+                Key = "expansion",
+                GroupFunc = quest => quest.Expansion.RowId,
+                GroupMapping = row =>
+                {
+                    var categoryId = (uint)row;
+                    var name = _expansionSheet.GetRowOrDefault(categoryId)?.Name.ToImGuiString() ?? "None";
+                    if (name == string.Empty)
+                    {
+                        name = "Ungrouped";
+                    }
+                    return name;
+                }
+            }
+        ];
     }
 
     public override string Singular => "Quest";

@@ -107,6 +107,9 @@ public abstract class CompendiumType<TData> : ICompendiumType<TData>
         return null;
     }
 
+    public virtual bool ShowInListing => true;
+    public virtual Type? ViewRedirection => null;
+
     public Dictionary<object, string>? GetGroups(ICompendiumGrouping compendiumGrouping)
     {
         if (compendiumGrouping is ICompendiumGrouping<TData> compendiumGroupingData)

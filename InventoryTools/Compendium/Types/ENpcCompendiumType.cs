@@ -95,7 +95,7 @@ public class ENpcCompendiumType : CompendiumType<IGrouping<string, ENpcBaseRow>>
         viewBuilder.SetupDefaults(this, row);
         viewBuilder.AddCollectionRowRefSection(new CollectionRowRefSectionOptions()
         {
-            RelatedRefs = row.SelectMany(c => c.Base.ENpcData).ToList(),
+            RelatedRefs = row.SelectMany(c => c.Base.ENpcData).DistinctBy(c => c.RowId).ToList(),
             Filter = typeof(Quest),
             SectionName = "Related Quests"
         });
@@ -110,7 +110,8 @@ public class ENpcCompendiumType : CompendiumType<IGrouping<string, ENpcBaseRow>>
 
     public override bool HasRow(uint rowId)
     {
-        return _eNpcBaseSheet.GetRowOrDefault(rowId) != null;
+        var eNpcBaseRow = _eNpcBaseSheet.GetRowOrDefault(rowId);
+        return eNpcBaseRow != null && eNpcBaseRow.Name != string.Empty;
     }
 
     public override List<Type>? RelatedTypes => [typeof(ENpcResidentRow), typeof(ENpcResident), typeof(ENpcBase)];

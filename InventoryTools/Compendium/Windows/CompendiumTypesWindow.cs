@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using DalaMock.Host.Mediator;
 using Dalamud.Bindings.ImGui;
@@ -24,7 +25,7 @@ public class CompendiumTypesWindow : GenericWindow
 
     public CompendiumTypesWindow(IEnumerable<ICompendiumType> compendiumTypes, ITextureProvider textureProvider, ILogger<CompendiumTypesWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration) : base(logger, mediator, imGuiService, configuration, "Compendium")
     {
-        _compendiumTypes = compendiumTypes;
+        _compendiumTypes = compendiumTypes.Where(c => c.ShowInListing);
         _textureProvider = textureProvider;
     }
 

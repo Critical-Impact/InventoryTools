@@ -24,9 +24,19 @@ public class CompendiumSectionStateService : IDisposable
         _loadedSections = new();
     }
 
-    public string GetStatePath(ICompendiumType compendiumType)
+    public string GetStatePath(ICompendiumType compendiumType, CompendiumSectionType compendiumSectionType)
     {
-        return Path.Join(this.GetStateDirectory(), compendiumType.Key + ".json");
+        string prefix = "";
+        switch (compendiumSectionType)
+        {
+            case CompendiumSectionType.List:
+                prefix = "list";
+                break;
+            case CompendiumSectionType.View:
+                prefix = "view";
+                break;
+        }
+        return Path.Join(this.GetStateDirectory(), prefix + "_" + compendiumType.Key + ".json");
     }
 
     public string GetStateDirectory()
@@ -34,13 +44,13 @@ public class CompendiumSectionStateService : IDisposable
         return Path.Join(_pluginInterface.GetPluginConfigDirectory(), "compendium");
     }
 
-    public async Task<SectionState> GetState(ICompendiumType compendiumType)
+    public async Task<SectionState> GetState(ICompendiumType compendiumType, CompendiumSectionType compendiumSectionType)
     {
         if (_loadedSections.TryGetValue(compendiumType, out var state))
         {
             return state;
         }
-        var statePath = GetStatePath(compendiumType);
+        var statePath = GetStatePath(compendiumType, compendiumSectionType);
         SectionState? sectionState = null;
         if (_reliableFileStorage.Exists(statePath))
         {
@@ -51,6 +61,7 @@ public class CompendiumSectionStateService : IDisposable
         if (sectionState == null)
         {
             sectionState = new SectionState();
+            sectionState.SectionType = compendiumSectionType;
         }
         sectionState.CompendiumType = compendiumType;
         sectionState.PropertyChanged += SectionStateChanged;
@@ -58,14 +69,14 @@ public class CompendiumSectionStateService : IDisposable
         return sectionState;
     }
 
-    public async Task SaveState(SectionState sectionState)
+    public async Task SaveState(SectionState sectionState, CompendiumSectionType compendiumSectionType)
     {
         var saveDirectory = new DirectoryInfo(GetStateDirectory());
         if (!saveDirectory.Exists)
         {
             saveDirectory.Create();
         }
-        var savePath = GetStatePath(sectionState.CompendiumType);
+        var savePath = GetStatePath(sectionState.CompendiumType, compendiumSectionType);
         var contents = JsonConvert.SerializeObject(sectionState);
         await _reliableFileStorage.WriteAllTextAsync(savePath, contents);
     }
@@ -74,7 +85,7 @@ public class CompendiumSectionStateService : IDisposable
     {
         if (sender is SectionState state)
         {
-            _ = SaveState(state);
+            _ = SaveState(state, state.SectionType);
         }
     }
 
@@ -84,7 +95,7 @@ public class CompendiumSectionStateService : IDisposable
         {
             foreach (var loadedSection in _loadedSections)
             {
-                SaveState(loadedSection.Value).Wait();
+                SaveState(loadedSection.Value, loadedSection.Value.SectionType).Wait();
             }
         }
     }
@@ -94,4 +105,10 @@ public class CompendiumSectionStateService : IDisposable
         Dispose(true);
         GC.SuppressFinalize(this);
     }
+}
+
+public enum CompendiumSectionType
+{
+    List,
+    View
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading;
-using AllaganLib.Interface.Grid;
+using System.Threading.Tasks;
 using AllaganLib.Shared.Extensions;
 using Autofac;
 using Autofac.Features.OwnedInstances;
@@ -13,6 +13,7 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
+using InventoryTools.Compendium.Services;
 using InventoryTools.Logic;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
@@ -25,6 +26,9 @@ namespace InventoryTools.Compendium.Windows;
 public class CompendiumListWindow : CompendiumWindow
 {
     private readonly WindowState _windowState;
+    private readonly CompendiumSectionStateService _sectionStateService;
+    private SectionState? _sectionState;
+    private Task<SectionState>? _sectionStateTask;
     private readonly ICompendiumType _compendiumType;
     private readonly IPluginLog _pluginLog;
     private readonly IEnumerable<IMenuWindow> _menuWindows;
@@ -37,9 +41,10 @@ public class CompendiumListWindow : CompendiumWindow
 
     public delegate Owned<CompendiumListWindow> Factory(ICompendiumType compendiumType);
 
-    public CompendiumListWindow(ILogger<CompendiumListWindow> logger, WindowState windowState, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ICompendiumType compendiumType, IComponentContext context, IPluginLog pluginLog, IEnumerable<IMenuWindow> menuWindows, IEnumerable<ICompendiumType> compendiumTypes) : base(logger, mediator, imGuiService, configuration, compendiumType.Plural + " Window")
+    public CompendiumListWindow(ILogger<CompendiumListWindow> logger, WindowState windowState, CompendiumSectionStateService sectionStateService, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ICompendiumType compendiumType, IComponentContext context, IPluginLog pluginLog, IEnumerable<IMenuWindow> menuWindows, IEnumerable<ICompendiumType> compendiumTypes) : base(logger, mediator, imGuiService, configuration, compendiumType.Plural + " Window")
     {
         _windowState = windowState;
+        _sectionStateService = sectionStateService;
         _compendiumType = compendiumType;
         _pluginLog = pluginLog;
         _menuWindows = menuWindows;
@@ -55,18 +60,53 @@ public class CompendiumListWindow : CompendiumWindow
         return _compendiumType.GetGroups(compendiumGrouping)?.OrderBy(k => k.Value).ToList();
     }
 
+    private string? GetSavedGrouping()
+    {
+        return ((AllaganLib.Interface.FormFields.IConfigurable<string?>)_sectionState!).Get("grouping");
+    }
+
+    private void SetSavedGrouping(string? newGrouping)
+    {
+        _sectionState?.Set("grouping", newGrouping);
+    }
+
     public override void DrawWindow()
     {
+        if (_sectionState == null)
+        {
+            if (_sectionStateTask == null)
+            {
+                _sectionStateTask = _sectionStateService.GetState(_compendiumType, CompendiumSectionType.List);
+            }
+
+            if (_sectionStateTask.IsCompleted)
+            {
+                _sectionState = _sectionStateTask.Result;
+                _sectionStateTask = null;
+            }
+
+            if (_sectionState == null)
+            {
+                return;
+            }
+        }
+
         DrawMenuBar();
 
         if (!_defaultGroupSet)
         {
             _defaultGroupSet = true;
-            var defaultGrouping = _compendiumType.GetDefaultGrouping();
-            if (defaultGrouping != string.Empty)
+            var savedGrouping = GetSavedGrouping();
+            var groupings = _compendiumType.GetGroupings();
+            if (groupings != null)
             {
-                var groupings = _compendiumType.GetGroupings();
-                if (groupings != null)
+                if (savedGrouping != null)
+                {
+                    _compendiumGrouping = groupings.FirstOrDefault(c => c.Key == savedGrouping);
+                }
+
+                var defaultGrouping = _compendiumType.GetDefaultGrouping();
+                if (_compendiumGrouping == null && defaultGrouping != string.Empty)
                 {
                     _compendiumGrouping = groupings.FirstOrDefault(c => c.Key == defaultGrouping);
                 }
@@ -186,6 +226,8 @@ public class CompendiumListWindow : CompendiumWindow
                                     if (ImGui.MenuItem(grouping.Name, _compendiumGrouping?.Equals(grouping) ?? false))
                                     {
                                         _compendiumGrouping = grouping;
+                                        _compendiumTabs = null;
+                                        SetSavedGrouping(grouping.Key);
                                     }
                                 }
                             }
@@ -250,5 +292,14 @@ public class CompendiumListWindow : CompendiumWindow
 
     public override void Initialize()
     {
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+        if (disposing)
+        {
+            _sectionStateTask?.Dispose();
+        }
     }
 }
