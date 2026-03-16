@@ -2,6 +2,7 @@
   <PropertyGroup>
     <AssemblyName>InventoryTools</AssemblyName>
     <NoWarn>IDE0003</NoWarn>
+    <NoWarn>S3267</NoWarn>
     <OutputType>Library</OutputType>
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <Configurations>Debug;Release;FullDebug</Configurations>
@@ -10,16 +11,19 @@
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AllaganLib.Interface" Version="2.0.5" />
-    <PackageReference Include="AllaganLib.Monitors" Version="2.0.4" />
-    <PackageReference Include="DalaMock.Host" Version="4.1.1" />
-    <PackageReference Include="DalaMock.Shared" Version="4.0.6" />
-    <PackageReference Include="Humanizer.Core" Version="3.0.1" />
+    <PackageReference Include="AllaganLib.Interface" Version="2.1.0" />
+    <PackageReference Include="AllaganLib.Monitors" Version="2.1.0" />
+    <PackageReference Include="Autofac" Version="9.1.0" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
+    <PackageReference Include="DalaMock.Host" Version="5.0.0" />
+    <PackageReference Include="DalaMock.Shared" Version="5.0.0" />
+    <PackageReference Include="Humanizer.Core" Version="3.0.10" />
     <PackageReference Include="Ionide.KeepAChangelog" Version="0.2.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="4.14.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
     <PackageReference Include="CsvHelper" Version="33.1.0" />
     <PackageReference Include="SerialQueue" Version="2.1.0" />
     <PackageReference Include="SonarAnalyzer.CSharp" Version="10.16.1.129956">
@@ -29,6 +33,7 @@
     <ProjectReference Include="..\CriticalCommonLib\CriticalCommonLib.csproj" />
     <ProjectReference Include="..\OtterGui\OtterGui.csproj" />
     <PackageReference Update="DotNet.ReproducibleBuilds" Version="1.2.39" />
+    <PackageReference Update="DalamudPackager" Version="14.0.2" />
   </ItemGroup>
   <ItemGroup>
     <ContentWithTargetPath Include="Images\icon.png">
@@ -155,6 +160,18 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>Images\wizard.png</TargetPath>
     </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Images\ec.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>Images\ec.png</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Images\wrench-icon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>Images\wrench-icon.png</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Images\armor.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>Images\armor.png</TargetPath>
+    </ContentWithTargetPath>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Logic\Columns\Tools\" />
@@ -165,13 +182,18 @@
   <PropertyGroup>
     <WarningsAsErrors>RS0030</WarningsAsErrors>
   </PropertyGroup>
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);Dalamud001</NoWarn>
+  </PropertyGroup>
   <ItemGroup>
     <Content Include="CHANGELOG.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Images\armor.png" />
     <Content Include="Images\collectable.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Images\ec.png" />
     <Content Include="Images\quality.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -9,6 +9,7 @@ using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using DalaMock.Host.Mediator;
 using InventoryTools.Attributes;
+using InventoryTools.Compendium.Windows;
 using InventoryTools.EquipmentSuggest;
 using InventoryTools.Mediator;
 using InventoryTools.Services.Interfaces;
@@ -60,6 +61,14 @@ namespace InventoryTools.Commands
         public void ShowHideNpcsWindow(string command, string args)
         {
             _mediatorService.Publish(new ToggleGenericWindowMessage(typeof(ENpcsWindow)));
+        }
+
+        [Command("/compendium")]
+        [Aliases("/atc")]
+        [HelpMessage("Shows the allagan tools compendium window.")]
+        public void ShowCompendiumWindow(string command, string args)
+        {
+            _mediatorService.Publish(new ToggleGenericWindowMessage(typeof(CompendiumTypesWindow)));
         }
 
 

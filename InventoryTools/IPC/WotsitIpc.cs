@@ -1,12 +1,18 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using CriticalCommonLib;
+using DalaMock.Host.Mediator;
 using Dalamud.Plugin.Ipc;
 using Dalamud.Plugin.Services;
+using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Logic;
+using InventoryTools.Logic.Settings;
+using InventoryTools.Mediator;
+using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using Timer = System.Timers.Timer;
@@ -17,6 +23,11 @@ namespace InventoryTools.IPC
 
     public class WotsitIpc: IWotsitIpc
     {
+        private readonly CompendiumWotsitSetting _compendiumWotsitSetting;
+        private readonly MediatorService _mediatorService;
+        private readonly InventoryToolsConfiguration _configuration;
+        private readonly IEnumerable<ICompendiumType> _compendiumTypes;
+        private readonly ConfigurationManagerService _configurationManagerService;
         private readonly IDalamudPluginInterface _dalamudPluginInterface;
         private readonly IListService _listService;
         private readonly IFramework _framework;
@@ -26,16 +37,24 @@ namespace InventoryTools.IPC
 
         private ICallGateSubscriber<string, string, string, uint, string>? _wotsitRegister;
         private ICallGateSubscriber<string, bool>? _wotsitUnregister;
+        private ICallGateSubscriber<string, string, bool>? _wotsitUnregisterOne;
         private ICallGateSubscriber<string, bool>? _callGateSubscriber;
         private ICallGateSubscriber<bool> _wotsitAvailable;
         private Dictionary<string, string> _wotsitToggleFilterGuids = new();
+        private Dictionary<string, ICompendiumType> _wotsitCompendiumIds = new();
         private Dictionary<string, string> _wotsitFilterNames = new();
+        private bool? _compendiumState;
         private bool _wotsItRegistered = false;
         private Timer? _delayTimer = null;
 
 
-        public WotsitIpc(ILogger<WotsitIpc> logger, IDalamudPluginInterface dalamudPluginInterface, IListService listService, IFramework framework)
+        public WotsitIpc(CompendiumWotsitSetting compendiumWotsitSetting, MediatorService mediatorService, InventoryToolsConfiguration configuration, IEnumerable<ICompendiumType> compendiumTypes, ConfigurationManagerService configurationManagerService, ILogger<WotsitIpc> logger, IDalamudPluginInterface dalamudPluginInterface, IListService listService, IFramework framework)
         {
+            _compendiumWotsitSetting = compendiumWotsitSetting;
+            _mediatorService = mediatorService;
+            _configuration = configuration;
+            _compendiumTypes = compendiumTypes;
+            _configurationManagerService = configurationManagerService;
             _dalamudPluginInterface = dalamudPluginInterface;
             _listService = listService;
             _framework = framework;
@@ -89,6 +108,10 @@ namespace InventoryTools.IPC
             {
                 _wotsitUnregister = _dalamudPluginInterface.GetIpcSubscriber<string, bool>("FA.UnregisterAll");
             }
+            if (_wotsitUnregister == null)
+            {
+                _wotsitUnregisterOne = _dalamudPluginInterface.GetIpcSubscriber<string, string, bool>("FA.UnregisterOne");
+            }
 
             if (_wotsitRegister == null)
             {
@@ -120,6 +143,10 @@ namespace InventoryTools.IPC
 
             _wotsItRegistered = true;
             RegisterFilters();
+            if (_compendiumState == null)
+            {
+                SetupCompendium();
+            }
         }
 
         public void RegisterFilters()
@@ -147,6 +174,66 @@ namespace InventoryTools.IPC
             Logger.LogDebug($"Registered {_wotsitToggleFilterGuids.Count} lists with Wotsit");
         }
 
+        public void SetupCompendium()
+        {
+            if (this._compendiumState is null or false && this._compendiumWotsitSetting.CurrentValue(_configuration))
+            {
+                RegisterCompendium();
+            }
+            if (this._compendiumState is true && !this._compendiumWotsitSetting.CurrentValue(_configuration))
+            {
+                UnRegisterCompendium();
+            }
+        }
+
+        public void RegisterCompendium()
+        {
+            if (_wotsitRegister != null)
+            {
+                _wotsitCompendiumIds = new Dictionary<string, ICompendiumType>();
+
+                foreach (var compendiumType in _compendiumTypes)
+                {
+                    try
+                    {
+                        var guid = _wotsitRegister.InvokeFunc(IpcDisplayName, "Compendium - " + compendiumType.Plural,
+                            $"Show the compendium list for " + compendiumType.Plural, WotsitIconId);
+                        _wotsitCompendiumIds.Add(guid, compendiumType);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.LogTrace(e , "Could not register with Wotsit IPC. This is normal if you do not have it installed.");
+                    }
+                }
+
+                _compendiumState = true;
+            }
+
+            Logger.LogDebug("Registered {CompendiumCount} compendium types with wotsit", _compendiumTypes.Count());
+        }
+
+        public void UnRegisterCompendium()
+        {
+            if (_wotsitUnregisterOne != null)
+            {
+                foreach (var compendiumType in _wotsitCompendiumIds)
+                {
+                    try
+                    {
+                        _wotsitUnregisterOne.InvokeFunc(IpcDisplayName, compendiumType.Key);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.LogTrace(e , "Could not unregister with Wotsit IPC. This is normal if you do not have it installed.");
+                    }
+                }
+                _wotsitCompendiumIds.Clear();
+                _compendiumState = false;
+            }
+
+            Logger.LogDebug("Unregistered {CompendiumCount} compendium types with wotsit", _compendiumTypes.Count());
+        }
+
         public void WotsitInvoke(string guid)
         {
             _framework.RunOnFrameworkThread(() =>
@@ -158,6 +245,10 @@ namespace InventoryTools.IPC
                     {
                         _listService.ToggleActiveBackgroundList(filter);
                     }
+                }
+                if (_wotsitCompendiumIds.TryGetValue(guid, out var compendiumType))
+                {
+                    _mediatorService.Publish(new ToggleCompendiumListMessage(compendiumType));
                 }
             });
         }
@@ -178,12 +269,18 @@ namespace InventoryTools.IPC
             _listService.ListAdded += ListAddedRemoved;
             _listService.ListRemoved += ListAddedRemoved;
             _listService.ListConfigurationChanged += ListChanged;
+            _configurationManagerService.ConfigurationChanged += ConfigurationManagerServiceOnConfigurationChanged;
 
             _delayTimer = new Timer(5000);
             _delayTimer.Elapsed += DelayTimerOnElapsed;
             _delayTimer.Enabled = true;
 
             return Task.CompletedTask;
+        }
+
+        private void ConfigurationManagerServiceOnConfigurationChanged()
+        {
+            SetupCompendium();
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
@@ -199,6 +296,7 @@ namespace InventoryTools.IPC
             {
                 // Wotsit was not installed or too early version
             }
+            _configurationManagerService.ConfigurationChanged -= ConfigurationManagerServiceOnConfigurationChanged;
             _listService.ListAdded -= ListAddedRemoved;
             _listService.ListRemoved -= ListAddedRemoved;
             _listService.ListConfigurationChanged -= ListChanged;

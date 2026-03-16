@@ -52,9 +52,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DalaMock.Core" Version="4.1.1" />
-    <PackageReference Include="Humanizer.Core" Version="3.0.1" />
+    <PackageReference Include="DalaMock.Core" Version="5.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="10.0.1" />
+    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="5.0.0-preview.5.20278.1" />
     <PackageReference Include="StbiSharp" Version="1.2.1" />
     <PackageReference Include="TextCopy" Version="6.2.1" />
     <PackageReference Include="Veldrid" Version="4.9.0" />
@@ -65,6 +65,9 @@
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageReference Update="DotNet.ReproducibleBuilds" Version="1.2.39" />
   </ItemGroup>
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);Dalamud001</NoWarn>
+  </PropertyGroup>
   <ItemGroup>
     <Folder Include="Properties" />
   </ItemGroup>
