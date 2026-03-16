@@ -20,7 +20,7 @@ namespace InventoryTools.Compendium.Columns;
 
 public class GenericItemTableColumn<TData> : IconColumn<WindowState, TData, MessageBase>
 {
-    public delegate GenericItemTableColumn<TData> Factory(CompendiumItemColumnOptions<TData> columnOptions);
+    public delegate GenericItemTableColumn<TData> Factory(ItemColumnOptions<TData> columnOptions);
 
     private readonly ITextureProvider _textureProvider;
     private readonly ItemSheet _itemSheet;
@@ -37,7 +37,7 @@ public class GenericItemTableColumn<TData> : IconColumn<WindowState, TData, Mess
         ImGuiMenuService imGuiMenuService,
         CompendiumRowHeightSetting rowHeightSetting,
         InventoryToolsConfiguration configuration,
-        CompendiumItemColumnOptions<TData> columnOptions) : base(textureProvider, imGuiService)
+        ItemColumnOptions<TData> columnOptions) : base(textureProvider, imGuiService)
     {
         Key = columnOptions.Key;
         Name = columnOptions.Name;

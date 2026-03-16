@@ -2,7 +2,7 @@ using Dalamud.Bindings.ImGui;
 
 namespace InventoryTools.Compendium.Columns.Options;
 
-public abstract record CompendiumColumnOptions
+public abstract record ColumnOptions
 {
     public required string Name { get; init; }
     public required string Key { get; init; }

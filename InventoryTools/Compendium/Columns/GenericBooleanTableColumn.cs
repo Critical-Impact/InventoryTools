@@ -10,12 +10,12 @@ namespace InventoryTools.Compendium.Columns;
 
 public class GenericBooleanTableColumn<TData> : BooleanColumn<WindowState, TData, MessageBase>
 {
-    public delegate GenericBooleanTableColumn<TData> Factory(CompendiumBooleanColumnOptions<TData> columnOptions);
+    public delegate GenericBooleanTableColumn<TData> Factory(BooleanColumnOptions<TData> columnOptions);
 
     private readonly Func<TData, bool?> _valueSelector;
 
     public GenericBooleanTableColumn(ImGuiService imGuiService,
-        CompendiumBooleanColumnOptions<TData> columnOptions) : base(imGuiService)
+        BooleanColumnOptions<TData> columnOptions) : base(imGuiService)
     {
         Key = columnOptions.Key;
         Name = columnOptions.Name;

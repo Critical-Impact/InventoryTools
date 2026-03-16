@@ -71,7 +71,7 @@ public class SharedModelCompendiumType : CompendiumType<SharedModelCache.SharedM
     public override void BuildColumns(CompendiumColumnBuilder<SharedModelCache.SharedModelGroup> builder)
     {
         builder.AddCompendiumOpenViewColumn(new(){Key = "icon", Name = "##Icon", HelpText = "The icon of the shared model", Version = "14.0.3", ValueSelector = row => ("armor", null), CompendiumType = this, RowIdSelector = row => (uint)_sharedModelCache.IndexOf(row)});
-        builder.AddStringColumn(new CompendiumStringColumnOptions<SharedModelCache.SharedModelGroup>
+        builder.AddStringColumn(new StringColumnOptions<SharedModelCache.SharedModelGroup>
         {
             ValueSelector = row => row.Items.First().ClassJobCategory?.Base.Name.ExtractText() ?? "Unknown",
             Name = "Class/Job",
@@ -79,7 +79,7 @@ public class SharedModelCompendiumType : CompendiumType<SharedModelCache.SharedM
             HelpText = "The class/job of the item",
             Version = "14.0.3"
         });
-        builder.AddStringColumn(new CompendiumStringColumnOptions<SharedModelCache.SharedModelGroup>
+        builder.AddStringColumn(new StringColumnOptions<SharedModelCache.SharedModelGroup>
         {
             ValueSelector = row => string.Join(", ", row.Items.First().EquipSlotCategory?.PossibleSlots.Select(c => c.Humanize()) ?? []),
             Name = "Equip Slots",
@@ -87,7 +87,7 @@ public class SharedModelCompendiumType : CompendiumType<SharedModelCache.SharedM
             HelpText = "The equipment slots of the item",
             Version = "14.0.3"
         });
-        builder.AddItemsColumn(new CompendiumItemsColumnOptions<SharedModelCache.SharedModelGroup>
+        builder.AddItemsColumn(new ItemsColumnOptions<SharedModelCache.SharedModelGroup>
         {
             ValueSelector = row => row.Items.ToList(),
             Name = "Items",

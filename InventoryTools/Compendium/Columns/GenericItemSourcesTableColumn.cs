@@ -16,7 +16,7 @@ namespace InventoryTools.Compendium.Columns;
 
 public class GenericItemSourcesTableColumn<TData> : StringColumn<WindowState, TData, MessageBase>
 {
-    public delegate GenericItemSourcesTableColumn<TData> Factory(CompendiumItemSourceColumnOptions<TData> columnOptions);
+    public delegate GenericItemSourcesTableColumn<TData> Factory(ItemSourceColumnOptions<TData> columnOptions);
 
     private readonly ItemInfoRenderService _itemInfoRenderService;
     private readonly CompendiumRowHeightSetting _rowHeightSetting;
@@ -28,7 +28,7 @@ public class GenericItemSourcesTableColumn<TData> : StringColumn<WindowState, TD
         ItemInfoRenderService itemInfoRenderService,
         CompendiumRowHeightSetting rowHeightSetting,
         InventoryToolsConfiguration configuration,
-        CompendiumItemSourceColumnOptions<TData> columnOptions) : base(imGuiService, stringColumnFilter)
+        ItemSourceColumnOptions<TData> columnOptions) : base(imGuiService, stringColumnFilter)
     {
         Key = columnOptions.Key;
         Name = columnOptions.Name;

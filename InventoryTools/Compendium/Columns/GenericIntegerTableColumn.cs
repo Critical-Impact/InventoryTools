@@ -11,13 +11,13 @@ namespace InventoryTools.Compendium.Columns;
 
 public class GenericIntegerTableColumn<TData> : IntegerColumn<WindowState, TData, MessageBase>
 {
-    public delegate GenericIntegerTableColumn<TData> Factory(CompendiumIntegerColumnOptions<TData> columnOptions);
+    public delegate GenericIntegerTableColumn<TData> Factory(IntegerColumnOptions<TData> columnOptions);
 
     private readonly Func<TData, string?> _valueSelector;
 
     public GenericIntegerTableColumn(ImGuiService imGuiService,
         StringColumnFilter stringColumnFilter,
-        CompendiumIntegerColumnOptions<TData> columnOptions) : base(imGuiService, stringColumnFilter)
+        IntegerColumnOptions<TData> columnOptions) : base(imGuiService, stringColumnFilter)
     {
         Key = columnOptions.Key;
         Name = columnOptions.Name;

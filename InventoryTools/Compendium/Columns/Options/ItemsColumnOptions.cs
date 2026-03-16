@@ -5,7 +5,7 @@ using InventoryTools.Compendium.Models;
 
 namespace InventoryTools.Compendium.Columns.Options;
 
-public sealed record CompendiumItemsColumnOptions<TData> : CompendiumColumnOptions
+public sealed record ItemsColumnOptions<TData> : ColumnOptions
 {
     public required Func<TData, List<ItemRow>> ValueSelector { get; init; }
 }

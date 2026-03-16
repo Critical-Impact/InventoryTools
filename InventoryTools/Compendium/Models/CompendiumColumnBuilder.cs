@@ -39,49 +39,49 @@ public sealed class CompendiumColumnBuilder<TData>
         _compendiumOpenViewTableColumnFactory = compendiumOpenViewTableColumnFactory;
     }
 
-    public CompendiumColumnBuilder<TData> AddStringColumn(CompendiumStringColumnOptions<TData> options)
+    public CompendiumColumnBuilder<TData> AddStringColumn(StringColumnOptions<TData> options)
     {
         var column = _stringColumnFactory(options);
         _columns.Add(column);
         return this;
     }
 
-    public CompendiumColumnBuilder<TData> AddItemSourcesColumn(CompendiumItemSourceColumnOptions<TData> options)
+    public CompendiumColumnBuilder<TData> AddItemSourcesColumn(ItemSourceColumnOptions<TData> options)
     {
         var column = _itemSourcesTableColumnFactory(options);
         _columns.Add(column);
         return this;
     }
 
-    public CompendiumColumnBuilder<TData> AddItemsColumn(CompendiumItemsColumnOptions<TData> options)
+    public CompendiumColumnBuilder<TData> AddItemsColumn(ItemsColumnOptions<TData> options)
     {
         var column = _itemsTableColumnFactory(options);
         _columns.Add(column);
         return this;
     }
 
-    public CompendiumColumnBuilder<TData> AddIntegerColumn(CompendiumIntegerColumnOptions<TData> options)
+    public CompendiumColumnBuilder<TData> AddIntegerColumn(IntegerColumnOptions<TData> options)
     {
         var column = _integerColumnFactory(options);
         _columns.Add(column);
         return this;
     }
 
-    public CompendiumColumnBuilder<TData> AddBooleanColumn(CompendiumBooleanColumnOptions<TData> options)
+    public CompendiumColumnBuilder<TData> AddBooleanColumn(BooleanColumnOptions<TData> options)
     {
         var column = _booleanColumnFactory(options);
         _columns.Add(column);
         return this;
     }
 
-    public CompendiumColumnBuilder<TData> AddIconColumn(CompendiumIconColumnOptions<TData>  options)
+    public CompendiumColumnBuilder<TData> AddIconColumn(IconColumnOptions<TData>  options)
     {
         var column = _iconColumnFactory(options);
         _columns.Add(column);
         return this;
     }
 
-    public CompendiumColumnBuilder<TData> AddImageIconColumn(CompendiumIconColumnOptions<TData>  options)
+    public CompendiumColumnBuilder<TData> AddImageIconColumn(IconColumnOptions<TData>  options)
     {
         var column = _iconColumnFactory(options);
         _columns.Add(column);
@@ -95,7 +95,7 @@ public sealed class CompendiumColumnBuilder<TData>
         return this;
     }
 
-    public CompendiumColumnBuilder<TData> AddItemColumn(CompendiumItemColumnOptions<TData>  options)
+    public CompendiumColumnBuilder<TData> AddItemColumn(ItemColumnOptions<TData>  options)
     {
         var column = _itemTableColumnFactory(options);
         _columns.Add(column);

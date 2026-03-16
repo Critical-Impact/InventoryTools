@@ -11,14 +11,14 @@ namespace InventoryTools.Compendium.Columns;
 
 public class GenericStringTableColumn<TData> : StringColumn<WindowState, TData, MessageBase>
 {
-    public delegate GenericStringTableColumn<TData> Factory(CompendiumStringColumnOptions<TData> columnOptions
+    public delegate GenericStringTableColumn<TData> Factory(StringColumnOptions<TData> columnOptions
     );
 
     private readonly Func<TData, string?> _valueSelector;
 
     public GenericStringTableColumn(ImGuiService imGuiService,
         StringColumnFilter stringColumnFilter,
-        CompendiumStringColumnOptions<TData> columnOptions) : base(imGuiService, stringColumnFilter)
+        StringColumnOptions<TData> columnOptions) : base(imGuiService, stringColumnFilter)
     {
         Key = columnOptions.Key;
         Name = columnOptions.Name;
