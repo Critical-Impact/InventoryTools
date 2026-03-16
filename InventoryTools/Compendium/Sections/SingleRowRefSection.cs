@@ -7,13 +7,14 @@ using Dalamud.Interface.Textures;
 using Dalamud.Plugin.Services;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
+using InventoryTools.Compendium.Sections.Options;
 using InventoryTools.Compendium.Services;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 
 namespace InventoryTools.Compendium.Sections;
 
-public class SingleRowRefSection : CompendiumViewSection
+public class SingleRowRefSection : ViewSection
 {
     private readonly SingleRowRefSectionOptions _options;
     private readonly ICompendiumTypeFactory _compendiumTypeFactory;

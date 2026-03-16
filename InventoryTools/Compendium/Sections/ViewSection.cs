@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 using InventoryTools.Compendium.Interfaces;
@@ -9,12 +8,12 @@ using InventoryTools.Services;
 
 namespace InventoryTools.Compendium.Sections;
 
-public abstract class CompendiumViewSection : ICompendiumViewSection
+public abstract class ViewSection : ICompendiumViewSection
 {
     private readonly ImGuiService _imGuiService;
     private List<ImGuiService.HeaderButton>? _headerButtons;
 
-    public CompendiumViewSection(ImGuiService imGuiService)
+    public ViewSection(ImGuiService imGuiService)
     {
         _imGuiService = imGuiService;
     }

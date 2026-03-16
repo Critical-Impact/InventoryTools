@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Lumina.Excel;
 
-namespace InventoryTools.Compendium.Sections;
+namespace InventoryTools.Compendium.Sections.Options;
 
 public sealed class CollectionRowRefSectionOptions
 {

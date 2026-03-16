@@ -1,20 +1,18 @@
 using System;
-using System.Collections.Generic;
 using System.Numerics;
 using CriticalCommonLib.Services;
-using DalaMock.Host.Mediator;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Textures;
 using Dalamud.Plugin.Services;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
-using InventoryTools.Mediator;
+using InventoryTools.Compendium.Sections.Options;
 using InventoryTools.Services;
 
 namespace InventoryTools.Compendium.Sections;
 
-public sealed class MapLinksViewSection : CompendiumViewSection
+public sealed class MapLinksViewSection : ViewSection
 {
     private readonly MapLinksViewSectionOptions _options;
     private readonly ITextureProvider _textureProvider;

@@ -10,6 +10,8 @@ using InventoryTools.Compendium.Columns.Options;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
 using InventoryTools.Compendium.Sections;
+using InventoryTools.Compendium.Sections.Options;
+using InventoryTools.Compendium.Services;
 using OtterGui.Extensions;
 using Icons = AllaganLib.Shared.Misc.Icons;
 
@@ -101,7 +103,7 @@ public class SharedModelCompendiumType : CompendiumType<SharedModelCache.SharedM
         viewBuilder.Icon = row.Items.First().Icon;
         viewBuilder.Title = "Shared Model #" + _sharedModelCache.IndexOf(row);
         viewBuilder.Subtitle = row.Items.Count + " items";
-        viewBuilder.AddItemListSection(new CompendiumItemListSectionOptions()
+        viewBuilder.AddItemListSection(new ItemListSectionOptions()
         {
             Items = row.Items.Select(c => new ItemInfo(c)),
             SectionName = "Items",

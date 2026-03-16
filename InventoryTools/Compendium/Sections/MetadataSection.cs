@@ -2,11 +2,12 @@ using System.Collections.Generic;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 using InventoryTools.Compendium.Models;
+using InventoryTools.Compendium.Sections.Options;
 using InventoryTools.Services;
 
 namespace InventoryTools.Compendium.Sections;
 
-public sealed class MetadataSection : CompendiumViewSection
+public sealed class MetadataSection : ViewSection
 {
     private readonly List<MetadataSectionOptions.Row> _rows;
 

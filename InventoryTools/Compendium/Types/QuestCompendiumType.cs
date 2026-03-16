@@ -13,6 +13,8 @@ using AllaganLib.GameSheets.Sheets;
 using AllaganLib.Shared.Misc;
 using Dalamud.Utility;
 using InventoryTools.Compendium.Interfaces;
+using InventoryTools.Compendium.Sections.Options;
+using InventoryTools.Compendium.Services;
 
 namespace InventoryTools.Compendium.Types;
 

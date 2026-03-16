@@ -15,6 +15,8 @@ using Dalamud.Interface.Colors;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
 using InventoryTools.Compendium.Sections;
+using InventoryTools.Compendium.Sections.Options;
+using InventoryTools.Compendium.Services;
 using InventoryTools.Ui;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
@@ -134,7 +136,7 @@ public class ItemCompendiumType : CompendiumType<ItemRow>
         var sharedModels = row.GetSharedModels();
         if (sharedModels.Count > 0)
         {
-            viewBuilder.AddItemListSection(new CompendiumItemListSectionOptions()
+            viewBuilder.AddItemListSection(new ItemListSectionOptions()
             {
                 SectionName = "Shared Models",
                 Items = sharedModels.Select(c => new ItemInfo(c))

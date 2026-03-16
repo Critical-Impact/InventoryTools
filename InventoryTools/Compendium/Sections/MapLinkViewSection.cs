@@ -7,11 +7,12 @@ using Dalamud.Interface.Textures;
 using Dalamud.Plugin.Services;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
+using InventoryTools.Compendium.Sections.Options;
 using InventoryTools.Services;
 
 namespace InventoryTools.Compendium.Sections;
 
-public sealed class MapLinkViewSection : CompendiumViewSection
+public sealed class MapLinkViewSection : ViewSection
 {
     private readonly MapLinkViewSectionOptions _options;
     private readonly ITextureProvider _textureProvider;

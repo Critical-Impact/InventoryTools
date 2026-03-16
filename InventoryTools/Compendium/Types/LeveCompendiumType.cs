@@ -13,6 +13,8 @@ using Humanizer;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
 using InventoryTools.Compendium.Sections;
+using InventoryTools.Compendium.Sections.Options;
+using InventoryTools.Compendium.Services;
 
 namespace InventoryTools.Compendium.Types;
 
@@ -178,7 +180,7 @@ public class LeveCompendiumType : CompendiumType<LeveRow>
 
             if (requiredItems.Count > 0)
             {
-                viewBuilder.AddItemListSection(new CompendiumItemListSectionOptions()
+                viewBuilder.AddItemListSection(new ItemListSectionOptions()
                 {
                     SectionName = "Required Items",
                     Items = requiredItems,
@@ -212,7 +214,7 @@ public class LeveCompendiumType : CompendiumType<LeveRow>
 
         if (rewards.Count > 0)
         {
-            viewBuilder.AddItemListSection(new CompendiumItemListSectionOptions()
+            viewBuilder.AddItemListSection(new ItemListSectionOptions()
             {
                 SectionName = "Reward Items",
                 Items = rewards,

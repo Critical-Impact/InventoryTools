@@ -1,20 +1,20 @@
 using System.Linq;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
-using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
+using InventoryTools.Compendium.Sections.Options;
 using InventoryTools.Services;
 using OtterGui;
 
 namespace InventoryTools.Compendium.Sections;
 
-public class CompendiumInfoTableSection : CompendiumViewSection
+public class InfoTableSection : ViewSection
 {
-    private readonly CompendiumInfoTableSectionOptions _options;
+    private readonly InfoTableSectionOptions _options;
 
-    public delegate CompendiumInfoTableSection Factory(CompendiumInfoTableSectionOptions options);
+    public delegate InfoTableSection Factory(InfoTableSectionOptions options);
 
-    public CompendiumInfoTableSection(ImGuiService imGuiService, CompendiumInfoTableSectionOptions options) : base(imGuiService)
+    public InfoTableSection(ImGuiService imGuiService, InfoTableSectionOptions options) : base(imGuiService)
     {
         _options = options;
     }

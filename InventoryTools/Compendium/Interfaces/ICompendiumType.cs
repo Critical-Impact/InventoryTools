@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DalaMock.Host.Mediator;
 using InventoryTools.Compendium.Models;
 using InventoryTools.Compendium.Sections;
+using InventoryTools.Compendium.Services;
 
 namespace InventoryTools.Compendium.Interfaces;
 

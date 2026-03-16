@@ -17,7 +17,7 @@ public sealed class CompendiumColumnBuilder<TData>
     private readonly GenericItemSourcesTableColumn<TData>.Factory _itemSourcesTableColumnFactory;
     private readonly GenericItemsTableColumn<TData>.Factory _itemsTableColumnFactory;
     private readonly GenericItemTableColumn<TData>.Factory _itemTableColumnFactory;
-    private readonly CompendiumOpenViewTableColumn<TData>.Factory _compendiumOpenViewTableColumnFactory;
+    private readonly OpenViewTableColumn<TData>.Factory _compendiumOpenViewTableColumnFactory;
 
     public CompendiumColumnBuilder(
         GenericStringTableColumn<TData>.Factory stringColumnFactory,
@@ -27,7 +27,7 @@ public sealed class CompendiumColumnBuilder<TData>
         GenericItemSourcesTableColumn<TData>.Factory  itemSourcesTableColumnFactory,
         GenericItemsTableColumn<TData>.Factory  itemsTableColumnFactory,
         GenericItemTableColumn<TData>.Factory  itemTableColumnFactory,
-        CompendiumOpenViewTableColumn<TData>.Factory compendiumOpenViewTableColumnFactory)
+        OpenViewTableColumn<TData>.Factory compendiumOpenViewTableColumnFactory)
     {
         _stringColumnFactory = stringColumnFactory;
         _integerColumnFactory = integerColumnFactory;
@@ -88,7 +88,7 @@ public sealed class CompendiumColumnBuilder<TData>
         return this;
     }
 
-    public CompendiumColumnBuilder<TData> AddCompendiumOpenViewColumn(CompendiumOpenViewTableColumnOptions<TData> options)
+    public CompendiumColumnBuilder<TData> AddCompendiumOpenViewColumn(OpenViewTableColumnOptions<TData> options)
     {
         var column = _compendiumOpenViewTableColumnFactory(options);
         _columns.Add(column);

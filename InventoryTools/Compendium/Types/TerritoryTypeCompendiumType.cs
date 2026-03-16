@@ -8,6 +8,7 @@ using DalaMock.Host.Mediator;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
 using InventoryTools.Compendium.Sections;
+using InventoryTools.Compendium.Services;
 using Lumina.Excel.Sheets;
 using Icons = AllaganLib.Shared.Misc.Icons;
 

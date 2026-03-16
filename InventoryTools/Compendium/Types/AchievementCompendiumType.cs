@@ -11,6 +11,8 @@ using DalaMock.Host.Mediator;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
 using InventoryTools.Compendium.Sections;
+using InventoryTools.Compendium.Sections.Options;
+using InventoryTools.Compendium.Services;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
 
@@ -139,7 +141,7 @@ public class AchievementCompendiumType : CompendiumType<AchievementRow>
         {
             information.Add(("Title", row.Base.Title.ValueNullable.Value.Masculine.ToImGuiString() + "/" + row.Base.Title.ValueNullable.Value.Feminine.ToImGuiString(), true));
         }
-        viewBuilder.AddInfoTableSection(new CompendiumInfoTableSectionOptions()
+        viewBuilder.AddInfoTableSection(new InfoTableSectionOptions()
         {
             SectionName = "Information",
             Items = information.AsReadOnly()

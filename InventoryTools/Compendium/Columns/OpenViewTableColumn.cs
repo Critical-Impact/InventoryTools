@@ -16,9 +16,9 @@ using InventoryTools.Services;
 
 namespace InventoryTools.Compendium.Columns;
 
-public class CompendiumOpenViewTableColumn<TData> : FormField<(string?, uint?), WindowState>, IValueColumn<WindowState, TData, MessageBase, (string?, uint?)>
+public class OpenViewTableColumn<TData> : FormField<(string?, uint?), WindowState>, IValueColumn<WindowState, TData, MessageBase, (string?, uint?)>
 {
-    public delegate CompendiumOpenViewTableColumn<TData> Factory(CompendiumOpenViewTableColumnOptions<TData> columnOptions);
+    public delegate OpenViewTableColumn<TData> Factory(OpenViewTableColumnOptions<TData> columnOptions);
 
     private readonly ITextureProvider _textureProvider;
     private readonly CompendiumRowHeightSetting _rowHeightSetting;
@@ -29,12 +29,12 @@ public class CompendiumOpenViewTableColumn<TData> : FormField<(string?, uint?), 
     private readonly ICompendiumType _compendiumType;
     private ISharedImmediateTexture? _texture;
 
-    public CompendiumOpenViewTableColumn(
+    public OpenViewTableColumn(
         ITextureProvider textureProvider,
         ImGuiService imGuiService,
         CompendiumRowHeightSetting rowHeightSetting,
         InventoryToolsConfiguration configuration,
-        CompendiumOpenViewTableColumnOptions<TData> columnOptions,
+        OpenViewTableColumnOptions<TData> columnOptions,
         MediatorService mediatorService) : base(imGuiService)
     {
         Key = columnOptions.Key;

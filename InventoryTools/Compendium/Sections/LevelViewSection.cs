@@ -1,6 +1,5 @@
 using System;
 using System.Numerics;
-using AllaganLib.GameSheets.Model;
 using AllaganLib.GameSheets.Sheets;
 using AllaganLib.GameSheets.Sheets.Rows;
 using Dalamud.Bindings.ImGui;
@@ -16,7 +15,7 @@ using Lumina.Excel.Sheets;
 
 namespace InventoryTools.Compendium.Sections;
 
-public class LevelViewSection : CompendiumViewSection
+public class LevelViewSection : ViewSection
 {
     private readonly LevelViewSectionOptions _options;
     private readonly LevelSheet _levelSheet;

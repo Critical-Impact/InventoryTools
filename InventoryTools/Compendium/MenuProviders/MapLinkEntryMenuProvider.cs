@@ -9,8 +9,6 @@ namespace InventoryTools.Compendium.MenuProviders;
 
 public class MapLinkEntryMenuProvider(MediatorService mediatorService, IChatUtilities chatUtilities) : MenuProvider<MapLinkEntry>(mediatorService)
 {
-    private readonly IChatUtilities _chatUtilities = chatUtilities;
-
     public override void DrawMenu(MapLinkEntry item)
     {
         ImGui.Text(item.Name);
@@ -19,13 +17,13 @@ public class MapLinkEntryMenuProvider(MediatorService mediatorService, IChatUtil
         if (ImGui.Selectable("Show on Map"))
         {
             //TODO: add map location message
-            _chatUtilities.PrintFullMapLink(item.Location);
+            chatUtilities.PrintFullMapLink(item.Location);
         }
 
         if (ImGui.Selectable("Teleport"))
         {
             MediatorService.Publish(new RequestTeleportToMapMessage(item.Location.Map.RowId, new Vector2((float)item.Location.MapX, (float)item.Location.MapY)));
-            _chatUtilities.PrintFullMapLink(item.Location);
+            chatUtilities.PrintFullMapLink(item.Location);
         }
     }
 

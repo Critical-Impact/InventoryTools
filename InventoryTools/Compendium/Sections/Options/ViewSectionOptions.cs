@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using DalaMock.Host.Mediator;
 
-namespace InventoryTools.Compendium.Sections;
+namespace InventoryTools.Compendium.Sections.Options;
 
-public record CompendiumViewSectionOptions
+public record ViewSectionOptions
 {
     public required string SectionName { get; init; }
     public string SectionId => SectionName.ToLower().Replace(" ", "");

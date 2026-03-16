@@ -13,6 +13,8 @@ using Dalamud.Bindings.ImGui;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
 using InventoryTools.Compendium.Sections;
+using InventoryTools.Compendium.Sections.Options;
+using InventoryTools.Compendium.Services;
 using Lumina.Excel.Sheets;
 
 namespace InventoryTools.Compendium.Types;
@@ -76,7 +78,7 @@ public class AirshipRoutesCompendiumType : CompendiumType<AirshipExplorationPoin
             ("Ceruleum Req.", row.Base.CeruleumTankReq.ToString(), true),
             ("Surveillance Req.", row.Base.SurveillanceReq.ToString(), true)
         };
-        viewBuilder.AddInfoTableSection(new CompendiumInfoTableSectionOptions()
+        viewBuilder.AddInfoTableSection(new InfoTableSectionOptions()
         {
             SectionName = "Information",
             Items = information.AsReadOnly()
@@ -96,7 +98,7 @@ public class AirshipRoutesCompendiumType : CompendiumType<AirshipExplorationPoin
             HideIfEmpty = true
         });
 
-        viewBuilder.AddItemListSection(new CompendiumItemListSectionOptions()
+        viewBuilder.AddItemListSection(new ItemListSectionOptions()
         {
             Items = row.DropItems.Select(c => new ItemInfo(c)).ToList(),
             SectionName = "Potential Drops"

@@ -17,7 +17,7 @@ namespace InventoryTools.Compendium.Types;
 
 public class GearsetCompendiumType : CompendiumType<Gearset>
 {
-    private readonly CompendiumItemListSection.Factory _itemListSectionFactory;
+    private readonly ItemListSection.Factory _itemListSectionFactory;
     private readonly List<Gearset> _gearsets;
     private readonly ItemSheet _itemSheet;
     private readonly ItemInfoCache _itemInfoCache;
@@ -26,7 +26,7 @@ public class GearsetCompendiumType : CompendiumType<Gearset>
     public GearsetCompendiumType(CompendiumTable<Gearset>.Factory tableFactory,
         Func<CompendiumColumnBuilder<Gearset>> columnBuilder,
         CompendiumViewBuilder.Factory viewBuilderFactory,
-        CompendiumItemListSection.Factory  itemListSectionFactory,
+        ItemListSection.Factory  itemListSectionFactory,
         List<Gearset> gearsets,
         ItemSheet itemSheet,
         ItemInfoCache itemInfoCache,

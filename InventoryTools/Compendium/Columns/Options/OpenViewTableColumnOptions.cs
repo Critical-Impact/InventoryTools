@@ -4,7 +4,7 @@ using InventoryTools.Compendium.Models;
 
 namespace InventoryTools.Compendium.Columns.Options;
 
-public sealed record CompendiumOpenViewTableColumnOptions<TData> : CompendiumColumnOptions
+public sealed record OpenViewTableColumnOptions<TData> : CompendiumColumnOptions
 {
     public required Func<TData, (string?, uint?)> ValueSelector { get; init; }
     public required Func<TData, uint> RowIdSelector { get; init; }

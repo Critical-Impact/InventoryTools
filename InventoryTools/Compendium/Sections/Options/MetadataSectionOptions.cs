@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace InventoryTools.Compendium.Sections;
+namespace InventoryTools.Compendium.Sections.Options;
 
 public sealed class MetadataSectionOptions
 {

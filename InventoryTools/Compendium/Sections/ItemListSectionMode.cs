@@ -1,6 +1,7 @@
 namespace InventoryTools.Compendium.Sections;
 
-public class CompendiumTagsSection
+enum ItemListSectionMode
 {
-    
+    List,
+    Grid
 }

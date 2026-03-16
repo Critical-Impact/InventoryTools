@@ -5,6 +5,7 @@ using AllaganLib.Interface.Grid;
 using DalaMock.Host.Mediator;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Sections;
+using InventoryTools.Compendium.Services;
 
 namespace InventoryTools.Compendium.Models;
 

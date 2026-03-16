@@ -1,7 +1,6 @@
-using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
 
-namespace InventoryTools.Compendium.Sections;
+namespace InventoryTools.Compendium.Sections.Options;
 
 public sealed class MapLinkViewSectionOptions
 {

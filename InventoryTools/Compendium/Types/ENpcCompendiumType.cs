@@ -10,6 +10,8 @@ using Dalamud.Utility;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
 using InventoryTools.Compendium.Sections;
+using InventoryTools.Compendium.Sections.Options;
+using InventoryTools.Compendium.Services;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
 

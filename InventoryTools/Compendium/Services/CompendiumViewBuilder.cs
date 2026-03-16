@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
-using AllaganLib.GameSheets.Sheets.Rows;
 using AllaganLib.Shared.Extensions;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
@@ -11,19 +9,19 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
-using InventoryTools.Compendium.Types;
+using InventoryTools.Compendium.Sections;
+using InventoryTools.Compendium.Sections.Options;
 using InventoryTools.Services;
 using OtterGui;
 
-namespace InventoryTools.Compendium.Sections;
+namespace InventoryTools.Compendium.Services;
 
 public class CompendiumViewBuilder
 {
-    private readonly ICompendiumType _compendiumType;
     private readonly ITextureProvider _textureProvider;
     private readonly ImGuiService _imGuiService;
-    private readonly CompendiumInfoTableSection.Factory _infoTableFactory;
-    private readonly CompendiumItemListSection.Factory _itemListFactory;
+    private readonly InfoTableSection.Factory _infoTableFactory;
+    private readonly ItemListSection.Factory _itemListFactory;
     private readonly MapLinkViewSection.Factory _mapLinkViewFactory;
     private readonly MapLinksViewSection.Factory _mapLinksViewFactory;
     private readonly SingleRowRefSection.Factory _singleRowRefFactory;
@@ -43,8 +41,8 @@ public class CompendiumViewBuilder
     public CompendiumViewBuilder(ICompendiumType compendiumType,
         ITextureProvider textureProvider,
         ImGuiService imGuiService,
-        CompendiumInfoTableSection.Factory infoTableFactory,
-        CompendiumItemListSection.Factory itemListFactory,
+        InfoTableSection.Factory infoTableFactory,
+        ItemListSection.Factory itemListFactory,
         MapLinkViewSection.Factory mapLinkViewFactory,
         MapLinksViewSection.Factory mapLinksViewFactory,
         SingleRowRefSection.Factory singleRowRefFactory,
@@ -52,7 +50,6 @@ public class CompendiumViewBuilder
         LevelViewSection.Factory levelViewFactory,
         MetadataSection.Factory metadataSectionFactory)
     {
-        _compendiumType = compendiumType;
         _textureProvider = textureProvider;
         _imGuiService = imGuiService;
         _infoTableFactory = infoTableFactory;
@@ -113,12 +110,12 @@ public class CompendiumViewBuilder
         _sections.Add(section);
     }
 
-    public void AddItemListSection(CompendiumItemListSectionOptions options)
+    public void AddItemListSection(ItemListSectionOptions options)
     {
         AddSection(_itemListFactory.Invoke(options));
     }
 
-    public void AddInfoTableSection(CompendiumInfoTableSectionOptions options)
+    public void AddInfoTableSection(InfoTableSectionOptions options)
     {
         AddSection(_infoTableFactory.Invoke(options));
     }

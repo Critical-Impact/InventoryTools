@@ -5,37 +5,34 @@ using AllaganLib.Interface.FormFields;
 using DalaMock.Host.Mediator;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Bindings.ImGui;
-using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
-using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
+using InventoryTools.Compendium.Sections.Options;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Ui;
 
 namespace InventoryTools.Compendium.Sections;
 
-public class CompendiumItemListSection : CompendiumViewSection
+public class ItemListSection : ViewSection
 {
-    private readonly CompendiumItemListSectionOptions _options;
+    private readonly ItemListSectionOptions _options;
     private readonly MediatorService _mediatorService;
-    private readonly IFont _font;
     private readonly ImGuiService _imGuiService;
     private readonly ITextureProvider _textureProvider;
     private readonly ImGuiTooltipService _tooltipService;
     private readonly ImGuiMenuService _menuService;
     private readonly ItemInfoRenderService _itemInfoRenderService;
 
-    public delegate CompendiumItemListSection Factory(CompendiumItemListSectionOptions options);
+    public delegate ItemListSection Factory(ItemListSectionOptions options);
 
-    public CompendiumItemListSection(CompendiumItemListSectionOptions options, MediatorService mediatorService, IFont font, ImGuiService imGuiService, ITextureProvider textureProvider, ImGuiTooltipService tooltipService, ImGuiMenuService menuService, ItemInfoRenderService itemInfoRenderService) : base(imGuiService)
+    public ItemListSection(ItemListSectionOptions options, MediatorService mediatorService, IFont font, ImGuiService imGuiService, ITextureProvider textureProvider, ImGuiTooltipService tooltipService, ImGuiMenuService menuService, ItemInfoRenderService itemInfoRenderService) : base(imGuiService)
     {
         _options = options;
         _mediatorService = mediatorService;
-        _font = font;
         _imGuiService = imGuiService;
         _textureProvider = textureProvider;
         _tooltipService = tooltipService;
@@ -45,10 +42,10 @@ public class CompendiumItemListSection : CompendiumViewSection
 
     private string sectionModeId => _options.SectionId + "_mode";
 
-    private CompendiumItemListSectionMode GetSectionMode(SectionState sectionState)
+    private ItemListSectionMode GetSectionMode(SectionState sectionState)
     {
         IConfigurable<Enum?> configurable = sectionState;
-        return (CompendiumItemListSectionMode)(configurable.Get(sectionModeId) ?? CompendiumItemListSectionMode.Grid);
+        return (ItemListSectionMode)(configurable.Get(sectionModeId) ?? ItemListSectionMode.Grid);
     }
 
     public override string SectionName => _options.SectionName;
@@ -57,11 +54,11 @@ public class CompendiumItemListSection : CompendiumViewSection
     {
         if (ImGui.Selectable("Compact View"))
         {
-            sectionState.Set(sectionModeId, CompendiumItemListSectionMode.Grid);
+            sectionState.Set(sectionModeId, ItemListSectionMode.Grid);
         }
         if (ImGui.Selectable("List View"))
         {
-            sectionState.Set(sectionModeId, CompendiumItemListSectionMode.List);
+            sectionState.Set(sectionModeId, ItemListSectionMode.List);
         }
     };
 
@@ -69,7 +66,7 @@ public class CompendiumItemListSection : CompendiumViewSection
     {
         var iconSize =  32;
         var paddedIconSize = (iconSize * ImGui.GetIO().FontGlobalScale) + ImGui.GetStyle().FramePadding.X * 2;
-        if (GetSectionMode(sectionState) == CompendiumItemListSectionMode.Grid)
+        if (GetSectionMode(sectionState) == ItemListSectionMode.Grid)
         {
             _imGuiService.WrapElements(_options.SectionName + "Items", _options.Items, paddedIconSize, ImGui.GetStyle().ItemSpacing.X, item =>
             {

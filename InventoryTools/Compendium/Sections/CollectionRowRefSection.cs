@@ -10,6 +10,7 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
+using InventoryTools.Compendium.Sections.Options;
 using InventoryTools.Compendium.Services;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
@@ -17,7 +18,7 @@ using Lumina.Excel;
 
 namespace InventoryTools.Compendium.Sections;
 
-public class CollectionRowRefSection : CompendiumViewSection
+public class CollectionRowRefSection : ViewSection
 {
     private readonly CollectionRowRefSectionOptions _options;
     private readonly ITextureProvider _textureProvider;
