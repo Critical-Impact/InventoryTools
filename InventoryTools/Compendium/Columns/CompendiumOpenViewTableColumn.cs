@@ -149,7 +149,7 @@ public class CompendiumOpenViewTableColumn<TData> : FormField<(string?, uint?), 
 
     public virtual void OnButtonClick(TData item)
     {
-        _mediatorService.Publish(new OpenCompendiumViewMessage(_compendiumType, _rowIdSelector.Invoke(item)));
+        _mediatorService.Publish(new ToggleCompendiumViewMessage(_compendiumType, _rowIdSelector.Invoke(item)));
     }
 
     public override bool DrawInput(WindowState configuration, int? inputSize = null)

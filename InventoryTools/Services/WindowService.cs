@@ -139,115 +139,135 @@ namespace InventoryTools.Services
 
         public IWindowSystem WindowSystem => _windowSystem;
 
-        public T GetWindow<T>() where T: GenericWindow
+        public T GetWindow<T>(out bool wasCreated) where T: GenericWindow
         {
             if (_genericWindows.ContainsKey(typeof(T)))
             {
+                wasCreated = false;
                 return (T)_genericWindows[typeof(T)];
             }
-            ;
+
             var newWindow = _genericWindowFactory.Invoke(typeof(T));
             AddWindow(newWindow);
+            wasCreated = true;
             return (T)newWindow;
         }
 
-        public Dalamud.Interface.Windowing.Window GetDalamudWindow(Type type)
+        public Dalamud.Interface.Windowing.Window GetDalamudWindow(Type type, out bool wasCreated)
         {
             if (_dalamudWindows.ContainsKey(type))
             {
+                wasCreated = false;
                 return _dalamudWindows[type];
             }
             var newWindow = _dalamudWindowFactory.Invoke(type);
             AddDalamudWindow(type, newWindow);
+            wasCreated = true;
             return newWindow;
         }
 
-        public GenericWindow GetWindow(Type type)
+        public GenericWindow GetWindow(Type type, out bool wasCreated)
         {
             if (_genericWindows.ContainsKey(type))
             {
+                wasCreated = false;
                 return (GenericWindow)_genericWindows[type];
             }
             var newWindow = _genericWindowFactory.Invoke(type);
             AddWindow(type, newWindow);
+            wasCreated = true;
             return newWindow;
         }
 
-        public UintWindow GetWindow(Type type, uint entryId)
+        public UintWindow GetWindow(Type type, uint entryId, out bool wasCreated)
         {
             if (_uintWindows.ContainsKey((type,entryId)))
             {
+                wasCreated = false;
                 return (UintWindow)_uintWindows[(type,entryId)];
             }
-            ;
+
             var newWindow = _uintWindowFactory.Invoke(type, entryId);
             AddWindow(type, newWindow, entryId);
+            wasCreated = true;
             return newWindow;
         }
 
-        public StringWindow GetWindow(Type type, string windowId)
+        public StringWindow GetWindow(Type type, string windowId, out bool wasCreated)
         {
             if (_stringWindows.ContainsKey((type,windowId)))
             {
+                wasCreated = false;
                 return (StringWindow)_stringWindows[(type,windowId)];
             }
-            ;
+
             var newWindow = _stringWindowFactory.Invoke(type, windowId);
             AddWindow(type, newWindow, windowId);
+            wasCreated = true;
             return newWindow;
         }
 
-        public Owned<CompendiumListWindow> GetWindow(ICompendiumType compendiumType)
+        public Owned<CompendiumListWindow> GetWindow(ICompendiumType compendiumType, out bool wasCreated)
         {
+            wasCreated = false;
             if (!_compendiumListWindows.TryGetValue(compendiumType, out var window))
             {
                 var listWindow = _compendiumListWindowFactory.Invoke(compendiumType);
                 AddWindow(listWindow, compendiumType);
                 window = listWindow;
+                wasCreated = true;
             }
 
             return window;
         }
 
 
-        public Owned<CompendiumViewWindow> GetWindow(ICompendiumType compendiumType, uint entryId)
+        public Owned<CompendiumViewWindow> GetWindow(ICompendiumType compendiumType, uint entryId, out bool wasCreated)
         {
             if (_compendiumViewWindows.ContainsKey((compendiumType,entryId)))
             {
+                wasCreated = false;
                 return _compendiumViewWindows[(compendiumType,entryId)];
             }
             var newWindow = _compendiumViewWindowFactory.Invoke(compendiumType, entryId);
             AddWindow(newWindow, compendiumType, entryId);
+            wasCreated = true;
             return newWindow;
         }
 
-        public T GetWindow<T>(uint windowId) where T: UintWindow
+        public T GetWindow<T>(uint windowId, out bool wasCreated) where T: UintWindow
         {
             if(_uintWindows.ContainsKey((typeof(T),windowId)) && _uintWindows[(typeof(T),windowId)] is T)
             {
+                wasCreated = false;
                 return (T)_uintWindows[(typeof(T),windowId)];
             }
             var newWindow = _uintWindowFactory.Invoke(typeof(T), windowId);
             AddWindow(newWindow, windowId);
+            wasCreated = true;
             return (T)newWindow;
         }
 
-        public T GetWindow<T>(string windowId) where T: StringWindow
+        public T GetWindow<T>(string windowId, out bool wasCreated) where T: StringWindow
         {
             if(_stringWindows.ContainsKey((typeof(T),windowId)) && _stringWindows[(typeof(T),windowId)] is T)
             {
+                wasCreated = false;
                 return (T)_stringWindows[(typeof(T),windowId)];
             }
             var newWindow = _stringWindowFactory.Invoke(typeof(T), windowId);
             AddWindow(newWindow, windowId);
+            wasCreated = true;
             return (T)newWindow;
         }
 
-        public T GetWindow<T>(ICompendiumType compendiumType) where T: Owned<CompendiumListWindow>
+        public T GetWindow<T>(ICompendiumType compendiumType, out bool wasCreated) where T: Owned<CompendiumListWindow>
         {
+            wasCreated = false;
             if (!_compendiumListWindows.TryGetValue(compendiumType, out var window))
             {
                 var listWindow = _compendiumListWindowFactory.Invoke(compendiumType);
+                wasCreated = true;
                 AddWindow(listWindow, compendiumType);
                 window = listWindow;
             }
@@ -257,43 +277,78 @@ namespace InventoryTools.Services
 
         public bool ToggleWindow<T>() where T: GenericWindow
         {
-            GetWindow<T>().Toggle();
+            var window = GetWindow<T>(out bool created);
+            window.Toggle();
+            if (created)
+            {
+                window.BringToFront();
+            }
             return true;
         }
 
         public bool ToggleWindow<T>(uint windowId) where T: UintWindow
         {
-            GetWindow<T>(windowId).Toggle();
+            var window = GetWindow<T>(windowId, out var created);
+            window.Toggle();
+            if (created)
+            {
+                window.BringToFront();
+            }
             return true;
         }
 
         public bool ToggleWindow<T>(string windowId) where T : StringWindow
         {
-            GetWindow<T>(windowId).Toggle();
+            var window = GetWindow<T>(windowId, out var created);
+            window.Toggle();
+            if (created)
+            {
+                window.BringToFront();
+            }
             return true;
         }
 
         public bool ToggleDalamudWindow(Type window)
         {
-            GetDalamudWindow(window).Toggle();
+            var dalamudWindow = GetDalamudWindow(window, out var created);
+            dalamudWindow.Toggle();
+            if (created)
+            {
+                dalamudWindow.BringToFront();
+            }
             return true;
         }
 
         public bool ToggleWindow(Type window)
         {
-            GetWindow(window).Toggle();
+            var genericWindow = GetWindow(window, out var created);
+            genericWindow.Toggle();
+            if (created)
+            {
+                genericWindow.BringToFront();
+            }
             return true;
         }
 
         public bool ToggleWindow(Type window, string windowId)
         {
-            GetWindow(window, windowId).Toggle();
+            var stringWindow = GetWindow(window, windowId, out var created);
+            stringWindow.Toggle();
+            if (created)
+            {
+                stringWindow.BringToFront();
+            }
             return true;
         }
 
         public bool ToggleWindow(Type window, uint windowId)
         {
-            GetWindow(window, windowId).Toggle();
+            var uintWindow = GetWindow(window, windowId, out var created);
+            uintWindow.Toggle();
+            if (created)
+            {
+                uintWindow.BringToFront();
+            }
             return true;
         }
 
@@ -301,21 +356,31 @@ namespace InventoryTools.Services
         {
             if (compendiumType.ViewRedirection != null)
             {
-                return OpenWindow(compendiumType.ViewRedirection, windowId);
+                return ToggleWindow(compendiumType.ViewRedirection, windowId);
             }
-            GetWindow(compendiumType, windowId).Value.Toggle();
+            var compendiumViewWindow = GetWindow(compendiumType, windowId, out var created).Value;
+            compendiumViewWindow.Toggle();
+            if (created)
+            {
+                compendiumViewWindow.BringToFront();
+            }
             return true;
         }
 
         private bool ToggleWindow(ICompendiumType compendiumType)
         {
-            GetWindow(compendiumType).Value.Toggle();
+            var compendiumListWindow = GetWindow(compendiumType, out var created).Value;
+            compendiumListWindow.Toggle();
+            if (created)
+            {
+                compendiumListWindow.BringToFront();
+            }
             return true;
         }
 
         public bool OpenDalamudWindow(Type type,bool refocus = true)
         {
-            var window = GetDalamudWindow(type);
+            var window = GetDalamudWindow(type, out  _);
             if (window.IsOpen)
             {
                 window.BringToFront();
@@ -329,7 +394,7 @@ namespace InventoryTools.Services
 
         public bool OpenWindow(Type type,bool refocus = true)
         {
-            var window = GetWindow(type);
+            var window = GetWindow(type, out _);
             if (window.IsOpen)
             {
                 window.BringToFront();
@@ -342,7 +407,7 @@ namespace InventoryTools.Services
         }
         public bool OpenWindow(Type type, uint windowId, bool refocus = true)
         {
-            var window = GetWindow(type, windowId);
+            var window = GetWindow(type, windowId, out _);
             if (window.IsOpen)
             {
                 window.BringToFront();
@@ -355,7 +420,7 @@ namespace InventoryTools.Services
         }
         public bool OpenWindow(Type type, string windowId, bool refocus = true)
         {
-            var window = GetWindow(type, windowId);
+            var window = GetWindow(type, windowId, out _);
             if (window.IsOpen)
             {
                 window.BringToFront();
@@ -368,7 +433,7 @@ namespace InventoryTools.Services
         }
         public bool OpenWindow(ICompendiumType compendiumType, bool refocus = true)
         {
-            var window = GetWindow(compendiumType);
+            var window = GetWindow(compendiumType, out _);
             if (window.Value.IsOpen)
             {
                 window.Value.BringToFront();
@@ -376,6 +441,7 @@ namespace InventoryTools.Services
             else
             {
                 window.Value.Open();
+                window.Value.BringToFront();
             }
             return true;
         }
@@ -385,7 +451,7 @@ namespace InventoryTools.Services
             {
                 return OpenWindow(type.ViewRedirection, windowId, refocus);
             }
-            var window = GetWindow(type, windowId);
+            var window = GetWindow(type, windowId, out _);
             if (window.Value.IsOpen)
             {
                 window.Value.BringToFront();
@@ -393,12 +459,13 @@ namespace InventoryTools.Services
             else
             {
                 window.Value.Open();
+                window.Value.BringToFront();
             }
             return true;
         }
         public bool OpenWindow<T>(bool refocus = true) where T: GenericWindow
         {
-            var window = GetWindow<T>();
+            var window = GetWindow<T>(out _);
             if (window.IsOpen)
             {
                 window.BringToFront();
@@ -412,7 +479,7 @@ namespace InventoryTools.Services
         }
         public bool OpenWindow<T>(uint windowId, bool refocus = true) where T: UintWindow
         {
-            var window = GetWindow<T>(windowId);
+            var window = GetWindow<T>(windowId, out _);
             if (window.IsOpen)
             {
                 window.BringToFront();
@@ -426,7 +493,7 @@ namespace InventoryTools.Services
         }
         public bool OpenWindow<T>(string windowId, bool refocus = true) where T: StringWindow
         {
-            var window = GetWindow<T>(windowId);
+            var window = GetWindow<T>(windowId, out _);
             if (window.IsOpen)
             {
                 window.BringToFront();
@@ -682,28 +749,7 @@ namespace InventoryTools.Services
 
             if (window.DestroyOnClose)
             {
-                if (window is CompendiumListWindow compendiumListWindow)
-                {
-                    var listWindow = GetWindow(compendiumListWindow.CompendiumType);
-                    RemoveWindow(window);
-                    listWindow.Dispose();
-                }
-                else if (window is CompendiumViewWindow compendiumViewWindow)
-                {
-                    var viewWindow = GetWindow(compendiumViewWindow.CompendiumType, compendiumViewWindow.EntityId);
-                    RemoveWindow(window);
-                    viewWindow.Dispose();
-                }
-                else
-                {
-                    RemoveWindow(window);
-                    if (window is IDisposable disposable)
-                    {
-                        disposable.Dispose();
-                    }
-                }
-
-
+                RemoveWindow(window);
             }
             MediatorService.Publish(new OverlaysRequestRefreshMessage());
         }
@@ -749,17 +795,35 @@ namespace InventoryTools.Services
 
             if (window is CompendiumListWindow listWindow)
             {
-                _compendiumListWindows.Remove(listWindow.CompendiumType, out _);
+                _compendiumListWindows.Remove(listWindow.CompendiumType, out var ownedListWindow);
+                if (ownedListWindow != null)
+                {
+                    ownedListWindow.Dispose();
+                }
+                if (window is Window actualWindow1)
+                {
+                    WindowSystem.RemoveWindow(actualWindow1);
+                }
+                return;
             }
 
             if (window is CompendiumViewWindow viewWindow)
             {
-                _compendiumViewWindows.Remove((viewWindow.CompendiumType, viewWindow.EntityId), out _);
+                _compendiumViewWindows.Remove((viewWindow.CompendiumType, viewWindow.EntityId), out var ownedViewWindow);
+                if (ownedViewWindow != null)
+                {
+                    ownedViewWindow.Dispose();
+                }
+                if (window is Window actualWindow2)
+                {
+                    WindowSystem.RemoveWindow(actualWindow2);
+                }
+                return;
             }
 
-            if (window is Window actualWindow)
+            if (window is Window actualWindow3)
             {
-                WindowSystem.RemoveWindow(actualWindow);
+                WindowSystem.RemoveWindow(actualWindow3);
             }
             window.Dispose();
         }

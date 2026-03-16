@@ -5,6 +5,7 @@ using AllaganLib.GameSheets.Extensions;
 using AllaganLib.Shared.Extensions;
 using AllaganLib.Shared.Misc;
 using DalaMock.Host.Mediator;
+using Dalamud.Utility;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
 using InventoryTools.Compendium.Sections;
@@ -37,7 +38,7 @@ public class InstanceContentCompendiumType : CompendiumType<InstanceContent>
 
     public override string? GetName(InstanceContent row)
     {
-        return row.ContentFinderCondition.Value.Name.ToImGuiString();
+        return row.ContentFinderCondition.Value.Name.ToImGuiString().FirstCharToUpper();
     }
 
     public override string? GetSubtitle(InstanceContent row)

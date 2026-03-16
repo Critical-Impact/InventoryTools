@@ -20,15 +20,17 @@ public class QuestCompendiumType : CompendiumType<Quest>
 {
     private readonly LevelSheet _levelSheet;
     private readonly ENpcBaseSheet _eNpcBaseSheet;
+    private readonly ExcelSheet<InstanceContent> _instanceContentSheet;
     private readonly ExcelSheet<JournalGenre> _journalGenreSheet;
     private readonly ExcelSheet<ExVersion> _expansionSheet;
     private readonly ExcelSheet<Quest> _questSheet;
     private readonly Func<string, ExcelSheet<QuestDialogue>> _questDialogueFactory;
 
-    public QuestCompendiumType(LevelSheet levelSheet, ENpcBaseSheet eNpcBaseSheet, ExcelSheet<JournalGenre> journalGenreSheet, ExcelSheet<ExVersion> expansionSheet, ExcelSheet<Quest> questSheet, Func<string, ExcelSheet<QuestDialogue>> questDialogueFactory, CompendiumTable<Quest>.Factory tableFactory, Func<CompendiumColumnBuilder<Quest>> columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory, columnBuilder, viewBuilderFactory)
+    public QuestCompendiumType(LevelSheet levelSheet, ENpcBaseSheet eNpcBaseSheet, ExcelSheet<InstanceContent> instanceContentSheet, ExcelSheet<JournalGenre> journalGenreSheet, ExcelSheet<ExVersion> expansionSheet, ExcelSheet<Quest> questSheet, Func<string, ExcelSheet<QuestDialogue>> questDialogueFactory, CompendiumTable<Quest>.Factory tableFactory, Func<CompendiumColumnBuilder<Quest>> columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory, columnBuilder, viewBuilderFactory)
     {
         _levelSheet = levelSheet;
         _eNpcBaseSheet = eNpcBaseSheet;
+        _instanceContentSheet = instanceContentSheet;
         _journalGenreSheet = journalGenreSheet;
         _expansionSheet = expansionSheet;
         _questSheet = questSheet;
@@ -165,6 +167,32 @@ public class QuestCompendiumType : CompendiumType<Quest>
             SectionName = "Related NPCs",
             Filter = typeof(ENpcBase)
         });
+
+        var dungeonNext = false;
+        var relatedInstanceIds = new HashSet<uint>();
+        for (var index = 0; index < row.QuestParams.Count; index++)
+        {
+            var questParam = row.QuestParams[index];
+            if (questParam.ScriptInstruction.ToImGuiString().StartsWith("INSTANCEDUNGEON"))
+            {
+                dungeonNext = true;
+            }
+
+            if (dungeonNext)
+            {
+                relatedInstanceIds.Add(questParam.ScriptArg);
+                dungeonNext = false;
+            }
+        }
+
+        var relatedInstances = relatedInstanceIds.Select(c => _instanceContentSheet.GetRowOrDefault(c)).Where(c => c != null)
+            .Select(c => c!.Value.AsUntypedRowRef()).ToList();
+        viewBuilder.AddCollectionRowRefSection(new CollectionRowRefSectionOptions()
+        {
+            RelatedRefs = relatedInstances,
+            SectionName = "Related Instances"
+        });
+
     }
 
     public override List<ICompendiumGrouping>? GetGroupings()

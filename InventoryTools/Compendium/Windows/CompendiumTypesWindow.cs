@@ -21,12 +21,14 @@ public class CompendiumTypesWindow : GenericWindow
 {
     private readonly IEnumerable<ICompendiumType> _compendiumTypes;
     private readonly ITextureProvider _textureProvider;
+    private readonly IFramework _framework;
     private string _search = string.Empty;
 
-    public CompendiumTypesWindow(IEnumerable<ICompendiumType> compendiumTypes, ITextureProvider textureProvider, ILogger<CompendiumTypesWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration) : base(logger, mediator, imGuiService, configuration, "Compendium")
+    public CompendiumTypesWindow(IEnumerable<ICompendiumType> compendiumTypes, ITextureProvider textureProvider, IFramework framework, ILogger<CompendiumTypesWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration) : base(logger, mediator, imGuiService, configuration, "Compendium")
     {
         _compendiumTypes = compendiumTypes.Where(c => c.ShowInListing);
         _textureProvider = textureProvider;
+        _framework = framework;
     }
 
     public override void DrawWindow()
@@ -112,9 +114,13 @@ public class CompendiumTypesWindow : GenericWindow
                     ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
                 }
 
-                if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+                if (ImGui.IsItemHovered() && ImGui.IsItemClicked(ImGuiMouseButton.Left))
                 {
-                    MediatorService.Publish(new ToggleCompendiumListMessage(compendiumType));
+                    _framework.RunOnTick(() =>
+                    {
+                        MediatorService.Publish(new ToggleCompendiumListMessage(compendiumType));
+                    }, new TimeSpan(0), 20);
+                    //Weird but only way I could get it to keep the window ordering correct.
                 }
             }
 
