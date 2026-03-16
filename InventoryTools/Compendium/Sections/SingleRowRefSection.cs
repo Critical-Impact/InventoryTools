@@ -4,6 +4,7 @@ using DalaMock.Host.Mediator;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Textures;
+using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
@@ -106,18 +107,21 @@ public class SingleRowRefSection : ViewSection
             var cursorPos = ImGui.GetCursorPos();
             ImGui.SetCursorPos(new Vector2(cursorPos.X, cursorPos.Y + offsetY));
 
-            ImGui.BeginGroup();
-
-            ImGui.TextUnformatted(_relatedCompendiumType.GetName(_options.RelatedRef.RowId));
-
-            if (!string.IsNullOrEmpty(subTitle))
+            using (var group = ImRaii.Group())
             {
-                ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.TankBlue);
-                ImGui.TextUnformatted(subTitle);
-                ImGui.PopStyleColor();
-            }
+                if (group)
+                {
+                    ImGui.TextUnformatted(_relatedCompendiumType.GetName(_options.RelatedRef.RowId));
 
-            ImGui.EndGroup();
+                    if (!string.IsNullOrEmpty(subTitle))
+                    {
+                        using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.TankBlue))
+                        {
+                            ImGui.TextUnformatted(subTitle);
+                        }
+                    }
+                }
+            }
 
             ImGui.SetCursorPosY(ImGui.GetCursorPosY() - offsetY);
 

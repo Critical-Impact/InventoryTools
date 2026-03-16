@@ -4,6 +4,7 @@ using CriticalCommonLib.Services;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Textures;
+using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
@@ -77,29 +78,37 @@ public sealed class MapLinkViewSection : ViewSection
         var cursorPos = ImGui.GetCursorPos();
         ImGui.SetCursorPos(new Vector2(cursorPos.X, cursorPos.Y + offsetY));
 
-        ImGui.BeginGroup();
-
-        ImGui.TextUnformatted(entry.Name);
-
-        if (!string.IsNullOrEmpty(entry.Subtitle))
+        using (var group = ImRaii.Group())
         {
-            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.TankBlue);
-            ImGui.TextUnformatted(entry.Subtitle);
-            ImGui.PopStyleColor();
-        }
+            if (group)
+            {
+                ImGui.TextUnformatted(entry.Name);
 
-        if (ImGui.IsItemHovered() || ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenOverlapped))
-        {
-            var loc = entry.Location;
-            ImGui.BeginTooltip();
-            ImGui.TextUnformatted(loc.FormattedName);
-            ImGui.Separator();
-            ImGui.Text($"X: {loc.MapX:0.0}");
-            ImGui.Text($"Y: {loc.MapY:0.0}");
-            ImGui.EndTooltip();
-        }
+                if (!string.IsNullOrEmpty(entry.Subtitle))
+                {
+                    using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.TankBlue))
+                    {
+                        ImGui.TextUnformatted(entry.Subtitle);
+                    }
+                }
 
-        ImGui.EndGroup();
+                if (ImGui.IsItemHovered() || ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenOverlapped))
+                {
+                    var loc = entry.Location;
+                    using (var tooltip = ImRaii.Tooltip())
+                    {
+                        if (tooltip)
+                        {
+                            ImGui.TextUnformatted(loc.FormattedName);
+                            ImGui.Separator();
+                            ImGui.Text($"X: {loc.MapX:0.0}");
+                            ImGui.Text($"Y: {loc.MapY:0.0}");
+                        }
+                    }
+                }
+
+            }
+        }
 
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() - offsetY);
     }

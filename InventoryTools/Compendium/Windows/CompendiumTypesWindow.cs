@@ -100,9 +100,10 @@ public class CompendiumTypesWindow : GenericWindow
                             if (group)
                             {
                                 ImGui.TextUnformatted(compendiumType.Plural);
-                                ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudGrey);
-                                ImGui.TextWrapped(compendiumType.Description);
-                                ImGui.PopStyleColor();
+                                using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudGrey))
+                                {
+                                    ImGui.TextWrapped(compendiumType.Description);
+                                }
                             }
                         }
                     }

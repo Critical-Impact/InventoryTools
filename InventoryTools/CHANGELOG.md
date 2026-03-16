@@ -8,6 +8,18 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [14.1.0] - 2026-03-16
+
+### Added
+- First release of the new Compendium system
+  - A in-game encyclopedia/compendium system was added, allowing players to browse and view detailed information about the game including the following (quests, items, NPCs, duties, leves, classes, achievements, allied societies, airship/submarine routes, gearsets, shared models, and territories) and with more to be added.
+  - Wotsit integration to allow you to access each of the compendium listings easily
+  - This is technically a beta but as it is segregated from the rest of the plugin, it's being released directly to live
+  - More compendium types will be added with future releases
+  - If there's something you'd like to see implemented please submit an issue or hit up the Allagan Tools plugin help forum post!
+
+- Vendors that have submenus should highlight correctly
+
 ## [14.0.7] - 2026-03-04
 
 ### Fixed

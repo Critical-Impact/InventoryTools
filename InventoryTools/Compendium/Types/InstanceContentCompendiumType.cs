@@ -89,16 +89,6 @@ public class InstanceContentCompendiumType : CompendiumType<InstanceContent>
             Version = "14.0.3",
             ValueSelector = GetName
         });
-        //
-        // builder.AddStringColumn(new()
-        // {
-        //     Key = "roulettes",
-        //     Name = "Roulettes",
-        //     HelpText = "Duty roulettes containing this duty",
-        //     Version = "14.0.3",
-        //     ValueSelector = row =>
-        //         row.ContentFinderCondition.Value.Roulettes
-        // });
 
         builder.AddIntegerColumn(new()
         {

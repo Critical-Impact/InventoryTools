@@ -5,6 +5,7 @@ using AllaganLib.GameSheets.Sheets.Rows;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Textures;
+using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
@@ -60,12 +61,6 @@ public class LevelViewSection : ViewSection
         {
         }
 
-        // if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
-        // {
-        //     _menuProvider.Open(entry);
-        // }
-        // _menuProvider.Draw(entry);
-
         var style = ImGui.GetStyle();
         var textHeight = ImGui.CalcTextSize(name).Y;
         textHeight += style.ItemSpacing.Y;
@@ -80,26 +75,31 @@ public class LevelViewSection : ViewSection
         var cursorPos = ImGui.GetCursorPos();
         ImGui.SetCursorPos(new Vector2(cursorPos.X, cursorPos.Y + offsetY));
 
-        ImGui.BeginGroup();
-
-        ImGui.TextUnformatted(name);
-
-        ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.TankBlue);
-        ImGui.TextUnformatted(_levelRow.FormattedName);
-        ImGui.PopStyleColor();
-
-        // Optional extra metadata
-        if (ImGui.IsItemHovered() || ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenOverlapped))
+        using (var group = ImRaii.Group())
         {
-            ImGui.BeginTooltip();
-            ImGui.TextUnformatted(_levelRow.FormattedName);
-            ImGui.Separator();
-            ImGui.Text($"X: {_levelRow.MapX:0.0}");
-            ImGui.Text($"Y: {_levelRow.MapY:0.0}");
-            ImGui.EndTooltip();
-        }
+            if (group)
+            {
+                ImGui.TextUnformatted(name);
+                using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.TankBlue))
+                {
+                    ImGui.TextUnformatted(_levelRow.FormattedName);
+                }
 
-        ImGui.EndGroup();
+                if (ImGui.IsItemHovered() || ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenOverlapped))
+                {
+                    using (var tooltip = ImRaii.Tooltip())
+                    {
+                        if (tooltip)
+                        {
+                            ImGui.TextUnformatted(_levelRow.FormattedName);
+                            ImGui.Separator();
+                            ImGui.Text($"X: {_levelRow.MapX:0.0}");
+                            ImGui.Text($"Y: {_levelRow.MapY:0.0}");
+                        }
+                    }
+                }
+            }
+        }
 
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() - offsetY);
     }

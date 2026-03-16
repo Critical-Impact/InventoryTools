@@ -163,20 +163,25 @@ public class ItemListSection : ViewSection
 
                 var cursorPos = ImGui.GetCursorPos();
                 ImGui.SetCursorPos(new Vector2(cursorPos.X, cursorPos.Y + offsetY));
-                ImGui.BeginGroup();
-                if (item.Count == null)
+                using (var group = ImRaii.Group())
                 {
-                    ImGui.Text(itemName);
-                }
-                else
-                {
-                    ImGui.Text(itemName + " x " + item.Count);
-                }
+                    if (group)
+                    {
+                        if (item.Count == null)
+                        {
+                            ImGui.Text(itemName);
+                        }
+                        else
+                        {
+                            ImGui.Text(itemName + " x " + item.Count);
+                        }
 
-                ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.TankBlue);
-                ImGui.Text(sourceNames);
-                ImGui.PopStyleColor();
-                ImGui.EndGroup();
+                        using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.TankBlue))
+                        {
+                            ImGui.Text(sourceNames);
+                        }
+                    }
+                }
             }
         }
 

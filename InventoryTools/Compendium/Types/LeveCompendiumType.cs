@@ -82,7 +82,7 @@ public class LeveCompendiumType : CompendiumType<LeveRow>
         builder.AddStringColumn(new() { Key = "name", Name = "Name", HelpText = "The name of the leve", Version = "14.0.3", ValueSelector = row => row.Base.Name.ToImGuiString() });
         builder.AddStringColumn(new() { Key = "type", Name = "Type", HelpText = "The type of the leve", Version = "14.0.3", ValueSelector = row => row.LeveType.ToString().Humanize() + "(" + row.Base.LeveAssignmentType.Value.Name.ToImGuiString() + ")" });
         builder.AddIntegerColumn(new() { Key = "level", Name = "Level", HelpText = "The level of the leve", Version = "14.0.3", ValueSelector = row => row.Base.ClassJobLevel.ToString() });
-        builder.AddStringColumn(new() { Key = "questgiver", Name = "Quest Giver", HelpText = "The NPC who starts the leve", Version = "14.0.3", ValueSelector = row => row.StartENpc?.Name ?? "N/A" });
+        builder.AddStringColumn(new() { Key = "leveissuer", Name = "Leve Issuer", HelpText = "The NPC who starts the leve", Version = "14.0.3", ValueSelector = row => row.StartENpc?.Name ?? "N/A" });
         builder.AddIntegerColumn(new() { Key = "exp", Name = "EXP", HelpText = "The exp rewarded on completion of the leve", Version = "14.0.3", ValueSelector = row => row.ExpReward.ToString() });
         builder.AddIntegerColumn(new() { Key = "gil", Name = "Gil", HelpText = "The gil rewarded on completion of the leve", Version = "14.0.3", ValueSelector = row => row.GilReward.ToString() });
         builder.AddStringColumn(new() { Key = "startlocation", Name = "Start Location", HelpText = "The start location of the leve", Version = "14.0.3", ValueSelector = row => row.StartLocation?.FormattedName ?? null });
@@ -160,7 +160,7 @@ public class LeveCompendiumType : CompendiumType<LeveRow>
         {
             viewBuilder.AddMapLinkSectionSection(new MapLinkViewSectionOptions()
             {
-                SectionName = "Quest Giver",
+                SectionName = "Leve Issuer",
                 MapLink = new MapLinkEntry(60453, row.StartENpc.Name, row.StartENpc.ENpcBase.Locations.First().FormattedName, row.StartENpc.ENpcBase.Locations.First())
             });
         }
@@ -168,7 +168,7 @@ public class LeveCompendiumType : CompendiumType<LeveRow>
         {
             viewBuilder.AddMapLinkSectionSection(new MapLinkViewSectionOptions()
             {
-                SectionName = "Quest Start",
+                SectionName = "Leve Start",
                 MapLink = new MapLinkEntry(60453, row.StartLocation.FormattedName, row.StartLocation.FormattedName, row.StartLocation)
             });
         }

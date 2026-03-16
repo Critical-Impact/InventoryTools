@@ -200,25 +200,29 @@ public class CompendiumViewBuilder
 
         ImGui.SameLine(0, iconTextPadding);
 
-        ImGui.BeginGroup();
-
-        ImGui.TextUnformatted(_title);
-
-        if (!string.IsNullOrEmpty(_subtitle))
+        using (var group = ImRaii.Group())
         {
-            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.7f, 0.7f, 0.7f, 1.0f));
-            ImGui.TextWrapped(_subtitle);
-            ImGui.PopStyleColor();
-        }
+            if (group)
+            {
+                ImGui.TextUnformatted(_title);
 
-        if (!string.IsNullOrEmpty(_description))
-        {
-            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.6f, 0.6f, 0.6f, 1.0f));
-            ImGui.TextWrapped(_description);
-            ImGui.PopStyleColor();
-        }
+                if (!string.IsNullOrEmpty(_subtitle))
+                {
+                    using (ImRaii.PushColor(ImGuiCol.Text, new Vector4(0.7f, 0.7f, 0.7f, 1.0f)))
+                    {
+                        ImGui.TextWrapped(_subtitle);
+                    }
+                }
 
-        ImGui.EndGroup();
+                if (!string.IsNullOrEmpty(_description))
+                {
+                    using (ImRaii.PushColor(ImGuiCol.Text, new Vector4(0.6f, 0.6f, 0.6f, 1.0f)))
+                    {
+                        ImGui.TextWrapped(_description);
+                    }
+                }
+            }
+        }
 
         var textBlockHeight = ImGui.GetItemRectSize().Y;
         if (iconSize > textBlockHeight)
