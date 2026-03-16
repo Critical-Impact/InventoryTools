@@ -1,4 +1,5 @@
 using System.Linq;
+using CriticalCommonLib;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 using InventoryTools.Compendium.Models;
@@ -35,14 +36,14 @@ public class InfoTableSection : ViewSection
                 foreach (var item in _options.Items.Where(c => c.IsVisible))
                 {
                     ImGui.TableNextColumn();
-                    ImGuiUtil.CenterWrappedText(item.Header);
+                    Utils.CenterWrappedText(item.Header);
                 }
 
                 ImGui.TableNextRow();
                 foreach (var item in _options.Items.Where(c => c.IsVisible))
                 {
                     ImGui.TableNextColumn();
-                    ImGuiUtil.CenterWrappedText(item.Value);
+                    Utils.CenterWrappedText(item.Value);
                 }
             }
         }
