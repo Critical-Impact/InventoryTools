@@ -728,8 +728,7 @@
           "Ionide.KeepAChangelog": "[0.2.0, )",
           "Microsoft.Extensions.Hosting": "[10.0.5, )",
           "OtterGui": "[1.0.0, )",
-          "SerialQueue": "[2.1.0, )",
-          "System.Reactive": "[6.1.0, )"
+          "SerialQueue": "[2.1.0, )"
         }
       },
       "ottergui": {
