@@ -27,6 +27,8 @@ public interface IItemInfoRenderer
     Func<ItemSource, string> GetName { get; }
     Func<ItemSource, int> GetIcon { get; }
     Func<ItemSource, string> GetDescription { get; }
+    Func<ItemSource, (Type, uint)>? RelatedType { get; }
+    Func<ItemSource, List<(Type, uint)>>? RelatedTypes { get; }
     byte MaxColumns { get; }
     float TooltipChildWidth { get; }
     float TooltipChildHeight { get; }

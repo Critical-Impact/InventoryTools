@@ -307,6 +307,7 @@ namespace InventoryTools
             builder.RegisterTransientsSelfAndInterfaces<IFormField<WindowState>>(dataAccess);
             builder.RegisterTransientsSelfAndInterfaces<ICompendiumViewSection>(dataAccess);
             builder.RegisterSingletonSelfAndInterfaces<CompendiumSectionStateService>();
+            builder.RegisterSingletonSelfAndInterfaces<ChocoboItemIterator>();
             builder.RegisterType<CompendiumTypeFactory>()
                 .As<ICompendiumTypeFactory>()
                 .SingleInstance();

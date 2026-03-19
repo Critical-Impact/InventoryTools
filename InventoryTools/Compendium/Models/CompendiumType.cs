@@ -127,4 +127,17 @@ public abstract class CompendiumType<TData> : ICompendiumType<TData>
         BuildColumns(builder);
         return builder.Columns;
     }
+
+    public string TriStateFormatted(bool? value)
+    {
+        switch (value)
+        {
+            case false:
+                return "No";
+            case true:
+                return "Yes";
+            case null:
+                return "N/A";
+        }
+    }
 }

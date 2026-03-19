@@ -32,6 +32,12 @@ public class ItemDungeonChestSourceRenderer : ItemInfoRenderer<ItemDungeonChestS
     public override bool ShouldGroup => true;
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Duty];
 
+    public override Func<ItemSource, (Type, uint)>? RelatedType => source =>
+    {
+        var asSource = AsSource(source);
+        return (asSource.ContentFinderCondition.InstanceContent.RowType, asSource.ContentFinderCondition.InstanceContent.RowId);
+    };
+
     public override Action<ItemSource> DrawTooltip => source =>
     {
         var asSource = AsSource(source);

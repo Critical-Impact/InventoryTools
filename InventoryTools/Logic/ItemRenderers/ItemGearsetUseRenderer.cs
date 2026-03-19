@@ -25,6 +25,12 @@ public class ItemGearsetUseRenderer : ItemInfoRenderer<ItemGearsetSource>
 
     public override bool ShouldGroup => true;
 
+    public override Func<ItemSource, (Type, uint)>? RelatedType => source =>
+    {
+        var asSource = AsSource(source);
+        return (asSource.Gearset.GetType(), (uint)asSource.GearsetIndex);
+    };
+
     public override Action<ItemSource> DrawTooltip => source =>
     {
         var asSource = AsSource(source);

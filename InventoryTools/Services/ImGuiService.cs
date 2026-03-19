@@ -167,7 +167,7 @@ public class ImGuiService : AllaganLib.Interface.Services.ImGuiService
 
     public void DrawIcon(uint icon, Vector2 size, bool hqIcon = false)
     {
-        if (icon <= 65103)
+        if (icon <= 250000)
         {
             var iconTex = TextureProvider.GetFromGameIcon(new GameIconLookup(icon, hqIcon));
             ImGui.Image(iconTex.GetWrapOrEmpty().Handle, size);
@@ -175,6 +175,23 @@ public class ImGuiService : AllaganLib.Interface.Services.ImGuiService
         else
         {
             ImGui.Text("Invalid Icon ID");
+        }
+    }
+
+    public void DrawIcon(string imageName, Vector2 size)
+    {
+        ImGui.Image(LoadImage(imageName).GetWrapOrEmpty().Handle, size);
+    }
+
+    public void DrawIcon((string?, uint?) imagePackage, Vector2 size, bool hqIcon = false)
+    {
+        if (imagePackage.Item1 == null)
+        {
+            DrawIcon(imagePackage.Item2!.Value, size, hqIcon);
+        }
+        else
+        {
+            DrawIcon(imagePackage.Item1!, size);
         }
     }
 

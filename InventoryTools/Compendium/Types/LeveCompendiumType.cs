@@ -15,6 +15,7 @@ using InventoryTools.Compendium.Models;
 using InventoryTools.Compendium.Sections;
 using InventoryTools.Compendium.Sections.Options;
 using InventoryTools.Compendium.Services;
+using Lumina.Excel.Sheets;
 
 namespace InventoryTools.Compendium.Types;
 
@@ -75,6 +76,8 @@ public class LeveCompendiumType : CompendiumType<LeveRow>
     {
         return _leveSheet.Where(c => c.Base.DataId.RowId != 0).ToList();
     }
+
+    public override List<Type>? RelatedTypes => [typeof(Leve)];
 
     public override void BuildColumns(CompendiumColumnBuilder<LeveRow> builder)
     {

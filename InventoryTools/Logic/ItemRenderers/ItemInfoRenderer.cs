@@ -216,6 +216,8 @@ public abstract class ItemInfoRenderer<T> : IItemInfoRenderer where T : ItemSour
     public abstract Func<ItemSource, string> GetName { get; }
     public abstract Func<ItemSource, int> GetIcon { get; }
     public abstract Func<ItemSource, string> GetDescription { get; }
+    public virtual Func<ItemSource, (Type, uint)>? RelatedType => null;
+    public virtual Func<ItemSource, List<(Type, uint)>>? RelatedTypes => null;
     public virtual byte MaxColumns { get; set; } = 3;
     public virtual float TooltipChildWidth { get; set; } = 250;
     public virtual float TooltipChildHeight { get; set; } = 150;

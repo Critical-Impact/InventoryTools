@@ -30,6 +30,12 @@ public class ItemQuestUseRenderer : ItemInfoRenderer<ItemQuestUse>
     public override string SingularName { get; } = "Quest";
     public override bool ShouldGroup { get; } = true;
 
+    public override Func<ItemSource, (Type, uint)>? RelatedType => source =>
+    {
+        var asSource = AsSource(source);
+        return (asSource.Quest.RowType, asSource.Quest.RowId);
+    };
+
     public ItemQuestUseRenderer(ITextureProvider textureProvider, ItemSheet itemSheet, MapSheet mapSheet,
         List<FestivalName> festivalNames, IDalamudPluginInterface dalamudPluginInterface) : base(textureProvider, dalamudPluginInterface, itemSheet, mapSheet)
     {
@@ -91,6 +97,12 @@ public class ItemQuestSourceRenderer : ItemInfoRenderer<ItemQuestSource>
     public override string SingularName { get; } = "Quest";
     public override string HelpText { get; } = "Does this item come from a quest?";
     public override bool ShouldGroup { get; } = true;
+
+    public override Func<ItemSource, (Type, uint)>? RelatedType => source =>
+    {
+        var asSource = AsSource(source);
+        return (asSource.Quest.RowType, asSource.Quest.RowId);
+    };
 
     public ItemQuestSourceRenderer(ITextureProvider textureProvider, ItemSheet itemSheet, MapSheet mapSheet,
         List<FestivalName> festivalNames, IDalamudPluginInterface dalamudPluginInterface) : base(textureProvider, dalamudPluginInterface, itemSheet, mapSheet)

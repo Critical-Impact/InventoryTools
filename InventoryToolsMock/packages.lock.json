@@ -129,8 +129,8 @@
       },
       "AllaganLib.GameSheets": {
         "type": "Transitive",
-        "resolved": "2.1.2",
-        "contentHash": "/Wy7CJCEphcn9ngY/MbCZBRz1NHZlz4dCWoOBezsOXnoivOHP5mWK+V5lolf50f0+Hmm8YdWXclA6RSx2Z0Dtg==",
+        "resolved": "2.1.3",
+        "contentHash": "tjq91S7VXpKHDGaoY/XRE3P7KqVk/Ua+/+PGuRW0ifaWlBBifm7IZaXd7dniUMa+vjctNrqjbo6dhDGth3vOhg==",
         "dependencies": {
           "AllaganLib.Shared": "2.1.0",
           "Autofac": "9.0.0",
@@ -701,7 +701,7 @@
       "criticalcommonlib": {
         "type": "Project",
         "dependencies": {
-          "AllaganLib.GameSheets": "[2.1.2, )",
+          "AllaganLib.GameSheets": "[2.1.3, )",
           "AllaganLib.Monitors": "[2.1.0, )",
           "AllaganLib.Shared": "[2.1.0, )",
           "DalaMock.Host": "[5.0.0, )",

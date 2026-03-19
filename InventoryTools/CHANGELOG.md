@@ -8,6 +8,12 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [14.1.1] - 2026-03-19
+
+### Added
+ - Achievements, Leves, Airships, Dungeons, Gearsets, Quests, Submarines sources/uses now display a "Compendium Entries" list when right clicked. This will take you to the related view window for the related entry.
+ - Chocobo Item and Chocobo Racing Items were added to the compendium
+
 ## [14.1.0] - 2026-03-16
 
 ### Added

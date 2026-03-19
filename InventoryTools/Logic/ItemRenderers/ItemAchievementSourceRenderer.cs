@@ -27,6 +27,12 @@ public class ItemAchievementSourceRenderer : ItemInfoRenderer<ItemAchievementSou
     public override string HelpText => "Can the item be earned via an achievement?";
     public override bool ShouldGroup => true;
 
+    public override Func<ItemSource, (Type, uint)>? RelatedType => source =>
+    {
+        var asSource = AsSource(source);
+        return (asSource.Achievement.RowType, asSource.Achievement.RowId);
+    };
+
     public override Action<ItemSource> DrawTooltip => source =>
     {
         var asSource = AsSource(source);

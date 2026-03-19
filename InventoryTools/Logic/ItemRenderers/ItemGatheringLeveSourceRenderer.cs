@@ -42,6 +42,13 @@ public class ItemGatheringLeveSourceRenderer : ItemInfoRenderer<ItemGatheringLev
     public override string HelpText => "Is this item obtained from a gathering leve?";
     public override bool ShouldGroup => true;
     public override IReadOnlyList<ItemInfoRenderCategory> Categories => [ItemInfoRenderCategory.Leve];
+
+    public override Func<ItemSource, (Type, uint)>? RelatedType => source =>
+    {
+        var asSource = AsSource(source);
+        return (asSource.Leve.RowType, asSource.Leve.RowId);
+    };
+
     public override Action<ItemSource> DrawTooltip => source =>
     {
         var asSource = AsSource(source);

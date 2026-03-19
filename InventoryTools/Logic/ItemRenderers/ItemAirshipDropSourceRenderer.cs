@@ -30,6 +30,12 @@ public class ItemAirshipDropSourceRenderer : ItemInfoRenderer<ItemAirshipDropSou
     public override bool ShouldGroup => true;
     public override string HelpText => "Can the item be earned from a airship exploration route?";
 
+    public override Func<ItemSource, (Type, uint)>? RelatedType => source =>
+    {
+        var asSource = AsSource(source);
+        return (asSource.AirshipExplorationPoint.GetType(), asSource.AirshipExplorationPoint.RowId);
+    };
+
     public override Func<ItemSource, List<MessageBase>?>? OnClick => source =>
     {
         var asSource = AsSource(source);

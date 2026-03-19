@@ -19,6 +19,7 @@ using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using Humanizer;
 using Dalamud.Bindings.ImGui;
+using InventoryTools.Compendium.Services;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
 using InventoryTools.Extensions;
@@ -43,6 +44,7 @@ public class ItemInfoRenderService : IDisposable
     private readonly IFont _font;
     private readonly IKeyState _keyState;
     private readonly IFramework _framework;
+    private readonly ICompendiumTypeFactory _compendiumTypeFactory;
     private readonly Dictionary<Type,IItemInfoRenderer> _sourceRenderers;
     private readonly Dictionary<Type,IItemInfoRenderer> _useRenderers;
     private readonly Dictionary<ItemInfoType,IItemInfoRenderer> _sourceRenderersByItemInfoType;
@@ -51,7 +53,8 @@ public class ItemInfoRenderService : IDisposable
     public ItemInfoRenderService(IEnumerable<IItemInfoRenderer> itemRenderers,
         SourceIconGroupingSetting sourceIconGroupingSetting, UseIconGroupingSetting useIconGroupingSetting,
         ImGuiService imGuiService, IPluginLog pluginLog, InventoryToolsConfiguration configuration,
-        IClipboardService clipboardService, ImGuiTooltipService tooltipService, IFont font, IKeyState keyState, IFramework framework)
+        IClipboardService clipboardService, ImGuiTooltipService tooltipService, IFont font, IKeyState keyState, IFramework framework,
+        ICompendiumTypeFactory compendiumTypeFactory)
     {
         _sourceIconGroupingSetting = sourceIconGroupingSetting;
         _useIconGroupingSetting = useIconGroupingSetting;
@@ -63,6 +66,7 @@ public class ItemInfoRenderService : IDisposable
         _font = font;
         _keyState = keyState;
         _framework = framework;
+        _compendiumTypeFactory = compendiumTypeFactory;
         var itemInfoRenderers = itemRenderers.ToList();
         _sourceRenderers = itemInfoRenderers.Where(c => c.RendererType == RendererType.Source).ToDictionary(c => c.ItemSourceType, c => c);
         _useRenderers = itemInfoRenderers.Where(c => c.RendererType == RendererType.Use).ToDictionary(c => c.ItemSourceType, c => c);
@@ -314,6 +318,30 @@ public class ItemInfoRenderService : IDisposable
     {
         var sourceRenderer = this._sourceRenderers.ContainsKey(itemSource.GetType()) ? this._sourceRenderers[itemSource.GetType()] : null;
         return sourceRenderer?.GetName(itemSource) ?? itemSource.Item.NameString;
+    }
+
+    public (Type, uint)? GetRelatedSourceType(ItemSource itemSource)
+    {
+        var sourceRenderer = this._sourceRenderers.ContainsKey(itemSource.GetType()) ? this._sourceRenderers[itemSource.GetType()] : null;
+        return sourceRenderer?.RelatedType?.Invoke(itemSource);
+    }
+
+    public List<(Type, uint)>? GetRelatedSourceTypes(ItemSource itemSource)
+    {
+        var sourceRenderer = this._sourceRenderers.ContainsKey(itemSource.GetType()) ? this._sourceRenderers[itemSource.GetType()] : null;
+        return sourceRenderer?.RelatedTypes?.Invoke(itemSource);
+    }
+
+    public (Type, uint)? GetRelatedUseType(ItemSource itemSource)
+    {
+        var useRenderer = this._useRenderers.ContainsKey(itemSource.GetType()) ? this._useRenderers[itemSource.GetType()] : null;
+        return useRenderer?.RelatedType?.Invoke(itemSource);
+    }
+
+    public List<(Type, uint)>? GetRelatedUseTypes(ItemSource itemSource)
+    {
+        var useRenderer = this._useRenderers.ContainsKey(itemSource.GetType()) ? this._useRenderers[itemSource.GetType()] : null;
+        return useRenderer?.RelatedTypes?.Invoke(itemSource);
     }
 
     public string GetSourceDescription(ItemSource itemSource)
@@ -813,6 +841,44 @@ public class ItemInfoRenderService : IDisposable
                             $"{firstItem.Item.NameString}:\n\n{(itemSources.Count > 1 ? (typeName.Plural ?? typeName.Singular) : typeName.Singular)}: {typeDescriptions}";
                         _clipboardService.CopyToClipboard(clipboardText);
                     }
+                }
+
+                var relatedTypes = itemSources.Select(c => rendererType == RendererType.Source ? (c, this.GetRelatedSourceType(c)) : (c, this.GetRelatedUseType(c))).Where(c => c.Item2 != null).GroupBy(c => c.Item2.Value.Item1).ToList();
+                if (relatedTypes.Count > 0)
+                {
+                    ImGui.NewLine();
+                    ImGui.Text("Compendium Entries");
+                    ImGui.Separator();
+
+                    foreach (var relatedGroup in relatedTypes)
+                    {
+                        var compendiumType = _compendiumTypeFactory.GetByType(relatedGroup.Key);
+                        if (compendiumType != null)
+                        {
+                            var compendiumIcon = compendiumType.Icon;
+                            this._imGuiService.DrawIcon(compendiumIcon, new Vector2(16, 16));
+                            ImGui.SameLine();
+                            using (var menu = ImRaii.Menu(relatedGroup.Count() == 1 ? compendiumType.Singular : compendiumType.Plural))
+                            {
+                                if (menu)
+                                {
+                                    foreach (var relatedType in relatedGroup)
+                                    {
+                                        var rowId = relatedType.Item2!.Value.Item2;
+                                        if (compendiumType.HasRow(rowId))
+                                        {
+                                            var name = compendiumType.GetName(rowId);
+                                            if (ImGui.MenuItem(name))
+                                            {
+                                                messages.Add(new OpenCompendiumViewMessage(compendiumType, rowId));
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                 }
             }
         }
