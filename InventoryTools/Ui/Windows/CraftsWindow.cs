@@ -130,7 +130,7 @@ namespace InventoryTools.Ui
             _keyState = keyState;
             _itemSheet = itemSheet;
             _framework = framework;
-            _compendiumTypes = compendiumTypes;
+            _compendiumTypes = compendiumTypes.Where(c => c.ShowInListing).OrderBy(c => c.Plural);
             Flags = ImGuiWindowFlags.MenuBar;
         }
         public override void Initialize()

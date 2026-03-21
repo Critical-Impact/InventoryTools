@@ -3,8 +3,7 @@ using InventoryTools.Compendium.Models;
 
 namespace InventoryTools.Compendium.Sections.Options;
 
-public sealed class MapLinksViewSectionOptions
+public record class MapLinksViewSectionOptions : SectionOptions
 {
-    public string SectionName { get; init; } = "Locations";
     public IReadOnlyList<MapLinkEntry>? MapLinks { get; init; }
 }

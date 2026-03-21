@@ -102,7 +102,7 @@ namespace InventoryTools.Ui
             _pluginLog = pluginLog;
             _highlightWhenFilter = highlightWhenFilter;
             _highlightWhenSetting = highlightWhenSetting;
-            _compendiumTypes = compendiumTypes;
+            _compendiumTypes = compendiumTypes.Where(c => c.ShowInListing).OrderBy(c => c.Plural);
             _configuration = configuration;
             this.Flags = ImGuiWindowFlags.MenuBar;
         }

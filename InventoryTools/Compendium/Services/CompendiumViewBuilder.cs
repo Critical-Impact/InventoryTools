@@ -28,6 +28,7 @@ public class CompendiumViewBuilder
     private readonly CollectionRowRefSection.Factory _collectionRowRefFactory;
     private readonly LevelViewSection.Factory _levelViewFactory;
     private readonly MetadataSection.Factory _metadataSectionFactory;
+    private readonly ItemSourcesSection.Factory _itemSourcesSectionFactory;
     private string _title;
     private string? _subtitle;
     private string? _description;
@@ -48,7 +49,8 @@ public class CompendiumViewBuilder
         SingleRowRefSection.Factory singleRowRefFactory,
         CollectionRowRefSection.Factory collectionRowRefFactory,
         LevelViewSection.Factory levelViewFactory,
-        MetadataSection.Factory metadataSectionFactory)
+        MetadataSection.Factory metadataSectionFactory,
+        ItemSourcesSection.Factory itemSourcesSectionFactory)
     {
         _textureProvider = textureProvider;
         _imGuiService = imGuiService;
@@ -60,6 +62,7 @@ public class CompendiumViewBuilder
         _collectionRowRefFactory = collectionRowRefFactory;
         _levelViewFactory = levelViewFactory;
         _metadataSectionFactory = metadataSectionFactory;
+        _itemSourcesSectionFactory = itemSourcesSectionFactory;
     }
 
     public string Title
@@ -148,6 +151,11 @@ public class CompendiumViewBuilder
     public void AddMetadataSection(MetadataSectionOptions options)
     {
         AddSection(_metadataSectionFactory.Invoke(options));
+    }
+
+    public void AddItemSourcesSection(ItemSourcesSectionOptions options)
+    {
+        AddSection(_itemSourcesSectionFactory.Invoke(options));
     }
 
     static void DrawTag(string id, string text, Vector4 color)

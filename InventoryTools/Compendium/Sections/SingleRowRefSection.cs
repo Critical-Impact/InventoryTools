@@ -18,11 +18,10 @@ namespace InventoryTools.Compendium.Sections;
 public class SingleRowRefSection : ViewSection
 {
     private readonly SingleRowRefSectionOptions _options;
-    private readonly ICompendiumTypeFactory _compendiumTypeFactory;
     private readonly ITextureProvider _textureProvider;
     private readonly MediatorService _mediatorService;
-    private ICompendiumType? _relatedCompendiumType = null;
-    private Type? refType;
+    private readonly ICompendiumType? _relatedCompendiumType = null;
+    private readonly Type? _refType;
     private string? _title;
     private string? _subTitle;
     private (string?, uint?)? _icon;
@@ -32,10 +31,9 @@ public class SingleRowRefSection : ViewSection
     public SingleRowRefSection(SingleRowRefSectionOptions options, ICompendiumTypeFactory compendiumTypeFactory, ImGuiService imGuiService, ITextureProvider textureProvider, MediatorService mediatorService) : base(imGuiService)
     {
         _options = options;
-        _compendiumTypeFactory = compendiumTypeFactory;
         _textureProvider = textureProvider;
         _mediatorService = mediatorService;
-        _relatedCompendiumType = _compendiumTypeFactory.GetByRowRef(options.RelatedRef, out refType);
+        _relatedCompendiumType = compendiumTypeFactory.GetByRowRef(options.RelatedRef, out _refType);
     }
 
     public override string SectionName => _options.SectionName ?? "Related " + (_relatedCompendiumType?.Singular ?? "Object");
@@ -43,7 +41,7 @@ public class SingleRowRefSection : ViewSection
     {
         if (_relatedCompendiumType == null)
         {
-            if (refType == null)
+            if (_refType == null)
             {
                 return false;
             }
@@ -61,13 +59,13 @@ public class SingleRowRefSection : ViewSection
     {
         if (_relatedCompendiumType == null)
         {
-            if (refType == null)
+            if (_refType == null)
             {
                 ImGui.Text("Unknown related row type.");
             }
             else
             {
-                ImGui.Text("No matching compendium type for " + refType.Name);
+                ImGui.Text("No matching compendium type for " + _refType.Name);
             }
         }
         else

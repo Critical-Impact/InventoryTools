@@ -88,11 +88,22 @@ public class ItemInfoRenderService : IDisposable
 
     private bool _scrollLeft;
     private bool _scrollRight;
-    private bool _inTooltip;
+
+    private DateTime? _lastTooltipTime;
+    private static readonly TimeSpan TooltipTimeout = TimeSpan.FromSeconds(2);
+
+    private bool InTooltip(DateTime now)
+    {
+        if (_lastTooltipTime == null)
+        {
+            return false;
+        }
+        return now - _lastTooltipTime < TooltipTimeout;
+    }
 
     private void CheckKeys(IFramework framework)
     {
-        if (_inTooltip)
+        if (InTooltip(framework.LastUpdate))
         {
             if (_keyState[VirtualKey.LEFT])
             {
@@ -629,7 +640,7 @@ public class ItemInfoRenderService : IDisposable
 
         if (!ImGui.IsAnyItemHovered())
         {
-            _inTooltip = false;
+            _lastTooltipTime = null;
             _scrollLeft = false;
             _scrollRight = false;
             _itemTooltipIndex = 0;
@@ -900,7 +911,7 @@ public class ItemInfoRenderService : IDisposable
 
         if ((hasTooltip || hasGroupedTooltip) && ImGui.IsItemHovered())
         {
-            _inTooltip = true;
+            _lastTooltipTime = _framework.LastUpdate;
             ImGui.SetNextWindowSizeConstraints( new System.Numerics.Vector2(250, -1), new System.Numerics.Vector2(1000,1000));
             using var tt = ImRaii.Tooltip();
             if (tt.Success)
@@ -1007,7 +1018,7 @@ public class ItemInfoRenderService : IDisposable
         }
         else if(ImGui.IsItemHovered())
         {
-            _inTooltip = true;
+            _lastTooltipTime = _framework.LastUpdate;
             using var tt = ImRaii.Tooltip();
             if (tt.Success)
             {

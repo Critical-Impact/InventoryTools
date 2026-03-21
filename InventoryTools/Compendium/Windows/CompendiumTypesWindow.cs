@@ -26,7 +26,7 @@ public class CompendiumTypesWindow : GenericWindow
 
     public CompendiumTypesWindow(IEnumerable<ICompendiumType> compendiumTypes, ITextureProvider textureProvider, IFramework framework, ILogger<CompendiumTypesWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration) : base(logger, mediator, imGuiService, configuration, "Compendium")
     {
-        _compendiumTypes = compendiumTypes.Where(c => c.ShowInListing);
+        _compendiumTypes = compendiumTypes.Where(c => c.ShowInListing).OrderBy(c => c.Plural);
         _textureProvider = textureProvider;
         _framework = framework;
     }

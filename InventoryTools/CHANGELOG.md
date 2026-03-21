@@ -8,6 +8,18 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [14.1.2] - 2026-03-19
+
+### Added
+- Added new compendium entries for BGM/Orchestrions, Mounts and Minions
+- Quest Compendium entries will now list if they are completed and also include a link to the corresponding consolegameswiki entry
+
+### Fixed
+- Fixed a bug where retainer market items would sometimes not be updated correctly
+- Fixed an issue where craft pricing would only work correctly once the craft list's pricing settings were edited
+- Fixed an issue when right clicking an item in the glamour chests creation window's where it'd bring up the wrong item
+- Fixed an issue where it was possible for the left/right arrows to be eaten by the plugin
+
 ## [14.1.1] - 2026-03-19
 
 ### Added

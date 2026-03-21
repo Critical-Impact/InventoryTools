@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -48,7 +49,7 @@ public class CompendiumViewWindow : CompendiumWindow
         _compendiumType = compendiumType;
         _pluginLog = pluginLog;
         _menuWindows = menuWindows;
-        _compendiumTypes = compendiumTypes;
+        _compendiumTypes = compendiumTypes.Where(c => c.ShowInListing).OrderBy(c => c.Plural);
         Flags = ImGuiWindowFlags.MenuBar;
     }
 

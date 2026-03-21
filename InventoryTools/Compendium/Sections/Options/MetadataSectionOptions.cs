@@ -3,13 +3,11 @@ using System.Collections.Generic;
 
 namespace InventoryTools.Compendium.Sections.Options;
 
-public sealed class MetadataSectionOptions
+public record MetadataSectionOptions : SectionOptions
 {
-    public required string SectionName { get; init; }
-
     public required List<Row> Rows { get; init; }
 
-    public sealed class Row
+    public record Row
     {
         public required string Label { get; init; }
         public required Func<string?> Value { get; init; }

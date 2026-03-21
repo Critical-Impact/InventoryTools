@@ -52,7 +52,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DalaMock.Core" Version="5.0.0" />
+    <PackageReference Include="DalaMock.Core" Version="5.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="10.0.1" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="5.0.0-preview.5.20278.1" />
     <PackageReference Include="StbiSharp" Version="1.2.1" />

@@ -53,7 +53,7 @@ namespace InventoryTools.IPC
             _compendiumWotsitSetting = compendiumWotsitSetting;
             _mediatorService = mediatorService;
             _configuration = configuration;
-            _compendiumTypes = compendiumTypes;
+            _compendiumTypes = compendiumTypes.Where(c => c.ShowInListing).OrderBy(c => c.Plural);
             _configurationManagerService = configurationManagerService;
             _dalamudPluginInterface = dalamudPluginInterface;
             _listService = listService;

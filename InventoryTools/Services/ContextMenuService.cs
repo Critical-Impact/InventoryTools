@@ -243,7 +243,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
 
     }
 
-    private uint? GetGameObjectItemId(IMenuOpenedArgs args)
+    private unsafe uint? GetGameObjectItemId(IMenuOpenedArgs args)
     {
         uint? item;
 
@@ -254,6 +254,20 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
             if (item == null)
             {
                 item = GetObjectItemId(args.AgentPtr, ItemSearchContextItemId);
+            }
+        }
+        else if (args.AddonName == "MiragePrismPrismBoxCrystallize")
+        {
+            var itemDetail = AgentInterfaceById(AgentId.ItemDetail);
+            if (itemDetail != null && itemDetail->IsAgentActive())
+            {
+                AgentItemDetail* agentItemDetail = (AgentItemDetail*)itemDetail;
+                item = agentItemDetail->ItemId;
+            }
+            else
+            {
+                item = GetObjectItemId(AgentById(AgentId.MiragePrismPrismItemDetail),
+                    AgentMiragePrismPrismItemDetailId);
             }
         }
         else
@@ -274,7 +288,6 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
                 "RecipeProductList" => GetObjectItemId(AgentById(AgentId.RecipeItemContext), AgentItemContextItemId),
                 "GatheringNote" => GetObjectItemId("GatheringNote", GatheringNoteContextItemId),
                 "ChatLog" => GetObjectItemId("ChatLog", ChatLogContextItemId),
-                "MiragePrismPrismBoxCrystallize" => GetObjectItemId(AgentById(AgentId.MiragePrismPrismItemDetail), AgentMiragePrismPrismItemDetailId),
                 _ => null,
             };
         }
@@ -421,6 +434,14 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
         var agents   = uiModule->GetAgentModule();
         var agent    = agents->GetAgentByInternalId(id);
         return (IntPtr)agent;
+    }
+
+    private unsafe AgentInterface* AgentInterfaceById(AgentId id)
+    {
+        var uiModule = (UIModule*)_gameGui.GetUIModule().Address;
+        var agents   = uiModule->GetAgentModule();
+        var agent    = agents->GetAgentByInternalId(id);
+        return agent;
     }
 
     private void AddToNewCraftList(IMenuItemClickedArgs obj, uint? itemId = null)

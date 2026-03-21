@@ -5,6 +5,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using DalaMock.Core.Mocks;
 using Dalamud.Interface.ImGuiSeStringRenderer;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Textures.TextureWraps;
@@ -13,7 +14,7 @@ using Lumina.Data.Files;
 
 namespace InventoryToolsTesting.Services
 {
-    public class TestTextureProvider : ITextureProvider
+    public class TestTextureProvider : ITextureProvider, IMockService
     {
         public IDalamudTextureWrap CreateEmpty(RawImageSpecification specs, bool cpuRead, bool cpuWrite, string? debugName = null)
         {
@@ -160,5 +161,7 @@ namespace InventoryToolsTesting.Services
         {
             return IntPtr.Zero;
         }
+
+        public string ServiceName => "Texture Provider";
     }
 }

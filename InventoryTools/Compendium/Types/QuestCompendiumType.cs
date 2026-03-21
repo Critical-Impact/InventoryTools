@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web;
 using AllaganLib.GameSheets.LuminaSheets;
 using AllaganLib.Shared.Extensions;
 using DalaMock.Host.Mediator;
@@ -11,6 +12,8 @@ using Lumina.Excel.Sheets;
 using AllaganLib.GameSheets.Extensions;
 using AllaganLib.GameSheets.Sheets;
 using AllaganLib.Shared.Misc;
+using Dalamud.Interface.Colors;
+using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Sections.Options;
@@ -27,8 +30,21 @@ public class QuestCompendiumType : CompendiumType<Quest>
     private readonly ExcelSheet<ExVersion> _expansionSheet;
     private readonly ExcelSheet<Quest> _questSheet;
     private readonly Func<string, ExcelSheet<QuestDialogue>> _questDialogueFactory;
+    private readonly IUnlockState _unlockState;
 
-    public QuestCompendiumType(LevelSheet levelSheet, ENpcBaseSheet eNpcBaseSheet, ExcelSheet<InstanceContent> instanceContentSheet, ExcelSheet<JournalGenre> journalGenreSheet, ExcelSheet<ExVersion> expansionSheet, ExcelSheet<Quest> questSheet, Func<string, ExcelSheet<QuestDialogue>> questDialogueFactory, CompendiumTable<Quest>.Factory tableFactory, Func<CompendiumColumnBuilder<Quest>> columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory, columnBuilder, viewBuilderFactory)
+    public QuestCompendiumType(LevelSheet levelSheet,
+        ENpcBaseSheet eNpcBaseSheet,
+        ExcelSheet<InstanceContent> instanceContentSheet,
+        ExcelSheet<JournalGenre> journalGenreSheet,
+        ExcelSheet<ExVersion> expansionSheet,
+        ExcelSheet<Quest> questSheet,
+        Func<string, ExcelSheet<QuestDialogue>> questDialogueFactory,
+        CompendiumTable<Quest>.Factory tableFactory,
+        Func<CompendiumColumnBuilder<Quest>> columnBuilder,
+        CompendiumViewBuilder.Factory viewBuilderFactory,
+        IUnlockState unlockState) : base(tableFactory,
+        columnBuilder,
+        viewBuilderFactory)
     {
         _levelSheet = levelSheet;
         _eNpcBaseSheet = eNpcBaseSheet;
@@ -37,6 +53,7 @@ public class QuestCompendiumType : CompendiumType<Quest>
         _expansionSheet = expansionSheet;
         _questSheet = questSheet;
         _questDialogueFactory = questDialogueFactory;
+        _unlockState = unlockState;
     }
 
     public override ICompendiumTable<WindowState, MessageBase> BuildTable()
@@ -100,17 +117,20 @@ public class QuestCompendiumType : CompendiumType<Quest>
         builder.AddStringColumn(new (){Key = "required_class", Name = "Required Class", HelpText = "The required class of the quest", Version = "14.0.3", ValueSelector = row => row.ClassJobRequired.ValueNullable?.Name.ToImGuiString().FirstCharToUpper() ?? ""});
         builder.AddStringColumn(new (){Key = "level", Name = "Level", HelpText = "The required level of the quest", Version = "14.0.3", ValueSelector = row => row.ClassJobLevel[0].ToString() ?? ""});
         builder.AddStringColumn(new (){Key = "expansion", Name = "Expansion", HelpText = "The expansion the quest corresponds to.", Version = "14.0.3", ValueSelector = row => row.Expansion.Value.Name.ToImGuiString() ?? ""});
+        builder.AddBooleanColumn(new (){Key = "completed", Name = "Completed", HelpText = "Is the quest completed?.", Version = "14.1.2", ValueSelector = row => _unlockState.IsQuestCompleted(row)});
     }
 
     public override void BuildViewFields(CompendiumViewBuilder viewBuilder, Quest row)
     {
         viewBuilder.SetupDefaults(this, row);
+        viewBuilder.AddLink($"https://ffxiv.consolegameswiki.com/wiki/{HttpUtility.UrlEncode(row.AsConsoleGamesWikiName())}", "Open in Console Games Wiki", "consolegameswiki");
         var dialogueSheet = _questDialogueFactory.Invoke(row.Id.ToImGuiString());
         var dialogue = dialogueSheet.GetRowOrDefault(0);
         if (dialogue != null)
         {
             viewBuilder.Description = dialogue.Value.Value.ToImGuiString();
         }
+        viewBuilder.AddTag("Completed?", "Is the quest completed?", () => _unlockState.IsQuestCompleted(row) ? ImGuiColors.HealerGreen : ImGuiColors.DalamudRed);
         viewBuilder.AddCollectionRowRefSection(new CollectionRowRefSectionOptions()
         {
             RelatedRefs = row.PreviousQuest.Select(c => (RowRef)c).ToList(),

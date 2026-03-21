@@ -172,6 +172,7 @@ public class AchievementCompendiumType : CompendiumType<AchievementRow>
         {
             viewBuilder.AddSingleRowRefSection(new SingleRowRefSectionOptions()
             {
+                SectionName = "Unlocked Item",
                 RelatedRef = row.Base.Item.Value.AsUntypedRowRef()
             });
         }

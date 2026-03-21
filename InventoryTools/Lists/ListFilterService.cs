@@ -45,6 +45,9 @@ public class ListFilterService : DisposableMediatorBackgroundService
     private readonly SourceInventoriesFilter _sourceInventoriesFilter;
     private readonly DestinationInventoriesFilter _destinationInventoriesFilter;
     private readonly InventoryScopeCalculator _inventoryScopeCalculator;
+    private readonly Lazy<CraftWorldPriceUseActiveWorldFilter> _useActiveWorldSetting;
+    private readonly Lazy<CraftWorldPriceUseHomeWorldFilter> _useHomeWorldSetting;
+    private readonly Lazy<CraftWorldPriceUseDefaultsFilter> _useDefaultWorldsSetting;
 
     public NamedBackgroundTaskQueue FilterQueue { get; }
 
@@ -56,7 +59,10 @@ public class ListFilterService : DisposableMediatorBackgroundService
         CraftSourceInventoriesFilter craftSourceInventoriesFilter, CraftDestinationInventoriesFilter craftDestinationInventoriesFilter,
         CraftStagingAreaFilter craftStagingAreaFilter,
         SourceInventoriesFilter sourceInventoriesFilter, DestinationInventoriesFilter destinationInventoriesFilter,
-        InventoryScopeCalculator inventoryScopeCalculator) : base(logger,
+        InventoryScopeCalculator inventoryScopeCalculator,
+        Lazy<CraftWorldPriceUseActiveWorldFilter> useActiveWorldSetting,
+        Lazy<CraftWorldPriceUseHomeWorldFilter> useHomeWorldSetting,
+        Lazy<CraftWorldPriceUseDefaultsFilter> useDefaultWorldsSetting) : base(logger,
         mediatorService)
     {
         _configuration = configuration;
@@ -74,6 +80,9 @@ public class ListFilterService : DisposableMediatorBackgroundService
         _sourceInventoriesFilter = sourceInventoriesFilter;
         _destinationInventoriesFilter = destinationInventoriesFilter;
         _inventoryScopeCalculator = inventoryScopeCalculator;
+        _useActiveWorldSetting = useActiveWorldSetting;
+        _useHomeWorldSetting = useHomeWorldSetting;
+        _useDefaultWorldsSetting = useDefaultWorldsSetting;
         FilterQueue = taskQueueFactory.Invoke("List Filter Queue", 1);
         MediatorService.Subscribe<RequestListUpdateMessage>(this, message => RequestRefresh(message.FilterConfiguration));
     }
@@ -144,14 +153,14 @@ public class ListFilterService : DisposableMediatorBackgroundService
             {
                 craftListConfiguration.WorldPreferences = new();
             }
-            if (filterConfiguration.GetBooleanFilter("CraftWorldPriceUseActiveWorld") == true && _characterMonitor.ActiveCharacter != null)
+            if (_useActiveWorldSetting.Value.CurrentValue(filterConfiguration) is true && _characterMonitor.ActiveCharacter != null)
             {
                 if (!craftListConfiguration.WorldPreferences.Contains(_characterMonitor.ActiveCharacter.ActiveWorldId))
                 {
                     craftListConfiguration.WorldPreferences.Add(_characterMonitor.ActiveCharacter.ActiveWorldId);
                 }
             }
-            if (filterConfiguration.GetBooleanFilter("CraftWorldPriceUseHomeWorld") == true && _characterMonitor.ActiveCharacter != null)
+            if (_useHomeWorldSetting.Value.CurrentValue(filterConfiguration) is true && _characterMonitor.ActiveCharacter != null)
             {
                 if (!craftListConfiguration.WorldPreferences.Contains(_characterMonitor.ActiveCharacter.ActiveWorldId))
                 {
@@ -159,7 +168,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
                 }
             }
 
-            if (filterConfiguration.GetBooleanFilter("CraftWorldPriceUseDefaults") == true)
+            if (_useDefaultWorldsSetting.Value.CurrentValue(filterConfiguration) is true)
             {
                 foreach (var worldId in _configuration.MarketBoardWorldIds)
                 {

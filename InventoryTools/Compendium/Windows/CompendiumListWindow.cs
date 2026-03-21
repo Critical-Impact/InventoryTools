@@ -5,7 +5,6 @@ using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using AllaganLib.Shared.Extensions;
-using Autofac;
 using Autofac.Features.OwnedInstances;
 using DalaMock.Host.Mediator;
 using Dalamud.Bindings.ImGui;
@@ -41,14 +40,14 @@ public class CompendiumListWindow : CompendiumWindow
 
     public delegate Owned<CompendiumListWindow> Factory(ICompendiumType compendiumType);
 
-    public CompendiumListWindow(ILogger<CompendiumListWindow> logger, WindowState windowState, CompendiumSectionStateService sectionStateService, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ICompendiumType compendiumType, IComponentContext context, IPluginLog pluginLog, IEnumerable<IMenuWindow> menuWindows, IEnumerable<ICompendiumType> compendiumTypes) : base(logger, mediator, imGuiService, configuration, compendiumType.Plural + " Window")
+    public CompendiumListWindow(ILogger<CompendiumListWindow> logger, WindowState windowState, CompendiumSectionStateService sectionStateService, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, ICompendiumType compendiumType, IPluginLog pluginLog, IEnumerable<IMenuWindow> menuWindows, IEnumerable<ICompendiumType> compendiumTypes) : base(logger, mediator, imGuiService, configuration, compendiumType.Plural + " Window")
     {
         _windowState = windowState;
         _sectionStateService = sectionStateService;
         _compendiumType = compendiumType;
         _pluginLog = pluginLog;
         _menuWindows = menuWindows;
-        _compendiumTypes = compendiumTypes;
+        _compendiumTypes = compendiumTypes.Where(c => c.ShowInListing).OrderBy(c => c.Plural);
         _table = new Lazy<ICompendiumTable<WindowState, MessageBase>>(
             compendiumType.BuildTable,
             LazyThreadSafetyMode.PublicationOnly);

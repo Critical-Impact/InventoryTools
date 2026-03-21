@@ -2,8 +2,7 @@ using Lumina.Excel;
 
 namespace InventoryTools.Compendium.Sections.Options;
 
-public sealed class SingleRowRefSectionOptions
+public record SingleRowRefSectionOptions : SectionOptions
 {
-    public string? SectionName { get; init; }
     public RowRef RelatedRef { get; init; }
 }
