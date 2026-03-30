@@ -64,6 +64,7 @@ public class InventoryToolsPluginMock : InventoryToolsPlugin
             container.RegisterType<MockGameInteropService>().As<IGameInteropService>().SingleInstance();
             container.RegisterType<MockUnlockTrackerService>().As<IUnlockTrackerService>().SingleInstance();
             container.RegisterType<MockQuestManagerService>().AsImplementedInterfaces().SingleInstance();
+            container.RegisterType<MockUIStateService>().AsImplementedInterfaces().SingleInstance();
             container.RegisterType<MockStartup>().AsImplementedInterfaces().SingleInstance();
             container.RegisterType<MockFileDialogManager>().AsImplementedInterfaces().SingleInstance();
 

@@ -258,6 +258,7 @@ namespace InventoryTools
             builder.RegisterSingletonSelfAndInterfaces<CsvLoaderService>();
             builder.RegisterSingletonSelfAndInterfaces<BackgroundTaskCollector>();
             builder.RegisterSingletonSelfAndInterfaces<AchievementMonitorConfiguration>();
+            builder.RegisterSingletonSelfAndInterfaces<UIStateService>();
 
             //Transient registrations
             builder.RegisterTransientSelfAndInterfaces<BackgroundTaskQueue>();

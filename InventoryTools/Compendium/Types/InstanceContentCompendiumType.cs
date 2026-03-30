@@ -5,12 +5,16 @@ using AllaganLib.GameSheets.Extensions;
 using AllaganLib.Shared.Extensions;
 using AllaganLib.Shared.Misc;
 using DalaMock.Host.Mediator;
+using Dalamud.Interface.Colors;
+using Dalamud.Plugin.Services;
 using Dalamud.Utility;
+using InventoryTools.Compendium.Columns.Options;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
 using InventoryTools.Compendium.Sections;
 using InventoryTools.Compendium.Sections.Options;
 using InventoryTools.Compendium.Services;
+using InventoryTools.Services;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
 
@@ -20,11 +24,15 @@ public class InstanceContentCompendiumType : CompendiumType<InstanceContent>
 {
     private readonly ExcelSheet<InstanceContent> _instanceContentSheet;
     private readonly ExcelSheet<Quest> _questSheet;
+    private readonly IUnlockState _unlockState;
+    private readonly IUIStateService _uiStateService;
 
-    public InstanceContentCompendiumType(ExcelSheet<InstanceContent> instanceContentSheet, ExcelSheet<Quest> questSheet, CompendiumTable<InstanceContent>.Factory tableFactory, Func<CompendiumColumnBuilder<InstanceContent>> columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory, columnBuilder, viewBuilderFactory)
+    public InstanceContentCompendiumType(ExcelSheet<InstanceContent> instanceContentSheet, ExcelSheet<Quest> questSheet, IUnlockState unlockState, IUIStateService uiStateService, CompendiumTable<InstanceContent>.Factory tableFactory, Func<CompendiumColumnBuilder<InstanceContent>> columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory, columnBuilder, viewBuilderFactory)
     {
         _instanceContentSheet = instanceContentSheet;
         _questSheet = questSheet;
+        _unlockState = unlockState;
+        _uiStateService = uiStateService;
     }
 
     public override ICompendiumTable<WindowState, MessageBase> BuildTable()
@@ -98,6 +106,24 @@ public class InstanceContentCompendiumType : CompendiumType<InstanceContent>
             Version = "14.0.3",
             ValueSelector = row =>
                 row.ContentFinderCondition.Value.ClassJobLevelRequired.ToString()
+        });
+
+        builder.AddBooleanColumn(new BooleanColumnOptions<InstanceContent>()
+        {
+            Key = "unlocked",
+            Name = "Unlocked?",
+            HelpText = "Is the instance unlocked?",
+            Version = "14.1.3",
+            ValueSelector = row => _unlockState.IsInstanceContentUnlocked(row)
+        });
+
+        builder.AddBooleanColumn(new BooleanColumnOptions<InstanceContent>()
+        {
+            Key = "completed",
+            Name = "Completed?",
+            HelpText = "Is the instance completed?",
+            Version = "14.1.3",
+            ValueSelector = row => _uiStateService.IsInstanceContentCompleted(row)
         });
 
         builder.AddIntegerColumn(new()
@@ -174,6 +200,9 @@ public class InstanceContentCompendiumType : CompendiumType<InstanceContent>
     public override void BuildViewFields(CompendiumViewBuilder viewBuilder, InstanceContent row)
     {
         viewBuilder.SetupDefaults(this, row);
+
+        viewBuilder.AddTag("Unlocked?", "Is the instance unlocked?", () => _unlockState.IsInstanceContentUnlocked(row) ? ImGuiColors.HealerGreen : ImGuiColors.DalamudRed);
+        viewBuilder.AddTag("Completed?", "Is the instance completed?", () => _uiStateService.IsInstanceContentCompleted(row) ? ImGuiColors.HealerGreen : ImGuiColors.DalamudRed);
 
         var relatedQuests = _questSheet.Where(c => c.InstanceContent.Any(c => c.RowId == row.RowId) || c.QuestParams.Any(c => c.ScriptArg == row.RowId && c.ScriptInstruction.ToString().StartsWith("INSTANCEDUNGEON")))
             .Select(c => c.AsUntypedRowRef()).ToList();
