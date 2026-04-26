@@ -29,7 +29,7 @@ public class ClassJobCompendiumType : CompendiumType<ClassJobRow>
         SubrowExcelSheet<ScenarioTreeTipsClassQuest> treeTipsClassQuestSheet,
         ILocalizer<RoleType> roleLocalizer,
         CompendiumTable<ClassJobRow>.Factory tableFactory,
-        Func<CompendiumColumnBuilder<ClassJobRow>> columnBuilder,
+        CompendiumColumnBuilder<ClassJobRow>.Factory columnBuilder,
         CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory,
         columnBuilder,
         viewBuilderFactory)
@@ -46,7 +46,7 @@ public class ClassJobCompendiumType : CompendiumType<ClassJobRow>
             CompendiumType = this,
             Key = "classes",
             Name = "Classes",
-            Columns = BuiltColumns()
+            Columns = BuiltColumns
         });
     }
 
@@ -63,6 +63,11 @@ public class ClassJobCompendiumType : CompendiumType<ClassJobRow>
     public override (string?, uint?) GetIcon(ClassJobRow row)
     {
         return (null, (uint)row.Icon);
+    }
+
+    public override uint GetRowId(ClassJobRow row)
+    {
+        return row.RowId;
     }
 
     public override ClassJobRow? GetRow(uint row)

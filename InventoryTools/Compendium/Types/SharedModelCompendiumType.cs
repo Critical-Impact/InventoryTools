@@ -21,7 +21,7 @@ public class SharedModelCompendiumType : CompendiumType<SharedModelCache.SharedM
 {
     private readonly SharedModelCache _sharedModelCache;
 
-    public SharedModelCompendiumType(CompendiumTable<SharedModelCache.SharedModelGroup>.Factory tableFactory, Func<CompendiumColumnBuilder<SharedModelCache.SharedModelGroup>> columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory, SharedModelCache sharedModelCache) : base(tableFactory, columnBuilder, viewBuilderFactory)
+    public SharedModelCompendiumType(CompendiumTable<SharedModelCache.SharedModelGroup>.Factory tableFactory, CompendiumColumnBuilder<SharedModelCache.SharedModelGroup>.Factory columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory, SharedModelCache sharedModelCache) : base(tableFactory, columnBuilder, viewBuilderFactory)
     {
         _sharedModelCache = sharedModelCache;
     }
@@ -32,7 +32,7 @@ public class SharedModelCompendiumType : CompendiumType<SharedModelCache.SharedM
         {
             Key = "shared_models",
             Name = Plural,
-            Columns = BuiltColumns(),
+            Columns = BuiltColumns,
             CompendiumType = this,
             BuildContextMenu = null
         });
@@ -51,6 +51,11 @@ public class SharedModelCompendiumType : CompendiumType<SharedModelCache.SharedM
     public override (string?, uint?) GetIcon(SharedModelCache.SharedModelGroup row)
     {
         return (null, row.Items.First().Icon);
+    }
+
+    public override uint GetRowId(SharedModelCache.SharedModelGroup row)
+    {
+        return (uint)GetRows().IndexOf(row);
     }
 
     public override SharedModelCache.SharedModelGroup GetRow(uint row)

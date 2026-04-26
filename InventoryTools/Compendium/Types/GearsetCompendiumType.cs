@@ -24,7 +24,7 @@ public class GearsetCompendiumType : CompendiumType<Gearset>
     private readonly CompendiumMenuBuilder _menuBuilder;
 
     public GearsetCompendiumType(CompendiumTable<Gearset>.Factory tableFactory,
-        Func<CompendiumColumnBuilder<Gearset>> columnBuilder,
+        CompendiumColumnBuilder<Gearset>.Factory columnBuilder,
         CompendiumViewBuilder.Factory viewBuilderFactory,
         ItemListSection.Factory  itemListSectionFactory,
         List<Gearset> gearsets,
@@ -47,7 +47,7 @@ public class GearsetCompendiumType : CompendiumType<Gearset>
         {
             Key = "gearsets",
             Name = Plural,
-            Columns = BuiltColumns(),
+            Columns = BuiltColumns,
             CompendiumType = this,
             BuildContextMenu = BuildContextMenu
         });
@@ -66,6 +66,11 @@ public class GearsetCompendiumType : CompendiumType<Gearset>
     public override (string?, uint?) GetIcon(Gearset row)
     {
         return (null, Icons.ArmorIcon);
+    }
+
+    public override uint GetRowId(Gearset row)
+    {
+        return (uint)GetRows().IndexOf(row);
     }
 
     private List<MessageBase> BuildContextMenu(Gearset arg)

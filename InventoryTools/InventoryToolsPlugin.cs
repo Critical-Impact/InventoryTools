@@ -46,6 +46,7 @@ using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
 using InventoryTools.Compendium.Sections;
 using InventoryTools.Compendium.Services;
+using InventoryTools.Compendium.Types.Extra;
 using InventoryTools.EquipmentSuggest;
 using InventoryTools.Highlighting;
 using InventoryTools.Host;
@@ -179,6 +180,7 @@ namespace InventoryTools
             this.RegisterHostedService(typeof(ShopMonitorService));
             this.RegisterHostedService(typeof(AcquisitionMonitorService));
             this.RegisterHostedService(typeof(AchievementMonitorService));
+            this.RegisterHostedService(typeof(POIService));
 
             //AllaganLib modules
             builder.RegisterModule(new GameSheetManagerModule()

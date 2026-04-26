@@ -8,6 +8,19 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [14.1.3] - 2026-04-26
+
+### Added
+- Added unlocked/completed to instances compendium listing/view
+- Added Relic Tools, Relic Weapons to the compendium and as uses to the source/use system
+- Added Custom Delivery NPCs to the compendium
+
+### Changed
+- Lumina Supplemental data update
+
+### Fixed
+- Fixed how certain names are displayed in languages other than english
+
 ## [14.1.2] - 2026-03-19
 
 ### Added

@@ -15,17 +15,20 @@ using InventoryTools.Compendium.Models;
 using InventoryTools.Compendium.Sections;
 using InventoryTools.Compendium.Sections.Options;
 using InventoryTools.Compendium.Services;
+using InventoryTools.Localizers;
 using Lumina.Excel.Sheets;
 
 namespace InventoryTools.Compendium.Types;
 
 public class LeveCompendiumType : CompendiumType<LeveRow>
 {
+    private readonly ILocalizer<ENpcBase> _npcLocalizer;
     private readonly LeveSheet _leveSheet;
     private readonly ItemInfoCache _itemInfoCache;
 
-    public LeveCompendiumType(CompendiumTable<LeveRow>.Factory tableFactory, Func<CompendiumColumnBuilder<LeveRow>> columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory, LeveSheet leveSheet, ItemInfoCache itemInfoCache) : base(tableFactory, columnBuilder, viewBuilderFactory)
+    public LeveCompendiumType(ILocalizer<ENpcBase> npcLocalizer, CompendiumTable<LeveRow>.Factory tableFactory, CompendiumColumnBuilder<LeveRow>.Factory columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory, LeveSheet leveSheet, ItemInfoCache itemInfoCache) : base(tableFactory, columnBuilder, viewBuilderFactory)
     {
+        _npcLocalizer = npcLocalizer;
         _leveSheet = leveSheet;
         _itemInfoCache = itemInfoCache;
     }
@@ -42,7 +45,7 @@ public class LeveCompendiumType : CompendiumType<LeveRow>
         {
             Key = "leves",
             Name = Plural,
-            Columns = BuiltColumns(),
+            Columns = BuiltColumns,
             CompendiumType = this,
         });
     }
@@ -60,6 +63,11 @@ public class LeveCompendiumType : CompendiumType<LeveRow>
     public override (string?, uint?) GetIcon(LeveRow row)
     {
         return (null, (uint)row.Base.LeveAssignmentType.Value.Icon);
+    }
+
+    public override uint GetRowId(LeveRow row)
+    {
+        return row.RowId;
     }
 
     public override LeveRow? GetRow(uint row)
@@ -85,7 +93,7 @@ public class LeveCompendiumType : CompendiumType<LeveRow>
         builder.AddStringColumn(new() { Key = "name", Name = "Name", HelpText = "The name of the leve", Version = "14.0.3", ValueSelector = row => row.Base.Name.ToImGuiString() });
         builder.AddStringColumn(new() { Key = "type", Name = "Type", HelpText = "The type of the leve", Version = "14.0.3", ValueSelector = row => row.LeveType.ToString().Humanize() + "(" + row.Base.LeveAssignmentType.Value.Name.ToImGuiString() + ")" });
         builder.AddIntegerColumn(new() { Key = "level", Name = "Level", HelpText = "The level of the leve", Version = "14.0.3", ValueSelector = row => row.Base.ClassJobLevel.ToString() });
-        builder.AddStringColumn(new() { Key = "leveissuer", Name = "Leve Issuer", HelpText = "The NPC who starts the leve", Version = "14.0.3", ValueSelector = row => row.StartENpc?.Name ?? "N/A" });
+        builder.AddStringColumn(new() { Key = "leveissuer", Name = "Leve Issuer", HelpText = "The NPC who starts the leve", Version = "14.0.3", ValueSelector = row => row.StartENpc == null ? "N/A" : _npcLocalizer.Format(row.StartENpc.ENpcBase.Base) });
         builder.AddIntegerColumn(new() { Key = "exp", Name = "EXP", HelpText = "The exp rewarded on completion of the leve", Version = "14.0.3", ValueSelector = row => row.ExpReward.ToString() });
         builder.AddIntegerColumn(new() { Key = "gil", Name = "Gil", HelpText = "The gil rewarded on completion of the leve", Version = "14.0.3", ValueSelector = row => row.GilReward.ToString() });
         builder.AddStringColumn(new() { Key = "startlocation", Name = "Start Location", HelpText = "The start location of the leve", Version = "14.0.3", ValueSelector = row => row.StartLocation?.FormattedName ?? null });
@@ -164,7 +172,7 @@ public class LeveCompendiumType : CompendiumType<LeveRow>
             viewBuilder.AddMapLinkSectionSection(new MapLinkViewSectionOptions()
             {
                 SectionName = "Leve Issuer",
-                MapLink = new MapLinkEntry(60453, row.StartENpc.Name, row.StartENpc.ENpcBase.Locations.First().FormattedName, row.StartENpc.ENpcBase.Locations.First())
+                MapLink = new MapLinkEntry(Icons.FlagIcon, _npcLocalizer.Format(row.StartENpc.ENpcBase.Base), row.StartENpc.ENpcBase.Locations.First().FormattedName, row.StartENpc.ENpcBase.Locations.First())
             });
         }
         if (row.StartLocation != null)
@@ -172,7 +180,7 @@ public class LeveCompendiumType : CompendiumType<LeveRow>
             viewBuilder.AddMapLinkSectionSection(new MapLinkViewSectionOptions()
             {
                 SectionName = "Leve Start",
-                MapLink = new MapLinkEntry(60453, row.StartLocation.FormattedName, row.StartLocation.FormattedName, row.StartLocation)
+                MapLink = new MapLinkEntry(Icons.FlagIcon, row.StartLocation.FormattedName, row.StartLocation.FormattedName, row.StartLocation)
             });
         }
 
@@ -228,6 +236,13 @@ public class LeveCompendiumType : CompendiumType<LeveRow>
     public override string GetDefaultGrouping()
     {
         return "type";
+    }
+
+    public override bool HasLocation => true;
+
+    public override ILocation? GetLocation(LeveRow row)
+    {
+        return row.StartLocation;
     }
 
     public override List<ICompendiumGrouping>? GetGroupings()

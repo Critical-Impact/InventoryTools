@@ -9,6 +9,8 @@ using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
 using InventoryTools.Compendium.Sections;
 using InventoryTools.Compendium.Services;
+using InventoryTools.Compendium.Windows;
+using InventoryTools.Mediator;
 using Lumina.Excel.Sheets;
 using Icons = AllaganLib.Shared.Misc.Icons;
 
@@ -17,10 +19,12 @@ namespace InventoryTools.Compendium.Types;
 public class TerritoryTypeCompendiumType : CompendiumType<IGrouping<string, TerritoryTypeRow>>
 {
     private readonly TerritoryTypeSheet _territoryTypeSheet;
+    private readonly MediatorService _mediatorService;
 
-    public TerritoryTypeCompendiumType(TerritoryTypeSheet territoryTypeSheet, CompendiumTable<IGrouping<string, TerritoryTypeRow>>.Factory tableFactory, Func<CompendiumColumnBuilder<IGrouping<string, TerritoryTypeRow>>> columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory, columnBuilder, viewBuilderFactory)
+    public TerritoryTypeCompendiumType(TerritoryTypeSheet territoryTypeSheet, MediatorService mediatorService, CompendiumTable<IGrouping<string, TerritoryTypeRow>>.Factory tableFactory, CompendiumColumnBuilder<IGrouping<string, TerritoryTypeRow>>.Factory columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory, columnBuilder, viewBuilderFactory)
     {
         _territoryTypeSheet = territoryTypeSheet;
+        _mediatorService = mediatorService;
     }
 
     public override List<Type>? RelatedTypes => [typeof(TerritoryType), typeof(TerritoryTypeRow)];
@@ -29,7 +33,7 @@ public class TerritoryTypeCompendiumType : CompendiumType<IGrouping<string, Terr
     {
         return Factory.Invoke(new CompendiumTableOptions<IGrouping<string, TerritoryTypeRow>>()
         {
-            Columns = BuiltColumns(),
+            Columns = BuiltColumns,
             CompendiumType = this,
             Key = "territory_types",
             Name = "Territory Types",
@@ -51,6 +55,11 @@ public class TerritoryTypeCompendiumType : CompendiumType<IGrouping<string, Terr
         return (null, Icons.FlagIcon);
     }
 
+    public override uint GetRowId(IGrouping<string, TerritoryTypeRow> row)
+    {
+        return (uint)GetRows().IndexOf(row);
+    }
+
     public override IGrouping<string, TerritoryTypeRow>? GetRow(uint row)
     {
         return this.GetRows().FirstOrDefault(c => c.Any(d => d.RowId == row));
@@ -58,7 +67,7 @@ public class TerritoryTypeCompendiumType : CompendiumType<IGrouping<string, Terr
 
     public override List<IGrouping<string, TerritoryTypeRow>> GetRows()
     {
-        return _territoryTypeSheet.Where(c => c.Base.TerritoryIntendedUse.RowId != 0 && c.Base.Map.RowId != 0).GroupBy(c => c.Base.Bg.ToImGuiString()).ToList();
+        return _territoryTypeSheet.Where(c => c.Base.Map.RowId != 0).GroupBy(c => c.Base.Bg.ToImGuiString()).ToList();
     }
 
     public override void BuildColumns(CompendiumColumnBuilder<IGrouping<string, TerritoryTypeRow>> builder)
@@ -94,7 +103,7 @@ public class TerritoryTypeCompendiumType : CompendiumType<IGrouping<string, Terr
         return _territoryTypeSheet.GetRowOrDefault(rowId) != null;
     }
 
-    public override bool ShowInListing => false;
+    public override bool ShowInListing => true;
 
     public override string Singular => "Territory";
     public override string Plural => "Territories";

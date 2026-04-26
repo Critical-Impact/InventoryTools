@@ -18,7 +18,7 @@ public class RacingChocoboItemCompendiumType : CompendiumType<RacingChocoboItem>
 
     public RacingChocoboItemCompendiumType(
         CompendiumTable<RacingChocoboItem>.Factory tableFactory,
-        Func<CompendiumColumnBuilder<RacingChocoboItem>> columnBuilder,
+        CompendiumColumnBuilder<RacingChocoboItem>.Factory columnBuilder,
         CompendiumViewBuilder.Factory viewBuilderFactory,
         ExcelSheet<RacingChocoboItem> racingChocoboItemSheet
     ) : base(tableFactory, columnBuilder, viewBuilderFactory)
@@ -39,7 +39,7 @@ public class RacingChocoboItemCompendiumType : CompendiumType<RacingChocoboItem>
         {
             Key = Key,
             Name = Plural,
-            Columns = BuiltColumns(),
+            Columns = BuiltColumns,
             CompendiumType = this,
         });
     }
@@ -57,6 +57,11 @@ public class RacingChocoboItemCompendiumType : CompendiumType<RacingChocoboItem>
     public override (string?, uint?) GetIcon(RacingChocoboItem row)
     {
         return (null, row.Item.ValueNullable?.Icon ?? 0);
+    }
+
+    public override uint GetRowId(RacingChocoboItem row)
+    {
+        return row.RowId;
     }
 
     public override RacingChocoboItem GetRow(uint row)

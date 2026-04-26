@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AllaganLib.GameSheets.Extensions;
+using AllaganLib.GameSheets.Model;
 using AllaganLib.Shared.Extensions;
-using AllaganLib.Shared.Misc;
+using CriticalCommonLib.Models;
 using DalaMock.Host.Mediator;
 using Dalamud.Interface.Colors;
 using Dalamud.Plugin.Services;
@@ -17,6 +18,7 @@ using InventoryTools.Compendium.Services;
 using InventoryTools.Services;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
+using Icons = AllaganLib.Shared.Misc.Icons;
 
 namespace InventoryTools.Compendium.Types;
 
@@ -27,7 +29,7 @@ public class InstanceContentCompendiumType : CompendiumType<InstanceContent>
     private readonly IUnlockState _unlockState;
     private readonly IUIStateService _uiStateService;
 
-    public InstanceContentCompendiumType(ExcelSheet<InstanceContent> instanceContentSheet, ExcelSheet<Quest> questSheet, IUnlockState unlockState, IUIStateService uiStateService, CompendiumTable<InstanceContent>.Factory tableFactory, Func<CompendiumColumnBuilder<InstanceContent>> columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory, columnBuilder, viewBuilderFactory)
+    public InstanceContentCompendiumType(ExcelSheet<InstanceContent> instanceContentSheet, ExcelSheet<Quest> questSheet, IUnlockState unlockState, IUIStateService uiStateService, CompendiumTable<InstanceContent>.Factory tableFactory, CompendiumColumnBuilder<InstanceContent>.Factory columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory, columnBuilder, viewBuilderFactory)
     {
         _instanceContentSheet = instanceContentSheet;
         _questSheet = questSheet;
@@ -42,7 +44,7 @@ public class InstanceContentCompendiumType : CompendiumType<InstanceContent>
             CompendiumType = this,
             Key = "instance_content",
             Name = "Instance Content",
-            Columns = BuiltColumns()
+            Columns = BuiltColumns
         });
     }
 
@@ -59,6 +61,11 @@ public class InstanceContentCompendiumType : CompendiumType<InstanceContent>
     public override (string?, uint?) GetIcon(InstanceContent row)
     {
         return (null, row.ContentFinderCondition.Value.ContentType.Value.IconDutyFinder);
+    }
+
+    public override uint GetRowId(InstanceContent row)
+    {
+        return row.RowId;
     }
 
     public override InstanceContent GetRow(uint row)
@@ -219,7 +226,19 @@ public class InstanceContentCompendiumType : CompendiumType<InstanceContent>
             RelatedRef = row.ContentFinderCondition.Value.TerritoryType.Value.AsUntypedRowRef(),
             SectionName = "Related Map"
         });
+    }
 
+    public override bool HasLocation => true;
+
+    public override ILocation? GetLocation(InstanceContent row)
+    {
+        var territoryType = row.ContentFinderCondition.ValueNullable?.TerritoryType;
+        if (territoryType == null || territoryType.Value.RowId == 0)
+        {
+            return null;
+        }
+
+        return new TerritoryLocation(territoryType.Value.Value);
     }
 
     public override string Singular => "Instance";

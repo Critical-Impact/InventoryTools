@@ -169,6 +169,10 @@ public class ItemInfoRenderService : IDisposable
                 return "Shops";
             case ItemInfoRenderCategory.House:
                 return "Housing";
+            case ItemInfoRenderCategory.RelicWeapon:
+                return "Relic Weapon";
+            case ItemInfoRenderCategory.RelicTool:
+                return "Relic Tool";
         }
 
         return renderCategory.ToString().Titleize();
@@ -876,6 +880,11 @@ public class ItemInfoRenderService : IDisposable
                                     foreach (var relatedType in relatedGroup)
                                     {
                                         var rowId = relatedType.Item2!.Value.Item2;
+                                        var newId = compendiumType.RemapType(relatedType.Item2!.Value.Item1, rowId);
+                                        if (newId != null)
+                                        {
+                                            rowId = newId.Value;
+                                        }
                                         if (compendiumType.HasRow(rowId))
                                         {
                                             var name = compendiumType.GetName(rowId);

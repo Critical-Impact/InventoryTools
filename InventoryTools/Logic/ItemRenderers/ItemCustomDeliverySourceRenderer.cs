@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Sheets;
@@ -6,6 +7,7 @@ using CriticalCommonLib.Models;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Bindings.ImGui;
+using Lumina.Excel.Sheets;
 
 namespace InventoryTools.Logic.ItemRenderers;
 
@@ -22,6 +24,12 @@ public class ItemCustomDeliverySourceRenderer : ItemInfoRenderer<ItemCustomDeliv
     public override string PluralName => "Custom Deliveries";
     public override string HelpText => "Can the item be delivered in a custom delivery quest?";
     public override bool ShouldGroup => false;
+
+    public override Func<ItemSource, (Type, uint)>? RelatedType => source =>
+    {
+        var asSource = AsSource(source);
+        return (typeof(SatisfactionNpc), asSource.SupplyRow.Npc!.Base.RowId);
+    };
 
     public override Action<ItemSource> DrawTooltip => source =>
     {

@@ -6,6 +6,7 @@ using AllaganLib.GameSheets.Extensions;
 using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Models;
 using DalaMock.Host.Mediator;
+using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Interface.Colors;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
@@ -13,6 +14,7 @@ using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
 using InventoryTools.Compendium.Sections.Options;
 using InventoryTools.Compendium.Services;
+using InventoryTools.Localizers;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
 
@@ -27,6 +29,7 @@ public class MinionCompendiumType : CompendiumType<Companion>
     private readonly ExcelSheet<Companion> _companionSheet;
     private readonly ExcelSheet<CompanionTransient> _companionTransientSheet;
     private readonly ExcelSheet<MinionRace> _minionRaceSheet;
+    private readonly ILocalizer<Companion> _companionLocalizer;
     private Dictionary<uint, uint>? _companionToItem;
     private Dictionary<uint, uint>? _itemToCompanion;
 
@@ -38,7 +41,8 @@ public class MinionCompendiumType : CompendiumType<Companion>
         ExcelSheet<CompanionTransient> companionTransientSheet,
         ExcelSheet<MinionRace> minionRaceSheet,
         CompendiumTable<Companion>.Factory tableFactory,
-        Func<CompendiumColumnBuilder<Companion>> columnBuilder,
+        CompendiumColumnBuilder<Companion>.Factory columnBuilder,
+        ILocalizer<Companion> companionLocalizer,
         CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory,
         columnBuilder,
         viewBuilderFactory)
@@ -50,6 +54,7 @@ public class MinionCompendiumType : CompendiumType<Companion>
         _companionSheet = companionSheet;
         _companionTransientSheet = companionTransientSheet;
         _minionRaceSheet = minionRaceSheet;
+        _companionLocalizer = companionLocalizer;
     }
 
     public Item? GetRelatedItem(uint companionId)
@@ -88,7 +93,7 @@ public class MinionCompendiumType : CompendiumType<Companion>
         return Factory.Invoke(new CompendiumTableOptions<Companion>()
         {
             Name = "Minions",
-            Columns = BuiltColumns(),
+            Columns = BuiltColumns,
             CompendiumType = this,
             Key = "minions",
         });
@@ -96,7 +101,7 @@ public class MinionCompendiumType : CompendiumType<Companion>
 
     public override string? GetName(Companion row)
     {
-        return row.Singular.ToImGuiString().FirstCharToUpper();
+        return _companionLocalizer.Format(row);
     }
 
     public override string? GetSubtitle(Companion row)
@@ -107,6 +112,11 @@ public class MinionCompendiumType : CompendiumType<Companion>
     public override (string?, uint?) GetIcon(Companion row)
     {
         return (null, row.Icon);
+    }
+
+    public override uint GetRowId(Companion row)
+    {
+        return row.RowId;
     }
 
     public override Companion GetRow(uint row)

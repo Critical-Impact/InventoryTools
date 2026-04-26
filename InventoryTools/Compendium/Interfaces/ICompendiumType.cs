@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AllaganLib.GameSheets.Model;
 using DalaMock.Host.Mediator;
 using InventoryTools.Compendium.Models;
 using InventoryTools.Compendium.Sections;
@@ -12,6 +13,8 @@ public interface ICompendiumType<TData> : ICompendiumType
     public string? GetName(TData row);
     public string? GetSubtitle(TData row);
     public (string?, uint?) GetIcon(TData row);
+    public uint GetRowId(TData row);
+    public ILocation? GetLocation(TData row);
     public TData? GetRow(uint row);
     public List<TData> GetRows();
     public void BuildColumns(CompendiumColumnBuilder<TData> builder);
@@ -20,13 +23,14 @@ public interface ICompendiumType<TData> : ICompendiumType
     public Dictionary<object, string>? GetGroups(ICompendiumGrouping<TData> compendiumGrouping);
 }
 
-public interface ICompendiumType
+public interface ICompendiumType : IEnumerable<uint>
 {
     public bool HasRow(uint rowId);
     public string? GetName(uint rowId);
     public string? GetSubtitle(uint rowId);
-    public object? GetObject(uint row);
+    public object? GetObject(uint rowId);
     public (string?, uint?) GetIcon(uint rowId);
+    public ILocation? GetLocation(uint rowId);
     public CompendiumViewBuilder? BuildView(uint rowId);
     public ICompendiumTable<WindowState, MessageBase> BuildTable();
     public string Singular { get; }
@@ -36,9 +40,11 @@ public interface ICompendiumType
     public (string?, uint?) Icon { get; }
     public Type Type { get; }
     public List<Type>? RelatedTypes { get; }
+    public uint? RemapType(Type type, uint rowId);
     public List<ICompendiumGrouping>? GetGroupings();
     public Dictionary<object, string>? GetGroups(ICompendiumGrouping compendiumGrouping);
     public string? GetDefaultGrouping();
     public bool ShowInListing { get; }
+    public bool HasLocation { get; }
     public Type? ViewRedirection { get; }
 }

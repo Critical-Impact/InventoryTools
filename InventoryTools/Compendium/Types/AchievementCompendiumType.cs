@@ -24,7 +24,7 @@ public class AchievementCompendiumType : CompendiumType<AchievementRow>
     private readonly ExcelSheet<AchievementCategory> _achievementCategorySheet;
     private readonly ICharacterMonitor _characterMonitor;
 
-    public AchievementCompendiumType(CompendiumTable<AchievementRow>.Factory tableFactory, Func<CompendiumColumnBuilder<AchievementRow>> columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory, AchievementSheet achievementSheet, ExcelSheet<AchievementCategory> achievementCategorySheet, ICharacterMonitor characterMonitor) : base(tableFactory, columnBuilder, viewBuilderFactory)
+    public AchievementCompendiumType(CompendiumTable<AchievementRow>.Factory tableFactory, CompendiumColumnBuilder<AchievementRow>.Factory columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory, AchievementSheet achievementSheet, ExcelSheet<AchievementCategory> achievementCategorySheet, ICharacterMonitor characterMonitor) : base(tableFactory, columnBuilder, viewBuilderFactory)
     {
         _achievementSheet = achievementSheet;
         _achievementCategorySheet = achievementCategorySheet;
@@ -40,7 +40,7 @@ public class AchievementCompendiumType : CompendiumType<AchievementRow>
         {
             Key = "achievements",
             Name = Plural,
-            Columns = BuiltColumns(),
+            Columns = BuiltColumns,
             CompendiumType = this,
         });
     }
@@ -58,6 +58,11 @@ public class AchievementCompendiumType : CompendiumType<AchievementRow>
     public override (string?, uint?) GetIcon(AchievementRow row)
     {
         return (null, row.Base.Icon);
+    }
+
+    public override uint GetRowId(AchievementRow row)
+    {
+        return row.RowId;
     }
 
     public override string Singular => "Achievement";

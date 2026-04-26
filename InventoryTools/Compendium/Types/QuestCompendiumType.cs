@@ -10,7 +10,9 @@ using InventoryTools.Compendium.Sections;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
 using AllaganLib.GameSheets.Extensions;
+using AllaganLib.GameSheets.Model;
 using AllaganLib.GameSheets.Sheets;
+using AllaganLib.GameSheets.Sheets.Rows;
 using AllaganLib.Shared.Misc;
 using Dalamud.Interface.Colors;
 using Dalamud.Plugin.Services;
@@ -40,7 +42,7 @@ public class QuestCompendiumType : CompendiumType<Quest>
         ExcelSheet<Quest> questSheet,
         Func<string, ExcelSheet<QuestDialogue>> questDialogueFactory,
         CompendiumTable<Quest>.Factory tableFactory,
-        Func<CompendiumColumnBuilder<Quest>> columnBuilder,
+        CompendiumColumnBuilder<Quest>.Factory columnBuilder,
         CompendiumViewBuilder.Factory viewBuilderFactory,
         IUnlockState unlockState) : base(tableFactory,
         columnBuilder,
@@ -63,7 +65,7 @@ public class QuestCompendiumType : CompendiumType<Quest>
             CompendiumType = this,
             Key = "quests",
             Name = "Quests",
-            Columns = BuiltColumns()
+            Columns = BuiltColumns
         });
     }
 
@@ -94,6 +96,11 @@ public class QuestCompendiumType : CompendiumType<Quest>
         return  (null, null);
     }
 
+    public override uint GetRowId(Quest row)
+    {
+        return row.RowId;
+    }
+
     public override Quest GetRow(uint row)
     {
         return _questSheet.GetRow(row);
@@ -101,12 +108,27 @@ public class QuestCompendiumType : CompendiumType<Quest>
 
     public override bool HasRow(uint rowId)
     {
+        if (rowId == 65536)
+        {
+            return false;
+        }
         return _questSheet.GetRowOrDefault(rowId) != null;
     }
 
     public override List<Quest> GetRows()
     {
         return _questSheet.Where(c => !c.Name.IsEmpty).ToList();
+    }
+
+    public override bool HasLocation => true;
+
+    public override ILocation? GetLocation(Quest row)
+    {
+        if (row.IssuerLocation.RowId == 0)
+        {
+            return null;
+        }
+        return _levelSheet.GetRow(row.IssuerLocation.RowId);
     }
 
     public override void BuildColumns(CompendiumColumnBuilder<Quest> builder)
@@ -177,7 +199,7 @@ public class QuestCompendiumType : CompendiumType<Quest>
             }
             viewBuilder.AddMapLinkSectionSection(new MapLinkViewSectionOptions()
             {
-                MapLink = new MapLinkEntry(60453, issuerName,  issuerLocation.FormattedName, issuerLocation),
+                MapLink = new MapLinkEntry(Icons.FlagIcon, issuerName,  issuerLocation.FormattedName, issuerLocation),
                 SectionName = "Issuer Location"
             });
         }

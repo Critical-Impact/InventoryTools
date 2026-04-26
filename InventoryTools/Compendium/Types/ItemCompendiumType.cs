@@ -28,7 +28,7 @@ public class ItemCompendiumType : CompendiumType<ItemRow>
     private readonly ItemSheet _itemSheet;
     private readonly IUnlockTrackerService _unlockTrackerService;
 
-    public ItemCompendiumType(ItemSheet itemSheet, CompendiumTable<ItemRow>.Factory tableFactory, Func<CompendiumColumnBuilder<ItemRow>> columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory, IUnlockTrackerService unlockTrackerService) : base(tableFactory, columnBuilder, viewBuilderFactory)
+    public ItemCompendiumType(ItemSheet itemSheet, CompendiumTable<ItemRow>.Factory tableFactory, CompendiumColumnBuilder<ItemRow>.Factory columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory, IUnlockTrackerService unlockTrackerService) : base(tableFactory, columnBuilder, viewBuilderFactory)
     {
         _itemSheet = itemSheet;
         _unlockTrackerService = unlockTrackerService;
@@ -38,7 +38,7 @@ public class ItemCompendiumType : CompendiumType<ItemRow>
     {
         return Factory.Invoke(new CompendiumTableOptions<ItemRow>()
         {
-            Columns = BuiltColumns(),
+            Columns = BuiltColumns,
             CompendiumType = this,
             Key = "items",
             Name = "Items"
@@ -58,6 +58,11 @@ public class ItemCompendiumType : CompendiumType<ItemRow>
     public override (string?, uint?) GetIcon(ItemRow row)
     {
         return (null, row.Icon);
+    }
+
+    public override uint GetRowId(ItemRow row)
+    {
+        return row.RowId;
     }
 
     public override ItemRow? GetRow(uint row)

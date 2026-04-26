@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using AllaganLib.GameSheets.Extensions;
 using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Models;
@@ -25,7 +26,7 @@ public class BGMCompendiumType : CompendiumType<BGM>
     private readonly Lazy<Dictionary<uint, BGMOrchestrion>> _bgmOrchestrions;
     private readonly Lazy<Dictionary<uint, uint>> _orchestionToItem;
 
-    public BGMCompendiumType(List<BGMOrchestrion> bgmOrchestrions, IUnlockState unlockState, ExcelSheet<BGM> bgmSheet, ExcelSheet<Item> itemSheet, CompendiumTable<BGM>.Factory tableFactory, Func<CompendiumColumnBuilder<BGM>> columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory, columnBuilder, viewBuilderFactory)
+    public BGMCompendiumType(List<BGMOrchestrion> bgmOrchestrions, IUnlockState unlockState, ExcelSheet<BGM> bgmSheet, ExcelSheet<Item> itemSheet, CompendiumTable<BGM>.Factory tableFactory, CompendiumColumnBuilder<BGM>.Factory columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory, columnBuilder, viewBuilderFactory)
     {
         _unlockState = unlockState;
         _bgmSheet = bgmSheet;
@@ -33,11 +34,11 @@ public class BGMCompendiumType : CompendiumType<BGM>
         _bgmOrchestrions = new Lazy<Dictionary<uint, BGMOrchestrion>>(() =>
         {
             return bgmOrchestrions.ToDictionary(c => c.BGMId, c => c);
-        });
+        }, LazyThreadSafetyMode.PublicationOnly);
         _orchestionToItem = new Lazy<Dictionary<uint, uint>>(() =>
         {
             return itemSheet.Where(c => c.FilterGroup == 32).ToDictionary(c => c.AdditionalData.RowId, c => c.RowId);
-        });
+        }, LazyThreadSafetyMode.PublicationOnly);
     }
 
     public override ICompendiumTable<WindowState, MessageBase> BuildTable()
@@ -45,7 +46,7 @@ public class BGMCompendiumType : CompendiumType<BGM>
         return Factory.Invoke(new CompendiumTableOptions<BGM>()
         {
             Name = "BGMs",
-            Columns = BuiltColumns(),
+            Columns = BuiltColumns,
             CompendiumType = this,
             Key = "bgms",
         });
@@ -74,6 +75,11 @@ public class BGMCompendiumType : CompendiumType<BGM>
     public override (string?, uint?) GetIcon(BGM row)
     {
         return (null, Icons.OrchestrionIcon);
+    }
+
+    public override uint GetRowId(BGM row)
+    {
+        return row.RowId;
     }
 
     public override BGM GetRow(uint row)

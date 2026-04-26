@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AllaganLib.GameSheets.Caches;
+using AllaganLib.GameSheets.Model;
 using AllaganLib.GameSheets.Sheets;
 using AllaganLib.GameSheets.Sheets.Rows;
 using AllaganLib.Shared.Misc;
@@ -12,6 +13,7 @@ using InventoryTools.Compendium.Models;
 using InventoryTools.Compendium.Sections;
 using InventoryTools.Compendium.Sections.Options;
 using InventoryTools.Compendium.Services;
+using InventoryTools.Localizers;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
 
@@ -20,12 +22,14 @@ namespace InventoryTools.Compendium.Types;
 public class ENpcCompendiumType : CompendiumType<IGrouping<string, ENpcBaseRow>>
 {
     private readonly ENpcBaseSheet _eNpcBaseSheet;
+    private readonly ILocalizer<ENpcBase> _npcLocalizer;
     private readonly ItemInfoCache _itemInfoCache;
     private List<IGrouping<string, ENpcBaseRow>>? _groupedRows;
 
-    public ENpcCompendiumType(ENpcBaseSheet eNpcBaseSheet, ItemInfoCache itemInfoCache, CompendiumTable<IGrouping<string, ENpcBaseRow>>.Factory tableFactory, Func<CompendiumColumnBuilder<IGrouping<string, ENpcBaseRow>>> columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory, columnBuilder, viewBuilderFactory)
+    public ENpcCompendiumType(ENpcBaseSheet eNpcBaseSheet, ILocalizer<ENpcBase> npcLocalizer, ItemInfoCache itemInfoCache, CompendiumTable<IGrouping<string, ENpcBaseRow>>.Factory tableFactory, CompendiumColumnBuilder<IGrouping<string, ENpcBaseRow>>.Factory columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory, columnBuilder, viewBuilderFactory)
     {
         _eNpcBaseSheet = eNpcBaseSheet;
+        _npcLocalizer = npcLocalizer;
         _itemInfoCache = itemInfoCache;
     }
 
@@ -34,7 +38,7 @@ public class ENpcCompendiumType : CompendiumType<IGrouping<string, ENpcBaseRow>>
         return Factory.Invoke(new CompendiumTableOptions<IGrouping<string, ENpcBaseRow>>()
         {
             Key = "npcs",
-            Columns = BuiltColumns(),
+            Columns = BuiltColumns,
             CompendiumType = this,
             Name = "NPCs",
         });
@@ -42,7 +46,7 @@ public class ENpcCompendiumType : CompendiumType<IGrouping<string, ENpcBaseRow>>
 
     public override string? GetName(IGrouping<string, ENpcBaseRow> row)
     {
-        return row.First().Name.FirstCharToUpper();
+        return _npcLocalizer.Format(row.First().Base);
     }
 
     public override string? GetSubtitle(IGrouping<string, ENpcBaseRow> row)
@@ -55,9 +59,14 @@ public class ENpcCompendiumType : CompendiumType<IGrouping<string, ENpcBaseRow>>
         return (null, Icons.ThreePeople);
     }
 
+    public override uint GetRowId(IGrouping<string, ENpcBaseRow> row)
+    {
+        return (uint)GetRows().IndexOf(row);
+    }
+
     public override IGrouping<string, ENpcBaseRow>? GetRow(uint row)
     {
-        return this.GetRows().FirstOrDefault(c => c.Any(d => d.RowId == row));
+        return this.GetRows()[(int)row];
     }
 
     public override List<IGrouping<string, ENpcBaseRow>> GetRows()
@@ -101,7 +110,7 @@ public class ENpcCompendiumType : CompendiumType<IGrouping<string, ENpcBaseRow>>
             Filter = typeof(Quest),
             SectionName = "Related Quests"
         });
-        var mapLinks = row.SelectMany(c => c.Locations).Select(c => new MapLinkEntry(60453, c.FormattedName, "", c)).ToList();
+        var mapLinks = row.SelectMany(c => c.Locations).Select(c => new MapLinkEntry(Icons.FlagIcon, c.FormattedName, "", c)).ToList();
         viewBuilder.AddMapLinksSectionSection(new MapLinksViewSectionOptions()
         {
             MapLinks = mapLinks,
@@ -112,8 +121,38 @@ public class ENpcCompendiumType : CompendiumType<IGrouping<string, ENpcBaseRow>>
 
     public override bool HasRow(uint rowId)
     {
-        var eNpcBaseRow = _eNpcBaseSheet.GetRowOrDefault(rowId);
-        return eNpcBaseRow != null && eNpcBaseRow.Name != string.Empty;
+        var rows = this.GetRows();
+        if ((int)rowId >= 0 && (int)rowId < rows.Count)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public override bool HasLocation => true;
+
+    public override ILocation? GetLocation(IGrouping<string, ENpcBaseRow> row)
+    {
+        return row.SelectMany(c => c.Locations).FirstOrDefault();
+    }
+
+    public override uint? RemapType(Type type, uint rowId)
+    {
+        if (type == typeof(ENpcBaseRow) || type == typeof(ENpcBase) || type == typeof(ENpcResident) || type == typeof(ENpcResidentRow))
+        {
+            var cs = GetRows();
+            for (var index = 0; index < cs.Count; index++)
+            {
+                var c = cs[index];
+                if (c.Any(d => d.RowId == rowId))
+                {
+                    return (uint?)index;
+                }
+            }
+        }
+
+        return null;
     }
 
     public override List<Type>? RelatedTypes => [typeof(ENpcResidentRow), typeof(ENpcResident), typeof(ENpcBase)];

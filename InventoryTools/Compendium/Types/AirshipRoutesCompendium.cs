@@ -23,7 +23,7 @@ public class AirshipRoutesCompendiumType : CompendiumType<AirshipExplorationPoin
 {
     private readonly AirshipExplorationPointSheet _airshipExplorationPointSheet;
 
-    public AirshipRoutesCompendiumType(AirshipExplorationPointSheet airshipExplorationPointSheet, CompendiumTable<AirshipExplorationPointRow>.Factory tableFactory, Func<CompendiumColumnBuilder<AirshipExplorationPointRow>> columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory, columnBuilder, viewBuilderFactory)
+    public AirshipRoutesCompendiumType(AirshipExplorationPointSheet airshipExplorationPointSheet, CompendiumTable<AirshipExplorationPointRow>.Factory tableFactory, CompendiumColumnBuilder<AirshipExplorationPointRow>.Factory columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory, columnBuilder, viewBuilderFactory)
     {
         _airshipExplorationPointSheet = airshipExplorationPointSheet;
     }
@@ -41,6 +41,11 @@ public class AirshipRoutesCompendiumType : CompendiumType<AirshipExplorationPoin
     public override (string?, uint?) GetIcon(AirshipExplorationPointRow row)
     {
         return (null, Icons.AirshipIcon);
+    }
+
+    public override uint GetRowId(AirshipExplorationPointRow row)
+    {
+        return row.RowId;
     }
 
     public override AirshipExplorationPointRow? GetRow(uint row)
@@ -111,7 +116,7 @@ public class AirshipRoutesCompendiumType : CompendiumType<AirshipExplorationPoin
         {
             Key = "airships",
             Name = Plural,
-            Columns = BuiltColumns(),
+            Columns = BuiltColumns,
             CompendiumType = this,
         });
     }

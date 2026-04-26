@@ -19,7 +19,7 @@ public class ChocoboItemCompendiumType : CompendiumType<ChocoboItem>
 
     public ChocoboItemCompendiumType(
         CompendiumTable<ChocoboItem>.Factory tableFactory,
-        Func<CompendiumColumnBuilder<ChocoboItem>> columnBuilder,
+        CompendiumColumnBuilder<ChocoboItem>.Factory columnBuilder,
         CompendiumViewBuilder.Factory viewBuilderFactory,
         ChocoboItemIterator iterator,
         ILocalizer<ChocoboItemSourceType> itemSourceTypeLocalizer
@@ -35,7 +35,7 @@ public class ChocoboItemCompendiumType : CompendiumType<ChocoboItem>
         {
             Key = Key,
             Name = Plural,
-            Columns = BuiltColumns(),
+            Columns = BuiltColumns,
             CompendiumType = this,
         });
     }
@@ -75,6 +75,11 @@ public class ChocoboItemCompendiumType : CompendiumType<ChocoboItem>
     public override (string?, uint?) GetIcon(ChocoboItem row)
     {
         return (null, row.Item.Icon);
+    }
+
+    public override uint GetRowId(ChocoboItem row)
+    {
+        return row.RowId;
     }
 
     public override void BuildColumns(

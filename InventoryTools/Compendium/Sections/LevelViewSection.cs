@@ -2,6 +2,7 @@ using System;
 using System.Numerics;
 using AllaganLib.GameSheets.Sheets;
 using AllaganLib.GameSheets.Sheets.Rows;
+using CriticalCommonLib.Models;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Textures;
@@ -47,7 +48,7 @@ public class LevelViewSection : ViewSection
             _relatedTypeCreated = true;
         }
 
-        var icon = _relatedObjectType?.GetIcon(entry.Value.Object.RowId).Item2 ?? 60453;
+        var icon = _relatedObjectType?.GetIcon(entry.Value.Object.RowId).Item2 ?? Icons.FlagIcon;
         var name = _relatedObjectType?.GetName(entry.Value.Object.RowId) ?? "Location";
 
         var iconSize = 32f * ImGui.GetIO().FontGlobalScale;

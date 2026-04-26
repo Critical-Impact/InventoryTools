@@ -29,12 +29,14 @@ public class CompendiumViewBuilder
     private readonly LevelViewSection.Factory _levelViewFactory;
     private readonly MetadataSection.Factory _metadataSectionFactory;
     private readonly ItemSourcesSection.Factory _itemSourcesSectionFactory;
+    private readonly ItemFlowSection.Factory _itemFlowSectionFactory;
     private string _title;
     private string? _subtitle;
     private string? _description;
     private uint _icon;
     private List<(string Link, string HelpText, ISharedImmediateTexture texture)>? _links;
     private List<(string Tag, string HelpText, Func<Vector4>? color)>? _tags;
+    private List<(string Title, string HelpText, Action action)>? _buttons;
     private List<ICompendiumViewSection>? _sections;
 
     public delegate CompendiumViewBuilder Factory(ICompendiumType compendiumType);
@@ -50,7 +52,8 @@ public class CompendiumViewBuilder
         CollectionRowRefSection.Factory collectionRowRefFactory,
         LevelViewSection.Factory levelViewFactory,
         MetadataSection.Factory metadataSectionFactory,
-        ItemSourcesSection.Factory itemSourcesSectionFactory)
+        ItemSourcesSection.Factory itemSourcesSectionFactory,
+        ItemFlowSection.Factory itemFlowSectionFactory)
     {
         _textureProvider = textureProvider;
         _imGuiService = imGuiService;
@@ -63,6 +66,7 @@ public class CompendiumViewBuilder
         _levelViewFactory = levelViewFactory;
         _metadataSectionFactory = metadataSectionFactory;
         _itemSourcesSectionFactory = itemSourcesSectionFactory;
+        _itemFlowSectionFactory = itemFlowSectionFactory;
     }
 
     public string Title
@@ -105,6 +109,12 @@ public class CompendiumViewBuilder
     {
         _tags ??= new();
         _tags.Add(new  (tag, helpText, color));
+    }
+
+    public void AddButton(string title, string helpText, Action action)
+    {
+        _buttons ??= new();
+        _buttons.Add(new(title, helpText, action));
     }
 
     public void AddSection(ICompendiumViewSection section)
@@ -158,6 +168,11 @@ public class CompendiumViewBuilder
         AddSection(_itemSourcesSectionFactory.Invoke(options));
     }
 
+    public void AddItemFlowSection(ItemFlowSectionOptions options)
+    {
+        AddSection(_itemFlowSectionFactory.Invoke(options));
+    }
+
     static void DrawTag(string id, string text, Vector4 color)
     {
         var padding = new Vector2(8, 3);
@@ -184,6 +199,37 @@ public class CompendiumViewBuilder
             min + padding,
             ImGui.GetColorU32(color),
             text
+        );
+    }
+
+    private void DrawButton(string id, string buttonTitle, Action action)
+    {
+        var padding = new Vector2(8, 3);
+
+        var textSize = ImGui.CalcTextSize(buttonTitle);
+        var size = textSize + padding * 2;
+
+        if (ImGui.InvisibleButton(id, size))
+        {
+            action();
+        }
+
+        var min = ImGui.GetItemRectMin();
+        var max = ImGui.GetItemRectMax();
+
+        var drawList = ImGui.GetWindowDrawList();
+
+        drawList.AddRectFilled(
+            min,
+            max,
+            ImGui.GetColorU32(ImGuiCol.FrameBg),
+            0f
+        );
+
+        drawList.AddText(
+            min + padding,
+            ImGui.GetColorU32(ImGuiCol.Text),
+            buttonTitle
         );
     }
 
@@ -260,6 +306,31 @@ public class CompendiumViewBuilder
 
                 if (i != _tags.Count - 1)
                     SameLineWrap(_tags[i + 1].Tag);
+            }
+        }
+
+        if (_buttons != null)
+        {
+            ImGui.NewLine();
+
+            for (var i = 0; i < _buttons.Count; i++)
+            {
+                var button = _buttons[i];
+
+                var action = button.action;
+
+                DrawButton($"button{i}", button.Title, action);
+
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+                    using var tooltip = ImRaii.Tooltip();
+                    if (tooltip)
+                        ImGui.TextUnformatted(button.HelpText);
+                }
+
+                if (i != _buttons.Count - 1)
+                    SameLineWrap(_buttons[i + 1].Title);
             }
         }
 

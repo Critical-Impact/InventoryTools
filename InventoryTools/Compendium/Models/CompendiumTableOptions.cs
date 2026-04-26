@@ -12,7 +12,7 @@ public sealed record CompendiumTableOptions<TData>
     public required string Name  { get; init; }
     public required string Key { get; init; }
     public required ICompendiumType<TData> CompendiumType { get; init; }
-    public required List<IColumn<WindowState, TData, MessageBase>> Columns { get; init; }
+    public required Func<(ICompendiumGrouping<TData>, object?)?, List<IColumn<WindowState, TData, MessageBase>>> Columns { get; init; }
     public Func<TData, List<MessageBase>>? BuildContextMenu { get; init; }
     public ImGuiTableFlags TableFlags { get; init; } = ImGuiTableFlags.SizingFixedFit |
                                                        ImGuiTableFlags.Resizable | ImGuiTableFlags.Hideable |

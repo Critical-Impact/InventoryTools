@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using AllaganLib.GameSheets.Model;
 using AllaganLib.Interface.Grid;
 using DalaMock.Host.Mediator;
 using InventoryTools.Compendium.Interfaces;
@@ -11,13 +13,13 @@ namespace InventoryTools.Compendium.Models;
 
 public abstract class CompendiumType<TData> : ICompendiumType<TData>
 {
-    private readonly Func<CompendiumColumnBuilder<TData>> _columnBuilder;
+    private readonly CompendiumColumnBuilder<TData>.Factory _columnBuilder;
     private readonly CompendiumViewBuilder.Factory _viewBuilderFactory;
     public CompendiumTable<TData>.Factory Factory { get; }
 
-    public Func<CompendiumColumnBuilder<TData>> ColumnBuilder => _columnBuilder;
+    public CompendiumColumnBuilder<TData>.Factory ColumnBuilder => _columnBuilder;
 
-    public CompendiumType(CompendiumTable<TData>.Factory tableFactory, Func<CompendiumColumnBuilder<TData>> columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory)
+    public CompendiumType(CompendiumTable<TData>.Factory tableFactory, CompendiumColumnBuilder<TData>.Factory columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory)
     {
         _columnBuilder = columnBuilder;
         _viewBuilderFactory = viewBuilderFactory;
@@ -70,6 +72,16 @@ public abstract class CompendiumType<TData> : ICompendiumType<TData>
         return GetIcon(row!);
     }
 
+    public ILocation? GetLocation(uint rowId)
+    {
+        var row = GetRow(rowId);
+        if (object.Equals(row, default(TData)))
+        {
+            return null;
+        }
+        return GetLocation(row!);
+    }
+
     public CompendiumViewBuilder? BuildView(uint rowId)
     {
         var row = GetRow(rowId);
@@ -86,6 +98,13 @@ public abstract class CompendiumType<TData> : ICompendiumType<TData>
     public abstract string? GetName(TData row);
     public abstract string? GetSubtitle(TData row);
     public abstract (string?, uint?) GetIcon(TData row);
+    public abstract uint GetRowId(TData row);
+
+    public virtual ILocation? GetLocation(TData row)
+    {
+        return null;
+    }
+
     public abstract TData? GetRow(uint row);
     public abstract bool HasRow(uint rowId);
     public abstract List<TData> GetRows();
@@ -96,6 +115,17 @@ public abstract class CompendiumType<TData> : ICompendiumType<TData>
     public Dictionary<object, string>? GetGroups(ICompendiumGrouping<TData> compendiumGrouping)
     {
         return GetRows().Select(c => compendiumGrouping.GroupFunc(c)).Distinct().ToDictionary(c => c, c => compendiumGrouping.GroupMapping(c));
+    }
+
+    /// <summary>
+    /// Allows for CompendiumTypes to remap a RelatedType in the case of grouping
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="rowId"></param>
+    /// <returns></returns>
+    public virtual uint? RemapType(Type type, uint rowId)
+    {
+        return null;
     }
 
     public virtual List<ICompendiumGrouping>? GetGroupings()
@@ -109,6 +139,7 @@ public abstract class CompendiumType<TData> : ICompendiumType<TData>
     }
 
     public virtual bool ShowInListing => true;
+    public virtual bool HasLocation { get; }
     public virtual Type? ViewRedirection => null;
 
     public Dictionary<object, string>? GetGroups(ICompendiumGrouping compendiumGrouping)
@@ -121,9 +152,9 @@ public abstract class CompendiumType<TData> : ICompendiumType<TData>
         return null;
     }
 
-    public List<IColumn<WindowState, TData, MessageBase>> BuiltColumns()
+    public List<IColumn<WindowState, TData, MessageBase>> BuiltColumns((ICompendiumGrouping<TData> compendiumGrouping, object item)? compendiumGrouping)
     {
-        var builder = _columnBuilder.Invoke();
+        var builder = _columnBuilder.Invoke(compendiumGrouping?.compendiumGrouping, compendiumGrouping?.item);
         BuildColumns(builder);
         return builder.Columns;
     }
@@ -139,5 +170,18 @@ public abstract class CompendiumType<TData> : ICompendiumType<TData>
             case null:
                 return "N/A";
         }
+    }
+
+    public IEnumerator<uint> GetEnumerator()
+    {
+        foreach (var row in GetRows())
+        {
+            yield return GetRowId(row);
+        }
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 }

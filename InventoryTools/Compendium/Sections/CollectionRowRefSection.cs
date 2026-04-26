@@ -126,11 +126,20 @@ public class CollectionRowRefSection : ViewSection
     {
         var compendiumType = item.CompendiumType!;
         var rowRef = item.RowRef;
-
-        if (!_icons.TryGetValue(rowRef.RowId, out var icon))
+        var rowId = rowRef.RowId;
+        if (item.RefType != null)
         {
-            icon = compendiumType.GetIcon(rowRef.RowId);
-            _icons.Add(rowRef.RowId, icon);
+            var newId = compendiumType.RemapType(item.RefType, rowId);
+            if (newId != null)
+            {
+                rowId = newId.Value;
+            }
+        }
+
+        if (!_icons.TryGetValue(rowId, out var icon))
+        {
+            icon = compendiumType.GetIcon(rowId);
+            _icons.Add(rowId, icon);
         }
         var iconSize = 32f * ImGui.GetIO().FontGlobalScale;
 
@@ -138,21 +147,21 @@ public class CollectionRowRefSection : ViewSection
         {
             if (ImGui.ImageButton(_textureProvider.GetFromGameIcon(new GameIconLookup(icon.Item2.Value)).GetWrapOrEmpty().Handle, new(iconSize)))
             {
-                _mediatorService.Publish(new OpenCompendiumViewMessage(compendiumType, rowRef.RowId));
+                _mediatorService.Publish(new OpenCompendiumViewMessage(compendiumType, rowId));
             }
             ImGui.SameLine();
         }
 
-        if (!_titles.TryGetValue(rowRef.RowId, out var title))
+        if (!_titles.TryGetValue(rowId, out var title))
         {
-            title = compendiumType.GetName(rowRef.RowId) ?? "";
-            _titles.Add(rowRef.RowId, title);
+            title = compendiumType.GetName(rowId) ?? "";
+            _titles.Add(rowId, title);
         }
 
-        if (!_subtitles.TryGetValue(rowRef.RowId, out var subTitle))
+        if (!_subtitles.TryGetValue(rowId, out var subTitle))
         {
-            subTitle = compendiumType.GetSubtitle(rowRef.RowId) ?? "";
-            _subtitles.Add(rowRef.RowId, subTitle);
+            subTitle = compendiumType.GetSubtitle(rowId) ?? "";
+            _subtitles.Add(rowId, subTitle);
         }
 
         var style = ImGui.GetStyle();

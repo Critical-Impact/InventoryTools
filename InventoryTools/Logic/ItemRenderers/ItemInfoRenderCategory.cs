@@ -22,4 +22,6 @@ public enum ItemInfoRenderCategory
     Pyros = 17,
     Hydatos = 18,
     DeepDungeon = 19,
+    RelicWeapon = 20,
+    RelicTool = 21,
 }

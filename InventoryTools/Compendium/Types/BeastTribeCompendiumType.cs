@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AllaganLib.GameSheets.Extensions;
+using AllaganLib.GameSheets.Model;
+using AllaganLib.GameSheets.Sheets;
+using AllaganLib.GameSheets.Sheets.Rows;
 using AllaganLib.Shared.Extensions;
-using AllaganLib.Shared.Misc;
+using CriticalCommonLib.Models;
 using DalaMock.Host.Mediator;
 using Dalamud.Utility;
 using InventoryTools.Compendium.Interfaces;
@@ -13,17 +16,20 @@ using InventoryTools.Compendium.Sections.Options;
 using InventoryTools.Compendium.Services;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
+using Icons = AllaganLib.Shared.Misc.Icons;
 
 namespace InventoryTools.Compendium.Types;
 
 public class BeastTribeCompendiumType : CompendiumType<BeastTribe>
 {
+    private readonly LevelSheet _levelSheet;
     private readonly ExcelSheet<BeastTribe> _beastTribeSheet;
     private readonly ExcelSheet<Quest> _questSheet;
     private readonly ExcelSheet<ExVersion> _expansionSheet;
 
-    public BeastTribeCompendiumType(ExcelSheet<BeastTribe> beastTribeSheet, ExcelSheet<Quest> questSheet, ExcelSheet<ExVersion> expansionSheet, CompendiumTable<BeastTribe>.Factory tableFactory, Func<CompendiumColumnBuilder<BeastTribe>> columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory, columnBuilder, viewBuilderFactory)
+    public BeastTribeCompendiumType(LevelSheet levelSheet, ExcelSheet<BeastTribe> beastTribeSheet, ExcelSheet<Quest> questSheet, ExcelSheet<ExVersion> expansionSheet, CompendiumTable<BeastTribe>.Factory tableFactory, CompendiumColumnBuilder<BeastTribe>.Factory columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory, columnBuilder, viewBuilderFactory)
     {
+        _levelSheet = levelSheet;
         _beastTribeSheet = beastTribeSheet;
         _questSheet = questSheet;
         _expansionSheet = expansionSheet;
@@ -35,7 +41,7 @@ public class BeastTribeCompendiumType : CompendiumType<BeastTribe>
         {
             Name = "Beast Tribes",
             Key = "beast_tribes",
-            Columns = BuiltColumns(),
+            Columns = BuiltColumns,
             CompendiumType = this
         });
     }
@@ -53,6 +59,11 @@ public class BeastTribeCompendiumType : CompendiumType<BeastTribe>
     public override (string?, uint?) GetIcon(BeastTribe row)
     {
         return (null, row.Icon);
+    }
+
+    public override uint GetRowId(BeastTribe row)
+    {
+        return row.RowId;
     }
 
     public override BeastTribe GetRow(uint row)
@@ -129,6 +140,13 @@ public class BeastTribeCompendiumType : CompendiumType<BeastTribe>
     {
         return rowId != 0 && _beastTribeSheet.HasRow(rowId);
     }
+
+    public override ILocation? GetLocation(BeastTribe row)
+    {
+        return _levelSheet.GetRow(row.Level.RowId);
+    }
+
+    public override bool HasLocation => true;
 
     public override string Singular => "Allied Society";
     public override string Plural => "Allied Societies";

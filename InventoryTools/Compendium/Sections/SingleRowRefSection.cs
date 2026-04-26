@@ -25,6 +25,7 @@ public class SingleRowRefSection : ViewSection
     private string? _title;
     private string? _subTitle;
     private (string?, uint?)? _icon;
+    private readonly uint relatedRefRowId;
 
     public delegate SingleRowRefSection Factory(SingleRowRefSectionOptions options);
 
@@ -34,6 +35,15 @@ public class SingleRowRefSection : ViewSection
         _textureProvider = textureProvider;
         _mediatorService = mediatorService;
         _relatedCompendiumType = compendiumTypeFactory.GetByRowRef(options.RelatedRef, out _refType);
+        relatedRefRowId = _options.RelatedRef.RowId;
+        if (_options.RelatedRef.RowType != null)
+        {
+            var newId = _relatedCompendiumType?.RemapType(_options.RelatedRef.RowType, relatedRefRowId);
+            if (newId != null)
+            {
+                relatedRefRowId = newId.Value;
+            }
+        }
     }
 
     public override string SectionName => _options.SectionName ?? "Related " + (_relatedCompendiumType?.Singular ?? "Object");
@@ -47,7 +57,7 @@ public class SingleRowRefSection : ViewSection
             }
         }
 
-        if (_relatedCompendiumType != null && !_relatedCompendiumType.HasRow(_options.RelatedRef.RowId))
+        if (_relatedCompendiumType != null && !_relatedCompendiumType.HasRow(relatedRefRowId))
         {
             return false;
         }
@@ -70,24 +80,24 @@ public class SingleRowRefSection : ViewSection
         }
         else
         {
-            if (!_relatedCompendiumType.HasRow(_options.RelatedRef.RowId))
+            if (!_relatedCompendiumType.HasRow(relatedRefRowId))
             {
                 return;
             }
 
-            var icon = _icon ??= _relatedCompendiumType.GetIcon(_options.RelatedRef.RowId);
+            var icon = _icon ??= _relatedCompendiumType.GetIcon(relatedRefRowId);
             var iconSize = 32f * ImGui.GetIO().FontGlobalScale;
             if (icon.Item2 != null)
             {
                 if (ImGui.ImageButton(_textureProvider.GetFromGameIcon(new GameIconLookup(icon.Item2.Value)).GetWrapOrEmpty().Handle, new(iconSize)))
                 {
-                    _mediatorService.Publish(new OpenCompendiumViewMessage(_relatedCompendiumType, _options.RelatedRef.RowId));
+                    _mediatorService.Publish(new OpenCompendiumViewMessage(_relatedCompendiumType, relatedRefRowId));
                 }
                 ImGui.SameLine();
             }
 
-            var name = _title ??= _relatedCompendiumType.GetName(_options.RelatedRef.RowId) ?? "";
-            var subTitle = _subTitle ??= _relatedCompendiumType.GetSubtitle(_options.RelatedRef.RowId) ?? "";
+            var name = _title ??= _relatedCompendiumType.GetName(relatedRefRowId) ?? "";
+            var subTitle = _subTitle ??= _relatedCompendiumType.GetSubtitle(relatedRefRowId) ?? "";
 
             var style = ImGui.GetStyle();
             var textHeight = ImGui.CalcTextSize(name).Y;
@@ -109,7 +119,7 @@ public class SingleRowRefSection : ViewSection
             {
                 if (group)
                 {
-                    ImGui.TextUnformatted(_relatedCompendiumType.GetName(_options.RelatedRef.RowId));
+                    ImGui.TextUnformatted(_relatedCompendiumType.GetName(relatedRefRowId));
 
                     if (!string.IsNullOrEmpty(subTitle))
                     {

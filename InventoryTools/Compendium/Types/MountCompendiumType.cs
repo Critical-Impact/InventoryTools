@@ -37,7 +37,7 @@ public class MountCompendiumType : CompendiumType<Mount>
         ExcelSheet<Mount> mountSheet,
         ExcelSheet<MountTransient> mountTransientSheet,
         CompendiumTable<Mount>.Factory tableFactory,
-        Func<CompendiumColumnBuilder<Mount>> columnBuilder,
+        CompendiumColumnBuilder<Mount>.Factory columnBuilder,
         CompendiumViewBuilder.Factory viewBuilderFactory)
         : base(tableFactory, columnBuilder, viewBuilderFactory)
     {
@@ -88,7 +88,7 @@ public class MountCompendiumType : CompendiumType<Mount>
         return Factory.Invoke(new CompendiumTableOptions<Mount>()
         {
             Name = "Mounts",
-            Columns = BuiltColumns(),
+            Columns = BuiltColumns,
             CompendiumType = this,
             Key = "mounts",
         });
@@ -109,6 +109,11 @@ public class MountCompendiumType : CompendiumType<Mount>
     public override (string?, uint?) GetIcon(Mount row)
     {
         return (null, row.Icon);
+    }
+
+    public override uint GetRowId(Mount row)
+    {
+        return row.RowId;
     }
 
     public override Mount GetRow(uint row)

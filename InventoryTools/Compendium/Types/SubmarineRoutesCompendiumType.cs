@@ -23,7 +23,7 @@ public class SubmarineRoutesCompendiumType : CompendiumType<SubmarineExploration
 {
     private readonly SubmarineExplorationSheet _submarineExplorationSheet;
 
-    public SubmarineRoutesCompendiumType(SubmarineExplorationSheet submarineExplorationSheet, CompendiumTable<SubmarineExplorationRow>.Factory tableFactory, Func<CompendiumColumnBuilder<SubmarineExplorationRow>> columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory, columnBuilder, viewBuilderFactory)
+    public SubmarineRoutesCompendiumType(SubmarineExplorationSheet submarineExplorationSheet, CompendiumTable<SubmarineExplorationRow>.Factory tableFactory, CompendiumColumnBuilder<SubmarineExplorationRow>.Factory columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory, columnBuilder, viewBuilderFactory)
     {
         _submarineExplorationSheet = submarineExplorationSheet;
     }
@@ -41,6 +41,11 @@ public class SubmarineRoutesCompendiumType : CompendiumType<SubmarineExploration
     public override (string?, uint?) GetIcon(SubmarineExplorationRow row)
     {
         return (null, Icons.SubmarineIcon);
+    }
+
+    public override uint GetRowId(SubmarineExplorationRow row)
+    {
+        return row.RowId;
     }
 
     public override SubmarineExplorationRow? GetRow(uint row)
@@ -109,7 +114,7 @@ public class SubmarineRoutesCompendiumType : CompendiumType<SubmarineExploration
         {
             Key = "submarines",
             Name = Plural,
-            Columns = BuiltColumns(),
+            Columns = BuiltColumns,
             CompendiumType = this,
         });
     }
