@@ -118,9 +118,11 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
         itemId %= 500000;
         Logger.LogDebug("ItemId: {ItemId}", itemId);
 
-        if (itemId != null)
+		if (itemId != null)
         {
-            if (_configuration.AddMoreInformationContextMenu)
+            var isRecipe = _itemSheet.GetRowOrDefault(itemId.Value) is { CanOpenCraftingLog: true };
+
+			if (_configuration.AddMoreInformationContextMenu)
             {
                 var menuItem = new MenuItem();
                 menuItem.Name = "More Information";
@@ -138,7 +140,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
                 args.AddMenuItem(menuItem);
             }
 
-            if (_configuration.AddToActiveCraftListContextMenu)
+            if (_configuration.AddToActiveCraftListContextMenu && isRecipe)
             {
                 var activeList = _listService.GetActiveCraftList();
                 if (activeList != null)
@@ -151,7 +153,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
                 }
             }
 
-            if (_configuration.AddToCraftListContextMenu)
+            if (_configuration.AddToCraftListContextMenu && isRecipe)
             {
                 var menuItem = new MenuItem();
                 menuItem.Name = "Add to Craft List";
@@ -180,17 +182,13 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
                 args.AddMenuItem(menuItem);
             }
 
-            if (_configuration.OpenCraftingLogContextMenu)
+            if (_configuration.OpenCraftingLogContextMenu && isRecipe)
             {
-                var item = _itemSheet.GetRowOrDefault(itemId.Value);
-                if (item != null && item.CanOpenCraftingLog)
-                {
-                    var menuItem = new MenuItem();
-                    menuItem.Name = "Open Crafting Log";
-                    menuItem.PrefixChar = 'A';
-                    menuItem.OnClicked += _ => _gameInterface.OpenCraftingLog(itemId.Value);
-                    args.AddMenuItem(menuItem);
-                }
+                var menuItem = new MenuItem();
+                menuItem.Name = "Open Crafting Log";
+                menuItem.PrefixChar = 'A';
+                menuItem.OnClicked += _ => _gameInterface.OpenCraftingLog(itemId.Value);
+                args.AddMenuItem(menuItem);
             }
 
             if (_configuration.OpenGatheringLogContextMenu)
