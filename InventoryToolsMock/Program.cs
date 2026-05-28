@@ -9,9 +9,7 @@ namespace InventoryToolsMock
     {
         static void Main(string[] args)
         {
-            var mockContainer = new MockContainer(new MockDalamudConfiguration()
-            {
-            });
+            var mockContainer = new MockContainer();
             var mockDalamudUi = mockContainer.GetMockUi();
             var pluginLoader = mockContainer.GetPluginLoader();
             mockContainer.GetGameData().GetExcelSheet<Item>();

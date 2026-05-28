@@ -11,17 +11,22 @@ namespace InventoryTools.Services;
 public interface IGameInteropService
 {
     unsafe Dictionary<ClassJob, short>? GetClassJobLevels();
+    unsafe byte? GetChocoboStainId();
+    unsafe RowRef<Stain> GetChocoboStain();
+
 }
 
 public class GameInteropService : IGameInteropService
 {
     private readonly IClientState _clientState;
     private readonly ExcelSheet<ClassJob> _classJobSheet;
+    private readonly IDataManager _dataManager;
 
-    public GameInteropService(IClientState clientState, ExcelSheet<ClassJob> classJobSheet)
+    public GameInteropService(IClientState clientState, ExcelSheet<ClassJob> classJobSheet, IDataManager dataManager)
     {
         _clientState = clientState;
         _classJobSheet = classJobSheet;
+        _dataManager = dataManager;
     }
 
     public unsafe Dictionary<ClassJob, short>? GetClassJobLevels()
@@ -45,5 +50,25 @@ public class GameInteropService : IGameInteropService
         }
 
         return levels;
+    }
+
+    public unsafe byte? GetChocoboStainId()
+    {
+        if (!_clientState.IsLoggedIn)
+        {
+            return null;
+        }
+        var uiState = UIState.Instance();
+        if (uiState == null)
+        {
+            return null;
+        }
+
+        return uiState->Buddy.CompanionInfo.CurrentColorStainId;
+    }
+
+    public RowRef<Stain> GetChocoboStain()
+    {
+        return new RowRef<Stain>(_dataManager.Excel, GetChocoboStainId() ?? 0);
     }
 }

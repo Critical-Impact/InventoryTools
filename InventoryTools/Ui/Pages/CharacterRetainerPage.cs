@@ -12,6 +12,8 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Bindings.ImGui;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
+using DalaMock.Shared.Interfaces;
+using Dalamud.Interface;
 using InventoryTools.Ui.Widgets;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
@@ -25,12 +27,14 @@ namespace InventoryTools.Ui.Pages
         private readonly ICharacterMonitor _characterMonitor;
         private readonly IInventoryMonitor _inventoryMonitor;
         private readonly ExcelSheet<World> _worldSheet;
+        private readonly IFont _font;
 
-        public CharacterRetainerPage(ILogger<CharacterRetainerPage> logger, ImGuiService imGuiService, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, ExcelSheet<World> worldSheet) : base(logger, imGuiService)
+        public CharacterRetainerPage(ILogger<CharacterRetainerPage> logger, ImGuiService imGuiService, ICharacterMonitor characterMonitor, IInventoryMonitor inventoryMonitor, ExcelSheet<World> worldSheet, IFont font) : base(logger, imGuiService)
         {
             _characterMonitor = characterMonitor;
             _inventoryMonitor = inventoryMonitor;
             _worldSheet = worldSheet;
+            _font = font;
         }
         private bool _isSeparator = false;
         public override void Initialize()
@@ -45,7 +49,7 @@ namespace InventoryTools.Ui.Pages
         private bool _editMode = false;
         private string _newName = "";
 
-        private HoverButton _editIcon = new(new Vector2(16,16));
+
 
         private Dictionary<Character, PopupMenu> _popupMenus = new();
         public PopupMenu GetCharacterMenu(Character character)
@@ -316,7 +320,8 @@ namespace InventoryTools.Ui.Pages
                             }
 
                             ImGui.SameLine();
-                            if(_editIcon.Draw(ImGuiService.LoadImage("edit"), "editName"))
+                            var cursorX = ImGui.GetCursorPosX();
+                            if (ImGuiService.DrawIconButton(_font, FontAwesomeIcon.Edit, ref cursorX))
                             {
                                 _editMode = true;
                                 _newName = character.AlternativeName ?? "";

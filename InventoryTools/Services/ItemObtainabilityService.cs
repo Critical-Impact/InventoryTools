@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using AllaganLib.GameSheets.Extensions;
 using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Crafting;
@@ -56,12 +57,16 @@ public class ItemObtainabilityService : IItemObtainabilityService
             var requiredLevel = levelTable.Base.ClassJobLevel;
             if (requiredLevel > 0)
             {
-                var playerLevel = _classJobService.GetPlayerLevelByCraftTypeId(recipe.Base.CraftType.RowId);
+                var craftTypeId = recipe.Base.CraftType.RowId;
+                var playerLevel = _classJobService.GetPlayerLevelByCraftTypeId(craftTypeId);
                 var jobName = recipe.CraftType?.FormattedName ?? "Crafter";
+                var craftJob = _classJobService.GetClassJobListFromCraftTypeId(craftTypeId);
+                RowRef? classJobRowRef = craftJob.HasValue ? _classJobService.GetClassJobRowRef(craftJob.Value) : null;
                 requirements.Add(new ObtainabilityRequirement(
                     ObtainabilityRequirementType.JobLevel,
                     playerLevel >= requiredLevel,
-                    $"{jobName} Lv {requiredLevel}"));
+                    $"{jobName} Lv {requiredLevel}",
+                    classJobRowRef));
             }
         }
 
@@ -73,7 +78,8 @@ public class ItemObtainabilityService : IItemObtainabilityService
             requirements.Add(new ObtainabilityRequirement(
                 ObtainabilityRequirementType.SecretRecipeBook,
                 hasBook,
-                bookName));
+                bookName,
+                (RowRef)recipe.Base.SecretRecipeBook));
         }
 
         //Determine later if this is actually a thing
@@ -101,7 +107,7 @@ public class ItemObtainabilityService : IItemObtainabilityService
         if (gatheringSources.Count == 0) return;
 
         var minLevel = gatheringSources
-            .Select(s => (int)s.GatheringItem.Base.GatheringItemLevel.RowId)
+            .Select(s => (int)s.GatheringItem.Base.GatheringItemLevel.Value.GatheringItemLevel)
             .Where(l => l > 0)
             .DefaultIfEmpty(0)
             .Min();
@@ -116,7 +122,8 @@ public class ItemObtainabilityService : IItemObtainabilityService
             requirements.Add(new ObtainabilityRequirement(
                 ObtainabilityRequirementType.JobLevel,
                 playerLevel >= minLevel,
-                $"{jobName} Lv {minLevel}"));
+                $"{jobName} Lv {minLevel}",
+                _classJobService.GetClassJobRowRef(job)));
         }
 
         // Folklore tome: GatheringSubCategory.Division is the tomeId for IsFolkloreBookUnlocked
@@ -128,12 +135,15 @@ public class ItemObtainabilityService : IItemObtainabilityService
         if (folkloreEntry.HasValue)
         {
             var tomeId = (uint)folkloreEntry.Value.Division;
-            var hasBook = _classJobService.IsFolkloreBookUnlocked(new RowRef<NotebookDivision>(folkloreEntry.Value.ExcelPage.Module, folkloreEntry.Value.Division));
+            var noteBookDivision = new RowRef<NotebookDivision>(folkloreEntry.Value.ExcelPage.Module, folkloreEntry.Value.Division);
+            var hasBook = _classJobService.IsFolkloreBookUnlocked(noteBookDivision);
             var tomeName = folkloreEntry.Value.Item.ValueNullable?.Name.ExtractText() ?? $"Folklore Tome #{tomeId}";
+            RowRef? tomeRowRef = noteBookDivision.Value.AsUntypedRowRef();
             requirements.Add(new ObtainabilityRequirement(
                 ObtainabilityRequirementType.FolkloreTome,
                 hasBook,
-                tomeName));
+                tomeName,
+                tomeRowRef));
         }
     }
 
@@ -143,7 +153,7 @@ public class ItemObtainabilityService : IItemObtainabilityService
         if (fishingSources.Count == 0) return;
 
         var minLevel = fishingSources
-            .Select(s => (int)s.FishParameter.Base.GatheringItemLevel.RowId)
+            .Select(s => (int)s.FishParameter.Base.GatheringItemLevel.Value.GatheringItemLevel)
             .Where(l => l > 0)
             .DefaultIfEmpty(0)
             .Min();
@@ -154,7 +164,8 @@ public class ItemObtainabilityService : IItemObtainabilityService
             requirements.Add(new ObtainabilityRequirement(
                 ObtainabilityRequirementType.JobLevel,
                 playerLevel >= minLevel,
-                $"Fisher Lv {minLevel}"));
+                $"Fisher Lv {minLevel}",
+                _classJobService.GetClassJobRowRef(ClassJobService.ClassJobList.Fisher)));
         }
 
         // FishParameter.GatheringSubCategory.Division is the tomeId for IsFolkloreBookUnlocked
@@ -167,10 +178,12 @@ public class ItemObtainabilityService : IItemObtainabilityService
             var tomeId = (uint)folkloreEntry.Value.Division;
             var hasBook = _classJobService.IsFolkloreBookUnlocked(new RowRef<NotebookDivision>(folkloreEntry.Value.ExcelPage.Module, folkloreEntry.Value.Division));
             var tomeName = folkloreEntry.Value.Item.ValueNullable?.Name.ExtractText() ?? $"Folklore Tome #{tomeId}";
+            RowRef? tomeRowRef = folkloreEntry.Value.Item.RowId != 0 ? (RowRef)folkloreEntry.Value.Item : null;
             requirements.Add(new ObtainabilityRequirement(
                 ObtainabilityRequirementType.FolkloreTome,
                 hasBook,
-                tomeName));
+                tomeName,
+                tomeRowRef));
         }
     }
 
@@ -180,7 +193,7 @@ public class ItemObtainabilityService : IItemObtainabilityService
         if (spearSources.Count == 0) return;
 
         var minLevel = spearSources
-            .Select(s => (int)s.SpearfishingItemRow.Base.GatheringItemLevel.RowId)
+            .Select(s => (int)s.SpearfishingItemRow.Base.GatheringItemLevel.Value.GatheringItemLevel)
             .Where(l => l > 0)
             .DefaultIfEmpty(0)
             .Min();
@@ -191,7 +204,8 @@ public class ItemObtainabilityService : IItemObtainabilityService
             requirements.Add(new ObtainabilityRequirement(
                 ObtainabilityRequirementType.JobLevel,
                 playerLevel >= minLevel,
-                $"Fisher Lv {minLevel}"));
+                $"Fisher Lv {minLevel}",
+                _classJobService.GetClassJobRowRef(ClassJobService.ClassJobList.Fisher)));
         }
     }
 }

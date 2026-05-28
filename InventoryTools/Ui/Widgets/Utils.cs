@@ -33,11 +33,6 @@ public static class ImGuiUtil
 
     public static void VerticalAlignText( string text, int cellHeight, bool autoWrap, float? xOffset = null)
     {
-        var columnWidth = ImGui.GetColumnWidth();
-        var frameHeight = cellHeight / 2.0f;
-        var calcText = ImGui.CalcTextSize(text);
-        var textHeight = autoWrap && calcText.X >= columnWidth ? 0 : calcText.Y / 2.0f;
-        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + frameHeight - textHeight);
         if (xOffset != null)
         {
             ImGui.SetCursorPosX(ImGui.GetCursorPosX() + xOffset.Value);
@@ -46,6 +41,7 @@ public static class ImGuiUtil
         {
             ImGui.PushTextWrapPos();
         }
+        ImGui.AlignTextToFramePadding();
         ImGui.TextUnformatted(text);
         if (autoWrap)
         {
@@ -55,11 +51,6 @@ public static class ImGuiUtil
 
     public static void VerticalAlignTextDisabled( string text, int cellHeight, bool autoWrap, float? xOffset = null)
     {
-        var columnWidth = ImGui.GetColumnWidth();
-        var frameHeight = cellHeight / 2.0f;
-        var calcText = ImGui.CalcTextSize(text);
-        var textHeight = autoWrap && calcText.X >= columnWidth ? 0 : calcText.Y / 2.0f;
-        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + frameHeight - textHeight);
         if (xOffset != null)
         {
             ImGui.SetCursorPosX(ImGui.GetCursorPosX() + xOffset.Value);

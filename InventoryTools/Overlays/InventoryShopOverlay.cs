@@ -38,7 +38,7 @@ public class InventoryShopOverlay : GameOverlay<AtkShop>, IAtkOverlayState
     public override bool NeedsStateRefresh { get; set; }
     public override void UpdateState(FilterState? newState)
     {
-        if (newState != null && newState.FilterResult != null)
+        if (newState != null && newState.FilterResult != null && newState.ShouldHighlightNpcs)
         {
             HasState = true;
             Clear();

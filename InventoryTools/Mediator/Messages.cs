@@ -36,6 +36,7 @@ public record ListAddedMessage(FilterConfiguration filterConfiguration) : Messag
 public record ListRemovedMessage(FilterConfiguration filterConfiguration) : MessageBase;
 public record ListUpdatedMessage(FilterConfiguration FilterConfiguration) : MessageBase;
 public record RequestListUpdateMessage(FilterConfiguration FilterConfiguration) : MessageBase;
+public record RequestTableUpdateMessage(FilterConfiguration FilterConfiguration) : MessageBase;
 public record TeamCraftDataImported(List<(uint, uint)> listData) : MessageBase;
 public record AddToCraftListMessage(string FilterKey, uint ItemId, uint Quantity, InventoryItem.ItemFlags Flags) : MessageBase;
 public record AddToCuratedListMessage(string FilterKey, uint ItemId, uint Quantity, InventoryItem.ItemFlags Flags) : MessageBase;

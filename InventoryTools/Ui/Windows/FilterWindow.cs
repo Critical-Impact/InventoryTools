@@ -12,6 +12,8 @@ using DalaMock.Shared.Interfaces;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic;
+using DalaMock.Shared.Interfaces;
+using Dalamud.Interface;
 using InventoryTools.Ui.Widgets;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
@@ -34,8 +36,9 @@ namespace InventoryTools.Ui
         private readonly IGameUiManager _gameUiManager;
         private readonly IFramework _framework;
         private readonly InventoryToolsConfiguration _configuration;
+        private readonly IFont _font;
 
-        public FilterWindow(ILogger<FilterWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, TableService tableService, IListService listService, ICharacterMonitor characterMonitor, IUniversalis universalis, IFileDialogManager fileDialogManager, IGameUiManager gameUiManager, IFramework framework, string name = "Filter Window") : base(logger, mediator, imGuiService, configuration, name)
+        public FilterWindow(ILogger<FilterWindow> logger, MediatorService mediator, ImGuiService imGuiService, InventoryToolsConfiguration configuration, TableService tableService, IListService listService, ICharacterMonitor characterMonitor, IUniversalis universalis, IFileDialogManager fileDialogManager, IGameUiManager gameUiManager, IFramework framework, IFont font, string name = "Filter Window") : base(logger, mediator, imGuiService, configuration, name)
         {
             _tableService = tableService;
             _listService = listService;
@@ -45,6 +48,7 @@ namespace InventoryTools.Ui
             _gameUiManager = gameUiManager;
             _framework = framework;
             _configuration = configuration;
+            _font = font;
         }
         public override void Initialize(string filterKey)
         {
@@ -81,14 +85,7 @@ namespace InventoryTools.Ui
                 });
         }
 
-        private HoverButton _editIcon = new();
-        private HoverButton _settingsIcon = new();
-        private HoverButton _craftIcon = new();
-        private HoverButton _csvIcon = new();
-        private HoverButton _clearIcon = new();
-        private HoverButton _marketIcon = new();
-        private HoverButton _menuIcon = new();
-        private HoverButton _filtersIcon = new();
+
 
         private PopupMenu _settingsMenu;
 
@@ -198,7 +195,8 @@ namespace InventoryTools.Ui
 
                     ImGui.SameLine();
                     ImGuiService.CenterElement(20 * ImGui.GetIO().FontGlobalScale);
-                    if(_clearIcon.Draw(ImGuiService.GetIconTexture(66308).Handle, "clearSearch"))
+                    var clearCursorX = ImGui.GetCursorPosX();
+                    if (ImGuiService.DrawIconButton(_font, FontAwesomeIcon.Times, ref clearCursorX))
                     {
                         itemTable.ClearFilters();
                     }
@@ -233,7 +231,8 @@ namespace InventoryTools.Ui
                 if (bottomBarChild.Success)
                 {
                     ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                    if(_marketIcon.Draw(ImGuiService.GetImageTexture("refresh-web").Handle, "refreshMarket"))
+                    var marketCursorX = ImGui.GetCursorPosX();
+                    if (ImGuiService.DrawIconButton(_font, FontAwesomeIcon.SyncAlt, ref marketCursorX))
                     {
                         var activeCharacter = _characterMonitor.ActiveCharacter;
                         if (activeCharacter != null)
@@ -248,7 +247,8 @@ namespace InventoryTools.Ui
                     ImGuiUtil.HoverTooltip("Refresh Market Prices");
                     ImGui.SameLine();
                     ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                    if (_csvIcon.Draw(ImGuiService.GetImageTexture("export2").Handle, "exportCsv"))
+                    var csvCursorX = ImGui.GetCursorPosX();
+                    if (ImGuiService.DrawIconButton(_font, FontAwesomeIcon.FileExport, ref csvCursorX))
                     {
                         _fileDialogManager.SaveFileDialog("Save to csv", "*.csv", "export.csv", ".csv",
                             (b, s) => { SaveCallback(itemTable, b, s); }, null, true);
@@ -309,17 +309,15 @@ namespace InventoryTools.Ui
 
                     var width = ImGui.GetWindowSize().X;
                     width -= 30 * ImGui.GetIO().FontGlobalScale;
-                    ImGui.SetCursorPosX(width);
                     ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                    if (_menuIcon.Draw(ImGuiService.GetImageTexture("menu").Handle, "openMenu"))
+                    if (ImGuiService.DrawIconButton(_font, FontAwesomeIcon.Bars, ref width))
                     {
                     }
                     _settingsMenu.Draw();
 
                     width -= 30 * ImGui.GetIO().FontGlobalScale;
                     ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                    ImGui.SetCursorPosX(width);
-                    if (_settingsIcon.Draw(ImGuiService.GetIconTexture(66319).Handle,"openConfig"))
+                    if (ImGuiService.DrawIconButton(_font, FontAwesomeIcon.Cog, ref width))
                     {
                         MediatorService.Publish(new ToggleGenericWindowMessage(typeof(ConfigurationWindow)));
                     }
@@ -328,9 +326,8 @@ namespace InventoryTools.Ui
 
                     ImGui.SetCursorPosY(0);
                     width -= 30 * ImGui.GetIO().FontGlobalScale;
-                    ImGui.SetCursorPosX(width);
                     ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                    if (_filtersIcon.Draw(ImGuiService.GetImageTexture("filters").Handle, "openFilters"))
+                    if (ImGuiService.DrawIconButton(_font, FontAwesomeIcon.Filter, ref width))
                     {
                         MediatorService.Publish(new ToggleGenericWindowMessage(typeof(FiltersWindow)));
                     }
@@ -339,9 +336,8 @@ namespace InventoryTools.Ui
 
                     ImGui.SetCursorPosY(0);
                     width -= 30 * ImGui.GetIO().FontGlobalScale;
-                    ImGui.SetCursorPosX(width);
                     ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                    if (_craftIcon.Draw(ImGuiService.GetImageTexture("craft").Handle, "openCraft"))
+                    if (ImGuiService.DrawIconButton(_font, FontAwesomeIcon.Hammer, ref width))
                     {
                         MediatorService.Publish(new ToggleGenericWindowMessage(typeof(CraftsWindow)));
                     }

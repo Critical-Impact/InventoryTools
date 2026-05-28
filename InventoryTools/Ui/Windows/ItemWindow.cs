@@ -33,7 +33,8 @@ using InventoryTools.Logic.Settings;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
-using InventoryTools.Ui.Widgets;
+using DalaMock.Shared.Interfaces;
+using Dalamud.Interface;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
 using LuminaSupplemental.Excel.Model;
@@ -83,8 +84,8 @@ namespace InventoryTools.Ui
         private readonly ItemLocalizer _itemLocalizer;
         private readonly TeleporterService _teleporterService;
         private readonly CraftList.Factory _craftListFactory;
+        private readonly IFont _font;
         private HashSet<uint> _marketRefreshing = new();
-        private HoverButton _refreshPricesButton = new();
 
         public ItemWindow(ILogger<ItemWindow> logger, MediatorService mediator, ImGuiService imGuiService,
             InventoryToolsConfiguration configuration, IMarketBoardService marketBoardService, IFramework framework,
@@ -94,6 +95,7 @@ namespace InventoryTools.Ui
             ItemInfoRenderService itemInfoRenderService, BNpcNameSheet bNpcNameSheet, MapSheet mapSheet, IUnlockTrackerService unlockTrackerService,
             ImGuiTooltipService tooltipService, ImGuiTooltipModeSetting tooltipModeSetting, ItemLocalizer itemLocalizer, TeleporterService teleporterService,
             CraftList.Factory craftListFactory,
+            IFont font,
             string name = "Item Window") : base(
             logger, mediator, imGuiService, configuration, name)
         {
@@ -119,6 +121,7 @@ namespace InventoryTools.Ui
             _itemLocalizer = itemLocalizer;
             _teleporterService = teleporterService;
             _craftListFactory = craftListFactory;
+            _font = font;
         }
 
         private void MarketCacheUpdated(MarketCacheUpdatedMessage obj)
@@ -1012,7 +1015,8 @@ namespace InventoryTools.Ui
 
                     ImGui.SameLine();
                     ImGui.SetCursorPosX(ImGui.GetWindowWidth() - 22 - ImGui.GetStyle().FramePadding.X);
-                    if (_refreshPricesButton.Draw(ImGuiService.GetImageTexture("refresh-web").Handle, "refreshPrices"))
+                    var cursorX = ImGui.GetCursorPosX();
+                    if (ImGuiService.DrawIconButton(_font, FontAwesomeIcon.SyncAlt, ref cursorX))
                     {
                         RequestMarketPrices();
                     }

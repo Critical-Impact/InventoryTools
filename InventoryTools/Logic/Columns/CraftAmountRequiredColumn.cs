@@ -147,7 +147,6 @@ namespace InventoryTools.Logic.Columns
                 ImGuiUtil.VerticalAlignText(searchResult.CraftItem.QuantityNeeded + "/" + searchResult.CraftItem.QuantityNeededPreUpdate, configuration.TableHeight, false);
             }
             ImGui.SameLine();
-            ImGui.SetCursorPosY(originalCursorPosY);
             ImGui.PushFont(_font.IconFont);
             ImGuiUtil.VerticalAlignTextDisabled(FontAwesomeIcon.InfoCircle.ToIconString(), configuration.TableHeight, false);
             ImGui.PopFont();

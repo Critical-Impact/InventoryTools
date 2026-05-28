@@ -893,6 +893,20 @@ namespace InventoryTools
 
         public bool FirstRun { get; set; } = true;
 
+        public uint ChocoboLockedCurrentStainId { get; set; } = 0;
+        public uint ChocoboLockedTargetStainId { get; set; } = 0;
+
+        public List<uint> ChocoboLockedFruitIds
+        {
+            get => _chocoboLockedFruitIds ??= new List<uint>();
+            set
+            {
+                _chocoboLockedFruitIds = value;
+                IsDirty = true;
+            }
+        }
+        public int ChocoboFruitsCheckedCount { get; set; } = 0;
+
         [DefaultValue(true)]
         private bool _showWizardNewFeatures { get; set; } = true;
 
@@ -968,6 +982,7 @@ namespace InventoryTools
         private bool _marketBoardUseActiveWorld = true;
         private bool _marketBoardUseHomeWorld = true;
         private List<uint>? _marketBoardWorldIds;
+        private List<uint>? _chocoboLockedFruitIds;
         private HighlightWhen _highlightWhenEnum;
 
         public ModifiableHotkey? GetHotkey(string hotkey)

@@ -18,6 +18,7 @@ public class ContextMenuFeature : Feature
             typeof(ContextMenuOpenCraftingLogSetting),
             typeof(ContextMenuOpenGatheringLogSetting),
             typeof(ContextMenuOpenFishingLogSetting),
+            typeof(ContextMenuCopyNameSetting),
         },
         settings)
     {

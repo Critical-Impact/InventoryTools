@@ -69,6 +69,7 @@ using InventoryTools.Logic.ItemRenderers;
 using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Overlays;
 using InventoryTools.ServiceConfigurations;
+using InventoryTools.Groupers;
 using InventoryTools.Services;
 using InventoryTools.Tooltips;
 using InventoryTools.Ui;
@@ -239,6 +240,8 @@ namespace InventoryTools
             builder.RegisterSingletonSelfAndInterfaces<MinifyResolver>();
             builder.RegisterSingletonSelfAndInterfaces<MobTracker>();
             builder.RegisterSingletonSelfAndInterfaces<PluginCommands>();
+            builder.RegisterSingletonSelfAndInterfaces<CalloutService>();
+            builder.RegisterSingletonSelfAndInterfaces<MissingRequirementsGrouper>();
             builder.RegisterSingletonSelfAndInterfaces<PopupService>();
             builder.RegisterSingletonSelfAndInterfaces<QuestManagerService>();
             builder.RegisterSingletonSelfAndInterfaces<SeTime>();
@@ -252,6 +255,7 @@ namespace InventoryTools
             builder.RegisterSingletonSelfAndInterfaces<BackgroundTaskCollector>();
             builder.RegisterSingletonSelfAndInterfaces<AchievementMonitorConfiguration>();
             builder.RegisterSingletonSelfAndInterfaces<UIStateService>();
+            builder.RegisterSingletonSelfAndInterfaces<ChocoboColourSolver>();
 
             //Transient registrations
             builder.RegisterTransientSelfAndInterfaces<BackgroundTaskQueue>();
@@ -537,12 +541,12 @@ namespace InventoryTools
         {
             _loadConfigStopwatch?.Stop();
             this.Host?.Services.GetRequiredService<MediatorService>().Publish(new PluginLoadedMessage());
-            _chatGui.Print("Finished loading plugin. ", "Allagan Tools");
             if (_loadConfigStopwatch != null)
             {
                 _pluginLog.Verbose("Took " + _loadConfigStopwatch.Elapsed.TotalSeconds.ToString("N2") +
                                    " seconds to start Allagan Tools.");
 #if DEBUG
+                _chatGui.Print("Finished loading plugin. ", "Allagan Tools");
                 _chatGui.Print("Took " + _loadConfigStopwatch.Elapsed.TotalSeconds.ToString("N2") + " seconds to start.", "Allagan Tools");
 #endif
             }

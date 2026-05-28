@@ -22,6 +22,8 @@ using Dalamud.Interface.Colors;
 using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Settings;
+using DalaMock.Shared.Interfaces;
+using Dalamud.Interface;
 using InventoryTools.Ui.Widgets;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
@@ -69,6 +71,7 @@ namespace InventoryTools.Ui
         private readonly IEnumerable<ICompendiumType> _compendiumTypes;
         private IEnumerable<IMenuWindow>? _menuWindows;
         private readonly InventoryToolsConfiguration _configuration;
+        private readonly IFont _font;
 
         public FiltersWindow(ILogger<FiltersWindow> logger, MediatorService mediator, ImGuiService imGuiService,
             InventoryToolsConfiguration configuration, IListService listService, IFilterService filterService,
@@ -78,7 +81,8 @@ namespace InventoryTools.Ui
             IComponentContext context, FiltersWindowLayoutSetting layoutSetting, ItemSheet itemSheet,
             FilterConfiguration.Factory filterConfigFactory, IEnumerable<ISampleFilter> sampleFilters,
             IClipboardService clipboardService, PopupService popupService, IKeyState keyState, IFramework framework,
-            IPluginLog pluginLog, HighlightWhenFilter highlightWhenFilter, HighlightWhenSetting highlightWhenSetting, IEnumerable<ICompendiumType> compendiumTypes) : base(logger, mediator, imGuiService, configuration, "Filters Window")
+            IPluginLog pluginLog, HighlightWhenFilter highlightWhenFilter, HighlightWhenSetting highlightWhenSetting,
+            IEnumerable<ICompendiumType> compendiumTypes, IFont font) : base(logger, mediator, imGuiService, configuration, "Filters Window")
         {
             _listService = listService;
             _filterService = filterService;
@@ -104,6 +108,7 @@ namespace InventoryTools.Ui
             _highlightWhenSetting = highlightWhenSetting;
             _compendiumTypes = compendiumTypes.Where(c => c.ShowInListing).OrderBy(c => c.Plural);
             _configuration = configuration;
+            _font = font;
             this.Flags = ImGuiWindowFlags.MenuBar;
         }
 
@@ -176,15 +181,7 @@ namespace InventoryTools.Ui
         public override string GenericKey => "filters";
         public override string GenericName => "Filters";
         public override bool DestroyOnClose => false;
-        private HoverButton _editIcon = new();
-        private HoverButton _settingsIcon = new();
-        private HoverButton _craftIcon = new();
-        private HoverButton _clearIcon = new();
-        private HoverButton _closeSettingsIcon = new();
-        private HoverButton _marketIcon = new();
-        private HoverButton _addIcon = new();
-        private HoverButton _menuIcon = new();
-        private HoverButton _searchIcon = new();
+
         private bool _addItemBarOpen;
 
         public bool ShowAddItemBar =>
@@ -1210,7 +1207,8 @@ namespace InventoryTools.Ui
                             }
 
                             ImGui.SameLine();
-                            if(_clearIcon.Draw(ImGuiService.GetIconTexture(66308).Handle, "clearSearch", new Vector2(18,18) * ImGui.GetIO().FontGlobalScale))
+                            var clearSearchCursorX = ImGui.GetCursorPosX();
+                            if (ImGuiService.DrawIconButton(_font, FontAwesomeIcon.Times, ref clearSearchCursorX))
                             {
                                 SearchString = "";
                             }
@@ -1281,7 +1279,8 @@ namespace InventoryTools.Ui
                         {
                             float height = ImGui.GetWindowSize().Y;
                             ImGui.SetCursorPosY(height - 24 * ImGui.GetIO().FontGlobalScale);
-                            if (_addIcon.Draw(ImGuiService.GetIconTexture(66315).Handle, "cb_af"))
+                            var addFilterCursorX = ImGui.GetCursorPosX();
+                            if (ImGuiService.DrawIconButton(_font, FontAwesomeIcon.Plus, ref addFilterCursorX))
                             {
                             }
 
@@ -1636,7 +1635,8 @@ namespace InventoryTools.Ui
                     float width = ImGui.GetWindowSize().X;
                     ImGui.SetCursorPosX(width - 42 * ImGui.GetIO().FontGlobalScale);
                     ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                    if (_closeSettingsIcon.Draw(ImGuiService.GetIconTexture(66311).Handle, "bb_settings"))
+                    var closeSettingsCursorX = ImGui.GetCursorPosX();
+                    if (ImGuiService.DrawIconButton(_font, FontAwesomeIcon.Check, ref closeSettingsCursorX))
                     {
                         _settingsActive = false;
                     }
@@ -1687,7 +1687,8 @@ namespace InventoryTools.Ui
 
                     ImGui.SameLine();
                     ImGuiService.CenterElement(20 * ImGui.GetIO().FontGlobalScale);
-                    if(_clearIcon.Draw(ImGuiService.GetIconTexture(66308).Handle, "clearSearch"))
+                    var clearCursorX = ImGui.GetCursorPosX();
+                    if (ImGuiService.DrawIconButton(_font, FontAwesomeIcon.Times, ref clearCursorX))
                     {
                         itemTable.ClearFilters();
                     }
@@ -1702,8 +1703,7 @@ namespace InventoryTools.Ui
                     {
                         ImGui.SameLine();
                         width -= 28 * ImGui.GetIO().FontGlobalScale;
-                        ImGui.SetCursorPosX(width);
-                        if (_searchIcon.Draw(ImGuiService.GetIconTexture(66320).Handle, "tb_oib"))
+                        if (ImGuiService.DrawIconButton(_font, FontAwesomeIcon.Search, ref width))
                         {
                             _addItemBarOpen = !_addItemBarOpen;
                         }
@@ -1713,8 +1713,7 @@ namespace InventoryTools.Ui
 
                     ImGui.SameLine();
                     width -= 28 * ImGui.GetIO().FontGlobalScale;
-                    ImGui.SetCursorPosX(width);
-                    if (_editIcon.Draw(ImGuiService.GetImageTexture("edit").Handle, "tb_edit"))
+                    if (ImGuiService.DrawIconButton(_font, FontAwesomeIcon.Edit, ref width))
                     {
                         _settingsActive = !_settingsActive;
                     }
@@ -1747,8 +1746,8 @@ namespace InventoryTools.Ui
             {
                 if (bottomBarChild.Success)
                 {
-                    ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                    if(_marketIcon.Draw(ImGuiService.GetImageTexture("refresh-web").Handle, "refreshMarket"))
+                    var marketCursorX = ImGui.GetCursorPosX();
+                    if (ImGuiService.DrawIconButton(_font, FontAwesomeIcon.SyncAlt, ref marketCursorX))
                     {
                         var activeCharacter = _characterMonitor.ActiveCharacter;
                         if (activeCharacter != null)
@@ -1816,18 +1815,12 @@ namespace InventoryTools.Ui
                     }
 
                     var width = ImGui.GetWindowSize().X;
-                    width -= 30 * ImGui.GetIO().FontGlobalScale;
-                    ImGui.SetCursorPosX(width);
-                    ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                    if (_menuIcon.Draw(ImGuiService.GetImageTexture("menu").Handle, "openMenu"))
-                    {
-                    }
-                    _settingsMenu.Draw();
+
 
                     width -= 30 * ImGui.GetIO().FontGlobalScale;
                     ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
                     ImGui.SetCursorPosX(width);
-                    if (_settingsIcon.Draw(ImGuiService.GetIconTexture(66319).Handle, "openConfig"))
+                    if (ImGuiService.DrawIconButton(_font, FontAwesomeIcon.Cog, ref width))
                     {
                         MediatorService.Publish(new ToggleGenericWindowMessage(typeof(ConfigurationWindow)));
                     }
@@ -1838,7 +1831,7 @@ namespace InventoryTools.Ui
                     width -= 30 * ImGui.GetIO().FontGlobalScale;
                     ImGui.SetCursorPosX(width);
                     ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                    if (_craftIcon.Draw(ImGuiService.GetImageTexture("craft").Handle, "openCraft"))
+                    if (ImGuiService.DrawIconButton(_font, FontAwesomeIcon.Hammer, ref width))
                     {
                         MediatorService.Publish(new ToggleGenericWindowMessage(typeof(CraftsWindow)));
                     }
@@ -1849,9 +1842,8 @@ namespace InventoryTools.Ui
                     {
                         ImGui.SetCursorPosY(0);
                         width -= 30 * ImGui.GetIO().FontGlobalScale;
-                        ImGui.SetCursorPosX(width);
                         ImGuiService.CenterElement(24 * ImGui.GetIO().FontGlobalScale);
-                        if (_clearIcon.Draw(ImGuiService.GetIconTexture(66308).Handle, "clearHistory"))
+                        if (ImGuiService.DrawIconButton(_font, FontAwesomeIcon.Times, ref width))
                         {
                             ImGui.OpenPopup("confirmHistoryDelete");
                         }
@@ -1868,6 +1860,9 @@ namespace InventoryTools.Ui
 
                         ImGuiUtil.HoverTooltip("Clear your history.");
                     }
+
+                    //TODO: check me
+                    ImGui.SameLine();
 
                     var totalItems =  itemTable.RenderSearchResults.Count + " items";
 
@@ -1932,7 +1927,8 @@ namespace InventoryTools.Ui
             ImGui.TableNextColumn();
             using (ImRaii.PushId("s_" + item.RowId))
             {
-                if (_addIcon.Draw(ImGuiService.GetIconTexture(66315).Handle, "bbadd_" + item.RowId, new Vector2(16,16) * ImGui.GetIO().FontGlobalScale))
+                var addItemCursorX = ImGui.GetCursorPosX();
+                if (ImGuiService.DrawIconButton(_font, FontAwesomeIcon.Plus, ref addItemCursorX))
                 {
                     _framework.RunOnFrameworkThread(() =>
                     {

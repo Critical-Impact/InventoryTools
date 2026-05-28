@@ -112,6 +112,8 @@ public class GearsetCompendiumType : CompendiumType<Gearset>
         builder.AddStringColumn(new (){Key = "name", Name = "Name", HelpText = "The name of the gearset", Version = "14.0.3", ValueSelector = row => row.Name});
         builder.AddItemSourcesColumn(new() { Key = "sources", Name = "Sources", HelpText = "The combined sources for the gearset.", Version = "14.0.3", ValueSelector = gearset => gearset.Items.Where(c => c.RowId != 0).SelectMany(c => _itemInfoCache.GetItemSources(c.RowId) ?? []).ToList()});
         builder.AddStringColumn(new (){Key = "patch", Name = "Patch", HelpText = "The patch the gearset was added.", Version = "14.0.3", ValueSelector = gearset => string.Join(", ", gearset.Items.Where(c => c.RowId != 0).Select(c => _itemSheet.GetRow(c.RowId).Patch.ToString(CultureInfo.InvariantCulture)).Distinct())});
+        builder.AddIntegerColumn(new (){Key = "ilvl", Name = "Item Level", HelpText = "The highest item level (iLvl) across all pieces in the gearset.", Version = "15.0.6", Width = 60, ValueSelector = gearset => { var max = gearset.Items.Where(c => c.RowId != 0).Select(c => (int)_itemSheet.GetRow(c.RowId).Base.LevelItem.RowId).DefaultIfEmpty(0).Max(); return max == 0 ? null : max.ToString(); }});
+        builder.AddIntegerColumn(new (){Key = "equip_level", Name = "Equip Level", HelpText = "The highest required equip level across all pieces in the gearset.", Version = "15.0.6", Width = 60, ValueSelector = gearset => { var max = gearset.Items.Where(c => c.RowId != 0).Select(c => (int)_itemSheet.GetRow(c.RowId).Base.LevelEquip).DefaultIfEmpty(0).Max(); return max == 0 ? null : max.ToString(); }});
         for (int i = 0; i < 12; i++)
         {
             var index = i;

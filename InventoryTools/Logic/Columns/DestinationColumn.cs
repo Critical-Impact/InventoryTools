@@ -33,6 +33,10 @@ namespace InventoryTools.Logic.Columns
 
             if (searchResult.SortingResult != null)
             {
+                if (!searchResult.SortingResult.IsSortable)
+                {
+                    return "No room";
+                }
 
                 var destination = searchResult.SortingResult.DestinationRetainerId.HasValue
                     ? _characterMonitor.Characters.ContainsKey(searchResult.SortingResult.DestinationRetainerId

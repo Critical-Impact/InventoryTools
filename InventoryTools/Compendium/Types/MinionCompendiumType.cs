@@ -154,9 +154,12 @@ public class MinionCompendiumType : CompendiumType<Companion>
         viewBuilder.SetupDefaults(this, row);
         var transientInformation = _companionTransientSheet.GetRow(row.RowId);
         viewBuilder.Description = transientInformation.DescriptionEnhanced.ToImGuiString();
-        viewBuilder.AddTag("Unlocked?", "Is the minion unlocked?", () => _unlockState.IsCompanionUnlocked(row) ? ImGuiColors.HealerGreen : ImGuiColors.DalamudRed);
-        viewBuilder.AddTag("Type: " + transientInformation.MinionSkillType.Value.Name.ToImGuiString(), "The skill type of the minion.");
-        viewBuilder.AddTag("Action: " + transientInformation.SpecialActionName.ToImGuiString(), transientInformation.SpecialActionDescription.ToImGuiString());
+        viewBuilder.AddTag(
+            () => _unlockState.IsCompanionUnlocked(row) ? "Unlocked" : "Not Unlocked",
+            () => "Is the minion unlocked?",
+            () => _unlockState.IsCompanionUnlocked(row) ? ImGuiColors.HealerGreen : ImGuiColors.DalamudRed);
+        viewBuilder.AddTag(() => "Type: " + transientInformation.MinionSkillType.Value.Name.ToImGuiString(), () => "The skill type of the minion.");
+        viewBuilder.AddTag(() => "Action: " + transientInformation.SpecialActionName.ToImGuiString(), () => transientInformation.SpecialActionDescription.ToImGuiString());
         viewBuilder.AddInfoTableSection(new InfoTableSectionOptions()
         {
             SectionKey = "stats",

@@ -14,6 +14,7 @@ using Dalamud.Plugin.Services;
 using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic;
 using InventoryTools.Logic.Filters;
+using InventoryTools.Logic.Settings;
 using InventoryTools.Mediator;
 using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -27,6 +28,7 @@ public class TableService : DisposableMediatorBackgroundService
     private readonly Func<FilterConfiguration, CraftItemTable> _craftItemTableFactory;
     private readonly Func<FilterConfiguration, FilterTable> _filterTableFactory;
     private readonly CraftReverseListDisplayFilter _craftReverseListDisplayFilter;
+    private readonly InventoryToolsConfiguration _configuration;
     private ConcurrentDictionary<string, FilterTable> _itemListTables;
     private ConcurrentDictionary<string, CraftItemTable> _craftItemTables;
 
@@ -34,13 +36,14 @@ public class TableService : DisposableMediatorBackgroundService
     public event TableRefreshedDelegate TableRefreshed;
     public BackgroundTaskQueue TableQueue { get; }
 
-    public TableService(ILogger<TableService> logger, MediatorService mediatorService, IListService listService, BackgroundTaskQueue.Factory taskQueueFactory, IFramework framework, Func<FilterConfiguration, CraftItemTable> craftItemTableFactory, Func<FilterConfiguration, FilterTable> filterTableFactory, CraftReverseListDisplayFilter craftReverseListDisplayFilter) : base(logger, mediatorService)
+    public TableService(ILogger<TableService> logger, MediatorService mediatorService, IListService listService, BackgroundTaskQueue.Factory taskQueueFactory, IFramework framework, Func<FilterConfiguration, CraftItemTable> craftItemTableFactory, Func<FilterConfiguration, FilterTable> filterTableFactory, CraftReverseListDisplayFilter craftReverseListDisplayFilter, InventoryToolsConfiguration configuration) : base(logger, mediatorService)
     {
         _listService = listService;
         _framework = framework;
         _craftItemTableFactory = craftItemTableFactory;
         _filterTableFactory = filterTableFactory;
         _craftReverseListDisplayFilter = craftReverseListDisplayFilter;
+        _configuration = configuration;
         _listService.ListConfigurationChanged += ListConfigurationChanged;
         _listService.ListTableConfigurationChanged += ListTableConfigurationChanged;
         _listService.ListRefreshed += ListRefreshed;
@@ -48,6 +51,7 @@ public class TableService : DisposableMediatorBackgroundService
         _craftItemTables = new ConcurrentDictionary<string, CraftItemTable>();
         TableQueue = taskQueueFactory.Invoke("Table Queue", 3);
         _framework.Update += OnUpdate;
+        MediatorService.Subscribe<RequestTableUpdateMessage>(this, message => this.InvalidateTables(message.FilterConfiguration));
     }
 
     private void ListRefreshed(FilterConfiguration configuration)

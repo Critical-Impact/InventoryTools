@@ -24,7 +24,8 @@ namespace InventoryTools.Logic
         public FilterState(ICharacterMonitor characterMonitor, WindowService windowService,
             IGameUiManager gameUiManager, IInventoryMonitor inventoryMonitor, InventoryToolsConfiguration configuration,
             ExcelSheet<CabinetCategory> cabinetCategorySheet, HighlightWhenFilter highlightWhenFilter,
-            HighlightWhenSetting highlightWhenSetting)
+            HighlightWhenSetting highlightWhenSetting, NpcHighlightFilter npcHighlightFilter,
+            ShopHighlightingNpcSetting npcHighlightingSetting)
         {
             _characterMonitor = characterMonitor;
             _windowService = windowService;
@@ -34,6 +35,8 @@ namespace InventoryTools.Logic
             _cabinetCategorySheet = cabinetCategorySheet;
             _highlightWhenFilter = highlightWhenFilter;
             _highlightWhenSetting = highlightWhenSetting;
+            _npcHighlightFilter = npcHighlightFilter;
+            _npcHighlightingSetting = npcHighlightingSetting;
         }
 
         public void Initialize(FilterConfiguration filterConfiguration)
@@ -50,6 +53,8 @@ namespace InventoryTools.Logic
         private readonly ExcelSheet<CabinetCategory> _cabinetCategorySheet;
         private readonly HighlightWhenFilter _highlightWhenFilter;
         private readonly HighlightWhenSetting _highlightWhenSetting;
+        private readonly NpcHighlightFilter _npcHighlightFilter;
+        private readonly ShopHighlightingNpcSetting _npcHighlightingSetting;
         public RenderTableBase? FilterTable;
         public ulong? ActiveRetainerId => _characterMonitor.ActiveRetainerId == 0 ? null : _characterMonitor.ActiveRetainerId;
         public ulong? ActiveFreeCompanyId => _characterMonitor.ActiveFreeCompanyId == 0 ? null : _characterMonitor.ActiveFreeCompanyId;
@@ -143,6 +148,20 @@ namespace InventoryTools.Logic
         public bool ShouldHighlightDestination => ShouldHighlight && FilterConfiguration.HighlightDestination != null && FilterConfiguration.HighlightDestination.Value || FilterConfiguration.HighlightDestination == null && _configuration.HighlightDestination;
         public bool ShouldHighlightDestinationEmpty => ShouldHighlight && FilterConfiguration.HighlightDestinationEmpty != null && FilterConfiguration.HighlightDestinationEmpty.Value || FilterConfiguration.HighlightDestinationEmpty == null && _configuration.HighlightDestinationEmpty;
 
+        public bool ShouldHighlightNpcs
+        {
+            get
+            {
+                var npcHighlight = _npcHighlightFilter.CurrentValue(FilterConfiguration);
+                if (npcHighlight == NpcHighlight.No)
+                {
+                    return false;
+                }
+
+                return _npcHighlightingSetting.CurrentValue(_configuration);
+            }
+        }
+
         public Vector4? GetTabHighlight(Dictionary<Vector2, Vector4?> bagHighlights)
         {
             if (InvertHighlighting)
@@ -208,7 +227,7 @@ namespace InventoryTools.Logic
                 HashSet<uint> requiredItems;
                 if (FilterConfiguration.FilterType == FilterType.CraftFilter)
                 {
-                    requiredItems = FilterConfiguration.CraftList.GetFlattenedMergedMaterials().Where(c => c.IngredientPreference.Type is IngredientPreferenceType.Buy or IngredientPreferenceType.Item or IngredientPreferenceType.HouseVendor ).Select(c => c.Item.RowId).Distinct()
+                    requiredItems = FilterConfiguration.CraftList.GetFlattenedMergedMaterials().Where(c => c.IngredientPreference.Type is IngredientPreferenceType.Buy or IngredientPreferenceType.Item or IngredientPreferenceType.HouseVendor ).Where(c => c.QuantityNeeded > 0).Select(c => c.Item.RowId).Distinct()
                         .ToHashSet();
                 }
                 else if (filterResult.Count != 0)
@@ -243,7 +262,7 @@ namespace InventoryTools.Logic
                 HashSet<uint> requiredItems;
                 if (FilterConfiguration.FilterType == FilterType.CraftFilter)
                 {
-                    requiredItems = FilterConfiguration.CraftList.GetFlattenedMergedMaterials().Where(c => c.IngredientPreference.Type is IngredientPreferenceType.Buy or IngredientPreferenceType.Item or IngredientPreferenceType.HouseVendor ).Select(c => c.Item.RowId).Distinct()
+                    requiredItems = FilterConfiguration.CraftList.GetFlattenedMergedMaterials().Where(c => c.IngredientPreference.Type is IngredientPreferenceType.Buy or IngredientPreferenceType.Item or IngredientPreferenceType.HouseVendor ).Where(c => c.QuantityNeeded > 0).Select(c => c.Item.RowId).Distinct()
                         .ToHashSet();
                 }
                 else if (filterResult.Count != 0)
@@ -277,7 +296,7 @@ namespace InventoryTools.Logic
             {
                 if (FilterConfiguration.FilterType == FilterType.CraftFilter)
                 {
-                    itemIds = FilterConfiguration.CraftList.GetFlattenedMergedMaterials().Where(c => c.IngredientPreference.Type is IngredientPreferenceType.Buy or IngredientPreferenceType.Item or IngredientPreferenceType.HouseVendor).Select(c => (c.Item.RowId, (uint?)c.QuantityNeeded)).Distinct()
+                    itemIds = FilterConfiguration.CraftList.GetFlattenedMergedMaterials().Where(c => c.IngredientPreference.Type is IngredientPreferenceType.Buy or IngredientPreferenceType.Item or IngredientPreferenceType.HouseVendor).Where(c => c.QuantityNeeded > 0).Select(c => (c.Item.RowId, (uint?)c.QuantityNeeded)).Distinct()
                         .ToHashSet();
                 }
                 else if (filterResult.Count != 0)

@@ -38,6 +38,8 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
     private readonly ContextMenuAddToFavouritesSetting _addToFavouritesSetting;
     private readonly ContextMenuMoreInformationNpcsSetting _moreInformationNpcsSetting;
     private readonly ContextMenuMoreInformationMonstersSetting _moreInformationMonstersSetting;
+    private readonly ContextMenuCopyNameSetting _copyNameSetting;
+    private readonly IClipboardService _clipboardService;
     private ulong? cachedHoverItemId = null;
     public const int SatisfactionSupplyItemIdx       = 84;
     public const int SatisfactionSupplyItem1Id       = 128 + 1 * 60;
@@ -71,7 +73,9 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
         ContextMenuAddToCuratedListSetting curatedListSetting,
         ContextMenuAddToFavouritesSetting addToFavouritesSetting,
         ContextMenuMoreInformationNpcsSetting moreInformationNpcsSetting,
-        ContextMenuMoreInformationMonstersSetting moreInformationMonstersSetting) : base(logger, mediatorService)
+        ContextMenuMoreInformationMonstersSetting moreInformationMonstersSetting,
+        ContextMenuCopyNameSetting copyNameSetting,
+        IClipboardService clipboardService) : base(logger, mediatorService)
     {
         ContextMenu = contextMenu;
         _listService = listService;
@@ -84,6 +88,8 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
         _addToFavouritesSetting = addToFavouritesSetting;
         _moreInformationNpcsSetting = moreInformationNpcsSetting;
         _moreInformationMonstersSetting = moreInformationMonstersSetting;
+        _copyNameSetting = copyNameSetting;
+        _clipboardService = clipboardService;
     }
 
     private void MenuOpened(IMenuOpenedArgs args)
@@ -135,6 +141,15 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
                 menuItem.Name = "Search";
                 menuItem.PrefixChar = 'A';
                 menuItem.OnClicked += clickedArgs => ItemSearchClicked(clickedArgs, itemId);
+                args.AddMenuItem(menuItem);
+            }
+
+            if (_copyNameSetting.CurrentValue(_configuration))
+            {
+                var menuItem = new MenuItem();
+                menuItem.Name = "Copy Name to Clipboard";
+                menuItem.PrefixChar = 'A';
+                menuItem.OnClicked += clickedArgs => CopyNameClicked(clickedArgs, itemId);
                 args.AddMenuItem(menuItem);
             }
 
@@ -563,6 +578,26 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
         else if(itemId != null)
         {
             MediatorService.Publish(new ItemSearchRequestedMessage(itemId.Value, InventoryItem.ItemFlags.None));
+        }
+    }
+
+    private void CopyNameClicked(IMenuItemClickedArgs obj, uint? itemId = null)
+    {
+        if (obj.Target is MenuTargetInventory inventory)
+        {
+            if (inventory.TargetItem != null)
+            {
+                itemId ??= inventory.TargetItem.Value.ItemId;
+            }
+        }
+
+        if (itemId != null)
+        {
+            var item = _itemSheet.GetRowOrDefault(itemId.Value);
+            if (item != null)
+            {
+                _clipboardService.CopyToClipboard(item.NameString);
+            }
         }
     }
 

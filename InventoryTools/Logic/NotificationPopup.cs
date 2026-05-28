@@ -4,4 +4,5 @@ public enum NotificationPopup
 {
     CraftNotice,
     HistoryNotice,
+    MissingRequirementsButton,
 }

@@ -197,9 +197,12 @@ public class MountCompendiumType : CompendiumType<Mount>
         viewBuilder.Description =
             transient.Description.ToImGuiString();
 
-        viewBuilder.AddTag("Unlocked?", "Is unlocked", () => _unlockState.IsMountUnlocked(row) ? ImGuiColors.HealerGreen : ImGuiColors.DalamudRed);
+        viewBuilder.AddTag(
+            () => _unlockState.IsMountUnlocked(row) ? "Unlocked" : "Not Unlocked",
+            () => "Is unlocked",
+            () => _unlockState.IsMountUnlocked(row) ? ImGuiColors.HealerGreen : ImGuiColors.DalamudRed);
 
-        viewBuilder.AddTag("Seats " + (row.ExtraSeats + 1), "How many people does this mount seat?");
+        viewBuilder.AddTag(() => "Seats " + (row.ExtraSeats + 1), () => "How many people does this mount seat?");
 
         var relatedItem = GetRelatedItem(row.RowId);
 

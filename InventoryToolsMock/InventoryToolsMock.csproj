@@ -52,7 +52,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DalaMock.Core" Version="6.0.1" />
+    <PackageReference Include="DalaMock.Core" Version="6.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="10.0.1" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="5.0.0-preview.5.20278.1" />
     <PackageReference Include="StbiSharp" Version="1.2.1" />
@@ -70,31 +70,5 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Properties" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="cimgui.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="cimgui.so">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="cimgui.so.bak">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="cimguizmo.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="cimguizmo.so">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="cimplot.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="cimplot.so">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Fonts\FontAwesomeFreeSolid.otf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 </Project>

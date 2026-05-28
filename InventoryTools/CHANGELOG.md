@@ -8,6 +8,29 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [15.0.6] - CHANGEME
+
+### Added
+- New Requirements System for craft lists which tracks:
+  - Level Requirements
+  - Tomes
+  - Specialist Souls
+- Item Level/Equip Level columns added to gearset compendium listing
+- Added "Copy Name" context menu feature
+- Added NPC highlighting setting per list
+- Added "Craftable Only" checkbox to item add sidebar in craft window
+- Added Job Soul Crystal, Craft Soul Crystal, Folklore Tomes, Mastercraft Recipebooks to the compendium and the related items as uses
+- Added "Is Stackable?" Column/Filter
+- Added "Stack Size" Column/Filter 
+- Added loot to the compendium instance view window
+- Added content type grouping to the compendium instances list.
+
+### Changed
+- Switched to using font awesome through out the app instead of custom icons + fixed width icon font
+- NPCs will only highlight in craft lists if you actually need to buy something from them
+- Unlocked/Not Unlocked will be shown for compendium view window tags
+- Plugin will no longer output a message when starting
+
 ## [15.0.5] - 2026-05-12
 
 ### Added

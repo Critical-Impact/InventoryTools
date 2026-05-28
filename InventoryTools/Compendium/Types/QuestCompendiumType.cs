@@ -152,7 +152,10 @@ public class QuestCompendiumType : CompendiumType<Quest>
         {
             viewBuilder.Description = dialogue.Value.Value.ToImGuiString();
         }
-        viewBuilder.AddTag("Completed?", "Is the quest completed?", () => _unlockState.IsQuestCompleted(row) ? ImGuiColors.HealerGreen : ImGuiColors.DalamudRed);
+        viewBuilder.AddTag(
+            () => _unlockState.IsQuestCompleted(row) ? "Completed" : "Not Completed",
+            () => "Is the quest completed?",
+            () => _unlockState.IsQuestCompleted(row) ? ImGuiColors.HealerGreen : ImGuiColors.DalamudRed);
         viewBuilder.AddCollectionRowRefSection(new CollectionRowRefSectionOptions()
         {
             RelatedRefs = row.PreviousQuest.Select(c => (RowRef)c).ToList(),

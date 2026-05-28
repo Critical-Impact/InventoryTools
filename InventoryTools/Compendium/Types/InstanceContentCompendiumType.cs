@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.Extensions;
+using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Model;
 using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Models;
@@ -15,6 +17,7 @@ using InventoryTools.Compendium.Models;
 using InventoryTools.Compendium.Sections;
 using InventoryTools.Compendium.Sections.Options;
 using InventoryTools.Compendium.Services;
+using InventoryTools.Localizers;
 using InventoryTools.Services;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
@@ -26,15 +29,21 @@ public class InstanceContentCompendiumType : CompendiumType<InstanceContent>
 {
     private readonly ExcelSheet<InstanceContent> _instanceContentSheet;
     private readonly ExcelSheet<Quest> _questSheet;
+    private readonly ExcelSheet<ContentType> _contentTypeSheet;
     private readonly IUnlockState _unlockState;
     private readonly IUIStateService _uiStateService;
+    private readonly ItemInfoCache _itemInfoCache;
+    private readonly ILocalizer<ContentType> _contentTypeLocalizer;
 
-    public InstanceContentCompendiumType(ExcelSheet<InstanceContent> instanceContentSheet, ExcelSheet<Quest> questSheet, IUnlockState unlockState, IUIStateService uiStateService, CompendiumTable<InstanceContent>.Factory tableFactory, CompendiumColumnBuilder<InstanceContent>.Factory columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory, columnBuilder, viewBuilderFactory)
+    public InstanceContentCompendiumType(ExcelSheet<InstanceContent> instanceContentSheet, ExcelSheet<Quest> questSheet, ExcelSheet<ContentType> contentTypeSheet, IUnlockState unlockState, IUIStateService uiStateService, ItemInfoCache itemInfoCache, ILocalizer<ContentType> contentTypeLocalizer, CompendiumTable<InstanceContent>.Factory tableFactory, CompendiumColumnBuilder<InstanceContent>.Factory columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory, columnBuilder, viewBuilderFactory)
     {
         _instanceContentSheet = instanceContentSheet;
         _questSheet = questSheet;
+        _contentTypeSheet = contentTypeSheet;
         _unlockState = unlockState;
         _uiStateService = uiStateService;
+        _itemInfoCache = itemInfoCache;
+        _contentTypeLocalizer = contentTypeLocalizer;
     }
 
     public override ICompendiumTable<WindowState, MessageBase> BuildTable()
@@ -55,7 +64,7 @@ public class InstanceContentCompendiumType : CompendiumType<InstanceContent>
 
     public override string? GetSubtitle(InstanceContent row)
     {
-        return row.ContentFinderCondition.Value.ContentType.Value.Name.ToImGuiString();
+        return _contentTypeLocalizer.Format(row.ContentFinderCondition.Value.ContentType.Value);
     }
 
     public override (string?, uint?) GetIcon(InstanceContent row)
@@ -80,8 +89,24 @@ public class InstanceContentCompendiumType : CompendiumType<InstanceContent>
 
     public override List<InstanceContent> GetRows()
     {
-        return _instanceContentSheet.Where(c => c.ContentFinderCondition.RowId != 0).ToList();
+        return _instanceContentSheet.Where(c => c.ContentFinderCondition.RowId != 0 && c.ContentFinderCondition.Value.ContentType.Value.IconDutyFinder != 0).ToList();
     }
+
+    public override List<ICompendiumGrouping>? GetGroupings()
+    {
+        return
+        [
+            new CompendiumGrouping<InstanceContent>()
+            {
+                Key = "content_type",
+                Name = "Content Type",
+                GroupFunc = row => row.ContentFinderCondition.Value.ContentType.RowId,
+                GroupMapping = id => _contentTypeLocalizer.Format(_contentTypeSheet.GetRow((uint)id))
+            }
+        ];
+    }
+
+    public override string? GetDefaultGrouping() => null;
 
     public override void BuildColumns(CompendiumColumnBuilder<InstanceContent> builder)
     {
@@ -208,8 +233,14 @@ public class InstanceContentCompendiumType : CompendiumType<InstanceContent>
     {
         viewBuilder.SetupDefaults(this, row);
 
-        viewBuilder.AddTag("Unlocked?", "Is the instance unlocked?", () => _unlockState.IsInstanceContentUnlocked(row) ? ImGuiColors.HealerGreen : ImGuiColors.DalamudRed);
-        viewBuilder.AddTag("Completed?", "Is the instance completed?", () => _uiStateService.IsInstanceContentCompleted(row) ? ImGuiColors.HealerGreen : ImGuiColors.DalamudRed);
+        viewBuilder.AddTag(
+            () => _unlockState.IsInstanceContentUnlocked(row) ? "Unlocked" : "Not Unlocked",
+            () => "Is the instance unlocked?",
+            () => _unlockState.IsInstanceContentUnlocked(row) ? ImGuiColors.HealerGreen : ImGuiColors.DalamudRed);
+        viewBuilder.AddTag(
+            () => _uiStateService.IsInstanceContentCompleted(row) ? "Completed" : "Not Completed",
+            () => "Is the instance completed?",
+            () => _uiStateService.IsInstanceContentCompleted(row) ? ImGuiColors.HealerGreen : ImGuiColors.DalamudRed);
 
         var relatedQuests = _questSheet.Where(c => c.InstanceContent.Any(c => c.RowId == row.RowId) || c.QuestParams.Any(c => c.ScriptArg == row.RowId && c.ScriptInstruction.ToString().StartsWith("INSTANCEDUNGEON")))
             .Select(c => c.AsUntypedRowRef()).ToList();
@@ -227,6 +258,103 @@ public class InstanceContentCompendiumType : CompendiumType<InstanceContent>
             RelatedRef = row.ContentFinderCondition.Value.TerritoryType.Value.AsUntypedRowRef(),
             SectionKey = "related_map",
             SectionName = "Related Map"
+        });
+
+        var cfcId = row.ContentFinderCondition.RowId;
+
+        var bossDropSources = _itemInfoCache
+            .GetItemSourcesByType<ItemDungeonBossDropSource>(ItemInfoType.DungeonBossDrop)
+            .Where(c => c.ContentFinderCondition.RowId == cfcId).ToList();
+
+        var bossChestSources = _itemInfoCache
+            .GetItemSourcesByType<ItemDungeonBossChestSource>(ItemInfoType.DungeonBossChest)
+            .Where(c => c.ContentFinderCondition.RowId == cfcId).ToList();
+
+        var bossChildSections = new List<ICompendiumViewSection>();
+        var allBossSources = bossDropSources.Select(c => (Boss: c.DungeonBoss, BNpcName: c.BNpcName))
+            .Concat(bossChestSources.Select(c => (Boss: c.DungeonBoss, BNpcName: c.BNpcName)))
+            .DistinctBy(c => c.Boss.FightNo)
+            .OrderBy(c => c.Boss.FightNo);
+
+        foreach (var (boss, bNpcName) in allBossSources)
+        {
+            var rawName = bNpcName.Base.Singular.ExtractText();
+            var bossName = string.IsNullOrEmpty(rawName) ? $"Boss {boss.FightNo + 1}" : rawName;
+
+            var drops = bossDropSources
+                .Where(s => s.DungeonBoss.FightNo == boss.FightNo)
+                .Select(s => new ItemInfo(s.Item, s.Quantity))
+                .ToList();
+            if (drops.Any())
+            {
+                bossChildSections.Add(viewBuilder.CreateItemListSection(new ItemListSectionOptions
+                {
+                    SectionKey = $"boss_{boss.FightNo}_drops",
+                    SectionName = $"{bossName} - Drops",
+                    HideWhenEmpty = true,
+                    Items = drops
+                }));
+            }
+
+            foreach (var coffer in bossChestSources
+                .Where(s => s.DungeonBoss.FightNo == boss.FightNo)
+                .GroupBy(s => s.DungeonBossChest.CofferNo)
+                .OrderBy(g => g.Key))
+            {
+                bossChildSections.Add(viewBuilder.CreateItemListSection(new ItemListSectionOptions
+                {
+                    SectionKey = $"boss_{boss.FightNo}_coffer_{coffer.Key}",
+                    SectionName = $"{bossName} - Coffer {coffer.Key}",
+                    HideWhenEmpty = true,
+                    Items = coffer.Select(s => new ItemInfo(s.Item, s.Quantity)).ToList()
+                }));
+            }
+        }
+
+        viewBuilder.AddNestedSection(new NestedSectionOptions
+        {
+            SectionKey = "boss_loot",
+            SectionName = "Instance Bosses",
+            HideWhenEmpty = true,
+            Sections = bossChildSections
+        });
+
+        var chestSources = _itemInfoCache
+            .GetItemSourcesByType<ItemDungeonChestSource>(ItemInfoType.DungeonChest)
+            .Where(c => c.ContentFinderCondition.RowId == cfcId)
+            .ToList();
+
+        var chestChildSections = new List<ICompendiumViewSection>();
+        foreach (var chestGroup in chestSources
+            .GroupBy(s => s.DungeonChest.ChestNo)
+            .OrderBy(g => g.Key))
+        {
+            chestChildSections.Add(viewBuilder.CreateItemListSection(new ItemListSectionOptions
+            {
+                SectionKey = $"chest_{chestGroup.Key}",
+                SectionName = $"Chest {chestGroup.Key}",
+                HideWhenEmpty = true,
+                Items = chestGroup.Select(s => new ItemInfo(s.Item)).ToList()
+            }));
+        }
+
+        viewBuilder.AddNestedSection(new NestedSectionOptions
+        {
+            SectionKey = "other_chests",
+            SectionName = "Other Chests",
+            HideWhenEmpty = true,
+            Sections = chestChildSections
+        });
+
+        viewBuilder.AddItemListSection(new ItemListSectionOptions
+        {
+            SectionKey = "rewards",
+            SectionName = "Rewards",
+            HideWhenEmpty = true,
+            Items = _itemInfoCache
+                .GetItemSourcesByType<ItemDungeonDropSource>(ItemInfoType.DungeonDrop)
+                .Where(c => c.ContentFinderCondition.RowId == cfcId)
+                .Select(s => new ItemInfo(s.Item))
         });
     }
 

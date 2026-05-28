@@ -11,7 +11,8 @@ using DalaMock.Host.Mediator;
 using Dalamud.Game.Text;
 using Dalamud.Bindings.ImGui;
 using InventoryTools.Logic.Columns.Abstract;
-using InventoryTools.Ui.Widgets;
+using DalaMock.Shared.Interfaces;
+using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using InventoryTools.Localizers;
 using InventoryTools.Logic.Columns.Abstract.ColumnSettings;
@@ -36,10 +37,12 @@ public class CraftSettingsColumn : IColumn
     private readonly CraftItemLocalizer _craftItemLocalizer;
     private readonly IngredientPreferenceLocalizer _ingredientPreferenceLocalizer;
     public ImGuiService ImGuiService { get; }
+    private readonly IFont _font;
 
     public CraftSettingsColumn(ILogger<CraftSettingsColumn> logger, ImGuiService imGuiService,
         CraftingCache craftingCache, RecipeSheet recipeSheet, MapSheet mapSheet, ItemSheet itemSheet,
-        ExcelSheet<World> worldSheet, CraftItemLocalizer craftItemLocalizer, IngredientPreferenceLocalizer ingredientPreferenceLocalizer)
+        ExcelSheet<World> worldSheet, CraftItemLocalizer craftItemLocalizer, IngredientPreferenceLocalizer ingredientPreferenceLocalizer,
+        IFont font)
     {
         _logger = logger;
         _craftingCache = craftingCache;
@@ -50,9 +53,9 @@ public class CraftSettingsColumn : IColumn
         _craftItemLocalizer = craftItemLocalizer;
         _ingredientPreferenceLocalizer = ingredientPreferenceLocalizer;
         ImGuiService = imGuiService;
+        _font = font;
     }
     public ColumnCategory ColumnCategory => ColumnCategory.Crafting;
-    private HoverButton _settingsIcon = new();
 
 
     public string Name { get; set; } = "Settings";
@@ -190,7 +193,8 @@ public class CraftSettingsColumn : IColumn
 
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + configuration.TableHeight / 2.0f - 9);
 
-        if (_settingsIcon.Draw(ImGuiService.GetIconTexture(66319).Handle, "cnf_" + rowIndex))
+        var cursorX = ImGui.GetCursorPosX();
+        if (ImGuiService.DrawIconButton(_font, FontAwesomeIcon.Cog, ref cursorX))
         {
             ImGui.OpenPopup("ConfigureItemSettings" + columnIndex + searchResult.CraftItem.ItemId + (searchResult.CraftItem.IsOutputItem ? "o" : ""));
         }

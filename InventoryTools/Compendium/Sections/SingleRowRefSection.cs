@@ -34,9 +34,17 @@ public class SingleRowRefSection : ViewSection
         _options = options;
         _textureProvider = textureProvider;
         _mediatorService = mediatorService;
-        _relatedCompendiumType = compendiumTypeFactory.GetByRowRef(options.RelatedRef, out _refType);
+        if (options.OverrideCompendiumType != null)
+        {
+            _relatedCompendiumType = options.OverrideCompendiumType;
+            _refType = options.OverrideCompendiumType.Type;
+        }
+        else
+        {
+            _relatedCompendiumType = compendiumTypeFactory.GetByRowRef(options.RelatedRef, out _refType);
+        }
         relatedRefRowId = _options.RelatedRef.RowId;
-        if (_options.RelatedRef.RowType != null)
+        if (_options.RelatedRef.RowType != null && options.OverrideCompendiumType == null)
         {
             var newId = _relatedCompendiumType?.RemapType(_options.RelatedRef.RowType, relatedRefRowId);
             if (newId != null)

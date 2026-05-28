@@ -177,6 +177,7 @@ namespace InventoryTools.Logic
         private string? _tableId = null;
         private string? _craftTableId = null;
         private HighlightWhen _highlightWhenEnum;
+        private NpcHighlight _npcHighlightEnum;
         public HighlightMode HighlightMode { get; set; } = HighlightMode.Never;
 
         public List<CuratedItem>? CuratedItems
@@ -501,6 +502,16 @@ namespace InventoryTools.Logic
             set
             {
                 _highlightWhenEnum = value;
+                ConfigurationDirty = true;
+            }
+        }
+
+        public NpcHighlight NpcHighlightEnum
+        {
+            get => _npcHighlightEnum;
+            set
+            {
+                _npcHighlightEnum = value;
                 ConfigurationDirty = true;
             }
         }

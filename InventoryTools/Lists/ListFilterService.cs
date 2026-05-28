@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AllaganLib.GameSheets.Sheets;
+using AllaganLib.GameSheets.Sheets.Rows;
 using AllaganLib.Shared.Interfaces;
 using AllaganLib.Shared.Services;
 using CriticalCommonLib.Crafting;

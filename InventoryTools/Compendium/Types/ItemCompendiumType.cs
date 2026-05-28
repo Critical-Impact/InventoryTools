@@ -93,29 +93,33 @@ public class ItemCompendiumType : CompendiumType<ItemRow>
     {
         viewBuilder.SetupDefaults(this, row);
         viewBuilder.Description = row.Base.Description.ToImGuiString();
-        viewBuilder.AddTag("iLvl " + row.Base.LevelItem.RowId, "The item level of the item");
-        viewBuilder.AddTag("Patch " + row.Patch, "The patch the item was introduced");
+        viewBuilder.AddTag(() => "iLvl " + row.Base.LevelItem.RowId, () => "The item level of the item");
+        viewBuilder.AddTag(() => "Patch " + row.Patch, () => "The patch the item was introduced");
         if (row.CanBeAcquired)
         {
-            viewBuilder.AddTag("Acquired", "Is the item acquired?", () =>
-            {
-                var isUnlocked = _unlockTrackerService.IsUnlocked(row);
-                if (isUnlocked == null)
+            viewBuilder.AddTag(
+                () =>
                 {
-                    return ImGuiColors.DalamudYellow;
-                }
-
-                return isUnlocked.Value ? ImGuiColors.ParsedGreen : ImGuiColors.DalamudRed;
-            });
+                    var isUnlocked = _unlockTrackerService.IsUnlocked(row);
+                    if (isUnlocked == null) return "Acquired?";
+                    return isUnlocked.Value ? "Acquired" : "Not Acquired";
+                },
+                () => "Is the item acquired?",
+                () =>
+                {
+                    var isUnlocked = _unlockTrackerService.IsUnlocked(row);
+                    if (isUnlocked == null) return ImGuiColors.DalamudYellow;
+                    return isUnlocked.Value ? ImGuiColors.ParsedGreen : ImGuiColors.DalamudRed;
+                });
         }
 
         if (row.CanBeCrafted)
         {
-            viewBuilder.AddTag("Craftable", "Is the item craftable?");
+            viewBuilder.AddTag(() => "Craftable", () => "Is the item craftable?");
         }
         if (row.CanBeDesynthed)
         {
-            viewBuilder.AddTag("Desynthable", "Can the item be desynthed?");
+            viewBuilder.AddTag(() => "Desynthable", () => "Can the item be desynthed?");
         }
 
         viewBuilder.AddItemSourcesSection(new ItemSourcesSectionOptions()
@@ -173,10 +177,10 @@ public class ItemCompendiumType : CompendiumType<ItemRow>
         var (allRequirements, requirementRows) = BuildObtainabilityRows(row);
         if (allRequirements.Count > 0)
         {
-            viewBuilder.AddTag("Unlocked?", "Are all unlock requirements met for this item?", () =>
-                allRequirements.All(r => r.IsMet)
-                    ? ImGuiColors.ParsedGreen
-                    : ImGuiColors.DalamudRed);
+            viewBuilder.AddTag(
+                () => allRequirements.All(r => r.IsMet) ? "Unlocked" : "Not Unlocked",
+                () => "Are all unlock requirements met for this item?",
+                () => allRequirements.All(r => r.IsMet) ? ImGuiColors.ParsedGreen : ImGuiColors.DalamudRed);
         }
 
         viewBuilder.AddMetadataSection(new MetadataSectionOptions()

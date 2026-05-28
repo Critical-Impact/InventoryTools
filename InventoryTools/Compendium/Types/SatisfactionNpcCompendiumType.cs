@@ -167,7 +167,7 @@ public class SatisfactionNpcCompendiumType : CompendiumType<SatisfactionNpc>
     public override void BuildViewFields(CompendiumViewBuilder viewBuilder, SatisfactionNpc row)
     {
         viewBuilder.SetupDefaults(this, row);
-        viewBuilder.AddTag($"{row.DeliveriesPerWeek}/week", "The number of times you can deliver to the client per week.");
+        viewBuilder.AddTag(() => $"{row.DeliveriesPerWeek}/week", () => "The number of times you can deliver to the client per week.");
 
         viewBuilder.AddSingleRowRefSection(new SingleRowRefSectionOptions()
         {

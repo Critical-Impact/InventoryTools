@@ -56,7 +56,7 @@ public class ImGuiService : AllaganLib.Interface.Services.ImGuiService
         Name = "CheckBoxA_hr1", Size = new Vector2(16, 16), Uv0 = new Vector2(0f, 0f), Uv1 = new Vector2(0.5f, 1f)
     };
 
-    public static bool DrawIconButton(
+    public bool DrawIconButton(
         IFont font,
         FontAwesomeIcon icon,
         ref float currentCursorX,
@@ -64,12 +64,14 @@ public class ImGuiService : AllaganLib.Interface.Services.ImGuiService
         bool reverseCursor = false,
         Vector4? textColor = null,
         bool invisible = false,
-        float? minWidth = null)
+        float? minWidth = null,
+        bool verticalCenter = false,
+        bool resetCursorY = false)
     {
         var success = false;
         var iconString = icon.ToIconString();
 
-        using var pushFont = ImRaii.PushFont(font.IconFont);
+        using var pushFont = ImRaii.PushFont(font.IconFixedWidth);
         using var pushColor = ImRaii.PushColor(ImGuiCol.Text, textColor ?? new Vector4(1, 1, 1, 1), textColor != null);
         var globalScale = ImGui.GetIO().FontGlobalScale;
         var iconSize = ImGui.CalcTextSize(iconString);
@@ -88,6 +90,12 @@ public class ImGuiService : AllaganLib.Interface.Services.ImGuiService
         }
 
         ImGui.SetCursorPosX(currentCursorX);
+
+        var savedCursorY = ImGui.GetCursorPosY();
+        if (verticalCenter)
+        {
+            ImGui.SetCursorPosY((ImGui.GetWindowSize().Y - buttonSize.Y) / 2.0f + ImGui.GetStyle().FramePadding.Y / 2.0f);
+        }
 
         var col1 = ImRaii.PushColor(ImGuiCol.Button,        new Vector4(0, 0, 0, 0), invisible);
         var col2 = ImRaii.PushColor(ImGuiCol.ButtonHovered, new Vector4(0, 0, 0, 0), invisible);
@@ -108,6 +116,11 @@ public class ImGuiService : AllaganLib.Interface.Services.ImGuiService
         col1.Pop();
         pushColor.Pop();
         pushFont.Pop();
+
+        if (resetCursorY)
+        {
+            ImGui.SetCursorPosY(savedCursorY);
+        }
 
         if (ImGui.IsItemHovered() && !string.IsNullOrEmpty(tooltip))
         {
@@ -277,11 +290,9 @@ public class ImGuiService : AllaganLib.Interface.Services.ImGuiService
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void VerticalCenter(string text)
     {
-        var offset = (ImGui.GetWindowSize().Y - ImGui.CalcTextSize(text).Y) / 2.0f;
-        ImGui.SetCursorPosY(offset);
+        ImGui.AlignTextToFramePadding();
         ImGui.TextUnformatted(text);
     }
 

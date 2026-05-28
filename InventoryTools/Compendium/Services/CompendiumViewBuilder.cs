@@ -32,13 +32,14 @@ public class CompendiumViewBuilder
     private readonly ItemSourcesSection.Factory _itemSourcesSectionFactory;
     private readonly ItemFlowSection.Factory _itemFlowSectionFactory;
     private readonly LinksSection.Factory _linksSectionFactory;
+    private readonly NestedSection.Factory _nestedSectionFactory;
     private string _title;
     private string? _subtitle;
     private string? _description;
     private uint _icon;
     private LinksSection? _linksSection;
     private LinksSectionOptions? _linksSectionOptions;
-    private List<(string Tag, string HelpText, Func<Vector4>? color)>? _tags;
+    private List<(Func<string> Tag, Func<string> HelpText, Func<Vector4>? color)>? _tags;
     private List<(string Title, string HelpText, Action action)>? _buttons;
     private List<ICompendiumViewSection>? _sections;
     private string? _draggedSectionKey;
@@ -58,7 +59,8 @@ public class CompendiumViewBuilder
         MetadataSection.Factory metadataSectionFactory,
         ItemSourcesSection.Factory itemSourcesSectionFactory,
         ItemFlowSection.Factory itemFlowSectionFactory,
-        LinksSection.Factory linksSectionFactory)
+        LinksSection.Factory linksSectionFactory,
+        NestedSection.Factory nestedSectionFactory)
     {
         _textureProvider = textureProvider;
         _imGuiService = imGuiService;
@@ -73,6 +75,7 @@ public class CompendiumViewBuilder
         _itemSourcesSectionFactory = itemSourcesSectionFactory;
         _itemFlowSectionFactory = itemFlowSectionFactory;
         _linksSectionFactory = linksSectionFactory;
+        _nestedSectionFactory = nestedSectionFactory;
     }
 
     public string Title
@@ -132,10 +135,10 @@ public class CompendiumViewBuilder
         _linksSectionOptions.Links.Add(new  (link, helpText, _imGuiService.LoadImage(imageName)));
     }
 
-    public void AddTag(string tag, string helpText, Func<Vector4>? color = null)
+    public void AddTag(Func<string> tag, Func<string> helpText, Func<Vector4>? color = null)
     {
         _tags ??= new();
-        _tags.Add(new  (tag, helpText, color));
+        _tags.Add(new (tag, helpText, color));
     }
 
     public void AddButton(string title, string helpText, Action action)
@@ -198,6 +201,16 @@ public class CompendiumViewBuilder
     public void AddItemFlowSection(ItemFlowSectionOptions options)
     {
         AddSection(_itemFlowSectionFactory.Invoke(options));
+    }
+
+    public ItemListSection CreateItemListSection(ItemListSectionOptions options)
+    {
+        return _itemListFactory.Invoke(options);
+    }
+
+    public void AddNestedSection(NestedSectionOptions options)
+    {
+        AddSection(_nestedSectionFactory.Invoke(options));
     }
 
     static void DrawTag(string id, string text, Vector4 color)
@@ -321,19 +334,20 @@ public class CompendiumViewBuilder
 
                 var color = tag.color?.Invoke() ?? ImGuiColors.DalamudWhite;
 
-                DrawTag($"tag{i}", tag.Tag, color);
+                var tagText = tag.Tag();
+                DrawTag($"tag{i}", tagText, color);
 
                 if (ImGui.IsItemHovered())
                 {
                     using (ImRaii.Tooltip())
                     {
-                        ImGui.TextUnformatted(tag.HelpText);
+                        ImGui.TextUnformatted(tag.HelpText());
                     }
                 }
 
                 if (i != _tags.Count - 1)
                 {
-                    SameLineWrap(_tags[i + 1].Tag);
+                    SameLineWrap(_tags[i + 1].Tag());
                 }
             }
         }

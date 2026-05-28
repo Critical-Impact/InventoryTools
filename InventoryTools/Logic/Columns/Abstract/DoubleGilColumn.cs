@@ -25,13 +25,26 @@ namespace InventoryTools.Logic.Columns.Abstract
                     var text = $"{currentValue.Value.Item1:n0}" + SeIconChar.Gil.ToIconString() + Divider +
                                $"{currentValue.Value.Item2:n0}" + SeIconChar.Gil.ToIconString();
                     var xOffset = ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize(text).X - 22;
-                    ImGuiUtil.VerticalAlignText(text, filterConfiguration.TableHeight, false, xOffset);
+                    ImGui.AlignTextToFramePadding();
+                    var posX = (ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(text).X - ImGui.GetScrollX() - 2 * ImGui.GetStyle().ItemSpacing.X);
+                    if (posX > ImGui.GetCursorPosX())
+                    {
+                        ImGui.SetCursorPosX(posX);
+                    }
+                    ImGui.Text(text);
                 }
                 else
                 {
                     var text = EmptyText;
                     var xOffset = ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize(text).X - 22;
-                    ImGuiUtil.VerticalAlignText(text, filterConfiguration.TableHeight, false, xOffset);
+                    ImGui.AlignTextToFramePadding();
+                    var posX = (ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(text).X - ImGui.GetScrollX() - 2 * ImGui.GetStyle().ItemSpacing.X);
+                    if (posX > ImGui.GetCursorPosX())
+                    {
+                        ImGui.SetCursorPosX(posX);
+                    }
+
+                    ImGui.Text(text);
                 }
             }
 
