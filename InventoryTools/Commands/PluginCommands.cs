@@ -241,6 +241,14 @@ namespace InventoryTools.Commands
             _mediatorService.Publish(new ToggleGenericWindowMessage(typeof(EquipmentSuggestWindow)));
         }
 
+        [Command("/chocobocolour")]
+        [Aliases("/atcc")]
+        [HelpMessage("Toggles the chocobo colour calculator window.")]
+        public void ToggleChocoboColourWindow(string command, string args)
+        {
+            _mediatorService.Publish(new ToggleGenericWindowMessage(typeof(ChocoboColourWindow)));
+        }
+
         [Command("/moreinfo")]
         [Aliases("/itemwindow")]
         [HelpMessage("Opens the more information window for a specific item. Provide the name of the item or the ID of the item.")]

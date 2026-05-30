@@ -255,6 +255,7 @@ namespace InventoryTools
             builder.RegisterSingletonSelfAndInterfaces<BackgroundTaskCollector>();
             builder.RegisterSingletonSelfAndInterfaces<AchievementMonitorConfiguration>();
             builder.RegisterSingletonSelfAndInterfaces<UIStateService>();
+            builder.RegisterSingletonSelfAndInterfaces<ChocoboColourSolver>();
 
             //Transient registrations
             builder.RegisterTransientSelfAndInterfaces<BackgroundTaskQueue>();
