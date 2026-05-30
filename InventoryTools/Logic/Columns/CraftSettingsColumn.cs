@@ -104,6 +104,8 @@ public class CraftSettingsColumn : IColumn
         ImGui.TableNextColumn();
         if (!ImGui.TableGetColumnFlags().HasFlag(ImGuiTableColumnFlags.IsEnabled)) return null;
 
+        using var id = ImRaii.PushId(rowIndex);
+
         using (var popup = ImRaii.Popup("ConfigureItemSettings" + columnIndex + searchResult.CraftItem.ItemId + (searchResult.CraftItem.IsOutputItem ? "o" : "")))
         {
             if (popup.Success)
