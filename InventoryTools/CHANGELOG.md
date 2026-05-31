@@ -8,6 +8,19 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [15.0.7] - 2026-05-31
+
+### Added
+- New Chocobo Colour Window, helps you recolour your chocobo by providing a list of the fruit required, craft list integration and a tracker!
+- Master Recipe book compendium now list the unlock status of each book
+
+### Changed
+- Switched the default ingredient sourcing list to include orange scrip instead of white.
+
+### Fixed
+- Folklore tomes should correctly list as locked/unlocked.
+- Stopped the new feature callout from taking focus and switched it to using a modal
+
 ## [15.0.6] - 2026-05-30
 
 ### Added

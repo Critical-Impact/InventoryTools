@@ -1,5 +1,6 @@
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Utility.Raii;
 using InventoryTools.Logic;
 using InventoryTools.Services.Interfaces;
 
@@ -26,14 +27,11 @@ public class CalloutService : ICalloutService
     {
         if (HasSeen(popup)) return false;
 
+        var popupId = $"##callout_{(int)popup}";
         var fontScale = ImGui.GetIO().FontGlobalScale;
         var wrapWidth = 320f * fontScale;
 
-        if (ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows))
-        {
-            ImGui.SetNextWindowFocus();
-        }
-
+        ImGui.OpenPopup(popupId);
         ImGui.SetNextWindowPos(anchorScreenPos + new Vector2(0, 28 * fontScale), ImGuiCond.Always);
         ImGui.SetNextWindowBgAlpha(0.97f);
 
@@ -43,22 +41,24 @@ public class CalloutService : ICalloutService
             | ImGuiWindowFlags.AlwaysAutoResize;
 
         var open = true;
-        if (ImGui.Begin($"##callout_{(int)popup}", ref open, flags))
+        using (var modal = ImRaii.PopupModal(popupId, ref open, flags))
         {
-            ImGui.TextColored(new Vector4(1f, 0.85f, 0.3f, 1f), title);
-            ImGui.Separator();
-            ImGui.Spacing();
-            ImGui.PushTextWrapPos(ImGui.GetCursorPosX() + wrapWidth);
-            ImGui.TextUnformatted(body);
-            ImGui.PopTextWrapPos();
-            ImGui.Spacing();
-            if (ImGui.Button("Got it"))
+            if (modal)
             {
-                MarkSeen(popup);
-                open = false;
+                ImGui.TextColored(new Vector4(1f, 0.85f, 0.3f, 1f), title);
+                ImGui.Separator();
+                ImGui.Spacing();
+                ImGui.PushTextWrapPos(ImGui.GetCursorPosX() + wrapWidth);
+                ImGui.TextUnformatted(body);
+                ImGui.PopTextWrapPos();
+                ImGui.Spacing();
+                if (ImGui.Button("Got it"))
+                {
+                    MarkSeen(popup);
+                    ImGui.CloseCurrentPopup();
+                }
             }
         }
-        ImGui.End();
 
         if (!open)
         {

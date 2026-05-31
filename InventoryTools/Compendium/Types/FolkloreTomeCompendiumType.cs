@@ -8,6 +8,7 @@ using AllaganLib.GameSheets.Model;
 using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Services;
 using DalaMock.Host.Mediator;
+using Dalamud.Plugin.Services;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
 using InventoryTools.Compendium.Sections.Options;
@@ -25,6 +26,7 @@ public class FolkloreTomeCompendiumType : CompendiumType<FolkloreTome>
     private readonly ExcelSheet<NotebookDivision> _notebookDivisionSheet;
     private readonly ClassJobService _classJobService;
     private readonly ItemInfoCache _itemInfoCache;
+    private readonly IUnlockState _unlockState;
     private readonly Lazy<List<FolkloreTome>> _folkloreTomes;
     private readonly Lazy<Dictionary<uint, FolkloreTome>> _folkloreTomesById;
     private readonly Lazy<(string?, uint?)> _staticIcon;
@@ -36,13 +38,15 @@ public class FolkloreTomeCompendiumType : CompendiumType<FolkloreTome>
         ItemInfoCache itemInfoCache,
         CompendiumTable<FolkloreTome>.Factory tableFactory,
         CompendiumColumnBuilder<FolkloreTome>.Factory columnBuilder,
-        CompendiumViewBuilder.Factory viewBuilderFactory)
+        CompendiumViewBuilder.Factory viewBuilderFactory,
+        IUnlockState unlockState)
         : base(tableFactory, columnBuilder, viewBuilderFactory)
     {
         _gatheringSubCategorySheet = gatheringSubCategorySheet;
         _notebookDivisionSheet = notebookDivisionSheet;
         _classJobService = classJobService;
         _itemInfoCache = itemInfoCache;
+        _unlockState = unlockState;
 
         _folkloreTomes = new Lazy<List<FolkloreTome>>(BuildFolkloreTomes, LazyThreadSafetyMode.ExecutionAndPublication);
         _folkloreTomesById = new Lazy<Dictionary<uint, FolkloreTome>>(
@@ -182,7 +186,7 @@ public class FolkloreTomeCompendiumType : CompendiumType<FolkloreTome>
             Name = "Unlocked?",
             HelpText = "Has the player unlocked this folklore tome?",
             Version = "15.0.6",
-            ValueSelector = row => _classJobService.IsFolkloreBookUnlocked(row.NotebookDivision),
+            ValueSelector = row => _unlockState.IsItemUnlocked(row.TomeItem!.Value.Value),
         });
         builder.AddItemColumn(new()
         {
@@ -199,9 +203,9 @@ public class FolkloreTomeCompendiumType : CompendiumType<FolkloreTome>
         viewBuilder.SetupDefaults(this, row);
 
         viewBuilder.AddTag(
-            () => _classJobService.IsFolkloreBookUnlocked(row.NotebookDivision) ? "Read" : "Not Read",
+            () => _unlockState.IsItemUnlocked(row.TomeItem!.Value.Value) ? "Read" : "Not Read",
             () => "Whether the player has read this folklore tome.",
-            () => _classJobService.IsFolkloreBookUnlocked(row.NotebookDivision) ? Dalamud.Interface.Colors.ImGuiColors.HealerGreen : Dalamud.Interface.Colors.ImGuiColors.DalamudRed);
+            () => _unlockState.IsItemUnlocked(row.TomeItem!.Value.Value) ? Dalamud.Interface.Colors.ImGuiColors.HealerGreen : Dalamud.Interface.Colors.ImGuiColors.DalamudRed);
 
         var info = new List<(string Header, string Value, bool IsVisible)>
         {

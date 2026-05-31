@@ -6,6 +6,7 @@ using AllaganLib.GameSheets.Sheets.Rows;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Services;
+using Dalamud.Plugin.Services;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
 using Microsoft.Extensions.Logging;
@@ -15,11 +16,13 @@ namespace InventoryTools.Services;
 public class ItemObtainabilityService : IItemObtainabilityService
 {
     private readonly ClassJobService _classJobService;
+    private readonly IUnlockState _unlockState;
     private readonly ILogger<ItemObtainabilityService> _logger;
 
-    public ItemObtainabilityService(ClassJobService classJobService, ILogger<ItemObtainabilityService> logger)
+    public ItemObtainabilityService(ClassJobService classJobService, IUnlockState unlockState, ILogger<ItemObtainabilityService> logger)
     {
         _classJobService = classJobService;
+        _unlockState = unlockState;
         _logger = logger;
     }
 
@@ -136,7 +139,7 @@ public class ItemObtainabilityService : IItemObtainabilityService
         {
             var tomeId = (uint)folkloreEntry.Value.Division;
             var noteBookDivision = new RowRef<NotebookDivision>(folkloreEntry.Value.ExcelPage.Module, folkloreEntry.Value.Division);
-            var hasBook = _classJobService.IsFolkloreBookUnlocked(noteBookDivision);
+            var hasBook = _unlockState.IsItemUnlocked(folkloreEntry.Value.Item.Value);
             var tomeName = folkloreEntry.Value.Item.ValueNullable?.Name.ExtractText() ?? $"Folklore Tome #{tomeId}";
             RowRef? tomeRowRef = noteBookDivision.Value.AsUntypedRowRef();
             requirements.Add(new ObtainabilityRequirement(
@@ -176,7 +179,7 @@ public class ItemObtainabilityService : IItemObtainabilityService
         if (folkloreEntry.HasValue)
         {
             var tomeId = (uint)folkloreEntry.Value.Division;
-            var hasBook = _classJobService.IsFolkloreBookUnlocked(new RowRef<NotebookDivision>(folkloreEntry.Value.ExcelPage.Module, folkloreEntry.Value.Division));
+            var hasBook = _unlockState.IsItemUnlocked(folkloreEntry.Value.Item.Value);
             var tomeName = folkloreEntry.Value.Item.ValueNullable?.Name.ExtractText() ?? $"Folklore Tome #{tomeId}";
             RowRef? tomeRowRef = folkloreEntry.Value.Item.RowId != 0 ? (RowRef)folkloreEntry.Value.Item : null;
             requirements.Add(new ObtainabilityRequirement(

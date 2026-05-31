@@ -7,7 +7,9 @@ using AllaganLib.GameSheets.ItemSources;
 using AllaganLib.GameSheets.Model;
 using AllaganLib.Shared.Extensions;
 using CriticalCommonLib.Models;
+using CriticalCommonLib.Services;
 using DalaMock.Host.Mediator;
+using Dalamud.Plugin.Services;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
 using InventoryTools.Compendium.Sections.Options;
@@ -22,6 +24,7 @@ public class SecretRecipeBookCompendiumType : CompendiumType<SecretRecipeBook>
 {
     private readonly ExcelSheet<SecretRecipeBook> _secretRecipeBookSheet;
     private readonly ItemInfoCache _itemInfoCache;
+    private readonly IUnlockState _unlockState;
     private readonly Lazy<List<SecretRecipeBook>> _books;
     private readonly Lazy<Dictionary<uint, SecretRecipeBook>> _booksById;
     private readonly Lazy<Dictionary<uint, ItemSecretRecipeBookUse>> _bookUsesByRowId;
@@ -29,6 +32,7 @@ public class SecretRecipeBookCompendiumType : CompendiumType<SecretRecipeBook>
     public SecretRecipeBookCompendiumType(
         ExcelSheet<SecretRecipeBook> secretRecipeBookSheet,
         ItemInfoCache itemInfoCache,
+        IUnlockState unlockState,
         CompendiumTable<SecretRecipeBook>.Factory tableFactory,
         CompendiumColumnBuilder<SecretRecipeBook>.Factory columnBuilder,
         CompendiumViewBuilder.Factory viewBuilderFactory)
@@ -36,6 +40,7 @@ public class SecretRecipeBookCompendiumType : CompendiumType<SecretRecipeBook>
     {
         _secretRecipeBookSheet = secretRecipeBookSheet;
         _itemInfoCache = itemInfoCache;
+        _unlockState = unlockState;
         _books = new Lazy<List<SecretRecipeBook>>(
             () => _secretRecipeBookSheet.Where(r => r.Name.ExtractText() != string.Empty && r.Item.RowId != 0 && r.RowId != 16).ToList(),
             LazyThreadSafetyMode.ExecutionAndPublication);
@@ -114,6 +119,14 @@ public class SecretRecipeBookCompendiumType : CompendiumType<SecretRecipeBook>
             Version = "15.0.6",
             ValueSelector = GetName,
         });
+        builder.AddBooleanColumn(new()
+        {
+            Key = "unlocked",
+            Name = "Unlocked?",
+            HelpText = "Has the player unlocked this master recipe book?",
+            Version = "15.0.6",
+            ValueSelector = row => _unlockState.IsItemUnlocked(row.Item.Value),
+        });
         builder.AddItemsColumn(new()
         {
             Key = "recipes_unlocked",
@@ -131,6 +144,11 @@ public class SecretRecipeBookCompendiumType : CompendiumType<SecretRecipeBook>
     public override void BuildViewFields(CompendiumViewBuilder viewBuilder, SecretRecipeBook row)
     {
         viewBuilder.SetupDefaults(this, row);
+
+        viewBuilder.AddTag(
+            () => _unlockState.IsItemUnlocked(row.Item.Value) ? "Read" : "Not Read",
+            () => "Whether the player has read this master recipe book.",
+            () => _unlockState.IsItemUnlocked(row.Item.Value) ? Dalamud.Interface.Colors.ImGuiColors.HealerGreen : Dalamud.Interface.Colors.ImGuiColors.DalamudRed);
 
         var bookUse = GetBookUse(row);
         var recipeCount = bookUse?.Recipes.Count ?? 0;
