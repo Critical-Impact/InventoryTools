@@ -65,11 +65,14 @@ public class ItemObtainabilityService : IItemObtainabilityService
                 var jobName = recipe.CraftType?.FormattedName ?? "Crafter";
                 var craftJob = _classJobService.GetClassJobListFromCraftTypeId(craftTypeId);
                 RowRef? classJobRowRef = craftJob.HasValue ? _classJobService.GetClassJobRowRef(craftJob.Value) : null;
-                requirements.Add(new ObtainabilityRequirement(
-                    ObtainabilityRequirementType.JobLevel,
-                    playerLevel >= requiredLevel,
-                    $"{jobName} Lv {requiredLevel}",
-                    classJobRowRef));
+                if (classJobRowRef != null)
+                {
+                    requirements.Add(new ObtainabilityRequirement(
+                        ObtainabilityRequirementType.JobLevel,
+                        playerLevel >= requiredLevel,
+                        $"{jobName} Lv {requiredLevel}",
+                        classJobRowRef.Value));
+                }
             }
         }
 
@@ -141,7 +144,7 @@ public class ItemObtainabilityService : IItemObtainabilityService
             var noteBookDivision = new RowRef<NotebookDivision>(folkloreEntry.Value.ExcelPage.Module, folkloreEntry.Value.Division);
             var hasBook = _unlockState.IsItemUnlocked(folkloreEntry.Value.Item.Value);
             var tomeName = folkloreEntry.Value.Item.ValueNullable?.Name.ExtractText() ?? $"Folklore Tome #{tomeId}";
-            RowRef? tomeRowRef = noteBookDivision.Value.AsUntypedRowRef();
+            RowRef tomeRowRef = noteBookDivision.Value.AsUntypedRowRef();
             requirements.Add(new ObtainabilityRequirement(
                 ObtainabilityRequirementType.FolkloreTome,
                 hasBook,
@@ -182,11 +185,14 @@ public class ItemObtainabilityService : IItemObtainabilityService
             var hasBook = _unlockState.IsItemUnlocked(folkloreEntry.Value.Item.Value);
             var tomeName = folkloreEntry.Value.Item.ValueNullable?.Name.ExtractText() ?? $"Folklore Tome #{tomeId}";
             RowRef? tomeRowRef = folkloreEntry.Value.Item.RowId != 0 ? (RowRef)folkloreEntry.Value.Item : null;
-            requirements.Add(new ObtainabilityRequirement(
-                ObtainabilityRequirementType.FolkloreTome,
-                hasBook,
-                tomeName,
-                tomeRowRef));
+            if (tomeRowRef != null)
+            {
+                requirements.Add(new ObtainabilityRequirement(
+                    ObtainabilityRequirementType.FolkloreTome,
+                    hasBook,
+                    tomeName,
+                    tomeRowRef.Value));
+            }
         }
     }
 

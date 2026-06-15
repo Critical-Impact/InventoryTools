@@ -20,7 +20,7 @@ public class MissingRequirementsGrouper
 
     public IReadOnlyList<MissingRequirementGroup> GetMissingRequirements(CraftList craftList)
     {
-        var groups = new Dictionary<(string, uint), (global::Lumina.Excel.RowRef? RowRef, ObtainabilityRequirementType Type, HashSet<string> Names)>();
+        var groups = new Dictionary<(string, uint), (global::Lumina.Excel.RowRef RowRef, ObtainabilityRequirementType Type, HashSet<string> Names)>();
 
         foreach (var craftItem in craftList.GetFlattenedMaterials())
         {
@@ -50,8 +50,8 @@ public class MissingRequirementsGrouper
             var requirements = _obtainabilityService.GetRequirements(craftItem.Item, preferenceType, recipe);
             foreach (var req in requirements)
             {
-                if (req.IsMet) continue;
-                var rowId = req.RowRef?.RowId ?? 0;
+                if (req.IsMet || req.RowRef.RowId == 0) continue;
+                var rowId = req.RowRef.RowId;
                 var key = (req.Description, rowId);
                 if (!groups.TryGetValue(key, out var group))
                 {
@@ -67,6 +67,6 @@ public class MissingRequirementsGrouper
             kv.Key.Item1,
             kv.Value.RowRef,
             kv.Value.Names.ToList()
-        )).OrderBy(c => c.Type).ThenBy(c => c.RowRef?.RowType ?? null).ToList();
+        )).OrderBy(c => c.Type).ThenBy(c => c.RowRef.RowType).ToList();
     }
 }

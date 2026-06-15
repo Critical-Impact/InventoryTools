@@ -2049,27 +2049,25 @@ namespace InventoryTools.Ui
 
             foreach (var group in _missingRequirements)
             {
-                if (group.RowRef == null)
-                {
-                    continue;
-                }
-                var compendiumType = ResolveCompendiumType(group.RowRef.Value);
+                var rowRef = group.RowRef;
+
+                var compendiumType = ResolveCompendiumType(rowRef);
 
                 if (compendiumType == null)
                 {
                     continue;
                 }
 
-                var hasLink = group.RowRef.HasValue && group.RowRef.Value.RowId != 0;
+                var hasLink = rowRef.RowId != 0;
                 if (hasLink)
                 {
                     ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.4f, 0.7f, 1f, 1f));
                 }
 
-                var icon = compendiumType.GetIcon(group.RowRef.Value.RowId);
+                var icon = compendiumType.GetIcon(rowRef.RowId);
                 ImGuiService.DrawIcon(icon, new FFXIVClientStructs.FFXIV.Common.Math.Vector2(16, 16));
                 ImGui.SameLine();
-                var clicked = ImGui.Selectable($"{group.Description}##req_{group.RowRef?.RowId ?? 0}", false, ImGuiSelectableFlags.SpanAllColumns);
+                var clicked = ImGui.Selectable($"{group.Description}##req_{rowRef.RowId}", false, ImGuiSelectableFlags.SpanAllColumns);
 
                 if (hasLink)
                 {
@@ -2078,7 +2076,7 @@ namespace InventoryTools.Ui
 
                 if (clicked)
                 {
-                    MediatorService.Publish(new OpenCompendiumViewMessage(compendiumType, group.RowRef!.Value.RowId));
+                    MediatorService.Publish(new OpenCompendiumViewMessage(compendiumType, rowRef.RowId));
                 }
 
                 ImGui.Indent();
