@@ -3,14 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using AllaganLib.GameSheets.Caches;
 using AllaganLib.GameSheets.Sheets;
-using Autofac;
-using CriticalCommonLib.Models;
 using InventoryTools.Logic.Filters;
 using InventoryTools.Logic.GenericFilters;
 using InventoryTools.Logic.ItemRenderers;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
-using OtterGui;
 using OtterGui.Extensions;
 
 namespace InventoryTools.Services;
@@ -23,7 +20,6 @@ public interface IFilterService
 
 public class FilterService : IFilterService
 {
-    private readonly GenericBooleanFilter.Factory _booleanFilterFactory;
     private readonly GenericHasSourceFilter.Factory _hasSourceFactory;
     private readonly GenericHasUseFilter.Factory _hasUseFactory;
     private readonly GenericHasSourceCategoryFilter.Factory _hasSourceCategoryFactory;
@@ -31,9 +27,8 @@ public class FilterService : IFilterService
     private readonly GenericIntegerFilter.Factory _integerFilterFactory;
     private readonly ExcelSheet<BaseParam> _baseParamSheet;
     private readonly ItemSheet _itemSheet;
-    public readonly List<FilterCategory> FilterCategoryOrder = new() { FilterCategory.Settings, FilterCategory.Display, FilterCategory.Inventories, FilterCategory.Columns,FilterCategory.CraftColumns,  FilterCategory.Basic,   FilterCategory.Stats, FilterCategory.Sources, FilterCategory.SourceCategories, FilterCategory.Uses, FilterCategory.UseCategories, FilterCategory.IngredientSourcing, FilterCategory.ItemIngredientOverrides, FilterCategory.ZonePreference,FilterCategory.WorldPricePreference, FilterCategory.Acquisition, FilterCategory.Searching, FilterCategory.Market, FilterCategory.Searching, FilterCategory.Crafting, FilterCategory.Gathering, FilterCategory.Advanced, FilterCategory.CompletionTracking};
+    public readonly List<FilterCategory> FilterCategoryOrder = new() { FilterCategory.Settings, FilterCategory.Display, FilterCategory.Inventories, FilterCategory.Columns,FilterCategory.CraftColumns,  FilterCategory.Basic,   FilterCategory.Stats, FilterCategory.Sources, FilterCategory.SourceCategories, FilterCategory.Uses, FilterCategory.UseCategories, FilterCategory.IngredientSourcing, FilterCategory.ItemIngredientOverrides, FilterCategory.ZonePreference,FilterCategory.WorldPricePreference, FilterCategory.Acquisition, FilterCategory.Searching, FilterCategory.Market, FilterCategory.Searching, FilterCategory.Crafting, FilterCategory.Gathering, FilterCategory.Advanced, FilterCategory.CompletionTracking, FilterCategory.Notifications};
     public FilterService(IEnumerable<IFilter> filters,
-        GenericBooleanFilter.Factory booleanFilterFactory,
         GenericHasSourceFilter.Factory hasSourceFactory,
         GenericHasUseFilter.Factory hasUseFactory,
         GenericHasSourceCategoryFilter.Factory hasSourceCategoryFactory,
@@ -43,7 +38,6 @@ public class FilterService : IFilterService
         ExcelSheet<BaseParam> baseParamSheet,
         ItemSheet itemSheet)
     {
-        _booleanFilterFactory = booleanFilterFactory;
         _hasSourceFactory = hasSourceFactory;
         _hasUseFactory = hasUseFactory;
         _hasSourceCategoryFactory = hasSourceCategoryFactory;

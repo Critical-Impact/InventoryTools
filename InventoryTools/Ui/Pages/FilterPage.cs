@@ -76,7 +76,7 @@ namespace InventoryTools.Ui.Pages
 
                 var filterType = filterConfiguration.FormattedFilterType;
                 ImGui.SetNextItemWidth(100);
-                ImGui.LabelText(labelName + "FilterTypeLabel", "Filter Type: ");
+                ImGui.LabelText(labelName + "FilterTypeLabel", "List Type: ");
                 ImGui.SameLine();
                 ImGui.TextDisabled(filterType);
 

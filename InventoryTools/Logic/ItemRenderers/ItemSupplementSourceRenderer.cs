@@ -310,6 +310,18 @@ public class ItemOizysSourceRenderer : ItemSupplementSourceRenderer<ItemOizysSou
     public override string HelpText => "Can the item be obtained from a loot item in Oizys?";
 }
 
+public class ItemAuxesiaSourceRenderer : ItemSupplementSourceRenderer<ItemAuxesiaSource>
+{
+    public override IReadOnlyList<ItemInfoRenderCategory>? Categories { get; } =
+        [ItemInfoRenderCategory.FieldOperation];
+    public ItemAuxesiaSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(itemSheet, mapSheet, textureProvider, pluginInterface, ItemInfoType.Auxesia, Icons.FieldOpsIcon)
+    {
+    }
+
+    public override string SingularName => "Auxesia";
+    public override string HelpText => "Can the item be obtained from a loot item in Auxesia?";
+}
+
 public class ItemHydatosUseRenderer : ItemSupplementUseRenderer<ItemHydatosSource>
 {
     public override IReadOnlyList<ItemInfoRenderCategory>? Categories { get; } =

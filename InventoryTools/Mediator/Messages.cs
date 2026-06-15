@@ -35,6 +35,7 @@ public record ListRepositionedMessage(FilterConfiguration filterConfiguration) :
 public record ListAddedMessage(FilterConfiguration filterConfiguration) : MessageBase;
 public record ListRemovedMessage(FilterConfiguration filterConfiguration) : MessageBase;
 public record ListUpdatedMessage(FilterConfiguration FilterConfiguration) : MessageBase;
+public record ListUpdatingMessage(FilterConfiguration FilterConfiguration) : MessageBase;
 public record RequestListUpdateMessage(FilterConfiguration FilterConfiguration) : MessageBase;
 public record RequestTableUpdateMessage(FilterConfiguration FilterConfiguration) : MessageBase;
 public record TeamCraftDataImported(List<(uint, uint)> listData) : MessageBase;

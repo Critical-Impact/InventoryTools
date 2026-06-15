@@ -130,7 +130,7 @@ namespace InventoryTools
             builder.RegisterSingletonsSelfAndInterfaces<IItemInfoRenderer>(dataAccess);
             builder.RegisterSingletonsSelfAndInterfaces<IDebugPane>(typeof(ShopMonitorDebugPane).Assembly); //Register AllaganLib.Monitor debug panes
             builder.RegisterSingletonsSelfAndInterfaces<IDebugPane>(dataAccess); //Register InventoryTools debug panes
-            builder.RegisterSingletonsSelfAndInterfaces<IFilter>(dataAccess).Where(c => c.GetInterface("IGenericFilter") == null); //Generic filters should not be registered as IFilters as we don't want them to show up anywhere we want to iterate over all available filters
+            builder.RegisterSingletonsSelfAndInterfaces<IFilter>(dataAccess).Where(c => c.GetInterface("IGenericFilter") == null || (c.BaseType?.GetInterface("IGenericFilter") ?? null) != null); //Generic filters should not be registered as IFilters as we don't want them to show up anywhere we want to iterate over all available filters. Also include filters that inherit from a class that has IGenericFilter
 
             //Register all classes that are transients and implement a particular interface/class
             builder.RegisterTransientsSelfAndInterfaces<IColumnSetting>(dataAccess);
@@ -153,7 +153,7 @@ namespace InventoryTools
             this.RegisterHostedService(typeof(Chat2Ipc));
             this.RegisterHostedService(typeof(ConfigurationManagerService));
             this.RegisterHostedService(typeof(ContextMenuService));
-            this.RegisterHostedService(typeof(HostedCraftMonitor));
+            this.RegisterHostedService(typeof(CraftListTrackingService));
             this.RegisterHostedService(typeof(HostedInventoryHistory));
             this.RegisterHostedService(typeof(HostedUniversalis));
             this.RegisterHostedService(typeof(HotkeyService));

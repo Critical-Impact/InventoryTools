@@ -48,9 +48,9 @@
       },
       "DalaMock.Host": {
         "type": "Direct",
-        "requested": "[6.1.2, )",
-        "resolved": "6.1.2",
-        "contentHash": "a7TuEGNjJMPK7VPPphAlQTq3+FVVyA7bSwPqNv7kwdapFUz6vLRSQ+ivaj7D8STIYt4jYRKjFuClJ2plReErwA==",
+        "requested": "[6.1.6, )",
+        "resolved": "6.1.6",
+        "contentHash": "2UommI5hwk3X5LxpaO4BpXPMb131iGRBK3wGYilBF8AKmK6Hv/VTuZ/qTqfr2Q4GwoufXQsyFKwZ1fy4fBBgLg==",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "10.0.0",
           "DalaMock.Shared": "6.1.2",
@@ -155,14 +155,14 @@
       },
       "AllaganLib.GameSheets": {
         "type": "Transitive",
-        "resolved": "2.2.3",
-        "contentHash": "vTajoURxkZfGBCemdfOdXwSge8OKx8D/2nTh9pXBvzoWOj+SysBmwO+i+V/zRGJ7p8/SO3Um2RDBJCQIW4J/8w==",
+        "resolved": "2.2.5",
+        "contentHash": "lthC01Ll8Ar1rfs4zeJwNdu+nvxERVfSJ7AvKwPHcjLNx590xtvPxJweRwusk7ScNrbD5qvinBSBa0I9zu7P8w==",
         "dependencies": {
           "AllaganLib.Shared": "2.2.0",
           "Autofac": "9.0.0",
           "Autofac.Extensions.DependencyInjection": "10.0.0",
           "CSVFile": "3.2.1",
-          "LuminaSupplemental.Excel": "4.3.4"
+          "LuminaSupplemental.Excel": "4.3.6"
         }
       },
       "AllaganLib.Shared": {
@@ -201,8 +201,8 @@
       },
       "LuminaSupplemental.Excel": {
         "type": "Transitive",
-        "resolved": "4.3.4",
-        "contentHash": "HKfQt9eijdKggL3+omdyYg0+vm2e2EAdewnEwzaEbBLJ+pGqhuHQiCwOk2eoVc1zFWcnWJcYoF2bd3r0TCCOsw==",
+        "resolved": "4.3.6",
+        "contentHash": "UDnCWF/eXFOayHvd54jsZWycwYRnyCkGingyE8W3YYPUCXg3PU/pGm6KdDlIcX8L9PDvGU7HMy2aM+p5gNgF7Q==",
         "dependencies": {
           "CSVFile": "3.2.1",
           "CsvHelper": "30.0.1",
@@ -492,10 +492,10 @@
       "criticalcommonlib": {
         "type": "Project",
         "dependencies": {
-          "AllaganLib.GameSheets": "[2.2.3, )",
+          "AllaganLib.GameSheets": "[2.2.5, )",
           "AllaganLib.Monitors": "[2.2.0, )",
           "AllaganLib.Shared": "[2.2.0, )",
-          "DalaMock.Host": "[6.1.2, )",
+          "DalaMock.Host": "[6.1.6, )",
           "Humanizer.Core": "[3.0.1, )",
           "NaturalSort.Extension": "[4.4.1, )",
           "SerialQueue": "[2.1.0, )",

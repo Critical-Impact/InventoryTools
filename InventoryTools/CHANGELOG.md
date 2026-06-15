@@ -8,6 +8,22 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [15.0.8] - 2026-06-14
+
+### Added
+- Added new notification system for Craft Lists
+  - Be notified when you gather/craft/buy items via chat and/or sounds
+  - Added a "Craft Notifications" wizard step to configure these notifications for your existing craft lists
+- Added a "Is Unobtainable? Filter/Column"
+- Added Auxesia loot as a source
+
+### Fixed
+- Certain filters were not showing and should now be visible
+
+### Removed
+- Old craft tracker removed and replaced with acqusition tracker entirely
+
+
 ## [15.0.7] - 2026-05-31
 
 ### Added

@@ -90,6 +90,8 @@ public class ListFilterService : DisposableMediatorBackgroundService
 
     public List<SearchResult> RefreshList(FilterConfiguration filterConfiguration, CancellationToken ct = default)
     {
+        MediatorService.Publish(new ListUpdatingMessage(filterConfiguration));
+
         var inventories = _inventoryMonitor.Inventories.Select(c => c.Value).ToList();
 
         List<SearchResult>? searchResult;
@@ -221,7 +223,7 @@ public class ListFilterService : DisposableMediatorBackgroundService
 
         Logger.LogTrace("Filter Information:");
         Logger.LogTrace("Filter Name:" + filter.Name);
-        Logger.LogTrace("Filter Type: " + filter.FilterType);
+        Logger.LogTrace("List Type: " + filter.FilterType);
 
         var filtersWithValues = _filterService.AvailableFilters.Where(c => c.HasValueSet(filter) && c.AvailableIn.HasFlag(filter.FilterType)).ToList();
 

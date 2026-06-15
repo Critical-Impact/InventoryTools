@@ -45,7 +45,6 @@ namespace InventoryTools
         private readonly ICharacterMonitor _characterMonitor;
         private readonly InventoryToolsConfiguration _configuration;
         private readonly IMobTracker _mobTracker;
-        private readonly ICraftMonitor _craftMonitor;
         private readonly IUnlockTrackerService _unlockTrackerService;
         private readonly IEnumerable<BaseTooltip> tooltips;
         private readonly ITooltipService _tooltipService;
@@ -57,7 +56,6 @@ namespace InventoryTools
         private readonly CraftTrackerTrackCombatDropFilter _trackCombatDropFilter;
         private readonly CraftTrackerTrackOtherFilter _trackOtherFilter;
         private readonly CraftTrackerTrackMarketBoardFilter _trackMarketBoardFilter;
-        private readonly UseOldCraftTrackerSetting _useOldCraftTrackerSetting;
         private readonly IMarketCache _marketCache;
         private readonly IEnumerable<ISampleFilter> _sampleFilters;
         private Dictionary<uint, InventoryMonitor.ItemChangesItem> _recentlyAddedSeen = new();
@@ -86,15 +84,9 @@ namespace InventoryTools
             IListService listService, ILogger<PluginLogic> logger, IFramework framework,
             MediatorService mediatorService, HostedInventoryHistory hostedInventoryHistory,
             IInventoryMonitor inventoryMonitor, IInventoryScanner inventoryScanner, ICharacterMonitor characterMonitor,
-            InventoryToolsConfiguration configuration, IMobTracker mobTracker,
-            ICraftMonitor craftMonitor, IUnlockTrackerService unlockTrackerService, IEnumerable<BaseTooltip> tooltips,
+            InventoryToolsConfiguration configuration, IMobTracker mobTracker, IUnlockTrackerService unlockTrackerService, IEnumerable<BaseTooltip> tooltips,
             IMarketCache marketCache, IEnumerable<ISampleFilter> sampleFilters,
-            ITooltipService tooltipService, FilterConfiguration.Factory filterConfigFactory,
-            IAcquisitionMonitorService acquisitionMonitorService,
-            CraftTrackerTrackCraftsFilter trackCraftsFilter, CraftTrackerTrackGatheringFilter trackGatheringFilter,
-            CraftTrackerTrackShoppingFilter trackShoppingFilter, CraftTrackerTrackCombatDropFilter trackCombatDropFilter,
-            CraftTrackerTrackOtherFilter trackOtherFilter, UseOldCraftTrackerSetting useOldCraftTrackerSetting,
-            CraftTrackerTrackMarketBoardFilter trackMarketBoardFilter) : base(logger, mediatorService)
+            ITooltipService tooltipService, FilterConfiguration.Factory filterConfigFactory) : base(logger, mediatorService)
         {
             _configurationManagerService = configurationManagerService;
             _chatUtilities = chatUtilities;
@@ -107,19 +99,10 @@ namespace InventoryTools
             _characterMonitor = characterMonitor;
             _configuration = configuration;
             _mobTracker = mobTracker;
-            _craftMonitor = craftMonitor;
             _unlockTrackerService = unlockTrackerService;
             this.tooltips = tooltips;
             _tooltipService = tooltipService;
             _filterConfigFactory = filterConfigFactory;
-            _acquisitionMonitorService = acquisitionMonitorService;
-            _trackCraftsFilter = trackCraftsFilter;
-            _trackGatheringFilter = trackGatheringFilter;
-            _trackShoppingFilter = trackShoppingFilter;
-            _trackCombatDropFilter = trackCombatDropFilter;
-            _trackOtherFilter = trackOtherFilter;
-            _useOldCraftTrackerSetting = useOldCraftTrackerSetting;
-            _trackMarketBoardFilter = trackMarketBoardFilter;
             _marketCache = marketCache;
             _sampleFilters = sampleFilters;
             MediatorService.Subscribe<PluginLoadedMessage>(this, PluginLoaded);
@@ -129,46 +112,6 @@ namespace InventoryTools
         {
             _inventoryMonitor.Start();
             _inventoryScanner.Enable();
-        }
-
-        private void CraftMonitorOnCraftCompleted(uint itemid, FFXIVClientStructs.FFXIV.Client.Game.InventoryItem.ItemFlags flags, uint quantity)
-        {
-            if (!_useOldCraftTrackerSetting.CurrentValue(_configuration))
-            {
-                _logger.LogTrace("Craft monitor event ignored as the acquisition tracker currently has precedence.");
-                return;
-            }
-            _logger.LogTrace("Craft completed for {Quantity} qty of item {ItemId}", quantity, itemid);
-
-            var activeCraftList = _listService.GetActiveCraftList();
-            if (activeCraftList != null && activeCraftList.FilterType == FilterType.CraftFilter && activeCraftList.CraftList.CraftListMode == CraftListMode.Normal)
-            {
-                _logger.LogTrace("Marking {Quantity} qty for item {ItemId} ({HqFlag}) as crafted.", quantity, itemid, flags == InventoryItem.ItemFlags.None ? "NQ" : "HQ");
-                activeCraftList.CraftList.MarkCrafted(itemid, flags, quantity);
-                if (activeCraftList is { IsEphemeralCraftList: true, CraftList.IsCompleted: true })
-                {
-                    _chatUtilities.Print("Ephemeral craft list '" + activeCraftList.Name + "' completed. List has been removed.");
-                    _listService.RemoveList(activeCraftList);
-                }
-                else
-                {
-                    activeCraftList.NeedsRefresh = true;
-                }
-            }
-            else
-            {
-                _logger.LogTrace("Active craft list is either inactive or in stock mode.");
-            }
-        }
-
-        private void CraftMonitorOnCraftFailed(uint itemid)
-        {
-            _logger.LogTrace("Craft failed for item " + itemid);
-        }
-
-        private void CraftMonitorOnCraftStarted(uint itemid)
-        {
-            _logger.LogTrace("Craft started for item " + itemid);
         }
 
         private void UnlockTrackerServiceOnAcquiredItemsUpdated()
@@ -330,11 +273,6 @@ namespace InventoryTools
             _inventoryMonitor.OnInventoryChanged += InventoryMonitorOnOnInventoryChanged;
             _framework.Update += FrameworkOnUpdate;
             _configurationManagerService.ConfigurationChanged += ConfigOnConfigurationChanged;
-
-            _acquisitionMonitorService.ItemAcquired += AcquisitionMonitorServiceOnItemAcquired;
-            _craftMonitor.CraftStarted += CraftMonitorOnCraftStarted;
-            _craftMonitor.CraftFailed += CraftMonitorOnCraftFailed ;
-            _craftMonitor.CraftCompleted += CraftMonitorOnCraftCompleted ;
             _unlockTrackerService.ItemUnlockStatusChanged += UnlockTrackerServiceOnAcquiredItemsUpdated;
 
             foreach (var tooltip in tooltips.OrderBy(c => c.Order))
@@ -352,47 +290,7 @@ namespace InventoryTools
             return Task.CompletedTask;
         }
 
-        private void AcquisitionMonitorServiceOnItemAcquired(uint itemId, InventoryItem.ItemFlags itemFlags, int qtyIncrease, AcquisitionReason reason)
-        {
-            if (_useOldCraftTrackerSetting.CurrentValue(_configuration))
-            {
-                _logger.LogTrace("Acquisition tracker event ignored as the craft monitor currently has precedence.");
-                return;
-            }
-            _logger.LogTrace("Item acquired through {Reason}, qty of {QtyIncrease}, item ID: {ItemId}", reason, qtyIncrease, itemId);
 
-            var activeCraftList = _listService.GetActiveCraftList();
-            if (activeCraftList != null && activeCraftList.FilterType == FilterType.CraftFilter && activeCraftList.CraftList.CraftListMode == CraftListMode.Normal)
-            {
-                if ((reason == AcquisitionReason.Crafting && _trackCraftsFilter.CurrentValue(activeCraftList) == false) ||
-                    (reason == AcquisitionReason.Gathering && _trackGatheringFilter.CurrentValue(activeCraftList) == false) ||
-                    (reason == AcquisitionReason.Shopping && _trackShoppingFilter.CurrentValue(activeCraftList) == false) ||
-                    (reason == AcquisitionReason.CombatDrop && _trackCombatDropFilter.CurrentValue(activeCraftList) == false) ||
-                    (reason == AcquisitionReason.Other && _trackOtherFilter.CurrentValue(activeCraftList) == false) ||
-                    (reason == AcquisitionReason.Marketboard && _trackMarketBoardFilter.CurrentValue(activeCraftList) == false)
-                    )
-                {
-                    _logger.LogTrace("Craft list configured to not track {Reason}, not altering required item counts.", reason);
-                    return;
-                }
-
-                _logger.LogTrace("Marking {Quantity} qty for item {ItemId} ({HqFlag}) as crafted.", qtyIncrease, itemId, itemFlags.ToString());
-                activeCraftList.CraftList.MarkCrafted(itemId, itemFlags, (uint)qtyIncrease);
-                if (activeCraftList is { IsEphemeralCraftList: true, CraftList.IsCompleted: true })
-                {
-                    _chatUtilities.Print("Ephemeral craft list '" + activeCraftList.Name + "' completed. List has been removed.");
-                    _listService.RemoveList(activeCraftList);
-                }
-                else
-                {
-                    activeCraftList.NeedsRefresh = true;
-                }
-            }
-            else
-            {
-                _logger.LogTrace("Active craft list is either inactive or in stock mode.");
-            }
-        }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
@@ -401,10 +299,6 @@ namespace InventoryTools
             _configuration.SavedCharacters = _characterMonitor.Characters;
             _framework.Update -= FrameworkOnUpdate;
             _inventoryMonitor.OnInventoryChanged -= InventoryMonitorOnOnInventoryChanged;
-            _acquisitionMonitorService.ItemAcquired -= AcquisitionMonitorServiceOnItemAcquired;
-            _craftMonitor.CraftStarted -= CraftMonitorOnCraftStarted;
-            _craftMonitor.CraftFailed -= CraftMonitorOnCraftFailed ;
-            _craftMonitor.CraftCompleted -= CraftMonitorOnCraftCompleted ;
             _configurationManagerService.ConfigurationChanged -= ConfigOnConfigurationChanged;
             _configurationManagerService.Save();
             _configurationManagerService.SaveInventoriesAsync(_inventoryMonitor.AllItems.ToList()).Wait(TimeSpan.FromSeconds(2));

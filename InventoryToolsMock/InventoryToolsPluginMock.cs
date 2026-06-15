@@ -1,3 +1,5 @@
+using System.Threading;
+using System.Threading.Tasks;
 using AllaganLib.Monitors.Services;
 using AllaganLib.Shared.Time;
 using Autofac;
@@ -37,10 +39,8 @@ public class InventoryToolsPluginMock : InventoryToolsPlugin
 
     public override IReplacementContainer ReplacementContainer { get; }
 
-    public override void PreBuild(IHostBuilder hostBuilder)
+    public override Task PreBuildingAsync(IHostBuilder hostBuilder, CancellationToken cancellationToken)
     {
-        base.PreBuild(hostBuilder);
-
         this.ReplaceHostedService(typeof(WotsitIpc),typeof(MockWotsitIpc));
         this.ReplaceHostedService(typeof(CraftMonitor),typeof(MockHostedCraftMonitor));
         this.ReplaceHostedService(typeof(OdrScanner),typeof(MockOdrScanner));
@@ -79,5 +79,6 @@ public class InventoryToolsPluginMock : InventoryToolsPlugin
             });
             container.RegisterInstance(seriLog).As<ILogger>().SingleInstance();
         });
+        return Task.CompletedTask;
     }
 }

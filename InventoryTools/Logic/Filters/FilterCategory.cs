@@ -24,5 +24,6 @@ namespace InventoryTools.Logic.Filters
         Stats = 19,
         CompletionTracking = 20,
         ItemIngredientOverrides = 21,
+        Notifications = 22,
     }
 }

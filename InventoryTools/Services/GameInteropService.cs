@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
 
@@ -13,7 +14,7 @@ public interface IGameInteropService
     unsafe Dictionary<ClassJob, short>? GetClassJobLevels();
     unsafe byte? GetChocoboStainId();
     unsafe RowRef<Stain> GetChocoboStain();
-
+    void PlayChatSoundEffect(uint soundEffectId);
 }
 
 public class GameInteropService : IGameInteropService
@@ -70,5 +71,15 @@ public class GameInteropService : IGameInteropService
     public RowRef<Stain> GetChocoboStain()
     {
         return new RowRef<Stain>(_dataManager.Excel, GetChocoboStainId() ?? 0);
+    }
+
+    public unsafe void PlayChatSoundEffect(uint soundEffectId)
+    {
+        if (!_clientState.IsLoggedIn)
+        {
+            return;
+        }
+
+        UIGlobals.PlayChatSoundEffect(soundEffectId);
     }
 }
