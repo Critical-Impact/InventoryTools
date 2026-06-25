@@ -9,7 +9,6 @@ using AllaganLib.GameSheets.Sheets.Rows;
 using AllaganLib.Shared.Extensions;
 using Autofac;
 using CriticalCommonLib;
-using CriticalCommonLib.Addons;
 using CriticalCommonLib.Crafting;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.Helpers;
@@ -17,7 +16,6 @@ using CriticalCommonLib.MarketBoard;
 using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
-using CriticalCommonLib.Services.Ui;
 using DalaMock.Host.Mediator;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Game.ClientState.Keys;
@@ -41,8 +39,10 @@ using InventoryTools.Logic.Columns;
 using InventoryTools.Logic.Filters;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
+using InventoryTools.Services.GameCraftSources;
 using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Logging;
+using Serilog.Events;
 using ImGuiUtil = OtterGui.ImGuiUtil;
 using InventoryItem = FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 using PopupMenu = InventoryTools.Ui.Widgets.PopupMenu;
@@ -60,7 +60,7 @@ namespace InventoryTools.Ui
         private readonly IUniversalis _universalis;
         private readonly ICharacterMonitor _characterMonitor;
         private readonly IFileDialogManager _fileDialogManager;
-        private readonly IGameUiManager _gameUiManager;
+        private readonly GameCraftSourceService _gameCraftSourceService;
         private readonly IChatUtilities _chatUtilities;
         private readonly ListImportExportService _importExportService;
         private readonly CraftWindowLayoutSetting _layoutSetting;
@@ -80,6 +80,7 @@ namespace InventoryTools.Ui
         private readonly ICompendiumTypeFactory _compendiumTypeFactory;
         private readonly ICalloutService _calloutService;
         private readonly MissingRequirementsGrouper _missingRequirementsGrouper;
+        private readonly IPluginLog _pluginLog;
         private IEnumerable<IMenuWindow> _menuWindows;
         private ThrottleDispatcher? _throttleDispatcher;
 
@@ -94,7 +95,7 @@ namespace InventoryTools.Ui
             IUniversalis universalis,
             ICharacterMonitor characterMonitor,
             IFileDialogManager fileDialogManager,
-            IGameUiManager gameUiManager,
+            GameCraftSourceService gameCraftSourceService,
             IChatUtilities chatUtilities,
             ListImportExportService importExportService,
             CraftWindowLayoutSetting layoutSetting,
@@ -113,7 +114,8 @@ namespace InventoryTools.Ui
             IEnumerable<ICompendiumType> compendiumTypes,
             ICompendiumTypeFactory compendiumTypeFactory,
             ICalloutService calloutService,
-            MissingRequirementsGrouper missingRequirementsGrouper) : base(logger, mediator, imGuiService, configuration, "Crafts Window")
+            MissingRequirementsGrouper missingRequirementsGrouper,
+            IPluginLog pluginLog) : base(logger, mediator, imGuiService, configuration, "Crafts Window")
         {
             _tableService = tableService;
             _configuration = configuration;
@@ -123,7 +125,7 @@ namespace InventoryTools.Ui
             _universalis = universalis;
             _characterMonitor = characterMonitor;
             _fileDialogManager = fileDialogManager;
-            _gameUiManager = gameUiManager;
+            _gameCraftSourceService = gameCraftSourceService;
             _chatUtilities = chatUtilities;
             _importExportService = importExportService;
             _layoutSetting = layoutSetting;
@@ -143,6 +145,7 @@ namespace InventoryTools.Ui
             _compendiumTypeFactory = compendiumTypeFactory;
             _calloutService = calloutService;
             _missingRequirementsGrouper = missingRequirementsGrouper;
+            _pluginLog = pluginLog;
             Flags = ImGuiWindowFlags.MenuBar;
             MediatorService.Subscribe<ListUpdatedMessage>(this, ListUpdatedMessage);
         }
@@ -421,6 +424,24 @@ namespace InventoryTools.Ui
                             if (ImGui.MenuItem("Help"))
                             {
                                 this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(HelpWindow)));
+                            }
+
+                            if (ImGui.MenuItem("Enable Verbose Logging", "",
+                                    this._pluginLog.MinimumLogLevel == LogEventLevel.Verbose))
+                            {
+                                if (this._pluginLog.MinimumLogLevel == LogEventLevel.Verbose)
+                                {
+                                    this._pluginLog.MinimumLogLevel = LogEventLevel.Debug;
+                                }
+                                else
+                                {
+                                    this._pluginLog.MinimumLogLevel = LogEventLevel.Verbose;
+                                }
+                            }
+
+                            if (ImGui.MenuItem("Generate Support Dump"))
+                            {
+                                this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(SupportDumpWindow)));
                             }
 
                             if (ImGui.MenuItem("Report a Issue"))
@@ -1716,6 +1737,56 @@ namespace InventoryTools.Ui
                         this.MediatorService.Publish(new ToggleGenericWindowMessage(typeof(CraftOverlayWindow)));
                     }
 
+                    DrawAddFromGameMenu();
+                }
+            }
+        }
+
+        private void DrawAddFromGameMenu()
+        {
+            if (SelectedConfiguration == null)
+            {
+                return;
+            }
+
+            var categories = _gameCraftSourceService.GetAvailableCategories();
+            if (categories.Count == 0)
+            {
+                return;
+            }
+
+            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.3f, 0.6f, 1f, 1f));
+            using (var menu = ImRaii.Menu("Add From Game"))
+            {
+                ImGui.PopStyleColor();
+                if (menu)
+                {
+                    foreach (var category in categories)
+                    {
+                        if (ImGui.MenuItem(category.Name))
+                        {
+                            var configuration = SelectedConfiguration;
+                            var items = category.GetItems();
+                            _framework.RunOnFrameworkThread(() =>
+                            {
+                                foreach (var item in items)
+                                {
+                                    configuration.CraftList.AddCraftItem(item.ItemId, item.Quantity, item.Flags);
+                                }
+                                configuration.NeedsRefresh = true;
+                            });
+                        }
+                    }
+                }
+            }
+
+            if (ImGui.IsItemHovered())
+            {
+                using (ImRaii.Tooltip())
+                {
+                    ImGui.Text("This menu appears because Allagan Tools detected a supported game window open");
+                    ImGui.Text("(such as the FC Workshop or your Grand Company supply list).");
+                    ImGui.Text("Each option adds its items to the currently selected craft list.");
                 }
             }
         }
@@ -2650,36 +2721,6 @@ namespace InventoryTools.Ui
 
                     ImGuiUtil.HoverTooltip("Refresh Market Prices");
                     ImGui.SameLine();
-
-                    if (_gameUiManager.IsWindowVisible(
-                            CriticalCommonLib.Services.Ui.WindowName.SubmarinePartsMenu))
-                    {
-                        var subMarinePartsMenu = _gameUiManager.GetWindow("SubmarinePartsMenu");
-                        if (subMarinePartsMenu != null)
-                        {
-                            if (ImGui.Button("Add Company Craft to List"))
-                            {
-                                var subAddon = (SubmarinePartsMenuAddon*)subMarinePartsMenu;
-                                for (byte i = 0; i < 6; i++)
-                                {
-                                    var itemRequired = subAddon->GetItem(i);
-                                    if (itemRequired != null)
-                                    {
-                                        var amountLeft = itemRequired.Value.QtyRemaining;
-                                        if (amountLeft > 0)
-                                        {
-                                            _framework.RunOnFrameworkThread(() =>
-                                            {
-                                                filterConfiguration.CraftList.AddCraftItem(itemRequired.Value.ItemId, amountLeft);
-                                                filterConfiguration.NeedsRefresh = true;
-                                            });
-                                        }
-                                    }
-                                }
-                            }
-                            ImGui.SameLine();
-                        }
-                    }
 
                     ImGuiService.VerticalCenter("Pending Market Requests: " + _universalis.QueuedCount);
 

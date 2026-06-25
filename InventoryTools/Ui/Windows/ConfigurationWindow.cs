@@ -465,6 +465,11 @@ namespace InventoryTools.Ui
                                 }
                             }
 
+                            if (ImGui.MenuItem("Generate Support Dump"))
+                            {
+                                this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(SupportDumpWindow)));
+                            }
+
                             if (ImGui.MenuItem("Ko-Fi"))
                             {
                                 "https://ko-fi.com/critical_impact".OpenBrowser();

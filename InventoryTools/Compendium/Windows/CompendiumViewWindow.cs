@@ -161,6 +161,11 @@ public class CompendiumViewWindow : CompendiumWindow
                                 }
                             }
 
+                            if (ImGui.MenuItem("Generate Support Dump"))
+                            {
+                                this.MediatorService.Publish(new OpenGenericWindowMessage(typeof(SupportDumpWindow)));
+                            }
+
                             if (ImGui.MenuItem("Report a Issue"))
                             {
                                 "https://github.com/Critical-Impact/InventoryTools".OpenBrowser();

@@ -71,6 +71,7 @@ using InventoryTools.Overlays;
 using InventoryTools.ServiceConfigurations;
 using InventoryTools.Groupers;
 using InventoryTools.Services;
+using InventoryTools.Services.GameCraftSources;
 using InventoryTools.Tooltips;
 using InventoryTools.Ui;
 using InventoryTools.Ui.Pages;
@@ -128,6 +129,7 @@ namespace InventoryTools
             builder.RegisterSingletonsSelfAndInterfaces<ISampleFilter>(dataAccess);
             builder.RegisterSingletonsSelfAndInterfaces<IFeature>(dataAccess);
             builder.RegisterSingletonsSelfAndInterfaces<IItemInfoRenderer>(dataAccess);
+            builder.RegisterSingletonsSelfAndInterfaces<IGameCraftSource>(dataAccess);
             builder.RegisterSingletonsSelfAndInterfaces<IDebugPane>(typeof(ShopMonitorDebugPane).Assembly); //Register AllaganLib.Monitor debug panes
             builder.RegisterSingletonsSelfAndInterfaces<IDebugPane>(dataAccess); //Register InventoryTools debug panes
             builder.RegisterSingletonsSelfAndInterfaces<IFilter>(dataAccess).Where(c => c.GetInterface("IGenericFilter") == null || (c.BaseType?.GetInterface("IGenericFilter") ?? null) != null); //Generic filters should not be registered as IFilters as we don't want them to show up anywhere we want to iterate over all available filters. Also include filters that inherit from a class that has IGenericFilter
@@ -220,6 +222,7 @@ namespace InventoryTools
             builder.RegisterSingletonSelfAndInterfaces<GameInterface>();
             builder.RegisterSingletonSelfAndInterfaces<GameInteropService>();
             builder.RegisterSingletonSelfAndInterfaces<GameUiManager>();
+            builder.RegisterSingletonSelfAndInterfaces<GameCraftSourceService>();
             builder.RegisterSingletonSelfAndInterfaces<HostedUniversalisConfiguration>();
             builder.RegisterSingletonSelfAndInterfaces<ImGuiMenuService>();
             builder.RegisterSingletonSelfAndInterfaces<ImGuiService>();
@@ -244,6 +247,7 @@ namespace InventoryTools
             builder.RegisterSingletonSelfAndInterfaces<MissingRequirementsGrouper>();
             builder.RegisterSingletonSelfAndInterfaces<PopupService>();
             builder.RegisterSingletonSelfAndInterfaces<QuestManagerService>();
+            builder.RegisterSingletonSelfAndInterfaces<SupportDumpService>();
             builder.RegisterSingletonSelfAndInterfaces<SeTime>();
             builder.RegisterSingletonSelfAndInterfaces<ShopHighlighting>();
             builder.RegisterSingletonSelfAndInterfaces<TeleporterIpc>();
@@ -535,6 +539,8 @@ namespace InventoryTools
 
         public override async Task StoppingAsync()
         {
+            _loadConfigStopwatch = new Stopwatch();
+            _loadConfigStopwatch.Start();
         }
 
         public override async Task StartedAsync(CancellationToken cancellationToken)
@@ -552,8 +558,14 @@ namespace InventoryTools
             }
         }
 
+
         public override async Task StoppedAsync()
         {
+            if (_loadConfigStopwatch != null)
+            {
+                _pluginLog.Verbose("Took " + _loadConfigStopwatch.Elapsed.TotalSeconds.ToString("N2") +
+                                   " seconds to stop Allagan Tools.");
+            }
         }
 
         protected virtual void Dispose(bool disposing)

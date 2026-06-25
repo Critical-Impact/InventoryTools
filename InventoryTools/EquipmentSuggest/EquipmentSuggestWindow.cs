@@ -109,6 +109,11 @@ public class EquipmentSuggestWindow : GenericWindow, IMenuWindow
                             }
                         }
 
+                        if (ImGui.MenuItem("Generate Support Dump"))
+                        {
+                            MediatorService.Publish(new OpenGenericWindowMessage(typeof(SupportDumpWindow)));
+                        }
+
                         if (ImGui.MenuItem("Report a Issue"))
                         {
                             "https://github.com/Critical-Impact/InventoryTools".OpenBrowser();
