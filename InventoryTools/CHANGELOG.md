@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.h
 - Added "Support Dump" feature, making it easier for plugin users to provide their logs + config
 - Added a new "Add From Game" menu to the Crafts list replacing the "Add Company Crafts" button. This currently supports the Company Craft parts menu and the Grand Company Supply/Provision windows.
 
+### Fixed
+- Fixed a exception being thrown in the crafts window when certain items are added
+
 ### Changed
 - Lumina Supplemental data update
 

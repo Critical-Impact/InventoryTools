@@ -67,6 +67,6 @@ public class MissingRequirementsGrouper
             kv.Key.Item1,
             kv.Value.RowRef,
             kv.Value.Names.ToList()
-        )).OrderBy(c => c.Type).ThenBy(c => c.RowRef.RowType).ToList();
+        )).OrderBy(c => c.Type).ThenBy(c => c.RowRef.RowType?.Name ?? "").ToList();
     }
 }
