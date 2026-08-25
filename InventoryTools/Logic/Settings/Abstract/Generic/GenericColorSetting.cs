@@ -9,14 +9,12 @@ namespace InventoryTools.Logic.Settings.Abstract.Generic;
 
 public abstract class GenericColorSetting : Setting<Vector4?>
 {
-    public GenericColorSetting(string key, string name, string helpText, Vector4? defaultValue, SettingCategory settingCategory, SettingSubCategory settingSubCategory, string version, ILogger logger, ImGuiService imGuiService) : base(logger, imGuiService)
+    public GenericColorSetting(string key, string name, string helpText, Vector4? defaultValue, string version, ILogger logger, ImGuiService imGuiService) : base(logger, imGuiService)
     {
         Key = key;
         Name = name;
         HelpText = helpText;
         DefaultValue = defaultValue;
-        SettingCategory = settingCategory;
-        SettingSubCategory = settingSubCategory;
         Version = version;
     }
 
@@ -77,7 +75,5 @@ public abstract class GenericColorSetting : Setting<Vector4?>
     public sealed override string Key { get; set; }
     public sealed override string Name { get; set; }
     public sealed override string HelpText { get; set; }
-    public sealed override SettingCategory SettingCategory { get; set; }
-    public override SettingSubCategory SettingSubCategory { get; }
     public override string Version { get; }
 }

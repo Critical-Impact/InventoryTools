@@ -13,8 +13,6 @@ public class HotkeyConfigWindowSetting : HotKeySetting
     public override string Key { get; set; } = AsKey;
     public override string Name { get; set; } = "Toggle Configuration Window";
     public override string HelpText { get; set; } = "The hotkey to toggle the configuration window.";
-    public override SettingCategory SettingCategory { get; set; } = SettingCategory.Hotkeys;
-    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
     public override string Version => "1.7.0.0";
 
     public HotkeyConfigWindowSetting(ILogger<HotkeyConfigWindowSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)

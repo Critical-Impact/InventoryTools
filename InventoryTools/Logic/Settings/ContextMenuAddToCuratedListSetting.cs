@@ -12,8 +12,6 @@ public class ContextMenuAddToCuratedListSetting : GenericBooleanSetting
         "Context Menu - Add to Curated List",
         "Add a submenu to add the item to a curated list?",
         false,
-        SettingCategory.ContextMenu,
-        SettingSubCategory.General,
         "1.7.0.21",
         logger,
         imGuiService)

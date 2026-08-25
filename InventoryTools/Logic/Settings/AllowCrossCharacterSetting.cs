@@ -23,9 +23,7 @@ namespace InventoryTools.Logic.Settings
 
         public override string HelpText { get; set; } =
             "Should characters not currently logged in and their associated retainers be available to view/search and filter against? Each list can have it's sources/destinations configured to include/exclude retainers/free companies that are related to the currently logged in character.";
-
-        public override SettingCategory SettingCategory { get; set; } = SettingCategory.Lists;
-        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
+        
         public override string Version => "1.7.0.0";
 
         public AllowCrossCharacterSetting(ILogger<AllowCrossCharacterSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)

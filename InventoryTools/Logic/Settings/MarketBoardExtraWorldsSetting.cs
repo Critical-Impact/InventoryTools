@@ -31,8 +31,6 @@ public class MarketBoardExtraWorldsSetting : MultipleChoiceSetting<uint>
     public override string Key { get; set; } = "MarketBoardExtraWorlds";
     public override string Name { get; set; } = "Price Worlds";
     public override string HelpText { get; set; } = "A list of extra worlds we should automatically price";
-    public override SettingCategory SettingCategory { get; set; } = SettingCategory.MarketBoard;
-    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Market;
     public override string Version { get; } = "1.7.0.0";
     private Dictionary<uint, string>? _worldNames;
     public override Dictionary<uint, string> GetChoices(InventoryToolsConfiguration configuration)

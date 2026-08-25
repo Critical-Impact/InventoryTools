@@ -26,8 +26,6 @@ public class AddTitleMenuButtonSetting : BooleanSetting
 
     public override string HelpText { get; set; } =
         "Adds a button to the title menu along side the dalamud menu items allowing you to open Allagan Tools while not logged in.";
-
-    public override SettingCategory SettingCategory { get; set; } = SettingCategory.TitleMenuButtons;
-    public override SettingSubCategory SettingSubCategory => SettingSubCategory.General;
+    
     public override string Version => "1.7.0.0"; 
 }

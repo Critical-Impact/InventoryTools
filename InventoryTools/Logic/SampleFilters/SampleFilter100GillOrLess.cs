@@ -35,6 +35,8 @@ public class SampleFilter100GillOrLess : BooleanSetting, ISampleFilter
         _shouldAdd = newValue;
     }
 
+    public override bool AppearsInConfigWindow => false;
+
     public override string Key { get; set; } = "sample1";
     public override string Name { get; set; } = "100 gil or less";
     public string SampleDefaultName => "100 gil or less";
@@ -44,8 +46,6 @@ public class SampleFilter100GillOrLess : BooleanSetting, ISampleFilter
 
     public SampleFilterType SampleFilterType => SampleFilterType.Sample;
     public override string HelpText { get; set; } = "Shows you any items that sell for under 100 gil at shops.";
-    public override SettingCategory SettingCategory { get; set; } = SettingCategory.None;
-    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.None;
     public override string Version => "1.7.0.0";
     public bool ShouldAdd => _shouldAdd;
     public FilterConfiguration AddFilter()

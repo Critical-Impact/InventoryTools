@@ -6,7 +6,7 @@ namespace InventoryTools.Logic.Settings
 {
     public class ContextMenuMoreInformationSetting : BooleanSetting
     {
-        public override bool DefaultValue { get; set; } = false;
+        public override bool DefaultValue { get; set; } = true;
         public override bool CurrentValue(InventoryToolsConfiguration configuration)
         {
             return configuration.AddMoreInformationContextMenu;
@@ -25,8 +25,6 @@ namespace InventoryTools.Logic.Settings
         public override string HelpText { get; set; } =
             "Add the more information menu item to the right click/context menu for items?";
 
-        public override SettingCategory SettingCategory { get; set; } = SettingCategory.ContextMenu;
-        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
         public override string Version => "1.7.0.0";
 
         public ContextMenuMoreInformationSetting(ILogger<ContextMenuMoreInformationSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)

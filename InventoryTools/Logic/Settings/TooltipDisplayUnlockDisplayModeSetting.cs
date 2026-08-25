@@ -18,7 +18,7 @@ public class TooltipDisplayUnlockDisplayModeSetting : GenericEnumChoiceSetting<T
     {
         { TooltipDisplayUnlockDisplayMode.CharacterPerLine , "Character Per Line" },
         { TooltipDisplayUnlockDisplayMode.GroupedByUnlockStatus , "Grouped By Unlock Status" },
-    }, SettingCategory.ToolTips, SettingSubCategory.ItemUnlockStatus, "1.11.1.1", logger, imGuiService)
+    }, "1.11.1.1", logger, imGuiService)
     {
     }
 }

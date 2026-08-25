@@ -38,6 +38,7 @@ namespace InventoryTools.Ui.Pages
 
         public override void Initialize() { }
 
+        public override string Key { get; } = "data/lists";
         public override string Name { get; } = "Lists";
 
         public PopupMenu GetListMenu(FilterConfiguration configuration)

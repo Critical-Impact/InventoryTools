@@ -22,10 +22,7 @@ namespace InventoryTools.Logic.Settings
 
         public override string HelpText { get; set; } =
             "Should the active background list be saved when exiting the game or disabling/re-enabling the plugin?";
-
-        public override SettingCategory SettingCategory { get; set; } = SettingCategory.Lists;
-
-        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
+        
         public override string Version => "1.7.0.0";
 
         public SaveBackgroundFilterSetting(ILogger<SaveBackgroundFilterSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)

@@ -23,24 +23,27 @@ public class SeparatorPageItem : IConfigPage
 
     }
 
+    public string Key => "separator/" + (_headerName ?? string.Empty);
+
     public string Name => "Separator";
 
     public List<MessageBase>? Draw()
     {
+        if (_includeNewLine)
+        {
+            ImGui.NewLine();
+        }
+
         if (_headerName != null)
         {
-            if (_includeNewLine)
-            {
-                ImGui.NewLine();
-            }
-
             ImGui.TextUnformatted(_headerName);
         }
+
         ImGui.Separator();
         return null;
     }
 
     public bool IsMenuItem => true;
-    public IEnumerable<Page>? ChildPages { get; set; } = null;
+    public IEnumerable<IConfigPage>? ChildPages { get; set; } = null;
     public bool DrawBorder { get; }
 }

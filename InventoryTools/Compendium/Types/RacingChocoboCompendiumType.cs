@@ -28,7 +28,7 @@ public class RacingChocoboItemCompendiumType : CompendiumType<RacingChocoboItem>
 
     public override string Singular => "Racing Chocobo Item";
     public override string Plural => "Racing Chocobo Items";
-    public override string Description => "Items used for Racing Chocobo training and breeding.";
+    public override string Description => "Items for Racing Chocobo training and breeding.";
     public override string Key => "racingChocoboItems";
 
     public override (string?, uint?) Icon => (null, 72);

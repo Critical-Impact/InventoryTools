@@ -23,7 +23,7 @@ public class CraftOverlayHideSetting : GenericEnumChoiceSetting<CraftOverlayHide
     {
         { CraftOverlayHide.AlwaysShow, "Always show" },
         { CraftOverlayHide.HideDuringDuties, "Hide during duties" },
-    }, SettingCategory.CraftOverlay, SettingSubCategory.General, "1.11.0.9", logger, imGuiService)
+    }, "1.11.0.9", logger, imGuiService)
     {
         _clientState = clientState;
         _condition = condition;

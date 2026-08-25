@@ -346,7 +346,7 @@ namespace InventoryTools
             return WindowsIgnoreEscape.Contains(windowName.Name);
         }
 
-        public int SelectedConfigurationPage { get; set; }
+        public string? SelectedConfigurationPageKey { get; set; }
         public bool ShowFilterTab { get; set; } = true;
         public bool SwitchFiltersAutomatically { get; set; } = true;
         public bool SwitchCraftListsAutomatically { get; set; } = true;
@@ -757,16 +757,6 @@ namespace InventoryTools
             }
         }
 
-        public bool TrackMobSpawns
-        {
-            get => _trackMobSpawns;
-            set
-            {
-                _trackMobSpawns = value;
-                IsDirty = true;
-            }
-        }
-
         public bool TooltipDisplayHeader
         {
             get => _tooltipDisplayHeader;
@@ -883,8 +873,6 @@ namespace InventoryTools
 
         public string? ActiveUiFilter { get; set; } = null;
 
-        public bool TetrisEnabled { get; set; } = false;
-
         public string? ActiveBackgroundFilter { get; set; }
 
         public string? ActiveCraftList { get; set; } = null;
@@ -911,7 +899,8 @@ namespace InventoryTools
         private bool _showWizardNewFeatures { get; set; } = true;
 
         private HashSet<string>? _wizardVersionsSeen { get; set; }
-        public int SelectedHelpPage { get; set; }
+
+        public string? SelectedHelpPageKey { get; set; }
         #if DEBUG
         public int SelectedDebugPage { get; set; }
         #endif

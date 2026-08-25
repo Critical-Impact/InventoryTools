@@ -25,9 +25,7 @@ namespace InventoryTools.Logic.Settings
 
         public override string HelpText { get; set; } =
             "The hotkey to open the more information window for an item when hovering it.";
-
-        public override SettingCategory SettingCategory { get; set; } = SettingCategory.Hotkeys;
-        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
+        
         public override string Version => "1.7.0.0";
 
         public HotkeyMoreInfoSetting(ILogger<HotkeyMoreInfoSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)

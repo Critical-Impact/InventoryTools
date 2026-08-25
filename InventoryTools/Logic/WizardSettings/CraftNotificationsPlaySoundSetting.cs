@@ -7,6 +7,8 @@ namespace InventoryTools.Logic.WizardSettings;
 
 public class CraftNotificationsPlaySoundSetting : GenericBooleanSetting
 {
+    public override bool AppearsInConfigWindow => false;
+
     private bool _shouldAdd;
 
     public CraftNotificationsPlaySoundSetting(ILogger<CraftNotificationsPlaySoundSetting> logger,
@@ -14,8 +16,6 @@ public class CraftNotificationsPlaySoundSetting : GenericBooleanSetting
         "Play sound when an item is complete",
         "Play a sound effect when an item in a craft list reaches its required quantity. The craft list must be active for notifications to occur.",
         false,
-        SettingCategory.None,
-        SettingSubCategory.None,
         "15.0.8",
         logger,
         imGuiService)

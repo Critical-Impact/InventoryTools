@@ -12,8 +12,6 @@ public class CraftOverlayMaxExpandedItemsSetting : GenericIntegerSetting
         "Max items when expanded",
         "When the craft overlay is expanded, how many items should be shown?",
         5,
-        SettingCategory.CraftOverlay,
-        SettingSubCategory.General,
         "1.11.0.8",
         logger,
         imGuiService)

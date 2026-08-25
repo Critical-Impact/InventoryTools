@@ -38,8 +38,6 @@ namespace InventoryTools.Logic.Settings
         public override string Key { get; set; } = "AutoSaveMinutes";
         public override string Name { get; set; } = "Auto save every";
         public override string HelpText { get; set; } = "How many minutes should there be between each auto save?";
-        public override SettingCategory SettingCategory { get; set; } = SettingCategory.AutoSave;
-        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
         public override string Version => "1.7.0.0";
     }
 }

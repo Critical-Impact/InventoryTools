@@ -25,11 +25,7 @@ public class TooltipDisplayGlamourReadySetSetting : BooleanSetting
 
     public override string HelpText { get; set; } =
         "When hovering an item, show whether it is a Outfit Glamour Set or part of one, along with which component items you already have in your Armory Chest or Armoire.";
-
-    public override uint? Order { get; } = 0;
-
-    public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
-    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.GlamourReadySet;
+    
     public override string Version => "1.12.0.0";
 
     public TooltipDisplayGlamourReadySetSetting(ILogger<TooltipDisplayGlamourReadySetSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)

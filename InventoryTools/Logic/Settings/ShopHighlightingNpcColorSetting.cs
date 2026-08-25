@@ -17,7 +17,7 @@ public class ShopHighlightingNpcColorSetting : GenericEnumChoiceSetting<ObjectHi
         { ObjectHighlightColor.Yellow,  "Yellow"  },
         { ObjectHighlightColor.Orange,  "Orange"  },
         { ObjectHighlightColor.Magenta, "Magenta" },
-    }, SettingCategory.Highlighting, SettingSubCategory.ShopHighlighting, "15.0.4", logger, imGuiService)
+    }, "15.0.4", logger, imGuiService)
     {
     }
 }

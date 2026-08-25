@@ -163,18 +163,6 @@ namespace InventoryTools
 
         private void SyncConfigurationChanges(bool save = true)
         {
-            if (_mobTracker.Enabled != _configuration.TrackMobSpawns)
-            {
-                if (_configuration.TrackMobSpawns)
-                {
-                    _mobTracker.Enable();
-                }
-                else
-                {
-                    _mobTracker.Disable();
-                }
-            }
-
             if (_hostedInventoryHistory.Enabled != _configuration.HistoryEnabled)
             {
                 if (_configuration.HistoryEnabled)
@@ -303,11 +291,6 @@ namespace InventoryTools
             _configurationManagerService.Save();
             _configurationManagerService.SaveInventoriesAsync(_inventoryMonitor.AllItems.ToList()).Wait(TimeSpan.FromSeconds(2));
             _configurationManagerService.SaveHistory(_hostedInventoryHistory.GetHistory());
-            if (_configuration.TrackMobSpawns)
-            {
-                _mobTracker.SaveCsv(_configurationManagerService.MobSpawnFile,
-                    _mobTracker.GetEntries());
-            }
             Logger.LogTrace("Stopped service {Type} ({This})", GetType().Name, this);
             return Task.CompletedTask;
         }

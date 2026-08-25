@@ -41,7 +41,7 @@ public class CraftSoulCrystalCompendiumType : CompendiumType<ItemCraftSoulCrysta
 
     public override string Singular => "Craft Soul Crystal";
     public override string Plural => "Craft Soul Crystals";
-    public override string Description => "Soul crystals that allow specialization in a crafting class.";
+    public override string Description => "Crystals allow specialization in a crafting class.";
     public override string Key => "craft_soul_crystals";
     public override (string?, uint?) Icon => _staticIcon.Value;
 

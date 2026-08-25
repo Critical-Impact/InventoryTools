@@ -76,8 +76,6 @@ public class TooltipCofferLootScopeSetting : Setting<List<InventorySearchScope>?
     public override string Key { get; set; } = "TooltipCofferLootScope";
     public override string Name { get; set; } = "Coffer Loot (Search Locations)";
     public override string HelpText { get; set; } = "Which inventories should be searched when determining how many coffer loot items you already own?";
-
-    public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
-    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.CofferLoot;
+    
     public override string Version => "1.12.0.0";
 }
