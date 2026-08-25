@@ -14,10 +14,6 @@ using Microsoft.Extensions.Logging;
 
 namespace InventoryTools.Ui;
 
-/// <summary>
-/// Renders the shared explanatory content layouts. The same pages back the configuration wizard's
-/// introduction, so the two cannot drift apart.
-/// </summary>
 public class HelpWindow : GenericWindow
 {
     private readonly InventoryToolsConfiguration _configuration;
@@ -47,9 +43,6 @@ public class HelpWindow : GenericWindow
             .ToList();
     }
 
-    /// <summary>
-    /// Reading order. A page missing from this list sorts to the end rather than disappearing.
-    /// </summary>
     private static readonly List<string> HelpPageOrder =
     [
         "help/general", "help/list-basics", "help/filtering", "help/about",

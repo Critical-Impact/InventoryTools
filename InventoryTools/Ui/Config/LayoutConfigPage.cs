@@ -92,6 +92,7 @@ public class LayoutConfigPage : IConfigPage
         };
 
         if (block is SettingBlock settingNode && _settings.TryGetValue(settingNode.SettingType, out var setting))
+        {
             entries.Add(new ConfigSearchEntry(
                 settingNode.SettingType,
                 settingNode.NameOverride ?? setting.Name,
@@ -99,6 +100,7 @@ public class LayoutConfigPage : IConfigPage
                 _root.Key,
                 _root.Name,
                 section));
+        }
 
         foreach (var child in block.Children)
         {

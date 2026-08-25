@@ -15,8 +15,7 @@ public class ContextMenuFeature : Feature
     public override PageLayout Build()
     {
         return Page("feature/context-menu", "Context Menus",
-            Paragraph(
-                "The plugin can add these entries to the game's right-click menus. Each entry makes the menu longer, so select only the entries that you will use."),
+            Paragraph("The plugin can add these entries to the game's right-click menus. Each entry makes the menu longer, so select only the entries that you will use."),
             Section("Lists",
                 Setting<ContextMenuAddToCraftListSetting>("Add to a craft list"),
                 Setting<ContextMenuAddToActiveCraftListSetting>("Add to the active craft list"),

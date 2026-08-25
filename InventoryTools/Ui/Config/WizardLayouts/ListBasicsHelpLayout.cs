@@ -7,11 +7,9 @@ public class ListBasicsHelpLayout : ContentLayout
     public override PageLayout Build()
     {
         return Page("help/list-basics", "List Basics",
-            Paragraph(
-                "Lists are the core way the plugin lets you view the items you are looking for, or are attempting to sort. There are currently 3 types of list that can be created."),
+            Paragraph("Lists are the core way the plugin lets you view the items you are looking for, or are attempting to sort. There are currently 3 types of list that can be created."),
             Section("Search List",
-                Paragraph(
-                    "Allows you to search for specific items across all your inventories. If you just need to find an item but don't want help sorting it, this is the list type you want."),
+                Paragraph("Allows you to search for specific items across all your inventories. If you just need to find an item but don't want help sorting it, this is the list type you want."),
                 Paragraph("Example uses:"),
                 Bullet("Finding materials for a craft."),
                 Bullet("Finding a housing item you put somewhere."),
@@ -20,9 +18,7 @@ public class ListBasicsHelpLayout : ContentLayout
                 Bullet("Checking your retainers' equipment without going to a retainer bell."),
                 Bullet("Checking if any items you have can go into the armoire.")),
             Section("Sort List",
-                Paragraph(
-                    "Builds on the search list, but also lets you pick where you want the items to be sorted. It'll attempt to show you the most optimised plan for storing the items in the " +
-                    "destinations you pick."),
+                Paragraph("Builds on the search list, but also lets you pick where you want the items to be sorted. It'll attempt to show you the most optimised plan for storing the items in the destinations you pick."),
                 Paragraph("Example uses:"),
                 Bullet("Putting away materials after a craft without having them double up."),
                 Bullet("Storing items above a certain item level in your chocobo saddlebag for later."),

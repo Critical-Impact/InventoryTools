@@ -49,18 +49,17 @@ public class SettingCoverageService
     {
         foreach (var setting in InvalidSettings)
         {
-            _logger.LogError("Config layout places {Setting}, which is not registered.", setting.Name);
+            _logger.LogError("Config layout includes {Setting}, which is not registered.", setting.Name);
         }
 
         foreach (var setting in DuplicateSettings)
         {
-            _logger.LogWarning("Setting {Setting} is placed by more than one config layout.", setting.Name);
+            _logger.LogWarning("Setting {Setting} is included by more than one config layout.", setting.Name);
         }
 
         if (UnplacedSettings.Count != 0)
         {
-            _logger.LogInformation(
-                "{Count} of {Total} config settings are not placed by a layout ({Skipped} more are drawn outside the config window): {Settings}",
+            _logger.LogInformation("{Count} of {Total} config settings are not included by a layout ({Skipped} more are drawn outside the config window): {Settings}",
                 UnplacedSettings.Count,
                 AllSettings.Count - IgnoredSettings.Count,
                 IgnoredSettings.Count,
@@ -69,7 +68,7 @@ public class SettingCoverageService
         else
         {
             _logger.LogInformation(
-                "All {Total} config settings are placed by a layout ({Skipped} more are drawn outside the config window).",
+                "All {Total} config settings are included by a layout ({Skipped} more are drawn outside the config window).",
                 AllSettings.Count - IgnoredSettings.Count,
                 IgnoredSettings.Count);
         }

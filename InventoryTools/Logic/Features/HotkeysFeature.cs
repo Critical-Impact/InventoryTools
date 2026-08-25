@@ -26,9 +26,7 @@ public class HotkeysFeature : Feature
                 Setting<HotkeySubmarinesWindowSetting>("Submarines"),
                 Setting<HotkeyRetainerTasksWindowSetting>("Retainer ventures")),
             Section("While the cursor is over an item",
-                Paragraph(
-                    "These hotkeys apply to the item under the cursor. If there is no item under the " +
-                    "cursor, they do nothing."),
+                Paragraph("These hotkeys apply to the item under the cursor. If there is no item under the cursor, they do nothing."),
                 Setting<HotkeyMoreInfoSetting>("More information"),
                 Setting<HotkeyOpenItemLogSetting>("The log that applies to the item"),
                 Setting<HotkeyOpenCraftingLogSetting>("Crafting log"),

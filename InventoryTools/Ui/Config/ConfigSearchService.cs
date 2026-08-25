@@ -7,7 +7,7 @@ namespace InventoryTools.Ui.Config;
 
 public class ConfigSearchService
 {
-    private List<ConfigSearchEntry> _entries = new();
+    private List<ConfigSearchEntry> _entries = [];
 
     public void BuildIndex(IEnumerable<IConfigPage> pages)
     {
@@ -18,7 +18,10 @@ public class ConfigSearchService
 
     public IReadOnlyList<ConfigSearchEntry> Search(string query, int limit = 40)
     {
-        if (string.IsNullOrWhiteSpace(query)) return Array.Empty<ConfigSearchEntry>();
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return [];
+        }
 
         var trimmed = query.Trim();
 

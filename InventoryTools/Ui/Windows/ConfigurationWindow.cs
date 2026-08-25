@@ -605,10 +605,6 @@ namespace InventoryTools.Ui
             _verticalSplitter.Draw(DrawSideBar, DrawMainWindow);
         }
 
-        /// <summary>
-        /// Drawn outside the splitter so it stays pinned: the right-hand pane is a scrolling child,
-        /// and anything drawn inside it scrolls away with the page content.
-        /// </summary>
         private void DrawSearchBar()
         {
             ImGui.SetNextItemWidth(-60 * ImGui.GetIO().FontGlobalScale);

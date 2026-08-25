@@ -9,8 +9,7 @@ public class GeneralLayout : ConfigLayout
     {
         return Page("general", "General",
             Section("Saving",
-                Paragraph(
-                    "Allagan Tools keeps its own record of your inventories. These control how often that record is written to disk and how much of it survives a restart."),
+                Paragraph("Allagan Tools keeps its own record of your inventories. These control how often that record is written to disk and how much of it survives a restart."),
                 Setting<AutoSaveSetting>("Save automatically"),
                 EnabledBy<AutoSaveSetting>(
                     Setting<AutoSaveTimeSetting>("How often")),

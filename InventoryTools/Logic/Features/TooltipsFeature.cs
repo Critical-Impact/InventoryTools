@@ -15,8 +15,7 @@ public class TooltipsFeature : Feature
     public override PageLayout Build()
     {
         return Page("feature/tooltips", "Tooltips",
-            Paragraph(
-                "Allagan Tools can add extra lines to the game's item tooltips. Each option below adds one line. Select the lines that you want."),
+            Paragraph("Allagan Tools can add extra lines to the game's item tooltips. Each option below adds one line. Select the lines that you want."),
             Setting<TooltipDisplayAmountOwnedSetting>("Where you own the item"),
             Setting<TooltipDisplayRetrieveAmountSetting>("How many the active craft list still needs"),
             Setting<TooltipMinimumMarketPriceSetting>("The market price"),

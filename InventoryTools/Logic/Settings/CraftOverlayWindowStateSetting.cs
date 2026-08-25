@@ -9,7 +9,6 @@ namespace InventoryTools.Logic.Settings;
 
 public class CraftOverlayWindowStateSetting : GenericEnumChoiceSetting<CraftOverlayWindowState>
 {
-    // Drawn by CraftOverlayWindow, not a config page.
     public override bool AppearsInConfigWindow => false;
 
     public CraftOverlayWindowStateSetting(ILogger<CraftOverlayWindowStateSetting> logger, ImGuiService imGuiService) : base("CraftOverlayWindowState", "Window State", "The current state of the craft overlay window.", CraftOverlayWindowState.Single, new Dictionary<CraftOverlayWindowState, string>()

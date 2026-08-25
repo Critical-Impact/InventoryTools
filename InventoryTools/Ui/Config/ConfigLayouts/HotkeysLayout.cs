@@ -19,9 +19,7 @@ public class HotkeysLayout : ConfigLayout
                 Setting<HotkeySubmarinesWindowSetting>("Submarines"),
                 Setting<HotkeyRetainerTasksWindowSetting>("Retainer ventures")),
             Section("While hovering an item",
-                Paragraph(
-                    "These act on whatever item is under the cursor, so they only do anything while an item " +
-                    "is hovered."),
+                Paragraph("These act on whatever item is under the cursor, so they only do anything while an item is hovered."),
                 Setting<HotkeyMoreInfoSetting>("More information"),
                 Setting<HotkeyOpenItemLogSetting>("Whichever log applies"),
                 Setting<HotkeyOpenCraftingLogSetting>("Crafting log"),

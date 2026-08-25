@@ -30,7 +30,9 @@ public sealed class SettingBlock : IConfigBlock
         }
 
         if (context.Navigation.ShouldScrollTo(SettingType))
+        {
             ImGui.SetScrollHereY(0.35f);
+        }
 
         var isHighlighted = context.Navigation.IsHighlighted(SettingType);
         var isNew = context.NewSettings.Contains(SettingType);
