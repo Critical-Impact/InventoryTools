@@ -36,9 +36,12 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
     private readonly ITargetManager _targetManager;
     private readonly ContextMenuAddToCuratedListSetting _curatedListSetting;
     private readonly ContextMenuAddToFavouritesSetting _addToFavouritesSetting;
+    private readonly ContextMenuMoreInformationSetting _moreInformationSetting;
     private readonly ContextMenuMoreInformationNpcsSetting _moreInformationNpcsSetting;
     private readonly ContextMenuMoreInformationMonstersSetting _moreInformationMonstersSetting;
     private readonly ContextMenuCopyNameSetting _copyNameSetting;
+    private readonly ContextMenuItemSearchSetting _itemSearchSetting;
+    private readonly ContextMenuAddToCraftListSetting _addToCraftListSetting;
     private readonly IClipboardService _clipboardService;
     private ulong? cachedHoverItemId = null;
     public const int SatisfactionSupplyItemIdx       = 84;
@@ -72,9 +75,12 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
         ITargetManager targetManager,
         ContextMenuAddToCuratedListSetting curatedListSetting,
         ContextMenuAddToFavouritesSetting addToFavouritesSetting,
+        ContextMenuMoreInformationSetting moreInformationSetting,
         ContextMenuMoreInformationNpcsSetting moreInformationNpcsSetting,
         ContextMenuMoreInformationMonstersSetting moreInformationMonstersSetting,
         ContextMenuCopyNameSetting copyNameSetting,
+        ContextMenuItemSearchSetting itemSearchSetting,
+        ContextMenuAddToCraftListSetting addToCraftListSetting,
         IClipboardService clipboardService) : base(logger, mediatorService)
     {
         ContextMenu = contextMenu;
@@ -86,9 +92,12 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
         _targetManager = targetManager;
         _curatedListSetting = curatedListSetting;
         _addToFavouritesSetting = addToFavouritesSetting;
+        _moreInformationSetting = moreInformationSetting;
         _moreInformationNpcsSetting = moreInformationNpcsSetting;
         _moreInformationMonstersSetting = moreInformationMonstersSetting;
         _copyNameSetting = copyNameSetting;
+        _itemSearchSetting = itemSearchSetting;
+        _addToCraftListSetting = addToCraftListSetting;
         _clipboardService = clipboardService;
     }
 
@@ -126,7 +135,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
 
         if (itemId != null)
         {
-            if (_configuration.AddMoreInformationContextMenu)
+            if (_moreInformationSetting.CurrentValue(_configuration))
             {
                 var menuItem = new MenuItem();
                 menuItem.Name = "More Information";
@@ -135,7 +144,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
                 args.AddMenuItem(menuItem);
             }
 
-            if (_configuration.ItemSearchContextMenu)
+            if (_itemSearchSetting.CurrentValue(_configuration))
             {
                 var menuItem = new MenuItem();
                 menuItem.Name = "Search";
@@ -166,7 +175,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
                 }
             }
 
-            if (_configuration.AddToCraftListContextMenu)
+            if (_addToCraftListSetting.CurrentValue(_configuration))
             {
                 var menuItem = new MenuItem();
                 menuItem.Name = "Add to Craft List";
