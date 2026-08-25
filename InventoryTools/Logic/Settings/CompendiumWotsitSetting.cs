@@ -7,7 +7,7 @@ namespace InventoryTools.Logic.Settings;
 
 public class CompendiumWotsitSetting : GenericBooleanSetting
 {
-    public CompendiumWotsitSetting(ILogger<CompendiumWotsitSetting> logger, ImGuiService imGuiService) : base("CompendiumWotsitSetting", "Enable Wotsit Integration?", "Should the compendium windows be listed in wotsit's search?", true, SettingCategory.Compendium, SettingSubCategory.General, "14.1.0", logger, imGuiService)
+    public CompendiumWotsitSetting(ILogger<CompendiumWotsitSetting> logger, ImGuiService imGuiService) : base("CompendiumWotsitSetting", "Enable Wotsit Integration?", "Should the compendium windows be listed in wotsit's search?", true, "14.1.0", logger, imGuiService)
     {
     }
 }

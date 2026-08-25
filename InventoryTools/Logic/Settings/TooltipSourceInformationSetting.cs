@@ -33,12 +33,11 @@ public enum TooltipSourceModifier
 
 public class TooltipSourceInformationEnabledSetting : GenericBooleanSetting
 {
-    public TooltipSourceInformationEnabledSetting(ILogger<TooltipSourceInformationEnabledSetting> logger, ImGuiService imGuiService) : base("TooltipSourceInformationEnabled", "Source Information Enabled", "Should source information be shown in the tooltip? For example that an item can be sourced via crafting, shops, monsters etc", false, SettingCategory.ToolTips, SettingSubCategory.SourceInformation, "1.11.0.11", logger, imGuiService)
+    public TooltipSourceInformationEnabledSetting(ILogger<TooltipSourceInformationEnabledSetting> logger, ImGuiService imGuiService) : base("TooltipSourceInformationEnabled", "Source Information Enabled", "Should source information be shown in the tooltip? For example that an item can be sourced via crafting, shops, monsters etc", true, "1.11.0.11", logger, imGuiService)
     {
     }
 
     public override string WizardName { get; } = "Show Source Information";
-    public override uint? Order { get; } = 0;
 }
 
 public class TooltipSourceInformationModifierSetting : GenericEnumChoiceSetting<TooltipSourceModifier>
@@ -48,10 +47,9 @@ public class TooltipSourceInformationModifierSetting : GenericEnumChoiceSetting<
         {TooltipSourceModifier.Always, "Always"},
         {TooltipSourceModifier.Control, "Control"},
         {TooltipSourceModifier.Shift, "Shift"},
-    }, SettingCategory.ToolTips, SettingSubCategory.SourceInformation, "1.11.0.11", logger, imGuiService)
+    }, "1.11.0.11", logger, imGuiService)
     {
     }
-    public override uint? Order { get; } = 2;
 }
 
 public class TooltipSourceInformationSetting : Setting<Dictionary<ItemInfoType, TooltipSourceSetting>>
@@ -275,12 +273,8 @@ public class TooltipSourceInformationSetting : Setting<Dictionary<ItemInfoType, 
     public override string Key { get; set; } = "TooltipSourceInformation";
     public override string Name { get; set; } = "Source Information Configuration";
 
-    public override uint? Order { get; } = 3;
-
     public override string HelpText { get; set; } =
         "If the source information tooltip is enabled, how should the various sources be ordered/displayed/etc?";
 
-    public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
-    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.SourceInformation;
     public override string Version { get; } = "1.11.0.11";
 }

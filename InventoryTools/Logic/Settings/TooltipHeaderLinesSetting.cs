@@ -22,9 +22,7 @@ public class TooltipHeaderLinesSetting : IntegerSetting
 
     public override string HelpText { get; set; } =
         "How many new lines should be added above any tooltip modifications made by this plugin?";
-
-    public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
-    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.Visuals;
+    
     public override string Version => "1.7.0.0";
 
     public TooltipHeaderLinesSetting(ILogger<TooltipHeaderLinesSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)

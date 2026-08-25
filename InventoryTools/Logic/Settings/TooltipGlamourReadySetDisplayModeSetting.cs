@@ -26,10 +26,7 @@ public class TooltipGlamourReadySetDisplayModeSetting : ChoiceSetting<GlamourRea
 
     public override string HelpText { get; set; } =
         "How the Glamour Ready Set information should be displayed in the tooltip. Detailed lists each piece with its ownership status; Compact shows a summary count.";
-
-    public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
-    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.GlamourReadySet;
-
+    
     public override Dictionary<GlamourReadySetDisplayMode, string> Choices => new()
     {
         { GlamourReadySetDisplayMode.Detailed, "Detailed (list all pieces)" },

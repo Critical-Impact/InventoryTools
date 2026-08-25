@@ -23,16 +23,14 @@ namespace InventoryTools.Logic.Settings.Abstract
         public abstract string Key { get; set; }
         public abstract string Name { get; set; }
         public abstract string HelpText { get; set; }
-        public abstract SettingCategory SettingCategory { get; set; }
-        public abstract SettingSubCategory SettingSubCategory { get; }
         public abstract string Version { get; }
+
+        public virtual bool AppearsInConfigWindow => true;
 
         public virtual string? Image { get; } = null;
         public virtual Vector2? ImageSize { get; } = null;
-
-        public virtual uint? Order { get; } = null;
-
-
+        
+        
         public virtual string WizardName
         {
             get

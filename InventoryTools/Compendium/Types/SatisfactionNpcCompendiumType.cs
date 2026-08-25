@@ -268,7 +268,7 @@ public class SatisfactionNpcCompendiumType : CompendiumType<SatisfactionNpc>
 
     public override string Singular => "Custom Delivery";
     public override string Plural => "Custom Deliveries";
-    public override string Description => "NPCs that accept Custom Deliveries (Satisfaction system).";
+    public override string Description => "NPCs that accept Custom Deliveries.";
     public override string Key => "satisfaction_npc";
     public override (string?, uint?) Icon => (null, Icons.CustomDeliveriesIcon);
 }

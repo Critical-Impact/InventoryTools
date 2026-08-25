@@ -12,8 +12,6 @@ public class ContextMenuAddToFavouritesSetting : GenericBooleanSetting
         "Context Menu - Add/Remove to Favourites",
         "Add a submenu to add/remove the item to/from your favourites?",
         false,
-        SettingCategory.ContextMenu,
-        SettingSubCategory.General,
         "1.13.1.9",
         logger,
         imGuiService)

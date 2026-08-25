@@ -422,11 +422,6 @@ public class MockWindow : GenericWindow
                 MediatorService.Publish(new OpenGenericWindowMessage(typeof(IconBrowserWindow)));
             }
 
-            if (ImGui.Button("Intro Window"))
-            {
-                MediatorService.Publish(new OpenGenericWindowMessage(typeof(IntroWindow)));
-            }
-
             if (ImGui.Button("Mock Items Window"))
             {
                 MediatorService.Publish(new OpenGenericWindowMessage(typeof(MockGameItemsWindow)));

@@ -18,11 +18,10 @@ namespace InventoryTools.Logic.Settings;
 
 public class TooltipUseInformationEnabledSetting : GenericBooleanSetting
 {
-    public TooltipUseInformationEnabledSetting(ILogger<TooltipUseInformationEnabledSetting> logger, ImGuiService imGuiService) : base("TooltipUseInformationEnabled", "Use Information Enabled", "Should use information be shown in the tooltip? For example, the item is used in a recipe or as currency at a shop, etc", false, SettingCategory.ToolTips, SettingSubCategory.UseInformation, "1.11.0.11", logger, imGuiService)
+    public TooltipUseInformationEnabledSetting(ILogger<TooltipUseInformationEnabledSetting> logger, ImGuiService imGuiService) : base("TooltipUseInformationEnabled", "Use Information Enabled", "Should use information be shown in the tooltip? For example, the item is used in a recipe or as currency at a shop, etc", true, "1.11.0.11", logger, imGuiService)
     {
     }
     public override string WizardName { get; } = "Show Use Information";
-    public override uint? Order { get; } = 0;
 }
 
 public class TooltipUseInformationModifierSetting : GenericEnumChoiceSetting<TooltipSourceModifier>
@@ -32,10 +31,9 @@ public class TooltipUseInformationModifierSetting : GenericEnumChoiceSetting<Too
         {TooltipSourceModifier.Always, "Always"},
         {TooltipSourceModifier.Control, "Control"},
         {TooltipSourceModifier.Shift, "Shift"},
-    }, SettingCategory.ToolTips, SettingSubCategory.UseInformation, "1.11.0.11", logger, imGuiService)
+    }, "1.11.0.11", logger, imGuiService)
     {
     }
-    public override uint? Order { get; } = 2;
 }
 
 public class TooltipUseInformationSetting : Setting<Dictionary<ItemInfoType, TooltipSourceSetting>>
@@ -259,12 +257,8 @@ public class TooltipUseInformationSetting : Setting<Dictionary<ItemInfoType, Too
     public override string Key { get; set; } = "TooltipUseInformation";
     public override string Name { get; set; } = "Use Information Configuration";
 
-    public override uint? Order { get; } = 3;
-
     public override string HelpText { get; set; } =
         "If the use information tooltip is enabled, how should the various uses be ordered/displayed/etc?";
 
-    public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
-    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.UseInformation;
     public override string Version { get; } = "1.11.0.11";
 }

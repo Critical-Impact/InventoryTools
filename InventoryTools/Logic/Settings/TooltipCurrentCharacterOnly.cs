@@ -23,9 +23,7 @@ namespace InventoryTools.Logic.Settings
 
         public override string HelpText { get; set; } =
             "Limits the information displayed on the tooltip to inventories belonging to the currently logged in character.";
-
-        public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
-        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.AddItemLocations;
+        
         public override string Version => "1.7.0.0";
 
         public TooltipCurrentCharacterSetting(ILogger<TooltipCurrentCharacterSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)

@@ -8,14 +8,12 @@ namespace InventoryTools.Logic.Settings.Abstract.Generic;
 
 public abstract class GenericGameColorSetting : GameColorSetting
 {
-    public GenericGameColorSetting(string key, string name, string helpText, uint? defaultValue, SettingCategory settingCategory, SettingSubCategory settingSubCategory, string version, ILogger logger, ImGuiService imGuiService, ExcelSheet<UIColor> uiColorSheet) : base(logger, imGuiService, uiColorSheet)
+    public GenericGameColorSetting(string key, string name, string helpText, uint? defaultValue, string version, ILogger logger, ImGuiService imGuiService, ExcelSheet<UIColor> uiColorSheet) : base(logger, imGuiService, uiColorSheet)
     {
         Key = key;
         Name = name;
         HelpText = helpText;
         DefaultValue = defaultValue;
-        SettingCategory = settingCategory;
-        SettingSubCategory = settingSubCategory;
         Version = version;
     }
 
@@ -33,7 +31,5 @@ public abstract class GenericGameColorSetting : GameColorSetting
     public sealed override string Key { get; set; }
     public sealed override string Name { get; set; }
     public sealed override string HelpText { get; set; }
-    public sealed override SettingCategory SettingCategory { get; set; }
-    public override SettingSubCategory SettingSubCategory { get; }
     public override string Version { get; }
 }

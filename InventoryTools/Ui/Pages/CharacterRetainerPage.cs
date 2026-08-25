@@ -41,6 +41,7 @@ namespace InventoryTools.Ui.Pages
         {
         }
 
+        public override string Key { get; } = "data/characters";
         public override string Name { get; } = "Characters/Retainers";
 
         private ulong _selectedCharacter = 0;

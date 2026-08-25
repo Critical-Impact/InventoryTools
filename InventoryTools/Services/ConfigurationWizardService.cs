@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using InventoryTools.Logic.Features;
@@ -8,8 +9,8 @@ namespace InventoryTools.Services;
 public class ConfigurationWizardService : IConfigurationWizardService
 {
     private readonly InventoryToolsConfiguration _configuration;
-    private List<IFeature> _availableFeatures = new();
-    private Dictionary<IFeature, List<ISetting>> _versionedSettings = new();
+    private readonly List<IFeature> _availableFeatures;
+    private readonly Dictionary<IFeature, IReadOnlySet<Type>> _versionedSettings = new();
     public ConfigurationWizardService(IEnumerable<IFeature> features, InventoryToolsConfiguration configuration)
     {
         _configuration = configuration;
@@ -21,14 +22,19 @@ public class ConfigurationWizardService : IConfigurationWizardService
     /// </summary>
     /// <param name="feature">The feature</param>
     /// <returns>A list of applicable settings</returns>
-    public List<ISetting> GetApplicableSettings(IFeature feature)
+    public IReadOnlySet<Type> GetNewSettingTypes(IFeature feature)
     {
-        if (!_versionedSettings.TryGetValue(feature, out var value))
+        if (_versionedSettings.TryGetValue(feature, out var value))
         {
-            var relatedSettings = feature.RelatedSettings;
-            value = relatedSettings.Where(c => !_configuration.WizardVersionsSeen.Contains(c.Version)).ToList();
-            _versionedSettings[feature] = value;
+            return value;
         }
+        value = ConfiguredOnce
+            ? feature.RelatedSettings
+                .Where(c => !_configuration.WizardVersionsSeen.Contains(c.Version))
+                .Select(c => c.GetType())
+                .ToHashSet()
+            : new HashSet<Type>();
+        _versionedSettings[feature] = value;
 
         return value;
     }

@@ -57,7 +57,7 @@ public class FolkloreTomeCompendiumType : CompendiumType<FolkloreTome>
 
     public override string Singular => "Folklore Tome";
     public override string Plural => "Folklore Tomes";
-    public override string Description => "Folklore tomes that unlock hidden gathering nodes when read.";
+    public override string Description => "Folklore tomes unlock hidden gathering nodes.";
     public override string Key => "folklore_tomes";
     public override (string?, uint?) Icon => _staticIcon.Value;
 

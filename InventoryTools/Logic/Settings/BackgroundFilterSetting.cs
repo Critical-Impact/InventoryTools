@@ -38,10 +38,7 @@ namespace InventoryTools.Logic.Settings
 
         public override string HelpText { get; set; } =
             "This is the list that is currently being highlighted when the allagan tools window is not visible. This list can be toggled with the associated slash commands.";
-
-        public override SettingCategory SettingCategory { get; set; } = SettingCategory.Lists;
-        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.ActiveLists;
-
+        
         public override Dictionary<string, string> Choices
         {
             get

@@ -4,6 +4,8 @@ using InventoryTools.Logic.Filters;
 using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Logic.WizardSettings;
 using InventoryTools.Services.Interfaces;
+using InventoryTools.Ui.Config;
+using InventoryTools.Ui.Config.Layouts;
 
 namespace InventoryTools.Logic.Features;
 
@@ -26,12 +28,7 @@ public class CraftNotificationsFeature : Feature
         CraftReportPlaySoundFilter playSoundFilter,
         CraftReportCompletionOnlyFilter completionOnlyFilter,
         IListService listService,
-        InventoryToolsConfiguration configuration) : base([
-            typeof(CraftNotificationsReportToChatSetting),
-            typeof(CraftNotificationsPlaySoundSetting),
-            typeof(CraftNotificationsCompletionOnlySetting)
-        ],
-        settings)
+        InventoryToolsConfiguration configuration) : base(settings)
     {
         _reportToChatSetting = reportToChatSetting;
         _playSoundSetting = playSoundSetting;
@@ -43,10 +40,16 @@ public class CraftNotificationsFeature : Feature
         _configuration = configuration;
     }
 
-    public override string Name => "Craft Notifications";
-
-    public override string Description =>
-        "Configure how Allagan Tools notifies you as you acquire items for your craft lists. The default craft list and any of your existing craft lists will receive these notification settings. Notifications only occur while a craft list is active. This feature can be further configured in craft lists by editing the settings of your individual lists or the default craft list.";
+    public override PageLayout Build()
+    {
+        return Page("feature/craft-notifications", "Craft Notifications",
+            Paragraph("The plugin can tell you about your progress as you collect the items for a craft list. These notifications occur only while a craft list is active."),
+            Setting<CraftNotificationsReportToChatSetting>("Report progress to the chat window"),
+            Setting<CraftNotificationsPlaySoundSetting>("Play a sound when an item is complete"),
+            Setting<CraftNotificationsCompletionOnlySetting>("Report only completed items, not each item that you collect"),
+            Paragraph("When you complete the wizard, the plugin applies these settings to your craft lists and to the default craft list. Each list then keeps its own copy, which you can change in the settings for that list.")
+        );
+    }
 
     public override void OnFinish()
     {
@@ -58,7 +61,10 @@ public class CraftNotificationsFeature : Feature
             .Where(c => c.FilterType == FilterType.CraftFilter)
             .ToList();
         var defaultList = _listService.GetDefaultCraftList();
-        if (!lists.Contains(defaultList)) lists.Add(defaultList);
+        if (!lists.Contains(defaultList))
+        {
+            lists.Add(defaultList);
+        }
 
         foreach (var list in lists)
         {

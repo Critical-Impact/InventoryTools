@@ -9,15 +9,13 @@ namespace InventoryTools.Logic.Settings.Abstract.Generic;
 public abstract class GenericMultipleEnumChoiceSetting<TEnum> : MultipleEnumChoiceSetting<TEnum>
     where TEnum : struct, Enum, IComparable
 {
-    protected GenericMultipleEnumChoiceSetting(string key, string name, string helpText, List<TEnum> defaultValue, Dictionary<TEnum, string> choices, SettingCategory settingCategory, SettingSubCategory settingSubCategory, string version, ILogger logger, ImGuiService imGuiService) : base(logger, imGuiService)
+    protected GenericMultipleEnumChoiceSetting(string key, string name, string helpText, List<TEnum> defaultValue, Dictionary<TEnum, string> choices, string version, ILogger logger, ImGuiService imGuiService) : base(logger, imGuiService)
     {
         Key = key;
         Name = name;
         HelpText = helpText;
         DefaultValue = defaultValue;
         Choices = choices;
-        SettingCategory = settingCategory;
-        SettingSubCategory = settingSubCategory;
         Version = version;
     }
 
@@ -35,8 +33,6 @@ public abstract class GenericMultipleEnumChoiceSetting<TEnum> : MultipleEnumChoi
     public sealed override string Name { get; set; }
     public sealed override string HelpText { get; set; }
     public sealed override List<TEnum> DefaultValue { get; set; }
-    public sealed override SettingCategory SettingCategory { get; set; }
-    public override SettingSubCategory SettingSubCategory { get; }
     public sealed override Dictionary<TEnum, string> Choices { get; }
     public override string Version { get; }
 }

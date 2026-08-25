@@ -14,6 +14,7 @@ using InventoryTools.Logic.Settings.Abstract;
 using InventoryTools.Ui.MenuItems;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Interface;
+using Dalamud.Interface.Colors;
 using InventoryTools.Ui.Widgets;
 using OtterGui;
 using Dalamud.Interface.Utility.Raii;
@@ -23,6 +24,9 @@ using InventoryTools.Logic.Features;
 using InventoryTools.Mediator;
 using InventoryTools.Services;
 using InventoryTools.Services.Interfaces;
+using InventoryTools.Ui.Config;
+using InventoryTools.Ui.Config.ConfigLayouts;
+using InventoryTools.Ui.Config.Layouts;
 using InventoryTools.Ui.Pages;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -39,7 +43,11 @@ namespace InventoryTools.Ui
         private readonly PluginLogic _pluginLogic;
         private readonly IListService _listService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
-        private readonly SettingPage.Factory _settingPageFactory;
+        private readonly LayoutConfigPage.Factory _layoutPageFactory;
+        private readonly SettingCoverageService _settingCoverageService;
+        private readonly ConfigNavigationState _configNavigationState;
+        private readonly ConfigSearchService _configSearchService = new();
+        private string _searchQuery = string.Empty;
         private readonly FilterConfiguration.Factory _filterConfigurationFactory;
         private readonly IEnumerable<ISampleFilter> _sampleFilters;
         private readonly Func<Type, IConfigPage> _configPageFactory;
@@ -63,7 +71,9 @@ namespace InventoryTools.Ui
             IServiceScopeFactory serviceScopeFactory,
             Func<Type, IConfigPage> configPageFactory,
             Func<FilterConfiguration, FilterPage> filterPageFactory,
-            SettingPage.Factory settingPageFactory,
+            LayoutConfigPage.Factory layoutPageFactory,
+            SettingCoverageService settingCoverageService,
+            ConfigNavigationState configNavigationState,
             FilterConfiguration.Factory filterConfigurationFactory,
             IEnumerable<ISampleFilter> sampleFilters,
             IComponentContext context,
@@ -79,7 +89,9 @@ namespace InventoryTools.Ui
             _pluginLogic = pluginLogic;
             _listService = listService;
             _serviceScopeFactory = serviceScopeFactory;
-            _settingPageFactory = settingPageFactory;
+            _layoutPageFactory = layoutPageFactory;
+            _settingCoverageService = settingCoverageService;
+            _configNavigationState = configNavigationState;
             _filterConfigurationFactory = filterConfigurationFactory;
             _sampleFilters = sampleFilters;
             _configPageFactory = configPageFactory;
@@ -95,26 +107,25 @@ namespace InventoryTools.Ui
         {
             WindowName = "Configuration";
             Key = "configuration";
+            #if DEBUG
+            _settingCoverageService.Report();
+            #endif
             _configPages = new List<IConfigPage>();
             _configPages.Add(new SeparatorPageItem("Settings"));
-            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.General));
-            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.Lists));
-            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.Highlighting));
-            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.Items));
-            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.Windows));
-            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.AutoSave));
+            _configPages.Add(_layoutPageFactory.Invoke(_context.Resolve<GeneralLayout>()));
+            _configPages.Add(_layoutPageFactory.Invoke(_context.Resolve<WindowsAndListsLayout>()));
+            _configPages.Add(_layoutPageFactory.Invoke(_context.Resolve<ItemIconsLayout>()));
+            _configPages.Add(_layoutPageFactory.Invoke(_context.Resolve<HighlightingLayout>()));
             _configPages.Add(new SeparatorPageItem("Modules", true));
-            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.MarketBoard));
-            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.ToolTips));
-            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.ContextMenu));
-            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.Hotkeys));
-            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.MobSpawnTracker));
-            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.TitleMenuButtons));
-            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.CraftOverlay));
-            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.CraftTracker));
-            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.History));
-            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.Misc));
-            _configPages.Add(_settingPageFactory.Invoke(SettingCategory.Troubleshooting, null, true));
+            _configPages.Add(_layoutPageFactory.Invoke(_context.Resolve<MarketBoardLayout>()));
+            _configPages.Add(_layoutPageFactory.Invoke(_context.Resolve<TooltipsLayout>()));
+            _configPages.Add(_layoutPageFactory.Invoke(_context.Resolve<ContextMenuLayout>()));
+            _configPages.Add(_layoutPageFactory.Invoke(_context.Resolve<HotkeysLayout>()));
+            _configPages.Add(_layoutPageFactory.Invoke(_context.Resolve<CraftOverlayLayout>()));
+            _configPages.Add(_layoutPageFactory.Invoke(_context.Resolve<EquipmentRecommendationLayout>()));
+            _configPages.Add(_layoutPageFactory.Invoke(_context.Resolve<HistoryLayout>()));
+            _configPages.Add(new SeparatorPageItem(null, true));
+            _configPages.Add(_layoutPageFactory.Invoke(_context.Resolve<TroubleshootingLayout>()));
             _configPages.Add(new SeparatorPageItem("Data", true));
             _configPages.Add(_configPageFactory.Invoke(typeof(ListsPage)));
             _configPages.Add(_configPageFactory.Invoke(typeof(CharacterRetainerPage)));
@@ -186,6 +197,8 @@ namespace InventoryTools.Ui
             _menuWindows = _context.Resolve<IEnumerable<IMenuWindow>>().OrderBy(c => c.GenericName).Where(c => c.GetType() != this.GetType());
 
             GenerateFilterPages();
+            CheckDuplicateKeys();
+            RebuildSearchIndex();
             MediatorService.Subscribe<ListInvalidatedMessage>(this, _ => Invalidate());
             MediatorService.Subscribe<ListRepositionedMessage>(this, _ => Invalidate());
             MediatorService.Subscribe<ListAddedMessage>(this, _ => Invalidate());
@@ -304,8 +317,13 @@ namespace InventoryTools.Ui
                 var existingFilter = _listService.GetListByKey(id);
                 if (existingFilter != null)
                 {
+                    if (_filterPages.TryGetValue(existingFilter.Key, out var removedPage)
+                        && ConfigSelectedConfigurationPageKey == removedPage.Key)
+                    {
+                        ConfigSelectedConfigurationPageKey = null;
+                    }
+
                     _listService.RemoveList(existingFilter);
-                    ConfigSelectedConfigurationPage--;
                 }
             }
         }
@@ -336,8 +354,8 @@ namespace InventoryTools.Ui
             var existingFilter = _listService.GetListByKey(id);
             if (existingFilter != null)
             {
-                _listService.DuplicateList(existingFilter, filterName);
-                SetNewFilterActive();
+                var duplicatedFilter = _listService.DuplicateList(existingFilter, filterName);
+                SetNewFilterActive(duplicatedFilter);
             }
         }
 
@@ -348,7 +366,7 @@ namespace InventoryTools.Ui
             filterConfiguration.FilterType = FilterType.SearchFilter;
             _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
-            SetNewFilterActive();
+            SetNewFilterActive(filterConfiguration);
         }
 
         private void AddHistoryFilter(string newName, string id)
@@ -358,7 +376,7 @@ namespace InventoryTools.Ui
             filterConfiguration.FilterType = FilterType.HistoryFilter;
             _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
-            SetNewFilterActive();
+            SetNewFilterActive(filterConfiguration);
         }
 
         private void AddGameItemFilter(string newName, string id)
@@ -368,7 +386,7 @@ namespace InventoryTools.Ui
             filterConfiguration.FilterType = FilterType.GameItemFilter;
             _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
-            SetNewFilterActive();
+            SetNewFilterActive(filterConfiguration);
         }
 
         private void AddSortFilter(string newName, string id)
@@ -378,14 +396,71 @@ namespace InventoryTools.Ui
             filterConfiguration.FilterType = FilterType.SortingFilter;
             _listService.AddDefaultColumns(filterConfiguration);
             _listService.AddList(filterConfiguration);
-            SetNewFilterActive();
+            SetNewFilterActive(filterConfiguration);
         }
 
-
-        private int ConfigSelectedConfigurationPage
+        private void CheckDuplicateKeys()
         {
-            get => _configuration.SelectedConfigurationPage;
-            set => _configuration.SelectedConfigurationPage = value;
+            var seen = new HashSet<string>();
+            foreach (var page in SelectablePages())
+            {
+                if (!seen.Add(page.Key))
+                {
+                    Logger.LogError(
+                        "Two configuration pages share the key {Key}; the second ({Name}) cannot be navigated to.",
+                        page.Key,
+                        page.Name);
+                }
+            }
+        }
+
+        private string? ConfigSelectedConfigurationPageKey
+        {
+            get => _configuration.SelectedConfigurationPageKey;
+            set => _configuration.SelectedConfigurationPageKey = value;
+        }
+
+        private IEnumerable<IConfigPage> SelectablePages()
+        {
+            foreach (var configPage in _configPages)
+            {
+                if (configPage.IsMenuItem)
+                {
+                    continue;
+                }
+
+                if (configPage.ChildPages != null)
+                {
+                    foreach (var childPage in configPage.ChildPages)
+                    {
+                        yield return childPage;
+                    }
+                }
+                else
+                {
+                    yield return configPage;
+                }
+            }
+
+            foreach (var filterPage in _filterPages.Values)
+            {
+                yield return filterPage;
+            }
+        }
+
+        private IConfigPage? SelectedPage()
+        {
+            IConfigPage? first = null;
+            foreach (var page in SelectablePages())
+            {
+                first ??= page;
+                if (page.Key == ConfigSelectedConfigurationPageKey)
+                {
+                    return page;
+                }
+            }
+
+            return first;
         }
 
         public void SetActiveFilter(FilterConfiguration configuration)
@@ -422,9 +497,9 @@ namespace InventoryTools.Ui
         public Dictionary<string, IConfigPage> _filterPages = new Dictionary<string,IConfigPage>();
 
 
-        private void SetNewFilterActive()
+        private void SetNewFilterActive(FilterConfiguration filterConfiguration)
         {
-            ConfigSelectedConfigurationPage = _configPages.Count + _filterPages.Count - 2;
+            _nextFilter = filterConfiguration;
         }
 
         private void DrawMenuBar()
@@ -526,67 +601,76 @@ namespace InventoryTools.Ui
         public override void DrawWindow()
         {
             DrawMenuBar();
+            DrawSearchBar();
             _verticalSplitter.Draw(DrawSideBar, DrawMainWindow);
+        }
+
+        /// <summary>
+        /// Drawn outside the splitter so it stays pinned: the right-hand pane is a scrolling child,
+        /// and anything drawn inside it scrolls away with the page content.
+        /// </summary>
+        private void DrawSearchBar()
+        {
+            ImGui.SetNextItemWidth(-60 * ImGui.GetIO().FontGlobalScale);
+            ImGui.InputTextWithHint("##configSearch", "Search settings...", ref _searchQuery, 100);
+
+            if (!string.IsNullOrWhiteSpace(_searchQuery))
+            {
+                ImGui.SameLine();
+                if (ImGui.Button("Clear##configSearchClear"))
+                {
+                    _searchQuery = string.Empty;
+                }
+            }
+
+            ImGui.Separator();
+        }
+
+        private void DrawSearchResults()
+        {
+            var results = _configSearchService.Search(_searchQuery);
+            if (results.Count == 0)
+            {
+                ImGui.TextWrapped($"No settings match '{_searchQuery}'.");
+                return;
+            }
+
+            foreach (var result in results)
+            {
+                using (ImRaii.PushId(result.SettingType.Name))
+                {
+                    if (ImGui.Selectable(result.DisplayName))
+                    {
+                        ConfigSelectedConfigurationPageKey = result.PageKey;
+                        _configNavigationState.RequestScrollTo(result.SettingType);
+                        _searchQuery = string.Empty;
+                    }
+
+                    using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudGrey))
+                    {
+                        ImGui.TextUnformatted("    " + result.Breadcrumb);
+                    }
+                }
+
+                ImGui.Separator();
+            }
         }
 
         private void DrawMainWindow()
         {
-            IConfigPage? currentConfigPage = null;
-
+            if (_nextFilter != null && _filterPages.TryGetValue(_nextFilter.Key, out var nextFilterPage))
             {
-                var count = 0;
-                for (var index = 0; index < _configPages.Count; index++)
-                {
-                    var configPage = _configPages[index];
-                    if (configPage.IsMenuItem)
-                    {
-                        continue;
-                    }
-
-                    if (ConfigSelectedConfigurationPage == count)
-                    {
-                        currentConfigPage = configPage;
-                    }
-
-
-                    if (configPage.ChildPages != null)
-                    {
-                        foreach (var childPage in configPage.ChildPages)
-                        {
-                            if (ConfigSelectedConfigurationPage == count)
-                            {
-                                currentConfigPage = childPage;
-                            }
-                            count++;
-                        }
-                    }
-                    else
-                    {
-                        count++;
-                    }
-                }
-
-                foreach (var filter in _filterPages)
-                {
-                    count++;
-                    if (_nextFilter != null)
-                    {
-                        if (filter.Value is FilterPage filterPage)
-                        {
-                            if (filterPage.FilterConfiguration == _nextFilter)
-                            {
-                                currentConfigPage = filterPage;
-                                ConfigSelectedConfigurationPage = count;
-                                _nextFilter = null;
-                            }
-                        }
-                    }
-                    if (ConfigSelectedConfigurationPage == count)
-                    {
-                        currentConfigPage = filter.Value;
-                    }
-                }
+                ConfigSelectedConfigurationPageKey = nextFilterPage.Key;
+                _nextFilter = null;
             }
+
+            if (!string.IsNullOrWhiteSpace(_searchQuery))
+            {
+                DrawSearchResults();
+                return;
+            }
+
+            var currentConfigPage = SelectedPage();
             if (currentConfigPage != null)
             {
                 MediatorService.Publish(currentConfigPage.Draw());
@@ -601,7 +685,6 @@ namespace InventoryTools.Ui
                 if (menuChild.Success)
                 {
 
-                    var count = 0;
                     for (var index = 0; index < _configPages.Count; index++)
                     {
                         var configPage = _configPages[index];
@@ -612,7 +695,7 @@ namespace InventoryTools.Ui
                         else
                         {
                             var hasChildren = configPage.ChildPages != null;
-                            var isSelected = ConfigSelectedConfigurationPage == count;
+                            var isSelected = ConfigSelectedConfigurationPageKey == configPage.Key;
                             using (var node = ImRaii.TreeNode(configPage.Name, hasChildren ?  ImGuiTreeNodeFlags.None : isSelected ? ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.Selected : ImGuiTreeNodeFlags.Leaf))
                             {
                                 if (node)
@@ -621,7 +704,7 @@ namespace InventoryTools.Ui
                                     {
                                         foreach (var childPage in configPage.ChildPages)
                                         {
-                                            isSelected = ConfigSelectedConfigurationPage == count;
+                                            isSelected = ConfigSelectedConfigurationPageKey == childPage.Key;
 
                                             using (var subNode = ImRaii.TreeNode(childPage.Name,
                                                        isSelected
@@ -636,20 +719,8 @@ namespace InventoryTools.Ui
 
                                             if (ImGui.IsItemClicked() && !ImGui.IsItemToggledOpen())
                                             {
-                                                ConfigSelectedConfigurationPage = count;
+                                                ConfigSelectedConfigurationPageKey = childPage.Key;
                                             }
-
-                                            count++;
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    if (configPage.ChildPages != null)
-                                    {
-                                        foreach (var childPage in configPage.ChildPages)
-                                        {
-                                            count++;
                                         }
                                     }
                                 }
@@ -659,10 +730,8 @@ namespace InventoryTools.Ui
                             {
                                 if (ImGui.IsItemClicked() && !ImGui.IsItemToggledOpen())
                                 {
-                                    ConfigSelectedConfigurationPage = count;
+                                    ConfigSelectedConfigurationPageKey = configPage.Key;
                                 }
-                                count++;
-
                             }
                         }
                     }
@@ -671,12 +740,10 @@ namespace InventoryTools.Ui
                     ImGui.TextUnformatted("Item Lists");
                     ImGui.Separator();
 
-                    var filterIndex = count;
                     foreach (var item in _filterPages)
                     {
-                        filterIndex++;
                         using (var subNode = ImRaii.TreeNode(item.Value.Name,
-                                   ConfigSelectedConfigurationPage == filterIndex
+                                   ConfigSelectedConfigurationPageKey == item.Value.Key
                                        ? ImGuiTreeNodeFlags.Selected |
                                          ImGuiTreeNodeFlags.Leaf
                                        : ImGuiTreeNodeFlags.Leaf))
@@ -688,7 +755,7 @@ namespace InventoryTools.Ui
 
                         if (ImGui.IsItemClicked() && !ImGui.IsItemToggledOpen())
                         {
-                            ConfigSelectedConfigurationPage = filterIndex;
+                            ConfigSelectedConfigurationPageKey = item.Value.Key;
                         }
 
                         var filter = _listService.GetListByKey(item.Key);
@@ -760,6 +827,12 @@ namespace InventoryTools.Ui
         public override void Invalidate()
         {
             GenerateFilterPages();
+            RebuildSearchIndex();
+        }
+
+        private void RebuildSearchIndex()
+        {
+            _configSearchService.BuildIndex(SelectablePages());
         }
 
         public override FilterConfiguration? SelectedConfiguration => null;

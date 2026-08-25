@@ -44,6 +44,8 @@ public class SampleFilterMaterialCleanup : BooleanSetting, ISampleFilter
         _shouldAdd = newValue;
     }
 
+    public override bool AppearsInConfigWindow => false;
+
     public override string Key { get; set; } = "sample3";
     public override string Name { get; set; } = "Material clean-up";
     public override string HelpText { get; set; } = "Finds all gatherable items in your characters inventory and attempts to show you where to put them in your retainers.";
@@ -51,8 +53,6 @@ public class SampleFilterMaterialCleanup : BooleanSetting, ISampleFilter
     public string SampleDescription =>
         "This will add a list that will be setup to quickly put away any excess materials. It will have all the material categories automatically added. When calculating where to put items it will try to prioritise existing stacks of items.";
     public SampleFilterType SampleFilterType => SampleFilterType.Sample;
-    public override SettingCategory SettingCategory { get; set; } = SettingCategory.None;
-    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.None;
     public override string Version => "1.7.0.0";
     public bool ShouldAdd => _shouldAdd;
     public FilterConfiguration AddFilter()

@@ -53,9 +53,7 @@ public class WindowIgnoreEscapeSetting<T> : BooleanSetting where T : Window
         get => _helpText;
         set {  }
     }
-
-    public override SettingCategory SettingCategory { get; set; } = SettingCategory.Windows;
-    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.IgnoreEscape;
+    
     public override string Version => "1.7.0.0";
 }
 

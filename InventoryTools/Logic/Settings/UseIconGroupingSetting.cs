@@ -125,7 +125,5 @@ public class UseIconGroupingSetting : Setting<Dictionary<Type, bool>?>
     public override string Key { get; set; } = "UseIconGrouping";
     public override string Name { get; set; } = "Use Acquisition Icon Grouping";
     public override string HelpText { get; set; } = "When use acquisition icons are displayed, how should they be grouped?";
-    public override SettingCategory SettingCategory { get; set; } = SettingCategory.Items;
-    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.UseGrouping;
     public override string Version { get; } = "1.11.0.10";
 }

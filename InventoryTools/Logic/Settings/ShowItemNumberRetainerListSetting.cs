@@ -23,9 +23,7 @@ namespace InventoryTools.Logic.Settings
 
         public override string HelpText { get; set; } =
             "Should the name of the retainer in the summoning bell list have the number of items to be sorted or are available in their inventory?";
-
-        public override SettingCategory SettingCategory { get; set; } = SettingCategory.Highlighting;
-        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
+        
         public override string Version => "1.7.0.0";
 
         public ShowItemNumberRetainerListSetting(ILogger<ShowItemNumberRetainerListSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)

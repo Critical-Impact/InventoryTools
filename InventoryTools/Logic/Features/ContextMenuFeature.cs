@@ -1,31 +1,37 @@
 using System.Collections.Generic;
 using InventoryTools.Logic.Settings;
 using InventoryTools.Logic.Settings.Abstract;
+using InventoryTools.Ui.Config;
+using InventoryTools.Ui.Config.Layouts;
 
 namespace InventoryTools.Logic.Features;
 
 public class ContextMenuFeature : Feature
 {
-    public ContextMenuFeature(IEnumerable<ISetting> settings) : base(new[]
-        {
-            typeof(ContextMenuMoreInformationSetting),
-            typeof(ContextMenuMoreInformationNpcsSetting),
-            typeof(ContextMenuMoreInformationMonstersSetting),
-            typeof(ContextMenuAddToCraftListSetting),
-            typeof(ContextMenuAddToActiveCraftListSetting),
-            typeof(ContextMenuAddToCuratedListSetting),
-            typeof(ContextMenuAddToFavouritesSetting),
-            typeof(ContextMenuOpenCraftingLogSetting),
-            typeof(ContextMenuOpenGatheringLogSetting),
-            typeof(ContextMenuOpenFishingLogSetting),
-            typeof(ContextMenuCopyNameSetting),
-        },
-        settings)
+    public ContextMenuFeature(IEnumerable<ISetting> settings) : base(settings)
     {
     }
 
-    public override string Name { get; } = "Context Menus";
-
-    public override string Description { get; } =
-        "Adds new items to the right click/context menu for items in the game. ";
+    public override PageLayout Build()
+    {
+        return Page("feature/context-menu", "Context Menus",
+            Paragraph(
+                "The plugin can add these entries to the game's right-click menus. Each entry makes the menu longer, so select only the entries that you will use."),
+            Section("Lists",
+                Setting<ContextMenuAddToCraftListSetting>("Add to a craft list"),
+                Setting<ContextMenuAddToActiveCraftListSetting>("Add to the active craft list"),
+                Setting<ContextMenuAddToCuratedListSetting>("Add to a curated list"),
+                Setting<ContextMenuAddToFavouritesSetting>("Add to or remove from favourites")),
+            Section("More information",
+                Setting<ContextMenuMoreInformationSetting>("Items"),
+                Setting<ContextMenuMoreInformationNpcsSetting>("NPCs"),
+                Setting<ContextMenuMoreInformationMonstersSetting>("Monsters")),
+            Section("Open a game log",
+                Setting<ContextMenuOpenCraftingLogSetting>("Crafting log"),
+                Setting<ContextMenuOpenGatheringLogSetting>("Gathering log"),
+                Setting<ContextMenuOpenFishingLogSetting>("Fishing log")),
+            Section("Other",
+                Setting<ContextMenuCopyNameSetting>("Copy the item name"))
+        );
+    }
 }

@@ -7,7 +7,7 @@ namespace InventoryTools.Logic.Settings;
 
 public class ShopHighlightingDisableItemsSetting : GenericBooleanSetting
 {
-    public ShopHighlightingDisableItemsSetting(ILogger<ShopHighlightingDisableItemsSetting> logger, ImGuiService imGuiService) : base("ShopHighlightingDisableItems", "Shop Highlighting - Disable Items", "When highlighting items in a shop, should the not highlighted items be disabled?", false, SettingCategory.Highlighting, SettingSubCategory.ShopHighlighting, "15.0.4", logger, imGuiService)
+    public ShopHighlightingDisableItemsSetting(ILogger<ShopHighlightingDisableItemsSetting> logger, ImGuiService imGuiService) : base("ShopHighlightingDisableItems", "Shop Highlighting - Disable Items", "When highlighting items in a shop, should the not highlighted items be disabled?", false, "15.0.4", logger, imGuiService)
     {
     }
 }

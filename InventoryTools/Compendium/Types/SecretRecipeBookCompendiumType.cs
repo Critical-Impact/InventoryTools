@@ -56,7 +56,7 @@ public class SecretRecipeBookCompendiumType : CompendiumType<SecretRecipeBook>
 
     public override string Singular => "Master Recipe Book";
     public override string Plural => "Master Recipe Books";
-    public override string Description => "Master recipe books that unlock additional crafting recipes when read.";
+    public override string Description => "Master recipe books unlock additional crafting recipes.";
     public override string Key => "secret_recipe_books";
     public override (string?, uint?) Icon => (null, Icons.MasterBookIcon);
 

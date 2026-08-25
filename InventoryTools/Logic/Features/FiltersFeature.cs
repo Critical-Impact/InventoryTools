@@ -1,38 +1,36 @@
 using System.Collections.Generic;
 using System.Linq;
-using Autofac;
+using InventoryTools.Logic.Settings;
 using InventoryTools.Logic.Settings.Abstract;
+using InventoryTools.Ui.Config;
+using InventoryTools.Ui.Config.Layouts;
 
 namespace InventoryTools.Logic.Features;
 
 public class FiltersFeature : Feature
 {
-    public FiltersFeature(IEnumerable<ISetting> settings) : base(new[]
-        {
-            typeof(SampleFilter100GillOrLess),
-            typeof(SampleFilterDuplicateItems),
-            typeof(SampleFilterMaterialCleanup),
-        },
-        settings)
+    public FiltersFeature(IEnumerable<ISetting> settings) : base(settings)
     {
     }
 
-    public override string Name { get; } = "Sample Item Lists";
-    public override string Description { get; } = "Select which sample item lists you'd like to install by default. These are good examples of the types of lists that are possible within Allagan Tools.";
+    public override PageLayout Build()
+    {
+        return Page("feature/sample-lists", "Sample Lists",
+            Paragraph("These lists show you what the plugin can do. After you add them, they behave as normal lists. You can change or delete them at any time."),
+            Setting<SampleFilter100GillOrLess>("Items worth 100 gil or less"),
+            Setting<SampleFilterDuplicateItems>("Duplicate items in your inventory"),
+            Setting<SampleFilterMaterialCleanup>("Crafting materials to move to storage")
+        );
+    }
 
     public override void OnFinish()
     {
         foreach (var setting in RelatedSettings.Select(c => c as ISampleFilter))
         {
-            if (setting != null && setting.ShouldAdd)
+            if (setting is { ShouldAdd: true })
             {
                 setting.AddFilter();
             }
         }
     }
-
 }
-
-//Need to add in hide category or make category optional/null
-//Need to add in put in armoire/glamour sample
-//Maybe other samples?

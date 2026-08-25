@@ -16,9 +16,7 @@ namespace InventoryTools.Logic.Settings
 
         public override string HelpText { get; set; } =
             "The hotkey to toggle the lists window.";
-
-        public override SettingCategory SettingCategory { get; set; } = SettingCategory.Hotkeys;
-        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
+        
         public override string Version => "1.7.0.12";
 
         public HotKeyListsWindowSetting(ILogger<HotKeyListsWindowSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)

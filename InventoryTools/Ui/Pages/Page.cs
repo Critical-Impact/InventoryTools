@@ -11,12 +11,13 @@ public abstract class Page : IConfigPage
 {
     private readonly ImGuiService _imGuiService;
     public abstract void Initialize();
+    public abstract string Key { get; }
     public abstract string Name { get; }
     public abstract List<MessageBase>? Draw();
     public abstract bool IsMenuItem { get; }
     public abstract bool DrawBorder { get; }
 
-    public IEnumerable<Page>? ChildPages { get; set; }
+    public IEnumerable<IConfigPage>? ChildPages { get; set; }
 
     public ImGuiService ImGuiService => _imGuiService;
 

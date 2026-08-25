@@ -27,9 +27,7 @@ public class TooltipAmountOwnedSortSetting : ChoiceSetting<TooltipAmountOwnedSor
 
     public override string HelpText { get; set; } =
         "How should the items displayed in the tooltip that you own be ordered? None is included if you find the sorting to be non-performant.";
-
-    public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
-    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.AddItemLocations;
+    
     public override string Version { get; } = "1.7.0.17";
 
     public override Dictionary<TooltipAmountOwnedSort, string> Choices { get; } =

@@ -28,8 +28,6 @@ public class ContextMenuOpenCraftingLogSetting : BooleanSetting
 
     public override string HelpText { get; set; } =
         "Add a context menu item to open the crafting log for any item that can be crafted?";
-
-    public override SettingCategory SettingCategory { get; set; } = SettingCategory.ContextMenu;
-    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
+    
     public override string Version { get; } = "1.11.0.2";
 }

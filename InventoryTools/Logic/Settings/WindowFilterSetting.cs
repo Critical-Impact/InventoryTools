@@ -38,10 +38,7 @@ namespace InventoryTools.Logic.Settings
 
         public override string HelpText { get; set; } =
             "This is the list that will be highlighted when any of the allagan tools windows are visible.";
-
-        public override SettingCategory SettingCategory { get; set; } = SettingCategory.Lists;
-        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.ActiveLists;
-
+        
         public override Dictionary<string, string> Choices
         {
             get

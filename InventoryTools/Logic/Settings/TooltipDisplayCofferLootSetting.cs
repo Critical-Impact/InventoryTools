@@ -25,11 +25,7 @@ public class TooltipDisplayCofferLootSetting : BooleanSetting
 
     public override string HelpText { get; set; } =
         "When hovering a coffer, card pack, or loot container, show how many of its possible loot items you already own.";
-
-    public override uint? Order { get; } = 0;
-
-    public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
-    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.CofferLoot;
+    
     public override string Version => "1.12.0.0";
 
     public TooltipDisplayCofferLootSetting(ILogger<TooltipDisplayCofferLootSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)

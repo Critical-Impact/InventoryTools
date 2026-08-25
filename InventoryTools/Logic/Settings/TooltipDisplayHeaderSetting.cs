@@ -22,9 +22,7 @@ public class TooltipDisplayHeaderSetting : BooleanSetting
 
     public override string HelpText { get; set; } =
         "Should [Allagan Tools] be displayed in the tooltip above any tooltip modifications?";
-
-    public override SettingCategory SettingCategory { get; set; } = SettingCategory.ToolTips;
-    public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.General;
+    
     public override string Version => "1.7.0.0";
 
     public TooltipDisplayHeaderSetting(ILogger<TooltipDisplayHeaderSetting> logger, ImGuiService imGuiService) : base(logger, imGuiService)

@@ -38,10 +38,7 @@ namespace InventoryTools.Logic.Settings
 
         public override string HelpText { get; set; } =
             "This is the craft list that crafts will count towards.";
-
-        public override SettingCategory SettingCategory { get; set; } = SettingCategory.Lists;
-        public override SettingSubCategory SettingSubCategory { get; } = SettingSubCategory.ActiveLists;
-
+        
         public override Dictionary<string, string> Choices
         {
             get
