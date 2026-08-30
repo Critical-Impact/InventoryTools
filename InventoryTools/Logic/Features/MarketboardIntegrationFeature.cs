@@ -15,7 +15,7 @@ public class MarketboardIntegrationFeature : Feature
     public override PageLayout Build()
     {
         return Page("feature/marketboard", "Market Board",
-            Paragraph("Prices come from Universalis, not from the game. The plugin downloads the prices and keeps a local copy. When this is on, you can filter and sort your lists by price."),
+            Paragraph("Prices come from Universalis, not from the game. The plugin downloads the prices and keeps a local copy. When this is on, prices are automatically downloaded. If not on, you must hit 'Refresh Market Prices' each time you want to get updated pricing on items."),
             Setting<AutomaticallyDownloadPricesSetting>("Download prices automatically"),
             Setting<MarketRefreshTimeHoursSetting>("Keep prices for this many hours"),
             Setting<MarketBoardSaleCountLimitSetting>("Days of sale history to include")

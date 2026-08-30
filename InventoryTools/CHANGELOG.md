@@ -8,6 +8,14 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [15.0.11] - 2026-08-30
+
+### Changed
+- Added configuration window setting search
+- Reworked configuration/wizard settings pages
+- Wizard now has an introduction explaining key plugin concepts
+- Changed the defaults for certain settings
+
 ## [15.0.10] - 2026-08-08
 
 ### Fixed

@@ -33,7 +33,7 @@ public class TooltipsLayout : ConfigLayout
                     Setting<TooltipAddCharacterNameSetting>("Affix the character name"),
                     Setting<TooltipAmountOwnedColorSetting>("Text colour"))),
             Page("tooltips/retrieve", "Amount to retrieve",
-                Paragraph("How many of this item your active list still wants."),
+                Paragraph("How many of this item your active list(sort list or craft list) still wants you to retrieve."),
                 Setting<TooltipDisplayRetrieveAmountSetting>("Show amount to retrieve"),
                 EnabledBy<TooltipDisplayRetrieveAmountSetting>(
                     Setting<TooltipAmountToRetrieveColorSetting>("Text colour"))),
@@ -71,7 +71,7 @@ public class TooltipsLayout : ConfigLayout
                 EnabledBy<TooltipDisplayIngredientPatchSetting>(
                     Setting<TooltipIngredientPatchTooltipColorSetting>("Text colour"))),
             Page("tooltips/sources", "Source information",
-                Paragraph("How the item can be acquired. Pick which sources are worth a tooltip line."),
+                Paragraph("How the item can be acquired."),
                 Setting<TooltipSourceInformationEnabledSetting>("Show source information"),
                 EnabledBy<TooltipSourceInformationEnabledSetting>(
                     Setting<TooltipSourceInformationModifierSetting>("Hold this key to show"),

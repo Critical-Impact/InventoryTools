@@ -15,6 +15,7 @@ public class MarketBoardLayout : ConfigLayout
                 Setting<MarketBoardUseActiveWorldSetting>("Current world"),
                 Setting<MarketBoardExtraWorldsSetting>("Additional worlds")),
             Section("Downloading",
+            Paragraph("Should pricing data be downloaded automatically? If not-enabled the 'Refresh Market Prices' button must be pressed to download pricing for items."),
                 Setting<AutomaticallyDownloadPricesSetting>("Download prices automatically"),
                 Setting<MarketRefreshTimeHoursSetting>("Keep prices for (hours)"),
                 Setting<MarketBoardSaleCountLimitSetting>("Sale history window (days)"))

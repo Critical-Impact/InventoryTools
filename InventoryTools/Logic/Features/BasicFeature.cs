@@ -17,8 +17,7 @@ public class BasicFeature : Feature
         return Page("feature/basic", "Basics",
             Paragraph("These settings apply to the whole plugin. You can change all of them later in the settings window."),
             Setting<AutoSaveSetting>("Save inventories automatically"),
-            Setting<AllowCrossCharacterSetting>("Show the inventories of your other characters"),
-            Setting<HistoryEnabledSetting>("Record the changes to your inventory"),
+            Setting<HistoryEnabledSetting>("Enable historical item tracking"),
             Setting<AddTitleMenuButtonSetting>("Add a button to the game's title menu")
         );
     }

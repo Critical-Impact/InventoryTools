@@ -9,12 +9,13 @@ public class WindowsAndListsLayout : ConfigLayout
     {
         return Page("windows-lists", "Windows & Lists",
             Section("Layout",
+                Paragraph("Control how various windows are laid out."),
                 Setting<CraftWindowLayoutSetting>("Craft window"),
                 Setting<FiltersWindowLayoutSetting>("Items window"),
                 Setting<ShowFiltersTabSetting>(),
                 Setting<CompendiumRowHeightSetting>("Compendium row height")),
-            Section("Behaviour",
-                Paragraph("Which lists are shown when, and how the windows respond to the escape key."),
+            Section("Auto-Switch",
+                Paragraph("When switching between lists in the UI, if highlighting is on should we automatically switch highlighting to that list?"),
                 Setting<SwitchFiltersAutomaticallySetting>(),
                 Setting<SwitchCraftListsAutomaticallySetting>()),
             Section("Ignore escape",
@@ -22,10 +23,7 @@ public class WindowsAndListsLayout : ConfigLayout
                 Setting<CraftWindowIgnoreEscapeSetting>("Craft window"),
                 Setting<FiltersWindowIgnoreEscapeSetting>("Items window"),
                 Setting<ItemWindowIgnoreEscapeSetting>("Item window"),
-                Setting<FilterWindowIgnoreEscapeSetting>("List window")),
-            Section("Active lists",
-                Paragraph("Crafts made anywhere in the game count towards this list."),
-                Setting<ActiveCraftListSetting>())
+                Setting<FilterWindowIgnoreEscapeSetting>("List window"))
         );
     }
 }

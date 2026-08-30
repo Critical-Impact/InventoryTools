@@ -46,7 +46,7 @@ public class ConfigurationWizard : GenericWindow
     private static readonly List<string> IntroPageOrder =
     [
         "intro/welcome", "intro/inventories", "intro/lists", "intro/crafting", "intro/compendium",
-        "intro/windows",
+        "intro/windows", "intro/defaults",
     ];
 
     private static readonly List<string> FeatureOrder =

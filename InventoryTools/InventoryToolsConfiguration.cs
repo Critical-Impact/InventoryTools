@@ -45,7 +45,7 @@ namespace InventoryTools
         private bool _invertTabHighlighting;
         private bool _highlightDestination;
         private bool _highlightDestinationEmpty;
-        private bool _addMoreInformationContextMenu;
+        private bool _addMoreInformationContextMenu = true;
         private bool _addToCraftListContextMenu;
         private bool _addToActiveCraftListContextMenu;
         private bool _openCraftingLogContextMenu;
@@ -362,7 +362,7 @@ namespace InventoryTools
         private bool _tooltipDisplayUnlock;
         private List<ulong>? _tooltipDisplayUnlockCharacters = new();
         private bool _tooltipDisplayMarketAveragePrice;
-        private bool _tooltipDisplayMarketLowestPrice = true;
+        private bool _tooltipDisplayMarketLowestPrice;
         private bool _tooltipAddCharacterNameOwned;
         private bool _tooltipDisplayRetrieveAmount;
         private int _tooltipLocationLimit = 10;

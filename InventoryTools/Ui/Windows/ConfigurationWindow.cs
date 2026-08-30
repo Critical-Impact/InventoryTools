@@ -114,8 +114,8 @@ namespace InventoryTools.Ui
             _configPages.Add(new SeparatorPageItem("Settings"));
             _configPages.Add(_layoutPageFactory.Invoke(_context.Resolve<GeneralLayout>()));
             _configPages.Add(_layoutPageFactory.Invoke(_context.Resolve<WindowsAndListsLayout>()));
-            _configPages.Add(_layoutPageFactory.Invoke(_context.Resolve<ItemIconsLayout>()));
             _configPages.Add(_layoutPageFactory.Invoke(_context.Resolve<HighlightingLayout>()));
+            _configPages.Add(_layoutPageFactory.Invoke(_context.Resolve<ItemIconsLayout>()));
             _configPages.Add(new SeparatorPageItem("Modules", true));
             _configPages.Add(_layoutPageFactory.Invoke(_context.Resolve<MarketBoardLayout>()));
             _configPages.Add(_layoutPageFactory.Invoke(_context.Resolve<TooltipsLayout>()));
