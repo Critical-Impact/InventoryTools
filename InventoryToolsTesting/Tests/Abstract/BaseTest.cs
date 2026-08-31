@@ -67,6 +67,7 @@ namespace InventoryToolsTesting.Tests.Abstract
 
         public static int CharacterCount = 0;
         public static int RetainerCount = 0;
+        public static int FreeCompanyCount = 0;
         public Character GenerateCharacter()
         {
             CharacterCount++;
@@ -84,6 +85,17 @@ namespace InventoryToolsTesting.Tests.Abstract
             character.Name = "Retainer " + RetainerCount;
             character.OwnerId = owner.CharacterId;
             character.CharacterId = 300 + (ulong)RetainerCount;
+            return character;
+        }
+
+        public Character GenerateFreeCompany(Character owner)
+        {
+            FreeCompanyCount++;
+            var character = GetCharacterFactory().Invoke();
+            character.Name = "Free Company " + FreeCompanyCount;
+            character.OwnerId = 0;
+            character.CharacterId = 900 + (ulong)FreeCompanyCount;
+            owner.FreeCompanyId = character.CharacterId;
             return character;
         }
 

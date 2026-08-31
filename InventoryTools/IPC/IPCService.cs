@@ -10,6 +10,7 @@ using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
 using InventoryTools.Lists;
 using InventoryTools.Logic;
+using InventoryTools.Logic.Editors;
 using InventoryTools.Services.Interfaces;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -24,6 +25,8 @@ public class IPCService : IHostedService
     private ICallGateProvider<uint, ulong, int, uint>? _itemCount;
     private ICallGateProvider<uint, ulong, int, uint>? _itemCountHQ;
     private ICallGateProvider<uint, bool, uint[], uint>? _itemCountOwned;
+    private ICallGateProvider<uint, bool, uint[], bool, uint>? _itemCountOwnedByCategory;
+    private ICallGateProvider<uint, bool, uint[], bool, Dictionary<ulong, uint>>? _getItemCountsByCharacter;
     private ICallGateProvider<string, bool>? _enableUiFilter;
     private ICallGateProvider<bool>? _disableUiFilter;
     private ICallGateProvider<string, bool>? _toggleUiFilter;
@@ -58,9 +61,10 @@ public class IPCService : IHostedService
     private IListService _listService;
     private IInventoryMonitor _inventoryMonitor;
     private ListFilterService _listFilterService;
+    private InventoryScopeCalculator _inventoryScopeCalculator;
     private bool _disposed;
 
-    public IPCService(IDalamudPluginInterface pluginInterface, ILogger<IPCService> logger, ICharacterMonitor characterMonitor, IListService listService, IInventoryMonitor inventoryMonitor, ListFilterService listFilterService)
+    public IPCService(IDalamudPluginInterface pluginInterface, ILogger<IPCService> logger, ICharacterMonitor characterMonitor, IListService listService, IInventoryMonitor inventoryMonitor, ListFilterService listFilterService, InventoryScopeCalculator inventoryScopeCalculator)
     {
         _pluginInterface = pluginInterface;
         _logger = logger;
@@ -68,6 +72,7 @@ public class IPCService : IHostedService
         _listService = listService;
         _inventoryMonitor = inventoryMonitor;
         _listFilterService = listFilterService;
+        _inventoryScopeCalculator = inventoryScopeCalculator;
     }
 
     private void InventoryMonitorOnOnInventoryChanged(List<InventoryChange> inventoryChanges, InventoryMonitor.ItemChanges? changedItems)
@@ -112,6 +117,58 @@ public class IPCService : IHostedService
                 && _characterMonitor.Characters.ContainsKey(item.RetainerId)
                 && (!currentCharacterOnly || _characterMonitor.BelongsToActiveCharacter(item.RetainerId)))
             .Sum(c => c.Quantity);
+    }
+
+    private IEnumerable<CriticalCommonLib.Models.InventoryItem> OwnedItems(uint itemId, bool currentCharacterOnly, uint[] inventoryCategories, bool includeSharedStorage)
+    {
+        var scope = new InventorySearchScope
+        {
+            ActiveCharacter = currentCharacterOnly ? true : null,
+            Categories = inventoryCategories.Length == 0
+                ? null
+                : inventoryCategories.Select(c => (InventoryCategory)c).ToHashSet(),
+            CharacterTypes = includeSharedStorage
+                ? null
+                : [CharacterType.Character, CharacterType.Retainer],
+        };
+
+        return _inventoryMonitor.AllItems.Where(item =>
+            item.ItemId == itemId
+            && _characterMonitor.Characters.ContainsKey(item.RetainerId)
+            && _inventoryScopeCalculator.Filter(scope, item.RetainerId, item.SortedCategory));
+    }
+
+    /// <summary>
+    /// Counts how much of an item is owned, across characters, retainers and optionally shared storage.
+    /// Both NQ and HQ are counted.
+    /// </summary>
+    /// <param name="itemId">The item to count.</param>
+    /// <param name="currentCharacterOnly">When true, only count storage belonging to the active character and its retainers/free company/houses.</param>
+    /// <param name="inventoryCategories"> The InventoryCategory values to count. An empty array counts every category. <see cref="InventoryCategory"/> </param>
+    /// <param name="includeSharedStorage">When false, free company chests and housing storage are excluded regardless of the categories given.</param>
+    public uint ItemCountOwnedByCategory(uint itemId, bool currentCharacterOnly, uint[] inventoryCategories, bool includeSharedStorage)
+    {
+        return (uint)OwnedItems(itemId, currentCharacterOnly, inventoryCategories, includeSharedStorage)
+            .Sum(c => c.Quantity);
+    }
+
+    /// <summary>
+    /// Counts how much of an item is owned, broken down by the character/retainer/free company/house holding it.
+    /// Owners holding none of the item are omitted. Both NQ and HQ are counted.
+    /// </summary>
+    /// <param name="itemId">The item to count.</param>
+    /// <param name="currentCharacterOnly">When true, only count storage belonging to the active character and its retainers/free company/houses.</param>
+    /// <param name="inventoryCategories">The InventoryCategory values to count, an empty array counts every category. <see cref="InventoryCategory"/></param>
+    /// <param name="includeSharedStorage">When false, free company chests and housing storage are excluded regardless of the categories given.</param>
+    public Dictionary<ulong, uint> GetItemCountsByCharacter(uint itemId, bool currentCharacterOnly, uint[] inventoryCategories, bool includeSharedStorage)
+    {
+        var itemCounts = new Dictionary<ulong, uint>();
+        foreach (var item in OwnedItems(itemId, currentCharacterOnly, inventoryCategories, includeSharedStorage))
+        {
+            itemCounts[item.RetainerId] = itemCounts.GetValueOrDefault(item.RetainerId) + item.Quantity;
+        }
+
+        return itemCounts;
     }
 
     private bool IsInitialized()
@@ -195,11 +252,9 @@ public class IPCService : IHostedService
             {
                 if (quantity == 0) continue;
 
-                if (retrievalItems.ContainsKey(itemId))
+                if (!retrievalItems.TryAdd(itemId, quantity))
                 {
                     retrievalItems[itemId] += quantity;
-                } else {
-                    retrievalItems.Add(itemId, quantity);
                 }
             }
         }
@@ -212,25 +267,30 @@ public class IPCService : IHostedService
             .Where(characterId => _characterMonitor.BelongsToActiveCharacter(characterId) && (includeOwner || characterId != _characterMonitor.ActiveCharacterId))
             .ToHashSet();
 
-    private HashSet<ulong[]> GetCharacterItems(ulong characterId)
+    public HashSet<ulong[]> GetCharacterItems(ulong characterId)
     {
-        var items = _inventoryMonitor.Inventories
-            .First(pair => pair.Key == characterId).Value
+        if (!_inventoryMonitor.Inventories.TryGetValue(characterId, out var characterInventories))
+        {
+            return [];
+        }
+
+        var items = characterInventories
             .GetAllInventories().SelectMany(item => item)
             .Where(item => item != null);
 
-        if (items == null) return new();
         return items.Select(item => item!.ToNumeric())
             .ToHashSet();
     }
 
-    private HashSet<ulong[]> GetCharacterItemsByType(ulong characterId, uint inventoryType)
+    public HashSet<ulong[]> GetCharacterItemsByType(ulong characterId, uint inventoryType)
     {
-        var characterInventories = _inventoryMonitor.Inventories
-            .First(pair => pair.Key == characterId).Value;
-        
+        if (!_inventoryMonitor.Inventories.TryGetValue(characterId, out var characterInventories))
+        {
+            return [];
+        }
+
         var items = (characterInventories
-                .GetInventoryByType((InventoryType)inventoryType) ?? Array.Empty<CriticalCommonLib.Models.InventoryItem?>())
+                .GetInventoryByType((InventoryType)inventoryType) ?? [])
             .Where(item => item != null);
 
         return items.Select(item => item!.ToNumeric())
@@ -240,7 +300,7 @@ public class IPCService : IHostedService
     {
         var filter = _listService.GetListByKeyOrName(filterKey);
         var filterItems = new Dictionary<uint, uint>();
-        
+
         if (filter != null)
         {
             if (filter.FilterType == FilterType.CraftFilter)
@@ -283,13 +343,9 @@ public class IPCService : IHostedService
                 var filterResult = _listFilterService.RefreshList(filter);
                 foreach (var sortedItem in filterResult)
                 {
-                    if (filterItems.ContainsKey(sortedItem.Item.RowId))
+                    if (!filterItems.TryAdd(sortedItem.Item.RowId, 0))
                     {
                         filterItems[sortedItem.Item.RowId] += 0;
-                    }
-                    else
-                    {
-                        filterItems.Add(sortedItem.Item.RowId, 0);
                     }
                 }
             }
@@ -301,7 +357,7 @@ public class IPCService : IHostedService
     private bool RemoveItemFromCraftList(string filterKey, uint itemId, uint quantity)
     {
         var filter = _listService.GetListByKeyOrName(filterKey);
-        
+
         if (filter is { FilterType: FilterType.CraftFilter })
         {
             filter.CraftList.RemoveCraftItem(itemId, quantity, InventoryItem.ItemFlags.None);
@@ -314,7 +370,7 @@ public class IPCService : IHostedService
     private bool AddItemToCraftList(string filterKey, uint itemId, uint quantity)
     {
         var filter = _listService.GetListByKeyOrName(filterKey);
-        
+
         if (filter is { FilterType: FilterType.CraftFilter })
         {
             filter.CraftList.AddCraftItem(itemId, quantity, InventoryItem.ItemFlags.None);
@@ -332,7 +388,7 @@ public class IPCService : IHostedService
         {
             filter = _listService.GetList(filterKey);
         }
-        
+
         if (filter != null)
         {
             _listService.ToggleActiveUiList(filter);
@@ -351,7 +407,7 @@ public class IPCService : IHostedService
     private bool EnableUiFilter(string filterKey)
     {
         var filter = _listService.GetListByKeyOrName(filterKey);
-        
+
         if (filter != null)
         {
             _listService.SetActiveUiList(filter);
@@ -364,7 +420,7 @@ public class IPCService : IHostedService
     private bool ToggleBackgroundFilter(string filterKey)
     {
         var filter = _listService.GetListByKeyOrName(filterKey);
-        
+
         if (filter != null)
         {
             _listService.ToggleActiveBackgroundList(filter);
@@ -383,7 +439,7 @@ public class IPCService : IHostedService
     private bool EnableBackgroundFilter(string filterKey)
     {
         var filter = _listService.GetListByKeyOrName(filterKey);
-        
+
         if (filter != null)
         {
             _listService.SetActiveBackgroundList(filter);
@@ -401,7 +457,7 @@ public class IPCService : IHostedService
         {
             filter = _listService.GetList(filterKey);
         }
-        
+
         if (filter != null)
         {
             _listService.ToggleActiveCraftList(filter);
@@ -420,7 +476,7 @@ public class IPCService : IHostedService
     private bool EnableCraftList(string filterKey)
     {
         var filter = _listService.GetListByKeyOrName(filterKey);
-        
+
         if (filter != null)
         {
             _listService.SetActiveCraftList(filter);
@@ -444,17 +500,17 @@ public class IPCService : IHostedService
     private uint InventoryCountByType(uint inventoryType, ulong? characterId)
     {
         return (uint)_inventoryMonitor.AllItems.Where(c => (uint)c.SortedContainer == inventoryType && (characterId == null || c.RetainerId == characterId)).Sum(c => c.Quantity);
-    }            
-    
+    }
+
     public Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogTrace("Starting service {type} ({this})", GetType().Name, this);
         _inventoryCountByType = _pluginInterface.GetIpcProvider<uint, ulong?, uint>("AllaganTools.InventoryCountByType");
         _inventoryCountByType.RegisterFunc(InventoryCountByType);
-        
+
         _inventoryCountByTypes = _pluginInterface.GetIpcProvider<uint[], ulong?, uint>("AllaganTools.InventoryCountByTypes");
         _inventoryCountByTypes.RegisterFunc(InventoryCountByTypes);
-        
+
         _itemCount = _pluginInterface.GetIpcProvider<uint, ulong, int, uint>("AllaganTools.ItemCount");
         _itemCount.RegisterFunc(ItemCount);
 
@@ -463,6 +519,12 @@ public class IPCService : IHostedService
 
         _itemCountOwned = _pluginInterface.GetIpcProvider<uint, bool, uint[], uint>("AllaganTools.ItemCountOwned");
         _itemCountOwned.RegisterFunc(ItemCountOwned);
+
+        _itemCountOwnedByCategory = _pluginInterface.GetIpcProvider<uint, bool, uint[], bool, uint>("AllaganTools.ItemCountOwnedByCategory");
+        _itemCountOwnedByCategory.RegisterFunc(ItemCountOwnedByCategory);
+
+        _getItemCountsByCharacter = _pluginInterface.GetIpcProvider<uint, bool, uint[], bool, Dictionary<ulong, uint>>("AllaganTools.GetItemCountsByCharacter");
+        _getItemCountsByCharacter.RegisterFunc(GetItemCountsByCharacter);
 
         _enableUiFilter = _pluginInterface.GetIpcProvider<string, bool>("AllaganTools.EnableUiFilter");
         _enableUiFilter.RegisterFunc(EnableUiFilter);
@@ -511,7 +573,6 @@ public class IPCService : IHostedService
 
         _getCharactersOwnedByActive = _pluginInterface.GetIpcProvider<bool, HashSet<ulong>>("AllaganTools.GetCharactersOwnedByActive");
         _getCharactersOwnedByActive.RegisterFunc(GetCharactersOwnedByActive);
-        _getCraftItems.RegisterFunc(GetCraftItems);
 
         _getCharacterItemsByType = _pluginInterface.GetIpcProvider<ulong,uint, HashSet<ulong[]>>("AllaganTools.GetCharacterItemsByType");
         _getCharacterItemsByType.RegisterFunc(GetCharacterItemsByType);
@@ -558,6 +619,8 @@ public class IPCService : IHostedService
         _itemCount?.UnregisterFunc();
         _itemCountHQ?.UnregisterFunc();
         _itemCountOwned?.UnregisterFunc();
+        _itemCountOwnedByCategory?.UnregisterFunc();
+        _getItemCountsByCharacter?.UnregisterFunc();
         _enableUiFilter?.UnregisterFunc();
         _disableUiFilter?.UnregisterFunc();
         _toggleUiFilter?.UnregisterFunc();
@@ -573,6 +636,7 @@ public class IPCService : IHostedService
         _getCraftItems?.UnregisterFunc();
         _getRetrievalItems?.UnregisterFunc();
         _itemAdded?.UnregisterFunc();
+        _itemRemoved?.UnregisterFunc();
         _getCraftLists?.UnregisterFunc();
         _getSearchFilters?.UnregisterFunc();
         _addNewCraftList?.UnregisterFunc();

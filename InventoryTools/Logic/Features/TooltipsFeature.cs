@@ -24,6 +24,7 @@ public class TooltipsFeature : Feature
             Setting<TooltipUseInformationEnabledSetting>("What the item is used for"),
             Setting<TooltipDisplayIngredientPatchSetting>("Which patch an ingredient is from"),
             Setting<TooltipDisplayCofferLootSetting>("What a coffer can contain"),
+            Setting<TooltipDisplayCuratedListsSetting>("Whether the item is on one of your curated lists"),
             Setting<TooltipDisplayGlamourReadySetSetting>("Whether the item completes an outfit"),
             Paragraph("Each line has more options in the settings window, under Tooltips. The options include colours, the locations to search, and the display mode.")
         );

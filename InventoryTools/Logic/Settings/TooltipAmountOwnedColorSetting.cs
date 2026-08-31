@@ -88,3 +88,10 @@ public class TooltipCofferLootColorSetting : GenericGameColorSetting
         this.DefaultValue = 541;
     }
 }
+public class TooltipCuratedListsColorSetting : GenericGameColorSetting
+{
+    public TooltipCuratedListsColorSetting(ILogger<TooltipCuratedListsColorSetting> logger, ImGuiService imGuiService, ExcelSheet<UIColor> uiColorSheet) : base("TooltipCuratedListsColor", "Text Colour", "When enabled, what colour should the text be for the 'Curated List' tooltip text be?", null, "15.0.12", logger, imGuiService, uiColorSheet)
+    {
+        this.DefaultValue = 535;
+    }
+}

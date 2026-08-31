@@ -1235,6 +1235,25 @@ namespace InventoryTools
             this.IsDirty = true;
         }
 
+        public List<string>? Get(string key, List<string>? defaultValue)
+        {
+            return this.ListSettings.TryGetValue(key, out var value) ? value : defaultValue;
+        }
+
+        public void Set(string key, List<string>? newValue)
+        {
+            if (newValue == null)
+            {
+                this.ListSettings.Remove(key);
+            }
+            else
+            {
+                this.ListSettings[key] = newValue;
+            }
+
+            this.IsDirty = true;
+        }
+
         public uint? Get(string key, uint? defaultValue)
         {
             return this.UIntegerSettings.TryGetValue(key, out var value) ? value : defaultValue;

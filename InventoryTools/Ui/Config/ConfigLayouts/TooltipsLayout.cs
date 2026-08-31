@@ -56,6 +56,13 @@ public class TooltipsLayout : ConfigLayout
                 EnabledBy<TooltipDisplayCofferLootSetting>(
                     Setting<TooltipCofferLootScopeSetting>("Search these locations"),
                     Setting<TooltipCofferLootColorSetting>("Text colour"))),
+            Page("tooltips/curated", "Curated lists",
+                Paragraph("Which of your curated lists already contain this item."),
+                Setting<TooltipDisplayCuratedListsSetting>("Show curated lists"),
+                EnabledBy<TooltipDisplayCuratedListsSetting>(
+                    Setting<TooltipCuratedListsSetting>("Limit to these lists"),
+                    Setting<TooltipCuratedListsMatchQualitySetting>("Match item quality"),
+                    Setting<TooltipCuratedListsColorSetting>("Text colour"))),
             Page("tooltips/glamour", "Outfit glamour",
                 Paragraph("Whether this item completes an outfit you are collecting."),
                 Setting<TooltipDisplayGlamourReadySetSetting>("Show outfit glamour info"),

@@ -8,6 +8,17 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [15.0.12]
+
+### Added
+- Added a tooltip that lists which of your curated lists contain the hovered item
+- Added IPC `AllaganTools.ItemCountOwnedByCategory` which counts an item across a character and its retainers in a single call, scoped by inventory category with the option to include/exclude shared storage(free companies/housing)
+- Added IPC `AllaganTools.GetItemCountsByCharacter` which returns the same count broken down per character, retainer, free company and house
+
+### Fixed
+- Certain items that can be collectable were not showing up in the retrieval list in craft lists
+- IPC `AllaganTools.GetCharacterItems` and `AllaganTools.GetCharacterItemsByType` threw an exception when given a character with no loaded inventory, they now return an empty set
+
 ## [15.0.11] - 2026-08-30
 
 ### Changed
