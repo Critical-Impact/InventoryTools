@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.h
 
 ### Fixed
 - Certain items that can be collectable were not showing up in the retrieval list in craft lists
-- IPC `AllaganTools.GetCharacterItems` and `AllaganTools.GetCharacterItemsByType` threw an exception when given a character with no loaded inventory, they now return an empty set
+- IPC `AllaganTools.GetCharacterItems` and `AllaganTools.GetCharacterItemsByType` were throwing an exception when given a character with no loaded inventory, now return an empty array
 
 ## [15.0.11] - 2026-08-30
 
