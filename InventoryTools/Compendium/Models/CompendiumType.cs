@@ -114,7 +114,7 @@ public abstract class CompendiumType<TData> : ICompendiumType<TData>
     public virtual Func<TData, List<MessageBase>>? BuildContextMenu() => null;
     public Dictionary<object, string>? GetGroups(ICompendiumGrouping<TData> compendiumGrouping)
     {
-        return GetRows().Select(c => compendiumGrouping.GroupFunc(c)).Distinct().ToDictionary(c => c, c => compendiumGrouping.GroupMapping(c));
+        return GetRows().SelectMany(c => compendiumGrouping.GetGroupKeys(c)).Distinct().ToDictionary(c => c, c => compendiumGrouping.GroupMapping(c));
     }
 
     /// <summary>

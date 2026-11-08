@@ -260,7 +260,7 @@ public class ContextMenuService : DisposableMediatorSubscriberBase, IHostedServi
                 var menuItem = new MenuItem();
                 menuItem.Name = "More Information";
                 menuItem.PrefixChar = 'A';
-                menuItem.OnClicked += _ => MediatorService.Publish(new OpenUintWindowMessage(typeof(BNpcWindow), bNpcNameId.Value));
+                menuItem.OnClicked += _ => MediatorService.Publish(new InventoryTools.Mediator.OpenCompendiumViewByTypeMessage(typeof(InventoryTools.Compendium.Types.BNpcCompendiumType), bNpcNameId.Value));
                 args.AddMenuItem(menuItem);
             }
         }

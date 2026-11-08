@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AllaganLib.GameSheets.Extensions;
 using AllaganLib.GameSheets.Sheets;
 using AllaganLib.GameSheets.Sheets.Rows;
 using AllaganLib.Shared.Extensions;
@@ -8,6 +9,7 @@ using DalaMock.Host.Mediator;
 using InventoryTools.Compendium.Interfaces;
 using InventoryTools.Compendium.Models;
 using InventoryTools.Compendium.Sections;
+using InventoryTools.Compendium.Sections.Options;
 using InventoryTools.Compendium.Services;
 using InventoryTools.Compendium.Windows;
 using InventoryTools.Mediator;
@@ -20,11 +22,13 @@ public class TerritoryTypeCompendiumType : CompendiumType<IGrouping<string, Terr
 {
     private readonly TerritoryTypeSheet _territoryTypeSheet;
     private readonly MediatorService _mediatorService;
+    private readonly BNpcCompendiumType _bNpcCompendiumType;
 
-    public TerritoryTypeCompendiumType(TerritoryTypeSheet territoryTypeSheet, MediatorService mediatorService, CompendiumTable<IGrouping<string, TerritoryTypeRow>>.Factory tableFactory, CompendiumColumnBuilder<IGrouping<string, TerritoryTypeRow>>.Factory columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory, columnBuilder, viewBuilderFactory)
+    public TerritoryTypeCompendiumType(TerritoryTypeSheet territoryTypeSheet, MediatorService mediatorService, BNpcCompendiumType bNpcCompendiumType, CompendiumTable<IGrouping<string, TerritoryTypeRow>>.Factory tableFactory, CompendiumColumnBuilder<IGrouping<string, TerritoryTypeRow>>.Factory columnBuilder, CompendiumViewBuilder.Factory viewBuilderFactory) : base(tableFactory, columnBuilder, viewBuilderFactory)
     {
         _territoryTypeSheet = territoryTypeSheet;
         _mediatorService = mediatorService;
+        _bNpcCompendiumType = bNpcCompendiumType;
     }
 
     public override List<Type>? RelatedTypes => [typeof(TerritoryType), typeof(TerritoryTypeRow)];
@@ -96,6 +100,22 @@ public class TerritoryTypeCompendiumType : CompendiumType<IGrouping<string, Terr
     public override void BuildViewFields(CompendiumViewBuilder viewBuilder, IGrouping<string, TerritoryTypeRow> row)
     {
         viewBuilder.SetupDefaults(this, row);
+
+        var mobs = row
+            .SelectMany(c => _bNpcCompendiumType.GetMobsInTerritory(c.RowId))
+            .Distinct()
+            .Select(c => _bNpcCompendiumType.GetRow(c))
+            .Where(c => c != null)
+            .Select(c => c!)
+            .OrderBy(c => _bNpcCompendiumType.GetName(c))
+            .Select(c => c.Base.AsUntypedRowRef())
+            .ToList();
+        viewBuilder.AddCollectionRowRefSection(new CollectionRowRefSectionOptions()
+        {
+            SectionKey = "mobs",
+            SectionName = "Mobs",
+            RelatedRefs = mobs,
+        });
     }
 
     public override bool HasRow(uint rowId)

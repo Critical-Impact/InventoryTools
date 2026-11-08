@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using AllaganLib.GameSheets.Caches;
@@ -12,6 +13,7 @@ using CriticalCommonLib;
 using CriticalCommonLib.Addons;
 using CriticalCommonLib.Extensions;
 using CriticalCommonLib.MarketBoard;
+using CriticalCommonLib.Models;
 using CriticalCommonLib.Services;
 using CriticalCommonLib.Services.Mediator;
 using CriticalCommonLib.Services.Ui;
@@ -119,8 +121,8 @@ namespace InventoryTools.Ui
             _settingsMenu = new PopupMenu("configMenu", PopupMenu.PopupMenuButtons.All,
                 new List<PopupMenu.IPopupMenuItem>()
                 {
-                    new PopupMenu.PopupMenuItemSelectable("Mob Window", "mobs", OpenMobsWindow,
-                        "Open the mobs window."),
+                    new PopupMenu.PopupMenuItemSelectable("Mobs", "mobs", OpenMobsWindow,
+                        "Open the mobs compendium."),
                     new PopupMenu.PopupMenuItemSelectable("Npcs Window", "npcs", OpenNpcsWindow,
                         "Open the npcs window."),
                     new PopupMenu.PopupMenuItemSelectable("Duties Window", "duties", OpenDutiesWindow,
@@ -278,7 +280,7 @@ namespace InventoryTools.Ui
 
         private void OpenMobsWindow(string obj)
         {
-            MediatorService.Publish(new Mediator.OpenGenericWindowMessage(typeof(BNpcsWindow)));
+            MediatorService.Publish(new InventoryTools.Mediator.OpenCompendiumListByTypeMessage(typeof(InventoryTools.Compendium.Types.BNpcCompendiumType)));
         }
 
         private void OpenNpcsWindow(string obj)
@@ -1800,6 +1802,23 @@ namespace InventoryTools.Ui
 
                     ImGui.SameLine();
                     ImGuiService.VerticalCenter("Pending Market Requests: " + _universalis.QueuedCount);
+
+                    if (_universalis.HasIssues && _universalis.LastFailure != null)
+                    {
+                        ImGui.SameLine();
+                        ImGui.Image(ImGuiService.GetIconTexture(Icons.ExclamationIcon).Handle,
+                            new Vector2(22, 22));
+                        ImGuiUtil.HoverTooltip($"There was an error when contacting Universalis at {_universalis.LastFailure.Value.ToString(CultureInfo.CurrentCulture)}. This likely means Universalis is having issues. Allagan Tools will back off requests for 30 seconds whenever this happens.");
+                    }
+
+                    if (_universalis.TooManyRequests)
+                    {
+                        ImGui.SameLine();
+                        ImGui.Image(ImGuiService.GetIconTexture(Icons.ExclamationIcon).Handle,
+                            new Vector2(22, 22));
+                        ImGuiUtil.HoverTooltip($"It appears you are sending too many requests to Universalis, if you have multiple plugins requesting marketboard data, this is the most likely cause.");
+                    }
+
                     if (filterConfiguration.FilterType == FilterType.CraftFilter)
                     {
                         ImGui.SameLine();

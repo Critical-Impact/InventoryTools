@@ -8,6 +8,25 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [15.1.0] - 2026-11-08
+
+### Added
+- Added a Mobs compendium that replaces the old mobs window
+- Added a Coffers compendium that shows what each coffer, card pack and similar container can give
+- Added a Familiars compendium for beastmaster familiars, with the family, location, skills, unlock item and where to get the unlock item
+- Added Beastmaster Familiar's as a use
+- Occult Crescent coffer and pot sources are now split into South Horn and North Horn
+- Added a delete button to the Characters and Retainers page, with a confirmation popup
+- The Items window now shows a warning icon when Universalis requests fail or when you send too many requests
+
+### Changed
+- Luminasupplemental data update
+
+### Fixed
+- The hunt rank shown for mobs was often wrong or missing
+- Oizys and Auxesia loot were not shown as item sources
+- Many mobs were missing spawn locations
+
 ## [15.0.13] - 2026-09-13
 
 ### Changed

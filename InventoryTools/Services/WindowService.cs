@@ -864,7 +864,48 @@ namespace InventoryTools.Services
             _mediatorService.Subscribe(this, new Action<OpenCompendiumViewMessage>(OpenCompendiumViewWindow));
             _mediatorService.Subscribe(this, new Action<ToggleCompendiumListMessage>(ToggleCompendiumListWindow));
             _mediatorService.Subscribe(this, new Action<ToggleCompendiumViewMessage>(ToggleCompendiumViewWindow));
+            _mediatorService.Subscribe(this, new Action<OpenCompendiumListByTypeMessage>(OpenCompendiumListByType));
+            _mediatorService.Subscribe(this, new Action<ToggleCompendiumListByTypeMessage>(ToggleCompendiumListByType));
+            _mediatorService.Subscribe(this, new Action<OpenCompendiumViewByTypeMessage>(OpenCompendiumViewByType));
             return Task.CompletedTask;
+        }
+
+        private ICompendiumType? GetCompendiumTypeByClass(Type compendiumTypeClass)
+        {
+            var compendiumType = _compendiumTypes.FirstOrDefault(c => c.GetType() == compendiumTypeClass);
+            if (compendiumType == null)
+            {
+                Logger.LogError("Could not find the compendium type {CompendiumType}.", compendiumTypeClass.Name);
+            }
+
+            return compendiumType;
+        }
+
+        private void OpenCompendiumListByType(OpenCompendiumListByTypeMessage obj)
+        {
+            var compendiumType = GetCompendiumTypeByClass(obj.CompendiumTypeClass);
+            if (compendiumType != null)
+            {
+                OpenWindow(compendiumType);
+            }
+        }
+
+        private void ToggleCompendiumListByType(ToggleCompendiumListByTypeMessage obj)
+        {
+            var compendiumType = GetCompendiumTypeByClass(obj.CompendiumTypeClass);
+            if (compendiumType != null)
+            {
+                ToggleWindow(compendiumType);
+            }
+        }
+
+        private void OpenCompendiumViewByType(OpenCompendiumViewByTypeMessage obj)
+        {
+            var compendiumType = GetCompendiumTypeByClass(obj.CompendiumTypeClass);
+            if (compendiumType != null)
+            {
+                OpenWindow(compendiumType, obj.RowId);
+            }
         }
 
         private void OpenCompendiumViewWindow(OpenCompendiumViewMessage obj)

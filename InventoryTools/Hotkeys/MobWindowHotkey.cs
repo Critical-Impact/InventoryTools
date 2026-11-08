@@ -17,7 +17,7 @@ public class MobWindowHotkey : Hotkey
         Configuration.GetHotkey(HotkeyMobWindowSetting.AsKey);
     public override bool OnHotKey()
     {
-        MediatorService.Publish(new ToggleGenericWindowMessage(typeof(BNpcsWindow)));
+        MediatorService.Publish(new ToggleCompendiumListByTypeMessage(typeof(InventoryTools.Compendium.Types.BNpcCompendiumType)));
         return true;
     }
 }

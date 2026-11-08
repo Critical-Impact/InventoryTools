@@ -57,4 +57,7 @@ public record OpenCompendiumListMessage(ICompendiumType CompendiumType) : Messag
 public record OpenCompendiumViewMessage(ICompendiumType CompendiumType, uint rowId) : MessageBase;
 public record ToggleCompendiumListMessage(ICompendiumType CompendiumType) : MessageBase;
 public record ToggleCompendiumViewMessage(ICompendiumType CompendiumType, uint rowId) : MessageBase;
+public record OpenCompendiumListByTypeMessage(Type CompendiumTypeClass) : MessageBase;
+public record ToggleCompendiumListByTypeMessage(Type CompendiumTypeClass) : MessageBase;
+public record OpenCompendiumViewByTypeMessage(Type CompendiumTypeClass, uint RowId) : MessageBase;
 public record OpenCurrentPOIMessage() : MessageBase;

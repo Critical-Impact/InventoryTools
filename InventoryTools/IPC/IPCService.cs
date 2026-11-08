@@ -219,7 +219,7 @@ public class IPCService : IHostedService
     {
         var filter = _listService.GetListByKeyOrName(filterKey);
         var craftItems = new Dictionary<uint, uint>();
-        
+
         if (filter != null && filter.FilterType == FilterType.CraftFilter)
         {
             foreach (var craftItem in filter.CraftList.CraftItems)
@@ -591,7 +591,7 @@ public class IPCService : IHostedService
 
         _isInitialized = _pluginInterface.GetIpcProvider<bool>("AllaganTools.IsInitialized");
         _isInitialized.RegisterFunc(IsInitialized);
-        
+
         //Events
         _retainerChanged = _pluginInterface.GetIpcProvider<ulong?, bool>("AllaganTools.RetainerChanged");
         _itemAdded = _pluginInterface.GetIpcProvider<(uint, InventoryItem.ItemFlags, ulong, uint), bool>("AllaganTools.ItemAdded");
@@ -603,7 +603,7 @@ public class IPCService : IHostedService
         _inventoryMonitor.OnInventoryChanged += InventoryMonitorOnOnInventoryChanged;
 
         _initalizedIpc = true;
-        
+
         _initialized.SendMessage(true);
 
         return Task.CompletedTask;

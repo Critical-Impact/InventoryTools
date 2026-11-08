@@ -247,7 +247,7 @@ namespace InventoryTools.Ui
 
         private void OpenMobsWindow(string obj)
         {
-            MediatorService.Publish(new OpenGenericWindowMessage(typeof(BNpcsWindow)));
+            MediatorService.Publish(new InventoryTools.Mediator.OpenCompendiumListByTypeMessage(typeof(InventoryTools.Compendium.Types.BNpcCompendiumType)));
         }
 
         private void OpenNpcsWindow(string obj)
@@ -2724,7 +2724,7 @@ namespace InventoryTools.Ui
 
                     ImGuiService.VerticalCenter("Pending Market Requests: " + _universalis.QueuedCount);
 
-                    if (_universalis.LastFailure != null)
+                    if (_universalis.HasIssues && _universalis.LastFailure != null)
                     {
                         ImGui.SameLine();
                         ImGui.Image(ImGuiService.GetIconTexture(Icons.ExclamationIcon).Handle,

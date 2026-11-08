@@ -101,34 +101,28 @@ public abstract class GenericTabbedTable<T> : GenericWindow, IGenericTabbedTable
         }
 
         var currentSortSpecs = ImGui.TableGetSortSpecs();
-        if (currentSortSpecs.SpecsDirty)
+        bool hasSortSpecs;
+        unsafe
         {
-            var actualSpecs = currentSortSpecs.Specs;
-            if (_sortColumn != actualSpecs.ColumnIndex)
-            {
-                _sortColumn = actualSpecs.ColumnIndex;
-                refresh = true;
-            }
-
-            if (_sortDirection != actualSpecs.SortDirection)
-            {
-                _sortDirection = actualSpecs.SortDirection;
-                refresh = true;
-            }
+            hasSortSpecs = currentSortSpecs.Handle != null;
         }
-        else
+
+        if (hasSortSpecs && currentSortSpecs.SpecsDirty)
         {
-            if (_sortColumn != null)
+            if (currentSortSpecs.SpecsCount == 0)
             {
                 _sortColumn = null;
-                refresh = true;
+                _sortDirection = null;
+            }
+            else
+            {
+                var actualSpecs = currentSortSpecs.Specs;
+                _sortColumn = (int)actualSpecs.ColumnUserID - 1;
+                _sortDirection = actualSpecs.SortDirection;
             }
 
-            if (_sortDirection != null)
-            {
-                _sortDirection = null;
-                refresh = true;
-            }
+            refresh = true;
+            currentSortSpecs.SpecsDirty = false;
         }
 
         ImGui.TableHeadersRow();

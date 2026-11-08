@@ -80,7 +80,7 @@ public class ItemMonsterDropSourceRenderer : ItemInfoRenderer<ItemMonsterDropSou
         var asSource = AsSource(source);
 
         return new List<MessageBase>()
-            { new OpenUintWindowMessage(typeof(BNpcWindow), asSource.BNpcName.RowId) };
+            { new OpenCompendiumViewByTypeMessage(typeof(InventoryTools.Compendium.Types.BNpcCompendiumType), asSource.BNpcName.RowId) };
     };
 
     public override Func<ItemSource, string> GetDescription => source =>

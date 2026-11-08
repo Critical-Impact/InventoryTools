@@ -335,6 +335,8 @@ namespace InventoryTools
                 .AsSelf();
             builder.RegisterGeneric(typeof(OpenViewTableColumn<>))
                 .AsSelf();
+            builder.RegisterGeneric(typeof(CompendiumLinkTableColumn<>))
+                .AsSelf();
 
             builder.RegisterGeneric(typeof(CompendiumTable<>))
                 .AsSelf();

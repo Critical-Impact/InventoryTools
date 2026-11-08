@@ -19,28 +19,11 @@ public class MockTooltipService : ITooltipService
         return 0;
     }
 
-    public unsafe byte ItemHoveredDetour(nint a1, nint* a2, int* containerid, ushort* slotid, nint a5, uint slotidint, nint a7)
-    {
-        return 0;
-    }
-
     public void Disable()
     {
     }
 
     public void Dispose()
     {
-    }
-
-    public unsafe void* GenerateItemTooltipDetour(AtkUnitBase* addonItemDetail, NumberArrayData* numberArrayData,
-        StringArrayData* stringArrayData)
-    {
-        return (void*)0;
-    }
-
-    public unsafe void* GenerateActionTooltipDetour(AtkUnitBase* addonItemDetail, NumberArrayData* numberArrayData,
-        StringArrayData* stringArrayData)
-    {
-        return (void*)0;
     }
 }

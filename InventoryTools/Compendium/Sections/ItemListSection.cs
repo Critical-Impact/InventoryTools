@@ -1,10 +1,12 @@
 using System;
 using System.Linq;
 using System.Numerics;
+using AllaganLib.GameSheets.Model;
 using AllaganLib.Interface.FormFields;
 using DalaMock.Host.Mediator;
 using DalaMock.Shared.Interfaces;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility.Raii;
@@ -26,6 +28,7 @@ public class ItemListSection : ViewSection
     private readonly ImGuiTooltipService _tooltipService;
     private readonly ImGuiMenuService _menuService;
     private readonly ItemInfoRenderService _itemInfoRenderService;
+    private readonly IFont _font;
 
     public delegate ItemListSection Factory(ItemListSectionOptions options);
 
@@ -38,6 +41,7 @@ public class ItemListSection : ViewSection
         _tooltipService = tooltipService;
         _menuService = menuService;
         _itemInfoRenderService = itemInfoRenderService;
+        _font = font;
     }
 
     private string sectionModeId => _options.SectionId + "_mode";
@@ -83,6 +87,8 @@ public class ItemListSection : ViewSection
                     _mediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), item.ItemId));
                 }
 
+                DrawOwnedMarker(item);
+
                 if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
                                         ImGuiHoveredFlags.AllowWhenOverlapped &
                                         ImGuiHoveredFlags.AllowWhenBlockedByPopup &
@@ -122,6 +128,8 @@ public class ItemListSection : ViewSection
                 {
                     _mediatorService.Publish(new OpenUintWindowMessage(typeof(ItemWindow), item.ItemId));
                 }
+
+                DrawOwnedMarker(item);
 
                 if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled &
                                         ImGuiHoveredFlags.AllowWhenOverlapped &
@@ -168,15 +176,19 @@ public class ItemListSection : ViewSection
 
                 var cursorPos = ImGui.GetCursorPos();
                 ImGui.SetCursorPos(new Vector2(cursorPos.X, cursorPos.Y + offsetY));
+                var isOwned = _options.IsOwned?.Invoke(item.ItemId);
                 using (ImRaii.Group())
                 {
-                    if (item.Count == null)
+                    using (ImRaii.PushColor(ImGuiCol.Text, isOwned == true ? ImGuiColors.ParsedGreen : ImGuiColors.DalamudRed, isOwned != null))
                     {
-                        ImGui.Text(itemName);
-                    }
-                    else
-                    {
-                        ImGui.Text(itemName + " x " + item.Count);
+                        if (item.Count == null)
+                        {
+                            ImGui.Text(itemName);
+                        }
+                        else
+                        {
+                            ImGui.Text(itemName + " x " + item.Count);
+                        }
                     }
 
                     using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.TankBlue))
@@ -187,5 +199,22 @@ public class ItemListSection : ViewSection
             }
         }
 
+    }
+
+    private void DrawOwnedMarker(ItemInfo item)
+    {
+        if (_options.IsOwned == null || !_options.IsOwned(item.ItemId))
+        {
+            return;
+        }
+
+        var tick = FontAwesomeIcon.Check.ToIconString();
+        var fontSize = ImGui.GetFontSize() * 0.8f;
+        var max = ImGui.GetItemRectMax();
+        var position = new Vector2(max.X - fontSize - 2, max.Y - fontSize - 2);
+        var drawList = ImGui.GetWindowDrawList();
+
+        drawList.AddText(_font.IconFont, fontSize, position + Vector2.One, ImGui.GetColorU32(new Vector4(0, 0, 0, 1)), tick);
+        drawList.AddText(_font.IconFont, fontSize, position, ImGui.GetColorU32(ImGuiColors.ParsedGreen), tick);
     }
 }

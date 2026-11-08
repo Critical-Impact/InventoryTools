@@ -74,8 +74,42 @@ namespace InventoryTools.Ui.Pages
             if (arg2)
             {
                 var characterId = ulong.Parse(arg1.Split("dc_", StringSplitOptions.RemoveEmptyEntries)[0]);
-                _characterMonitor.RemoveCharacter(characterId);
-                _inventoryMonitor.ClearCharacterInventories(characterId);
+                RemoveCharacter(characterId);
+            }
+        }
+
+        private void RemoveCharacter(ulong characterId)
+        {
+            _characterMonitor.RemoveCharacter(characterId);
+            _inventoryMonitor.ClearCharacterInventories(characterId);
+            if (_selectedCharacter == characterId)
+            {
+                _selectedCharacter = 0;
+                _editMode = false;
+            }
+        }
+
+        private void DrawDeleteConfirmPopup(Character character)
+        {
+            using var popup = ImRaii.Popup("deleteCharacterConfirm");
+            if (!popup)
+            {
+                return;
+            }
+
+            ImGui.TextUnformatted("Are you sure you want to delete this " + character.CharacterType.FormattedName() + "?\nThis operation cannot be undone!\n\n");
+            ImGui.Separator();
+
+            if (ImGui.Button("OK", new Vector2(120, 0) * ImGui.GetIO().FontGlobalScale))
+            {
+                RemoveCharacter(character.CharacterId);
+                ImGui.CloseCurrentPopup();
+            }
+
+            ImGui.SameLine();
+            if (ImGui.Button("Cancel", new Vector2(120, 0) * ImGui.GetIO().FontGlobalScale))
+            {
+                ImGui.CloseCurrentPopup();
             }
         }
 
@@ -329,6 +363,16 @@ namespace InventoryTools.Ui.Pages
                             }
 
                             ImGuiUtil.HoverTooltip("Edit name, set the name to blank to return it to the original name.");
+
+                            ImGui.SameLine();
+                            cursorX = ImGui.GetCursorPosX();
+                            if (ImGuiService.DrawIconButton(_font, FontAwesomeIcon.Trash, ref cursorX))
+                            {
+                                ImGui.OpenPopup("deleteCharacterConfirm");
+                            }
+
+                            ImGuiUtil.HoverTooltip("Delete this " + character.CharacterType.FormattedName() + " and its inventories.");
+                            DrawDeleteConfirmPopup(character);
 
                             if (_editMode)
                             {

@@ -381,6 +381,9 @@ public class TableService : DisposableMediatorBackgroundService
             {
                 await workItem(stoppingToken);
             }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+            }
             catch (Exception ex)
             {
                 Logger.LogError(ex,

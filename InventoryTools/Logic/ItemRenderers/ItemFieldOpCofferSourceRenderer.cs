@@ -108,8 +108,8 @@ public class ItemOccultTreasureSourceRenderer : ItemFieldOpCofferSourceRenderer<
     {
     }
 
-    public override string SingularName => "Occult Crescent (Treasure Coffer)";
-    public override string HelpText => "Does this item drop from a occult crescent treasure coffer?";
+    public override string SingularName => "Occult Crescent - South Horn (Treasure Coffer)";
+    public override string HelpText => "Does this item drop from a treasure coffer in the South Horn of the Occult Crescent?";
 }
 
 public class ItemOccultPotSourceRenderer : ItemFieldOpCofferSourceRenderer<ItemOccultPotSource>
@@ -121,8 +121,8 @@ public class ItemOccultPotSourceRenderer : ItemFieldOpCofferSourceRenderer<ItemO
     {
     }
 
-    public override string SingularName => "Occult Crescent (Pot)";
-    public override string HelpText => "Does this item drop from a occult crescent pot?";
+    public override string SingularName => "Occult Crescent - South Horn (Pot)";
+    public override string HelpText => "Does this item drop from a pot in the South Horn of the Occult Crescent?";
 }
 
 public class ItemOccultGoldenCofferSourceRenderer : ItemFieldOpCofferSourceRenderer<ItemOccultGoldenCofferSource>
@@ -134,6 +134,45 @@ public class ItemOccultGoldenCofferSourceRenderer : ItemFieldOpCofferSourceRende
     {
     }
 
-    public override string SingularName => "Occult Crescent (Golden Coffer)";
-    public override string HelpText => "Does this item drop from a occult crescent golden coffer?";
+    public override string SingularName => "Occult Crescent - South Horn (Golden Coffer)";
+    public override string HelpText => "Does this item drop from a golden coffer in the South Horn of the Occult Crescent?";
+}
+
+public class ItemOccultNorthHornTreasureSourceRenderer : ItemFieldOpCofferSourceRenderer<ItemOccultNorthHornTreasureCofferSource>
+{
+    public override IReadOnlyList<ItemInfoRenderCategory>? Categories { get; } =
+        [ItemInfoRenderCategory.FieldOperation, ItemInfoRenderCategory.OccultCrescent];
+
+    public ItemOccultNorthHornTreasureSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(itemSheet, mapSheet, textureProvider, pluginInterface, ItemInfoType.OccultNorthHornTreasure)
+    {
+    }
+
+    public override string SingularName => "Occult Crescent - North Horn (Treasure Coffer)";
+    public override string HelpText => "Does this item drop from a treasure coffer in the North Horn of the Occult Crescent?";
+}
+
+public class ItemOccultNorthHornPotSourceRenderer : ItemFieldOpCofferSourceRenderer<ItemOccultNorthHornPotSource>
+{
+    public override IReadOnlyList<ItemInfoRenderCategory>? Categories { get; } =
+        [ItemInfoRenderCategory.FieldOperation, ItemInfoRenderCategory.OccultCrescent];
+
+    public ItemOccultNorthHornPotSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(itemSheet, mapSheet, textureProvider, pluginInterface, ItemInfoType.OccultNorthHornPot)
+    {
+    }
+
+    public override string SingularName => "Occult Crescent - North Horn (Pot)";
+    public override string HelpText => "Does this item drop from a pot in the North Horn of the Occult Crescent?";
+}
+
+public class ItemOccultNorthHornGoldenCofferSourceRenderer : ItemFieldOpCofferSourceRenderer<ItemOccultNorthHornGoldenCofferSource>
+{
+    public override IReadOnlyList<ItemInfoRenderCategory>? Categories { get; } =
+        [ItemInfoRenderCategory.FieldOperation, ItemInfoRenderCategory.OccultCrescent];
+
+    public ItemOccultNorthHornGoldenCofferSourceRenderer(ItemSheet itemSheet, MapSheet mapSheet, ITextureProvider textureProvider, IDalamudPluginInterface pluginInterface) : base(itemSheet, mapSheet, textureProvider, pluginInterface, ItemInfoType.OccultNorthHornGoldenCoffer)
+    {
+    }
+
+    public override string SingularName => "Occult Crescent - North Horn (Golden Coffer)";
+    public override string HelpText => "Does this item drop from a golden coffer in the North Horn of the Occult Crescent?";
 }

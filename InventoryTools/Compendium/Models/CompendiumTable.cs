@@ -41,7 +41,7 @@ public sealed class CompendiumTable<TData> : RenderTable<WindowState, TData, Mes
     {
         if (_grouping != null)
         {
-            return _compendiumType.GetRows().Where(c => _groupingGroup != null && _grouping.GroupFunc(c).Equals(_groupingGroup)).ToList();
+            return _compendiumType.GetRows().Where(c => _groupingGroup != null && _grouping.GetGroupKeys(c).Contains(_groupingGroup)).ToList();
         }
         return _compendiumType.GetRows();
     }

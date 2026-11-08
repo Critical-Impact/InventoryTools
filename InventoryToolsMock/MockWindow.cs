@@ -393,7 +393,7 @@ public class MockWindow : GenericWindow
 
             if (ImGui.Button("Mobs Window"))
             {
-                MediatorService.Publish(new OpenGenericWindowMessage(typeof(BNpcsWindow)));
+                MediatorService.Publish(new InventoryTools.Mediator.OpenCompendiumListByTypeMessage(typeof(InventoryTools.Compendium.Types.BNpcCompendiumType)));
             }
 
             if (ImGui.Button("Airships Window"))
