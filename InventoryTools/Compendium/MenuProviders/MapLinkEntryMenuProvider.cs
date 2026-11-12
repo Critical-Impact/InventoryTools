@@ -17,13 +17,13 @@ public class MapLinkEntryMenuProvider(MediatorService mediatorService, IChatUtil
         if (ImGui.Selectable("Show on Map"))
         {
             //TODO: add map location message
-            chatUtilities.PrintFullMapLink(item.Location);
+            chatUtilities.PrintFullMapLink(item.Location, item.LinkText);
         }
 
         if (ImGui.Selectable("Teleport"))
         {
             MediatorService.Publish(new RequestTeleportToMapMessage(item.Location.Map.RowId, new Vector2((float)item.Location.MapX, (float)item.Location.MapY)));
-            chatUtilities.PrintFullMapLink(item.Location);
+            chatUtilities.PrintFullMapLink(item.Location, item.LinkText);
         }
     }
 

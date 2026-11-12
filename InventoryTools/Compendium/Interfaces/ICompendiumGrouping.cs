@@ -16,4 +16,14 @@ public interface ICompendiumGrouping
     public string Key { get; }
     public string Name { get; }
     public Func<object, string> GroupMapping { get; init; }
+
+    /// <summary>
+    /// Gets the key of the group
+    /// </summary>
+    public Func<object?>? CurrentGroupFunc { get; init; }
+
+    /// <summary>
+    /// The text of the main menu item.
+    /// </summary>
+    public string? CurrentGroupLabel { get; init; }
 }

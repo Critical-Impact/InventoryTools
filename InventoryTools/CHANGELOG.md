@@ -8,6 +8,16 @@ Instead the changelog reader and automation surrounding plugin PRs will add the 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.html).
 
+## [15.1.1] - 2026-11-12
+
+### Added
+- Added a Locations column to the Mobs compendium, click a flag to link the spawn location in chat or right click it to teleport
+- Added a "Hunt Mark?" column to the Mobs compendium
+- When the Mobs compendium is grouped by zone, a Current Zone menu can open the tab for the zone you are in, or follow you as you change zones
+
+### Fixed
+- Map links printed to chat from the compendium were showing the wrong name
+
 ## [15.1.0] - 2026-11-08
 
 ### Added

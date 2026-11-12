@@ -20,6 +20,12 @@ public record CompendiumGrouping<TData> : ICompendiumGrouping<TData>
     /// </summary>
     public Func<TData, IEnumerable<object>>? GroupsFunc { get; init; }
 
+    /// <inheritdoc/>
+    public Func<object?>? CurrentGroupFunc { get; init; }
+
+    /// <inheritdoc/>
+    public string? CurrentGroupLabel { get; init; }
+
     public IEnumerable<object> GetGroupKeys(TData row)
     {
         if (GroupsFunc != null)

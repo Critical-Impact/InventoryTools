@@ -1,5 +1,6 @@
 using System;
 using AllaganLib.Interface.Grid;
+using AllaganLib.Interface.Grid.ColumnFilters;
 using DalaMock.Host.Mediator;
 using Dalamud.Bindings.ImGui;
 using InventoryTools.Compendium.Columns.Options;
@@ -15,7 +16,7 @@ public class GenericBooleanTableColumn<TData> : BooleanColumn<WindowState, TData
     private readonly Func<TData, bool?> _valueSelector;
 
     public GenericBooleanTableColumn(ImGuiService imGuiService,
-        BooleanColumnOptions<TData> columnOptions) : base(imGuiService)
+        BooleanColumnOptions<TData> columnOptions) : base(imGuiService, new ChoiceColumnFilter([("true", "Yes"), ("false", "No")]))
     {
         Key = columnOptions.Key;
         Name = columnOptions.Name;

@@ -143,8 +143,8 @@
       },
       "AllaganLib.Interface": {
         "type": "Transitive",
-        "resolved": "2.2.0",
-        "contentHash": "j/okNI8mz/beZ0zqGYsBZzVRtzye4ztbpbDMgbcM98jswM1Rk6Pijn9OMoafF2rEfDPwWjnNLYTUEoFHfQ7SIg==",
+        "resolved": "2.3.3",
+        "contentHash": "/DEsv5V1Gbo5Lyin8BDeHG1golNwqhmx0R61/72RTMBqOYchJ/5fIPaKeX0grO450g7TgBLjKuy3FAFxJuS9MQ==",
         "dependencies": {
           "AllaganLib.Data": "2.2.0",
           "AllaganLib.Shared": "2.2.0",
@@ -738,7 +738,7 @@
       "inventorytools": {
         "type": "Project",
         "dependencies": {
-          "AllaganLib.Interface": "[2.2.0, )",
+          "AllaganLib.Interface": "[2.3.3, )",
           "AllaganLib.Monitors": "[2.2.9, )",
           "Autofac": "[9.3.2, )",
           "Autofac.Extensions.DependencyInjection": "[11.0.2, )",

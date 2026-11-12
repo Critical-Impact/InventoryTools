@@ -21,6 +21,7 @@ public sealed class CompendiumColumnBuilder<TData>
     private readonly GenericItemTableColumn<TData>.Factory _itemTableColumnFactory;
     private readonly OpenViewTableColumn<TData>.Factory _compendiumOpenViewTableColumnFactory;
     private readonly CompendiumLinkTableColumn<TData>.Factory _compendiumLinkTableColumnFactory;
+    private readonly GenericMapLinksTableColumn<TData>.Factory _mapLinksTableColumnFactory;
     private readonly object? _groupItem;
 
     public delegate CompendiumColumnBuilder<TData> Factory(ICompendiumGrouping<TData>? compendiumGrouping, object? groupItem);
@@ -36,6 +37,7 @@ public sealed class CompendiumColumnBuilder<TData>
         GenericItemTableColumn<TData>.Factory itemTableColumnFactory,
         OpenViewTableColumn<TData>.Factory compendiumOpenViewTableColumnFactory,
         CompendiumLinkTableColumn<TData>.Factory compendiumLinkTableColumnFactory,
+        GenericMapLinksTableColumn<TData>.Factory mapLinksTableColumnFactory,
         object? groupItem)
     {
         _groupItem = groupItem;
@@ -49,6 +51,7 @@ public sealed class CompendiumColumnBuilder<TData>
         _itemTableColumnFactory = itemTableColumnFactory;
         _compendiumOpenViewTableColumnFactory = compendiumOpenViewTableColumnFactory;
         _compendiumLinkTableColumnFactory = compendiumLinkTableColumnFactory;
+        _mapLinksTableColumnFactory = mapLinksTableColumnFactory;
     }
 
     public CompendiumColumnBuilder<TData> AddStringColumn(StringColumnOptions<TData> options)
@@ -117,6 +120,13 @@ public sealed class CompendiumColumnBuilder<TData>
     public CompendiumColumnBuilder<TData> AddItemColumn(ItemColumnOptions<TData> options)
     {
         var column = _itemTableColumnFactory(options);
+        _columns.Add(column);
+        return this;
+    }
+
+    public CompendiumColumnBuilder<TData> AddMapLinksColumn(MapLinksColumnOptions<TData> options)
+    {
+        var column = _mapLinksTableColumnFactory(options);
         _columns.Add(column);
         return this;
     }

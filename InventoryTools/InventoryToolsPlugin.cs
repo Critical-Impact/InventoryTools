@@ -329,6 +329,8 @@ namespace InventoryTools
                 .AsSelf();
             builder.RegisterGeneric(typeof(GenericItemsTableColumn<>))
                 .AsSelf();
+            builder.RegisterGeneric(typeof(GenericMapLinksTableColumn<>))
+                .AsSelf();
             builder.RegisterGeneric(typeof(GenericBooleanTableColumn<>))
                 .AsSelf();
             builder.RegisterGeneric(typeof(GenericItemTableColumn<>))

@@ -58,7 +58,7 @@ public sealed class MapLinksViewSection : ViewSection
                         .Handle,
                     new Vector2(iconSize, iconSize)))
             {
-                _chatUtilities.PrintFullMapLink(entry.Location);
+                _chatUtilities.PrintFullMapLink(entry.Location, entry.LinkText);
             }
 
             if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
